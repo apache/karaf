@@ -1,0 +1,147 @@
+Project Oscar
+====================
+
+Motivation
+----------
+
+Unlike .NET, which requires that applications are packaged as assemblies
+with explicit dependencies among them, the Java platform does not offer
+sufficient support for modularity. This lack of support complicates not
+only Java application development, but also subsequent deployment and
+administration. Many of the complications result from the fact that
+every project that requires some form of modularity ends up inventing
+their own ClassLoader-based approach for solving their needs. This
+phenomenon is evident in application servers, integrated development
+environments, and any component- or plugin-oriented systems. The OSGi
+framework defined by the OSGi Alliance has a long history of addressing
+these types of issues and the imminent release of version R4 of the OSGi
+specification is set to move the OSGi framework even further along
+this path.
+
+The recent adoption of OSGi technology as the modularity layer of the
+Eclipse Rich Client Platform (RCP) underscores the inroads that OSGi
+technology has made. Further, the announcement of JSR 277 verifies that
+demand for modularity in Java has reached a critical point.
+
+This project can serve the greater Java open source community by
+providing immediate modularity support for Java applications today
+through the OSGi framework, creating a unifying community around open
+source OSGi technology, and tracking and participating in the progression
+of JSR 277.
+
+
+Proposal
+--------
+
+We propose the creation of a new Apache project, Oscar, that will achieve
+the following goals :
+
+1) create a compliant, independent implementation of the OSGi R4 core
+   framework with framework-dependent services under the Apache License,
+   Version 2.0.
+
+2) unify resources from the OSGi community to implement, document, maintain,
+   and support standard OSGi R4 services.
+
+3) provide a focal point for the OSGi community to develop interfaces, APIs,
+   and other common needs not fully specified by the OSGi R4 specification,
+   such as store interfaces, aspects of the runtime container's packaging
+   and configuration, and the design and behavior of bundle repositories.
+   
+4) provide a focal point for the open-source OSGi community to develop next
+   generation enhancements to the core framework and act as a conduit for
+   the open-source community to the OSGi Alliance.
+   
+5) evangelize the OSGi Service Platform within Apache and provide documentation
+   and support for successful container migrations.
+
+
+Starting Participants
+---------------------
+
+We propose that the following people are considered the starting participants.
+We hope to start with a diverse cross-section of the community and preserve
+this as we grow. The information in parenthesis indicates other community
+participation or relevant experiences of that individual.
+
+These individuals have expressed an interest in participating in the
+architecture and design work and in participating as committers for the
+Apache-licensed implementation :
+
+   Richard Hall (OSGi Alliance (Invited Researcher) and Founder of the Oscar project)
+   Alex Karasulu (Apache)
+   Enrique Rodriguez (Apache)
+   Trustin Lee (Apache)
+
+These individuals will participate as Incubator Mentors :
+
+   Alex Karasulu (Apache)
+
+The following Apache Members will be the sponsoring members :
+
+   Alex Karasulu (Apache)
+   Noel Bergman (Apache)
+   Carsten Ziegeler (Apache)
+   Berin Loritsch (Apache)
+   Sylvain Wallez (Apache)
+   Bertrand Delacretaz (Apache)
+   Upayavira (Apache)
+
+The following community members support this effort :
+
+   Daniel Fagerstrom (Apache)
+   Niclas Hedhman (Apache)
+   Reinhard Poetz (Apache)
+   Stefano Mazzocchi (Apache)
+   Andreas Oberhack (Apache)
+   Timothy Bennett (Apache and Metro Government of Nashville/Davidson County)
+   Peter Kriens (OSGi Alliance (Director of Technology) and Managing Director, aQute)
+   Humberto Cervantes (Service Binder author and Professor/Researcher, UAM Iztapalapa)
+   Marcel Offermans (+2 others, Luminis)
+   Rob Walker (Ascert)
+   Gerald Friedland (Researcher, Freie Universität Berlin, E-Chalk Project)
+   Juan Alonso (Independent)
+   Stéphane Frénot (Associate Professor, INSA-Lyon/INRIA)
+   Frédéric Le Mouël (Associate Professor, INSA-Lyon/INRIA)
+   Emil Ivov (PhD Candidate, Louis Pasteur University, Strasboug, France)
+   Tom Enderes (CTO, Gatewide LLC)
+   Eric Swindell (Software Craftsman, Caribbean Blue)
+   Jesus Bermejo (Independent)
+   David Ence (Lockheed Martin)
+   Ed Anuff (DriveFire)
+   Rick Litton (Kyocera)
+   Peter Neubauer (OPS4J)
+   Francesco Furfari (Domoware, Domotics Lab, ISTI-CNR)
+   Stefano Lenzi (Domoware, Domotics Lab, ISTI-CNR)
+   Matteo Demuru (Domoware, Domotics Lab, ISTI-CNR)
+   Karl Pauls (Raccoon/Eureka/Sopa, Researcher (DFG), Fu-Berlin)
+   Heejune Ahn (Independent)
+   Yalcin Akdogan (Zeroadmin Software)
+   Juan C. Dueñas (ITEA/Eureka researcher and Associate Professor, DIT-UPM)
+   José L. Ruiz (PhD Candidate, DIT-UPM)
+   Manuel Santillan (PhD Candidate, DIT-UPM)
+   David Leangen (Bioscene Informatics, Japan)
+   Miles Sabin (Technical Director, Codefarm Software Ltd.)
+   Roger Ni (ASPire Technologies)
+
+
+Operating Considerations
+------------------------
+
+We have established a list for discussions. Unless your comment is directed
+to the general Incubator community or the Incubator PMC, please post
+everything to :
+
+     oscar-dev@incubator.apache.org
+
+You can subscribe by sending an email to
+
+     oscar-dev-subscribe@incubator.apache.org
+
+Until this proposal has been accepted by the Apache Incubator PMC, these lists
+are provisional.
+
+
+--
+Alex Karasulu                                  +1-904-982-6992
+akarasulu@apache.org
