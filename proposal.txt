@@ -123,6 +123,9 @@ The following community members support this effort :
    David Leangen (Bioscene Informatics, Japan)
    Miles Sabin (Technical Director, Codefarm Software Ltd.)
    Roger Ni (ASPire Technologies)
+   Mikael Desertot (University of Grenoble)
+   Clement Escoffier (University of Grenoble)
+   Didier Donsez (University of Grenoble)
 
 
 Operating Considerations
