@@ -126,6 +126,9 @@ The following community members support this effort :
    Mikael Desertot (University of Grenoble)
    Clement Escoffier (University of Grenoble)
    Didier Donsez (University of Grenoble)
+   Stéphane Chomat (University of Grenoble)
+   Cristina Marin (University of Grenoble)
+   Antonin Chazalet (University of Grenoble)
 
 
 Operating Considerations
