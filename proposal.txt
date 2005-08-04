@@ -86,6 +86,7 @@ The following Apache Members will be the sponsoring members :
    Sylvain Wallez (Apache)
    Bertrand Delacretaz (Apache)
    Upayavira (Apache)
+   Brett Porter (Apache)
 
 The following community members support this effort :
 
