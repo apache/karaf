@@ -1,0 +1,4 @@
+felix.auto.start.1=file:bundle/shell.jar file:bundle/tablelayout.jar \
+    file:bundle/shellgui.jar file:bundle/shellplugin.jar \
+    file:bundle/bundlerepository.jar
+

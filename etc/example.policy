@@ -1,0 +1,40 @@
+grant codeBase "file:bundle/shellgui.jar" {
+  permission org.osgi.framework.ServicePermission "org.ungoverned.osgi.bundle.shellgui.Plugin", "get";
+};
+
+grant codeBase "file:bundle/shelltui.jar" {
+  permission org.osgi.framework.ServicePermission "org.ungoverned.osgi.service.shell.ShellService", "get";
+};
+
+grant codeBase "file:bundle/shellplugin.jar" {
+  permission java.security.AllPermission;
+};
+
+grant codeBase "file:bundle/bundlerepository.jar" {
+  permission java.security.AllPermission;
+};
+
+grant codeBase "file:bundle/permissionmanager.jar" {
+  permission java.security.AllPermission;
+};
+
+grant codeBase "file:bundle/shell.jar" {
+  permission java.security.AllPermission;
+};
+
+grant codeBase "file:${lib.dir}/felix.jar" {
+  permission java.security.AllPermission;
+};
+
+grant codeBase "file:${lib.dir}/osgi.jar" {
+  permission java.security.AllPermission;
+};
+
+grant codeBase "file:${lib.dir}/moduleloader.jar" {
+  permission java.security.AllPermission;
+};
+
+grant {
+  permission java.io.FilePermission "${user.home}${file.separator}.felix${file.separator}-", "read, write, delete";
+  permission org.osgi.framework.PackagePermission "*", "EXPORT";
+};

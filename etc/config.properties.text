@@ -1,0 +1,3 @@
+felix.auto.start.1=file:bundle/shell.jar file:bundle/shelltui.jar \
+    file:bundle/bundlerepository.jar
+
