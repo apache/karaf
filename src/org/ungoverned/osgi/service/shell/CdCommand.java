@@ -18,14 +18,14 @@ package org.ungoverned.osgi.service.shell;
 
 /**
  * This interface defines the <tt>cd</tt> command service interface for the
- * Felix shell service. The <tt>cd</tt> command does not really change the
- * directory of the shell, rather it maintains a base URL for
+ * Felix impl service. The <tt>cd</tt> command does not really change the
+ * directory of the impl, rather it maintains a base URL for
  * simplifying URL entry.
  * <p>
  * For example, if the base URL is <tt>http://www.foo.com/<tt> and you
  * try to install a bundle <tt>foo.jar</tt>, the actual URL will be
  * expanded to <tt>http://www.foo.com/foo.jar</tt>. Any bundles wishing
- * to retrieve or set the current directory of the shell can use this
+ * to retrieve or set the current directory of the impl can use this
  * service interface.
 **/
 public interface CdCommand extends Command
@@ -33,16 +33,16 @@ public interface CdCommand extends Command
     /**
      * Property used to configure the base URL.
     **/
-    public static final String BASE_URL_PROPERTY = "felix.shell.baseurl";
+    public static final String BASE_URL_PROPERTY = "felix.impl.baseurl";
 
     /**
-     * Returns the current <i>directory</i> of the shell service.
-     * @return the current shell directory.
+     * Returns the current <i>directory</i> of the impl service.
+     * @return the current impl directory.
     **/
     public String getBaseURL();
 
     /**
-     * Sets the current <i>directory</i> of the shell service.
+     * Sets the current <i>directory</i> of the impl service.
      * @param s the new value for the base URL.
     **/
     public void setBaseURL(String s);

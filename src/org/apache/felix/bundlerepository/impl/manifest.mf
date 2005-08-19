@@ -1,0 +1,10 @@
+Bundle-Name: Bundle Repository
+Bundle-SymbolicName: org.apache.felix.bundlerepository.impl
+Bundle-Description: A simple bundle repository for Felix.
+Bundle-Activator: org.apache.felix.bundlerepository.impl.Activator
+Bundle-ClassPath: .,org/apache/felix/bundlerepository/impl/kxml.jar
+Bundle-Version: 2.0.0.alpha2
+Import-Package: org.osgi.framework
+DynamicImport-Package: org.apache.felix.shell
+Export-Package: 
+ org.apache.felix.bundlerepository; specification-version="1.1.0"

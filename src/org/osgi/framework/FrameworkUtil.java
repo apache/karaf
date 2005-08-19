@@ -10,7 +10,7 @@
 
 package org.osgi.framework;
 
-import org.apache.osgi.framework.FilterImpl;
+import org.apache.felix.framework.FilterImpl;
 
 /**
  * Framework Utility class.

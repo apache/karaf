@@ -21,14 +21,14 @@ import java.io.PrintStream;
 import org.osgi.framework.ServiceReference;
 
 /**
- * This interface defines the Felix shell service. The shell service
- * is an extensible, user interface neutral shell for controlling and
- * interacting with the framework. In general, the shell service assumes that
+ * This interface defines the Felix impl service. The impl service
+ * is an extensible, user interface neutral impl for controlling and
+ * interacting with the framework. In general, the impl service assumes that
  * it is operating in a command line fashion, i.e., it receives a
  * complete command line, parses it, and executes the corresponding
  * command, but graphical interfaces are also possible.
  * <p>
- * All commands in the shell service are actually implemented as OSGi
+ * All commands in the impl service are actually implemented as OSGi
  * services; these services implement the <tt>Command</tt> service
  * interface. Any bundle can implement custom commands by creating
  * command services and registering them with the OSGi framework.
@@ -36,7 +36,7 @@ import org.osgi.framework.ServiceReference;
 public interface ShellService
 {
     /**
-     * Returns an array of command names available in the shell service.
+     * Returns an array of command names available in the impl service.
      * @return an array of available command names or an empty array.
     **/
     public String[] getCommands();

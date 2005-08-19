@@ -1,2 +1,0 @@
-Main-Class: org.apache.osgi.framework.Main
-Class-Path: osgi.jar moduleloader.jar

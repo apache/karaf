@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
 import java.util.*;
-import org.apache.osgi.framework.FilterImpl;
+import org.apache.felix.framework.FilterImpl;
 
 /**
  * Indicates the caller's authority to perform specific privileged administrative 

@@ -19,11 +19,11 @@ package org.ungoverned.osgi.service.shell;
 import java.io.PrintStream;
 
 /**
- * This interface is used to define commands for the Felix shell
+ * This interface is used to define commands for the Felix impl
  * service. Any bundle wishing to create commands for the
- * shell service simply needs to create a service object that
+ * impl service simply needs to create a service object that
  * implements this interface and then register it with the OSGi
- * framework. The shell service automatically includes any
+ * framework. The impl service automatically includes any
  * registered command services in its list of available commands.
 **/
 public interface Command

@@ -50,7 +50,7 @@
     <target name="moduleloader" depends="compile">
         <jar jarfile="${lib.dir}/moduleloader.jar"
             basedir="${output.dir}">
-            <include name="org/apache/osgi/moduleloader/"/>
+            <include name="org/apache/felix/moduleloader/"/>
         </jar>
     </target>
 
@@ -65,42 +65,40 @@
 
     <!-- Create Felix JAR file. -->
     <target name="felix" depends="compile">
-        <jar manifest="${src.dir}/org/apache/osgi/framework/manifest.mf"
+        <jar manifest="${src.dir}/org/apache/felix/framework/manifest.mf"
             jarfile="${lib.dir}/felix.jar"
             basedir="${output.dir}">
-            <include name="org/apache/osgi/framework/"/>
-            <exclude name="org/apache/osgi/framework/installer/"/>
+            <include name="org/apache/felix/framework/"/>
+            <exclude name="org/apache/felix/framework/installer/"/>
         </jar>
     </target>
 
-    <!-- Create shell bundle JAR files. -->
+    <!-- Create impl bundle JAR files. -->
     <target name="bundle" depends="compile">
 
         <!-- Shell -->
-        <jar manifest="${src.dir}/org/apache/osgi/bundle/shell/manifest.mf"
+        <jar manifest="${src.dir}/org/apache/felix/shell/impl/manifest.mf"
             jarfile="${bundle.dir}/shell.jar"
             basedir="${output.dir}">
-            <include name="org/apache/osgi/service/shell/**"/>
+            <include name="org/apache/felix/shell/**"/>
             <include name="org/ungoverned/osgi/service/shell/**"/>
-            <include name="org/apache/osgi/bundle/shell/**"/>
         </jar>
 
         <!-- Shell TUI -->
-        <jar manifest="${src.dir}/org/apache/osgi/bundle/shelltui/manifest.mf"
+        <jar manifest="${src.dir}/org/apache/felix/shelltui/manifest.mf"
             jarfile="${bundle.dir}/shelltui.jar"
             basedir="${output.dir}">
-            <include name="org/apache/osgi/bundle/shelltui/**"/>
+            <include name="org/apache/felix/shelltui/**"/>
         </jar>
 
         <!-- OBR -->
         <copy file="${lib.dir}/kxml.jar"
-         todir="${output.dir}/org/apache/osgi/bundle/bundlerepository/"/>
+         todir="${output.dir}/org/apache/felix/bundlerepository/impl/"/>
 
-        <jar manifest="${src.dir}/org/apache/osgi/bundle/bundlerepository/manifest.mf"
+        <jar manifest="${src.dir}/org/apache/felix/bundlerepository/impl/manifest.mf"
             jarfile="${bundle.dir}/bundlerepository.jar"
             basedir="${output.dir}">
-            <include name="org/apache/osgi/bundle/bundlerepository/**"/>
-            <include name="org/apache/osgi/service/bundlerepository/**"/>
+            <include name="org/apache/felix/bundlerepository/**"/>
         </jar>
 
     </target>

@@ -1,0 +1,2 @@
+Main-Class: org.apache.felix.framework.Main
+Class-Path: osgi.jar moduleloader.jar
