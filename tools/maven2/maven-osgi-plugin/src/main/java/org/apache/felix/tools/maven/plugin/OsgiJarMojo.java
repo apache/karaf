@@ -1,5 +1,3 @@
-package org.apache.felix.tools.maven.plugin;
-
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
  *
@@ -15,6 +13,7 @@ package org.apache.felix.tools.maven.plugin;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.felix.tools.maven.plugin;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
