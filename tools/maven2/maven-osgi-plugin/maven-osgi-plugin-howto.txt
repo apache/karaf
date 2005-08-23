@@ -1,0 +1,114 @@
+This document describes how to use the maven-osgi-plugin for Maven2.
+
+NOTE: This plugin is only for Maven2.  It will not work with Maven 1.x versions.
+
+NOTE: This plugin is very immature and is a project under development. Help
+with the development of this plugin is welcome. A development roadmap for this
+plugin will be posted at http://issues.apache.org/jira/browse/FELIX at some
+point in the near future.
+
+HOW-TO
+======
+
+1. Install maven-2.0-alpha-3 release on your local machine.  You can download
+a binary distro from http://maven.apache.org/maven2/download.html along with
+some instructions for getting started with Maven2.
+
+2. You'll need an interim build of Maven2's maven-archiver that I've made
+available at:
+
+    https://svn.apache.org/repos/asf/incubator/felix/trunk/sandbox/tbennett/maven-archiver
+
+I've submitted patches to the Maven team that include these modifications to
+the maven-archiver-plugin.  However, they are not scheduled to be released
+until the maven-2.0-beta-1 release.  You'll need to use this version of
+maven-archiver until that release is available from the Maven team.
+
+Once you've done an SVN checkout of the maven-archiver from my sandbox, simply
+execute the following command from the maven-archiver project root directory:
+
+    $ m2 install
+
+This will build and locally install this interim version of the maven-archiver-plugin.
+
+3. Perform an SVN checkout of the maven-osgi-plugin available at:
+
+    https://svn.apache.org/repos/asf/incubator/felix/trunk/tools/maven2/maven-osgi-plugin
+
+Once you've done this, simply execute the following command from the
+maven-osgi-plugin project root directory:
+
+    $ m2 install
+
+This will build and locally install the maven-osgi-plugin.
+
+4. You can now use the plugin with a Maven2 POM to build an OSGi bundle jar
+artifact.  An example of what a bundle's Maven2 POM might look like that uses
+this plugin is shown below.
+
+After compiling your bundle using the standard Maven2 compile goal:
+
+    $ m2 compile
+
+You can build the OSGi bundle artifact by issuing the following maven2
+command:
+
+    $ m2 osgi:osgi-jar
+
+Note the definition of the maven-osgi-plugin in the <build/> section of the
+POM, along with the specification of the custom manifest entries you'd like
+Maven2 to include in the jar's manifest file.  Currently, the only manifest
+entries that I've added support so far are: Bundle-Activator, Bundle-Name,
+Bundle-Description, Bundle-Version, Bundle-Vendor, Bundle-Date,
+Bundle-UpdateLocation, Export-Package, and Metadata-Location.  More support
+will be added soon.
+
+The plugin also takes advantage of Maven2's <scope/> specifier for given
+project dependency.  If the scope specifier is either "compile" or
+"runtime", the given dependency will be bundled in the root directory of
+the jar, and it's filename added to the Bundle-Classpath entry in the jar's
+manifest file.  This is done automatically by simply setting the dependency
+scope.  In the case of the below example, the osgi-framework-1.2.jar
+dependency that my-bundle specifies has scope of "provided".  This tells
+the maven-osgi-plugin that the OSGi container will *provide* this dependency
+at runtime, and therefore this dependency will not need to be embedded into
+the bundle's jar file.
+
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>gov.bna.jis.osgi.bundle</groupId>
+  <artifactId>my-bundle</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>OSGi Test Bundle</name>
+  <build>
+      <plugins>
+        <plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-osgi-plugin</artifactId>
+           <version>0.1</version>
+           <configuration>
+              <osgiManifest>
+			    <bundleActivator>gov.bna.jis.osgi.bundle.Activator</bundleActivator>
+				<bundleName>My Bundle Name</bundleName>
+				<bundleDescription>My Bundle Description</bundleDescription>
+				<bundleVendor>Metro Government of Nashville-Davidson Co.</bundleVendor>
+				<bundleVersion>1.0.0</bundleVersion>
+			  </osgiManifest>
+           </configuration>
+        </plugin>
+      </plugins>
+  </build>
+  <dependencies>
+      <dependency>
+        <groupId>osgi</groupId>
+        <artifactId>osgi-framework</artifactId>
+        <version>1.2</version>
+		<scope>provided</scope>
+      </dependency>
+  </dependencies>
+</project>
+
+There's much more functionality to add to this plugin, but it's a start.
+
+-tbennett
