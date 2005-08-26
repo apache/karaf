@@ -31,11 +31,12 @@ public class OsgiManifest {
     private String bundleName;
     private String bundleDescription;
     private String bundleVendor;
-    private String bundleVersion;
+    //private String bundleVersion;
     //private String bundleClassPath;
     private String bundleDate;
     private String bundleUpdateLocation;
     private String exportPackage;
+    private String importPackage;
     private String metadataLocation;
     private Hashtable entries = new Hashtable();
 
@@ -52,11 +53,16 @@ public class OsgiManifest {
         if (getBundleVendor() != null) {
             entries.put("Bundle-Vendor", getBundleVendor());
         }
+        /*
         if (getBundleVersion() != null) {
             entries.put("Bundle-Version", getBundleVersion());
         }
+        */
         if (getExportPackage() != null) {
             entries.put("Export-Package", getExportPackage());
+        }
+        if (getImportPackage() != null) {
+            entries.put("Import-Package", getImportPackage());
         }
         /*
         if (getBundleClassPath() != null) {
@@ -106,7 +112,7 @@ public class OsgiManifest {
     public void setBundleVendor(String bundleVendor) {
         this.bundleVendor = bundleVendor;
     }
-
+/*
     public String getBundleVersion() {
         return bundleVersion;
     }
@@ -114,7 +120,7 @@ public class OsgiManifest {
     public void setBundleVersion(String bundleVersion) {
         this.bundleVersion = bundleVersion;
     }
-
+*/
     public String getExportPackage() {
         return exportPackage;
     }
@@ -122,6 +128,15 @@ public class OsgiManifest {
     public void setExportPackage(String exportPackage) {
         this.exportPackage = exportPackage;
     }
+
+    public String getImportPackage() {
+        return importPackage;
+    }
+
+    public void setImportPackage(String importPackage) {
+        this.importPackage = importPackage;
+    }
+
 /*
     public String getBundleClassPath() {
         return bundleClassPath;

@@ -32,7 +32,7 @@ import java.util.Set;
 
 /**
  * @author <a href="tbennett@apache.org">Timothy Bennett</a>
- * @goal felix-jar
+ * @goal osgi-jar
  * @phase package
  * @requiresDependencyResolution runtime
  * @description build a OSGi bundle jar
@@ -89,7 +89,7 @@ public class OsgiJarMojo extends AbstractMojo {
      * @todo Add license files in META-INF directory.
      */
     public void execute() throws MojoExecutionException {
-        File jarFile = new File(basedir, finalName + ".jar");
+        File jarFile = new File(basedir, finalName + "-bundle.jar");
 
         MavenArchiver archiver = new MavenArchiver();
         archiver.setOutputFile(jarFile);
@@ -158,6 +158,9 @@ public class OsgiJarMojo extends AbstractMojo {
             archive.addManifestEntry("Bundle-ClassPath", bundleClasspath.toString());
         }
         bundleClasspath = null;
+
+        // auto-set the bundle version...
+        archive.addManifestEntry("Bundle-Version", project.getVersion());
 
         // create the target bundle archive...
         try {
