@@ -35,6 +35,7 @@ public class OsgiManifest {
     //private String bundleClassPath;
     private String bundleDate;
     private String bundleUpdateLocation;
+    private String bundleSymbolicName;
     private String exportPackage;
     private String importPackage;
     private String metadataLocation;
@@ -74,6 +75,9 @@ public class OsgiManifest {
         }
         if (getBundleUpdateLocation() != null) {
             entries.put("Bundle-UpdateLocation", getBundleUpdateLocation());
+        }
+        if (getBundleSymbolicName() != null) {
+            entries.put("Bundle-SymbolicName", getBundleSymbolicName());
         }
         if (getMetadataLocation() != null) {
             entries.put("Metadata-Location", getMetadataLocation());
@@ -160,6 +164,14 @@ public class OsgiManifest {
 
     public void setBundleUpdateLocation(String bundleUpdateLocation) {
         this.bundleUpdateLocation = bundleUpdateLocation;
+    }
+
+    public String getBundleSymbolicName() {
+        return bundleSymbolicName;
+    }
+
+    public void setBundleSymbolicName(String bundleSymbolicName) {
+        this.bundleSymbolicName = bundleSymbolicName;
     }
 
     public String getMetadataLocation() {
