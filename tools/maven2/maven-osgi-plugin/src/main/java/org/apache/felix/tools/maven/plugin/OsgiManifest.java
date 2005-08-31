@@ -36,6 +36,7 @@ public class OsgiManifest {
     private String bundleDate;
     private String bundleUpdateLocation;
     private String bundleSymbolicName;
+	private String exportService;
     private String exportPackage;
     private String importPackage;
     private String metadataLocation;
@@ -59,6 +60,9 @@ public class OsgiManifest {
             entries.put("Bundle-Version", getBundleVersion());
         }
         */
+        if (getExportService() != null) {
+            entries.put("Export-Service", getExportService());
+        }
         if (getExportPackage() != null) {
             entries.put("Export-Package", getExportPackage());
         }
@@ -125,6 +129,14 @@ public class OsgiManifest {
         this.bundleVersion = bundleVersion;
     }
 */
+    public String getExportService() {
+        return exportService;
+    }
+
+    public void setExportService(String exportService) {
+        this.exportService = exportService;
+    }
+
     public String getExportPackage() {
         return exportPackage;
     }
