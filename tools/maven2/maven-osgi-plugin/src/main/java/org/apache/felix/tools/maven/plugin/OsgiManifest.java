@@ -36,6 +36,8 @@ public class OsgiManifest {
     private String bundleDate;
     private String bundleUpdateLocation;
     private String bundleSymbolicName;
+	private String bundleDocUrl;
+	private String bundleCategory;
 	private String exportService;
     private String exportPackage;
     private String importPackage;
@@ -86,7 +88,29 @@ public class OsgiManifest {
         if (getMetadataLocation() != null) {
             entries.put("Metadata-Location", getMetadataLocation());
         }
+		if (getBundleCategory() != null) {
+			entries.put("Bundle-Category", getBundleCategory());
+		}
+		if (getBundleDocUrl() != null) {
+			entries.put("Bundle-DocUrl", getBundleDocUrl());
+		}
         return (Map) entries;
+    }
+
+    public String getBundleDocUrl() {
+        return bundleDocUrl;
+    }
+
+    public void setBundleDocUrl(String bundleDocUrl) {
+        this.bundleDocUrl = bundleDocUrl;
+    }
+
+    public String getBundleCategory() {
+        return bundleCategory;
+    }
+
+    public void setBundleCategory(String bundleCategory) {
+        this.bundleCategory = bundleCategory;
     }
 
     public String getBundleActivator() {

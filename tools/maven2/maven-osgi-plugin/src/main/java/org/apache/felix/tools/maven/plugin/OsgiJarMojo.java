@@ -100,16 +100,14 @@ public class OsgiJarMojo extends AbstractMojo {
             merging of manifest entries located in some file somewhere in the project
             directory?  If so, do we allow both file and configuration based entries
             to be specified simultaneously and how do we merge these?
-
-            For now... I'm going to disable support for file-based manifest entries.
         */
-        //if (manifestFile != null) {
-        //    File file = new File(project.getBasedir().getAbsolutePath(), manifestFile);
-        //    getLog().info("Manifest file: " + file.getAbsolutePath() + " will be used");
-        //    archive.setManifestFile(file);
-        //} else {
-        //    getLog().info("No manifest file specified. Default will be used.");
-        //}
+        if (manifestFile != null) {
+            File file = new File(project.getBasedir().getAbsolutePath(), manifestFile);
+            getLog().info("Manifest file: " + file.getAbsolutePath() + " will be used");
+            archive.setManifestFile(file);
+        } else {
+            getLog().info("No manifest file specified. Default will be used.");
+        }
 
         // Look for any OSGi specified manifest entries in the maven-felix-plugin configuration
         // section of the POM.  If we find some, then add them to the target artifact's manifest.
