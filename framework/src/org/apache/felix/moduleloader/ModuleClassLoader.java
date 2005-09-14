@@ -220,6 +220,11 @@ public class ModuleClassLoader extends SecureClassLoader
                                     (String) params[5],
                                     null);
                             }
+                            else
+                            {
+                                definePackage(pkgName, null, null,
+                                    null, null, null, null, null);
+                            }
                         }
                     }
 
