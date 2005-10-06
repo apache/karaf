@@ -2638,11 +2638,15 @@ public class Felix
                 (importers != null) && (impIdx < importers.length);
                 impIdx++)
             {
+                // Avoid cycles if the bundle is already in map.
+                if (!map.containsKey(importers[impIdx]))
+                {
                     // Add each importing bundle to map.
                     map.put(importers[impIdx], importers[impIdx]);
                     // Now recurse into each bundle to get its importers.
                     populateImportGraph(
                         (BundleImpl) importers[impIdx], map);
+                }
             }
         }
     }
