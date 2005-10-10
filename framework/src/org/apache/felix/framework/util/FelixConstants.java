@@ -24,7 +24,7 @@ public interface FelixConstants extends org.osgi.framework.Constants
 
     // Framework constants and values.
     public static final String FELIX_VERSION_PROPERTY = "felix.version";
-    public static final String FELIX_VERSION_VALUE = "2.0.0.alpha8";
+    public static final String FELIX_VERSION_VALUE = "0.7.0";
 
     // Miscellaneous manifest constants.
     public static final String DIRECTIVE_SEPARATOR = ":=";
