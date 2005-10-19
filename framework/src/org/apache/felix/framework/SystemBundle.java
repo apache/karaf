@@ -83,7 +83,7 @@ class SystemBundle extends BundleImpl
         exports[0] = new R4Package(
             "org.osgi.framework",
             new R4Directive[0],
-            new R4Attribute[] { new R4Attribute("version", "1.2.0", false) });
+            new R4Attribute[] { new R4Attribute("version", "1.3.0", false) });
 
         exports[1] = new R4Package(
             "org.osgi.service.packageadmin",
