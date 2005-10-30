@@ -716,7 +716,7 @@ public class DefaultBundleArchive implements BundleArchive
             // Get manifest.
             Manifest mf = jarFile.getManifest();
             // Create a case insensitive map of manifest attributes.
-            Map map = new CaseInsensitiveMap(mf.getMainAttributes());
+            Map map = new StringMap(mf.getMainAttributes(), false);
             // If the request is for the current revision's header,
             // then cache it.
             if (revision == (getRevisionCount() - 1))

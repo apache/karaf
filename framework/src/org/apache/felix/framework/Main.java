@@ -23,8 +23,8 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 import org.apache.felix.framework.cache.DefaultBundleCache;
-import org.apache.felix.framework.util.CaseInsensitiveMap;
 import org.apache.felix.framework.util.MutablePropertyResolverImpl;
+import org.apache.felix.framework.util.StringMap;
 
 /**
  * <p>
@@ -188,7 +188,7 @@ public class Main
             // Now create an instance of the framework.
             m_felix = new Felix();
             m_felix.start(
-                new MutablePropertyResolverImpl(new CaseInsensitiveMap(configProps)),
+                new MutablePropertyResolverImpl(new StringMap(configProps, false)),
                 null);
         }
         catch (Exception ex)

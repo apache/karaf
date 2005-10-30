@@ -211,7 +211,7 @@ public class Felix
         // Initialize member variables.
         m_mgr = null;
         m_configProps = (configProps == null)
-            ? new MutablePropertyResolverImpl(new CaseInsensitiveMap()) : configProps;
+            ? new MutablePropertyResolverImpl(new StringMap(false)) : configProps;
         m_activeStartLevel = FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
         m_installRequestMap = new HashMap();
         m_installedBundleMap = new HashMap();

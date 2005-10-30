@@ -20,7 +20,7 @@ import java.io.CharArrayReader;
 import java.io.IOException;
 import java.util.*;
 
-import org.apache.felix.framework.util.CaseInsensitiveMap;
+import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.ldap.*;
 import org.osgi.framework.*;
 
@@ -127,7 +127,7 @@ public class FilterImpl implements Filter
     {
         try
         {
-            m_mapper.setSource(dict);
+            m_mapper.setSource(dict, false);
             return m_evaluator.evaluate(m_mapper);
         }
         catch (AttributeNotFoundException ex)
@@ -169,7 +169,18 @@ public class FilterImpl implements Filter
 
     public boolean matchCase(Dictionary dictionary)
     {
-        // TODO: Implement Filter.matchCase()
+        try
+        {
+            m_mapper.setSource(dictionary, true);
+            return m_evaluator.evaluate(m_mapper);
+        }
+        catch (AttributeNotFoundException ex)
+        {
+            m_logger.log(LogWrapper.LOG_DEBUG, "FilterImpl: " + ex);
+        }
+        catch (EvaluationException ex)
+        {
+            m_logger.log(LogWrapper.LOG_ERROR, "FilterImpl: " + toString(), ex);        }
         return false;
     }
 
@@ -189,7 +200,7 @@ public class FilterImpl implements Filter
     static class SimpleMapper implements Mapper
     {
         private ServiceReference m_ref = null;
-        private Map m_map = null;
+        private StringMap m_map = null;
 
         public void setSource(ServiceReference ref)
         {
@@ -197,17 +208,23 @@ public class FilterImpl implements Filter
             m_map = null;
         }
 
-        public void setSource(Dictionary dict)
+        public void setSource(Dictionary dict, boolean caseSensitive)
         {
+            // Create a map if we don't have one.
+            
             if (m_map == null)
             {
-                m_map = new CaseInsensitiveMap();
+                m_map = new StringMap();
             }
             else
             {
                 m_map.clear();
             }
 
+            // Set case comparison accordingly.
+            m_map.setCaseSensitive(caseSensitive);
+
+            // Put all dictionary entries into the map.
             if (dict != null)
             {
                 Enumeration keys = dict.keys();

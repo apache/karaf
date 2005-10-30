@@ -22,8 +22,8 @@ import java.security.PrivilegedAction;
 import java.util.*;
 
 import org.apache.felix.framework.searchpolicy.*;
-import org.apache.felix.framework.util.CaseInsensitiveMap;
 import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.moduleloader.LibrarySource;
 import org.apache.felix.moduleloader.ResourceSource;
 import org.osgi.framework.*;
@@ -126,7 +126,7 @@ class SystemBundle extends BundleImpl
         }
 
         // Initialize header map as a case insensitive map.
-        Map map = new CaseInsensitiveMap();
+        Map map = new StringMap(false);
         map.put(FelixConstants.BUNDLE_VERSION, FelixConstants.FELIX_VERSION_VALUE);
         map.put(FelixConstants.BUNDLE_NAME, "System Bundle");
         map.put(FelixConstants.BUNDLE_DESCRIPTION,

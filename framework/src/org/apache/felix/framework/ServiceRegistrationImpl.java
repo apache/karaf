@@ -20,7 +20,7 @@ import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.util.*;
 
-import org.apache.felix.framework.util.CaseInsensitiveMap;
+import org.apache.felix.framework.util.StringMap;
 import org.osgi.framework.*;
 
 class ServiceRegistrationImpl implements ServiceRegistration
@@ -212,7 +212,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
         // Create a case insensitive map.
         if (m_propMap == null)
         {
-            m_propMap = new CaseInsensitiveMap();
+            m_propMap = new StringMap(false);
         }
         else
         {
