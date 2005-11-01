@@ -5,6 +5,7 @@
     <version>2.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.felix.plugins</groupId>
   <artifactId>maven-osgi-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Maven OSGi Plugin</name>
