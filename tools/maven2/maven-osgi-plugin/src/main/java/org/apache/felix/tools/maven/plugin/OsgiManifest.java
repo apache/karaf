@@ -14,207 +14,251 @@
  *   limitations under the License.
  *
  */
+
 package org.apache.felix.tools.maven.plugin;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Hashtable;
 
 /**
- * Created by IntelliJ IDEA.
- * User: tbennett
- * Date: Aug 12, 2005
- * Time: 4:03:29 PM
- * To change this template use File | Settings | File Templates.
+ * Hold values for an OSGi jar "bundle" manifest.
+ * 
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Apache Felix Project</a>
+ * @version $Rev$, $Date$
  */
-public class OsgiManifest {
+public class OsgiManifest
+{
     private String bundleActivator;
     private String bundleName;
     private String bundleDescription;
     private String bundleVendor;
-    //private String bundleVersion;
-    //private String bundleClassPath;
     private String bundleDate;
     private String bundleUpdateLocation;
     private String bundleSymbolicName;
-	private String bundleDocUrl;
-	private String bundleCategory;
-	private String exportService;
+    private String bundleDocUrl;
+    private String bundleCategory;
+    private String exportService;
     private String exportPackage;
     private String importPackage;
     private String metadataLocation;
-    private Hashtable entries = new Hashtable();
 
-    public Map getEntries() {
-        if (getBundleActivator() != null) {
-            entries.put("Bundle-Activator", getBundleActivator());
+    // private String bundleClasspath;
+
+    private Map entries = new HashMap();
+
+    public Map getEntries()
+    {
+        if ( getBundleActivator() != null )
+        {
+            entries.put( "Bundle-Activator", getBundleActivator() );
         }
-        if (getBundleName() != null) {
-            entries.put("Bundle-Name", getBundleName());
+
+        if ( getBundleName() != null )
+        {
+            entries.put( "Bundle-Name", getBundleName() );
         }
-        if (getBundleDescription() != null) {
-            entries.put("Bundle-Description", getBundleDescription());
+
+        if ( getBundleDescription() != null )
+        {
+            entries.put( "Bundle-Description", getBundleDescription() );
         }
-        if (getBundleVendor() != null) {
-            entries.put("Bundle-Vendor", getBundleVendor());
+
+        if ( getBundleVendor() != null )
+        {
+            entries.put( "Bundle-Vendor", getBundleVendor() );
         }
+
+        if ( getExportService() != null )
+        {
+            entries.put( "Export-Service", getExportService() );
+        }
+
+        if ( getExportPackage() != null )
+        {
+            entries.put( "Export-Package", getExportPackage() );
+        }
+
+        if ( getImportPackage() != null )
+        {
+            entries.put( "Import-Package", getImportPackage() );
+        }
+
         /*
-        if (getBundleVersion() != null) {
-            entries.put("Bundle-Version", getBundleVersion());
+         if (getBundleClassPath() != null) {
+         entries.put("Bundle-Classpath", getBundleClassPath());
+         }
+         */
+
+        if ( getBundleDate() != null )
+        {
+            entries.put( "Bundle-Date", getBundleDate() );
         }
-        */
-        if (getExportService() != null) {
-            entries.put("Export-Service", getExportService());
+
+        if ( getBundleUpdateLocation() != null )
+        {
+            entries.put( "Bundle-UpdateLocation", getBundleUpdateLocation() );
         }
-        if (getExportPackage() != null) {
-            entries.put("Export-Package", getExportPackage());
+
+        if ( getBundleSymbolicName() != null )
+        {
+            entries.put( "Bundle-SymbolicName", getBundleSymbolicName() );
         }
-        if (getImportPackage() != null) {
-            entries.put("Import-Package", getImportPackage());
+
+        if ( getMetadataLocation() != null )
+        {
+            entries.put( "Metadata-Location", getMetadataLocation() );
         }
-        /*
-        if (getBundleClassPath() != null) {
-            entries.put("Bundle-ClassPath", getBundleClassPath());
+
+        if ( getBundleCategory() != null )
+        {
+            entries.put( "Bundle-Category", getBundleCategory() );
         }
-        */
-        if (getBundleDate() != null) {
-            entries.put("Bundle-Date", getBundleDate());
+
+        if ( getBundleDocUrl() != null )
+        {
+            entries.put( "Bundle-DocUrl", getBundleDocUrl() );
         }
-        if (getBundleUpdateLocation() != null) {
-            entries.put("Bundle-UpdateLocation", getBundleUpdateLocation());
-        }
-        if (getBundleSymbolicName() != null) {
-            entries.put("Bundle-SymbolicName", getBundleSymbolicName());
-        }
-        if (getMetadataLocation() != null) {
-            entries.put("Metadata-Location", getMetadataLocation());
-        }
-		if (getBundleCategory() != null) {
-			entries.put("Bundle-Category", getBundleCategory());
-		}
-		if (getBundleDocUrl() != null) {
-			entries.put("Bundle-DocUrl", getBundleDocUrl());
-		}
-        return (Map) entries;
+
+        return entries;
     }
 
-    public String getBundleDocUrl() {
+    public String getBundleDocUrl()
+    {
         return bundleDocUrl;
     }
 
-    public void setBundleDocUrl(String bundleDocUrl) {
+    public void setBundleDocUrl( String bundleDocUrl )
+    {
         this.bundleDocUrl = bundleDocUrl;
     }
 
-    public String getBundleCategory() {
+    public String getBundleCategory()
+    {
         return bundleCategory;
     }
 
-    public void setBundleCategory(String bundleCategory) {
+    public void setBundleCategory( String bundleCategory )
+    {
         this.bundleCategory = bundleCategory;
     }
 
-    public String getBundleActivator() {
+    public String getBundleActivator()
+    {
         return bundleActivator;
     }
 
-    public void setBundleActivator(String bundleActivator) {
+    public void setBundleActivator( String bundleActivator )
+    {
         this.bundleActivator = bundleActivator;
     }
 
-    public String getBundleName() {
+    public String getBundleName()
+    {
         return bundleName;
     }
 
-    public void setBundleName(String bundleName) {
+    public void setBundleName( String bundleName )
+    {
         this.bundleName = bundleName;
     }
 
-    public String getBundleDescription() {
+    public String getBundleDescription()
+    {
         return bundleDescription;
     }
 
-    public void setBundleDescription(String bundleDescription) {
+    public void setBundleDescription( String bundleDescription )
+    {
         this.bundleDescription = bundleDescription;
     }
 
-    public String getBundleVendor() {
+    public String getBundleVendor()
+    {
         return bundleVendor;
     }
 
-    public void setBundleVendor(String bundleVendor) {
+    public void setBundleVendor( String bundleVendor )
+    {
         this.bundleVendor = bundleVendor;
     }
-/*
-    public String getBundleVersion() {
-        return bundleVersion;
-    }
 
-    public void setBundleVersion(String bundleVersion) {
-        this.bundleVersion = bundleVersion;
-    }
-*/
-    public String getExportService() {
+    public String getExportService()
+    {
         return exportService;
     }
 
-    public void setExportService(String exportService) {
+    public void setExportService( String exportService )
+    {
         this.exportService = exportService;
     }
 
-    public String getExportPackage() {
+    public String getExportPackage()
+    {
         return exportPackage;
     }
 
-    public void setExportPackage(String exportPackage) {
+    public void setExportPackage( String exportPackage )
+    {
         this.exportPackage = exportPackage;
     }
 
-    public String getImportPackage() {
+    public String getImportPackage()
+    {
         return importPackage;
     }
 
-    public void setImportPackage(String importPackage) {
+    public void setImportPackage( String importPackage )
+    {
         this.importPackage = importPackage;
     }
 
-/*
-    public String getBundleClassPath() {
-        return bundleClassPath;
-    }
+    /*
+     public String getBundleClasspath() {
+     return bundleClasspath;
+     }
 
-    public void setBundleClassPath(String bundleClassPath) {
-        this.bundleClassPath = bundleClassPath;
-    }
-*/
-    public String getBundleDate() {
+     public void setBundleClasspath(String bundleClasspath) {
+     this.bundleClasspath = bundleClasspath;
+     }
+     */
+
+    public String getBundleDate()
+    {
         return bundleDate;
     }
 
-    public void setBundleDate(String bundleDate) {
+    public void setBundleDate( String bundleDate )
+    {
         this.bundleDate = bundleDate;
     }
 
-    public String getBundleUpdateLocation() {
+    public String getBundleUpdateLocation()
+    {
         return bundleUpdateLocation;
     }
 
-    public void setBundleUpdateLocation(String bundleUpdateLocation) {
+    public void setBundleUpdateLocation( String bundleUpdateLocation )
+    {
         this.bundleUpdateLocation = bundleUpdateLocation;
     }
 
-    public String getBundleSymbolicName() {
+    public String getBundleSymbolicName()
+    {
         return bundleSymbolicName;
     }
 
-    public void setBundleSymbolicName(String bundleSymbolicName) {
+    public void setBundleSymbolicName( String bundleSymbolicName )
+    {
         this.bundleSymbolicName = bundleSymbolicName;
     }
 
-    public String getMetadataLocation() {
+    public String getMetadataLocation()
+    {
         return metadataLocation;
     }
 
-    public void setMetadataLocation(String metadataLocation) {
+    public void setMetadataLocation( String metadataLocation )
+    {
         this.metadataLocation = metadataLocation;
     }
 }
