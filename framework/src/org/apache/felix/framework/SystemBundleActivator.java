@@ -58,4 +58,9 @@ class SystemBundleActivator implements BundleActivator
             }
         }
     }
+
+    public BundleContext getBundleContext()
+    {
+        return m_context;
+    }
 }

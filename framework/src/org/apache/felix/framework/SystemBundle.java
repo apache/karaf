@@ -55,6 +55,9 @@ class SystemBundle extends BundleImpl
         // Add the bundle activator for the start level service.
         activatorList.add(new StartLevelActivator(felix));
 
+        // Add the bundle activator for the URL Handlers service.
+        activatorList.add(new URLHandlersActivator(felix));
+
         m_activatorList = activatorList;
 
         // The system bundle exports framework packages as well as
@@ -78,7 +81,7 @@ class SystemBundle extends BundleImpl
 
         // Now, create the list of standard framework exports for
         // the system bundle.
-        R4Package[] exports = new R4Package[classPathPkgs.length + 3];
+        R4Package[] exports = new R4Package[classPathPkgs.length + 4];
 
         exports[0] = new R4Package(
             "org.osgi.framework",
@@ -91,12 +94,17 @@ class SystemBundle extends BundleImpl
             new R4Attribute[] { new R4Attribute("version", "1.2.0", false) });
 
         exports[2] = new R4Package(
-            "org.osgi.service.startlevel",
-            new R4Directive[0],
-            new R4Attribute[] { new R4Attribute("version", "1.0.0", false) });
+                "org.osgi.service.startlevel",
+                new R4Directive[0],
+                new R4Attribute[] { new R4Attribute("version", "1.0.0", false) });
+
+        exports[3] = new R4Package(
+                "org.osgi.service.url",
+                new R4Directive[0],
+                new R4Attribute[] { new R4Attribute("version", "1.0.0", false) });
 
         // Copy the class path exported packages.
-        System.arraycopy(classPathPkgs, 0, exports, 3, classPathPkgs.length);
+        System.arraycopy(classPathPkgs, 0, exports, 4, classPathPkgs.length);
 
         m_attributes = new Object[][] {
             new Object[] { R4SearchPolicy.EXPORTS_ATTR, exports },
@@ -266,7 +274,6 @@ throwable.printStackTrace();
     }
 
     protected BundleActivator getActivator()
-        throws Exception
     {
         if (m_activator == null)
         {
