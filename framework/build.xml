@@ -60,6 +60,7 @@
             <include name="org/osgi/framework/**"/>
             <include name="org/osgi/service/packageadmin/**"/>
             <include name="org/osgi/service/startlevel/**"/>
+            <include name="org/osgi/service/url/**"/>
         </jar>
     </target>
 
