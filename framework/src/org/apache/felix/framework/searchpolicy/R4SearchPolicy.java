@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.*;
 
 import org.apache.felix.framework.LogWrapper;
+import org.apache.felix.framework.util.SecurityManagerEx;
 import org.apache.felix.moduleloader.*;
 import org.apache.felix.moduleloader.search.ResolveException;
 import org.apache.felix.moduleloader.search.ResolveListener;
@@ -52,7 +53,7 @@ public class R4SearchPolicy implements SearchPolicy, ModuleListener
     public static final R4Wire[] m_emptyWires = new R4Wire[0];
 
     // Re-usable security manager for accessing class context.
-    private static SecurityManagerX m_sm = new SecurityManagerX();
+    private static SecurityManagerEx m_sm = new SecurityManagerEx();
 
     public R4SearchPolicy(LogWrapper logger)
     {
@@ -1624,15 +1625,6 @@ m_logger.log(LogWrapper.LOG_DEBUG, "WIRE: [" + module + "] " + wires[wireIdx]);
             {
                 m_visited = true;
             }
-        }
-    }
-
-    // Utility class to get the class context from the security manager.
-    private static class SecurityManagerX extends SecurityManager
-    {
-        public Class[] getClassContext()
-        {
-            return super.getClassContext();
         }
     }
 }
