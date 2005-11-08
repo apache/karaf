@@ -118,6 +118,20 @@ public class ModuleClassLoader extends SecureClassLoader
 
     /**
      * <p>
+     * This method is only used by a framework instance so that it can determine
+     * if a given module class loader is for a module of a bundle inside of it;
+     * this is used for the URL Handlers service implementation.
+     * </p>
+     * @return <tt>true</tt> if the specified module manager is the same as
+     *         the one associated with this module class loader.
+    **/
+    public boolean isModuleManagerEqual(ModuleManager mgr)
+    {
+        return m_mgr == mgr;
+    }
+
+    /**
+     * <p>
      * This method is nearly an exact copy of the ClassLoader.loadClass()
      * method. The main difference is that it delegates to its associated
      * <tt>ModuleManager</tt>'s search policy before calling the
