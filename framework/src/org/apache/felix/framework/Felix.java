@@ -153,6 +153,12 @@ public class Felix
      *   <li><tt>felix.startlevel.bundle</tt> - The default start level for
      *       newly installed bundles; the default value is 1.
      *   </li>
+     *   <li><tt>framework.service.urlhandlers</tt> - Flag to indicate whether
+     *       to activate the URL Handlers service for the framework instance;
+     *       the default value is "<tt>true</tt>". Activating the URL Handlers
+     *       service will result in the <tt>URL.setURLStreamHandlerFactory()</tt>
+     *       and <tt>URLConnection.setContentHandlerFactory()</tt> being called.
+     *   </li>
      *   <li><tt>felix.embedded.execution</tt> - Flag to indicate whether
      *       the framework is embedded into a host application; the default value is
      *       "<tt>false</tt>". If this flag is "<tt>true</tt>" then the framework
@@ -878,6 +884,85 @@ public class Felix
         }
 
         return (((BundleImpl) bundle).getInfo().getPersistentState() == Bundle.ACTIVE);
+    }
+
+    /**
+     * <p>
+     * This method is used to determine if the specified class is from
+     * a bundle installed in the framework instance. This method is used
+     * by the URL Handlers service when determining the framework instance
+     * associated with call stack.
+     * </p>
+     * @param clazz The class to test for whether it comes from a bundle.
+     * @return <tt>true</tt> if the class comes from a bundle installed in
+     *         the framework, <tt>false</tt> otherwise.
+    **/
+    protected boolean isBundleClass(Class clazz)
+    {
+        if (clazz.getClassLoader() instanceof ModuleClassLoader)
+        {
+            return ((ModuleClassLoader) clazz.getClassLoader()).isModuleManagerEqual(m_mgr);
+        }
+        return false;
+    }
+
+    /**
+     * <p>
+     * This method returns an input stream for the specified bundle resource
+     * URL.
+     * </p>
+     * @param url the URL representing the bundle resource for which an input
+     *        stream is desired.
+     * @return an input stream to the bundle resource.
+     * @throws IOException if the input stream could not be created.
+    **/
+    protected InputStream getBundleResourceInputStream(URL url)
+        throws IOException
+    {
+        // The URL is constructed like this:
+        // bundle://<module-id>/<source-idx>/<resource-path>
+    
+        Module module = m_mgr.getModule(url.getHost());
+        if (module == null)
+        {
+            throw new IOException("Unable to find bundle's module.");
+        }
+    
+        String resource = url.getFile();
+        if (resource == null)
+        {
+            throw new IOException("Unable to find resource: " + url.toString());
+        }
+        if (resource.startsWith("/"))
+        {
+            resource = resource.substring(1);
+        }
+        int rsIdx = -1;
+        try
+        {
+            rsIdx = Integer.parseInt(resource.substring(0, resource.indexOf("/")));
+        }
+        catch (NumberFormatException ex)
+        {
+            new IOException("Error parsing resource index.");
+        }
+        resource = resource.substring(resource.indexOf("/") + 1);
+
+        // Get the resource bytes from the resource source.
+        byte[] bytes = null;
+        ResourceSource[] resSources = module.getResourceSources();
+        if ((resSources != null) && (rsIdx < resSources.length))
+        {
+            if (resSources[rsIdx].hasResource(resource))
+            {
+                bytes = resSources[rsIdx].getBytes(resource);
+            }
+        }
+        if (bytes == null)
+        {
+            throw new IOException("Unable to find resource: " + url.toString());
+        }
+        return new ByteArrayInputStream(bytes);
     }
 
     //
