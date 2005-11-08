@@ -25,13 +25,13 @@ import org.apache.felix.moduleloader.*;
 
 public class OSGiURLPolicy implements URLPolicy
 {
-    private Felix m_felix = null;
-    private BundleURLStreamHandler m_handler = null;
+    private Felix m_framework = null;
+    private URLHandlersBundleStreamHandler m_bundleHandler = null;
     private FakeURLStreamHandler m_fakeHandler = null;
 
-    public OSGiURLPolicy(Felix felix)
+    public OSGiURLPolicy(Felix framework)
     {
-        m_felix = felix;
+        m_framework = framework;
     }
 
     public URL createCodeSourceURL(ModuleManager mgr, Module module)
@@ -75,9 +75,9 @@ public class OSGiURLPolicy implements URLPolicy
 
     public URL createResourceURL(ModuleManager mgr, Module module, int rsIdx, String name)
     {
-        if (m_handler == null)
+        if (m_bundleHandler == null)
         {
-            m_handler = new BundleURLStreamHandler(mgr);
+            m_bundleHandler = new URLHandlersBundleStreamHandler(m_framework);
         }
 
         // Add a slash if there is one already, otherwise
@@ -98,7 +98,7 @@ public class OSGiURLPolicy implements URLPolicy
             else
             {
                 return new URL(FelixConstants.BUNDLE_URL_PROTOCOL,
-                    module.getId(), -1, "/" + rsIdx + name, m_handler);
+                    module.getId(), -1, "/" + rsIdx + name, m_bundleHandler);
             }
         }
         catch (Exception ex)
@@ -127,7 +127,8 @@ public class OSGiURLPolicy implements URLPolicy
 
         public Object run() throws Exception
         {
-            return new URL("bundle", m_id, -1, "/" + m_rsIdx + m_name, m_handler);
+            return new URL(FelixConstants.BUNDLE_URL_PROTOCOL,
+                m_id, -1, "/" + m_rsIdx + m_name, m_bundleHandler);
         }
     }
 }
