@@ -101,7 +101,12 @@ public class R4SearchPolicy implements SearchPolicy, ModuleListener
         }
         catch (ResolveException ex)
         {
-            throw new ClassNotFoundException(name);
+            // We do not use the resolve exception as the
+            // cause of the exception, since this would
+            // potentially leak internal module information.
+            throw new ClassNotFoundException(
+                name + ": cannot resolve package "
+                + ex.getPackage() + ".");
         }
 
         // Get the package of the target class.
@@ -590,7 +595,7 @@ m_logger.log(LogWrapper.LOG_DEBUG, "WIRE: [" + module + "] " + newWires[wires.le
                 else
                 {
                     throw new ResolveException(
-                            "Unable to resolve.", module, imports[impIdx]);
+                        "Unable to resolve.", module, imports[impIdx]);
                 }
             }
             else if (candidates.length > 0)
