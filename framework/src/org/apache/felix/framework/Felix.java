@@ -1150,7 +1150,7 @@ public class Felix
         }
         catch (ClassNotFoundException ex)
         {
-            // The spec says we must throw a framework error.
+            // The spec says we must fire a framework error.
             fireFrameworkEvent(
                 FrameworkEvent.ERROR, bundle,
                 new BundleException(ex.getMessage()));
