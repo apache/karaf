@@ -1140,6 +1140,25 @@ public class Felix
     }
 
     /**
+     * Implementation for Bundle.loadClass().
+    **/
+    protected Class loadBundleClass(BundleImpl bundle, String name) throws ClassNotFoundException
+    {
+        try
+        {
+            return bundle.getInfo().getCurrentModule().getClassLoader().loadClass(name);
+        }
+        catch (ClassNotFoundException ex)
+        {
+            // The spec says we must throw a framework error.
+            fireFrameworkEvent(
+                FrameworkEvent.ERROR, bundle,
+                new BundleException(ex.getMessage()));
+            throw ex;
+        }
+    }
+
+    /**
      * Implementation for Bundle.start().
     **/
     protected void startBundle(BundleImpl bundle, boolean record)

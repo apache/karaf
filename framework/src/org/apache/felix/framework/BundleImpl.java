@@ -149,8 +149,7 @@ class BundleImpl implements Bundle
 
     public Class loadClass(String name) throws ClassNotFoundException
     {
-        // TODO: Implement Bundle.loadClass()
-        return null;
+        return m_felix.loadBundleClass(this, name);
     }
 
     public Enumeration getResources(String name) throws IOException
