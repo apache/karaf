@@ -65,6 +65,11 @@ import org.osgi.framework.BundleContext;
 **/
 class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
 {
+    private static final String STREAM_HANDLER_PACKAGE_PROP = "java.protocol.handler.pkgs";
+    private static final String CONTENT_HANDLER_PACKAGE_PROP = "java.content.handler.pkgs";
+    private static final String DEFAULT_STREAM_HANDLER_PACKAGE = "sun.net.www.protocol";
+    
+    private static final String DEFAULT_CONTENT_HANDLER_PACKAGE = "sun.net.www.content";
     private static String m_lock = new String("string-lock");
     private static SecurityManagerEx m_sm = null;
     private static URLHandlers m_handler = null;
@@ -82,7 +87,6 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
     **/
     private URLHandlers()
     {
-System.out.println("SETTING HANDLERS");
         // No one can create an instance, but we need an instance
         // so we can set this as the stream and content handler factory.
         URL.setURLStreamHandlerFactory(this);
@@ -103,12 +107,10 @@ System.out.println("SETTING HANDLERS");
     {
         synchronized (this)
         {
-            // TODO: Determine the best way to handle internal handlers.
-            if (protocol.equals("file"))
-            {
-                return null;
-            }
-            else if (protocol.equals(FelixConstants.BUNDLE_URL_PROTOCOL))
+            // If this is the framework's "bundle:" protocol, then return
+            // a handler for that immediately, since no one else can be
+            // allowed to deal with it.
+            if (protocol.equals(FelixConstants.BUNDLE_URL_PROTOCOL))
             {
                 if (m_bundleHandler == null)
                 {
@@ -116,6 +118,42 @@ System.out.println("SETTING HANDLERS");
                 }
                 return m_bundleHandler;
             }
+
+            // Check for built-in handlers for the protocol.
+// TODO: NEED TO DO A "DO PRIVILEGED" TO GET PROPERTY.
+// TODO: USE CONFIG.
+            String pkgs = System.getProperty(STREAM_HANDLER_PACKAGE_PROP, "");
+            pkgs = (pkgs.equals(""))
+                ? DEFAULT_STREAM_HANDLER_PACKAGE
+                : pkgs + "|" + DEFAULT_STREAM_HANDLER_PACKAGE;
+
+            // Iterate over built-in packages.
+            StringTokenizer pkgTok = new StringTokenizer(pkgs, "| ");
+            while (pkgTok.hasMoreTokens())
+            {
+                String pkg = pkgTok.nextToken().trim();
+                String className = pkg + "." + protocol + ".Handler";
+                try
+                {
+// TODO: USE DO PRIVILEGED.
+                    Class clazz = Class.forName(className);
+                    // If a built-in handler is found then let the
+                    // JRE handle it.
+                    if (clazz != null)
+                    {
+                        return null;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // This could be a class not found exception or an
+                    // instantiation exception, not much we can do in either
+                    // case other than ignore it.
+                }
+            }
+
+            // If we don't have a built-in handler, then create a proxy;
+            // otherwise return the built-in handler.
             return new URLHandlersStreamHandlerProxy(protocol);
         }
     }
@@ -132,23 +170,64 @@ System.out.println("SETTING HANDLERS");
     **/
     public ContentHandler createContentHandler(String mimeType)
     {
-        synchronized (m_lock)
+        synchronized (this)
         {
-            // See if we have a cached content handler.
-            ContentHandler hdlr = (m_contentHandlerCache == null)
+            // See if there is a cached content handler.
+            ContentHandler handler = (m_contentHandlerCache == null)
                 ? null
                 : (ContentHandler) m_contentHandlerCache.get(mimeType);
-            // If no cache content handler, then create one.
-            if (hdlr == null)
+
+            // If there is not cached handler, then search for built-in
+            // handler or create a new handler proxy.
+            if (handler == null)
             {
-                hdlr = new URLHandlersContentHandlerProxy(mimeType);
+                // Check for built-in handlers for the mime type.
+// TODO: NEED TO DO A "DO PRIVILEGED" TO GET PROPERTY.
+// TODO: USE CONFIG.
+                String pkgs = System.getProperty(CONTENT_HANDLER_PACKAGE_PROP, "");
+                pkgs = (pkgs.equals(""))
+                    ? DEFAULT_CONTENT_HANDLER_PACKAGE
+                    : pkgs + "|" + DEFAULT_CONTENT_HANDLER_PACKAGE;
+    
+                // Remove periods, slashes, and dashes from mime type.
+                String fixedType = mimeType.replace('.', '_').replace('/', '.').replace('-', '_');
+    
+                // Iterate over built-in packages.
+                StringTokenizer pkgTok = new StringTokenizer(pkgs, "| ");
+                while (pkgTok.hasMoreTokens())
+                {
+                    String pkg = pkgTok.nextToken().trim();
+                    String className = pkg + "." + fixedType;
+                    try
+                    {
+// TODO: USE DO PRIVILEGED.
+                        Class clazz = Class.forName(className);
+                        // If a built-in handler is found then let the
+                        // JRE handle it.
+                        if (clazz != null)
+                        {
+                            return null;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // This could be a class not found exception or an
+                        // instantiation exception, not much we can do in either
+                        // case other than ignore it.
+                    }
+                }
+
+                // If no cached or built-in content handler, then create one
+                // and cache it.
+                handler = new URLHandlersContentHandlerProxy(mimeType);
                 if (m_contentHandlerCache == null)
                 {
                     m_contentHandlerCache = new HashMap();
                 }
-                m_contentHandlerCache.put(mimeType, hdlr);
+                m_contentHandlerCache.put(mimeType, handler);
             }
-            return hdlr;
+
+            return handler;
         }
     }
 
