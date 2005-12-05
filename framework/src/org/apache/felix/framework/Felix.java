@@ -39,7 +39,7 @@ public class Felix
     // Config properties.
     private PropertyResolver m_config = new ConfigImpl();
     // Configuration properties passed into constructor.
-    private MutablePropertyResolver m_configProps = null;
+    private MutablePropertyResolver m_configMutable = null;
 
     // MODULE MANAGER.
     private ModuleManager m_mgr = null;
@@ -196,14 +196,14 @@ public class Felix
      * class documentation for more information.
      * </p>
      * 
-     * @param configProps An object for obtaining configuration properties,
+     * @param configMutable An object for obtaining configuration properties,
      *        may be <tt>null</tt>.
      * @param frameworkProps An object for obtaining framework properties,
      *        may be <tt>null</tt>.
      * @param activatorList A list of System Bundle activators.
     **/
     public synchronized void start(
-        MutablePropertyResolver configProps,
+        MutablePropertyResolver configMutable,
         List activatorList)
     {
         if (m_frameworkStatus != INITIAL_STATUS)
@@ -216,8 +216,8 @@ public class Felix
 
         // Initialize member variables.
         m_mgr = null;
-        m_configProps = (configProps == null)
-            ? new MutablePropertyResolverImpl(new StringMap(false)) : configProps;
+        m_configMutable = (configMutable == null)
+            ? new MutablePropertyResolverImpl(new StringMap(false)) : configMutable;
         m_activeStartLevel = FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
         m_installRequestMap = new HashMap();
         m_installedBundleMap = new HashMap();
@@ -756,7 +756,7 @@ public class Felix
                 "Initial start level must be greater than zero.");
         }
 
-        m_configProps.put(
+        m_configMutable.put(
             FelixConstants.BUNDLE_STARTLEVEL_PROP, Integer.toString(startLevel));
     }
 
@@ -1732,7 +1732,7 @@ public class Felix
     protected String getProperty(String key)
     {
         // First, check the config properties.
-        String val = (String) m_configProps.get(key);
+        String val = (String) m_config.get(key);
         // If not found, then try the system properties.
         return (val == null) ? System.getProperty(key) : val;
     }
@@ -3171,16 +3171,16 @@ public class Felix
     private void initializeFrameworkProperties()
     {
         // Standard OSGi properties.
-        m_configProps.put(
+        m_configMutable.put(
             FelixConstants.FRAMEWORK_VERSION,
             FelixConstants.FRAMEWORK_VERSION_VALUE);
-        m_configProps.put(
+        m_configMutable.put(
             FelixConstants.FRAMEWORK_VENDOR,
             FelixConstants.FRAMEWORK_VENDOR_VALUE);
-        m_configProps.put(
+        m_configMutable.put(
             FelixConstants.FRAMEWORK_LANGUAGE,
             System.getProperty("user.language"));
-        m_configProps.put(
+        m_configMutable.put(
             FelixConstants.FRAMEWORK_OS_VERSION,
             System.getProperty("os.version"));
 
@@ -3188,14 +3188,14 @@ public class Felix
         s = OSGiLibrarySource.normalizePropertyValue(
             FelixConstants.FRAMEWORK_OS_NAME,
             System.getProperty("os.name"));
-        m_configProps.put(FelixConstants.FRAMEWORK_OS_NAME, s);
+        m_configMutable.put(FelixConstants.FRAMEWORK_OS_NAME, s);
         s = OSGiLibrarySource.normalizePropertyValue(
             FelixConstants.FRAMEWORK_PROCESSOR,
             System.getProperty("os.arch"));
-        m_configProps.put(FelixConstants.FRAMEWORK_PROCESSOR, s);
+        m_configMutable.put(FelixConstants.FRAMEWORK_PROCESSOR, s);
 
         // The framework version property.
-        m_configProps.put(
+        m_configMutable.put(
             FelixConstants.FELIX_VERSION_PROPERTY,
             FelixConstants.FELIX_VERSION_VALUE);
     }
@@ -3409,12 +3409,12 @@ public class Felix
     {
         public String get(String key)
         {
-            return (m_configProps == null) ? null : m_configProps.get(key);
+            return (m_configMutable == null) ? null : m_configMutable.get(key);
         }
 
         public String[] getKeys()
         {
-            return m_configProps.getKeys();
+            return m_configMutable.getKeys();
         }
     }
 
