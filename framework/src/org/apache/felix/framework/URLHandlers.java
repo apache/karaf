@@ -39,8 +39,8 @@ import org.osgi.framework.BundleContext;
  * handler currently exists. This approach is used for three reasons:
  * </p>
  * <ol>
- *   <li>Caching behavior by the JVM of stream handlers does not give you
- *       a second chance to provide a handler.
+ *   <li>Potential caching behavior by the JVM of stream handlers does not give
+ *       you a second chance to provide a handler.
  *   </li>
  *   <li>Due to the dynamic nature of OSGi services, handlers may appear at
  *       any time, so always creating a proxy makes sense.
@@ -75,8 +75,8 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
     private static URLHandlers m_handler = null;
     private static int m_frameworkCount = 0;
     private static List m_frameworkList = null;
+    private static Map m_streamHandlerCache = null;
     private static Map m_contentHandlerCache = null;
-    private static URLHandlersBundleStreamHandler m_bundleHandler = null;
 
     /**
      * <p>
@@ -97,8 +97,8 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
      * <p>
      * This is a method implementation for the <tt>URLStreamHandlerFactory</tt>
      * interface. It simply creates a stream handler proxy object for the
-     * specified protocol. It does not perform caching of the return proxies,
-     * since this is done by the Java runtime.
+     * specified protocol. It caches the returned proxy; therefore, subsequent
+     * requests for the same protocol will receive the same handler proxy.
      * </p>
      * @param protocol the protocol for which a stream handler should be returned.
      * @return a stream handler proxy for the specified protocol.
@@ -107,54 +107,77 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
     {
         synchronized (this)
         {
+            // See if there is a cached stream handler.
+            // IMPLEMENTATION NOTE: Caching is not strictly necessary for
+            // stream handlers since the Java runtime caches them. Caching is
+            // performed for code consistency between stream and content
+            // handlers and also because caching behavior may not be guaranteed
+            // across different JRE implementations.
+            URLStreamHandler handler = (m_streamHandlerCache == null)
+                ? null
+                : (URLStreamHandler) m_streamHandlerCache.get(protocol);
+
             // If this is the framework's "bundle:" protocol, then return
             // a handler for that immediately, since no one else can be
             // allowed to deal with it.
             if (protocol.equals(FelixConstants.BUNDLE_URL_PROTOCOL))
             {
-                if (m_bundleHandler == null)
+                handler = new URLHandlersBundleStreamHandler(null);
+                if (m_streamHandlerCache == null)
                 {
-                    m_bundleHandler = new URLHandlersBundleStreamHandler(null);
+                    m_streamHandlerCache = new HashMap();
                 }
-                return m_bundleHandler;
+                m_streamHandlerCache.put(protocol, handler);
+                return handler;
             }
 
-            // Check for built-in handlers for the protocol.
+            // If there is not cached handler, then search for built-in
+            // handler or create a new handler proxy.
+            if (handler == null)
+            {
+                // Check for built-in handlers for the protocol.
 // TODO: NEED TO DO A "DO PRIVILEGED" TO GET PROPERTY.
 // TODO: USE CONFIG.
-            String pkgs = System.getProperty(STREAM_HANDLER_PACKAGE_PROP, "");
-            pkgs = (pkgs.equals(""))
-                ? DEFAULT_STREAM_HANDLER_PACKAGE
-                : pkgs + "|" + DEFAULT_STREAM_HANDLER_PACKAGE;
-
-            // Iterate over built-in packages.
-            StringTokenizer pkgTok = new StringTokenizer(pkgs, "| ");
-            while (pkgTok.hasMoreTokens())
-            {
-                String pkg = pkgTok.nextToken().trim();
-                String className = pkg + "." + protocol + ".Handler";
-                try
+                String pkgs = System.getProperty(STREAM_HANDLER_PACKAGE_PROP, "");
+                pkgs = (pkgs.equals(""))
+                    ? DEFAULT_STREAM_HANDLER_PACKAGE
+                    : pkgs + "|" + DEFAULT_STREAM_HANDLER_PACKAGE;
+    
+                // Iterate over built-in packages.
+                StringTokenizer pkgTok = new StringTokenizer(pkgs, "| ");
+                while (pkgTok.hasMoreTokens())
                 {
-// TODO: USE DO PRIVILEGED.
-                    Class clazz = Class.forName(className);
-                    // If a built-in handler is found then let the
-                    // JRE handle it.
-                    if (clazz != null)
+                    String pkg = pkgTok.nextToken().trim();
+                    String className = pkg + "." + protocol + ".Handler";
+                    try
                     {
-                        return null;
+                        // If a built-in handler is found then let the
+                        // JRE handle it.
+// TODO: USE DO PRIVILEGED.
+                        if (Class.forName(className) != null)
+                        {
+                            return null;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // This could be a class not found exception or an
+                        // instantiation exception, not much we can do in either
+                        // case other than ignore it.
                     }
                 }
-                catch (Exception ex)
+    
+                // If no cached or built-in content handler, then create a
+                // proxy handler and cache it.
+                handler = new URLHandlersStreamHandlerProxy(protocol);
+                if (m_streamHandlerCache == null)
                 {
-                    // This could be a class not found exception or an
-                    // instantiation exception, not much we can do in either
-                    // case other than ignore it.
+                    m_streamHandlerCache = new HashMap();
                 }
+                m_streamHandlerCache.put(protocol, handler);
             }
 
-            // If we don't have a built-in handler, then create a proxy;
-            // otherwise return the built-in handler.
-            return new URLHandlersStreamHandlerProxy(protocol);
+            return handler;
         }
     }
 
@@ -162,8 +185,8 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
      * <p>
      * This is a method implementation for the <tt>ContentHandlerFactory</tt>
      * interface. It simply creates a content handler proxy object for the
-     * specified mime type. It also performs caching of the return proxies,
-     * since this is not done by the Java runtime.
+     * specified mime type. It caches the returned proxy; therefore, subsequent
+     * requests for the same content type will receive the same handler proxy.
      * </p>
      * @param mimeType the mime type for which a content handler should be returned.
      * @return a content handler proxy for the specified mime type.
@@ -200,11 +223,10 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                     String className = pkg + "." + fixedType;
                     try
                     {
-// TODO: USE DO PRIVILEGED.
-                        Class clazz = Class.forName(className);
                         // If a built-in handler is found then let the
                         // JRE handle it.
-                        if (clazz != null)
+// TODO: USE DO PRIVILEGED.
+                        if (Class.forName(className) != null)
                         {
                             return null;
                         }
@@ -217,8 +239,8 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                     }
                 }
 
-                // If no cached or built-in content handler, then create one
-                // and cache it.
+                // If no cached or built-in content handler, then create a
+                // proxy handler and cache it.
                 handler = new URLHandlersContentHandlerProxy(mimeType);
                 if (m_contentHandlerCache == null)
                 {
