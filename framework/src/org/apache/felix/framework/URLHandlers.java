@@ -19,8 +19,7 @@ package org.apache.felix.framework;
 import java.net.*;
 import java.util.*;
 
-import org.apache.felix.framework.util.FelixConstants;
-import org.apache.felix.framework.util.SecurityManagerEx;
+import org.apache.felix.framework.util.*;
 import org.apache.felix.moduleloader.ModuleClassLoader;
 import org.osgi.framework.BundleContext;
 
@@ -77,6 +76,8 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
     private static List m_frameworkList = null;
     private static Map m_streamHandlerCache = null;
     private static Map m_contentHandlerCache = null;
+
+    private final static SecureAction m_secureAction = new SecureAction();
 
     /**
      * <p>
@@ -136,9 +137,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
             if (handler == null)
             {
                 // Check for built-in handlers for the protocol.
-// TODO: NEED TO DO A "DO PRIVILEGED" TO GET PROPERTY.
-// TODO: USE CONFIG.
-                String pkgs = System.getProperty(STREAM_HANDLER_PACKAGE_PROP, "");
+                String pkgs = m_secureAction.getProperty(STREAM_HANDLER_PACKAGE_PROP, "");
                 pkgs = (pkgs.equals(""))
                     ? DEFAULT_STREAM_HANDLER_PACKAGE
                     : pkgs + "|" + DEFAULT_STREAM_HANDLER_PACKAGE;
@@ -153,8 +152,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                     {
                         // If a built-in handler is found then let the
                         // JRE handle it.
-// TODO: USE DO PRIVILEGED.
-                        if (Class.forName(className) != null)
+                        if (m_secureAction.forName(className) != null)
                         {
                             return null;
                         }
@@ -205,9 +203,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
             if (handler == null)
             {
                 // Check for built-in handlers for the mime type.
-// TODO: NEED TO DO A "DO PRIVILEGED" TO GET PROPERTY.
-// TODO: USE CONFIG.
-                String pkgs = System.getProperty(CONTENT_HANDLER_PACKAGE_PROP, "");
+                String pkgs = m_secureAction.getProperty(CONTENT_HANDLER_PACKAGE_PROP, "");
                 pkgs = (pkgs.equals(""))
                     ? DEFAULT_CONTENT_HANDLER_PACKAGE
                     : pkgs + "|" + DEFAULT_CONTENT_HANDLER_PACKAGE;
@@ -225,8 +221,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                     {
                         // If a built-in handler is found then let the
                         // JRE handle it.
-// TODO: USE DO PRIVILEGED.
-                        if (Class.forName(className) != null)
+                        if (m_secureAction.forName(className) != null)
                         {
                             return null;
                         }
