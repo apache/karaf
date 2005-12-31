@@ -1,0 +1,6 @@
+<archetype>
+  <id>osgi-archetype</id>
+  <sources>
+    <source>src/main/java/MyBundleActivator.java</source>
+  </sources>
+</archetype>
