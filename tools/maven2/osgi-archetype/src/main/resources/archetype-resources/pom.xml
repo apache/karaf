@@ -5,8 +5,8 @@
   <artifactId>${artifactId}</artifactId>
   <packaging>osgi-bundle</packaging>
   <version>${version}</version>
-  <name>My Bundle Project Name Here</name>
-  <url>My Organization URL Here</url>
+  <name>Simple Bundle Project</name>
+  <url>http://incubator.apache.org/felix</url>
   <build>
     <!--
     ***********************************************************
@@ -35,9 +35,9 @@
           *******************************************************************
           -->
           <osgiManifest>
-            <bundleName>My Bundle Name</bundleName>
-            <bundleActivator>${groupId}.MyBundleActivator</bundleActivator>
-            <bundleVendor>My Organization Name</bundleVendor>
+            <bundleName>Simple Bundle</bundleName>
+            <bundleActivator>${groupId}.Activator</bundleActivator>
+            <bundleVendor>Apache Software Foundation</bundleVendor>
           </osgiManifest>
         </configuration>
       </plugin>
