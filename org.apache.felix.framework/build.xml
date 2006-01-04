@@ -1,7 +1,7 @@
 <project name="felix" default="all" basedir=".">
 
     <!-- Set our global properties -->
-    <property name="src.dir" value="src"/>
+    <property name="src.dir" value="src/main/java"/>
     <property name="lib.dir" value="lib"/>
     <property name="output.dir" value="classes"/>
     <property name="bundle.dir" value="bundle"/>
