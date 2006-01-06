@@ -1479,7 +1479,8 @@ loop:   for (;;)
      * 
      * Approximate for numerical values involves a difference of less than APPROX_CRITERIA
      * Approximate for string values is calculated by using the Levenshtein distance
-     * between strings. Less than APPROX_CRITERIA of difference is considered as approximate.
+     * between strings and is case insensitive. Less than APPROX_CRITERIA of
+     * difference is considered as approximate.
      * 
      * Supported types only include the following subclasses of Number:
      * - Byte
@@ -1551,7 +1552,8 @@ loop:   for (;;)
         }
         else if (obj1 instanceof String)
         {
-            int distance = getDistance(obj1.toString(),obj2.toString());
+            int distance = getDistance(
+                obj1.toString().toLowerCase(), obj2.toString().toLowerCase());
             int size = ((String)obj1).length();
             return (distance <= ((size*APPROX_CRITERIA)/100));
         }
