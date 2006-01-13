@@ -1471,6 +1471,7 @@ public class Felix
             }
 
             info.setState(Bundle.INSTALLED);
+            info.setLastModified(System.currentTimeMillis());
 
             // Mark as needing a refresh.
             info.setRemovalPending();
@@ -1708,6 +1709,7 @@ public class Felix
 
         // Set state to uninstalled.
         info.setState(Bundle.UNINSTALLED);
+        info.setLastModified(System.currentTimeMillis());
 
         // Fire bundle event.
         fireBundleEvent(BundleEvent.UNINSTALLED, bundle);
@@ -1882,6 +1884,7 @@ public class Felix
             {
                 // This will persistently set the bundle's start level.
                 bundle.getInfo().setStartLevel(getInitialBundleStartLevel());
+                bundle.getInfo().setLastModified(System.currentTimeMillis());
             }
 
             synchronized (m_installedBundleLock_Priority2)

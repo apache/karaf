@@ -28,6 +28,7 @@ class BundleInfo
     private BundleArchive m_archive = null;
     private Module[] m_modules = null;
     private int m_state = 0;
+    private long m_modified = 0;
     private BundleActivator m_activator = null;
     private BundleContext m_context = null;
     // Indicates that the bundle was either updated
@@ -196,6 +197,16 @@ class BundleInfo
     public void setState(int i)
     {
         m_state = i;
+    }
+
+    public long getLastModified()
+    {
+        return m_modified;
+    }
+
+    public void setLastModified(long l)
+    {
+        m_modified = l;
     }
 
     public int getPersistentState()

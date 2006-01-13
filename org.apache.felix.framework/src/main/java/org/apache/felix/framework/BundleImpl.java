@@ -60,6 +60,11 @@ class BundleImpl implements Bundle
         return m_felix.getBundleHeaders(this);
     }
 
+    public long getLastModified()
+    {
+        return m_info.getLastModified();
+    }
+
     public String getLocation()
     {
         return m_felix.getBundleLocation(this);
@@ -96,9 +101,19 @@ class BundleImpl implements Bundle
         return m_info.getState();
     }
 
+    public String getSymbolicName()
+    {
+    	return (String) getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
+    }
+
     public boolean hasPermission(Object obj)
     {
         return m_felix.bundleHasPermission(this, obj);
+    }
+
+    public Class loadClass(String name) throws ClassNotFoundException
+    {
+        return m_felix.loadBundleClass(this, name);
     }
 
     public void start() throws BundleException
@@ -137,19 +152,9 @@ class BundleImpl implements Bundle
 
     public Dictionary getHeaders(String locale)
     {
-        // TODO: Implement Bundle.getHeaders()
+        // TODO: Implement Bundle.getHeaders(String locale)
+    	// Should be done after [#FELIX-27] resolution
         return null;
-    }
-
-    public String getSymbolicName()
-    {
-        // TODO: Implement Bundle.getSymbolicName()
-        return null;
-    }
-
-    public Class loadClass(String name) throws ClassNotFoundException
-    {
-        return m_felix.loadBundleClass(this, name);
     }
 
     public Enumeration getResources(String name) throws IOException
@@ -168,12 +173,6 @@ class BundleImpl implements Bundle
     {
         // TODO: Implement Bundle.getEntry()
         return null;
-    }
-
-    public long getLastModified()
-    {
-        // TODO: Implement Bundle.getLastModified()
-        return 0;
     }
 
     public Enumeration findEntries(String path, String filePattern, boolean recurse)
