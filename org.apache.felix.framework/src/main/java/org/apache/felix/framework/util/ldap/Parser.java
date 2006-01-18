@@ -433,7 +433,7 @@ loop:   for (;;)
                     wasStar = false;
                     lexer.get();
                     c = lexer.get();
-                    if (c != EOF)
+                    if (c == EOF)
                     {
                         throw new ParseException("unexpected EOF");
                     }
