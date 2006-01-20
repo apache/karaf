@@ -49,7 +49,9 @@ class ServiceReferenceImpl implements ServiceReference
 
     public Bundle getBundle()
     {
-        return m_bundle;
+        // The spec says that this should return null if
+        // the service is unregistered.
+        return (m_registration.isValid()) ? m_bundle : null;
     }
 
     public Bundle[] getUsingBundles()
