@@ -77,9 +77,16 @@ public class ServiceRegistry
             ServiceRegistration[] regs = (ServiceRegistration[]) m_serviceRegsMap.get(bundle);
             m_serviceRegsMap.put(bundle, removeServiceRegistration(regs, reg));
         }
+
         fireServiceChanged(new ServiceEvent(ServiceEvent.UNREGISTERING, reg.getReference()));
     }
 
+    /**
+     * This method retrieves all services registrations for the specified
+     * bundle and invokes <tt>ServiceRegistration.unregister()</tt> on each
+     * one.
+     * @param bundle the bundle whose services should be unregistered.
+    **/
     public void unregisterServices(Bundle bundle)
     {
         // Simply remove all service registrations for the bundle.
@@ -87,14 +94,12 @@ public class ServiceRegistry
         synchronized (this)
         {
             regs = (ServiceRegistration[]) m_serviceRegsMap.get(bundle);
-            m_serviceRegsMap.remove(bundle);
         }
 
-        // Fire all events outside of synchronized block.
+        // Unregister each service.
         for (int i = 0; (regs != null) && (i < regs.length); i++)
         {
-            fireServiceChanged(
-                new ServiceEvent(ServiceEvent.UNREGISTERING, regs[i].getReference()));
+            regs[i].unregister();
         }
     }
 

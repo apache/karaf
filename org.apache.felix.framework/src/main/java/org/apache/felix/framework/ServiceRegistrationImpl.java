@@ -91,9 +91,12 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
     public void unregister()
     {
-        m_registry.unregisterService(m_bundle, this);
-        m_svcObj = null;
-        m_factory = null;
+        if (m_svcObj != null)
+        {
+            m_registry.unregisterService(m_bundle, this);
+            m_svcObj = null;
+            m_factory = null;
+        }
     }
 
     //
