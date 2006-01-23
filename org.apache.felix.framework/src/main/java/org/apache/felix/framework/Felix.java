@@ -1135,7 +1135,7 @@ public class Felix
             throw new IllegalStateException("The bundle is uninstalled.");
         }
 
-        if (null != System.getSecurityManager())
+        if (System.getSecurityManager() != null)
         {
             try
             {
