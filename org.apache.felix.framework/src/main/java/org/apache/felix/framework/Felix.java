@@ -1135,8 +1135,28 @@ public class Felix
             throw new IllegalStateException("The bundle is uninstalled.");
         }
 
-// TODO: IMPLEMENT THIS CORRECTLY.
-        return true;
+        if (null != System.getSecurityManager())
+        {
+            try
+            {
+               return (obj instanceof java.security.Permission)
+                   ? java.security.Policy.getPolicy().getPermissions(
+                        new java.security.CodeSource(
+                            new java.net.URL(bundle.getInfo().getLocation()), null))
+                                .implies((java.security.Permission) obj)
+                   : false;
+            }
+            catch (Exception ex)
+            {
+                m_logger.log(
+                    LogWrapper.LOG_WARNING,
+                    "Exception while evaluating the permission.",
+                    ex);
+                return false; 
+            }
+         }
+
+         return true;
     }
 
     /**
