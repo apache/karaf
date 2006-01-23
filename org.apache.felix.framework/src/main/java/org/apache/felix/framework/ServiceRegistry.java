@@ -84,7 +84,8 @@ public class ServiceRegistry
     /**
      * This method retrieves all services registrations for the specified
      * bundle and invokes <tt>ServiceRegistration.unregister()</tt> on each
-     * one.
+     * one. This method is only called be the framework to clean up after
+     * a stopped bundle.
      * @param bundle the bundle whose services should be unregistered.
     **/
     public void unregisterServices(Bundle bundle)
@@ -101,6 +102,9 @@ public class ServiceRegistry
         {
             regs[i].unregister();
         }
+
+        // Now remove the bundle itself.
+        m_serviceRegsMap.remove(bundle);
     }
 
     public synchronized List getServiceReferences(String className, Filter filter)
