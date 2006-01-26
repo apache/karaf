@@ -206,6 +206,18 @@ public class DefaultBundleCache implements BundleCache
         return null;
     }
 
+    public int getArchiveIndex(BundleArchive ba)
+    {
+        for (int i = 0; i < m_archives.length; i++)
+        {
+            if (m_archives[i] == ba)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public BundleArchive create(long id, String location, InputStream is)
         throws Exception
     {
@@ -257,6 +269,20 @@ public class DefaultBundleCache implements BundleCache
     public void remove(BundleArchive ba)
         throws Exception
     {
+        // Remove the archive itself.
         ((DefaultBundleArchive) ba).remove();
+        // Remove the archive from the cache.
+        int idx = getArchiveIndex(ba);
+        if (idx >= 0)
+        {
+            BundleArchive[] bas = new BundleArchive[m_archives.length - 1];
+            System.arraycopy(m_archives, 0, bas, 0, idx);
+            if (idx < bas.length)
+            {
+                System.arraycopy(m_archives, idx + 1, bas, idx,
+                    bas.length - idx);
+            }
+            m_archives = bas;
+        }
     }
 }
