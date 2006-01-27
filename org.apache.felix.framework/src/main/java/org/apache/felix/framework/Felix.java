@@ -1139,13 +1139,13 @@ public class Felix
         {
             try
             {
-               return (obj instanceof java.security.Permission)
-                   ? java.security.Policy.getPolicy().getPermissions(
+                return (obj instanceof java.security.Permission)
+                    ? java.security.Policy.getPolicy().getPermissions(
                         new java.security.CodeSource(
                             new java.net.URL(bundle.getInfo().getLocation()),
                             (java.security.cert.Certificate[]) null))
                                 .implies((java.security.Permission) obj)
-                   : false;
+                    : false;
             }
             catch (Exception ex)
             {
@@ -1155,9 +1155,9 @@ public class Felix
                     ex);
                 return false; 
             }
-         }
+        }
 
-         return true;
+        return true;
     }
 
     /**
