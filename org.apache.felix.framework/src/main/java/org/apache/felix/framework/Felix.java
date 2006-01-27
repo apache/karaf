@@ -1142,7 +1142,8 @@ public class Felix
                return (obj instanceof java.security.Permission)
                    ? java.security.Policy.getPolicy().getPermissions(
                         new java.security.CodeSource(
-                            new java.net.URL(bundle.getInfo().getLocation()), null))
+                            new java.net.URL(bundle.getInfo().getLocation()),
+                            (java.security.cert.Certificate[]) null))
                                 .implies((java.security.Permission) obj)
                    : false;
             }
