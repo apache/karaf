@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
  */
 package org.apache.felix.framework;
 
-import org.apache.felix.framework.searchpolicy.R4Version;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
 import org.osgi.service.packageadmin.ExportedPackage;
 
 class ExportedPackageImpl implements ExportedPackage
@@ -25,12 +25,12 @@ class ExportedPackageImpl implements ExportedPackage
     private Felix m_felix = null;
     private BundleImpl m_exporter = null;
     private String m_name = null;
-    private R4Version m_version = null;
+    private Version m_version = null;
     private String m_toString = null;
     private String m_versionString = null;
 
     public ExportedPackageImpl(
-        Felix felix, BundleImpl exporter, String name, R4Version version)
+        Felix felix, BundleImpl exporter, String name, Version version)
     {
         m_felix = felix;
         m_exporter = exporter;

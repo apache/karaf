@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.apache.felix.framework.cache.BundleArchive;
 import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.moduleloader.IContent;
+import org.apache.felix.moduleloader.IContentLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 
@@ -67,7 +69,7 @@ public class SystemBundleArchive implements BundleArchive
         return null;
     }
 
-    public BundleActivator getActivator(ClassLoader loader)
+    public BundleActivator getActivator(IContentLoader contentLoader)
         throws Exception
     {
         return null;
@@ -95,7 +97,13 @@ public class SystemBundleArchive implements BundleArchive
         m_headerMap = headerMap;
     }
 
-    public String[] getClassPath(int revision)
+    public IContent getContent(int revision)
+        throws Exception
+    {
+        return null;
+    }
+
+    public IContent[] getContentPath(int revision)
         throws Exception
     {
         return null;

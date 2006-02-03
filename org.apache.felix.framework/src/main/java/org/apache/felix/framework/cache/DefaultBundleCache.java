@@ -18,7 +18,7 @@ package org.apache.felix.framework.cache;
 
 import java.io.*;
 
-import org.apache.felix.framework.LogWrapper;
+import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.PropertyResolver;
 
 /**
@@ -77,7 +77,7 @@ public class DefaultBundleCache implements BundleCache
     protected static transient final String BUNDLE_DIR_PREFIX = "bundle";
 
     private PropertyResolver m_cfg = null;
-    private LogWrapper m_logger = null;
+    private Logger m_logger = null;
     private File m_profileDir = null;
     private BundleArchive[] m_archives = null;
 
@@ -85,7 +85,7 @@ public class DefaultBundleCache implements BundleCache
     {
     }
 
-    public void initialize(PropertyResolver cfg, LogWrapper logger) throws Exception
+    public void initialize(PropertyResolver cfg, Logger logger) throws Exception
     {
         // Save Properties reference.
         m_cfg = cfg;
@@ -154,7 +154,7 @@ public class DefaultBundleCache implements BundleCache
             if (!m_profileDir.mkdirs())
             {
                 m_logger.log(
-                    LogWrapper.LOG_ERROR,
+                    Logger.LOG_ERROR,
                     "Unable to create directory: " + m_profileDir);
                 throw new RuntimeException("Unable to create profile directory.");
             }

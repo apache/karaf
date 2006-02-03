@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ package org.apache.felix.framework;
 import java.util.Map;
 
 import org.apache.felix.framework.cache.BundleArchive;
-import org.apache.felix.moduleloader.Module;
+import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
 class BundleInfo
 {
-    private LogWrapper m_logger = null;
+    private Logger m_logger = null;
     private BundleArchive m_archive = null;
-    private Module[] m_modules = null;
+    private IModule[] m_modules = null;
     private int m_state = 0;
     private long m_modified = 0;
     private BundleActivator m_activator = null;
@@ -39,12 +39,12 @@ class BundleInfo
     private int m_lockCount = 0;
     private Thread m_lockThread = null;
 
-    protected BundleInfo(LogWrapper logger, BundleArchive archive, Module module)
+    protected BundleInfo(Logger logger, BundleArchive archive, IModule module)
         throws Exception
     {
         m_logger = logger;
         m_archive = archive;
-        m_modules = (module == null) ? new Module[0] : new Module[] { module };
+        m_modules = (module == null) ? new IModule[0] : new IModule[] { module };
 
         m_state = Bundle.INSTALLED;
         m_removalPending = false;
@@ -73,7 +73,7 @@ class BundleInfo
      * no limit on the potential number of bundle JAR file revisions.
      * @return array of modules corresponding to the bundle JAR file revisions.
     **/
-    public Module[] getModules()
+    public IModule[] getModules()
     {
         return m_modules;
     }
@@ -84,7 +84,7 @@ class BundleInfo
      * @return <tt>true</tt> if the specified module is in the array of modules
      *         associated with this bundle, <tt>false</tt> otherwise.
     **/
-    public boolean hasModule(Module module)
+    public boolean hasModule(IModule module)
     {
         for (int i = 0; i < m_modules.length; i++)
         {
@@ -101,7 +101,7 @@ class BundleInfo
      * in the module array.
      * @return the newest module.
     **/
-    public Module getCurrentModule()
+    public IModule getCurrentModule()
     {
         return m_modules[m_modules.length - 1];
     }
@@ -111,9 +111,9 @@ class BundleInfo
      * the bundle associated with this <tt>BundleInfo</tt> object.
      * @param module the module to add.
     **/
-    public void addModule(Module module)
+    public void addModule(IModule module)
     {
-        Module[] dest = new Module[m_modules.length + 1];
+        IModule[] dest = new IModule[m_modules.length + 1];
         System.arraycopy(m_modules, 0, dest, 0, m_modules.length);
         dest[m_modules.length] = module;
         m_modules = dest;
@@ -133,7 +133,7 @@ class BundleInfo
         catch (Exception ex)
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "Error reading location from bundle archive.",
                 ex);
             return null;
@@ -149,7 +149,7 @@ class BundleInfo
         catch (Exception ex)
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "Error reading start level from bundle archive.",
                 ex);
             return defaultLevel;
@@ -165,7 +165,7 @@ class BundleInfo
         catch (Exception ex)
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "Error writing start level to bundle archive.",
                 ex);
         }
@@ -182,7 +182,7 @@ class BundleInfo
         catch (Exception ex)
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "Error reading manifest from bundle archive.",
                 ex);
             return null;
@@ -218,7 +218,7 @@ class BundleInfo
         catch (Exception ex)
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "Error reading persistent state from bundle archive.",
                 ex);
             return Bundle.INSTALLED;
@@ -233,7 +233,7 @@ class BundleInfo
         }
         catch (Exception ex)
         {
-            m_logger.log(LogWrapper.LOG_ERROR,
+            m_logger.log(Logger.LOG_ERROR,
                 "Error writing persistent state to bundle archive.",
                 ex);
         }
@@ -248,7 +248,7 @@ class BundleInfo
         catch (Exception ex)
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "Error writing persistent state to bundle archive.",
                 ex);
         }
@@ -263,7 +263,7 @@ class BundleInfo
         catch (Exception ex)
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "Error writing persistent state to bundle archive.",
                 ex);
         }
@@ -341,43 +341,5 @@ class BundleInfo
     {
         m_lockCount = info.m_lockCount;
         m_lockThread = info.m_lockThread;
-    }
-
-    /**
-     * Converts a module identifier to a bundle identifier. Module IDs
-     * are typically <tt>&lt;bundle-id&gt;.&lt;revision&gt;</tt>; this
-     * method returns only the portion corresponding to the bundle ID.
-    **/
-    protected static long getBundleIdFromModuleId(String id)
-    {
-        try
-        {
-            String bundleId = (id.indexOf('.') >= 0)
-                ? id.substring(0, id.indexOf('.')) : id;
-            return Long.parseLong(bundleId);
-        }
-        catch (NumberFormatException ex)
-        {
-            return -1;
-        }
-    }
-
-    /**
-     * Converts a module identifier to a bundle identifier. Module IDs
-     * are typically <tt>&lt;bundle-id&gt;.&lt;revision&gt;</tt>; this
-     * method returns only the portion corresponding to the revision.
-    **/
-    protected static int getModuleRevisionFromModuleId(String id)
-    {
-        try
-        {
-            String rev = (id.indexOf('.') >= 0)
-                ? id.substring(id.indexOf('.') + 1) : id;
-            return Integer.parseInt(rev);
-        }
-        catch (NumberFormatException ex)
-        {
-            return -1;
-        }
     }
 }

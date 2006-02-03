@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -23,8 +23,10 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
-import org.apache.felix.framework.LogWrapper;
+import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.*;
+import org.apache.felix.framework.util.Util;
+import org.apache.felix.moduleloader.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 
@@ -53,7 +55,7 @@ public class DefaultBundleArchive implements BundleArchive
     private static final transient String INSTALLED_STATE = "installed";
     private static final transient String UNINSTALLED_STATE = "uninstalled";
 
-    private LogWrapper m_logger = null;
+    private Logger m_logger = null;
     private long m_id = -1;
     private File m_dir = null;
     private String m_location = null;
@@ -64,7 +66,8 @@ public class DefaultBundleArchive implements BundleArchive
     private long m_refreshCount = -1;
     private int m_revisionCount = -1;
 
-    public DefaultBundleArchive(LogWrapper logger, File dir, long id, String location, InputStream is)    
+    public DefaultBundleArchive(
+        Logger logger, File dir, long id, String location, InputStream is)    
         throws Exception
     {
         this(logger, dir, id);
@@ -80,14 +83,14 @@ public class DefaultBundleArchive implements BundleArchive
             if (!deleteDirectoryTree(dir))
             {
                 m_logger.log(
-                    LogWrapper.LOG_ERROR,
+                    Logger.LOG_ERROR,
                     "Unable to delete the archive directory: " + id);
             }
             throw ex;
         }
     }
 
-    public DefaultBundleArchive(LogWrapper logger, File dir, long id)
+    public DefaultBundleArchive(Logger logger, File dir, long id)
     {
         m_logger = logger;
         m_dir = dir;
@@ -133,7 +136,7 @@ public class DefaultBundleArchive implements BundleArchive
             if (!m_dir.mkdir())
             {
                 m_logger.log(
-                    LogWrapper.LOG_ERROR,
+                    Logger.LOG_ERROR,
                     "DefaultBundleArchive: Unable to create archive directory.");
                 throw new IOException("Unable to create archive directory.");
             }
@@ -152,7 +155,7 @@ public class DefaultBundleArchive implements BundleArchive
             if (!revisionDir.mkdir())
             {
                 m_logger.log(
-                    LogWrapper.LOG_ERROR,
+                    Logger.LOG_ERROR,
                     "DefaultBundleArchive: Unable to create revision directory.");
                 throw new IOException("Unable to create revision directory.");
             }
@@ -354,7 +357,7 @@ public class DefaultBundleArchive implements BundleArchive
         catch (IOException ex)
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "DefaultBundleArchive: Unable to record state: " + ex);
             throw ex;
         }
@@ -463,7 +466,7 @@ public class DefaultBundleArchive implements BundleArchive
         catch (IOException ex)
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "DefaultBundleArchive: Unable to record start leel: " + ex);
             throw ex;
         }
@@ -521,7 +524,7 @@ public class DefaultBundleArchive implements BundleArchive
         }
     }
 
-    public BundleActivator getActivator(ClassLoader loader)
+    public BundleActivator getActivator(IContentLoader contentLoader)
         throws Exception
     {
         if (System.getSecurityManager() != null)
@@ -530,7 +533,7 @@ public class DefaultBundleArchive implements BundleArchive
             {
                 return (BundleActivator) AccessController.doPrivileged(
                     new PrivilegedAction(
-                        PrivilegedAction.GET_ACTIVATOR_ACTION, this, loader));
+                        PrivilegedAction.GET_ACTIVATOR_ACTION, this, contentLoader));
             }
             catch (PrivilegedActionException ex)
             {
@@ -539,11 +542,11 @@ public class DefaultBundleArchive implements BundleArchive
         }
         else
         {
-            return getActivatorUnchecked(loader);
+            return getActivatorUnchecked(contentLoader);
         }
     }
 
-    private BundleActivator getActivatorUnchecked(ClassLoader loader)
+    private BundleActivator getActivatorUnchecked(IContentLoader contentLoader)
         throws Exception
     {
         // Get bundle activator file.
@@ -559,14 +562,14 @@ public class DefaultBundleArchive implements BundleArchive
         try
         {
             is = new FileInputStream(activatorFile);
-            ois = new ObjectInputStreamX(is, loader);
+            ois = new ObjectInputStreamX(is, contentLoader);
             Object o = ois.readObject();
             return (BundleActivator) o;
         }
         catch (Exception ex)
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "DefaultBundleArchive: Trying to deserialize - " + ex);
         }
         finally
@@ -623,7 +626,7 @@ public class DefaultBundleArchive implements BundleArchive
         catch (IOException ex)
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "DefaultBundleArchive: Unable to serialize activator - " + ex);
             throw ex;
         }
@@ -741,16 +744,28 @@ public class DefaultBundleArchive implements BundleArchive
         return new JarFile(bundleJar);
     }
 
-    public String[] getClassPath(int revision)
+    private IContent getContentUnchecked(int revision)
         throws Exception
     {
+        // Get the revision directory.
+        File revisionDir = new File(
+            m_dir, REVISION_DIRECTORY + getRefreshCount() + "." + revision);
+        // Return a content object for the bundle itself.
+        return new JarContent(new File(revisionDir, BUNDLE_JAR_FILE));
+    }
+
+    public IContent getContent(int revision)
+        throws Exception
+    {
+        IContent content = null;
+    
         if (System.getSecurityManager() != null)
         {
             try
             {
-                return (String []) AccessController.doPrivileged(
+                content = (IContent) AccessController.doPrivileged(
                     new PrivilegedAction(
-                        PrivilegedAction.GET_CLASS_PATH_ACTION, this, revision));
+                        PrivilegedAction.GET_CONTENT_ACTION, this, revision));
             }
             catch (PrivilegedActionException ex)
             {
@@ -759,16 +774,24 @@ public class DefaultBundleArchive implements BundleArchive
         }
         else
         {
-            return getClassPathUnchecked(revision);
+            content = getContentUnchecked(revision);
         }
+    
+        return content;
     }
 
-    private String[] getClassPathUnchecked(int revision)
+    private IContent[] getContentPathUnchecked(int revision)
         throws Exception
     {
+        // Creating the content path entails examining the bundle's
+        // class path to determine whether the bundle JAR file itself
+        // is on the bundle's class path and then creating content
+        // objects for everything on the class path.
+
         // Get the revision directory.
         File revisionDir = new File(
             m_dir, REVISION_DIRECTORY + getRefreshCount() + "." + revision);
+        File embedDir = new File(revisionDir, EMBEDDED_DIRECTORY);
 
         // Get the bundle's manifest header.
         Map map = getManifestHeader(revision);
@@ -778,75 +801,79 @@ public class DefaultBundleArchive implements BundleArchive
         }
 
         // Find class path meta-data.
-        String classPath = null;
+        String classPathString = null;
         Iterator iter = map.entrySet().iterator();
-        while ((classPath == null) && iter.hasNext())
+        while ((classPathString == null) && iter.hasNext())
         {
             Map.Entry entry = (Map.Entry) iter.next();
             if (entry.getKey().toString().toLowerCase().equals(
                 FelixConstants.BUNDLE_CLASSPATH.toLowerCase()))
             {
-                classPath = entry.getValue().toString();
+                classPathString = entry.getValue().toString();
             }
         }
 
         // Parse the class path into strings.
         String[] classPathStrings = Util.parseDelimitedString(
-            classPath, FelixConstants.CLASS_PATH_SEPARATOR);
+            classPathString, FelixConstants.CLASS_PATH_SEPARATOR);
 
         if (classPathStrings == null)
         {
             classPathStrings = new String[0];
         }
 
-        // Now, check for "." in the class path.
-        boolean includeDot = false;
-        for (int i = 0; !includeDot && (i < classPathStrings.length); i++)
+        // Create the bundles class path.
+        IContent self = new JarContent(new File(revisionDir, BUNDLE_JAR_FILE));
+        IContent[] classPath = new IContent[classPathStrings.length];
+        for (int i = 0; i < classPathStrings.length; i++)
         {
             if (classPathStrings[i].equals(FelixConstants.CLASS_PATH_DOT))
             {
-                includeDot = true;
+                classPath[i] = self;
             }
-        }
-
-        // Include all JARs in the embedded jar directory, since they
-        // were extracted when the bundle was initially saved.
-        File embedDir = new File(revisionDir, EMBEDDED_DIRECTORY);
-        String[] paths = null;
-        if (embedDir.exists())
-        {
-            // The size of the paths array is the number of
-            // embedded JAR files plus one, if we need to include
-            // ".", otherwise it is just the number of JAR files.
-            // If "." is included, then it will be added to the
-            // first place in the path array below.
-            File[] children = embedDir.listFiles();
-            int size = (children == null) ? 0 : children.length;
-            size = (includeDot) ? size + 1 : size;
-            paths = new String[size];
-            for (int i = 0; i < children.length; i++)
+            else
             {
-                // If we are including "." then skip the first slot,
-                // because this is where we will put the bundle JAR file.
-                paths[(includeDot) ? i + 1 : i] = children[i].getPath();
+                String jarName = (classPathStrings[i].lastIndexOf('/') >= 0)
+                    ? classPathStrings[i].substring(classPathStrings[i].lastIndexOf('/') + 1)
+                    : classPathStrings[i];
+                classPath[i] = new JarContent(new File(embedDir, jarName));
             }
         }
 
         // If there is nothing on the class path, then include
         // "." by default, as per the spec.
-        if ((paths == null) || (paths.length == 0))
+        if (classPath.length == 0)
         {
-            includeDot = true;
-            paths = new String[1];
+            classPath = new IContent[] { self };
         }
 
-        // Put the bundle jar file first, if included.
-        if (includeDot)
+        return classPath;
+    }
+
+    public IContent[] getContentPath(int revision)
+        throws Exception
+    {
+        IContent[] contents = null;
+
+        if (System.getSecurityManager() != null)
         {
-            paths[0] = revisionDir + File.separator + BUNDLE_JAR_FILE;
+            try
+            {
+                contents = (IContent[]) AccessController.doPrivileged(
+                    new PrivilegedAction(
+                        PrivilegedAction.GET_CONTENT_PATH_ACTION, this, revision));
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw ((PrivilegedActionException) ex).getException();
+            }
+        }
+        else
+        {
+            contents = getContentPathUnchecked(revision);
         }
 
-        return paths;
+        return contents;
     }
 
 //  TODO: This will need to consider security.
@@ -999,7 +1026,7 @@ public class DefaultBundleArchive implements BundleArchive
         catch (IOException ex)
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "DefaultBundleArchive: Unable to write counter: " + ex);
             throw ex;
         }
@@ -1159,6 +1186,8 @@ public class DefaultBundleArchive implements BundleArchive
         // Remove leading slash if present.
         jarPath = (jarPath.charAt(0) == '/') ? jarPath.substring(1) : jarPath;
         // Get only the JAR file name.
+// TODO: FIX THIS SO THAT IT CREATES DIRECTORIES TO AVOID NAME CLASHES,
+// DOING SO WILL IMPACT getContentLoaderUnchecked() METHOD ABOVE.
         String jarName = (jarPath.lastIndexOf('/') >= 0)
             ? jarPath.substring(jarPath.lastIndexOf('/') + 1) : jarPath;
 
@@ -1254,7 +1283,7 @@ public class DefaultBundleArchive implements BundleArchive
                 {
                     // There is very little we can do here.
                     m_logger.log(
-                        LogWrapper.LOG_ERROR,
+                        Logger.LOG_ERROR,
                         "Unable to remove partial revision directory.", ex2);
                 }
             }
@@ -1368,16 +1397,17 @@ public class DefaultBundleArchive implements BundleArchive
         private static final int SET_START_LEVEL_ACTION = 9;
         private static final int OPEN_BUNDLE_JAR_ACTION = 10;
         private static final int CREATE_DATA_DIR_ACTION = 11;
-        private static final int GET_CLASS_PATH_ACTION = 12;
-        private static final int GET_ACTIVATOR_ACTION = 13;
-        private static final int SET_ACTIVATOR_ACTION = 14;
+        private static final int GET_CONTENT_ACTION = 12;
+        private static final int GET_CONTENT_PATH_ACTION = 13;
+        private static final int GET_ACTIVATOR_ACTION = 14;
+        private static final int SET_ACTIVATOR_ACTION = 15;
 
         private int m_action = 0;
         private DefaultBundleArchive m_archive = null;
         private InputStream m_isArg = null;
         private int m_intArg = 0;
         private File m_fileArg = null;
-        private ClassLoader m_loaderArg = null;
+        private IContentLoader m_contentLoaderArg = null;
         private Object m_objArg = null;
 
         public PrivilegedAction(int action, DefaultBundleArchive archive)
@@ -1407,11 +1437,11 @@ public class DefaultBundleArchive implements BundleArchive
             m_fileArg = fileArg;
         }
 
-        public PrivilegedAction(int action, DefaultBundleArchive archive, ClassLoader loaderArg)
+        public PrivilegedAction(int action, DefaultBundleArchive archive, IContentLoader contentLoaderArg)
         {
             m_action = action;
             m_archive = archive;
-            m_loaderArg = loaderArg;
+            m_contentLoaderArg = contentLoaderArg;
         }
 
         public PrivilegedAction(int action, DefaultBundleArchive archive, Object objArg)
@@ -1456,10 +1486,12 @@ public class DefaultBundleArchive implements BundleArchive
                 case CREATE_DATA_DIR_ACTION:
                     m_archive.createDataDirectoryUnchecked(m_fileArg);
                     return null;
-                case GET_CLASS_PATH_ACTION:
-                    return m_archive.getClassPathUnchecked(m_intArg);
+                case GET_CONTENT_ACTION:
+                    return m_archive.getContentUnchecked(m_intArg);
+                case GET_CONTENT_PATH_ACTION:
+                    return m_archive.getContentPathUnchecked(m_intArg);
                 case GET_ACTIVATOR_ACTION:
-                    return m_archive.getActivatorUnchecked(m_loaderArg);
+                    return m_archive.getActivatorUnchecked(m_contentLoaderArg);
                 case SET_ACTIVATOR_ACTION:
                     m_archive.setActivatorUnchecked(m_objArg);
                     return null;

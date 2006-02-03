@@ -32,7 +32,7 @@ import org.osgi.framework.*;
 **/
 public class FilterImpl implements Filter
 {
-    private LogWrapper m_logger = null;
+    private Logger m_logger = null;
     private String m_toString = null;
     private Evaluator m_evaluator = null;
     private SimpleMapper m_mapper = null;
@@ -47,7 +47,7 @@ public class FilterImpl implements Filter
      * Construct a filter for a given filter expression string.
      * @param expr the filter expression string for the filter.
     **/
-    public FilterImpl(LogWrapper logger, String expr) throws InvalidSyntaxException
+    public FilterImpl(Logger logger, String expr) throws InvalidSyntaxException
     {
         m_logger = logger;
         if (expr == null)
@@ -132,11 +132,11 @@ public class FilterImpl implements Filter
         }
         catch (AttributeNotFoundException ex)
         {
-            m_logger.log(LogWrapper.LOG_DEBUG, "FilterImpl: " + ex);
+            m_logger.log(Logger.LOG_DEBUG, "FilterImpl: " + ex);
         }
         catch (EvaluationException ex)
         {
-            m_logger.log(LogWrapper.LOG_ERROR, "FilterImpl: " + toString(), ex);
+            m_logger.log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);
         }
         return false;
     }
@@ -158,11 +158,11 @@ public class FilterImpl implements Filter
         }
         catch (AttributeNotFoundException ex)
         {
-            m_logger.log(LogWrapper.LOG_DEBUG, "FilterImpl: " + ex);
+            m_logger.log(Logger.LOG_DEBUG, "FilterImpl: " + ex);
         }
         catch (EvaluationException ex)
         {
-            m_logger.log(LogWrapper.LOG_ERROR, "FilterImpl: " + toString(), ex);
+            m_logger.log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);
         }
         return false;
     }
@@ -176,11 +176,11 @@ public class FilterImpl implements Filter
         }
         catch (AttributeNotFoundException ex)
         {
-            m_logger.log(LogWrapper.LOG_DEBUG, "FilterImpl: " + ex);
+            m_logger.log(Logger.LOG_DEBUG, "FilterImpl: " + ex);
         }
         catch (EvaluationException ex)
         {
-            m_logger.log(LogWrapper.LOG_ERROR, "FilterImpl: " + toString(), ex);        }
+            m_logger.log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);        }
         return false;
     }
 

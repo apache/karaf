@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.apache.felix.framework.util;
 
 import java.io.*;
 
+import org.apache.felix.moduleloader.IContentLoader;
+
 /**
  * The ObjectInputStreamX class is a simple extension to the ObjectInputStream
  * class.  The purpose of ObjectInputStreamX is to allow objects to be deserialized
@@ -25,7 +27,7 @@ import java.io.*;
  */
 public class ObjectInputStreamX extends ObjectInputStream
 {
-    private ClassLoader m_loader = null;
+    private IContentLoader m_contentLoader = null;
 
     /**
      * Construct an ObjectInputStreamX for the specified InputStream and the specified
@@ -33,11 +35,11 @@ public class ObjectInputStreamX extends ObjectInputStream
      * @param in the input stream to read.
      * @param loader the class loader used to resolve classes.
      */
-    public ObjectInputStreamX(InputStream in, ClassLoader loader)
+    public ObjectInputStreamX(InputStream in, IContentLoader contentLoader)
         throws IOException, StreamCorruptedException
     {
         super(in);
-        this.m_loader = loader;
+        m_contentLoader = contentLoader;
     }
 
     /**
@@ -47,7 +49,6 @@ public class ObjectInputStreamX extends ObjectInputStream
     protected Class resolveClass(ObjectStreamClass v)
         throws IOException, ClassNotFoundException
     {
-        Class clazz = m_loader.loadClass(v.getName());
-        return clazz;
+        return m_contentLoader.getClass(v.getName());
     }
 }

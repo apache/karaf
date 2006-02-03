@@ -16,6 +16,7 @@
  */
 package org.apache.felix.framework.util;
 
+import java.net.*;
 import java.security.*;
 
 /**
@@ -33,20 +34,21 @@ import java.security.*;
 public class SecureAction
 {
     private AccessControlContext m_acc = null;
+    private Actions m_actions = new Actions();
 
     public SecureAction()
     {
         m_acc = AccessController.getContext();
     }
 
-    public String getProperty(String name, String def)
+    public synchronized String getProperty(String name, String def)
     {
         if (System.getSecurityManager() != null)
         {
             try
             {
-                return (String) AccessController.doPrivileged(
-                    new Actions(Actions.GET_PROPERTY_ACTION, name, def), m_acc);
+                m_actions.set(Actions.GET_PROPERTY_ACTION, name, def);
+                return (String) AccessController.doPrivileged(m_actions, m_acc);
             }
             catch (PrivilegedActionException ex)
             {
@@ -59,14 +61,14 @@ public class SecureAction
         }
     }
 
-    public Class forName(String name) throws ClassNotFoundException
+    public synchronized Class forName(String name) throws ClassNotFoundException
     {
         if (System.getSecurityManager() != null)
         {
             try
             {
-                return (Class) AccessController.doPrivileged(
-                    new Actions(Actions.FOR_NAME_ACTION, name), m_acc);
+                m_actions.set(Actions.FOR_NAME_ACTION, name);
+                return (Class) AccessController.doPrivileged(m_actions, m_acc);
             }
             catch (PrivilegedActionException ex)
             {
@@ -83,26 +85,87 @@ public class SecureAction
         }
     }
 
+    public synchronized URL createURL(String protocol, String host,
+        int port, String path, URLStreamHandler handler)
+        throws MalformedURLException
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try 
+            {
+                m_actions.set(
+                    Actions.CREATE_URL_ACTION, protocol, host, port, path, handler);
+                return (URL) AccessController.doPrivileged(m_actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                if (ex.getException() instanceof MalformedURLException)
+                {
+                    throw (MalformedURLException) ex.getException();
+                }
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return new URL(protocol, host, port, path, handler);
+        }
+    }
+
     private static class Actions implements PrivilegedExceptionAction
     {
         public static final int GET_PROPERTY_ACTION = 0;
         public static final int FOR_NAME_ACTION = 1;
+        public static final int CREATE_URL_ACTION = 2;
 
         private int m_action = -1;
         private Object m_arg1 = null;
         private Object m_arg2 = null;
 
-        public Actions(int action, Object arg1)
+        private String m_protocol = null;
+        private String m_host = null;
+        private int m_port = -1;
+        private String m_path = null;
+        private URLStreamHandler m_handler = null;
+
+        public void set(int action, Object arg1)
         {
             m_action = action;
             m_arg1 = arg1;
+
+            m_arg2 = null;
+            m_protocol = null;
+            m_host = null;
+            m_port = -1;
+            m_path = null;
+            m_handler = null;
         }
 
-        public Actions(int action, Object arg1, Object arg2)
+        public void set(int action, Object arg1, Object arg2)
         {
             m_action = action;
             m_arg1 = arg1;
             m_arg2 = arg2;
+
+            m_protocol = null;
+            m_host = null;
+            m_port = -1;
+            m_path = null;
+            m_handler = null;
+        }
+
+        public void set(int action, String protocol, String host,
+            int port, String path, URLStreamHandler handler)
+        {
+            m_action = action;
+            m_protocol = protocol;
+            m_host = host;
+            m_port = port;
+            m_path = path;
+            m_handler = handler;
+
+            m_arg1 = null;
+            m_arg2 = null;
         }
 
         public Object run() throws Exception
@@ -111,9 +174,13 @@ public class SecureAction
             {
                 return System.getProperty((String) m_arg1, (String) m_arg2);
             }
-            else if (m_action ==FOR_NAME_ACTION)
+            else if (m_action == FOR_NAME_ACTION)
             {
                 return Class.forName((String) m_arg1);
+            }
+            else if (m_action == CREATE_URL_ACTION)
+            {
+                return new URL(m_protocol, m_host, m_port, m_path, m_handler);
             }
             return null;
         }

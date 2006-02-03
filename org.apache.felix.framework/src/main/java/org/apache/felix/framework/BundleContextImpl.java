@@ -156,7 +156,7 @@ class BundleContextImpl implements FelixBundleContext
         }
         catch (InvalidSyntaxException ex)
         {
-            m_felix.getLogger().log(LogWrapper.LOG_ERROR, "BundleContextImpl: " + ex);
+            m_felix.getLogger().log(Logger.LOG_ERROR, "BundleContextImpl: " + ex);
         }
         return null;
     }

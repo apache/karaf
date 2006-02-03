@@ -14,10 +14,9 @@
  *   limitations under the License.
  *
  */
-package org.apache.felix.moduleloader.search;
+package org.apache.felix.framework.searchpolicy;
 
-import org.apache.felix.framework.searchpolicy.R4Package;
-import org.apache.felix.moduleloader.Module;
+import org.apache.felix.moduleloader.IModule;
 
 /**
  * <p>
@@ -30,14 +29,14 @@ import org.apache.felix.moduleloader.Module;
 **/
 public class ResolveException extends Exception
 {
-    private Module m_module = null;
+    private IModule m_module = null;
     private R4Package m_pkg = null;
 
     /**
      * Constructs an exception with the specified message, module,
      * import identifier, import version number, and propagation flag.
     **/
-    public ResolveException(String msg, Module module, R4Package pkg)
+    public ResolveException(String msg, IModule module, R4Package pkg)
     {
         super(msg);
         m_module = module;
@@ -48,7 +47,7 @@ public class ResolveException extends Exception
      * Returns the module that was being resolved.
      * @return the module that was being resolved.
     **/
-    public Module getModule()
+    public IModule getModule()
     {
         return m_module;
     }

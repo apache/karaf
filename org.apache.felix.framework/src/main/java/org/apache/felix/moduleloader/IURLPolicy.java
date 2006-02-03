@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,20 +16,9 @@
  */
 package org.apache.felix.moduleloader;
 
-import java.io.IOException;
-import java.net.*;
+import java.net.URL;
 
-class ModuleURLStreamHandler extends URLStreamHandler
+public interface IURLPolicy
 {
-    private ModuleManager m_mgr = null;
-
-    public ModuleURLStreamHandler(ModuleManager mgr)
-    {
-        m_mgr = mgr;
-    }
-
-    protected URLConnection openConnection(URL url) throws IOException
-    {
-        return new ModuleURLConnection(m_mgr, url);
-    }
+    public URL createURL(String path);
 }

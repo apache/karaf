@@ -18,7 +18,7 @@ package org.apache.felix.framework.util;
 
 import java.util.*;
 
-import org.apache.felix.framework.LogWrapper;
+import org.apache.felix.framework.Logger;
 
 /**
  * This class implements an event dispatching queue to simplify delivering
@@ -66,13 +66,13 @@ public class DispatchQueue
     // Cached dispatch requests to avoid memory allocation.
     private static final ArrayList m_requestCache = new ArrayList();
     // The logger for dispatch queue.
-    private static LogWrapper m_logger = null;
+    private static Logger m_logger = null;
 
     /**
      * Constructs a dispatch queue and starts a dispather thread if
      * necessary.
     **/
-    public DispatchQueue(LogWrapper logger)
+    public DispatchQueue(Logger logger)
     {
         synchronized (m_threadLock)
         {
@@ -127,7 +127,7 @@ public class DispatchQueue
         }
     }
 
-    public static LogWrapper getLogger()
+    public static Logger getLogger()
     {
         return m_logger;
     }
@@ -360,7 +360,7 @@ public class DispatchQueue
                     try {
                         m_requestList.wait();
                     } catch (InterruptedException ex) {
-                        m_logger.log(LogWrapper.LOG_ERROR, "DispatchQueue: Thread interrupted.", ex);
+                        m_logger.log(Logger.LOG_ERROR, "DispatchQueue: Thread interrupted.", ex);
                     }
                 }
 
@@ -396,7 +396,7 @@ public class DispatchQueue
                             dr.m_dispatcher.dispatch(
                                 (EventListener) dr.m_listeners[i + 1], dr.m_eventObj);
                         } catch (Throwable th) {
-                            m_logger.log(LogWrapper.LOG_ERROR, "DispatchQueue: Error during dispatch.", th);
+                            m_logger.log(Logger.LOG_ERROR, "DispatchQueue: Error during dispatch.", th);
                         }
                     }
                 }

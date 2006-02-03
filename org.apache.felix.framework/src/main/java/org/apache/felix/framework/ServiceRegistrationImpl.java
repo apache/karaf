@@ -174,7 +174,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
             catch (Exception ex)
             {
                 m_registry.getLogger().log(
-                    LogWrapper.LOG_ERROR, "ServiceRegistrationImpl: Error getting service.", ex);
+                    Logger.LOG_ERROR, "ServiceRegistrationImpl: Error getting service.", ex);
                 return null;
             }
         }
@@ -205,7 +205,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
             catch (Exception ex)
             {
                 m_registry.getLogger().log(
-                    LogWrapper.LOG_ERROR, "ServiceRegistrationImpl: Error ungetting service.", ex);
+                    Logger.LOG_ERROR, "ServiceRegistrationImpl: Error ungetting service.", ex);
             }
         }
     }

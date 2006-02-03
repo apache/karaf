@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,18 +17,12 @@
 package org.apache.felix.moduleloader;
 
 import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
-/**
- * <p>
- * This class implements a <tt>ResourceSource</tt> for retrieving resources
- * from a JAR file. The approach used by this implementation is to defer
- * opening the JAR file until a request for a resource is made.
- * </p>
- * @see org.apache.felix.moduleloader.ResourceSource
-**/
-public class JarResourceSource implements ResourceSource
+public class JarContent implements IContent
 {
     private static final int BUFSIZE = 4096;
 
@@ -36,123 +30,100 @@ public class JarResourceSource implements ResourceSource
     private JarFile m_jarFile = null;
     private boolean m_opened = false;
 
-    /**
-     * <p>
-     * Constructs an instance using the specified file name as the source
-     * of the JAR file.
-     * </p>
-     * @param fileName the name of the JAR file to be used as the source.
-    **/
-    public JarResourceSource(String fileName)
-    {
-        m_file = new File(fileName);
-    }
-
-    /**
-     * <p>
-     * Constructs an instance using the specified file as the source
-     * of the JAR file.
-     * </p>
-     * @param file the JAR file to be used as the source.
-    **/
-    public JarResourceSource(File file)
+    public JarContent(File file)
     {
         m_file = file;
     }
 
-    /**
-     * <p>
-     * Closes the JAR file if it has not already been closed.
-     * <p>
-    **/
     protected void finalize()
     {
         if (m_jarFile != null)
         {
-            try {
+            try
+            {
                 m_jarFile.close();
-            } catch (IOException ex) {
+            }
+            catch (IOException ex)
+            {
                 // Not much we can do, so ignore it.
             }
         }
     }
 
-    /**
-     * <p>
-     * This method initializes the resource source. Since opening
-     * the JAR file is deferred until a request for a resource is
-     * actually made, this method really only sets a flag indicating
-     * that the resource source has been initialized.
-     * <p>
-    **/
     public void open()
     {
         m_opened = true;
     }
 
-    /**
-     * <p>
-     * This method deinitializes the resource source by closing
-     * the associated JAR file if it is open.
-     * <p>
-    **/
     public synchronized void close()
     {
-        try {
+        try
+        {
             if (m_jarFile != null)
             {
                 m_jarFile.close();
             }
-        } catch (Exception ex) {
-            System.err.println("JarResourceSource: " + ex);
+        }
+        catch (Exception ex)
+        {
+            System.err.println("JarContent: " + ex);
         }
 
         m_jarFile = null;
         m_opened = false;
     }
 
-    // JavaDoc comments are copied from ResourceSource.
-    public synchronized boolean hasResource(String name) throws IllegalStateException
+    public synchronized boolean hasEntry(String name) throws IllegalStateException
     {
         if (!m_opened)
         {
-            throw new IllegalStateException("JarResourceSource is not open");
+            throw new IllegalStateException("JarContent is not open");
         }
 
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
-            try {
+            try
+            {
                 openJarFile();
-            } catch (IOException ex) {
-                System.err.println("JarResourceSource: " + ex);
+            }
+            catch (IOException ex)
+            {
+                System.err.println("JarContent: " + ex);
                 return false;
             }
         }
 
-        try {
+        try
+        {
             ZipEntry ze = m_jarFile.getEntry(name);
             return ze != null;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             return false;
-        } finally {
+        }
+        finally
+        {
         }
     }
 
-    // JavaDoc comments are copied from ResourceSource.
-    public synchronized byte[] getBytes(String name) throws IllegalStateException
+    public synchronized byte[] getEntry(String name) throws IllegalStateException
     {
         if (!m_opened)
         {
-            throw new IllegalStateException("JarResourceSource is not open");
+            throw new IllegalStateException("JarContent is not open");
         }
 
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
-            try {
+            try
+            {
                 openJarFile();
-            } catch (IOException ex) {
+            }
+            catch (IOException ex)
+            {
                 System.err.println("JarResourceSource: " + ex);
                 return null;
             }
@@ -162,7 +133,8 @@ public class JarResourceSource implements ResourceSource
         InputStream is = null;
         ByteArrayOutputStream baos = null;
 
-        try {
+        try
+        {
             ZipEntry ze = m_jarFile.getEntry(name);
             if (ze == null)
             {
@@ -182,18 +154,79 @@ public class JarResourceSource implements ResourceSource
             }
             return baos.toByteArray();
 
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             return null;
-        } finally {
-            try {
+        }
+        finally
+        {
+            try
+            {
                 if (baos != null) baos.close();
-            } catch (Exception ex) {
             }
-            try {
+            catch (Exception ex)
+            {
+            }
+            try
+            {
                 if (is != null) is.close();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
             }
         }
+    }
+
+    public synchronized InputStream getEntryAsStream(String name)
+        throws IllegalStateException, IOException
+    {
+        if (!m_opened)
+        {
+            throw new IllegalStateException("JarContent is not open");
+        }
+
+        // Open JAR file if not already opened.
+        if (m_jarFile == null)
+        {
+            try
+            {
+                openJarFile();
+            }
+            catch (IOException ex)
+            {
+                System.err.println("JarResourceSource: " + ex);
+                return null;
+            }
+        }
+
+        // Get the embedded resource.
+        InputStream is = null;
+
+        try
+        {
+            ZipEntry ze = m_jarFile.getEntry(name);
+            if (ze == null)
+            {
+                return null;
+            }
+            is = m_jarFile.getInputStream(ze);
+            if (is == null)
+            {
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+
+        return is;
+    }
+
+    public String[] getEntryPaths(String path)
+    {
+        return null;
     }
 
     private void openJarFile() throws IOException

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -24,19 +24,16 @@ import java.util.*;
 import org.apache.felix.framework.searchpolicy.*;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
-import org.apache.felix.moduleloader.LibrarySource;
-import org.apache.felix.moduleloader.ResourceSource;
+import org.apache.felix.moduleloader.IContentLoader;
 import org.osgi.framework.*;
-
 
 class SystemBundle extends BundleImpl
 {
     private List m_activatorList = null;
     private BundleActivator m_activator = null;
     private Thread m_shutdownThread = null;
-    private Object[][] m_attributes = null;
-    private ResourceSource[] m_resSources = null;
-    private LibrarySource[] m_libSources = null;
+    private R4Export[] m_exports = null;
+    private IContentLoader m_contentLoader = null;
 
     protected SystemBundle(Felix felix, BundleInfo info, List activatorList)
         throws BundleException
@@ -74,62 +71,59 @@ class SystemBundle extends BundleImpl
         }
         catch (Exception ex)
         {
+            classPathPkgs = new R4Package[0];
             getFelix().getLogger().log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "Error parsing system bundle export statement.", ex);
         }
 
         // Now, create the list of standard framework exports for
         // the system bundle.
-        R4Package[] exports = new R4Package[classPathPkgs.length + 4];
+        m_exports = new R4Export[classPathPkgs.length + 4];
 
-        exports[0] = new R4Package(
+        m_exports[0] = new R4Export(
             "org.osgi.framework",
             new R4Directive[0],
             new R4Attribute[] { new R4Attribute("version", "1.3.0", false) });
 
-        exports[1] = new R4Package(
+        m_exports[1] = new R4Export(
             "org.osgi.service.packageadmin",
             new R4Directive[0],
             new R4Attribute[] { new R4Attribute("version", "1.2.0", false) });
 
-        exports[2] = new R4Package(
+        m_exports[2] = new R4Export(
                 "org.osgi.service.startlevel",
                 new R4Directive[0],
                 new R4Attribute[] { new R4Attribute("version", "1.0.0", false) });
 
-        exports[3] = new R4Package(
+        m_exports[3] = new R4Export(
                 "org.osgi.service.url",
                 new R4Directive[0],
                 new R4Attribute[] { new R4Attribute("version", "1.0.0", false) });
 
         // Copy the class path exported packages.
-        System.arraycopy(classPathPkgs, 0, exports, 4, classPathPkgs.length);
+        for (int i = 0; i < classPathPkgs.length; i++)
+        {
+            m_exports[i + 4] = new R4Export(classPathPkgs[i]);
+        }
 
-        m_attributes = new Object[][] {
-            new Object[] { R4SearchPolicy.EXPORTS_ATTR, exports },
-            new Object[] { R4SearchPolicy.IMPORTS_ATTR, new R4Package[0] }
-        };
-
-        m_resSources = new ResourceSource[0];
-
-        m_libSources = null;
+        m_contentLoader = new SystemBundleContentLoader(getFelix().getLogger());
 
         String exportString = "";
-        for (int i = 0; i < exports.length; i++)
+        for (int i = 0; i < m_exports.length; i++)
         {
             exportString = exportString +
-            exports[i].getId()
+            m_exports[i].getName()
             + "; specification-version=\""
-            + exports[i].getVersionLow().toString() + "\"";
+            + m_exports[i].getVersion().toString() + "\"";
 
-            if (i < (exports.length - 1))
+            if (i < (m_exports.length - 1))
             {
                 exportString = exportString + ", ";
                 exportString = exportString +
-                    exports[i].getId()
+                    m_exports[i].getName()
                     + "; specification-version=\""
-                    + exports[i].getVersionLow().toString() + "\", ";
+                    + m_exports[i].getVersion().toString() + "\", ";
             }
         }
 
@@ -143,19 +137,14 @@ class SystemBundle extends BundleImpl
         ((SystemBundleArchive) getInfo().getArchive()).setManifestHeader(map);
     }
 
-    public Object[][] getAttributes()
+    public R4Export[] getExports()
     {
-        return m_attributes;
+        return m_exports;
     }
 
-    public ResourceSource[] getResourceSources()
+    public IContentLoader getContentLoader()
     {
-        return m_resSources;
-    }
-
-    public LibrarySource[] getLibrarySources()
-    {
-        return m_libSources;
+        return m_contentLoader;
     }
 
     public synchronized void start() throws BundleException
@@ -173,7 +162,6 @@ class SystemBundle extends BundleImpl
             getInfo().setContext(new BundleContextImpl(getFelix(), this));
             getActivator().start(getInfo().getContext());
         } catch (Throwable throwable) {
-throwable.printStackTrace();
             throw new BundleException(
                 "Unable to start system bundle.", throwable);
         }
@@ -205,7 +193,7 @@ throwable.printStackTrace();
                     catch (Exception ex)
                     {
                         getFelix().getLogger().log(
-                            LogWrapper.LOG_ERROR,
+                            Logger.LOG_ERROR,
                             "SystemBundle: Error while shutting down.", ex);
                     }
 

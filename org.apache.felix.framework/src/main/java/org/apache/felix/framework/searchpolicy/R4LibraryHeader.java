@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  *   limitations under the License.
  *
  */
-package org.apache.felix.framework.util;
+package org.apache.felix.framework.searchpolicy;
 
 import java.util.*;
 
+import org.apache.felix.framework.Logger;
 import org.osgi.framework.Constants;
 
-public class LibraryInfo
+public class R4LibraryHeader
 {
     private String m_name = null;
     private String[] m_osnames = null;
@@ -28,7 +29,7 @@ public class LibraryInfo
     private String[] m_processors = null;
     private String[] m_languages = null;
 
-    public LibraryInfo(String name, String[] osnames, String[] osversions,
+    public R4LibraryHeader(String name, String[] osnames, String[] osversions,
         String[] processors, String[] languages)
     {
         m_name = name;
@@ -38,7 +39,7 @@ public class LibraryInfo
         m_languages = languages;
     }
 
-    public LibraryInfo(LibraryInfo library)
+    public R4LibraryHeader(R4LibraryHeader library)
     {
         m_name = library.m_name;
         m_osnames = library.m_osnames;
@@ -67,7 +68,7 @@ public class LibraryInfo
         return m_processors;
     }
 
-    public static LibraryInfo[] parse(String s)
+    public static R4LibraryHeader[] parse(Logger logger, String s)
     {
         try
         {
@@ -150,11 +151,11 @@ public class LibraryInfo
                 return null;
             }
 
-            LibraryInfo[] libraries = new LibraryInfo[libCount];
+            R4LibraryHeader[] libraries = new R4LibraryHeader[libCount];
             for (int i = 0; i < libCount; i++)
             {
                 libraries[i] =
-                    new LibraryInfo(
+                    new R4LibraryHeader(
                         libs[i],
                         (String[]) osNameList.toArray(new String[0]),
                         (String[]) osVersionList.toArray(new String[0]),
@@ -167,7 +168,10 @@ public class LibraryInfo
         }
         catch (RuntimeException ex)
         {
-            ex.printStackTrace();
+            logger.log(
+                Logger.LOG_ERROR,
+                "Error parsing native library header.",
+                ex);
             throw ex;
         }
     }

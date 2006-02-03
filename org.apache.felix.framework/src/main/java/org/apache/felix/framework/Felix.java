@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -27,22 +27,21 @@ import org.apache.felix.framework.searchpolicy.*;
 import org.apache.felix.framework.util.*;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.*;
-import org.apache.felix.moduleloader.search.ResolveException;
-import org.apache.felix.moduleloader.search.ResolveListener;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 
 public class Felix
 {
     // Logging related member variables.
-    private LogWrapper m_logger = new LogWrapper();
+    private Logger m_logger = new Logger();
     // Config properties.
     private PropertyResolver m_config = new ConfigImpl();
     // Configuration properties passed into constructor.
     private MutablePropertyResolver m_configMutable = null;
 
-    // MODULE MANAGER.
-    private ModuleManager m_mgr = null;
+    // MODULE FACTORY.
+    private IModuleFactory m_factory = null;
+    private R4SearchPolicyCore m_policyCore = null;
 
     // Object used as a lock when calculating which bundles
     // when performing an operation on one or more bundles.
@@ -96,6 +95,9 @@ public class Felix
 
     // Service registry.
     private ServiceRegistry m_registry = null;
+
+    // Reusable bundle URL stream handler.
+    private URLStreamHandler m_bundleStreamHandler = null;
 
     // Reusable admin permission object for all instances
     // of the BundleImpl.
@@ -215,7 +217,7 @@ public class Felix
         m_frameworkStatus = STARTING_STATUS;
 
         // Initialize member variables.
-        m_mgr = null;
+        m_factory = null;
         m_configMutable = (configMutable == null)
             ? new MutablePropertyResolverImpl(new StringMap(false)) : configMutable;
         m_activeStartLevel = FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
@@ -225,6 +227,7 @@ public class Felix
         m_cache = null;
         m_nextId = 1L;
         m_dispatchQueue = null;
+        m_bundleStreamHandler = new URLHandlersBundleStreamHandler(this);
         m_registry = new ServiceRegistry(m_logger);
 
         // Add a listener to the service registry; this is
@@ -272,18 +275,18 @@ public class Felix
         }
 
         // Create search policy for module loader.
-        R4SearchPolicy searchPolicy = new R4SearchPolicy(m_logger);
+        m_policyCore = new R4SearchPolicyCore(m_logger);
 
         // Add a resolver listener to the search policy
         // so that we will be notified when modules are resolved
         // in order to update the bundle state.
-        searchPolicy.addResolverListener(new ResolveListener() {
+        m_policyCore.addResolverListener(new ResolveListener() {
             public void moduleResolved(ModuleEvent event)
             {
                 BundleImpl bundle = null;
                 try
                 {
-                    long id = BundleInfo.getBundleIdFromModuleId(
+                    long id = Util.getBundleIdFromModuleId(
                         event.getModule().getId());
                     if (id >= 0)
                     {
@@ -331,7 +334,8 @@ public class Felix
             }
         });
 
-        m_mgr = new ModuleManager(searchPolicy, new OSGiURLPolicy(this));
+        m_factory = new ModuleFactoryImpl(m_logger);
+        m_policyCore.setModuleFactory(m_factory);
 
         // Initialize dispatch queue.
         m_dispatchQueue = new FelixDispatchQueue(m_logger);
@@ -349,13 +353,16 @@ public class Felix
             BundleInfo info = new BundleInfo(
                 m_logger, new SystemBundleArchive(), null);
             systembundle = new SystemBundle(this, info, activatorList);
-            systembundle.getInfo().addModule(
-                m_mgr.addModule(
-                    "0", systembundle.getAttributes(),
-                    systembundle.getResourceSources(),
-                    systembundle.getLibrarySources(),
-                    true)); // HACK ALERT! This flag indicates that we will
-                            // use the parent class loader as a resource source.
+            systembundle.getInfo().addModule(m_factory.createModule("0"));
+            systembundle.getContentLoader().setSearchPolicy(
+                new R4SearchPolicy(
+                    m_policyCore, systembundle.getInfo().getCurrentModule()));
+            m_factory.setContentLoader(
+                systembundle.getInfo().getCurrentModule(),
+                systembundle.getContentLoader());
+            m_policyCore.setExports(
+                systembundle.getInfo().getCurrentModule(), systembundle.getExports());
+
             m_installedBundleMap.put(
                 systembundle.getInfo().getLocation(), systembundle);
 
@@ -363,7 +370,7 @@ public class Felix
             // state to be set to RESOLVED.
             try
             {
-                searchPolicy.resolve(systembundle.getInfo().getCurrentModule());
+                m_policyCore.resolve(systembundle.getInfo().getCurrentModule());
             }
             catch (ResolveException ex)
             {
@@ -380,9 +387,9 @@ public class Felix
         }
         catch (Exception ex)
         {
-            m_mgr = null;
+            m_factory = null;
             DispatchQueue.shutdown();
-            m_logger.log(LogWrapper.LOG_ERROR, "Unable to start system bundle.", ex);
+            m_logger.log(Logger.LOG_ERROR, "Unable to start system bundle.", ex);
             throw new RuntimeException("Unable to start system bundle.");
         }
         
@@ -397,7 +404,7 @@ public class Felix
         catch (Exception ex)
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR,
+                Logger.LOG_ERROR,
                 "Unable to list saved bundles: " + ex, ex);
             archives = null;
         }
@@ -437,14 +444,14 @@ public class Felix
                 try
                 {
                     m_logger.log(
-                        LogWrapper.LOG_ERROR,
+                        Logger.LOG_ERROR,
                         "Unable to re-install " + archives[i].getLocation(),
                         ex);
                 }
                 catch (Exception ex2)
                 {
                     m_logger.log(
-                        LogWrapper.LOG_ERROR,
+                        Logger.LOG_ERROR,
                         "Unable to re-install bundle " + archives[i].getId(),
                         ex);
                 }
@@ -521,7 +528,7 @@ public class Felix
         catch (Exception ex)
         {
             fireFrameworkEvent(FrameworkEvent.ERROR, getBundle(0), ex);
-            m_logger.log(LogWrapper.LOG_ERROR, "Error stopping system bundle.", ex);
+            m_logger.log(Logger.LOG_ERROR, "Error stopping system bundle.", ex);
         }
 
         // Loop through all bundles and update any updated bundles.
@@ -538,7 +545,7 @@ public class Felix
                 catch (Exception ex)
                 {
                     fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
-                    m_logger.log(LogWrapper.LOG_ERROR, "Unable to purge bundle "
+                    m_logger.log(Logger.LOG_ERROR, "Unable to purge bundle "
                         + bundle.getInfo().getLocation(), ex);
                 }
             }
@@ -556,7 +563,7 @@ public class Felix
             catch (Exception ex)
             {
                 m_logger.log(
-                    LogWrapper.LOG_ERROR,
+                    Logger.LOG_ERROR,
                     "Unable to remove "
                     + m_uninstalledBundles[i].getInfo().getLocation(), ex);
             }
@@ -682,7 +689,7 @@ public class Felix
                 {
                     fireFrameworkEvent(FrameworkEvent.ERROR, impl, th);
                     m_logger.log(
-                        LogWrapper.LOG_ERROR,
+                        Logger.LOG_ERROR,
                         "Error starting " + impl.getInfo().getLocation(), th);
                 }
             }
@@ -698,7 +705,7 @@ public class Felix
                 {
                     fireFrameworkEvent(FrameworkEvent.ERROR, impl, th);
                     m_logger.log(
-                        LogWrapper.LOG_ERROR,
+                        Logger.LOG_ERROR,
                         "Error stopping " + impl.getInfo().getLocation(), th);
                 }
             }
@@ -810,7 +817,7 @@ public class Felix
         }
         catch (BundleException ex)
         {
-            m_logger.log(LogWrapper.LOG_ERROR, "Unable to acquire lock to set start level.", ex);
+            m_logger.log(Logger.LOG_ERROR, "Unable to acquire lock to set start level.", ex);
             return;
         }
         
@@ -847,12 +854,12 @@ public class Felix
                 catch (Throwable th)
                 {
                     rethrow = th;
-                    m_logger.log(LogWrapper.LOG_ERROR, "Error starting/stopping bundle.", th);
+                    m_logger.log(Logger.LOG_ERROR, "Error starting/stopping bundle.", th);
                 }
             }
             else
             {
-                m_logger.log(LogWrapper.LOG_WARNING, "Bundle start level must be greater than zero.");
+                m_logger.log(Logger.LOG_WARNING, "Bundle start level must be greater than zero.");
             }
         }
         finally
@@ -899,9 +906,18 @@ public class Felix
     **/
     protected boolean isBundleClass(Class clazz)
     {
-        if (clazz.getClassLoader() instanceof ModuleClassLoader)
+        if (clazz.getClassLoader() instanceof ContentClassLoader)
         {
-            return ((ModuleClassLoader) clazz.getClassLoader()).isModuleManagerEqual(m_mgr);
+            IContentLoader contentLoader =
+                ((ContentClassLoader) clazz.getClassLoader()).getContentLoader();
+            IModule[] modules = m_factory.getModules();
+            for (int i = 0; i < modules.length; i++)
+            {
+                if (modules[i].getContentLoader() == contentLoader)
+                {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -916,13 +932,16 @@ public class Felix
      * @return an input stream to the bundle resource.
      * @throws IOException if the input stream could not be created.
     **/
+/*
+ This might note be needed due to changes in URLHandlersBundleURLConnection
+
     protected InputStream getBundleResourceInputStream(URL url)
         throws IOException
     {
         // The URL is constructed like this:
         // bundle://<module-id>/<source-idx>/<resource-path>
     
-        Module module = m_mgr.getModule(url.getHost());
+        IModule module = m_factory.getModule(url.getHost());
         if (module == null)
         {
             throw new IOException("Unable to find bundle's module.");
@@ -933,38 +952,22 @@ public class Felix
         {
             throw new IOException("Unable to find resource: " + url.toString());
         }
+
+        // Remove any leading slash.
         if (resource.startsWith("/"))
         {
             resource = resource.substring(1);
         }
-        int rsIdx = -1;
-        try
-        {
-            rsIdx = Integer.parseInt(resource.substring(0, resource.indexOf("/")));
-        }
-        catch (NumberFormatException ex)
-        {
-            new IOException("Error parsing resource index.");
-        }
-        resource = resource.substring(resource.indexOf("/") + 1);
 
         // Get the resource bytes from the resource source.
-        byte[] bytes = null;
-        ResourceSource[] resSources = module.getResourceSources();
-        if ((resSources != null) && (rsIdx < resSources.length))
-        {
-            if (resSources[rsIdx].hasResource(resource))
-            {
-                bytes = resSources[rsIdx].getBytes(resource);
-            }
-        }
+        byte[] bytes = module.getContentLoader().getResourceBytes(resource);
         if (bytes == null)
         {
             throw new IOException("Unable to find resource: " + url.toString());
         }
         return new ByteArrayInputStream(bytes);
     }
-
+*/
     //
     // Implementation of Bundle interface methods.
     //
@@ -1006,7 +1009,7 @@ public class Felix
         {
             AccessController.checkPermission(m_adminPerm);
         }
-        return bundle.getInfo().getCurrentModule().getClassLoader().getResource(name);
+        return bundle.getInfo().getCurrentModule().getContentLoader().getResource(name);
     }
 
     protected ServiceReference[] getBundleRegisteredServices(BundleImpl bundle)
@@ -1150,7 +1153,7 @@ public class Felix
             catch (Exception ex)
             {
                 m_logger.log(
-                    LogWrapper.LOG_WARNING,
+                    Logger.LOG_WARNING,
                     "Exception while evaluating the permission.",
                     ex);
                 return false; 
@@ -1165,18 +1168,20 @@ public class Felix
     **/
     protected Class loadBundleClass(BundleImpl bundle, String name) throws ClassNotFoundException
     {
-        try
+        Class clazz = bundle.getInfo().getCurrentModule().getContentLoader().getClass(name);
+        if (clazz == null)
         {
-            return bundle.getInfo().getCurrentModule().getClassLoader().loadClass(name);
-        }
-        catch (ClassNotFoundException ex)
-        {
+            // Throw exception.
+            ClassNotFoundException ex = new ClassNotFoundException(name);
+
             // The spec says we must fire a framework error.
             fireFrameworkEvent(
                 FrameworkEvent.ERROR, bundle,
                 new BundleException(ex.getMessage()));
+
             throw ex;
         }
+        return clazz;
     }
 
     /**
@@ -1366,13 +1371,10 @@ public class Felix
 //            }
         }
 
-        // Get the import search policy.
-        R4SearchPolicy search = (R4SearchPolicy) m_mgr.getSearchPolicy();
-
-        Module module = bundle.getInfo().getCurrentModule();
+        IModule module = bundle.getInfo().getCurrentModule();
         try
         {
-            search.resolve(module);
+            m_policyCore.resolve(module);
         }
         catch (ResolveException ex)
         {
@@ -1380,7 +1382,7 @@ public class Felix
             {
                 throw new BundleException(
                     "Unresolved package in bundle "
-                    + BundleInfo.getBundleIdFromModuleId(ex.getModule().getId())
+                    + Util.getBundleIdFromModuleId(ex.getModule().getId())
                     + ": " + ex.getPackage());
             }
             else
@@ -1478,7 +1480,7 @@ public class Felix
                 // Create a module for the new revision; the revision is
                 // base zero, so subtract one from the revision count to
                 // get the revision of the new update.
-                Module module = createModule(
+                IModule module = createModule(
                     info.getBundleId(),
                     archive.getRevisionCount() - 1,
                     info.getCurrentHeader());
@@ -1487,7 +1489,7 @@ public class Felix
             }
             catch (Exception ex)
             {
-                m_logger.log(LogWrapper.LOG_ERROR, "Unable to update the bundle.", ex);
+                m_logger.log(Logger.LOG_ERROR, "Unable to update the bundle.", ex);
                 rethrow = ex;
             }
 
@@ -1522,7 +1524,7 @@ public class Felix
             }
             catch (IOException ex)
             {
-                m_logger.log(LogWrapper.LOG_ERROR, "Unable to close input stream.", ex);
+                m_logger.log(Logger.LOG_ERROR, "Unable to close input stream.", ex);
             }
         }
     }
@@ -1614,7 +1616,7 @@ public class Felix
         }
         catch (Throwable th)
         {
-            m_logger.log(LogWrapper.LOG_ERROR, "Error stopping bundle.", th);
+            m_logger.log(Logger.LOG_ERROR, "Error stopping bundle.", th);
             rethrow = th;
         }
                   
@@ -1725,7 +1727,7 @@ public class Felix
         else
         {
             m_logger.log(
-                LogWrapper.LOG_ERROR, "Unable to remove bundle from installed map!");
+                Logger.LOG_ERROR, "Unable to remove bundle from installed map!");
         }
 
         // Set state to uninstalled.
@@ -1846,7 +1848,7 @@ public class Felix
                     catch (IOException ex)
                     {
                         m_logger.log(
-                            LogWrapper.LOG_ERROR,
+                            Logger.LOG_ERROR,
                             "Unable to close input stream.", ex);
                     }
                 }
@@ -1867,9 +1869,8 @@ public class Felix
                 }
                 catch (Exception ex)
                 {
-                    ex.printStackTrace();
                     m_logger.log(
-                        LogWrapper.LOG_ERROR,
+                        Logger.LOG_ERROR,
                         "Could not purge bundle.", ex);
                 }
             }
@@ -1892,10 +1893,11 @@ public class Felix
                     catch (Exception ex1)
                     {
                         m_logger.log(
-                            LogWrapper.LOG_ERROR,
+                            Logger.LOG_ERROR,
                             "Could not remove from cache.", ex1);
                     }
                 }
+ex.printStackTrace();
                 throw new BundleException("Could not create bundle object.", ex);
             }
 
@@ -1926,7 +1928,7 @@ public class Felix
             catch (IOException ex)
             {
                 m_logger.log(
-                    LogWrapper.LOG_ERROR,
+                    Logger.LOG_ERROR,
                     "Unable to close input stream.", ex);
                 // Not much else we can do.
             }
@@ -2367,7 +2369,7 @@ public class Felix
                         // We do not throw this exception since the bundle
                         // is not supposed to know about the service at all
                         // if it does not have permission.
-                        m_logger.log(LogWrapper.LOG_ERROR, ex.getMessage());
+                        m_logger.log(Logger.LOG_ERROR, ex.getMessage());
                     }
                 }
                 
@@ -2496,7 +2498,7 @@ public class Felix
         }
         catch (Exception ex)
         {
-            m_logger.log(LogWrapper.LOG_ERROR, ex.getMessage());
+            m_logger.log(Logger.LOG_ERROR, ex.getMessage());
             return null;
         }
     }
@@ -2517,14 +2519,13 @@ public class Felix
     {
         // First, find the bundle exporting the package.
         BundleImpl bundle = null;
-        R4SearchPolicy search = (R4SearchPolicy) m_mgr.getSearchPolicy();
-        Module[] exporters = search.getInUseExporters(new R4Package(pkgName, null, null));
+        IModule[] exporters = m_policyCore.getInUseExporters(new R4Import(pkgName, null, null));
         if (exporters != null)
         {
             // Since OSGi R4 there may be more than one exporting, so just
             // take the first one.
             bundle = (BundleImpl) getBundle(
-                BundleInfo.getBundleIdFromModuleId(exporters[0].getId()));
+                Util.getBundleIdFromModuleId(exporters[0].getId()));
         }
 
         // If we have found the exporting bundle, then return the
@@ -2541,13 +2542,13 @@ public class Felix
             // that the first module found to be exporting the package is the
             // provider of the package, which makes sense since it must have
             // been resolved first.
-            Module[] modules = bundle.getInfo().getModules();
+            IModule[] modules = bundle.getInfo().getModules();
             for (int modIdx = 0; modIdx < modules.length; modIdx++)
             {
-                R4Package pkg = R4SearchPolicy.getExportPackage(modules[modIdx], pkgName);
-                if (pkg != null)
+                R4Export export = Util.getExportPackage(modules[modIdx], pkgName);
+                if (export != null)
                 {
-                    return new ExportedPackageImpl(this, bundle, pkgName, pkg.getVersionLow());
+                    return new ExportedPackageImpl(this, bundle, pkgName, export.getVersion());
                 }
             }
         }
@@ -2619,26 +2620,32 @@ public class Felix
     **/
     private void getExportedPackages(BundleImpl bundle, List list)
     {
-        R4SearchPolicy policy = (R4SearchPolicy) m_mgr.getSearchPolicy();
-
         // Since a bundle may have many modules associated with it,
         // one for each revision in the cache, search each module
         // for each revision to get all exports.
-        Module[] modules = bundle.getInfo().getModules();
+        IModule[] modules = bundle.getInfo().getModules();
         for (int modIdx = 0; modIdx < modules.length; modIdx++)
         {
-            R4Package[] exports = R4SearchPolicy.getExportsAttr(modules[modIdx]);
-            if (exports.length > 0)
+            R4Export[] exports = m_policyCore.getExports(modules[modIdx]);
+            if ((exports != null) && (exports.length > 0))
             {
                 for (int expIdx = 0; expIdx < exports.length; expIdx++)
                 {
                     // See if the target bundle's module is one of the
                     // "in use" exporters of the package.
-                    Module[] inUseModules = policy.getInUseExporters(exports[expIdx]);
-                    if (R4SearchPolicy.isModuleInArray(inUseModules, modules[modIdx]))
+                    IModule[] inUseModules =
+                        m_policyCore.getInUseExporters(
+                            new R4Import(exports[expIdx].getName(), null, null));
+                    // Search through the current providers to find the target
+                    // module.
+                    for (int i = 0; (inUseModules != null) && (i < inUseModules.length); i++)
                     {
-                        list.add(new ExportedPackageImpl(
-                            this, bundle, exports[expIdx].getId(), exports[expIdx].getVersionLow()));
+                        if (inUseModules[i] == modules[modIdx])
+                        {
+                            list.add(new ExportedPackageImpl(
+                                this, bundle, exports[expIdx].getName(),
+                                exports[expIdx].getVersion()));
+                        }
                     }
                 }
             }
@@ -2667,15 +2674,15 @@ public class Felix
             if (exporter != importer)
             {
                 // Check the import wires of all modules for all bundles.
-                Module[] modules = importer.getInfo().getModules();
+                IModule[] modules = importer.getInfo().getModules();
                 for (int modIdx = 0; modIdx < modules.length; modIdx++)
                 {
-                    R4Wire wire = R4SearchPolicy.getWire(modules[modIdx], ep.getName());
+                    R4Wire wire = Util.getWire(modules[modIdx], ep.getName());
     
                     // If the resolving module is associated with the
                     // exporting bundle, then add current bundle to
                     // import list.
-                    if ((wire != null) && exporterInfo.hasModule(wire.m_module))
+                    if ((wire != null) && exporterInfo.hasModule(wire.getExportingModule()))
                     {
                         // Add the bundle to the list of importers.
                         list.add(bundles[bundleIdx]);
@@ -2808,7 +2815,7 @@ public class Felix
         // Create the module for the bundle; although there should only
         // ever be one revision at this point, create the module for
         // the current revision to be safe.
-        Module module = createModule(
+        IModule module = createModule(
             archive.getId(), archive.getRevisionCount() - 1, headerMap);
 
         // Finally, create an return the bundle info.
@@ -2824,7 +2831,7 @@ public class Felix
      * @param headers The headers map associated with the bundle.
      * @return The initialized and/or newly created module.
     **/
-    private Module createModule(long id, int revision, Map headerMap)
+    private IModule createModule(long id, int revision, Map headerMap)
         throws Exception
     {
         // Get the manifest version.
@@ -2835,31 +2842,14 @@ public class Felix
             throw new BundleException("Unknown 'Bundle-ManifestVersion' value: " + version);
         }
 
-        // Create the resource sources for the bundle. The resource sources
-        // are comprised of the bundle's class path values (as JarResourceSources).
-        ResourceSource[] resSources = null;
-        try
-        {
-            // Get bundle class path for the specified revision from cache.
-            String[] classPath = m_cache.getArchive(id).getClassPath(revision);
-
-            // Create resource sources for everything.
-            resSources = new ResourceSource[classPath.length];
-            for (int i = 0; i < classPath.length; i++)
-            {
-                resSources[i] = new JarResourceSource(classPath[i]);
-            }
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            throw new BundleException("Error in class path: " + ex);
-        }
-
         // Get import packages from bundle manifest.
-        R4Package[] imports = R4Package.parseImportOrExportHeader(
+        R4Package[] pkgs = R4Package.parseImportOrExportHeader(
             (String) headerMap.get(Constants.IMPORT_PACKAGE));
-
+        R4Import[] imports = new R4Import[pkgs.length];
+        for (int i = 0; i < pkgs.length; i++)
+        {
+            imports[i] = new R4Import(pkgs[i]);
+        }
 
         // Check to make sure that R3 bundles have only specified
         // the 'specification-version' attribute and no directives.
@@ -2887,8 +2877,13 @@ public class Felix
         }
 
         // Get export packages from bundle manifest.
-        R4Package[] exports = R4Package.parseImportOrExportHeader(
+        pkgs = R4Package.parseImportOrExportHeader(
             (String) headerMap.get(Constants.EXPORT_PACKAGE));
+        R4Export[] exports = new R4Export[pkgs.length];
+        for (int i = 0; i < pkgs.length; i++)
+        {
+            exports[i] = new R4Export(pkgs[i]);
+        }
 
         // Check to make sure that R3 bundles have only specified
         // the 'specification-version' attribute and no directives.
@@ -2915,9 +2910,12 @@ public class Felix
                 }
             }
             
-            R4Package[] newImports = new R4Package[imports.length + exports.length];
+            R4Import[] newImports = new R4Import[imports.length + exports.length];
             System.arraycopy(imports, 0, newImports, 0, imports.length);
-            System.arraycopy(exports, 0, newImports, imports.length, exports.length);
+            for (int i = 0; i < exports.length; i++)
+            {
+                newImports[i + imports.length] = new R4Import(exports[i]);
+            }
             imports = newImports;
         }
 
@@ -2933,24 +2931,28 @@ public class Felix
             {
                 usesValue = usesValue
                     + ((usesValue.length() > 0) ? "," : "")
-                    + imports[i].getId();
+                    + imports[i].getName();
             }
             R4Directive uses = new R4Directive(
                 FelixConstants.USES_DIRECTIVE, usesValue);
             for (int i = 0; (exports != null) && (i < exports.length); i++)
             {
-                exports[i] = new R4Package(
-                    exports[i].getId(),
+                exports[i] = new R4Export(
+                    exports[i].getName(),
                     new R4Directive[] { uses },
                     exports[i].getAttributes());
             }
         }
 
 // TODO: CHECK FOR DUPLICATE IMPORTS/EXPORTS HERE.
-
         // Get dynamic import packages from bundle manifest.
-        R4Package[] dynamics = R4Package.parseImportOrExportHeader(
+        pkgs = R4Package.parseImportOrExportHeader(
             (String) headerMap.get(Constants.DYNAMICIMPORT_PACKAGE));
+        R4Import[] dynamics = new R4Import[pkgs.length];
+        for (int i = 0; i < pkgs.length; i++)
+        {
+            dynamics[i] = new R4Import(pkgs[i]);
+        }
 
         // Check to make sure that R3 bundles have no attributes or
         // directives.
@@ -2969,30 +2971,56 @@ public class Felix
             }
         }
 
-        Object[][] attributes = {
-            new Object[] { R4SearchPolicy.EXPORTS_ATTR, exports },
-            new Object[] { R4SearchPolicy.IMPORTS_ATTR, imports },
-            new Object[] { R4SearchPolicy.DYNAMICIMPORTS_ATTR, dynamics }
-        };
-
         // Get native library entry names for module library sources.
-        LibraryInfo[] libraries =
+        R4LibraryHeader[] libraryHeaders =
             Util.parseLibraryStrings(
+                m_logger,
                 Util.parseDelimitedString(
                     (String) headerMap.get(Constants.BUNDLE_NATIVECODE), ","));
-        LibrarySource[] libSources = {
-            new OSGiLibrarySource(
+        R4Library[] libraries = new R4Library[libraryHeaders.length];
+        for (int i = 0; i < libraries.length; i++)
+        {
+            libraries[i] = new R4Library(
                 m_logger, m_cache, id, revision,
                 getProperty(Constants.FRAMEWORK_OS_NAME),
                 getProperty(Constants.FRAMEWORK_PROCESSOR),
-                libraries)
-        };
+                libraryHeaders[i]);
+        }
 
-        Module module =
-            m_mgr.addModule(
-                Long.toString(id) + "." + Integer.toString(revision),
-                attributes, resSources, libSources);
+        // Now that we have all of the metadata associated with the
+        // module, we need to create the module itself. This is somewhat
+        // complicated because a module is constructed out of several
+        // interrelated pieces (e.g., content loader, search policy,
+        // url policy). We need to create all of these pieces and bind
+        // them together.
 
+        // First, create the module.
+        IModule module = m_factory.createModule(
+            Long.toString(id) + "." + Integer.toString(revision));
+        // Attach the R4 search policy metadata to the module.
+        m_policyCore.setExports(module, exports);
+        m_policyCore.setImports(module, imports);
+        m_policyCore.setDynamicImports(module, dynamics);
+        m_policyCore.setLibraries(module, libraries);
+
+        // Create the content loader associated with the module archive.
+        IContentLoader contentLoader = new ContentLoaderImpl(
+                m_logger,
+                m_cache.getArchive(id).getContent(revision),
+                m_cache.getArchive(id).getContentPath(revision));
+        // Set the content loader's search policy.
+        contentLoader.setSearchPolicy(
+                new R4SearchPolicy(m_policyCore, module));
+        // Set the content loader's URL policy.
+        contentLoader.setURLPolicy(
+// TODO: FIX - NEED URL POLICY PER MODULE.
+                new URLPolicyImpl(
+                    m_logger, m_bundleStreamHandler, module));
+
+        // Set the module's content loader to the created content loader.
+        m_factory.setContentLoader(module, contentLoader);
+
+        // Done, so return the module.
         return module;
     }
 
@@ -3013,7 +3041,7 @@ public class Felix
             {
                 activator =
                     m_cache.getArchive(info.getBundleId())
-                        .getActivator(info.getCurrentModule().getClassLoader());
+                        .getActivator(info.getCurrentModule().getContentLoader());
             }
             catch (Exception ex)
             {
@@ -3037,7 +3065,7 @@ public class Felix
             if (className != null)
             {
                 className = className.trim();
-                Class clazz = info.getCurrentModule().getClassLoader().loadClass(className);
+                Class clazz = info.getCurrentModule().getContentLoader().getClass(className);
                 if (clazz == null)
                 {
                     throw new BundleException("Not found: "
@@ -3070,10 +3098,10 @@ public class Felix
             // way to do this is to remove the bundle, but that
             // would be incorrect, because this is a refresh operation
             // and should not trigger bundle REMOVE events.
-            Module[] modules = info.getModules();
+            IModule[] modules = info.getModules();
             for (int i = 0; i < modules.length; i++)
             {
-                m_mgr.removeModule(modules[i]);
+                m_factory.removeModule(modules[i]);
             }
 
             // Purge all bundle revisions, but the current one.
@@ -3094,10 +3122,10 @@ public class Felix
 
         // Remove the bundle's associated modules from
         // the module manager.
-        Module[] modules = bundle.getInfo().getModules();
+        IModule[] modules = bundle.getInfo().getModules();
         for (int i = 0; i < modules.length; i++)
         {
-            m_mgr.removeModule(modules[i]);
+            m_factory.removeModule(modules[i]);
         }
 
         // Remove the bundle from the cache.
@@ -3209,11 +3237,11 @@ public class Felix
             System.getProperty("os.version"));
 
         String s = null;
-        s = OSGiLibrarySource.normalizePropertyValue(
+        s = R4Library.normalizePropertyValue(
             FelixConstants.FRAMEWORK_OS_NAME,
             System.getProperty("os.name"));
         m_configMutable.put(FelixConstants.FRAMEWORK_OS_NAME, s);
-        s = OSGiLibrarySource.normalizePropertyValue(
+        s = R4Library.normalizePropertyValue(
             FelixConstants.FRAMEWORK_PROCESSOR,
             System.getProperty("os.arch"));
         m_configMutable.put(FelixConstants.FRAMEWORK_PROCESSOR, s);
@@ -3243,7 +3271,7 @@ public class Felix
                 }
                 catch (NumberFormatException ex)
                 {
-                    m_logger.log(LogWrapper.LOG_ERROR, "Invalid property: " + keys[i]);
+                    m_logger.log(Logger.LOG_ERROR, "Invalid property: " + keys[i]);
                 }
                 StringTokenizer st = new StringTokenizer(m_config.get(keys[i]), "\" ",true);
                 if (st.countTokens() > 0)
@@ -3262,7 +3290,7 @@ public class Felix
                             catch (Exception ex)
                             {
                                 m_logger.log(
-                                    LogWrapper.LOG_ERROR, "Auto-properties install.", ex);
+                                    Logger.LOG_ERROR, "Auto-properties install.", ex);
                             }
                         }
                     }
@@ -3289,7 +3317,7 @@ public class Felix
                 }
                 catch (NumberFormatException ex)
                 {
-                    m_logger.log(LogWrapper.LOG_ERROR, "Invalid property: " + keys[i]);
+                    m_logger.log(Logger.LOG_ERROR, "Invalid property: " + keys[i]);
                 }
                 StringTokenizer st = new StringTokenizer(m_config.get(keys[i]), "\" ",true);
                 if (st.countTokens() > 0)
@@ -3307,7 +3335,7 @@ public class Felix
                             }
                             catch (Exception ex)
                             {
-                                m_logger.log(LogWrapper.LOG_ERROR, "Auto-properties install.", ex);
+                                m_logger.log(Logger.LOG_ERROR, "Auto-properties install.", ex);
                             }
                         }
                     }
@@ -3342,7 +3370,7 @@ public class Felix
                             catch (Exception ex)
                             {
                                 m_logger.log(
-                                    LogWrapper.LOG_ERROR, "Auto-properties start.", ex);
+                                    Logger.LOG_ERROR, "Auto-properties start.", ex);
                             }
                         }
                     }
@@ -3446,7 +3474,7 @@ public class Felix
     // Logging methods and inner classes.
     //
 
-    public LogWrapper getLogger()
+    public Logger getLogger()
     {
         return m_logger;
     }

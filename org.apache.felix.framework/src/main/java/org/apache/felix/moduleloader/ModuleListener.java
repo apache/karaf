@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import java.util.EventListener;
  * <p>
  * This interface is an event listener for <tt>ModuleEvent</tt> events.
  * To receive events, an implementation of this listener must be added
- * to the <tt>ModuleManager</tt> instance.
+ * to the <tt>IModuleFactory</tt> instance.
  * </p>
- * @see org.apache.felix.moduleloader.ModuleManager
+ * @see org.apache.felix.moduleloader.IModuleFactory
  * @see org.apache.felix.moduleloader.ModuleEvent
 **/
 public interface ModuleListener extends EventListener
@@ -32,7 +32,7 @@ public interface ModuleListener extends EventListener
     /**
      * <p>
      * This method is called after a module is added to the
-     * <tt>ModuleManager</tt>.
+     * <tt>IModuleFactory</tt>.
      * </p>
      * @param event the event object containing the event details.
     **/
@@ -40,17 +40,8 @@ public interface ModuleListener extends EventListener
 
     /**
      * <p>
-     * This method is called after a module has been reset by the
-     * <tt>ModuleManager</tt>.
-     * </p>
-     * @param event the event object containing the event details.
-    **/
-    public void moduleReset(ModuleEvent event);
-
-    /**
-     * <p>
      * This method is called after a module is remove from the
-     * <tt>ModuleManager</tt>.
+     * <tt>IModuleFactory</tt>.
      * </p>
      * @param event the event object containing the event details.
     **/

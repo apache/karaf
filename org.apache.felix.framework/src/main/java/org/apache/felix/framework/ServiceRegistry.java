@@ -23,7 +23,7 @@ import org.osgi.framework.*;
 
 public class ServiceRegistry
 {
-    private LogWrapper m_logger = null;
+    private Logger m_logger = null;
     private long m_currentServiceId = 1L;
     // Maps bundle to an array of service registrations.
     private Map m_serviceRegsMap = new HashMap();
@@ -32,7 +32,7 @@ public class ServiceRegistry
 
     private ServiceListener m_serviceListener = null;
 
-    public ServiceRegistry(LogWrapper logger)
+    public ServiceRegistry(Logger logger)
     {
         m_logger = logger;
     }
@@ -337,7 +337,7 @@ public class ServiceRegistry
         fireServiceChanged(new ServiceEvent(ServiceEvent.MODIFIED, reg.getReference()));
     }
 
-    public LogWrapper getLogger()
+    public Logger getLogger()
     {
         return m_logger;
     }

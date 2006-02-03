@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,8 +20,136 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.felix.framework.Logger;
+import org.apache.felix.framework.searchpolicy.*;
+import org.apache.felix.moduleloader.IModule;
+
 public class Util
 {
+    /**
+     * Converts a module identifier to a bundle identifier. Module IDs
+     * are typically <tt>&lt;bundle-id&gt;.&lt;revision&gt;</tt>; this
+     * method returns only the portion corresponding to the bundle ID.
+    **/
+    public static long getBundleIdFromModuleId(String id)
+    {
+        try
+        {
+            String bundleId = (id.indexOf('.') >= 0)
+                ? id.substring(0, id.indexOf('.')) : id;
+            return Long.parseLong(bundleId);
+        }
+        catch (NumberFormatException ex)
+        {
+            return -1;
+        }
+    }
+
+    /**
+     * Converts a module identifier to a bundle identifier. Module IDs
+     * are typically <tt>&lt;bundle-id&gt;.&lt;revision&gt;</tt>; this
+     * method returns only the portion corresponding to the revision.
+    **/
+    public static int getModuleRevisionFromModuleId(String id)
+    {
+        try
+        {
+            String rev = (id.indexOf('.') >= 0)
+                ? id.substring(id.indexOf('.') + 1) : id;
+            return Integer.parseInt(rev);
+        }
+        catch (NumberFormatException ex)
+        {
+            return -1;
+        }
+    }
+
+    public static String getClassName(String className)
+    {
+        if (className == null)
+        {
+            className = "";
+        }
+        return (className.lastIndexOf('.') < 0)
+            ? "" : className.substring(className.lastIndexOf('.') + 1);
+    }
+
+    public static String getClassPackage(String className)
+    {
+        if (className == null)
+        {
+            className = "";
+        }
+        return (className.lastIndexOf('.') < 0)
+            ? "" : className.substring(0, className.lastIndexOf('.'));
+    }
+
+    public static String getResourcePackage(String resource)
+    {
+        if (resource == null)
+        {
+            resource = "";
+        }
+        // NOTE: The package of a resource is tricky to determine since
+        // resources do not follow the same naming conventions as classes.
+        // This code is pessimistic and assumes that the package of a
+        // resource is everything up to the last '/' character. By making
+        // this choice, it will not be possible to load resources from
+        // imports using relative resource names. For example, if a
+        // bundle exports "foo" and an importer of "foo" tries to load
+        // "/foo/bar/myresource.txt", this will not be found in the exporter
+        // because the following algorithm assumes the package name is
+        // "foo.bar", not just "foo". This only affects imported resources,
+        // local resources will work as expected.
+        String pkgName = (resource.startsWith("/")) ? resource.substring(1) : resource;
+        pkgName = (pkgName.lastIndexOf('/') < 0)
+            ? "" : pkgName.substring(0, pkgName.lastIndexOf('/'));
+        pkgName = pkgName.replace('/', '.');
+        return pkgName;
+    }
+
+    public static R4Export getExportPackage(IModule m, String name)
+    {
+        R4Export[] pkgs =
+            ((IR4SearchPolicy) m.getContentLoader().getSearchPolicy()).getExports();
+        for (int i = 0; (pkgs != null) && (i < pkgs.length); i++)
+        {
+            if (pkgs[i].getName().equals(name))
+            {
+                return pkgs[i];
+            }
+        }
+        return null;
+    }
+
+    public static R4Import getImportPackage(IModule m, String name)
+    {
+        R4Import[] pkgs =
+            ((IR4SearchPolicy) m.getContentLoader().getSearchPolicy()).getImports();
+        for (int i = 0; (pkgs != null) && (i < pkgs.length); i++)
+        {
+            if (pkgs[i].getName().equals(name))
+            {
+                return pkgs[i];
+            }
+        }
+        return null;
+    }
+
+    public static R4Wire getWire(IModule m, String name)
+    {
+        R4Wire[] wires =
+            ((IR4SearchPolicy) m.getContentLoader().getSearchPolicy()).getWires();
+        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        {
+            if (wires[i].getExport().getName().equals(name))
+            {
+                return wires[i];
+            }
+        }
+        return null;
+    }
+
     /**
      * Parses delimited string and returns an array containing the tokens. This
      * parser obeys quotes, so the delimiter character will be ignored if it is
@@ -97,19 +225,19 @@ public class Util
      * @return an array of <tt>LibraryInfo</tt> objects for the
      *         passed in strings.
     **/
-    public static LibraryInfo[] parseLibraryStrings(String[] libStrs)
+    public static R4LibraryHeader[] parseLibraryStrings(Logger logger, String[] libStrs)
         throws IllegalArgumentException
     {
         if (libStrs == null)
         {
-            return null;
+            return new R4LibraryHeader[0];
         }
 
         List libList = new ArrayList();
 
         for (int i = 0; i < libStrs.length; i++)
         {
-            LibraryInfo[] libs = LibraryInfo.parse(libStrs[i]);
+            R4LibraryHeader[] libs = R4LibraryHeader.parse(logger, libStrs[i]);
             for (int libIdx = 0;
                 (libs != null) && (libIdx < libs.length);
                 libIdx++)
@@ -118,12 +246,7 @@ public class Util
             }
         }
 
-        if (libList.size() == 0)
-        {
-            return null;
-        }
-
-        return (LibraryInfo[]) libList.toArray(new LibraryInfo[libList.size()]);
+        return (R4LibraryHeader[]) libList.toArray(new R4LibraryHeader[libList.size()]);
     }
 
     private static final byte encTab[] = { 0x41, 0x42, 0x43, 0x44, 0x45, 0x46,

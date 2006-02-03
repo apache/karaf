@@ -25,13 +25,13 @@ import java.util.EventObject;
  * events, a <tt>ModuleListener</tt> must be added to the <tt>ModuleManager</tt>
  * instance.
  * </p>
- * @see org.apache.felix.moduleloader.ModuleManager
- * @see org.apache.felix.moduleloader.Module
+ * @see org.apache.felix.moduleloader.ModuleFactoryImpl
+ * @see org.apache.felix.moduleloader.ModuleImpl
  * @see org.apache.felix.moduleloader.ModuleListener
 **/
 public class ModuleEvent extends EventObject
 {
-    private Module m_module = null;
+    private IModule m_module = null;
 
     /**
      * <p>
@@ -42,9 +42,9 @@ public class ModuleEvent extends EventObject
      * @param mgr the source of the event.
      * @param module the subject of the event.
     **/
-    public ModuleEvent(ModuleManager mgr, Module module)
+    public ModuleEvent(IModuleFactory factory, IModule module)
     {
-        super(mgr);
+        super(factory);
         m_module = module;
     }
 
@@ -54,7 +54,7 @@ public class ModuleEvent extends EventObject
      * </p>
      * @return the module that is the subject of the event.
     **/
-    public Module getModule()
+    public IModule getModule()
     {
         return m_module;
     }

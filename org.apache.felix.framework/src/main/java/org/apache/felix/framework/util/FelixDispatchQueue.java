@@ -19,7 +19,7 @@ package org.apache.felix.framework.util;
 import java.util.EventListener;
 import java.util.EventObject;
 
-import org.apache.felix.framework.LogWrapper;
+import org.apache.felix.framework.Logger;
 import org.osgi.framework.*;
 
 /**
@@ -36,7 +36,7 @@ import org.osgi.framework.*;
 **/
 public class FelixDispatchQueue extends DispatchQueue
 {
-    public FelixDispatchQueue(LogWrapper logger)
+    public FelixDispatchQueue(Logger logger)
     {
         super(logger);
     }
@@ -77,7 +77,7 @@ public class FelixDispatchQueue extends DispatchQueue
                             (EventListener) lw, eventObj);
                     } catch (Throwable th) {
                         getLogger().log(
-                            LogWrapper.LOG_ERROR,
+                            Logger.LOG_ERROR,
                             "FelixDispatchQueue: Error during dispatch.", th);
                     }
                 }
@@ -100,7 +100,7 @@ public class FelixDispatchQueue extends DispatchQueue
                             (EventListener) lw, eventObj);
                     } catch (Throwable th) {
                         getLogger().log(
-                            LogWrapper.LOG_ERROR,
+                            Logger.LOG_ERROR,
                             "FelixDispatchQueue: Error during dispatch.", th);
                     }
                 }

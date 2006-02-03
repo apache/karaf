@@ -18,7 +18,7 @@ package org.apache.felix.framework.cache;
 
 import java.io.InputStream;
 
-import org.apache.felix.framework.LogWrapper;
+import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.PropertyResolver;
 
 /**
@@ -58,7 +58,7 @@ public interface BundleCache
      * @param logger the logger to use for reporting errors.
      * @throws Exception if any error occurs.
     **/
-    public void initialize(PropertyResolver cfg, LogWrapper logger)
+    public void initialize(PropertyResolver cfg, Logger logger)
         throws Exception;
 
     /**

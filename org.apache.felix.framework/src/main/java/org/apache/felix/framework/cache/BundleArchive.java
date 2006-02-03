@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.apache.felix.framework.cache;
 import java.io.File;
 import java.util.Map;
 
+import org.apache.felix.moduleloader.IContent;
+import org.apache.felix.moduleloader.IContentLoader;
 import org.osgi.framework.BundleActivator;
 
 /**
@@ -117,7 +119,7 @@ public interface BundleArchive
      *         this archive.
      * @throws java.lang.Exception if any error occurs.
     **/
-    public BundleActivator getActivator(ClassLoader loader)
+    public BundleActivator getActivator(IContentLoader contentLoader)
         throws Exception;
 
     /**
@@ -162,19 +164,27 @@ public interface BundleArchive
 
     /**
      * <p>
-     * Returns an array of <tt>String</tt>s that represent the class path of
-     * the specified revision of the bundle associated with this archive.
-     * Currently, these values are restricted to absolute paths in the file
-     * system, but this may be lifted in the future (perhaps they should be
-     * <tt>ResourceSource</tt>s from the Module Loader.
+     * Returns a content object that is associated with the specified bundle
+     * revision's JAR file.
      * </p>
      * @param revision the specified revision.
-     * @return a <tt>String</tt> array of the absolute path names that
-     *         comprise the class path of the specified revision of the
-     *         bundle associated with this archive.
+     * @return A content object for the specified bundle revision's JAR file.
      * @throws java.lang.Exception if any error occurs.
     **/
-    public String[] getClassPath(int revision)
+    public IContent getContent(int revision)
+        throws Exception;
+
+    /**
+     * <p>
+     * Returns an array of content objects that are associated with the
+     * specified bundle revision's class path.
+     * </p>
+     * @param revision the specified revision.
+     * @return An array of content objects for the specified bundle revision's
+     *         class path.
+     * @throws java.lang.Exception if any error occurs.
+    **/
+    public IContent[] getContentPath(int revision)
         throws Exception;
 
     /**

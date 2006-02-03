@@ -19,8 +19,8 @@ package org.apache.felix.framework;
 import java.net.*;
 import java.util.*;
 
+import org.apache.felix.framework.searchpolicy.ContentClassLoader;
 import org.apache.felix.framework.util.*;
-import org.apache.felix.moduleloader.ModuleClassLoader;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -345,7 +345,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                 Class targetClass = null;
                 for (int i = 0; i < stack.length; i++)
                 {
-                    if (stack[i].getClassLoader() instanceof ModuleClassLoader)
+                    if (stack[i].getClassLoader() instanceof ContentClassLoader)
                     {
                         targetClass = stack[i];
                         break;

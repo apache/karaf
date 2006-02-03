@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.Permission;
+
+import org.apache.felix.framework.util.Util;
 
 class URLHandlersBundleURLConnection extends URLConnection
 {
@@ -54,8 +56,18 @@ class URLHandlersBundleURLConnection extends URLConnection
                 throw new IOException("Unable to find framework instance from context.");
             }
 
-            m_is = m_framework.getBundleResourceInputStream(url);
-            m_contentLength = m_is.available();
+            // The URL is constructed like this:
+            //     bundle://<module-id>/<resource-path>
+            // Where <module-id> = <bundle-id>.<revision>
+            long bundleId = Util.getBundleIdFromModuleId(url.getHost());
+            BundleImpl bundle = (BundleImpl) m_framework.getBundle(bundleId);
+            if (bundle == null)
+            {
+                throw new IOException("Unable to find bundle.");
+            }
+            int revision = Util.getModuleRevisionFromModuleId(url.getHost());
+            m_is = bundle.getInfo().getModules()[revision].getContentLoader().getResourceAsStream(url.getPath());
+            m_contentLength = (m_is == null) ? 0 : m_is.available();
             m_contentTime = 0L;
             m_contentType = URLConnection.guessContentTypeFromName(url.getFile());
             connected = true;

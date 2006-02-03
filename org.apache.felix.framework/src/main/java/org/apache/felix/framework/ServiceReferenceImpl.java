@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
  */
 package org.apache.felix.framework;
 
-import org.apache.felix.framework.searchpolicy.R4SearchPolicy;
 import org.apache.felix.framework.searchpolicy.R4Wire;
+import org.apache.felix.framework.util.Util;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
@@ -31,7 +31,7 @@ class ServiceReferenceImpl implements ServiceReference
         m_registration = reg;
         m_bundle = bundle;
     }
-
+    
     protected ServiceRegistrationImpl getServiceRegistration()
     {
         return m_registration;
@@ -117,11 +117,12 @@ class ServiceReferenceImpl implements ServiceReference
         boolean allow = true;
         // Get the package.
         String pkgName =
-            org.apache.felix.moduleloader.Util.getClassPackage(className);
-        // Get package wiring from service provider and requester.
-        R4Wire requesterWire = R4SearchPolicy.getWire(
+            Util.getClassPackage(className);
+        // Get package wiring from service requester.
+        R4Wire requesterWire = Util.getWire(
             ((BundleImpl) requester).getInfo().getCurrentModule(), pkgName);
-        R4Wire providerWire = R4SearchPolicy.getWire(
+        // Get package wiring from service provider.
+        R4Wire providerWire = Util.getWire(
             ((BundleImpl) m_bundle).getInfo().getCurrentModule(), pkgName);
 
         // There are three situations that may occur here:
@@ -151,8 +152,8 @@ class ServiceReferenceImpl implements ServiceReference
             {
                 // Load the class from the requesting bundle.
                 Class requestClass =
-                    ((BundleImpl) requester).getInfo().getCurrentModule().getClassLoader()
-                        .loadClass(className);
+                    ((BundleImpl) requester).getInfo().getCurrentModule().getContentLoader()
+                        .getClass(className);
                 // Get the service registration and ask it to check
                 // if the service object is assignable to the requesting
                 // bundle's class.
@@ -168,7 +169,7 @@ class ServiceReferenceImpl implements ServiceReference
         // same source module.
         else
         {
-            allow = providerWire.m_module.equals(requesterWire.m_module);
+            allow = providerWire.getExportingModule().equals(requesterWire.getExportingModule());
         }
 
         return allow;

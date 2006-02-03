@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -14,27 +14,25 @@
  *   limitations under the License.
  *
  */
-package org.apache.felix.framework;
+package org.apache.felix.framework.searchpolicy;
 
+import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.cache.BundleCache;
-import org.apache.felix.framework.util.LibraryInfo;
-import org.apache.felix.moduleloader.LibrarySource;
 import org.osgi.framework.Constants;
 
-public class OSGiLibrarySource implements LibrarySource
+public class R4Library
 {
-    private LogWrapper m_logger = null;
-    private boolean m_opened = false;
+    private Logger m_logger = null;
     private BundleCache m_cache = null;
     private long m_bundleId = -1;
     private int m_revision = -1;
     private String m_os = null;
     private String m_processor = null;
-    private LibraryInfo[] m_libraries = null;
+    private R4LibraryHeader m_header = null;
 
-    public OSGiLibrarySource(
-        LogWrapper logger, BundleCache cache, long bundleId, int revision,
-        String os, String processor, LibraryInfo[] libraries)
+    public R4Library(
+        Logger logger, BundleCache cache, long bundleId, int revision,
+        String os, String processor, R4LibraryHeader header)
     {
         m_logger = logger;
         m_cache = cache;
@@ -42,51 +40,32 @@ public class OSGiLibrarySource implements LibrarySource
         m_revision = revision;
         m_os = normalizePropertyValue(Constants.FRAMEWORK_OS_NAME, os);
         m_processor = normalizePropertyValue(Constants.FRAMEWORK_PROCESSOR, processor);
-        m_libraries = libraries;
+        m_header = header;
     }
 
-    public void open()
+    /**
+     * <p>
+     * Returns a file system path to the specified library.
+     * </p>
+     * @param name the name of the library that is being requested.
+     * @return a file system path to the specified library.
+    **/
+    public String getPath(String name)
     {
-        m_opened = true;
-    }
-
-    public void close()
-    {
-        m_opened = false;
-    }
-
-    public String getPath(String name) throws IllegalStateException
-    {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("OSGiLibrarySource is not open");
-        }
-
-        if (m_libraries != null)
+        if (m_header != null)
         {
             String libname = System.mapLibraryName(name);
 
-            // Check to see if we have a matching library.
-            // TODO: This "matching" algorithm does not fully
-            // match the spec and should be improved.
-            LibraryInfo library = null;
-            for (int i = 0; (library == null) && (i < m_libraries.length); i++)
-            {
-                boolean osOkay = checkOS(m_libraries[i].getOSNames());
-                boolean procOkay = checkProcessor(m_libraries[i].getProcessors());
-                if (m_libraries[i].getName().endsWith(libname) && osOkay && procOkay)
-                {
-                    library = m_libraries[i];
-                }
-            }
-
-            if (library != null)
+            // Check to see if the library matches.
+            boolean osOkay = checkOS(m_header.getOSNames());
+            boolean procOkay = checkProcessor(m_header.getProcessors());
+            if (m_header.getName().endsWith(libname) && osOkay && procOkay)
             {
                 try {
                     return m_cache.getArchive(m_bundleId)
-                        .findLibrary(m_revision, library.getName());
+                        .findLibrary(m_revision, m_header.getName());
                 } catch (Exception ex) {
-                    m_logger.log(LogWrapper.LOG_ERROR, "OSGiLibrarySource: Error finding library.", ex);
+                    m_logger.log(Logger.LOG_ERROR, "R4Library: Error finding library.", ex);
                 }
             }
         }

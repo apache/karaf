@@ -31,7 +31,7 @@ import org.osgi.framework.ServiceReference;
  * </p>
 **/
 // TODO: Modify LogWrapper to get LogService service object and invoke with reflection.
-public class LogWrapper
+public class Logger
 {
     public static final int LOG_ERROR = 1;
     public static final int LOG_WARNING = 2;
@@ -40,7 +40,7 @@ public class LogWrapper
 
     private Object m_logObj = null;
 
-    public LogWrapper()
+    public Logger()
     {
     }
 
