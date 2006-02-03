@@ -18,6 +18,18 @@ package org.apache.felix.framework.util;
 
 import java.security.*;
 
+/**
+ * <p>
+ * This is a utility class to centralize all action that should be performed
+ * in a <tt>doPrivileged()</tt> block. To perform a secure action, simply
+ * create an instance of this class and use the specific method to perform
+ * the desired action. When an instance is created, this class will capture
+ * the security context and will then use that context when checking for
+ * permission to perform the action. Instances of this class should not be
+ * passed around since they may grant the receiver a capability to perform
+ * privileged actions.
+ * </p>
+**/
 public class SecureAction
 {
     private AccessControlContext m_acc = null;
