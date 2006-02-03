@@ -33,7 +33,7 @@ public interface CdCommand extends Command
     /**
      * Property used to configure the base URL.
     **/
-    public static final String BASE_URL_PROPERTY = "felix.impl.baseurl";
+    public static final String BASE_URL_PROPERTY = "felix.shell.baseurl";
 
     /**
      * Returns the current <i>directory</i> of the impl service.
