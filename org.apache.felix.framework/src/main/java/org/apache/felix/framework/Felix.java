@@ -922,52 +922,6 @@ public class Felix
         return false;
     }
 
-    /**
-     * <p>
-     * This method returns an input stream for the specified bundle resource
-     * URL.
-     * </p>
-     * @param url the URL representing the bundle resource for which an input
-     *        stream is desired.
-     * @return an input stream to the bundle resource.
-     * @throws IOException if the input stream could not be created.
-    **/
-/*
- This might note be needed due to changes in URLHandlersBundleURLConnection
-
-    protected InputStream getBundleResourceInputStream(URL url)
-        throws IOException
-    {
-        // The URL is constructed like this:
-        // bundle://<module-id>/<source-idx>/<resource-path>
-    
-        IModule module = m_factory.getModule(url.getHost());
-        if (module == null)
-        {
-            throw new IOException("Unable to find bundle's module.");
-        }
-    
-        String resource = url.getFile();
-        if (resource == null)
-        {
-            throw new IOException("Unable to find resource: " + url.toString());
-        }
-
-        // Remove any leading slash.
-        if (resource.startsWith("/"))
-        {
-            resource = resource.substring(1);
-        }
-
-        // Get the resource bytes from the resource source.
-        byte[] bytes = module.getContentLoader().getResourceBytes(resource);
-        if (bytes == null)
-        {
-            throw new IOException("Unable to find resource: " + url.toString());
-        }
-        return new ByteArrayInputStream(bytes);
-    }
-*/
     //
     // Implementation of Bundle interface methods.
     //
@@ -1009,7 +963,7 @@ public class Felix
         {
             AccessController.checkPermission(m_adminPerm);
         }
-        return bundle.getInfo().getCurrentModule().getContentLoader().getResource(name);
+        return bundle.getInfo().getCurrentModule().getResource(name);
     }
 
     protected ServiceReference[] getBundleRegisteredServices(BundleImpl bundle)
