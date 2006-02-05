@@ -19,6 +19,8 @@ package org.apache.felix.framework.searchpolicy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Enumeration;
+import java.util.Vector;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.moduleloader.*;
@@ -111,12 +113,74 @@ public class ContentLoaderImpl implements IContentLoader
 
     public URL getResource(String name)
     {
-        if (m_classLoader == null)
+        URL url = null;
+        // Remove leading slash, if present.
+        if (name.startsWith("/"))
         {
-            m_classLoader = new ContentClassLoader(this);
+            name = name.substring(1);
         }
 
-        return m_classLoader.getResourceFromModule(name);
+        // Check the module class path.
+        for (int i = 0;
+            (url == null) &&
+            (i < getClassPath().length); i++)
+        {
+            if (getClassPath()[i].hasEntry(name))
+            {
+                url = getURLPolicy().createURL((i + 1) + "/" + name);
+            }
+        }
+
+        return url;
+    }
+
+    protected Enumeration getResources(String name)
+    {
+        Vector v = new Vector();
+
+        // Remove leading slash, if present.
+        if (name.startsWith("/"))
+        {
+            name = name.substring(1);
+        }
+
+        // Check the module class path.
+        for (int i = 0; i < getClassPath().length; i++)
+        {
+            if (getClassPath()[i].hasEntry(name))
+            {
+                // Use the class path index + 1 for creating the path so
+                // that we can differentiate between module content URLs
+                // (where the path will start with 0) and module class
+                // path URLs.
+                v.addElement(getURLPolicy().createURL((i + 1) + "/" + name));
+            }
+        }
+
+        return v.elements();
+    }
+
+    // TODO: API: Investigate making this an API call.
+    public URL getResourceFromContent(String name)
+    {
+        URL url = null;
+
+        // Remove leading slash, if present.
+        if (name.startsWith("/"))
+        {
+            name = name.substring(1);
+        }
+
+        // Check the module content.
+        if (getContent().hasEntry(name))
+        {
+            // Module content URLs start with 0, whereas module
+            // class path URLs start with the index into the class
+            // path + 1.
+            url = getURLPolicy().createURL("0/" + name);
+        }
+
+        return url;
     }
 
     public InputStream getResourceAsStream(String name)
@@ -127,10 +191,17 @@ public class ContentLoaderImpl implements IContentLoader
             name = name.substring(1);
         }
         // The name is the path contructed like this:
-        // <class-path-index> / <relative-resource-path>
+        // <index> / <relative-resource-path>
+        // where <index> == 0 is the module content
+        // and <index> > 0 is the index into the class
+        // path - 1.
         int idx = Integer.parseInt(name.substring(0, name.indexOf('/')));
         name = name.substring(name.indexOf('/') + 1);
-        return m_contentPath[idx].getEntryAsStream(name);
+        if (idx == 0)
+        {
+            return m_content.getEntryAsStream(name);
+        }
+        return m_contentPath[idx - 1].getEntryAsStream(name);
     }
 
     public String toString()

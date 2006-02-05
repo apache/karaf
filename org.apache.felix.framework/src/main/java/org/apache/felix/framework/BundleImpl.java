@@ -55,6 +55,11 @@ class BundleImpl implements Bundle
         return m_info.getBundleId();
     }
 
+    public URL getEntry(String name)
+    {
+        return m_felix.getBundleEntry(this, name);
+    }
+
     public Dictionary getHeaders()
     {
         return m_felix.getBundleHeaders(this);
@@ -166,12 +171,6 @@ class BundleImpl implements Bundle
     public Enumeration getEntryPaths(String path)
     {
         // TODO: Implement Bundle.getEntryPaths()
-        return null;
-    }
-
-    public URL getEntry(String name)
-    {
-        // TODO: Implement Bundle.getEntry()
         return null;
     }
 

@@ -966,6 +966,24 @@ public class Felix
         return bundle.getInfo().getCurrentModule().getResource(name);
     }
 
+    /**
+     * Implementation for Bundle.getEntry().
+    **/
+    protected URL getBundleEntry(BundleImpl bundle, String name)
+    {
+        if (bundle.getInfo().getState() == Bundle.UNINSTALLED)
+        {
+            throw new IllegalStateException("The bundle is uninstalled.");
+        }
+// TODO: SECURITY - Implement correct check.
+        else if (System.getSecurityManager() != null)
+        {
+            AccessController.checkPermission(m_adminPerm);
+        }
+        return ((ContentLoaderImpl) bundle.getInfo().getCurrentModule()
+            .getContentLoader()).getResourceFromContent(name);
+    }
+
     protected ServiceReference[] getBundleRegisteredServices(BundleImpl bundle)
     {
         if (bundle.getInfo().getState() == Bundle.UNINSTALLED)

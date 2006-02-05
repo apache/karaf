@@ -21,7 +21,6 @@ import java.security.CodeSource;
 import java.security.SecureClassLoader;
 import java.security.cert.Certificate;
 import java.util.Enumeration;
-import java.util.Vector;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.Util;
@@ -198,48 +197,12 @@ public class ContentClassLoader extends SecureClassLoader
 
     protected URL findResource(String name)
     {
-        URL url = null;
-
-        // Remove leading slash, if present.
-        if (name.startsWith("/"))
-        {
-            name = name.substring(1);
-        }
-
-        // Check the module class path.
-        for (int i = 0;
-            (url == null) &&
-            (i < m_contentLoader.getClassPath().length); i++)
-        {
-            if (m_contentLoader.getClassPath()[i].hasEntry(name))
-            {
-                url = m_contentLoader.getURLPolicy().createURL(i + "/" + name);
-            }
-        }
-
-        return url;
+        return m_contentLoader.getResource(name);
     }
 
     protected Enumeration findResources(String name)
     {
-        Vector v = new Vector();
-
-        // Remove leading slash, if present.
-        if (name.startsWith("/"))
-        {
-            name = name.substring(1);
-        }
-
-        // Check the module class path.
-        for (int i = 0; i < m_contentLoader.getClassPath().length; i++)
-        {
-            if (m_contentLoader.getClassPath()[i].hasEntry(name))
-            {
-                v.addElement(m_contentLoader.getURLPolicy().createURL(i + "/" + name));
-            }
-        }
-
-        return v.elements();
+        return m_contentLoader.getResources(name);
     }
 
     protected String findLibrary(String name)
