@@ -275,13 +275,13 @@ public class R4SearchPolicyCore implements ModuleListener
         // these packages cannot be provided by other bundles.
         if (pkgName.startsWith("java."))
         {
-            return this.getClass().getClassLoader().loadClass(name);
+            return getClass().getClassLoader().loadClass(name);
         }
 
         // Look in the module's imports.
         Class clazz = findImportedClass(module, name, pkgName);
 
-        // If not found, try the module's own content.
+        // If not found, try the module's own class path.
         if (clazz == null)
         {
             clazz = module.getContentLoader().getClass(name);
@@ -404,9 +404,16 @@ public class R4SearchPolicyCore implements ModuleListener
         }
         catch (ResolveException ex)
         {
-            // We do not use the resolve exception as the
-            // cause of the exception, since this would
-            // potentially leak internal module information.
+            // The spec states that if the bundle cannot be resolved, then
+            // only the local bundle's resources should be searched. So we
+            // will ask the module's own class path.
+            URL url = module.getContentLoader().getResource(name);
+            if (url != null)
+            {
+                return url;
+            }
+
+            // We need to throw a resource not found exception.
             throw new ResourceNotFoundException(
                 name + ": cannot resolve package "
                 + ex.getPackage());
@@ -419,13 +426,13 @@ public class R4SearchPolicyCore implements ModuleListener
         // these packages cannot be provided by other bundles.
         if (pkgName.startsWith("java."))
         {
-            return this.getClass().getClassLoader().getResource(name);
+            return getClass().getClassLoader().getResource(name);
         }
 
         // Look in the module's imports.
         URL url = findImportedResource(module, name);
 
-        // If not found, try the module's own content.
+        // If not found, try the module's own class path.
         if (url == null)
         {
             url = module.getContentLoader().getResource(name);
