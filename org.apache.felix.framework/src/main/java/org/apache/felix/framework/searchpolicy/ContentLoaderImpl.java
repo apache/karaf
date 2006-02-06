@@ -114,6 +114,7 @@ public class ContentLoaderImpl implements IContentLoader
     public URL getResource(String name)
     {
         URL url = null;
+
         // Remove leading slash, if present.
         if (name.startsWith("/"))
         {
@@ -165,19 +166,29 @@ public class ContentLoaderImpl implements IContentLoader
     {
         URL url = null;
 
-        // Remove leading slash, if present.
-        if (name.startsWith("/"))
+        // Check for the special case of "/", which represents
+        // the root of the bundle according to the spec.
+        if (name.equals("/"))
         {
-            name = name.substring(1);
+            url = getURLPolicy().createURL("0/");
         }
 
-        // Check the module content.
-        if (getContent().hasEntry(name))
+        if (url == null)
         {
-            // Module content URLs start with 0, whereas module
-            // class path URLs start with the index into the class
-            // path + 1.
-            url = getURLPolicy().createURL("0/" + name);
+            // Remove leading slash, if present.
+            if (name.startsWith("/"))
+            {
+                name = name.substring(1);
+            }
+    
+            // Check the module content.
+            if (getContent().hasEntry(name))
+            {
+                // Module content URLs start with 0, whereas module
+                // class path URLs start with the index into the class
+                // path + 1.
+                url = getURLPolicy().createURL("0/" + name);
+            }
         }
 
         return url;
