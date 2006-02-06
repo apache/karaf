@@ -18,6 +18,7 @@ package org.apache.felix.moduleloader;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 
 public interface IContent
 {
@@ -27,5 +28,5 @@ public interface IContent
     public byte[] getEntry(String name);
     public InputStream getEntryAsStream(String name)
         throws IOException;
-    public String[] getEntryPaths(String path);
+    public Enumeration getEntryPaths(String path);
 }

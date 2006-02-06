@@ -17,8 +17,8 @@
 package org.apache.felix.moduleloader;
 
 import java.io.*;
-import java.io.File;
-import java.io.IOException;
+import java.util.Enumeration;
+import java.util.NoSuchElementException;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
@@ -224,9 +224,31 @@ public class JarContent implements IContent
         return is;
     }
 
-    public String[] getEntryPaths(String path)
+    public synchronized Enumeration getEntryPaths(String path)
     {
-        return null;
+        if (!m_opened)
+        {
+            throw new IllegalStateException("JarContent is not open");
+        }
+
+        // Open JAR file if not already opened.
+        if (m_jarFile == null)
+        {
+            try
+            {
+                openJarFile();
+            }
+            catch (IOException ex)
+            {
+                System.err.println("JarResourceSource: " + ex);
+                return null;
+            }
+        }
+
+        // Wrap entries enumeration to filter non-matching entries.
+        Enumeration e = new FilteredEnumeration(m_jarFile.entries(), path);
+        // Spec says to return null if there are no entries.
+        return (e.hasMoreElements()) ? e : null;
     }
 
     private void openJarFile() throws IOException
@@ -240,5 +262,50 @@ public class JarContent implements IContent
     public String toString()
     {
         return "JAR " + m_file.getPath();
+    }
+
+    private static class FilteredEnumeration implements Enumeration
+    {
+        private Enumeration m_enumeration = null;
+        private String m_path = null;
+        private Object m_next = null;
+
+        public FilteredEnumeration(Enumeration enumeration, String path)
+        {
+            m_enumeration = enumeration;
+            // Add a '/' to the end if not present.
+            m_path = (path.length() > 0) && (path.charAt(path.length() - 1) != '/')
+                ? path + "/" : path;
+            m_next = findNext();
+        }
+
+        public boolean hasMoreElements()
+        {
+            return (m_next != null);
+        }
+
+        public Object nextElement()
+        {
+            if (m_next == null)
+            {
+                throw new NoSuchElementException("No more entry paths.");
+            }
+            Object last = m_next;
+            m_next = findNext();
+            return last;
+        }
+
+        private Object findNext()
+        {
+            while (m_enumeration.hasMoreElements())
+            {
+                ZipEntry entry = (ZipEntry) m_enumeration.nextElement();
+                if (entry.getName().startsWith(m_path))
+                {
+                    return entry.getName();
+                }
+            }
+            return null;
+        }
     }
 }

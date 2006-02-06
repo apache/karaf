@@ -60,6 +60,11 @@ class BundleImpl implements Bundle
         return m_felix.getBundleEntry(this, name);
     }
 
+    public Enumeration getEntryPaths(String path)
+    {
+        return m_felix.getBundleEntryPaths(this, path);
+    }
+
     public Dictionary getHeaders()
     {
         return m_felix.getBundleHeaders(this);
@@ -165,12 +170,6 @@ class BundleImpl implements Bundle
     public Enumeration getResources(String name) throws IOException
     {
         // TODO: Implement Bundle.getResources()
-        return null;
-    }
-
-    public Enumeration getEntryPaths(String path)
-    {
-        // TODO: Implement Bundle.getEntryPaths()
         return null;
     }
 

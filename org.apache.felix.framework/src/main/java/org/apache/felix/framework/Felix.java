@@ -984,6 +984,29 @@ public class Felix
             .getContentLoader()).getResourceFromContent(name);
     }
 
+    /**
+     * Implementation for Bundle.getEntryPaths().
+    **/
+    protected Enumeration getBundleEntryPaths(BundleImpl bundle, String path)
+    {
+        if (bundle.getInfo().getState() == Bundle.UNINSTALLED)
+        {
+            throw new IllegalStateException("The bundle is uninstalled.");
+        }
+// TODO: SECURITY - Implement correct check.
+        else if (System.getSecurityManager() != null)
+        {
+            AccessController.checkPermission(m_adminPerm);
+        }
+        // Strip leading '/' if present.
+        if (path.charAt(0) == '/')
+        {
+            path = path.substring(1);
+        }
+        return bundle.getInfo().getCurrentModule()
+            .getContentLoader().getContent().getEntryPaths(path);
+    }
+
     protected ServiceReference[] getBundleRegisteredServices(BundleImpl bundle)
     {
         if (bundle.getInfo().getState() == Bundle.UNINSTALLED)
