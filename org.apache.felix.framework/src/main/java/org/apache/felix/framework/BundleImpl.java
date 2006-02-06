@@ -178,4 +178,13 @@ class BundleImpl implements Bundle
         // TODO: Implement Bundle.findEntries()
         return null;
     }
+
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof BundleImpl)
+        {
+            return (((BundleImpl) obj).getInfo().getBundleId() == getInfo().getBundleId());
+        }
+        return false;
+    }
 }

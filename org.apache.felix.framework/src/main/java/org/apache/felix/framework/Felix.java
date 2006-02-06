@@ -961,7 +961,16 @@ public class Felix
         }
         else if (System.getSecurityManager() != null)
         {
-            AccessController.checkPermission(m_adminPerm);
+            try
+            {
+                AccessController.checkPermission(
+                    new AdminPermission(bundle, AdminPermission.RESOURCE));
+            }
+            catch (SecurityException ex)
+            {
+                // Spec says to return null if there is a security exception.
+                return null;
+            }
         }
         return bundle.getInfo().getCurrentModule().getResource(name);
     }
@@ -975,10 +984,18 @@ public class Felix
         {
             throw new IllegalStateException("The bundle is uninstalled.");
         }
-// TODO: SECURITY - Implement correct check.
         else if (System.getSecurityManager() != null)
         {
-            AccessController.checkPermission(m_adminPerm);
+            try
+            {
+                AccessController.checkPermission(
+                    new AdminPermission(bundle, AdminPermission.RESOURCE));
+            }
+            catch (SecurityException ex)
+            {
+                // Spec says to return null if there is a security exception.
+                return null;
+            }
         }
         return ((ContentLoaderImpl) bundle.getInfo().getCurrentModule()
             .getContentLoader()).getResourceFromContent(name);
@@ -993,10 +1010,18 @@ public class Felix
         {
             throw new IllegalStateException("The bundle is uninstalled.");
         }
-// TODO: SECURITY - Implement correct check.
         else if (System.getSecurityManager() != null)
         {
-            AccessController.checkPermission(m_adminPerm);
+            try
+            {
+                AccessController.checkPermission(
+                    new AdminPermission(bundle, AdminPermission.RESOURCE));
+            }
+            catch (SecurityException ex)
+            {
+                // Spec says to return null if there is a security exception.
+                return null;
+            }
         }
         // Strip leading '/' if present.
         if (path.charAt(0) == '/')
