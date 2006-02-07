@@ -19,7 +19,6 @@ package org.apache.felix.moduleloader;
 import java.io.*;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
-import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
 public class JarContent implements IContent
@@ -27,7 +26,7 @@ public class JarContent implements IContent
     private static final int BUFSIZE = 4096;
 
     private File m_file = null;
-    private JarFile m_jarFile = null;
+    private JarFileX m_jarFile = null;
     private boolean m_opened = false;
 
     public JarContent(File file)
@@ -255,7 +254,7 @@ public class JarContent implements IContent
     {
         if (m_jarFile == null)
         {
-            m_jarFile = new JarFile(m_file);
+            m_jarFile = new JarFileX(m_file);
         }
     }
 
