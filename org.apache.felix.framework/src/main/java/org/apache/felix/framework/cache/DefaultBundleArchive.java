@@ -833,10 +833,7 @@ public class DefaultBundleArchive implements BundleArchive
             }
             else
             {
-                String jarName = (classPathStrings[i].lastIndexOf('/') >= 0)
-                    ? classPathStrings[i].substring(classPathStrings[i].lastIndexOf('/') + 1)
-                    : classPathStrings[i];
-                classPath[i] = new JarContent(new File(embedDir, jarName));
+                classPath[i] = new JarContent(new File(embedDir, classPathStrings[i]));
             }
         }
 
@@ -1185,18 +1182,26 @@ public class DefaultBundleArchive implements BundleArchive
     {
         // Remove leading slash if present.
         jarPath = (jarPath.charAt(0) == '/') ? jarPath.substring(1) : jarPath;
-        // Get only the JAR file name.
-// TODO: FIX THIS SO THAT IT CREATES DIRECTORIES TO AVOID NAME CLASHES,
-// DOING SO WILL IMPACT getContentLoaderUnchecked() METHOD ABOVE.
-        String jarName = (jarPath.lastIndexOf('/') >= 0)
-            ? jarPath.substring(jarPath.lastIndexOf('/') + 1) : jarPath;
 
         // If JAR is already extracted, then don't
         // re-extract it...
         File embedFile = new File(
-            revisionDir, EMBEDDED_DIRECTORY + File.separatorChar + jarName);
+            revisionDir, EMBEDDED_DIRECTORY + File.separatorChar + jarPath);
+
         if (!embedFile.exists())
         {
+            // Make sure that the embedded JAR's parent directory exists;
+            // it may be in a sub-directory.
+            File embedDir = embedFile.getParentFile();
+            if (!embedDir.exists())
+            {
+                if (!embedDir.mkdirs())
+                {
+                    throw new IOException("Unable to create embedded JAR directory.");
+                }
+            }
+
+            // Extract embedded JAR into its directory.
             JarFile jarFile = null;
             InputStream is = null;
 
