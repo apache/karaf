@@ -1185,47 +1185,47 @@ public class DefaultBundleArchive implements BundleArchive
 
         // If JAR is already extracted, then don't
         // re-extract it...
-        File embedFile = new File(
+        File jarFile = new File(
             revisionDir, EMBEDDED_DIRECTORY + File.separatorChar + jarPath);
 
-        if (!embedFile.exists())
+        if (!jarFile.exists())
         {
             // Make sure that the embedded JAR's parent directory exists;
             // it may be in a sub-directory.
-            File embedDir = embedFile.getParentFile();
-            if (!embedDir.exists())
+            File jarDir = jarFile.getParentFile();
+            if (!jarDir.exists())
             {
-                if (!embedDir.mkdirs())
+                if (!jarDir.mkdirs())
                 {
                     throw new IOException("Unable to create embedded JAR directory.");
                 }
             }
 
             // Extract embedded JAR into its directory.
-            JarFile jarFile = null;
+            JarFile bundleJar = null;
             InputStream is = null;
 
             try
             {
-                jarFile = openBundleJarUnchecked(revisionDir);
-                ZipEntry ze = jarFile.getEntry(jarPath);
+                bundleJar = openBundleJarUnchecked(revisionDir);
+                ZipEntry ze = bundleJar.getEntry(jarPath);
                 if (ze == null)
                 {
                     throw new IOException("No JAR entry: " + jarPath);
                 }
-                is = new BufferedInputStream(jarFile.getInputStream(ze), DefaultBundleCache.BUFSIZE);
+                is = new BufferedInputStream(bundleJar.getInputStream(ze), DefaultBundleCache.BUFSIZE);
                 if (is == null)
                 {
                     throw new IOException("No input stream: " + jarPath);
                 }
 
                 // Create the file.
-                copy(is, embedFile);
+                copy(is, jarFile);
 
             }
             finally
             {
-                if (jarFile != null) jarFile.close();
+                if (bundleJar != null) bundleJar.close();
                 if (is != null) is.close();
             }
         }
