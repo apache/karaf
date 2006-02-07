@@ -297,12 +297,28 @@ public class JarContent implements IContent
 
         private Object findNext()
         {
+            // This method filters the entries of the zip file, such that
+            // it only displays the contents of the directory specified by
+            // the path argument; much like using "ls" to list the contents
+            // of a directory.
             while (m_enumeration.hasMoreElements())
             {
+                // Get the next zip entry.
                 ZipEntry entry = (ZipEntry) m_enumeration.nextElement();
-                if (entry.getName().startsWith(m_path))
+                // Check to see if it is a child of the specified path.
+                if (!entry.getName().equals(m_path) && entry.getName().startsWith(m_path))
                 {
-                    return entry.getName();
+                    // Verify that it is a child of the path and not a
+                    // grandchild by examining its remaining path length.
+                    // this code uses the knowledge that zip entries
+                    // corresponding to directories end in '/'. It checks
+                    // to see if the next occurrence of '/' is also the
+                    // end of the string or if there are no more occurrences.
+                    int idx = entry.getName().indexOf('/', m_path.length());
+                    if ((idx < 0) || (idx == (entry.getName().length() - 1)))
+                    {
+                        return entry.getName();
+                    }
                 }
             }
             return null;
