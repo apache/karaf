@@ -123,7 +123,7 @@ public class JarContent implements IContent
             }
             catch (IOException ex)
             {
-                System.err.println("JarResourceSource: " + ex);
+                System.err.println("JarContent: " + ex);
                 return null;
             }
         }
@@ -194,7 +194,7 @@ public class JarContent implements IContent
             }
             catch (IOException ex)
             {
-                System.err.println("JarResourceSource: " + ex);
+                System.err.println("JarContent: " + ex);
                 return null;
             }
         }
@@ -239,7 +239,7 @@ public class JarContent implements IContent
             }
             catch (IOException ex)
             {
-                System.err.println("JarResourceSource: " + ex);
+                System.err.println("JarContent: " + ex);
                 return null;
             }
         }

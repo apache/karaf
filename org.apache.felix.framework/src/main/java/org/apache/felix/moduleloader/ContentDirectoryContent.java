@@ -23,14 +23,14 @@ import java.util.Enumeration;
 public class ContentDirectoryContent implements IContent
 {
     private IContent m_content = null;
-    private String m_path = null;
+    private String m_rootPath = null;
     private boolean m_opened = false;
 
     public ContentDirectoryContent(IContent content, String path)
     {
         m_content = content;
         // Add a '/' to the end if not present.
-        m_path = (path.length() > 0) && (path.charAt(path.length() - 1) != '/')
+        m_rootPath = (path.length() > 0) && (path.charAt(path.length() - 1) != '/')
             ? path + "/" : path;
     }
 
@@ -78,7 +78,7 @@ public class ContentDirectoryContent implements IContent
             name = name.substring(1);
         }
 
-        return m_content.hasEntry(m_path + name);
+        return m_content.hasEntry(m_rootPath + name);
     }
 
     public synchronized byte[] getEntry(String name) throws IllegalStateException
@@ -93,7 +93,7 @@ public class ContentDirectoryContent implements IContent
             name = name.substring(1);
         }
 
-        return m_content.getEntry(m_path + name);
+        return m_content.getEntry(m_rootPath + name);
     }
 
     public synchronized InputStream getEntryAsStream(String name)
@@ -109,7 +109,7 @@ public class ContentDirectoryContent implements IContent
             name = name.substring(1);
         }
 
-        return m_content.getEntryAsStream(m_path + name);
+        return m_content.getEntryAsStream(m_rootPath + name);
     }
 
     public synchronized Enumeration getEntryPaths(String path)
@@ -124,11 +124,38 @@ public class ContentDirectoryContent implements IContent
             path = path.substring(1);
         }
 
-        return m_content.getEntryPaths(m_path + path);
+System.out.println("GET ENTRY PATHS FOR " + m_rootPath + path);
+        return new WrappedEnumeration(m_content.getEntryPaths(m_rootPath + path), m_rootPath);
     }
 
     public String toString()
     {
-        return "CONTENT DIR " + m_path + " (" + m_content + ")";
+        return "CONTENT DIR " + m_rootPath + " (" + m_content + ")";
+    }
+
+    private static class WrappedEnumeration implements Enumeration
+    {
+        private Enumeration m_enumeration = null;
+        private String m_rootPath = null;
+
+        public WrappedEnumeration(Enumeration enumeration, String rootPath)
+        {
+            m_enumeration = enumeration;
+            m_rootPath = rootPath;
+        }
+
+        public boolean hasMoreElements()
+        {
+            return m_enumeration.hasMoreElements();
+        }
+
+        public Object nextElement()
+        {
+            // We need to treat the specified path as the root of the
+            // content, so we need to strip off the leading path from
+            // each entry because it is automatically added back on
+            // in the other calls above.
+            return ((String) m_enumeration.nextElement()).substring(m_rootPath.length());
+        }
     }
 }
