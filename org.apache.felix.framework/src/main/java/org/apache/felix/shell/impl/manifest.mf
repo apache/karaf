@@ -12,5 +12,8 @@ Import-Package:
 Export-Package: 
  org.apache.felix.shell; specification-version="1.0.0",
  org.ungoverned.osgi.service.shell; specification-version="1.0.0"
-Export-Service: org.apache.felix.shell,
- org.ungoverned.osgi.service.shell
+Export-Service: org.apache.felix.shell.ShellService,
+ org.ungoverned.osgi.service.shell.ShellService
+Import-Service: org.osgi.service.startlevel.StartLevel,
+ org.osgi.service.packageadmin.PackageAdmin
+
