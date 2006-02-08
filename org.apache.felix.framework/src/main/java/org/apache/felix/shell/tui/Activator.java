@@ -14,7 +14,7 @@
  *   limitations under the License.
  *
  */
-package org.apache.felix.shelltui;
+package org.apache.felix.shell.tui;
 
 import java.io.*;
 

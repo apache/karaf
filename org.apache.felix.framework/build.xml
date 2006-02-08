@@ -79,17 +79,18 @@
 
         <!-- Shell -->
         <jar manifest="${src.dir}/org/apache/felix/shell/impl/manifest.mf"
-            jarfile="${bundle.dir}/shell.jar"
+            jarfile="${bundle.dir}/org.apache.felix.shell.jar"
             basedir="${output.dir}">
             <include name="org/apache/felix/shell/**"/>
             <include name="org/ungoverned/osgi/service/shell/**"/>
+            <exclude name="org/apache/felix/shell/tui/**"/>
         </jar>
 
         <!-- Shell TUI -->
-        <jar manifest="${src.dir}/org/apache/felix/shelltui/manifest.mf"
-            jarfile="${bundle.dir}/shelltui.jar"
+        <jar manifest="${src.dir}/org/apache/felix/shell/tui/manifest.mf"
+            jarfile="${bundle.dir}/org.apache.felix.shell.tui.jar"
             basedir="${output.dir}">
-            <include name="org/apache/felix/shelltui/**"/>
+            <include name="org/apache/felix/shell/tui/**"/>
         </jar>
 
         <!-- OBR -->
@@ -97,7 +98,7 @@
          todir="${output.dir}/org/apache/felix/bundlerepository/impl/"/>
 
         <jar manifest="${src.dir}/org/apache/felix/bundlerepository/impl/manifest.mf"
-            jarfile="${bundle.dir}/bundlerepository.jar"
+            jarfile="${bundle.dir}/org.apache.felix.bundlerepository.jar"
             basedir="${output.dir}">
             <include name="org/apache/felix/bundlerepository/**"/>
         </jar>

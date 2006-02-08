@@ -1,0 +1,9 @@
+Bundle-Name: ShellTUI
+Bundle-SymbolicName: org.apache.felix.shell.tui
+Bundle-Description: A simple textual user interface for Felix' shell service.
+Bundle-DocURL: http://oscar-osgi.sf.net/repo/shelltui/
+Bundle-Version: 1.0.0
+Bundle-Activator: org.apache.felix.shell.tui.Activator
+Bundle-ClassPath: .
+Import-Package: org.osgi.framework, org.apache.felix.shell
+Import-Service: org.apache.felix.shell
