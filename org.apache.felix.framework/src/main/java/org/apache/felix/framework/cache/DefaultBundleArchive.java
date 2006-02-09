@@ -1154,13 +1154,10 @@ public class DefaultBundleArchive implements BundleArchive
         {
             // Get the bundle's manifest header.
             Map map = getManifestHeader(revision);
-            if (map == null)
-            {
-                map = new HashMap();
-            }
 
             // Find class path meta-data.
-            String classPath = map.get(FelixConstants.BUNDLE_CLASSPATH).toString();
+            String classPath = (map == null)
+                ? null : (String) map.get(FelixConstants.BUNDLE_CLASSPATH);
 
             // Parse the class path into strings.
             String[] classPathStrings = Util.parseDelimitedString(
