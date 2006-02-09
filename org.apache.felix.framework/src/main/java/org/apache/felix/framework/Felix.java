@@ -2558,7 +2558,7 @@ ex.printStackTrace();
         IModule[] exporters = m_policyCore.getInUseExporters(new R4Import(name, null, null));
         if (exporters != null)
         {
-            pkgs = new ExportedPackage[pkgs.length];
+            pkgs = new ExportedPackage[exporters.length];
             for (int pkgIdx = 0; pkgIdx < pkgs.length; pkgIdx++)
             {
                 // Get the bundle associated with the current exporting module.
