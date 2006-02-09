@@ -2535,45 +2535,61 @@ ex.printStackTrace();
      * @param name The name of the exported package to find.
      * @return The exported package or null if no matching package was found.
     **/
-    protected ExportedPackage getExportedPackage(String pkgName)
+    protected ExportedPackage getExportedPackage(String name)
     {
-        // First, find the bundle exporting the package.
-        BundleImpl bundle = null;
-        IModule[] exporters = m_policyCore.getInUseExporters(new R4Import(pkgName, null, null));
+        ExportedPackage[] pkgs = getExportedPackages(name);
+        // There can be multiple versions of the same package exported,
+        // so we will just return the first one.
+        return (pkgs != null) ? pkgs[0] : null;
+    }
+
+    /**
+     * Returns the exported package associated with the specified
+     * package name. This is used by the PackageAdmin service
+     * implementation.
+     *
+     * @param name The name of the exported package to find.
+     * @return The exported package or null if no matching package was found.
+    **/
+    protected ExportedPackage[] getExportedPackages(String name)
+    {
+        // First, get all exporters of the package.
+        ExportedPackage[] pkgs = null;
+        IModule[] exporters = m_policyCore.getInUseExporters(new R4Import(name, null, null));
         if (exporters != null)
         {
-            // Since OSGi R4 there may be more than one exporting, so just
-            // take the first one.
-            bundle = (BundleImpl) getBundle(
-                Util.getBundleIdFromModuleId(exporters[0].getId()));
-        }
-
-        // If we have found the exporting bundle, then return the
-        // exported package interface instance.
-        if (bundle != null)
-        {
-            // We need to find the version of the exported package, but this
-            // is tricky since there may be multiple versions of the package
-            // offered by a given bundle, since multiple revisions of the
-            // bundle JAR file may exist if the bundle was updated without
-            // refreshing the framework. In this case, each revision of the
-            // bundle JAR file is represented as a module in the BundleInfo
-            // module array, which is ordered from oldest to newest. We assume
-            // that the first module found to be exporting the package is the
-            // provider of the package, which makes sense since it must have
-            // been resolved first.
-            IModule[] modules = bundle.getInfo().getModules();
-            for (int modIdx = 0; modIdx < modules.length; modIdx++)
+            pkgs = new ExportedPackage[pkgs.length];
+            for (int pkgIdx = 0; pkgIdx < pkgs.length; pkgIdx++)
             {
-                R4Export export = Util.getExportPackage(modules[modIdx], pkgName);
-                if (export != null)
+                // Get the bundle associated with the current exporting module.
+                BundleImpl bundle = (BundleImpl) getBundle(
+                    Util.getBundleIdFromModuleId(exporters[pkgIdx].getId()));
+
+                // We need to find the version of the exported package, but this
+                // is tricky since there may be multiple versions of the package
+                // offered by a given bundle, since multiple revisions of the
+                // bundle JAR file may exist if the bundle was updated without
+                // refreshing the framework. In this case, each revision of the
+                // bundle JAR file is represented as a module in the BundleInfo
+                // module array, which is ordered from oldest to newest. We assume
+                // that the first module found to be exporting the package is the
+                // provider of the package, which makes sense since it must have
+                // been resolved first.
+                IModule[] modules = bundle.getInfo().getModules();
+                for (int modIdx = 0; modIdx < modules.length; modIdx++)
                 {
-                    return new ExportedPackageImpl(this, bundle, pkgName, export.getVersion());
+                    R4Export export = Util.getExportPackage(modules[modIdx], name);
+                    if (export != null)
+                    {
+                        pkgs[pkgIdx] =
+                            new ExportedPackageImpl(
+                                this, bundle, name, export.getVersion());
+                    }
                 }
             }
         }
 
-        return null;
+        return pkgs;
     }
 
     /**

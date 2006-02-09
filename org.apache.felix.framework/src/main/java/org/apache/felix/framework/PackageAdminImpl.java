@@ -141,8 +141,7 @@ class PackageAdminImpl implements PackageAdmin, Runnable
 
     public ExportedPackage[] getExportedPackages(String name)
     {
-        // TODO: Implement PackageAdmin.getExportedPackages()
-        return null;
+        return m_felix.getExportedPackages(name);
     }
 
     public boolean resolveBundles(Bundle[] bundles)
