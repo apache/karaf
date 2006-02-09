@@ -1,8 +1,9 @@
 Bundle-Name: ShellService
 Bundle-SymbolicName: org.apache.felix.shell.impl
 Bundle-Description: A simple command shell service for Felix (or any other OSGi framework).
-Bundle-DocURL: http://oscar-osgi.sf.net/repo/shell/
-Bundle-Version: 1.0.2
+Bundle-DocURL: http://oscar-osgi.sf.net/obr2/shell/
+Bundle-Source: http://oscar-osgi.sf.net/obr2/shell/org.apache.felix.shell.impl-src.jar
+Bundle-Version: 1.0.3
 Bundle-Activator: org.apache.felix.shell.impl.Activator
 Bundle-ClassPath: .
 Import-Package: 
