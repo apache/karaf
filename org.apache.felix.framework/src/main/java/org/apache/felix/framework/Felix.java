@@ -3101,7 +3101,7 @@ ex.printStackTrace();
             if (className != null)
             {
                 className = className.trim();
-                Class clazz = info.getCurrentModule().getContentLoader().getClass(className);
+                Class clazz = info.getCurrentModule().getClass(className);
                 if (clazz == null)
                 {
                     throw new BundleException("Not found: "
