@@ -109,22 +109,18 @@ class SystemBundle extends BundleImpl
 
         m_contentLoader = new SystemBundleContentLoader(getFelix().getLogger());
 
-        String exportString = "";
+        StringBuffer exportSB = new StringBuffer("");
         for (int i = 0; i < m_exports.length; i++)
         {
-            exportString = exportString +
-            m_exports[i].getName()
-            + "; specification-version=\""
-            + m_exports[i].getVersion().toString() + "\"";
-
-            if (i < (m_exports.length - 1))
+            if (i > 0)
             {
-                exportString = exportString + ", ";
-                exportString = exportString +
-                    m_exports[i].getName()
-                    + "; specification-version=\""
-                    + m_exports[i].getVersion().toString() + "\", ";
+                exportSB.append(", ");
             }
+
+            exportSB.append(m_exports[i].getName());
+            exportSB.append("; specification-version=\"");
+            exportSB.append(m_exports[i].getVersion().toString());
+            exportSB.append("\"");
         }
 
         // Initialize header map as a case insensitive map.
@@ -133,7 +129,7 @@ class SystemBundle extends BundleImpl
         map.put(FelixConstants.BUNDLE_NAME, "System Bundle");
         map.put(FelixConstants.BUNDLE_DESCRIPTION,
             "This bundle is system specific; it implements various system services.");
-        map.put(FelixConstants.EXPORT_PACKAGE, exportString);
+        map.put(FelixConstants.EXPORT_PACKAGE, exportSB.toString());
         ((SystemBundleArchive) getInfo().getArchive()).setManifestHeader(map);
     }
 
