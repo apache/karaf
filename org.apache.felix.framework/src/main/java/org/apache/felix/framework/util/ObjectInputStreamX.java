@@ -18,7 +18,7 @@ package org.apache.felix.framework.util;
 
 import java.io.*;
 
-import org.apache.felix.moduleloader.IContentLoader;
+import org.apache.felix.moduleloader.IModule;
 
 /**
  * The ObjectInputStreamX class is a simple extension to the ObjectInputStream
@@ -27,7 +27,7 @@ import org.apache.felix.moduleloader.IContentLoader;
  */
 public class ObjectInputStreamX extends ObjectInputStream
 {
-    private IContentLoader m_contentLoader = null;
+    private IModule m_module = null;
 
     /**
      * Construct an ObjectInputStreamX for the specified InputStream and the specified
@@ -35,11 +35,11 @@ public class ObjectInputStreamX extends ObjectInputStream
      * @param in the input stream to read.
      * @param loader the class loader used to resolve classes.
      */
-    public ObjectInputStreamX(InputStream in, IContentLoader contentLoader)
+    public ObjectInputStreamX(InputStream in, IModule module)
         throws IOException, StreamCorruptedException
     {
         super(in);
-        m_contentLoader = contentLoader;
+        m_module = module;
     }
 
     /**
@@ -49,6 +49,6 @@ public class ObjectInputStreamX extends ObjectInputStream
     protected Class resolveClass(ObjectStreamClass v)
         throws IOException, ClassNotFoundException
     {
-        return m_contentLoader.getClass(v.getName());
+        return m_module.getClass(v.getName());
     }
 }

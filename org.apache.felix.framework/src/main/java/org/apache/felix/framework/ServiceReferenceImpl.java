@@ -152,8 +152,7 @@ class ServiceReferenceImpl implements ServiceReference
             {
                 // Load the class from the requesting bundle.
                 Class requestClass =
-                    ((BundleImpl) requester).getInfo().getCurrentModule().getContentLoader()
-                        .getClass(className);
+                    ((BundleImpl) requester).getInfo().getCurrentModule().getClass(className);
                 // Get the service registration and ask it to check
                 // if the service object is assignable to the requesting
                 // bundle's class.

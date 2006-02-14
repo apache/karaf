@@ -522,7 +522,7 @@ public class DefaultBundleArchive implements BundleArchive
         }
     }
 
-    public BundleActivator getActivator(IContentLoader contentLoader)
+    public BundleActivator getActivator(IModule module)
         throws Exception
     {
         if (System.getSecurityManager() != null)
@@ -531,7 +531,7 @@ public class DefaultBundleArchive implements BundleArchive
             {
                 return (BundleActivator) AccessController.doPrivileged(
                     new PrivilegedAction(
-                        PrivilegedAction.GET_ACTIVATOR_ACTION, this, contentLoader));
+                        PrivilegedAction.GET_ACTIVATOR_ACTION, this, module));
             }
             catch (PrivilegedActionException ex)
             {
@@ -540,11 +540,11 @@ public class DefaultBundleArchive implements BundleArchive
         }
         else
         {
-            return getActivatorUnchecked(contentLoader);
+            return getActivatorUnchecked(module);
         }
     }
 
-    private BundleActivator getActivatorUnchecked(IContentLoader contentLoader)
+    private BundleActivator getActivatorUnchecked(IModule module)
         throws Exception
     {
         // Get bundle activator file.
@@ -560,7 +560,7 @@ public class DefaultBundleArchive implements BundleArchive
         try
         {
             is = new FileInputStream(activatorFile);
-            ois = new ObjectInputStreamX(is, contentLoader);
+            ois = new ObjectInputStreamX(is, module);
             Object o = ois.readObject();
             return (BundleActivator) o;
         }
@@ -1430,7 +1430,7 @@ public class DefaultBundleArchive implements BundleArchive
         private InputStream m_isArg = null;
         private int m_intArg = 0;
         private File m_fileArg = null;
-        private IContentLoader m_contentLoaderArg = null;
+        private IModule m_moduleArg = null;
         private Object m_objArg = null;
 
         public PrivilegedAction(int action, DefaultBundleArchive archive)
@@ -1460,11 +1460,11 @@ public class DefaultBundleArchive implements BundleArchive
             m_fileArg = fileArg;
         }
 
-        public PrivilegedAction(int action, DefaultBundleArchive archive, IContentLoader contentLoaderArg)
+        public PrivilegedAction(int action, DefaultBundleArchive archive, IModule moduleArg)
         {
             m_action = action;
             m_archive = archive;
-            m_contentLoaderArg = contentLoaderArg;
+            m_moduleArg = moduleArg;
         }
 
         public PrivilegedAction(int action, DefaultBundleArchive archive, Object objArg)
@@ -1514,7 +1514,7 @@ public class DefaultBundleArchive implements BundleArchive
                 case GET_CONTENT_PATH_ACTION:
                     return m_archive.getContentPathUnchecked(m_intArg);
                 case GET_ACTIVATOR_ACTION:
-                    return m_archive.getActivatorUnchecked(m_contentLoaderArg);
+                    return m_archive.getActivatorUnchecked(m_moduleArg);
                 case SET_ACTIVATOR_ACTION:
                     m_archive.setActivatorUnchecked(m_objArg);
                     return null;

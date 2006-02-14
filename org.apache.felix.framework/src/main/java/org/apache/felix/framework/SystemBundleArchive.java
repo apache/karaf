@@ -22,7 +22,7 @@ import java.util.Map;
 import org.apache.felix.framework.cache.BundleArchive;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.moduleloader.IContent;
-import org.apache.felix.moduleloader.IContentLoader;
+import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 
@@ -69,7 +69,7 @@ public class SystemBundleArchive implements BundleArchive
         return null;
     }
 
-    public BundleActivator getActivator(IContentLoader contentLoader)
+    public BundleActivator getActivator(IModule module)
         throws Exception
     {
         return null;

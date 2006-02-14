@@ -41,7 +41,7 @@ public class ContentClassLoader extends SecureClassLoader
         return m_contentLoader;
     }
 
-    public Class loadClassFromModule(String name)
+    protected Class loadClassFromModule(String name)
         throws ClassNotFoundException
     {
         // Ask the search policy for the clas before consulting the module.

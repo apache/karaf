@@ -20,7 +20,7 @@ import java.io.File;
 import java.util.Map;
 
 import org.apache.felix.moduleloader.IContent;
-import org.apache.felix.moduleloader.IContentLoader;
+import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.BundleActivator;
 
 /**
@@ -113,13 +113,13 @@ public interface BundleArchive
      * this archive; this is a non-standard OSGi method that is only called
      * when Felix is running in non-strict OSGi mode.
      * </p>
-     * @param loader the class loader to use when trying to instantiate
+     * @param module the module to use when trying to instantiate
      *        the bundle activator.
      * @return the persistent bundle activator of the bundle associated with
      *         this archive.
      * @throws java.lang.Exception if any error occurs.
     **/
-    public BundleActivator getActivator(IContentLoader contentLoader)
+    public BundleActivator getActivator(IModule module)
         throws Exception;
 
     /**

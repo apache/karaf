@@ -1188,7 +1188,7 @@ public class Felix
     **/
     protected Class loadBundleClass(BundleImpl bundle, String name) throws ClassNotFoundException
     {
-        Class clazz = bundle.getInfo().getCurrentModule().getContentLoader().getClass(name);
+        Class clazz = bundle.getInfo().getCurrentModule().getClass(name);
         if (clazz == null)
         {
             // Throw exception.
@@ -3077,7 +3077,7 @@ ex.printStackTrace();
             {
                 activator =
                     m_cache.getArchive(info.getBundleId())
-                        .getActivator(info.getCurrentModule().getContentLoader());
+                        .getActivator(info.getCurrentModule());
             }
             catch (Exception ex)
             {
