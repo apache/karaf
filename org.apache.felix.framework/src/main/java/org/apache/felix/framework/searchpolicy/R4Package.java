@@ -28,7 +28,7 @@ public class R4Package
     private String m_name = "";
     protected R4Directive[] m_directives = null;
     protected R4Attribute[] m_attrs = null;
-    protected Version m_version = null;
+    protected Version m_version = new Version("0.0.0");
 
     public R4Package(String name, R4Directive[] directives, R4Attribute[] attrs)
     {
