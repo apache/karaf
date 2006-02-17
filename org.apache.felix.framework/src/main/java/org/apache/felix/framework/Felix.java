@@ -25,7 +25,6 @@ import java.util.*;
 import org.apache.felix.framework.cache.*;
 import org.apache.felix.framework.searchpolicy.*;
 import org.apache.felix.framework.util.*;
-import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.ExportedPackage;
@@ -306,11 +305,6 @@ public class Felix
                             {
                                 bundle.getInfo().setState(Bundle.RESOLVED);
                             }
-                        }
-                        catch (BundleException ex)
-                        {
-                            // This should not happen, but if it does
-                            // there isn't much we can do.
                         }
                         finally
                         {
@@ -604,137 +598,186 @@ public class Felix
     protected void setFrameworkStartLevel(int requestedLevel)
     {
         // Lock the installed bundle lock to ensure that no bundles
-        // can be installed or uninstalled during this operation.
-        synchronized (m_installedBundleLock_Priority2)
+        // can be installed or uninstalled during this operation. We
+        // need to try to get all bundle locks at once to avoid potential
+        // "hold-and-wait" deadlock problems. If all bundle locks
+        // cannot be acquired, then we must release the installed bundle
+        // lock and start over from scratch.
+        boolean finished = false;
+retry:  while (!finished)
         {
-            // Determine if we are lowering or raising the
-            // active start level.
-            boolean lowering = (requestedLevel < m_activeStartLevel);
-    
-            // Record new start level.
-            m_activeStartLevel = requestedLevel;
-    
-            // Get array of all installed bundles.
-            Bundle[] bundles = getBundles();
-    
-            // Sort bundle array by start level either ascending or
-            // descending depending on whether the start level is being
-            // lowered or raised.
-            Comparator comparator = null;
-            if (lowering)
+            synchronized (m_installedBundleLock_Priority2)
             {
-                // Sort descending to stop highest start level first.
-                comparator = new Comparator() {
-                    public int compare(Object o1, Object o2)
+                // Determine if we are lowering or raising the
+                // active start level.
+                boolean lowering = (requestedLevel < m_activeStartLevel);
+        
+                // Record new start level.
+                m_activeStartLevel = requestedLevel;
+        
+                // Get array of all installed bundles.
+                Bundle[] bundles = getBundles();
+                for (int bundleIdx = 1; bundleIdx < bundles.length; bundleIdx++)
+                {
+                    BundleImpl impl = (BundleImpl) bundles[bundleIdx];
+
+                    // Ignore system bundle.
+                    if (impl.getInfo().getBundleId() == 0)
                     {
-                        BundleImpl b1 = (BundleImpl) o1;
-                        BundleImpl b2 = (BundleImpl) o2;
-                        if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
-                            < b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
-                        {
-                            return 1;
-                        }
-                        else if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
-                            > b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
-                        {
-                            return -1;
-                        }
-                        return 0;
+                        continue;
                     }
-                };
-            }
-            else
-            {
-                // Sort ascending to start lowest start level first.
-                comparator = new Comparator() {
-                    public int compare(Object o1, Object o2)
+
+                    if (!acquireBundleLockOrFail(impl))
                     {
-                        BundleImpl b1 = (BundleImpl) o1;
-                        BundleImpl b2 = (BundleImpl) o2;
-                        if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
-                            > b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
+                        // Release all bundle locks acquired thus far.
+                        for (int undoIdx = 0; undoIdx < bundleIdx; undoIdx++)
                         {
-                            return 1;
+                            impl = (BundleImpl) bundles[undoIdx];
+                            // Ignore system bundle.
+                            if (impl.getInfo().getBundleId() == 0)
+                            {
+                                continue;
+                            }
+                            releaseBundleLock((BundleImpl) bundles[undoIdx]);
                         }
-                        else if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
-                            < b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
-                        {
-                            return -1;
-                        }
-                        return 0;
-                    }
-                };
-            }
-    
-            Arrays.sort(bundles, comparator);
-    
-            // Stop or start the bundles according to the start level.
-            for (int i = 0; (bundles != null) && (i < bundles.length); i++)
-            {
-                BundleImpl impl = (BundleImpl) bundles[i];
-    
-                // Ignore the system bundle, since its start() and
-                // stop() methods get called explicitly in initialize()
-                // and shutdown(), respectively.
-                if (impl.getInfo().getBundleId() == 0)
-                {
-                    continue;
-                }
-    
-                // Acquire the lock for the bundle, because we must ensure
-                // that the bundle's start level does not change until we
-                // are done starting or stopping it.
-                try
-                {
-                    acquireBundleLock(impl);
-                }
-                catch (BundleException ex)
-                {
-                    m_logger.log(Logger.LOG_ERROR, "Unable to acquire lock to set start level.", ex);
-                    return;
-                }
-    
-                try
-                {
-                    // Start the bundle if necessary.
-                    if ((impl.getInfo().getPersistentState() == Bundle.ACTIVE) &&
-                        (impl.getInfo().getStartLevel(getInitialBundleStartLevel())
-                            <= m_activeStartLevel))
-                    {
+                        // Wait a little while to give other threads a chance
+                        // to release the bundle locks.
                         try
                         {
-                            startBundle(impl, false);
+                            Thread.sleep(500);
                         }
-                        catch (Throwable th)
+                        catch (InterruptedException ex)
                         {
-                            fireFrameworkEvent(FrameworkEvent.ERROR, impl, th);
-                            m_logger.log(
-                                Logger.LOG_ERROR,
-                                "Error starting " + impl.getInfo().getLocation(), th);
+                            // Ignore.
                         }
+
+                        // Try to acquire bundle locks again.
+                        break retry;
                     }
-                    // Stop the bundle if necessary.
-                    else if (impl.getInfo().getStartLevel(getInitialBundleStartLevel())
-                        > m_activeStartLevel)
+                }
+
+                //
+                // Now that we have all of the bundle locks, start or stop
+                // the bundles according to the start level settings.
+                //
+
+                try
+                {
+                    // Sort bundle array by start level either ascending or
+                    // descending depending on whether the start level is being
+                    // lowered or raised.
+                    Comparator comparator = null;
+                    if (lowering)
                     {
-                        try
+                        // Sort descending to stop highest start level first.
+                        comparator = new Comparator() {
+                            public int compare(Object o1, Object o2)
+                            {
+                                BundleImpl b1 = (BundleImpl) o1;
+                                BundleImpl b2 = (BundleImpl) o2;
+                                if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
+                                    < b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
+                                {
+                                    return 1;
+                                }
+                                else if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
+                                    > b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
+                                {
+                                    return -1;
+                                }
+                                return 0;
+                            }
+                        };
+                    }
+                    else
+                    {
+                        // Sort ascending to start lowest start level first.
+                        comparator = new Comparator() {
+                            public int compare(Object o1, Object o2)
+                            {
+                                BundleImpl b1 = (BundleImpl) o1;
+                                BundleImpl b2 = (BundleImpl) o2;
+                                if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
+                                    > b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
+                                {
+                                    return 1;
+                                }
+                                else if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
+                                    < b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
+                                {
+                                    return -1;
+                                }
+                                return 0;
+                            }
+                        };
+                    }
+            
+                    Arrays.sort(bundles, comparator);
+            
+                    // Stop or start the bundles according to the start level.
+                    for (int i = 0; (bundles != null) && (i < bundles.length); i++)
+                    {
+                        BundleImpl impl = (BundleImpl) bundles[i];
+            
+                        // Ignore the system bundle, since its start() and
+                        // stop() methods get called explicitly in initialize()
+                        // and shutdown(), respectively.
+                        if (impl.getInfo().getBundleId() == 0)
                         {
-                            stopBundle(impl, false);
+                            continue;
                         }
-                        catch (Throwable th)
+        
+                        // Start the bundle if necessary.
+                        if ((impl.getInfo().getPersistentState() == Bundle.ACTIVE) &&
+                            (impl.getInfo().getStartLevel(getInitialBundleStartLevel())
+                                <= m_activeStartLevel))
                         {
-                            fireFrameworkEvent(FrameworkEvent.ERROR, impl, th);
-                            m_logger.log(
-                                Logger.LOG_ERROR,
-                                "Error stopping " + impl.getInfo().getLocation(), th);
+                            try
+                            {
+                                startBundle(impl, false);
+                            }
+                            catch (Throwable th)
+                            {
+                                fireFrameworkEvent(FrameworkEvent.ERROR, impl, th);
+                                m_logger.log(
+                                    Logger.LOG_ERROR,
+                                    "Error starting " + impl.getInfo().getLocation(), th);
+                            }
+                        }
+                        // Stop the bundle if necessary.
+                        else if (impl.getInfo().getStartLevel(getInitialBundleStartLevel())
+                            > m_activeStartLevel)
+                        {
+                            try
+                            {
+                                stopBundle(impl, false);
+                            }
+                            catch (Throwable th)
+                            {
+                                fireFrameworkEvent(FrameworkEvent.ERROR, impl, th);
+                                m_logger.log(
+                                    Logger.LOG_ERROR,
+                                    "Error stopping " + impl.getInfo().getLocation(), th);
+                            }
                         }
                     }
                 }
                 finally
                 {
-                    // Always release the bundle lock.
-                    releaseBundleLock(impl);
+                    // Always release the bundle locks.
+                    for (int bundleIdx = 1; bundleIdx < bundles.length; bundleIdx++)
+                    {
+                        BundleImpl impl = (BundleImpl) bundles[bundleIdx];
+                        // Ignore system bundle.
+                        if (impl.getInfo().getBundleId() == 0)
+                        {
+                            continue;
+                        }
+                        releaseBundleLock(impl);
+                    }
                 }
+
+                finished = true;
             }
         }
 
@@ -838,15 +881,7 @@ public class Felix
         }
 
         // Acquire bundle lock.
-        try
-        {
-            acquireBundleLock((BundleImpl) bundle);
-        }
-        catch (BundleException ex)
-        {
-            m_logger.log(Logger.LOG_ERROR, "Unable to acquire lock to set start level.", ex);
-            return;
-        }
+        acquireBundleLock((BundleImpl) bundle);
         
         Throwable rethrow = null;
 
@@ -1249,19 +1284,19 @@ public class Felix
         // we only acquire the lock for the bundle being started, because
         // when resolve is called on this bundle, it will eventually
         // call resolve on the module loader search policy, which does
-        // its own locking on the module manager instance. Since the 
-        // resolve algorithm is locking the module manager instance, it
+        // its own locking on the module factory instance. Since the 
+        // resolve algorithm is locking the module factory instance, it
         // is not possible for other bundles to be installed or removed,
         // so we don't have to worry about these possibilities.
         //
         // Further, if other bundles are started during this operation,
         // then either they will resolve first because they got the lock
-        // on the module manager or we will resolve first since we got
-        // the lock on the module manager, so there should be no interference.
+        // on the module factory or we will resolve first since we got
+        // the lock on the module factory, so there should be no interference.
         // If other bundles are stopped or uninstalled, this should pose
         // no problems, since this does not impact their resolved state.
         // If a refresh occurs, then the refresh algorithm ulimately has
-        // to acquire the module manager instance lock too before it can
+        // to acquire the module factory instance lock too before it can
         // completely purge old modules, so it should also complete either
         // before or after this bundle is started. At least that's the
         // theory.
@@ -1342,6 +1377,9 @@ public class Felix
             }
 
             info.setState(Bundle.ACTIVE);
+
+            // TODO: CONCURRENCY - Reconsider firing event outside of the
+            // bundle lock.
 
             fireBundleEvent(BundleEvent.STARTED, bundle);
         }
@@ -2221,16 +2259,7 @@ public class Felix
         }
 
         // Acquire bundle lock.
-        try
-        {
-            acquireBundleLock(bundle);
-        }
-        catch (BundleException ex)
-        {
-            // This would probably only happen when the bundle is uninstalled.
-            throw new IllegalStateException(
-                "Can only register services while bundle is active or activating.");
-        }
+        acquireBundleLock(bundle);
 
         ServiceRegistration reg = null;
 
@@ -2274,7 +2303,10 @@ public class Felix
             // Always release bundle lock.
             releaseBundleLock(bundle);
         }
-        
+
+        // TODO: CONCURRENCY - Reconsider firing event here, outside of the
+        // bundle lock.
+
         // NOTE: The service registered event is fired from the service
         // registry to the framework, where it is then redistributed to
         // interested service event listeners.
@@ -3746,7 +3778,6 @@ public class Felix
     }
 
     protected void acquireBundleLock(BundleImpl bundle)
-        throws BundleException
     {
         synchronized (m_bundleLock)
         {
@@ -3765,6 +3796,19 @@ public class Felix
         }
     }
     
+    protected boolean acquireBundleLockOrFail(BundleImpl bundle)
+    {
+        synchronized (m_bundleLock)
+        {
+            if (!bundle.getInfo().isLockable())
+            {
+                return false;
+            }
+            bundle.getInfo().lock();
+            return true;
+        }
+    }
+
     protected void releaseBundleLock(BundleImpl bundle)
     {
         synchronized (m_bundleLock)
