@@ -131,7 +131,12 @@ class SystemBundle extends BundleImpl
         map.put(FelixConstants.BUNDLE_DESCRIPTION,
             "This bundle is system specific; it implements various system services.");
         map.put(FelixConstants.EXPORT_PACKAGE, exportSB.toString());
+        map.put(FelixConstants.EXPORT_SERVICE, "org.osgi.service.packageadmin.PackageAdmin,org.osgi.service.startlevel.StartLevel");
         ((SystemBundleArchive) getInfo().getArchive()).setManifestHeader(map);
+
+        // TODO: FRAMEWORK - We need some systematic way for framework services
+        // to add packages and services to the system bundle's headers, something
+        // that will allow for them to be independently configured.
     }
 
     public R4Export[] getExports()
