@@ -3107,7 +3107,7 @@ retry:  while (!finished)
                 new R4SearchPolicy(m_policyCore, module));
         // Set the content loader's URL policy.
         contentLoader.setURLPolicy(
-// TODO: FIX - NEED URL POLICY PER MODULE.
+// TODO: ML - SUCKS NEEDING URL POLICY PER MODULE.
                 new URLPolicyImpl(
                     m_logger, m_bundleStreamHandler, module));
 

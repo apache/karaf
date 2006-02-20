@@ -31,7 +31,7 @@ public class URLPolicyImpl implements IURLPolicy
     private IModule m_module = null;
     private static SecureAction m_secureAction = new SecureAction();
 
-// TODO: FIX - IT SUCKS HAVING A URL POLICY OBJECT PER MODULE!
+// TODO: ML - IT SUCKS HAVING A URL POLICY OBJECT PER MODULE!
     public URLPolicyImpl(Logger logger, URLStreamHandler streamHandler, IModule module)
     {
         m_logger = logger;
