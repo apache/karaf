@@ -2936,14 +2936,30 @@ retry:  while (!finished)
             throw new BundleException("Unknown 'Bundle-ManifestVersion' value: " + version);
         }
 
+        // Create map to check for duplicate imports/exports.
+        Map dupeMap = new HashMap();
+
         // Get import packages from bundle manifest.
         R4Package[] pkgs = R4Package.parseImportOrExportHeader(
             (String) headerMap.get(Constants.IMPORT_PACKAGE));
-        R4Import[] imports = new R4Import[pkgs.length];
+
+        // Create non-duplicated import array.
+        dupeMap.clear();
         for (int i = 0; i < pkgs.length; i++)
         {
-            imports[i] = new R4Import(pkgs[i]);
+            if (dupeMap.get(pkgs[i].getName()) == null)
+            {
+                dupeMap.put(pkgs[i].getName(), new R4Import(pkgs[i]));
+            }
+            else
+            {
+                // TODO: FRAMEWORK - Determine if we should error here.
+                m_logger.log(Logger.LOG_WARNING,
+                    "Duplicate import - " + pkgs[i].getName());
+            }
         }
+        R4Import[] imports =
+            (R4Import[]) dupeMap.values().toArray(new R4Import[dupeMap.size()]);
 
         // Check to make sure that R3 bundles have only specified
         // the 'specification-version' attribute and no directives.
@@ -2973,11 +2989,25 @@ retry:  while (!finished)
         // Get export packages from bundle manifest.
         pkgs = R4Package.parseImportOrExportHeader(
             (String) headerMap.get(Constants.EXPORT_PACKAGE));
-        R4Export[] exports = new R4Export[pkgs.length];
+
+        // Create non-duplicated export array.
+        dupeMap.clear();
         for (int i = 0; i < pkgs.length; i++)
         {
-            exports[i] = new R4Export(pkgs[i]);
+            if (dupeMap.get(pkgs[i].getName()) == null)
+            {
+                dupeMap.put(pkgs[i].getName(), new R4Export(pkgs[i]));
+            }
+            else
+            {
+                // TODO: FRAMEWORK - Exports can be duplicated, so fix this.
+                m_logger.log(Logger.LOG_WARNING,
+                    "Duplicate export - " + pkgs[i].getName());
+            }
         }
+        R4Export[] exports =
+            (R4Export[]) dupeMap.values().toArray(new R4Export[dupeMap.size()]);
+
 
         // Check to make sure that R3 bundles have only specified
         // the 'specification-version' attribute and no directives.
@@ -3038,15 +3068,27 @@ retry:  while (!finished)
             }
         }
 
-// TODO: CHECK FOR DUPLICATE IMPORTS/EXPORTS HERE.
         // Get dynamic import packages from bundle manifest.
         pkgs = R4Package.parseImportOrExportHeader(
             (String) headerMap.get(Constants.DYNAMICIMPORT_PACKAGE));
-        R4Import[] dynamics = new R4Import[pkgs.length];
+
+        // Create non-duplicated dynamic import array.
+        dupeMap.clear();
         for (int i = 0; i < pkgs.length; i++)
         {
-            dynamics[i] = new R4Import(pkgs[i]);
+            if (dupeMap.get(pkgs[i].getName()) == null)
+            {
+                dupeMap.put(pkgs[i].getName(), new R4Import(pkgs[i]));
+            }
+            else
+            {
+                // TODO: FRAMEWORK - Determine if we should error here.
+                m_logger.log(Logger.LOG_WARNING,
+                    "Duplicate import - " + pkgs[i].getName());
+            }
         }
+        R4Import[] dynamics =
+            (R4Import[]) dupeMap.values().toArray(new R4Import[dupeMap.size()]);
 
         // Check to make sure that R3 bundles have no attributes or
         // directives.
