@@ -802,27 +802,14 @@ public class DefaultBundleArchive implements BundleArchive
 
         // Get the bundle's manifest header.
         Map map = getManifestHeader(revision);
-        if (map == null)
-        {
-            map = new HashMap();
-        }
 
         // Find class path meta-data.
-        String classPathString = null;
-        Iterator iter = map.entrySet().iterator();
-        while ((classPathString == null) && iter.hasNext())
-        {
-            Map.Entry entry = (Map.Entry) iter.next();
-            if (entry.getKey().toString().toLowerCase().equals(
-                FelixConstants.BUNDLE_CLASSPATH.toLowerCase()))
-            {
-                classPathString = entry.getValue().toString();
-            }
-        }
+        String classPath = (map == null)
+            ? null : (String) map.get(FelixConstants.BUNDLE_CLASSPATH);
 
         // Parse the class path into strings.
         String[] classPathStrings = Util.parseDelimitedString(
-            classPathString, FelixConstants.CLASS_PATH_SEPARATOR);
+            classPath, FelixConstants.CLASS_PATH_SEPARATOR);
 
         if (classPathStrings == null)
         {
@@ -835,12 +822,12 @@ public class DefaultBundleArchive implements BundleArchive
         {
             bundleJar = openBundleJar(revisionDir);
             IContent self = new JarContent(new File(revisionDir, BUNDLE_JAR_FILE));
-            IContent[] classPath = new IContent[classPathStrings.length];
+            IContent[] contentPath = new IContent[classPathStrings.length];
             for (int i = 0; i < classPathStrings.length; i++)
             {
                 if (classPathStrings[i].equals(FelixConstants.CLASS_PATH_DOT))
                 {
-                    classPath[i] = self;
+                    contentPath[i] = self;
                 }
                 else
                 {
@@ -849,23 +836,23 @@ public class DefaultBundleArchive implements BundleArchive
                     ZipEntry entry = bundleJar.getEntry(classPathStrings[i]);
                     if ((entry != null) && entry.isDirectory())
                     {
-                        classPath[i] = new ContentDirectoryContent(self, classPathStrings[i]);
+                        contentPath[i] = new ContentDirectoryContent(self, classPathStrings[i]);
                     }
                     else
                     {
-                        classPath[i] = new JarContent(new File(embedDir, classPathStrings[i]));
+                        contentPath[i] = new JarContent(new File(embedDir, classPathStrings[i]));
                     }
                 }
             }
     
             // If there is nothing on the class path, then include
             // "." by default, as per the spec.
-            if (classPath.length == 0)
+            if (contentPath.length == 0)
             {
-                classPath = new IContent[] { self };
+                contentPath = new IContent[] { self };
             }
 
-            return classPath;
+            return contentPath;
         }
         finally
         {
