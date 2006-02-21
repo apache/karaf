@@ -124,7 +124,6 @@ public class ContentDirectoryContent implements IContent
             path = path.substring(1);
         }
 
-System.out.println("GET ENTRY PATHS FOR " + m_rootPath + path);
         return new WrappedEnumeration(m_content.getEntryPaths(m_rootPath + path), m_rootPath);
     }
 
