@@ -665,9 +665,9 @@ public class R4SearchPolicyCore implements ModuleListener
                     wire = new R4Wire(
                         module, candidate,
                         Util.getExportPackage(candidate, impMatch.getName()));
-                    newWires[wires.length] = wire;
+                    newWires[newWires.length - 1] = wire;
                     setWires(module, newWires);
-m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + newWires[wires.length]);
+m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + newWires[newWires.length - 1]);
                 }
             }
         }
