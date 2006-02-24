@@ -137,7 +137,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
             if (handler == null)
             {
                 // Check for built-in handlers for the protocol.
-                String pkgs = m_secureAction.getProperty(STREAM_HANDLER_PACKAGE_PROP, "");
+                String pkgs = m_secureAction.getSystemProperty(STREAM_HANDLER_PACKAGE_PROP, "");
                 pkgs = (pkgs.equals(""))
                     ? DEFAULT_STREAM_HANDLER_PACKAGE
                     : pkgs + "|" + DEFAULT_STREAM_HANDLER_PACKAGE;
@@ -203,7 +203,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
             if (handler == null)
             {
                 // Check for built-in handlers for the mime type.
-                String pkgs = m_secureAction.getProperty(CONTENT_HANDLER_PACKAGE_PROP, "");
+                String pkgs = m_secureAction.getSystemProperty(CONTENT_HANDLER_PACKAGE_PROP, "");
                 pkgs = (pkgs.equals(""))
                     ? DEFAULT_CONTENT_HANDLER_PACKAGE
                     : pkgs + "|" + DEFAULT_CONTENT_HANDLER_PACKAGE;

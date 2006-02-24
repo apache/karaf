@@ -16,8 +16,12 @@
  */
 package org.apache.felix.framework.util;
 
+import java.io.*;
 import java.net.*;
 import java.security.*;
+import java.util.jar.JarFile;
+
+import org.apache.felix.moduleloader.JarFileX;
 
 /**
  * <p>
@@ -33,6 +37,8 @@ import java.security.*;
 **/
 public class SecureAction
 {
+    protected static transient int BUFSIZE = 4096;
+
     private AccessControlContext m_acc = null;
     private Actions m_actions = new Actions();
 
@@ -41,7 +47,7 @@ public class SecureAction
         m_acc = AccessController.getContext();
     }
 
-    public synchronized String getProperty(String name, String def)
+    public synchronized String getSystemProperty(String name, String def)
     {
         if (System.getSecurityManager() != null)
         {
@@ -112,11 +118,239 @@ public class SecureAction
         }
     }
 
-    private static class Actions implements PrivilegedExceptionAction
+    public synchronized boolean fileExists(File file)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                m_actions.set(Actions.FILE_EXISTS_ACTION, file);
+                return ((Boolean) AccessController.doPrivileged(m_actions, m_acc))
+                    .booleanValue();
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return file.exists();
+        }
+    }
+
+    public synchronized boolean isFileDirectory(File file)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                m_actions.set(Actions.FILE_IS_DIRECTORY_ACTION, file);
+                return ((Boolean) AccessController.doPrivileged(m_actions, m_acc))
+                    .booleanValue();
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return file.isDirectory();
+        }
+    }
+
+    public synchronized boolean mkdir(File file)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                m_actions.set(Actions.MAKE_DIRECTORY_ACTION, file);
+                return ((Boolean) AccessController.doPrivileged(m_actions, m_acc))
+                    .booleanValue();
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return file.mkdir();
+        }
+    }
+
+    public synchronized boolean mkdirs(File file)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                m_actions.set(Actions.MAKE_DIRECTORIES_ACTION, file);
+                return ((Boolean) AccessController.doPrivileged(m_actions, m_acc))
+                    .booleanValue();
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return file.mkdirs();
+        }
+    }
+
+    public synchronized File[] listDirectory(File file)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                m_actions.set(Actions.MAKE_DIRECTORY_ACTION, file);
+                return (File[]) AccessController.doPrivileged(m_actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return file.listFiles();
+        }
+    }
+
+    public synchronized boolean renameFile(File oldFile, File newFile)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                m_actions.set(Actions.RENAME_FILE_ACTION, oldFile, newFile);
+                return ((Boolean) AccessController.doPrivileged(m_actions, m_acc))
+                    .booleanValue();
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return oldFile.renameTo(newFile);
+        }
+    }
+
+    public synchronized InputStream getFileInputStream(File file) throws IOException
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                m_actions.set(Actions.GET_FILE_INPUT_ACTION, file);
+                return (InputStream) AccessController.doPrivileged(m_actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                if (ex.getException() instanceof IOException)
+                {
+                    throw (IOException) ex.getException();
+                }
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return new FileInputStream(file);
+        }
+    }
+
+    public synchronized OutputStream getFileOutputStream(File file) throws IOException
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                m_actions.set(Actions.GET_FILE_OUTPUT_ACTION, file);
+                return (OutputStream) AccessController.doPrivileged(m_actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                if (ex.getException() instanceof IOException)
+                {
+                    throw (IOException) ex.getException();
+                }
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return new FileOutputStream(file);
+        }
+    }
+
+    public synchronized boolean deleteFile(File target)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                m_actions.set(Actions.DELETE_FILE_ACTION, target);
+                return ((Boolean) AccessController.doPrivileged(m_actions, m_acc))
+                    .booleanValue();
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return target.delete();
+        }
+    }
+
+    public synchronized JarFile openJAR(File file) throws IOException
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                m_actions.set(Actions.OPEN_JAR_ACTION, file);
+                return (JarFile) AccessController.doPrivileged(m_actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                if (ex.getException() instanceof IOException)
+                {
+                    throw (IOException) ex.getException();
+                }
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return new JarFileX(file);
+        }
+    }
+
+    private class Actions implements PrivilegedExceptionAction
     {
         public static final int GET_PROPERTY_ACTION = 0;
         public static final int FOR_NAME_ACTION = 1;
         public static final int CREATE_URL_ACTION = 2;
+        public static final int FILE_EXISTS_ACTION = 3;
+        public static final int FILE_IS_DIRECTORY_ACTION = 4;
+        public static final int MAKE_DIRECTORY_ACTION = 5;
+        public static final int MAKE_DIRECTORIES_ACTION = 6;
+        public static final int LIST_DIRECTORY_ACTION = 7;
+        public static final int RENAME_FILE_ACTION = 8;
+        public static final int GET_FILE_INPUT_ACTION = 9;
+        public static final int GET_FILE_OUTPUT_ACTION = 10;
+        public static final int DELETE_FILE_ACTION = 11;
+        public static final int OPEN_JAR_ACTION = 12;
 
         private int m_action = -1;
         private Object m_arg1 = null;
@@ -181,6 +415,46 @@ public class SecureAction
             else if (m_action == CREATE_URL_ACTION)
             {
                 return new URL(m_protocol, m_host, m_port, m_path, m_handler);
+            }
+            else if (m_action == FILE_EXISTS_ACTION)
+            {
+                return ((File) m_arg1).exists() ? Boolean.TRUE : Boolean.FALSE;
+            }
+            else if (m_action == FILE_IS_DIRECTORY_ACTION)
+            {
+                return ((File) m_arg1).isDirectory() ? Boolean.TRUE : Boolean.FALSE;
+            }
+            else if (m_action == MAKE_DIRECTORY_ACTION)
+            {
+                return ((File) m_arg1).mkdir() ? Boolean.TRUE : Boolean.FALSE;
+            }
+            else if (m_action == MAKE_DIRECTORIES_ACTION)
+            {
+                return ((File) m_arg1).mkdirs() ? Boolean.TRUE : Boolean.FALSE;
+            }
+            else if (m_action == LIST_DIRECTORY_ACTION)
+            {
+                return ((File) m_arg1).listFiles();
+            }
+            else if (m_action == RENAME_FILE_ACTION)
+            {
+                return ((File) m_arg1).renameTo((File) m_arg2) ? Boolean.TRUE : Boolean.FALSE;
+            }
+            else if (m_action == GET_FILE_INPUT_ACTION)
+            {
+                return new FileInputStream((File) m_arg1);
+            }
+            else if (m_action == GET_FILE_OUTPUT_ACTION)
+            {
+                return new FileOutputStream((File) m_arg1);
+            }
+            else if (m_action == DELETE_FILE_ACTION)
+            {
+                return ((File) m_arg1).delete() ? Boolean.TRUE : Boolean.FALSE;
+            }
+            else if (m_action == OPEN_JAR_ACTION)
+            {
+                return new JarFileX((File) m_arg1);
             }
             return null;
         }
