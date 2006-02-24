@@ -80,7 +80,7 @@ public class Felix
         FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
 
     // Local file system cache.
-    private BundleCache m_cache = null;
+    private DefaultBundleCache m_cache = null;
 
     // Next available bundle identifier.
     private long m_nextId = 1L;
@@ -240,19 +240,9 @@ public class Felix
             }
         });
 
-        // Create default storage system from the specified cache class
-        // or use the default cache if no custom cache was specified.
-        String className = m_config.get(FelixConstants.CACHE_CLASS_PROP);
-        if (className == null)
-        {
-            className = DefaultBundleCache.class.getName();
-        }
-
         try
         {
-            Class clazz = Class.forName(className);
-            m_cache = (BundleCache) clazz.newInstance();
-            m_cache.initialize(m_config, m_logger);
+            m_cache = new DefaultBundleCache(m_config, m_logger);
         }
         catch (Exception ex)
         {
@@ -389,7 +379,7 @@ public class Felix
         }
         
         // Reload and cached bundles.
-        BundleArchive[] archives = null;
+        DefaultBundleArchive[] archives = null;
 
         // First get cached bundle identifiers.
         try
@@ -409,13 +399,13 @@ public class Felix
         // Now install all cached bundles.
         for (int i = 0; (archives != null) && (i < archives.length); i++)
         {
-            // Make sure our id generator is not going to overlap.
-            // TODO: This is not correct since it may lead to re-used
-            // ids, which is not okay according to OSGi.
-            m_nextId = Math.max(m_nextId, archives[i].getId() + 1);
-
             try
             {
+                // Make sure our id generator is not going to overlap.
+                // TODO: This is not correct since it may lead to re-used
+                // ids, which is not okay according to OSGi.
+                m_nextId = Math.max(m_nextId, archives[i].getId() + 1);
+
                 // It is possible that a bundle in the cache was previously
                 // uninstalled, but not completely deleted (perhaps because
                 // of a crash or a locked file), so if we see an archive
@@ -447,7 +437,7 @@ public class Felix
                 {
                     m_logger.log(
                         Logger.LOG_ERROR,
-                        "Unable to re-install bundle " + archives[i].getId(),
+                        "Unable to re-install cached bundle.",
                         ex);
                 }
                 // TODO: Perhaps we should remove the cached bundle?
@@ -1086,7 +1076,7 @@ retry:  while (!finished)
             }
         }
         // Strip leading '/' if present.
-        if (path.charAt(0) == '/')
+        if ((path.length() > 0) && (path.charAt(0) == '/'))
         {
             path = path.substring(1);
         }
@@ -1534,34 +1524,11 @@ retry:  while (!finished)
 
             try
             {
-                // Get the URL input stream if necessary.
-                if (is == null)
-                {
-                    // Do it the manual way to have a chance to 
-                    // set request properties such as proxy auth.
-                    URL url = new URL(updateLocation);
-                    URLConnection conn = url.openConnection(); 
-
-                    // Support for http proxy authentication.
-                    String auth = System.getProperty("http.proxyAuth");
-                    if ((auth != null) && (auth.length() > 0))
-                    {
-                        if ("http".equals(url.getProtocol()) ||
-                            "https".equals(url.getProtocol()))
-                        {
-                            String base64 = Util.base64Encode(auth);
-                            conn.setRequestProperty(
-                                "Proxy-Authorization", "Basic " + base64);
-                        }
-                    }
-                    is = conn.getInputStream();
-                }
-
                 // Get the bundle's archive.
-                BundleArchive archive = m_cache.getArchive(info.getBundleId());
+                DefaultBundleArchive archive = m_cache.getArchive(info.getBundleId());
                 // Update the bundle; this operation will increase
                 // the revision count for the bundle.
-                m_cache.update(archive, is);
+                archive.revise(updateLocation, is);
                 // Create a module for the new revision; the revision is
                 // base zero, so subtract one from the revision count to
                 // get the revision of the new update.
@@ -1594,7 +1561,7 @@ retry:  while (!finished)
             // This will not start the bundle if it was not previously
             // active.
             startBundle(bundle, false);
-    
+
             // If update failed, rethrow exception.
             if (rethrow != null)
             {
@@ -1860,7 +1827,7 @@ retry:  while (!finished)
         {
             AccessController.checkPermission(m_adminPerm);
         }
-    
+
         BundleImpl bundle = null;
 
         // Acquire an install lock.
@@ -1894,30 +1861,8 @@ retry:  while (!finished)
 
                 try
                 {
-                    // Get the URL input stream if necessary.
-                    if (is == null)
-                    {
-                        // Do it the manual way to have a chance to 
-                        // set request properties such as proxy auth.
-                        URL url = new URL(location);
-                        URLConnection conn = url.openConnection(); 
-
-                        // Support for http proxy authentication.
-                        String auth = System.getProperty("http.proxyAuth");
-                        if ((auth != null) && (auth.length() > 0))
-                        {
-                            if ("http".equals(url.getProtocol()) ||
-                                "https".equals(url.getProtocol()))
-                            {
-                                String base64 = Util.base64Encode(auth);
-                                conn.setRequestProperty(
-                                    "Proxy-Authorization", "Basic " + base64);
-                            }
-                        }
-                        is = conn.getInputStream();
-                    }
                     // Add the bundle to the cache.
-                    m_cache.create(id, location, is);
+                    m_cache.create(id, location);
                 }
                 catch (Exception ex)
                 {
@@ -1949,7 +1894,7 @@ retry:  while (!finished)
                 {
                     if (m_cache.getArchive(id).getRevisionCount() > 1)
                     {
-                        m_cache.purge(m_cache.getArchive(id));
+                        m_cache.getArchive(id).purge();
                     }
                 }
                 catch (Exception ex)
@@ -1962,7 +1907,7 @@ retry:  while (!finished)
 
             try
             {
-                BundleArchive archive = m_cache.getArchive(id);
+                DefaultBundleArchive archive = m_cache.getArchive(id);
                 bundle = new BundleImpl(this, createBundleInfo(archive));
             }
             catch (Exception ex)
@@ -2884,7 +2829,7 @@ retry:  while (!finished)
     // Miscellaneous private methods.
     //
 
-    private BundleInfo createBundleInfo(BundleArchive archive)
+    private BundleInfo createBundleInfo(DefaultBundleArchive archive)
         throws Exception
     {
         // Get the bundle manifest.
@@ -2893,7 +2838,7 @@ retry:  while (!finished)
         {
             // Although there should only ever be one revision at this
             // point, get the header for the current revision to be safe.
-            headerMap = archive.getManifestHeader(archive.getRevisionCount() - 1);
+            headerMap = archive.getRevision(archive.getRevisionCount() - 1).getManifestHeader();
         }
         catch (Exception ex)
         {
@@ -3142,8 +3087,8 @@ retry:  while (!finished)
         // Create the content loader associated with the module archive.
         IContentLoader contentLoader = new ContentLoaderImpl(
                 m_logger,
-                m_cache.getArchive(id).getContent(revision),
-                m_cache.getArchive(id).getContentPath(revision));
+                m_cache.getArchive(id).getRevision(revision).getContent(),
+                m_cache.getArchive(id).getRevision(revision).getContentPath());
         // Set the content loader's search policy.
         contentLoader.setSearchPolicy(
                 new R4SearchPolicy(m_policyCore, module));
@@ -3190,11 +3135,11 @@ retry:  while (!finished)
         if (activator == null)
         {
             // Get the associated bundle archive.
-            BundleArchive ba = m_cache.getArchive(info.getBundleId());
+            DefaultBundleArchive ba = m_cache.getArchive(info.getBundleId());
             // Get the manifest from the current revision; revision is
             // base zero so subtract one from the count to get the
             // current revision.
-            Map headerMap = ba.getManifestHeader(ba.getRevisionCount() - 1);
+            Map headerMap = ba.getRevision(ba.getRevisionCount() - 1).getManifestHeader();
             // Get the activator class attribute.
             String className = (String) headerMap.get(Constants.BUNDLE_ACTIVATOR);
             // Try to instantiate activator class if present.
@@ -3241,7 +3186,7 @@ retry:  while (!finished)
             }
 
             // Purge all bundle revisions, but the current one.
-            m_cache.purge(m_cache.getArchive(info.getBundleId()));
+            m_cache.getArchive(info.getBundleId()).purge();
         }
         finally
         {

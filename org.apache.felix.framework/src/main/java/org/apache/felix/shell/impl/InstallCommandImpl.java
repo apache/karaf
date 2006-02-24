@@ -17,7 +17,6 @@
 package org.apache.felix.shell.impl;
 
 import java.io.PrintStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.StringTokenizer;
 
@@ -109,15 +108,10 @@ public class InstallCommandImpl implements Command
 
     private String absoluteLocation(String location)
     {
-        if (!location.endsWith(".jar"))
-        {
-            location = location + ".jar";
-        }
-        try
-        {
-            new URL(location);
-        }
-        catch (MalformedURLException ex)
+        String guess = location;
+        // If the location does not contain a ":", then try to
+        // add the base URL from the 'cd' command service.
+        if (location.indexOf(':') < 0)
         {
             // Try to create a valid URL using the base URL
             // contained in the "cd" command service.
@@ -137,16 +131,16 @@ public class InstallCommandImpl implements Command
                     m_context.ungetService(ref);
                 }
 
-                String theURL = baseURL + location;
+                String theURL = baseURL + guess;
                 new URL(theURL);
-
             }
             catch (Exception ex2)
             {
-                return null;
+                // If that fails, then just return the original.
+                return location;
             }
-            location = baseURL + location;
+            guess = baseURL + guess;
         }
-        return location;
+        return guess;
     }
 }

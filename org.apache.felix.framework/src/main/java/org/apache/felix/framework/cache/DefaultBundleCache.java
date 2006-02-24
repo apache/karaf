@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,16 +17,20 @@
 package org.apache.felix.framework.cache;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.PropertyResolver;
+import org.apache.felix.framework.util.SecureAction;
 
 /**
  * <p>
- * This class, combined with <tt>DefaultBundleArchive</tt>, implements the
- * default file system-based bundle cache for Felix. It is possible to
- * configure the default behavior of this class by passing properties into
- * Felix constructor. The configuration properties for this class are:
+ * This class, combined with <tt>BundleArchive</tt>, and concrete
+ * <tt>BundleRevision</tt> subclasses, implement the Felix bundle cache.
+ * It is possible to configure the default behavior of this class by
+ * passing properties into Felix' constructor. The configuration properties
+ * for this class are:
  * </p>
  * <ul>
  *   <li><tt>felix.cache.bufsize</tt> - Sets the buffer size to be used by
@@ -65,7 +69,7 @@ import org.apache.felix.framework.util.PropertyResolver;
  * </p>
  * @see org.apache.felix.framework.util.DefaultBundleArchive
 **/
-public class DefaultBundleCache implements BundleCache
+public class DefaultBundleCache
 {
     public static final String CACHE_BUFSIZE_PROP = "felix.cache.bufsize";
     public static final String CACHE_DIR_PROP = "felix.cache.dir";
@@ -79,19 +83,169 @@ public class DefaultBundleCache implements BundleCache
     private PropertyResolver m_cfg = null;
     private Logger m_logger = null;
     private File m_profileDir = null;
-    private BundleArchive[] m_archives = null;
+    private DefaultBundleArchive[] m_archives = null;
 
-    public DefaultBundleCache()
+    private static SecureAction m_secureAction = new SecureAction();
+
+    public DefaultBundleCache(PropertyResolver cfg, Logger logger)
+        throws Exception
     {
+        m_cfg = cfg;
+        m_logger = logger;
+        initialize();
     }
 
-    public void initialize(PropertyResolver cfg, Logger logger) throws Exception
+    /* package */ static SecureAction getSecureAction()
     {
-        // Save Properties reference.
-        m_cfg = cfg;
-        // Save LogService reference.
-        m_logger = logger;
+        return m_secureAction;
+    }
 
+    public synchronized DefaultBundleArchive[] getArchives()
+        throws Exception
+    {
+        return m_archives;
+    }
+
+    public synchronized DefaultBundleArchive getArchive(long id)
+        throws Exception
+    {
+        for (int i = 0; i < m_archives.length; i++)
+        {
+            if (m_archives[i].getId() == id)
+            {
+                return m_archives[i];
+            }
+        }
+        return null;
+    }
+
+    public synchronized int getArchiveIndex(DefaultBundleArchive ba)
+    {
+        for (int i = 0; i < m_archives.length; i++)
+        {
+            if (m_archives[i] == ba)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public synchronized DefaultBundleArchive create(long id, String location)
+        throws Exception
+    {
+        // Construct archive root directory.
+        File archiveRootDir =
+            new File(m_profileDir, BUNDLE_DIR_PREFIX + Long.toString(id));
+
+        try
+        {
+            // Create the archive and add it to the list of archives.
+            DefaultBundleArchive ba = new DefaultBundleArchive(m_logger, archiveRootDir, id, location);
+            DefaultBundleArchive[] tmp = new DefaultBundleArchive[m_archives.length + 1];
+            System.arraycopy(m_archives, 0, tmp, 0, m_archives.length);
+            tmp[m_archives.length] = ba;
+            m_archives = tmp;
+            return ba;
+        }
+        catch (Exception ex)
+        {
+            if (m_secureAction.fileExists(archiveRootDir))
+            {
+                if (!DefaultBundleCache.deleteDirectoryTree(archiveRootDir))
+                {
+                    m_logger.log(
+                        Logger.LOG_ERROR,
+                        getClass().getName()
+                            + ": Unable to delete the archive directory - "
+                            + archiveRootDir);
+                }
+            }
+            throw ex;
+        }
+    }
+
+    public synchronized void remove(DefaultBundleArchive ba)
+        throws Exception
+    {
+        // Remove the archive.
+        ba.dispose();
+        // Remove the archive from the cache.
+        int idx = getArchiveIndex(ba);
+        if (idx >= 0)
+        {
+            DefaultBundleArchive[] tmp =
+                new DefaultBundleArchive[m_archives.length - 1];
+            System.arraycopy(m_archives, 0, tmp, 0, idx);
+            if (idx < tmp.length)
+            {
+                System.arraycopy(m_archives, idx + 1, tmp, idx,
+                    tmp.length - idx);
+            }
+            m_archives = tmp;
+        }
+    }
+
+    //
+    // Static file-related utility methods.
+    //
+
+    /**
+     * This method copies an input stream to the specified file.
+     * <p>
+     * Security: This method must be called from within a <tt>doPrivileged()</tt>
+     * block since it accesses the disk.
+     * @param is the input stream to copy.
+     * @param outputFile the file to which the input stream should be copied.
+    **/
+    protected static void copyStreamToFile(InputStream is, File outputFile)
+        throws IOException
+    {
+        OutputStream os = null;
+
+        try
+        {
+            os = getSecureAction().getFileOutputStream(outputFile);
+            os = new BufferedOutputStream(os, BUFSIZE);
+            byte[] b = new byte[BUFSIZE];
+            int len = 0;
+            while ((len = is.read(b)) != -1)
+            {
+                os.write(b, 0, len);
+            }
+        }
+        finally
+        {
+            if (is != null) is.close();
+            if (os != null) os.close();
+        }
+    }
+
+    protected static boolean deleteDirectoryTree(File target)
+    {
+        if (!getSecureAction().fileExists(target))
+        {
+            return true;
+        }
+
+        if (getSecureAction().isFileDirectory(target))
+        {
+            File[] files = getSecureAction().listDirectory(target);
+            for (int i = 0; i < files.length; i++)
+            {
+                deleteDirectoryTree(files[i]);
+            }
+        }
+
+        return getSecureAction().deleteFile(target);
+    }
+
+    //
+    // Private methods.
+    //
+
+    private void initialize() throws Exception
+    {
         // Get buffer size value.
         try
         {
@@ -148,141 +302,44 @@ public class DefaultBundleCache implements BundleCache
             m_profileDir = new File(cacheDirStr, profileName);
         }
 
-        // Create profile directory.
-        if (!m_profileDir.exists())
+        // Create profile directory, if it does not exist.
+        if (!getSecureAction().fileExists(m_profileDir))
         {
-            if (!m_profileDir.mkdirs())
+            if (!getSecureAction().mkdirs(m_profileDir))
             {
                 m_logger.log(
                     Logger.LOG_ERROR,
-                    "Unable to create directory: " + m_profileDir);
+                    getClass().getName() + ": Unable to create directory: "
+                        + m_profileDir);
                 throw new RuntimeException("Unable to create profile directory.");
             }
         }
 
         // Create the existing bundle archives in the profile directory,
         // if any exist.
-        File[] children = m_profileDir.listFiles();
-        int count = 0;
-        for (int i = 0; (children != null) && (i < children.length); i++)
-        {
-            // Count the legitimate bundle directories.
-            if (children[i].getName().startsWith(BUNDLE_DIR_PREFIX))
-            {
-                count++;
-            }
-        }
-        m_archives = new BundleArchive[count];
-        count = 0;
+        List archiveList = new ArrayList();
+        File[] children = getSecureAction().listDirectory(m_profileDir);
         for (int i = 0; (children != null) && (i < children.length); i++)
         {
             // Ignore directories that aren't bundle directories.
             if (children[i].getName().startsWith(BUNDLE_DIR_PREFIX))
             {
-                String id = children[i].getName().substring(BUNDLE_DIR_PREFIX.length());
-                m_archives[count] = new DefaultBundleArchive(
-                    m_logger, children[i], Long.parseLong(id));
-                count++;
+                // Recreate the bundle archive.
+                try
+                {
+                    archiveList.add(
+                        new DefaultBundleArchive(m_logger, children[i]));
+                }
+                catch (Exception ex)
+                {
+                    // Log and ignore.
+                    m_logger.log(Logger.LOG_ERROR,
+                        getClass().getName() + ": Error creating archive.", ex);
+                }
             }
         }
-    }
-
-    public BundleArchive[] getArchives()
-        throws Exception
-    {
-        return m_archives;
-    }
-
-    public BundleArchive getArchive(long id)
-        throws Exception
-    {
-        for (int i = 0; i < m_archives.length; i++)
-        {
-            if (m_archives[i].getId() == id)
-            {
-                return m_archives[i];
-            }
-        }
-        return null;
-    }
-
-    public int getArchiveIndex(BundleArchive ba)
-    {
-        for (int i = 0; i < m_archives.length; i++)
-        {
-            if (m_archives[i] == ba)
-            {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public BundleArchive create(long id, String location, InputStream is)
-        throws Exception
-    {
-        // Define new bundle's directory.
-        File bundleDir = new File(m_profileDir, "bundle" + id);
-
-        try
-        {
-            // Buffer the input stream.
-            is = new BufferedInputStream(is, DefaultBundleCache.BUFSIZE);
-            // Create an archive instance for the new bundle.
-            BundleArchive ba = new DefaultBundleArchive(
-                m_logger, bundleDir, id, location, is);
-            // Add the archive instance to the list of bundle archives.
-            BundleArchive[] bas = new BundleArchive[m_archives.length + 1];
-            System.arraycopy(m_archives, 0, bas, 0, m_archives.length);
-            bas[m_archives.length] = ba;
-            m_archives = bas;
-            return ba;
-        }
-        finally
-        {
-            if (is != null) is.close();
-        }
-    }
-
-    public void update(BundleArchive ba, InputStream is)
-        throws Exception
-    {
-        try
-        {
-            // Buffer the input stream.
-            is = new BufferedInputStream(is, DefaultBundleCache.BUFSIZE);
-            // Do the update.
-            ((DefaultBundleArchive) ba).update(is);
-        }
-        finally
-        {
-            if (is != null) is.close();
-        }
-    }
-
-    public void purge(BundleArchive ba)
-        throws Exception
-    {
-        ((DefaultBundleArchive) ba).purge();
-    }
-
-    public void remove(BundleArchive ba)
-        throws Exception
-    {
-        // Remove the archive itself.
-        ((DefaultBundleArchive) ba).remove();
-        // Remove the archive from the cache.
-        int idx = getArchiveIndex(ba);
-        if (idx >= 0)
-        {
-            BundleArchive[] bas = new BundleArchive[m_archives.length - 1];
-            System.arraycopy(m_archives, 0, bas, 0, idx);
-            if (idx < bas.length)
-            {
-                System.arraycopy(m_archives, idx + 1, bas, idx,
-                    bas.length - idx);
-            }
-            m_archives = bas;
-        }
+        
+        m_archives = (DefaultBundleArchive[])
+            archiveList.toArray(new DefaultBundleArchive[archiveList.size()]);
     }
 }

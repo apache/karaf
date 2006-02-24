@@ -43,7 +43,6 @@ public interface FelixConstants extends org.osgi.framework.Constants
     public static final String AUTO_START_PROP = "felix.auto.start";
     public static final String EMBEDDED_EXECUTION_PROP = "felix.embedded.execution";
     public static final String STRICT_OSGI_PROP = "felix.strict.osgi";
-    public static final String CACHE_CLASS_PROP = "felix.cache.class";
     public static final String FRAMEWORK_STARTLEVEL_PROP
         = "felix.startlevel.framework";
     public static final String BUNDLE_STARTLEVEL_PROP

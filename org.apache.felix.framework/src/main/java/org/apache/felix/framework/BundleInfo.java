@@ -18,14 +18,14 @@ package org.apache.felix.framework;
 
 import java.util.Map;
 
-import org.apache.felix.framework.cache.BundleArchive;
+import org.apache.felix.framework.cache.DefaultBundleArchive;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
 class BundleInfo
 {
     private Logger m_logger = null;
-    private BundleArchive m_archive = null;
+    private DefaultBundleArchive m_archive = null;
     private IModule[] m_modules = null;
     private int m_state = 0;
     private long m_modified = 0;
@@ -39,7 +39,7 @@ class BundleInfo
     private int m_lockCount = 0;
     private Thread m_lockThread = null;
 
-    protected BundleInfo(Logger logger, BundleArchive archive, IModule module)
+    protected BundleInfo(Logger logger, DefaultBundleArchive archive, IModule module)
         throws Exception
     {
         m_logger = logger;
@@ -56,7 +56,7 @@ class BundleInfo
      *  Returns the bundle archive associated with this bundle.
      * @return the bundle archive associated with this bundle.
     **/
-    public BundleArchive getArchive()
+    public DefaultBundleArchive getArchive()
     {
         return m_archive;
     }
@@ -121,7 +121,18 @@ class BundleInfo
 
     public long getBundleId()
     {
-        return m_archive.getId();
+        try
+        {
+            return m_archive.getId();
+        }
+        catch (Exception ex)
+        {
+            m_logger.log(
+                Logger.LOG_ERROR,
+                "Error getting the identifier from bundle archive.",
+                ex);
+            return -1;
+        }
     }
     
     public String getLocation()
@@ -134,7 +145,7 @@ class BundleInfo
         {
             m_logger.log(
                 Logger.LOG_ERROR,
-                "Error reading location from bundle archive.",
+                "Error getting location from bundle archive.",
                 ex);
             return null;
         }
@@ -177,7 +188,7 @@ class BundleInfo
         {
             // Return the header for the most recent bundle revision only,
             // since we shouldn't ever need access to older revisions.
-            return m_archive.getManifestHeader(m_archive.getRevisionCount() - 1);
+            return m_archive.getRevision(m_archive.getRevisionCount() - 1).getManifestHeader();
         }
         catch (Exception ex)
         {

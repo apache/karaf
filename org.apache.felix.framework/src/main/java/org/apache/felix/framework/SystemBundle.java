@@ -21,6 +21,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
 
+import org.apache.felix.framework.cache.SystemBundleArchive;
 import org.apache.felix.framework.searchpolicy.*;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
