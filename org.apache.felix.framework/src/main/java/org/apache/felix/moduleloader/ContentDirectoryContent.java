@@ -73,7 +73,7 @@ public class ContentDirectoryContent implements IContent
             throw new IllegalStateException("ContentDirectoryContent is not open");
         }
 
-        if (name.charAt(0) == '/')
+        if ((name.length() > 0) && (name.charAt(0) == '/'))
         {
             name = name.substring(1);
         }
@@ -88,7 +88,7 @@ public class ContentDirectoryContent implements IContent
             throw new IllegalStateException("ContentDirectoryContent is not open");
         }
 
-        if (name.charAt(0) == '/')
+        if ((name.length() > 0) && (name.charAt(0) == '/'))
         {
             name = name.substring(1);
         }
@@ -104,7 +104,7 @@ public class ContentDirectoryContent implements IContent
             throw new IllegalStateException("ContentDirectoryContent is not open");
         }
 
-        if (name.charAt(0) == '/')
+        if ((name.length() > 0) && (name.charAt(0) == '/'))
         {
             name = name.substring(1);
         }
@@ -119,7 +119,7 @@ public class ContentDirectoryContent implements IContent
             throw new IllegalStateException("ContentDirectoryContent is not open");
         }
 
-        if (path.charAt(0) == '/')
+        if ((path.length() > 0) && (path.charAt(0) == '/'))
         {
             path = path.substring(1);
         }
