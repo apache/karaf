@@ -435,7 +435,7 @@ public class DefaultBundleArchive
         // Get bundle data directory.
         File dataDir = new File(m_archiveRootDir, DATA_DIRECTORY);
         // Create the data directory if necessary.
-        if (DefaultBundleCache.getSecureAction().fileExists(dataDir))
+        if (!DefaultBundleCache.getSecureAction().fileExists(dataDir))
         {
             if (!DefaultBundleCache.getSecureAction().mkdir(dataDir))
             {
