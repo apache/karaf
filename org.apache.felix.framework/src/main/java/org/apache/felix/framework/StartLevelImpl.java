@@ -77,6 +77,37 @@ public class StartLevelImpl implements StartLevel, Runnable
         }
     }
 
+    /**
+     * This method is currently only called by the shutdown thread when the
+     * framework is shutting down.
+     * @param startlevel
+    **/
+    /* package */ void setStartLevelAndWait(int startlevel)
+    {
+        Object request = new Integer(startlevel);
+        synchronized (request)
+        {
+            synchronized (m_requestList)
+            {
+                m_requestList.add(request);
+                m_requestList.notifyAll();
+            }
+
+            try
+            {
+                request.wait();
+            }
+            catch (InterruptedException ex)
+            {
+                // Log it and ignore since it won't cause much of an issue.
+                m_felix.getLogger().log(
+                    Logger.LOG_WARNING,
+                    "Wait for start level change during shutdown interrupted.",
+                    ex);
+            }
+        }
+    }
+
     /* (non-Javadoc)
      * @see org.osgi.service.startlevel.StartLevel#getBundleStartLevel(org.osgi.framework.Bundle)
     **/
@@ -119,7 +150,7 @@ public class StartLevelImpl implements StartLevel, Runnable
 
     public void run()
     {
-        int startLevel = 0;
+        Integer request = null;
 
         // This thread loops forever, thus it should
         // be a daemon thread.
@@ -130,18 +161,28 @@ public class StartLevelImpl implements StartLevel, Runnable
                 // Wait for a request.
                 while (m_requestList.size() == 0)
                 {
-                    try {
+                    try
+                    {
                         m_requestList.wait();
-                    } catch (InterruptedException ex) {
+                    }
+                    catch (InterruptedException ex)
+                    {
+                        // Ignore.
                     }
                 }
                 
                 // Get the requested start level.
-                startLevel = ((Integer) m_requestList.remove(0)).intValue();
+                request = (Integer) m_requestList.remove(0);
             }
 
             // Set the new start level.
-            m_felix.setFrameworkStartLevel(startLevel);
+            m_felix.setFrameworkStartLevel(request.intValue());
+
+            // Notify any waiting thread that this request is done.
+            synchronized (request)
+            {
+                request.notifyAll();
+            }
         }
     }
 }

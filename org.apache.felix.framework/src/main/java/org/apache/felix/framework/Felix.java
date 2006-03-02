@@ -28,6 +28,7 @@ import org.apache.felix.framework.util.*;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.ExportedPackage;
+import org.osgi.service.startlevel.StartLevel;
 
 public class Felix
 {
@@ -462,8 +463,25 @@ public class Felix
         // Load bundles from auto-install and auto-start properties;
         processAutoProperties();
 
-        // This will restart bundles if necessary.
-        setFrameworkStartLevel(startLevel);
+        // Set the start level using the start level service;
+        // this ensures that all start level requests are
+        // serialized.
+        // NOTE: There is potentially a specification compliance
+        // issue here, since the start level request is asynchronous;
+        // this means that the framework will fire its STARTED event
+        // before all bundles have officially been restarted and it
+        // is not clear if this is really an issue or not.
+        try
+        {
+            StartLevel sl = (StartLevel) getService(
+                getBundle(0),
+                getServiceReferences((BundleImpl) getBundle(0), StartLevel.class.getName(), null)[0]);
+            sl.setStartLevel(startLevel);
+        }
+        catch (InvalidSyntaxException ex)
+        {
+            // Should never happen.
+        }
 
         // The framework is now running.
         m_frameworkStatus = RUNNING_STATUS;
@@ -499,9 +517,22 @@ public class Felix
         // The framework is now in its shutdown sequence.
         m_frameworkStatus = STOPPING_STATUS;
 
-        // Set the start level to zero in order to stop
-        // all bundles in the framework.
-        setFrameworkStartLevel(0);
+        // Use the start level service to set the start level to zero
+        // in order to stop all bundles in the framework. Since framework
+        // shutdown happens on its own thread, we can wait for the start
+        // level service to finish before proceeding by calling the
+        // non-spec setStartLevelAndWait() method.
+        try
+        {
+            StartLevelImpl sl = (StartLevelImpl) getService(
+                getBundle(0),
+                getServiceReferences((BundleImpl) getBundle(0), StartLevel.class.getName(), null)[0]);
+            sl.setStartLevelAndWait(0);
+        }
+        catch (InvalidSyntaxException ex)
+        {
+            // Should never happen.
+        }
 
         // Just like initialize() called the system bundle's start()
         // method, we must call its stop() method here so that it
@@ -582,192 +613,158 @@ public class Felix
      * parameter check. The security and parameter check are done in the
      * StartLevel service implementation because this method is called on
      * a separate thread and the caller's thread would already be gone if
-     * we did the checks in this method.
+     * we did the checks in this method. This method should not be called
+     * directly.
      * @param requestedLevel The new start level of the framework.
     **/
     protected void setFrameworkStartLevel(int requestedLevel)
     {
-        // Lock the installed bundle lock to ensure that no bundles
-        // can be installed or uninstalled during this operation. We
-        // need to try to get all bundle locks at once to avoid potential
-        // "hold-and-wait" deadlock problems. If all bundle locks
-        // cannot be acquired, then we must release the installed bundle
-        // lock and start over from scratch.
-        boolean finished = false;
-retry:  while (!finished)
+        Bundle[] bundles = null;
+
+        // Synchronization for changing the start level is rather loose.
+        // The install lock is grabbed initially to atomically change the
+        // framework's start level and to grab a sorted snapshot of the
+        // currently installed bundles, but then this lock is freed immediately.
+        // No locks are held while processing the currently installed bundles
+        // for starting/stopping based on the new start level. The only locking
+        // that occurs is for individual bundles when startBundle()/stopBundle()
+        // is called, but this locking is done in the respective method.
+        //
+        // This approach does mean that it is possible for a for individual
+        // bundle states to change during this operation. For example, bundle
+        // start levels can be changed or bundles can be uninstalled. If a
+        // bundle's start level changes, then it is possible for it to be
+        // processed out of order. Uninstalled bundles are just logged and
+        // ignored. I had a bit of discussion with Peter Kriens about these
+        // issues and he felt they were consistent with the spec, which
+        // intended Start Level to have some leeway.
+        //
+        // Calls to this method are only made by the start level thread, which
+        // serializes framework start level changes. Thus, it is not possible
+        // for two requests to change the framework's start level to interfere
+        // with each other.
+
+        synchronized (m_installedBundleLock_Priority2)
         {
-            synchronized (m_installedBundleLock_Priority2)
+            // Determine if we are lowering or raising the
+            // active start level.
+            boolean lowering = (requestedLevel < m_activeStartLevel);
+    
+            // Record new start level.
+            m_activeStartLevel = requestedLevel;
+    
+            // Get a snapshot of all installed bundles.
+            bundles = getBundles();
+
+            // Sort bundle array by start level either ascending or
+            // descending depending on whether the start level is being
+            // lowered or raised to that the bundles can be efficiently
+            // processed in order.
+            Comparator comparator = null;
+            if (lowering)
             {
-                // Determine if we are lowering or raising the
-                // active start level.
-                boolean lowering = (requestedLevel < m_activeStartLevel);
-        
-                // Record new start level.
-                m_activeStartLevel = requestedLevel;
-        
-                // Get array of all installed bundles.
-                Bundle[] bundles = getBundles();
-                for (int bundleIdx = 1; bundleIdx < bundles.length; bundleIdx++)
-                {
-                    BundleImpl impl = (BundleImpl) bundles[bundleIdx];
-
-                    // Ignore system bundle.
-                    if (impl.getInfo().getBundleId() == 0)
+                // Sort descending to stop highest start level first.
+                comparator = new Comparator() {
+                    public int compare(Object o1, Object o2)
                     {
-                        continue;
+                        BundleImpl b1 = (BundleImpl) o1;
+                        BundleImpl b2 = (BundleImpl) o2;
+                        if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
+                            < b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
+                        {
+                            return 1;
+                        }
+                        else if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
+                            > b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
+                        {
+                            return -1;
+                        }
+                        return 0;
                     }
-
-                    if (!acquireBundleLockOrFail(impl))
+                };
+            }
+            else
+            {
+                // Sort ascending to start lowest start level first.
+                comparator = new Comparator() {
+                    public int compare(Object o1, Object o2)
                     {
-                        // Release all bundle locks acquired thus far.
-                        for (int undoIdx = 0; undoIdx < bundleIdx; undoIdx++)
+                        BundleImpl b1 = (BundleImpl) o1;
+                        BundleImpl b2 = (BundleImpl) o2;
+                        if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
+                            > b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
                         {
-                            impl = (BundleImpl) bundles[undoIdx];
-                            // Ignore system bundle.
-                            if (impl.getInfo().getBundleId() == 0)
-                            {
-                                continue;
-                            }
-                            releaseBundleLock((BundleImpl) bundles[undoIdx]);
+                            return 1;
                         }
-                        // Wait a little while to give other threads a chance
-                        // to release the bundle locks.
-                        try
+                        else if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
+                            < b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
                         {
-                            Thread.sleep(500);
+                            return -1;
                         }
-                        catch (InterruptedException ex)
-                        {
-                            // Ignore.
-                        }
+                        return 0;
+                    }
+                };
+            }
 
-                        // Try to acquire bundle locks again.
-                        break retry;
+            Arrays.sort(bundles, comparator);
+        }
+
+        // Stop or start the bundles according to the start level.
+        for (int i = 0; (bundles != null) && (i < bundles.length); i++)
+        {
+            BundleImpl impl = (BundleImpl) bundles[i];
+
+            // Ignore the system bundle, since its start() and
+            // stop() methods get called explicitly in Felix.start()
+            // and Felix.shutdown(), respectively.
+            if (impl.getInfo().getBundleId() == 0)
+            {
+                continue;
+            }
+
+            // Lock the current bundle.
+            acquireBundleLock(impl);
+
+            try
+            {
+                // Start the bundle if necessary.
+                if ((impl.getInfo().getPersistentState() == Bundle.ACTIVE) &&
+                    (impl.getInfo().getStartLevel(getInitialBundleStartLevel())
+                        <= m_activeStartLevel))
+                {
+                    try
+                    {
+                        startBundle(impl, false);
+                    }
+                    catch (Throwable th)
+                    {
+                        fireFrameworkEvent(FrameworkEvent.ERROR, impl, th);
+                        m_logger.log(
+                            Logger.LOG_ERROR,
+                            "Error starting " + impl.getInfo().getLocation(), th);
                     }
                 }
-
-                //
-                // Now that we have all of the bundle locks, start or stop
-                // the bundles according to the start level settings.
-                //
-
-                try
+                // Stop the bundle if necessary.
+                else if (impl.getInfo().getStartLevel(getInitialBundleStartLevel())
+                    > m_activeStartLevel)
                 {
-                    // Sort bundle array by start level either ascending or
-                    // descending depending on whether the start level is being
-                    // lowered or raised.
-                    Comparator comparator = null;
-                    if (lowering)
+                    try
                     {
-                        // Sort descending to stop highest start level first.
-                        comparator = new Comparator() {
-                            public int compare(Object o1, Object o2)
-                            {
-                                BundleImpl b1 = (BundleImpl) o1;
-                                BundleImpl b2 = (BundleImpl) o2;
-                                if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
-                                    < b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
-                                {
-                                    return 1;
-                                }
-                                else if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
-                                    > b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
-                                {
-                                    return -1;
-                                }
-                                return 0;
-                            }
-                        };
+                        stopBundle(impl, false);
                     }
-                    else
+                    catch (Throwable th)
                     {
-                        // Sort ascending to start lowest start level first.
-                        comparator = new Comparator() {
-                            public int compare(Object o1, Object o2)
-                            {
-                                BundleImpl b1 = (BundleImpl) o1;
-                                BundleImpl b2 = (BundleImpl) o2;
-                                if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
-                                    > b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
-                                {
-                                    return 1;
-                                }
-                                else if (b1.getInfo().getStartLevel(getInitialBundleStartLevel())
-                                    < b2.getInfo().getStartLevel(getInitialBundleStartLevel()))
-                                {
-                                    return -1;
-                                }
-                                return 0;
-                            }
-                        };
-                    }
-            
-                    Arrays.sort(bundles, comparator);
-            
-                    // Stop or start the bundles according to the start level.
-                    for (int i = 0; (bundles != null) && (i < bundles.length); i++)
-                    {
-                        BundleImpl impl = (BundleImpl) bundles[i];
-            
-                        // Ignore the system bundle, since its start() and
-                        // stop() methods get called explicitly in initialize()
-                        // and shutdown(), respectively.
-                        if (impl.getInfo().getBundleId() == 0)
-                        {
-                            continue;
-                        }
-        
-                        // Start the bundle if necessary.
-                        if ((impl.getInfo().getPersistentState() == Bundle.ACTIVE) &&
-                            (impl.getInfo().getStartLevel(getInitialBundleStartLevel())
-                                <= m_activeStartLevel))
-                        {
-                            try
-                            {
-                                startBundle(impl, false);
-                            }
-                            catch (Throwable th)
-                            {
-                                fireFrameworkEvent(FrameworkEvent.ERROR, impl, th);
-                                m_logger.log(
-                                    Logger.LOG_ERROR,
-                                    "Error starting " + impl.getInfo().getLocation(), th);
-                            }
-                        }
-                        // Stop the bundle if necessary.
-                        else if (impl.getInfo().getStartLevel(getInitialBundleStartLevel())
-                            > m_activeStartLevel)
-                        {
-                            try
-                            {
-                                stopBundle(impl, false);
-                            }
-                            catch (Throwable th)
-                            {
-                                fireFrameworkEvent(FrameworkEvent.ERROR, impl, th);
-                                m_logger.log(
-                                    Logger.LOG_ERROR,
-                                    "Error stopping " + impl.getInfo().getLocation(), th);
-                            }
-                        }
+                        fireFrameworkEvent(FrameworkEvent.ERROR, impl, th);
+                        m_logger.log(
+                            Logger.LOG_ERROR,
+                            "Error stopping " + impl.getInfo().getLocation(), th);
                     }
                 }
-                finally
-                {
-                    // Always release the bundle locks.
-                    for (int bundleIdx = 1; bundleIdx < bundles.length; bundleIdx++)
-                    {
-                        BundleImpl impl = (BundleImpl) bundles[bundleIdx];
-                        // Ignore system bundle.
-                        if (impl.getInfo().getBundleId() == 0)
-                        {
-                            continue;
-                        }
-                        releaseBundleLock(impl);
-                    }
-                }
-
-                finished = true;
+            }
+            finally
+            {
+                // Always release bundle lock.
+                releaseBundleLock(impl);
             }
         }
 
