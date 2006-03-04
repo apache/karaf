@@ -1859,7 +1859,7 @@ public class Felix
                 try
                 {
                     // Add the bundle to the cache.
-                    m_cache.create(id, location);
+                    m_cache.create(id, location, is);
                 }
                 catch (Exception ex)
                 {

@@ -105,18 +105,21 @@ public class DefaultBundleArchive
      * <p>
      * This constructor is used for creating new archives when a bundle is
      * installed into the framework. Each archive receives a logger, a root
-     * directory, its associated bundle identifier, and the associated bundle
-     * location string. The root directory is where any required state can be
-     * stored.
+     * directory, its associated bundle identifier, the associated bundle
+     * location string, and an input stream from which to read the bundle
+     * content. The root directory is where any required state can be
+     * stored. The input stream may be null, in which case the location is
+     * used as an URL to the bundle content.
      * </p>
      * @param logger the logger to be used by the archive.
      * @param archiveRootDir the archive root directory for storing state.
      * @param id the bundle identifier associated with the archive.
      * @param location the bundle location string associated with the archive.
+     * @param is input stream from which to read the bundle content.
      * @throws Exception if any error occurs.
     **/
     public DefaultBundleArchive(
-        Logger logger, File archiveRootDir, long id, String location)    
+        Logger logger, File archiveRootDir, long id, String location, InputStream is)    
         throws Exception
     {
         m_logger = logger;
@@ -133,7 +136,7 @@ public class DefaultBundleArchive
         initialize();
 
         // Add a revision for the content.
-        revise(getCurrentLocation(), null);
+        revise(getCurrentLocation(), is);
     }
 
     /**

@@ -131,7 +131,8 @@ public class DefaultBundleCache
         return -1;
     }
 
-    public synchronized DefaultBundleArchive create(long id, String location)
+    public synchronized DefaultBundleArchive create(
+        long id, String location, InputStream is)
         throws Exception
     {
         // Construct archive root directory.
@@ -141,7 +142,8 @@ public class DefaultBundleCache
         try
         {
             // Create the archive and add it to the list of archives.
-            DefaultBundleArchive ba = new DefaultBundleArchive(m_logger, archiveRootDir, id, location);
+            DefaultBundleArchive ba =
+                new DefaultBundleArchive(m_logger, archiveRootDir, id, location, is);
             DefaultBundleArchive[] tmp = new DefaultBundleArchive[m_archives.length + 1];
             System.arraycopy(m_archives, 0, tmp, 0, m_archives.length);
             tmp[m_archives.length] = ba;
