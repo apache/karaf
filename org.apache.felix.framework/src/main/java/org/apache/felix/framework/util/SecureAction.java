@@ -208,7 +208,7 @@ public class SecureAction
         {
             try
             {
-                m_actions.set(Actions.MAKE_DIRECTORY_ACTION, file);
+                m_actions.set(Actions.LIST_DIRECTORY_ACTION, file);
                 return (File[]) AccessController.doPrivileged(m_actions, m_acc);
             }
             catch (PrivilegedActionException ex)
