@@ -1,0 +1,26 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.felix</groupId>
+  <artifactId>felix</artifactId>
+  <packaging>pom</packaging>
+  <name>Apache Felix (parent)</name>
+  <version>0.8-SNAPSHOT</version>
+  <modules>
+    <module>javax.servlet</module>
+    <module>tools/maven2/maven-osgi-plugin</module>
+    <module>org.osgi</module>
+    <module>org.apache.felix.framework</module>
+    <module>org.apache.felix.shell</module>
+    <module>org.apache.felix.shell.tui</module>
+    <module>org.apache.felix.daemon</module>
+    <module>org.apache.felix.main</module>
+  </modules>
+
+  <repositories>
+    <repository>
+      <id>safehaus</id>
+      <name>Alternate Repository for Missing Ibiblio Artifacts</name>
+      <url>http://m2.safehaus.org</url>
+    </repository>
+  </repositories>
+</project>
