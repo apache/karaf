@@ -143,7 +143,7 @@ public class Main
         Main.loadSystemProperties();
 
         // Read configuration properties.
-        Properties configProps = Main.readConfigProperties();
+        Properties configProps = Main.loadConfigProperties();
 
         // See if the profile name property was specified.
         String profileName = configProps.getProperty(DefaultBundleCache.CACHE_PROFILE_PROP);
@@ -204,10 +204,13 @@ public class Main
      * <p>
      * Loads the properties in the system property file associated with the
      * framework installation into <tt>System.setProperty()</tt>. These properties
-     * are not directly used by the framework in anyway. By default, the system property
-     * file is located in the same directory as the <tt>felix.jar</tt> file and
-     * is called "<tt>system.properties</tt>". This may be changed by setting the
-     * "<tt>felix.system.properties</tt>" system property to an
+     * are not directly used by the framework in anyway. By default, the system
+     * property file is located in the <tt>conf/</tt> directory of the Felix
+     * installation directory and is called "<tt>system.properties</tt>". The
+     * installation directory of Felix is assumed to be the parent directory of
+     * the <tt>felix.jar</tt> file as found on the system class path property.
+     * The precise file from which to load system properties can be set by
+     * initializing the "<tt>felix.system.properties</tt>" system property to an
      * arbitrary URL.
      * </p>
     **/
@@ -234,29 +237,30 @@ public class Main
         }
         else
         {
-            // Determine where felix.jar is located by looking at the
-            // system class path.
-            String jarLoc = null;
+            // Determine where the configuration directory is by figuring
+            // out where felix.jar is located on the system class path.
+            File confDir = null;
             String classpath = System.getProperty("java.class.path");
             int index = classpath.toLowerCase().indexOf("felix.jar");
             int start = classpath.lastIndexOf(File.pathSeparator, index) + 1;
             if (index > start)
             {
-                jarLoc = classpath.substring(start, index);
-                if (jarLoc.length() == 0)
+                String jarLocation = classpath.substring(start, index);
+                if (jarLocation.length() == 0)
                 {
-                    jarLoc = ".";
+                    jarLocation = ".";
                 }
+                confDir = new File(new File(jarLocation).getParent(), "conf");
             }
             else
             {
                 // Can't figure it out so use the current directory as default.
-                jarLoc = System.getProperty("user.dir");
+                confDir = new File(System.getProperty("user.dir"));
             }
 
             try
             {
-                propURL = new File(jarLoc, SYSTEM_PROPERTIES_FILE_VALUE).toURL();
+                propURL = new File(confDir, SYSTEM_PROPERTIES_FILE_VALUE).toURL();
             }
             catch (MalformedURLException ex)
             {
@@ -304,18 +308,21 @@ public class Main
 
     /**
      * <p>
-     * Reads the configuration properties in the configuration property
-     * file associated with the framework installation; these properties are
-     * only accessible to the framework and are intended for configuration
-     * purposes. By default, the configuration property file is located in
-     * the same directory as the <tt>felix.jar</tt> file and is called
-     * "<tt>config.properties</tt>". This may be changed by setting the
-     * "<tt>felix.config.properties</tt>" system property to an
-     * arbitrary URL.
+     * Loads the configuration properties in the configuration property file
+     * associated with the framework installation; these properties
+     * are accessible to the framework and to bundles and are intended
+     * for configuration purposes. By default, the configuration property
+     * file is located in the <tt>conf/</tt> directory of the Felix
+     * installation directory and is called "<tt>config.properties</tt>".
+     * The installation directory of Felix is assumed to be the parent
+     * directory of the <tt>felix.jar</tt> file as found on the system class
+     * path property. The precise file from which to load configuration
+     * properties can be set by initializing the "<tt>felix.config.properties</tt>"
+     * system property to an arbitrary URL.
      * </p>
      * @return A <tt>Properties</tt> instance or <tt>null</tt> if there was an error.
     **/
-    public static Properties readConfigProperties()
+    public static Properties loadConfigProperties()
     {
         // The config properties file is either specified by a system
         // property or it is in the same directory as the Felix JAR file.
@@ -338,29 +345,30 @@ public class Main
         }
         else
         {
-            // Determine where felix.jar is located by looking at the
-            // system class path.
-            String jarLoc = null;
+            // Determine where the configuration directory is by figuring
+            // out where felix.jar is located on the system class path.
+            File confDir = null;
             String classpath = System.getProperty("java.class.path");
             int index = classpath.toLowerCase().indexOf("felix.jar");
             int start = classpath.lastIndexOf(File.pathSeparator, index) + 1;
             if (index > start)
             {
-                jarLoc = classpath.substring(start, index);
-                if (jarLoc.length() == 0)
+                String jarLocation = classpath.substring(start, index);
+                if (jarLocation.length() == 0)
                 {
-                    jarLoc = ".";
+                    jarLocation = ".";
                 }
+                confDir = new File(new File(jarLocation).getParent(), "conf");
             }
             else
             {
                 // Can't figure it out so use the current directory as default.
-                jarLoc = System.getProperty("user.dir");
+                confDir = new File(System.getProperty("user.dir"));
             }
 
             try
             {
-                propURL = new File(jarLoc, CONFIG_PROPERTIES_FILE_VALUE).toURL();
+                propURL = new File(confDir, CONFIG_PROPERTIES_FILE_VALUE).toURL();
             }
             catch (MalformedURLException ex)
             {
