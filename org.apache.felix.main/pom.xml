@@ -1,5 +1,5 @@
 <project>
-  <parent>
+ <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
     <version>0.8-SNAPSHOT</version>
@@ -20,6 +20,9 @@
       <version>${pom.version}</version>
     </dependency>
   </dependencies>
+  <properties>
+    <property name="install.home" value="${basedir.absolutePath}"/>
+  </properties>
   <build>
     <plugins>
       <plugin>
@@ -34,6 +37,47 @@
           </archive>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>install</phase>
+            <configuration>
+              <tasks>
+                <delete dir="${basedir}/bin"/>
+                <mkdir dir="${basedir}/bin"/>
+                <delete dir="${basedir}/lib"/>
+                <mkdir dir="${basedir}/lib"/>
+                <delete dir="${basedir}/conf"/>
+                <mkdir dir="${basedir}/conf"/>
+                <delete dir="${basedir}/bundle"/>
+                <mkdir dir="${basedir}/bundle"/>
+<copy file="${basedir}/target/org.apache.felix.main-${pom.version}.jar"
+      tofile="${basedir}/bin/felix.jar"/>
+<copy file="${basedir}/target/classes/config.properties"
+      todir="${basedir}/conf"/>
+<copy file="${basedir}/../org.apache.felix.framework/target/org.apache.felix.framework-${pom.version}.jar"
+      todir="${basedir}/lib"/>
+<copy file="${basedir}/../org.osgi/target/org.osgi-${pom.version}.jar"
+      todir="${basedir}/lib"/>
+<copy file="${basedir}/../org.apache.felix.shell/target/org.apache.felix.shell-${pom.version}.jar"
+      todir="${basedir}/bundle"/>
+<copy file="${basedir}/../org.apache.felix.shell.tui/target/org.apache.felix.shell.tui-${pom.version}.jar"
+      todir="${basedir}/bundle"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
   </build>
 </project>
