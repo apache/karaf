@@ -154,6 +154,9 @@
               <izPackInstallFile>
                 src/main/installers/izpack-unix.xml
               </izPackInstallFile>
+              <izPackShortcutsUnixFile>
+                src/main/installers/unix_shortcuts.xml
+              </izPackShortcutsUnixFile>
               <finalName>
                 felix-${pom.version}-linux-i386-setup.jar
               </finalName>
@@ -170,6 +173,9 @@
               <izPackInstallFile>
                 src/main/installers/izpack-unix.xml
               </izPackInstallFile>
+              <izPackShortcutsUnixFile>
+                src/main/installers/unix_shortcuts.xml
+              </izPackShortcutsUnixFile>
               <osName>sunos</osName>
               <osFamily>unix</osFamily>
               <osArch>sparc</osArch>
@@ -180,6 +186,9 @@
               <izPackInstallFile>
                 src/main/installers/izpack-unix.xml
               </izPackInstallFile>
+              <izPackShortcutsUnixFile>
+                src/main/installers/unix_shortcuts.xml
+              </izPackShortcutsUnixFile>
               <finalName>
                 felix-${pom.version}-solaris-i386-setup.jar
               </finalName>
@@ -193,6 +202,9 @@
               <izPackInstallFile>
                 src/main/installers/izpack-mac.xml
               </izPackInstallFile>
+              <izPackShortcutsUnixFile>
+                src/main/installers/unix_shortcuts.xml
+              </izPackShortcutsUnixFile>
               <finalName>
                 felix-${pom.version}-macosx-ppc-setup.jar
               </finalName>

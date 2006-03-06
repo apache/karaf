@@ -77,10 +77,7 @@
       </fileset>
     
       <executable os="unix" targetfile="$INSTALL_PATH/bin/${app}" stage="never" keep="true" />
-      <singlefile os="unix" src="bin/${server.init}" target="/etc/init.d/${app}" />
       <parsable os="unix" targetfile="$INSTALL_PATH/bin/${server.init}" type="shell" />
-      <parsable os="unix" targetfile="/etc/init.d/${app}" type="shell" />
-      <executable os="unix" targetfile="/etc/init.d/${app}" stage="never" keep="true" />
       <executable os="unix" targetfile="$INSTALL_PATH/bin/${server.init}" stage="never" keep="true" />
     </pack>
   </packs>
