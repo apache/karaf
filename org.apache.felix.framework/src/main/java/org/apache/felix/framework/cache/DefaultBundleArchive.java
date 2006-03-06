@@ -725,6 +725,7 @@ public class DefaultBundleArchive
      * necessary to keep track of this so it is possible to determine what
      * kind of revision needs to be created when recreating revisions when
      * the framework restarts.
+     * </p>
      * @return the last update location.
      * @throws Exception if any error occurs.
     **/
@@ -764,6 +765,7 @@ public class DefaultBundleArchive
      * necessary to keep track of this so it is possible to determine what
      * kind of revision needs to be created when recreating revisions when
      * the framework restarts.
+     * </p>
      * @throws Exception if any error occurs.
     **/
     private void setCurrentLocation(String location) throws Exception
