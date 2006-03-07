@@ -1,0 +1,43 @@
+<project>
+  <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>0.8-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>osgi-bundle</packaging>
+  <name>Apache Felix Examples: Service Event Listener</name>
+  <artifactId>org.apache.felix.examples.eventlistener</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix.plugins</groupId>
+        <artifactId>maven-osgi-plugin</artifactId>
+        <version>${pom.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <osgiManifest>
+            <bundleName>Service listener example</bundleName>
+            <bundleDescription>
+              Bundle listening for service events: displays a message on startup and when service events occur.
+            </bundleDescription>
+            <bundleActivator>
+              org.apache.felix.examples.eventlistener.Activator
+            </bundleActivator>
+            <bundleSymbolicName>
+              org.apache.felix.examples.eventlistener
+            </bundleSymbolicName>
+          </osgiManifest>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

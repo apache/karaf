@@ -14,6 +14,7 @@
     <module>org.apache.felix.shell.tui</module>
     <module>org.apache.felix.daemon</module>
     <module>org.apache.felix.main</module>
+    <module>org.apache.felix.examples.eventlistener</module>
   </modules>
 
   <repositories>
@@ -40,7 +41,7 @@
     </snapshotRepository>
     <repository>
       <name>ASF Mirrored M2 Distributions</name>
-      <id>apache.snapshots</id>
+      <id>apache.releases</id>
       <url>
         scpexe://minotaur.apache.org/www/www.apache.org/dist/maven-repository
       </url>
@@ -52,7 +53,7 @@
       <id>apache.snapshots</id>
       <name>snapshot plugins</name>
       <url>
-        scpexe://apache.org/www/cvs.apache.org/maven-snapshot-repository
+        http://cvs.apache.org/maven-snapshot-repository
       </url>
     </pluginRepository>
   </pluginRepositories>
