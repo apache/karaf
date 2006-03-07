@@ -36,8 +36,7 @@ public class Activator implements BundleActivator, ServiceListener
      * Implements BundleActivator.start(). Prints a message and adds itself to
      * the bundle context as a service listener.
      * 
-     * @param context
-     *            the framework context for the bundle.
+     * @param context the framework context for the bundle.
      */
     public void start( BundleContext context )
     {
@@ -50,8 +49,7 @@ public class Activator implements BundleActivator, ServiceListener
      * Implements BundleActivator.stop(). Prints a message and removes itself
      * from the bundle context as a service listener.
      * 
-     * @param context
-     *            the framework context for the bundle.
+     * @param context the framework context for the bundle.
      */
     public void stop( BundleContext context )
     {
@@ -67,8 +65,7 @@ public class Activator implements BundleActivator, ServiceListener
      * Implements ServiceListener.serviceChanged(). Prints the details of any
      * service event from the framework.
      * 
-     * @param event
-     *            the fired service event.
+     * @param event the fired service event.
      */
     public void serviceChanged( ServiceEvent event )
     {
