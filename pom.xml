@@ -16,6 +16,7 @@
     <module>org.apache.felix.main</module>
     <module>org.apache.felix.examples.eventlistener</module>
     <module>org.apache.felix.examples.dictionaryservice</module>
+    <module>org.apache.felix.examples.frenchdictionary</module>
   </modules>
 
   <repositories>
