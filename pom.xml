@@ -17,10 +17,44 @@
   </modules>
 
   <repositories>
+    <!-- For snapshots (no release jars or non-apache jars)           -->
+    <repository>
+      <id>apache.snapshots</id>
+      <name>Apache Snapshot Repository</name>
+      <url>http://cvs.apache.org/maven-snapshot-repository</url>
+    </repository>
+
     <repository>
       <id>safehaus</id>
       <name>Alternate Repository for Missing Ibiblio Artifacts</name>
       <url>http://m2.safehaus.org</url>
     </repository>
   </repositories>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>apache.snapshots</id>
+      <url>
+        scpexe://apache.org/www/cvs.apache.org/maven-snapshot-repository
+      </url>
+    </snapshotRepository>
+    <repository>
+      <name>ASF Mirrored M2 Distributions</name>
+      <id>apache.snapshots</id>
+      <url>
+        scpexe://minotaur.apache.org/www/www.apache.org/dist/maven-repository
+      </url>
+    </repository>
+  </distributionManagement>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>apache.snapshots</id>
+      <name>snapshot plugins</name>
+      <url>
+        scpexe://apache.org/www/cvs.apache.org/maven-snapshot-repository
+      </url>
+    </pluginRepository>
+  </pluginRepositories>
+
 </project>

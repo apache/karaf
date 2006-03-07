@@ -14,5 +14,10 @@
       <artifactId>org.apache.felix.shell</artifactId>
       <version>${pom.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
   </dependencies>
 </project>

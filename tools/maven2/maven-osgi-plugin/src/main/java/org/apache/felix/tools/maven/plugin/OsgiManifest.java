@@ -30,6 +30,7 @@ public class OsgiManifest
 {
     private String bundleActivator;
     private String bundleName;
+    private String bundleSource;
     private String bundleDescription;
     private String bundleVendor;
     private String bundleDate;
@@ -37,6 +38,7 @@ public class OsgiManifest
     private String bundleSymbolicName;
     private String bundleDocUrl;
     private String bundleCategory;
+    private String importService;
     private String exportService;
     private String exportPackage;
     private String importPackage;
@@ -71,6 +73,11 @@ public class OsgiManifest
         if ( getExportService() != null )
         {
             entries.put( "Export-Service", getExportService() );
+        }
+
+        if ( getImportService() != null )
+        {
+            entries.put( "Import-Service", getImportService() );
         }
 
         if ( getExportPackage() != null )
@@ -117,6 +124,11 @@ public class OsgiManifest
         if ( getBundleDocUrl() != null )
         {
             entries.put( "Bundle-DocUrl", getBundleDocUrl() );
+        }
+
+        if ( getBundleDocUrl() != null )
+        {
+            entries.put( "Bundle-Source", getBundleSource() );
         }
 
         return entries;
@@ -260,5 +272,25 @@ public class OsgiManifest
     public void setMetadataLocation( String metadataLocation )
     {
         this.metadataLocation = metadataLocation;
+    }
+
+    public void setBundleSource( String bundleSource )
+    {
+        this.bundleSource = bundleSource;
+    }
+
+    public String getBundleSource()
+    {
+        return bundleSource;
+    }
+
+    public void setImportService( String importService )
+    {
+        this.importService = importService;
+    }
+
+    public String getImportService()
+    {
+        return importService;
     }
 }
