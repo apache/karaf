@@ -15,6 +15,12 @@
       <version>${pom.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.examples.dictionaryservice</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -33,6 +39,9 @@
             <bundleActivator>
               org.apache.felix.examples.spellcheckservice.impl.Activator
             </bundleActivator>
+            <importPackage>
+              org.apache.felix.examples.dictionaryservice
+            </importPackage>
             <exportPackage>
               org.apache.felix.examples.spellcheckservice
             </exportPackage>
