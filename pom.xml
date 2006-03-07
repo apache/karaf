@@ -20,6 +20,7 @@
     <module>org.apache.felix.examples.dictionaryclient</module>
     <module>org.apache.felix.examples.dictionaryclient2</module>
     <module>org.apache.felix.examples.spellcheckservice</module>
+    <module>org.apache.felix.examples.spellcheckclient</module>
   </modules>
 
   <repositories>
