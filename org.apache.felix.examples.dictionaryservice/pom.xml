@@ -1,0 +1,44 @@
+<project>
+  <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>0.8-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>osgi-bundle</packaging>
+  <name>Apache Felix Examples: English Dictionary Service</name>
+  <artifactId>org.apache.felix.examples.dictionaryservice</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix.plugins</groupId>
+        <artifactId>maven-osgi-plugin</artifactId>
+        <version>${pom.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <osgiManifest>
+            <bundleName>English Dictionary Example</bundleName>
+            <bundleVendor>Apache Software Foundation</bundleVendor>
+            <bundleDescription>
+              A bundle that registersan English dictionary service.
+            </bundleDescription>
+            <bundleActivator>
+              org.apache.felix.examples.dictionaryservice.impl.Activator
+            </bundleActivator>
+            <exportPackage>
+              org.apache.felix.examples.dictionaryservice
+            </exportPackage>
+          </osgiManifest>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
