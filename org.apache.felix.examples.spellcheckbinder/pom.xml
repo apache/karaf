@@ -43,11 +43,16 @@
         <extensions>true</extensions>
         <configuration>
           <osgiManifest>
+            <entries>
+              <property>
+                <name>Metadata-Location</name>
+                <value>metadata.xml</value>
+              </property>
+            </entries>
             <bundleName>Spell Check w/ ServiceBinder Example</bundleName>
             <bundleVendor>Apache Software Foundation</bundleVendor>
             <bundleDescription>
-              A bundle that registers a spell checking service based on 
-              service binder.
+              A bundle that registers a spell checking service based on service binder.
             </bundleDescription>
             <bundleActivator>
               org.apache.felix.examples.spellcheckbinder.Activator

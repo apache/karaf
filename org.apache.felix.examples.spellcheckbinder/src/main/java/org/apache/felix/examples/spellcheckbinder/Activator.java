@@ -17,25 +17,23 @@
 package org.apache.felix.examples.spellcheckbinder;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.StringTokenizer;
-
-import org.apache.felix.examples.dictionaryservice.DictionaryService;
-import org.apache.felix.examples.spellcheckservice.SpellCheckService;
-
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
+import org.ungoverned.gravity.servicebinder.GenericActivator;
 
 
 /**
+ * This example re-implements the spell check service of Example 5 using the
+ * Gravity Service Binder. The Service Binder greatly simplifies creating OSGi
+ * applications by essentially eliminating the need to write OSGi-related code;
+ * instead of writing OSGi code for you bundle, you create a simple XML file to
+ * describe your bundle's service dependencies. This class extends the generic
+ * bundle activator; it does not provide any additional functionality. All
+ * functionality for service-related tasks, such as look-up and binding, is
+ * handled by the generic activator base class using data from the metadata.xml
+ * file. All application functionality is defined in the
+ * SpellCheckServiceImpl.java file.
  * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public class Activator
+public class Activator extends GenericActivator
 {
 }

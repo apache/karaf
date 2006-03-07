@@ -17,8 +17,9 @@
 
 package org.apache.felix.tools.maven.plugin;
 
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.Properties;
+
 
 /**
  * Hold values for an OSGi jar "bundle" manifest.
@@ -46,9 +47,9 @@ public class OsgiManifest
 
     // private String bundleClasspath;
 
-    private Map entries = new HashMap();
+    private Properties entries = new Properties();
 
-    public Map getEntries()
+    public Properties getEntries()
     {
         if ( getBundleActivator() != null )
         {
