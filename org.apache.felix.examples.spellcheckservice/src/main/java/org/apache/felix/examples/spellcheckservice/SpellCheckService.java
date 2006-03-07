@@ -14,23 +14,13 @@
  *   limitations under the License.
  *
  */
-package org.apache.felix.examples.dictionaryservice;
+package org.apache.felix.examples.spellcheckservice;
 
 
 /**
- * A simple service interface that defines a dictionary service. A dictionary
- * service simply verifies the existence of a word.
  * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public interface DictionaryService
+public interface SpellCheckService
 {
-    /**
-     * Check for the existence of a word.
-     * 
-     * @param word the word to be checked.
-     * @return true if the word is in the dictionary, false otherwise.
-     */
-    public boolean checkWord( String word );
-
 }
