@@ -9,6 +9,16 @@
   <artifactId>maven-osgi-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Maven OSGi Plugin</name>
+
+  <repositories>
+    <!-- For snapshots (no release jars or non-apache jars)           -->
+    <repository>
+      <id>apache.snapshots</id>
+      <name>Apache Snapshot Repository</name>
+      <url>http://cvs.apache.org/maven-snapshot-repository</url>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.maven</groupId>
