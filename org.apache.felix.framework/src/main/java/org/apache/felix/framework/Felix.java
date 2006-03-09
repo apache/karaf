@@ -3323,8 +3323,6 @@ public class Felix
             FelixConstants.FRAMEWORK_PROCESSOR,
             System.getProperty("os.arch"));
         m_configMutable.put(FelixConstants.FRAMEWORK_PROCESSOR, s);
-
-        
         m_configMutable.put(
             FelixConstants.FELIX_VERSION_PROPERTY, getFrameworkVersion());
     }
@@ -3346,8 +3344,18 @@ public class Felix
         {
             ex.printStackTrace();
         } 
-        
-        return props.getProperty(FelixConstants.FELIX_VERSION_PROPERTY, "unknown");
+ 
+        // Maven uses a '-' to separate the version qualifier,
+        // while OSGi uses a '.', so we need to convert to a '.'
+        StringBuffer sb =
+            new StringBuffer(
+                props.getProperty(
+                    FelixConstants.FELIX_VERSION_PROPERTY, "unknown"));
+        if (sb.indexOf("-") >= 0)
+        {
+            sb.setCharAt(sb.indexOf("-"), '.');
+        }
+        return sb.toString();
     }
     
     private void processAutoProperties()

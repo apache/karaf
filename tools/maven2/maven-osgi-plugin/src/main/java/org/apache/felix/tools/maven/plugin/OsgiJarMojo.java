@@ -269,7 +269,14 @@ public class OsgiJarMojo extends AbstractMojo
      */
     private void addBundleVersion()
     {
-        archiveConfig.addManifestEntry( "Bundle-Version", project.getVersion() );
+        // Maven uses a '-' to separate the version qualifier,
+        // while OSGi uses a '.', so we need to convert to a '.'
+        StringBuffer sb = new StringBuffer(project.getVersion());
+        if (sb.indexOf("-") >= 0)
+        {
+            sb.setCharAt(sb.indexOf("-"), '.');
+        }
+        archiveConfig.addManifestEntry( "Bundle-Version", sb.toString() );
     }
 
     /**
