@@ -3326,42 +3326,30 @@ public class Felix
 
         
         m_configMutable.put(
-            FelixConstants.FELIX_VERSION_PROPERTY, getVersion() );
+            FelixConstants.FELIX_VERSION_PROPERTY, getFrameworkVersion());
     }
 
-
-    private static final String FELIX_VERSION_VALUE;
-    
-    static
-    {
-        FELIX_VERSION_VALUE = getVersion0();
-    }
-    
-    
-    private static String getVersion0()
+    /**
+     * Read the framework version from the property file.
+     * @return the framework version as a string.
+    **/
+    private static String getFrameworkVersion()
     {
         // The framework version property.
         Properties props = new Properties();
-        InputStream in = Felix.class.getResourceAsStream( "Felix.properties" );
+        InputStream in = Felix.class.getResourceAsStream("Felix.properties");
         try
         {
-            props.load( in );
+            props.load(in);
         }
-        catch ( IOException e )
+        catch (IOException ex)
         {
-            e.printStackTrace();
+            ex.printStackTrace();
         } 
         
-        return props.getProperty( FelixConstants.FELIX_VERSION_PROPERTY, "unknown" );
-    }
-
-    
-    public static String getVersion()
-    {
-        return FELIX_VERSION_VALUE;
+        return props.getProperty(FelixConstants.FELIX_VERSION_PROPERTY, "unknown");
     }
     
-
     private void processAutoProperties()
     {
         // The auto-install property specifies a space-delimited list of

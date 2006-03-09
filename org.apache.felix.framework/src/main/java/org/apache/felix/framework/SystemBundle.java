@@ -126,8 +126,10 @@ class SystemBundle extends BundleImpl
 
         // Initialize header map as a case insensitive map.
         Map map = new StringMap(false);
-        map.put(FelixConstants.BUNDLE_VERSION, Felix.getVersion() );
-        map.put(FelixConstants.BUNDLE_SYMBOLICNAME, FelixConstants.SYSTEM_BUNDLE_SYMBOLICNAME);
+        map.put(FelixConstants.BUNDLE_VERSION,
+            getFelix().getConfig().get(FelixConstants.FELIX_VERSION_PROPERTY));
+        map.put(FelixConstants.BUNDLE_SYMBOLICNAME,
+            FelixConstants.SYSTEM_BUNDLE_SYMBOLICNAME);
         map.put(FelixConstants.BUNDLE_NAME, "System Bundle");
         map.put(FelixConstants.BUNDLE_DESCRIPTION,
             "This bundle is system specific; it implements various system services.");
