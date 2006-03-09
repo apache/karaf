@@ -43,6 +43,7 @@ public class OsgiManifest
     private String exportService;
     private String exportPackage;
     private String importPackage;
+    private String dynamicImportPackage;
     private String metadataLocation;
 
     // private String bundleClasspath;
@@ -89,6 +90,11 @@ public class OsgiManifest
         if ( getImportPackage() != null )
         {
             entries.put( "Import-Package", getImportPackage() );
+        }
+
+        if ( getDynamicImportPackage() != null )
+        {
+            entries.put( "DynamicImport-Package", getDynamicImportPackage() );
         }
 
         /*
@@ -223,6 +229,16 @@ public class OsgiManifest
     public void setImportPackage( String importPackage )
     {
         this.importPackage = importPackage;
+    }
+
+    public String getDynamicImportPackage()
+    {
+        return dynamicImportPackage;
+    }
+
+    public void setDynamicImportPackage( String importPackage )
+    {
+        dynamicImportPackage = importPackage;
     }
 
     /*
