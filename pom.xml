@@ -4,7 +4,7 @@
   <artifactId>felix</artifactId>
   <packaging>pom</packaging>
   <name>Apache Felix (parent)</name>
-  <version>0.8-SNAPSHOT</version>
+  <version>0.8.0-SNAPSHOT</version>
   <modules>
     <!-- <module>javax.servlet</module> -->
     <module>tools/maven2/maven-osgi-plugin</module>
