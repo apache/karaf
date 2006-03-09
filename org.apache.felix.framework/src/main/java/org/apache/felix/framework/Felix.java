@@ -3324,11 +3324,43 @@ public class Felix
             System.getProperty("os.arch"));
         m_configMutable.put(FelixConstants.FRAMEWORK_PROCESSOR, s);
 
-        // The framework version property.
+        
         m_configMutable.put(
-            FelixConstants.FELIX_VERSION_PROPERTY,
-            FelixConstants.FELIX_VERSION_VALUE);
+            FelixConstants.FELIX_VERSION_PROPERTY, getVersion() );
     }
+
+
+    private static final String FELIX_VERSION_VALUE;
+    
+    static
+    {
+        FELIX_VERSION_VALUE = getVersion0();
+    }
+    
+    
+    private static String getVersion0()
+    {
+        // The framework version property.
+        Properties props = new Properties();
+        InputStream in = Felix.class.getResourceAsStream( "Felix.properties" );
+        try
+        {
+            props.load( in );
+        }
+        catch ( IOException e )
+        {
+            e.printStackTrace();
+        } 
+        
+        return props.getProperty( FelixConstants.FELIX_VERSION_PROPERTY, "unknown" );
+    }
+
+    
+    public static String getVersion()
+    {
+        return FELIX_VERSION_VALUE;
+    }
+    
 
     private void processAutoProperties()
     {

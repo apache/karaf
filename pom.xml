@@ -6,7 +6,7 @@
   <name>Apache Felix (parent)</name>
   <version>0.8-SNAPSHOT</version>
   <modules>
-    <module>javax.servlet</module>
+    <!-- <module>javax.servlet</module> -->
     <module>tools/maven2/maven-osgi-plugin</module>
     <module>org.osgi</module>
     <module>org.apache.felix.framework</module>
@@ -41,6 +41,7 @@
 
   <distributionManagement>
     <snapshotRepository>
+      <name>Apache Snapshots</name>
       <id>apache.snapshots</id>
       <url>
         scpexe://apache.org/www/cvs.apache.org/maven-snapshot-repository
@@ -48,7 +49,7 @@
     </snapshotRepository>
     <repository>
       <name>ASF Mirrored M2 Distributions</name>
-      <id>apache.releases</id>
+      <id>apache.distributions</id>
       <url>
         scpexe://minotaur.apache.org/www/www.apache.org/dist/maven-repository
       </url>

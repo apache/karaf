@@ -24,6 +24,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 
+import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.installer.artifact.*;
 import org.apache.felix.framework.installer.editor.BooleanEditor;
 import org.apache.felix.framework.installer.editor.FileEditor;
@@ -107,7 +108,7 @@ public class Install extends JFrame
             "User documentation",
             true,
             "http://download.forge.objectweb.org/oscar/oscar-doc-"
-            + FelixConstants.FELIX_VERSION_VALUE + ".jar");
+           + Felix.getVersion() + ".jar");
         list.add(prop);
 
         // Add the documentation URL property.
@@ -115,7 +116,7 @@ public class Install extends JFrame
             "API documentation",
             true,
             "http://download.forge.objectweb.org/oscar/oscar-api-"
-            + FelixConstants.FELIX_VERSION_VALUE + ".jar");
+            + Felix.getVersion() + ".jar");
         list.add(prop);
 
         return list;
@@ -283,7 +284,7 @@ public class Install extends JFrame
     public static void main(String[] argv) throws Exception
     {
         String msg = "<html>"
-            + "<center><h1>Felix " + FelixConstants.FELIX_VERSION_VALUE + "</h1></center>"
+            + "<center><h1>Felix " + Felix.getVersion() + "</h1></center>"
             + "You can download example bundles at the Felix impl prompt by<br>"
             + "using the <b><tt>obr</tt></b> command to access the OSGi Bundle Repository;<br>"
             + "type <b><tt>obr help</tt></b> at the Felix impl prompt for details."
