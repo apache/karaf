@@ -17,7 +17,7 @@
     <dependency>
       <groupId>org.apache.directory.daemon</groupId>
       <artifactId>daemon-bootstrappers</artifactId>
-      <version>1.0-RC1</version>
+      <version>1.0-RC2-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
