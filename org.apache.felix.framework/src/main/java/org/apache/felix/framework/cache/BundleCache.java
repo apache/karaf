@@ -67,9 +67,9 @@ import org.apache.felix.framework.util.SecureAction;
  * For specific information on how to configure Felix using system properties,
  * refer to the Felix usage documentation.
  * </p>
- * @see org.apache.felix.framework.util.DefaultBundleArchive
+ * @see org.apache.felix.framework.util.BundleArchive
 **/
-public class DefaultBundleCache
+public class BundleCache
 {
     public static final String CACHE_BUFSIZE_PROP = "felix.cache.bufsize";
     public static final String CACHE_DIR_PROP = "felix.cache.dir";
@@ -83,11 +83,11 @@ public class DefaultBundleCache
     private PropertyResolver m_cfg = null;
     private Logger m_logger = null;
     private File m_profileDir = null;
-    private DefaultBundleArchive[] m_archives = null;
+    private BundleArchive[] m_archives = null;
 
     private static SecureAction m_secureAction = new SecureAction();
 
-    public DefaultBundleCache(PropertyResolver cfg, Logger logger)
+    public BundleCache(PropertyResolver cfg, Logger logger)
         throws Exception
     {
         m_cfg = cfg;
@@ -100,13 +100,13 @@ public class DefaultBundleCache
         return m_secureAction;
     }
 
-    public synchronized DefaultBundleArchive[] getArchives()
+    public synchronized BundleArchive[] getArchives()
         throws Exception
     {
         return m_archives;
     }
 
-    public synchronized DefaultBundleArchive getArchive(long id)
+    public synchronized BundleArchive getArchive(long id)
         throws Exception
     {
         for (int i = 0; i < m_archives.length; i++)
@@ -119,7 +119,7 @@ public class DefaultBundleCache
         return null;
     }
 
-    public synchronized int getArchiveIndex(DefaultBundleArchive ba)
+    public synchronized int getArchiveIndex(BundleArchive ba)
     {
         for (int i = 0; i < m_archives.length; i++)
         {
@@ -131,7 +131,7 @@ public class DefaultBundleCache
         return -1;
     }
 
-    public synchronized DefaultBundleArchive create(
+    public synchronized BundleArchive create(
         long id, String location, InputStream is)
         throws Exception
     {
@@ -142,9 +142,9 @@ public class DefaultBundleCache
         try
         {
             // Create the archive and add it to the list of archives.
-            DefaultBundleArchive ba =
-                new DefaultBundleArchive(m_logger, archiveRootDir, id, location, is);
-            DefaultBundleArchive[] tmp = new DefaultBundleArchive[m_archives.length + 1];
+            BundleArchive ba =
+                new BundleArchive(m_logger, archiveRootDir, id, location, is);
+            BundleArchive[] tmp = new BundleArchive[m_archives.length + 1];
             System.arraycopy(m_archives, 0, tmp, 0, m_archives.length);
             tmp[m_archives.length] = ba;
             m_archives = tmp;
@@ -154,7 +154,7 @@ public class DefaultBundleCache
         {
             if (m_secureAction.fileExists(archiveRootDir))
             {
-                if (!DefaultBundleCache.deleteDirectoryTree(archiveRootDir))
+                if (!BundleCache.deleteDirectoryTree(archiveRootDir))
                 {
                     m_logger.log(
                         Logger.LOG_ERROR,
@@ -167,7 +167,7 @@ public class DefaultBundleCache
         }
     }
 
-    public synchronized void remove(DefaultBundleArchive ba)
+    public synchronized void remove(BundleArchive ba)
         throws Exception
     {
         // Remove the archive.
@@ -176,8 +176,8 @@ public class DefaultBundleCache
         int idx = getArchiveIndex(ba);
         if (idx >= 0)
         {
-            DefaultBundleArchive[] tmp =
-                new DefaultBundleArchive[m_archives.length - 1];
+            BundleArchive[] tmp =
+                new BundleArchive[m_archives.length - 1];
             System.arraycopy(m_archives, 0, tmp, 0, idx);
             if (idx < tmp.length)
             {
@@ -330,7 +330,7 @@ public class DefaultBundleCache
                 try
                 {
                     archiveList.add(
-                        new DefaultBundleArchive(m_logger, children[i]));
+                        new BundleArchive(m_logger, children[i]));
                 }
                 catch (Exception ex)
                 {
@@ -341,7 +341,7 @@ public class DefaultBundleCache
             }
         }
         
-        m_archives = (DefaultBundleArchive[])
-            archiveList.toArray(new DefaultBundleArchive[archiveList.size()]);
+        m_archives = (BundleArchive[])
+            archiveList.toArray(new BundleArchive[archiveList.size()]);
     }
 }

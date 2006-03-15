@@ -66,8 +66,8 @@ class JarRevision extends BundleRevision
         if (byReference)
         {
             m_bundleFile = new File(location.substring(
-                location.indexOf(DefaultBundleArchive.FILE_PROTOCOL)
-                    + DefaultBundleArchive.FILE_PROTOCOL.length()));
+                location.indexOf(BundleArchive.FILE_PROTOCOL)
+                    + BundleArchive.FILE_PROTOCOL.length()));
         }
         else
         {
@@ -91,7 +91,7 @@ class JarRevision extends BundleRevision
         try
         {
             // Open bundle JAR file.
-            jarFile = DefaultBundleCache.getSecureAction().openJAR(m_bundleFile);
+            jarFile = BundleCache.getSecureAction().openJAR(m_bundleFile);
             // Error if no jar file.
             if (jarFile == null)
             {
@@ -144,7 +144,7 @@ class JarRevision extends BundleRevision
         JarFile bundleJar = null;
         try
         {
-            bundleJar = DefaultBundleCache.getSecureAction().openJAR(m_bundleFile);
+            bundleJar = BundleCache.getSecureAction().openJAR(m_bundleFile);
             IContent self = new JarContent(m_bundleFile);
             IContent[] contentPath = new IContent[classPathStrings.length];
             for (int i = 0; i < classPathStrings.length; i++)
@@ -194,37 +194,37 @@ class JarRevision extends BundleRevision
         // Make sure that the library's parent directory exists;
         // it may be in a sub-directory.
         libDir = libFile.getParentFile();
-        if (!DefaultBundleCache.getSecureAction().fileExists(libDir))
+        if (!BundleCache.getSecureAction().fileExists(libDir))
         {
-            if (!DefaultBundleCache.getSecureAction().mkdirs(libDir))
+            if (!BundleCache.getSecureAction().mkdirs(libDir))
             {
                 throw new IOException("Unable to create library directory.");
             }
         }
         // Extract the library from the JAR file if it does not
         // already exist.
-        if (!DefaultBundleCache.getSecureAction().fileExists(libFile))
+        if (!BundleCache.getSecureAction().fileExists(libFile))
         {
             JarFile bundleJar = null;
             InputStream is = null;
 
             try
             {
-                bundleJar = DefaultBundleCache.getSecureAction().openJAR(m_bundleFile);
+                bundleJar = BundleCache.getSecureAction().openJAR(m_bundleFile);
                 ZipEntry ze = bundleJar.getEntry(libName);
                 if (ze == null)
                 {
                     throw new IOException("No JAR entry: " + libName);
                 }
                 is = new BufferedInputStream(
-                    bundleJar.getInputStream(ze), DefaultBundleCache.BUFSIZE);
+                    bundleJar.getInputStream(ze), BundleCache.BUFSIZE);
                 if (is == null)
                 {
                     throw new IOException("No input stream: " + libName);
                 }
 
                 // Create the file.
-                DefaultBundleCache.copyStreamToFile(is, libFile);
+                BundleCache.copyStreamToFile(is, libFile);
             }
             finally
             {
@@ -233,7 +233,7 @@ class JarRevision extends BundleRevision
             }
         }
 
-        return DefaultBundleCache.getSecureAction().getAbsolutePath(libFile);
+        return BundleCache.getSecureAction().getAbsolutePath(libFile);
     }
 
     public void dispose() throws Exception
@@ -254,13 +254,13 @@ class JarRevision extends BundleRevision
         {
             // If the revision directory exists, then we don't
             // need to initialize since it has already been done.
-            if (DefaultBundleCache.getSecureAction().fileExists(getRevisionRootDir()))
+            if (BundleCache.getSecureAction().fileExists(getRevisionRootDir()))
             {
                 return;
             }
 
             // Create revision directory, if it does not exist.
-            if (!DefaultBundleCache.getSecureAction().mkdir(getRevisionRootDir()))
+            if (!BundleCache.getSecureAction().mkdir(getRevisionRootDir()))
             {
                 getLogger().log(
                     Logger.LOG_ERROR,
@@ -278,7 +278,7 @@ class JarRevision extends BundleRevision
                     URLConnection conn = url.openConnection(); 
         
                     // Support for http proxy authentication.
-                    String auth = DefaultBundleCache.getSecureAction()
+                    String auth = BundleCache.getSecureAction()
                         .getSystemProperty("http.proxyAuth", null);
                     if ((auth != null) && (auth.length() > 0))
                     {
@@ -294,7 +294,7 @@ class JarRevision extends BundleRevision
                 }
     
                 // Save the bundle jar file.
-                DefaultBundleCache.copyStreamToFile(is, m_bundleFile);
+                BundleCache.copyStreamToFile(is, m_bundleFile);
             }
 
             // This will always be revision zero.
@@ -320,18 +320,18 @@ class JarRevision extends BundleRevision
         //
 
         File embedDir = new File(getRevisionRootDir(), EMBEDDED_DIRECTORY);
-        if (!DefaultBundleCache.getSecureAction().fileExists(embedDir))
+        if (!BundleCache.getSecureAction().fileExists(embedDir))
         {
-            if (!DefaultBundleCache.getSecureAction().mkdir(embedDir))
+            if (!BundleCache.getSecureAction().mkdir(embedDir))
             {
                 throw new IOException("Could not create embedded JAR directory.");
             }
         }
 
         File libDir = new File(getRevisionRootDir(), LIBRARY_DIRECTORY);
-        if (!DefaultBundleCache.getSecureAction().fileExists(libDir))
+        if (!BundleCache.getSecureAction().fileExists(libDir))
         {
-            if (!DefaultBundleCache.getSecureAction().mkdir(libDir))
+            if (!BundleCache.getSecureAction().mkdir(libDir))
             {
                 throw new IOException("Unable to create native library directory.");
             }
@@ -394,14 +394,14 @@ class JarRevision extends BundleRevision
         File jarFile = new File(
             getRevisionRootDir(), EMBEDDED_DIRECTORY + File.separatorChar + jarPath);
 
-        if (!DefaultBundleCache.getSecureAction().fileExists(jarFile))
+        if (!BundleCache.getSecureAction().fileExists(jarFile))
         {
             JarFile bundleJar = null;
             InputStream is = null;
             try
             {
                 // Make sure class path entry is a JAR file.
-                bundleJar = DefaultBundleCache.getSecureAction().openJAR(m_bundleFile);
+                bundleJar = BundleCache.getSecureAction().openJAR(m_bundleFile);
                 ZipEntry ze = bundleJar.getEntry(jarPath);
                 if (ze == null)
                 {
@@ -415,22 +415,22 @@ class JarRevision extends BundleRevision
                     // Make sure that the embedded JAR's parent directory exists;
                     // it may be in a sub-directory.
                     File jarDir = jarFile.getParentFile();
-                    if (!DefaultBundleCache.getSecureAction().fileExists(jarDir))
+                    if (!BundleCache.getSecureAction().fileExists(jarDir))
                     {
-                        if (!DefaultBundleCache.getSecureAction().mkdirs(jarDir))
+                        if (!BundleCache.getSecureAction().mkdirs(jarDir))
                         {
                             throw new IOException("Unable to create embedded JAR directory.");
                         }
                     }
     
                     // Extract embedded JAR into its directory.
-                    is = new BufferedInputStream(bundleJar.getInputStream(ze), DefaultBundleCache.BUFSIZE);
+                    is = new BufferedInputStream(bundleJar.getInputStream(ze), BundleCache.BUFSIZE);
                     if (is == null)
                     {
                         throw new IOException("No input stream: " + jarPath);
                     }
                     // Copy the file.
-                    DefaultBundleCache.copyStreamToFile(is, jarFile);
+                    BundleCache.copyStreamToFile(is, jarFile);
                 }
             }
             finally

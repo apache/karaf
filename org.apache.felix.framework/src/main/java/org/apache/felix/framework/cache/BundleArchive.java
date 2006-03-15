@@ -61,7 +61,7 @@ import org.osgi.framework.BundleActivator;
  * @see org.apache.felix.framework.cache.BundleCache
  * @see org.apache.felix.framework.cache.BundleRevision
 **/
-public class DefaultBundleArchive
+public class BundleArchive
 {
     public static final transient String FILE_PROTOCOL = "file:";
     public static final transient String REFERENCE_PROTOCOL = "reference:";
@@ -97,7 +97,7 @@ public class DefaultBundleArchive
      * because it is special an is not really an archive.
      * </p>
     **/
-    DefaultBundleArchive()
+    BundleArchive()
     {
     }
 
@@ -118,7 +118,7 @@ public class DefaultBundleArchive
      * @param is input stream from which to read the bundle content.
      * @throws Exception if any error occurs.
     **/
-    public DefaultBundleArchive(
+    public BundleArchive(
         Logger logger, File archiveRootDir, long id, String location, InputStream is)    
         throws Exception
     {
@@ -151,7 +151,7 @@ public class DefaultBundleArchive
      * @param id the bundle identifier associated with the archive.
      * @throws Exception if any error occurs.
     **/
-    public DefaultBundleArchive(Logger logger, File archiveRootDir)    
+    public BundleArchive(Logger logger, File archiveRootDir)    
         throws Exception
     {
         m_logger = logger;
@@ -180,7 +180,7 @@ public class DefaultBundleArchive
         BufferedReader br = null;
         try
         {
-            is = DefaultBundleCache.getSecureAction()
+            is = BundleCache.getSecureAction()
                 .getFileInputStream(new File(m_archiveRootDir, BUNDLE_ID_FILE));
             br = new BufferedReader(new InputStreamReader(is));
             m_id = Long.parseLong(br.readLine());
@@ -194,7 +194,7 @@ public class DefaultBundleArchive
             // into them. Eventually, this can be removed.
             m_id = Long.parseLong(
                 m_archiveRootDir.getName().substring(
-                    DefaultBundleCache.BUNDLE_DIR_PREFIX.length()));
+                    BundleCache.BUNDLE_DIR_PREFIX.length()));
         }
         finally
         {
@@ -224,7 +224,7 @@ public class DefaultBundleArchive
         BufferedReader br = null;
         try
         {
-            is = DefaultBundleCache.getSecureAction()
+            is = BundleCache.getSecureAction()
                 .getFileInputStream(new File(m_archiveRootDir, BUNDLE_LOCATION_FILE));
             br = new BufferedReader(new InputStreamReader(is));
             m_originalLocation = br.readLine();
@@ -258,7 +258,7 @@ public class DefaultBundleArchive
 
         // If the state file doesn't exist, then
         // assume the bundle was installed.
-        if (!DefaultBundleCache.getSecureAction().fileExists(stateFile))
+        if (!BundleCache.getSecureAction().fileExists(stateFile))
         {
             return Bundle.INSTALLED;
         }
@@ -268,7 +268,7 @@ public class DefaultBundleArchive
         BufferedReader br = null;
         try
         {
-            is = DefaultBundleCache.getSecureAction()
+            is = BundleCache.getSecureAction()
                 .getFileInputStream(stateFile);
             br = new BufferedReader(new InputStreamReader(is));
             String s = br.readLine();
@@ -309,7 +309,7 @@ public class DefaultBundleArchive
         BufferedWriter bw= null;
         try
         {
-            os = DefaultBundleCache.getSecureAction()
+            os = BundleCache.getSecureAction()
                 .getFileOutputStream(new File(m_archiveRootDir, BUNDLE_STATE_FILE));
             bw = new BufferedWriter(new OutputStreamWriter(os));
             String s = null;
@@ -361,7 +361,7 @@ public class DefaultBundleArchive
 
         // If the start level file doesn't exist, then
         // return an error.
-        if (!DefaultBundleCache.getSecureAction().fileExists(levelFile))
+        if (!BundleCache.getSecureAction().fileExists(levelFile))
         {
             return -1;
         }
@@ -371,7 +371,7 @@ public class DefaultBundleArchive
         BufferedReader br= null;
         try
         {
-            is = DefaultBundleCache.getSecureAction()
+            is = BundleCache.getSecureAction()
                 .getFileInputStream(levelFile);
             br = new BufferedReader(new InputStreamReader(is));
             m_startLevel = Integer.parseInt(br.readLine());
@@ -398,7 +398,7 @@ public class DefaultBundleArchive
         BufferedWriter bw = null;
         try
         {
-            os = DefaultBundleCache.getSecureAction()
+            os = BundleCache.getSecureAction()
                 .getFileOutputStream(new File(m_archiveRootDir, BUNDLE_START_LEVEL_FILE));
             bw = new BufferedWriter(new OutputStreamWriter(os));
             String s = Integer.toString(level);
@@ -438,9 +438,9 @@ public class DefaultBundleArchive
         // Get bundle data directory.
         File dataDir = new File(m_archiveRootDir, DATA_DIRECTORY);
         // Create the data directory if necessary.
-        if (!DefaultBundleCache.getSecureAction().fileExists(dataDir))
+        if (!BundleCache.getSecureAction().fileExists(dataDir))
         {
-            if (!DefaultBundleCache.getSecureAction().mkdir(dataDir))
+            if (!BundleCache.getSecureAction().mkdir(dataDir))
             {
                 throw new IOException("Unable to create bundle data directory.");
             }
@@ -465,7 +465,7 @@ public class DefaultBundleArchive
         File activatorFile = new File(m_archiveRootDir, BUNDLE_ACTIVATOR_FILE);
         // If the activator file doesn't exist, then
         // assume there isn't one.
-        if (!DefaultBundleCache.getSecureAction().fileExists(activatorFile))
+        if (!BundleCache.getSecureAction().fileExists(activatorFile))
         {
             return null;
         }
@@ -475,7 +475,7 @@ public class DefaultBundleArchive
         ObjectInputStreamX ois = null;
         try
         {
-            is = DefaultBundleCache.getSecureAction()
+            is = BundleCache.getSecureAction()
                 .getFileInputStream(activatorFile);
             ois = new ObjectInputStreamX(is, module);
             Object o = ois.readObject();
@@ -515,7 +515,7 @@ public class DefaultBundleArchive
         ObjectOutputStream oos = null;
         try
         {
-            os = DefaultBundleCache.getSecureAction()
+            os = BundleCache.getSecureAction()
                 .getFileOutputStream(new File(m_archiveRootDir, BUNDLE_ACTIVATOR_FILE));
             oos = new ObjectOutputStream(os);
             oos.writeObject(obj);
@@ -621,9 +621,9 @@ public class DefaultBundleArchive
         {
             m_revisions[i].dispose();
             revisionDir = new File(m_archiveRootDir, REVISION_DIRECTORY + refreshCount + "." + i);
-            if (DefaultBundleCache.getSecureAction().fileExists(revisionDir))
+            if (BundleCache.getSecureAction().fileExists(revisionDir))
             {
-                DefaultBundleCache.deleteDirectoryTree(revisionDir);
+                BundleCache.deleteDirectoryTree(revisionDir);
             }
         }
 
@@ -639,7 +639,7 @@ public class DefaultBundleArchive
         // of the new refresh level.
         File currentDir = new File(m_archiveRootDir, REVISION_DIRECTORY + (refreshCount + 1) + ".0");
         revisionDir = new File(m_archiveRootDir, REVISION_DIRECTORY + refreshCount + "." + (count - 1));
-        DefaultBundleCache.getSecureAction().renameFile(revisionDir, currentDir);
+        BundleCache.getSecureAction().renameFile(revisionDir, currentDir);
 
         // Null the revision array since they are all invalid now.
         m_revisions = null;
@@ -657,7 +657,7 @@ public class DefaultBundleArchive
     **/
     /* package */ void dispose() throws Exception
     {
-        if (!DefaultBundleCache.deleteDirectoryTree(m_archiveRootDir))
+        if (!BundleCache.deleteDirectoryTree(m_archiveRootDir))
         {
             m_logger.log(
                 Logger.LOG_ERROR,
@@ -683,13 +683,13 @@ public class DefaultBundleArchive
         {
             // If the archive directory exists, then we don't
             // need to initialize since it has already been done.
-            if (DefaultBundleCache.getSecureAction().fileExists(m_archiveRootDir))
+            if (BundleCache.getSecureAction().fileExists(m_archiveRootDir))
             {
                 return;
             }
 
             // Create archive directory, if it does not exist.
-            if (!DefaultBundleCache.getSecureAction().mkdir(m_archiveRootDir))
+            if (!BundleCache.getSecureAction().mkdir(m_archiveRootDir))
             {
                 m_logger.log(
                     Logger.LOG_ERROR,
@@ -698,7 +698,7 @@ public class DefaultBundleArchive
             }
 
             // Save id.
-            os = DefaultBundleCache.getSecureAction()
+            os = BundleCache.getSecureAction()
                 .getFileOutputStream(new File(m_archiveRootDir, BUNDLE_ID_FILE));
             bw = new BufferedWriter(new OutputStreamWriter(os));
             bw.write(Long.toString(m_id), 0, Long.toString(m_id).length());
@@ -706,7 +706,7 @@ public class DefaultBundleArchive
             os.close();
 
             // Save location string.
-            os = DefaultBundleCache.getSecureAction()
+            os = BundleCache.getSecureAction()
                 .getFileOutputStream(new File(m_archiveRootDir, BUNDLE_LOCATION_FILE));
             bw = new BufferedWriter(new OutputStreamWriter(os));
             bw.write(m_originalLocation, 0, m_originalLocation.length());
@@ -741,7 +741,7 @@ public class DefaultBundleArchive
         BufferedReader br = null;
         try
         {
-            is = DefaultBundleCache.getSecureAction()
+            is = BundleCache.getSecureAction()
                 .getFileInputStream(new File(m_archiveRootDir, CURRENT_LOCATION_FILE));
             br = new BufferedReader(new InputStreamReader(is));
             m_currentLocation = br.readLine();
@@ -775,7 +775,7 @@ public class DefaultBundleArchive
         BufferedWriter bw = null;
         try
         {
-            os = DefaultBundleCache.getSecureAction()
+            os = BundleCache.getSecureAction()
                 .getFileOutputStream(new File(m_archiveRootDir, CURRENT_LOCATION_FILE));
             bw = new BufferedWriter(new OutputStreamWriter(os));
             bw.write(location, 0, location.length());
@@ -822,7 +822,7 @@ public class DefaultBundleArchive
 
                 // Make sure the referenced file exists.
                 File file = new File(location.substring(FILE_PROTOCOL.length()));
-                if (!DefaultBundleCache.getSecureAction().fileExists(file))
+                if (!BundleCache.getSecureAction().fileExists(file))
                 {
                     throw new IOException("Referenced file does not exist: " + file);
                 }
@@ -830,7 +830,7 @@ public class DefaultBundleArchive
                 // If the referenced file is a directory, then create a directory
                 // revision; otherwise, create a JAR revision with the reference
                 // flag set to true.
-                if (DefaultBundleCache.getSecureAction().isFileDirectory(file))
+                if (BundleCache.getSecureAction().isFileDirectory(file))
                 {
                     return new DirectoryRevision(m_logger, revisionRootDir, location);
                 }
@@ -852,9 +852,9 @@ public class DefaultBundleArchive
         }
         catch (Exception ex)
         {
-            if (DefaultBundleCache.getSecureAction().fileExists(revisionRootDir))
+            if (BundleCache.getSecureAction().fileExists(revisionRootDir))
             {
-                if (!DefaultBundleCache.deleteDirectoryTree(revisionRootDir))
+                if (!BundleCache.deleteDirectoryTree(revisionRootDir))
                 {
                     m_logger.log(
                         Logger.LOG_ERROR,
@@ -895,7 +895,7 @@ public class DefaultBundleArchive
 
         // If the refresh counter file doesn't exist, then
         // assume the counter is at zero.
-        if (!DefaultBundleCache.getSecureAction().fileExists(counterFile))
+        if (!BundleCache.getSecureAction().fileExists(counterFile))
         {
             return 0;
         }
@@ -905,7 +905,7 @@ public class DefaultBundleArchive
         BufferedReader br = null;
         try
         {
-            is = DefaultBundleCache.getSecureAction()
+            is = BundleCache.getSecureAction()
                 .getFileInputStream(counterFile);
             br = new BufferedReader(new InputStreamReader(is));
             long counter = Long.parseLong(br.readLine());
@@ -943,7 +943,7 @@ public class DefaultBundleArchive
         BufferedWriter bw = null;
         try
         {
-            os = DefaultBundleCache.getSecureAction()
+            os = BundleCache.getSecureAction()
                 .getFileOutputStream(counterFile);
             bw = new BufferedWriter(new OutputStreamWriter(os));
             String s = Long.toString(counter);

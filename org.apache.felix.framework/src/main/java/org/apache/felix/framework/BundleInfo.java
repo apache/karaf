@@ -18,14 +18,14 @@ package org.apache.felix.framework;
 
 import java.util.Map;
 
-import org.apache.felix.framework.cache.DefaultBundleArchive;
+import org.apache.felix.framework.cache.BundleArchive;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
 class BundleInfo
 {
     private Logger m_logger = null;
-    private DefaultBundleArchive m_archive = null;
+    private BundleArchive m_archive = null;
     private IModule[] m_modules = null;
     private int m_state = 0;
     private long m_modified = 0;
@@ -39,7 +39,7 @@ class BundleInfo
     private int m_lockCount = 0;
     private Thread m_lockThread = null;
 
-    protected BundleInfo(Logger logger, DefaultBundleArchive archive, IModule module)
+    protected BundleInfo(Logger logger, BundleArchive archive, IModule module)
         throws Exception
     {
         m_logger = logger;
@@ -56,7 +56,7 @@ class BundleInfo
      *  Returns the bundle archive associated with this bundle.
      * @return the bundle archive associated with this bundle.
     **/
-    public DefaultBundleArchive getArchive()
+    public BundleArchive getArchive()
     {
         return m_archive;
     }

@@ -17,13 +17,13 @@
 package org.apache.felix.framework.searchpolicy;
 
 import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.cache.DefaultBundleCache;
+import org.apache.felix.framework.cache.BundleCache;
 import org.osgi.framework.Constants;
 
 public class R4Library
 {
     private Logger m_logger = null;
-    private DefaultBundleCache m_cache = null;
+    private BundleCache m_cache = null;
     private long m_bundleId = -1;
     private int m_revision = -1;
     private String m_os = null;
@@ -31,7 +31,7 @@ public class R4Library
     private R4LibraryHeader m_header = null;
 
     public R4Library(
-        Logger logger, DefaultBundleCache cache, long bundleId, int revision,
+        Logger logger, BundleCache cache, long bundleId, int revision,
         String os, String processor, R4LibraryHeader header)
     {
         m_logger = logger;

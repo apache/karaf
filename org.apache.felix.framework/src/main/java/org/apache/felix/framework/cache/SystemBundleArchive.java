@@ -33,7 +33,7 @@ import org.osgi.framework.BundleActivator;
  * bundle is not a real archive.
  * </p>
 **/
-public class SystemBundleArchive extends DefaultBundleArchive
+public class SystemBundleArchive extends BundleArchive
 {
     private Map m_headerMap = null;
     private BundleRevision m_revision = null;

@@ -81,7 +81,7 @@ public class Felix
         FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
 
     // Local file system cache.
-    private DefaultBundleCache m_cache = null;
+    private BundleCache m_cache = null;
 
     // Next available bundle identifier.
     private long m_nextId = 1L;
@@ -243,7 +243,7 @@ public class Felix
 
         try
         {
-            m_cache = new DefaultBundleCache(m_config, m_logger);
+            m_cache = new BundleCache(m_config, m_logger);
         }
         catch (Exception ex)
         {
@@ -380,7 +380,7 @@ public class Felix
         }
         
         // Reload and cached bundles.
-        DefaultBundleArchive[] archives = null;
+        BundleArchive[] archives = null;
 
         // First get cached bundle identifiers.
         try
@@ -1522,7 +1522,7 @@ public class Felix
             try
             {
                 // Get the bundle's archive.
-                DefaultBundleArchive archive = m_cache.getArchive(info.getBundleId());
+                BundleArchive archive = m_cache.getArchive(info.getBundleId());
                 // Update the bundle; this operation will increase
                 // the revision count for the bundle.
                 archive.revise(updateLocation, is);
@@ -1904,7 +1904,7 @@ public class Felix
 
             try
             {
-                DefaultBundleArchive archive = m_cache.getArchive(id);
+                BundleArchive archive = m_cache.getArchive(id);
                 bundle = new BundleImpl(this, createBundleInfo(archive));
             }
             catch (Exception ex)
@@ -2826,7 +2826,7 @@ public class Felix
     // Miscellaneous private methods.
     //
 
-    private BundleInfo createBundleInfo(DefaultBundleArchive archive)
+    private BundleInfo createBundleInfo(BundleArchive archive)
         throws Exception
     {
         // Get the bundle manifest.
@@ -3132,7 +3132,7 @@ public class Felix
         if (activator == null)
         {
             // Get the associated bundle archive.
-            DefaultBundleArchive ba = m_cache.getArchive(info.getBundleId());
+            BundleArchive ba = m_cache.getArchive(info.getBundleId());
             // Get the manifest from the current revision; revision is
             // base zero so subtract one from the count to get the
             // current revision.

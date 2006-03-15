@@ -42,8 +42,8 @@ class DirectoryRevision extends BundleRevision
     {
         super(logger, revisionRootDir, location);
         m_refDir = new File(location.substring(
-            location.indexOf(DefaultBundleArchive.FILE_PROTOCOL)
-                + DefaultBundleArchive.FILE_PROTOCOL.length()));
+            location.indexOf(BundleArchive.FILE_PROTOCOL)
+                + BundleArchive.FILE_PROTOCOL.length()));
     }
 
     public synchronized Map getManifestHeader()
@@ -60,7 +60,7 @@ class DirectoryRevision extends BundleRevision
         try
         {
             // Open manifest file.
-            is = DefaultBundleCache.getSecureAction()
+            is = BundleCache.getSecureAction()
                 .getFileInputStream(new File(m_refDir, "META-INF/MANIFEST.MF"));
             // Error if no jar file.
             if (is == null)
@@ -121,7 +121,7 @@ class DirectoryRevision extends BundleRevision
             {
                 // Determine if the class path entry is a file or directory.
                 File file = new File(m_refDir, classPathStrings[i]);
-                if (DefaultBundleCache.getSecureAction().isFileDirectory(file))
+                if (BundleCache.getSecureAction().isFileDirectory(file))
                 {
                     contentPath[i] = new DirectoryContent(file);
                 }
@@ -145,7 +145,7 @@ class DirectoryRevision extends BundleRevision
 // TODO: This will need to consider security.
     public String findLibrary(String libName) throws Exception
     {
-        return DefaultBundleCache.getSecureAction().getAbsolutePath(new File(m_refDir, libName));
+        return BundleCache.getSecureAction().getAbsolutePath(new File(m_refDir, libName));
     }
 
     public void dispose() throws Exception
