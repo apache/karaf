@@ -118,6 +118,26 @@ public class SecureAction
         }
     }
 
+    public synchronized String getAbsolutePath(File file)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                m_actions.set(Actions.GET_ABSOLUTE_PATH_ACTION, file);
+                return (String) AccessController.doPrivileged(m_actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return file.getAbsolutePath();
+        }
+    }
+
     public synchronized boolean fileExists(File file)
     {
         if (System.getSecurityManager() != null)
@@ -341,16 +361,17 @@ public class SecureAction
         public static final int GET_PROPERTY_ACTION = 0;
         public static final int FOR_NAME_ACTION = 1;
         public static final int CREATE_URL_ACTION = 2;
-        public static final int FILE_EXISTS_ACTION = 3;
-        public static final int FILE_IS_DIRECTORY_ACTION = 4;
-        public static final int MAKE_DIRECTORY_ACTION = 5;
-        public static final int MAKE_DIRECTORIES_ACTION = 6;
-        public static final int LIST_DIRECTORY_ACTION = 7;
-        public static final int RENAME_FILE_ACTION = 8;
-        public static final int GET_FILE_INPUT_ACTION = 9;
-        public static final int GET_FILE_OUTPUT_ACTION = 10;
-        public static final int DELETE_FILE_ACTION = 11;
-        public static final int OPEN_JAR_ACTION = 12;
+        public static final int GET_ABSOLUTE_PATH_ACTION = 3;
+        public static final int FILE_EXISTS_ACTION = 4;
+        public static final int FILE_IS_DIRECTORY_ACTION = 5;
+        public static final int MAKE_DIRECTORY_ACTION = 6;
+        public static final int MAKE_DIRECTORIES_ACTION = 7;
+        public static final int LIST_DIRECTORY_ACTION = 8;
+        public static final int RENAME_FILE_ACTION = 9;
+        public static final int GET_FILE_INPUT_ACTION = 10;
+        public static final int GET_FILE_OUTPUT_ACTION = 11;
+        public static final int DELETE_FILE_ACTION = 12;
+        public static final int OPEN_JAR_ACTION = 13;
 
         private int m_action = -1;
         private Object m_arg1 = null;
@@ -415,6 +436,10 @@ public class SecureAction
             else if (m_action == CREATE_URL_ACTION)
             {
                 return new URL(m_protocol, m_host, m_port, m_path, m_handler);
+            }
+            else if (m_action == GET_ABSOLUTE_PATH_ACTION)
+            {
+                return ((File) m_arg1).getAbsolutePath();
             }
             else if (m_action == FILE_EXISTS_ACTION)
             {

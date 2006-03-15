@@ -233,7 +233,7 @@ class JarRevision extends BundleRevision
             }
         }
 
-        return libFile.toString();
+        return DefaultBundleCache.getSecureAction().getAbsolutePath(libFile);
     }
 
     public void dispose() throws Exception
