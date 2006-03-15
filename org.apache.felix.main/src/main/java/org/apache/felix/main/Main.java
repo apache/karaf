@@ -23,7 +23,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 import org.apache.felix.framework.Felix;
-import org.apache.felix.framework.cache.DefaultBundleCache;
+import org.apache.felix.framework.cache.BundleCache;
 import org.apache.felix.framework.util.MutablePropertyResolverImpl;
 import org.apache.felix.framework.util.StringMap;
 
@@ -146,10 +146,10 @@ public class Main
         Properties configProps = Main.loadConfigProperties();
 
         // See if the profile name property was specified.
-        String profileName = configProps.getProperty(DefaultBundleCache.CACHE_PROFILE_PROP);
+        String profileName = configProps.getProperty(BundleCache.CACHE_PROFILE_PROP);
 
         // See if the profile directory property was specified.
-        String profileDirName = configProps.getProperty(DefaultBundleCache.CACHE_PROFILE_DIR_PROP);
+        String profileDirName = configProps.getProperty(BundleCache.CACHE_PROFILE_DIR_PROP);
 
         // Print welcome banner.
         System.out.println("\nWelcome to Felix.");
@@ -173,7 +173,7 @@ public class Main
             System.out.println("");
             if (profileName.length() != 0)
             {
-                configProps.setProperty(DefaultBundleCache.CACHE_PROFILE_PROP, profileName);
+                configProps.setProperty(BundleCache.CACHE_PROFILE_PROP, profileName);
             }
         }
 
