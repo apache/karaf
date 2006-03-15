@@ -13,7 +13,7 @@ import org.apache.directory.daemon.DaemonApplication;
 import org.apache.directory.daemon.InstallationLayout;
 
 import org.apache.felix.framework.Felix;
-import org.apache.felix.framework.cache.DefaultBundleCache;
+import org.apache.felix.framework.cache.BundleCache;
 import org.apache.felix.framework.util.MutablePropertyResolverImpl;
 import org.apache.felix.framework.util.StringMap;
 
@@ -61,16 +61,16 @@ public class Service implements DaemonApplication
     public void start()
     {
         // See if the profile name property was specified.
-        String profileName = configationProperties.getProperty( DefaultBundleCache.CACHE_PROFILE_PROP );
+        String profileName = configationProperties.getProperty( BundleCache.CACHE_PROFILE_PROP );
 
         // See if the profile directory property was specified.
-        String profileDirName = configationProperties.getProperty( DefaultBundleCache.CACHE_PROFILE_DIR_PROP );
+        String profileDirName = configationProperties.getProperty( BundleCache.CACHE_PROFILE_DIR_PROP );
 
         // If no profile or profile directory is specified in the properties, then set the 
         // name to the default production mode profile name since this is not started from main()
         if ( ( profileName == null ) && ( profileDirName == null ) )
         {
-            configationProperties.setProperty( DefaultBundleCache.CACHE_PROFILE_PROP, DEFAULT_PRODUCTION_PROFILE );
+            configationProperties.setProperty( BundleCache.CACHE_PROFILE_PROP, DEFAULT_PRODUCTION_PROFILE );
         }
 
         // start up the instance using the loaded and possibly altered configuration 
