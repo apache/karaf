@@ -94,6 +94,11 @@ class ExportedPackageImpl implements ExportedPackage
         return m_versionString;
     }
 
+    public Version getVersion()
+    {
+        return m_version;
+    }
+
     public boolean isRemovalPending()
     {
         return m_exporter.getInfo().isRemovalPending();
