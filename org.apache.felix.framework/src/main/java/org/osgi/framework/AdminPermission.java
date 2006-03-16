@@ -17,10 +17,9 @@
 package org.osgi.framework;
 
 import java.security.*;
-import java.util.Enumeration;
-import java.util.StringTokenizer;
+import java.util.*;
 
-import sun.net.www.MeteredStream;
+import org.apache.felix.framework.FilterImpl;
 
 /**
  * <p>
@@ -56,24 +55,46 @@ public final class AdminPermission extends BasicPermission
         LIFECYCLE_MASK | LISTENER_MASK | METADATA_MASK |
         RESOLVE_MASK | RESOURCE_MASK | STARTLEVEL_MASK;
 
-    private String m_bundleFilter = null;
     private String m_actions = null;
     private int m_actionMask = 0;
 
+    // Cached filter for permissions created with a filter when
+    // granting admin permissions.
+    private FilterImpl m_filterImpl = null;
+
+    // Bundle associated with the permission when checking
+    // admin permissions.
+    private Bundle m_bundle = null;
+    // Cached bundle property dictionary when checking
+    // admin permissions.
+    private Dictionary m_bundleDict = null;
+
+    // This constructor is only used when granting an admin permission.
 	public AdminPermission()
     {
 		this("*", "*");
 	}
 
+    // This constructor is only used when checking a granted admin permission.
     public AdminPermission(Bundle bundle, String actions)
     {
-        this(createNameFilter(bundle), actions);
+        this(createName(bundle), actions);
+        m_bundle = bundle;
     }
 
+    // This constructor is only used when granting an admin permission.
 	public AdminPermission(String filter, String actions)
     {
-		super((filter == null) ? "*" : filter);
+		super((filter == null) || (filter.equals("*")) ? "(id=*)" : filter);
         m_actionMask = parseActions(actions);
+    }
+
+    // This constructor is only used by the admin permission collection
+    // when combining admin permissions.
+    private AdminPermission(String filter, int actionMask)
+    {
+        super((filter == null) || (filter.equals("*")) ? "(id=*)" : filter);
+        m_actionMask = actionMask;
     }
 
 	public boolean equals(Object obj)
@@ -90,12 +111,12 @@ public final class AdminPermission extends BasicPermission
 
 		AdminPermission p = (AdminPermission) obj;
 
-		return m_bundleFilter.equals(p.m_bundleFilter) && (m_actionMask == p.m_actionMask);
+		return getName().equals(p.getName()) && (m_actionMask == p.m_actionMask);
 	}
 
 	public int hashCode()
     {
-		return m_bundleFilter.hashCode() ^ getActions().hashCode();
+		return getName().hashCode() ^ getActions().hashCode();
 	}
 
 	public String getActions()
@@ -116,12 +137,27 @@ public final class AdminPermission extends BasicPermission
 
         AdminPermission admin = (AdminPermission) p;
 
-        if (m_actionMask != admin.m_actionMask)
+        // Make sure the action mask is a subset.
+        if ((m_actionMask & admin.m_actionMask) != admin.m_actionMask)
         {
             return false;
         }
 
-        // TODO: SECURITY - Still need check that the "name" filter.
+        // Otherwise, see if this permission's filter matches the
+        // dictionary of the passed in permission.
+        if (m_filterImpl == null)
+        {
+            try
+            {
+                m_filterImpl = new FilterImpl(getName());
+            }
+            catch (InvalidSyntaxException ex)
+            {
+                return false;
+            }
+
+            return m_filterImpl.match(admin.getBundleDictionary());
+        }
 
         return false;
 	}
@@ -130,6 +166,34 @@ public final class AdminPermission extends BasicPermission
     {
 		return new AdminPermissionCollection();
 	}
+
+    private Dictionary getBundleDictionary()
+    {
+        if (m_bundleDict == null)
+        {
+            // Add bundle properties to dictionary.
+            m_bundleDict = new Hashtable();
+            m_bundleDict.put("id", new Long(m_bundle.getBundleId()));
+            m_bundleDict.put("name", m_bundle.getSymbolicName());
+            // Add location in privileged block since it performs a security check.
+            if (System.getSecurityManager() != null)
+            {
+                AccessController.doPrivileged(new PrivilegedAction() {
+                    public Object run()
+                    {
+                        m_bundleDict.put("location", m_bundle.getLocation());
+                        return null;
+                    }
+                });
+            }
+            else
+            {
+                m_bundleDict.put("location", m_bundle.getLocation());
+            }
+            // TODO: SECURITY - Add bundle signer properties to dictionary.
+        }
+        return m_bundleDict;
+    }
 
     private static int parseActions(String actions)
     {
@@ -247,7 +311,7 @@ public final class AdminPermission extends BasicPermission
         return sb.toString();
     }
 
-    private static String createNameFilter(Bundle bundle)
+    private static String createName(Bundle bundle)
     {
         StringBuffer sb = new StringBuffer();
         sb.append("(id=");
@@ -258,21 +322,58 @@ public final class AdminPermission extends BasicPermission
 
     final class AdminPermissionCollection extends PermissionCollection
     {
+        private HashMap m_map = new HashMap();
+
         public void add(Permission permission)
         {
-            // TODO: SECURITY - AdminPermissionCollection.add()
+            if (!(permission instanceof AdminPermission))
+            {
+                throw new IllegalArgumentException("Invalid permission: " + permission);
+            }
+            else if (isReadOnly())
+            {
+                throw new SecurityException(
+                    "Cannot add to read-only permission collection.");
+            }
+
+            AdminPermission admin = (AdminPermission) permission;
+            AdminPermission current = (AdminPermission) m_map.get(admin.getName());
+            if (current != null)
+            {
+                if (admin.m_actionMask != current.m_actionMask)
+                {
+                    m_map.put(admin.getName(),
+                        new AdminPermission(admin.getName(),
+                            admin.m_actionMask | current.m_actionMask));
+                }
+            }
+            else
+            {
+                m_map.put(admin.getName(), admin);
+            }
         }
 
         public boolean implies(Permission permission)
         {
-            // TODO: SECURITY - AdminPermissionCollection.implies()
+            if (!(permission instanceof AdminPermission))
+            {
+                return false;
+            }
+
+            for (Iterator iter = m_map.values().iterator(); iter.hasNext(); )
+            {
+                if (((AdminPermission) iter.next()).implies(permission))
+                {
+                    return true;
+                }
+            }
+
             return false;
         }
 
         public Enumeration elements()
         {
-            // TODO: SECURITY - AdminPermissionCollection.elements()
-            return null;
+            return Collections.enumeration(m_map.values());
         }
     }
 }
