@@ -1,16 +1,22 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceReference.java,v 1.11 2005/05/13 20:32:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceReference.java,v 1.14 2006/03/14 01:21:02 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this 
- * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.osgi.framework;
-
-import java.util.Dictionary;
 
 /**
  * A reference to a service.
@@ -20,8 +26,9 @@ import java.util.Dictionary;
  * <code>BundleContext.getServiceReference</code> and
  * <code>BundleContext.getServiceReferences</code> methods.
  * <p>
- * A <code>ServiceReference</code> object may be shared between bundles and can be
- * used to examine the properties of the service and to get the service object.
+ * A <code>ServiceReference</code> object may be shared between bundles and
+ * can be used to examine the properties of the service and to get the service
+ * object.
  * <p>
  * Every service registered in the Framework has a unique
  * <code>ServiceRegistration</code> object and may have multiple, distinct
@@ -35,13 +42,13 @@ import java.util.Dictionary;
  * <code>ServiceReference</code> objects associated with different
  * <code>ServiceRegistration</code> objects are not equal.
  * 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.14 $
  * @see BundleContext#getServiceReference
  * @see BundleContext#getServiceReferences
  * @see BundleContext#getService
  */
 
-public abstract interface ServiceReference {
+public interface ServiceReference {
 	/**
 	 * Returns the property value to which the specified property key is mapped
 	 * in the properties <code>Dictionary</code> object of the service
@@ -60,7 +67,7 @@ public abstract interface ServiceReference {
 	 * @return The property value to which the key is mapped; <code>null</code>
 	 *         if there is no property named after the key.
 	 */
-	public abstract Object getProperty(String key);
+	public Object getProperty(String key);
 
 	/**
 	 * Returns an array of the keys in the properties <code>Dictionary</code>
@@ -77,28 +84,28 @@ public abstract interface ServiceReference {
 	 * This method is <i>case-preserving </i>; this means that every key in the
 	 * returned array must have the same case as the corresponding key in the
 	 * properties <code>Dictionary</code> that was passed to the
-	 * {@link BundleContext#registerService(String[],Object,Dictionary)}or
-	 * {@link ServiceRegistration#setProperties}methods.
+	 * {@link BundleContext#registerService(String[],Object,java.util.Dictionary)} or
+	 * {@link ServiceRegistration#setProperties} methods.
 	 * 
 	 * @return An array of property keys.
 	 */
-	public abstract String[] getPropertyKeys();
+	public String[] getPropertyKeys();
 
 	/**
 	 * Returns the bundle that registered the service referenced by this
 	 * <code>ServiceReference</code> object.
 	 * 
 	 * <p>
-	 * This method must return <code>null</code> when the service has
-	 * been unregistered. This can be used to determine if the service has been
+	 * This method must return <code>null</code> when the service has been
+	 * unregistered. This can be used to determine if the service has been
 	 * unregistered.
 	 * 
 	 * @return The bundle that registered the service referenced by this
 	 *         <code>ServiceReference</code> object; <code>null</code> if
 	 *         that service has already been unregistered.
-	 * @see BundleContext#registerService(String[],Object,Dictionary)
+	 * @see BundleContext#registerService(String[],Object,java.util.Dictionary)
 	 */
-	public abstract Bundle getBundle();
+	public Bundle getBundle();
 
 	/**
 	 * Returns the bundles that are using the service referenced by this
@@ -112,19 +119,19 @@ public abstract interface ServiceReference {
 	 * 
 	 * @since 1.1
 	 */
-	public abstract Bundle[] getUsingBundles();
+	public Bundle[] getUsingBundles();
 
 	/**
 	 * Tests if the bundle that registered the service referenced by this
-	 * <code>ServiceReference</code> and the specified bundle use the same source
-	 * for the package of the specified class name.
+	 * <code>ServiceReference</code> and the specified bundle use the same
+	 * source for the package of the specified class name.
 	 * <p>
 	 * This method performs the following checks:
 	 * <ol>
 	 * <li>Get the package name from the specified class name.</li>
 	 * <li>For the bundle that registered the service referenced by this
-	 * <code>ServiceReference</code> (registrant bundle); find the source for the
-	 * package. If no source is found then return <code>true</code> if the
+	 * <code>ServiceReference</code> (registrant bundle); find the source for
+	 * the package. If no source is found then return <code>true</code> if the
 	 * registrant bundle is equal to the specified bundle; otherwise return
 	 * <code>false</code>.</li>
 	 * <li>If the package source of the registrant bundle is equal to the
@@ -135,12 +142,12 @@ public abstract interface ServiceReference {
 	 * @param bundle The <code>Bundle</code> object to check.
 	 * @param className The class name to check.
 	 * @return <code>true</code> if the bundle which registered the service
-	 *         referenced by this <code>ServiceReference</code> and the specified
-	 *         bundle use the same source for the package of the specified class
-	 *         name. Otherwise <code>false</code> is returned.
+	 *         referenced by this <code>ServiceReference</code> and the
+	 *         specified bundle use the same source for the package of the
+	 *         specified class name. Otherwise <code>false</code> is returned.
 	 * 
 	 * @since 1.3
 	 */
-	public abstract boolean isAssignableTo(Bundle bundle, String className);
+	public boolean isAssignableTo(Bundle bundle, String className);
 
 }

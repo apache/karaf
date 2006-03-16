@@ -1,11 +1,19 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceRegistration.java,v 1.8 2005/05/13 20:32:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceRegistration.java,v 1.11 2006/03/14 01:21:02 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this 
- * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.osgi.framework;
@@ -24,23 +32,24 @@ import java.util.Dictionary;
  * The <code>ServiceRegistration</code> object may be used to update the
  * properties of the service or to unregister the service.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.11 $
  * @see BundleContext#registerService(String[],Object,Dictionary)
  */
 
-public abstract interface ServiceRegistration {
+public interface ServiceRegistration {
 	/**
 	 * Returns a <code>ServiceReference</code> object for a service being
 	 * registered.
 	 * <p>
-	 * The <code>ServiceReference</code> object may be shared with other bundles.
+	 * The <code>ServiceReference</code> object may be shared with other
+	 * bundles.
 	 * 
-	 * @exception java.lang.IllegalStateException If this
-	 *            <code>ServiceRegistration</code> object has already been
-	 *            unregistered.
+	 * @throws java.lang.IllegalStateException If this
+	 *         <code>ServiceRegistration</code> object has already been
+	 *         unregistered.
 	 * @return <code>ServiceReference</code> object.
 	 */
-	public abstract ServiceReference getReference();
+	public ServiceReference getReference();
 
 	/**
 	 * Updates the properties associated with a service.
@@ -55,7 +64,7 @@ public abstract interface ServiceRegistration {
 	 * <ol>
 	 * <li>The service's properties are replaced with the provided properties.
 	 * <li>A service event of type {@link ServiceEvent#MODIFIED} is
-	 * synchronously sent.
+	 * fired.
 	 * </ol>
 	 * 
 	 * @param properties The properties for this service. See {@link Constants}
@@ -63,19 +72,18 @@ public abstract interface ServiceRegistration {
 	 *        be made to this object after calling this method. To update the
 	 *        service's properties this method should be called again.
 	 * 
-	 * @exception IllegalStateException If this <code>ServiceRegistration</code>
-	 *            object has already been unregistered.
-	 * 
-	 * @exception IllegalArgumentException If <code>properties</code> contains
-	 *            case variants of the same key name.
+	 * @throws IllegalStateException If this <code>ServiceRegistration</code>
+	 *         object has already been unregistered.
+	 * @throws IllegalArgumentException If <code>properties</code> contains
+	 *         case variants of the same key name.
 	 */
-	public abstract void setProperties(Dictionary properties);
+	public void setProperties(Dictionary properties);
 
 	/**
 	 * Unregisters a service. Remove a <code>ServiceRegistration</code> object
 	 * from the Framework service registry. All <code>ServiceReference</code>
-	 * objects associated with this <code>ServiceRegistration</code> object can no
-	 * longer be used to interact with the service.
+	 * objects associated with this <code>ServiceRegistration</code> object
+	 * can no longer be used to interact with the service.
 	 * 
 	 * <p>
 	 * The following steps are required to unregister a service:
@@ -84,22 +92,21 @@ public abstract interface ServiceRegistration {
 	 * it can no longer be used. <code>ServiceReference</code> objects for the
 	 * service may no longer be used to get a service object for the service.
 	 * <li>A service event of type {@link ServiceEvent#UNREGISTERING} is
-	 * synchronously sent so that bundles using this service can release their
+	 * fired so that bundles using this service can release their
 	 * use of it.
 	 * <li>For each bundle whose use count for this service is greater than
 	 * zero: <br>
 	 * The bundle's use count for this service is set to zero. <br>
 	 * If the service was registered with a {@link ServiceFactory} object, the
-	 * <code>ServiceFactory.ungetService</code> method is called to release the
-	 * service object for the bundle.
+	 * <code>ServiceFactory.ungetService</code> method is called to release
+	 * the service object for the bundle.
 	 * </ol>
 	 * 
-	 * @exception java.lang.IllegalStateException If this
-	 *            <code>ServiceRegistration</code> object has already been
-	 *            unregistered.
+	 * @throws java.lang.IllegalStateException If this
+	 *         <code>ServiceRegistration</code> object has already been
+	 *         unregistered.
 	 * @see BundleContext#ungetService
 	 * @see ServiceFactory#ungetService
 	 */
-	public abstract void unregister();
+	public void unregister();
 }
-

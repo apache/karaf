@@ -1,11 +1,19 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.packageadmin/src/org/osgi/service/packageadmin/RequiredBundle.java,v 1.5 2005/05/13 20:32:34 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.packageadmin/src/org/osgi/service/packageadmin/RequiredBundle.java,v 1.10 2006/03/14 21:02:47 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this 
- * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.osgi.service.packageadmin;
@@ -16,62 +24,74 @@ import org.osgi.framework.Version;
 /**
  * A required bundle.
  * 
- * Instances implementing this interface are created by the Package Admin
- * service.
+ * Objects implementing this interface are created by the Package Admin service.
  * 
  * <p>
- * The information about a <code>RequiredBundle</code> provided by this object is
- * valid only until the next time <code>PackageAdmin.refreshPackages()</code>
- * called. If a <code>RequiredBundle</code> object becomes stale (that is, the
- * bundle it references has been updated or removed as a result of calling
- * <code>PackageAdmin.refreshPackages()</code>), its <code>getSymbolicName()</code>
- * and <code>getVersion()</code> continue to return their old values,
- * <code>isRemovalPending()</code> returns true, and <code>getBundle()</code> and
- * <code>getRequiringBundles()</code> return <code>null</code>.
+ * The term <i>required bundle</i> refers to a resolved bundle that has a
+ * bundle symbolic name and is not a fragment. That is, a bundle that may be
+ * required by other bundles. This bundle may or may not be currently required
+ * by other bundles.
+ * 
+ * <p>
+ * The information about a required bundle provided by this object may change. A
+ * <code>RequiredBundle</code> object becomes stale if an exported package of
+ * the bundle it references has been updated or removed as a result of calling
+ * <code>PackageAdmin.refreshPackages()</code>).
+ * 
+ * If this object becomes stale, its <code>getSymbolicName()</code> and
+ * <code>getVersion()</code> methods continue to return their original values,
+ * <code>isRemovalPending()</code> returns true, and <code>getBundle()</code>
+ * and <code>getRequiringBundles()</code> return <code>null</code>.
  * 
  * @since 1.2
+ * @version $Revision: 1.10 $
  */
 public interface RequiredBundle {
 	/**
-	 * Returns the bundle which defines this RequiredBundle.
+	 * Returns the symbolic name of this required bundle.
 	 * 
-	 * @return The bundle, or <code>null</code> if this <code>RequiredBundle</code>
-	 *         object has become stale.
-	 */
-	public Bundle getBundle();
-
-	/**
-	 * Returns the resolved bundles that currently require this bundle. If this
-	 * <code>RequiredBundle</code> object is required and re-exported by another
-	 * bundle then all the requiring bundles of the re-exporting bundle are
-	 * included in the returned array.
-	 * 
-	 * @return An array of resolved bundles currently requiring this bundle, or
-	 *         <code>null</code> if this <code>RequiredBundle</code> object has
-	 *         become stale.
-	 */
-	public Bundle[] getRequiringBundles();
-
-	/**
-	 * Returns the symbolic name of the bundle.
-	 * 
-	 * @return The symbolic name of the bundle.
+	 * @return The symbolic name of this required bundle.
 	 */
 	public String getSymbolicName();
 
 	/**
-	 * Returns the version of the bundle.
+	 * Returns the bundle associated with this required bundle.
 	 * 
-	 * @return The version of the bundle.
+	 * @return The bundle, or <code>null</code> if this
+	 *         <code>RequiredBundle</code> object has become stale.
+	 */
+	public Bundle getBundle();
+
+	/**
+	 * Returns the bundles that currently require this required bundle.
+	 * 
+	 * <p>
+	 * If this required bundle is required and then re-exported by another
+	 * bundle then all the requiring bundles of the re-exporting bundle are
+	 * included in the returned array.
+	 * 
+	 * @return An array of bundles currently requiring this required bundle, or
+	 *         <code>null</code> if this <code>RequiredBundle</code> object
+	 *         has become stale.
+	 */
+	public Bundle[] getRequiringBundles();
+
+	/**
+	 * Returns the version of this required bundle.
+	 * 
+	 * @return The version of this required bundle, or
+	 *         {@link Version#emptyVersion} if no version information is
+	 *         available.
 	 */
 	public Version getVersion();
 
 	/**
-	 * Returns <code>true</code> if the bundle has been updated or uninstalled.
+	 * Returns <code>true</code> if the bundle associated with this
+	 * <code>RequiredBundle</code> object has been updated or uninstalled.
 	 * 
-	 * @return <code>true</code> if the bundle has been updated or uninstalled, or
-	 *         if the <code>RequiredBundle</code> object has become stale;
-	 *         <code>false</code> otherwise.
+	 * @return <code>true</code> if the reqiured bundle has been updated or
+	 *         uninstalled, or if the <code>RequiredBundle</code> object has
+	 *         become stale; <code>false</code> otherwise.
 	 */
 	public boolean isRemovalPending();
 }

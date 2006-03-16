@@ -1,11 +1,19 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/InvalidSyntaxException.java,v 1.10 2005/05/13 20:32:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/InvalidSyntaxException.java,v 1.13 2006/03/14 01:21:02 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this 
- * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.osgi.framework;
@@ -14,13 +22,13 @@ package org.osgi.framework;
  * A Framework exception.
  * 
  * <p>
- * An <code>InvalidSyntaxException</code> object indicates that a filter string
- * parameter has an invalid syntax and cannot be parsed.
+ * An <code>InvalidSyntaxException</code> object indicates that a filter
+ * string parameter has an invalid syntax and cannot be parsed.
  * 
  * <p>
  * See {@link Filter} for a description of the filter string syntax.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.13 $
  */
 
 public class InvalidSyntaxException extends Exception {
@@ -38,8 +46,9 @@ public class InvalidSyntaxException extends Exception {
 	 * Creates an exception of type <code>InvalidSyntaxException</code>.
 	 * 
 	 * <p>
-	 * This method creates an <code>InvalidSyntaxException</code> object with the
-	 * specified message and the filter string which generated the exception.
+	 * This method creates an <code>InvalidSyntaxException</code> object with
+	 * the specified message and the filter string which generated the
+	 * exception.
 	 * 
 	 * @param msg The message.
 	 * @param filter The invalid filter string.
@@ -54,8 +63,9 @@ public class InvalidSyntaxException extends Exception {
 	 * Creates an exception of type <code>InvalidSyntaxException</code>.
 	 * 
 	 * <p>
-	 * This method creates an <code>InvalidSyntaxException</code> object with the
-	 * specified message and the filter string which generated the exception.
+	 * This method creates an <code>InvalidSyntaxException</code> object with
+	 * the specified message and the filter string which generated the
+	 * exception.
 	 * 
 	 * @param msg The message.
 	 * @param filter The invalid filter string.
@@ -81,11 +91,11 @@ public class InvalidSyntaxException extends Exception {
 	}
 
 	/**
-	 * Returns the cause of this exception or <code>null</code> if no cause was
-	 * specified when this exception was created.
+	 * Returns the cause of this exception or <code>null</code> if no cause
+	 * was specified when this exception was created.
 	 * 
-	 * @return The cause of this exception or <code>null</code> if no cause was
-	 *         specified.
+	 * @return The cause of this exception or <code>null</code> if no cause
+	 *         was specified.
 	 * @since 1.3
 	 */
 	public Throwable getCause() {
@@ -95,6 +105,8 @@ public class InvalidSyntaxException extends Exception {
 	/**
 	 * The cause of this exception can only be set when constructed.
 	 * 
+	 * @param cause Cause of the exception.
+	 * @return This object.
 	 * @throws java.lang.IllegalStateException This method will always throw an
 	 *         <code>IllegalStateException</code> since the cause of this
 	 *         exception can only be set when constructed.
@@ -104,4 +116,3 @@ public class InvalidSyntaxException extends Exception {
 		throw new IllegalStateException();
 	}
 }
-

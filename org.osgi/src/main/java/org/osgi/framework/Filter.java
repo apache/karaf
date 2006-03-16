@@ -1,11 +1,19 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Filter.java,v 1.11 2005/05/13 20:32:56 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Filter.java,v 1.13 2006/03/14 01:21:02 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this 
- * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.osgi.framework;
 
@@ -24,13 +32,13 @@ import java.util.Dictionary;
  * Some examples of LDAP filters are:
  * 
  * <pre>
- *     &quot;(cn=Babs Jensen)&quot;
- *     &quot;(!(cn=Tim Howes))&quot;
- *     &quot;(&amp;(&quot; + Constants.OBJECTCLASS + &quot;=Person)(|(sn=Jensen)(cn=Babs J*)))&quot;
- *     &quot;(o=univ*of*mich*)&quot;
+ *      &quot;(cn=Babs Jensen)&quot;
+ *      &quot;(!(cn=Tim Howes))&quot;
+ *      &quot;(&amp;(&quot; + Constants.OBJECTCLASS + &quot;=Person)(|(sn=Jensen)(cn=Babs J*)))&quot;
+ *      &quot;(o=univ*of*mich*)&quot;
  * </pre>
  * 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.13 $
  * @since 1.1
  * @see "Framework specification for a description of the filter string syntax."
  */
@@ -38,30 +46,32 @@ public interface Filter {
 	/**
 	 * Filter using a service's properties.
 	 * <p>
-	 * The filter is executed using the keys and values of the referenced service's
-	 * properties.  The keys are case insensitively matched with the filter.
+	 * The filter is executed using the keys and values of the referenced
+	 * service's properties. The keys are case insensitively matched with the
+	 * filter.
 	 * 
 	 * @param reference The reference to the service whose properties are used
 	 *        in the match.
 	 * 
-	 * @return <code>true</code> if the service's properties match this filter;
-	 *         <code>false</code> otherwise.
+	 * @return <code>true</code> if the service's properties match this
+	 *         filter; <code>false</code> otherwise.
 	 */
 	public boolean match(ServiceReference reference);
 
 	/**
-	 * Filter using a <code>Dictionary</code> object. The Filter is executed using
-	 * the <code>Dictionary</code> object's keys and values.
-	 * The keys are case insensitively matched with the filter.
+	 * Filter using a <code>Dictionary</code> object. The Filter is executed
+	 * using the <code>Dictionary</code> object's keys and values. The keys
+	 * are case insensitively matched with the filter.
 	 * 
-	 * @param dictionary The <code>Dictionary</code> object whose keys are used in
-	 *        the match.
+	 * @param dictionary The <code>Dictionary</code> object whose keys are
+	 *        used in the match.
 	 * 
-	 * @return <code>true</code> if the <code>Dictionary</code> object's keys and
-	 *         values match this filter; <code>false</code> otherwise.
+	 * @return <code>true</code> if the <code>Dictionary</code> object's
+	 *         keys and values match this filter; <code>false</code>
+	 *         otherwise.
 	 * 
-	 * @exception IllegalArgumentException If <code>dictionary</code> contains
-	 *            case variants of the same key name.
+	 * @throws IllegalArgumentException If <code>dictionary</code> contains
+	 *         case variants of the same key name.
 	 */
 	public boolean match(Dictionary dictionary);
 
@@ -78,10 +88,11 @@ public interface Filter {
 	/**
 	 * Compares this <code>Filter</code> object to another object.
 	 * 
-	 * @param obj The object to compare against this <code>Filter</code> object.
+	 * @param obj The object to compare against this <code>Filter</code>
+	 *        object.
 	 * 
-	 * @return If the other object is a <code>Filter</code> object, then returns
-	 *         <code>this.toString().equals(obj.toString()</code>;<code>false</code>
+	 * @return If the other object is a <code>Filter</code> object, then
+	 *         returns <code>this.toString().equals(obj.toString()</code>;<code>false</code>
 	 *         otherwise.
 	 */
 	public boolean equals(Object obj);
@@ -95,15 +106,16 @@ public interface Filter {
 	public int hashCode();
 
 	/**
-	 * Filter with case sensitivity using a <code>Dictionary</code> object. The
-	 * Filter is executed using the <code>Dictionary</code> object's keys and
-	 * values. The keys are case sensitively matched with the filter.
+	 * Filter with case sensitivity using a <code>Dictionary</code> object.
+	 * The Filter is executed using the <code>Dictionary</code> object's keys
+	 * and values. The keys are case sensitively matched with the filter.
 	 * 
-	 * @param dictionary The <code>Dictionary</code> object whose keys are used in
-	 *        the match.
+	 * @param dictionary The <code>Dictionary</code> object whose keys are
+	 *        used in the match.
 	 * 
-	 * @return <code>true</code> if the <code>Dictionary</code> object's keys and
-	 *         values match this filter; <code>false</code> otherwise.
+	 * @return <code>true</code> if the <code>Dictionary</code> object's
+	 *         keys and values match this filter; <code>false</code>
+	 *         otherwise.
 	 * 
 	 * @since 1.3
 	 */

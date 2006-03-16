@@ -1,45 +1,63 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionalPermissionInfo.java,v 1.7 2005/07/14 10:47:13 pkriens Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionalPermissionInfo.java,v 1.10 2006/03/14 01:20:40 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this 
- * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
- 
+
 package org.osgi.service.condpermadmin;
 
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 /**
- * This interface describes a binding of a set of Conditions to a set of
- * Permissions. Instances of this interface are obtained from the
- * ConditionalPermissionAdmin service. This interface is also used to remove
- * ConditionalPermissionCollections from ConditionPermissionAdmin.
+ * A binding of a set of Conditions to a set of Permissions. Instances of this
+ * interface are obtained from the Conditional Permission Admin service.
+ * 
+ * @version $Revision: 1.10 $
  */
 public interface ConditionalPermissionInfo {
 	/**
-	 * Returns the ConditionInfos for the Conditions that must be satisfied to
-	 * enable this ConditionalPermissionCollection.
-	 */
-	ConditionInfo[] getConditionInfos();
-
-	/**
-	 * Returns the PermissionInfos for the Permission in this
-	 * ConditionalPermissionCollection.
-	 */
-	PermissionInfo[] getPermissionInfos();
-
-	/**
-	 * Removes the ConditionalPermissionCollection from the
-	 * ConditionalPermissionAdmin.
-	 */
-	void delete();
-	
-	/**
-	 * Return the name of this Conditional Permission Info object.
+	 * Returns the Condition Infos for the Conditions that must be satisfied to
+	 * enable the Permissions.
 	 * 
+	 * @return The Condition Infos for the Conditions in this Conditional
+	 *         Permission Info.
 	 */
-	String getName();
+	public ConditionInfo[] getConditionInfos();
+
+	/**
+	 * Returns the Permission Infos for the Permission in this Conditional
+	 * Permission Info.
+	 * 
+	 * @return The Permission Infos for the Permission in this Conditional
+	 *         Permission Info.
+	 */
+	public PermissionInfo[] getPermissionInfos();
+
+	/**
+	 * Removes this Conditional Permission Info from the Conditional Permission
+	 * Admin.
+	 * 
+	 * @throws SecurityException If the caller does not have
+	 *         <code>AllPermission</code>.
+	 */
+	public void delete();
+
+	/**
+	 * Returns the name of this Conditional Permission Info.
+	 * 
+	 * @return The name of this Conditional Permission Info.
+	 */
+	public String getName();
 }

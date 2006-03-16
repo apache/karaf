@@ -1,11 +1,19 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceFactory.java,v 1.6 2005/05/13 20:32:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceFactory.java,v 1.8 2006/03/14 01:21:02 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this 
- * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.osgi.framework;
@@ -15,16 +23,18 @@ package org.osgi.framework;
  * environment.
  * 
  * <p>
- * When registering a service, a <code>ServiceFactory</code> object can be used
- * instead of a service object, so that the bundle developer can gain control of
- * the specific service object granted to a bundle that is using the service.
+ * When registering a service, a <code>ServiceFactory</code> object can be
+ * used instead of a service object, so that the bundle developer can gain
+ * control of the specific service object granted to a bundle that is using the
+ * service.
  * 
  * <p>
- * When this happens, the <code>BundleContext.getService(ServiceReference)</code>
- * method calls the <code>ServiceFactory.getService</code> method to create a
- * service object specifically for the requesting bundle. The service object
- * returned by the <code>ServiceFactory</code> object is cached by the Framework
- * until the bundle releases its use of the service.
+ * When this happens, the
+ * <code>BundleContext.getService(ServiceReference)</code> method calls the
+ * <code>ServiceFactory.getService</code> method to create a service object
+ * specifically for the requesting bundle. The service object returned by the
+ * <code>ServiceFactory</code> object is cached by the Framework until the
+ * bundle releases its use of the service.
  * 
  * <p>
  * When the bundle's use count for the service equals zero (including the bundle
@@ -32,22 +42,23 @@ package org.osgi.framework;
  * <code>ServiceFactory.ungetService</code> method is called.
  * 
  * <p>
- * <code>ServiceFactory</code> objects are only used by the Framework and are not
- * made available to other bundles in the OSGi environment.
+ * <code>ServiceFactory</code> objects are only used by the Framework and are
+ * not made available to other bundles in the OSGi environment.
  * 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.8 $
  * @see BundleContext#getService
  */
 
-public abstract interface ServiceFactory {
+public interface ServiceFactory {
 	/**
 	 * Creates a new service object.
 	 * 
 	 * <p>
 	 * The Framework invokes this method the first time the specified
 	 * <code>bundle</code> requests a service object using the
-	 * <code>BundleContext.getService(ServiceReference)</code> method. The service
-	 * factory can then return a specific service object for each bundle.
+	 * <code>BundleContext.getService(ServiceReference)</code> method. The
+	 * service factory can then return a specific service object for each
+	 * bundle.
 	 * 
 	 * <p>
 	 * The Framework caches the value returned (unless it is <code>null</code>),
@@ -66,7 +77,7 @@ public abstract interface ServiceFactory {
 	 *         all the classes named when the service was registered.
 	 * @see BundleContext#getService
 	 */
-	public abstract Object getService(Bundle bundle,
+	public Object getService(Bundle bundle,
 			ServiceRegistration registration);
 
 	/**
@@ -83,7 +94,6 @@ public abstract interface ServiceFactory {
 	 *        <code>ServiceFactory.getService</code> method.
 	 * @see BundleContext#ungetService
 	 */
-	public abstract void ungetService(Bundle bundle,
+	public void ungetService(Bundle bundle,
 			ServiceRegistration registration, Object service);
 }
-

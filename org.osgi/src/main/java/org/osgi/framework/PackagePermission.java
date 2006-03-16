@@ -1,11 +1,19 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/PackagePermission.java,v 1.10 2005/05/13 20:32:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/PackagePermission.java,v 1.13 2006/03/14 01:21:02 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this 
- * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.osgi.framework;
@@ -32,10 +40,10 @@ import java.util.Hashtable;
  * 
  * <p>
  * <code>PackagePermission</code> has two actions: <code>EXPORT</code> and
- * <code>IMPORT</code>. The <code>EXPORT</code> action implies the <code>IMPORT</code>
- * action.
+ * <code>IMPORT</code>. The <code>EXPORT</code> action implies the
+ * <code>IMPORT</code> action.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.13 $
  */
 
 public final class PackagePermission extends BasicPermission {
@@ -55,9 +63,6 @@ public final class PackagePermission extends BasicPermission {
 	private final static int	ACTION_ALL			= ACTION_EXPORT
 															| ACTION_IMPORT;
 	private final static int	ACTION_NONE			= 0;
-//  NOT USED
-//  private final static int	ACTION_ERROR		= 0x80000000;
-
 	/**
 	 * The actions mask.
 	 */
@@ -78,25 +83,24 @@ public final class PackagePermission extends BasicPermission {
 	 * string. Wildcards may be used. For example:
 	 * 
 	 * <pre>
-	 * 
-	 *  org.osgi.service.http
-	 *  javax.servlet.*
-	 *  *
-	 *  
+	 * org.osgi.service.http
+	 * javax.servlet.*
+	 * *
 	 * </pre>
 	 * 
 	 * <p>
 	 * Package Permissions are granted over all possible versions of a package.
 	 * 
 	 * A bundle that needs to export a package must have the appropriate
-	 * <code>PackagePermission</code> for that package; similarly, a bundle that
-	 * needs to import a package must have the appropriate
+	 * <code>PackagePermission</code> for that package; similarly, a bundle
+	 * that needs to import a package must have the appropriate
 	 * <code>PackagePermssion</code> for that package.
 	 * <p>
 	 * Permission is granted for both classes and resources.
 	 * 
 	 * @param name Package name.
-	 * @param actions <code>EXPORT</code>,<code>IMPORT</code> (canonical order).
+	 * @param actions <code>EXPORT</code>,<code>IMPORT</code> (canonical
+	 *        order).
 	 */
 
 	public PackagePermission(String name, String actions) {
@@ -232,15 +236,16 @@ public final class PackagePermission extends BasicPermission {
 	 * named package.
 	 * 
 	 * <pre>
-	 *  x.y.*,&quot;export&quot; -&gt; x.y.z,&quot;export&quot; is true
-	 *  *,&quot;import&quot; -&gt; x.y, &quot;import&quot;      is true
-	 *  *,&quot;export&quot; -&gt; x.y, &quot;import&quot;      is true
-	 *  x.y,&quot;export&quot; -&gt; x.y.z, &quot;export&quot;  is false
+	 * x.y.*,&quot;export&quot; -&gt; x.y.z,&quot;export&quot; is true
+	 * *,&quot;import&quot; -&gt; x.y, &quot;import&quot;      is true
+	 * *,&quot;export&quot; -&gt; x.y, &quot;import&quot;      is true
+	 * x.y,&quot;export&quot; -&gt; x.y.z, &quot;export&quot;  is false
 	 * </pre>
 	 * 
 	 * @param p The target permission to interrogate.
-	 * @return <code>true</code> if the specified <code>PackagePermission</code>
-	 *         action is implied by this object; <code>false</code> otherwise.
+	 * @return <code>true</code> if the specified
+	 *         <code>PackagePermission</code> action is implied by this
+	 *         object; <code>false</code> otherwise.
 	 */
 
 	public boolean implies(Permission p) {
@@ -262,8 +267,8 @@ public final class PackagePermission extends BasicPermission {
 	 * Always returns present <code>PackagePermission</code> actions in the
 	 * following order: <code>EXPORT</code>,<code>IMPORT</code>.
 	 * 
-	 * @return Canonical string representation of the <code>PackagePermission</code>
-	 *         actions.
+	 * @return Canonical string representation of the
+	 *         <code>PackagePermission</code> actions.
 	 */
 
 	public String getActions() {
@@ -289,8 +294,8 @@ public final class PackagePermission extends BasicPermission {
 	}
 
 	/**
-	 * Returns a new <code>PermissionCollection</code> object suitable for storing
-	 * <code>PackagePermission</code> objects.
+	 * Returns a new <code>PermissionCollection</code> object suitable for
+	 * storing <code>PackagePermission</code> objects.
 	 * 
 	 * @return A new <code>PermissionCollection</code> object.
 	 */
@@ -302,14 +307,15 @@ public final class PackagePermission extends BasicPermission {
 	 * Determines the equality of two <code>PackagePermission</code> objects.
 	 * 
 	 * This method checks that specified package has the same package name and
-	 * <code>PackagePermission</code> actions as this <code>PackagePermission</code>
-	 * object.
+	 * <code>PackagePermission</code> actions as this
+	 * <code>PackagePermission</code> object.
 	 * 
 	 * @param obj The object to test for equality with this
 	 *        <code>PackagePermission</code> object.
-	 * @return <code>true</code> if <code>obj</code> is a <code>PackagePermission</code>,
-	 *         and has the same package name and actions as this
-	 *         <code>PackagePermission</code> object; <code>false</code> otherwise.
+	 * @return <code>true</code> if <code>obj</code> is a
+	 *         <code>PackagePermission</code>, and has the same package name
+	 *         and actions as this <code>PackagePermission</code> object;
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean equals(Object obj) {
 		if (obj == this) {
@@ -399,7 +405,6 @@ final class PackagePermissionCollection extends PermissionCollection {
 
 	/**
 	 * Create an empty PackagePermissions object.
-	 *  
 	 */
 
 	public PackagePermissionCollection() {
@@ -408,16 +413,17 @@ final class PackagePermissionCollection extends PermissionCollection {
 	}
 
 	/**
-	 * Adds a permission to the <code>PackagePermission</code> objects. The key
-	 * for the hash is the name.
+	 * Adds a permission to the <code>PackagePermission</code> objects. The
+	 * key for the hash is the name.
 	 * 
 	 * @param permission The <code>PackagePermission</code> object to add.
 	 * 
-	 * @exception IllegalArgumentException If the permission is not a
-	 *            <code>PackagePermission</code> instance.
+	 * @throws IllegalArgumentException If the permission is not a
+	 *         <code>PackagePermission</code> instance.
 	 * 
-	 * @exception SecurityException If this <code>PackagePermissionCollection</code>
-	 *            object has been marked read-only.
+	 * @throws SecurityException If this
+	 *         <code>PackagePermissionCollection</code> object has been marked
+	 *         read-only.
 	 */
 
 	public void add(Permission permission) {
@@ -459,8 +465,9 @@ final class PackagePermissionCollection extends PermissionCollection {
 	 * @param permission The Permission object to compare with this
 	 *        <code>PackagePermission</code> object.
 	 * 
-	 * @return <code>true</code> if <code>permission</code> is a proper subset of a
-	 *         permission in the set; <code>false</code> otherwise.
+	 * @return <code>true</code> if <code>permission</code> is a proper
+	 *         subset of a permission in the set; <code>false</code>
+	 *         otherwise.
 	 */
 
 	public boolean implies(Permission permission) {
@@ -522,8 +529,8 @@ final class PackagePermissionCollection extends PermissionCollection {
 	}
 
 	/**
-	 * Returns an enumeration of all <code>PackagePermission</code> objects in the
-	 * container.
+	 * Returns an enumeration of all <code>PackagePermission</code> objects in
+	 * the container.
 	 * 
 	 * @return Enumeration of all <code>PackagePermission</code> objects.
 	 */
@@ -532,4 +539,3 @@ final class PackagePermissionCollection extends PermissionCollection {
 		return (permissions.elements());
 	}
 }
-

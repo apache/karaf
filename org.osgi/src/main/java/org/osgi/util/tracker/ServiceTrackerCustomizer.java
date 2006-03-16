@@ -1,11 +1,19 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTrackerCustomizer.java,v 1.7 2005/05/13 20:33:35 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTrackerCustomizer.java,v 1.9 2006/03/14 01:20:01 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
  * 
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this 
- * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.osgi.util.tracker;
@@ -32,7 +40,7 @@ import org.osgi.framework.ServiceReference;
  * <code>ServiceRegistration.unregister</code>) a service while being
  * synchronized on any object.
  * 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.9 $
  */
 public interface ServiceTrackerCustomizer {
 	/**
@@ -52,7 +60,7 @@ public interface ServiceTrackerCustomizer {
 	 *         <code>ServiceReference</code> object or <code>null</code> if the
 	 *         <code>ServiceReference</code> object should not be tracked.
 	 */
-	public abstract Object addingService(ServiceReference reference);
+	public Object addingService(ServiceReference reference);
 
 	/**
 	 * A service tracked by the <code>ServiceTracker</code> object has been
@@ -65,7 +73,7 @@ public interface ServiceTrackerCustomizer {
 	 * @param reference Reference to service that has been modified.
 	 * @param service The service object for the modified service.
 	 */
-	public abstract void modifiedService(ServiceReference reference,
+	public void modifiedService(ServiceReference reference,
 			Object service);
 
 	/**
@@ -79,6 +87,6 @@ public interface ServiceTrackerCustomizer {
 	 * @param reference Reference to service that has been removed.
 	 * @param service The service object for the removed service.
 	 */
-	public abstract void removedService(ServiceReference reference,
+	public void removedService(ServiceReference reference,
 			Object service);
 }

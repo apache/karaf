@@ -1,11 +1,19 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundlePermission.java,v 1.10 2005/06/21 16:22:12 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundlePermission.java,v 1.14 2006/03/14 01:21:02 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
  * 
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this 
- * distribution, and is available at http://www.eclipse.org/legal/epl-v10.html.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.osgi.framework;
@@ -71,9 +79,6 @@ public final class BundlePermission extends BasicPermission {
 															| ACTION_HOST
 															| ACTION_FRAGMENT;
 	private final static int	ACTION_NONE			= 0;
-//    NOT USED!!!
-//    private final static int	ACTION_ERROR		= 0x80000000;
-
 	/**
 	 * The actions mask.
 	 */
@@ -256,10 +261,10 @@ public final class BundlePermission extends BasicPermission {
 	 * named symbolic name.
 	 * 
 	 * <pre>
-	 *      x.y.*,&quot;provide&quot; -&gt; x.y.z,&quot;provide&quot; is true
-	 *      *,&quot;require&quot; -&gt; x.y, &quot;require&quot;      is true
-	 *      *,&quot;provide&quot; -&gt; x.y, &quot;require&quot;      is true
-	 *      x.y,&quot;provide&quot; -&gt; x.y.z, &quot;provide&quot;  is false
+	 *       x.y.*,&quot;provide&quot; -&gt; x.y.z,&quot;provide&quot; is true
+	 *       *,&quot;require&quot; -&gt; x.y, &quot;require&quot;      is true
+	 *       *,&quot;provide&quot; -&gt; x.y, &quot;require&quot;      is true
+	 *       x.y,&quot;provide&quot; -&gt; x.y.z, &quot;provide&quot;  is false
 	 * </pre>
 	 * 
 	 * @param p The target permission to interrogate.
@@ -311,6 +316,7 @@ public final class BundlePermission extends BasicPermission {
 				if (comma)
 					sb.append(',');
 				sb.append(HOST);
+				comma = true;
 			}
 
 			if ((action_mask & ACTION_FRAGMENT) == ACTION_FRAGMENT) {
@@ -456,12 +462,10 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 * 
 	 * @param permission The <code>BundlePermission</code> object to add.
 	 * 
-	 * @exception IllegalArgumentException If the permission is not a
-	 *            <code>BundlePermission</code> instance.
-	 * 
-	 * @exception SecurityException If this
-	 *            <code>BundlePermissionCollection</code> object has been
-	 *            marked read-only.
+	 * @throws IllegalArgumentException If the permission is not a
+	 *         <code>BundlePermission</code> instance.
+	 * @throws SecurityException If this <code>BundlePermissionCollection</code>
+	 *         object has been marked read-only.
 	 */
 
 	public void add(Permission permission) {
