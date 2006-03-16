@@ -37,7 +37,7 @@ public class FilterImpl implements Filter
     private Evaluator m_evaluator = null;
     private SimpleMapper m_mapper = null;
 
-// TODO: FilterImpl needs a logger, this is a hack to get FrameworkUtil to compile.
+// TODO: FilterImpl needs a logger, this is a hack for FrameworkUtil.
     public FilterImpl(String expr) throws InvalidSyntaxException
     {
         this(null, expr);
@@ -132,11 +132,11 @@ public class FilterImpl implements Filter
         }
         catch (AttributeNotFoundException ex)
         {
-            m_logger.log(Logger.LOG_DEBUG, "FilterImpl: " + ex);
+            log(Logger.LOG_DEBUG, "FilterImpl: Attribute not found.", ex);
         }
         catch (EvaluationException ex)
         {
-            m_logger.log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);
+            log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);
         }
         return false;
     }
@@ -158,11 +158,11 @@ public class FilterImpl implements Filter
         }
         catch (AttributeNotFoundException ex)
         {
-            m_logger.log(Logger.LOG_DEBUG, "FilterImpl: " + ex);
+            log(Logger.LOG_DEBUG, "FilterImpl: Attribute not found.", ex);
         }
         catch (EvaluationException ex)
         {
-            m_logger.log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);
+            log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);
         }
         return false;
     }
@@ -176,11 +176,12 @@ public class FilterImpl implements Filter
         }
         catch (AttributeNotFoundException ex)
         {
-            m_logger.log(Logger.LOG_DEBUG, "FilterImpl: " + ex);
+            log(Logger.LOG_DEBUG, "FilterImpl: Attribute not found.", ex);
         }
         catch (EvaluationException ex)
         {
-            m_logger.log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);        }
+            log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);
+        }
         return false;
     }
 
@@ -252,6 +253,18 @@ public class FilterImpl implements Filter
                 return m_ref.getProperty(name);
             }
             return m_map.get(name);
+        }
+    }
+
+    private void log(int flag, String msg, Throwable th)
+    {
+        if (m_logger == null)
+        {
+            System.out.println(msg + ": " + th);
+        }
+        else
+        {
+            m_logger.log(flag, msg, th);
         }
     }
 }
