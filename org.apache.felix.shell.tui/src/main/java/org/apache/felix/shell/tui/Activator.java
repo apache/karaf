@@ -23,10 +23,11 @@ import org.osgi.framework.*;
 
 public class Activator implements BundleActivator
 {
-    private transient BundleContext m_context = null;
-    private transient ShellTuiRunnable m_runnable = null;
-    private transient ServiceReference m_shellRef = null;
-    private transient ShellService m_shell = null;
+    private BundleContext m_context = null;
+    private ShellTuiRunnable m_runnable = null;
+    private Thread m_thread = null;
+    private ServiceReference m_shellRef = null;
+    private ShellService m_shell = null;
 
     public void start(BundleContext context)
     {
@@ -63,14 +64,17 @@ public class Activator implements BundleActivator
                 }
             }
         };
-        try {
+        try
+        {
             m_context.addServiceListener(sl,
                 "(objectClass="
                 + org.apache.felix.shell.ShellService.class.getName()
                 + ")");
-        } catch (InvalidSyntaxException ex) {
-            System.err.println("ShellTuiActivator: Cannot add service listener.");
-            System.err.println("ShellTuiActivator: " + ex);
+        }
+        catch (InvalidSyntaxException ex)
+        {
+            System.err.println("ShellTui: Cannot add service listener.");
+            System.err.println("ShellTui: " + ex);
         }
 
         // Now try to manually initialize the impl service
@@ -78,19 +82,24 @@ public class Activator implements BundleActivator
         initializeService();
 
         // Start impl thread.
-        new Thread(
+        m_thread = new Thread(
             m_runnable = new ShellTuiRunnable(),
-            "Felix Shell TUI").start();
+            "Felix Shell TUI");
+        m_thread.start();
     }
 
     private synchronized void initializeService()
     {
         if (m_shell != null)
+        {
             return;
+        }
         m_shellRef = m_context.getServiceReference(
             org.apache.felix.shell.ShellService.class.getName());
         if (m_shellRef == null)
+        {
             return;
+        }
         m_shell = (ShellService) m_context.getService(m_shellRef);
     }
 
@@ -99,6 +108,7 @@ public class Activator implements BundleActivator
         if (m_runnable != null)
         {
             m_runnable.stop();
+            m_thread.interrupt();
         }
     }
 
@@ -120,9 +130,12 @@ public class Activator implements BundleActivator
             {
                 System.out.print("-> ");
 
-                try {
+                try
+                {
                     line = in.readLine();
-                } catch (IOException ex) {
+                }
+                catch (IOException ex)
+                {
                     System.err.println("Could not read input, please try again.");
                     continue;
                 }
@@ -147,10 +160,13 @@ public class Activator implements BundleActivator
                         continue;
                     }
 
-                    try {
+                    try
+                    {
                         m_shell.executeCommand(line, System.out, System.err);
-                    } catch (Exception ex) {
-                        System.err.println("ShellTuiActivator: " + ex);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.err.println("ShellTui: " + ex);
                         ex.printStackTrace();
                     }
                 }
