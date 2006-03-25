@@ -1,0 +1,60 @@
+<project>
+  <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>0.8.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>osgi-bundle</packaging>
+  <name>Apache Felix Service Binder</name>
+  <artifactId>org.apache.felix.servicebinder</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>kxml</groupId>
+      <artifactId>kxml</artifactId>
+      <version>1.21</version>
+      <scope>required</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix.plugins</groupId>
+        <artifactId>maven-osgi-plugin</artifactId>
+        <version>${pom.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <osgiManifest>
+            <entries>
+              <property>
+                <name>Metadata-Location</name>
+                <value>metadata.xml</value>
+              </property>
+            </entries>
+            <bundleName>Service Binder</bundleName>
+            <bundleVendor>Apache Software Foundation</bundleVendor>
+            <!--<bundleVersion>1.1.2</bundleVersion>-->
+            <bundleDescription>
+              This bundle provides a mechanism to automate service dependency management.
+            </bundleDescription>
+            <bundleActivator>
+              org.apache.felix.servicebinder.impl.Activator
+            </bundleActivator>
+            <exportPackage>
+              org.apache.felix.servicebinder; specification-version="1.1.0",org.apache.felix.servicebinder.architecture; specification-version="1.1.0"
+            </exportPackage>
+            <metadataLocation>
+              metadata.xml
+            </metadataLocation>
+          </osgiManifest>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
