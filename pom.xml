@@ -13,6 +13,7 @@
     <module>org.apache.felix.shell</module>
     <module>org.apache.felix.shell.tui</module>
     <module>org.apache.felix.daemon</module>
+    <module>org.apache.felix.dependencymanager</module>
     <module>org.apache.felix.main</module>
     <module>org.apache.felix.examples.eventlistener</module>
     <module>org.apache.felix.examples.dictionaryservice</module>
