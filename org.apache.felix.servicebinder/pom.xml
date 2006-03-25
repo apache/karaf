@@ -19,7 +19,6 @@
       <groupId>kxml</groupId>
       <artifactId>kxml</artifactId>
       <version>1.21</version>
-      <scope>required</scope>
     </dependency>
   </dependencies>
   <build>

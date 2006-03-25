@@ -22,6 +22,7 @@
     <module>org.apache.felix.examples.spellcheckservice</module>
     <module>org.apache.felix.examples.spellcheckclient</module>
     <module>org.apache.felix.examples.spellcheckbinder</module>
+    <module>org.apache.felix.servicebinder</module>
   </modules>
 
   <repositories>
