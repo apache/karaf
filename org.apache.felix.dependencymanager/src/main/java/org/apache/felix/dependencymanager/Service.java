@@ -1,0 +1,195 @@
+/*
+ *   Copyright 2006 The Apache Software Foundation
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
+ */
+package org.apache.felix.dependencymanager;
+
+import java.util.Dictionary;
+import java.util.List;
+
+import org.osgi.framework.ServiceRegistration;
+
+/**
+ * Service interface.
+ * 
+ * @author Marcel Offermans
+ */
+public interface Service {
+    /**
+     * Adds a new dependency to this service.
+     * 
+     * @param dependency the dependency to add
+     * @return this service
+     */
+    public Service add(Dependency dependency);
+    
+    /**
+     * Removes a dependency from this service.
+     * 
+     * @param dependency the dependency to remove
+     * @return this service
+     */
+    public Service remove(Dependency dependency);
+
+    /**
+     * Sets the public interface under which this service should be registered
+     * in the OSGi service registry.
+     *  
+     * @param serviceName the name of the service interface
+     * @param properties the properties for this service
+     * @return this service
+     */
+    public Service setInterface(String serviceName, Dictionary properties);
+    /**
+     * Sets the public interfaces under which this service should be registered
+     * in the OSGi service registry.
+     *  
+     * @param serviceNames the names of the service interface
+     * @param properties the properties for this service
+     * @return this service
+     */
+    public Service setInterface(String[] serviceNames, Dictionary properties);
+    
+    /**
+     * Sets the implementation for this service. You can actually specify
+     * an instance you have instantiated manually, or a <code>Class</code>
+     * that will be instantiated using its default constructor when the
+     * required dependencies are resolved (effectively giving you a lazy
+     * instantiation mechanism).
+     * 
+     * There are four special methods that are called when found through
+     * reflection to give you some life-cycle management options:
+     * <ol>
+     * <li><code>init()</code> when the implementation should be initialized,
+     * before it is actually registered as a service (if at all)</li>
+     * <li><code>start()</code> when the implementation has been registered
+     * as a service (if at all)</li>
+     * <li><code>stop()</code> when the implementation will be stopped, just
+     * before the service will go away (if it had been registered)</li>
+     * <li><code>destroy()</code>after the service has gone away (if it had
+     * been registered)</li>
+     * </ol>
+     * In short, this allows you to initialize your instance before it is
+     * registered, perform some post-initialization and pre-destruction code
+     * as well as final cleanup. If a method is not defined, it simply is not
+     * called, so you can decide which one(s) you need.
+     * 
+     * @param implementation the implementation
+     * @return this service
+     */
+    public Service setImplementation(Object implementation);
+    
+    /**
+     * Returns a list of dependencies.
+     * 
+     * @return a list of dependencies
+     */
+    public List getDependencies();
+    
+    /**
+     * Returns the service registration for this service. The method
+     * will return <code>null</code> if no service registration is
+     * available.
+     * 
+     * @return the service registration
+     */
+    public ServiceRegistration getServiceRegistration();
+    
+    /**
+     * Returns the service instance for this service. The method will
+     * return <code>null</code> if no service instance is available.
+     * 
+     * @return the service instance
+     */
+    public Object getService();
+
+    /**
+     * Returns the service properties associated with the service.
+     * 
+     * @return the properties or <code>null</code> if there are none
+     */
+    public Dictionary getServiceProperties();
+    
+    /**
+     * Sets the service properties associated with the service. If the service
+     * was already registered, it will be updated.
+     * 
+     * @param serviceProperties the properties
+     */
+    public void setServiceProperties(Dictionary serviceProperties);
+    
+    /**
+     * Sets the names of the methods used as callbacks. These methods, when found, are
+     * invoked as part of the life-cycle management of the service implementation. The
+     * methods should not have any parameters.
+     * 
+     * @param init the name of the init method
+     * @param start the name of the start method
+     * @param stop the name of the stop method
+     * @param destroy the name of the destroy method
+     * @return the service instance
+     */
+    public Service setCallbacks(String init, String start, String stop, String destroy);
+
+    // listener
+    /**
+     * Adds a service state listener to this service.
+     * 
+     * @param listener the state listener
+     */
+    public void addStateListener(ServiceStateListener listener);
+
+    /**
+     * Removes a service state listener from this service.
+     * 
+     * @param listener the state listener
+     */
+    public void removeStateListener(ServiceStateListener listener);
+    
+    // events, must be fired when the dependency is started/active
+    
+    /**
+     * Will be called when the dependency becomes available.
+     * 
+     * @param dependency the dependency
+     */
+    public void dependencyAvailable(Dependency dependency);
+    
+    /**
+     * Will be called when the dependency changes.
+     * 
+     * @param dependency the dependency
+     */
+    public void dependencyUnavailable(Dependency dependency);
+    
+    /**
+     * Will be called when the dependency becomes unavailable.
+     * 
+     * @param dependency the dependency
+     */
+    public void dependencyChanged(Dependency dependency);
+
+    /**
+     * Starts the service. This activates the dependency tracking mechanism
+     * for this service.
+     */
+    public void start();
+    
+    /**
+     * Stops the service. This deactivates the dependency tracking mechanism
+     * for this service.
+     */
+    public void stop();
+}
