@@ -8,7 +8,8 @@
   <modules>
     <!-- <module>javax.servlet</module> -->
     <module>tools/maven2/maven-osgi-plugin</module>
-    <module>org.osgi</module>
+    <module>org.osgi.core</module>
+    <module>org.osgi.compendium</module>
     <module>org.apache.felix.framework</module>
     <module>org.apache.felix.shell</module>
     <module>org.apache.felix.shell.tui</module>
@@ -46,14 +47,14 @@
       <name>Apache Snapshots</name>
       <id>apache.snapshots</id>
       <url>
-        scpexe://apache.org/www/cvs.apache.org/maven-snapshot-repository
+        scp://apache.org/www/cvs.apache.org/maven-snapshot-repository
       </url>
     </snapshotRepository>
     <repository>
       <name>ASF Mirrored M2 Distributions</name>
       <id>apache.distributions</id>
       <url>
-        scpexe://minotaur.apache.org/www/www.apache.org/dist/maven-repository
+        scp://minotaur.apache.org/www/www.apache.org/dist/maven-repository
       </url>
     </repository>
   </distributionManagement>
