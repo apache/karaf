@@ -8,6 +8,7 @@
   <modules>
     <!-- <module>javax.servlet</module> -->
     <module>tools/maven2/maven-osgi-plugin</module>
+    <module>javax.servlet</module>
     <module>org.osgi.core</module>
     <module>org.osgi.compendium</module>
     <module>org.apache.felix.framework</module>

@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-SymbolicName: javax.servlet
-Bundle-Name: servlet
-Bundle-Description: Servlet 2.1 API
-Bundle-Version: 2.1
-Bundle-Category: servlet
-Bundle-Copyright: Copyright 1999,2005 The Apache Software Foundation
-Export-Package: javax.servlet;specification-version="2.1",
- javax.servlet.http;specification-version="2.1"
