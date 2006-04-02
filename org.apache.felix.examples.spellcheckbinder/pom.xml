@@ -11,7 +11,7 @@
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
-      <artifactId>org.osgi</artifactId>
+      <artifactId>org.osgi.core</artifactId>
       <version>${pom.version}</version>
       <scope>provided</scope>
     </dependency>
@@ -28,9 +28,9 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.ungoverned.gravity.servicebinder</groupId>
-      <artifactId>servicebinder</artifactId>
-      <version>1.0</version>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.servicebinder</artifactId>
+      <version>${pom.version}</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
@@ -58,7 +58,7 @@
               org.apache.felix.examples.spellcheckbinder.Activator
             </bundleActivator>
             <importPackage>
-              org.apache.felix.examples.dictionaryservice, org.ungoverned.gravity.servicebinder, org.apache.felix.examples.spellcheckservice
+              org.apache.felix.examples.dictionaryservice, org.apache.felix.servicebinder, org.apache.felix.examples.spellcheckservice
             </importPackage>
           </osgiManifest>
         </configuration>

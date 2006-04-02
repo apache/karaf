@@ -11,7 +11,7 @@
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
-      <artifactId>org.osgi</artifactId>
+      <artifactId>org.osgi.core</artifactId>
       <version>${pom.version}</version>
       <scope>provided</scope>
     </dependency>

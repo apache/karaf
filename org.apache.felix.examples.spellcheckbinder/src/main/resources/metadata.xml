@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bundle>
   <!--
-     This metadata file instructs the Gravity Service Binder to
+     This metadata file instructs the Apache Felix Service Binder to
      create one instance of "SpellCheckServiceImpl". It also
      tells the generic activator that this instance implements the
      "SpellCheckService" service interface and that it has an
