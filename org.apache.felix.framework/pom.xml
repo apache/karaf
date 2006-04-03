@@ -16,7 +16,7 @@
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
-      <artifactId>org.osgi</artifactId>
+      <artifactId>org.osgi.core</artifactId>
       <version>${pom.version}</version>
     </dependency>
   </dependencies>
