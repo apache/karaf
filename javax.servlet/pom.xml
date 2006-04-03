@@ -19,10 +19,10 @@
           <osgiManifest>
             <bundleName>servlet</bundleName>
             <bundleVendor>Apache Software Foundation</bundleVendor>
-            <!--<bundleVersion>2.1</bundleVersion>-->
+            <bundleVersion>2.1</bundleVersion>
             <bundleSymbolicName>javax.servlet</bundleSymbolicName>
             <bundleDescription>Servlet 2.1 API</bundleDescription>
-            <!--<bundleCopyright>Copyright 1999,2005 The Apache Software Foundation</bundleCopyright>-->
+            <bundleCopyright>Copyright 1999,2005 The Apache Software Foundation</bundleCopyright>
             <bundleCategory>servlet</bundleCategory>
             <exportPackage>javax.servlet;specification-version="2.1",javax.servlet.http;specification-version="2.1"</exportPackage>
           </osgiManifest>
