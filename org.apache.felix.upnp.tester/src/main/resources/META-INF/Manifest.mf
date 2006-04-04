@@ -1,0 +1,5 @@
+Bundle-ClassPath: .
+Bundle-Author: Matteo Demuru <matte-d@users.sourceforge.net>,
+ Francesco Furfari <francesco.furfari@users.sourceforge.net>,
+ Stefano "Kismet" Lenzi <kismet-sl@users.sourceforge.net>
+ 
