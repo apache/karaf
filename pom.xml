@@ -28,6 +28,7 @@
     <module>org.apache.felix.examples.spellcheckclient</module>
     <module>org.apache.felix.examples.spellcheckbinder</module>
     <module>org.apache.felix.servicebinder</module>
+    <module>org.apache.felix.wireadmin</module>
   </modules>
 
   <repositories>
