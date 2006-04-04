@@ -27,8 +27,8 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.event.EventListenerList;
 
-import org.osgi.framework.*;
 import org.apache.felix.shell.gui.Plugin;
+import org.osgi.framework.*;
 
 public class Activator implements BundleActivator
 {
