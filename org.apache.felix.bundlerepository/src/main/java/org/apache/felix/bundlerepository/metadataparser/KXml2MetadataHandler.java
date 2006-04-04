@@ -16,9 +16,7 @@
  */
 package org.apache.felix.bundlerepository.metadataparser;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 import org.apache.felix.bundlerepository.metadataparser.kxmlsax.KXml2SAXParser;
 

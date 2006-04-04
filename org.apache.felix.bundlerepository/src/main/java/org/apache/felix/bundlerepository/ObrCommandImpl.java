@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.apache.felix.bundlerepository;
 
 import java.io.*;
 import java.lang.reflect.Array;
-import java.net.*;
+import java.net.URL;
 import java.util.*;
 
 import org.apache.felix.shell.Command;

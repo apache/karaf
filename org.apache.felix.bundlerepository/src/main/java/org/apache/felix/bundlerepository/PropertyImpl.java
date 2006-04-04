@@ -16,7 +16,8 @@
  */
 package org.apache.felix.bundlerepository;
 
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.osgi.framework.Version;
 import org.osgi.service.obr.Resource;

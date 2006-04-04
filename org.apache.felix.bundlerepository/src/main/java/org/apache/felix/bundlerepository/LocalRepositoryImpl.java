@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import java.net.URL;
 import java.util.*;
 
 import org.osgi.framework.*;
-import org.osgi.service.obr.*;
+import org.osgi.service.obr.Repository;
+import org.osgi.service.obr.Resource;
 
 public class LocalRepositoryImpl implements Repository
 {
