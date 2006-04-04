@@ -1,0 +1,178 @@
+package org.apache.felix.bundlerepository;
+
+import java.io.*;
+import java.net.*;
+import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+
+import org.apache.felix.bundlerepository.metadataparser.XmlCommonHandler;
+import org.apache.felix.bundlerepository.metadataparser.kxmlsax.KXml2SAXParser;
+import org.osgi.service.obr.*;
+import org.osgi.service.obr.Repository;
+import org.osgi.service.obr.Resource;
+
+public class RepositoryImpl implements Repository
+{
+    private String m_name = null;
+    private long m_lastmodified = 0;
+    private URL m_url = null;
+    private Resource[] m_resources = null;
+    private int m_hopCount = 1;
+
+    // Reusable comparator for sorting resources by name.
+    private ResourceComparator m_nameComparator = new ResourceComparator();
+
+    public RepositoryImpl(URL url)
+    {
+        m_url = url;
+        parseRepositoryFile(m_hopCount);
+    }
+
+    public URL getURL()
+    {
+        return m_url;
+    }
+
+    protected void setURL(URL url)
+    {
+        m_url = url;
+    }
+
+    public Resource[] getResources()
+    {
+        return m_resources;
+    }
+
+    // TODO: OBR - Wrong parameter type from metadata parser.
+    public void addResource(ResourceImpl resource)
+    {
+        // Set resource's repository.
+        ((ResourceImpl) resource).setRepository(this);
+
+        // Add to resource array.
+        if (m_resources == null)
+        {
+            m_resources = new Resource[] { resource };
+        }
+        else
+        {
+            Resource[] newResources = new Resource[m_resources.length + 1];
+            System.arraycopy(m_resources, 0, newResources, 0, m_resources.length);
+            newResources[m_resources.length] = resource;
+            m_resources = newResources;
+        }
+
+        Arrays.sort(m_resources, m_nameComparator);
+    }
+
+    public String getName()
+    {
+        return m_name;
+    }
+
+    public void setName(String name)
+    {
+        m_name = name;
+    }
+
+    public long getLastModified()
+    {
+        return m_lastmodified;
+    }
+
+    public void setLastmodified(String s)
+    {
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddhhmmss.SSS");
+        try
+        {
+            m_lastmodified = format.parse(s).getTime();
+        }
+        catch (ParseException ex)
+        {
+        }
+    }
+
+    private void parseRepositoryFile(int hopCount)
+    {
+// TODO: OBR - Implement hop count.
+        InputStream is = null;
+        BufferedReader br = null;
+
+        try
+        {
+            // Do it the manual way to have a chance to 
+            // set request properties as proxy auth (EW).
+            URLConnection conn = m_url.openConnection(); 
+
+            // Support for http proxy authentication
+            String auth = System.getProperty("http.proxyAuth");
+            if ((auth != null) && (auth.length() > 0))
+            {
+                if ("http".equals(m_url.getProtocol()) ||
+                    "https".equals(m_url.getProtocol()))
+                {
+                    String base64 = Util.base64Encode(auth);
+                    conn.setRequestProperty(
+                        "Proxy-Authorization", "Basic " + base64);
+                }
+            }
+            is = conn.getInputStream();
+
+            // Create the parser Kxml
+            XmlCommonHandler handler = new XmlCommonHandler();
+            try
+            {
+                Object factory = new Object() {
+                    public RepositoryImpl newInstance()
+                    {
+                        return RepositoryImpl.this;
+                    }
+                };
+                handler.addType("repository", factory, Repository.class);
+                handler.addType("resource", ResourceImpl.class, Resource.class);
+                handler.addType("category", CategoryImpl.class, null);
+                handler.addType("require", RequirementImpl.class, Requirement.class);
+                handler.addType("capability", CapabilityImpl.class, Capability.class);
+                handler.addType("p", PropertyImpl.class, null);
+                handler.setDefaultType(String.class, null);
+            }
+            catch (Exception ex)
+            {
+                System.err.println("RepositoryAdminImpl: " + ex);
+            }
+
+            br = new BufferedReader(new InputStreamReader(is));
+            KXml2SAXParser parser;
+            try
+            {
+                parser = new KXml2SAXParser(br);
+                parser.parseXML(handler);
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+        catch (MalformedURLException ex)
+        {
+            System.err.println("RepositoryAdminImpl: " + ex);
+        }
+        catch (IOException ex)
+        {
+            System.err.println("RepositoryAdminImpl: " + ex);
+        }
+        finally
+        {
+            try
+            {
+                if (is != null) is.close();
+            }
+            catch (IOException ex)
+            {
+                // Not much we can do.
+            }
+        }
+    }
+}
