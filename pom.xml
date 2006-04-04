@@ -14,6 +14,7 @@
     <module>org.apache.felix.framework</module>
     <module>org.apache.felix.shell</module>
     <module>org.apache.felix.shell.tui</module>
+    <module>org.apache.felix.shell.gui</module>
     <module>org.apache.felix.daemon</module>
     <module>org.apache.felix.dependencymanager</module>
     <module>org.apache.felix.main</module>

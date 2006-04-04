@@ -1,0 +1,41 @@
+<project>
+  <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>0.8.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>osgi-bundle</packaging>
+  <name>Apache Felix Shell GUI</name>
+  <artifactId>org.apache.felix.shell.gui</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix.plugins</groupId>
+        <artifactId>maven-osgi-plugin</artifactId>
+        <version>${pom.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <osgiManifest>
+            <bundleName>ShellGUI</bundleName>
+            <bundleDescription>A simple plugin-oriented GUI shell.</bundleDescription>
+            <bundleActivator>org.apache.felix.shell.gui.impl.Activator</bundleActivator>
+            <bundleDocUrl>http://oscar-osgi.sf.net/obr2/shellgui/</bundleDocUrl>
+            <bundleSource>http://oscar-osgi.sf.net/obr2/shellgui/org.apache.felix.shell.gui-src.jar</bundleSource>
+            <bundleSymbolicName>org.apache.felix.shell.gui</bundleSymbolicName>
+            <importPackage>org.osgi.framework</importPackage>
+            <exportPackage>org.apache.felix.shell.gui; specification-version="1.0.0"</exportPackage>
+          </osgiManifest>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
