@@ -14,11 +14,6 @@
       <artifactId>org.apache.felix.framework</artifactId>
       <version>${pom.version}</version>
     </dependency>
-    <dependency>
-      <groupId>${pom.groupId}</groupId>
-      <artifactId>org.apache.felix.shell.tui</artifactId>
-      <version>${pom.version}</version>
-    </dependency>
   </dependencies>
   <properties>
     <property name="install.home" value="${basedir.absolutePath}"/>
@@ -63,6 +58,8 @@
 <copy file="${basedir}/../org.apache.felix.shell/target/org.apache.felix.shell-${pom.version}.jar"
       todir="${basedir}/bundle"/>
 <copy file="${basedir}/../org.apache.felix.shell.tui/target/org.apache.felix.shell.tui-${pom.version}.jar"
+      todir="${basedir}/bundle"/>
+<copy file="${basedir}/../org.apache.felix.bundlerepository/target/org.apache.felix.bundlerepository-${pom.version}.jar"
       todir="${basedir}/bundle"/>
               </tasks>
             </configuration>
