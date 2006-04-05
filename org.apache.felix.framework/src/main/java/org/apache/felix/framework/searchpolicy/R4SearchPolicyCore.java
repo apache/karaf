@@ -372,10 +372,13 @@ public class R4SearchPolicyCore implements ModuleListener
         // Start from 1 to skip security manager class.
         for (int i = 1; i < classes.length; i++)
         {
-            // Find the first class on the call stack that is neither
-            // a class loader or Class itself, because we want to ignore
-            // the calls to ClassLoader.loadClass() and Class.forName().
-            if (!ClassLoader.class.isAssignableFrom(classes[i]) &&
+            // Find the first class on the call stack that is not one
+            // of the R4 search policy classes, nor a class loader or
+            // class itself, because we want to ignore the calls to
+            // ClassLoader.loadClass() and Class.forName().
+            if (!R4SearchPolicyCore.class.equals(classes[i]) &&
+                !R4SearchPolicy.class.equals(classes[i]) &&
+                !ClassLoader.class.isAssignableFrom(classes[i]) &&
                 !Class.class.isAssignableFrom(classes[i]))
             {
                 // If the instigating class was not from a bundle, then
@@ -523,10 +526,13 @@ public class R4SearchPolicyCore implements ModuleListener
         // Start from 1 to skip security manager class.
         for (int i = 1; i < classes.length; i++)
         {
-            // Find the first class on the call stack that is neither
-            // a class loader or Class itself, because we want to ignore
-            // the calls to ClassLoader.loadClass() and Class.forName().
-            if (!ClassLoader.class.isAssignableFrom(classes[i]) &&
+            // Find the first class on the call stack that is not one
+            // of the R4 search policy classes, nor a class loader or
+            // class itself, because we want to ignore the calls to
+            // ClassLoader.loadClass() and Class.forName().
+            if (!R4SearchPolicyCore.class.equals(classes[i]) &&
+                !R4SearchPolicy.class.equals(classes[i]) &&
+                !ClassLoader.class.isAssignableFrom(classes[i]) &&
                 !Class.class.isAssignableFrom(classes[i]))
             {
                 // If the instigating class was not from a bundle, then
