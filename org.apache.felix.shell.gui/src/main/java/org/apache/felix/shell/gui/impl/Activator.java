@@ -140,7 +140,7 @@ public class Activator implements BundleActivator
         if (m_frame == null)
         {
             ShellPanel panel = new ShellPanel(this);
-            m_frame = new JFrame("Oscar GUI Shell");
+            m_frame = new JFrame("Felix GUI Shell");
             m_frame.getContentPane().setLayout(new BorderLayout());
             m_frame.getContentPane().add(panel);
             m_frame.pack();
