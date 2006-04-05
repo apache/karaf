@@ -29,9 +29,10 @@
             <bundleDescription>A simple plugin-oriented GUI shell.</bundleDescription>
             <bundleActivator>org.apache.felix.shell.gui.impl.Activator</bundleActivator>
             <bundleDocUrl>http://oscar-osgi.sf.net/obr2/shellgui/</bundleDocUrl>
+            <bundleUrl>http://oscar-osgi.sf.net/obr2/shellgui/org.apache.felix.shell.gui.jar</bundleUrl>
             <bundleSource>http://oscar-osgi.sf.net/obr2/shellgui/org.apache.felix.shell.gui-src.jar</bundleSource>
             <bundleSymbolicName>org.apache.felix.shell.gui</bundleSymbolicName>
-            <importPackage>org.osgi.framework</importPackage>
+            <importPackage>org.osgi.framework,javax.swing,javax.swing.event</importPackage>
             <exportPackage>org.apache.felix.shell.gui; specification-version="1.0.0"</exportPackage>
           </osgiManifest>
         </configuration>
