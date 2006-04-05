@@ -112,9 +112,11 @@ public class ServiceImpl implements Service {
             // if we're waiting for required dependencies, then
             // we only need to stop tracking the dependency if it
             // too is required; this might trigger a state change
-            dependency.stop(this);
-            if (allRequiredDependenciesAvailable()) {
-                activateService();
+            if (dependency.isRequired()) {
+                dependency.stop(this);
+                if (allRequiredDependenciesAvailable()) {
+                    activateService();
+                }
             }
         }
         return this;
