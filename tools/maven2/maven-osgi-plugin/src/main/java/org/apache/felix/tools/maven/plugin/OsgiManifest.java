@@ -54,6 +54,7 @@ public class OsgiManifest
     private static final String FRAGMENT_HOST = "Fragment-Host";
     private static final String BUNDLE_MANIFESTVERSION = "Bundle-ManifestVersion";
 
+    private static final String BUNDLE_URL = "Bundle-URL";
     private static final String BUNDLE_SOURCE = "Bundle-Source";
     private static final String BUNDLE_DATE = "Bundle-Date";
     private static final String METADATA_LOCATION = "Metadata-Location";
@@ -88,6 +89,7 @@ public class OsgiManifest
     /**
      * Instance variables supporting non-framework manifest headers
      */
+    private String bundleUrl;
     private String bundleSource;
     private String bundleDate;
     private String metadataLocation;
@@ -211,6 +213,11 @@ public class OsgiManifest
         if ( getBundleManifestVersion() != null )
         {
             entries.put( BUNDLE_MANIFESTVERSION, getBundleManifestVersion() );
+        }
+
+        if ( getBundleUrl() != null )
+        {
+            entries.put( BUNDLE_URL, getBundleUrl() );
         }
 
         if ( getBundleSource() != null )
@@ -461,6 +468,16 @@ public class OsgiManifest
     public void setBundleManifestVersion( String bundleManifestVersion )
     {
         this.bundleManifestVersion = bundleManifestVersion;
+    }
+
+    public String getBundleUrl()
+    {
+        return bundleUrl;
+    }
+
+    public void setBundleUrl( String bundleUrl )
+    {
+        this.bundleUrl = bundleUrl;
     }
 
     public String getBundleSource()
