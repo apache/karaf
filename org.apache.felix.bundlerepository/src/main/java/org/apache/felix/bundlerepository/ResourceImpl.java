@@ -122,13 +122,11 @@ public class ResourceImpl implements Resource, Map
 
     public void addRequire(Requirement req)
     {
-System.out.println("ADDING REQUIREMENTS PROPERLY");
         m_reqList.add(req);
     }
 
     public Capability[] getCapabilities()
     {
-System.out.println("ADDING CAPABILITIES PROPERLY");
         return (Capability[]) m_capList.toArray(new Capability[m_capList.size()]);
     }
 
@@ -252,13 +250,11 @@ System.out.println("ADDING CAPABILITIES PROPERLY");
             // TODO: OBR - These should be handled by the "add" methods above.
             else if (key.equals("require"))
             {
-System.out.println("ADDING REQUIREMENTS IMPROPERLY!!!!!!!!!!!!!!!");
                 m_reqList.add(value);
                 return null;
             }
             else if (key.equals("capability"))
             {
-System.out.println("ADDING CAPABILITIES IMPROPERLY!!!!!!!!!!!!!!!");
                 m_capList.add(value);
                 return null;
             }
