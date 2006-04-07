@@ -11,6 +11,14 @@
   <name>Apache Felix UPnP Base Driver</name>
   <artifactId>org.apache.felix.upnp.basedriver</artifactId>
   <version>0.1.0-SNAPSHOT</version>
+  <repositories>
+    <!-- For snapshots (no release jars or non-apache jars)           -->
+    <repository>
+      <id>domoware.isti.cnr.it</id>
+      <name>DomoWare Repository for Missing Artifacts</name>
+      <url>http://domoware.isti.cnr.it/maven2</url>
+    </repository>
+  </repositories>
   <!-- <url>http://maven.apache.org</url> -->
   <dependencies>
     <dependency>
@@ -32,9 +40,9 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.cybergarage</groupId>
-      <artifactId>cyberlink-patched-release</artifactId>
-      <version>1.7</version>
+      <groupId>org-cybergarage</groupId>
+      <artifactId>cyberlink-upnp-patched</artifactId>
+      <version>1.7.0</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
