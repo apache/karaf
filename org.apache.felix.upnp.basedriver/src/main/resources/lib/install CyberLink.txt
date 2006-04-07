@@ -1,2 +1,0 @@
-mvn install:install-file -DgroupId=org.cybergarage -DartifactId=cyberlink-patched-release 
--Dversion=1.7 -Dpackaging=jar -Dfile=<basedir>trunk\org.apache.felix.upnp.basedriver\src\main\resources\lib\cyberlink-1.7-patched-release.jar
