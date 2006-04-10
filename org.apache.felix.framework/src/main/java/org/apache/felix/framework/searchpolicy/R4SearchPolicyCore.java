@@ -20,18 +20,23 @@ import java.net.URL;
 import java.util.*;
 
 import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.util.SecurityManagerEx;
-import org.apache.felix.framework.util.Util;
+import org.apache.felix.framework.util.*;
 import org.apache.felix.moduleloader.*;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
 public class R4SearchPolicyCore implements ModuleListener
 {
     private Logger m_logger = null;
+    private PropertyResolver m_config = null;
     private IModuleFactory m_factory = null;
     private Map m_availPkgMap = new HashMap();
     private Map m_inUsePkgMap = new HashMap();
     private Map m_moduleDataMap = new HashMap();
+
+    // Boot delegation packages.
+    private String[] m_bootPkgs = null;
+    private boolean[] m_bootPkgWildcards = null;
 
     // Listener-related instance variables.
     private static final ResolveListener[] m_emptyListeners = new ResolveListener[0];
@@ -43,9 +48,27 @@ public class R4SearchPolicyCore implements ModuleListener
     // Re-usable security manager for accessing class context.
     private static SecurityManagerEx m_sm = new SecurityManagerEx();
 
-    public R4SearchPolicyCore(Logger logger)
+    public R4SearchPolicyCore(Logger logger, PropertyResolver config)
     {
         m_logger = logger;
+        m_config = config;
+
+        // Read the boot delegation property and parse it.
+        String s = m_config.get(Constants.FRAMEWORK_BOOTDELEGATION);
+        s = (s == null) ? "java.*" : s + ",java.*";
+        StringTokenizer st = new StringTokenizer(s, " ,");
+        m_bootPkgs = new String[st.countTokens()];
+        m_bootPkgWildcards = new boolean[m_bootPkgs.length];
+        for (int i = 0; i < m_bootPkgs.length; i++)
+        {
+            s = st.nextToken();
+            if (s.endsWith("*"))
+            {
+                m_bootPkgWildcards[i] = true;
+                s = s.substring(0, s.length() - 1);
+            }
+            m_bootPkgs[i] = s;
+        }
     }
 
     public IModuleFactory getModuleFactory()
@@ -271,11 +294,23 @@ public class R4SearchPolicyCore implements ModuleListener
         // Get the package of the target class.
         String pkgName = Util.getClassPackage(name);
 
-        // Load all "java.*" classes from parent class loader;
-        // these packages cannot be provided by other bundles.
-        if (pkgName.startsWith("java."))
+        // Delegate any packages listed in the boot delegation
+        // property to the parent class loader.
+        for (int i = 0; i < m_bootPkgs.length; i++)
         {
-            return getClass().getClassLoader().loadClass(name);
+            // A wildcarded boot delegation package will be in the form of "foo.",
+            // so if the package is wildcarded do a startsWith() or a regionMatches()
+            // to ignore the trailing "." to determine if the request should be
+            // delegated to the paren class loader. If the package is not wildcarded,
+            // then simply do an equals() test to see if the request should be
+            // delegated to the parent class loader.
+            if ((m_bootPkgWildcards[i] &&
+                    (pkgName.startsWith(m_bootPkgs[i]) ||
+                    m_bootPkgs[i].regionMatches(0, pkgName, 0, m_bootPkgs[i].length() - 1)))
+                || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
+            {
+                return getClass().getClassLoader().loadClass(name);
+            }
         }
 
         // Look in the module's imports.
@@ -391,7 +426,7 @@ public class R4SearchPolicyCore implements ModuleListener
                 break;
             }
         }
-        
+
         throw new ClassNotFoundException(name);
     }
 
@@ -425,11 +460,23 @@ public class R4SearchPolicyCore implements ModuleListener
         // Get the package of the target class.
         String pkgName = Util.getResourcePackage(name);
 
-        // Load all "java.*" classes from parent class loader;
-        // these packages cannot be provided by other bundles.
-        if (pkgName.startsWith("java."))
+        // Delegate any packages listed in the boot delegation
+        // property to the parent class loader.
+        for (int i = 0; i < m_bootPkgs.length; i++)
         {
-            return getClass().getClassLoader().getResource(name);
+            // A wildcarded boot delegation package will be in the form of "foo.",
+            // so if the package is wildcarded do a startsWith() or a regionMatches()
+            // to ignore the trailing "." to determine if the request should be
+            // delegated to the paren class loader. If the package is not wildcarded,
+            // then simply do an equals() test to see if the request should be
+            // delegated to the parent class loader.
+            if ((m_bootPkgWildcards[i] &&
+                    (pkgName.startsWith(m_bootPkgs[i]) ||
+                    m_bootPkgs[i].regionMatches(0, pkgName, 0, m_bootPkgs[i].length() - 1)))
+                || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
+            {
+                return getClass().getClassLoader().getResource(name);
+            }
         }
 
         // Look in the module's imports.
@@ -1069,8 +1116,6 @@ m_logger.log(
                 node.m_candidates[node.m_idx],
                 candidatePkg,
                 new HashMap());
-//System.out.println("MODULE " + rootModule + " USES    " + usesMap);
-//System.out.println("CANDIDATE " + node.m_candidates[node.m_idx] + " USES " + candUsesMap);
 
             // Iterate through the root module's current set of transitive
             // "uses" constraints and compare them with the candidate's

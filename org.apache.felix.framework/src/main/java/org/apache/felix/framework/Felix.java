@@ -266,7 +266,7 @@ public class Felix
         }
 
         // Create search policy for module loader.
-        m_policyCore = new R4SearchPolicyCore(m_logger);
+        m_policyCore = new R4SearchPolicyCore(m_logger, m_config);
 
         // Add a resolver listener to the search policy
         // so that we will be notified when modules are resolved
