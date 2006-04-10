@@ -26,14 +26,15 @@
         <configuration>
           <osgiManifest>
             <bundleName>ShellService</bundleName>
-            <bundleDescription>A simple command shell service for Felix (or any other OSGi framework).</bundleDescription>
-            <bundleActivator>org.apache.felix.shell.impl.Activator</bundleActivator>
-            <bundleDocUrl>http://oscar-osgi.sf.net/obr2/shell/</bundleDocUrl>
-            <bundleSource>http://oscar-osgi.sf.net/obr2/shell/org.apache.felix.shell.impl-src.jar</bundleSource>
-            <bundleSymbolicName>org.apache.felix.shell.impl</bundleSymbolicName>
+            <bundleDescription>A simple OSGi command shell service.</bundleDescription>
+            <bundleActivator>${pom.artifactId}.impl.Activator</bundleActivator>
+            <bundleDocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</bundleDocUrl>
+            <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>
+            <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
+            <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
             <importPackage>org.osgi.framework, org.osgi.service.startlevel, org.osgi.service.packageadmin</importPackage>
-            <exportPackage>org.apache.felix.shell; specification-version="1.0.0", org.ungoverned.osgi.service.shell; specification-version="1.0.0"</exportPackage>
-            <exportService>org.apache.felix.shell.ShellService, org.ungoverned.osgi.service.shell.ShellService</exportService>
+            <exportPackage>${pom.artifactId}; specification-version="1.0.0", org.ungoverned.osgi.service.shell; specification-version="1.0.0"</exportPackage>
+            <exportService>${pom.artifactId}.ShellService, org.ungoverned.osgi.service.shell.ShellService</exportService>
             <importService>org.osgi.service.startlevel.StartLevel, org.osgi.service.packageadmin.PackageAdmin</importService>
           </osgiManifest>
         </configuration>

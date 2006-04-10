@@ -37,12 +37,12 @@
         <configuration>
           <osgiManifest>
             <bundleName>BundleRepository</bundleName>
-            <bundleDescription>Bundle repository service for Felix (or any other OSGi framework).</bundleDescription>
-            <bundleActivator>org.apache.felix.bundlerepository.Activator</bundleActivator>
-            <bundleDocUrl>http://oscar-osgi.sf.net/obr2/bundlerepository/</bundleDocUrl>
-            <bundleUrl>http://oscar-osgi.sf.net/obr2/bundlerepository/org.apache.felix.bundlerepository.jar</bundleUrl>
-            <bundleSource>http://oscar-osgi.sf.net/obr2/bundlerepository/org.apache.felix.bundlerepository-src.jar</bundleSource>
-            <bundleSymbolicName>org.apache.felix.bundlerepository</bundleSymbolicName>
+            <bundleDescription>Bundle repository service.</bundleDescription>
+            <bundleActivator>${pom.artifactId}.Activator</bundleActivator>
+            <bundleDocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</bundleDocUrl>
+            <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>
+            <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
+            <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
             <importPackage>org.osgi.framework</importPackage>
             <dynamicImportPackage>org.apache.felix.shell</dynamicImportPackage>
             <exportPackage>org.osgi.service.obr</exportPackage>
