@@ -22,7 +22,8 @@ import java.security.PrivilegedAction;
 import java.util.*;
 
 import org.apache.felix.framework.cache.SystemBundleArchive;
-import org.apache.felix.framework.searchpolicy.*;
+import org.apache.felix.framework.searchpolicy.R4Export;
+import org.apache.felix.framework.searchpolicy.R4Package;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.moduleloader.IContentLoader;
@@ -68,7 +69,7 @@ class SystemBundle extends BundleImpl
         try
         {
             classPathPkgs = R4Package.parseImportOrExportHeader(
-                getFelix().getConfig().get(FelixConstants.FRAMEWORK_SYSTEMPACKAGES));
+                getFelix().getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES));
         }
         catch (Exception ex)
         {
@@ -80,32 +81,12 @@ class SystemBundle extends BundleImpl
 
         // Now, create the list of standard framework exports for
         // the system bundle.
-        m_exports = new R4Export[classPathPkgs.length + 4];
-
-        m_exports[0] = new R4Export(
-            "org.osgi.framework",
-            new R4Directive[0],
-            new R4Attribute[] { new R4Attribute("version", "1.3.0", false) });
-
-        m_exports[1] = new R4Export(
-            "org.osgi.service.packageadmin",
-            new R4Directive[0],
-            new R4Attribute[] { new R4Attribute("version", "1.2.0", false) });
-
-        m_exports[2] = new R4Export(
-                "org.osgi.service.startlevel",
-                new R4Directive[0],
-                new R4Attribute[] { new R4Attribute("version", "1.0.0", false) });
-
-        m_exports[3] = new R4Export(
-                "org.osgi.service.url",
-                new R4Directive[0],
-                new R4Attribute[] { new R4Attribute("version", "1.0.0", false) });
+        m_exports = new R4Export[classPathPkgs.length];
 
         // Copy the class path exported packages.
         for (int i = 0; i < classPathPkgs.length; i++)
         {
-            m_exports[i + 4] = new R4Export(classPathPkgs[i]);
+            m_exports[i] = new R4Export(classPathPkgs[i]);
         }
 
         m_contentLoader = new SystemBundleContentLoader(getFelix().getLogger());
@@ -119,7 +100,7 @@ class SystemBundle extends BundleImpl
             }
 
             exportSB.append(m_exports[i].getName());
-            exportSB.append("; specification-version=\"");
+            exportSB.append("; version=\"");
             exportSB.append(m_exports[i].getVersion().toString());
             exportSB.append("\"");
         }
