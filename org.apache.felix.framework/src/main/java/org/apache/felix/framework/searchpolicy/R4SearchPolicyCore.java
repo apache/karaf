@@ -306,7 +306,7 @@ public class R4SearchPolicyCore implements ModuleListener
             // delegated to the parent class loader.
             if ((m_bootPkgWildcards[i] &&
                     (pkgName.startsWith(m_bootPkgs[i]) ||
-                    m_bootPkgs[i].regionMatches(0, pkgName, 0, m_bootPkgs[i].length() - 1)))
+                    m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
                 || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
             {
                 return getClass().getClassLoader().loadClass(name);
