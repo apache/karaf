@@ -259,13 +259,13 @@ public class R4SearchPolicyCore implements ModuleListener
         R4Package pkg = Util.getExportPackage(module, pkgName);
         if (pkg != null)
         {
-            return new Object[]  {
+            return new Object[] {
                 pkgName, // Spec title.
                 pkg.getVersion().toString(), // Spec version.
                 "", // Spec vendor.
                 "", // Impl title.
                 "", // Impl version.
-                ""  // Impl vendor.
+                "" // Impl vendor.
             };
         }
         return null;
@@ -313,27 +313,35 @@ public class R4SearchPolicyCore implements ModuleListener
             }
         }
 
-        // Look in the module's imports.
-        Class clazz = findImportedClass(module, name, pkgName);
-
-        // If not found, try the module's own class path.
-        if (clazz == null)
+        try
         {
-            clazz = module.getContentLoader().getClass(name);
-
-            // If still not found, then try the module's dynamic imports.
+            // Look in the module's imports.
+            Class clazz = findImportedClass(module, name, pkgName);
+    
+            // If not found, try the module's own class path.
             if (clazz == null)
             {
-                clazz = findDynamicallyImportedClass(module, name, pkgName);
+                clazz = module.getContentLoader().getClass(name);
+    
+                // If still not found, then try the module's dynamic imports.
+                if (clazz == null)
+                {
+                    clazz = findDynamicallyImportedClass(module, name, pkgName);
+                }
             }
-        }
 
-        if (clazz == null)
+            if (clazz == null)
+            {
+                throw new ClassNotFoundException(name);
+            }
+    
+            return clazz;
+        }
+        catch (ClassNotFoundException ex)
         {
-            throw new ClassNotFoundException(name);
+            diagnoseClassLoadError(module, name, pkgName);
+            throw ex;
         }
-
-        return clazz;
     }
 
     private Class findImportedClass(IModule module, String name, String pkgName)
@@ -370,18 +378,8 @@ public class R4SearchPolicyCore implements ModuleListener
         // normal static imports.
         if (wire != null)
         {
-            // If we find the class, then return it. Otherwise,
-            // throw an exception since the provider of the
-            // package did not have the class.
-            Class clazz = wire.getClass(name);
-            if (clazz != null)
-            {
-                return clazz;
-            }
-            else
-            {
-                throw new ClassNotFoundException(name);
-            }
+            // Return the class.
+            return wire.getClass(name);
         }
 
         // At this point, the class could not be found by the bundle's static
@@ -411,14 +409,14 @@ public class R4SearchPolicyCore implements ModuleListener
             // of the R4 search policy classes, nor a class loader or
             // class itself, because we want to ignore the calls to
             // ClassLoader.loadClass() and Class.forName().
-            if (!R4SearchPolicyCore.class.equals(classes[i]) &&
-                !R4SearchPolicy.class.equals(classes[i]) &&
-                !ClassLoader.class.isAssignableFrom(classes[i]) &&
-                !Class.class.isAssignableFrom(classes[i]))
+            if (!R4SearchPolicyCore.class.equals(classes[i])
+                && !R4SearchPolicy.class.equals(classes[i])
+                && !ClassLoader.class.isAssignableFrom(classes[i])
+                && !Class.class.isAssignableFrom(classes[i]))
             {
                 // If the instigating class was not from a bundle, then
                 // delegate to the parent class loader. Otherwise, break
-                // out of loop and throw an exception.
+                // out of loop and return null.
                 if (!ContentClassLoader.class.isInstance(classes[i].getClassLoader()))
                 {
                     return this.getClass().getClassLoader().loadClass(name);
@@ -427,7 +425,7 @@ public class R4SearchPolicyCore implements ModuleListener
             }
         }
 
-        throw new ClassNotFoundException(name);
+        return null;
     }
 
     public URL findResource(IModule module, String name)
@@ -479,27 +477,34 @@ public class R4SearchPolicyCore implements ModuleListener
             }
         }
 
-        // Look in the module's imports.
-        URL url = findImportedResource(module, name);
-
-        // If not found, try the module's own class path.
-        if (url == null)
+        try
         {
-            url = module.getContentLoader().getResource(name);
+            // Look in the module's imports.
+            URL url = findImportedResource(module, name);
 
-            // If still not found, then try the module's dynamic imports.
+            // If not found, try the module's own class path.
             if (url == null)
             {
-                url = findDynamicallyImportedResource(module, name, pkgName);
+                url = module.getContentLoader().getResource(name);
+        
+                // If still not found, then try the module's dynamic imports.
+                if (url == null)
+                {
+                    url = findDynamicallyImportedResource(module, name, pkgName);
+                }
             }
+        
+            if (url == null)
+            {
+                throw new ResourceNotFoundException(name);
+            }
+        
+            return url;
         }
-
-        if (url == null)
+        catch (ResourceNotFoundException ex)
         {
-            throw new ResourceNotFoundException(name);
+            throw ex;
         }
-
-        return url;
     }
 
     private URL findImportedResource(IModule module, String name)
@@ -516,7 +521,7 @@ public class R4SearchPolicyCore implements ModuleListener
                 return url;
             }
         }
-    
+
         return null;
     }
 
@@ -528,7 +533,7 @@ public class R4SearchPolicyCore implements ModuleListener
         // the module's content. Now we make an attempt to load the
         // class via a dynamic import, if possible.
         R4Wire wire = attemptDynamicImport(module, pkgName);
-        
+
         // If the dynamic import was successful, then this initial
         // time we must directly return the result from dynamically
         // created wire, but subsequent requests for resources in
@@ -536,20 +541,10 @@ public class R4SearchPolicyCore implements ModuleListener
         // normal static imports.
         if (wire != null)
         {
-            // If we find the class, then return it. Otherwise,
-            // throw an exception since the provider of the
-            // package did not have the class.
-            URL url = wire.getResource(name);
-            if (url != null)
-            {
-                return url;
-            }
-            else
-            {
-                throw new ResourceNotFoundException(name);
-            }
+            // Return the resource.
+            return wire.getResource(name);
         }
-    
+
         // At this point, the resource could not be found by the bundle's static
         // or dynamic imports, nor its own resources. Before we throw
         // an exception, we will try to determine if the instigator of the
@@ -567,7 +562,7 @@ public class R4SearchPolicyCore implements ModuleListener
         // parent class loader and we will delegate to it. If the class was
         // from a bundle, then we will enforce strict class loading rules
         // for the bundle and throw a resource not found exception.
-    
+
         // Get the class context to see the classes on the stack.
         Class[] classes = m_sm.getClassContext();
         // Start from 1 to skip security manager class.
@@ -577,14 +572,14 @@ public class R4SearchPolicyCore implements ModuleListener
             // of the R4 search policy classes, nor a class loader or
             // class itself, because we want to ignore the calls to
             // ClassLoader.loadClass() and Class.forName().
-            if (!R4SearchPolicyCore.class.equals(classes[i]) &&
-                !R4SearchPolicy.class.equals(classes[i]) &&
-                !ClassLoader.class.isAssignableFrom(classes[i]) &&
-                !Class.class.isAssignableFrom(classes[i]))
+            if (!R4SearchPolicyCore.class.equals(classes[i])
+                && !R4SearchPolicy.class.equals(classes[i])
+                && !ClassLoader.class.isAssignableFrom(classes[i])
+                && !Class.class.isAssignableFrom(classes[i]))
             {
                 // If the instigating class was not from a bundle, then
                 // delegate to the parent class loader. Otherwise, break
-                // out of loop and throw an exception.
+                // out of loop and return null.
                 if (!ContentClassLoader.class.isInstance(classes[i].getClassLoader()))
                 {
                     return this.getClass().getClassLoader().getResource(name);
@@ -592,8 +587,8 @@ public class R4SearchPolicyCore implements ModuleListener
                 break;
             }
         }
-        
-        throw new ResourceNotFoundException(name);
+
+        return null;
     }
 
     private R4Wire attemptDynamicImport(IModule module, String pkgName)
@@ -607,45 +602,8 @@ public class R4SearchPolicyCore implements ModuleListener
 
         try
         {
-            // Check the dynamic import specs for a match of
-            // the target package.
-            R4Import[] dynamics = getDynamicImports(module);
-            R4Import impMatch = null;
-            for (int i = 0;
-                (impMatch == null) && (dynamics != null) && (i < dynamics.length);
-                i++)
-            {
-                // Star matches everything.
-                if (dynamics[i].getName().equals("*"))
-                {
-                    // Create a package instance without wildcard.
-                    impMatch = new R4Import(
-                        pkgName,
-                        dynamics[i].getDirectives(),
-                        dynamics[i].getAttributes());
-                }
-                // Packages ending in ".*" must match starting strings.
-                else if (dynamics[i].getName().endsWith(".*"))
-                {
-                    if (pkgName.regionMatches(
-                        0, dynamics[i].getName(), 0, dynamics[i].getName().length() - 2))
-                    {
-                        // Create a package instance without wildcard.
-                        impMatch = new R4Import(
-                            pkgName,
-                            dynamics[i].getDirectives(),
-                            dynamics[i].getAttributes());
-                    }
-                }
-                // Or we can have a precise match.
-                else
-                {
-                    if (pkgName.equals(dynamics[i].getName()))
-                    {
-                        impMatch = dynamics[i];
-                    }
-                }
-            }
+            // Get the matching dynamic import, if any.
+            R4Import impMatch = createDynamicImportTarget(module, pkgName);
 
             // If the target package does not match any dynamically imported
             // packages or if the module is already wired for the target package,
@@ -732,6 +690,46 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + newWires[newWires.len
         return wire;
     }
 
+    private R4Import createDynamicImportTarget(IModule module, String pkgName)
+    {
+        // Check the dynamic import specs for a match of
+        // the target package.
+        R4Import[] dynamics = getDynamicImports(module);
+        R4Import impMatch = null;
+        for (int i = 0; (impMatch == null) && (dynamics != null)
+            && (i < dynamics.length); i++)
+        {
+            // Star matches everything.
+            if (dynamics[i].getName().equals("*"))
+            {
+                // Create a package instance without wildcard.
+                impMatch = new R4Import(pkgName, dynamics[i]
+                    .getDirectives(), dynamics[i].getAttributes());
+            }
+            // Packages ending in ".*" must match starting strings.
+            else if (dynamics[i].getName().endsWith(".*"))
+            {
+                if (pkgName.regionMatches(0, dynamics[i].getName(), 0,
+                    dynamics[i].getName().length() - 2))
+                {
+                    // Create a package instance without wildcard.
+                    impMatch = new R4Import(pkgName, dynamics[i]
+                        .getDirectives(), dynamics[i].getAttributes());
+                }
+            }
+            // Or we can have a precise match.
+            else
+            {
+                if (pkgName.equals(dynamics[i].getName()))
+                {
+                    impMatch = dynamics[i];
+                }
+            }
+        }
+
+        return impMatch;
+    }
+
     public String findLibrary(IModule module, String name)
     {
         // Remove leading slash, if present.
@@ -761,7 +759,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + newWires[newWires.len
         // modules are added, removed, or resolved.
         synchronized (m_factory)
         {
-            return getCompatibleExporters((IModule[]) m_availPkgMap.get(pkg.getName()), pkg);
+            return getCompatibleExporters(
+                (IModule[]) m_availPkgMap.get(pkg.getName()), pkg);
         }
     }
 
@@ -771,7 +770,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + newWires[newWires.len
         // modules are added, removed, or resolved.
         synchronized (m_factory)
         {
-            return getCompatibleExporters((IModule[]) m_inUsePkgMap.get(pkg.getName()), pkg);
+            return getCompatibleExporters(
+                (IModule[]) m_inUsePkgMap.get(pkg.getName()), pkg);
         }
     }
 
@@ -790,12 +790,12 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + newWires[newWires.len
         // candidates to resolve the import and the current selected
         // candidate index.
         Map resolverMap = new HashMap();
-    
+
         // This map will be used to hold the final wires for all
         // resolved modules, which can then be used to fire resolved
         // events outside of the synchronized block.
         Map resolvedModuleWireMap = null;
-    
+
         // Synchronize on the module manager, because we don't want
         // any modules being added or removed while we are in the
         // middle of this operation.
@@ -826,7 +826,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + newWires[newWires.len
             // it exhausts all possible combinations and could not find a
             // consistent class space.
             findConsistentClassSpace(resolverMap, rootModule);
-    
+
             // The final step is to create the wires for the root module and
             // transitively all modules that are to be resolved from the
             // selected candidates for resolving the root module's imports.
@@ -836,10 +836,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + newWires[newWires.len
             // The resolved module wire map maps a module to its array of
             // wires.
             resolvedModuleWireMap = createWires(resolverMap, rootModule);
-        
+
 //dumpAvailablePackages();
 //dumpUsedPackages();
-
         } // End of synchronized block on module manager.
 
         // Fire resolved events for all resolved modules;
@@ -951,8 +950,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + newWires[newWires.len
         }
     }
 
-
-//  TODO: REMOVE THESE DEBUG METHODS.
+// TODO: REMOVE THESE DEBUG METHODS.
     private void dumpAvailablePackages()
     {
         synchronized (this)
@@ -1014,7 +1012,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + newWires[newWires.len
         throws ResolveException
     {
         List resolverList = null;
-    
+
         // Test the current set of candidates to determine if they
         // are consistent. Keep looping until we find a consistent
         // set or an exception is thrown.
@@ -1037,10 +1035,10 @@ m_logger.log(
                     resolverList.add((List) ((Map.Entry) iter.next()).getValue());
                 }
             }
-    
+
             // Increment the candidate configuration so we can test again.
             incrementCandidateConfiguration(resolverList);
-    
+
             // Clear the cycle map.
             cycleMap.clear();
         }
@@ -1057,10 +1055,10 @@ m_logger.log(
         {
             return true;
         }
-    
+
         // Add to cycle map for future reference.
         cycleMap.put(rootModule, rootModule);
-    
+
         // Create an implicit "uses" constraint for every exported package
         // of the root module that is not also imported; uses constraints
         // for exported packages that are also imported will be taken
@@ -1076,7 +1074,7 @@ m_logger.log(
                 usesMap.put(exports[i].getName(), rootModule);
             }
         }
-    
+
         // Loop through the current candidates for the module's imports
         // (available in the resolver node list of the resolver map) and
         // calculate the uses constraints for each of the currently
@@ -1091,10 +1089,10 @@ m_logger.log(
             // calculating the candidate's transitive "uses" constraints
             // for the provided package and testing whether they
             // overlap with existing constraints.
-    
+
             // First, get the resolver node.
             ResolverNode node = (ResolverNode) nodeList.get(nodeIdx);
-    
+
             // Verify that the current candidate itself has a consistent
             // class space.
             if (!isClassSpaceConsistent(
@@ -1102,12 +1100,12 @@ m_logger.log(
             {
                 return false;
             }
-    
+
             // Get the exported package from the current candidate that
             // will be used to resolve the root module's import.
             R4Export candidatePkg = Util.getExportPackage(
                 node.m_candidates[node.m_idx], node.m_import.getName());
-    
+
             // Calculate the "uses" dependencies implied by the candidate's
             // exported package with respect to the currently selected
             // candidates in the resolver map.
@@ -1134,14 +1132,14 @@ m_logger.log(
                     return false;
                 }
             }
-    
+
             // Since the current candidate's uses constraints did not
             // conflict with existing constraints, merge all constraints
             // and keep testing the remaining candidates for the other
             // imports of the root module.
             usesMap.putAll(candUsesMap);
         }
-    
+
         return true;
     }
 
@@ -1219,7 +1217,7 @@ m_logger.log(
                         node = null;
                     }
                 }
-    
+
                 // If there is a resolver node for the "used" package,
                 // then this means that the module imports the package
                 // and we need to recursively add the constraints of
@@ -1289,7 +1287,7 @@ m_logger.log(
             Map.Entry entry = (Map.Entry) iter.next();
             IModule module = (IModule) entry.getKey();
             R4Wire[] wires = (R4Wire[]) entry.getValue();
-    
+
             // Set the module's resolved and wiring attribute.
             setResolved(module, true);
             // Only add wires attribute if some exist; export
@@ -1298,7 +1296,7 @@ m_logger.log(
             {
                 setWires(module, wires);
             }
-    
+
             // Remove the wire's exporting module from the "available"
             // package map and put it into the "in use" package map;
             // these steps may be a no-op.
@@ -1311,7 +1309,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + wires[wireIdx]);
                 IModule[] modules = (IModule[]) m_availPkgMap.get(wires[wireIdx].getExport().getName());
                 modules = removeModuleFromArray(modules, wires[wireIdx].getExportingModule());
                 m_availPkgMap.put(wires[wireIdx].getExport().getName(), modules);
-    
+
                 // Also remove any exported packages from the "available"
                 // package map that are from the module associated with
                 // the current wires where the exported packages were not
@@ -1326,7 +1324,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + wires[wireIdx]);
                     modules = removeModuleFromArray(modules, module);
                     m_availPkgMap.put(wires[wireIdx].getExport().getName(), modules);
                 }
-    
+
                 // Add the module of the wire to the "in use" package map.
                 modules = (IModule[]) m_inUsePkgMap.get(wires[wireIdx].getExport().getName());
                 modules = addModuleToArray(modules, wires[wireIdx].getExportingModule());
@@ -1344,30 +1342,30 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + wires[wireIdx]);
         {
             return wireMap;
         }
-    
+
         List nodeList = (List) resolverMap.get(module);
         R4Wire[] wires = new R4Wire[nodeList.size()];
-    
+
         // Put the module in the wireMap with an empty wire array;
         // we do this early so we can use it to detect cycles.
         wireMap.put(module, wires);
-    
+
         // Loop through each resolver node and create a wire
         // for the selected candidate for the associated import.
         for (int nodeIdx = 0; nodeIdx < nodeList.size(); nodeIdx++)
         {
             // Get the import's associated resolver node.
             ResolverNode node = (ResolverNode) nodeList.get(nodeIdx);
-    
+
             // Add the candidate to the list of wires.
             R4Export export =
                 Util.getExportPackage(node.m_candidates[node.m_idx], node.m_import.getName());
             wires[nodeIdx] = new R4Wire(module, node.m_candidates[node.m_idx], export);
-    
+
             // Create the wires for the selected candidate module.
             wireMap = populateWireMap(resolverMap, node.m_candidates[node.m_idx], wireMap);
         }
-    
+
         return wireMap;
     }
 
@@ -1617,7 +1615,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + wires[wireIdx]);
             // Otherwise, we need to do some array copying.
             else
             {
-                IModule[] newModules= new IModule[modules.length - 1];
+                IModule[] newModules = new IModule[modules.length - 1];
                 System.arraycopy(modules, 0, newModules, 0, idx);
                 if (idx < newModules.length)
                 {
@@ -1697,6 +1695,249 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + wires[wireIdx]);
             if (isResolved(m_module))
             {
                 m_visited = true;
+            }
+        }
+    }
+
+    private void diagnoseClassLoadError(IModule module, String name, String pkgName)
+    {
+        // We will try to do some diagnostics here to help the developer
+        // deal with this exception.
+
+        boolean imported = false;
+        boolean exported = false;
+
+        // First, get the bundle ID of the module doing the class loader.
+        long impId = Util.getBundleIdFromModuleId(module.getId());
+        
+        // Next, check to see if the module imports the package.
+        R4Wire[] wires = getWires(module);
+        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        {
+            if (wires[i].getExport().getName().equals(pkgName))
+            {
+                imported = true;
+
+                long expId = Util.getBundleIdFromModuleId(
+                    wires[i].getExportingModule().getId());
+
+                StringBuffer sb = new StringBuffer("****\n****\n");
+                sb.append("Package '");
+                sb.append(pkgName);
+                sb.append("' is imported by bundle ");
+                sb.append(impId);
+                sb.append(" from bundle ");
+                sb.append(expId);
+                sb.append(", but the exported package from bundle ");
+                sb.append(expId);
+                sb.append(" does not contain the requested class '");
+                sb.append(name);
+                sb.append("'. Please verify that the class name is correct in the importing bundle ");
+                sb.append(impId);
+                sb.append(" and/or that the exported package is correctly bundled in ");
+                sb.append(expId);
+                sb.append(".");
+                sb.append("\n****\n****");
+
+                m_logger.log(Logger.LOG_ERROR, sb.toString());
+            }
+        }
+
+        // Next, check to see if the package was optionally imported and
+        // whether or not there is an exporter available.
+        if (!imported)
+        {
+            R4Import[] imports = getImports(module);
+            for (int i = 0; (imports != null) && (i < imports.length); i++)
+            {
+                if (imports[i].getName().equals(pkgName) && imports[i].isOptional())
+                {
+                    imported = true;
+
+                    // Try to see if there is an exporter available. It may be
+                    // the case that the package is exported, but the attributes
+                    // do not match, so check that case too.
+                    IModule[] exporters = getInUseExporters(imports[i]);
+                    exporters = (exporters.length == 0)
+                        ? getAvailableExporters(imports[i]) : exporters;
+                    exporters = (exporters.length == 0)
+                        ? getInUseExporters(new R4Import(pkgName, null, null)) : exporters;
+                    exporters = (exporters.length == 0)
+                        ? getAvailableExporters(new R4Import(pkgName, null, null)) : exporters;
+                    long expId = (exporters.length == 0)
+                        ? -1 : Util.getBundleIdFromModuleId(exporters[0].getId());
+
+                    StringBuffer sb = new StringBuffer("****\n****\n");
+                    sb.append("Class '");
+                    sb.append(name);
+                    sb.append("' was not found, but this is likely normal since package '");
+                    sb.append(pkgName);
+                    sb.append("' is optionally imported by bundle ");
+                    sb.append(impId);
+                    sb.append(".");
+                    if (exporters.length > 0)
+                    {
+                        sb.append(" However, bundle ");
+                        sb.append(expId);
+                        if (imports[i].isSatisfied(
+                            Util.getExportPackage(exporters[0], imports[i].getName())))
+                        {
+                            sb.append(" does export this package. Bundle ");
+                            sb.append(expId);
+                            sb.append(" must be installed before bundle ");
+                            sb.append(impId);
+                            sb.append(" is resolved or else the optional import will be ignored.");
+                        }
+                        else
+                        {
+                            sb.append(" does export this package with attributes that do not match.");
+                        }
+                    }
+                    sb.append("\n****\n****");
+
+                    m_logger.log(Logger.LOG_ERROR, sb.toString());
+                }
+            }
+        }
+
+        // Next, check to see if the package is dynamically imported
+        // by the module.
+        if (!imported)
+        {
+            R4Import imp = createDynamicImportTarget(module, pkgName);
+            if (imp != null)
+            {
+                imported = true;
+
+                // Try to see if there is an exporter available. It may be
+                // the case that the package is exported, but the attributes
+                // do not match, so check that case too.
+                IModule[] exporters = getInUseExporters(imp);
+                exporters = (exporters.length == 0)
+                    ? getAvailableExporters(imp) : exporters;
+                exporters = (exporters.length == 0)
+                    ? getInUseExporters(new R4Import(pkgName, null, null)) : exporters;
+                exporters = (exporters.length == 0)
+                    ? getAvailableExporters(new R4Import(pkgName, null, null)) : exporters;
+                long expId = (exporters.length == 0)
+                    ? -1 : Util.getBundleIdFromModuleId(exporters[0].getId());
+
+                StringBuffer sb = new StringBuffer("****\n****\n");
+                sb.append("Class '");
+                sb.append(name);
+                sb.append("' was not found, but this is likely normal since package '");
+                sb.append(pkgName);
+                sb.append("' is dynamically imported by bundle ");
+                sb.append(impId);
+                sb.append(".");
+                if (exporters.length > 0)
+                {
+                    if (!imp.isSatisfied(
+                        Util.getExportPackage(exporters[0], imp.getName())))
+                    {
+                        sb.append(" However, bundle ");
+                        sb.append(expId);
+                        sb.append(" does export this package with attributes that do not match.");
+                    }
+                }
+                sb.append("\n****\n****");
+
+                m_logger.log(Logger.LOG_ERROR, sb.toString());
+            }
+        }
+
+        // Next, if the package is not imported by the module, check to
+        // see if there is an exporter for the package.
+        if (!imported)
+        {
+            IModule[] exporters = getInUseExporters(new R4Import(pkgName, null, null));
+            exporters = (exporters.length == 0)
+                ? getAvailableExporters(new R4Import(pkgName, null, null)) : exporters;
+            if (exporters.length > 0)
+            {
+                exported = true;
+   
+                long expId = Util.getBundleIdFromModuleId(exporters[0].getId());
+   
+                StringBuffer sb = new StringBuffer("****\n****\n");
+                sb.append("Class '");
+                sb.append(name);
+                sb.append("' was not found because bundle ");
+                sb.append(impId);
+                sb.append(" does not import '");
+                sb.append(pkgName);
+                sb.append("' even though bundle ");
+                sb.append(expId);
+                sb.append(" does export it. There are two fixes: 1) Add an import for '");
+                sb.append(pkgName);
+                sb.append("' to bundle ");
+                sb.append(impId);
+                sb.append("; imports are necessary for each class directly touched by bundle code or indirectly touched, such as super classes if their methods are used. ");
+                sb.append("2) Add package '");
+                sb.append(pkgName);
+                sb.append("' to the '");
+                sb.append(Constants.FRAMEWORK_BOOTDELEGATION);
+                sb.append("' property; a library or VM bug can cause classes to be loaded by the wrong class loader. The first approach is preferable for preserving modularity.");
+                sb.append("\n****\n****");
+
+                m_logger.log(Logger.LOG_ERROR, sb.toString());
+            }
+        }
+
+        // Next, try to see if the class is available from the system
+        // class loader.
+        if (!imported && !exported)
+        {
+            try
+            {
+                ClassLoader.getSystemClassLoader().loadClass(name);
+
+                exported = true;
+
+                StringBuffer sb = new StringBuffer("****\n****\n");
+                sb.append("Package '");
+                sb.append(pkgName);
+                sb.append("' is not imported by bundle ");
+                sb.append(impId);
+                sb.append(", nor is there any bundle that exports package '");
+                sb.append(pkgName);
+                sb.append("'. However, the class '");
+                sb.append(name);
+                sb.append("' is available from the system class loader. There are two fixes: 1) Add package '");
+                sb.append(pkgName);
+                sb.append("' to the '");
+                sb.append(Constants.FRAMEWORK_SYSTEMPACKAGES);
+                sb.append("' property and modify bundle ");
+                sb.append(impId);
+                sb.append(" to import this package; this causes the system bundle to export class path packages. 2) Add package '");
+                sb.append(pkgName);
+                sb.append("' to the '");
+                sb.append(Constants.FRAMEWORK_BOOTDELEGATION);
+                sb.append("' property; a library or VM bug can cause classes to be loaded by the wrong class loader. The first approach is preferable for preserving modularity.");
+                sb.append("\n****\n****");
+
+                m_logger.log(Logger.LOG_ERROR, sb.toString());
+            }
+            catch (Exception ex2)
+            {
+            }
+
+            // Finally, if there are no imports or exports for the package
+            // and it is not available on the system class path, simply
+            // log a message saying so.
+            if (!imported && !exported)
+            {
+                StringBuffer sb = new StringBuffer("****\n****\n");
+                sb.append("Class '");
+                sb.append(name);
+                sb.append("' was not found. Bundle ");
+                sb.append(impId);
+                sb.append(" does not import package '");
+                sb.append(pkgName);
+                sb.append("', nor is the package exported by any other bundle or available from the system class loader.");
+                sb.append("\n****\n****");
+
+                m_logger.log(Logger.LOG_ERROR, sb.toString());
             }
         }
     }
