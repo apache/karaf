@@ -48,6 +48,9 @@
             <exportPackage>
               org.apache.felix.servicebinder; specification-version="1.1.0",org.apache.felix.servicebinder.architecture; specification-version="1.1.0"
             </exportPackage>
+            <importPackage>
+            	 org.osgi.framework
+            </importPackage>
             <metadataLocation>
               metadata.xml
             </metadataLocation>

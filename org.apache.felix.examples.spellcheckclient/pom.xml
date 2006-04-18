@@ -40,7 +40,7 @@
               org.apache.felix.examples.spellcheckclient.Activator
             </bundleActivator>
             <importPackage>
-              org.apache.felix.examples.spellcheckservice
+              org.osgi.framework, org.apache.felix.examples.spellcheckservice
             </importPackage>
           </osgiManifest>
         </configuration>

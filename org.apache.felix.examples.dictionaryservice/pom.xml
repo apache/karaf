@@ -36,6 +36,9 @@
             <exportPackage>
               org.apache.felix.examples.dictionaryservice
             </exportPackage>
+            <importPackage>
+            	 org.osgi.framework
+            </importPackage>
           </osgiManifest>
         </configuration>
       </plugin>

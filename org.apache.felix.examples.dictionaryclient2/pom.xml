@@ -40,7 +40,7 @@
               org.apache.felix.examples.dictionaryclient2.Activator
             </bundleActivator>
             <importPackage>
-              org.apache.felix.examples.dictionaryservice
+              org.osgi.framework, org.apache.felix.examples.dictionaryservice
             </importPackage>
           </osgiManifest>
         </configuration>

@@ -40,7 +40,7 @@
               org.apache.felix.examples.spellcheckservice.impl.Activator
             </bundleActivator>
             <importPackage>
-              org.apache.felix.examples.dictionaryservice
+              org.osgi.framework, org.apache.felix.examples.dictionaryservice
             </importPackage>
             <exportPackage>
               org.apache.felix.examples.spellcheckservice

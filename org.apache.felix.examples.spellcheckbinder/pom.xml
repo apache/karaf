@@ -58,7 +58,7 @@
               org.apache.felix.examples.spellcheckbinder.Activator
             </bundleActivator>
             <importPackage>
-              org.apache.felix.examples.dictionaryservice, org.apache.felix.servicebinder, org.apache.felix.examples.spellcheckservice
+              org.osgi.framework, org.apache.felix.examples.dictionaryservice, org.apache.felix.servicebinder, org.apache.felix.examples.spellcheckservice
             </importPackage>
           </osgiManifest>
         </configuration>

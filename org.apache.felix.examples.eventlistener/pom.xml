@@ -35,6 +35,9 @@
             <bundleSymbolicName>
               org.apache.felix.examples.eventlistener
             </bundleSymbolicName>
+            <importPackage>
+              org.osgi.framework
+            </importPackage>
           </osgiManifest>
         </configuration>
       </plugin>

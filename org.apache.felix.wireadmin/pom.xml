@@ -41,7 +41,7 @@
             </bundleActivator>
             <bundleSymbolicName>org.apache.felix.wireadmin</bundleSymbolicName>
             <importPackage>
-              org.osgi.service.wireadmin; specification-version=1.0.0
+              org.osgi.framework, org.osgi.service.wireadmin; specification-version=1.0.0
             </importPackage>
           </osgiManifest>
         </configuration>
