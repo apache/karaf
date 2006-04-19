@@ -304,12 +304,18 @@ public class R4SearchPolicyCore implements ModuleListener
             // delegated to the parent class loader. If the package is not wildcarded,
             // then simply do an equals() test to see if the request should be
             // delegated to the parent class loader.
-            if ((m_bootPkgWildcards[i] &&
-                (pkgName.startsWith(m_bootPkgs[i]) ||
-                m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
-                || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
+            if (pkgName.length() > 0)
             {
-                return getClass().getClassLoader().loadClass(name);
+                // Only consider delegation if we have a package name, since
+                // we don't want to promote the default package. The spec does
+                // not take a stand on this issue.
+                if ((m_bootPkgWildcards[i] &&
+                    (pkgName.startsWith(m_bootPkgs[i]) ||
+                    m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
+                    || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
+                {
+                    return getClass().getClassLoader().loadClass(name);
+                }
             }
         }
 
@@ -468,12 +474,18 @@ public class R4SearchPolicyCore implements ModuleListener
             // delegated to the parent class loader. If the package is not wildcarded,
             // then simply do an equals() test to see if the request should be
             // delegated to the parent class loader.
-            if ((m_bootPkgWildcards[i] &&
-                (pkgName.startsWith(m_bootPkgs[i]) ||
-                m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
-                || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
+            if (pkgName.length() > 0)
             {
-                return getClass().getClassLoader().getResource(name);
+                // Only consider delegation if we have a package name, since
+                // we don't want to promote the default package. The spec does
+                // not take a stand on this issue.
+                if ((m_bootPkgWildcards[i] &&
+                    (pkgName.startsWith(m_bootPkgs[i]) ||
+                    m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
+                    || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
+                {
+                    return getClass().getClassLoader().getResource(name);
+                }
             }
         }
 
@@ -1859,7 +1871,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + wires[wireIdx]);
                 boolean classpath = false;
                 try
                 {
-                    ClassLoader.getSystemClassLoader().loadClass(name);
+                    getClass().getClassLoader().loadClass(name);
                     classpath = true;
                 }
                 catch (Exception ex)
@@ -1881,7 +1893,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + wires[wireIdx]);
                 sb.append(" does export it.");
                 if (classpath)
                 {
-                    sb.append(" There are two fixes: 1) Add an import for '");
+                    sb.append(" Additionally, the class is also available from the system class loader. There are two fixes: 1) Add an import for '");
                     sb.append(pkgName);
                     sb.append("' to bundle ");
                     sb.append(impId);
@@ -1912,7 +1924,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + wires[wireIdx]);
         {
             try
             {
-                ClassLoader.getSystemClassLoader().loadClass(name);
+                getClass().getClassLoader().loadClass(name);
 
                 exported = true;
 
