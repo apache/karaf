@@ -1,0 +1,9 @@
+<classpath>
+  <classpathentry kind="src" path="src/main/java"/>
+  <classpathentry kind="output" path="target/classes"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+  <classpathentry kind="var" path="M2_REPO/tomcat/servlet-api/5.0.16/servlet-api-5.0.16.jar"/>
+  <classpathentry kind="src" path="/org.osgi.core"/>
+  <classpathentry kind="src" path="/org.osgi.compendium"/>
+  <classpathentry kind="var" path="M2_REPO/jetty/org.mortbay.jetty-jdk1.2/4.2.25/org.mortbay.jetty-jdk1.2-4.2.25.jar"/>
+</classpath>
