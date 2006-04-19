@@ -301,12 +301,12 @@ public class R4SearchPolicyCore implements ModuleListener
             // A wildcarded boot delegation package will be in the form of "foo.",
             // so if the package is wildcarded do a startsWith() or a regionMatches()
             // to ignore the trailing "." to determine if the request should be
-            // delegated to the paren class loader. If the package is not wildcarded,
+            // delegated to the parent class loader. If the package is not wildcarded,
             // then simply do an equals() test to see if the request should be
             // delegated to the parent class loader.
             if ((m_bootPkgWildcards[i] &&
-                    (pkgName.startsWith(m_bootPkgs[i]) ||
-                    m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
+                (pkgName.startsWith(m_bootPkgs[i]) ||
+                m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
                 || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
             {
                 return getClass().getClassLoader().loadClass(name);
@@ -465,12 +465,12 @@ public class R4SearchPolicyCore implements ModuleListener
             // A wildcarded boot delegation package will be in the form of "foo.",
             // so if the package is wildcarded do a startsWith() or a regionMatches()
             // to ignore the trailing "." to determine if the request should be
-            // delegated to the paren class loader. If the package is not wildcarded,
+            // delegated to the parent class loader. If the package is not wildcarded,
             // then simply do an equals() test to see if the request should be
             // delegated to the parent class loader.
             if ((m_bootPkgWildcards[i] &&
-                    (pkgName.startsWith(m_bootPkgs[i]) ||
-                    m_bootPkgs[i].regionMatches(0, pkgName, 0, m_bootPkgs[i].length() - 1)))
+                (pkgName.startsWith(m_bootPkgs[i]) ||
+                m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
                 || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
             {
                 return getClass().getClassLoader().getResource(name);
@@ -486,7 +486,7 @@ public class R4SearchPolicyCore implements ModuleListener
             if (url == null)
             {
                 url = module.getContentLoader().getResource(name);
-        
+
                 // If still not found, then try the module's dynamic imports.
                 if (url == null)
                 {
@@ -1856,6 +1856,16 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + wires[wireIdx]);
             if (exporters.length > 0)
             {
                 exported = true;
+                boolean classpath = false;
+                try
+                {
+                    ClassLoader.getSystemClassLoader().loadClass(name);
+                    classpath = true;
+                }
+                catch (Exception ex)
+                {
+                    // Ignore
+                }
    
                 long expId = Util.getBundleIdFromModuleId(exporters[0].getId());
    
@@ -1868,16 +1878,28 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + wires[wireIdx]);
                 sb.append(pkgName);
                 sb.append("' even though bundle ");
                 sb.append(expId);
-                sb.append(" does export it. There are two fixes: 1) Add an import for '");
-                sb.append(pkgName);
-                sb.append("' to bundle ");
-                sb.append(impId);
-                sb.append("; imports are necessary for each class directly touched by bundle code or indirectly touched, such as super classes if their methods are used. ");
-                sb.append("2) Add package '");
-                sb.append(pkgName);
-                sb.append("' to the '");
-                sb.append(Constants.FRAMEWORK_BOOTDELEGATION);
-                sb.append("' property; a library or VM bug can cause classes to be loaded by the wrong class loader. The first approach is preferable for preserving modularity.");
+                sb.append(" does export it.");
+                if (classpath)
+                {
+                    sb.append(" There are two fixes: 1) Add an import for '");
+                    sb.append(pkgName);
+                    sb.append("' to bundle ");
+                    sb.append(impId);
+                    sb.append("; imports are necessary for each class directly touched by bundle code or indirectly touched, such as super classes if their methods are used. ");
+                    sb.append("2) Add package '");
+                    sb.append(pkgName);
+                    sb.append("' to the '");
+                    sb.append(Constants.FRAMEWORK_BOOTDELEGATION);
+                    sb.append("' property; a library or VM bug can cause classes to be loaded by the wrong class loader. The first approach is preferable for preserving modularity.");
+                }
+                else
+                {
+                    sb.append(" To resolve this issue, add an import for '");
+                    sb.append(pkgName);
+                    sb.append("' to bundle ");
+                    sb.append(impId);
+                    sb.append(".");
+                }
                 sb.append("\n****\n****");
 
                 m_logger.log(Logger.LOG_ERROR, sb.toString());
