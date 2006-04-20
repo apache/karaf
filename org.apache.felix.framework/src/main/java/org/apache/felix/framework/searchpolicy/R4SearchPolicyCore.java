@@ -274,6 +274,47 @@ public class R4SearchPolicyCore implements ModuleListener
     public Class findClass(IModule module, String name)
         throws ClassNotFoundException
     {
+        try
+        {
+            return (Class) findClassOrResource(module, name, true);
+        }
+        catch (ResourceNotFoundException ex)
+        {
+            // This should never happen, so just ignore it.
+        }
+        catch (ClassNotFoundException ex)
+        {
+            diagnoseClassLoadError(module, name);
+            throw ex;
+        }
+
+        // We should never reach this point.
+        return null;
+    }
+
+    public URL findResource(IModule module, String name)
+        throws ResourceNotFoundException
+    {
+        try
+        {
+            return (URL) findClassOrResource(module, name, false);
+        }
+        catch (ClassNotFoundException ex)
+        {
+            // This should never happen, so just ignore it.
+        }
+        catch (ResourceNotFoundException ex)
+        {
+            throw ex;
+        }
+    
+        // We should never reach this point.
+        return null;
+    }
+
+    private Object findClassOrResource(IModule module, String name, boolean isClass)
+        throws ClassNotFoundException, ResourceNotFoundException
+    {
         // First, try to resolve the originating module.
 // TODO: Consider opimizing this call to resolve, since it is called
 // for each class load.
@@ -283,16 +324,37 @@ public class R4SearchPolicyCore implements ModuleListener
         }
         catch (ResolveException ex)
         {
-            // We do not use the resolve exception as the
-            // cause of the exception, since this would
-            // potentially leak internal module information.
-            throw new ClassNotFoundException(
-                name + ": cannot resolve package "
-                + ex.getPackage());
+            if (isClass)
+            {
+                // We do not use the resolve exception as the
+                // cause of the exception, since this would
+                // potentially leak internal module information.
+                throw new ClassNotFoundException(
+                    name + ": cannot resolve package "
+                    + ex.getPackage());
+            }
+            else
+            {
+                // The spec states that if the bundle cannot be resolved, then
+                // only the local bundle's resources should be searched. So we
+                // will ask the module's own class path.
+                URL url = module.getContentLoader().getResource(name);
+                if (url != null)
+                {
+                    return url;
+                }
+   
+                // We need to throw a resource not found exception.
+                throw new ResourceNotFoundException(
+                    name + ": cannot resolve package "
+                    + ex.getPackage());
+            }
         }
 
-        // Get the package of the target class.
-        String pkgName = Util.getClassPackage(name);
+        // Get the package of the target class/resource.
+        String pkgName = (isClass)
+            ? Util.getClassPackage(name)
+            : Util.getResourcePackage(name);
 
         // Delegate any packages listed in the boot delegation
         // property to the parent class loader.
@@ -314,97 +376,104 @@ public class R4SearchPolicyCore implements ModuleListener
                     m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
                     || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
                 {
-                    return getClass().getClassLoader().loadClass(name);
+                    return (isClass)
+                        ? (Object) getClass().getClassLoader().loadClass(name)
+                        : (Object) getClass().getClassLoader().getResource(name);
                 }
             }
         }
 
-        try
-        {
-            // Look in the module's imports.
-            Class clazz = findImportedClass(module, name, pkgName);
-    
-            // If not found, try the module's own class path.
-            if (clazz == null)
-            {
-                clazz = module.getContentLoader().getClass(name);
-    
-                // If still not found, then try the module's dynamic imports.
-                if (clazz == null)
-                {
-                    clazz = findDynamicallyImportedClass(module, name, pkgName);
-                }
-            }
+        // Look in the module's imports.
+        Object result = searchImports(module, name, isClass);
 
-            if (clazz == null)
+        // If not found, try the module's own class path.
+        if (result == null)
+        {
+            result = (isClass)
+                ? (Object) module.getContentLoader().getClass(name)
+                : (Object) module.getContentLoader().getResource(name);
+
+            // If still not found, then try the module's dynamic imports.
+            if (result == null)
+            {
+                result = searchDynamicImports(module, name, pkgName, isClass);
+            }
+        }
+     
+        if (result == null)
+        {
+            if (isClass)
             {
                 throw new ClassNotFoundException(name);
             }
-    
-            return clazz;
+            else
+            {
+                throw new ResourceNotFoundException(name);
+            }
         }
-        catch (ClassNotFoundException ex)
-        {
-            diagnoseClassLoadError(module, name, pkgName);
-            throw ex;
-        }
+     
+        return result;
     }
 
-    private Class findImportedClass(IModule module, String name, String pkgName)
-        throws ClassNotFoundException
+    private Object searchImports(IModule module, String name, boolean isClass)
+        throws ClassNotFoundException, ResourceNotFoundException
     {
-        // We delegate to the module's wires to find the class.
+        // We delegate to the module's wires to find the class or resource.
         R4Wire[] wires = getWires(module);
         for (int i = 0; (wires != null) && (i < wires.length); i++)
         {
-            // If we find the class, then return it.
-            Class clazz = wires[i].getClass(name);
-            if (clazz != null)
+            // If we find the class or resource, then return it.
+            Object result = (isClass)
+                ? (Object) wires[i].getClass(name)
+                : (Object) wires[i].getResource(name);
+            if (result != null)
             {
-                return clazz;
+                return result;
             }
         }
 
         return null;
     }
 
-    private Class findDynamicallyImportedClass(
-        IModule module, String name, String pkgName)
-        throws ClassNotFoundException
+    private Object searchDynamicImports(
+        IModule module, String name, String pkgName, boolean isClass)
+        throws ClassNotFoundException, ResourceNotFoundException
     {
         // At this point, the module's imports were searched and so was the
         // the module's content. Now we make an attempt to load the
-        // class via a dynamic import, if possible.
+        // class/resource via a dynamic import, if possible.
         R4Wire wire = attemptDynamicImport(module, pkgName);
 
         // If the dynamic import was successful, then this initial
         // time we must directly return the result from dynamically
-        // created wire, but subsequent requests for classes in
-        // the associated package will be processed as part of
+        // created wire, but subsequent requests for classes/resources
+        // in the associated package will be processed as part of
         // normal static imports.
         if (wire != null)
         {
-            // Return the class.
-            return wire.getClass(name);
+            // Return the class or resource.
+            return (isClass)
+                ? (Object) wire.getClass(name)
+                : (Object) wire.getResource(name);
         }
 
-        // At this point, the class could not be found by the bundle's static
-        // or dynamic imports, nor its own resources. Before we throw
+        // At this point, the class/resource could not be found by the bundle's
+        // static or dynamic imports, nor its own content. Before we throw
         // an exception, we will try to determine if the instigator of the
-        // class load was a class from a bundle or not. This is necessary
+        // class/resource load was a class from a bundle or not. This is necessary
         // because the specification mandates that classes on the class path
         // should be hidden (except for java.*), but it does allow for these
-        // classes to be exposed by the system bundle as an export. However,
-        // in some situations classes on the class path make the faulty
+        // classes/resources to be exposed by the system bundle as an export.
+        // However, in some situations classes on the class path make the faulty
         // assumption that they can access everything on the class path from
         // every other class loader that they come in contact with. This is
         // not true if the class loader in question is from a bundle. Thus,
         // this code tries to detect that situation. If the class
-        // instigating the class load was NOT from a bundle, then we will
+        // instigating the load request was NOT from a bundle, then we will
         // make the assumption that the caller actually wanted to use the
         // parent class loader and we will delegate to it. If the class was
         // from a bundle, then we will enforce strict class loading rules
-        // for the bundle and throw a class not found exception.
+        // for the bundle and throw an exception.
 
         // Get the class context to see the classes on the stack.
         Class[] classes = m_sm.getClassContext();
@@ -426,175 +495,6 @@ public class R4SearchPolicyCore implements ModuleListener
                 if (!ContentClassLoader.class.isInstance(classes[i].getClassLoader()))
                 {
                     return this.getClass().getClassLoader().loadClass(name);
-                }
-                break;
-            }
-        }
-
-        return null;
-    }
-
-    public URL findResource(IModule module, String name)
-        throws ResourceNotFoundException
-    {
-        // First, try to resolve the originating module.
-// TODO: Consider opimizing this call to resolve, since it is called
-// for each class load.
-        try
-        {
-            resolve(module);
-        }
-        catch (ResolveException ex)
-        {
-            // The spec states that if the bundle cannot be resolved, then
-            // only the local bundle's resources should be searched. So we
-            // will ask the module's own class path.
-            URL url = module.getContentLoader().getResource(name);
-            if (url != null)
-            {
-                return url;
-            }
-
-            // We need to throw a resource not found exception.
-            throw new ResourceNotFoundException(
-                name + ": cannot resolve package "
-                + ex.getPackage());
-        }
-
-        // Get the package of the target class.
-        String pkgName = Util.getResourcePackage(name);
-
-        // Delegate any packages listed in the boot delegation
-        // property to the parent class loader.
-        for (int i = 0; i < m_bootPkgs.length; i++)
-        {
-            // A wildcarded boot delegation package will be in the form of "foo.",
-            // so if the package is wildcarded do a startsWith() or a regionMatches()
-            // to ignore the trailing "." to determine if the request should be
-            // delegated to the parent class loader. If the package is not wildcarded,
-            // then simply do an equals() test to see if the request should be
-            // delegated to the parent class loader.
-            if (pkgName.length() > 0)
-            {
-                // Only consider delegation if we have a package name, since
-                // we don't want to promote the default package. The spec does
-                // not take a stand on this issue.
-                if ((m_bootPkgWildcards[i] &&
-                    (pkgName.startsWith(m_bootPkgs[i]) ||
-                    m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
-                    || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
-                {
-                    return getClass().getClassLoader().getResource(name);
-                }
-            }
-        }
-
-        try
-        {
-            // Look in the module's imports.
-            URL url = findImportedResource(module, name);
-
-            // If not found, try the module's own class path.
-            if (url == null)
-            {
-                url = module.getContentLoader().getResource(name);
-
-                // If still not found, then try the module's dynamic imports.
-                if (url == null)
-                {
-                    url = findDynamicallyImportedResource(module, name, pkgName);
-                }
-            }
-        
-            if (url == null)
-            {
-                throw new ResourceNotFoundException(name);
-            }
-        
-            return url;
-        }
-        catch (ResourceNotFoundException ex)
-        {
-            throw ex;
-        }
-    }
-
-    private URL findImportedResource(IModule module, String name)
-        throws ResourceNotFoundException
-    {
-        // We delegate to the module's wires to find the class.
-        R4Wire[] wires = getWires(module);
-        for (int i = 0; (wires != null) && (i < wires.length); i++)
-        {
-            // If we find the resource, then return it.
-            URL url = wires[i].getResource(name);
-            if (url != null)
-            {
-                return url;
-            }
-        }
-
-        return null;
-    }
-
-    private URL findDynamicallyImportedResource(
-        IModule module, String name, String pkgName)
-        throws ResourceNotFoundException
-    {
-        // At this point, the module's imports were searched and so was the
-        // the module's content. Now we make an attempt to load the
-        // class via a dynamic import, if possible.
-        R4Wire wire = attemptDynamicImport(module, pkgName);
-
-        // If the dynamic import was successful, then this initial
-        // time we must directly return the result from dynamically
-        // created wire, but subsequent requests for resources in
-        // the associated package will be processed as part of
-        // normal static imports.
-        if (wire != null)
-        {
-            // Return the resource.
-            return wire.getResource(name);
-        }
-
-        // At this point, the resource could not be found by the bundle's static
-        // or dynamic imports, nor its own resources. Before we throw
-        // an exception, we will try to determine if the instigator of the
-        // resource load was a class from a bundle or not. This is necessary
-        // because the specification mandates that classes on the class path
-        // should be hidden (except for java.*), but it does allow for these
-        // classes to be exposed by the system bundle as an export. However,
-        // in some situations classes on the class path make the faulty
-        // assumption that they can access everything on the class path from
-        // every other class loader that they come in contact with. This is
-        // not true if the class loader in question is from a bundle. Thus,
-        // this code tries to detect that situation. If the class
-        // instigating the resource load was NOT from a bundle, then we will
-        // make the assumption that the caller actually wanted to use the
-        // parent class loader and we will delegate to it. If the class was
-        // from a bundle, then we will enforce strict class loading rules
-        // for the bundle and throw a resource not found exception.
-
-        // Get the class context to see the classes on the stack.
-        Class[] classes = m_sm.getClassContext();
-        // Start from 1 to skip security manager class.
-        for (int i = 1; i < classes.length; i++)
-        {
-            // Find the first class on the call stack that is not one
-            // of the R4 search policy classes, nor a class loader or
-            // class itself, because we want to ignore the calls to
-            // ClassLoader.loadClass() and Class.forName().
-            if (!R4SearchPolicyCore.class.equals(classes[i])
-                && !R4SearchPolicy.class.equals(classes[i])
-                && !ClassLoader.class.isAssignableFrom(classes[i])
-                && !Class.class.isAssignableFrom(classes[i]))
-            {
-                // If the instigating class was not from a bundle, then
-                // delegate to the parent class loader. Otherwise, break
-                // out of loop and return null.
-                if (!ContentClassLoader.class.isInstance(classes[i].getClassLoader()))
-                {
-                    return this.getClass().getClassLoader().getResource(name);
                 }
                 break;
             }
@@ -1711,13 +1611,16 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + wires[wireIdx]);
         }
     }
 
-    private void diagnoseClassLoadError(IModule module, String name, String pkgName)
+    private void diagnoseClassLoadError(IModule module, String name)
     {
         // We will try to do some diagnostics here to help the developer
         // deal with this exception.
 
         boolean imported = false;
         boolean exported = false;
+
+        // Get package name.
+        String pkgName = Util.getClassPackage(name);
 
         // First, get the bundle ID of the module doing the class loader.
         long impId = Util.getBundleIdFromModuleId(module.getId());
