@@ -35,6 +35,7 @@
     <module>org.apache.felix.upnp.tester</module>      
     <module>org.apache.felix.upnp.sample.tv</module>
     <module>org.apache.felix.http.jetty</module>
+	<module>org.apache.felix.scr</module>
   </modules>
 
   <repositories>
