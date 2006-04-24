@@ -26,8 +26,6 @@ import org.xml.sax.SAXException;
 
 /**
  * SAX handler for the XML file
- * 
- * @author Didier Donsez (didier.donsez@imag.fr)
  */
 public class XmlCommonHandler implements KXml2SAXHandler {
 
@@ -35,7 +33,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 
 	public static final String METADATAPARSER_PIS = "METADATAPARSER_PIS";
 
-	public static final String METADATAPARSER_INSTANCEFACTORY = "METADATAPARSER_INSTANCEFACTORY";
+	public static final String METADATAPARSER_TYPES = "METADATAPARSER_TYPES";
 
 	private int columnNumber;
 
@@ -49,43 +47,116 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 	// Data
 	//
 
-	private Object root;
+	private XmlStackElement root;
 
-	private Stack objectStack;
-
-	private Stack qnameStack;
-
+	private Stack elementStack;
+	
 	private Map pis;
 
 	private boolean missingPIExceptionFlag;
 
-	private Map instanceFactories;
+	private Map types;
 
-	private Map instanceClasses;
-
-	private Map castClasses;
-
-	private Map context;
-
-	private Object defaultInstanceFactory;
-
-	private Class defaultInstanceClass;
-
-	private Class defaultCastClass;
+	private TypeEntry defaultType;
 
 	private StringBuffer currentText;
 
+	private Map context;
+
+	private class XmlStackElement {
+		
+		public final String qname;
+		public Object object;
+		
+		public XmlStackElement(String qname, Object object) {
+			super();
+			this.qname = qname;
+			this.object = object;
+		};
+	}
+
+	public class TypeEntry {
+		public final Object instanceFactory;
+		public final Class instanceClass;
+		public final Method newInstanceMethod;
+		public final Class castClass;
+		public final Method defaultAddMethod;
+		
+		public TypeEntry(Object instanceFactory, Class castClass, Method defaultAddMethod) throws Exception {
+			super();
+			this.instanceFactory = instanceFactory;
+						
+			try {
+				if (instanceFactory instanceof Class) {
+					newInstanceMethod = instanceFactory.getClass()
+						.getDeclaredMethod("newInstance", null);
+					if (castClass == null) {
+						this.castClass = (Class) instanceFactory;
+					} else {
+						if (!castClass.isAssignableFrom((Class) instanceFactory)) {
+							throw new Exception(
+											"instanceFactory "
+											+ instanceFactory.getClass().getName()
+											+ " could not instanciate objects assignable to "
+											+ castClass.getName());
+						}
+						this.castClass=castClass;
+					}
+					instanceClass = (Class) instanceFactory;
+				} else {
+					newInstanceMethod = instanceFactory.getClass()
+						.getDeclaredMethod("newInstance", null);
+					Class returnType = newInstanceMethod.getReturnType();
+					if (castClass == null) {
+						this.castClass = returnType;
+					} else if (!castClass.isAssignableFrom(returnType)) {
+						throw new Exception(
+								"instanceFactory "
+								+ instanceFactory.getClass().getName()
+								+ " could not instanciate objects assignable to "
+								+ castClass.getName());
+					} else 
+						this.castClass=castClass;
+					instanceClass = returnType;
+				}
+			} catch (NoSuchMethodException e) {
+				throw new Exception(
+						"instanceFactory " + instanceFactory.getClass().getName()
+						+ " should have a newInstance method");
+			}
+			
+			// TODO check method
+			this.defaultAddMethod = defaultAddMethod;
+            if (this.defaultAddMethod != null)
+            {
+                this.defaultAddMethod.setAccessible(true);
+            }
+		}
+		
+		public String toString(){
+			StringBuffer sb=new StringBuffer();
+			sb.append("[");
+			if(instanceFactory instanceof Class)
+				sb.append("instanceFactory=").append(((Class)instanceFactory).getName());
+			else
+				sb.append("instanceFactory=").append(instanceFactory.getClass().getName());
+			sb.append(",instanceClass=").append(instanceClass.getName());
+			sb.append(",castClass=").append(castClass.getName());
+			sb.append(",defaultAddMethod=");
+			if(defaultAddMethod==null) sb.append(""); else sb.append(defaultAddMethod.getName());
+			sb.append("]");
+			return sb.toString();
+		}
+	}
+	
 	public XmlCommonHandler() {
-		objectStack = new Stack();
-		qnameStack = new Stack();
+		elementStack = new Stack();
 		pis = new HashMap();
 		missingPIExceptionFlag = false;
-		instanceFactories = new HashMap();
-		instanceClasses = new HashMap();
-		castClasses = new HashMap();
+		types = new HashMap();
 		context = new HashMap();
 		context.put(METADATAPARSER_PIS, pis);
-		context.put(METADATAPARSER_INSTANCEFACTORY, instanceFactories);
+		context.put(METADATAPARSER_TYPES, types);
 	}
 
 	public void addPI(String piname, Class clazz) {
@@ -102,79 +173,41 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 	public void setMissingPIExceptionFlag(boolean flag) {
 		missingPIExceptionFlag = flag;
 	}
+	
+	public void addType(String qname, Object instanceFactory, Class castClass, Method defaultAddMethod)
+	throws Exception {
 
-	private Class checkAndGetInstanceClass(String qname,
-			Object instanceFactory, Class castClass) throws Exception {
-		String typeMsg = (qname == null) ? " for default type "
-				: (" for type " + qname);
+		TypeEntry typeEntry;
 		try {
-			if (instanceFactory instanceof Class) {
-				if (castClass == null) {
-					castClass = (Class) instanceFactory;
-				} else {
-					if (!castClass.isAssignableFrom((Class) instanceFactory)) {
-						throw new Exception(
-								lineNumber
-										+ ","
-										+ columnNumber
-										+ ":"
-										+ "instanceFactory "
-										+ instanceFactory.getClass().getName()
-										+ typeMsg
-										+ " could not instanciate objects assignable to "
-										+ castClass.getName());
-					}
-				}
-				return (Class) instanceFactory;
-			} else {
-				Method newInstanceMethod = instanceFactory.getClass()
-						.getDeclaredMethod("newInstance", null);
-				Class returnType = newInstanceMethod.getReturnType();
-				if (castClass == null) {
-					castClass = returnType;
-				} else if (!castClass.isAssignableFrom(returnType)) {
-					throw new Exception(lineNumber + "," + columnNumber + ":"
-							+ "instanceFactory "
-							+ instanceFactory.getClass().getName() + typeMsg
-							+ " could not instanciate objects assignable to "
-							+ castClass.getName());
-				}
-				return returnType;
-			}
-		} catch (NoSuchMethodException e) {
-			throw new Exception(lineNumber + "," + columnNumber + ":"
-					+ "instanceFactory " + instanceFactory.getClass().getName()
-					+ " for type " + qname
-					+ " should have a newInstance method");
+			typeEntry = new TypeEntry(
+					instanceFactory,
+					castClass,
+					defaultAddMethod
+				);
+		} catch (Exception e) {
+			throw new Exception(lineNumber + "," + columnNumber + ":" + qname + " : " + e.getMessage());
 		}
-	}
-
-	public void addType(String qname, Object instanceFactory, Class castClass)
-			throws Exception {
-		Class instanceClass = checkAndGetInstanceClass(qname, instanceFactory,
-				castClass);
-		instanceClasses.put(qname, instanceClass);
-		instanceFactories.put(qname, instanceFactory);
-		castClasses.put(qname, castClass != null ? castClass : instanceClass);
+		types.put(qname,typeEntry);		
 		trace("element "
 				+ qname
-				+ " : instanceFactory="
-				+ (instanceFactory instanceof Class ? ((Class) instanceFactory)
-						.getName() : instanceFactory.getClass().getName())
-				+ " castClass="
-				+ (castClass != null ? castClass : instanceClass).getName());
+				+ " : " + typeEntry.toString());
 	}
-
-	public void setDefaultType(Object instanceFactory, Class castClass)
+		
+	public void setDefaultType(Object instanceFactory, Class castClass, Method defaultAddMethod)
 			throws Exception {
-		defaultInstanceClass = checkAndGetInstanceClass(null, instanceFactory,
-				castClass);
-		defaultInstanceFactory = instanceFactory;
-		defaultCastClass = castClass != null ? castClass : defaultInstanceClass;
-		trace("defaut type : instanceFactory="
-				+ (instanceFactory instanceof Class ? ((Class) instanceFactory)
-						.getName() : instanceFactory.getClass().getName())
-				+ " castClass=" + defaultCastClass.getName());
+		TypeEntry typeEntry;
+		try {
+			typeEntry = new TypeEntry(
+					instanceFactory,
+					castClass,
+					defaultAddMethod
+				);
+		} catch (Exception e) {
+			throw new Exception(lineNumber + "," + columnNumber + ": default element : " + e.getMessage());
+		}
+		defaultType=typeEntry;		
+		trace("default element "
+				+ " : " + typeEntry.toString());
 	}
 
 	public void setContext(Map context) {
@@ -186,7 +219,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 	}
 
 	public Object getRoot() {
-		return root;
+		return root.object;
 	}
 
 	/* for PCDATA */
@@ -224,7 +257,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 		Method method = null;
 		try {
 			// TODO setContext from castClass or object.getClass() ?
-			method = object.getClass().getMethod("setContext",
+			method = object.getClass().getDeclaredMethod("setContext",
 					new Class[] { Map.class });
 		} catch (NoSuchMethodException e) {
 			// do nothing
@@ -249,7 +282,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 		Method method = null;
 		try {
 			// TODO process from castClass or object.getClass() ?
-			method = object.getClass().getMethod("process", null);
+			method = object.getClass().getDeclaredMethod("process", null);
 		} catch (NoSuchMethodException e) {
 			// do nothing
 		}
@@ -274,7 +307,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 		Method method = null;
 		try {
 			// TODO setParent from castClass or object.getClass() ?
-			method = object.getClass().getMethod("setParent",
+			method = object.getClass().getDeclaredMethod("setParent",
 					new Class[] { parent.getClass() });
 		} catch (NoSuchMethodException e) {
 			// do nothing
@@ -306,53 +339,26 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 				+ qName);
 
 		// TODO: should add uri in the qname in the future
-		Object instanceFactory = instanceFactories.get(qName); // instanceFactory
-		// can be a
-		// java.lang.Class
-		// or a object
-		// with a
-		// newInstance()
-		// method
-		Class castClass = null;
-		Class instanceClass = null;
-
-		if (instanceFactory == null) {
-			if (defaultInstanceFactory != null) {
-				instanceFactory = defaultInstanceFactory;
-				castClass = defaultCastClass;
-				instanceClass = defaultInstanceClass;
-			}
-		} else {
-			castClass = (Class) castClasses.get(qName);
-			instanceClass = (Class) instanceClasses.get(qName);
+		TypeEntry type=(TypeEntry) types.get(qName);
+		if(type==null) {
+			type=defaultType;
 		}
 
 		Object obj = null;
-		if (instanceFactory != null) {
-			Method newInstanceMethod = null;
-			try {
-				newInstanceMethod = instanceFactory.getClass().getMethod(
-						"newInstance", null);
-			} catch (NoSuchMethodException e) {
-				// never catch since checked by addType and setDefaultType
-				throw new Exception(lineNumber + "," + columnNumber + ":"
-						+ "instanceFactory "
-						+ instanceFactory.getClass().getName()
-						+ " for element " + qName
-						+ " should have a newInstance method");
-			}
+		if (type != null) {
 
 			try {
-                newInstanceMethod.setAccessible(true);
-				obj = newInstanceMethod.invoke(instanceFactory, null);
+				// enables to access to "unmuttable" method
+				type.newInstanceMethod.setAccessible(true);
+				obj = type.newInstanceMethod.invoke(type.instanceFactory, null);
 			} catch (Exception e) {
 				// do nothing
 			}
 
 			// set parent
-			if (!objectStack.isEmpty()) {
-				Object parent = objectStack.peek();
-				setObjectParent(obj, parent);
+			if (!elementStack.isEmpty()) {
+				XmlStackElement parent = (XmlStackElement) elementStack.peek();
+				setObjectParent(obj, parent.object);
 			}
 
 			// set the parser context
@@ -374,16 +380,16 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 				Method method = null;
 				if (!(obj instanceof String)) {
 					try {
-						// method = castClass.getMethod(setterOf(key),new
+						// method = castClass.getDeclaredMethod(setterOf(key),new
 						// Class[] { String.class });
-						method = instanceClass.getMethod(setterOf(key),
+						method = type.instanceClass.getDeclaredMethod(setterOf(key),
 								new Class[] { String.class });
 					} catch (NoSuchMethodException e) {
 						// do nothing
 					}
 					if (method == null)
 						try {
-							method = instanceClass.getMethod(adderOf(key),
+							method = type.instanceClass.getDeclaredMethod(adderOf(key),
 									new Class[] { String.class });
 
 						} catch (NoSuchMethodException e) {
@@ -395,6 +401,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 						}
 
 				}
+				
 				if (method != null) {
 					trace(method.getName());
 					try {
@@ -404,19 +411,9 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 						throw e;
 					}
 				} else {
-					// Secondly, test if object if a map, a dictionary, a
-					// collection, or a string
-
-					if (obj instanceof Map) {
-						((Map) obj).put(key, value);
-					} else if (obj instanceof Dictionary) {
-						((Dictionary) obj).put(key, value);
-					} else if (obj instanceof Collection) {
-						throw new Exception(lineNumber + "," + columnNumber
-								+ ":" + "List element " + qName
-								+ " cannot have any attribute");
-					} else if (obj instanceof String) {
-						if (key.equals("value")) {
+					
+					if (obj instanceof String) {
+						if (key.equals(VALUE)) {
 							obj = value;
 						} else {
 							throw new Exception(lineNumber + "," + columnNumber
@@ -424,12 +421,32 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 									+ " cannot have other attribute than value");
 						}
 					} else {
-						throw new Exception(lineNumber + "," + columnNumber
+						if (type.defaultAddMethod != null) {
+							Class[] parameterTypes=type.defaultAddMethod.getParameterTypes();
+							if(parameterTypes.length==2
+								&& parameterTypes[0].isAssignableFrom(String.class)
+								&& parameterTypes[1].isAssignableFrom(String.class)
+							){
+								type.defaultAddMethod.invoke(obj,new String[]{key, value});
+							} else if(parameterTypes.length==1
+										&& parameterTypes[0].isAssignableFrom(String.class)
+									){
+										type.defaultAddMethod.invoke(obj,new String[]{value});
+							} else 
+								throw new Exception(lineNumber + "," + columnNumber
+										+ ":" + "class "
+										+ type.instanceFactory.getClass().getName()
+										+ " for element " + qName
+										+ " does not support the attribute " + key
+										);							
+						} else {
+							throw new Exception(lineNumber + "," + columnNumber
 								+ ":" + "class "
-								+ instanceFactory.getClass().getName()
+								+ type.instanceFactory.getClass().getName()
 								+ " for element " + qName
 								+ " does not support the attribute " + key
-								+ "or List.add or Map.put");
+								);
+						}
 
 					}
 				}
@@ -440,11 +457,10 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 			throw new Exception(lineNumber + "," + columnNumber + ":"
 					+ "this element " + qName + " has not corresponding class");
 		}
-
+		XmlStackElement element=new XmlStackElement(qName,obj);
 		if (root == null)
-			root = obj;
-		objectStack.push(obj);
-		qnameStack.push(qName);
+			root = element;
+		elementStack.push(element);
 		currentText = new StringBuffer();
 
 		trace("START/ (" + lineNumber + "," + columnNumber + "):" + uri + ":"
@@ -465,9 +481,12 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 		trace("END (" + lineNumber + "," + columnNumber + "):" + uri + ":"
 				+ qName);
 
-		Object obj = objectStack.pop();
-		Class objClass = obj.getClass();
-
+		XmlStackElement element = (XmlStackElement) elementStack.pop();
+		TypeEntry elementType=(TypeEntry) types.get(element.qname);
+		if(elementType==null) {
+			elementType=defaultType;
+		}		
+		
 		if (currentText != null && currentText.length() != 0) {
 
 			String currentStr = ReplaceUtility.replace(currentText.toString(),
@@ -477,11 +496,11 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 
 			Method method = null;
 			try {
-				method = objClass.getMethod("addText",
+				method = elementType.castClass.getDeclaredMethod("addText",
 						new Class[] { String.class });
 			} catch (NoSuchMethodException e) {
 				try {
-					method = objClass.getMethod("setText",
+					method = elementType.castClass.getDeclaredMethod("setText",
 							new Class[] { String.class });
 				} catch (NoSuchMethodException e2) {
 					// do nothing
@@ -490,21 +509,14 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 			if (method != null) {
 				trace(method.getName());
 				try {
-					method.invoke(obj, new String[] { currentStr });
+					method.invoke(element.object, new String[] { currentStr });
 				} catch (InvocationTargetException e) {
 					e.getTargetException().printStackTrace(System.err);
 					throw e;
 				}
 			} else {
-				if (Map.class.isAssignableFrom(objClass)) {
-					((Map) obj).put(qName, currentStr);
-				} else if (Dictionary.class.isAssignableFrom(objClass)) {
-					((Dictionary) obj).put(qName, currentStr);
-				} else if (Collection.class.isAssignableFrom(objClass)) {
-					throw new Exception(lineNumber + "," + columnNumber + ":"
-							+ "List element " + qName + " cannot have PCDATAs");
-				} else if (String.class.isAssignableFrom(objClass)) {
-					String str = (String) obj;
+				if (String.class.isAssignableFrom(elementType.castClass)) {
+					String str = (String) element.object;
 					if (str.length() != 0) {
 						throw new Exception(
 								lineNumber
@@ -515,7 +527,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 										+ qName
 										+ " cannot have both PCDATA and an attribute value");
 					} else {
-						obj = currentStr;
+						element.object = currentStr;
 					}
 				}
 			}
@@ -524,69 +536,87 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 
 		currentText = null;
 
-		if (!objectStack.isEmpty()) {
+		if (!elementStack.isEmpty()) {
 
-			Object parent = objectStack.peek();
-			String parentName = (String) qnameStack.peek();
-			// TODO Class parentClass = (castClasses(parentName)).getClass() ????
-			Class parentClass = parent.getClass();
+			XmlStackElement parent = (XmlStackElement) elementStack.peek();
+			TypeEntry parentType = (TypeEntry) types.get(parent.qname);
+			if(parentType==null) {
+				parentType=defaultType;
+			}		
 
+			String capqName=ClassUtility.capitalize(qName);
 			Method method = null;
 			try {
-				method = parentClass.getMethod(adderOf(ClassUtility
-						.capitalize(qName)), new Class[] { objClass });  // instanceClass
+// TODO: OBR PARSER: We should also check for instance class as a parameter.
+				method = parentType.instanceClass.getDeclaredMethod(
+						adderOf(capqName),
+						new Class[] { elementType.castClass });  // instanceClass
 			} catch (NoSuchMethodException e) {
 				trace("NoSuchMethodException: "
-						+ adderOf(ClassUtility.capitalize(qName)));
+						+ adderOf(capqName) + "("+elementType.castClass.getName()+")");
 				// do nothing
 			}
 			if (method == null)
-				try {
-					method = parent.getClass().getMethod(
-							setterOf(ClassUtility.capitalize(qName)),
-							new Class[] { objClass });
+                try {
+					method = parentType.instanceClass.getDeclaredMethod(
+						setterOf(capqName),
+						new Class[] { elementType.castClass });
 				} catch (NoSuchMethodException e) {
 					trace("NoSuchMethodException: "
-							+ setterOf(ClassUtility.capitalize(qName)));
+							+ setterOf(capqName) + "("+elementType.castClass.getName()+")");
+					// do nothing
+				}
+			/*if (method == null)
+				try {
+					method = parentType.castClass.getDeclaredMethod(
+							adderOf(type.castClass),
+							new Class[] { type.castClass });
+				} catch (NoSuchMethodException e) {
+					trace("NoSuchMethodException: " + adderOf(type.castClass)+ "("+type.castClass.getName()+")");
 					// do nothing
 				}
 			if (method == null)
 				try {
-					method = parent.getClass().getMethod(adderOf(objClass),
-							new Class[] { objClass });
+					method = parentType.castClass.getDeclaredMethod(
+							setterOf(type.castClass),
+							new Class[] { type.castClass });
 				} catch (NoSuchMethodException e) {
-					trace("NoSuchMethodException: " + adderOf(objClass));
+					trace("NoSuchMethodException: " + setterOf(type.castClass)+ "("+type.castClass.getName()+")");
 					// do nothing
 				}
-			if (method == null)
-				try {
-					method = parent.getClass().getMethod(setterOf(objClass),
-							new Class[] { objClass });
-				} catch (NoSuchMethodException e) {
-					trace("NoSuchMethodException: " + setterOf(objClass));
-					// do nothing
-				}
-
+				*/
 			if (method != null) {
 				trace(method.getName());
 				try {
-					method.invoke(parent, new Object[] { obj });
+                    method.setAccessible(true);
+					method.invoke(parent.object, new Object[] { element.object });
 				} catch (InvocationTargetException e) {
 					e.getTargetException().printStackTrace(System.err);
 					throw e;
 				}
 			} else {
-				if (Map.class.isAssignableFrom(parentClass)) {
-					((Map) parent).put(qName, obj);
-				} else if (Dictionary.class.isAssignableFrom(parentClass)) {
-					((Dictionary) parent).put(qName, obj);
-				} else if (Collection.class.isAssignableFrom(parentClass)) {
-					((Collection) parent).add(obj);
+				if (parentType.defaultAddMethod != null) {
+					Class[] parameterTypes=parentType.defaultAddMethod.getParameterTypes();
+					if(parameterTypes.length==2
+						&& parameterTypes[0].isAssignableFrom(String.class)
+						&& parameterTypes[1].isAssignableFrom(elementType.castClass)
+					){
+						parentType.defaultAddMethod.invoke(parent.object,new Object[]{qName, element.object});
+					} else 	if(parameterTypes.length==1
+							&& parameterTypes[0].isAssignableFrom(elementType.castClass)
+						){
+							parentType.defaultAddMethod.invoke(parent.object,new Object[]{element.object});
+					} else {
+						throw new Exception(lineNumber + "," + columnNumber + ":"
+								+ " element " + parent.qname
+								+ " cannot have an attribute " + qName
+								+ " of type " + elementType.castClass);						
+					}
 				} else {
 					throw new Exception(lineNumber + "," + columnNumber + ":"
-							+ " element " + parentName
+							+ " element " + parent.qname
 							+ " cannot have an attribute " + qName
-							+ " of type " + objClass);
+							+ " of type " + elementType.castClass);
 				}
 			}
 
@@ -594,7 +624,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 
 		// invoke the process method
 		try {
-			invokeProcess(obj);
+			invokeProcess(element);
 		} catch (Throwable e) {
 			e.printStackTrace();
 			throw new Exception(e);
@@ -704,7 +734,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 					context);
 			Method method = null;
 			try {
-				method = clazz.getMethod(setterOf(key),
+				method = clazz.getDeclaredMethod(setterOf(key),
 						new Class[] { String.class });
 			} catch (NoSuchMethodException e) {
 				// do nothing
@@ -762,7 +792,10 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 						+ " cannot found class " + classname
 						+ " for \"mapping\" PI");
 			}
-			setDefaultType(clazz, null);
+
+			//			 TODO Add method
+			Method defaultdefaultAddMethod=null;
+			setDefaultType(clazz, null,defaultdefaultAddMethod);
 			return;
 		}
 
@@ -824,6 +857,9 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 						+ " for \"mapping\" PI");
 			}
 
-		addType(element, clazz, castClazz);
+		// TODO Add method
+		Method defaultAddMethod=null;
+			
+		addType(element, clazz, castClazz, defaultAddMethod);
 	}
 }

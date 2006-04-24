@@ -17,16 +17,16 @@
 package org.apache.felix.bundlerepository.metadataparser;
 
 import java.io.InputStream;
+import java.lang.reflect.Method;
 
-
-/**
- * @version 	1.00 9 Jul 2004
- * @author 	Didier Donsez
- */
 public abstract class MetadataHandler {
 
 	protected XmlCommonHandler handler;
 
+	/**
+	 * constructor 
+	 *
+	 */
 	public MetadataHandler() {
 		handler = new XmlCommonHandler();
 	}
@@ -37,29 +37,80 @@ public abstract class MetadataHandler {
 	public abstract void parse(InputStream is) throws Exception;
 
 	/**
-	 * return the metadata
-	 * @return a Objet
+	 * return the metadata after the parsing
+	 * @return a Object. Its class is the returned type of instanceFactory newInstance method for the root element of the XML document.
 	 */
 	public final Object getMetadata() {
 		return handler.getRoot();
 	}
-
+	/**
+	 * Add a type for a element
+	 * @param qname the name of the element to process
+	 * @param instanceFactory the factory of objects representing an element. Must have a newInstance method. could be a class.
+	 * @throws Exception
+	 */
 	public final void addType(String qname, Object instanceFactory) throws Exception {
-		handler.addType(qname, instanceFactory, null);
+		handler.addType(qname, instanceFactory, null, null);
 	}
 
+	/**
+	 * Add a type for a element
+	 * @param qname the name of the element to process
+	 * @param instanceFactory the factory of objects representing an element. Must have a newInstance method. could be a class.
+	 * @param castClass the class used to introspect the adder/setter and parameters in parent adder/setter. if null the castClass is by default the class returned by the newInstance method of the instanceFactory.
+	 * @throws Exception
+	 */
 	public final void addType(String qname, Object instanceFactory, Class castClass) throws Exception {
-		handler.addType(qname, instanceFactory, castClass);
+		handler.addType(qname, instanceFactory, castClass, null);
+	}
+
+	/**
+	 * Add a type for a element
+	 * @param qname the name of the element to process
+	 * @param instanceFactory the factory of objects representing an element. Must have a newInstance method. could be a class.
+	 * @param castClass the class used to introspect the adder/setter and parameters in parent adder/setter. if null the castClass is by default the class returned by the newInstance method of the instanceFactory.
+	 * @param defaultAddMethod the method used to add the sub-elements and attributes if no adder/setter is founded. could be omitted.
+	 * @throws Exception
+	 */
+	public final void addType(String qname, Object instanceFactory, Class castClass, Method defaultAddMethod) throws Exception {
+		handler.addType(qname, instanceFactory, castClass, defaultAddMethod);
 	}
 	
+	/**
+	 * Add a type for the default element
+	 * @param instanceFactory the factory of objects representing an element. Must have a newInstance method. could be a class.
+	 * @throws Exception
+	 */
 	public final void setDefaultType(Object instanceFactory) throws Exception {
-		handler.setDefaultType(instanceFactory,null);
+		handler.setDefaultType(instanceFactory,null,null);
 	}
 
+	/**
+	 * Add a type for the default element
+	 * @param instanceFactory the factory of objects representing an element. Must have a newInstance method. could be a class.
+	 * @param castClass the class used to introspect the adder/setter and parameters in parent adder/setter. if null the castClass is by default the class returned by the newInstance method of the instanceFactory.
+	 * @throws Exception
+	 */
 	public final void setDefaultType(Object instanceFactory, Class castClass) throws Exception {
-		handler.setDefaultType(instanceFactory, castClass);
+		handler.setDefaultType(instanceFactory, castClass,null);
 	}
 
+	/**
+	 * Add a type for the default element
+	 * @param instanceFactory the factory of objects representing an element. Must have a newInstance method. could be a class.
+	 * @param castClass the class used to introspect the adder/setter and parameters in parent adder/setter. if null the castClass is by default the class returned by the newInstance method of the instanceFactory.
+	 * @param defaultAddMethod the method used to add the sub-elements and attributes if no adder/setter is founded. could be omitted.
+	 * @throws Exception
+	 */
+	public final void setDefaultType(Object instanceFactory, Class castClass, Method defaultAddMethod) throws Exception {
+		handler.setDefaultType(instanceFactory,castClass,defaultAddMethod);
+	}
+
+	/**
+	 * Add a type to process the processing instruction
+	 * @param piname
+	 * @param clazz
+	 */
 	public final void addPI(String piname, Class clazz) {
 		handler.addPI(piname, clazz);
 	}

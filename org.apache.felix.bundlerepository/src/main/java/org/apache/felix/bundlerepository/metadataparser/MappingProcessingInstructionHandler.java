@@ -19,8 +19,6 @@ package org.apache.felix.bundlerepository.metadataparser;
 
 /**
  * this class adds type of elements to the parser
- *
- * @author Didier Donsez (didier.donsez@imag.fr)
  */
 public class MappingProcessingInstructionHandler {
 
@@ -39,7 +37,7 @@ public class MappingProcessingInstructionHandler {
 		if(classname==null) {
 			throw new Exception("class is missing");
 		}
-		handler.addType(name,this.getClass().getClassLoader().loadClass(classname),null);
+		handler.addType(name,this.getClass().getClassLoader().loadClass(classname),null,null);
 	}
 
 	public void setElement(String element) {

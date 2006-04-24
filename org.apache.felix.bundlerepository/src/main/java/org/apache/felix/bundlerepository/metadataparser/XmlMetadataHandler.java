@@ -25,9 +25,6 @@ import org.xml.sax.*;
 
 /**
  * handles the metadata in XML format
- *
- * @version 1.00 18 May 2003
- * @author 	Didier Donsez
  */
 public class XmlMetadataHandler extends MetadataHandler {
 

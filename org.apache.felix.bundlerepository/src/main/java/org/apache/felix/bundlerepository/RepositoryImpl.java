@@ -17,6 +17,7 @@
 package org.apache.felix.bundlerepository;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -59,7 +60,7 @@ public class RepositoryImpl implements Repository
     }
 
     // TODO: OBR - Wrong parameter type from metadata parser.
-    public void addResource(ResourceImpl resource)
+    public void addResource(Resource resource)
     {
         // Set resource's repository.
         ((ResourceImpl) resource).setRepository(this);
@@ -143,13 +144,19 @@ public class RepositoryImpl implements Repository
                         return RepositoryImpl.this;
                     }
                 };
-                handler.addType("repository", factory, Repository.class);
-                handler.addType("resource", ResourceImpl.class, Resource.class);
-                handler.addType("category", CategoryImpl.class, null);
-                handler.addType("require", RequirementImpl.class, Requirement.class);
-                handler.addType("capability", CapabilityImpl.class, Capability.class);
-                handler.addType("p", PropertyImpl.class, null);
-                handler.setDefaultType(String.class, null);
+
+                // Get default setter method for Resource.
+                Method resourceSetter = ResourceImpl.class.getDeclaredMethod(
+                    "put", new Class[] { Object.class, Object.class });
+
+                // Map XML tags to types.
+                handler.addType("repository", factory, Repository.class, null);
+                handler.addType("resource", ResourceImpl.class, Resource.class, resourceSetter);
+                handler.addType("category", CategoryImpl.class, null, null);
+                handler.addType("require", RequirementImpl.class, Requirement.class, null);
+                handler.addType("capability", CapabilityImpl.class, Capability.class, null);
+                handler.addType("p", PropertyImpl.class, null, null);
+                handler.setDefaultType(String.class, null, null);
             }
             catch (Exception ex)
             {

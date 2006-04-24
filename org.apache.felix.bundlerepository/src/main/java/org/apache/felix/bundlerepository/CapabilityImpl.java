@@ -50,7 +50,7 @@ public class CapabilityImpl implements Capability
         return m_map;
     }
 
-    public void addP(PropertyImpl prop)
+    protected void addP(PropertyImpl prop)
     {
         m_map.put(prop.getN(), prop.getV());
     }

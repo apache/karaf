@@ -43,7 +43,7 @@
             <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>
             <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
             <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
-            <importPackage>org.osgi.framework</importPackage>
+            <importPackage>org.osgi.framework,org.xml.sax,javax.xml.parsers</importPackage>
             <dynamicImportPackage>org.apache.felix.shell</dynamicImportPackage>
             <exportPackage>org.osgi.service.obr</exportPackage>
             <exportService>org.osgi.service.obr.RepositoryAdmin</exportService>

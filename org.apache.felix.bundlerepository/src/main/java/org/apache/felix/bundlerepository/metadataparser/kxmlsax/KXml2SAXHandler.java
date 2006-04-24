@@ -20,8 +20,6 @@ import java.util.Properties;
 
 /**
  * Interface for SAX handler with kXML
- *
- * @author Didier Donsez (didier.donsez@imag.fr)
  */
 public interface KXml2SAXHandler {
 

@@ -23,7 +23,7 @@ import java.util.*;
 import org.osgi.framework.Version;
 import org.osgi.service.obr.*;
 
-public class ResourceImpl implements Resource, Map
+public class ResourceImpl implements Resource
 {
     private final String URI = "uri";
 
@@ -55,7 +55,7 @@ public class ResourceImpl implements Resource, Map
 
         if (resource != null)
         {
-            resource.putAll(resource.getProperties());
+            m_map.putAll(resource.getProperties());
             m_catList.addAll(resource.m_catList);
             m_capList.addAll(resource.m_capList);
             m_reqList.addAll(resource.m_reqList);
@@ -120,7 +120,7 @@ public class ResourceImpl implements Resource, Map
         return (Requirement[]) m_reqList.toArray(new Requirement[m_reqList.size()]);
     }
 
-    public void addRequire(Requirement req)
+    protected void addRequire(Requirement req)
     {
         m_reqList.add(req);
     }
@@ -130,8 +130,7 @@ public class ResourceImpl implements Resource, Map
         return (Capability[]) m_capList.toArray(new Capability[m_capList.size()]);
     }
 
-    // TODO: OBR - Should this be a property?
-    public void addCapability(Capability cap)
+    protected void addCapability(Capability cap)
     {
         m_capList.add(cap);
     }
@@ -141,7 +140,7 @@ public class ResourceImpl implements Resource, Map
         return (String[]) m_catList.toArray(new String[m_catList.size()]);
     }
 
-    public void addCategory(CategoryImpl cat)
+    protected void addCategory(CategoryImpl cat)
     {
         m_catList.add(cat.getId());
     }
@@ -156,66 +155,10 @@ public class ResourceImpl implements Resource, Map
         m_repo = repo;
     }
 
-    //
-    // Map interface methods.
-    //
-
-    public int size()
-    {
-        return m_map.size();
-    }
-
-    public void clear()
-    {
-        m_map.clear();
-    }
-
-    public boolean isEmpty()
-    {
-        return m_map.isEmpty();
-    }
-
-    public boolean containsKey(Object key)
-    {
-        return m_map.containsKey(key);
-    }
-
-    public boolean containsValue(Object value)
-    {
-        return m_map.containsValue(value);
-    }
-
-    public Collection values()
-    {
-        return m_map.values();
-    }
-
-    public void putAll(Map t)
-    {
-        m_map.putAll(t);
-    }
-
-    public Set entrySet()
-    {
-        return m_map.entrySet();
-    }
-
-    public Set keySet()
-    {
-        return m_map.keySet();
-    }
-
-    public Object get(Object key)
-    {
-        return m_map.get(key);
-    }
-
-    public Object remove(Object key)
-    {
-        return m_map.remove(key);
-    }
-
-    public Object put(Object key, Object value)
+    /**
+     * Default setter method when setting parsed data from the XML file. 
+    **/
+    protected Object put(Object key, Object value)
     {
         // Capture the URIs since they might be relative, so we
         // need to defer setting the actual URL value until they
@@ -246,22 +189,6 @@ public class ResourceImpl implements Resource, Map
             else if (key.equals(SIZE))
             {
                 value = Long.valueOf(value.toString());
-            }
-            // TODO: OBR - These should be handled by the "add" methods above.
-            else if (key.equals("require"))
-            {
-                m_reqList.add(value);
-                return null;
-            }
-            else if (key.equals("capability"))
-            {
-                m_capList.add(value);
-                return null;
-            }
-            else if (key.equals("category"))
-            {
-                m_catList.add(value);
-                return null;
             }
     
             return m_map.put(key, value);

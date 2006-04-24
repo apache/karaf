@@ -23,8 +23,6 @@ import org.apache.felix.bundlerepository.metadataparser.kxmlsax.KXml2SAXParser;
 /**
  * handles the metadata in XML format
  * (use kXML (http://kxml.enhydra.org/) a open-source very light weight XML parser
- * @version 	1.00 11 Nov 2003
- * @author 	Didier Donsez
  */
 public class KXml2MetadataHandler extends MetadataHandler {
 

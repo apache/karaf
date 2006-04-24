@@ -24,19 +24,12 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 /**
- * The KXml2SAXParser extends the XmlParser from kxml. This is a very
- * simple parser that does not take into account the DTD
- *
- * @version 	1.0 08 Nov 2002
- * @version 	1.1 24 Apr 2004
- * @author 	Humberto Cervantes, Didier Donsez
+ * The KXml2SAXParser extends the XmlParser from kxml2 (which  does not take into account the DTD).
  */
 public class KXml2SAXParser extends KXmlParser {
 	
 	public String uri="uri";
 
-	private Reader reader;
-	
 	/**
 	* The constructor for a parser, it receives a java.io.Reader.
 	*
@@ -45,15 +38,14 @@ public class KXml2SAXParser extends KXmlParser {
 	*/
 	public KXml2SAXParser(Reader reader) throws XmlPullParserException {
 		super();
-		this.reader=reader;
 	    setInput(reader);
 	}
 	
 	/**
-	* Parser from the reader provided in the constructor, and call
-	* the startElement and endElement in a KxmlHandler
+	* parse from the reader provided in the constructor, and call
+	* the startElement and endElement in the handler
 	*
-	* @param   reader  The reader
+	* @param   handler  The handler
 	* @exception   Exception thrown by the superclass
 	*/
 	public void parseXML(KXml2SAXHandler handler) throws Exception {
