@@ -108,6 +108,16 @@ public class RepositoryImpl implements Repository
         }
     }
 
+    /**
+     * Default setter method when setting parsed data from the XML file,
+     * which currently ignores everything. 
+    **/
+    protected Object put(Object key, Object value)
+    {
+        // Ignore everything for now.
+        return null;
+    }
+
     private void parseRepositoryFile(int hopCount)
     {
 // TODO: OBR - Implement hop count.
@@ -145,13 +155,17 @@ public class RepositoryImpl implements Repository
                     }
                 };
 
+                // Get default setter method for Repository.
+                Method repoSetter = RepositoryImpl.class.getDeclaredMethod(
+                    "put", new Class[] { Object.class, Object.class });
+
                 // Get default setter method for Resource.
-                Method resourceSetter = ResourceImpl.class.getDeclaredMethod(
+                Method resSetter = ResourceImpl.class.getDeclaredMethod(
                     "put", new Class[] { Object.class, Object.class });
 
                 // Map XML tags to types.
-                handler.addType("repository", factory, Repository.class, null);
-                handler.addType("resource", ResourceImpl.class, Resource.class, resourceSetter);
+                handler.addType("repository", factory, Repository.class, repoSetter);
+                handler.addType("resource", ResourceImpl.class, Resource.class, resSetter);
                 handler.addType("category", CategoryImpl.class, null, null);
                 handler.addType("require", RequirementImpl.class, Requirement.class, null);
                 handler.addType("capability", CapabilityImpl.class, Capability.class, null);

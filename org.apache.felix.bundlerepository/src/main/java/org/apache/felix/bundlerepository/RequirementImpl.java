@@ -118,7 +118,8 @@ public class RequirementImpl implements Requirement
                 (m_optional == r.isOptional()) &&
                 (m_multiple == r.isMultiple()) &&
                 m_filter.toString().equals(r.getFilter()) &&
-                m_comment.equals(r.getComment());
+                ((m_comment == r.getComment()) ||
+                    ((m_comment != null) && (m_comment.equals(r.getComment()))));
         }
         return false;
     }
