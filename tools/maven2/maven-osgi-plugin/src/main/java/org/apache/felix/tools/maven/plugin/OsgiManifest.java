@@ -58,6 +58,7 @@ public class OsgiManifest
     private static final String BUNDLE_SOURCE = "Bundle-Source";
     private static final String BUNDLE_DATE = "Bundle-Date";
     private static final String METADATA_LOCATION = "Metadata-Location";
+    private static final String SERVICE_COMPONENT = "Service-Component";
 
     /**
      * Instance variables corresponding to the R4 framework manifest headers
@@ -93,6 +94,7 @@ public class OsgiManifest
     private String bundleSource;
     private String bundleDate;
     private String metadataLocation;
+    private String serviceComponent;
 
     private Properties entries = new Properties();
 
@@ -233,6 +235,11 @@ public class OsgiManifest
         if ( getMetadataLocation() != null )
         {
             entries.put( METADATA_LOCATION, getMetadataLocation() );
+        }
+
+        if ( getServiceComponent() != null )
+        {
+            entries.put( SERVICE_COMPONENT, getServiceComponent() );
         }
 
         return entries;
@@ -508,5 +515,15 @@ public class OsgiManifest
     public void setMetadataLocation( String metadataLocation )
     {
         this.metadataLocation = metadataLocation;
+    }
+
+    public String getServiceComponent()
+    {
+        return serviceComponent;
+    }
+
+    public void setServiceComponent( String serviceComponent )
+    {
+        this.serviceComponent = serviceComponent;
     }
 }
