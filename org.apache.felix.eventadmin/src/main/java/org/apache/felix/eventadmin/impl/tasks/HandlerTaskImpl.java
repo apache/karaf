@@ -78,6 +78,8 @@ public class HandlerTaskImpl implements HandlerTask
                     + m_eventHandlerRef + " | Bundle("
                     + m_eventHandlerRef.getBundle() + ")]", e);
         }
+        
+        m_handlerTasks.ungetEventHandler(handler, m_eventHandlerRef);
     }
 
     /**

@@ -36,6 +36,7 @@ import org.apache.felix.eventadmin.impl.security.CacheTopicPermissions;
 import org.apache.felix.eventadmin.impl.security.SecureEventAdminFactory;
 import org.apache.felix.eventadmin.impl.security.TopicPermissions;
 import org.apache.felix.eventadmin.impl.tasks.AsyncDeliverTasks;
+import org.apache.felix.eventadmin.impl.tasks.BlockTask;
 import org.apache.felix.eventadmin.impl.tasks.DeliverTasks;
 import org.apache.felix.eventadmin.impl.tasks.DispatchTask;
 import org.apache.felix.eventadmin.impl.tasks.SyncDeliverTasks;
@@ -96,21 +97,6 @@ import org.osgi.service.event.TopicPermission;
  * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-// TODO: This is a tricky one: what do we do in case we are stopped but still have
-// already posted or send events that are not yet delivered? At the moment we will
-// throw an IllegalStateException on new events after we are stopped but
-// will deliver the pending events. Now the question is do we block in the stop 
-// method until we don't have pending events anymore or (as we currently do) return
-// immediately and deliver the events ignoring the fact that we are stopped? What is 
-// the best practice? Alternatively, we could just free all blocked threads and 
-// discard any pending events (Note that this would need some refactoring). From my
-// point of view the current approach has the advantage that the semantics are 
-// preserved: First, the immediate return allows other bundles to be notified that we 
-// are stopped (and hence they deserve an IllegalStateException if they call us 
-// regardless) second, successful posted or send events will be delivered, and third
-// we don't block a shutdown due to only using daemon threads internally. However,
-// it might take some time until we settle down which is somewhat cumbersome given
-// that we already are marked as stopped?
 // TODO: Security is in place but untested due to not being implemented by the 
 // framework. However, it needs to be revisited once security is implemented. 
 // Two places are affected by this namely, security/* and handler/*
@@ -246,9 +232,16 @@ public class Activator implements BundleActivator
         // Finally, adapt the outside events to our kind of events as per spec
         adaptEvents(context, m_admin);
     }
-
+    
     /**
-     * Called upon stopping the bundle.
+     * Called upon stopping the bundle. This will block until all pending events are
+     * delivered. An IllegalStateException will be thrown on new events starting with
+     * the begin of this method. However, it might take some time until we settle
+     * down which is somewhat cumbersome given that the spec asks for return in 
+     * a timely manner. Note that calling the stop method in one of the event 
+     * delivery threads will cause the handler to be timed-out. Furthermore, calling
+     * stop in one of the event delivery threads with time-out disabled will lead to
+     * a deadlock.
      *
      * @param context The bundle context passed by the framework
      * 
@@ -260,9 +253,16 @@ public class Activator implements BundleActivator
         
         m_pool.close();
         
-        m_asyncQueue.close();
+        // This tasks will be unblocked once the queues are empty
+        final BlockTask asyncShutdownBlock = new BlockTask();
         
-        m_syncQueue.close();
+        final BlockTask syncShutdownBlock = new BlockTask();
+        
+        // Now close the queues. Note that already added tasks will be delivered
+        // The given shutdownTask will be executed once the queue is empty
+        m_asyncQueue.close(asyncShutdownBlock);
+        
+        m_syncQueue.close(syncShutdownBlock);
   
         m_admin = null;
         
@@ -271,6 +271,13 @@ public class Activator implements BundleActivator
         m_asyncQueue = null;
         
         m_syncQueue = null;
+        
+        // Wait till the queues are empty (i.e., all pending events are delivered)
+        // Warning: if this is one of the event delivery threads this will lead to 
+        // a deadlock in case that time-outs are disabled. 
+        asyncShutdownBlock.block();
+        
+        syncShutdownBlock.block();
     }
     
     /*

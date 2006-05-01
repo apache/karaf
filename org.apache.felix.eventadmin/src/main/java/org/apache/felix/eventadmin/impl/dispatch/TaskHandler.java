@@ -103,15 +103,20 @@ public class TaskHandler implements TaskQueue, TaskProducer
     }
 
     /**
-     * Close the queue. 
+     * Close the queue. The given shutdown task will be executed once the queue is
+     * empty.
+     * 
+     * @param shutdownTask The task to execute once the queue is empty
      * 
      * @see org.apache.felix.eventadmin.impl.dispatch.TaskQueue#close()
      */
-    public void close()
+    public void close(final HandlerTask shutdownTask)
     {
         synchronized(m_queue)
         {
             m_closed = true;
+            
+            m_queue.add(shutdownTask);
             
             m_queue.notifyAll();
         }

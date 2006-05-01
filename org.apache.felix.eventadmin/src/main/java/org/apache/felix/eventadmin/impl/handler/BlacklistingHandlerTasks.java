@@ -190,6 +190,23 @@ public class BlacklistingHandlerTasks implements HandlerTasks
 
         return (EventHandler) ((null != result) ? result : m_nullEventHandler);
     }
+    
+    /**
+     * Unget the service reference for the given event handler unless it is the 
+     * NullEventHandler. This is a private method and only public due to
+     * its usage in a friend class.
+     * 
+     * @param handler The event handler service to unget
+     * @param handlerRef The service reference to unget
+     */
+    public void ungetEventHandler(final EventHandler handler, 
+    		final ServiceReference handlerRef)
+    {
+    		if(m_nullEventHandler != handler)
+    		{
+    			m_context.ungetService(handlerRef);
+    		}
+    }
 
     /*
      * This is a null object that is supposed to do nothing. This is used once an 

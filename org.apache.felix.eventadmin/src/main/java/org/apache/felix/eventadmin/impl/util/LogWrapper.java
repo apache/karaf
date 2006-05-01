@@ -201,13 +201,16 @@ public class LogWrapper
                 // class as well.
                 for (Iterator iter = m_loggerRefs.iterator(); iter.hasNext();)
                 {
+                    final ServiceReference next = (ServiceReference) iter.next();
+                    
                     org.osgi.service.log.LogService logger = 
-                        (org.osgi.service.log.LogService) m_context.getService(
-                        (ServiceReference) iter.next());
+                        (org.osgi.service.log.LogService) m_context.getService(next);
     
                     if (null != logger)
                     {
                         logger.log(level, logMsg);
+                        
+                        m_context.ungetService(next);
                     }
                     else
                     {
@@ -245,13 +248,16 @@ public class LogWrapper
                 // class as well.
                 for (Iterator iter = m_loggerRefs.iterator(); iter.hasNext();)
                 {
+                    final ServiceReference next = (ServiceReference) iter.next();
+                    
                     org.osgi.service.log.LogService logger = 
-                        (org.osgi.service.log.LogService) m_context.getService(
-                        (ServiceReference) iter.next());
+                        (org.osgi.service.log.LogService) m_context.getService(next);
     
                     if (null != logger)
                     {
                         logger.log(level, logMsg, ex);
+                        
+                        m_context.ungetService(next);
                     }
                     else
                     {
@@ -289,13 +295,16 @@ public class LogWrapper
                 // class as well.
                 for (Iterator iter = m_loggerRefs.iterator(); iter.hasNext();)
                 {
+                	   final ServiceReference next = (ServiceReference) iter.next();
+                	   
                     org.osgi.service.log.LogService logger = 
-                        (org.osgi.service.log.LogService) m_context.getService(
-                        (ServiceReference) iter.next());
+                        (org.osgi.service.log.LogService) m_context.getService(next);
     
                     if (null != logger)
                     {
                         logger.log(sr, level, logMsg);
+                        
+                        m_context.ungetService(next);
                     }
                     else
                     {
@@ -335,13 +344,16 @@ public class LogWrapper
                 // class as well.
                 for (Iterator iter = m_loggerRefs.iterator(); iter.hasNext();)
                 {
+                	   final ServiceReference next = (ServiceReference) iter.next();
+                	   
                     org.osgi.service.log.LogService logger = 
-                        (org.osgi.service.log.LogService) m_context.getService(
-                        (ServiceReference) iter.next());
+                        (org.osgi.service.log.LogService) m_context.getService(next);
     
                     if (null != logger)
                     {
                         logger.log(sr, level, logMsg, ex);
+                        
+                        m_context.ungetService(next);
                     }
                     else
                     {

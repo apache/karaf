@@ -49,7 +49,9 @@ public interface TaskQueue
     public void push(HandlerTask[] tasks);
     
     /**
-     * Close the queue. 
+     * Close the queue. The given callback will be executed once the queue is empty.
+     * 
+     * @param shutdownTask The task to execute once the queue is empty
      */
-    public void close();
+    public void close(final HandlerTask shutdownTask);
 }
