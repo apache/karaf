@@ -44,6 +44,7 @@ import org.apache.felix.eventadmin.impl.util.LeastRecentlyUsedCacheMap;
 import org.apache.felix.eventadmin.impl.util.LogWrapper;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.TopicPermission;
 
@@ -118,6 +119,9 @@ public class Activator implements BundleActivator
     // added via a decorator in the start method (this is the wrapped object without 
     // the wrapper).
     private volatile EventAdminImpl m_admin;
+    
+    // The registration of the security decorator factory (i.e., the service)
+    private volatile ServiceRegistration m_registration;
     
     /**
      * Called upon starting of the bundle. Constructs and registers the EventAdmin
@@ -226,7 +230,7 @@ public class Activator implements BundleActivator
         // register the admin wrapped in a service factory (SecureEventAdminFactory)
         // that hands-out the m_admin object wrapped in a decorator that checks 
         // appropriated permissions of each calling bundle
-        context.registerService(EventAdmin.class.getName(), 
+        m_registration = context.registerService(EventAdmin.class.getName(),
             new SecureEventAdminFactory(m_admin, publishPermissions), null);
         
         // Finally, adapt the outside events to our kind of events as per spec
@@ -249,6 +253,9 @@ public class Activator implements BundleActivator
      */
     public void stop(final BundleContext context)
     {
+        // We need to unregister manually
+        m_registration.unregister();
+        
         m_admin.stop();
         
         m_pool.close();
@@ -271,6 +278,8 @@ public class Activator implements BundleActivator
         m_asyncQueue = null;
         
         m_syncQueue = null;
+        
+        m_registration = null;
         
         // Wait till the queues are empty (i.e., all pending events are delivered)
         // Warning: if this is one of the event delivery threads this will lead to 

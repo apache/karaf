@@ -295,8 +295,8 @@ public class LogWrapper
                 // class as well.
                 for (Iterator iter = m_loggerRefs.iterator(); iter.hasNext();)
                 {
-                	   final ServiceReference next = (ServiceReference) iter.next();
-                	   
+                    final ServiceReference next = (ServiceReference) iter.next();
+                       
                     org.osgi.service.log.LogService logger = 
                         (org.osgi.service.log.LogService) m_context.getService(next);
     
@@ -344,8 +344,8 @@ public class LogWrapper
                 // class as well.
                 for (Iterator iter = m_loggerRefs.iterator(); iter.hasNext();)
                 {
-                	   final ServiceReference next = (ServiceReference) iter.next();
-                	   
+                       final ServiceReference next = (ServiceReference) iter.next();
+                       
                     org.osgi.service.log.LogService logger = 
                         (org.osgi.service.log.LogService) m_context.getService(next);
     

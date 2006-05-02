@@ -200,12 +200,17 @@ public class BlacklistingHandlerTasks implements HandlerTasks
      * @param handlerRef The service reference to unget
      */
     public void ungetEventHandler(final EventHandler handler, 
-    		final ServiceReference handlerRef)
+            final ServiceReference handlerRef)
     {
-    		if(m_nullEventHandler != handler)
-    		{
-    			m_context.ungetService(handlerRef);
-    		}
+            if(m_nullEventHandler != handler)
+            {
+                // Is the handler not unregistered or blacklisted?
+                if(!m_blackList.contains(handlerRef) && (null != 
+                    handlerRef.getBundle()))
+                {
+                    m_context.ungetService(handlerRef);
+                }
+            }
     }
 
     /*
