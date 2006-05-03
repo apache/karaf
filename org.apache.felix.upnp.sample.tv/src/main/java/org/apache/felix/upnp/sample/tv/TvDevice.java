@@ -38,7 +38,7 @@ import org.osgi.service.upnp.UPnPService;
 
 public class TvDevice implements UPnPDevice,UPnPEventListener,ServiceListener  {
 	
-	final private String DEVICE_ID = "uuid:DomoWare-TV";
+	final private String DEVICE_ID = "uuid:Felix-TV";
 	private final static String CLOCK_DEVICE_TYPE = "urn:schemas-upnp-org:device:clock:1";
 	private final static String CLOCK_SERVICE_TYPE = "urn:schemas-upnp-org:service:timer:1";
 	
@@ -97,14 +97,14 @@ public class TvDevice implements UPnPDevice,UPnPEventListener,ServiceListener  {
 	        	.device.Constants.DEVICE_CATEGORY,
         	new String[]{UPnPDevice.DEVICE_CATEGORY}
         );
-		dictionary.put(UPnPDevice.FRIENDLY_NAME,"Domoware Sample Tv");
-		dictionary.put(UPnPDevice.MANUFACTURER,"ISTI-CNR");
-		dictionary.put(UPnPDevice.MANUFACTURER_URL,"http://domoware.isti.cnr.it");
+		dictionary.put(UPnPDevice.FRIENDLY_NAME,"Felix Sample Tv");
+		dictionary.put(UPnPDevice.MANUFACTURER,"Apache Software Foundation");
+		dictionary.put(UPnPDevice.MANUFACTURER_URL,"http://incubator.apache.org/felix/");
 		dictionary.put(UPnPDevice.MODEL_DESCRIPTION,"A CyberLink Tv device clone to test OSGi to UPnP service import");
 		dictionary.put(UPnPDevice.MODEL_NAME,"BimbiTv");
 		dictionary.put(UPnPDevice.MODEL_NUMBER,"1.0");
-		dictionary.put(UPnPDevice.MODEL_URL,"http://domoware.isti.cnr.it/BimbiTv");
-		dictionary.put(UPnPDevice.PRESENTATION_URL,"http://domoware.isti.cnr.it/BimbiTv/presentation");
+		dictionary.put(UPnPDevice.MODEL_URL,"http://incubator.apache.org/felix/BimbiTv");
+		dictionary.put(UPnPDevice.PRESENTATION_URL,"http://incubator.apache.org/felix/BimbiTv/presentation");
 		dictionary.put(UPnPDevice.SERIAL_NUMBER,"123456789");
 		dictionary.put(UPnPDevice.TYPE,"urn:schemas-upnp-org:device:tv:1");
 		dictionary.put(UPnPDevice.UDN,DEVICE_ID);

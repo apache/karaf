@@ -111,9 +111,6 @@ public class PowerStateVariable implements UPnPStateVariableDescriptor {
 		this.notifier = notifier;
 	}
 
-    /* (non-Javadoc)
-     * @see it.cnr.isti.niche.osgi.sample.tv.UPnPStateVariableDescriptor#getValue()
-     */
     public Object getValue() {
          return power;
     }

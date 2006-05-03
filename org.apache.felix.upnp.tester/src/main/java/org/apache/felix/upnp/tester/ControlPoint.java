@@ -64,7 +64,7 @@ public class ControlPoint implements PopupMenuListener {
 	
 	
 	public ControlPoint() {
-		frame = new JFrame("OSGi UPnP Device Tester");
+		frame = new JFrame("Felix UPnPDevice Tester");
        try {
             URL eventIconUrl = Util.class.getResource("IMAGES/logo.gif");           
             ImageIcon icon=  new ImageIcon(eventIconUrl,"logo");
@@ -183,7 +183,7 @@ public class ControlPoint implements PopupMenuListener {
             });
         
         
-        loggerMenu = new JMenu("Domoware Logger");
+        loggerMenu = new JMenu("Felix Logger");
         final String NO_LOGGING ="No Logging";
         final String ERROR ="Error";
         final String WARNING ="Warning";

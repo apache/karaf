@@ -64,7 +64,7 @@ public class DeviceSetup {
 	        );
 
 		/*UPNP_IMPORT*/
-		properties.put(Constants.UPNP_IMPORT, "http://domoware.isti.cnr.it");
+		properties.put(Constants.UPNP_IMPORT, "http://felix.apache.org");
 		
 		/* FRIENDLY_NAME */
 		//TODO controllato in metodo getFriendlyName se non esiste il frinedly mi restituisce una stringa vuota

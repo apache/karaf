@@ -70,9 +70,9 @@ public class Activator implements BundleActivator {
         
  		Activator.bc = context;				
 		
-	    String levelStr = (String) Util.getPropertyDefault(context,"domoware.upnpbase.log","2");	    
+	    String levelStr = (String) Util.getPropertyDefault(context,"felix.upnpbase.log","2");	    
 		Activator.logger = new Logger(levelStr);
-	    String cyberLog = (String) Util.getPropertyDefault(context,"domoware.upnpbase.cyberlink.log","false");
+	    String cyberLog = (String) Util.getPropertyDefault(context,"felix.upnpbase.cyberlink.log","false");
 	    Activator.logger.setCyberDebug(cyberLog);
 
         UPnP.setXMLParser(new JaxpParser());

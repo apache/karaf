@@ -20,7 +20,9 @@ package org.apache.felix.upnp.sample.tv;
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.URL;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 import org.osgi.framework.BundleException;
@@ -30,7 +32,7 @@ import org.osgi.framework.BundleException;
 
 public class TvFrame extends JFrame implements Runnable 
 {
-	private final static String TITLE = "DomoWare Sample TV";
+	private final static String TITLE = "Felix UpnP TV";
 	
 	private TvDevice tvDev;
 	private TvPane tvPane;
@@ -59,6 +61,15 @@ public class TvFrame extends JFrame implements Runnable
 			}
 		});			
 		
+	       try {
+	            URL eventIconUrl = TvFrame.class.getResource("images/logo.gif");           
+	            ImageIcon icon=  new ImageIcon(eventIconUrl,"logo");
+	            setIconImage(icon.getImage());
+	       }
+	        catch (Exception ex){
+	                System.out.println("Resource: IMAGES/logo.gif not found : " + ex.toString());
+	        }
+	        
 		pack();
 		setVisible(true);
 	}

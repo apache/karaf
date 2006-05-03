@@ -95,9 +95,6 @@ public class TreeViewer extends JPanel 	implements DeviceNodeListener
     public void setPopupMenuEnabled(boolean driverControllerAvailable){
         popup.getComponent(0).setEnabled(driverControllerAvailable);
     }
-	/* (non-Javadoc)
-	 * @see org.apache.felix.sample.upnp.DeviceNodeListener#deviceDetected(it.cnr.isti.niche.osgi.upnpbase.export.DeviceNode)
-	 */
 	public void deviceDetected(DeviceNode node) {
 		root.add(new UPnPDeviceTreeNode(node,Activator.context));
 		treeModel.nodeStructureChanged(root);
