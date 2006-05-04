@@ -30,7 +30,7 @@ import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPStateVariable;
 
 import org.apache.felix.upnp.extra.util.Converter;
-import org.apache.felix.upnp.extra.util.UPnPException;
+import org.osgi.service.upnp.UPnPException;
 
 /**
  * @author Matteo "matted" Demuru

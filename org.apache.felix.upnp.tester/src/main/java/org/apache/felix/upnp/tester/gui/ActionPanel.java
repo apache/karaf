@@ -44,7 +44,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
 
 import org.apache.felix.upnp.extra.util.Converter;
-import org.apache.felix.upnp.extra.util.UPnPException;
+import org.osgi.service.upnp.UPnPException;
 import org.apache.felix.upnp.tester.Mediator;
 import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPStateVariable;
@@ -107,8 +107,8 @@ public class ActionPanel extends JPanel {
                 catch (UPnPException ex){
                     String error =  
                         "===== Action Failed =====" +
-                        "\nUPnP Error Code::\n    " +ex.getErrorCode() +
-                        "\nUPnP Error Description::\n    " +ex.getErrorDescription();
+                        "\nUPnP Error Code::\n    " +ex.getUPnPError_Code() +
+                        "\nUPnP Error Description::\n    " +ex.getMessage();
                     printReport(params,error);
                     JOptionPane.showMessageDialog(
                         Mediator.getPropertiesViewer(),error);                   

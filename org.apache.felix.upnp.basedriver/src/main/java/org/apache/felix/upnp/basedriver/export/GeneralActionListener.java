@@ -38,7 +38,7 @@ import org.osgi.service.upnp.UPnPService;
 
 import org.apache.felix.upnp.basedriver.Activator;
 import org.apache.felix.upnp.extra.util.Converter;
-import org.apache.felix.upnp.extra.util.UPnPException;
+import org.osgi.service.upnp.UPnPException;
 
 /**
  * @author Stefano "Kismet" Lenzi 
@@ -107,7 +107,7 @@ public class GeneralActionListener implements ServiceListener,ActionListener {
 			outArgs=osgiAct.invoke(inArgs);
 		} catch (UPnPException e) {
 			//TODO Activator.logger.log()
-			upnpAct.setStatus(e.getErrorCode(),e.getErrorDescription());
+			upnpAct.setStatus(e.getUPnPError_Code(),e.getMessage());
 			invalidAction=true;
 		} catch (Exception e){
 			//TODO Activator.logger.log()
