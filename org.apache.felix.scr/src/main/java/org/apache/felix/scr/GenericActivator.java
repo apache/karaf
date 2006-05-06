@@ -25,8 +25,8 @@ import java.util.StringTokenizer;
 
 import java.io.InputStream;
 
-import org.apache.felix.declarativeservices.scr.KXml2SAXParser;
-import org.apache.felix.declarativeservices.scr.ParseException;
+import org.apache.felix.scr.parser.KXml2SAXParser;
+import org.apache.felix.scr.parser.ParseException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentException;

@@ -20,8 +20,8 @@ import java.util.Properties;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.felix.declarativeservices.scr.KXml2SAXHandler;
-import org.apache.felix.declarativeservices.scr.ParseException;
+import org.apache.felix.scr.parser.KXml2SAXHandler;
+import org.apache.felix.scr.parser.ParseException;
 
 /**
  * 
