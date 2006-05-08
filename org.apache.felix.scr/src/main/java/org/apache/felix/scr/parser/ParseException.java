@@ -14,7 +14,7 @@
  *   limitations under the License.
  *
  */
-package org.apache.felix.declarativeservices.scr;
+package org.apache.felix.scr.parser;
 
 public class ParseException extends Exception
 {
