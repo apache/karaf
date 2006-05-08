@@ -1,3 +1,0 @@
-Bundle-Author: Matteo Demuru <demuru@apache.org>,Francesco Furfari <furfari@apache.org>,Stefano "Kismet" Lenzi <lenzi@apache.org>
-Bundle-ClassPath: .
-
