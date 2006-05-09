@@ -259,7 +259,7 @@ class JarRevision extends BundleRevision
                 return;
             }
 
-            // Create revision directory, if it does not exist.
+            // Create revision directory.
             if (!BundleCache.getSecureAction().mkdir(getRevisionRootDir()))
             {
                 getLogger().log(
@@ -297,7 +297,6 @@ class JarRevision extends BundleRevision
                 BundleCache.copyStreamToFile(is, m_bundleFile);
             }
 
-            // This will always be revision zero.
             preprocessBundleJar();
         }
         finally

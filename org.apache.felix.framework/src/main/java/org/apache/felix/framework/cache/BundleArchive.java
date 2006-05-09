@@ -157,7 +157,40 @@ public class BundleArchive
         m_logger = logger;
         m_archiveRootDir = archiveRootDir;
 
-        // Add a revision for the content.
+        // Add a revision for each one that already exists in the file
+        // system. The file system might contain more than one revision
+        // if the bundle was updated in a previous session, but the
+        // framework was not refreshed; this might happen if the framework
+        // did not exit cleanly. We must create the existing revisions so
+        // that they can be properly purged.
+        int revisionCount = 0;
+        while (true)
+        {
+            // Count the number of existing revision directories, which
+            // will be in a directory named like:
+            //     "${REVISION_DIRECTORY)${refresh-count}.${revision-count}"
+            File revisionRootDir = new File(m_archiveRootDir,
+                REVISION_DIRECTORY + getRefreshCount() + "." + revisionCount);
+            if (!BundleCache.getSecureAction().fileExists(revisionRootDir))
+            {
+                break;
+            }
+
+            // Increment the revision count.
+            revisionCount++;
+        }
+
+        // If there are multiple revisions in the file system, then create
+        // an array that is big enough to hold all revisions minus one; the
+        // call below to revise() will add the most recent revision. NOTE: We
+        // do not actually need to add a real revision object for the older
+        // revisions since they will be purged immediately on framework startup.
+        if (revisionCount > 1)
+        {
+            m_revisions = new BundleRevision[revisionCount - 1];
+        }
+
+        // Add the revision object for the most recent revision.
         revise(getCurrentLocation(), null);
     }
 
@@ -619,7 +652,14 @@ public class BundleArchive
         File revisionDir = null;
         for (int i = 0; i < count - 1; i++)
         {
-            m_revisions[i].dispose();
+            // Dispose of the revision, but this might be null in certain
+            // circumstances, such as if this bundle archive was created
+            // for an existing bundle that was updated, but not refreshed
+            // due to a system crash; see the constructor code for details.
+            if (m_revisions[i] != null)
+            {
+                m_revisions[i].dispose();
+            }
             revisionDir = new File(m_archiveRootDir, REVISION_DIRECTORY + refreshCount + "." + i);
             if (BundleCache.getSecureAction().fileExists(revisionDir))
             {
@@ -797,7 +837,7 @@ public class BundleArchive
     private BundleRevision createRevisionFromLocation(String location, InputStream is)
         throws Exception
     {
-        // The revision directory is name using the refresh count and
+        // The revision directory is named using the refresh count and
         // the revision count. The revision count is obvious, but the
         // refresh count is less obvious. This is necessary due to how
         // native libraries are handled in Java; needless to say, every
