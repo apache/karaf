@@ -17,6 +17,7 @@
 package org.apache.felix.eventadmin.bridge.upnp;
 
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -122,13 +123,65 @@ public class UPnPEventToEventAdminBridge implements ServiceListener,
                 
                 if(null != eventAdmin)
                 {
+                    final Dictionary immutableEvents = new Dictionary(){
+
+                        public int size()
+                        {
+                            return events.size();
+                        }
+
+                        public boolean isEmpty()
+                        {
+                            return events.isEmpty();
+                        }
+
+                        public Enumeration keys()
+                        {
+                            return events.keys();
+                        }
+
+                        public Enumeration elements()
+                        {
+                            return events.elements();
+                        }
+
+                        public Object get(Object arg0)
+                        {
+                            return events.get(arg0);
+                        }
+
+                        public Object put(Object arg0, Object arg1)
+                        {
+                            throw new IllegalStateException("Event Properties may not be changed");
+                        }
+
+                        public Object remove(Object arg0)
+                        {
+                            throw new IllegalStateException("Event Properties may not be changed");
+                        }
+                        
+                        public boolean equals(Object arg0)
+                        {
+                            return events.equals(arg0);
+                        }
+                        
+                        public int hashCode()
+                        {
+                            return events.hashCode();
+                        }
+                        
+                        public String toString()
+                        {
+                            return events.toString();
+                        }
+                    };
+                    
                     eventAdmin.postEvent(new Event("org/osgi/service/upnp/UPnPEvent",
                         new Hashtable(){{
                             put("upnp.deviceId", deviceId);
                             put("upnp.serviceId", serviceId);
-                            put("upnp.events", events);
+                            put("upnp.events", immutableEvents);
                         }}));
-// TODO: See 113.3.2 
                     
                     m_context.ungetService(ref);
                 }
