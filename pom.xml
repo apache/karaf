@@ -37,8 +37,9 @@
     <module>org.apache.felix.upnp.sample.clock</module>
     <module>org.apache.felix.upnp.sample.binaryLight</module>
     <module>org.apache.felix.http.jetty</module>
-	<module>org.apache.felix.scr</module>
-	<module>org.apache.felix.eventadmin</module>
+    <module>org.apache.felix.scr</module>
+    <module>org.apache.felix.eventadmin</module>
+    <module>org.apache.felix.eventadmin.bridge.upnp</module>
   </modules>
 
   <repositories>
