@@ -37,6 +37,7 @@ import org.apache.felix.eventadmin.impl.security.SecureEventAdminFactory;
 import org.apache.felix.eventadmin.impl.security.TopicPermissions;
 import org.apache.felix.eventadmin.impl.tasks.AsyncDeliverTasks;
 import org.apache.felix.eventadmin.impl.tasks.BlockTask;
+import org.apache.felix.eventadmin.impl.tasks.DeliverTask;
 import org.apache.felix.eventadmin.impl.tasks.DeliverTasks;
 import org.apache.felix.eventadmin.impl.tasks.DispatchTask;
 import org.apache.felix.eventadmin.impl.tasks.SyncDeliverTasks;
@@ -242,10 +243,7 @@ public class Activator implements BundleActivator
      * delivered. An IllegalStateException will be thrown on new events starting with
      * the begin of this method. However, it might take some time until we settle
      * down which is somewhat cumbersome given that the spec asks for return in 
-     * a timely manner. Note that calling the stop method in one of the event 
-     * delivery threads will cause the handler to be timed-out. Furthermore, calling
-     * stop in one of the event delivery threads with time-out disabled will lead to
-     * a deadlock.
+     * a timely manner. 
      *
      * @param context The bundle context passed by the framework
      * 
@@ -257,8 +255,6 @@ public class Activator implements BundleActivator
         m_registration.unregister();
         
         m_admin.stop();
-        
-        m_pool.close();
         
         // This tasks will be unblocked once the queues are empty
         final BlockTask asyncShutdownBlock = new BlockTask();
@@ -273,20 +269,26 @@ public class Activator implements BundleActivator
   
         m_admin = null;
         
-        m_pool = null;
-        
         m_asyncQueue = null;
         
         m_syncQueue = null;
         
         m_registration = null;
         
-        // Wait till the queues are empty (i.e., all pending events are delivered)
-        // Warning: if this is one of the event delivery threads this will lead to 
-        // a deadlock in case that time-outs are disabled. 
+        final DispatchTask task = m_pool.getTask(Thread.currentThread(), null);
+        
+        if(null != task)
+        {
+            task.handover();
+        }
+        
         asyncShutdownBlock.block();
         
         syncShutdownBlock.block();
+        
+        m_pool.close();
+        
+        m_pool = null;
     }
     
     /*
