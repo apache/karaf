@@ -33,12 +33,10 @@
           <osgiManifest>
             <bundleName>ShellTUI</bundleName>
             <bundleDescription>A simple textual user interface for Felix' shell service.</bundleDescription>
-            <bundleActivator>${pom.artifactId}.Activator</bundleActivator>
             <bundleDocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</bundleDocUrl>
             <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>
             <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
             <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
-            <importPackage>org.osgi.framework, org.apache.felix.shell</importPackage>
             <importService>org.apache.felix.shell.ShellService</importService>
           </osgiManifest>
         </configuration>

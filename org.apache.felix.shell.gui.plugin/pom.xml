@@ -45,12 +45,10 @@
           <osgiManifest>
             <bundleName>ShellGUIPlugin</bundleName>
             <bundleDescription>A simple set of plugins for the ShellGUI bundle.</bundleDescription>
-            <bundleActivator>${pom.artifactId}.Activator</bundleActivator>
             <bundleDocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</bundleDocUrl>
             <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>
             <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
             <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
-            <importPackage>org.osgi.framework,javax.swing,javax.swing.event,javax.swing.table,javax.swing.tree,javax.swing.border,javax.swing.text,org.apache.felix.shell,org.apache.felix.shell.gui,org.osgi.service.obr</importPackage>
             <exportService>org.apache.felix.shell.gui.Plugin</exportService>
             <importService>org.apache.felix.shell.ShellService,org.apache.felix.bundlerepository.RepostioryAdmin</importService>
           </osgiManifest>

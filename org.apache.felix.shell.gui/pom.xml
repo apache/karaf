@@ -27,12 +27,10 @@
           <osgiManifest>
             <bundleName>ShellGUI</bundleName>
             <bundleDescription>A simple plugin-oriented GUI shell.</bundleDescription>
-            <bundleActivator>${pom.artifactId}.impl.Activator</bundleActivator>
             <bundleDocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</bundleDocUrl>
             <bundleUrl>http://oscar-osgi.sf.net/obr2/shellgui/${pom.artifactId}-${pom.version}.jar</bundleUrl>
             <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
             <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
-            <importPackage>org.osgi.framework,javax.swing,javax.swing.event</importPackage>
             <exportPackage>${pom.artifactId}; specification-version="1.0.0"</exportPackage>
           </osgiManifest>
         </configuration>
