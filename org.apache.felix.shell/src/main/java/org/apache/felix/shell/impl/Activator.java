@@ -120,6 +120,11 @@ public class Activator implements BundleActivator
             org.apache.felix.shell.Command.class.getName(),
             new RefreshCommandImpl(m_context), null);
 
+        // Register "resolve" command service.
+        context.registerService(
+            org.apache.felix.shell.Command.class.getName(),
+            new ResolveCommandImpl(m_context), null);
+
         // Register "services" command service.
         context.registerService(
             org.apache.felix.shell.Command.class.getName(),
