@@ -2737,10 +2737,55 @@ public class Felix
         return null;
     }
 
+    protected boolean resolveBundles(Bundle[] targets)
+    {
+        if (System.getSecurityManager() != null)
+        {
+// TODO: FW SECURITY - Perform proper security check.
+            AccessController.checkPermission(m_adminPerm);
+        }
+
+        // Acquire locks for all bundles to be resolved.
+        BundleImpl[] bundles = acquireBundleResolveLocks(targets);
+
+        try
+        {
+            boolean result = true;
+
+            // If there are targets, then resolve each one.
+            if (bundles != null)
+            {
+                for (int i = 0; i < bundles.length; i++)
+                {
+                    try
+                    {
+                        _resolveBundle(bundles[i]);
+                    }
+                    catch (BundleException ex)
+                    {
+                        result = false;
+                        m_logger.log(
+                            Logger.LOG_WARNING,
+                            "Unable to resolve bundle " + bundles[i].getBundleId(),
+                            ex);
+                    }
+                }
+            }
+
+            return result;
+        }
+        finally
+        {
+            // Always release all bundle locks.
+            releaseBundleLocks(bundles);
+        }
+    }
+
     protected void refreshPackages(Bundle[] targets)
     {
         if (System.getSecurityManager() != null)
         {
+// TODO: FW SECURITY - Perform proper security check.
             AccessController.checkPermission(m_adminPerm);
         }
 
@@ -3830,6 +3875,94 @@ public class Felix
         }
     }
 
+    protected BundleImpl[] acquireBundleResolveLocks(Bundle[] targets)
+    {
+        // Hold bundles to be locked.
+        BundleImpl[] bundles = null;
+        // Convert existing target bundle array to bundle impl array.
+        if (targets != null)
+        {
+            bundles = new BundleImpl[targets.length];
+            for (int i = 0; i < targets.length; i++)
+            {
+                bundles[i] = (BundleImpl) targets[i];
+            }
+        }
+
+        synchronized (m_bundleLock)
+        {
+            boolean success = false;
+            while (!success)
+            {
+                // If targets is null, then resolve all unresolved bundles.
+                if (targets == null)
+                {
+                    List list = new ArrayList();
+
+                    // Add all unresolved bundles to the list.
+                    synchronized (m_installedBundleLock_Priority2)
+                    {
+                        Iterator iter = m_installedBundleMap.values().iterator();
+                        while (iter.hasNext())
+                        {
+                            BundleImpl bundle = (BundleImpl) iter.next();
+                            if (bundle.getInfo().getState() == Bundle.INSTALLED)
+                            {
+                                list.add(bundle);
+                            }
+                        }
+                    }
+
+                    // Create an array.
+                    if (list.size() > 0)
+                    {
+                        bundles = (BundleImpl[]) list.toArray(new BundleImpl[list.size()]);
+                    }
+                }
+                
+                // Check if all unresolved bundles can be locked.
+                boolean lockable = true;
+                if (bundles != null)
+                {
+                    for (int i = 0; lockable && (i < bundles.length); i++)
+                    {
+                        lockable = bundles[i].getInfo().isLockable();
+                    }
+        
+                    // If we can lock all bundles, then lock them.
+                    if (lockable)
+                    {
+                        for (int i = 0; i < bundles.length; i++)
+                        {
+                            bundles[i].getInfo().lock();
+                        }
+                        success = true;
+                    }
+                    // Otherwise, wait and try again.
+                    else
+                    {
+                        try
+                        {
+                            m_bundleLock.wait();
+                        }
+                        catch (InterruptedException ex)
+                        {
+                            // Ignore and just keep waiting.
+                        }
+                    }
+                }
+                else
+                {
+                    // If there were no bundles to lock, then we can just
+                    // exit the lock loop.
+                    success = true;
+                }
+            }
+        }
+
+        return bundles;
+    }
+
     protected BundleImpl[] acquireBundleRefreshLocks(Bundle[] targets)
     {
         // Hold bundles to be locked.
@@ -3898,7 +4031,7 @@ public class Felix
                     bundles = (BundleImpl[]) map.values().toArray(new BundleImpl[map.size()]);
                 }
                 
-                // Check if all corresponding bundles can be locked
+                // Check if all corresponding bundles can be locked.
                 boolean lockable = true;
                 if (bundles != null)
                 {
