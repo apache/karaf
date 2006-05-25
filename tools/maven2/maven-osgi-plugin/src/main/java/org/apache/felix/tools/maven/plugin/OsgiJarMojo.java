@@ -335,8 +335,7 @@ public class OsgiJarMojo extends AbstractMojo {
 		test.removeAll(declaredImports);
 		for (Iterator m = test.iterator(); m.hasNext();) {
 			Object o = m.next();
-			getLog().error("[OSGi] MISSING IMPORT: " + o);
-			throw new MojoExecutionException("Missing Import " + o);
+			getLog().warn("[OSGi] MISSING IMPORT: " + o);
 		}
 
 		test = new HashSet(declaredImports);
