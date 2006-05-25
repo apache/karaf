@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ import org.codehaus.plexus.util.FileUtils;
  * @description build an OSGi bundle jar
  */
 public class OsgiJarMojo extends AbstractMojo {
+    public static final String OSGI_REFERENCES = "osgi.references";
+
 	private static final String[]		EMPTY_STRING_ARRAY		= {};
 
 	int									bundleManifestVersion	= 1;
@@ -191,7 +193,16 @@ public class OsgiJarMojo extends AbstractMojo {
 			analyzeJar(jar, contained, referred, uses);
 		}
 
-		referred.removeAll(contained);
+        referred.removeAll(contained);
+
+        // Check if the osgi.references property is set and display result
+        // if necessary.
+		checkReferencesProperty(uses);
+
+        // Dump referenced package information if debug logging is enabled.
+		if (getLog().isDebugEnabled()) {
+		    printReferencedPackages(uses);
+		}
 
 		Map exports = parseHeader(osgiManifest.getExportPackage());
 		Map imports = parseHeader(osgiManifest.getImportPackage());
@@ -207,6 +218,10 @@ public class OsgiJarMojo extends AbstractMojo {
 			verifyDeclaredExports(exports, contained);
 			createExportHeader(exports, uses);
 		}
+
+        // Remove any ignored packages from the referred set.
+        Set ignorePackage = parseIgnorePackage();
+        referred.removeAll(ignorePackage);
 
 		// If the POM file contains an import declaration,
 		// we verify its validity. Otherwise, we generate the
@@ -246,11 +261,11 @@ public class OsgiJarMojo extends AbstractMojo {
 
 	private void createBundleClasspathHeader(List bundleClassPath) {
 		StringBuffer sb = new StringBuffer();
-		String del = ".,";
-		for (Iterator i = bundleClassPath.iterator(); i.hasNext();) {
-			sb.append(del);
+		for (Iterator i = bundleClassPath.iterator(); i.hasNext(); ) {
 			sb.append(i.next());
-			del = ",";
+            if (i.hasNext()) {
+                sb.append(",");
+            }
 		}
 		if (sb.length() > 0)
 			archiveConfig.addManifestEntry("Bundle-Classpath", sb.toString());
@@ -263,7 +278,6 @@ public class OsgiJarMojo extends AbstractMojo {
 	 * 
 	 * @param contained Set of contained packages
 	 * @param exports Map with the export clauses from the POM
-	 * @param uses Map with use clauses
 	 * @throws MojoExecutionException
 	 */
 	void verifyDeclaredExports(Map exports, Set contained)
@@ -335,7 +349,17 @@ public class OsgiJarMojo extends AbstractMojo {
 		test.removeAll(declaredImports);
 		for (Iterator m = test.iterator(); m.hasNext();) {
 			Object o = m.next();
-			getLog().warn("[OSGi] MISSING IMPORT: " + o);
+			// For backwards compatibility with existing builds, only
+            // issue a warning for missing imports. Other the other hand,
+            // if packages are being ignored, then this is a new build
+            // so be more strict and throw an error.
+            if (osgiManifest.getIgnorePackage() == null) {
+                getLog().warn("[OSGi] MISSING IMPORT: " + o);
+            }
+            else {
+                getLog().error("[OSGi] MISSING IMPORT: " + o);
+                throw new MojoExecutionException("Missing Import " + o);
+            }
 		}
 
 		test = new HashSet(declaredImports);
@@ -430,7 +454,6 @@ public class OsgiJarMojo extends AbstractMojo {
 	 * changed TODO
 	 * 
 	 * @param mainJar
-	 * @param sb
 	 * @return
 	 */
 	List getBundleClassPath(Jar mainJar) {
@@ -484,7 +507,6 @@ public class OsgiJarMojo extends AbstractMojo {
 	 * @param exports map { name => Map { attribute|directive => value } }
 	 * @return the clauses
 	 */
-
 	String printClauses(Map exports) {
 		StringBuffer sb = new StringBuffer();
 		String del = "";
@@ -559,7 +581,7 @@ public class OsgiJarMojo extends AbstractMojo {
 		if (osgiManifest != null && osgiManifest.getEntries().size() > 0) {
 			Map entries = osgiManifest.getEntries();
 
-			getLog().info(
+			getLog().debug(
 					"Bundle manifest will be modified with the following entries: "
 							+ entries.toString());
 			archiveConfig.addManifestEntries(entries);
@@ -642,4 +664,73 @@ public class OsgiJarMojo extends AbstractMojo {
 
 		return (String[]) excludeList.toArray(EMPTY_STRING_ARRAY);
 	}
+
+    private Set parseIgnorePackage() {
+        HashSet result = new HashSet();
+        String pkgs = osgiManifest.getIgnorePackage();
+        if (pkgs != null) {
+            StringTokenizer st = new StringTokenizer(pkgs, ",", false);
+            while (st.hasMoreTokens()) {
+                result.add(st.nextToken().trim());
+            }
+        }
+        return result;
+    }
+
+    private void checkReferencesProperty(Map uses) {
+        String interestedIn = System.getProperty(OSGI_REFERENCES);
+        if (interestedIn == null) {
+            return;
+        }
+        StringBuffer buf = new StringBuffer();
+        Iterator it1 = uses.entrySet().iterator();
+        while (it1.hasNext()) {
+            Map.Entry entry = (Map.Entry) it1.next();
+            String pack = (String) entry.getKey();
+            Set references = (Set) entry.getValue();
+            Iterator it2 = references.iterator();
+            while (it2.hasNext()) {
+                String packReferred = (String) it2.next();
+                if (interestedIn.equals(packReferred)) {
+                    buf.append("          |-- ");
+                    buf.append(pack);
+                    buf.append('\n');
+                    break;
+                }
+            }
+        }
+        if (buf.length() == 0) {
+            getLog().info("Noone uses " + interestedIn);
+        }
+        else {
+            int changePos = buf.lastIndexOf("|");
+            buf.setCharAt(changePos, '+');
+            getLog().info(interestedIn + " used by;\n" + buf);
+        }
+    }
+
+    private void printReferencedPackages(Map uses) {
+        StringBuffer buf = new StringBuffer();
+        Iterator it1 = uses.entrySet().iterator();
+        while (it1.hasNext()) {
+            Map.Entry entry = (Map.Entry) it1.next();
+            String pack = (String) entry.getKey();
+            buf.append(pack);
+            buf.append('\n');
+            Set references = (Set) entry.getValue();
+            Iterator it2 = references.iterator();
+            while (it2.hasNext()) {
+                String packReferred = (String) it2.next();
+                buf.append("          |-- ");
+                buf.append(packReferred);
+                buf.append('\n');
+            }
+            int changePos = buf.lastIndexOf("|");
+            if (changePos >= 0) {
+                buf.setCharAt(changePos, '+');
+            }
+            buf.append('\n');
+        }
+        getLog().debug("Referenced package list: \n" + buf.toString());
+    }
 }
