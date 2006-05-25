@@ -47,6 +47,7 @@
             <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>
             <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
             <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
+            <importPackage>org.osgi.framework,javax.servlet;javax.servlet.http;version=2.3.0</importPackage>
             <dynamicImportPackage>javax.net.ssl</dynamicImportPackage>
             <exportPackage>org.osgi.service.http; version=1.1,javax.servlet;javax.servlet.http;version=2.3.0</exportPackage>
             <exportService>org.osgi.service.http.HttpService</exportService>
