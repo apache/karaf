@@ -14,7 +14,6 @@
  *   limitations under the License.
  *
  */
-
 package org.apache.felix.tools.maven.plugin;
 
 import java.util.Properties;
@@ -100,147 +99,37 @@ public class OsgiManifest
 
     public Properties getEntries()
     {
-        if (getBundleCategory() != null)
-        {
-            entries.put(BUNDLE_CATEGORY, getBundleCategory());
-        }
-
         /*
-         * if (getBundleClassPath() != null) { entries.put(BUNDLE_CLASSPATH,
-         * getBundleClassPath()); }
+         * setEntryValue( BUNDLE_CLASSPATH, getBundleClassPath(), null);
          */
-
-        if (getBundleCopyright() != null)
-        {
-            entries.put(BUNDLE_COPYRIGHT, getBundleCopyright());
-        }
-
-        if (getBundleDescription() != null)
-        {
-            entries.put(BUNDLE_DESCRIPTION, getBundleDescription());
-        }
-
-        if (getBundleName() != null)
-        {
-            entries.put(BUNDLE_NAME, getBundleName());
-        }
-
-        if (getBundleNativeCode() != null)
-        {
-            entries.put(BUNDLE_NATIVECODE, getBundleNativeCode());
-        }
-
-        if (getExportPackage() != null)
-        {
-            entries.put(EXPORT_PACKAGE, getExportPackage());
-        }
-
-        if (getExportService() != null)
-        {
-            entries.put(EXPORT_SERVICE, getExportService());
-        }
-
-        if (getImportPackage() != null)
-        {
-            entries.put(IMPORT_PACKAGE, getImportPackage());
-        }
-
-        if (getDynamicImportPackage() != null)
-        {
-            entries.put(DYNAMICIMPORT_PACKAGE, getDynamicImportPackage());
-        }
-
-        if (getImportService() != null)
-        {
-            entries.put(IMPORT_SERVICE, getImportService());
-        }
-
-        if (getBundleVendor() != null)
-        {
-            entries.put(BUNDLE_VENDOR, getBundleVendor());
-        }
-
-        if (getBundleVersion() != null)
-        {
-            entries.put(BUNDLE_VERSION, getBundleVersion());
-        }
-
-        if (getBundleDocUrl() != null)
-        {
-            entries.put(BUNDLE_DOCURL, getBundleDocUrl());
-        }
-
-        if (getBundleContactAddress() != null)
-        {
-            entries.put(BUNDLE_CONTACTADDRESS, getBundleContactAddress());
-        }
-
-        if (getBundleActivator() != null)
-        {
-            entries.put(BUNDLE_ACTIVATOR, getBundleActivator());
-        }
-
-        if (getBundleUpdateLocation() != null)
-        {
-            entries.put(BUNDLE_UPDATELOCATION, getBundleUpdateLocation());
-        }
-
-        if (getBundleRequiredExecutionEnvironment() != null)
-        {
-            entries.put(BUNDLE_REQUIREDEXECUTIONENVIRONMENT,
-                getBundleRequiredExecutionEnvironment());
-        }
-
-        if (getBundleSymbolicName() != null)
-        {
-            entries.put(BUNDLE_SYMBOLICNAME, getBundleSymbolicName());
-        }
-
-        if (getBundleLocalization() != null)
-        {
-            entries.put(BUNDLE_LOCALIZATION, getBundleLocalization());
-        }
-
-        if (getRequireBundle() != null)
-        {
-            entries.put(REQUIRE_BUNDLE, getRequireBundle());
-        }
-
-        if (getFragmentHost() != null)
-        {
-            entries.put(FRAGMENT_HOST, getFragmentHost());
-        }
-
-        if (getBundleManifestVersion() != null)
-        {
-            entries.put(BUNDLE_MANIFESTVERSION, getBundleManifestVersion());
-        }
-
-        if (getBundleUrl() != null)
-        {
-            entries.put(BUNDLE_URL, getBundleUrl());
-        }
-
-        if (getBundleSource() != null)
-        {
-            entries.put(BUNDLE_SOURCE, getBundleSource());
-        }
-
-        if (getBundleDate() != null)
-        {
-            entries.put(BUNDLE_DATE, getBundleDate());
-        }
-
-        if (getMetadataLocation() != null)
-        {
-            entries.put(METADATA_LOCATION, getMetadataLocation());
-        }
-
-        if (getServiceComponent() != null)
-        {
-            entries.put(SERVICE_COMPONENT, getServiceComponent());
-        }
-
+        setEntryValue(BUNDLE_CATEGORY, getBundleCategory(), null);
+        setEntryValue(BUNDLE_COPYRIGHT, getBundleCopyright(), null);
+        setEntryValue(BUNDLE_DESCRIPTION, getBundleDescription(), null);
+        setEntryValue(BUNDLE_NAME, getBundleName(), null);
+        setEntryValue(BUNDLE_NATIVECODE, getBundleNativeCode(), null);
+        setEntryValue(EXPORT_PACKAGE, getExportPackage(), null);
+        setEntryValue(EXPORT_SERVICE, getExportService(), null);
+        setEntryValue(IMPORT_PACKAGE, getImportPackage(), null);
+        setEntryValue(DYNAMICIMPORT_PACKAGE, getDynamicImportPackage(), null);
+        setEntryValue(IMPORT_SERVICE, getImportService(), null);
+        setEntryValue(BUNDLE_VENDOR, getBundleVendor(), null);
+        setEntryValue(BUNDLE_VERSION, getBundleVersion(), null);
+        setEntryValue(BUNDLE_DOCURL, getBundleDocUrl(), null);
+        setEntryValue(BUNDLE_CONTACTADDRESS, getBundleContactAddress(), null);
+        setEntryValue(BUNDLE_ACTIVATOR, getBundleActivator(), null);
+        setEntryValue(BUNDLE_UPDATELOCATION, getBundleUpdateLocation(), null);
+        setEntryValue(BUNDLE_REQUIREDEXECUTIONENVIRONMENT,
+            getBundleRequiredExecutionEnvironment(), null);
+        setEntryValue(BUNDLE_SYMBOLICNAME, getBundleSymbolicName(), null);
+        setEntryValue(BUNDLE_LOCALIZATION, getBundleLocalization(), null);
+        setEntryValue(REQUIRE_BUNDLE, getRequireBundle(), null);
+        setEntryValue(FRAGMENT_HOST, getFragmentHost(), null);
+        setEntryValue(BUNDLE_MANIFESTVERSION, getBundleManifestVersion(), null);
+        setEntryValue(BUNDLE_URL, getBundleUrl(), null);
+        setEntryValue(BUNDLE_SOURCE, getBundleSource(), null);
+        setEntryValue(BUNDLE_DATE, getBundleDate(), null);
+        setEntryValue(METADATA_LOCATION, getMetadataLocation(), null);
+        setEntryValue(SERVICE_COMPONENT, getServiceComponent(), null);
         return entries;
     }
 
@@ -534,8 +423,9 @@ public class OsgiManifest
 
     /**
      * Removes all whitespace in the entry.
-     *
-     * @param entry The entry to be cleaned up.
+     * 
+     * @param entry
+     *            The entry to be cleaned up.
      * @return A copy of the entry string without any whitespace.
      */
     private String trim(String entry)
@@ -550,5 +440,17 @@ public class OsgiManifest
             }
         }
         return buf.toString();
+    }
+
+    private void setEntryValue(String key, String value, String defaultValue)
+    {
+        if (value != null)
+        {
+            entries.put(key, value);
+        }
+        else if (defaultValue != null)
+        {
+            entries.put(key, defaultValue);
+        }
     }
 }
