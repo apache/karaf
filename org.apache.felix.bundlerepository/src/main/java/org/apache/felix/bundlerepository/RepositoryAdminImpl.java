@@ -171,10 +171,20 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         for (int i = 0; i < m_urlList.size(); i++)
         {
             URL url = (URL) m_urlList.get(i);
-            Repository repo = new RepositoryImpl(url);
-            if (repo != null)
+            try
             {
-                m_repoMap.put(url, repo);
+                Repository repo = new RepositoryImpl(url);
+                if (repo != null)
+                {
+                    m_repoMap.put(url, repo);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.err.println(
+                    "RepositoryAdminImpl: Exception creating repository - " + ex);
+                System.err.println(
+                    "RepositoryAdminImpl: Ignoring repository " + url);
             }
         }
     }

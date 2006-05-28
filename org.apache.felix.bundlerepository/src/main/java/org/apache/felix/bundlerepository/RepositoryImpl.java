@@ -38,7 +38,7 @@ public class RepositoryImpl implements Repository
     // Reusable comparator for sorting resources by name.
     private ResourceComparator m_nameComparator = new ResourceComparator();
 
-    public RepositoryImpl(URL url)
+    public RepositoryImpl(URL url) throws Exception
     {
         m_url = url;
         parseRepositoryFile(m_hopCount);
@@ -59,7 +59,6 @@ public class RepositoryImpl implements Repository
         return m_resources;
     }
 
-    // TODO: OBR - Wrong parameter type from metadata parser.
     public void addResource(Resource resource)
     {
         // Set resource's repository.
@@ -118,7 +117,7 @@ public class RepositoryImpl implements Repository
         return null;
     }
 
-    private void parseRepositoryFile(int hopCount)
+    private void parseRepositoryFile(int hopCount) throws Exception
     {
 // TODO: OBR - Implement hop count.
         InputStream is = null;
@@ -146,56 +145,34 @@ public class RepositoryImpl implements Repository
 
             // Create the parser Kxml
             XmlCommonHandler handler = new XmlCommonHandler();
-            try
-            {
-                Object factory = new Object() {
-                    public RepositoryImpl newInstance()
-                    {
-                        return RepositoryImpl.this;
-                    }
-                };
+            Object factory = new Object() {
+                public RepositoryImpl newInstance()
+                {
+                    return RepositoryImpl.this;
+                }
+            };
 
-                // Get default setter method for Repository.
-                Method repoSetter = RepositoryImpl.class.getDeclaredMethod(
-                    "put", new Class[] { Object.class, Object.class });
+            // Get default setter method for Repository.
+            Method repoSetter = RepositoryImpl.class.getDeclaredMethod(
+                "put", new Class[] { Object.class, Object.class });
 
-                // Get default setter method for Resource.
-                Method resSetter = ResourceImpl.class.getDeclaredMethod(
-                    "put", new Class[] { Object.class, Object.class });
+            // Get default setter method for Resource.
+            Method resSetter = ResourceImpl.class.getDeclaredMethod(
+                "put", new Class[] { Object.class, Object.class });
 
-                // Map XML tags to types.
-                handler.addType("repository", factory, Repository.class, repoSetter);
-                handler.addType("resource", ResourceImpl.class, Resource.class, resSetter);
-                handler.addType("category", CategoryImpl.class, null, null);
-                handler.addType("require", RequirementImpl.class, Requirement.class, null);
-                handler.addType("capability", CapabilityImpl.class, Capability.class, null);
-                handler.addType("p", PropertyImpl.class, null, null);
-                handler.setDefaultType(String.class, null, null);
-            }
-            catch (Exception ex)
-            {
-                System.err.println("RepositoryAdminImpl: " + ex);
-            }
+            // Map XML tags to types.
+            handler.addType("repository", factory, Repository.class, repoSetter);
+            handler.addType("resource", ResourceImpl.class, Resource.class, resSetter);
+            handler.addType("category", CategoryImpl.class, null, null);
+            handler.addType("require", RequirementImpl.class, Requirement.class, null);
+            handler.addType("capability", CapabilityImpl.class, Capability.class, null);
+            handler.addType("p", PropertyImpl.class, null, null);
+            handler.setDefaultType(String.class, null, null);
 
             br = new BufferedReader(new InputStreamReader(is));
             KXml2SAXParser parser;
-            try
-            {
-                parser = new KXml2SAXParser(br);
-                parser.parseXML(handler);
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
-        }
-        catch (MalformedURLException ex)
-        {
-            System.err.println("RepositoryAdminImpl: " + ex);
-        }
-        catch (IOException ex)
-        {
-            System.err.println("RepositoryAdminImpl: " + ex);
+            parser = new KXml2SAXParser(br);
+            parser.parseXML(handler);
         }
         finally
         {
