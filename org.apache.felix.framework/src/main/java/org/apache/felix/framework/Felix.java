@@ -3396,9 +3396,9 @@ public class Felix
             new StringBuffer(
                 props.getProperty(
                     FelixConstants.FELIX_VERSION_PROPERTY, "unknown"));
-        if (sb.indexOf("-") >= 0)
+        if (sb.toString().indexOf("-") >= 0)
         {
-            sb.setCharAt(sb.indexOf("-"), '.');
+            sb.setCharAt(sb.toString().indexOf("-"), '.');
         }
         return sb.toString();
     }
