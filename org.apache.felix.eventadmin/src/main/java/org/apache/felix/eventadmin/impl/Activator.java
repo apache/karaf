@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.apache.felix.eventadmin.impl.security.SecureEventAdminFactory;
 import org.apache.felix.eventadmin.impl.security.TopicPermissions;
 import org.apache.felix.eventadmin.impl.tasks.AsyncDeliverTasks;
 import org.apache.felix.eventadmin.impl.tasks.BlockTask;
-import org.apache.felix.eventadmin.impl.tasks.DeliverTask;
 import org.apache.felix.eventadmin.impl.tasks.DeliverTasks;
 import org.apache.felix.eventadmin.impl.tasks.DispatchTask;
 import org.apache.felix.eventadmin.impl.tasks.SyncDeliverTasks;

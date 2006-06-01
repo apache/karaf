@@ -24,7 +24,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * Service interface.
  * 
- * @author Marcel Offermans
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public interface Service {
     /**

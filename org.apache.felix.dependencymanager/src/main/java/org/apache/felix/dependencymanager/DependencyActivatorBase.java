@@ -28,7 +28,7 @@ import org.osgi.framework.BundleContext;
  * the bundle context and the dependency manager. The dependency manager can be used
  * to define all the dependencies.
  * 
- * @author Marcel Offermans
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public abstract class DependencyActivatorBase implements BundleActivator {
     private BundleContext m_context;

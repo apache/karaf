@@ -25,7 +25,7 @@ import org.osgi.framework.ServiceRegistration;
  * A wrapper around a service registration that blocks until the
  * service registration is available.
  * 
- * @author Marcel Offermans
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ServiceRegistrationImpl implements ServiceRegistration {
     private ServiceRegistration m_registration;

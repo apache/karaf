@@ -31,7 +31,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * Service implementation.
  * 
- * @author Marcel Offermans
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ServiceImpl implements Service {
     private static final ServiceRegistration NULL_REGISTRATION;

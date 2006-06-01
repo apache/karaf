@@ -34,7 +34,7 @@ import org.osgi.framework.ServiceReference;
  * integrate only the parts I want as soon as this code is finished. Perhaps
  * it would be better to borrow the Knopflerfish implementation here.
  * 
- * @author Marcel Offermans
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ServiceTracker implements ServiceTrackerCustomizer
 {

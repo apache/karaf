@@ -22,7 +22,7 @@ package org.apache.felix.dependencymanager;
  * when the service is starting, started, stopping and stopped. Each callback
  * includes a reference to the service in question.
  * 
- * @author Marcel Offermans
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public interface ServiceStateListener {
     /**

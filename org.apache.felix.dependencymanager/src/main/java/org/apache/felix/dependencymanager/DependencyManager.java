@@ -25,7 +25,7 @@ import org.osgi.framework.BundleContext;
 /**
  * The dependency manager. Manages all services and their dependencies.
  * 
- * @author Marcel Offermans
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class DependencyManager {
     private BundleContext m_context;

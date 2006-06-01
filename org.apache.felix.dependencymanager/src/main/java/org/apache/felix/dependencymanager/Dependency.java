@@ -28,7 +28,7 @@ package org.apache.felix.dependencymanager;
  * methods. State changes of the dependency itself may only be made as long as
  * the dependency is not 'active', meaning it is associated with a running service.
  * 
- * @author Marcel Offermans
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public interface Dependency {
     /**

@@ -23,7 +23,7 @@ import org.osgi.framework.ServiceReference;
  * extra callback "addedservice" that is invoked after the service has been added
  * to the tracker (and therefore is accessible through the tracker API)
  * 
- * @author Marcel Offermans
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public interface ServiceTrackerCustomizer {
     public Object addingService(ServiceReference ref);

@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
  * Default null object implementation. Uses a dynamic proxy. Null objects are used
  * as placeholders for services that are not available.
  * 
- * @author Marcel Offermans
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class DefaultNullObject implements InvocationHandler {
     private static final Boolean DEFAULT_BOOLEAN = Boolean.FALSE;

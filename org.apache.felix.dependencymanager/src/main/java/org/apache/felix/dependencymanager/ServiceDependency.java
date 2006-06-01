@@ -28,7 +28,7 @@ import org.osgi.framework.ServiceReference;
 /**
  * Service dependency that can track an OSGi service.
  * 
- * @author Marcel Offermans
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
     private boolean m_isRequired;
