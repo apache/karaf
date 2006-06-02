@@ -522,7 +522,7 @@ public class MyCtrlPoint extends ControlPoint
 				}
 			} else {/* obj==null (interested in all devices) */
 				try {
-					String newfilter = "(!(" + EXPORT_FLTR+ ")";
+					String newfilter = "(!" + EXPORT_FLTR+ ")";
 					devicesRefs = context.getServiceReferences(UPnPDevice.class.getName(), newfilter);
 				} catch (InvalidSyntaxException e) {
 					e.printStackTrace();
