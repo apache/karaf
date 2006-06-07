@@ -401,7 +401,7 @@ public class OsgiJarMojo extends AbstractMojo {
 			del = qt.getSeparator();
 			while (del == ';') {
 				String adname = qt.nextToken();
-				if (qt.getSeparator() != '=') {
+				if ((del = qt.getSeparator()) != '=') {
 					if (hadAttribute)
 						throw new MojoExecutionException(
 								"Header contains name field after attribute or directive: "
