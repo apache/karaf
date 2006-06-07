@@ -37,6 +37,7 @@
         <configuration>
           <osgiManifest>
             <bundleName>BundleRepository</bundleName>
+            <bundleActivator>auto-detect</bundleActivator>
             <bundleDescription>Bundle repository service.</bundleDescription>
             <bundleDocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</bundleDocUrl>
             <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>

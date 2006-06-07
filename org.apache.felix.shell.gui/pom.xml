@@ -27,6 +27,7 @@
           <osgiManifest>
             <bundleName>ShellGUI</bundleName>
             <bundleDescription>A simple plugin-oriented GUI shell.</bundleDescription>
+            <bundleActivator>auto-detect</bundleActivator>
             <bundleDocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</bundleDocUrl>
             <bundleUrl>http://oscar-osgi.sf.net/obr2/shellgui/${pom.artifactId}-${pom.version}.jar</bundleUrl>
             <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>

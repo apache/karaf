@@ -33,6 +33,7 @@
           <osgiManifest>
             <bundleName>ShellTUI</bundleName>
             <bundleDescription>A simple textual user interface for Felix' shell service.</bundleDescription>
+            <bundleActivator>auto-detect</bundleActivator>
             <bundleDocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</bundleDocUrl>
             <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>
             <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>

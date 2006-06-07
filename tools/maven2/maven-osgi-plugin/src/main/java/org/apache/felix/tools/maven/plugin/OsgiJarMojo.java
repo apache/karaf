@@ -40,6 +40,7 @@ import org.codehaus.plexus.util.FileUtils;
  */
 public class OsgiJarMojo extends AbstractMojo {
     public static final String OSGI_REFERENCES = "osgi.references";
+    public static final String AUTO_DETECT = "auto-detect";
 
 	private static final String[]		EMPTY_STRING_ARRAY		= {};
 
@@ -243,18 +244,20 @@ public class OsgiJarMojo extends AbstractMojo {
 
 	private void verifyBundleActivator(Jar mainJar) {
 		String ba = osgiManifest.getBundleActivator();
-		if (ba == null || ba.trim().length() == 0) {
+		if ((ba != null) && ba.equals(AUTO_DETECT)) {
 			switch ( mainJar.activators.size() ) {
-				case 0: break;
-				case 1: archiveConfig.addManifestEntry("Bundle-Activator", mainJar.activators.get(0));
-				break;
+				case 0:
+                    break;
+				case 1:
+                    archiveConfig.addManifestEntry("Bundle-Activator", mainJar.activators.get(0));
+				    break;
 				default:
-					getLog().info("[OSGi] No Bundle-Activator specified and multiple found" );
-				break;
+					getLog().info("[OSGi] Multiple activators found, unable to auto-detect." );
+				    break;
 			}
 		}
-		else {
-			if( ! mainJar.activators.contains(ba))
+		else if (ba != null) {
+			if (!mainJar.activators.contains(ba))
 				getLog().warn("[OSGi] UNABLE TO VERIFY BUNDLE ACTIVATOR: " + ba);
 		}
 	}
