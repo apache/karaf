@@ -1,0 +1,33 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>ipojo-bundle</packaging>
+  <groupId>${groupId}</groupId>
+  <artifactId>${artifactId}</artifactId>
+  <version>${version}</version>
+  <name>$YOUR_PROJECT_NAME</name>
+  
+  <pluginRepositories>
+    <pluginRepository>
+      <id>iPOJO.repository</id>
+      <name>iPOJO Repository</name>
+      <url>http://www-adele.imag.fr/~escoffie/repository</url>
+    </pluginRepository>
+  </pluginRepositories>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix.ipojo</groupId>
+        <artifactId>org.apache.felix.ipojo.plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <osgiManifest>
+            <bundleName>${pom.name}</bundleName>
+            <bundleDescription>$YOUR_BUNDLE_DESCRIPTION</bundleDescription>
+            <iPOJOMetadata>metadata.xml</iPOJOMetadata>
+          </osgiManifest>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -1,0 +1,43 @@
+<project>
+  <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>0.8.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>ipojo-bundle</packaging>
+  <name>Apache Felix iPOJO Arch Command</name>
+  <version>0.6.0-SNAPSHOT</version>
+  <artifactId>org.apache.felix.ipojo.arch</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.ipojo</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.shell</artifactId>
+      <version>0.8.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>${pom.groupId}</groupId>
+        <artifactId>org.apache.felix.ipojo.plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <osgiManifest>
+            <bundleName>iPOJO Arch Command</bundleName>
+            <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
+            <bundleDescription>Architecture Shell Command (arch)</bundleDescription>
+            <iPOJOMetadata>metadata.xml</iPOJOMetadata>
+          </osgiManifest>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
