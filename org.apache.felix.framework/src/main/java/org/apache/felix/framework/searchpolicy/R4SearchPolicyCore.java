@@ -383,7 +383,9 @@ public class R4SearchPolicyCore implements ModuleListener
             }
         }
 
-        // Look in the module's imports.
+        // Look in the module's imports. Note that the search may
+        // be aborted if this method throws an exception, otherwise
+        // it continues if a null is returned.
         Object result = searchImports(module, name, isClass);
 
         // If not found, try the module's own class path.
