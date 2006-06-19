@@ -53,6 +53,12 @@
       <version>${pom.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.bundlerepository</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
+
   </dependencies>
   <build>
     <plugins>
@@ -67,6 +73,7 @@
             <exclude>org.apache.felix:org.apache.felix.main</exclude>
             <exclude>org.apache.felix:org.apache.felix.shell</exclude>
             <exclude>org.apache.felix:org.apache.felix.shell.tui</exclude>
+            <exclude>org.apache.felix:org.apache.felix.bundlerepository</exclude>
           </excludes>
           <application>
             <name>felix</name>
@@ -110,6 +117,13 @@
               <source>org.apache.felix:org.apache.felix.shell.tui</source>
               <destinationPath>
                 bundle/org.apache.felix.shell.tui-${pom.version}.jar
+              </destinationPath>
+            </packagedFile>
+            <packagedFile>
+              <dependency>true</dependency>
+              <source>org.apache.felix:org.apache.felix.bundlerepository</source>
+              <destinationPath>
+                bundle/org.apache.felix.bundlerepository-${pom.version}.jar
               </destinationPath>
             </packagedFile>
           </packagedFiles>
