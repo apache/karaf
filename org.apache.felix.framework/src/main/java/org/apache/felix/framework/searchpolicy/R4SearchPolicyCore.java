@@ -590,7 +590,7 @@ public class R4SearchPolicyCore implements ModuleListener
                         Util.getExportPackage(candidate, impMatch.getName()));
                     newWires[newWires.length - 1] = wire;
                     setWires(module, newWires);
-m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + newWires[newWires.length - 1]);
+m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 }
             }
         }
@@ -1216,7 +1216,7 @@ m_logger.log(
                 (wires != null) && (wireIdx < wires.length);
                 wireIdx++)
             {
-m_logger.log(Logger.LOG_DEBUG, "WIRE: [" + module + "] " + wires[wireIdx]);
+m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 // First remove the wire module from "available" package map.
                 IModule[] modules = (IModule[]) m_availPkgMap.get(wires[wireIdx].getExport().getName());
                 modules = removeModuleFromArray(modules, wires[wireIdx].getExportingModule());
