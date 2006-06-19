@@ -353,8 +353,8 @@ public class OsgiJarMojo extends AbstractMojo {
 		for (Iterator m = test.iterator(); m.hasNext();) {
 			Object o = m.next();
 			// For backwards compatibility with existing builds, only
-            // issue a warning for missing imports. Other the other hand,
-            // if packages are being ignored, then this is a new build
+            // Issue a warning for missing imports. On the other hand,
+            // if packages are being ignored, then this is a new project
             // so be more strict and throw an error.
             if (osgiManifest.getIgnorePackage() == null) {
                 getLog().warn("[OSGi] MISSING IMPORT: " + o);
