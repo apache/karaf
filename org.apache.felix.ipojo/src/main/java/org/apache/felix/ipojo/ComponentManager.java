@@ -195,7 +195,7 @@ public class ComponentManager {
 	public void stop() {
 		setState(INVALID);
 		// Stop all the handlers
-		for (int i = 0; i < m_handlers.length; i++) {
+		for (int i = m_handlers.length - 1; i > -1; i--) {
 			m_handlers[i].stop();
 		}
 		m_instances = new Object[0];
@@ -214,7 +214,7 @@ public class ComponentManager {
 
 			// The state changed call the handler stateChange method
 			m_state = state;
-			for (int i = 0; i < m_handlers.length; i++) {
+			for (int i = m_handlers.length - 1; i > -1; i--) {
 				m_handlers[i].stateChanged(state);
 			}
 		}

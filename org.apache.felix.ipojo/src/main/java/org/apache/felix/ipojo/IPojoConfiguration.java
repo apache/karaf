@@ -43,8 +43,8 @@ public class IPojoConfiguration {
 	public static final Class[] INTERNAL_HANDLERS = new Class[] {
 		DependencyHandler.class,
 		ProvidedServiceHandler.class,
-		LifecycleCallbackHandler.class,
 		ConfigurationHandler.class,
+		LifecycleCallbackHandler.class,
 		ArchitectureHandler.class
 	};
 
