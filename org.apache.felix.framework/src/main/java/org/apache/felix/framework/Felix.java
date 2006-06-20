@@ -590,6 +590,27 @@ public class Felix
 
         // The framework is no longer in a usable state.
         m_frameworkStatus = INITIAL_STATUS;
+
+        // Remove all bundles from the module factory so that any
+        // open resources will be closed.
+        bundles = getBundles();
+        for (int i = 0; i < bundles.length; i++)
+        {
+            BundleImpl bundle = (BundleImpl) bundles[i];
+            try
+            {
+                IModule[] modules = bundle.getInfo().getModules();
+                for (int j = 0; j < modules.length; j++)
+                {
+                    m_factory.removeModule(modules[j]);
+                }
+            }
+            catch (Exception ex)
+            {
+                m_logger.log(Logger.LOG_ERROR,
+                   "Unable to clean up " + bundle.getInfo().getLocation(), ex);
+            }
+        }
     }
 
     public int getStatus()
