@@ -252,43 +252,51 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
     private void invokeCallbackMethod(Object instance, String methodName, ServiceReference reference, Object service) throws NoSuchMethodException {
         Method method = null;
         Class clazz = instance.getClass();
-        AccessibleObject.setAccessible(clazz.getDeclaredMethods(), true);
-        try {
-            try {
-                method = clazz.getDeclaredMethod(methodName, new Class[] {ServiceReference.class, Object.class});
-                method.invoke(instance, new Object[] {reference, service});
-            }
-            catch (NoSuchMethodException e) {
-                try {
-                    method = clazz.getDeclaredMethod(methodName, new Class[] {ServiceReference.class});
-                    method.invoke(instance, new Object[] {reference});
-                } 
-                catch (NoSuchMethodException e1) {
-                    try {
-                        method = clazz.getDeclaredMethod(methodName, new Class[] {Object.class});
-                        method.invoke(instance, new Object[] {service});
-                    } 
-                    catch (NoSuchMethodException e2) {
-                        try {
-                            method = clazz.getDeclaredMethod(methodName, new Class[] {m_trackedServiceName});
-                            method.invoke(instance, new Object[] {service});
-                        } 
-                        catch (NoSuchMethodException e3) {
-                            method = clazz.getDeclaredMethod(methodName, null);
-                            method.invoke(instance, null);
-                        }
-                    }
-                }
-            }
-        } catch (IllegalArgumentException e1) {
-            // TODO handle this exception, probably best to ignore it
-            e1.printStackTrace();
-        } catch (IllegalAccessException e1) {
-            // TODO handle this exception, probably best to ignore it
-            e1.printStackTrace();
-        } catch (InvocationTargetException e1) {
-            // TODO handle this exception, probably best to ignore it
-            e1.printStackTrace();
+        while (clazz != null) {
+	        AccessibleObject.setAccessible(clazz.getDeclaredMethods(), true);
+	        try {
+	            try {
+	                method = clazz.getDeclaredMethod(methodName, new Class[] {ServiceReference.class, Object.class});
+	                method.invoke(instance, new Object[] {reference, service});
+	                return;
+	            }
+	            catch (NoSuchMethodException e) {
+	                try {
+	                    method = clazz.getDeclaredMethod(methodName, new Class[] {ServiceReference.class});
+	                    method.invoke(instance, new Object[] {reference});
+	                    return;
+	                } 
+	                catch (NoSuchMethodException e1) {
+	                    try {
+	                        method = clazz.getDeclaredMethod(methodName, new Class[] {Object.class});
+	                        method.invoke(instance, new Object[] {service});
+	                        return;
+	                    } 
+	                    catch (NoSuchMethodException e2) {
+	                        try {
+	                            method = clazz.getDeclaredMethod(methodName, new Class[] {m_trackedServiceName});
+	                            method.invoke(instance, new Object[] {service});
+	                            return;
+	                        } 
+	                        catch (NoSuchMethodException e3) {
+	                            method = clazz.getDeclaredMethod(methodName, null);
+	                            method.invoke(instance, null);
+	                            return;
+	                        }
+	                    }
+	                }
+	            }
+	        } 
+	        catch (IllegalArgumentException e1) {
+	        	// ignore this exception
+	        } 
+	        catch (IllegalAccessException e1) {
+	        	// ignore this exception
+	        } 
+	        catch (InvocationTargetException e1) {
+	        	// ignore this exception
+	        }
+	        clazz = clazz.getSuperclass();
         }
     }
     
