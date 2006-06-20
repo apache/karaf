@@ -131,12 +131,6 @@ public class Felix
      * The following configuration properties can be specified:
      * </p>
      * <ul>
-     *   <li><tt>felix.cache.class</tt> - The class name to be used when
-     *       creating an instance for the bundle cache; this class must
-     *       implement the <tt>BundleCache</tt> interface and have a default
-     *       constructor. By default, the framework will create an instance of
-     *       <tt>DefaultBundleCache</tt> for the bundle cache.
-     *   </li>
      *   <li><tt>felix.auto.install.&lt;n&gt;</tt> - Space-delimited list of
      *       bundles to automatically install into start level <tt>n</tt> when
      *       the framework is started. Append a specific start level to this
