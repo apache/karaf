@@ -40,6 +40,14 @@
         <version>${pom.version}</version>
         <extensions>true</extensions>
         <configuration>
+          <ignorePackage>
+            com.sun.net.ssl.internal.ssl,
+            com.sun.net.ssl,
+            org.xml.sax,
+            org.xml.sax.helpers,
+            javax.xml.parsers,
+            javax.security.cert
+          </ignorePackage>
           <osgiManifest>
             <bundleName>HTTP Service</bundleName>
             <bundleDescription>An implementation of the OSGi HTTP Service using Jetty.</bundleDescription>
@@ -48,14 +56,6 @@
             <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>
             <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
             <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
-            <ignorePackage>
-                com.sun.net.ssl.internal.ssl,
-                com.sun.net.ssl,
-                org.xml.sax,
-                org.xml.sax.helpers,
-                javax.xml.parsers,
-                javax.security.cert
-            </ignorePackage>
             <dynamicImportPackage>javax.net.ssl</dynamicImportPackage>
             <exportPackage>org.osgi.service.http; version=1.1,javax.servlet;javax.servlet.http;version=2.3.0</exportPackage>
             <exportService>org.osgi.service.http.HttpService</exportService>
