@@ -19,6 +19,8 @@ package org.apache.felix.tools.maven.plugin;
 
 import java.io.*;
 import java.util.*;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipEntry;
 
 import org.apache.maven.archiver.*;
 import org.apache.maven.artifact.*;
@@ -46,7 +48,14 @@ public class OsgiJarMojo extends AbstractMojo {
 
 	int									bundleManifestVersion	= 1;
 
-	/**
+    /**
+     * Jars to Inline
+     *
+     * @parameter
+     */
+    private List inlinedArtifacts = new ArrayList();
+
+    /**
 	 * The Maven project.
 	 * 
 	 * @parameter expression="${project}"
@@ -147,7 +156,9 @@ public class OsgiJarMojo extends AbstractMojo {
 			ArchiverException, ManifestException,
 			DependencyResolutionRequiredException, MojoExecutionException {
 
-		verifyDeclaredBundleManifestVersion();
+        outputDirectory.mkdirs();
+
+        verifyDeclaredBundleManifestVersion();
 
 		getLog().info("Generating JAR bundle " + jarFile.getAbsolutePath());
 
@@ -159,8 +170,11 @@ public class OsgiJarMojo extends AbstractMojo {
 		addManifestFile();
 		addManifestEntries();
 
-		// Add the JARs that were specified in the POM
-		// as "not" provided
+        // Inline the contents of the indicated jar artifacts
+        inlineArtifacts();
+
+        // Add the JARs that were specified in the POM
+		// as "not" provided and which are not inlined
 		addEmbeddedJars();
 		addBundleVersion();
 
@@ -353,7 +367,7 @@ public class OsgiJarMojo extends AbstractMojo {
 		for (Iterator m = test.iterator(); m.hasNext();) {
 			Object o = m.next();
 			// For backwards compatibility with existing builds, only
-            // Issue a warning for missing imports. On the other hand,
+            // issue a warning for missing imports. On the other hand,
             // if packages are being ignored, then this is a new project
             // so be more strict and throw an error.
             if (osgiManifest.getIgnorePackage() == null) {
@@ -601,6 +615,8 @@ public class OsgiJarMojo extends AbstractMojo {
 	 * a dependency has a scope of either RUNTIME or COMPILE, then we'll JAR
 	 * them up inside the OSGi bundle artifact. We will then add the
 	 * Bundle-Classpath manifest entry.
+     *
+     * Artifacts which are inlined will not be included.
 	 */
 	private void addEmbeddedJars() throws MojoExecutionException {
 		Set artifacts = project.getArtifacts();
@@ -612,19 +628,22 @@ public class OsgiJarMojo extends AbstractMojo {
 				String type = artifact.getType();
 
 				if ("jar".equals(type)) {
-					File depFile = artifact.getFile();
+                    // Do not include artifacts which are inlined
+                    if (!(inlinedArtifacts.contains(artifact.getArtifactId()))) {
+                        File depFile = artifact.getFile();
 
-					try {
-						FileUtils.copyFileToDirectory(depFile, outputDirectory);
+                        try {
+                            FileUtils.copyFileToDirectory(depFile, outputDirectory);
 
-					}
-					catch (Exception e) {
-						String errmsg = "Error copying "
-								+ depFile.getAbsolutePath() + " to "
-								+ outputDirectory.getAbsolutePath();
-						throw new MojoExecutionException(errmsg, e);
-					}
-				}
+                        }
+                        catch (Exception e) {
+                            String errmsg = "Error copying "
+                                            + depFile.getAbsolutePath() + " to "
+                                            + outputDirectory.getAbsolutePath();
+                            throw new MojoExecutionException(errmsg, e);
+                        }
+                    }
+                }
 			}
 		}
 	}
@@ -735,5 +754,50 @@ public class OsgiJarMojo extends AbstractMojo {
             buf.append('\n');
         }
         getLog().debug("Referenced package list: \n" + buf.toString());
+    }
+
+    private void inlineArtifacts() throws MojoExecutionException {
+		Set artifacts = project.getArtifacts();
+
+		for (Iterator it = artifacts.iterator(); it.hasNext();) {
+			Artifact artifact = (Artifact) it.next();
+			if (!Artifact.SCOPE_PROVIDED.equals(artifact.getScope())
+					&& !Artifact.SCOPE_TEST.equals(artifact.getScope())) {
+				String type = artifact.getType();
+
+				if ("jar".equals(type)) {
+                    if ((inlinedArtifacts.contains(artifact.getArtifactId()))) {
+                        File depFile = artifact.getFile();
+
+                        try {
+                            ZipFile inlinedJar = new ZipFile(depFile);
+                            Enumeration entries = inlinedJar.entries();
+                            byte[] buffer = new byte[4096];
+                            while (entries.hasMoreElements()) {
+                                ZipEntry entry = (ZipEntry) entries.nextElement();
+                                if (entry.isDirectory()) {
+                                    new File(outputDirectory, entry.getName()).mkdirs();
+                                } else {
+                                    // Have to do this because some JARs ship without directories, i.e., just files.
+                                    new File(outputDirectory, entry.getName()).getParentFile().mkdirs();
+                                    FileOutputStream out = new FileOutputStream(new File(outputDirectory, entry.getName()));
+                                    InputStream in = inlinedJar.getInputStream(entry);
+                                    for (int read = in.read(buffer); read != -1; read = in.read(buffer)) {
+                                        out.write(buffer, 0, read);
+                                    }
+                                    in.close();
+                                    out.close();
+                                }
+                            }
+                        } catch (Exception e) {
+                            String errmsg = "Error inlining "
+                                            + depFile.getAbsolutePath() + " to "
+                                            + outputDirectory.getAbsolutePath();
+                            throw new MojoExecutionException(errmsg, e);
+                        }
+                    }
+                }
+			}
+		}
     }
 }
