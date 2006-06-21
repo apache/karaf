@@ -56,6 +56,13 @@ public class OsgiJarMojo extends AbstractMojo {
     private List inlinedArtifacts = new ArrayList();
 
     /**
+     * Packages to ignore when generating import-package header.
+     *
+     * @parameter
+     */
+    private String ignorePackage;
+
+    /**
 	 * The Maven project.
 	 * 
 	 * @parameter expression="${project}"
@@ -235,8 +242,8 @@ public class OsgiJarMojo extends AbstractMojo {
 		}
 
         // Remove any ignored packages from the referred set.
-        Set ignorePackage = parseIgnorePackage();
-        referred.removeAll(ignorePackage);
+        Set ignorePackageSet = parseIgnorePackage();
+        referred.removeAll(ignorePackageSet);
 
 		// If the POM file contains an import declaration,
 		// we verify its validity. Otherwise, we generate the
@@ -689,9 +696,14 @@ public class OsgiJarMojo extends AbstractMojo {
 
     private Set parseIgnorePackage() {
         HashSet result = new HashSet();
-        String pkgs = osgiManifest.getIgnorePackage();
-        if (pkgs != null) {
-            StringTokenizer st = new StringTokenizer(pkgs, ",", false);
+        if ((ignorePackage == null) && (osgiManifest.getIgnorePackage() != null)) {
+            ignorePackage = osgiManifest.getIgnorePackage();
+            getLog().warn("DEPRECATED METADATA! "
+                + "The <ignorePackage> tag should be set inside the <configuration> "
+                + "tag, not in the <osgiManifest> tag.");            
+        }
+        if (ignorePackage != null) {
+            StringTokenizer st = new StringTokenizer(ignorePackage, ",", false);
             while (st.hasMoreTokens()) {
                 result.add(st.nextToken().trim());
             }
