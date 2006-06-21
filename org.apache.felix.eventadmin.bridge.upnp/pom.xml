@@ -36,14 +36,11 @@
             <bundleDescription>
               This bundle provides a bridge between UPnP and EventAdmin events.
             </bundleDescription>
-            <bundleActivator>
-              org.apache.felix.eventadmin.bridge.upnp.Activator
-            </bundleActivator>
-            <importPackage>
-              org.osgi.framework, org.osgi.service.event; version=1.0.1, org.osgi.service.upnp; version=1.1
-            </importPackage>
+            <bundleActivator>auto-detect</bundleActivator>
+            <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
             <importService>
-            	 org.osgi.service.event.EventAdmin
+            	org.osgi.service.event.EventAdmin,
+       		org.osgi.service.event.EventHandler
             </importService>
             <exportService>
             	 org.osgi.service.upnp.UPnPEventListener

@@ -29,166 +29,262 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.service.upnp.UPnPEventListener;
 
 /**
- * This class registers itself as an UPnPEventListener service with the 
- * framework and subsequently, bridges UPnPEvents received to available EventAdmin 
- * services. In order to track EventAdmin services this class registers itself as
- * a ServiceListener for EventAdmin services too.
+ * This class registers itself as an UPnPEventListener service with the
+ * framework whenever both, at least one EventAdmin and at least one
+ * EventHandler is present and subsequently, bridges UPnPEvents received to the
+ * EventAdmin service. In order to track EventAdmin services this class
+ * registers a ServiceListener for EventAdmin services as well as a
+ * ServiceListener for EventHandlers in order to determine EventHandler
+ * availability.
  * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public class UPnPEventToEventAdminBridge implements ServiceListener,
-    UPnPEventListener
+public class UPnPEventToEventAdminBridge implements UPnPEventListener
 {
-    // The references to the EventAdmins additionally, used as a lock
-    private final Set m_refs = new HashSet();
-    
+    private static final String EVENT_HANDLER_FILTER = "(&("
+        + Constants.OBJECTCLASS + "=" + EventHandler.class.getName() + ")(|("
+        + EventConstants.EVENT_TOPIC + "=\\*)(" + EventConstants.EVENT_TOPIC
+        + "=org/\\*)(" + EventConstants.EVENT_TOPIC + "=org/osgi/\\*)("
+        + EventConstants.EVENT_TOPIC + "=org/osgi/service/\\*)("
+        + EventConstants.EVENT_TOPIC + "=org/osgi/service/upnp/\\*)("
+        + EventConstants.EVENT_TOPIC + "=org/osgi/service/upnp/UPnPEvent)))";
+
+    private final Object m_lock = new Object();
+
+    // The references to the EventAdmins
+    private final Set m_adminRefs = new HashSet();
+
+    // The references to the EventHandlers
+    private final Set m_handlerRefs = new HashSet();
+
     private final BundleContext m_context;
-    
+
+    private ServiceRegistration m_reg = null;
+
     /**
-     * Registers itself as an UPnPEventListener service with the given context and
-     * in order to track EventAdmin services as a ServicListener too.
+     * This class registers itself as an UPnPEventListener service with the
+     * framework whenever both, at least one EventAdmin and at least one
+     * EventHandler is present and subsequently, bridges UPnPEvents received to
+     * the EventAdmin service. In order to track EventAdmin services this class
+     * registers a ServiceListener for EventAdmin services as well as a
+     * ServiceListener for EventHandlers in order to determine EventHandler
+     * availability.
      * 
-     * @param context The context to register with.
+     * @param context
+     *            The context to register with.
      */
     public UPnPEventToEventAdminBridge(final BundleContext context)
     {
-        synchronized(m_refs)
+        synchronized(m_lock)
         {
             m_context = context;
-            
-            try {
-                m_context.addServiceListener(this, "(" + Constants.OBJECTCLASS + 
-                    "=" + EventAdmin.class.getName() + ")");
-                
-                final ServiceReference[] refs = m_context.getServiceReferences(
-                    EventAdmin.class.getName(), null);
-                
-                if(null != refs)
+
+            try
+            {
+                m_context.addServiceListener(new ServiceListener()
                 {
-                    for(int i = 0;i < refs.length;i++)
+
+                    public void serviceChanged(final ServiceEvent event)
                     {
-                        m_refs.add(refs[i]);
+                        synchronized(m_lock)
+                        {
+                            switch(event.getType())
+                            {
+                                case ServiceEvent.REGISTERED:
+                                    m_adminRefs
+                                        .add(event.getServiceReference());
+                                    break;
+                                case ServiceEvent.UNREGISTERING:
+                                    m_adminRefs.remove(event
+                                        .getServiceReference());
+                                    break;
+                            }
+
+                            check();
+                        }
+                    }
+                }, "(" + Constants.OBJECTCLASS + "="
+                    + EventAdmin.class.getName() + ")");
+
+                final ServiceReference[] adminRefs = m_context
+                    .getServiceReferences(EventAdmin.class.getName(), null);
+
+                if(null != adminRefs)
+                {
+                    for(int i = 0; i < adminRefs.length; i++)
+                    {
+                        m_adminRefs.add(adminRefs[i]);
                     }
                 }
-            } catch(InvalidSyntaxException e) {
-                 // This will never happen
+
+                m_context.addServiceListener(new ServiceListener()
+                {
+                    public void serviceChanged(final ServiceEvent event)
+                    {
+                        synchronized(m_lock)
+                        {
+                            switch(event.getType())
+                            {
+                                case ServiceEvent.REGISTERED:
+                                    m_handlerRefs.add(event
+                                        .getServiceReference());
+                                    break;
+                                case ServiceEvent.UNREGISTERING:
+                                    m_handlerRefs.remove(event
+                                        .getServiceReference());
+                                    break;
+                            }
+
+                            check();
+                        }
+                    }
+                }, EVENT_HANDLER_FILTER);
+
+                final ServiceReference[] handlerRefs = m_context
+                    .getServiceReferences(EventHandler.class.getName(),
+                        EVENT_HANDLER_FILTER);
+
+                if(null != handlerRefs)
+                {
+                    for(int i = 0; i < handlerRefs.length; i++)
+                    {
+                        m_handlerRefs.add(handlerRefs[i]);
+                    }
+                }
+            } catch(InvalidSyntaxException e)
+            {
+                // This will never happen
             }
-            
-            m_context.registerService(UPnPEventListener.class.getName(), this, null);
+
+            check();
         }
     }
-    
-    /**
-     * Add newly registered service references.
-     * 
-     * @param event If event.getType equals REGISTERED the reference is added.
-     * 
-     * @see org.osgi.framework.ServiceListener#serviceChanged(org.osgi.framework.ServiceEvent)
-     */
-    public void serviceChanged(final ServiceEvent event)
+
+    // Registers itself as an UPnPEventListener with the framework in case there
+    // is both, at least one EventAdmin (i.e., !m_adminRefs.isEmpty()) and at
+    // least one EventHandler (i.e., !m_handlerRefs.isEmpty()) present and it is not
+    // already registers. Respectively, it unregisters itself in case one of the 
+    // above is false.
+    private void check()
     {
-        synchronized (m_refs)
+        if(m_adminRefs.isEmpty() || m_handlerRefs.isEmpty())
         {
-            if(ServiceEvent.REGISTERED == event.getType())
+            if(null != m_reg)
             {
-                m_refs.add(event.getServiceReference());
+                m_reg.unregister();
+                m_reg = null;
+            }
+        }
+        else
+        {
+            if(null == m_reg)
+            {
+                m_reg = m_context.registerService(UPnPEventListener.class
+                    .getName(), this, null);
             }
         }
     }
 
     /**
-     * Bridge any event to all available EventAdmin services.
+     * Bridge any event to the EventAdmin service.
      * 
-     * @param deviceId Bridged to <tt>upnp.deviceId</tt>
-     * @param serviceId Bridged to <tt>upnp.serviceId</tt>
-     * @param events Bridged to <tt>upnp.events</tt>
+     * @param deviceId
+     *            Bridged to <tt>upnp.deviceId</tt>
+     * @param serviceId
+     *            Bridged to <tt>upnp.serviceId</tt>
+     * @param events
+     *            Bridged to <tt>upnp.events</tt>
      * 
-     * @see org.osgi.service.upnp.UPnPEventListener#notifyUPnPEvent(java.lang.String, java.lang.String, java.util.Dictionary)
+     * @see org.osgi.service.upnp.UPnPEventListener#notifyUPnPEvent(java.lang.String,
+     *      java.lang.String, java.util.Dictionary)
      */
-    public void notifyUPnPEvent(final String deviceId, final String serviceId, 
+    public void notifyUPnPEvent(final String deviceId, final String serviceId,
         final Dictionary events)
     {
-        synchronized (m_refs)
+        final ServiceReference ref = m_context
+            .getServiceReference(EventAdmin.class.getName());
+
+        if(null != ref)
         {
-            for (Iterator iter = m_refs.iterator(); iter.hasNext();)
+            final EventAdmin eventAdmin = (EventAdmin) m_context
+                .getService(ref);
+
+            if(null != eventAdmin)
             {
-                final ServiceReference ref = (ServiceReference) iter.next();
-                
-                final EventAdmin eventAdmin = (EventAdmin) m_context.getService(ref);
-                
-                if(null != eventAdmin)
+                final Dictionary immutableEvents = new Dictionary()
                 {
-                    final Dictionary immutableEvents = new Dictionary(){
+                    public int size()
+                    {
+                        return events.size();
+                    }
 
-                        public int size()
-                        {
-                            return events.size();
-                        }
+                    public boolean isEmpty()
+                    {
+                        return events.isEmpty();
+                    }
 
-                        public boolean isEmpty()
-                        {
-                            return events.isEmpty();
-                        }
+                    public Enumeration keys()
+                    {
+                        return events.keys();
+                    }
 
-                        public Enumeration keys()
-                        {
-                            return events.keys();
-                        }
+                    public Enumeration elements()
+                    {
+                        return events.elements();
+                    }
 
-                        public Enumeration elements()
-                        {
-                            return events.elements();
-                        }
+                    public Object get(Object arg0)
+                    {
+                        return events.get(arg0);
+                    }
 
-                        public Object get(Object arg0)
-                        {
-                            return events.get(arg0);
-                        }
+                    public Object put(Object arg0, Object arg1)
+                    {
+                        throw new IllegalStateException(
+                            "Event Properties may not be changed");
+                    }
 
-                        public Object put(Object arg0, Object arg1)
-                        {
-                            throw new IllegalStateException("Event Properties may not be changed");
-                        }
+                    public Object remove(Object arg0)
+                    {
+                        throw new IllegalStateException(
+                            "Event Properties may not be changed");
+                    }
 
-                        public Object remove(Object arg0)
+                    public boolean equals(Object arg0)
+                    {
+                        return events.equals(arg0);
+                    }
+
+                    public int hashCode()
+                    {
+                        return events.hashCode();
+                    }
+
+                    public String toString()
+                    {
+                        return events.toString();
+                    }
+                };
+
+                eventAdmin.postEvent(new Event(
+                    "org/osgi/service/upnp/UPnPEvent", new Hashtable()
+                    {
                         {
-                            throw new IllegalStateException("Event Properties may not be changed");
-                        }
-                        
-                        public boolean equals(Object arg0)
-                        {
-                            return events.equals(arg0);
-                        }
-                        
-                        public int hashCode()
-                        {
-                            return events.hashCode();
-                        }
-                        
-                        public String toString()
-                        {
-                            return events.toString();
-                        }
-                    };
-                    
-                    eventAdmin.postEvent(new Event("org/osgi/service/upnp/UPnPEvent",
-                        new Hashtable(){{
                             put("upnp.deviceId", deviceId);
                             put("upnp.serviceId", serviceId);
                             put("upnp.events", immutableEvents);
-                        }}));
-                    
-                    m_context.ungetService(ref);
-                }
-                else
-                {
-                    iter.remove();
-                }
+                        }
+                    }));
+
+                m_context.ungetService(ref);
             }
         }
     }
