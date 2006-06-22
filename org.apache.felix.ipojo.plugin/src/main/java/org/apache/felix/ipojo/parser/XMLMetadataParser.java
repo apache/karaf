@@ -20,7 +20,7 @@ import java.util.logging.Level;
 
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.plugin.IpojoPluginConfiguration;
+import org.apache.felix.ipojo.plugin.IPojoPluginConfiguration;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
@@ -57,7 +57,7 @@ public class XMLMetadataParser implements ContentHandler {
 	 * @see org.xml.sax.ContentHandler#endDocument()
 	 */
 	public void endDocument() throws SAXException {
-		IpojoPluginConfiguration.getLogger().log(Level.INFO, "End of the XML parsing, " + m_elements.length + " primary elements found");
+		IPojoPluginConfiguration.getLogger().log(Level.INFO, "End of the XML parsing, " + m_elements.length + " primary elements found");
 
 	}
 
@@ -71,7 +71,7 @@ public class XMLMetadataParser implements ContentHandler {
 
         // Check if the name is consitent with the name of this end tag
         if (!lastElement.getName().equalsIgnoreCase(qName) && !lastElement.getNameSpace().equals(namespaceURI)) {
-        	IpojoPluginConfiguration.getLogger().log(Level.SEVERE, "Parse error when ending an element : " + qName + " [" + namespaceURI + "]");
+        	IPojoPluginConfiguration.getLogger().log(Level.SEVERE, "Parse error when ending an element : " + qName + " [" + namespaceURI + "]");
         	throw new SAXException("Parse error when ending an element : " + qName + " [" + namespaceURI + "]");
         }
 
@@ -132,7 +132,7 @@ public class XMLMetadataParser implements ContentHandler {
 	 * @see org.xml.sax.ContentHandler#startDocument()
 	 */
 	public void startDocument() throws SAXException {
-		IpojoPluginConfiguration.getLogger().log(Level.INFO, "Start of the XML parsing");
+		IPojoPluginConfiguration.getLogger().log(Level.INFO, "Start of the XML parsing");
 
 	}
 
@@ -141,7 +141,7 @@ public class XMLMetadataParser implements ContentHandler {
 	 */
 	public void startElement(String namespaceURI, String localName,
 			String qName, Attributes atts) throws SAXException {
-		IpojoPluginConfiguration.getLogger().log(Level.INFO, "An XML tag was openend : " + localName + " [" + namespaceURI + "]");
+		IPojoPluginConfiguration.getLogger().log(Level.INFO, "An XML tag was openend : " + localName + " [" + namespaceURI + "]");
 
         Element elem = new Element(localName, namespaceURI);     
         

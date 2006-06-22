@@ -19,7 +19,7 @@ package org.apache.felix.ipojo.manipulation;
 import java.util.HashMap;
 import java.util.logging.Level;
 
-import org.apache.felix.ipojo.plugin.IpojoPluginConfiguration;
+import org.apache.felix.ipojo.plugin.IPojoPluginConfiguration;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -36,7 +36,7 @@ import org.objectweb.asm.Type;
  * - Store information about field ok
  * - Store information about implemented interfaces ok
  * - Change GETFIELD and PUTFIELD to called the getter and setter method
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  *
  */
 public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
@@ -157,7 +157,7 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
                 final String signature,
                 final Object value) {
             if ((access & ACC_STATIC) == 0) {
-            		IpojoPluginConfiguration.getLogger().log(Level.INFO, "Manipulate the field declaration of " + name);
+            		IPojoPluginConfiguration.getLogger().log(Level.INFO, "Manipulate the field declaration of " + name);
                     Type type = Type.getType(desc);
 
                     // Keep the field in the code
@@ -392,7 +392,7 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             	break;
 
                 default :
-                	IpojoPluginConfiguration.getLogger().log(Level.SEVERE, "Manipulation problem in " + m_owner + " : a type is not implemented : " + type);
+                	IPojoPluginConfiguration.getLogger().log(Level.SEVERE, "Manipulation problem in " + m_owner + " : a type is not implemented : " + type);
                     break;
             }
 
@@ -460,7 +460,7 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
                 	mv.visitInsn(RETURN);
                 	break;
                 default :
-                	IpojoPluginConfiguration.getLogger().log(Level.SEVERE, "Manipulation Error : Cannot create the setter method for the field : " + name + " (" + type + ")");
+                	IPojoPluginConfiguration.getLogger().log(Level.SEVERE, "Manipulation Error : Cannot create the setter method for the field : " + name + " (" + type + ")");
                     break;
             }
 

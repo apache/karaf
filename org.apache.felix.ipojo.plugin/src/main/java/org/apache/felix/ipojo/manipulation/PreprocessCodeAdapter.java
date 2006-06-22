@@ -18,16 +18,14 @@ package org.apache.felix.ipojo.manipulation;
 
 import java.util.logging.Level;
 
-import org.apache.felix.ipojo.plugin.IpojoPluginConfiguration;
+import org.apache.felix.ipojo.plugin.IPojoPluginConfiguration;
 import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 
 /**
- * Date : 29 janv. 2006
- * @author clément
- *
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class PreprocessCodeAdapter extends MethodAdapter implements Opcodes {
 
@@ -61,14 +59,14 @@ public class PreprocessCodeAdapter extends MethodAdapter implements Opcodes {
             final String desc) {
         if (owner.equals(m_owner)) {
             if (opcode == GETFIELD) {
-            		IpojoPluginConfiguration.getLogger().log(Level.INFO, "Manipulate a GETFIELD on : " + name);
+            		IPojoPluginConfiguration.getLogger().log(Level.INFO, "Manipulate a GETFIELD on : " + name);
                     String gDesc = "()" + desc;
                     visitMethodInsn(INVOKEVIRTUAL, owner, "_get" + name, gDesc);
                     return;
             } else
             	if (opcode == PUTFIELD) {
             		// replaces PUTFIELD f by INVOKESPECIAL _setf
-            		IpojoPluginConfiguration.getLogger().log(Level.INFO, "Manipulate a PUTFIELD on : " + name);
+            		IPojoPluginConfiguration.getLogger().log(Level.INFO, "Manipulate a PUTFIELD on : " + name);
             		String sDesc = "(" + desc + ")V";
             		visitMethodInsn(INVOKESPECIAL, owner, "_set" + name, sDesc);
             		return;

@@ -19,7 +19,7 @@ package org.apache.felix.ipojo.plugin;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class IpojoPluginConfiguration {
+public class IPojoPluginConfiguration {
 
 	private static Logger logger;
 	

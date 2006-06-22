@@ -21,12 +21,12 @@ import java.util.logging.Level;
 
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.plugin.IpojoPluginConfiguration;
+import org.apache.felix.ipojo.plugin.IPojoPluginConfiguration;
 
 /**
  * Manifest Metadata parser.
  * Read a manifest file and construct metadata
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ManifestMetadataParser {
 
@@ -135,13 +135,13 @@ public class ManifestMetadataParser {
 					c = string[i];
 				}
 				Attribute att = new Attribute(attName, attNs ,attValue);
-				IpojoPluginConfiguration.getLogger().log(Level.INFO, "Detect a new  attribute : '" + "[" + attNs + "]" + attName + "' = '" + attValue + "'");
+				IPojoPluginConfiguration.getLogger().log(Level.INFO, "Detect a new  attribute : '" + "[" + attNs + "]" + attName + "' = '" + attValue + "'");
 				m_elements[m_elements.length - 1].addAttribute(att);
 				break;
 
 			case '}' :
 				Element lastElement = removeLastElement();
-				IpojoPluginConfiguration.getLogger().log(Level.INFO, "End of the element : " + lastElement.getName());
+				IPojoPluginConfiguration.getLogger().log(Level.INFO, "End of the element : " + lastElement.getName());
 				if (m_elements.length != 0) {
 					Element newQueue = m_elements[m_elements.length - 1];
 					newQueue.addElement(lastElement);
@@ -172,7 +172,7 @@ public class ManifestMetadataParser {
 					i = i + 1; // skip {
 				    Element elem = new Element(name, ns);
 					addElement(elem);
-					IpojoPluginConfiguration.getLogger().log(Level.INFO, "Start an new element : " + name);
+					IPojoPluginConfiguration.getLogger().log(Level.INFO, "Start an new element : " + name);
 				break;
 			}
 			}

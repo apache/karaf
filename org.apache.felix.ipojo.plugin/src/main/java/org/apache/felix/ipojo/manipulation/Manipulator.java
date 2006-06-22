@@ -23,13 +23,13 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.logging.Level;
 
-import org.apache.felix.ipojo.plugin.IpojoPluginConfiguration;
+import org.apache.felix.ipojo.plugin.IPojoPluginConfiguration;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
 /**
  * iPOJO Bytecode Manipulator.
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  *
  */
 public class Manipulator {
@@ -77,7 +77,7 @@ public class Manipulator {
 		URL url = clazz.toURI().toURL();
 
         //if (url == null) { throw new ClassNotFoundException(name); }
-        IpojoPluginConfiguration.getLogger().log(Level.INFO, "Manipulate the class file : " + clazz.getAbsolutePath());
+        IPojoPluginConfiguration.getLogger().log(Level.INFO, "Manipulate the class file : " + clazz.getAbsolutePath());
 
         InputStream is = url.openStream();
 
@@ -101,7 +101,7 @@ public class Manipulator {
                 fos.write(cw0.toByteArray());
                 
                 fos.close();
-                IpojoPluginConfiguration.getLogger().log(Level.INFO, "Put the file " + file.getAbsolutePath() + " in the jar file");
+                IPojoPluginConfiguration.getLogger().log(Level.INFO, "Put the file " + file.getAbsolutePath() + " in the jar file");
             } catch (Exception e) { System.err.println("Problem to write the adapted class on the file system " + " [ "+ file.getAbsolutePath() +" ] " + e.getMessage()); }
 
         m_fields = preprocess.getFields();
