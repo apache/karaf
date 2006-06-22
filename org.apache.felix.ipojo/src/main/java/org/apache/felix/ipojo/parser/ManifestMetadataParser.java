@@ -24,7 +24,7 @@ import org.apache.felix.ipojo.metadata.Element;
 /**
  * Manifest Metadata parser.
  * Read a manifest file and construct metadata
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ManifestMetadataParser {
 

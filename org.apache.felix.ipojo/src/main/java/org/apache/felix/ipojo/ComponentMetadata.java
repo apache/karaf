@@ -22,7 +22,7 @@ import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * Component Metadata.
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ComponentMetadata {
 

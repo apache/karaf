@@ -14,12 +14,12 @@
  *   limitations under the License.
  *
  */
-package org.apache.felix.ipojo.handlers.providedService;
+package org.apache.felix.ipojo.handlers.providedservice;
 
 
 /**
  * Provided Service Metadata.
- * @author Clément Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ProvidedServiceMetadata {
 

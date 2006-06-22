@@ -30,8 +30,8 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * Represent a service dependency either for a componenet dependency either for
- * a provided service dependency. Date : 3 déc. 2005
- * @author clément
+ * a provided service dependency.
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class Dependency implements ServiceListener {
 

@@ -21,7 +21,7 @@ import org.apache.felix.ipojo.metadata.Element;
 /**
  * Handler Interface.
  * An handler need implements tese method to be notifed of lifecycle change, getfield operation and putfield operation
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public interface Handler {
 

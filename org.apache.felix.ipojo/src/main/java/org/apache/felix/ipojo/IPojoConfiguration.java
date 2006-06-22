@@ -22,13 +22,13 @@ import org.apache.felix.ipojo.handlers.architecture.ArchitectureHandler;
 import org.apache.felix.ipojo.handlers.configuration.ConfigurationHandler;
 import org.apache.felix.ipojo.handlers.dependency.DependencyHandler;
 import org.apache.felix.ipojo.handlers.lifecycle.callback.LifecycleCallbackHandler;
-import org.apache.felix.ipojo.handlers.providedService.ProvidedServiceHandler;
+import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
 
 /**
  * Activator Basic Configuration.
  * - Log Level
  * - Available handlers
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class IPojoConfiguration {
 

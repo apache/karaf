@@ -28,7 +28,7 @@ import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * The dependency handler manages a list of dependencies.
- * @author clément
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class DependencyHandler implements Handler {
 

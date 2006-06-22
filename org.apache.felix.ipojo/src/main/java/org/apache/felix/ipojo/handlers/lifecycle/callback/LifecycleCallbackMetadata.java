@@ -20,7 +20,7 @@ import org.apache.felix.ipojo.ComponentManager;
 
 /**
  * Lifecycle callback metadata.
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class LifecycleCallbackMetadata {
 

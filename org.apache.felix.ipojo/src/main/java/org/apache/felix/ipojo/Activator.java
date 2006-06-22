@@ -32,8 +32,7 @@ import org.osgi.framework.BundleContext;
 
 /**
  * iPOJO generic activator.
- * Date : 31 mars 2006
- * @author clement escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class Activator implements BundleActivator {
 

@@ -19,7 +19,7 @@ package org.apache.felix.ipojo.architecture;
 /**
  * Architecture service.
  * Allows to have information of the service delivery about GenSD component.
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public interface Architecture {
 

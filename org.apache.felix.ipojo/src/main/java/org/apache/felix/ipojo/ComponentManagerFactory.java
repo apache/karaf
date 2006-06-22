@@ -23,7 +23,7 @@ import org.osgi.framework.BundleContext;
 
 /**
  * The component manager factory class manages component manager object.
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ComponentManagerFactory {
 

@@ -28,11 +28,7 @@ import org.apache.felix.ipojo.architecture.ProvidedServiceDescription;
 import org.apache.felix.ipojo.handlers.dependency.Dependency;
 import org.apache.felix.ipojo.handlers.dependency.DependencyHandler;
 import org.apache.felix.ipojo.handlers.dependency.DependencyMetadata;
-import org.apache.felix.ipojo.handlers.providedService.Property;
-import org.apache.felix.ipojo.handlers.providedService.PropertyMetadata;
-import org.apache.felix.ipojo.handlers.providedService.ProvidedService;
-import org.apache.felix.ipojo.handlers.providedService.ProvidedServiceHandler;
-import org.apache.felix.ipojo.handlers.providedService.ProvidedServiceMetadata;
+import org.apache.felix.ipojo.handlers.providedservice.*;
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -40,7 +36,7 @@ import org.osgi.framework.ServiceRegistration;
 
 /**
  * Achtiecture Handler : do reflection on your component.
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ArchitectureHandler implements Handler, Architecture {
 

@@ -18,7 +18,7 @@ package org.apache.felix.ipojo.handlers.dependency;
 
 /**
  * Dependency Metadata.
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class DependencyMetadata {
 

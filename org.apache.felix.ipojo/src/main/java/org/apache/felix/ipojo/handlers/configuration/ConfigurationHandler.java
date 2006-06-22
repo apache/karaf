@@ -33,7 +33,7 @@ import org.osgi.service.cm.ManagedService;
 
 /**
  * Handler managing the Configuration Admin.
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ConfigurationHandler implements Handler, ManagedService {
 

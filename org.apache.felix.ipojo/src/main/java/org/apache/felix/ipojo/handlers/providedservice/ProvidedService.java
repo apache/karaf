@@ -14,7 +14,7 @@
  *   limitations under the License.
  *
  */
-package org.apache.felix.ipojo.handlers.providedService;
+package org.apache.felix.ipojo.handlers.providedservice;
 
 import java.util.Properties;
 import java.util.logging.Level;
@@ -29,9 +29,7 @@ import org.osgi.framework.ServiceRegistration;
 
 /**
  * Provided Service represent a provided service by the component.
- * Date : 3 déc. 2005
- * @author clément
- *
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ProvidedService implements ServiceFactory {
 
@@ -203,7 +201,11 @@ public class ProvidedService implements ServiceFactory {
     			Properties serviceProperties = getServiceProperties();
 
     			m_state = REGISTERED;
-    			m_serviceRegistration = m_handler.getComponentManager().getContext().registerService(m_metadata.getServiceSpecification(), this, serviceProperties);
+                synchronized (this) {
+                    m_serviceRegistration =
+                        m_handler.getComponentManager().getContext().registerService(
+                            m_metadata.getServiceSpecification(), this, serviceProperties);
+                }
     	}
     }
 
@@ -268,7 +270,11 @@ public class ProvidedService implements ServiceFactory {
         Properties serviceProperties = getServiceProperties();
 
         // Update the service registration
-        if (m_state == REGISTERED) { m_serviceRegistration.setProperties(serviceProperties); }
+        if (m_state == REGISTERED) {
+            synchronized (this) {
+                m_serviceRegistration.setProperties(serviceProperties);
+            }
+        }
     }
 
 	/**

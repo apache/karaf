@@ -21,8 +21,7 @@ import org.apache.felix.ipojo.Callback;
 
 /**
  * This class is the implementation of callback on lifecycle transition.
- * @author Clement Escoffier
- *
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class LifecycleCallback {
 

@@ -26,7 +26,7 @@ import org.osgi.framework.Bundle;
 /**
  * iPOJO Classloader.
  * This classloadert is used to load manipulated class.
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class NullableClassloader extends ClassLoader {
 

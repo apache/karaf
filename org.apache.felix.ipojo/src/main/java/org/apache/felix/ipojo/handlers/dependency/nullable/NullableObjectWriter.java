@@ -28,7 +28,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 /** Create the proxy class.
- * @author clément
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class NullableObjectWriter implements Opcodes {
 

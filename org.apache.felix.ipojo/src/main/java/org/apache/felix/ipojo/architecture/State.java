@@ -17,8 +17,7 @@
 package org.apache.felix.ipojo.architecture;
 
 /**
- * @author Clement Escoffier
- *
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class State {
 

@@ -26,8 +26,7 @@ import org.objectweb.asm.Opcodes;
 /** This class implement a class visitor. It store all method signature of
  * the visited interface. Then it returns these class signatures for the proxy
  * generation or the nullable class.
- * Date : 4/9/2005
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class MethodSignatureVisitor implements ClassVisitor, Opcodes {
 

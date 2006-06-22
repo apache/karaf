@@ -14,7 +14,7 @@
  *   limitations under the License.
  *
  */
-package org.apache.felix.ipojo.handlers.providedService;
+package org.apache.felix.ipojo.handlers.providedservice;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -28,8 +28,7 @@ import org.apache.felix.ipojo.metadata.Element;
  * A property can be attached to a field.
  * The value of the property is thefield value.
  * When the value change, the published value change too.
- * Date : 5 févr. 2006
- * @author clément
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class Property {
 

@@ -21,7 +21,7 @@ import org.osgi.framework.BundleContext;
 
 /**
  * This class is just if you start ipojo. It does nothing but avoid the launch of the Activator class on the iPOJO bundle
- * @author escoffie
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  *
  */
 public class DummyActivator implements BundleActivator {

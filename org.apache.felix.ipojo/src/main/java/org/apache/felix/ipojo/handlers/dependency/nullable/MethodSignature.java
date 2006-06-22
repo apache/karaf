@@ -19,8 +19,7 @@ package org.apache.felix.ipojo.handlers.dependency.nullable;
 /**
  * Reprensent of method description.
  * The goal of this class, is to be able to generate a proxy class, or a nullable class from an interface.
- * @author Clement Escoffier
- *
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class MethodSignature {
 

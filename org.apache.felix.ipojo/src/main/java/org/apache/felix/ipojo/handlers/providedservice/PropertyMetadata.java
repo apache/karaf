@@ -14,11 +14,11 @@
  *   limitations under the License.
  *
  */
-package org.apache.felix.ipojo.handlers.providedService;
+package org.apache.felix.ipojo.handlers.providedservice;
 
 /**
  * Property metadata : either static either dynamic.
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class PropertyMetadata {
 

@@ -23,8 +23,7 @@ import org.apache.felix.ipojo.Callback;
 
 /**
  * This class allwos the creation of callback when service dependency arrives or disappear.
- * @author escoffie
- *
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class DependencyCallback {
 

@@ -26,7 +26,7 @@ import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * Lifecycle callback handler.
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class LifecycleCallbackHandler implements Handler {
 

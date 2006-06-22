@@ -27,7 +27,7 @@ import org.osgi.framework.BundleContext;
 /**
  * The component manager class manage one "version" of a component.
  * It manages component lifecycle, component instance creation and handlers.
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ComponentManager {
 

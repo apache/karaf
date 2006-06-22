@@ -24,7 +24,7 @@ import java.util.logging.Level;
 
 /**
  * A callback allows calling a method on the component.
- * @author Clement Escoffier
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class Callback {
 
