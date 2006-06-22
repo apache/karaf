@@ -183,9 +183,8 @@ public class OsgiJarMojo extends AbstractMojo {
         // Add the JARs that were specified in the POM
 		// as "not" provided and which are not inlined
 		addEmbeddedJars();
-		addBundleVersion();
 
-		jarArchiver.addDirectory(outputDirectory, getIncludes(), getExcludes());
+        jarArchiver.addDirectory(outputDirectory, getIncludes(), getExcludes());
 
 		// Parse the output directory as if it was a JAR file.
 		// This creates special entries for classes, packageinfo
@@ -602,7 +601,10 @@ public class OsgiJarMojo extends AbstractMojo {
 	 * target artifact's manifest.
 	 */
 	private void addManifestEntries() {
-		if (osgiManifest != null && osgiManifest.getEntries().size() > 0) {
+        if (osgiManifest.getBundleVersion() == null) {
+            addBundleVersion();
+        } 
+        if (osgiManifest != null && osgiManifest.getEntries().size() > 0) {
 			Map entries = osgiManifest.getEntries();
 
 			getLog().debug(
@@ -659,13 +661,10 @@ public class OsgiJarMojo extends AbstractMojo {
 	 * Auto-set the bundle version.
 	 */
 	private void addBundleVersion() {
-		// Maven uses a '-' to separate the version qualifier,
-		// while OSGi uses a '.', so we need to convert to a '.'
-		StringBuffer sb = new StringBuffer(project.getVersion());
-		if (sb.indexOf("-") >= 0) {
-			sb.setCharAt(sb.indexOf("-"), '.');
-		}
-		archiveConfig.addManifestEntry("Bundle-Version", sb.toString());
+        // Maven uses a '-' to separate the version qualifier,
+	    // while OSGi uses a '.', so we need to convert to a '.'
+        String version = project.getVersion().replace('-', '.');
+        osgiManifest.setBundleVersion(version);
 	}
 
 	/**
