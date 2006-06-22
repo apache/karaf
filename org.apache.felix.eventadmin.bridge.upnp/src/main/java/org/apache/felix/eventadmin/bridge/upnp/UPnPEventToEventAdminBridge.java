@@ -34,7 +34,9 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPEventListener;
+import org.osgi.service.upnp.UPnPService;
 
 /**
  * This class registers itself as an UPnPEventListener service with the
@@ -168,28 +170,107 @@ public class UPnPEventToEventAdminBridge implements UPnPEventListener
         }
     }
 
+    // The set contains the last used filter parts. It will be null in case the last
+    // time we registered with a null property. It will be an empty HashSet in 
+    // case we have been unregistered previously
+    private Set last = new HashSet();
+    
     // Registers itself as an UPnPEventListener with the framework in case there
     // is both, at least one EventAdmin (i.e., !m_adminRefs.isEmpty()) and at
-    // least one EventHandler (i.e., !m_handlerRefs.isEmpty()) present and it is not
-    // already registers. Respectively, it unregisters itself in case one of the 
-    // above is false.
+    // least one EventHandler (i.e., !m_handlerRefs.isEmpty()) present and it is
+    // not already registers. Respectively, it unregisters itself in case one of
+    // the above is false.
     private void check()
     {
+        // do we need to be registered?
         if(m_adminRefs.isEmpty() || m_handlerRefs.isEmpty())
         {
+            //no we don't but do we need to unregister?
             if(null != m_reg)
             {
+                //yes 
                 m_reg.unregister();
                 m_reg = null;
+                last = new HashSet();
             }
+        }
+        else // yes we need to be registered
+        {
+            final Set parts = new HashSet();
+            final StringBuffer result = new StringBuffer().append("(|");
+
+            for(Iterator iter = m_handlerRefs.iterator(); iter.hasNext();)
+            {
+                final String filter = (String) ((ServiceReference) iter.next())
+                    .getProperty(EventConstants.EVENT_FILTER);
+
+                // if any filter is not set we need to register with a null and can
+                // return
+                if(null == filter)
+                {
+                    // but only if we are not currently registered with a null
+                    if(last != null)
+                    {
+                        last = null;
+                        change(null);
+                    }
+                    return;
+                }
+
+                // if we don't already have this filter part we need to check if
+                // it is a valid filter
+                if(!parts.contains(filter))
+                {
+                    try
+                    {
+                        m_context.createFilter(filter);
+                        parts.add(filter);
+                        result.append(filter);
+                    } catch(InvalidSyntaxException e)
+                    {
+                        // and it is not a valid filter - hence, drop it
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            final String filter = result.append(")").toString();
+
+            // parts will one be empty if there is no handler with a valid filter
+            // and we only need to register with the new filter if it doesn't equal
+            // the last filter
+            if(!parts.isEmpty() && !parts.equals(last))
+            {
+                last = parts;
+
+                try
+                {
+                    change(new Hashtable()
+                    {
+                        {
+                            put(UPnPEventListener.UPNP_FILTER, m_context
+                                .createFilter(filter));
+                        }
+                    });
+                } catch(InvalidSyntaxException e)
+                {
+                    // This will never happen
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void change(final Dictionary filter)
+    {
+        if(null == m_reg)
+        {
+            m_reg = m_context.registerService(
+                UPnPEventListener.class.getName(), this, filter);
         }
         else
         {
-            if(null == m_reg)
-            {
-                m_reg = m_context.registerService(UPnPEventListener.class
-                    .getName(), this, null);
-            }
+            m_reg.setProperties(filter);
         }
     }
 
@@ -278,8 +359,8 @@ public class UPnPEventToEventAdminBridge implements UPnPEventListener
                     "org/osgi/service/upnp/UPnPEvent", new Hashtable()
                     {
                         {
-                            put("upnp.deviceId", deviceId);
-                            put("upnp.serviceId", serviceId);
+                            put(UPnPDevice.ID, deviceId);
+                            put(UPnPService.ID, serviceId);
                             put("upnp.events", immutableEvents);
                         }
                     }));
