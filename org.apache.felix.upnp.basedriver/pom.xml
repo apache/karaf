@@ -56,7 +56,7 @@
           <osgiManifest>
             <bundleName>UPnPBaseDriver</bundleName>
             <bundleVendor>Apache Software Foundation</bundleVendor>
-            <bundleVersion>1.0.0</bundleVersion>
+            <bundleVersion>0.1.0</bundleVersion>
             <bundleDescription>
                	A Bundle implementation of the UPnP Service Specification R4 (not yet)
             </bundleDescription>

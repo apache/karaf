@@ -96,16 +96,16 @@ public class BuildDevice {
 		devUPnP.setManufactureURL((String) sr.getProperty(UPnPDevice.MANUFACTURER_URL));
 		devUPnP.setModelDescription((String) sr.getProperty(UPnPDevice.MODEL_DESCRIPTION));
 		devUPnP.setModelName((String) sr.getProperty(UPnPDevice.MODEL_NAME));
-		devUPnP.setUDN((String) sr.getProperty(UPnPDevice.UDN));
-		devUPnP.setPresentationURL((String) sr.getProperty(UPnPDevice.PRESENTATION_URL));
-		devUPnP.setUPC((String) sr.getProperty(UPnPDevice.UPC));
 		devUPnP.setModelNumber((String) sr.getProperty(UPnPDevice.MODEL_NUMBER));
 		devUPnP.setModelURL((String) sr.getProperty(UPnPDevice.MODEL_URL));
 		devUPnP.setSerialNumber((String) sr.getProperty(UPnPDevice.SERIAL_NUMBER));
+		devUPnP.setUDN((String) sr.getProperty(UPnPDevice.UDN));
+		devUPnP.setUPC((String) sr.getProperty(UPnPDevice.UPC));
 		devUPnP.setLocation("/gen-desc.xml");		
 
 		addServices("",devUPnP,sr);
 		addDevices("",devUPnP,sr);
+		devUPnP.setPresentationURL((String) sr.getProperty(UPnPDevice.PRESENTATION_URL));
 		
 		return devUPnP;
 	}
@@ -144,18 +144,19 @@ public class BuildDevice {
 		devUPnP.setManufactureURL((String) sr.getProperty(UPnPDevice.MANUFACTURER_URL));
 		devUPnP.setModelDescription((String) sr.getProperty(UPnPDevice.MODEL_DESCRIPTION));
 		devUPnP.setModelName((String) sr.getProperty(UPnPDevice.MODEL_NAME));
-		devUPnP.setUDN((String) sr.getProperty(UPnPDevice.UDN));
-		devUPnP.setPresentationURL((String) sr.getProperty(UPnPDevice.PRESENTATION_URL));
-		devUPnP.setUPC((String) sr.getProperty(UPnPDevice.UPC));
 		devUPnP.setModelNumber((String) sr.getProperty(UPnPDevice.MODEL_NUMBER));
 		devUPnP.setModelURL((String) sr.getProperty(UPnPDevice.MODEL_URL));
 		devUPnP.setSerialNumber((String) sr.getProperty(UPnPDevice.SERIAL_NUMBER));
+		devUPnP.setUDN((String) sr.getProperty(UPnPDevice.UDN));
+		devUPnP.setUPC((String) sr.getProperty(UPnPDevice.UPC));
 		devUPnP.setLocation(id+"/gen-desc.xml");		
 
 		addServices(id,devUPnP,sr);
 		addDevices(id,devUPnP,sr);
 
 		parent.addDevice(devUPnP); //		twa: essential!!!!!!!
+		devUPnP.setPresentationURL((String) sr.getProperty(UPnPDevice.PRESENTATION_URL));
+		
 	}
 	
 	/**
@@ -190,35 +191,7 @@ public class BuildDevice {
 			ser.setDescriptionURL(id+"/service/"+i+"/gen-desc.xml");
 			ser.setControlURL(id+"/service/"+i+"/ctrl");
 			ser.setEventSubURL(id+"/service/"+i+"/event");
-			
-			UPnPStateVariable[] vars = services[i].getStateVariables();
-			for (int j = 0; j < vars.length; j++) {
-				StateVariable var = new StateVariable();
-				var.setDataType(vars[j].getUPnPDataType());
-				var.setName(vars[j].getName());
-				var.setSendEvents(vars[j].sendsEvents());
-				String[] values = vars[j].getAllowedValues();
-				if(values!=null){
-					AllowedValueList avl = new AllowedValueList(values);
-					var.setAllowedValueList(avl);
-				}else if(vars[j].getMaximum()!= null){
-					AllowedValueRange avr = new AllowedValueRange(
-							vars[j].getMaximum(),
-							vars[j].getMinimum(),
-							vars[j].getStep()
-						);
-					var.setAllowedValueRange(avr);
-				}
-				if(vars[j].getDefaultValue()!=null)
-					try {
-						var.setDefaultValue(Converter.toString(
-								vars[j].getDefaultValue(),vars[j].getUPnPDataType()
-							));
-					} catch (Exception ignored) {
-					}
-				ser.addStateVariable(var);				
-			}
-			
+
 			UPnPAction[] actions = services[i].getActions();
 			for (int j = 0; j < actions.length; j++) {
 				Action act = new Action(ser.getServiceNode());
@@ -251,8 +224,36 @@ public class BuildDevice {
 				}
 				act.setArgumentList(al);
 				ser.addAction(act);
-			}
+			}			
 			
+			UPnPStateVariable[] vars = services[i].getStateVariables();
+			for (int j = 0; j < vars.length; j++) {
+				StateVariable var = new StateVariable();
+				var.setDataType(vars[j].getUPnPDataType());
+				var.setName(vars[j].getName());
+				var.setSendEvents(vars[j].sendsEvents());
+				String[] values = vars[j].getAllowedValues();
+				if(values!=null){
+					AllowedValueList avl = new AllowedValueList(values);
+					var.setAllowedValueList(avl);
+				}else if(vars[j].getMaximum()!= null){
+					AllowedValueRange avr = new AllowedValueRange(
+							vars[j].getMaximum(),
+							vars[j].getMinimum(),
+							vars[j].getStep()
+						);
+					var.setAllowedValueRange(avr);
+				}
+				if(vars[j].getDefaultValue()!=null)
+					try {
+						var.setDefaultValue(Converter.toString(
+								vars[j].getDefaultValue(),vars[j].getUPnPDataType()
+							));
+					} catch (Exception ignored) {
+					}
+				ser.addStateVariable(var);				
+			}
+						
 			Activator.bc.ungetService(sr);
 		}
 		
