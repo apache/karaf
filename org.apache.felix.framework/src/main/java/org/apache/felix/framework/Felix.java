@@ -3207,7 +3207,7 @@ public class Felix
                 if (clazz == null)
                 {
                     throw new BundleException("Not found: "
-                        + className);
+                        + className, new ClassNotFoundException(className));
                 }
                 activator = (BundleActivator) clazz.newInstance();
             }
