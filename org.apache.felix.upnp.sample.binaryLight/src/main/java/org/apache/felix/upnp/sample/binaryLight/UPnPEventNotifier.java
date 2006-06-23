@@ -47,13 +47,17 @@ public class UPnPEventNotifier implements PropertyChangeListener,ServiceListener
 	Properties UPnPTargetListener;
 	String serviceId;
 	Vector upnpListeners = new Vector();
+	private String serviceType;
+	private String deviceType;
 	
 	public UPnPEventNotifier(BundleContext context,String deviceId,UPnPService service,EventSource source){
 		this.context=context;
-		this.deviceId=deviceId;
 		this.service=service;
 		this.source=source;
+		this.deviceId=deviceId;
+		this.deviceType = "urn:schemas-upnp-org:device:BinaryLight:1";
 		this.serviceId=service.getId();
+		this.serviceType = service.getType();
 		setupUPnPListenerHouseKeeping(deviceId);
 	}
 	
@@ -64,6 +68,8 @@ public class UPnPEventNotifier implements PropertyChangeListener,ServiceListener
 		UPnPTargetListener = new Properties();
 		UPnPTargetListener.put(UPnPDevice.ID,deviceId);
 		UPnPTargetListener.put(UPnPService.ID,serviceId);
+		UPnPTargetListener.put(UPnPService.TYPE,serviceType);
+		UPnPTargetListener.put(UPnPDevice.TYPE,deviceType);
 		String ANY_UPnPEventListener = "("+Constants.OBJECTCLASS+"="+UPnPEventListener.class.getName()+")";
 		
 		ServiceReference[] listeners = null; 
@@ -150,6 +156,15 @@ public class UPnPEventNotifier implements PropertyChangeListener,ServiceListener
 			};break;
 			
 			case ServiceEvent.MODIFIED:{				
+	               ServiceReference sr = e.getServiceReference();
+	               Filter filter = (Filter)	sr.getProperty(UPnPEventListener.UPNP_FILTER);
+	               removeListener(sr);
+	               if (filter == null)
+	                   addNewListener(sr);
+	               else {
+	                   if (filter.match(UPnPTargetListener))
+	                       addNewListener(sr);
+	               }
 			};break;
 			
 			case ServiceEvent.UNREGISTERING:{	

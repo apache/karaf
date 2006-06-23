@@ -156,6 +156,15 @@ public class UPnPEventNotifier implements PropertyChangeListener,ServiceListener
 			};break;
 			
 			case ServiceEvent.MODIFIED:{				
+	               ServiceReference sr = e.getServiceReference();
+	               Filter filter = (Filter)	sr.getProperty(UPnPEventListener.UPNP_FILTER);
+	               removeListener(sr);
+	               if (filter == null)
+	                   addNewListener(sr);
+	               else {
+	                   if (filter.match(UPnPTargetListener))
+	                       addNewListener(sr);
+	               }
 			};break;
 			
 			case ServiceEvent.UNREGISTERING:{	
