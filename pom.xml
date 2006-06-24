@@ -40,6 +40,9 @@
     <module>org.apache.felix.scr</module>
     <module>org.apache.felix.eventadmin</module>
     <module>org.apache.felix.eventadmin.bridge.upnp</module>
+    <module>org.apache.felix.eventadmin.bridge.configuration</module>
+    <module>org.apache.felix.eventadmin.bridge.useradmin</module>
+    <module>org.apache.felix.eventadmin.bridge.wireadmin</module>
   </modules>
 
   <repositories>
