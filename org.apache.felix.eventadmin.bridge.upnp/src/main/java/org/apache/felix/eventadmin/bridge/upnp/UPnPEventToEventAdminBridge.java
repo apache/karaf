@@ -170,11 +170,12 @@ public class UPnPEventToEventAdminBridge implements UPnPEventListener
         }
     }
 
-    // The set contains the last used filter parts. It will be null in case the last
-    // time we registered with a null property. It will be an empty HashSet in 
+    // The set contains the last used filter parts. It will be null in case the
+    // last
+    // time we registered with a null property. It will be an empty HashSet in
     // case we have been unregistered previously
     private Set last = new HashSet();
-    
+
     // Registers itself as an UPnPEventListener with the framework in case there
     // is both, at least one EventAdmin (i.e., !m_adminRefs.isEmpty()) and at
     // least one EventHandler (i.e., !m_handlerRefs.isEmpty()) present and it is
@@ -185,16 +186,17 @@ public class UPnPEventToEventAdminBridge implements UPnPEventListener
         // do we need to be registered?
         if(m_adminRefs.isEmpty() || m_handlerRefs.isEmpty())
         {
-            //no we don't but do we need to unregister?
+            // no we don't but do we need to unregister?
             if(null != m_reg)
             {
-                //yes 
+                // yes
                 m_reg.unregister();
                 m_reg = null;
                 last = new HashSet();
             }
         }
-        else // yes we need to be registered
+        else
+        // yes we need to be registered
         {
             final Set parts = new HashSet();
             final StringBuffer result = new StringBuffer().append("(|");
@@ -204,7 +206,8 @@ public class UPnPEventToEventAdminBridge implements UPnPEventListener
                 final String filter = (String) ((ServiceReference) iter.next())
                     .getProperty(EventConstants.EVENT_FILTER);
 
-                // if any filter is not set we need to register with a null and can
+                // if any filter is not set we need to register with a null and
+                // can
                 // return
                 if(null == filter)
                 {
@@ -234,10 +237,10 @@ public class UPnPEventToEventAdminBridge implements UPnPEventListener
                 }
             }
 
-            final String filter = result.append(")").toString();
-
-            // parts will one be empty if there is no handler with a valid filter
-            // and we only need to register with the new filter if it doesn't equal
+            // parts will one be empty if there is no handler with a valid
+            // filter
+            // and we only need to register with the new filter if it doesn't
+            // equal
             // the last filter
             if(!parts.isEmpty() && !parts.equals(last))
             {
@@ -249,7 +252,10 @@ public class UPnPEventToEventAdminBridge implements UPnPEventListener
                     {
                         {
                             put(UPnPEventListener.UPNP_FILTER, m_context
-                                .createFilter(filter));
+                                .createFilter(result.append(")").toString()
+                                    .replaceAll("upnp.serviceId",
+                                        UPnPService.ID).replaceAll(
+                                        "upnp.deviceId", UPnPDevice.ID)));
                         }
                     });
                 } catch(InvalidSyntaxException e)
@@ -361,6 +367,8 @@ public class UPnPEventToEventAdminBridge implements UPnPEventListener
                         {
                             put(UPnPDevice.ID, deviceId);
                             put(UPnPService.ID, serviceId);
+                            put("upnp.serviceId", serviceId);
+                            put("upnp.deviceId", deviceId);
                             put("upnp.events", immutableEvents);
                         }
                     }));
