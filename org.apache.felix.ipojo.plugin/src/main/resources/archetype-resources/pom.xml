@@ -17,7 +17,7 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.felix.ipojo</groupId>
+        <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.ipojo.plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
