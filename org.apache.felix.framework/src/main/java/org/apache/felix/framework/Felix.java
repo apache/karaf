@@ -2021,6 +2021,17 @@ public class Felix
             }
         }
 
+        synchronized (m_uninstalledBundlesLock_Priority3)
+        {
+            for (int i = 0; i < m_uninstalledBundles.length; i++)
+            {
+                if (m_uninstalledBundles[i].getInfo().getBundleId() == id)
+                {
+                    return m_uninstalledBundles[i];
+                }
+            }
+        }
+
         return null;
     }
 
@@ -2555,7 +2566,7 @@ public class Felix
         ExportedPackage[] pkgs = getExportedPackages(name);
         // There can be multiple versions of the same package exported,
         // so we will just return the first one.
-        return (pkgs != null) ? pkgs[0] : null;
+        return ((pkgs != null) && (pkgs.length != 0)) ? pkgs[0] : null;
     }
 
     /**
