@@ -2953,55 +2953,8 @@ public class Felix
         // Create map to check for duplicate imports/exports.
         Map dupeMap = new HashMap();
 
-        // Get import packages from bundle manifest.
-        R4Package[] pkgs = R4Package.parseImportOrExportHeader(
-            (String) headerMap.get(Constants.IMPORT_PACKAGE));
-
-        // Create non-duplicated import array.
-        dupeMap.clear();
-        for (int i = 0; i < pkgs.length; i++)
-        {
-            if (dupeMap.get(pkgs[i].getName()) == null)
-            {
-                dupeMap.put(pkgs[i].getName(), new R4Import(pkgs[i]));
-            }
-            else
-            {
-                // TODO: FRAMEWORK - Determine if we should error here.
-                m_logger.log(Logger.LOG_WARNING,
-                    "Duplicate import - " + pkgs[i].getName());
-            }
-        }
-        R4Import[] imports =
-            (R4Import[]) dupeMap.values().toArray(new R4Import[dupeMap.size()]);
-
-        // Check to make sure that R3 bundles have only specified
-        // the 'specification-version' attribute and no directives.
-        if (version.equals("1"))
-        {
-            for (int i = 0; (imports != null) && (i < imports.length); i++)
-            {
-                if (imports[i].getDirectives().length != 0)
-                {
-                    throw new BundleException("R3 imports cannot contain directives.");
-                }
-                // NOTE: This is checking for "version" rather than "specification-version"
-                // because the package class normalizes to "version" to avoid having
-                // future special cases. This could be changed if more strict behavior
-                // is required.
-                if ((imports[i].getVersionHigh() != null) ||
-                    (imports[i].getAttributes().length > 1) ||
-                    ((imports[i].getAttributes().length == 1) &&
-                        (!imports[i].getAttributes()[0].getName().equals(FelixConstants.VERSION_ATTRIBUTE))))
-                {
-                    throw new BundleException(
-                        "Import does not conform to R3 syntax: " + imports[i]);
-                }
-            }
-        }
-
         // Get export packages from bundle manifest.
-        pkgs = R4Package.parseImportOrExportHeader(
+        R4Package[] pkgs = R4Package.parseImportOrExportHeader(
             (String) headerMap.get(Constants.EXPORT_PACKAGE));
 
         // Create non-duplicated export array.
@@ -3022,65 +2975,27 @@ public class Felix
         R4Export[] exports =
             (R4Export[]) dupeMap.values().toArray(new R4Export[dupeMap.size()]);
 
+        // Get import packages from bundle manifest.
+        pkgs = R4Package.parseImportOrExportHeader(
+            (String) headerMap.get(Constants.IMPORT_PACKAGE));
 
-        // Check to make sure that R3 bundles have only specified
-        // the 'specification-version' attribute and no directives.
-        // In addition, all R3 exports imply imports, so add a
-        // corresponding import for each export.
-        if (version.equals("1"))
+        // Create non-duplicated import array.
+        dupeMap.clear();
+        for (int i = 0; i < pkgs.length; i++)
         {
-            for (int i = 0; (exports != null) && (i < exports.length); i++)
+            if (dupeMap.get(pkgs[i].getName()) == null)
             {
-                if (exports[i].getDirectives().length != 0)
-                {
-                    throw new BundleException("R3 exports cannot contain directives.");
-                }
-                // NOTE: This is checking for "version" rather than "specification-version"
-                // because the package class normalizes to "version" to avoid having
-                // future special cases. This could be changed if more strict behavior
-                // is required.
-                if ((exports[i].getAttributes().length > 1) ||
-                    ((exports[i].getAttributes().length == 1) &&
-                        (!exports[i].getAttributes()[0].getName().equals(FelixConstants.VERSION_ATTRIBUTE))))
-                {
-                    throw new BundleException(
-                        "Export does not conform to R3 syntax: " + imports[i]);
-                }
+                dupeMap.put(pkgs[i].getName(), new R4Import(pkgs[i]));
             }
-            
-            R4Import[] newImports = new R4Import[imports.length + exports.length];
-            System.arraycopy(imports, 0, newImports, 0, imports.length);
-            for (int i = 0; i < exports.length; i++)
+            else
             {
-                newImports[i + imports.length] = new R4Import(exports[i]);
-            }
-            imports = newImports;
-        }
-
-        // For R3 bundles, add a "uses" directive onto each export
-        // that references every other import (which will include
-        // exports, since export implies import); this is
-        // necessary since R3 bundles assumed a single class space,
-        // but R4 allows for multiple class spaces.
-        if (version.equals("1"))
-        {
-            String usesValue = "";
-            for (int i = 0; (imports != null) && (i < imports.length); i++)
-            {
-                usesValue = usesValue
-                    + ((usesValue.length() > 0) ? "," : "")
-                    + imports[i].getName();
-            }
-            R4Directive uses = new R4Directive(
-                FelixConstants.USES_DIRECTIVE, usesValue);
-            for (int i = 0; (exports != null) && (i < exports.length); i++)
-            {
-                exports[i] = new R4Export(
-                    exports[i].getName(),
-                    new R4Directive[] { uses },
-                    exports[i].getAttributes());
+                // TODO: FRAMEWORK - Determine if we should error here.
+                m_logger.log(Logger.LOG_WARNING,
+                    "Duplicate import - " + pkgs[i].getName());
             }
         }
+        R4Import[] imports =
+            (R4Import[]) dupeMap.values().toArray(new R4Import[dupeMap.size()]);
 
         // Get dynamic import packages from bundle manifest.
         pkgs = R4Package.parseImportOrExportHeader(
@@ -3104,19 +3019,109 @@ public class Felix
         R4Import[] dynamics =
             (R4Import[]) dupeMap.values().toArray(new R4Import[dupeMap.size()]);
 
-        // Check to make sure that R3 bundles have no attributes or
-        // directives.
+        // Do validity checking and conversion on bundles with R3 headers.
         if (version.equals("1"))
         {
-            for (int i = 0; (dynamics != null) && (i < dynamics.length); i++)
+            // Check to make sure that R3 bundles have only specified
+            // the 'specification-version' attribute and no directives
+            // on their exports.
+            for (int i = 0; (exports != null) && (i < exports.length); i++)
             {
-                if (dynamics[i].getDirectives().length != 0)
+                if (exports[i].getDirectives().length != 0)
                 {
-                    throw new BundleException("R3 dynamic imports cannot contain directives.");
+                    throw new BundleException("R3 exports cannot contain directives.");
                 }
-                if (dynamics[i].getAttributes().length != 0)
+                // NOTE: This is checking for "version" rather than "specification-version"
+                // because the package class normalizes to "version" to avoid having
+                // future special cases. This could be changed if more strict behavior
+                // is required.
+                if ((exports[i].getAttributes().length > 1) ||
+                    ((exports[i].getAttributes().length == 1) &&
+                        (!exports[i].getAttributes()[0].getName().equals(FelixConstants.VERSION_ATTRIBUTE))))
                 {
-                    throw new BundleException("R3 dynamic imports cannot contain attributes.");
+                    throw new BundleException(
+                        "Export does not conform to R3 syntax: " + imports[i]);
+                }
+            }
+            
+            // Check to make sure that R3 bundles have only specified
+            // the 'specification-version' attribute and no directives
+            // on their imports.
+            for (int i = 0; (imports != null) && (i < imports.length); i++)
+            {
+                if (imports[i].getDirectives().length != 0)
+                {
+                    throw new BundleException("R3 imports cannot contain directives.");
+                }
+                // NOTE: This is checking for "version" rather than "specification-version"
+                // because the package class normalizes to "version" to avoid having
+                // future special cases. This could be changed if more strict behavior
+                // is required.
+                if ((imports[i].getVersionHigh() != null) ||
+                    (imports[i].getAttributes().length > 1) ||
+                    ((imports[i].getAttributes().length == 1) &&
+                        (!imports[i].getAttributes()[0].getName().equals(FelixConstants.VERSION_ATTRIBUTE))))
+                {
+                    throw new BundleException(
+                        "Import does not conform to R3 syntax: " + imports[i]);
+                }
+            }
+
+            // Since all R3 exports imply an import, add a corresponding
+            // import for each existing export. Create non-duplicated import array.
+            dupeMap.clear();
+            // Add existing imports.
+            for (int i = 0; i < imports.length; i++)
+            {
+                dupeMap.put(imports[i].getName(), imports[i]);
+            }
+            // Add import for each export.
+            for (int i = 0; i < exports.length; i++)
+            {
+                if (dupeMap.get(exports[i].getName()) == null)
+                {
+                    dupeMap.put(exports[i].getName(), new R4Import(exports[i]));
+                }
+            }
+            imports =
+                (R4Import[]) dupeMap.values().toArray(new R4Import[dupeMap.size()]);
+
+            // Add a "uses" directive onto each export of R3 bundles
+            // that references every other import (which will include
+            // exports, since export implies import); this is
+            // necessary since R3 bundles assumed a single class space,
+            // but R4 allows for multiple class spaces.
+            String usesValue = "";
+            for (int i = 0; (imports != null) && (i < imports.length); i++)
+            {
+                usesValue = usesValue
+                    + ((usesValue.length() > 0) ? "," : "")
+                    + imports[i].getName();
+            }
+            R4Directive uses = new R4Directive(
+                FelixConstants.USES_DIRECTIVE, usesValue);
+            for (int i = 0; (exports != null) && (i < exports.length); i++)
+            {
+                exports[i] = new R4Export(
+                    exports[i].getName(),
+                    new R4Directive[] { uses },
+                    exports[i].getAttributes());
+            }
+
+            // Check to make sure that R3 bundles have no attributes or
+            // directives on their dynamic imports.
+            if (version.equals("1"))
+            {
+                for (int i = 0; (dynamics != null) && (i < dynamics.length); i++)
+                {
+                    if (dynamics[i].getDirectives().length != 0)
+                    {
+                        throw new BundleException("R3 dynamic imports cannot contain directives.");
+                    }
+                    if (dynamics[i].getAttributes().length != 0)
+                    {
+                        throw new BundleException("R3 dynamic imports cannot contain attributes.");
+                    }
                 }
             }
         }
