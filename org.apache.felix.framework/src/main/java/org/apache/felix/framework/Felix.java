@@ -1362,6 +1362,13 @@ public class Felix
             // then reset its state to RESOLVED.
             info.setState(Bundle.RESOLVED);
 
+            // Clean up the bundle context, if necessary.
+            if (info.getContext() != null)
+            {
+                ((BundleContextImpl) info.getContext()).invalidate();
+                info.setContext(null);
+            }
+
             // Unregister any services offered by this bundle.
             m_registry.unregisterServices(bundle);
 
@@ -1655,6 +1662,13 @@ public class Felix
             rethrow = th;
         }
                   
+        // Clean up the bundle context, if necessary.
+        if (info.getContext() != null)
+        {
+            ((BundleContextImpl) info.getContext()).invalidate();
+            info.setContext(null);
+        }
+
         // Unregister any services offered by this bundle.
         m_registry.unregisterServices(bundle);
         

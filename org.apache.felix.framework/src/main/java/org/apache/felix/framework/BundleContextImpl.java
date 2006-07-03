@@ -27,11 +27,17 @@ class BundleContextImpl implements FelixBundleContext
 {
     private Felix m_felix = null;
     private BundleImpl m_bundle = null;
+    private boolean m_valid = true;
 
     protected BundleContextImpl(Felix felix, BundleImpl bundle)
     {
         m_felix = felix;
         m_bundle = bundle;
+    }
+
+    protected void invalidate()
+    {
+        m_valid = false;
     }
 
     public void addImportPackage() throws BundleException
@@ -56,14 +62,14 @@ class BundleContextImpl implements FelixBundleContext
 
     public String getProperty(String name)
     {
-        checkBundleContextValid();
+        checkValidity();
         
         return m_felix.getProperty(name);
     }
 
     public Bundle getBundle()
     {
-        checkBundleContextValid();
+        checkValidity();
         
         return m_bundle;
     }
@@ -71,7 +77,7 @@ class BundleContextImpl implements FelixBundleContext
     public Filter createFilter(String expr)
         throws InvalidSyntaxException
     {
-        checkBundleContextValid();
+        checkValidity();
         
         return new FilterImpl(m_felix.getLogger(), expr);
     }
@@ -85,35 +91,35 @@ class BundleContextImpl implements FelixBundleContext
     public Bundle installBundle(String location, InputStream is)
         throws BundleException
     {
-        checkBundleContextValid();
+        checkValidity();
         
         return m_felix.installBundle(location, is);
     }
 
     public Bundle getBundle(long id)
     {
-        checkBundleContextValid();
+        checkValidity();
         
         return m_felix.getBundle(id);
     }
 
     public Bundle[] getBundles()
     {
-        checkBundleContextValid();
+        checkValidity();
         
         return m_felix.getBundles();
     }
 
     public void addBundleListener(BundleListener l)
     {
-        checkBundleContextValid();
+        checkValidity();
         
         m_felix.addBundleListener(m_bundle, l);
     }
 
     public void removeBundleListener(BundleListener l)
     {
-        checkBundleContextValid();
+        checkValidity();
         
         m_felix.removeBundleListener(l);
     }
@@ -133,28 +139,28 @@ class BundleContextImpl implements FelixBundleContext
     public void addServiceListener(ServiceListener l, String s)
         throws InvalidSyntaxException
     {
-        checkBundleContextValid();
+        checkValidity();
         
         m_felix.addServiceListener(m_bundle, l, s);
     }
 
     public void removeServiceListener(ServiceListener l)
     {
-        checkBundleContextValid();
+        checkValidity();
         
         m_felix.removeServiceListener(l);
     }
 
     public void addFrameworkListener(FrameworkListener l)
     {
-        checkBundleContextValid();
+        checkValidity();
         
         m_felix.addFrameworkListener(m_bundle, l);
     }
 
     public void removeFrameworkListener(FrameworkListener l)
     {
-        checkBundleContextValid();
+        checkValidity();
         
         m_felix.removeFrameworkListener(l);
     }
@@ -168,14 +174,14 @@ class BundleContextImpl implements FelixBundleContext
     public ServiceRegistration registerService(
         String[] clazzes, Object svcObj, Dictionary dict)
     {
-        checkBundleContextValid();
+        checkValidity();
         
         return m_felix.registerService(m_bundle, clazzes, svcObj, dict);
     }
 
     public ServiceReference getServiceReference(String clazz)
     {
-        checkBundleContextValid();
+        checkValidity();
         
         try
         {
@@ -275,7 +281,7 @@ class BundleContextImpl implements FelixBundleContext
 
     public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException
     {
-        checkBundleContextValid();
+        checkValidity();
         
         // TODO: Implement BundleContext.getAllServiceReferences()
         return null;
@@ -284,14 +290,14 @@ class BundleContextImpl implements FelixBundleContext
     public ServiceReference[] getServiceReferences(String clazz, String filter)
         throws InvalidSyntaxException
     {
-        checkBundleContextValid();
+        checkValidity();
         
         return m_felix.getServiceReferences(m_bundle, clazz, filter);
     }
 
     public Object getService(ServiceReference ref)
     {
-        checkBundleContextValid();
+        checkValidity();
         
         if (ref == null)
         {
@@ -302,7 +308,7 @@ class BundleContextImpl implements FelixBundleContext
 
     public boolean ungetService(ServiceReference ref)
     {
-        checkBundleContextValid();
+        checkValidity();
         
         if (ref == null)
         {
@@ -315,19 +321,22 @@ class BundleContextImpl implements FelixBundleContext
 
     public File getDataFile(String s)
     {
-        checkBundleContextValid();
+        checkValidity();
         
         return m_felix.getDataFile(m_bundle, s);
     }
 
-    private void checkBundleContextValid()
+    private void checkValidity()
     {
-        switch(m_bundle.getState())
+        if (m_valid)
         {
-            case Bundle.ACTIVE:
-            case Bundle.STARTING:
-            case Bundle.STOPPING:
-                return;
+            switch (m_bundle.getState())
+            {
+                case Bundle.ACTIVE:
+                case Bundle.STARTING:
+                case Bundle.STOPPING:
+                    return;
+            }
         }
         
         throw new IllegalStateException("Invalid BundleContext.");
