@@ -3017,8 +3017,34 @@ public class Felix
         R4Import[] dynamics =
             (R4Import[]) dupeMap.values().toArray(new R4Import[dupeMap.size()]);
 
-        // Do validity checking and conversion on bundles with R3 headers.
-        if (version.equals("1"))
+        // Do some validity checking on bundles with R4 headers.
+        if (version.equals("2"))
+        {
+            // Verify that bundle symbolic name is specified.
+            String targetSym = (String) headerMap.get(FelixConstants.BUNDLE_SYMBOLICNAME);
+            if (targetSym == null)
+            {
+                throw new BundleException("R4 bundle manifests must include bundle symbolic name.");
+            }
+            // Verify that the bundle symbolic name and version is unique.
+            String targetVer = (String) headerMap.get(FelixConstants.BUNDLE_VERSION);
+            targetVer = (targetVer == null) ? "0.0.0" : targetVer;
+            Bundle[] bundles = getBundles();
+            for (int i = 0; (bundles != null) && (i < bundles.length); i++)
+            {
+                String sym = (String) ((BundleImpl) bundles[i])
+                    .getInfo().getCurrentHeader().get(Constants.BUNDLE_SYMBOLICNAME);
+                String ver = (String) ((BundleImpl) bundles[i])
+                    .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION);
+                ver = (ver == null) ? "0.0.0" : ver;
+                if (targetSym.equals(sym) && targetVer.equals(ver))
+                {
+                    throw new BundleException("Bundle symbolic name and version are not unique.");
+                }
+            }
+        }
+        // Do some validity checking and conversion on bundles with R3 headers.
+        else if (version.equals("1"))
         {
             // Check to make sure that R3 bundles have only specified
             // the 'specification-version' attribute and no directives
