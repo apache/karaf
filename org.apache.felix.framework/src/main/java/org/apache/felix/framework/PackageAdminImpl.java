@@ -126,6 +126,11 @@ class PackageAdminImpl implements PackageAdmin, Runnable
         return m_felix.getExportedPackages(b);
     }
 
+    public ExportedPackage[] getExportedPackages(String name)
+    {
+        return m_felix.getExportedPackages(name);
+    }
+
     /**
      * The OSGi specification states that refreshing packages is
      * asynchronous; this method simply notifies the package admin
@@ -205,11 +210,6 @@ class PackageAdminImpl implements PackageAdmin, Runnable
                 }
             }
         }
-    }
-
-    public ExportedPackage[] getExportedPackages(String name)
-    {
-        return m_felix.getExportedPackages(name);
     }
 
     public boolean resolveBundles(Bundle[] bundles)
