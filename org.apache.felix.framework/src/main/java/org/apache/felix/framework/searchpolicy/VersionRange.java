@@ -82,8 +82,8 @@ public class VersionRange
         if (range.indexOf(',') >= 0)
         {
             String s = range.substring(1, range.length() - 1);
-            String vlo = s.substring(0, s.indexOf(','));
-            String vhi = s.substring(s.indexOf(',') + 1, s.length());
+            String vlo = s.substring(0, s.indexOf(',')).trim();
+            String vhi = s.substring(s.indexOf(',') + 1, s.length()).trim();
             return new VersionRange (
                 new Version(vlo), (range.charAt(0) == '['),
                 new Version(vhi), (range.charAt(range.length() - 1) == ']'));
