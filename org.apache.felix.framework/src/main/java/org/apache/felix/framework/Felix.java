@@ -2932,20 +2932,20 @@ public class Felix
      * Creates a module for a given bundle by reading the bundle's
      * manifest meta-data and converting it to work with the underlying
      * import/export search policy of the module loader.
-     * @param id The identifier of the bundle for which the module should
+     * @param targetId The identifier of the bundle for which the module should
      *        be created.
-     * @param headers The headers map associated with the bundle.
+     * @param headerMap The headers map associated with the bundle.
      * @return The initialized and/or newly created module.
     **/
-    private IModule createModule(long id, int revision, Map headerMap)
+    private IModule createModule(long targetId, int revision, Map headerMap)
         throws Exception
     {
         // Get the manifest version.
-        String version = (String) headerMap.get(FelixConstants.BUNDLE_MANIFESTVERSION);
-        version = (version == null) ? "1" : version;
-        if (!version.equals("1") && !version.equals("2"))
+        String manifestVersion = (String) headerMap.get(FelixConstants.BUNDLE_MANIFESTVERSION);
+        manifestVersion = (manifestVersion == null) ? "1" : manifestVersion;
+        if (!manifestVersion.equals("1") && !manifestVersion.equals("2"))
         {
-            throw new BundleException("Unknown 'Bundle-ManifestVersion' value: " + version);
+            throw new BundleException("Unknown 'Bundle-ManifestVersion' value: " + manifestVersion);
         }
 
         // Create map to check for duplicate imports/exports.
@@ -3018,7 +3018,7 @@ public class Felix
             (R4Import[]) dupeMap.values().toArray(new R4Import[dupeMap.size()]);
 
         // Do some validity checking on bundles with R4 headers.
-        if (version.equals("2"))
+        if (manifestVersion.equals("2"))
         {
             // Verify that bundle symbolic name is specified.
             String targetSym = (String) headerMap.get(FelixConstants.BUNDLE_SYMBOLICNAME);
@@ -3032,19 +3032,20 @@ public class Felix
             Bundle[] bundles = getBundles();
             for (int i = 0; (bundles != null) && (i < bundles.length); i++)
             {
+                long id = ((BundleImpl) bundles[i]).getInfo().getBundleId();
                 String sym = (String) ((BundleImpl) bundles[i])
                     .getInfo().getCurrentHeader().get(Constants.BUNDLE_SYMBOLICNAME);
                 String ver = (String) ((BundleImpl) bundles[i])
                     .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION);
                 ver = (ver == null) ? "0.0.0" : ver;
-                if (targetSym.equals(sym) && targetVer.equals(ver))
+                if (targetSym.equals(sym) && targetVer.equals(ver) && (targetId != id))
                 {
                     throw new BundleException("Bundle symbolic name and version are not unique.");
                 }
             }
         }
         // Do some validity checking and conversion on bundles with R3 headers.
-        else if (version.equals("1"))
+        else if (manifestVersion.equals("1"))
         {
             // Check to make sure that R3 bundles have only specified
             // the 'specification-version' attribute and no directives
@@ -3134,18 +3135,15 @@ public class Felix
 
             // Check to make sure that R3 bundles have no attributes or
             // directives on their dynamic imports.
-            if (version.equals("1"))
+            for (int i = 0; (dynamics != null) && (i < dynamics.length); i++)
             {
-                for (int i = 0; (dynamics != null) && (i < dynamics.length); i++)
+                if (dynamics[i].getDirectives().length != 0)
                 {
-                    if (dynamics[i].getDirectives().length != 0)
-                    {
-                        throw new BundleException("R3 dynamic imports cannot contain directives.");
-                    }
-                    if (dynamics[i].getAttributes().length != 0)
-                    {
-                        throw new BundleException("R3 dynamic imports cannot contain attributes.");
-                    }
+                    throw new BundleException("R3 dynamic imports cannot contain directives.");
+                }
+                if (dynamics[i].getAttributes().length != 0)
+                {
+                    throw new BundleException("R3 dynamic imports cannot contain attributes.");
                 }
             }
         }
@@ -3160,7 +3158,7 @@ public class Felix
         for (int i = 0; i < libraries.length; i++)
         {
             libraries[i] = new R4Library(
-                m_logger, m_cache, id, revision,
+                m_logger, m_cache, targetId, revision,
                 getProperty(Constants.FRAMEWORK_OS_NAME),
                 getProperty(Constants.FRAMEWORK_PROCESSOR),
                 libraryHeaders[i]);
@@ -3175,7 +3173,7 @@ public class Felix
 
         // First, create the module.
         IModule module = m_factory.createModule(
-            Long.toString(id) + "." + Integer.toString(revision));
+            Long.toString(targetId) + "." + Integer.toString(revision));
         // Attach the R4 search policy metadata to the module.
         m_policyCore.setExports(module, exports);
         m_policyCore.setImports(module, imports);
@@ -3185,8 +3183,8 @@ public class Felix
         // Create the content loader associated with the module archive.
         IContentLoader contentLoader = new ContentLoaderImpl(
                 m_logger,
-                m_cache.getArchive(id).getRevision(revision).getContent(),
-                m_cache.getArchive(id).getRevision(revision).getContentPath());
+                m_cache.getArchive(targetId).getRevision(revision).getContent(),
+                m_cache.getArchive(targetId).getRevision(revision).getContentPath());
         // Set the content loader's search policy.
         contentLoader.setSearchPolicy(
                 new R4SearchPolicy(m_policyCore, module));
