@@ -139,7 +139,8 @@ class PackageAdminImpl implements PackageAdmin, Runnable
 
     public ExportedPackage[] getExportedPackages(String name)
     {
-        return m_felix.getExportedPackages(name);
+        ExportedPackage[] pkgs = m_felix.getExportedPackages(name);
+        return ((pkgs == null) || pkgs.length == 0) ? null : pkgs;
     }
 
     /**
