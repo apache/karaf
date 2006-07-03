@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="Apache Felix">
+  <bannerLeft>
+    <name>Apache Felix</name>
+    <href>http://incubator.apache.org/felix/</href>
+  </bannerLeft>
+  <body>
+    <links>
+      <item name="Apache" href="http://www.apache.org/" />
+      <item name="Wiki" href="#"/>
+    </links>
+
+    <menu name="Apache Felix">
+      <item name="Introduction" href="index.html"/>
+      <item name="Download" href="download.html"/>
+      <item name="Release Notes" href="release-notes.html" />
+      <item name="General Information" href="about.html"/>
+      <item name="Road Map" href="roadmap.html" />
+    </menu>
+
+	<menu ref="modules" />
+	
+    <menu ref="reports" />
+
+    <menu name="Test Reports">
+      <item name="Unit tests" href="surefire-report.html" />
+    </menu>
+
+    ${reports}
+
+  </body>
+</project>

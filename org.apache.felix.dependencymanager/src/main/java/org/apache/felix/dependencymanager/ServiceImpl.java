@@ -246,7 +246,9 @@ public class ServiceImpl implements Service {
             }
             catch (Exception e) {
                 // TODO handle this exception
-                e.printStackTrace();
+                // e.printStackTrace();
+                // TODO remove line below!!!
+                throw new RuntimeException(e);
             }
         }
     }
