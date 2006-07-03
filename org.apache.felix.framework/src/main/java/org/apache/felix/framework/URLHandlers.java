@@ -359,7 +359,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                     // Check the registry of framework instances
                     for (int i = 0; i < m_frameworkList.size(); i++)
                     {
-                        if (((Felix) m_frameworkList.get(i)).isBundleClass(targetClass))
+                        if (((Felix) m_frameworkList.get(i)).getBundle(targetClass) != null)
                         {
                             return (Felix) m_frameworkList.get(i);
                         }

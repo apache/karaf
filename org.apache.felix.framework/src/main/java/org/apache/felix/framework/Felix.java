@@ -957,35 +957,6 @@ public class Felix
         return (((BundleImpl) bundle).getInfo().getPersistentState() == Bundle.ACTIVE);
     }
 
-    /**
-     * <p>
-     * This method is used to determine if the specified class is from
-     * a bundle installed in the framework instance. This method is used
-     * by the URL Handlers service when determining the framework instance
-     * associated with call stack.
-     * </p>
-     * @param clazz The class to test for whether it comes from a bundle.
-     * @return <tt>true</tt> if the class comes from a bundle installed in
-     *         the framework, <tt>false</tt> otherwise.
-    **/
-    protected boolean isBundleClass(Class clazz)
-    {
-        if (clazz.getClassLoader() instanceof ContentClassLoader)
-        {
-            IContentLoader contentLoader =
-                ((ContentClassLoader) clazz.getClassLoader()).getContentLoader();
-            IModule[] modules = m_factory.getModules();
-            for (int i = 0; i < modules.length; i++)
-            {
-                if (modules[i].getContentLoader() == contentLoader)
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     //
     // Implementation of Bundle interface methods.
     //
@@ -2552,6 +2523,36 @@ public class Felix
     //
     // PackageAdmin related methods.
     //
+
+    /**
+     * This method returns the bundle associated with the specified class if
+     * the class was loaded from a bundle from this framework instance. If the
+     * class was not loaded from a bundle or was loaded by a bundle in another
+     * framework instance, then <tt>null</tt> is returned.
+     * 
+     * @param clazz the class for which to find its associated bundle.
+     * @return the bundle associated with the specified class or <tt>null</tt>
+     *         if the class was not loaded by a bundle or its associated
+     *         bundle belongs to a different framework instance.
+    **/
+    protected Bundle getBundle(Class clazz)
+    {
+        if (clazz.getClassLoader() instanceof ContentClassLoader)
+        {
+            IContentLoader contentLoader =
+                ((ContentClassLoader) clazz.getClassLoader()).getContentLoader();
+            IModule[] modules = m_factory.getModules();
+            for (int i = 0; i < modules.length; i++)
+            {
+                if (modules[i].getContentLoader() == contentLoader)
+                {
+                    long id = Util.getBundleIdFromModuleId(modules[i].getId());
+                    return getBundle(id);
+                }
+            }
+        }
+        return null;
+    }
 
     /**
      * Returns the exported package associated with the specified

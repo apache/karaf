@@ -16,7 +16,10 @@
  */
 package org.apache.felix.framework;
 
-import org.osgi.framework.Bundle;
+import java.util.*;
+
+import org.apache.felix.framework.searchpolicy.VersionRange;
+import org.osgi.framework.*;
 import org.osgi.service.packageadmin.*;
 
 class PackageAdminImpl implements PackageAdmin, Runnable
@@ -32,6 +35,71 @@ class PackageAdminImpl implements PackageAdmin, Runnable
         Thread t = new Thread(this, "FelixPackageAdmin");
         t.setDaemon(true);
         t.start();
+    }
+
+    /**
+     * Returns the bundle associated with this class if the class was
+     * loaded from a bundle, otherwise returns null.
+     * 
+     * @param clazz the class for which to determine its associated bundle.
+     * @return the bundle associated with the specified class, otherwise null.
+    **/
+    public Bundle getBundle(Class clazz)
+    {
+        return m_felix.getBundle(clazz);
+    }
+
+    /**
+     * Returns all bundles that have a specified symbolic name and whose
+     * version is in the specified version range. If no version range is
+     * specified, then all bundles with the specified symbolic name are
+     * returned. The array is sorted in descending version order.
+     * 
+     * @param symbolicName the target symbolic name.
+     * @param versionRange the target version range.
+     * @return an array of matching bundles sorted in descending version order.
+    **/
+    public Bundle[] getBundles(String symbolicName, String versionRange)
+    {
+// TODO: PACKAGEADMIN - This could be made more efficient by reducing object creation.
+        VersionRange vr = (versionRange == null)
+            ? null : VersionRange.parse(versionRange);
+        Bundle[] bundles = m_felix.getBundles();
+        List list = new ArrayList();
+        for (int i = 0; (bundles != null) && (i < bundles.length); i++)
+        {
+            String sym = (String) ((BundleImpl) bundles[i])
+                .getInfo().getCurrentHeader().get(Constants.BUNDLE_SYMBOLICNAME);
+            if ((sym != null) && sym.equals(symbolicName))
+            {
+                String s = (String) ((BundleImpl) bundles[i])
+                    .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION);
+                Version v = (s == null) ? new Version("0.0.0") : new Version(s);
+                if ((vr == null) || vr.isInRange(v))
+                {
+                    list.add(bundles[i]);
+                }
+            }
+        }
+        if (list.size() == 0)
+        {
+            return null;
+        }
+        bundles = (Bundle[]) list.toArray(new Bundle[list.size()]);
+        Arrays.sort(bundles, new Comparator() {
+            public int compare(Object o1, Object o2)
+            {
+                String s1 = (String) ((BundleImpl) o1)
+                    .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION);
+                String s2 = (String) ((BundleImpl) o2)
+                    .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION);
+                Version v1 = (s1 == null) ? new Version("0.0.0") : new Version(s1);
+                Version v2 = (s2 == null) ? new Version("0.0.0") : new Version(s2);
+                // Compare in reverse order to get descending sort.
+                return v2.compareTo(v1);
+            }
+        });
+        return bundles;
     }
 
     /**
@@ -155,12 +223,6 @@ class PackageAdminImpl implements PackageAdmin, Runnable
         return null;
     }
 
-    public Bundle[] getBundles(String symbolicName, String versionRange)
-    {
-        // TODO: Implement PackageAdmin.getBundles()
-        return null;
-    }
-
     public Bundle[] getFragments(Bundle bundle)
     {
         // TODO: Implement PackageAdmin.getFragments()
@@ -170,12 +232,6 @@ class PackageAdminImpl implements PackageAdmin, Runnable
     public Bundle[] getHosts(Bundle bundle)
     {
         // TODO: Implement PackageAdmin.getHosts()
-        return null;
-    }
-
-    public Bundle getBundle(Class clazz)
-    {
-        // TODO: Implement PackageAdmin.getBundle()
         return null;
     }
 
