@@ -2569,23 +2569,7 @@ public class Felix
     }
 
     /**
-     * Returns the exported package associated with the specified
-     * package name. This is used by the PackageAdmin service
-     * implementation.
-     *
-     * @param name The name of the exported package to find.
-     * @return The exported package or null if no matching package was found.
-    **/
-    protected ExportedPackage getExportedPackage(String name)
-    {
-        ExportedPackage[] pkgs = getExportedPackages(name);
-        // There can be multiple versions of the same package exported,
-        // so we will just return the first one.
-        return ((pkgs != null) && (pkgs.length != 0)) ? pkgs[0] : null;
-    }
-
-    /**
-     * Returns the exported package associated with the specified
+     * Returns the exported packages associated with the specified
      * package name. This is used by the PackageAdmin service
      * implementation.
      *

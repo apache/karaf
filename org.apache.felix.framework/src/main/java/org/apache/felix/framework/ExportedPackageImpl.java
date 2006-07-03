@@ -35,7 +35,7 @@ class ExportedPackageImpl implements ExportedPackage
         m_felix = felix;
         m_exporter = exporter;
         m_name = name;
-        m_version = version;
+        m_version = (version == null) ? Version.emptyVersion : version;
     }
 
     public Bundle getExportingBundle()
@@ -82,14 +82,7 @@ class ExportedPackageImpl implements ExportedPackage
     {
         if (m_versionString == null)
         {
-            if (m_version == null)
-            {
-                m_versionString = "0.0.0";
-            }
-            else
-            {
-                m_versionString = m_version.toString();
-            }
+            m_versionString = m_version.toString();
         }
         return m_versionString;
     }

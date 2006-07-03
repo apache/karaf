@@ -102,16 +102,44 @@ class PackageAdminImpl implements PackageAdmin, Runnable
         return bundles;
     }
 
+    public int getBundleType(Bundle bundle)
+    {
+        return 0;
+    }
+
     /**
      * Returns the exported package associated with the specified
-     * package name.
+     * package name. If there are more than one version of the package
+     * being exported, then the highest version is returned.
      *
      * @param name the name of the exported package to find.
      * @return the exported package or null if no matching package was found.
     **/
     public ExportedPackage getExportedPackage(String name)
     {
-        return m_felix.getExportedPackage(name);
+        // Get all versions of the exported package.
+        ExportedPackage[] pkgs = m_felix.getExportedPackages(name);
+        // If there are no versions exported, then return null.
+        if ((pkgs == null) || (pkgs.length == 0))
+        {
+            return null;
+        }
+        // Sort the exported versions.
+        Arrays.sort(pkgs, new Comparator() {
+            public int compare(Object o1, Object o2)
+            {
+                // Reverse arguments to sort in descending order.
+                return ((ExportedPackage) o2).getVersion().compareTo(
+                    ((ExportedPackage) o1).getVersion());
+            }
+        });
+        // Return the highest version.
+        return pkgs[0];
+    }
+
+    public ExportedPackage[] getExportedPackages(String name)
+    {
+        return m_felix.getExportedPackages(name);
     }
 
     /**
@@ -124,11 +152,6 @@ class PackageAdminImpl implements PackageAdmin, Runnable
     public ExportedPackage[] getExportedPackages(Bundle b)
     {
         return m_felix.getExportedPackages(b);
-    }
-
-    public ExportedPackage[] getExportedPackages(String name)
-    {
-        return m_felix.getExportedPackages(name);
     }
 
     /**
@@ -233,11 +256,5 @@ class PackageAdminImpl implements PackageAdmin, Runnable
     {
         // TODO: Implement PackageAdmin.getHosts()
         return null;
-    }
-
-    public int getBundleType(Bundle bundle)
-    {
-        // TODO: Implement PackageAdmin.getBundleType()
-        return 0;
     }
 }
