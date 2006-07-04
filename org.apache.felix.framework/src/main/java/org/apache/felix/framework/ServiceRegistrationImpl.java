@@ -97,6 +97,10 @@ class ServiceRegistrationImpl implements ServiceRegistration
             m_svcObj = null;
             m_factory = null;
         }
+        else
+        {
+            throw new IllegalStateException("Service already unregistered.");
+        }
     }
 
     //
