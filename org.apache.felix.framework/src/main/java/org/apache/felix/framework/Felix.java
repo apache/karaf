@@ -1733,8 +1733,6 @@ public class Felix
             AccessController.checkPermission(m_adminPerm);
         }
 
-        BundleException rethrow = null;
-
         BundleInfo info = bundle.getInfo();
         if (info.getState() == Bundle.UNINSTALLED)
         {
@@ -1750,7 +1748,7 @@ public class Felix
         }
         catch (BundleException ex)
         {
-            rethrow = ex;
+            fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
         }
 
         // Remove the bundle from the installed map.
@@ -1785,11 +1783,6 @@ public class Felix
 
         // Fire bundle event.
         fireBundleEvent(BundleEvent.UNINSTALLED, bundle);
-
-        if (rethrow != null)
-        {
-            throw rethrow;
-        }
     }
 
     //
@@ -2309,6 +2302,8 @@ public class Felix
     **/
     private static Class loadClassUsingClass(Class clazz, String name)
     {
+        Class loadedClass = null;
+
         while (clazz != null)
         {
             // Get the class loader of the current class object.
@@ -2330,10 +2325,10 @@ public class Felix
             Class[] ifcs = clazz.getInterfaces();
             for (int i = 0; i < ifcs.length; i++)
             {
-                clazz = loadClassUsingClass(ifcs[i], name);
-                if (clazz != null)
+                loadedClass = loadClassUsingClass(ifcs[i], name);
+                if (loadedClass != null)
                 {
-                    return clazz;
+                    return loadedClass;
                 }
             }
 
