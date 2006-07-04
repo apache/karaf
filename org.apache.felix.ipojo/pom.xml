@@ -45,7 +45,6 @@
             <exportPackage>
               org.apache.felix.ipojo, org.apache.felix.ipojo.metadata, org.apache.felix.ipojo.architecture, org.apache.felix.ipojo.parser, org.osgi.service.cm
             </exportPackage>
-            <bundleActivator>org.apache.felix.ipojo.DummyActivator</bundleActivator>
           </osgiManifest>
         </configuration>
       </plugin>
