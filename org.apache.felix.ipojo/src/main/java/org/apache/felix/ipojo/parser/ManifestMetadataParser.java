@@ -129,12 +129,16 @@ public class ManifestMetadataParser {
 					c = string[i];
 				}
 				i++; // skip =
+				i++; // skip "
 				c = string[i];
-				while (c != ' ') {
+				while (c != '"') {
 					attValue = attValue + c;
 					i++;
 					c = string[i];
 				}
+				i++; // skip "
+				c=string[i];
+
 				Attribute att = new Attribute(attName, attNs , attValue);
 				m_elements[m_elements.length - 1].addAttribute(att);
 				break;
