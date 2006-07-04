@@ -985,10 +985,10 @@ public class OsgiJarMojo extends AbstractMojo {
 		
 		for(int i = 0; i < element.getAttributes().length; i++) {
 			if(element.getAttributes()[i].getNameSpace().equals("")) { 
-				result = result + "$" + element.getAttributes()[i].getName() + "="+element.getAttributes()[i].getValue() + " ";
+				result = result + "$" + element.getAttributes()[i].getName() + "=\""+element.getAttributes()[i].getValue() + "\" ";
 			}
 			else {
-				result = result + "$" + element.getAttributes()[i].getNameSpace()+ ":" + element.getAttributes()[i].getName() + "="+element.getAttributes()[i].getValue() + " ";
+				result = result + "$" + element.getAttributes()[i].getNameSpace()+ ":" + element.getAttributes()[i].getName() + "=\""+element.getAttributes()[i].getValue() + "\" ";
 			}
 		}
 		for(int i = 0; i < element.getElements().length; i++) {
