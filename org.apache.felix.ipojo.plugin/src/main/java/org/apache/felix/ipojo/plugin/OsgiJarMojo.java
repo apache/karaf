@@ -14,47 +14,36 @@
  *   limitations under the License.
  *
  */
+
 package org.apache.felix.ipojo.plugin;
 
-//import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-//import java.io.InputStreamReader;
+import java.io.*;
+import java.util.*;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipEntry;
+
+import org.apache.maven.archiver.*;
+import org.apache.maven.artifact.*;
+import org.apache.maven.plugin.*;
+import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.archiver.ArchiverException;
+import org.codehaus.plexus.archiver.jar.*;
+import org.codehaus.plexus.util.FileUtils;
+
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.felix.ipojo.manipulation.Manipulator;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
-//import org.apache.felix.ipojo.parser.KXml2SAXParser;
+
 import org.apache.felix.ipojo.parser.ManifestMetadataParser;
 import org.apache.felix.ipojo.parser.ParseException;
-//import org.apache.felix.ipojo.parser.XMLGenericMetadataParser;
 import org.apache.felix.ipojo.parser.XMLMetadataParser;
-import org.apache.maven.archiver.MavenArchiveConfiguration;
-import org.apache.maven.archiver.MavenArchiver;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.archiver.ArchiverException;
-import org.codehaus.plexus.archiver.jar.JarArchiver;
-import org.codehaus.plexus.archiver.jar.ManifestException;
-import org.codehaus.plexus.util.FileUtils;
+
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
-//import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Package an OSGi jar "bundle."
@@ -67,9 +56,26 @@ import org.xml.sax.helpers.XMLReaderFactory;
  * @description build an OSGi bundle jar
  */
 public class OsgiJarMojo extends AbstractMojo {
+    public static final String OSGI_REFERENCES = "osgi.references";
+    public static final String AUTO_DETECT = "auto-detect";
+
 	private static final String[]		EMPTY_STRING_ARRAY		= {};
 
 	int									bundleManifestVersion	= 1;
+
+	/**
+     * Jars to Inline
+     *
+     * @parameter
+     */
+    private List inlinedArtifacts = new ArrayList();
+
+    /**
+     * Packages to ignore when generating import-package header.
+     *
+     * @parameter
+     */
+    private String ignorePackage;
 
 	/**
 	 * The Maven project.
@@ -174,6 +180,8 @@ public class OsgiJarMojo extends AbstractMojo {
 			ArchiverException, ManifestException,
 			DependencyResolutionRequiredException, MojoExecutionException {
 
+		outputDirectory.mkdirs();
+		
 		verifyDeclaredBundleManifestVersion();
 
 		getLog().info("Generating JAR bundle " + jarFile.getAbsolutePath());
@@ -185,6 +193,9 @@ public class OsgiJarMojo extends AbstractMojo {
 
 		addManifestFile();
 		addManifestEntries();
+		
+		// Inline the contents of the indicated jar artifacts
+        inlineArtifacts();
 
 		// Add the JARs that were specified in the POM
 		// as "not" provided
@@ -224,7 +235,16 @@ public class OsgiJarMojo extends AbstractMojo {
 			analyzeJar(jar, contained, referred, uses);
 		}
 
-		referred.removeAll(contained);
+        referred.removeAll(contained);
+
+        // Check if the osgi.references property is set and display result
+        // if necessary.
+		checkReferencesProperty(uses);
+
+        // Dump referenced package information if debug logging is enabled.
+		if (getLog().isDebugEnabled()) {
+		    printReferencedPackages(uses);
+		}
 
 		Map exports = parseHeader(osgiManifest.getExportPackage());
 		Map imports = parseHeader(osgiManifest.getImportPackage());
@@ -241,6 +261,10 @@ public class OsgiJarMojo extends AbstractMojo {
 			createExportHeader(exports, uses);
 		}
 
+        // Remove any ignored packages from the referred set.
+        Set ignorePackage = parseIgnorePackage();
+        referred.removeAll(ignorePackage);
+
 		// If the POM file contains an import declaration,
 		// we verify its validity. Otherwise, we generate the
 		// import package header from the referred. Exports
@@ -255,181 +279,8 @@ public class OsgiJarMojo extends AbstractMojo {
 
 		//verifyBundleActivator(mainJar); // Replace it by setBundleActivator
 		
-		
 		archiver.createArchive(project, archiveConfig);
 		project.getArtifact().setFile(jarFile);
-	}
-	
-	private Element[] parseXMLMetadata(String path) throws MojoExecutionException {
-		File metadata = new File(outputDirectory+path);
-		URL url;
-		Element[] components = null;
-		try {
-			url = metadata.toURI().toURL();
-			if (url == null) { 
-				getLog().error("No metadata at : " + outputDirectory+path);
-				throw new MojoExecutionException("[iPOJO] No metadata at : " + outputDirectory+path); 
-			}
-			
-			InputStream stream = url.openStream();
-
-//	        //Open the file and parse :
-//			BufferedReader in = new BufferedReader(new InputStreamReader(stream));
-//		    XMLGenericMetadataParser handler = new XMLGenericMetadataParser();
-//		    KXml2SAXParser parser;
-//			parser = new KXml2SAXParser(in);
-//			parser.parseXML(handler);
-//		    stream.close();
-			
-			XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
-			XMLMetadataParser handler = new XMLMetadataParser();
-			parser.setContentHandler(handler);
-			InputSource is = new InputSource(stream);
-			parser.parse(is);
-		    
-		    components = handler.getComponentsMetadata();
-
-		    
-		} catch (MalformedURLException e) {
-			getLog().error("Malformed URL for " + outputDirectory+path+ "("+e.getMessage()+")");
-			throw new MojoExecutionException("[iPOJO] Malformed URL for " + outputDirectory+path);
-		} catch (IOException e) { 
-        	getLog().error("Cannot open the file : " + outputDirectory+path + "("+e.getMessage()+")");
-			throw new MojoExecutionException("[iPOJO] Cannot open the file : " + outputDirectory+path);
-//        } catch (XmlPullParserException e) {
-//        	getLog().error("Error when  parsing the XML file " + outputDirectory+path+ "("+e.getMessage()+")");
-//			throw new MojoExecutionException("[iPOJO] Error when  parsing the XML file " + outputDirectory+path);
-		} catch (Exception e) {
-			getLog().error("Parsing Error when parsing the XML file " + outputDirectory+path+ "("+e.getMessage()+")");
-			throw new MojoExecutionException("[iPOJO] Parsing Error when parsing the XML file " + outputDirectory+path);
-		}
-		
-		if(components == null || components.length == 0) {
-			getLog().error("No component in " + outputDirectory+path);
-			throw new MojoExecutionException("[iPOJO] No component in " + outputDirectory+path);
-		}
-		
-		return components;
-	}
-	
-	private Element[] parseManifestMetadata(String metadata) throws MojoExecutionException {
-		Element[] components = null;
-		ManifestMetadataParser parser = new ManifestMetadataParser();
-    	try {
-			parser.parse(metadata);
-			components = parser.getComponentsMetadata();
-		} catch (ParseException e) {
-			getLog().error("Parsing Error when parsing the Manifest metadata " +  metadata + "("+e.getMessage()+")");
-			throw new MojoExecutionException("[iPOJO] Parsing Error when parsing the Manifest metadata " +  metadata);
-			
-		}
-    	
-		if(components == null || components.length == 0) {
-			getLog().error("No component in " + metadata);
-			throw new MojoExecutionException("[iPOJO] No component in " + metadata);
-		}
-        
-        return components;
-	}
-	
-	private void iPojoManipulation() throws MojoExecutionException {
-		//Try to read the content of a file of the ouptut directory
-		getLog().info("iPOJO Manipulation ...");
-		
-		Element[] components = null;
-		
-		// Get the metadata.xml location 
-		String path = (String) osgiManifest.getEntries().get("iPOJO-Metadata");
-		
-		if(path != null) {
-			if(!path.startsWith("/")) { path = "/" + path; }
-			components = parseXMLMetadata(path);
-		} else {
-			String meta_ = (String) osgiManifest.getEntries().get("iPOJO-Components");
-			if(meta_ != null) {
-				components = parseManifestMetadata(meta_);
-			} else {
-				getLog().error("Neither iPOJO-Metadata nor iPOJO-Components are in the manifest, please in the osgi-bundle packaging instead og ipojo-bundle");
-				throw new MojoExecutionException("[iPOJO] Neither iPOJO-Metadata nor iPOJO-Components are in the manifest");
-			}
-				
-		}
-		
-			
-		Manipulator manipulator = new Manipulator();
-		String[] metadata = new String[components.length];
-		String meta = "";
-		if(namespaces == null) { namespaces = new String[components.length][]; }
-        for(int i = 0; i < components.length; i++) {
-        	getLog().info("Component Class Name : " + components[i].getAttribute("className"));
-        	namespaces[i] = components[i].getNamespaces();
-        	try {
-				manipulator.preProcess(components[i].getAttribute("className"), outputDirectory);
-			} catch (Exception e) {
-				getLog().error("Manipulation error in the class : " + components[i].getAttribute("className") + "("+e.getMessage()+")");
-				throw new MojoExecutionException("[iPOJO] Manipulation error in the class : " + components[i].getAttribute("className"));
-			}
-        	
-        	getLog().info("Add manipulation metadata for : " + components[i].getAttribute("className"));
-        	// Insert information to metadata
-        	Element elem = new Element("Manipulation", "");
-        	for(int j = 0; j < manipulator.getInterfaces().length; j++) {
-        		// Create an interface element for each implemented interface
-        		Element itf = new Element("Interface", "");
-        		Attribute att =new Attribute("name", manipulator.getInterfaces()[j]);
-        		itf.addAttribute(att);
-        		elem.addElement(itf);
-        	}
-
-        	for(Iterator it = manipulator.getFields().keySet().iterator(); it.hasNext(); ) {
-        		Element field = new Element("Field", "");
-        		String name = (String) it.next();
-        		String type = (String) manipulator.getFields().get(name);
-        		Attribute attName =new Attribute("name", name);
-        		Attribute attType =new Attribute("type", type);
-        		field.addAttribute(attName);
-        		field.addAttribute(attType);
-        		elem.addElement(field);
-        	}
-
-        	components[i].addElement(elem);
-        	
-        	// Transform the metadate to manifest metadata
-        	metadata[i] = buildManifestMetadata(components[i], "");
-        	meta = meta + metadata[i];
-        }
-        
-        getLog().info("Metadata of the bundles : " + meta);
-	    archiveConfig.addManifestEntry("iPOJO-Components", meta);
-	        
-	    getLog().info("Set the bundle activator");
-	    setBundleActivator();
-			
-	    getLog().info("iPOJO Manipulation ... SUCCESS");
-		
-	}
-
-	private String buildManifestMetadata(Element element, String actual) {
-		String result="";
-		if(element.getNameSpace().equals("")) { result = actual + element.getName() + " { "; }
-		else { result = actual + element.getNameSpace()+":"+element.getName() + " { ";	}
-		
-		for(int i = 0; i < element.getAttributes().length; i++) {
-			if(element.getAttributes()[i].getNameSpace().equals("")) { 
-				result = result + "$" + element.getAttributes()[i].getName() + "="+element.getAttributes()[i].getValue() + " ";
-			}
-			else {
-				result = result + "$" + element.getAttributes()[i].getNameSpace()+ ":" + element.getAttributes()[i].getName() + "="+element.getAttributes()[i].getValue() + " ";
-			}
-		}
-		for(int i = 0; i < element.getElements().length; i++) {
-			result = buildManifestMetadata(element.getElements()[i], result);
-		}
-		return result +"}";
-	}
-
-	private void setBundleActivator() throws MojoExecutionException {
-		archiveConfig.addManifestEntry("Bundle-Activator", "org.apache.felix.ipojo.Activator");		
 	}
 
 //	private void verifyBundleActivator(Jar mainJar) {
@@ -452,11 +303,11 @@ public class OsgiJarMojo extends AbstractMojo {
 
 	private void createBundleClasspathHeader(List bundleClassPath) {
 		StringBuffer sb = new StringBuffer();
-		String del = ".,";
-		for (Iterator i = bundleClassPath.iterator(); i.hasNext();) {
-			sb.append(del);
+		for (Iterator i = bundleClassPath.iterator(); i.hasNext(); ) {
 			sb.append(i.next());
-			del = ",";
+            if (i.hasNext()) {
+                sb.append(",");
+            }
 		}
 		if (sb.length() > 0)
 			archiveConfig.addManifestEntry("Bundle-Classpath", sb.toString());
@@ -469,7 +320,6 @@ public class OsgiJarMojo extends AbstractMojo {
 	 * 
 	 * @param contained Set of contained packages
 	 * @param exports Map with the export clauses from the POM
-	 * @param uses Map with use clauses
 	 * @throws MojoExecutionException
 	 */
 	void verifyDeclaredExports(Map exports, Set contained)
@@ -541,9 +391,17 @@ public class OsgiJarMojo extends AbstractMojo {
 		test.removeAll(declaredImports);
 		for (Iterator m = test.iterator(); m.hasNext();) {
 			Object o = m.next();
-			if(o.equals("org.apache.felix.ipojo")) { break; } // Skip iPOJO, it will be add at the end of the packaging
-			getLog().warn("[OSGi] MISSING IMPORT: " + o);
-			//throw new MojoExecutionException("Missing Import " + o);
+			// For backwards compatibility with existing builds, only
+            // issue a warning for missing imports. Other the other hand,
+            // if packages are being ignored, then this is a new build
+            // so be more strict and throw an error.
+            if (osgiManifest.getIgnorePackage() == null) {
+                getLog().warn("[OSGi] MISSING IMPORT: " + o);
+            }
+            else {
+                getLog().error("[OSGi] MISSING IMPORT: " + o);
+                throw new MojoExecutionException("Missing Import " + o);
+            }
 		}
 
 		test = new HashSet(declaredImports);
@@ -582,7 +440,7 @@ public class OsgiJarMojo extends AbstractMojo {
 			del = qt.getSeparator();
 			while (del == ';') {
 				String adname = qt.nextToken();
-				if (qt.getSeparator() != '=') {
+				if ((del = qt.getSeparator()) != '=') {
 					if (hadAttribute)
 						throw new MojoExecutionException(
 								"Header contains name field after attribute or directive: "
@@ -611,6 +469,17 @@ public class OsgiJarMojo extends AbstractMojo {
 	 * @param contained
 	 */
 	void createImportHeader(Set referred, Set contained) {
+		// Add handler import
+		for(int j = 0; j < namespaces.length; j++) {
+			for(int k = 0; k < namespaces[j].length; k++) {
+				if(!namespaces[j][k].equals("")) {
+					int lastIndex = namespaces[j][k].lastIndexOf('.');
+					String ns = namespaces[j][k].substring(0, lastIndex);
+					referred.add(ns);
+				}
+			}
+		}
+		
 		if (referred.isEmpty())
 			return;
 
@@ -619,7 +488,7 @@ public class OsgiJarMojo extends AbstractMojo {
 		if (bundleManifestVersion > 1) {
 			referred.addAll(contained);
 		}
-
+		
 		StringBuffer sb = new StringBuffer();
 		String del = "";
 
@@ -627,21 +496,7 @@ public class OsgiJarMojo extends AbstractMojo {
 			sb.append(del);
 			sb.append(i.next());
 			del = ", ";
-		}
-		
-		// Add handler import
-		for(int j = 0; j < namespaces.length; j++) {
-			for(int k = 0; k < namespaces[j].length; k++) {
-				if(! namespaces[j][k].equals("")) {
-					int lastIndex = namespaces[j][k].lastIndexOf('.');
-					String ns = namespaces[j][k].substring(0, lastIndex);
-					sb.append(del);
-					sb.append(ns);
-					del = ", ";
-				}
-			}
-		}
-		
+		}	
 		archiveConfig.addManifestEntry("Import-Package", sb.toString());
 		getLog().info("Set Imports to : " + sb.toString());
 	}
@@ -653,7 +508,6 @@ public class OsgiJarMojo extends AbstractMojo {
 	 * changed TODO
 	 * 
 	 * @param mainJar
-	 * @param sb
 	 * @return
 	 */
 	List getBundleClassPath(Jar mainJar) {
@@ -707,7 +561,6 @@ public class OsgiJarMojo extends AbstractMojo {
 	 * @param exports map { name => Map { attribute|directive => value } }
 	 * @return the clauses
 	 */
-
 	String printClauses(Map exports) {
 		StringBuffer sb = new StringBuffer();
 		String del = "";
@@ -779,10 +632,13 @@ public class OsgiJarMojo extends AbstractMojo {
 	 * target artifact's manifest.
 	 */
 	private void addManifestEntries() {
-		if (osgiManifest != null && osgiManifest.getEntries().size() > 0) {
+		 if (osgiManifest.getBundleVersion() == null) {
+            addBundleVersion();
+        } 
+        if (osgiManifest != null && osgiManifest.getEntries().size() > 0) {
 			Map entries = osgiManifest.getEntries();
 
-			getLog().info(
+			getLog().debug(
 					"Bundle manifest will be modified with the following entries: "
 							+ entries.toString());
 			archiveConfig.addManifestEntries(entries);
@@ -799,6 +655,8 @@ public class OsgiJarMojo extends AbstractMojo {
 	 * a dependency has a scope of either RUNTIME or COMPILE, then we'll JAR
 	 * them up inside the OSGi bundle artifact. We will then add the
 	 * Bundle-Classpath manifest entry.
+     *
+     * Artifacts which are inlined will not be included.
 	 */
 	private void addEmbeddedJars() throws MojoExecutionException {
 		Set artifacts = project.getArtifacts();
@@ -810,19 +668,22 @@ public class OsgiJarMojo extends AbstractMojo {
 				String type = artifact.getType();
 
 				if ("jar".equals(type)) {
-					File depFile = artifact.getFile();
+                    // Do not include artifacts which are inlined
+                    if (!(inlinedArtifacts.contains(artifact.getArtifactId()))) {
+                        File depFile = artifact.getFile();
 
-					try {
-						FileUtils.copyFileToDirectory(depFile, outputDirectory);
+                        try {
+                            FileUtils.copyFileToDirectory(depFile, outputDirectory);
 
-					}
-					catch (Exception e) {
-						String errmsg = "Error copying "
-								+ depFile.getAbsolutePath() + " to "
-								+ outputDirectory.getAbsolutePath();
-						throw new MojoExecutionException(errmsg, e);
-					}
-				}
+                        }
+                        catch (Exception e) {
+                            String errmsg = "Error copying "
+                                            + depFile.getAbsolutePath() + " to "
+                                            + outputDirectory.getAbsolutePath();
+                            throw new MojoExecutionException(errmsg, e);
+                        }
+                    }
+                }
 			}
 		}
 	}
@@ -832,12 +693,9 @@ public class OsgiJarMojo extends AbstractMojo {
 	 */
 	private void addBundleVersion() {
 		// Maven uses a '-' to separate the version qualifier,
-		// while OSGi uses a '.', so we need to convert to a '.'
-		StringBuffer sb = new StringBuffer(project.getVersion());
-		if (sb.indexOf("-") >= 0) {
-			sb.setCharAt(sb.indexOf("-"), '.');
-		}
-		archiveConfig.addManifestEntry("Bundle-Version", sb.toString());
+	    // while OSGi uses a '.', so we need to convert to a '.'
+        String version = project.getVersion().replace('-', '.');
+        osgiManifest.setBundleVersion(version);
 	}
 
 	/**
@@ -864,5 +722,282 @@ public class OsgiJarMojo extends AbstractMojo {
 		}
 
 		return (String[]) excludeList.toArray(EMPTY_STRING_ARRAY);
+	}
+
+    private Set parseIgnorePackage() {
+        HashSet result = new HashSet();
+        if ((ignorePackage == null) && (osgiManifest.getIgnorePackage() != null)) {
+            ignorePackage = osgiManifest.getIgnorePackage();
+            getLog().warn("DEPRECATED METADATA! "
+                + "The <ignorePackage> tag should be set inside the <configuration> "
+                + "tag, not in the <osgiManifest> tag.");            
+        }
+        if (ignorePackage != null) {
+            StringTokenizer st = new StringTokenizer(ignorePackage, ",", false);
+            while (st.hasMoreTokens()) {
+                result.add(st.nextToken().trim());
+            }
+        }
+        return result;
+    }
+
+    private void checkReferencesProperty(Map uses) {
+        String interestedIn = System.getProperty(OSGI_REFERENCES);
+        if (interestedIn == null) {
+            return;
+        }
+        StringBuffer buf = new StringBuffer();
+        Iterator it1 = uses.entrySet().iterator();
+        while (it1.hasNext()) {
+            Map.Entry entry = (Map.Entry) it1.next();
+            String pack = (String) entry.getKey();
+            Set references = (Set) entry.getValue();
+            Iterator it2 = references.iterator();
+            while (it2.hasNext()) {
+                String packReferred = (String) it2.next();
+                if (interestedIn.equals(packReferred)) {
+                    buf.append("          |-- ");
+                    buf.append(pack);
+                    buf.append('\n');
+                    break;
+                }
+            }
+        }
+        if (buf.length() == 0) {
+            getLog().info("Noone uses " + interestedIn);
+        }
+        else {
+            int changePos = buf.lastIndexOf("|");
+            buf.setCharAt(changePos, '+');
+            getLog().info(interestedIn + " used by;\n" + buf);
+        }
+    }
+
+    private void printReferencedPackages(Map uses) {
+        StringBuffer buf = new StringBuffer();
+        Iterator it1 = uses.entrySet().iterator();
+        while (it1.hasNext()) {
+            Map.Entry entry = (Map.Entry) it1.next();
+            String pack = (String) entry.getKey();
+            buf.append(pack);
+            buf.append('\n');
+            Set references = (Set) entry.getValue();
+            Iterator it2 = references.iterator();
+            while (it2.hasNext()) {
+                String packReferred = (String) it2.next();
+                buf.append("          |-- ");
+                buf.append(packReferred);
+                buf.append('\n');
+            }
+            int changePos = buf.lastIndexOf("|");
+            if (changePos >= 0) {
+                buf.setCharAt(changePos, '+');
+            }
+            buf.append('\n');
+        }
+        getLog().debug("Referenced package list: \n" + buf.toString());
+    }
+    
+        private void inlineArtifacts() throws MojoExecutionException {
+		Set artifacts = project.getArtifacts();
+
+		for (Iterator it = artifacts.iterator(); it.hasNext();) {
+			Artifact artifact = (Artifact) it.next();
+			if (!Artifact.SCOPE_PROVIDED.equals(artifact.getScope())
+					&& !Artifact.SCOPE_TEST.equals(artifact.getScope())) {
+				String type = artifact.getType();
+
+				if ("jar".equals(type)) {
+                    if ((inlinedArtifacts.contains(artifact.getArtifactId()))) {
+                        File depFile = artifact.getFile();
+
+                        try {
+                            ZipFile inlinedJar = new ZipFile(depFile);
+                            Enumeration entries = inlinedJar.entries();
+                            byte[] buffer = new byte[4096];
+                            while (entries.hasMoreElements()) {
+                                ZipEntry entry = (ZipEntry) entries.nextElement();
+                                if (entry.isDirectory()) {
+                                    new File(outputDirectory, entry.getName()).mkdirs();
+                                } else {
+                                    // Have to do this because some JARs ship without directories, i.e., just files.
+                                    new File(outputDirectory, entry.getName()).getParentFile().mkdirs();
+                                    FileOutputStream out = new FileOutputStream(new File(outputDirectory, entry.getName()));
+                                    InputStream in = inlinedJar.getInputStream(entry);
+                                    for (int read = in.read(buffer); read != -1; read = in.read(buffer)) {
+                                        out.write(buffer, 0, read);
+                                    }
+                                    in.close();
+                                    out.close();
+                                }
+                            }
+                        } catch (Exception e) {
+                            String errmsg = "Error inlining "
+                                            + depFile.getAbsolutePath() + " to "
+                                            + outputDirectory.getAbsolutePath();
+                            throw new MojoExecutionException(errmsg, e);
+                        }
+                    }
+                }
+			}
+		}
+    }
+	
+	// ===== iPOJO's methods =====
+	
+	private Element[] parseXMLMetadata(String path) throws MojoExecutionException {
+		File metadata = new File(outputDirectory+path);
+		URL url;
+		Element[] components = null;
+		try {
+			url = metadata.toURI().toURL();
+			if (url == null) { 
+				getLog().error("No metadata at : " + outputDirectory+path);
+				throw new MojoExecutionException("[iPOJO] No metadata at : " + outputDirectory+path); 
+			}
+			
+			InputStream stream = url.openStream();			
+			XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+			XMLMetadataParser handler = new XMLMetadataParser();
+			parser.setContentHandler(handler);
+			InputSource is = new InputSource(stream);
+			parser.parse(is);
+		    
+		    components = handler.getComponentsMetadata();
+		    
+		} catch (MalformedURLException e) {
+			getLog().error("Malformed URL for " + outputDirectory+path+ "("+e.getMessage()+")");
+			throw new MojoExecutionException("[iPOJO] Malformed URL for " + outputDirectory+path);
+		} catch (IOException e) { 
+        	getLog().error("Cannot open the file : " + outputDirectory+path + "("+e.getMessage()+")");
+			throw new MojoExecutionException("[iPOJO] Cannot open the file : " + outputDirectory+path);
+		} catch (Exception e) {
+			getLog().error("Parsing Error when parsing the XML file " + outputDirectory+path+ "("+e.getMessage()+")");
+			throw new MojoExecutionException("[iPOJO] Parsing Error when parsing the XML file " + outputDirectory+path);
+		}
+		
+		if(components == null || components.length == 0) {
+			getLog().error("No component in " + outputDirectory+path);
+			throw new MojoExecutionException("[iPOJO] No component in " + outputDirectory+path);
+		}
+		
+		return components;
+	}
+	
+	private Element[] parseManifestMetadata(String metadata) throws MojoExecutionException {
+		Element[] components = null;
+		ManifestMetadataParser parser = new ManifestMetadataParser();
+    	try {
+			parser.parse(metadata);
+			components = parser.getComponentsMetadata();
+		} catch (ParseException e) {
+			getLog().error("Parsing Error when parsing the Manifest metadata " +  metadata + "("+e.getMessage()+")");
+			throw new MojoExecutionException("[iPOJO] Parsing Error when parsing the Manifest metadata " +  metadata);
+			
+		}
+    	
+		if(components == null || components.length == 0) {
+			getLog().error("No component in " + metadata);
+			throw new MojoExecutionException("[iPOJO] No component in " + metadata);
+		}
+        
+        return components;
+	}
+	
+	private void iPojoManipulation() throws MojoExecutionException {
+		//Try to read the content of a file of the ouptut directory
+		getLog().info("iPOJO Manipulation ...");
+		
+		Element[] components = null;
+		
+		// Get the metadata.xml location 
+		String path = (String) osgiManifest.getEntries().get("iPOJO-Metadata");
+		
+		if(path != null) {
+			if(!path.startsWith("/")) { path = "/" + path; }
+			components = parseXMLMetadata(path);
+		} else {
+			String meta_ = (String) osgiManifest.getEntries().get("iPOJO-Components");
+			if(meta_ != null) {
+				components = parseManifestMetadata(meta_);
+			} else {
+				getLog().error("Neither iPOJO-Metadata nor iPOJO-Components are in the manifest, please in the osgi-bundle packaging instead og ipojo-bundle");
+				throw new MojoExecutionException("[iPOJO] Neither iPOJO-Metadata nor iPOJO-Components are in the manifest");
+			}				
+		}
+		
+		Manipulator manipulator = new Manipulator();
+		String[] metadata = new String[components.length];
+		String meta = "";
+		if(namespaces == null) { namespaces = new String[components.length][]; }
+        for(int i = 0; i < components.length; i++) {
+        	getLog().info("Component Class Name : " + components[i].getAttribute("className"));
+        	namespaces[i] = components[i].getNamespaces();
+        	try {
+				manipulator.preProcess(components[i].getAttribute("className"), outputDirectory);
+			} catch (Exception e) {
+				getLog().error("Manipulation error in the class : " + components[i].getAttribute("className") + "("+e.getMessage()+")");
+				throw new MojoExecutionException("[iPOJO] Manipulation error in the class : " + components[i].getAttribute("className"));
+			}
+        	
+        	getLog().info("Add manipulation metadata for : " + components[i].getAttribute("className"));
+        	// Insert information to metadata
+        	Element elem = new Element("Manipulation", "");
+        	for(int j = 0; j < manipulator.getInterfaces().length; j++) {
+        		// Create an interface element for each implemented interface
+        		Element itf = new Element("Interface", "");
+        		Attribute att =new Attribute("name", manipulator.getInterfaces()[j]);
+        		itf.addAttribute(att);
+        		elem.addElement(itf);
+        	}
+
+        	for(Iterator it = manipulator.getFields().keySet().iterator(); it.hasNext(); ) {
+        		Element field = new Element("Field", "");
+        		String name = (String) it.next();
+        		String type = (String) manipulator.getFields().get(name);
+        		Attribute attName =new Attribute("name", name);
+        		Attribute attType =new Attribute("type", type);
+        		field.addAttribute(attName);
+        		field.addAttribute(attType);
+        		elem.addElement(field);
+        	}
+
+        	components[i].addElement(elem);
+        	
+        	// Transform the metadate to manifest metadata
+        	metadata[i] = buildManifestMetadata(components[i], "");
+        	meta = meta + metadata[i];
+        }
+        
+        getLog().info("Metadata of the bundles : " + meta);
+	    archiveConfig.addManifestEntry("iPOJO-Components", meta);
+	        
+	    getLog().info("Set the bundle activator");
+	    setBundleActivator();
+			
+	    getLog().info("iPOJO Manipulation ... SUCCESS");
+	}
+
+	private String buildManifestMetadata(Element element, String actual) {
+		String result="";
+		if(element.getNameSpace().equals("")) { result = actual + element.getName() + " { "; }
+		else { result = actual + element.getNameSpace()+":"+element.getName() + " { ";	}
+		
+		for(int i = 0; i < element.getAttributes().length; i++) {
+			if(element.getAttributes()[i].getNameSpace().equals("")) { 
+				result = result + "$" + element.getAttributes()[i].getName() + "="+element.getAttributes()[i].getValue() + " ";
+			}
+			else {
+				result = result + "$" + element.getAttributes()[i].getNameSpace()+ ":" + element.getAttributes()[i].getName() + "="+element.getAttributes()[i].getValue() + " ";
+			}
+		}
+		for(int i = 0; i < element.getElements().length; i++) {
+			result = buildManifestMetadata(element.getElements()[i], result);
+		}
+		return result +"}";
+	}
+
+	private void setBundleActivator() throws MojoExecutionException {
+		archiveConfig.addManifestEntry("Bundle-Activator", "org.apache.felix.ipojo.Activator");		
 	}
 }
