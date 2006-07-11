@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import org.apache.felix.ipojo.ComponentManager;
 import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.Activator;
+import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -46,6 +47,17 @@ public class ConfigurationHandler implements Handler, ManagedService {
 	 * List of the configurable fields.
 	 */
 	private ConfigurableProperty[] m_configurableProperties = new ConfigurableProperty[0];
+
+	/**
+	 * ProvidedServiceHandler of the component.
+	 * It is useful to priopagate properties to service registrations.
+	 */
+	private ProvidedServiceHandler m_providedServiceHandler;
+
+	/**
+	 * Properties porpagated at the last "updated".
+	 */
+	private Dictionary m_propagated = new Properties();
 
 	/**
 	 * PID of the component.
@@ -92,6 +104,7 @@ public class ConfigurationHandler implements Handler, ManagedService {
 		// Get the PID :
 		if (metadata.containsAttribute("name")) { m_pid = metadata.getAttribute("name"); }
 		else { m_pid = metadata.getAttribute("className"); }
+		m_providedServiceHandler = (ProvidedServiceHandler) m_manager.getHandler(ProvidedServiceHandler.class.getName());
 	}
 
 	/**
@@ -168,7 +181,7 @@ public class ConfigurationHandler implements Handler, ManagedService {
 	 * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
 	 */
 	public void updated(Dictionary np) throws ConfigurationException {
-
+		Properties toPropagate = new Properties();
 		if (np != null) {
 			Enumeration keysEnumeration = np.keys();
 			while (keysEnumeration.hasMoreElements()) {
@@ -188,11 +201,21 @@ public class ConfigurationHandler implements Handler, ManagedService {
 					}
 				}
 				if (!find) {
-					Activator.getLogger().log(Level.WARNING, "[" + m_manager.getComponentMetatada().getClassName() + "] The configuration is not valid, the property " + name + " is not a configurable property");
+					//The property is not a configurable property
+					Activator.getLogger().log(Level.INFO, "[" + m_manager.getComponentMetatada().getClassName() + "] The property " + name + " will be propagated to service registrations");
+					toPropagate.put(name, value);
 					}
 				}
 			}
 		else { Activator.getLogger().log(Level.WARNING, "[" + m_manager.getComponentMetatada().getClassName() + "] The pushed configuration is null for " + m_pid); }
+
+		// Propagation of the properties to service registrations :
+		if (m_providedServiceHandler != null && !toPropagate.isEmpty()) {
+			Activator.getLogger().log(Level.INFO, "[" + m_manager.getComponentMetatada().getClassName() + "] Properties will be propagated");
+			m_providedServiceHandler.removeProperties(m_propagated);
+			m_providedServiceHandler.addProperties(toPropagate);
+			m_propagated = toPropagate;
+		}
 
 	}
 

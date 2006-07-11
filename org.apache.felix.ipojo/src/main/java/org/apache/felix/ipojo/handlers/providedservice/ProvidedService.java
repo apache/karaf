@@ -16,6 +16,8 @@
  */
 package org.apache.felix.ipojo.handlers.providedservice;
 
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -106,7 +108,7 @@ public class ProvidedService implements ServiceFactory {
      * Add the given property to the property list.
      * @param p : the element to add
      */
-    private void addProperty(Property p) {
+    private synchronized void addProperty(Property p) {
         for (int i = 0; (m_properties != null) && (i < m_properties.length); i++) {
             if (m_properties[i] == p) { return; }
         }
@@ -118,6 +120,24 @@ public class ProvidedService implements ServiceFactory {
             m_properties = newProp;
         }
         else { m_properties = new Property[] {p}; }
+    }
+
+    private synchronized void removeProperty(String name) {
+    	 int idx = -1;
+         for (int i = 0; i < m_properties.length; i++) {
+             if (m_properties[i].getMetadata().getName() == name) { idx = i; break; }
+         }
+
+         if (idx >= 0) {
+             if ((m_properties.length - 1) == 0) { m_properties = new Property[0]; }
+             else {
+            	 Property[] newPropertiesList = new Property[m_properties.length - 1];
+                 System.arraycopy(m_properties, 0, newPropertiesList, 0, idx);
+                 if (idx < newPropertiesList.length) {
+                     System.arraycopy(m_properties, idx + 1, newPropertiesList, idx, newPropertiesList.length - idx); }
+                 m_properties = newPropertiesList;
+             }
+         }
     }
 
     /**
@@ -263,7 +283,7 @@ public class ProvidedService implements ServiceFactory {
      * Update refresh the service properties.
      * The new list of properties is sended to the service registry.
      */
-    protected void update() {
+    public void update() {
         // Update the service properties
 
         // Contruct the service properties list
@@ -282,6 +302,34 @@ public class ProvidedService implements ServiceFactory {
 	 */
 	public ProvidedServiceMetadata getMetadata() {
 		return m_metadata;
+	}
+
+	/**
+	 * Add properties to the list.
+	 * @param props : properties to add
+	 */
+	protected void addProperties(Dictionary props) {
+		Enumeration keys = props.keys();
+		while (keys.hasMoreElements()) {
+			String key = (String) keys.nextElement();
+			Object value = props.get(key);
+			Property prop = new Property(this, key, value);
+			addProperty(prop);
+		}
+		update();
+	}
+
+	/**
+	 * Remove properties from the list.
+	 * @param props : properties to remove
+	 */
+	protected void deleteProperties(Dictionary props) {
+		Enumeration keys = props.keys();
+		while (keys.hasMoreElements()) {
+			String key = (String) keys.nextElement();
+			removeProperty(key);
+		}
+		update();
 	}
 
 }

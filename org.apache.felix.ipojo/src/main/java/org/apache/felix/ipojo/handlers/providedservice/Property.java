@@ -16,6 +16,7 @@
  */
 package org.apache.felix.ipojo.handlers.providedservice;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
@@ -70,11 +71,23 @@ public class Property {
         			break;
         		}
         	}
-
     		pm.setType(type);
     	}
 
     	if (pm.getValue() != null) { setValue(pm.getValue()); }
+    }
+
+    /**
+     * Property constructor.
+     * This constructor is used only for non-field property (property not attached to a field).
+     * @param ps : the provided service
+     * @param name : the name of the property
+     * @param value : the value of the property
+     */
+    public Property(ProvidedService ps, String name, Object value) {
+    	m_providedService = ps;
+    	m_metadata = new PropertyMetadata(name, null, value.getClass().getName(), null);
+    	m_value = value;
     }
 
     /**
@@ -130,6 +143,16 @@ public class Property {
     private void setValue(String value) {
     	String type = m_metadata.getType();
 
+    	// Array :
+    	if (type.endsWith("[]")) {
+    		String internalType = type.substring(0, type.length() - 2);
+    		value = value.substring(1, value.length() - 1);
+    		String[] values = value.split(",");
+    		setArrayValue(internalType, values);
+    		return;
+    	}
+
+    	// Simple :
     	Activator.getLogger().log(Level.INFO, "[" + m_providedService.getComponentManager().getComponentMetatada().getClassName() + "] Set the value of the property " + m_metadata.getName() + " [" + m_metadata.getType() + "] " + " with the value : " + value);
 
         if (type.equals("string") || type.equals("String")) { m_value = new String(value); return; }
@@ -169,7 +192,82 @@ public class Property {
         }
     }
 
-    /**
+    private void setArrayValue(String internalType, String[] values) {
+    	 if (internalType.equals("string") || internalType.equals("String")) { m_value = values; return; }
+         if (internalType.equals("boolean")) {
+        	 boolean[] bool = new boolean[values.length];
+        	 for (int i = 0; i < values.length; i++) { bool[i] = new Boolean(values[i]).booleanValue(); }
+        	 m_value = bool;
+        	 return;
+        }
+        if (internalType.equals("byte")) {
+        	byte[] byt = new byte[values.length];
+       	 	for (int i = 0; i < values.length; i++) { byt[i] = new Byte(values[i]).byteValue(); }
+       	 	m_value = byt;
+        	return;
+        }
+         if (internalType.equals("short")) {
+        	 short[] shor = new short[values.length];
+        	 for (int i = 0; i < values.length; i++) { shor[i] = new Short(values[i]).shortValue(); }
+        	 m_value = shor;
+        	 return;
+        }
+         if (internalType.equals("int")) {
+        	 int[] in = new int[values.length];
+        	 for (int i = 0; i < values.length; i++) { in[i] = new Integer(values[i]).intValue(); }
+        	 m_value = in;
+        	 return;
+        }
+         if (internalType.equals("long")) {
+        	 long[] ll = new long[values.length];
+        	 for (int i = 0; i < values.length; i++) { ll[i] = new Long(values[i]).longValue(); }
+        	 m_value = ll;
+        	 return;
+        }
+         if (internalType.equals("float")) {
+        	 float[] fl = new float[values.length];
+        	 for (int i = 0; i < values.length; i++) { fl[i] = new Float(values[i]).floatValue(); }
+        	 m_value = fl;
+        	 return; }
+         if (internalType.equals("double")) {
+        	 double[] dl = new double[values.length];
+        	 for (int i = 0; i < values.length; i++) { dl[i] = new Double(values[i]).doubleValue(); }
+        	 m_value = dl;
+        	 return; }
+
+         // Else it is a neither a primitive type neither a String -> create the object by calling a constructor with a string in argument.
+         try {
+             Class c = m_providedService.getComponentManager().getContext().getBundle().loadClass(internalType);
+             Constructor cst = c.getConstructor(new Class[] {String.class});
+             Object[] ob = (Object[]) Array.newInstance(c, values.length);
+             for (int i = 0; i < values.length; i++) {
+            	 ob[i] = cst.newInstance(new Object[] {values[i]});
+             }
+             m_value = ob;
+             return;
+         } catch (ClassNotFoundException e) {
+             System.err.println("Class not found exception in setValue on " + internalType);
+             e.printStackTrace();
+         } catch (SecurityException e) {
+             e.printStackTrace();
+         } catch (NoSuchMethodException e) {
+             System.err.println("Constructor not found exeption in setValue on " + internalType);
+             e.printStackTrace();
+         } catch (IllegalArgumentException e) {
+             System.err.println("Argument problem to call the constructor of the type " + internalType);
+             e.printStackTrace();
+         } catch (InstantiationException e) {
+             System.err.println("Instantiation problem  " + internalType);
+             e.printStackTrace();
+         } catch (IllegalAccessException e) {
+             e.printStackTrace();
+         } catch (InvocationTargetException e) {
+             System.err.println("Invocation problem " + internalType);
+             e.printStackTrace();
+         }
+	}
+
+	/**
      * @return the value of the property.
      */
     public Object getValue() { return m_value; }

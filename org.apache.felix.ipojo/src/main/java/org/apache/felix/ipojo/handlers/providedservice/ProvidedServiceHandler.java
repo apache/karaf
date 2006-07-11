@@ -16,6 +16,7 @@
  */
 package org.apache.felix.ipojo.handlers.providedservice;
 
+import java.util.Dictionary;
 import java.util.logging.Level;
 
 import org.apache.felix.ipojo.ComponentManager;
@@ -300,6 +301,26 @@ public class ProvidedServiceHandler implements Handler {
 			return;
 		}
 
+	}
+
+	/**
+	 * Add properties to all provided services.
+	 * @param dict : dictionary fo properties to add
+	 */
+	public void addProperties(Dictionary dict) {
+		for (int i = 0; i < m_providedServices.length; i++) {
+			m_providedServices[i].addProperties(dict);
+		}
+	}
+
+	/**
+	 * Remove properties form all provided services.
+	 * @param dict : dictionary of properties to delete.
+	 */
+	public void removeProperties(Dictionary dict) {
+		for (int i = 0; i < m_providedServices.length; i++) {
+			m_providedServices[i].deleteProperties(dict);
+		}
 	}
 
 }

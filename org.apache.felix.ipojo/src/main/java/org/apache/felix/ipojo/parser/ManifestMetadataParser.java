@@ -137,7 +137,7 @@ public class ManifestMetadataParser {
 					c = string[i];
 				}
 				i++; // skip "
-				c=string[i];
+				c = string[i];
 
 				Attribute att = new Attribute(attName, attNs , attValue);
 				m_elements[m_elements.length - 1].addAttribute(att);

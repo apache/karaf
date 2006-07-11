@@ -16,6 +16,7 @@
  */
 package org.apache.felix.ipojo.handlers.configuration;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
@@ -24,7 +25,7 @@ import org.apache.felix.ipojo.Activator;
 import org.apache.felix.ipojo.metadata.Element;
 
 /**
- * Configurable Property
+ * Configurable Property.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ConfigurableProperty {
@@ -95,6 +96,14 @@ public class ConfigurableProperty {
         if (type.equals("long")) { value = new Long(strValue); }
         if (type.equals("float")) { value = new Float(strValue); }
         if (type.equals("double")) { value = new Double(strValue); }
+    	// Array :
+    	if (type.endsWith("[]")) {
+    		String internalType = type.substring(0, type.length() - 2);
+    		strValue = strValue.substring(1, strValue.length() - 1);
+    		String[] values = strValue.split(",");
+    		setArrayValue(internalType, values);
+    		return;
+    	}
 
         if (value == null) {
         	// Else it is a neither a primitive type neither a String -> create the object by calling a constructor with a string in argument.
@@ -133,6 +142,81 @@ public class ConfigurableProperty {
         m_value = value;
 
     }
+
+    private void setArrayValue(String internalType, String[] values) {
+   	 if (internalType.equals("string") || internalType.equals("String")) { m_value = values; return; }
+        if (internalType.equals("boolean")) {
+       	 boolean[] bool = new boolean[values.length];
+       	 for (int i = 0; i < values.length; i++) { bool[i] = new Boolean(values[i]).booleanValue(); }
+       	 m_value = bool;
+       	 return;
+       }
+       if (internalType.equals("byte")) {
+       	byte[] byt = new byte[values.length];
+      	 	for (int i = 0; i < values.length; i++) { byt[i] = new Byte(values[i]).byteValue(); }
+      	 	m_value = byt;
+       	return;
+       }
+        if (internalType.equals("short")) {
+       	 short[] shor = new short[values.length];
+       	 for (int i = 0; i < values.length; i++) { shor[i] = new Short(values[i]).shortValue(); }
+       	 m_value = shor;
+       	 return;
+       }
+        if (internalType.equals("int")) {
+       	 int[] in = new int[values.length];
+       	 for (int i = 0; i < values.length; i++) { in[i] = new Integer(values[i]).intValue(); }
+       	 m_value = in;
+       	 return;
+       }
+        if (internalType.equals("long")) {
+       	 long[] ll = new long[values.length];
+       	 for (int i = 0; i < values.length; i++) { ll[i] = new Long(values[i]).longValue(); }
+       	 m_value = ll;
+       	 return;
+       }
+        if (internalType.equals("float")) {
+       	 float[] fl = new float[values.length];
+       	 for (int i = 0; i < values.length; i++) { fl[i] = new Float(values[i]).floatValue(); }
+       	 m_value = fl;
+       	 return; }
+        if (internalType.equals("double")) {
+       	 double[] dl = new double[values.length];
+       	 for (int i = 0; i < values.length; i++) { dl[i] = new Double(values[i]).doubleValue(); }
+       	 m_value = dl;
+       	 return; }
+
+        // Else it is a neither a primitive type neither a String -> create the object by calling a constructor with a string in argument.
+        try {
+            Class c = m_handler.getComponentManager().getContext().getBundle().loadClass(internalType);
+            Constructor cst = c.getConstructor(new Class[] {String.class});
+            Object[] ob = (Object[]) Array.newInstance(c, values.length);
+            for (int i = 0; i < values.length; i++) {
+           	 ob[i] = cst.newInstance(new Object[] {values[i]});
+            }
+            m_value = ob;
+            return;
+        } catch (ClassNotFoundException e) {
+            System.err.println("Class not found exception in setValue on " + internalType);
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            System.err.println("Constructor not found exeption in setValue on " + internalType);
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            System.err.println("Argument problem to call the constructor of the type " + internalType);
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            System.err.println("Instantiation problem  " + internalType);
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            System.err.println("Invocation problem " + internalType);
+            e.printStackTrace();
+        }
+	}
 
     /**
      * @return the name of the property.
