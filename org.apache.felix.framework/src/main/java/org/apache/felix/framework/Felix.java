@@ -3076,7 +3076,7 @@ public class Felix
                         (!exports[i].getAttributes()[0].getName().equals(FelixConstants.VERSION_ATTRIBUTE))))
                 {
                     throw new BundleException(
-                        "Export does not conform to R3 syntax: " + imports[i]);
+                        "Export does not conform to R3 syntax: " + exports[i]);
                 }
             }
             
