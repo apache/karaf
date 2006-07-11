@@ -1549,30 +1549,25 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             return m_emptyModules;
         }
 
-        int count = 0;
+        // Move all non-null values to one end of the array.
+        int lower = 0;
         for (int i = 0; i < modules.length; i++)
         {
-            if (modules[i] == null)
+            if (modules[i] != null)
             {
-                count++;
+                modules[lower++] = modules[i];
             }
         }
 
-        if (count > 0)
+        if (lower == 0)
         {
-            IModule[] newModules = new IModule[modules.length - count];
-            count = 0;
-            for (int i = 0; i < modules.length; i++)
-            {
-                if (modules[i] != null)
-                {
-                    newModules[count++] = modules[i];
-                }
-            }
-            modules = newModules;
+            return m_emptyModules;
         }
 
-        return modules;
+        // Copy non-null values into a new array and return.
+        IModule[] newModules = new IModule[lower];
+        System.arraycopy(modules, 0, newModules, 0, lower);
+        return newModules;
     }
 
     //
