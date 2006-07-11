@@ -376,9 +376,6 @@ class JarRevision extends BundleRevision
     /**
      * This method extracts an embedded JAR file from the bundle's
      * JAR file.
-     * <p>
-     * Security: This method must be called from within a <tt>doPrivileged()</tt>
-     * block since it accesses the disk.
      * @param id the identifier of the bundle that owns the embedded JAR file.
      * @param jarPath the path to the embedded JAR file inside the bundle JAR file.
     **/
@@ -404,7 +401,10 @@ class JarRevision extends BundleRevision
                 ZipEntry ze = bundleJar.getEntry(jarPath);
                 if (ze == null)
                 {
-                    throw new IOException("No JAR entry: " + jarPath);
+// TODO: FRAMEWORK - Per the spec, this should fire a FrameworkEvent.INFO event;
+//       need to create an "Eventer" class like "Logger" perhaps.
+                    getLogger().log(Logger.LOG_INFO, "Class path entry not found: " + jarPath);
+                    return;
                 }
                 // If the zip entry is a directory, then ignore it since
                 // we don't need to extact it; otherwise, it points to an

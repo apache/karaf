@@ -194,9 +194,6 @@ public class BundleCache
 
     /**
      * This method copies an input stream to the specified file.
-     * <p>
-     * Security: This method must be called from within a <tt>doPrivileged()</tt>
-     * block since it accesses the disk.
      * @param is the input stream to copy.
      * @param outputFile the file to which the input stream should be copied.
     **/
