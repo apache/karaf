@@ -72,13 +72,27 @@ public class ServiceRegistry
 
     public void unregisterService(Bundle bundle, ServiceRegistration reg)
     {
+        // First remove the registered service.
         synchronized (this)
         {
             ServiceRegistration[] regs = (ServiceRegistration[]) m_serviceRegsMap.get(bundle);
             m_serviceRegsMap.put(bundle, removeServiceRegistration(regs, reg));
         }
 
+        // Fire the service event which gives all client bundles the
+        // opportunity to unget their service object.
         fireServiceChanged(new ServiceEvent(ServiceEvent.UNREGISTERING, reg.getReference()));
+
+        // Now forcibly unget the service object for all stubborn clients.
+        synchronized (this)
+        {
+            Bundle[] clients = getUsingBundles(reg.getReference());
+            for (int i = 0; (clients != null) && (i < clients.length); i++)
+            {
+                while (ungetService(clients[i], reg.getReference()))
+                    ; // Keep removing until it is no longer possible
+            }
+        }
     }
 
     /**
