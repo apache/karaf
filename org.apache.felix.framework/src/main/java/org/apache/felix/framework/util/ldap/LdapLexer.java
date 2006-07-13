@@ -24,8 +24,6 @@ public class LdapLexer {
     static final int EOF = -1;
     static final int NOCHAR = 0; // signal no peeked char; different from EOF
 
-    public static final String WHITESPACE = " \t\n\r";
-
     Reader reader = null;
 
     int nextChar = NOCHAR; // last peeked character
@@ -66,7 +64,7 @@ public class LdapLexer {
 
     void skipwhitespace() throws IOException
     {
-    while(WHITESPACE.indexOf(peek()) >= 0) get();
+        while (Character.isWhitespace((char) peek())) get();
     }
 
     public int getnw() throws IOException // next non-whitespace char
