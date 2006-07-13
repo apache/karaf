@@ -1266,31 +1266,29 @@ loop:   for (;;)
             {
                 return compareBoolean(lhs, rhs, operator);
             }
-        
-            // If LHS is not a Boolean, then verify it is a comparable
-            // and perform comparison.
+
+            // If the LHS is not a comparable, then try to use simple
+            // equals() comparison. If that fails, return false.
             if (!(Comparable.class.isAssignableFrom(lhsClass)))
             {
-                String opName = null;
-                switch (operator)
+                try
                 {
-                    case EQUAL :
-                        opName = "=";
-                    case GREATER_EQUAL :
-                        opName = ">=";
-                    case LESS_EQUAL :
-                        opName = "<=";
-                    case APPROX:
-                        opName = "~=";
-                    default:
-                        opName = "UNKNOWN OP";
+                    Object rhsObject = lhsClass
+                        .getConstructor(new Class[] { String.class })
+                            .newInstance(new Object[] { rhs });
+                        return lhs.equals(rhsObject);
+                }
+                catch (Exception ex)
+                {
+                    // Always return false.
                 }
 
-                unsupportedType(opName, lhsClass);
+                return false;
             }
 
-            // We will try to create a comparable object from the
-            // RHS string.
+            // Here we know that the LHS is a comparable object, so
+            // try to create an object for the RHS by using a constructor
+            // that will take the RHS string as a parameter.
             Comparable rhsComparable = null;
             try
             {
