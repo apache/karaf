@@ -21,6 +21,7 @@ import java.security.PrivilegedExceptionAction;
 import java.util.*;
 
 import org.apache.felix.framework.util.StringMap;
+import org.apache.felix.framework.util.Util;
 import org.osgi.framework.*;
 
 class ServiceRegistrationImpl implements ServiceRegistration
@@ -116,12 +117,11 @@ class ServiceRegistrationImpl implements ServiceRegistration
     **/
     protected boolean isClassAccessible(Class clazz)
     {
-        ClassLoader loader = (m_factory != null)
-            ? m_factory.getClass().getClassLoader()
-            : m_svcObj.getClass().getClassLoader();
+        Class sourceClass = (m_factory != null)
+            ? m_factory.getClass() : m_svcObj.getClass();
         try
         {
-            Class target = loader.loadClass(clazz.getName());
+            Class target = Util.loadClassUsingClass(sourceClass, clazz.getName());
             return (target.getClassLoader() == clazz.getClassLoader());
         }
         catch (Exception ex)

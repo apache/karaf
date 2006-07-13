@@ -108,6 +108,86 @@ public class Util
         return pkgName;
     }
 
+    /**
+     * <p>
+     * This is a simple utility class that attempts to load the named
+     * class using the class loader of the supplied class or
+     * the class loader of one of its super classes or their implemented
+     * interfaces. This is necessary during service registration to test
+     * whether a given service object implements its declared service
+     * interfaces.
+     * </p>
+     * <p>
+     * To perform this test, the framework must try to load
+     * the classes associated with the declared service interfaces, so
+     * it must choose a class loader. The class loader of the registering
+     * bundle cannot be used, since this disallows third parties to
+     * register service on behalf of another bundle. Consequently, the
+     * class loader of the service object must be used. However, this is
+     * also not sufficient since the class loader of the service object
+     * may not have direct access to the class in question.
+     * </p>
+     * <p>
+     * The service object's class loader may not have direct access to
+     * its service interface if it extends a super class from another
+     * bundle which implements the service interface from an imported
+     * bundle or if it implements an extension of the service interface
+     * from another bundle which imports the base interface from another
+     * bundle. In these cases, the service object's class loader only has
+     * access to the super class's class or the extended service interface,
+     * respectively, but not to the actual service interface.
+     * </p>
+     * <p>
+     * Thus, it is necessary to not only try to load the service interface
+     * class from the service object's class loader, but from the class
+     * loaders of any interfaces it implements and the class loaders of
+     * all super classes.
+     * </p>
+     * @param svcObj the class that is the root of the search.
+     * @param name the name of the class to load.
+     * @return the loaded class or <tt>null</tt> if it could not be
+     *         loaded.
+    **/
+    public static Class loadClassUsingClass(Class clazz, String name)
+    {
+        Class loadedClass = null;
+    
+        while (clazz != null)
+        {
+            // Get the class loader of the current class object.
+            ClassLoader loader = clazz.getClassLoader();
+            // A null class loader represents the system class loader.
+            loader = (loader == null) ? ClassLoader.getSystemClassLoader() : loader;
+            try
+            {
+                return loader.loadClass(name);
+            }
+            catch (ClassNotFoundException ex)
+            {
+                // Ignore and try interface class loaders.
+            }
+    
+            // Try to see if we can load the class from
+            // one of the class's implemented interface
+            // class loaders.
+            Class[] ifcs = clazz.getInterfaces();
+            for (int i = 0; i < ifcs.length; i++)
+            {
+                loadedClass = loadClassUsingClass(ifcs[i], name);
+                if (loadedClass != null)
+                {
+                    return loadedClass;
+                }
+            }
+    
+            // Try to see if we can load the class from
+            // the super class class loader.
+            clazz = clazz.getSuperclass();
+        }
+    
+        return null;
+    }
+
     public static R4Export getExportPackage(IModule m, String name)
     {
         R4Export[] pkgs =
