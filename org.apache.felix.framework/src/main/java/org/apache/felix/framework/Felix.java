@@ -878,18 +878,6 @@ public class Felix
     **/
     protected void setBundleStartLevel(Bundle bundle, int startLevel)
     {
-        if (System.getSecurityManager() != null)
-        {
-            AccessController.checkPermission(m_adminPerm);
-        }
-
-        // Cannot change the system bundle.
-        if (bundle.getBundleId() == 0)
-        {
-            throw new IllegalArgumentException(
-                "Cannot change system bundle start level.");
-        }
-
         // Acquire bundle lock.
         acquireBundleLock((BundleImpl) bundle);
         

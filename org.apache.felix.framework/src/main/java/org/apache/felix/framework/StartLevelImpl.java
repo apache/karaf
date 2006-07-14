@@ -32,6 +32,9 @@ import org.osgi.service.startlevel.StartLevel;
 **/
 public class StartLevelImpl implements StartLevel, Runnable
 {
+    private static final int BUNDLE_IDX = 0;
+    private static final int STARTLEVEL_IDX = 1;
+
     private Felix m_felix = null;
     private List m_requestList = null;
     // Reusable admin permission.
@@ -121,7 +124,25 @@ public class StartLevelImpl implements StartLevel, Runnable
     **/
     public void setBundleStartLevel(Bundle bundle, int startlevel)
     {
-        m_felix.setBundleStartLevel(bundle, startlevel);
+        if (System.getSecurityManager() != null)
+        {
+            AccessController.checkPermission(m_adminPerm);
+        }
+        else if (bundle.getBundleId() == 0)
+        {
+            throw new IllegalArgumentException(
+                "Cannot change system bundle start level.");
+        }
+        else if (startlevel <= 0)
+        {
+            throw new IllegalArgumentException(
+                "Start level must be greater than zero.");
+        }
+        synchronized (m_requestList)
+        {
+            m_requestList.add(new Object[] { bundle, new Integer(startlevel) });
+            m_requestList.notifyAll();
+        }
     }
 
     /* (non-Javadoc)
@@ -150,7 +171,7 @@ public class StartLevelImpl implements StartLevel, Runnable
 
     public void run()
     {
-        Integer request = null;
+        Object request = null;
 
         // This thread loops forever, thus it should
         // be a daemon thread.
@@ -172,11 +193,24 @@ public class StartLevelImpl implements StartLevel, Runnable
                 }
                 
                 // Get the requested start level.
-                request = (Integer) m_requestList.remove(0);
+                request = m_requestList.remove(0);
             }
 
-            // Set the new start level.
-            m_felix.setFrameworkStartLevel(request.intValue());
+            // If the request object is an Integer, then the request
+            // is to set the framework start level. If the request is
+            // an Object array, then the request is to set the start
+            // level for a bundle.
+            if (request instanceof Integer)
+            {
+                // Set the new framework start level.
+                m_felix.setFrameworkStartLevel(((Integer) request).intValue());
+            }
+            else
+            {
+                Bundle bundle = (Bundle) ((Object[]) request)[BUNDLE_IDX];
+                int startlevel = ((Integer) ((Object[]) request)[STARTLEVEL_IDX]).intValue();
+                m_felix.setBundleStartLevel(bundle, startlevel);
+            }
 
             // Notify any waiting thread that this request is done.
             synchronized (request)
