@@ -674,7 +674,7 @@ public class Felix
             // Sort bundle array by start level either ascending or
             // descending depending on whether the start level is being
             // lowered or raised to that the bundles can be efficiently
-            // processed in order.
+            // processed in order. Within a start level sort by bundle ID.
             Comparator comparator = null;
             if (lowering)
             {
@@ -694,7 +694,11 @@ public class Felix
                         {
                             return -1;
                         }
-                        return 0;
+                        else if (b1.getInfo().getBundleId() < b2.getInfo().getBundleId())
+                        {
+                            return 1;
+                        }
+                        return -1;
                     }
                 };
             }
@@ -716,7 +720,11 @@ public class Felix
                         {
                             return -1;
                         }
-                        return 0;
+                        else if (b1.getInfo().getBundleId() > b2.getInfo().getBundleId())
+                        {
+                            return 1;
+                        }
+                        return -1;
                     }
                 };
             }
