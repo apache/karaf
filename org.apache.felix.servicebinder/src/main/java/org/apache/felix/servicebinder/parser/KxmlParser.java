@@ -17,13 +17,11 @@
 package org.apache.felix.servicebinder.parser;
 
 import org.apache.felix.servicebinder.XmlHandler;
-import org.kxml.parser.XmlParser;
-import org.kxml.parser.ParseEvent;
-import org.kxml.Xml;
-import org.kxml.Attribute;
-
+import org.kxml2.io.KXmlParser;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import java.io.IOException;
 import java.io.Reader;
-
 import java.util.Properties;
 
 /**
@@ -32,46 +30,50 @@ import java.util.Properties;
  *
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public class KxmlParser extends XmlParser
+public class KxmlParser extends KXmlParser
 {
     /**
-    * The constructor for a parser, it receives a java.io.Reader.
-    *
-    * @param   r  The reader
-    * @exception   java.io.IOException thrown by the superclass
-    */
-    public KxmlParser(Reader r) throws java.io.IOException
+     * The constructor for a parser, it receives a java.io.Reader.
+     * 
+     * @param reader The reader
+     * @throws XmlPullParserException thrown by the super class.
+     */
+    public KxmlParser(final Reader reader) throws XmlPullParserException
     {
-        super(r);
+        super();
+        setInput(reader);
     }
 
     /**
-    * Parser from the reader provided in the constructor, and call
-    * the startElement and endElement in a KxmlHandler
-    *
-    * @param   handler The handler
-    * @exception   java.io.IOException thrown by the superclass
-    */
-    public void parseXML(XmlHandler handler) throws java.io.IOException, ParseException
+     * Parser from the reader provided in the constructor, and call the
+     * startElement and endElement in a KxmlHandler
+     * 
+     * @param handler The handler
+     * @throws XmlPullParserException thrown by the super class.
+     * @throws IOException thrown by the super class.
+     * @throws ParseException thrown by the handler.
+     */
+    public void parseXML(final XmlHandler handler)
+        throws XmlPullParserException, IOException, ParseException
     {
-        ParseEvent evt=null;
-        do
+        while (next() != XmlPullParser.END_DOCUMENT)
         {
-            evt = read();
-            if (evt.getType() == Xml.START_TAG)
+            switch (getEventType())
             {
-                Properties props = new Properties();
-                for (int i=0; i<evt.getAttributeCount();i++)
-                {
-                    Attribute attr = evt.getAttribute(i);
-                    props.put(attr.getName(),attr.getValue());
-                }
-                handler.startElement("uri",evt.getName(),evt.getName(),props);
+                case XmlPullParser.START_TAG:
+                    Properties props = new Properties();
+                    for (int i = 0; i < getAttributeCount(); i++)
+                    {
+                        props.put(getAttributeName(i), getAttributeValue(i));
+                    }
+                    handler.startElement(getNamespace(), getName(), getName(), props);
+                    break;
+                case XmlPullParser.END_TAG:
+                    handler.endElement(getNamespace(), getName(), getName());
+                    break;
+                default:
+                    continue;
             }
-            if (evt.getType() == Xml.END_TAG)
-            {
-                handler.endElement("uri",evt.getName(),evt.getName());
-            }
-        }while(evt.getType()!=Xml.END_DOCUMENT);
+        }
     }
 }
