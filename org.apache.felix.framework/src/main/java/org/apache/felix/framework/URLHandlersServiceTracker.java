@@ -58,7 +58,8 @@ class URLHandlersServiceTracker
                 public void serviceChanged(ServiceEvent event)
                 {
                     ServiceReference eventRef = event.getServiceReference();
-                    if (event.getType() == ServiceEvent.REGISTERED)
+                    if ((event.getType() == ServiceEvent.REGISTERED) ||
+                        (event.getType() == ServiceEvent.MODIFIED))
                     {
                         synchronized (URLHandlersServiceTracker.this)
                         {
