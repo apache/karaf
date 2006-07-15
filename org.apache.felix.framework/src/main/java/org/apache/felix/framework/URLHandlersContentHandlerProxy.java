@@ -25,6 +25,8 @@ import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.url.URLConstants;
 
+import sun.security.action.GetIntegerAction;
+
 /**
  * <p>
  * This class implements a content handler proxy. When the content handler
@@ -66,8 +68,7 @@ class URLHandlersContentHandlerProxy extends ContentHandler
         ContentHandler svc = getContentHandlerService();
         if (svc == null)
         {
-            throw new IOException("Content handler unavailable: "
-                + urlc.getContentType());
+            return urlc.getInputStream();
         }
         return svc.getContent(urlc);
     }
