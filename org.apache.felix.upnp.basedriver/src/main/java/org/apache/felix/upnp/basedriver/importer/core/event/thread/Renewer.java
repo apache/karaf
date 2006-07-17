@@ -24,13 +24,9 @@ import org.apache.felix.upnp.basedriver.importer.core.MyCtrlPoint;
 import org.apache.felix.upnp.basedriver.importer.core.event.message.SidExipired;
 import org.apache.felix.upnp.basedriver.importer.core.event.structs.SubscriptionQueue;
 
-/**
- * @author Matteo "matted" Demuru
- * @author Stefano "kismet-sl" Lenzi
- * @author Francesco Furfari
- *         
- *
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class Renewer extends Thread {
 	private long timeout;
 	private String sid;

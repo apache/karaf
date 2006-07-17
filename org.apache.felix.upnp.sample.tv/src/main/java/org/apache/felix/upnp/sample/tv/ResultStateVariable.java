@@ -17,9 +17,9 @@
 
 package org.apache.felix.upnp.sample.tv;
 import org.osgi.service.upnp.UPnPStateVariable;
-/**
- * @author Francesco Furfari
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 
 public class ResultStateVariable implements UPnPStateVariable{
 	

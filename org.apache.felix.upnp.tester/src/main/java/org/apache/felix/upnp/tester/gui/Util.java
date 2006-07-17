@@ -21,11 +21,9 @@ import java.awt.GridBagConstraints;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * @author Francesco Furfari 
- *  
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 
 public class Util {
 	final static GridBagConstraints constrains = new GridBagConstraints();

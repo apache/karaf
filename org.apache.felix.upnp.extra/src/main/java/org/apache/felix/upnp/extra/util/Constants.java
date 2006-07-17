@@ -15,11 +15,9 @@
  *
  */
 package org.apache.felix.upnp.extra.util;
-/**
- * 
- * @author Stefano "Kismet" Lenzi 
- *
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public interface Constants {
 	/**
 	 * If this property is set on a UPnP Device means that the 

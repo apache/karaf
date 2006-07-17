@@ -33,11 +33,9 @@ import org.osgi.service.upnp.UPnPService;
 import org.apache.felix.upnp.basedriver.importer.util.DeviceSetup;
 import org.apache.felix.upnp.basedriver.importer.util.DictionaryProp;
 
-/**
- * @author Matteo "matted" Demuru
- * @author Stefanoi "kismet-sl" Lenzi
- * 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class UPnPDeviceImpl implements UPnPDevice {
 
 	/**

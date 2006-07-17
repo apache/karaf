@@ -20,10 +20,9 @@ package org.apache.felix.upnp.basedriver.importer.core.event.message;
 
 import org.cybergarage.upnp.Service;
 
-/**
- * @author Matteo "matted" Demuru
- *
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class SidExipired {
 private String sid;
 private Service service;

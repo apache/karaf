@@ -52,7 +52,7 @@ public class LightIcon implements UPnPIcon {
 	 * @see org.osgi.service.upnp.UPnPIcon#getSize()
 	 */
 	public int getSize() {
-		return 0;
+		return 1072;
 	}
 
 	/* (non-Javadoc)

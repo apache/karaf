@@ -23,10 +23,9 @@ import java.util.Enumeration;
 
 import org.apache.felix.upnp.basedriver.importer.core.event.message.StateChanged;
 
-/**
- * @author Matteo "matted" Demuru
- * 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class StateVarsToNotify {
 	private Dictionary stateVars;
 	private String sid;

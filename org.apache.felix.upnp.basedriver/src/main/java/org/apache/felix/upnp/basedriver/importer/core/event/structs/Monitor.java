@@ -32,12 +32,10 @@ import org.apache.felix.upnp.basedriver.importer.core.MyCtrlPoint;
 import org.apache.felix.upnp.basedriver.importer.core.event.message.FirstMessage;
 import org.apache.felix.upnp.basedriver.importer.core.event.message.ListenerModified;
 
-/**
- * @author Matteo "matted" Demuru
- * @author Francesco Furfari 
- * 
- *
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
+
 public class Monitor {
 	private Hashtable sidStateVars;
 	private SidsListenersMaps sidListSid;

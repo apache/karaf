@@ -22,9 +22,9 @@ import java.util.Hashtable;
 
 import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPStateVariable;
-/**
- * @author Francesco Furfari
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 
 public class SetPowerAction implements UPnPAction {
 

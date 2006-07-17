@@ -17,11 +17,9 @@
 
 package org.apache.felix.upnp.tester.discovery;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * @author Francesco Furfari 
- *  
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public interface DeviceNodeListener {
 	public void deviceDetected(DeviceNode d);
 	public void rootDeviceUnplugged(String udn);

@@ -24,10 +24,9 @@ import org.osgi.service.upnp.UPnPEventListener;
 /**
  * Message that is euqueued for Suscriber, only when a UPnPEventListener changes 
  * his properties
- * 
- * @author Matteo "matted" Demuru
- *
- */
+ *  
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class ListenerModified {
 	private Vector newServices;
 	private UPnPEventListener listener;

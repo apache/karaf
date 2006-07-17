@@ -39,11 +39,9 @@ import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPService;
 import org.osgi.service.upnp.UPnPStateVariable;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * @author Francesco Furfari 
- *  
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class UPnPDeviceTreeNode extends DefaultMutableTreeNode {
 	public final static String ROOT_DEVICE = "RootDeviceNode";
 	public final static String DEVICE = "DeviceNode";

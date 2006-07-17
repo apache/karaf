@@ -25,11 +25,9 @@ import org.apache.xerces.impl.dv.util.Base64;
 import org.apache.xerces.impl.dv.util.HexBin;
 import org.osgi.service.upnp.*;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * 
- *
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class Converter {
 	
 	/**

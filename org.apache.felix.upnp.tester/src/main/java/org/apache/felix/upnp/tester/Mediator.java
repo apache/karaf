@@ -23,11 +23,9 @@ import javax.swing.*;
 import org.apache.felix.upnp.tester.discovery.*;
 import org.apache.felix.upnp.tester.gui.*;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * @author Francesco Furfari 
- *  
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public  class Mediator {
 	static PropertiesViewer props;
 	static JTree tree;

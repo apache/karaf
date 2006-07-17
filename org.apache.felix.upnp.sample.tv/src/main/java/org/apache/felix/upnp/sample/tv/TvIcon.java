@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.osgi.service.upnp.UPnPIcon;
-/**
- * @author Francesco Furfari
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 
 public class TvIcon implements UPnPIcon {
 

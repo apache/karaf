@@ -37,11 +37,10 @@ import org.apache.felix.upnp.basedriver.importer.core.upnp.UPnPIconImpl;
 import org.apache.felix.upnp.basedriver.importer.core.upnp.UPnPServiceImpl;
 import org.apache.felix.upnp.extra.util.Constants;
 
-/**
- * @author Matteo "matted" Demuru 
- * @author Stefano "Kismet" Lenzi
- *  
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
+
 public class DeviceSetup {
 
 	public static void deviceSetup(DictionaryProp properties, Device dev,Vector icons,Hashtable services) {

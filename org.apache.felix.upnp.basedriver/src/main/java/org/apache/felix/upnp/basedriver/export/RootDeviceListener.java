@@ -31,10 +31,9 @@ import org.osgi.service.upnp.UPnPDevice;
 
 import org.apache.felix.upnp.basedriver.Activator;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * @author Francesco "Sygent" Furfari 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class RootDeviceListener implements ServiceListener {
 
 	private RootDeviceExportingQueue queue;

@@ -19,10 +19,9 @@ package org.apache.felix.upnp.sample.tv;
 
 import org.osgi.service.upnp.UPnPStateVariable;
 
-/**
- * UPnPStateVariableDescriptor.java 22-gen-2005
- * @author Francesco Furfari
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public interface UPnPStateVariableDescriptor extends UPnPStateVariable {
     Object getValue();
 

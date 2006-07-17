@@ -21,11 +21,9 @@ package org.apache.felix.upnp.tester;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-/**
- * @author Stefano "Kismet" Lenzi
- * @author Francesco Furfari 
- * 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class Activator implements BundleActivator {
 
 	public static BundleContext context;

@@ -40,11 +40,9 @@ import org.ungoverned.device.RootDescription;
 
 import org.apache.felix.upnp.basedriver.Activator;
 import org.apache.felix.upnp.extra.util.Converter;
-/**
- * 
- * @author Stefano "Kismet" Lenzi 
- * 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class BuildDevice {
 	
 	private static Node buildRootNode(){
@@ -101,6 +99,7 @@ public class BuildDevice {
 		devUPnP.setSerialNumber((String) sr.getProperty(UPnPDevice.SERIAL_NUMBER));
 		devUPnP.setUDN((String) sr.getProperty(UPnPDevice.UDN));
 		devUPnP.setUPC((String) sr.getProperty(UPnPDevice.UPC));
+
 		devUPnP.setLocation("/gen-desc.xml");		
 
 		addServices("",devUPnP,sr);

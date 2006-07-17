@@ -25,11 +25,9 @@ import org.apache.felix.upnp.tester.gui.*;
 import org.osgi.framework.*;
 import org.osgi.service.upnp.*;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * @author Francesco Furfari
- *  
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class RootDeviceListener implements ServiceListener {
 		
 	//This list contains all partial tree of UPnP Device

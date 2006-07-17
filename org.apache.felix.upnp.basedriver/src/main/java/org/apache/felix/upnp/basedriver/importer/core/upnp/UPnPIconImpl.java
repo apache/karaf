@@ -29,11 +29,9 @@ import org.osgi.service.upnp.UPnPIcon;
 import org.apache.felix.upnp.basedriver.importer.util.HTTPRequestForIcon;
 import org.apache.felix.upnp.basedriver.importer.util.ParseLocation;
 
-/**
- * @author Matteo "matted" Demuru
- * @author Stefanoi "kismet-sl" Lenzi
- * 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class UPnPIconImpl implements UPnPIcon {
 
 	/* (non-Javadoc)

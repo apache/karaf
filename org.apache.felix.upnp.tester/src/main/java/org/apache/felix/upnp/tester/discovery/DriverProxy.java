@@ -21,11 +21,9 @@ import org.apache.felix.upnp.extra.controller.*;
 import org.apache.felix.upnp.tester.*;
 
 import org.osgi.framework.*;
-/**
- * @author Stefano "Kismet" Lenzi 
- * @author Francesco Furfari 
- *  
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class DriverProxy implements ServiceListener {
     private DevicesInfo devicesInfo;
     private DriverController drvController;

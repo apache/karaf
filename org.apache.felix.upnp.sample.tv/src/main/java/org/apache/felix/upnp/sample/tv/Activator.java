@@ -24,10 +24,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.upnp.UPnPDevice;
 
-/**
- * @author Francesco Furfari
- */
-
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class Activator implements BundleActivator {
 
 	static BundleContext context;

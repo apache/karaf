@@ -18,9 +18,9 @@
 package org.apache.felix.upnp.sample.tv;
 
 import java.beans.PropertyChangeListener;
-/**
- * @author Francesco Furfari
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 
 public interface EventSource {
 	void addPropertyChangeListener(PropertyChangeListener listener);

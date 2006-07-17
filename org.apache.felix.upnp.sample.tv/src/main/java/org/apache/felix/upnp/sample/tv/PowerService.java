@@ -22,9 +22,9 @@ import java.util.HashMap;
 import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPService;
 import org.osgi.service.upnp.UPnPStateVariable;
-/**
- * @author Francesco Furfari
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 
 public class PowerService implements UPnPService {
 	final private String SERVICE_ID = "urn:schemas-upnp-org:serviceId:power:1";

@@ -26,9 +26,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 import org.osgi.framework.BundleException;
-/**
- * @author Francesco Furfari
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 
 public class TvFrame extends JFrame implements Runnable 
 {

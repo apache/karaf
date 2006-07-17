@@ -19,11 +19,9 @@ package org.apache.felix.upnp.tester.discovery;
 
 import java.util.*;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * @author Francesco Furfari 
- *  
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class DevicesList {
 	
 	ArrayList devices;	

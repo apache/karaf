@@ -40,11 +40,9 @@ import org.apache.felix.upnp.basedriver.importer.core.event.thread.SubScriber;
 import org.apache.felix.upnp.basedriver.tool.Logger;
 import org.apache.felix.upnp.basedriver.tool.Util;
 
-/**
- * @author Stefano "Kismet" Lenzi, 
- * @author Francesco Furfari
- * 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class Activator implements BundleActivator {
 
     public static BundleContext bc;

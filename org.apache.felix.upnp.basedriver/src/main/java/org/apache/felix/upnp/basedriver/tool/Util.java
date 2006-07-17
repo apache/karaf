@@ -24,10 +24,9 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.upnp.UPnPDevice;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class Util {
 	
 	public static boolean isUPnPDevice(ServiceReference sr){

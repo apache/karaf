@@ -19,10 +19,9 @@ package org.apache.felix.upnp.basedriver.importer.util;
 
 import java.util.*;
 
-/**
- * @author Matteo "matted" Demuru
- *
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class DictionaryProp extends Dictionary {
 	private Hashtable hash=null;
 	/* (non-Javadoc)

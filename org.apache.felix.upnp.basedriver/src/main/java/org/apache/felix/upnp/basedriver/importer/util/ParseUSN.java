@@ -17,10 +17,9 @@
 
 package org.apache.felix.upnp.basedriver.importer.util;
 
-/**
- * @author Matteo "matted" Demuru
- *
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class ParseUSN {
 	boolean service;
 	boolean device;

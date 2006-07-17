@@ -27,9 +27,9 @@ import org.osgi.service.upnp.UPnPEventListener;
  * This is message is related to a registration of listener for a 
  * CyberLink Service during the registering of the UPnP Event Listener
  * 
- * @author Matteo "matted" Demuru
- *
- */
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
+ 
 
 public class FirstMessage {
 	private Service service;

@@ -22,10 +22,9 @@ import org.osgi.framework.ServiceRegistration;
 
 import org.apache.felix.upnp.basedriver.importer.core.upnp.UPnPDeviceImpl;
 
-/**
- * @author Matteo "matted" Demuru
- *
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class OSGiDeviceInfo {
 	private UPnPDeviceImpl osgidevice;
 	private ServiceRegistration registration;

@@ -30,10 +30,9 @@ import org.osgi.service.upnp.UPnPEventListener;
 
 import org.apache.felix.upnp.extra.util.Converter;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class ExporterUPnPEventListener implements UPnPEventListener {
 
 	private Device d;

@@ -31,11 +31,9 @@ import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPService;
 import org.osgi.service.upnp.UPnPStateVariable;
 
-/**
- * @author Matteo "matted" Demuru
- * @author Stefanoi "kismet-sl" Lenzi
- * 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class UPnPServiceImpl implements UPnPService {
 	private Service service;
 	private Hashtable actions;

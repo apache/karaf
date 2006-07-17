@@ -19,10 +19,9 @@ package org.apache.felix.upnp.basedriver.export;
 
 import java.util.Vector;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- *
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class RootDeviceExportingQueue {
 	
     private Vector v;

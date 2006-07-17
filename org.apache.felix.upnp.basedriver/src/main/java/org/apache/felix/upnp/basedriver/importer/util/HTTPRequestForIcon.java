@@ -20,14 +20,9 @@ package org.apache.felix.upnp.basedriver.importer.util;
 import java.io.*;
 import java.net.*;
 
-/**
- * @author Matteo "matted" Demuru
- * @author Stefanoi "kismet-sl" Lenzi
- *
- * 
- * TODO To change the template for this generated type comment go to Window -
- * Preferences - Java - Code Style - Code Templates
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class HTTPRequestForIcon {
 	private URL url;
 

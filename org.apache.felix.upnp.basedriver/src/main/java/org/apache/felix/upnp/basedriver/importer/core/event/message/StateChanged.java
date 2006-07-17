@@ -22,10 +22,9 @@ import java.util.Dictionary;
 import org.cybergarage.upnp.Device;
 import org.cybergarage.upnp.Service;
 
-/**
- * @author Matteo "matted" Demuru
- *
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class StateChanged {
 	private String sid;
 	private Dictionary dic;

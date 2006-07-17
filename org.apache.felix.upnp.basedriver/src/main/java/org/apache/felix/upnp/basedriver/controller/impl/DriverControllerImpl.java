@@ -28,11 +28,9 @@ import org.apache.felix.upnp.basedriver.Activator;
 import org.apache.felix.upnp.basedriver.importer.core.MyCtrlPoint;
 import org.apache.felix.upnp.basedriver.tool.Logger;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * @author Francesco Furfari 
- *
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class DriverControllerImpl implements DriverController, DevicesInfo{
     private MyCtrlPoint myCtrl;
     private Logger logger = Activator.logger;

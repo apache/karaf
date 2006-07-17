@@ -23,10 +23,9 @@ import org.cybergarage.upnp.control.ActionListener;
 import org.osgi.framework.ServiceReference;
 
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class ActionDispatcher implements ActionListener{
     /**
      * 

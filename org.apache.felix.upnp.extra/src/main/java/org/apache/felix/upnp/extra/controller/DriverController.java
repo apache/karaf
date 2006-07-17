@@ -18,10 +18,9 @@ package org.apache.felix.upnp.extra.controller;
 
 //import java.net.InetAddress;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * @author Francesco Furfari 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public interface DriverController {
 	/**
 	 * String for searching all the device on UPnP Network

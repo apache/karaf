@@ -22,11 +22,9 @@ import java.util.Vector;
 
 import org.osgi.service.upnp.UPnPEventListener;
 
-/**
- * @author Matteo "matted" Demuru
- * @author Francesco Furfari 
- * 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class Listener2Sids {
 	private Hashtable listenerSid;
     

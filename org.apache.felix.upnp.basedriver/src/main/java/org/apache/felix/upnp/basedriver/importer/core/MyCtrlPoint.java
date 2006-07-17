@@ -66,13 +66,9 @@ import org.apache.felix.upnp.basedriver.importer.util.DictionaryProp;
 import org.apache.felix.upnp.basedriver.importer.util.ParseUSN;
 import org.apache.felix.upnp.extra.util.Converter;
 
-/**
- * @author Matteo "matted" Demuru 
- * @author Stefano "Kismet" Lenzi
- * @author Francesco Furfari 
- * 
- *  
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class MyCtrlPoint extends ControlPoint
 		implements
 			NotifyListener,

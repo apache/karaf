@@ -23,11 +23,10 @@ import org.apache.felix.upnp.basedriver.importer.core.event.structs.NotifierQueu
 import org.apache.felix.upnp.basedriver.importer.core.event.structs.StateVarsToNotify;
 
 
-/**
- * @author Matteo "matted" Demuru
- * @author Stefano "kismet-sl" Lenzi
- * 
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
+
 public class Notifier extends Thread {
 
 	private NotifierQueue notifierQueue;

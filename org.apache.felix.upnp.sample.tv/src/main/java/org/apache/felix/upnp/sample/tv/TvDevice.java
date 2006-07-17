@@ -32,9 +32,9 @@ import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPEventListener;
 import org.osgi.service.upnp.UPnPIcon;
 import org.osgi.service.upnp.UPnPService;
-/**
- * @author Francesco Furfari
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 
 public class TvDevice implements UPnPDevice,UPnPEventListener,ServiceListener  {
 	

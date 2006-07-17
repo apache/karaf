@@ -25,11 +25,9 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-/**
- * @author Stefano "Kismet" Lenzi 
- * @author Francesco Furfari 
- *  
- */
+/* 
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+*/
 public class LogPanel extends JPanel {
     private static JTextArea logArea = new JTextArea(4,50);
     private static JPanel statusBar = new JPanel(new BorderLayout());
