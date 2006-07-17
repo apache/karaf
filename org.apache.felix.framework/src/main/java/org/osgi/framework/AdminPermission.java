@@ -72,7 +72,7 @@ public final class AdminPermission extends BasicPermission
     // This constructor is only used when granting an admin permission.
 	public AdminPermission()
     {
-		this("*", "*");
+		this("*", ALL_MASK);
 	}
 
     // This constructor is only used when checking a granted admin permission.
@@ -90,7 +90,8 @@ public final class AdminPermission extends BasicPermission
     }
 
     // This constructor is only used by the admin permission collection
-    // when combining admin permissions.
+    // when combining admin permissions or by the default constructor when granting
+    // an admin permission
     private AdminPermission(String filter, int actionMask)
     {
         super((filter == null) || (filter.equals("*")) ? "(id=*)" : filter);
@@ -137,12 +138,35 @@ public final class AdminPermission extends BasicPermission
 
         AdminPermission admin = (AdminPermission) p;
 
+        // Make sure that the permission was create with a bundle or a "*". 
+        // Otherwise, throw an Exception - as per spec.
+        if ((admin.m_bundle == null) && !(admin.getName().equals("(id=*)")))
+        {
+            throw new RuntimeException(
+                "The specified permission was not constructed with a bundle or *!");
+        }
+        
         // Make sure the action mask is a subset.
         if ((m_actionMask & admin.m_actionMask) != admin.m_actionMask)
         {
             return false;
         }
 
+        // Special case: if the specified permission was constructed with "*"
+        // filter, then this method returns <code>true</code> if this object's
+        // filter is "*".
+        if (admin.getName().equals("(id=*)"))
+        {
+            return getName().equals("(id=*)");
+        }
+        
+        // Next, if this object was create with a "*" we can return true
+        // (This way we avoid creating and matching a filter).
+        if (getName().equals("(id=*)"))
+        {
+            return true;
+        }
+        
         // Otherwise, see if this permission's filter matches the
         // dictionary of the passed in permission.
         if (m_filterImpl == null)
@@ -155,11 +179,9 @@ public final class AdminPermission extends BasicPermission
             {
                 return false;
             }
-
-            return m_filterImpl.match(admin.getBundleDictionary());
         }
 
-        return false;
+        return m_filterImpl.match(admin.getBundleDictionary());
 	}
 
 	public PermissionCollection newPermissionCollection()
@@ -211,6 +233,7 @@ public final class AdminPermission extends BasicPermission
             if (s.equals("*"))
             {
                 mask = ALL_MASK;
+                break;
             }
             else if (s.equalsIgnoreCase(CLASS))
             {
@@ -256,47 +279,56 @@ public final class AdminPermission extends BasicPermission
     private static String createActionString(int mask)
     {
         StringBuffer sb = new StringBuffer();
+        
         if ((mask & CLASS_MASK) > 0)
         {
             sb.append(CLASS);
             sb.append(",");
         }
-        else if ((mask & EXECUTE_MASK) > 0)
+        
+        if ((mask & EXECUTE_MASK) > 0)
         {
             sb.append(EXECUTE);
             sb.append(",");
         }
-        else if ((mask & EXTENSIONLIFECYCLE_MASK) > 0)
+        
+        if ((mask & EXTENSIONLIFECYCLE_MASK) > 0)
         {
             sb.append(EXTENSIONLIFECYCLE);
             sb.append(",");
         }
-        else if ((mask & LIFECYCLE_MASK) > 0)
+        
+        if ((mask & LIFECYCLE_MASK) > 0)
         {
             sb.append(LIFECYCLE);
             sb.append(",");
         }
-        else if ((mask & LISTENER_MASK) > 0)
+        
+        if ((mask & LISTENER_MASK) > 0)
         {
             sb.append(LISTENER);
             sb.append(",");
         }
-        else if ((mask & METADATA_MASK) > 0)
+        
+        if ((mask & METADATA_MASK) > 0)
         {
             sb.append(METADATA);
             sb.append(",");
         }
-        else if ((mask & RESOLVE_MASK) > 0)
+        
+        if ((mask & RESOLVE_MASK) > 0)
         {
             sb.append(RESOLVE);
             sb.append(",");
         }
-        else if ((mask & RESOURCE_MASK) > 0)
+        
+        if ((mask & RESOURCE_MASK) > 0)
         {
             sb.append(RESOURCE);
             sb.append(",");
         }
-        else if ((mask & STARTLEVEL_MASK) > 0)
+        
+        if ((mask & STARTLEVEL_MASK) > 0)
         {
             sb.append(STARTLEVEL);
             sb.append(",");
