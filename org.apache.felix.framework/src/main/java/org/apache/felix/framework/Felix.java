@@ -2626,11 +2626,9 @@ public class Felix
 
     protected Bundle[] getImportingBundles(ExportedPackage ep)
     {
-        // Get exporting bundle; we need to use this internal
-        // method because the spec says ep.getExportingBundle()
-        // should return null if the package is stale.
+        // Get exporting bundle.
         BundleImpl exporter = (BundleImpl)
-            ((ExportedPackageImpl) ep).getExportingBundleInternal();
+            ((ExportedPackage) ep).getExportingBundle();
         BundleInfo exporterInfo = exporter.getInfo();
 
         // Create list for storing importing bundles.
@@ -3648,6 +3646,9 @@ public class Felix
             try
             {
                 BundleInfo info = m_bundle.getInfo();
+
+                // Mark the bundle as stale.
+                info.setStale();
 
                 // Remove or purge the bundle depending on its
                 // current state.

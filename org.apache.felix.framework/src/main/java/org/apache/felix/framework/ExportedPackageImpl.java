@@ -40,33 +40,18 @@ class ExportedPackageImpl implements ExportedPackage
 
     public Bundle getExportingBundle()
     {
-        // If remove is pending due to a bundle update, then
-        // return null per the spec.
-        if (m_exporter.getInfo().isRemovalPending())
+        // If the package is stale, then return null per the spec.
+        if (m_exporter.getInfo().isStale())
         {
             return null;
         }
         return m_exporter;
     }
 
-    /**
-     * Returns the exporting bundle whether the package is state or
-     * not. This is called internally to get access to the exporting
-     * bundle during a refresh operation, which is not possible using
-     * <tt>getExportingBundle</tt> since the specification says that
-     * method must return <tt>null</tt> for stale packages.
-     * @return the exporting bundle for the package.
-    **/
-    protected Bundle getExportingBundleInternal()
-    {
-        return m_exporter;
-    }
-    
     public Bundle[] getImportingBundles()
     {
-        // If remove is pending due to a bundle update, then
-        // return null per the spec.
-        if (m_exporter.getInfo().isRemovalPending())
+        // If the package is stale, then return null per the spec.
+        if (m_exporter.getInfo().isStale())
         {
             return null;
         }
