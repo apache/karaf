@@ -207,12 +207,8 @@ class PackageAdminImpl implements PackageAdmin, Runnable
                     }
                 }
 
-                // Get the bundles parameter for the current
-                // refresh request.
-                if (m_reqBundles != null)
-                {
-                    bundles = m_reqBundles[0];
-                }
+                // Get the bundles parameter for the current refresh request.
+                bundles = m_reqBundles[0];
             }
 
             // Perform refresh.
