@@ -44,7 +44,6 @@ import org.apache.felix.upnp.extra.util.Constants;
 public class DeviceSetup {
 
 	public static void deviceSetup(DictionaryProp properties, Device dev,Vector icons,Hashtable services) {
-		//TODO se non ho device ho una devlist con zero elementi
 		//TODO if I don't have any device, the size of devlist is 0 
 		DeviceList devList = dev.getDeviceList();
 		/* childrenUDN property */
@@ -66,7 +65,6 @@ public class DeviceSetup {
 		properties.put(Constants.UPNP_IMPORT, "http://felix.apache.org");
 		
 		/* FRIENDLY_NAME */
-		//TODO controllato in metodo getFriendlyName se non esiste il frinedly mi restituisce una stringa vuota
 		//check the implementation fo getFriendlyName made by CyberLink
 		properties.put(UPnPDevice.FRIENDLY_NAME, dev.getFriendlyName());
 		/* MANUFACTURER */
@@ -110,12 +108,9 @@ public class DeviceSetup {
 			}
 		}
 		/* 
-		 * servizi del device
 		 * service of this device
 		 */ 
-		ServiceList serviceList = dev.getServiceList();//ok mi restituisce una
-													   // service list con zero
-													   // elementi
+		ServiceList serviceList = dev.getServiceList();
 		/*
 		 * if dev contain no service I'll get an empty SserviceList object
 		 */

@@ -22,7 +22,6 @@ package org.apache.felix.upnp.basedriver.importer.util;
 */
 public class ParseLocation {
 	public static String getUrlBase(String location){
-		//http://148.12.14.144:65888/
 		String [] splited=location.split("/");
 		return splited[0]+"/"+"/"+splited[2];
 	}

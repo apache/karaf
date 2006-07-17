@@ -60,7 +60,7 @@ public class UPnPActionImpl implements UPnPAction {
 	 * @see org.osgi.service.upnp.UPnPAction#getReturnArgumentName()
 	 */
 	public String getReturnArgumentName() {
-	/*	 TODO da discutere .. perche' mi dovrei riparsare l'xml 
+	/*	 TODO should I to parse again the xml?
 		 */
 		
 		return null;
@@ -102,9 +102,7 @@ public class UPnPActionImpl implements UPnPAction {
 	 * @see org.osgi.service.upnp.UPnPAction#getStateVariable(java.lang.String)
 	 */
 	public UPnPStateVariable getStateVariable(String argumentName) {
-		/*TODO  controllare se non e' 
-		troppo brutto il modo di ottenere 
-		la UPnPStateVariable
+		/*
 		
 		check if the way to obtain the UPnPStateVariabile is not too bad
 		
@@ -121,26 +119,17 @@ public class UPnPActionImpl implements UPnPAction {
 	 * @see org.osgi.service.upnp.UPnPAction#invoke(java.util.Dictionary)
 	 */
 	public Dictionary invoke(Dictionary args) throws Exception {
-		/*TODO da controllare se ho capito bene quello che 
-		richiedeva il metodo
-		
+		/*TODO 
 		check if I have understood wath this method should do
 		*/
 		/*
-		 * mi ricavo gli argomenti e i valori
-		 * e gli inserisco in un ArgumentList
-		 * 
 		 * I look for argument and value and then I add them to ArgumentList
 		 */
 		ArgumentList argsList=new ArgumentList();
 		argsList= act.getInputArgumentList();
 	
 		for(int i=0;i<argsList.size();i++){
-			/*
-			TODO assumo che .getArgument(i) mi dia un Argument con solo il nome e non il valore 
-			che sara' cio che ci mettero' io 
-			e assumo anche che siano ordinati
-			
+			/*			
 			 * I assert that .getArgument(i) will return to me an Argument with only the name of the
 			 * Argument and not it's value. I'll set the associated value by myself and
 			 * Also I assert that the Argument are ordered
@@ -151,13 +140,11 @@ public class UPnPActionImpl implements UPnPAction {
 			UPnPStateVariable stateVar=this.getStateVariable(argumentName);
 			String upnpType=stateVar.getUPnPDataType();
 			/*Class javaClass=stateVar.getJavaDataType();*/
-			//setto il valore dell'argomento di input
 			//setting the value related to the input argument
 			argument.setValue(Converter.toString(args.get(argumentName),upnpType));
 		}
 		act.setArgumentValues(argsList);
 		if(act.postControlAction()==true){
-			//TODO controllare cosa succede se non ho argomenti di out 
 			//TODO check what happen if I don't have any output argument
 			Properties outDic=new Properties();
 			ArgumentList outArgs=act.getOutputArgumentList();
@@ -170,7 +157,6 @@ public class UPnPActionImpl implements UPnPAction {
 				//String relateVar=argument.getRelatedStateVariableName();
 				UPnPStateVariable stateVar=getStateVariable(argumentName);
 				//String javaType=stateVar.getJavaDataType().getName(); 
-				//TODO ricordarsi di catchare nunber exception
 				//TODO rember to catch number exception
 				String upnpType=stateVar.getUPnPDataType();
 				outDic.put(argumentName,Converter.parseString(argument.getValue(),upnpType));

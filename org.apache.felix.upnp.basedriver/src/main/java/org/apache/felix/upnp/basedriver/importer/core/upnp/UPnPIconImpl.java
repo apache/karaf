@@ -52,7 +52,6 @@ public class UPnPIconImpl implements UPnPIcon {
 	 * @see org.osgi.service.upnp.UPnPIcon#getWidth()
 	 */
 	public int getWidth() {
-		// TODO se parso una stringa vuota che succede ? da eccezione?penso di si 
 		//TODO what happen if the String is empty? do I get an Exception? I think so
 		String width=icon.getWidth();
 		if(width.length()==0){

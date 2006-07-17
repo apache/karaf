@@ -79,7 +79,6 @@ public class SetTargetAction implements UPnPAction {
 	 * @see org.osgi.service.upnp.UPnPAction#invoke(java.util.Dictionary)
 	 */
 	public Dictionary invoke(Dictionary args) throws Exception {
-		System.out.println("Accesa"); 
 		Boolean value = (Boolean) args.get(NEW_TARGET_VALUE);
 		model.doSwitch(value.booleanValue());
 		return null;

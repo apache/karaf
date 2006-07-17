@@ -73,7 +73,6 @@ public class Renewer extends Thread {
 				}
 			} else {//renew not ok
 				bool=false;
-				//System.out.println("morto renewer");
 				subqueue.enqueue(new SidExipired(sid,service));
 			}
 		}

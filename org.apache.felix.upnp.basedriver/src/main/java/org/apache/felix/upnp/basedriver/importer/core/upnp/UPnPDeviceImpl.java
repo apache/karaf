@@ -73,7 +73,6 @@ public class UPnPDeviceImpl implements UPnPDevice {
 	public UPnPService[] getServices() {
 		Enumeration e = services.elements();
 		if (e == null) {
-			//TODO restituisco null o un array vuoto null l'ho letto nella specifica
 			//TODO should I return null or an empty array? The specification seems to said to return null
 			return null;
 		}

@@ -81,8 +81,6 @@ public class Monitor {
 	}
     
 /*    
- * controllare se bisogna fare un po' di cleaning
- * 
     public synchronized StateVarsToNotify getStateVars(String sid) {
         return (StateVarsToNotify) sidStateVars.get(sid);
     }
@@ -115,7 +113,7 @@ public class Monitor {
 			MyCtrlPoint ctrl/*##renew, SidRenewer sidRenewer*/) {
         
         //francesco-renew
-        // le strutture delle variabili di stato quando si ripulisono?
+        // State variable clean up -- todo?
         
 		Vector sids = sidListSid.getSidsFromListener(listener);
 		if (sids != null) {
@@ -165,8 +163,7 @@ public class Monitor {
 
 		Vector oldSids = sidListSid.getSidsFromListener(listener);
         // francesco-renew
-        // qua mi sembra che si esca troppo presto
-        // i servizi notSubribed si registrano soltanto dopo ""
+        // check subscribed services
 		if(oldSids==null) return;
 		
 		for (int i = 0; i < notSubscribed.size(); i++) {
@@ -178,14 +175,8 @@ public class Monitor {
 			String oldSid = (String) oldSids.elementAt(i);
 			if (!subscribed.contains(oldSid)) {
                 // francesco-renew
-                // qua si rimuove il sid dalla lista Listner2Sids
-                // ma il Listner dalla lista sid2Listener?
-                // la delListner che si esegue dopo � pensata per rimuovere principalmente i
-                // listener e ci sono condizioni es. Lista Listener2Sid vuota
-                // che nn fanno rimuovere eventuali listener dalla sid2Listener
-                // controllare bene !!
-                
-				
+                // to check -- Listner removal from sid2Listener
+                				
 				unsubscribeListenerForSid(oldSid,listener,ctrl);
 			}
 		}

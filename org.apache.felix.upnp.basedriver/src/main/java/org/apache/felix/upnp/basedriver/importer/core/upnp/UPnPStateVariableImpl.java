@@ -128,7 +128,6 @@ public class UPnPStateVariableImpl implements UPnPStateVariable {
 	 * @see org.osgi.service.upnp.UPnPStateVariable#getDefaultValue()
 	 */
 	public Object getDefaultValue() {
-		//TODO da implementare da zero.. e' raccommended ..
 		//TODO must be implemented from scretch, it's just raccommend
 		return null;
 	}
@@ -161,7 +160,6 @@ public class UPnPStateVariableImpl implements UPnPStateVariable {
 	 * @see org.osgi.service.upnp.UPnPStateVariable#getMinimum()
 	 */
 	public Number getMinimum() {
-		// TODO stessa cosa get maximum
 		//TODO the same thing for getMaximum
 		AllowedValueRange allowedValueRange = variable.getAllowedValueRange();
 		if(allowedValueRange==null){
@@ -185,7 +183,6 @@ public class UPnPStateVariableImpl implements UPnPStateVariable {
 	 * @see org.osgi.service.upnp.UPnPStateVariable#getMaximum()
 	 */
 	public Number getMaximum() {
-		// TODO suppongo che le invochino con cognizione di causa ??
 		//TODO I think that this method will be invoked from people that know what is doing
 		AllowedValueRange allowedValueRange = variable.getAllowedValueRange();
 		if(allowedValueRange==null){
@@ -209,7 +206,6 @@ public class UPnPStateVariableImpl implements UPnPStateVariable {
 	 * @see org.osgi.service.upnp.UPnPStateVariable#getStep()
 	 */
 	public Number getStep() {
-		// TODO stssa cosa di getmaximum
 		//TODO same things of getMaxium
 		AllowedValueRange allowedValueRange = variable.getAllowedValueRange();
 		if(allowedValueRange==null){

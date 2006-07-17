@@ -163,14 +163,6 @@ public class MyCtrlPoint extends ControlPoint
         Activator.logger.DEBUG("[Importer] deviceNotifyReceived");
         Activator.logger.PACKET(ssdpPacket.toString());
 		/*
-		 * case is notify case isalive case new root crea e aggiungi il servizio
-		 * in Osgi con tutta la stirpe case device or service controllo se
-		 * esiste in OSGi se si nada, se no lo creo partendo dal root case
-		 * byebye case root deregistro tutta la stirpe case device o service
-		 * reinstanzio il root con le modifiche
-		 *  
-		 */
-		/*
 		 * if the packet is 
 		 * 		NOTIFY or ISALIVE or *new* ROOT	then create and register the UPnPDevice and 
 		 * 										all the embeeded device too
@@ -290,7 +282,6 @@ public class MyCtrlPoint extends ControlPoint
 		String[] childrenUDN = (String[]) dev.getDescriptions(null).get(
 				UPnPDevice.CHILDREN_UDN);
 		if (childrenUDN == null) {
-			//non ha figli
 			//no children
 			unregisterUPnPDevice(((OSGiDeviceInfo) devices.get(dev
 					.getDescriptions(null).get(UPnPDevice.UDN)))
@@ -349,12 +340,6 @@ public class MyCtrlPoint extends ControlPoint
 	}
     
     
-	/*
-	 * public void registerHierarchyUPnPDevice(Device dev) { registro il root
-	 * con tutta la sua stirpe in osgi registerUPnPDevice(dev); DeviceList
-	 * devList = dev.getDeviceList(); for (int i = 0; i < devList.size(); i++) {
-	 * registerHierarchyUPnPDevice(devList.getDevice(i)); } }
-	 */
 	public void unregisterUPnPDevice(ServiceRegistration registration) {
 		registration.unregister();
 
@@ -478,19 +463,15 @@ public class MyCtrlPoint extends ControlPoint
 				}
 
 				if (devicesRefs != null) {/*
-										   * solo se ci sono dei device
-										   * compatibili
 										   * 
 										   * only if there is a compatibile device
 										   */
 					Dictionary dic = new DictionaryProp();
-					/* cerco i servizi che matchano */
 					for (int i = 0; i < devicesRefs.length; i++) {
 						UPnPDevice device = (UPnPDevice) context.getService(devicesRefs[i]);
 						dic.put(UPnPDevice.ID, device.getDescriptions(null).get(UPnPDevice.UDN));
 						dic.put(UPnPDevice.TYPE, device.getDescriptions(null).get(UPnPDevice.TYPE));
 						UPnPService[] services = device.getServices();
-						//TODO fare l'unget del servizio UPnPDevice??
 						//TODO do I have to do the unget of UPnPDevice??
 						if (services != null) {
 							for (int j = 0; j < services.length; j++) {
@@ -524,7 +505,6 @@ public class MyCtrlPoint extends ControlPoint
 					e.printStackTrace();
 				}
 				if (devicesRefs != null) {/*
-										   * solo se ci sono dei device
 										   * 
 										   * only if there is a device
 										   */
@@ -533,7 +513,6 @@ public class MyCtrlPoint extends ControlPoint
 						UPnPDevice device = (UPnPDevice) context
 								.getService(devicesRefs[i]);
 						UPnPService[] services = device.getServices();
-						//fare l'unget del servizio UPnPDevice??
 						//do I have to do the unget of UPnPDevice??
 						if (services != null) {
 							for (int j = 0; j < services.length; j++) {
@@ -576,15 +555,11 @@ public class MyCtrlPoint extends ControlPoint
 					e.printStackTrace();
 				}
 				if (devicesRefs != null) {/*
-										   * solo se ci sono dei device
-										   * compatibili
 										   * 
 										   * only if there is a compatibile device
 										   */
 					Dictionary dic = new DictionaryProp();
 					/* 
-					 * cerco i servizi che matchano
-					 * 
 					 * look for the service that match
 					 */
 					for (int i = 0; i < devicesRefs.length; i++) {
@@ -596,7 +571,6 @@ public class MyCtrlPoint extends ControlPoint
 								.get(UPnPDevice.TYPE));
 						UPnPService[] services = device.getServices();
 
-						//fare l'unget del servizio UPnPDevice??
 						//do I have to do the unget of UPnPDevice??
 						if (services != null) {
 							for (int j = 0; j < services.length; j++) {
@@ -642,8 +616,6 @@ public class MyCtrlPoint extends ControlPoint
 					e.printStackTrace();
 				}
 				if (devicesRefs != null) {/*
-										   * solo se ci sono dei device
-										   * 
 										   * only if there is a device
 										   */
 
@@ -651,7 +623,6 @@ public class MyCtrlPoint extends ControlPoint
 						UPnPDevice device = (UPnPDevice) context
 								.getService(devicesRefs[i]);
 						UPnPService[] services = device.getServices();
-						//fare l'unget del servizio UPnPDevice??
 						//do I have to do the unget of UPnPDevice??
 						if (services != null) {
 							for (int j = 0; j < services.length; j++) {
@@ -776,7 +747,6 @@ public class MyCtrlPoint extends ControlPoint
             String[] oldServicesType = 
                 (String[]) device.getDescriptions(null).get(UPnPServiceImpl.TYPE);
             
-            //per via delle istanze multiple di un tipo di servizio
             //to handle multiple instance of a serivice of the same type
             Device cyberDevice = findDeviceCtrl(this, udn);
             ServiceList serviceList = cyberDevice.getServiceList();

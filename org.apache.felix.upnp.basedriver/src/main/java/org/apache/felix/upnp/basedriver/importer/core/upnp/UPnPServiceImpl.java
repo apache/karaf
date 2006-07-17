@@ -44,7 +44,6 @@ public class UPnPServiceImpl implements UPnPService {
 		actions = new Hashtable();
 		stateVariables=new Hashtable();
 		/*
-		 * azioni
 		 * action
 		 */
 		ActionList actionlist = service.getActionList();
@@ -86,7 +85,6 @@ public class UPnPServiceImpl implements UPnPService {
 	 * @see org.osgi.service.upnp.UPnPService#getVersion()
 	 */
 	public String getVersion() {
-		// TODO da  controllare si puo' migliorare lastindexof
 		//TODO to check can I speed up this? May be using lastIndexOf
 		String [] splited=service.getServiceType().split(":"); 
 		return splited[splited.length-1];
@@ -97,7 +95,6 @@ public class UPnPServiceImpl implements UPnPService {
 	   * @see org.osgi.service.upnp.UPnPService#getAction(java.lang.String)
 	   */
 	public UPnPAction getAction(String name) {
-		// TODO da controllare
 		//TODO to check
 		return (UPnPAction) actions.get(name);
 	}
@@ -108,7 +105,6 @@ public class UPnPServiceImpl implements UPnPService {
 	 * @see org.osgi.service.upnp.UPnPService#getActions()
 	 */
 	public UPnPAction[] getActions() {
-		// TODO ricontrollare
 		//TODO check again
 		Enumeration e=actions.elements();
 		if(e==null){
@@ -129,7 +125,6 @@ public class UPnPServiceImpl implements UPnPService {
 	 * @see org.osgi.service.upnp.UPnPService#getStateVariables()
 	 */
 	public UPnPStateVariable[] getStateVariables() {
-		// TODO ricontrollare
 		//TODO check again
 		UPnPStateVariableImpl [] vars =new UPnPStateVariableImpl[stateVariables.size()];
 		Enumeration e=stateVariables.elements();
@@ -150,7 +145,6 @@ public class UPnPServiceImpl implements UPnPService {
 	 * @see org.osgi.service.upnp.UPnPService#getStateVariable(java.lang.String)
 	 */
 	public UPnPStateVariable getStateVariable(String name) {
-		// TODO ricontrollare	
 		//TODO chack again
 		return (UPnPStateVariableImpl) stateVariables.get(name);
 	}

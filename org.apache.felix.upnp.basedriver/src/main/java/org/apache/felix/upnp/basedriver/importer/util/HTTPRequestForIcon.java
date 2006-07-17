@@ -30,7 +30,6 @@ public class HTTPRequestForIcon {
 		this.url = url;
 	}
 	public InputStream getInputStream() throws IOException {
-		//TODO da discutere
 		//TODO we should speak about that
 		InetAddress inet = InetAddress.getByName(url.getHost());
 		int port = url.getPort();
@@ -75,9 +74,9 @@ public class HTTPRequestForIcon {
 		return in;
 
 		/*
-		 * utilizzando la classe di satoshi HTTPResponse response=new
-		 * HTTPResponse(in); InputStream
-		 * iconInStream=response.getContentInputStream(); return iconInStream;
+		 * HTTPResponse response=new HTTPResponse(in); 
+		 * InputStream  iconInStream=response.getContentInputStream(); 
+		 * return iconInStream;
 		 * 
 		 */
 		/*
