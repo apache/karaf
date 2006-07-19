@@ -1534,8 +1534,6 @@ public class Felix
                 } 
                 catch (Exception ex)
                 {
-                    rethrow = ex;
-                    
                     try 
                     {
                         archive.undoRevise();
@@ -1545,7 +1543,7 @@ public class Felix
                         m_logger.log(Logger.LOG_ERROR, "Unable to rollback.", busted);
                     }
                     
-                    m_logger.log(Logger.LOG_ERROR, "Unable to update the bundle.", ex);
+                    throw ex;
                 }
             }
             catch (Exception ex)
@@ -2099,9 +2097,14 @@ public class Felix
         }
     }
 
-    protected void removeBundleListener(BundleListener l)
+    protected void removeBundleListener(Bundle bundle, BundleListener l)
     {
-        m_dispatchQueue.removeListener(BundleListener.class, l);
+        BundleListenerWrapper old = (BundleListenerWrapper)
+            m_dispatchQueue.getListener(BundleListener.class, l);
+        if ((old != null) && old.getBundle().equals(bundle))
+        {
+            m_dispatchQueue.removeListener(BundleListener.class, l);
+        }
     }
 
     /**
@@ -2135,12 +2138,18 @@ public class Felix
     /**
      * Implementation for BundleContext.removeServiceListener().
      * Removes service listeners from the listener list.
-     *
+     * 
+     * @param bundle The context bundle of the listener
      * @param l The service listener to remove from the listener list.
     **/
-    protected void removeServiceListener(ServiceListener l)
+    protected void removeServiceListener(Bundle bundle, ServiceListener l)
     {
-        m_dispatchQueue.removeListener(ServiceListener.class, l);
+        ServiceListenerWrapper old = (ServiceListenerWrapper) 
+            m_dispatchQueue.getListener(ServiceListener.class, l);
+        if ((old != null) && old.getBundle().equals(bundle))
+        {
+            m_dispatchQueue.removeListener(ServiceListener.class, l);
+        }
     }
 
     protected void addFrameworkListener(Bundle bundle, FrameworkListener l)
@@ -2156,9 +2165,14 @@ public class Felix
         }
     }
 
-    protected void removeFrameworkListener(FrameworkListener l)
+    protected void removeFrameworkListener(Bundle bundle, FrameworkListener l)
     {
-        m_dispatchQueue.removeListener(FrameworkListener.class, l);
+        FrameworkListenerWrapper old = (FrameworkListenerWrapper)
+            m_dispatchQueue.getListener(FrameworkListener.class, l);
+        if ((old != null) && old.getBundle().equals(bundle))
+        {
+            m_dispatchQueue.removeListener(FrameworkListener.class, l);
+        }
     }
 
     /**

@@ -121,7 +121,7 @@ class BundleContextImpl implements FelixBundleContext
     {
         checkValidity();
         
-        m_felix.removeBundleListener(l);
+        m_felix.removeBundleListener(m_bundle, l);
     }
 
     public void addServiceListener(ServiceListener l)
@@ -148,7 +148,7 @@ class BundleContextImpl implements FelixBundleContext
     {
         checkValidity();
         
-        m_felix.removeServiceListener(l);
+        m_felix.removeServiceListener(m_bundle, l);
     }
 
     public void addFrameworkListener(FrameworkListener l)
@@ -162,7 +162,7 @@ class BundleContextImpl implements FelixBundleContext
     {
         checkValidity();
         
-        m_felix.removeFrameworkListener(l);
+        m_felix.removeFrameworkListener(m_bundle, l);
     }
 
     public ServiceRegistration registerService(
