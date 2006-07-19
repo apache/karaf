@@ -170,21 +170,24 @@ public class BundleCache
     public synchronized void remove(BundleArchive ba)
         throws Exception
     {
-        // Remove the archive.
-        ba.dispose();
-        // Remove the archive from the cache.
-        int idx = getArchiveIndex(ba);
-        if (idx >= 0)
+        if (ba != null)
         {
-            BundleArchive[] tmp =
-                new BundleArchive[m_archives.length - 1];
-            System.arraycopy(m_archives, 0, tmp, 0, idx);
-            if (idx < tmp.length)
+            // Remove the archive.
+            ba.dispose();
+            // Remove the archive from the cache.
+            int idx = getArchiveIndex(ba);
+            if (idx >= 0)
             {
-                System.arraycopy(m_archives, idx + 1, tmp, idx,
-                    tmp.length - idx);
+                BundleArchive[] tmp =
+                    new BundleArchive[m_archives.length - 1];
+                System.arraycopy(m_archives, 0, tmp, 0, idx);
+                if (idx < tmp.length)
+                {
+                    System.arraycopy(m_archives, idx + 1, tmp, idx,
+                        tmp.length - idx);
+                }
+                m_archives = tmp;
             }
-            m_archives = tmp;
         }
     }
 
