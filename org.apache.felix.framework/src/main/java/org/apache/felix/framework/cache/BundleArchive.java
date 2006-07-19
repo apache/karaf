@@ -70,6 +70,7 @@ public class BundleArchive
     private static final transient String BUNDLE_ID_FILE = "bundle.id";
     private static final transient String BUNDLE_LOCATION_FILE = "bundle.location";
     private static final transient String CURRENT_LOCATION_FILE = "current.location";
+    private static final transient String REVISION_LOCATION_FILE = "revision.location";
     private static final transient String BUNDLE_STATE_FILE = "bundle.state";
     private static final transient String BUNDLE_START_LEVEL_FILE = "bundle.startlevel";
     private static final transient String REFRESH_COUNTER_FILE = "refresh.counter";
@@ -79,7 +80,7 @@ public class BundleArchive
     private static final transient String ACTIVE_STATE = "active";
     private static final transient String INSTALLED_STATE = "installed";
     private static final transient String UNINSTALLED_STATE = "uninstalled";
-
+    
     private Logger m_logger = null;
     private long m_id = -1;
     private File m_archiveRootDir = null;
@@ -136,7 +137,7 @@ public class BundleArchive
         initialize();
 
         // Add a revision for the content.
-        revise(getCurrentLocation(), is);
+        revise(m_originalLocation, is);
     }
 
     /**
@@ -190,8 +191,21 @@ public class BundleArchive
             m_revisions = new BundleRevision[revisionCount - 1];
         }
 
-        // Add the revision object for the most recent revision.
-        revise(getCurrentLocation(), null);
+        // Add the revision object for the most recent revision. We first try to read
+        // the location from the current revision - if that fails we likely have 
+        // an old bundle cache and read the location the old way. The next 
+        // revision will update the bundle cache.
+        // TODO: FRAMEWORK - This try catch block can eventually be deleted when we decide to remove
+        // support for the old way, then we only need the first call to revise().
+        try 
+        {
+            revise(getRevisionLocation(revisionCount - 1), null);
+        }
+        catch (Exception ex)
+        {
+            m_logger.log(Logger.LOG_WARNING, getClass().getName() + ": Updating old bundle cache format.");
+            revise(getCurrentLocation(), null);
+        }
     }
 
     /**
@@ -598,6 +612,7 @@ public class BundleArchive
      * This method adds a revision to the archive. The revision is created
      * based on the specified location and/or input stream.
      * </p>
+     * @param location the location string associated with the revision.
      * @throws Exception if any error occurs.
     **/
     public synchronized void revise(String location, InputStream is)
@@ -618,8 +633,12 @@ public class BundleArchive
         }
 
         // Set the current revision location to match.
+        // TODO: FRAMEWORK - This can eventually be deleted when we removed
+        // support for the old way of doing things.
         setCurrentLocation(location);
 
+        setRevisionLocation(location, (m_revisions == null) ? 0 : m_revisions.length);
+        
         // Add new revision to revision array.
         if (m_revisions == null)
         {
@@ -634,6 +653,97 @@ public class BundleArchive
         }
     }
 
+    /**
+     * <p>
+     * This method undoes the previous revision to the archive; this method will
+     * remove the latest revision from the archive. This method is only called
+     * when there are problems during an update after the revision has been
+     * created, such as errors in the update bundle's manifest. This method
+     * can only be called if there is more than one revision, otherwise there
+     * is nothing to undo.
+     * </p>
+     * @return true if the undo was a success false if there is no previous revision
+     * @throws Exception if any error occurs.
+     */
+    public synchronized boolean undoRevise() throws Exception
+    {
+        // Can only undo the revision if there is more than one.
+        if (getRevisionCount() <= 1)
+        {
+            return false;
+        }
+        
+        String location = getRevisionLocation(m_revisions.length - 2);
+
+        // TODO: FRAMEWORK - This can eventually be deleted when we removed
+        // support for the old way of doing things.
+        setCurrentLocation(location);
+        
+        try
+        {
+            m_revisions[m_revisions.length - 1].dispose();
+        } 
+        catch(Exception ex)
+        {
+           m_logger.log(Logger.LOG_ERROR, getClass().getName() + 
+               ": Unable to dispose latest revision", ex); 
+        }
+
+        File revisionDir = new File(m_archiveRootDir, REVISION_DIRECTORY + 
+            getRefreshCount() + "." + (m_revisions.length - 1));
+        
+        if (BundleCache.getSecureAction().fileExists(revisionDir))
+        {
+            BundleCache.deleteDirectoryTree(revisionDir);
+        }
+        
+        BundleRevision[] tmp = new BundleRevision[m_revisions.length - 1];
+        System.arraycopy(m_revisions, 0, tmp, 0, m_revisions.length - 1);
+        
+        return true;
+    }
+    
+    private synchronized String getRevisionLocation(int revision) throws Exception
+    {   
+        InputStream is = null;
+        BufferedReader br = null;
+        try
+        {
+            is = BundleCache.getSecureAction().getFileInputStream(new File(
+                new File(m_archiveRootDir, REVISION_DIRECTORY + 
+                getRefreshCount() + "." + revision), REVISION_LOCATION_FILE));
+            
+            br = new BufferedReader(new InputStreamReader(is));
+            return br.readLine();
+        }
+        finally
+        {
+            if (br != null) br.close();
+            if (is != null) is.close();
+        }
+    }
+    
+    private synchronized void setRevisionLocation(String location, int revision) throws Exception
+    {
+        // Save current revision location.
+        OutputStream os = null;
+        BufferedWriter bw = null;
+        try
+        {
+            os = BundleCache.getSecureAction()
+                .getFileOutputStream(new File(
+                    new File(m_archiveRootDir, REVISION_DIRECTORY + 
+                    getRefreshCount() + "." + revision), REVISION_LOCATION_FILE));
+            bw = new BufferedWriter(new OutputStreamWriter(os));
+            bw.write(location, 0, location.length());
+        }
+        finally
+        {
+            if (bw != null) bw.close();
+            if (os != null) os.close();
+        }
+    }
+    
     /**
      * <p>
      * This method removes all old revisions associated with the archive
@@ -672,9 +782,13 @@ public class BundleArchive
         // to the new refresh level.
         m_revisions[count - 1].dispose();
 
+        // Save the current revision location for use later when
+        // we recreate the revision.
+        String location = getRevisionLocation(count -1);
+        
         // Increment the refresh count.
         setRefreshCount(refreshCount + 1);
-
+        
         // Rename the current revision directory to be the zero revision
         // of the new refresh level.
         File currentDir = new File(m_archiveRootDir, REVISION_DIRECTORY + (refreshCount + 1) + ".0");
@@ -684,7 +798,7 @@ public class BundleArchive
         // Null the revision array since they are all invalid now.
         m_revisions = null;
         // Finally, recreate the revision for the current location.
-        BundleRevision revision = createRevisionFromLocation(getCurrentLocation(), null);
+        BundleRevision revision = createRevisionFromLocation(location, null);
         // Create new revision array.
         m_revisions = new BundleRevision[] { revision };
     }

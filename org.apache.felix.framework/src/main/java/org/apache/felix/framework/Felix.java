@@ -1523,12 +1523,30 @@ public class Felix
                 // Create a module for the new revision; the revision is
                 // base zero, so subtract one from the revision count to
                 // get the revision of the new update.
-                IModule module = createModule(
-                    info.getBundleId(),
-                    archive.getRevisionCount() - 1,
-                    info.getCurrentHeader());
-                // Add module to bundle info.
-                info.addModule(module);
+                try
+                {
+                    IModule module = createModule(
+                        info.getBundleId(),
+                        archive.getRevisionCount() - 1,
+                        info.getCurrentHeader());
+                    // Add module to bundle info.
+                    info.addModule(module);
+                } 
+                catch (Exception ex)
+                {
+                    rethrow = ex;
+                    
+                    try 
+                    {
+                        archive.undoRevise();
+                    }
+                    catch (Exception busted)
+                    {
+                        m_logger.log(Logger.LOG_ERROR, "Unable to rollback.", busted);
+                    }
+                    
+                    m_logger.log(Logger.LOG_ERROR, "Unable to update the bundle.", ex);
+                }
             }
             catch (Exception ex)
             {
@@ -1536,12 +1554,13 @@ public class Felix
                 rethrow = ex;
             }
 
-            info.setState(Bundle.INSTALLED);
-            info.setLastModified(System.currentTimeMillis());
-
-            // Fire updated event if successful.
+            // Set new state, mark as needing a refresh, and fire updated event 
+            // if successful.
             if (rethrow == null)
             {
+                info.setState(Bundle.INSTALLED);
+                info.setLastModified(System.currentTimeMillis());
+                
                 // Mark previous the bundle's old module for removal since
                 // it can no longer be used to resolve other modules per the spec.
                 IModule module = info.getModules()[info.getModules().length - 2];
