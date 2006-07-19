@@ -254,6 +254,23 @@ public class R4SearchPolicyCore implements ModuleListener
         data.m_resolved = resolved;
     }
 
+    public synchronized boolean isRemovalPending(IModule module)
+    {
+        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
+        return (data == null) ? false : data.m_removalPending;
+    }
+
+    public synchronized void setRemovalPending(IModule module, boolean removalPending)
+    {
+        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
+        if (data == null)
+        {
+            data = new ModuleData(module);
+            m_moduleDataMap.put(module, data);
+        }
+        data.m_removalPending = removalPending;
+    }
+
     public Object[] definePackage(IModule module, String pkgName)
     {
         R4Package pkg = Util.getExportPackage(module, pkgName);
@@ -541,7 +558,7 @@ public class R4SearchPolicyCore implements ModuleListener
 
                 // First check already resolved exports for a match.
                 IModule[] candidates = getCompatibleExporters(
-                    (IModule[]) m_inUsePkgMap.get(impMatch.getName()), impMatch);
+                    (IModule[]) m_inUsePkgMap.get(impMatch.getName()), impMatch, false);
                 // If there is an "in use" candidate, just take the first one.
                 if (candidates.length > 0)
                 {
@@ -553,7 +570,7 @@ public class R4SearchPolicyCore implements ModuleListener
                 if (candidate == null)
                 {
                     candidates = getCompatibleExporters(
-                        (IModule[]) m_availPkgMap.get(impMatch.getName()), impMatch);
+                        (IModule[]) m_availPkgMap.get(impMatch.getName()), impMatch, false);
                     for (int candIdx = 0;
                         (candidate == null) && (candIdx < candidates.length);
                         candIdx++)
@@ -674,7 +691,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         synchronized (m_factory)
         {
             return getCompatibleExporters(
-                (IModule[]) m_availPkgMap.get(pkg.getName()), pkg);
+                (IModule[]) m_availPkgMap.get(pkg.getName()), pkg, false);
         }
     }
 
@@ -685,7 +702,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         synchronized (m_factory)
         {
             return getCompatibleExporters(
-                (IModule[]) m_inUsePkgMap.get(pkg.getName()), pkg);
+                (IModule[]) m_inUsePkgMap.get(pkg.getName()), pkg, true);
         }
     }
 
@@ -796,10 +813,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             // at the front of the list of candidates.
             IModule[] inuse = getCompatibleExporters(
                 (IModule[]) m_inUsePkgMap.get(
-                    imports[impIdx].getName()), imports[impIdx]);
+                    imports[impIdx].getName()), imports[impIdx], false);
             IModule[] available = getCompatibleExporters(
                 (IModule[]) m_availPkgMap.get(
-                    imports[impIdx].getName()), imports[impIdx]);
+                    imports[impIdx].getName()), imports[impIdx], false);
             IModule[] candidates = new IModule[inuse.length + available.length];
             System.arraycopy(inuse, 0, candidates, 0, inuse.length);
             System.arraycopy(available, 0, candidates, inuse.length, available.length);
@@ -873,11 +890,14 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             for (Iterator i = m_availPkgMap.entrySet().iterator(); i.hasNext(); )
             {
                 Map.Entry entry = (Map.Entry) i.next();
-                System.out.println("  " + entry.getKey());
                 IModule[] modules = (IModule[]) entry.getValue();
-                for (int j = 0; j < modules.length; j++)
+                if ((modules != null) && (modules.length > 0))
                 {
-                    System.out.println("    " + modules[j]);
+                    System.out.println("  " + entry.getKey());
+                    for (int j = 0; j < modules.length; j++)
+                    {
+                        System.out.println("    " + modules[j]);
+                    }
                 }
             }
         }
@@ -891,28 +911,38 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             for (Iterator i = m_inUsePkgMap.entrySet().iterator(); i.hasNext(); )
             {
                 Map.Entry entry = (Map.Entry) i.next();
-                System.out.println("  " + entry.getKey());
                 IModule[] modules = (IModule[]) entry.getValue();
-                for (int j = 0; j < modules.length; j++)
+                if ((modules != null) && (modules.length > 0))
                 {
-                    System.out.println("    " + modules[j]);
+                    System.out.println("  " + entry.getKey());
+                    for (int j = 0; j < modules.length; j++)
+                    {
+                        System.out.println("    " + modules[j]);
+                    }
                 }
             }
         }
     }
 
-    private IModule[] getCompatibleExporters(IModule[] modules, R4Import target)
+    private IModule[] getCompatibleExporters(
+        IModule[] modules, R4Import target, boolean includeRemovalPending)
     {
         // Create list of compatible exporters.
         IModule[] candidates = null;
         for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
         {
-            // Get the modules export package for the target package.
-            R4Export export = Util.getExportPackage(modules[modIdx], target.getName());
-            // If compatible, then add the candidate to the list.
-            if ((export != null) && (target.isSatisfied(export)))
+            // The spec says that we cannot consider modules that
+            // are pending removal, so ignore them.
+            if (includeRemovalPending || !isRemovalPending(modules[modIdx]))
             {
-                candidates = addModuleToArray(candidates, modules[modIdx]);
+                // Get the modules export package for the target package.
+                R4Export export = Util.getExportPackage(
+                    modules[modIdx], target.getName());
+                // If compatible, then add the candidate to the list.
+                if ((export != null) && (target.isSatisfied(export)))
+                {
+                    candidates = addModuleToArray(candidates, modules[modIdx]);
+                }
             }
         }
         if (candidates == null)
@@ -1583,6 +1613,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         public R4Library[] m_libraries = null;
         public R4Wire[] m_wires = null;
         public boolean m_resolved = false;
+        public boolean m_removalPending = false;
         public ModuleData(IModule module)
         {
             m_module = module;

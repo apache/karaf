@@ -16,6 +16,9 @@
  */
 package org.apache.felix.framework;
 
+import org.apache.felix.framework.searchpolicy.IR4SearchPolicy;
+import org.apache.felix.framework.searchpolicy.R4Export;
+import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.service.packageadmin.ExportedPackage;
@@ -23,35 +26,35 @@ import org.osgi.service.packageadmin.ExportedPackage;
 class ExportedPackageImpl implements ExportedPackage
 {
     private Felix m_felix = null;
-    private BundleImpl m_exporter = null;
-    private String m_name = null;
-    private Version m_version = null;
+    private BundleImpl m_exportingBundle = null;
+    private IModule m_exportingModule = null;
+    private R4Export m_export = null;
     private String m_toString = null;
     private String m_versionString = null;
 
     public ExportedPackageImpl(
-        Felix felix, BundleImpl exporter, String name, Version version)
+        Felix felix, BundleImpl exporter, IModule module, R4Export export)
     {
         m_felix = felix;
-        m_exporter = exporter;
-        m_name = name;
-        m_version = (version == null) ? Version.emptyVersion : version;
+        m_exportingBundle = exporter;
+        m_exportingModule = module;
+        m_export = export;
     }
 
     public Bundle getExportingBundle()
     {
         // If the package is stale, then return null per the spec.
-        if (m_exporter.getInfo().isStale())
+        if (m_exportingBundle.getInfo().isStale())
         {
             return null;
         }
-        return m_exporter;
+        return m_exportingBundle;
     }
 
     public Bundle[] getImportingBundles()
     {
         // If the package is stale, then return null per the spec.
-        if (m_exporter.getInfo().isStale())
+        if (m_exportingBundle.getInfo().isStale())
         {
             return null;
         }
@@ -60,33 +63,38 @@ class ExportedPackageImpl implements ExportedPackage
 
     public String getName()
     {
-        return m_name;
+        return m_export.getName();
     }
 
     public String getSpecificationVersion()
     {
         if (m_versionString == null)
         {
-            m_versionString = m_version.toString();
+            m_versionString = (m_export.getVersion() == null)
+                ? Version.emptyVersion.toString()
+                : m_export.getVersion().toString();
         }
         return m_versionString;
     }
 
     public Version getVersion()
     {
-        return m_version;
+        return (m_export.getVersion() == null)
+            ? Version.emptyVersion
+            : m_export.getVersion();
     }
 
     public boolean isRemovalPending()
     {
-        return m_exporter.getInfo().isRemovalPending();
+        return ((IR4SearchPolicy)
+            m_exportingModule.getContentLoader().getSearchPolicy()).isRemovalPending();
     }
 
     public String toString()
     {
         if (m_toString == null)
         {
-            m_toString = m_name
+            m_toString = m_export.getName()
                 + "; version=" + getSpecificationVersion();
         }
         return m_toString;

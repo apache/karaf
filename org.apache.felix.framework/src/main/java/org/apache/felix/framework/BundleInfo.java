@@ -19,14 +19,12 @@ package org.apache.felix.framework;
 import java.util.Map;
 
 import org.apache.felix.framework.cache.BundleArchive;
+import org.apache.felix.framework.searchpolicy.R4SearchPolicy;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
 class BundleInfo
 {
-    private static final int REMOVAL_PENDING_FLAG = 1;
-    private static final int STALE_FLAG = 2;
-
     private Logger m_logger = null;
     private BundleArchive m_archive = null;
     private IModule[] m_modules = null;
@@ -34,11 +32,9 @@ class BundleInfo
     private long m_modified = 0;
     private BundleActivator m_activator = null;
     private BundleContext m_context = null;
-    // Indicates that the bundle was either updated or
-    // uninstalled and is waiting to be removed or refreshed,
-    // or whether the bundle is stale because it was already
-    // refreshed.
-    private int m_removalState = 0;
+    // Indicates whether the bundle is stale, meaning that it has
+    // been refreshed and completely removed from the framework.
+    private boolean m_stale = false;
 
     // Used for bundle locking.
     private int m_lockCount = 0;
@@ -52,7 +48,7 @@ class BundleInfo
         m_modules = (module == null) ? new IModule[0] : new IModule[] { module };
 
         m_state = Bundle.INSTALLED;
-        m_removalState = 0;
+        m_stale = false;
         m_activator = null;
         m_context = null;
     }
@@ -305,24 +301,14 @@ class BundleInfo
         m_activator = activator;
     }
 
-    public boolean isRemovalPending()
-    {
-        return (m_removalState & REMOVAL_PENDING_FLAG) != 0;
-    }
-
-    public void setRemovalPending()
-    {
-        m_removalState = (m_removalState | REMOVAL_PENDING_FLAG);
-    }
-
     public boolean isStale()
     {
-        return (m_removalState & STALE_FLAG) != 0;
+        return m_stale;
     }
 
     public void setStale()
     {
-        m_removalState = (m_removalState | STALE_FLAG | REMOVAL_PENDING_FLAG);
+        m_stale = true;
     }
 
     //

@@ -118,6 +118,16 @@ public class R4SearchPolicy implements IR4SearchPolicy
         m_policyCore.resolve(m_module);
     }
 
+    public boolean isRemovalPending()
+    {
+        return m_policyCore.isRemovalPending(m_module);
+    }
+
+    public void setRemovalPending(boolean removalPending)
+    {
+        m_policyCore.setRemovalPending(m_module, removalPending);
+    }
+
     public void addResolverListener(ResolveListener l)
     {
         m_policyCore.addResolverListener(l);

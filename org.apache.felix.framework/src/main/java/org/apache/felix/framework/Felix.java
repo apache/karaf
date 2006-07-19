@@ -541,12 +541,17 @@ public class Felix
             m_logger.log(Logger.LOG_ERROR, "Error stopping system bundle.", ex);
         }
 
-        // Loop through all bundles and update any updated bundles.
+        // Since they may be updated and uninstalled bundles that
+        // have not been refreshed, we will take care of refreshing
+        // them during shutdown.
+
+        // First loop through all bundled and purge old revisions
+        // from updated bundles.
         Bundle[] bundles = getBundles();
         for (int i = 0; i < bundles.length; i++)
         {
             BundleImpl bundle = (BundleImpl) bundles[i];
-            if (bundle.getInfo().isRemovalPending())
+            if (bundle.getInfo().getArchive().getRevisionCount() > 1)
             {
                 try
                 {
@@ -561,7 +566,7 @@ public class Felix
             }
         }
 
-        // Remove any uninstalled bundles.
+        // Next garbage collection any uninstalled bundles.
         for (int i = 0;
             (m_uninstalledBundles != null) && (i < m_uninstalledBundles.length);
             i++)
@@ -1534,12 +1539,14 @@ public class Felix
             info.setState(Bundle.INSTALLED);
             info.setLastModified(System.currentTimeMillis());
 
-            // Mark as needing a refresh.
-            info.setRemovalPending();
-    
             // Fire updated event if successful.
             if (rethrow == null)
             {
+                // Mark previous the bundle's old module for removal since
+                // it can no longer be used to resolve other modules per the spec.
+                IModule module = info.getModules()[info.getModules().length - 2];
+                m_policyCore.setRemovalPending(module, true);
+        
                 fireBundleEvent(BundleEvent.UPDATED, bundle);
             }
     
@@ -1761,8 +1768,9 @@ public class Felix
             // Set the bundle's persistent state to uninstalled.
             target.getInfo().setPersistentStateUninstalled();
 
-            // Mark bundle for removal.
-            target.getInfo().setRemovalPending();
+            // Mark current module for removal since it can no longer
+            // be used to resolve other modules per the spec.
+            m_policyCore.setRemovalPending(target.getInfo().getCurrentModule(), true);
 
             // Put bundle in uninstalled bundle array.
             rememberUninstalledBundle(bundle);
@@ -2519,7 +2527,7 @@ public class Felix
                     {
                         pkgs[pkgIdx] =
                             new ExportedPackageImpl(
-                                this, bundle, name, export.getVersion());
+                                this, bundle, modules[modIdx], export);
                     }
                 }
             }
@@ -2615,8 +2623,7 @@ public class Felix
                         if (inUseModules[i] == modules[modIdx])
                         {
                             list.add(new ExportedPackageImpl(
-                                this, bundle, exports[expIdx].getName(),
-                                exports[expIdx].getVersion()));
+                                this, bundle, modules[modIdx], exports[expIdx]));
                         }
                     }
                 }
@@ -3979,7 +3986,7 @@ public class Felix
                         while (iter.hasNext())
                         {
                             BundleImpl bundle = (BundleImpl) iter.next();
-                            if (bundle.getInfo().isRemovalPending())
+                            if (bundle.getInfo().getArchive().getRevisionCount() > 1)
                             {
                                 list.add(bundle);
                             }

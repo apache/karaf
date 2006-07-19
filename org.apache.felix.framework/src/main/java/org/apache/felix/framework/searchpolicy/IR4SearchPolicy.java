@@ -50,6 +50,9 @@ public interface IR4SearchPolicy extends ISearchPolicy
     public void setResolved(boolean resolved);
     public void resolve() throws ResolveException;
 
+    public boolean isRemovalPending();
+    public void setRemovalPending(boolean removePending);
+
     public void addResolverListener(ResolveListener l);
     public void removeResolverListener(ResolveListener l);
 }
