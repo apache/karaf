@@ -2680,24 +2680,20 @@ public class Felix
         {
             BundleImpl importer = (BundleImpl) bundles[bundleIdx];
 
-            // Ignore the bundle if it imports from itself.
-            if (exporter != importer)
+            // Check the import wires of all modules for all bundles.
+            IModule[] modules = importer.getInfo().getModules();
+            for (int modIdx = 0; modIdx < modules.length; modIdx++)
             {
-                // Check the import wires of all modules for all bundles.
-                IModule[] modules = importer.getInfo().getModules();
-                for (int modIdx = 0; modIdx < modules.length; modIdx++)
+                R4Wire wire = Util.getWire(modules[modIdx], ep.getName());
+
+                // If the resolving module is associated with the
+                // exporting bundle, then add current bundle to
+                // import list.
+                if ((wire != null) && exporterInfo.hasModule(wire.getExportingModule()))
                 {
-                    R4Wire wire = Util.getWire(modules[modIdx], ep.getName());
-    
-                    // If the resolving module is associated with the
-                    // exporting bundle, then add current bundle to
-                    // import list.
-                    if ((wire != null) && exporterInfo.hasModule(wire.getExportingModule()))
-                    {
-                        // Add the bundle to the list of importers.
-                        list.add(bundles[bundleIdx]);
-                        break;
-                    }
+                    // Add the bundle to the list of importers.
+                    list.add(bundles[bundleIdx]);
+                    break;
                 }
             }
         }
