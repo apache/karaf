@@ -1068,6 +1068,38 @@ public class Felix
             .getContentLoader().getContent().getEntryPaths(path);
     }
 
+    /**
+     * Implementation for findEntries().
+    **/
+    public Enumeration findBundleEntries(
+        BundleImpl bundle, String path, String filePattern, boolean recurse)
+    {
+        // Strip leading '/' if present.
+        if ((path.length() > 0) && (path.charAt(0) == '/'))
+        {
+            path = path.substring(1);
+        }
+
+        // Sanity check the parameters.
+        if (path == null)
+        {
+            throw new IllegalArgumentException("The path for findEntries() cannot be null.");
+        }
+        filePattern = (filePattern == null) ? "*" : filePattern;
+
+
+        // Try to resolve the bundle per the spec.
+        resolveBundles(new Bundle[] { bundle });
+
+        // Get the entry enumeration from the module content.
+        Enumeration enumeration = bundle.getInfo().getCurrentModule()
+            .getContentLoader().getContent().findEntries(path, filePattern, recurse);
+
+        // Return a wrapper that will convert the entry strings to URLs.
+        return (enumeration == null)
+            ? null : new FindEntriesEnumeration(bundle, enumeration);
+    }
+
     protected ServiceReference[] getBundleRegisteredServices(BundleImpl bundle)
     {
         if (bundle.getInfo().getState() == Bundle.UNINSTALLED)
@@ -3742,6 +3774,41 @@ public class Felix
                     fireFrameworkEvent(FrameworkEvent.ERROR, m_bundle, ex);
                 }
             }
+        }
+    }
+
+    //
+    // Miscellaneous inner classes.
+    //
+
+    /**
+     * Used by findBundleEntries() method to wrap the enumeration
+     * returned by IContent.findEntries() to convert the returned
+     * Strings to URLs.
+     */
+    private static class FindEntriesEnumeration implements Enumeration
+    {
+        private BundleImpl m_bundle = null;
+        private Enumeration m_enumeration = null;
+
+        public FindEntriesEnumeration(BundleImpl bundle, Enumeration enumeration)
+        {
+            m_bundle = bundle;
+            m_enumeration = enumeration;
+        }
+        
+        public boolean hasMoreElements()
+        {
+            return m_enumeration.hasMoreElements();
+        }
+
+        public Object nextElement()
+        {
+            URL url = 
+                ((ContentLoaderImpl) m_bundle.getInfo().getCurrentModule()
+                    .getContentLoader()).getResourceFromContent(
+                        (String) m_enumeration.nextElement());
+            return url;
         }
     }
 

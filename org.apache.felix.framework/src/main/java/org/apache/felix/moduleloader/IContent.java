@@ -29,4 +29,5 @@ public interface IContent
     public InputStream getEntryAsStream(String name)
         throws IOException;
     public Enumeration getEntryPaths(String path);
+    public Enumeration findEntries(String path, String filePattern, boolean recurse);
 }
