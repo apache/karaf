@@ -557,8 +557,7 @@ public class R4SearchPolicyCore implements ModuleListener
                 // Select the first candidate that successfully resolves.
 
                 // First check already resolved exports for a match.
-                IModule[] candidates = getCompatibleExporters(
-                    (IModule[]) m_inUsePkgMap.get(impMatch.getName()), impMatch, false);
+                IModule[] candidates = getInUseExporters(impMatch, false);
                 // If there is an "in use" candidate, just take the first one.
                 if (candidates.length > 0)
                 {
@@ -569,8 +568,7 @@ public class R4SearchPolicyCore implements ModuleListener
                 // candidates.
                 if (candidate == null)
                 {
-                    candidates = getCompatibleExporters(
-                        (IModule[]) m_availPkgMap.get(impMatch.getName()), impMatch, false);
+                    candidates = getAvailableExporters(impMatch, false);
                     for (int candIdx = 0;
                         (candidate == null) && (candIdx < candidates.length);
                         candIdx++)
@@ -684,25 +682,25 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         return null;
     }
 
-    public IModule[] getAvailableExporters(R4Import pkg)
+    public IModule[] getAvailableExporters(R4Import pkg, boolean includeRemovalPending)
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
         synchronized (m_factory)
         {
             return getCompatibleExporters(
-                (IModule[]) m_availPkgMap.get(pkg.getName()), pkg, false);
+                (IModule[]) m_availPkgMap.get(pkg.getName()), pkg, includeRemovalPending);
         }
     }
 
-    public IModule[] getInUseExporters(R4Import pkg)
+    public IModule[] getInUseExporters(R4Import pkg, boolean includeRemovalPending)
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
         synchronized (m_factory)
         {
             return getCompatibleExporters(
-                (IModule[]) m_inUsePkgMap.get(pkg.getName()), pkg, true);
+                (IModule[]) m_inUsePkgMap.get(pkg.getName()), pkg, includeRemovalPending);
         }
     }
 
@@ -811,12 +809,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             // package maps. Candidates "in use" have higher priority
             // than "available" ones, so put the "in use" candidates
             // at the front of the list of candidates.
-            IModule[] inuse = getCompatibleExporters(
-                (IModule[]) m_inUsePkgMap.get(
-                    imports[impIdx].getName()), imports[impIdx], false);
-            IModule[] available = getCompatibleExporters(
-                (IModule[]) m_availPkgMap.get(
-                    imports[impIdx].getName()), imports[impIdx], false);
+            IModule[] inuse = getInUseExporters(imports[impIdx], false);
+            IModule[] available = getAvailableExporters(imports[impIdx], false);
             IModule[] candidates = new IModule[inuse.length + available.length];
             System.arraycopy(inuse, 0, candidates, 0, inuse.length);
             System.arraycopy(available, 0, candidates, inuse.length, available.length);
@@ -1700,13 +1694,13 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                     // Try to see if there is an exporter available. It may be
                     // the case that the package is exported, but the attributes
                     // do not match, so check that case too.
-                    IModule[] exporters = getInUseExporters(imports[i]);
+                    IModule[] exporters = getInUseExporters(imports[i], true);
                     exporters = (exporters.length == 0)
-                        ? getAvailableExporters(imports[i]) : exporters;
+                        ? getAvailableExporters(imports[i], true) : exporters;
                     exporters = (exporters.length == 0)
-                        ? getInUseExporters(new R4Import(pkgName, null, null)) : exporters;
+                        ? getInUseExporters(new R4Import(pkgName, null, null), true) : exporters;
                     exporters = (exporters.length == 0)
-                        ? getAvailableExporters(new R4Import(pkgName, null, null)) : exporters;
+                        ? getAvailableExporters(new R4Import(pkgName, null, null), true) : exporters;
                     long expId = (exporters.length == 0)
                         ? -1 : Util.getBundleIdFromModuleId(exporters[0].getId());
 
@@ -1755,13 +1749,13 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 // Try to see if there is an exporter available. It may be
                 // the case that the package is exported, but the attributes
                 // do not match, so check that case too.
-                IModule[] exporters = getInUseExporters(imp);
+                IModule[] exporters = getInUseExporters(imp, true);
                 exporters = (exporters.length == 0)
-                    ? getAvailableExporters(imp) : exporters;
+                    ? getAvailableExporters(imp, true) : exporters;
                 exporters = (exporters.length == 0)
-                    ? getInUseExporters(new R4Import(pkgName, null, null)) : exporters;
+                    ? getInUseExporters(new R4Import(pkgName, null, null), true) : exporters;
                 exporters = (exporters.length == 0)
-                    ? getAvailableExporters(new R4Import(pkgName, null, null)) : exporters;
+                    ? getAvailableExporters(new R4Import(pkgName, null, null), true) : exporters;
                 long expId = (exporters.length == 0)
                     ? -1 : Util.getBundleIdFromModuleId(exporters[0].getId());
 
@@ -1793,9 +1787,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         // see if there is an exporter for the package.
         if (!imported)
         {
-            IModule[] exporters = getInUseExporters(new R4Import(pkgName, null, null));
+            IModule[] exporters = getInUseExporters(new R4Import(pkgName, null, null), true);
             exporters = (exporters.length == 0)
-                ? getAvailableExporters(new R4Import(pkgName, null, null)) : exporters;
+                ? getAvailableExporters(new R4Import(pkgName, null, null), true) : exporters;
             if (exporters.length > 0)
             {
                 exported = true;

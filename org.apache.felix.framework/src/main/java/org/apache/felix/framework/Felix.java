@@ -2566,7 +2566,7 @@ public class Felix
     {
         // First, get all exporters of the package.
         ExportedPackage[] pkgs = null;
-        IModule[] exporters = m_policyCore.getInUseExporters(new R4Import(name, null, null));
+        IModule[] exporters = m_policyCore.getInUseExporters(new R4Import(name, null, null), true);
         if (exporters != null)
         {
             pkgs = new ExportedPackage[exporters.length];
@@ -2682,7 +2682,7 @@ public class Felix
                     // "in use" exporters of the package.
                     IModule[] inUseModules =
                         m_policyCore.getInUseExporters(
-                            new R4Import(exports[expIdx].getName(), null, null));
+                            new R4Import(exports[expIdx].getName(), null, null), true);
                     // Search through the current providers to find the target
                     // module.
                     for (int i = 0; (inUseModules != null) && (i < inUseModules.length); i++)
