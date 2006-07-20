@@ -27,6 +27,10 @@ import org.apache.felix.framework.FilterImpl;
 **/
 public class FrameworkUtil
 {
+    private FrameworkUtil()
+    {
+    }
+
     public static Filter createFilter(String filter)
         throws InvalidSyntaxException
     {
