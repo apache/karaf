@@ -44,6 +44,24 @@ class DirectoryRevision extends BundleRevision
         m_refDir = new File(location.substring(
             location.indexOf(BundleArchive.FILE_PROTOCOL)
                 + BundleArchive.FILE_PROTOCOL.length()));
+
+        // If the revision directory exists, then we don't
+        // need to initialize since it has already been done.
+        if (BundleCache.getSecureAction().fileExists(getRevisionRootDir()))
+        {
+            return;
+        }
+
+        // Create revision directory, we only need this to store the
+        // revision location, since nothing else needs to be extracted
+        // since we are referencing a read directory already.
+        if (!BundleCache.getSecureAction().mkdir(getRevisionRootDir()))
+        {
+            getLogger().log(
+                Logger.LOG_ERROR,
+                getClass().getName() + ": Unable to create revision directory.");
+            throw new IOException("Unable to create archive directory.");
+        }
     }
 
     public synchronized Map getManifestHeader()
