@@ -80,7 +80,7 @@ public class Activator implements BundleActivator {
      */
     public void addComponentFactory(Element cm) {
     	// Create the factory :
-    	ComponentManagerFactory factory = new ComponentManagerFactory(this, cm);
+    	ComponentManagerFactory factory = new ComponentManagerFactory(m_bundleContext, cm);
 
     	// If the factory array is not empty add the new factory at the end
         if (m_factories.length != 0) {

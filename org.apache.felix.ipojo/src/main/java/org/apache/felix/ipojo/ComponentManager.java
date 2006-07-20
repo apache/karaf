@@ -132,7 +132,6 @@ public class ComponentManager {
 				// It is not an internal handler, try to load it
 				try {
 					Class c = m_context.getBundle().loadClass(cm.getNamespaces()[i]);
-					//Class c = Class.forName(cm.getNamespaces()[i]);
 					Handler h = (Handler) c.newInstance();
 					h.configure(this, cm);
 				} catch (ClassNotFoundException e) {
@@ -241,8 +240,8 @@ public class ComponentManager {
 	 */
 	private void load() {
         try {
-        	m_clazz = m_factory.getBundleContext().getBundle().loadClass(m_metadata.getClassName());
-        } catch (Exception  e) {
+        	m_clazz = m_factory.loadClass(m_metadata.getClassName());
+        } catch (ClassNotFoundException  e) {
             Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] Class not found during the loading phase : " + e.getMessage());
             return;
         }
