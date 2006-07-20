@@ -1,0 +1,223 @@
+<?xml version="1.0"?>
+<strings>
+	<str id="none"></str>
+	<str id="common.title">MX4J/Http Adaptor</str>
+	<str id="common.subtitle">JMX Management Console</str>
+	<str id="common.tabs.serverview">Server view</str>
+	<str id="common.tabs.mbeanview">MBean view</str>
+	<str id="common.tabs.timerview">Timers</str>
+	<str id="common.tabs.monitorview">Monitors</str>
+	<str id="common.tabs.relationview">Relations</str>
+	<str id="common.tabs.mletview">MLet</str>
+	<str id="common.tabs.about">About</str>
+	<str id="common.serverview.return">Return to server view</str>
+	<str id="common.bottom.banner">Built using {0} HttpAdaptor</str>
+	<str id="common.mbeanview.return">Return to MBean view</str>
+	<str id="common.logo">MX4J logo</str>
+	<str id="common.logo.gif">logo.gif</str>
+	<str id="common.logo.width">100</str>
+	<str id="common.logo.height">50</str>
+	<str id="common.site">mx4j.sourceforge.net</str>
+
+	<str id="serverbydomain.title">MX4J - Agent View</str>
+	<str id="serverbydomain.error.query">Exception during query: {0}</str>
+	<str id="serverbydomain.domain.label">Domain: {0}</str>
+	<str id="serverbydomain.server.title">MBean By Domain:</str>
+	<str id="serverbydomain.server.filter">Filter:</str>
+	<str id="serverbydomain.server.query">Query</str>
+	<str id="serverbydomain.mbean.unregister">Unregister</str>
+
+	<str id="emptymbean.title">MBean - View</str>
+	<str id="emptymbean.querycontructors">Query constructors for class:</str>
+	<str id="emptymbean.query">query</str>
+
+	<str id="mbean.title">MX4J - MBean View</str>
+	<str id="mbean.parameters.unknown">Unknown type</str>
+	<str id="mbean.operations.title">Operations</str>
+	<str id="mbean.operations.name">Name</str>
+	<str id="mbean.operations.returntype">Return type</str>
+	<str id="mbean.operations.description">Description</str>
+	<str id="mbean.operations.parameter">Parameters</str>
+	<str id="mbean.operations.parameterid">id</str>
+	<str id="mbean.operations.parametername">Name</str>
+	<str id="mbean.operations.parameterdescription">Description</str>
+	<str id="mbean.operations.parameterclass">Class</str>
+	<str id="mbean.operations.invoke">Invoke</str>
+	<str id="mbean.constructors.class">Class</str>
+	<str id="mbean.constructors.objectname">ObjectName: </str>
+	<str id="mbean.constructors.description">Description</str>
+	<str id="mbean.constructors.parameter">Parameters</str>
+	<str id="mbean.constructors.parameterid">id</str>
+	<str id="mbean.constructors.parametername">Name</str>
+	<str id="mbean.constructors.parameterdescription">Description</str>
+	<str id="mbean.constructors.parameterclass">Class</str>
+	<str id="mbean.constructors.create">Create new</str>
+	<str id="mbean.mbean.title">MBean {0}</str>
+	<str id="mbean.mbean.description">Description {0}</str>
+	<str id="mbean.mbean.attributes">Attributes</str>
+	<str id="mbean.mbean.constructors">Constructors</str>
+
+	<str id="mbean_attributes.attribute.name">Name</str>
+	<str id="mbean_attributes.attribute.description">Description</str>
+	<str id="mbean_attributes.attribute.type">Type</str>
+	<str id="mbean_attributes.attribute.value">Value</str>
+	<str id="mbean_attributes.attribute.newvalue">New Value</str>
+	<str id="mbean_attributes.attribute.arrayof">Array of {0}</str>
+	<str id="mbean_attributes.attribute.setall">Set all</str>
+	<str id="mbean_attributes.RO.readonly">Read-only attribute</str>
+	<str id="mbean_attributes.WO.readonly">Write-only attribute</str>
+	<str id="mbean_attributes.submit.set">set</str>
+	<str id="mbean_attributes.form.unknowntype">Unknown type</str>
+	<str id="mbean_attributes.array.view">View array</str>
+	<str id="mbean_attributes.map.view">View map</str>
+	<str id="mbean_attributes.collection.view">View collection</str>
+	<str id="mbean_attributes.array.null">Array is null</str>
+	<str id="mbean_attributes.map.null">Map is null</str>
+	<str id="mbean_attributes.collection.null">Collection is null</str>
+
+	<str id="setattributes.title">MX4J - MBean View</str>
+	<str id="setattributes.operation.title">MBean operation: set attributes on MBean {0}</str>
+	<str id="setattributes.operation.success">Attribute {0} set to {1} </str>
+	<str id="setattributes.operation.error">Exception during set attribute {0}, message: {1} </str>
+
+	<str id="error.title">MX4J - Exception</str>
+	<str id="error.httpexception.title">Error during request</str>
+	<str id="error.httpexception.code">Code: {0}</str>
+	<str id="error.httpexception.message">Message: {0}</str>
+
+	<str id="constructors.constructors.objectnameinput">ObjectName:</str>
+	<str id="constructors.constructors.createnew">Create new</str>
+	<str id="constructors.constructors.intro">Constructor for class {0}</str>
+	<str id="constructors.title">MX4J - MBean Constructor's View</str>
+	<str id="constructors.main.title">Constructors for class {0}</str>
+	<str id="constructors.error.exception">Exception: {0}</str>
+	<str id="constructors.parameters.title">Parameters</str>
+	<str id="constructors.parameters.id">id</str>
+	<str id="constructors.parameters.type">type</str>
+	<str id="constructors.parameters.value">value</str>
+	<str id="constructors.parameters.unknowntype">Unkown type</str>
+
+	<str id="create.title">MX4J - MBean View</str>
+	<str id="create.operation.success">MBean successfully created</str>
+	<str id="create.operation.error">Error during MBean creation, message: {0}</str>
+	<str id="create.operation.title">MBean operation: create MBean of class {0} and object name {1}</str>
+
+	<str id="delete.title">MX4J - MBean View</str>
+	<str id="delete.operation.title">MBean delete, objectname {0}</str>
+	<str id="delete.operation.success">MBean successfully deleted</str>
+	<str id="delete.operation.error">Error during MBean deletion, message: {0}</str>
+
+	<str id="timer.title">MX4J - Timer Service</str>
+	<str id="timer.main.title">Timers by Domain:</str>
+	<str id="timer.main.createlabel">ObjectName:</str>
+	<str id="timer.main.createbutton">New timer</str>
+	<str id="timer.mbean.unregister">Unregister</str>
+	<str id="timer.domain.title">Timers for domain: {0}</str>
+	<str id="timer.domain.objectname">ObjectName</str>
+
+	<str id="timer_create.title">MX4J - Timer Creation</str>
+	<str id="timer_create.operation.title">Timer creation with object name {0}</str>
+	<str id="timer_create.operation.success">Timer created</str>
+	<str id="timer_create.operation.error">Exception during timer creation, message: {0}</str>
+	<str id="timer_create.operation.mbeanview">Configure timer</str>
+
+	<str id="viewarray.title">MX4J - Array View</str>
+	<str id="viewarray.main.title">MBean {0}</str>
+	<str id="viewarray.main.arraytitle">Array attribute {0} of type {1}</str>
+	<str id="viewarray.main.index">Index</str>
+	<str id="viewarray.main.value">Value</str>
+	<str id="viewarray.main.navigation.first">first</str>
+	<str id="viewarray.main.navigation.previous">previous</str>
+	<str id="viewarray.main.navigation.next">next</str>
+	<str id="viewarray.main.navigation.last">last</str>
+
+	<str id="viewcollection.title">MX4J - Collection View</str>
+	<str id="viewcollection.main.title">MBean {0}</str>
+	<str id="viewcollection.main.viewcollectiontitle">Collection of class {0} on attribute {1}</str>
+	<str id="viewcollection.main.index">Index</str>
+	<str id="viewcollection.main.valueclass">Value class</str>
+	<str id="viewcollection.main.value">Value</str>
+	<str id="viewcollection.main.navigation.first">first</str>
+	<str id="viewcollection.main.navigation.previous">previous</str>
+	<str id="viewcollection.main.navigation.next">next</str>
+	<str id="viewcollection.main.navigation.last">last</str>
+
+	<str id="viewmap.title">MX4J - Map View</str>
+	<str id="viewmap.main.title">MBean {0}</str>
+	<str id="viewmap.main.viewmaptitle">Map of class {0} on attribute {1}</str>
+	<str id="viewmap.main.key">Key</str>
+	<str id="viewmap.main.keyclass">Key class</str>
+	<str id="viewmap.main.valueclass">Value class</str>
+	<str id="viewmap.main.value">Value</str>
+	<str id="viewmap.main.navigation.first">first</str>
+	<str id="viewmap.main.navigation.previous">previous</str>
+	<str id="viewmap.main.navigation.next">next</str>
+	<str id="viewmap.main.navigation.last">last</str>
+
+	<str id="monitor.title">MX4J - Monitor Service</str>
+	<str id="monitor.mbean.unregister">Unregister</str>
+	<str id="monitor.main.title">Monitors By Domain</str>
+	<str id="monitor.main.createstring.label">ObjectName:</str>
+	<str id="monitor.main.createstring.button">New StringMonitor</str>
+	<str id="monitor.main.creategauge.label">ObjectName:</str>
+	<str id="monitor.main.creategauge.button">New GaugeMonitor</str>
+	<str id="monitor.main.createcounter.label">ObjectName:</str>
+	<str id="monitor.main.createcounter.button">New CounterMonitor</str>
+
+	<str id="monitor_create.title">MX4J - Monitor creation</str>
+	<str id="monitor_create.operation.title"> creation with object name {0}</str>
+	<str id="monitor_create.operation.success">Monitor type {0} successfully created</str>
+	<str id="monitor_create.operation.error">Exception during {0} creation, mesage: {1}</str>
+	<str id="monitor_create.operation.mbeanview">Configure Monitor</str>
+	<str id="monitor_create.operation.stringmonitor">StringMonitor</str>
+	<str id="monitor_create.operation.gaugemonitor">GaugeMonitor</str>
+	<str id="monitor_create.operation.countermonitor">CounterMonitor</str>
+
+	<str id="mlet.title">MX4J - MLet Service</str>
+	<str id="mlet.mbean.unregister">MX4J - MLet Service</str>
+	<str id="mlet.main.title">Mlet: (Not yet implemented)</str>
+
+	<str id="invoke.title">MX4J - MBean View</str>
+	<str id="invoke.operation.title">MBean operation: invoke method {0} on MBean {1}</str>
+	<str id="invoke.operation.success">Invocation successful</str>
+	<str id="invoke.operation.success.result">Result value: <pre>{0}</pre></str>
+	<str id="invoke.operation.success.noresult">No result</str>
+	<str id="invoke.operation.success.error">Error during MBean operation invocation<br/>Message: {0}</str>
+
+	<str id="about.title">MX4J - About</str>
+	<str id="about.main.title">{0} - HttpAdaptor</str>
+	<str id="about.main.url">http://mx4j.sourceforge.net</str>
+	<str id="about.main.url2">http://www.javasoft.com/jmx</str>
+	<str id="about.main.line1">Built based on the {0} specification</str>
+	<str id="about.main.implementation">JMX Implementation:</str>
+	<str id="about.main.implementationversion">Implementation Version:</str>
+	<str id="about.main.serverid">MBeanServer ID:</str>
+
+	<!-- relation service strings -->
+	<str id="relation.title">MX4J - Relation Service</str>
+	<str id="relation.typename.title">RelationTypeName:</str>
+	<str id="relation.metadata.title">Relation Type metaData:</str>
+	<str id="relation.relationids.title">RelationIds:</str>
+	<str id="relation.rolename.title">Role Name:</str>
+	<str id="relation.classname.title">MBeanClass:</str>
+	<str id="relation.description.title">Description:</str>
+	<str id="relation.mindegree.title">Min Degree:</str>
+	<str id="relation.maxdegree.title">Max Degree:</str>
+	<str id="relation.readable.title">Readable:</str>
+	<str id="relation.writable.title">Writable:</str>
+	<str id="relation.paramname">relation</str>
+	<str id="relation.inprogress">Relation Service: (In Progress)</str>
+
+	<!--MBean Server strings -->
+	<str id="server.title">MX4J - Agent View</str>
+	<str id="server.unregister">Unregister</str>
+	<str id="server.mbeans.title">MBeans:</str>
+	<str id="server.filter.title">Filter:</str>
+
+	<!-- Set attribute stylesheet, to be deprecated -->
+	<str id="setattribute.title">MX4J - MBean View</str>
+	<str id="setattribute.operation.title">MBean operation: set attribute {0} on MBean {1}</str>
+	<str id="setattribute.operation.success">Attribute {0} set to {1}</str>
+	<str id="setattribute.operation.error">Error during set attribute, message: {0}</str>
+
+</strings>
