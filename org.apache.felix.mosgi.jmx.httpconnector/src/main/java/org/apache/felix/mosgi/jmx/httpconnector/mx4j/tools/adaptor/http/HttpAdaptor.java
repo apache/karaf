@@ -55,6 +55,16 @@ import org.apache.felix.mosgi.jmx.agent.mx4j.util.Base64Codec;
 
 import org.apache.felix.mosgi.jmx.httpconnector.HttpConnectorActivator;
 
+import org.apache.felix.mosgi.jmx.httpconnector.mx4j.tools.adaptor.http.ServerCommandProcessor;
+import org.apache.felix.mosgi.jmx.httpconnector.mx4j.tools.adaptor.http.ServerByDomainCommandProcessor;
+import org.apache.felix.mosgi.jmx.httpconnector.mx4j.tools.adaptor.http.MBeanCommandProcessor;
+import org.apache.felix.mosgi.jmx.httpconnector.mx4j.tools.adaptor.http.SetAttributesCommandProcessor;
+import org.apache.felix.mosgi.jmx.httpconnector.mx4j.tools.adaptor.http.DeleteMBeanCommandProcessor;
+import org.apache.felix.mosgi.jmx.httpconnector.mx4j.tools.adaptor.http.InvokeOperationCommandProcessor;
+import org.apache.felix.mosgi.jmx.httpconnector.mx4j.tools.adaptor.http.CreateMBeanCommandProcessor;
+import org.apache.felix.mosgi.jmx.httpconnector.mx4j.tools.adaptor.http.ConstructorsCommandProcessor;
+import org.apache.felix.mosgi.jmx.httpconnector.mx4j.tools.adaptor.http.EmptyCommandProcessor;
+
 /**
  * HttpAdaptor sets the basic adaptor listening for HTTP requests
  *
@@ -110,17 +120,17 @@ public class HttpAdaptor implements HttpAdaptorMBean, MBeanRegistration
 	private long requestsCount;
 
 	private String[][] defaultCommandProcessors = {
-		{"server", "mx4j.tools.adaptor.http.ServerCommandProcessor"},
-		{"serverbydomain", "mx4j.tools.adaptor.http.ServerByDomainCommandProcessor"},
-		{"mbean", "mx4j.tools.adaptor.http.MBeanCommandProcessor"},
-		{"setattributes", "mx4j.tools.adaptor.http.SetAttributesCommandProcessor"},
-		{"setattribute", "mx4j.tools.adaptor.http.SetAttributeCommandProcessor"},
-		{"getattribute", "mx4j.tools.adaptor.http.GetAttributeCommandProcessor"},
-		{"delete", "mx4j.tools.adaptor.http.DeleteMBeanCommandProcessor"},
-		{"invoke", "mx4j.tools.adaptor.http.InvokeOperationCommandProcessor"},
-		{"create", "mx4j.tools.adaptor.http.CreateMBeanCommandProcessor"},
-		{"constructors", "mx4j.tools.adaptor.http.ConstructorsCommandProcessor"},
-		{"empty", "mx4j.tools.adaptor.http.EmptyCommandProcessor"}};
+		{"server", ServerCommandProcessor.class.getName()},
+		{"serverbydomain", ServerByDomainCommandProcessor.class.getName()},
+		{"mbean", MBeanCommandProcessor.class.getName()},
+		{"setattributes", SetAttributesCommandProcessor.class.getName()},
+		{"setattribute", SetAttributeCommandProcessor.class.getName()},
+		{"getattribute", GetAttributeCommandProcessor.class.getName()},
+		{"delete", DeleteMBeanCommandProcessor.class.getName()},
+		{"invoke", InvokeOperationCommandProcessor.class.getName()},
+		{"create", CreateMBeanCommandProcessor.class.getName()},
+		{"constructors", ConstructorsCommandProcessor.class.getName()},
+		{"empty", EmptyCommandProcessor.class.getName()}};
 
 //		{"relation", "mx4j.tools.adaptor.http.RelationCommandProcessor"},
 
@@ -721,12 +731,12 @@ public class HttpAdaptor implements HttpAdaptorMBean, MBeanRegistration
 		if (processorName != null)
 		{
 			if (server.isRegistered(processorName) &&
-					server.isInstanceOf(processorName, "mx4j.tools.adaptor.http.ProcessorMBean"))
+					server.isInstanceOf(processorName, ProcessorMBean.class.getName()))
 			{
 				server.invoke(processorName,
 						"writeResponse",
 						new Object[]{out, in, document},
-						new String[]{"mx4j.tools.adaptor.http.HttpOutputStream", "mx4j.tools.adaptor.http.HttpInputStream", "org.w3c.dom.Document"});
+						new String[]{HttpOutputStream.class.getName(), HttpInputStream.class.getName(), Document.class.getName()});
 				processed = true;
 			}
 			else
@@ -754,12 +764,12 @@ public class HttpAdaptor implements HttpAdaptorMBean, MBeanRegistration
 		if (processorName != null)
 		{
 			if (server.isRegistered(processorName) &&
-					server.isInstanceOf(processorName, "mx4j.tools.adaptor.http.ProcessorMBean"))
+					server.isInstanceOf(processorName, ProcessorMBean.class.getName()))
 			{
 				server.invoke(processorName,
 						"notFoundElement",
 						new Object[]{path, out, in},
-						new String[]{"java.lang.String", "mx4j.tools.adaptor.http.HttpOutputStream", "mx4j.tools.adaptor.http.HttpInputStream"});
+						new String[]{String.class.getName(), HttpOutputStream.class.getName(), HttpInputStream.class.getName()});
 				processed = true;
 			}
 			else
@@ -788,13 +798,13 @@ public class HttpAdaptor implements HttpAdaptorMBean, MBeanRegistration
 		{
 			HttpAdaptor. log(LogService.LOG_DEBUG,"Preprocess using " + processorName,null);
 			if (server.isRegistered(processorName) &&
-					server.isInstanceOf(processorName, "mx4j.tools.adaptor.http.ProcessorMBean"))
+					server.isInstanceOf(processorName, ProcessorMBean.class.getName()))
 			{
 				HttpAdaptor.log(LogService.LOG_DEBUG,"Preprocessing",null);
 				path = (String)server.invoke(processorName,
 						"preProcess",
 						new Object[]{path},
-						new String[]{"java.lang.String"});
+						new String[]{String.class.getName()});
 				processed = true;
 			}
 			else
@@ -823,12 +833,12 @@ public class HttpAdaptor implements HttpAdaptorMBean, MBeanRegistration
 		if (processorName != null)
 		{
 			if (server.isRegistered(processorName) &&
-					server.isInstanceOf(processorName, "mx4j.tools.adaptor.http.ProcessorMBean"))
+					server.isInstanceOf(processorName, ProcessorMBean.class.getName()))
 			{
 				server.invoke(processorName,
 						"writeError",
 						new Object[]{out, in, e},
-						new String[]{"mx4j.tools.adaptor.http.HttpOutputStream", "mx4j.tools.adaptor.http.HttpInputStream", "java.lang.Exception"});
+						new String[]{HttpOutputStream.class.getName(),HttpInputStream.class.getName(), Exception.class.getName()});
 				processed = true;
 			}
 			else
@@ -1012,7 +1022,7 @@ public class HttpAdaptor implements HttpAdaptorMBean, MBeanRegistration
       System.out.println("No Log Service");
     }
     }else{
-      System.out.println("mx4j.tools.adapatoir.http.HttpAdaptor.log: No bundleContext");
+      System.out.println(HttpAdaptor.class.getName()+".log: No bundleContext");
     }
   }
 }
