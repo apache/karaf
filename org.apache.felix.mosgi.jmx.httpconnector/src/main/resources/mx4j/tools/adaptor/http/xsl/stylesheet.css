@@ -1,0 +1,436 @@
+/*
+
+ * Copyright (C) MX4J.
+
+ * All rights reserved.
+
+ *
+
+ * This software is distributed under the terms of the MX4J License version 1.0.
+
+ * See the terms of the MX4J License in the documentation provided with this software.
+
+ * Author: Carlos Quiroz
+
+ * Revision: $Revision: 1.1.1.1 $
+
+ */
+
+
+
+body {
+
+	background: white;
+
+	color: black;
+
+	font-family: tahoma,verdana,helvetica,arial,sans-serif;
+
+	margin-top: 5px;
+
+	margin-left: 5px;
+
+	margin-right: 5px;
+
+	margin-bottom: 5px;
+
+}
+
+
+
+/* Footer class */
+
+div.footer {
+
+	font-weight: bold;
+
+	text-align: center;
+
+}
+
+
+
+/* Tabs styles */
+
+td.fronttab {
+
+	background: rgb(220,220,220);
+
+	color: black;
+
+	padding-left: 10px;
+
+	padding-right: 10px;
+
+	padding-bottom: 3px;
+
+	font-size: small;
+
+}
+
+
+
+td.backtab {
+
+	background: rgb(240,240,240);
+
+	color: black;
+
+	height: 25px;
+
+	padding-left: 10px;
+
+	padding-right: 10px;
+
+	font-size: small;
+
+}
+
+
+
+a.tabs {
+
+	color: black;
+
+	text-decoration: none;
+
+	font-size: small;
+
+}
+
+/* End of tabs styles */
+
+
+
+/* Header styles */
+
+td.darker {
+
+	background: rgb(57,128,144);
+
+	height: 18px;
+
+}
+
+
+
+td.topheading {
+
+	background: rgb(183,187,184);
+
+	color: black;
+
+	font-weight: bold;
+
+	padding-left: 10px;
+
+}
+
+/* End of Header styles */
+
+
+
+td.domainline {
+
+	background: rgb(220,220,220);
+
+	color: black;
+
+	padding-left: 10px;
+
+}
+
+
+
+td.page_title {
+
+	background: rgb(220,220,220);
+
+	color: black;
+
+	padding-left: 10px;
+
+	padding-right: 10px;
+
+	padding-top: 2px;
+
+	padding-bottom: 2px;
+
+	font-weight: bold;
+
+}
+
+
+
+div.subtitle {
+
+	font-size: smaller;
+
+}
+
+
+
+/* Server by domain styles */
+
+td.serverbydomain_domainline {
+
+	background: rgb(200,200,200);
+
+	color: black;
+
+	padding-left: 10px;
+
+	font-weight: bold;
+
+}
+
+
+
+tr.clearline {
+
+	background: rgb(255,255,255);
+
+	color: black;
+
+	padding-left: 10px;
+
+	padding-right: 10px;
+
+	padding-top: 2px;
+
+	padding-bottom: 2px;
+
+}
+
+
+
+tr.darkline {
+
+	background: rgb(240,240,240);
+
+	color: black;
+
+	padding-left: 10px;
+
+	padding-right: 10px;
+
+}
+
+
+
+td.serverbydomain_row {
+
+	font-size: x-small;
+
+	padding-left: 10px;
+
+}
+
+
+
+/* MBean section title */
+
+td.mbeans {
+
+	background: rgb(183,187,184);
+
+}
+
+
+
+p.darklinebottom {
+
+	background: rgb(240,240,240);
+
+	color: black;
+
+	height: 20px;
+
+	padding-left: 10px;
+
+	font-weight: bold;
+
+}
+
+
+
+div.tableheader {
+
+	font-weight: bold;
+
+	padding-top: 2px;
+
+	padding-bottom: 2px;
+
+	font-size: small
+
+}
+
+
+
+td.mbean_row {
+
+	font-size: x-small;
+
+	padding-left: 1px;
+
+}
+
+
+
+td.attributes_setall {
+
+	padding-right: 20px;
+
+	padding-top: 5px;
+
+	padding-bottom: 5px;
+
+}
+
+
+
+/* MBean section title */
+
+td.mbeans {
+
+	background: rgb(183,187,184);
+
+	color: black;
+
+	height: 20px;
+
+	padding-left: 10px;
+
+	padding-right: 10px;
+
+	font-weight: bold;
+
+}
+
+
+
+div.tableheader {
+
+	font-weight: bold;
+
+	padding-top: 2px;
+
+	padding-bottom: 2px;
+
+	font-size: small
+
+}
+
+
+
+td.mbean_row {
+
+	font-size: x-small;
+
+	padding-left: 1px;
+
+}
+
+
+
+td.aggregationrow {
+
+	font-size: small;
+
+	padding-left: 1px;
+
+}
+
+
+
+td.constructorrow {
+
+	font-size: small;
+
+	padding-left: 1px;
+
+}
+
+
+
+td.attributes_setall {
+
+	padding-right: 20px;
+
+	padding-top: 5px;
+
+	padding-bottom: 5px;
+
+}
+
+
+
+tr.about {
+
+	background: rgb(220,220,220);
+
+}
+
+
+
+h1.about {
+
+	padding-left: 20px;
+
+	padding-right: 20px;
+
+	padding-top: 20px;
+
+	padding-bottom: 20px;
+
+	font-size: xx-large;
+
+	background: rgb(220,220,220);
+
+	color: black;
+
+}
+
+
+
+h2.about {
+
+	padding-left: 20px;
+
+	padding-right: 20px;
+
+	padding-top: 15px;
+
+	padding-bottom: 15px;
+
+	font-size: x-large;
+
+	background: rgb(220,220,220);
+
+	color: black;
+
+}
+
+
+
+h3.about {
+
+	padding-left: 20px;
+
+	padding-right: 20px;
+
+	padding-top: 15px;
+
+	padding-bottom: 15px;
+
+	font-size: large;
+
+	background: rgb(220,220,220);
+
+	color: black;
+
+}
+
+
+
