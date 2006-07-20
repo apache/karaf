@@ -2022,7 +2022,9 @@ public class Felix
 
         synchronized (m_uninstalledBundlesLock_Priority3)
         {
-            for (int i = 0; i < m_uninstalledBundles.length; i++)
+            for (int i = 0;
+                (m_uninstalledBundles != null) && (i < m_uninstalledBundles.length);
+                i++)
             {
                 if (m_uninstalledBundles[i].getInfo().getBundleId() == id)
                 {
