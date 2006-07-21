@@ -18,8 +18,8 @@ package org.apache.felix.framework.searchpolicy;
 
 import java.util.*;
 
-import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.Util;
+import org.osgi.framework.Constants;
 
 public class R4Export extends R4Package
 {
@@ -40,15 +40,15 @@ public class R4Export extends R4Package
         String mandatory = "", uses = "";
         for (int i = 0; i < m_directives.length; i++)
         {
-            if (m_directives[i].getName().equals(FelixConstants.USES_DIRECTIVE))
+            if (m_directives[i].getName().equals(Constants.USES_DIRECTIVE))
             {
                 uses = m_directives[i].getValue();
             }
-            else if (m_directives[i].getName().equals(FelixConstants.MANDATORY_DIRECTIVE))
+            else if (m_directives[i].getName().equals(Constants.MANDATORY_DIRECTIVE))
             {
                 mandatory = m_directives[i].getValue();
             }
-            else if (m_directives[i].getName().equals(FelixConstants.INCLUDE_DIRECTIVE))
+            else if (m_directives[i].getName().equals(Constants.INCLUDE_DIRECTIVE))
             {
                 String[] ss = Util.parseDelimitedString(m_directives[i].getValue(), ",");
                 m_includeFilter = new String[ss.length][];
@@ -57,7 +57,7 @@ public class R4Export extends R4Package
                     m_includeFilter[filterIdx] = parseSubstring(ss[filterIdx]);
                 }
             }
-            else if (m_directives[i].getName().equals(FelixConstants.EXCLUDE_DIRECTIVE))
+            else if (m_directives[i].getName().equals(Constants.EXCLUDE_DIRECTIVE))
             {
                 String[] ss = Util.parseDelimitedString(m_directives[i].getValue(), ",");
                 m_excludeFilter = new String[ss.length][];
@@ -104,16 +104,17 @@ public class R4Export extends R4Package
             }
         }
 
-        // Find and parse version attribute, if present.
+        // Convert version, if present.
         String rangeStr = "0.0.0";
         for (int i = 0; i < m_attrs.length; i++)
         {
-            if (m_attrs[i].getName().equals(FelixConstants.VERSION_ATTRIBUTE) ||
-                m_attrs[i].getName().equals(FelixConstants.PACKAGE_SPECIFICATION_VERSION))
+            // Find and parse version attribute, if present.
+            if (m_attrs[i].getName().equals(Constants.VERSION_ATTRIBUTE) ||
+                m_attrs[i].getName().equals(Constants.PACKAGE_SPECIFICATION_VERSION))
             {
                 // Normalize version attribute name.
                 m_attrs[i] = new R4Attribute(
-                    FelixConstants.VERSION_ATTRIBUTE, m_attrs[i].getValue(),
+                    Constants.VERSION_ATTRIBUTE, m_attrs[i].getValue(),
                     m_attrs[i].isMandatory());
                 rangeStr = m_attrs[i].getValue();
                 break;

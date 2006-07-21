@@ -305,13 +305,27 @@ public class ManifestParser
         }
 
         // Verify that there are no duplicate directives.
-        Map map = new HashMap();
         for (int i = 0; (m_exports != null) && (i < m_exports.length); i++)
         {
             String targetVer = get(Constants.BUNDLE_VERSION);
             targetVer = (targetVer == null) ? "0.0.0" : targetVer;
 
+            // First verify that the exports do not specify
+            // bundle symbolic name or bundle version.
             R4Attribute[] attrs = m_exports[i].getAttributes();
+            for (int attrIdx = 0; attrIdx < attrs.length; attrIdx++)
+            {
+                // Find and parse version attribute, if present.
+                if (attrs[attrIdx].getName().equals(Constants.BUNDLE_VERSION_ATTRIBUTE) ||
+                    attrs[attrIdx].getName().equals(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE))
+                {
+                    throw new BundleException(
+                        "Exports must not specify bundle symbolic name or bundle version.");
+                }
+            }
+
+            // Now that we know that there are no bundle symbolic name and version
+            // attributes, add them since the spec says they are there implicitly.
             R4Attribute[] newAttrs = new R4Attribute[attrs.length + 2];
             System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
             newAttrs[attrs.length] = new R4Attribute(
