@@ -171,10 +171,13 @@ public class DirectoryContent implements IContent
                 throw new NoSuchElementException("No more entry paths.");
             }
 
+            // Convert the file separator character to slashes.
+            String abs = m_children[m_counter].getAbsolutePath()
+                .replace(File.separatorChar, '/');
+
             // Remove the leading path of the reference directory, since the
             // entry paths are supposed to be relative to the root.
-// TODO: ML - Under Windows we will have to deal with drive letters, I think.
-            StringBuffer sb = new StringBuffer(m_children[m_counter].getAbsolutePath());
+            StringBuffer sb = new StringBuffer(abs);
             sb.delete(0, m_dir.getAbsolutePath().length() + 1);
             // Add a '/' to the end of directory entries.
             if (m_children[m_counter].isDirectory())
