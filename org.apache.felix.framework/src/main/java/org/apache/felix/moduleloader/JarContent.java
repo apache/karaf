@@ -22,6 +22,8 @@ import java.util.Enumeration;
 import java.util.NoSuchElementException;
 import java.util.zip.ZipEntry;
 
+import org.apache.felix.framework.util.SecureAction;
+
 public class JarContent implements IContent
 {
     private static final int BUFSIZE = 4096;
@@ -29,6 +31,8 @@ public class JarContent implements IContent
     private File m_file = null;
     private JarFileX m_jarFile = null;
     private boolean m_opened = false;
+    
+    private static SecureAction m_secureAction = new SecureAction();
 
     public JarContent(File file)
     {
@@ -256,7 +260,7 @@ public class JarContent implements IContent
     {
         if (m_jarFile == null)
         {
-            m_jarFile = new JarFileX(m_file);
+            m_jarFile = m_secureAction.openJAR(m_file);
         }
     }
 

@@ -16,7 +16,6 @@
  */
 package org.apache.felix.framework;
 
-import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,14 +36,13 @@ public class StartLevelImpl implements StartLevel, Runnable
 
     private Felix m_felix = null;
     private List m_requestList = null;
-    // Reusable admin permission.
-    private static AdminPermission m_adminPerm = new AdminPermission();
+    private Bundle m_systemBundle = null;
     
     public StartLevelImpl(Felix felix)
     {
         m_felix = felix;
         m_requestList = new ArrayList();
-
+        m_systemBundle = m_felix.getBundle(0);
         // Start a thread to perform asynchronous package refreshes.
         Thread t = new Thread(this, "FelixStartLevel");
         t.setDaemon(true);
@@ -64,15 +62,20 @@ public class StartLevelImpl implements StartLevel, Runnable
     **/
     public void setStartLevel(int startlevel)
     {
-        if (System.getSecurityManager() != null)
+        Object sm = System.getSecurityManager();
+        
+        if (sm != null)
         {
-            AccessController.checkPermission(m_adminPerm);
+            ((SecurityManager) sm).checkPermission(
+                new AdminPermission(m_systemBundle, AdminPermission.STARTLEVEL));
         }
-        else if (startlevel <= 0)
+        
+        if (startlevel <= 0)
         {
             throw new IllegalArgumentException(
                 "Start level must be greater than zero.");
         }
+        
         synchronized (m_requestList)
         {
             m_requestList.add(new Integer(startlevel));
@@ -124,11 +127,15 @@ public class StartLevelImpl implements StartLevel, Runnable
     **/
     public void setBundleStartLevel(Bundle bundle, int startlevel)
     {
-        if (System.getSecurityManager() != null)
+        Object sm = System.getSecurityManager();
+        
+        if (sm != null)
         {
-            AccessController.checkPermission(m_adminPerm);
+            ((SecurityManager) sm).checkPermission(
+                new AdminPermission(bundle, AdminPermission.STARTLEVEL));
         }
-        else if (bundle.getBundleId() == 0)
+        
+        if (bundle.getBundleId() == 0)
         {
             throw new IllegalArgumentException(
                 "Cannot change system bundle start level.");
@@ -158,6 +165,13 @@ public class StartLevelImpl implements StartLevel, Runnable
     **/
     public void setInitialBundleStartLevel(int startlevel)
     {
+        Object sm = System.getSecurityManager();
+        
+        if (sm != null)
+        {
+            ((SecurityManager) sm).checkPermission(
+                new AdminPermission(m_systemBundle, AdminPermission.STARTLEVEL));
+        }
         m_felix.setInitialBundleStartLevel(startlevel);
     }
 

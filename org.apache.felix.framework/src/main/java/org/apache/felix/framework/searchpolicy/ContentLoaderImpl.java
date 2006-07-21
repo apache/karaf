@@ -23,6 +23,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import org.apache.felix.framework.Logger;
+import org.apache.felix.framework.util.SecureAction;
 import org.apache.felix.moduleloader.*;
 
 public class ContentLoaderImpl implements IContentLoader
@@ -33,6 +34,7 @@ public class ContentLoaderImpl implements IContentLoader
     private ISearchPolicy m_searchPolicy = null;
     private IURLPolicy m_urlPolicy = null;
     private ContentClassLoader m_classLoader = null;
+    private static SecureAction m_secureAction = new SecureAction();
 
     public ContentLoaderImpl(Logger logger, IContent content, IContent[] contentPath)
     {
@@ -98,7 +100,7 @@ public class ContentLoaderImpl implements IContentLoader
     {
         if (m_classLoader == null)
         {
-            m_classLoader = new ContentClassLoader(this);
+            m_classLoader = m_secureAction.createContentClassLoader(this);
         }
 
         try

@@ -21,6 +21,8 @@ import java.net.*;
 import java.security.*;
 import java.util.jar.JarFile;
 
+import org.apache.felix.framework.searchpolicy.ContentClassLoader;
+import org.apache.felix.framework.searchpolicy.ContentLoaderImpl;
 import org.apache.felix.moduleloader.JarFileX;
 
 /**
@@ -310,6 +312,31 @@ public class SecureAction
             return new FileOutputStream(file);
         }
     }
+    
+    public synchronized InputStream getURLConnectionInputStream(URLConnection conn) 
+        throws IOException
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                m_actions.set(Actions.GET_URL_INPUT_ACTION, conn);
+                return (InputStream) AccessController.doPrivileged(m_actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                if (ex.getException() instanceof IOException)
+                {
+                    throw (IOException) ex.getException();
+                }
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return conn.getInputStream();
+        }
+    }
 
     public synchronized boolean deleteFile(File target)
     {
@@ -332,14 +359,14 @@ public class SecureAction
         }
     }
 
-    public synchronized JarFile openJAR(File file) throws IOException
+    public synchronized JarFileX openJAR(File file) throws IOException
     {
         if (System.getSecurityManager() != null)
         {
             try
             {
                 m_actions.set(Actions.OPEN_JAR_ACTION, file);
-                return (JarFile) AccessController.doPrivileged(m_actions, m_acc);
+                return (JarFileX) AccessController.doPrivileged(m_actions, m_acc);
             }
             catch (PrivilegedActionException ex)
             {
@@ -353,6 +380,26 @@ public class SecureAction
         else
         {
             return new JarFileX(file);
+        }
+    }
+   
+    public synchronized ContentClassLoader createContentClassLoader(ContentLoaderImpl impl)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                m_actions.set(Actions.CREATE_CONTENTCLASSLOADER_ACTION, impl);
+                return (ContentClassLoader) AccessController.doPrivileged(m_actions);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return new ContentClassLoader(impl);
         }
     }
 
@@ -372,6 +419,8 @@ public class SecureAction
         public static final int GET_FILE_OUTPUT_ACTION = 11;
         public static final int DELETE_FILE_ACTION = 12;
         public static final int OPEN_JAR_ACTION = 13;
+        public static final int GET_URL_INPUT_ACTION = 14;
+        public static final int CREATE_CONTENTCLASSLOADER_ACTION = 15;
 
         private int m_action = -1;
         private Object m_arg1 = null;
@@ -480,6 +529,14 @@ public class SecureAction
             else if (m_action == OPEN_JAR_ACTION)
             {
                 return new JarFileX((File) m_arg1);
+            }
+            else if (m_action == GET_URL_INPUT_ACTION)
+            {
+                return ((URLConnection) m_arg1).getInputStream();
+            }
+            else if (m_action == CREATE_CONTENTCLASSLOADER_ACTION)
+            {
+                return new ContentClassLoader((ContentLoaderImpl) m_arg1);
             }
             return null;
         }

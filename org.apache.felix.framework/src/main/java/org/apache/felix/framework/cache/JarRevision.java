@@ -290,7 +290,7 @@ class JarRevision extends BundleRevision
                                 "Proxy-Authorization", "Basic " + base64);
                         }
                     }
-                    is = conn.getInputStream();
+                    is = BundleCache.getSecureAction().getURLConnectionInputStream(conn);
                 }
     
                 // Save the bundle jar file.

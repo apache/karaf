@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ public class ServiceListenerWrapper extends ListenerWrapper implements ServiceLi
     // LDAP query filter.
     private Filter m_filter = null;
     // Remember the security context.
-    private AccessControlContext m_acc = null;
+    private Object m_acc = null;
 
     public ServiceListenerWrapper(Bundle bundle, ServiceListener l, Filter filter)
     {
@@ -34,9 +34,11 @@ public class ServiceListenerWrapper extends ListenerWrapper implements ServiceLi
 
         // Remember security context for filtering
         // events based on security.
-        if (System.getSecurityManager() != null)
+        Object sm = System.getSecurityManager();
+        
+        if (sm != null)
         {
-            m_acc = AccessController.getContext();
+            m_acc = ((SecurityManager) sm).getSecurityContext();
         }
     }
 
@@ -67,19 +69,25 @@ public class ServiceListenerWrapper extends ListenerWrapper implements ServiceLi
         if (objectClass != null)
         {
             boolean hasPermission = false;
-            if (m_acc != null)
+            
+            Object sm = System.getSecurityManager();
+            
+            if ((m_acc != null) && (sm != null))
             {
                 for (int i = 0;
                     !hasPermission && (i < objectClass.length);
                     i++)
                 {
-                    try {
+                    try 
+                    {
                         ServicePermission perm =
                             new ServicePermission(
                                 objectClass[i], ServicePermission.GET);
-                        m_acc.checkPermission(perm);
+                        ((SecurityManager) sm).checkPermission(perm, m_acc);
                         hasPermission = true;
-                    } catch (Exception ex) {
+                    } 
+                    catch (Exception ex) 
+                    {
                     }
                 }
             }

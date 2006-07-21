@@ -18,10 +18,7 @@ package org.apache.felix.framework;
 
 import java.io.*;
 import java.net.*;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
 import java.util.*;
-import java.util.zip.ZipEntry;
 
 import org.apache.felix.framework.cache.*;
 import org.apache.felix.framework.searchpolicy.*;
@@ -100,10 +97,6 @@ public class Felix
 
     // Reusable bundle URL stream handler.
     private URLStreamHandler m_bundleStreamHandler = null;
-
-    // Reusable admin permission object for all instances
-    // of the BundleImpl.
-    private static AdminPermission m_adminPerm = new AdminPermission();
 
     /**
      * <p>
@@ -252,7 +245,23 @@ public class Felix
                 ? false : embedded.equals("true");
             if (!isEmbedded)
             {
-                System.exit(-1);
+                if (System.getSecurityManager() != null)
+                {
+                    java.security.AccessController.doPrivileged(
+                        new java.security.PrivilegedAction()
+                        {
+                            public Object run()
+                            {
+                                System.exit(-1);
+                                
+                                return null;
+                            }
+                        });
+                }
+                else
+                {
+                    System.exit(-1);
+                }
             }
             else
             {
@@ -497,11 +506,6 @@ public class Felix
     **/
     public synchronized void shutdown()
     {
-        if (System.getSecurityManager() != null)
-        {
-            AccessController.checkPermission(m_adminPerm);
-        }
-
         // Change framework status from running to stopping.
         // If framework is not running, then just return.
         if (m_frameworkStatus != RUNNING_STATUS)
@@ -838,11 +842,6 @@ public class Felix
     **/
     protected void setInitialBundleStartLevel(int startLevel)
     {
-        if (System.getSecurityManager() != null)
-        {
-            AccessController.checkPermission(m_adminPerm);
-        }
-
         if (startLevel <= 0)
         {
             throw new IllegalArgumentException(
@@ -968,10 +967,6 @@ public class Felix
     **/
     protected Dictionary getBundleHeaders(BundleImpl bundle)
     {
-        if (System.getSecurityManager() != null)
-        {
-            AccessController.checkPermission(m_adminPerm);
-        }
         return new MapToDictionary(bundle.getInfo().getCurrentHeader());
     }
 
@@ -980,10 +975,6 @@ public class Felix
     **/
     protected String getBundleLocation(BundleImpl bundle)
     {
-        if (System.getSecurityManager() != null)
-        {
-            AccessController.checkPermission(m_adminPerm);
-        }
         return bundle.getInfo().getLocation();
     }
 
@@ -995,19 +986,6 @@ public class Felix
         if (bundle.getInfo().getState() == Bundle.UNINSTALLED)
         {
             throw new IllegalStateException("The bundle is uninstalled.");
-        }
-        else if (System.getSecurityManager() != null)
-        {
-            try
-            {
-                AccessController.checkPermission(
-                    new AdminPermission(bundle, AdminPermission.RESOURCE));
-            }
-            catch (SecurityException ex)
-            {
-                // Spec says to return null if there is a security exception.
-                return null;
-            }
         }
         return bundle.getInfo().getCurrentModule().getResource(name);
     }
@@ -1021,19 +999,6 @@ public class Felix
         {
             throw new IllegalStateException("The bundle is uninstalled.");
         }
-        else if (System.getSecurityManager() != null)
-        {
-            try
-            {
-                AccessController.checkPermission(
-                    new AdminPermission(bundle, AdminPermission.RESOURCE));
-            }
-            catch (SecurityException ex)
-            {
-                // Spec says to return null if there is a security exception.
-                return null;
-            }
-        }
         return ((ContentLoaderImpl) bundle.getInfo().getCurrentModule()
             .getContentLoader()).getResourceFromContent(name);
     }
@@ -1046,19 +1011,6 @@ public class Felix
         if (bundle.getInfo().getState() == Bundle.UNINSTALLED)
         {
             throw new IllegalStateException("The bundle is uninstalled.");
-        }
-        else if (System.getSecurityManager() != null)
-        {
-            try
-            {
-                AccessController.checkPermission(
-                    new AdminPermission(bundle, AdminPermission.RESOURCE));
-            }
-            catch (SecurityException ex)
-            {
-                // Spec says to return null if there is a security exception.
-                return null;
-            }
         }
 
         // Get the entry enumeration from the module content and
@@ -1075,7 +1027,6 @@ public class Felix
     public Enumeration findBundleEntries(
         BundleImpl bundle, String path, String filePattern, boolean recurse)
     {
-
         // Try to resolve the bundle per the spec.
         resolveBundles(new Bundle[] { bundle });
 
@@ -1097,114 +1048,16 @@ public class Felix
 
         // Filter list of registered service references.
         ServiceReference[] refs = m_registry.getRegisteredServices(bundle);
-        List list = new ArrayList();
-        for (int refIdx = 0; (refs != null) && (refIdx < refs.length); refIdx++)
-        {
-            // Check that the current security context has permission
-            // to get at least one of the service interfaces; the
-            // objectClass property of the service stores its service
-            // interfaces.
-            boolean hasPermission = false;
-            if (System.getSecurityManager() != null)
-            {
-                String[] objectClass = (String[])
-                    refs[refIdx].getProperty(Constants.OBJECTCLASS);
-                if (objectClass == null)
-                {
-                    return null;
-                }
-                for (int ifcIdx = 0;
-                    !hasPermission && (ifcIdx < objectClass.length);
-                    ifcIdx++)
-                {
-                    try
-                    {
-                        ServicePermission perm =
-                            new ServicePermission(
-                                objectClass[ifcIdx], ServicePermission.GET);
-                        AccessController.checkPermission(perm);
-                        hasPermission = true;
-                    }
-                    catch (Exception ex)
-                    {
-                    }
-                }
-            }
-            else
-            {
-                hasPermission = true;
-            }
 
-            if (hasPermission)
-            {
-                list.add(refs[refIdx]);
-            }
-        }
-
-        if (list.size() > 0)
-        {
-            return (ServiceReference[])
-                list.toArray(new ServiceReference[list.size()]);
-        }
-
-        return null;
+        return refs;
     }
 
     protected ServiceReference[] getBundleServicesInUse(Bundle bundle)
     {
         // Filter list of "in use" service references.
         ServiceReference[] refs = m_registry.getServicesInUse(bundle);
-        List list = new ArrayList();
-        for (int refIdx = 0; (refs != null) && (refIdx < refs.length); refIdx++)
-        {
-            // Check that the current security context has permission
-            // to get at least one of the service interfaces; the
-            // objectClass property of the service stores its service
-            // interfaces.
-            boolean hasPermission = false;
-            if (System.getSecurityManager() != null)
-            {
-                String[] objectClass = (String[])
-                    refs[refIdx].getProperty(Constants.OBJECTCLASS);
-                if (objectClass == null)
-                {
-                    return null;
-                }
-                for (int ifcIdx = 0;
-                    !hasPermission && (ifcIdx < objectClass.length);
-                    ifcIdx++)
-                {
-                    try
-                    {
-                        ServicePermission perm =
-                            new ServicePermission(
-                                objectClass[ifcIdx], ServicePermission.GET);
-                        AccessController.checkPermission(perm);
-                        hasPermission = true;
-                    }
-                    catch (Exception ex)
-                    {
-                    }
-                }
-            }
-            else
-            {
-                hasPermission = true;
-            }
 
-            if (hasPermission)
-            {
-                list.add(refs[refIdx]);
-            }
-        }
-
-        if (list.size() > 0)
-        {
-            return (ServiceReference[])
-                list.toArray(new ServiceReference[list.size()]);
-        }
-
-        return null;
+        return refs;
     }
 
     protected boolean bundleHasPermission(BundleImpl bundle, Object obj)
@@ -1266,11 +1119,6 @@ public class Felix
     protected void startBundle(BundleImpl bundle, boolean record)
         throws BundleException
     {
-        if (System.getSecurityManager() != null)
-        {
-            AccessController.checkPermission(m_adminPerm);
-        }
-
         // CONCURRENCY NOTE:
         // Starting a bundle may actually impact many bundles, since
         // the bundle being started my need to be resolved, which in
@@ -1360,9 +1208,9 @@ public class Felix
 
                 if (System.getSecurityManager() != null)
                 {
-//                    m_startStopPrivileged.setAction(StartStopPrivileged.START_ACTION);
-//                    m_startStopPrivileged.setBundle(bundle);
-//                    AccessController.doPrivileged(m_startStopPrivileged);
+                    java.security.AccessController.doPrivileged(
+                        new PrivilegedActivatorCall(PrivilegedActivatorCall.START,
+                        info.getActivator(), info.getContext()));
                 }
                 else
                 {
@@ -1409,11 +1257,10 @@ public class Felix
             {
                 throw (SecurityException) th;
             }
-            // Convert a privileged action exception to the
-            // nested exception.
-            else if (th instanceof PrivilegedActionException)
+            else if ((System.getSecurityManager() != null) && 
+                (th instanceof java.security.PrivilegedActionException))
             {
-                th = ((PrivilegedActionException) th).getException();
+                th = ((java.security.PrivilegedActionException) th).getException();
             }
 
             // Rethrow all other exceptions as a BundleException.
@@ -1438,23 +1285,25 @@ public class Felix
                 throw new BundleException("Cannot resolve, bad URL "
                     + bundle.getInfo().getLocation());
             }
-
-//            try
-//            {
-//                AccessController.doPrivileged(new CheckImportsPrivileged(url, bundle));
-//            }
-//            catch (PrivilegedActionException ex)
-//            {
-//                Exception thrown = ((PrivilegedActionException) ex).getException();
-//                if (thrown instanceof AccessControlException)
-//                {
-//                    throw (AccessControlException) thrown;
-//                }
-//                else
-//                {
-//                    throw new BundleException("Problem resolving: " + ex);
-//                }
-//            }
+            
+            try
+            {
+                java.security.AccessController.doPrivileged(
+                    new CheckImportsPrivileged(url, bundle));
+            }
+            catch (java.security.PrivilegedActionException ex)
+            {
+                Exception thrown = 
+                    ((java.security.PrivilegedActionException) ex).getException();
+                if (thrown instanceof SecurityException)
+                {
+                    throw (SecurityException) thrown;
+                }
+                else
+                {
+                    throw new BundleException("Problem resolving: " + ex);
+                }
+            }
         }
 
         IModule module = bundle.getInfo().getCurrentModule();
@@ -1483,11 +1332,6 @@ public class Felix
     protected void updateBundle(BundleImpl bundle, InputStream is)
         throws BundleException
     {
-        if (System.getSecurityManager() != null)
-        {
-            AccessController.checkPermission(m_adminPerm);
-        }
-
         // Acquire bundle lock.
         acquireBundleLock(bundle);
 
@@ -1549,6 +1393,15 @@ public class Felix
                         info.getBundleId(),
                         archive.getRevisionCount() - 1,
                         info.getCurrentHeader());
+                    
+                    Object sm = System.getSecurityManager();
+                    
+                    if (sm != null)
+                    {
+                        ((SecurityManager) sm).checkPermission(
+                            new AdminPermission(bundle, AdminPermission.LIFECYCLE));
+                    }
+                    
                     // Add module to bundle info.
                     info.addModule(module);
                 } 
@@ -1595,6 +1448,12 @@ public class Felix
             // If update failed, rethrow exception.
             if (rethrow != null)
             {
+                if ((System.getSecurityManager() != null) && 
+                    (rethrow instanceof SecurityException))
+                {
+                    throw (SecurityException) rethrow;
+                }
+                
                 throw new BundleException("Update failed.", rethrow);
             }
         }
@@ -1614,11 +1473,6 @@ public class Felix
     protected void stopBundle(BundleImpl bundle, boolean record)
         throws BundleException
     {
-        if (System.getSecurityManager() != null)
-        {
-            AccessController.checkPermission(m_adminPerm);
-        }
-
         // Acquire bundle lock.
         acquireBundleLock(bundle);
 
@@ -1667,9 +1521,9 @@ public class Felix
             {
                 if (System.getSecurityManager() != null)
                 {
-//                    m_startStopPrivileged.setAction(StartStopPrivileged.STOP_ACTION);
-//                    m_startStopPrivileged.setBundle(bundle);
-//                    AccessController.doPrivileged(m_startStopPrivileged);
+                    java.security.AccessController.doPrivileged(
+                        new PrivilegedActivatorCall(PrivilegedActivatorCall.STOP,
+                        info.getActivator(), info.getContext()));
                 }
                 else
                 {
@@ -1735,9 +1589,10 @@ public class Felix
             {
                 throw (SecurityException) rethrow;
             }
-            else if (rethrow instanceof PrivilegedActionException)
+            else if ((System.getSecurityManager() != null) && 
+                (rethrow instanceof java.security.PrivilegedActionException))
             {
-                rethrow = ((PrivilegedActionException) rethrow).getException();
+                rethrow = ((java.security.PrivilegedActionException) rethrow).getException();
             }
     
             // Rethrow all other exceptions as a BundleException.
@@ -1747,11 +1602,6 @@ public class Felix
 
     protected void uninstallBundle(BundleImpl bundle) throws BundleException
     {
-        if (System.getSecurityManager() != null)
-        {
-            AccessController.checkPermission(m_adminPerm);
-        }
-
         // Acquire bundle lock.
         acquireBundleLock(bundle);
 
@@ -1768,11 +1618,6 @@ public class Felix
 
     private void _uninstallBundle(BundleImpl bundle) throws BundleException
     {
-        if (System.getSecurityManager() != null)
-        {
-            AccessController.checkPermission(m_adminPerm);
-        }
-
         BundleInfo info = bundle.getInfo();
         if (info.getState() == Bundle.UNINSTALLED)
         {
@@ -1854,11 +1699,6 @@ public class Felix
     private Bundle installBundle(long id, String location, InputStream is)
         throws BundleException
     {
-        if (System.getSecurityManager() != null)
-        {
-            AccessController.checkPermission(m_adminPerm);
-        }
-
         BundleImpl bundle = null;
 
         // Acquire an install lock.
@@ -1940,6 +1780,14 @@ public class Felix
             {
                 BundleArchive archive = m_cache.getArchive(id);
                 bundle = new BundleImpl(this, createBundleInfo(archive));
+                
+                Object sm = System.getSecurityManager();
+                
+                if (sm != null)
+                {
+                    ((SecurityManager) sm).checkPermission(
+                        new AdminPermission(bundle, AdminPermission.LIFECYCLE));
+                }
             }
             catch (Exception ex)
             {
@@ -1958,6 +1806,13 @@ public class Felix
                             "Could not remove from cache.", ex1);
                     }
                 }
+                
+                if ((System.getSecurityManager() != null) && 
+                    (ex instanceof SecurityException))
+                {
+                    throw (SecurityException) ex;
+                }
+                
                 throw new BundleException("Could not create bundle object.", ex);
             }
 
@@ -2252,17 +2107,6 @@ public class Felix
             throw new IllegalArgumentException("Service object cannot be null.");
         }
 
-        // Check for permission to register all passed in interface names.
-        if (System.getSecurityManager() != null)
-        {
-            for (int i = 0; i < classNames.length; i++)
-            {
-                ServicePermission perm = new ServicePermission(
-                    classNames[i], ServicePermission.REGISTER);
-                AccessController.checkPermission(perm);
-            }
-        }
-
         // Acquire bundle lock.
         acquireBundleLock(bundle);
 
@@ -2345,47 +2189,6 @@ public class Felix
             // Get the current service reference.
             ServiceReference ref = (ServiceReference) refList.get(refIdx);
 
-            // Get the service's objectClass property.
-            String[] objectClass = (String[]) ref.getProperty(FelixConstants.OBJECTCLASS);
-
-            // Boolean flag.
-            boolean allow = false;
-
-            // Filter the service reference if the requesting bundle
-            // does not have permission.
-            if (System.getSecurityManager() != null)
-            {
-                for (int classIdx = 0;
-                    !allow && (classIdx < objectClass.length);
-                    classIdx++)
-                {
-                    try
-                    {
-                        ServicePermission perm = new ServicePermission(
-                            objectClass[classIdx], ServicePermission.GET);
-                        AccessController.checkPermission(perm);
-                        // The bundle only needs permission for one
-                        // of the service interfaces, so break out
-                        // of the loop when permission is granted.
-                        allow = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        // We do not throw this exception since the bundle
-                        // is not supposed to know about the service at all
-                        // if it does not have permission.
-                        m_logger.log(Logger.LOG_ERROR, ex.getMessage());
-                    }
-                }
-                
-                if (!allow)
-                {
-                    refList.remove(refIdx);
-                    refIdx--;
-                    continue;
-                }
-            }
-
             // Now check for castability.
             if (!isServiceAssignable(bundle, ref))
             {
@@ -2441,38 +2244,6 @@ public class Felix
         String[] objectClass = (String[])
             ref.getProperty(Constants.OBJECTCLASS);
         if (objectClass == null)
-        {
-            return null;
-        }
-
-        boolean hasPermission = false;
-        if (System.getSecurityManager() != null)
-        {
-            for (int i = 0;
-                !hasPermission && (i < objectClass.length);
-                i++)
-            {
-                try
-                {
-                    ServicePermission perm =
-                        new ServicePermission(
-                            objectClass[i], ServicePermission.GET);
-                    AccessController.checkPermission(perm);
-                    hasPermission = true;
-                }
-                catch (Exception ex)
-                {
-                }
-            }
-        }
-        else
-        {
-            hasPermission = true;
-        }
-
-        // If the bundle does not permission to access the service,
-        // then return null.
-        if (!hasPermission)
         {
             return null;
         }
@@ -2731,12 +2502,6 @@ public class Felix
 
     protected boolean resolveBundles(Bundle[] targets)
     {
-        if (System.getSecurityManager() != null)
-        {
-// TODO: FW SECURITY - Perform proper security check.
-            AccessController.checkPermission(m_adminPerm);
-        }
-
         // Acquire locks for all bundles to be resolved.
         BundleImpl[] bundles = acquireBundleResolveLocks(targets);
 
@@ -2775,12 +2540,6 @@ public class Felix
 
     protected void refreshPackages(Bundle[] targets)
     {
-        if (System.getSecurityManager() != null)
-        {
-// TODO: FW SECURITY - Perform proper security check.
-            AccessController.checkPermission(m_adminPerm);
-        }
-
         // Acquire locks for all impacted bundles.
         BundleImpl[] bundles = acquireBundleRefreshLocks(targets);
 
@@ -4124,6 +3883,102 @@ public class Felix
                 bundles[i].getInfo().unlock();
             }
             m_bundleLock.notifyAll();
+        }
+    }
+    
+    private static class PrivilegedActivatorCall implements 
+        java.security.PrivilegedExceptionAction
+    {
+        private static final int START = 1;
+        private static final int STOP = 2;
+        private int m_action;
+        private BundleActivator m_activator;
+        private BundleContext m_context;
+        
+        PrivilegedActivatorCall(int action, BundleActivator activator, BundleContext context)
+        {
+            m_action = action;
+            m_activator = activator;
+            m_context = context;
+        }
+        public Object run() throws Exception
+        {
+            switch (m_action)
+            {
+                case START:
+                    m_activator.start(m_context);
+                    break;
+                case STOP:
+                    m_activator.stop(m_context);
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown activator action.");
+            }
+            
+            return null;
+        }
+    }
+    
+    /**
+     * This simple class is used to perform the privileged action of
+     * checking if a bundle has permission to import its packages.
+    **/
+    private class CheckImportsPrivileged implements java.security.PrivilegedExceptionAction
+    {
+        private URL m_url = null;
+        private BundleImpl m_bundle = null;
+
+        public CheckImportsPrivileged(URL url, BundleImpl bundle)
+        {
+            m_url = url;
+            m_bundle = bundle;
+        }
+
+        public Object run() throws Exception
+        {
+            // Get permission collection for code source; we cannot
+            // call AccessController.checkPermission() directly since
+            // the bundle's code is not on the access context yet because
+            // it has not started yet...we are simply resolving it to see
+            // if we can start it. We must check for import permission
+            // on the exports as well, since export implies import.
+            java.security.CodeSource cs = new java.security.CodeSource(m_url,
+                (java.security.cert.Certificate[]) null);
+            
+            java.security.PermissionCollection pc = 
+                java.security.Policy.getPolicy().getPermissions(cs);
+
+            R4Import[] imports = m_policyCore.getImports(
+                m_bundle.getInfo().getCurrentModule());
+            
+            for (int i = 0;i < imports.length; i++)
+            {
+                PackagePermission perm = new PackagePermission(imports[i].getName(), 
+                    PackagePermission.IMPORT);
+                if (!pc.implies(perm))
+                {
+                   throw new java.security.AccessControlException(
+                       "PackagePermission.IMPORT denied for import: " + 
+                       imports[i].getName(), perm);
+                }
+            }
+            // Check export permission for all exports of the current module.
+            R4Export[] implicitImports = m_policyCore.getExports(
+                m_bundle.getInfo().getCurrentModule());
+            
+            for (int i = 0;i < implicitImports.length; i++)
+            {
+                PackagePermission perm = new PackagePermission(
+                    implicitImports[i].getName(), PackagePermission.EXPORT);
+                if (!pc.implies(perm))
+                {
+                    throw new java.security.AccessControlException(
+                        "PackagePermission.EXPORT denied for implicit export: " + 
+                        implicitImports[i].getName(), perm);
+                }
+            }
+            
+            return null;
         }
     }
 }

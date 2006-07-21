@@ -17,8 +17,6 @@
 package org.apache.felix.framework;
 
 import java.io.InputStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.*;
 
 import org.apache.felix.framework.cache.SystemBundleArchive;
@@ -159,11 +157,14 @@ class SystemBundle extends BundleImpl
 
     public synchronized void stop() throws BundleException
     {
-        if (System.getSecurityManager() != null)
+        Object sm = System.getSecurityManager();
+        
+        if(sm != null)
         {
-            AccessController.checkPermission(new AdminPermission());
+            ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+                AdminPermission.EXECUTE));
         }
-
+    
         // Spec says stop() on SystemBundle should return immediately and
         // shutdown framework on another thread.
         if (getFelix().getStatus() == Felix.RUNNING_STATUS)
@@ -192,13 +193,16 @@ class SystemBundle extends BundleImpl
                     {
                         if (System.getSecurityManager() != null)
                         {
-                            AccessController.doPrivileged(new PrivilegedAction() {
-                                public Object run()
+                            java.security.AccessController.doPrivileged(
+                                new java.security.PrivilegedAction()
                                 {
-                                    System.exit(0);
-                                    return null;
-                                }
-                            });
+                                    public Object run()
+                                    {
+                                        System.exit(0);
+                                        
+                                        return null;
+                                    }
+                                });
                         }
                         else
                         {
@@ -238,9 +242,12 @@ class SystemBundle extends BundleImpl
 
     public synchronized void update(InputStream is) throws BundleException
     {
-        if (System.getSecurityManager() != null)
+        Object sm = System.getSecurityManager();
+        
+        if (sm != null)
         {
-            AccessController.checkPermission(new AdminPermission());
+            ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+                AdminPermission.EXECUTE));
         }
 
         // TODO: This is supposed to stop and then restart the framework.

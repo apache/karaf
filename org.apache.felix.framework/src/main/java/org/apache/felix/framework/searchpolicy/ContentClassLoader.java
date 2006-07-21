@@ -31,7 +31,7 @@ public class ContentClassLoader extends SecureClassLoader
 {
     private ContentLoaderImpl m_contentLoader = null;
 
-    ContentClassLoader(ContentLoaderImpl contentLoader)
+    public ContentClassLoader(ContentLoaderImpl contentLoader)
     {
         m_contentLoader = contentLoader;
     }

@@ -32,8 +32,7 @@ class PackageAdminActivator implements BundleActivator
     {
         m_reg = context.registerService(
             org.osgi.service.packageadmin.PackageAdmin.class.getName(),
-            new PackageAdminImpl(m_felix),
-            null);
+            new PackageAdminImpl(m_felix), null);
     }
 
     public void stop(BundleContext context) throws Exception

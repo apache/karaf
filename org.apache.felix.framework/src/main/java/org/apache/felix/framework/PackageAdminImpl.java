@@ -26,10 +26,12 @@ class PackageAdminImpl implements PackageAdmin, Runnable
 {
     private Felix m_felix = null;
     private Bundle[][] m_reqBundles = null;
+    private Bundle m_systemBundle = null;
 
     public PackageAdminImpl(Felix felix)
     {
         m_felix = felix;
+        m_systemBundle = m_felix.getBundle(0);
 
         // Start a thread to perform asynchronous package refreshes.
         Thread t = new Thread(this, "FelixPackageAdmin");
@@ -165,6 +167,14 @@ class PackageAdminImpl implements PackageAdmin, Runnable
     public synchronized void refreshPackages(Bundle[] bundles)
         throws SecurityException
     {
+        Object sm = System.getSecurityManager();
+        
+        if (sm != null)
+        {
+            ((SecurityManager) sm).checkPermission(
+                new AdminPermission(m_systemBundle, AdminPermission.RESOLVE));
+        }
+        
         // Save our request parameters and notify all.
         if (m_reqBundles == null)
         {
@@ -234,6 +244,14 @@ class PackageAdminImpl implements PackageAdmin, Runnable
 
     public boolean resolveBundles(Bundle[] bundles)
     {
+        Object sm = System.getSecurityManager();
+        
+        if (sm != null)
+        {
+            ((SecurityManager) sm).checkPermission(
+                new AdminPermission(m_systemBundle, AdminPermission.RESOLVE));
+        }
+        
         return m_felix.resolveBundles(bundles);
     }
 
