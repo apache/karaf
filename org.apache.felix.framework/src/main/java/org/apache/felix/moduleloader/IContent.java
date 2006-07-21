@@ -28,6 +28,16 @@ public interface IContent
     public byte[] getEntry(String name);
     public InputStream getEntryAsStream(String name)
         throws IOException;
-    public Enumeration getEntryPaths(String path);
-    public Enumeration findEntries(String path, String filePattern, boolean recurse);
+
+    /**
+     * <p>
+     * Returns an enumeration of entry names as <tt>String</tt> objects.
+     * An entry name is a path constructed with '/' as path element
+     * separators and is relative to the root of the content. Entry names
+     * for entries that represent directories should end with the '/'
+     * character.
+     * </p>
+     * @ returns An enumeration of entry names or <tt>null</tt>.
+    **/ 
+    public Enumeration getEntries();
 }

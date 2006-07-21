@@ -112,31 +112,14 @@ public class ContentDirectoryContent implements IContent
         return m_content.getEntryAsStream(m_rootPath + name);
     }
 
-    public synchronized Enumeration getEntryPaths(String path)
+    public synchronized Enumeration getEntries()
     {
         if (!m_opened)
         {
             throw new IllegalStateException("ContentDirectoryContent is not open");
         }
 
-        if ((path.length() > 0) && (path.charAt(0) == '/'))
-        {
-            path = path.substring(1);
-        }
-
-        return new WrappedEnumeration(m_content.getEntryPaths(m_rootPath + path), m_rootPath);
-    }
-
-    public Enumeration findEntries(String path, String filePattern, boolean recurse)
-    {
-        // This IContent method supports Bundle.findEntries(), which is used to
-        // browse the bundle JAR file, not the bundle's class path. However,
-        // this implementation of IContent is used purely to add support for
-        // directories in the bundle class path, thus it will never represent
-        // the actual bundle content, so this method should never be called.
-        // For now we will leave this unimplemented and if it becomes necessary
-        // it can be implemented later.
-        throw new UnsupportedOperationException("Not implemented, since it should not be used.");
+        return new EntriesEnumeration(m_content.getEntries(), m_rootPath);
     }
 
     public String toString()
@@ -144,12 +127,12 @@ public class ContentDirectoryContent implements IContent
         return "CONTENT DIR " + m_rootPath + " (" + m_content + ")";
     }
 
-    private static class WrappedEnumeration implements Enumeration
+    private static class EntriesEnumeration implements Enumeration
     {
         private Enumeration m_enumeration = null;
         private String m_rootPath = null;
 
-        public WrappedEnumeration(Enumeration enumeration, String rootPath)
+        public EntriesEnumeration(Enumeration enumeration, String rootPath)
         {
             m_enumeration = enumeration;
             m_rootPath = rootPath;
