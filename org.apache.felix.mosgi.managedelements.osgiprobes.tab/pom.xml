@@ -52,8 +52,7 @@
 	            org.osgi.framework;specification-version="1.0.0",
 	            javax.swing;specification-version="1.0.0",
 	            javax.swing.table;specification-version="1.0.0",
-	            org.apache.felix.mosgi.console.ifc;specification-version="1.0.0",
-							${pom.artifactId};specification-version="1.0.0"
+	            org.apache.felix.mosgi.console.ifc;specification-version="1.0.0"
 	          </importPackage>
           </osgiManifest>
         </configuration>
