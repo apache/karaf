@@ -16,11 +16,11 @@
  */
 package org.apache.felix.framework.searchpolicy;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.Util;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
 public class R4Package
@@ -129,9 +129,8 @@ public class R4Package
             }
 
             // Parse the directives/attributes.
-            R4Directive[] dirs = new R4Directive[pieces.length - pkgCount];
-            R4Attribute[] attrs = new R4Attribute[pieces.length - pkgCount];
-            int dirCount = 0, attrCount = 0;
+            Map dirsMap = new HashMap();
+            Map attrsMap = new HashMap();
             int idx = -1;
             String sep = null;
             for (int pieceIdx = pkgCount; pieceIdx < pieces.length; pieceIdx++)
@@ -165,20 +164,49 @@ public class R4Package
                 // Save the directive/attribute in the appropriate array.
                 if (sep.equals(FelixConstants.DIRECTIVE_SEPARATOR))
                 {
-                    dirs[dirCount++] = new R4Directive(key, value);
+                    // Check for duplicates.
+                    if (dirsMap.get(key) != null)
+                    {
+                        throw new IllegalArgumentException(
+                            "Duplicate directive: " + key);
+                    }
+                    dirsMap.put(key, new R4Directive(key, value));
                 }
                 else
                 {
-                    attrs[attrCount++] = new R4Attribute(key, value, false);
+                    // Check for duplicates.
+                    if (attrsMap.get(key) != null)
+                    {
+                        throw new IllegalArgumentException(
+                            "Duplicate attribute: " + key);
+                    }
+                    attrsMap.put(key, new R4Attribute(key, value, false));
                 }
             }
 
-            // Shrink directive array.
-            R4Directive[] dirsFinal = new R4Directive[dirCount];
-            System.arraycopy(dirs, 0, dirsFinal, 0, dirCount);
-            // Shrink attribute array.
-            R4Attribute[] attrsFinal = new R4Attribute[attrCount];
-            System.arraycopy(attrs, 0, attrsFinal, 0, attrCount);
+            // Check for "version" and "specification-version" attributes
+            // and verify they are the same if both are specified.
+            R4Attribute v = (R4Attribute) attrsMap.get(Constants.VERSION_ATTRIBUTE);
+            R4Attribute sv = (R4Attribute) attrsMap.get(Constants.PACKAGE_SPECIFICATION_VERSION);
+            if ((v != null) && (sv != null))
+            {
+                // Verify they are equal.
+                if (!v.getValue().trim().equals(sv.getValue().trim()))
+                {
+                    throw new IllegalArgumentException(
+                        "Both version and specificat-version are specified, but they are not equal.");
+                }
+                // Remove spec-version since it isn't needed.
+                attrsMap.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
+            }
+
+            // Create directive array.
+            R4Directive[] dirs = (R4Directive[])
+                dirsMap.values().toArray(new R4Directive[dirsMap.size()]);
+
+            // Create attribute array.
+            R4Attribute[] attrs = (R4Attribute[])
+                attrsMap.values().toArray(new R4Attribute[attrsMap.size()]);
 
             // Create package attributes for each package and
             // set directives/attributes. Add each package to
@@ -186,7 +214,7 @@ public class R4Package
             R4Package[] pkgs = new R4Package[pkgCount];
             for (int pkgIdx = 0; pkgIdx < pkgCount; pkgIdx++)
             {
-                pkgs[pkgIdx] = new R4Package(pieces[pkgIdx], dirsFinal, attrsFinal);
+                pkgs[pkgIdx] = new R4Package(pieces[pkgIdx], dirs, attrs);
                 completeList.add(pkgs[pkgIdx]);
             }
         }
