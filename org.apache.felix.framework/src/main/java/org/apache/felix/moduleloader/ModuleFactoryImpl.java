@@ -45,7 +45,7 @@ public class ModuleFactoryImpl implements IModuleFactory
         return (IModule) m_moduleMap.get(id);
     }
 
-    public IModule createModule(String id)
+    public IModule createModule(String id, IModuleDefinition md)
     {
         IModule module = null;
 
@@ -55,7 +55,7 @@ public class ModuleFactoryImpl implements IModuleFactory
         {
             if (m_moduleMap.get(id) == null)
             {
-                module = new ModuleImpl(m_logger, id);
+                module = new ModuleImpl(m_logger, id, md);
                 m_moduleMap.put(id, module);
             }
             else

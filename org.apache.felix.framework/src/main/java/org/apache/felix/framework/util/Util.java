@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.searchpolicy.*;
 import org.apache.felix.moduleloader.IModule;
+import org.apache.felix.moduleloader.IWire;
 
 public class Util
 {
@@ -190,8 +191,7 @@ public class Util
 
     public static R4Export getExportPackage(IModule m, String name)
     {
-        R4Export[] pkgs =
-            ((IR4SearchPolicy) m.getContentLoader().getSearchPolicy()).getExports();
+        R4Export[] pkgs = m.getDefinition().getExports();
         for (int i = 0; (pkgs != null) && (i < pkgs.length); i++)
         {
             if (pkgs[i].getName().equals(name))
@@ -204,8 +204,7 @@ public class Util
 
     public static R4Import getImportPackage(IModule m, String name)
     {
-        R4Import[] pkgs =
-            ((IR4SearchPolicy) m.getContentLoader().getSearchPolicy()).getImports();
+        R4Import[] pkgs = m.getDefinition().getImports();
         for (int i = 0; (pkgs != null) && (i < pkgs.length); i++)
         {
             if (pkgs[i].getName().equals(name))
@@ -216,10 +215,9 @@ public class Util
         return null;
     }
 
-    public static R4Wire getWire(IModule m, String name)
+    public static IWire getWire(IModule m, String name)
     {
-        R4Wire[] wires =
-            ((IR4SearchPolicy) m.getContentLoader().getSearchPolicy()).getWires();
+        IWire[] wires = m.getWires();
         for (int i = 0; (wires != null) && (i < wires.length); i++)
         {
             if (wires[i].getExport().getName().equals(name))

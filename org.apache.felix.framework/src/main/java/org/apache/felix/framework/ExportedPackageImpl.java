@@ -16,7 +16,6 @@
  */
 package org.apache.felix.framework;
 
-import org.apache.felix.framework.searchpolicy.IR4SearchPolicy;
 import org.apache.felix.framework.searchpolicy.R4Export;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.Bundle;
@@ -86,8 +85,7 @@ class ExportedPackageImpl implements ExportedPackage
 
     public boolean isRemovalPending()
     {
-        return ((IR4SearchPolicy)
-            m_exportingModule.getContentLoader().getSearchPolicy()).isRemovalPending();
+        return m_exportingModule.isRemovalPending();
     }
 
     public String toString()

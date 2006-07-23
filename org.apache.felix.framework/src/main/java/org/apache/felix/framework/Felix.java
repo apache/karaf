@@ -343,15 +343,16 @@ public class Felix
             BundleInfo info = new BundleInfo(
                 m_logger, new SystemBundleArchive(), null);
             systembundle = new SystemBundle(this, info, activatorList);
-            systembundle.getInfo().addModule(m_factory.createModule("0"));
+            // Create a module for the system bundle.
+            IModuleDefinition md = new ModuleDefinition(
+                systembundle.getExports(), null, null, null);
+            systembundle.getInfo().addModule(m_factory.createModule("0", md));
             systembundle.getContentLoader().setSearchPolicy(
                 new R4SearchPolicy(
                     m_policyCore, systembundle.getInfo().getCurrentModule()));
             m_factory.setContentLoader(
                 systembundle.getInfo().getCurrentModule(),
                 systembundle.getContentLoader());
-            m_policyCore.setExports(
-                systembundle.getInfo().getCurrentModule(), systembundle.getExports());
 
             m_installedBundleMap.put(
                 systembundle.getInfo().getLocation(), systembundle);
@@ -1434,8 +1435,8 @@ public class Felix
                 
                 // Mark previous the bundle's old module for removal since
                 // it can no longer be used to resolve other modules per the spec.
-                IModule module = info.getModules()[info.getModules().length - 2];
-                m_policyCore.setRemovalPending(module, true);
+                ((ModuleImpl) info.getModules()[info.getModules().length - 2])
+                    .setRemovalPending(true);
         
                 fireBundleEvent(BundleEvent.UPDATED, bundle);
             }
@@ -1652,7 +1653,7 @@ public class Felix
 
             // Mark current module for removal since it can no longer
             // be used to resolve other modules per the spec.
-            m_policyCore.setRemovalPending(target.getInfo().getCurrentModule(), true);
+            ((ModuleImpl) target.getInfo().getCurrentModule()).setRemovalPending(true);
 
             // Put bundle in uninstalled bundle array.
             rememberUninstalledBundle(bundle);
@@ -2432,7 +2433,7 @@ public class Felix
         IModule[] modules = bundle.getInfo().getModules();
         for (int modIdx = 0; modIdx < modules.length; modIdx++)
         {
-            R4Export[] exports = m_policyCore.getExports(modules[modIdx]);
+            R4Export[] exports = modules[modIdx].getDefinition().getExports();
             if ((exports != null) && (exports.length > 0))
             {
                 for (int expIdx = 0; expIdx < exports.length; expIdx++)
@@ -2477,12 +2478,12 @@ public class Felix
             IModule[] modules = importer.getInfo().getModules();
             for (int modIdx = 0; modIdx < modules.length; modIdx++)
             {
-                R4Wire wire = Util.getWire(modules[modIdx], ep.getName());
+                IWire wire = Util.getWire(modules[modIdx], ep.getName());
 
                 // If the resolving module is associated with the
                 // exporting bundle, then add current bundle to
                 // import list.
-                if ((wire != null) && exporterInfo.hasModule(wire.getExportingModule()))
+                if ((wire != null) && exporterInfo.hasModule(wire.getExporter()))
                 {
                     // Add the bundle to the list of importers.
                     list.add(bundles[bundleIdx]);
@@ -2694,27 +2695,27 @@ public class Felix
         // Now that we have all of the metadata associated with the
         // module, we need to create the module itself. This is somewhat
         // complicated because a module is constructed out of several
-        // interrelated pieces (e.g., content loader, search policy,
-        // url policy). We need to create all of these pieces and bind
-        // them together.
+        // interrelated pieces (e.g., module definition, content loader,
+        // search policy, url policy). We need to create all of these
+        // pieces and bind them together.
 
-        // First, create the module.
-        IModule module = m_factory.createModule(
-            Long.toString(targetId) + "." + Integer.toString(revision));
-
-        // Attach the R4 search policy metadata to the module.
-        m_policyCore.setExports(module, mp.getExports());
-        m_policyCore.setImports(module, mp.getImports());
-        m_policyCore.setDynamicImports(module, mp.getDynamicImports());
-        m_policyCore.setLibraries(module,
+        // Create the module definition for the new module.
+        IModuleDefinition md = new ModuleDefinition(
+            mp.getExports(),
+            mp.getImports(),
+            mp.getDynamicImports(),
             mp.getLibraries(
                 m_cache,
                 targetId,
                 revision,
                 m_config.get(Constants.FRAMEWORK_OS_NAME),
                 m_config.get(Constants.FRAMEWORK_PROCESSOR)));
+                
+        // Create the module using the module definition.
+        IModule module = m_factory.createModule(
+            Long.toString(targetId) + "." + Integer.toString(revision), md);
 
-        // Create the content loader associated with the module archive.
+        // Create the content loader from the module archive.
         IContentLoader contentLoader = new ContentLoaderImpl(
                 m_logger,
                 m_cache.getArchive(targetId).getRevision(revision).getContent(),
@@ -3740,8 +3741,8 @@ public class Felix
             java.security.PermissionCollection pc = 
                 java.security.Policy.getPolicy().getPermissions(cs);
 
-            R4Import[] imports = m_policyCore.getImports(
-                m_bundle.getInfo().getCurrentModule());
+            R4Import[] imports =
+                m_bundle.getInfo().getCurrentModule().getDefinition().getImports();
             
             for (int i = 0;i < imports.length; i++)
             {
@@ -3755,8 +3756,8 @@ public class Felix
                 }
             }
             // Check export permission for all exports of the current module.
-            R4Export[] implicitImports = m_policyCore.getExports(
-                m_bundle.getInfo().getCurrentModule());
+            R4Export[] implicitImports =
+                m_bundle.getInfo().getCurrentModule().getDefinition().getExports();
             
             for (int i = 0;i < implicitImports.length; i++)
             {

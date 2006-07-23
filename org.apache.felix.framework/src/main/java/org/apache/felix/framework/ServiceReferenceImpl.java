@@ -16,8 +16,8 @@
  */
 package org.apache.felix.framework;
 
-import org.apache.felix.framework.searchpolicy.R4Wire;
 import org.apache.felix.framework.util.Util;
+import org.apache.felix.moduleloader.IWire;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
@@ -119,10 +119,10 @@ class ServiceReferenceImpl implements ServiceReference
         String pkgName =
             Util.getClassPackage(className);
         // Get package wiring from service requester.
-        R4Wire requesterWire = Util.getWire(
+        IWire requesterWire = Util.getWire(
             ((BundleImpl) requester).getInfo().getCurrentModule(), pkgName);
         // Get package wiring from service provider.
-        R4Wire providerWire = Util.getWire(
+        IWire providerWire = Util.getWire(
             ((BundleImpl) m_bundle).getInfo().getCurrentModule(), pkgName);
 
         // There are three situations that may occur here:
@@ -168,7 +168,7 @@ class ServiceReferenceImpl implements ServiceReference
         // same source module.
         else
         {
-            allow = providerWire.getExportingModule().equals(requesterWire.getExportingModule());
+            allow = providerWire.getExporter().equals(requesterWire.getExporter());
         }
 
         return allow;

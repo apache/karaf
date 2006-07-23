@@ -18,15 +18,13 @@ package org.apache.felix.moduleloader;
 
 import java.net.URL;
 
-public interface IModule
+import org.apache.felix.framework.searchpolicy.R4Export;
+
+public interface IWire
 {
-    public String getId();
-    public IModuleDefinition getDefinition();
-    public IContentLoader getContentLoader();
-    public IWire[] getWires();
-
-    public boolean isRemovalPending();
-
-    public Class getClass(String name);
-    public URL getResource(String name);
+    public IModule getImporter();
+    public IModule getExporter();
+    public R4Export getExport();
+    public Class getClass(String name) throws ClassNotFoundException;
+    public URL getResource(String name) throws ResourceNotFoundException;
 }

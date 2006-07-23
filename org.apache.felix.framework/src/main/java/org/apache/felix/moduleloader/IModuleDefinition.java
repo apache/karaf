@@ -16,17 +16,12 @@
  */
 package org.apache.felix.moduleloader;
 
-import java.net.URL;
+import org.apache.felix.framework.searchpolicy.*;
 
-public interface IModule
+public interface IModuleDefinition
 {
-    public String getId();
-    public IModuleDefinition getDefinition();
-    public IContentLoader getContentLoader();
-    public IWire[] getWires();
-
-    public boolean isRemovalPending();
-
-    public Class getClass(String name);
-    public URL getResource(String name);
+    public R4Export[] getExports();
+    public R4Import[] getImports();
+    public R4Import[] getDynamicImports();
+    public R4Library[] getLibraries();
 }

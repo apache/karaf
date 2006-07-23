@@ -21,7 +21,7 @@ public interface IModuleFactory
     public IModule[] getModules();
     public IModule getModule(String id);
 
-    public IModule createModule(String id);    
+    public IModule createModule(String id, IModuleDefinition md);    
     public void removeModule(IModule module);
 
     public void setContentLoader(IModule module, IContentLoader contentLoader);

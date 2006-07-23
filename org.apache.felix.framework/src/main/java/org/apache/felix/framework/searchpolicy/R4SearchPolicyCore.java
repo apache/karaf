@@ -90,160 +90,13 @@ public class R4SearchPolicyCore implements ModuleListener
         }
     }
 
-    public synchronized R4Export[] getExports(IModule module)
-    {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        return (data == null) ? null : data.m_exports;
-    }
-
-    public synchronized void setExports(IModule module, R4Export[] exports)
-    {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        if (data == null)
-        {
-            data = new ModuleData(module);
-            m_moduleDataMap.put(module, data);
-        }
-        data.m_exports = exports;
-
-        // When a module is added and its exports are set, create an
-        // aggregated list of available exports to simplify later
-        // processing when resolving bundles.
-
-        // Add exports to available package map.
-        for (int i = 0; (exports != null) && (i < exports.length); i++)
-        {
-            IModule[] modules = (IModule[]) m_availPkgMap.get(exports[i].getName());
-
-            // We want to add the module into the list of available
-            // exporters in sorted order (descending version and
-            // ascending bundle identifier). Insert using a simple
-            // binary search algorithm.
-            if (modules == null)
-            {
-                modules = new IModule[] { module };
-            }
-            else
-            {
-                int top = 0, bottom = modules.length - 1, middle = 0;
-                Version middleVersion = null;
-                while (top <= bottom)
-                {
-                    middle = (bottom - top) / 2 + top;
-                    middleVersion = Util.getExportPackage(
-                        modules[middle], exports[i].getName()).getVersion();
-                    // Sort in reverse version order.
-                    int cmp = middleVersion.compareTo(exports[i].getVersion());
-                    if (cmp < 0)
-                    {
-                        bottom = middle - 1;
-                    }
-                    else if (cmp == 0)
-                    {
-                        // Sort further by ascending bundle ID.
-                        long middleId = Util.getBundleIdFromModuleId(modules[middle].getId());
-                        long exportId = Util.getBundleIdFromModuleId(module.getId());
-                        if (middleId < exportId)
-                        {
-                            top = middle + 1;
-                        }
-                        else
-                        {
-                            bottom = middle - 1;
-                        }
-                    }
-                    else
-                    {
-                        top = middle + 1;
-                    }
-                }
-
-                IModule[] newMods = new IModule[modules.length + 1];
-                System.arraycopy(modules, 0, newMods, 0, top);
-                System.arraycopy(modules, top, newMods, top + 1, modules.length - top);
-                newMods[top] = module;
-                modules = newMods;
-            }
-
-            m_availPkgMap.put(exports[i].getName(), modules);
-        }
-    }
-
-    public synchronized R4Import[] getImports(IModule module)
-    {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        return (data == null) ? null : data.m_imports;
-    }
-
-    public synchronized void setImports(IModule module, R4Import[] imports)
-    {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        if (data == null)
-        {
-            data = new ModuleData(module);
-            m_moduleDataMap.put(module, data);
-        }
-        data.m_imports = imports;
-    }
-
-    public synchronized R4Import[] getDynamicImports(IModule module)
-    {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        return (data == null) ? null : data.m_dynamicImports;
-    }
-
-    public synchronized void setDynamicImports(IModule module, R4Import[] imports)
-    {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        if (data == null)
-        {
-            data = new ModuleData(module);
-            m_moduleDataMap.put(module, data);
-        }
-        data.m_dynamicImports = imports;
-    }
-
-    public synchronized R4Library[] getLibraries(IModule module)
-    {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        return (data == null) ? null : data.m_libraries;
-    }
-
-    public synchronized void setLibraries(IModule module, R4Library[] libraries)
-    {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        if (data == null)
-        {
-            data = new ModuleData(module);
-            m_moduleDataMap.put(module, data);
-        }
-        data.m_libraries = libraries;
-    }
-
-    public synchronized R4Wire[] getWires(IModule module)
-    {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        return (data == null) ? null : data.m_wires;
-    }
-
-    public synchronized void setWires(IModule module, R4Wire[] wires)
-    {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        if (data == null)
-        {
-            data = new ModuleData(module);
-            m_moduleDataMap.put(module, data);
-        }
-        data.m_wires = wires;
-    }
-
-    public synchronized boolean isResolved(IModule module)
+    protected synchronized boolean isResolved(IModule module)
     {
         ModuleData data = (ModuleData) m_moduleDataMap.get(module);
         return (data == null) ? false : data.m_resolved;
     }
 
-    public synchronized void setResolved(IModule module, boolean resolved)
+    protected synchronized void setResolved(IModule module, boolean resolved)
     {
         ModuleData data = (ModuleData) m_moduleDataMap.get(module);
         if (data == null)
@@ -252,23 +105,6 @@ public class R4SearchPolicyCore implements ModuleListener
             m_moduleDataMap.put(module, data);
         }
         data.m_resolved = resolved;
-    }
-
-    public synchronized boolean isRemovalPending(IModule module)
-    {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        return (data == null) ? false : data.m_removalPending;
-    }
-
-    public synchronized void setRemovalPending(IModule module, boolean removalPending)
-    {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        if (data == null)
-        {
-            data = new ModuleData(module);
-            m_moduleDataMap.put(module, data);
-        }
-        data.m_removalPending = removalPending;
     }
 
     public Object[] definePackage(IModule module, String pkgName)
@@ -438,7 +274,7 @@ public class R4SearchPolicyCore implements ModuleListener
         throws ClassNotFoundException, ResourceNotFoundException
     {
         // We delegate to the module's wires to find the class or resource.
-        R4Wire[] wires = getWires(module);
+        IWire[] wires = module.getWires();
         for (int i = 0; (wires != null) && (i < wires.length); i++)
         {
             // If we find the class or resource, then return it.
@@ -461,7 +297,7 @@ public class R4SearchPolicyCore implements ModuleListener
         // At this point, the module's imports were searched and so was the
         // the module's content. Now we make an attempt to load the
         // class/resource via a dynamic import, if possible.
-        R4Wire wire = attemptDynamicImport(module, pkgName);
+        IWire wire = attemptDynamicImport(module, pkgName);
 
         // If the dynamic import was successful, then this initial
         // time we must directly return the result from dynamically
@@ -522,7 +358,7 @@ public class R4SearchPolicyCore implements ModuleListener
         return null;
     }
 
-    private R4Wire attemptDynamicImport(IModule module, String pkgName)
+    private IWire attemptDynamicImport(IModule module, String pkgName)
     {
         R4Wire wire = null;
         IModule candidate = null;
@@ -588,7 +424,7 @@ public class R4SearchPolicyCore implements ModuleListener
                 // wiring attribute.
                 if (candidate != null)
                 {
-                    R4Wire[] wires = getWires(module);
+                    IWire[] wires = module.getWires();
                     R4Wire[] newWires = null;
                     if (wires == null)
                     {
@@ -606,7 +442,7 @@ public class R4SearchPolicyCore implements ModuleListener
                         module, candidate,
                         Util.getExportPackage(candidate, impMatch.getName()));
                     newWires[newWires.length - 1] = wire;
-                    setWires(module, newWires);
+                    ((ModuleImpl) module).setWires(newWires);
 m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 }
             }
@@ -623,7 +459,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
     {
         // Check the dynamic import specs for a match of
         // the target package.
-        R4Import[] dynamics = getDynamicImports(module);
+        R4Import[] dynamics = module.getDefinition().getDynamicImports();
         R4Import impMatch = null;
         for (int i = 0; (impMatch == null) && (dynamics != null)
             && (i < dynamics.length); i++)
@@ -669,7 +505,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
         // TODO: This "matching" algorithm does not fully
         // match the spec and should be improved.
-        R4Library[] libs = getLibraries(module);
+        R4Library[] libs = module.getDefinition().getLibraries();
         for (int i = 0; (libs != null) && (i < libs.length); i++)
         {
             String path = libs[i].getPath(name);
@@ -802,7 +638,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
         // Loop through each import and calculate its resolving
         // set of candidates.
-        R4Import[] imports = getImports(module);
+        R4Import[] imports = module.getDefinition().getImports();
         for (int impIdx = 0; (imports != null) && (impIdx < imports.length); impIdx++)
         {
             // Get the candidates from the "in use" and "available"
@@ -927,7 +763,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         {
             // The spec says that we cannot consider modules that
             // are pending removal, so ignore them.
-            if (includeRemovalPending || !isRemovalPending(modules[modIdx]))
+            if (includeRemovalPending || !modules[modIdx].isRemovalPending())
             {
                 // Get the modules export package for the target package.
                 R4Export export = Util.getExportPackage(
@@ -1001,7 +837,7 @@ m_logger.log(
         // of the root module that is not also imported; uses constraints
         // for exported packages that are also imported will be taken
         // care of as part of normal import package processing.
-        R4Export[] exports = getExports(rootModule);
+        R4Export[] exports = rootModule.getDefinition().getExports();
         Map usesMap = new HashMap();
         for (int i = 0; (exports != null) && (i < exports.length); i++)
         {
@@ -1124,11 +960,11 @@ m_logger.log(
                 // Get the actual exporter from the wire or if there
                 // is no wire, then get the export is from the module
                 // itself.
-                R4Wire wire = Util.getWire(module, uses[usesIdx]);
+                IWire wire = Util.getWire(module, uses[usesIdx]);
                 if (wire != null)
                 {
                     usesMap = calculateUsesDependencies(
-                        resolverMap, wire.getExportingModule(), wire.getExport(), usesMap);
+                        resolverMap, wire.getExporter(), wire.getExport(), usesMap);
                 }
                 else
                 {
@@ -1224,7 +1060,7 @@ m_logger.log(
         {
             Map.Entry entry = (Map.Entry) iter.next();
             IModule module = (IModule) entry.getKey();
-            R4Wire[] wires = (R4Wire[]) entry.getValue();
+            IWire[] wires = (IWire[]) entry.getValue();
 
             // Set the module's resolved and wiring attribute.
             setResolved(module, true);
@@ -1232,7 +1068,7 @@ m_logger.log(
             // only modules may not have wires.
             if (wires.length > 0)
             {
-                setWires(module, wires);
+                ((ModuleImpl) module).setWires(wires);
             }
 
             // Remove the wire's exporting module from the "available"
@@ -1245,7 +1081,7 @@ m_logger.log(
 m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 // First remove the wire module from "available" package map.
                 IModule[] modules = (IModule[]) m_availPkgMap.get(wires[wireIdx].getExport().getName());
-                modules = removeModuleFromArray(modules, wires[wireIdx].getExportingModule());
+                modules = removeModuleFromArray(modules, wires[wireIdx].getExporter());
                 m_availPkgMap.put(wires[wireIdx].getExport().getName(), modules);
 
                 // Also remove any exported packages from the "available"
@@ -1256,7 +1092,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 // to a different module. If the exported package is not
                 // actually exported, then we just want to remove it
                 // completely, since it cannot be used.
-                if (wires[wireIdx].getExportingModule() != module)
+                if (wires[wireIdx].getExporter() != module)
                 {
                     modules = (IModule[]) m_availPkgMap.get(wires[wireIdx].getExport().getName());
                     modules = removeModuleFromArray(modules, module);
@@ -1265,7 +1101,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
                 // Add the module of the wire to the "in use" package map.
                 modules = (IModule[]) m_inUsePkgMap.get(wires[wireIdx].getExport().getName());
-                modules = addModuleToArray(modules, wires[wireIdx].getExportingModule());
+                modules = addModuleToArray(modules, wires[wireIdx].getExporter());
                 m_inUsePkgMap.put(wires[wireIdx].getExport().getName(), modules);
             }
         }
@@ -1282,7 +1118,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         }
 
         List nodeList = (List) resolverMap.get(module);
-        R4Wire[] wires = new R4Wire[nodeList.size()];
+        IWire[] wires = new IWire[nodeList.size()];
 
         // Put the module in the wireMap with an empty wire array;
         // we do this early so we can use it to detect cycles.
@@ -1459,6 +1295,71 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
     public void moduleAdded(ModuleEvent event)
     {
+        synchronized (m_factory)
+        {
+            // When a module is added, create an aggregated list of available
+            // exports to simplify later processing when resolving bundles.
+            IModule module = event.getModule();
+            R4Export[] exports = module.getDefinition().getExports();
+
+            // Add exports to available package map.
+            for (int i = 0; (exports != null) && (i < exports.length); i++)
+            {
+                IModule[] modules = (IModule[]) m_availPkgMap.get(exports[i].getName());
+
+                // We want to add the module into the list of available
+                // exporters in sorted order (descending version and
+                // ascending bundle identifier). Insert using a simple
+                // binary search algorithm.
+                if (modules == null)
+                {
+                    modules = new IModule[] { module };
+                }
+                else
+                {
+                    int top = 0, bottom = modules.length - 1, middle = 0;
+                    Version middleVersion = null;
+                    while (top <= bottom)
+                    {
+                        middle = (bottom - top) / 2 + top;
+                        middleVersion = Util.getExportPackage(
+                            modules[middle], exports[i].getName()).getVersion();
+                        // Sort in reverse version order.
+                        int cmp = middleVersion.compareTo(exports[i].getVersion());
+                        if (cmp < 0)
+                        {
+                            bottom = middle - 1;
+                        }
+                        else if (cmp == 0)
+                        {
+                            // Sort further by ascending bundle ID.
+                            long middleId = Util.getBundleIdFromModuleId(modules[middle].getId());
+                            long exportId = Util.getBundleIdFromModuleId(module.getId());
+                            if (middleId < exportId)
+                            {
+                                top = middle + 1;
+                            }
+                            else
+                            {
+                                bottom = middle - 1;
+                            }
+                        }
+                        else
+                        {
+                            top = middle + 1;
+                        }
+                    }
+
+                    IModule[] newMods = new IModule[modules.length + 1];
+                    System.arraycopy(modules, 0, newMods, 0, top);
+                    System.arraycopy(modules, top, newMods, top + 1, modules.length - top);
+                    newMods[top] = module;
+                    modules = newMods;
+                }
+
+                m_availPkgMap.put(exports[i].getName(), modules);
+            }
+        }
     }
 
     public void moduleRemoved(ModuleEvent event)
@@ -1472,7 +1373,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         synchronized (m_factory)
         {
             // Remove exports from package maps.
-            R4Export[] exports = getExports(event.getModule());
+            R4Export[] exports = event.getModule().getDefinition().getExports();
             for (int i = 0; (exports != null) && (i < exports.length); i++)
             {
                 // Remove from "available" package map.
@@ -1601,13 +1502,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
     private static class ModuleData
     {
         public IModule m_module = null;
-        public R4Export[] m_exports = null;
-        public R4Import[] m_imports = null;
-        public R4Import[] m_dynamicImports = null;
-        public R4Library[] m_libraries = null;
-        public R4Wire[] m_wires = null;
         public boolean m_resolved = false;
-        public boolean m_removalPending = false;
         public ModuleData(IModule module)
         {
             m_module = module;
@@ -1648,7 +1543,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         long impId = Util.getBundleIdFromModuleId(module.getId());
         
         // Next, check to see if the module imports the package.
-        R4Wire[] wires = getWires(module);
+        IWire[] wires = module.getWires();
         for (int i = 0; (wires != null) && (i < wires.length); i++)
         {
             if (wires[i].getExport().getName().equals(pkgName))
@@ -1656,7 +1551,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 imported = true;
 
                 long expId = Util.getBundleIdFromModuleId(
-                    wires[i].getExportingModule().getId());
+                    wires[i].getExporter().getId());
 
                 StringBuffer sb = new StringBuffer("****\n****\n");
                 sb.append("Package '");
@@ -1684,7 +1579,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         // whether or not there is an exporter available.
         if (!imported)
         {
-            R4Import[] imports = getImports(module);
+            R4Import[] imports = module.getDefinition().getImports();
             for (int i = 0; (imports != null) && (i < imports.length); i++)
             {
                 if (imports[i].getName().equals(pkgName) && imports[i].isOptional())
