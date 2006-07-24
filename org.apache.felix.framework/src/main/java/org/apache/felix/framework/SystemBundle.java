@@ -137,7 +137,7 @@ class SystemBundle extends BundleImpl
         // is started by the framework.
         if (getState() == Bundle.ACTIVE)
         {
-            throw new BundleException("Cannot start the system bundle.");
+            return;
         }
 
         getInfo().setState(Bundle.STARTING);
