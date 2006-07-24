@@ -380,13 +380,20 @@ public class ServiceImpl implements Service {
             configureImplementation(ServiceRegistration.class, wrapper);
             // service name can either be a string or an array of strings
             ServiceRegistration registration;
-            if (m_serviceName instanceof String) {
-                registration = m_context.registerService((String) m_serviceName, m_serviceInstance, m_serviceProperties);
+            try {
+                if (m_serviceName instanceof String) {
+                    registration = m_context.registerService((String) m_serviceName, m_serviceInstance, m_serviceProperties);
+                }
+                else {
+                    registration = m_context.registerService((String[]) m_serviceName, m_serviceInstance, m_serviceProperties);
+                }
+                wrapper.setServiceRegistration(registration);
             }
-            else {
-                registration = m_context.registerService((String[]) m_serviceName, m_serviceInstance, m_serviceProperties);
+            catch (IllegalArgumentException iae) {
+                // set the registration to an illegal state object, which will make all invocations on this
+                // wrapper fail with an ISE (which also occurs when the SR becomes invalid)
+                wrapper.setServiceRegistration(ServiceRegistrationImpl.ILLEGAL_STATE);
             }
-            wrapper.setServiceRegistration(registration);
         }
     }
     

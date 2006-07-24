@@ -28,6 +28,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ServiceRegistrationImpl implements ServiceRegistration {
+    public static final ServiceRegistrationImpl ILLEGAL_STATE = new ServiceRegistrationImpl();
     private ServiceRegistration m_registration;
 
     public ServiceRegistrationImpl() {
@@ -73,6 +74,9 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
                 // we were interrupted so hopefully we will now have a
                 // service registration ready; if not we wait again
             }
+        }
+        if (ILLEGAL_STATE.equals(m_registration)) {
+            throw new IllegalStateException("Service is not registered.");
         }
     }
 
