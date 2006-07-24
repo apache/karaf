@@ -44,7 +44,7 @@ class GetEntryPathsEnumeration implements Enumeration
             m_path = m_path.substring(1);
         }
         // Add a '/' to the end if not present.
-        if ((m_path.length() > 0) && (m_path.charAt(path.length() - 1) != '/'))
+        if ((m_path.length() > 0) && (m_path.charAt(m_path.length() - 1) != '/'))
         {
             m_path = m_path + "/";
         }
