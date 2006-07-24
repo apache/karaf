@@ -49,7 +49,18 @@ public class ManifestParser
         // Verify bundle version syntax.
         if (get(Constants.BUNDLE_VERSION) != null)
         {
-            Version.parseVersion(get(Constants.BUNDLE_VERSION));
+            try
+            {
+                Version.parseVersion(get(Constants.BUNDLE_VERSION));
+            }
+            catch (RuntimeException ex)
+            {
+                // R4 bundle versions must parse, R3 bundle version may not.
+                if (getVersion().equals("2"))
+                {
+                    throw ex;
+                }
+            }
         }
 
         // Create map to check for duplicate imports/exports.
