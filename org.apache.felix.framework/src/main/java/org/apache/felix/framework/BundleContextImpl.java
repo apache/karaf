@@ -538,7 +538,7 @@ class BundleContextImpl implements FelixBundleContext
     {
         if (m_valid)
         {
-            switch (m_bundle.getState())
+            switch (m_bundle.getInfo().getState())
             {
                 case Bundle.ACTIVE:
                 case Bundle.STARTING:
