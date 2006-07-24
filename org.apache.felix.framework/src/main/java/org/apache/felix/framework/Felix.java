@@ -86,11 +86,7 @@ public class Felix
     private Object m_nextIdLock = new Object[0];
 
     // List of event listeners.
-    private FelixDispatchQueue m_dispatchQueue = null;
-    // Re-usable event dispatchers.
-    private Dispatcher m_frameworkDispatcher = null;
-    private Dispatcher m_bundleDispatcher = null;
-    private Dispatcher m_serviceDispatcher = null;
+    private EventDispatcher m_dispatcher = null;
 
     // Service registry.
     private ServiceRegistry m_registry = null;
@@ -215,7 +211,7 @@ public class Felix
         m_uninstalledBundles = null;
         m_cache = null;
         m_nextId = 1L;
-        m_dispatchQueue = null;
+        m_dispatcher = null;
         m_bundleStreamHandler = new URLHandlersBundleStreamHandler(this);
         m_registry = new ServiceRegistry(m_logger);
 
@@ -327,8 +323,8 @@ public class Felix
         m_factory = new ModuleFactoryImpl(m_logger);
         m_policyCore.setModuleFactory(m_factory);
 
-        // Initialize dispatch queue.
-        m_dispatchQueue = new FelixDispatchQueue(m_logger);
+        // Initialize event dispatcher.
+        m_dispatcher = new EventDispatcher(m_logger);
 
         // Initialize framework properties.
         initializeFrameworkProperties();
@@ -379,7 +375,7 @@ public class Felix
         catch (Exception ex)
         {
             m_factory = null;
-            DispatchQueue.shutdown();
+            EventDispatcher.shutdown();
             m_logger.log(Logger.LOG_ERROR, "Unable to start system bundle.", ex);
             throw new RuntimeException("Unable to start system bundle.");
         }
@@ -591,7 +587,7 @@ public class Felix
         }
 
         // Shutdown event dispatching queue.
-        DispatchQueue.shutdown();
+        EventDispatcher.shutdown();
 
         // The framework is no longer in a usable state.
         m_frameworkStatus = INITIAL_STATUS;
@@ -1246,7 +1242,7 @@ public class Felix
             m_registry.ungetServices(bundle);
 
             // Remove any listeners registered by this bundle.
-            removeListeners(bundle);
+            m_dispatcher.removeListeners(bundle);
 
             // The spec says to expect BundleException or
             // SecurityException, so rethrow these exceptions.
@@ -1572,7 +1568,7 @@ public class Felix
         
         // The spec says that we must remove all event
         // listeners for a bundle when it is stopped.
-        removeListeners(bundle);
+        m_dispatcher.removeListeners(bundle);
         
         info.setState(Bundle.RESOLVED);
         fireBundleEvent(BundleEvent.STOPPED, bundle);
@@ -1964,25 +1960,12 @@ public class Felix
 
     protected void addBundleListener(Bundle bundle, BundleListener l)
     {
-        // The spec says do nothing if the listener is
-        // already registered.
-        BundleListenerWrapper old = (BundleListenerWrapper)
-            m_dispatchQueue.getListener(BundleListener.class, l);
-        if (old == null)
-        {
-            l = new BundleListenerWrapper(bundle, l);
-            m_dispatchQueue.addListener(BundleListener.class, l);
-        }
+        m_dispatcher.addListener(bundle, BundleListener.class, l, null);
     }
 
     protected void removeBundleListener(Bundle bundle, BundleListener l)
     {
-        BundleListenerWrapper old = (BundleListenerWrapper)
-            m_dispatchQueue.getListener(BundleListener.class, l);
-        if ((old != null) && old.getBundle().equals(bundle))
-        {
-            m_dispatchQueue.removeListener(BundleListener.class, l);
-        }
+        m_dispatcher.removeListener(bundle, BundleListener.class, l);
     }
 
     /**
@@ -1997,20 +1980,8 @@ public class Felix
     protected void addServiceListener(Bundle bundle, ServiceListener l, String f)
         throws InvalidSyntaxException
     {
-        // The spec says if the listener is already registered,
-        // then replace filter.
-        ServiceListenerWrapper old = (ServiceListenerWrapper)
-            m_dispatchQueue.getListener(ServiceListener.class, l);
-        if (old != null)
-        {
-            old.setFilter((f == null) ? null : new FilterImpl(m_logger, f));
-        }
-        else
-        {
-            l = new ServiceListenerWrapper(
-                bundle, l, (f == null) ? null : new FilterImpl(m_logger, f));
-            m_dispatchQueue.addListener(ServiceListener.class, l);
-        }
+        m_dispatcher.addListener(
+            bundle, ServiceListener.class, l, (f == null) ? null : new FilterImpl(m_logger, f));
     }
 
     /**
@@ -2022,67 +1993,17 @@ public class Felix
     **/
     protected void removeServiceListener(Bundle bundle, ServiceListener l)
     {
-        ServiceListenerWrapper old = (ServiceListenerWrapper) 
-            m_dispatchQueue.getListener(ServiceListener.class, l);
-        if ((old != null) && old.getBundle().equals(bundle))
-        {
-            m_dispatchQueue.removeListener(ServiceListener.class, l);
-        }
+        m_dispatcher.removeListener(bundle, ServiceListener.class, l);
     }
 
     protected void addFrameworkListener(Bundle bundle, FrameworkListener l)
     {
-        // The spec says do nothing if the listener is
-        // already registered.
-        FrameworkListenerWrapper old = (FrameworkListenerWrapper)
-            m_dispatchQueue.getListener(FrameworkListener.class, l);
-        if (old == null)
-        {
-            l = new FrameworkListenerWrapper(bundle, l);
-            m_dispatchQueue.addListener(FrameworkListener.class, l);
-        }
+        m_dispatcher.addListener(bundle, FrameworkListener.class, l, null);
     }
 
     protected void removeFrameworkListener(Bundle bundle, FrameworkListener l)
     {
-        FrameworkListenerWrapper old = (FrameworkListenerWrapper)
-            m_dispatchQueue.getListener(FrameworkListener.class, l);
-        if ((old != null) && old.getBundle().equals(bundle))
-        {
-            m_dispatchQueue.removeListener(FrameworkListener.class, l);
-        }
-    }
-
-    /**
-     * Remove all of the specified bundle's event listeners from
-     * the framework.
-     * @param bundle The bundle whose listeners are to be removed.
-    **/
-    private void removeListeners(Bundle bundle)
-    {
-        if (bundle == null)
-        {
-            return;
-        }
-
-        // Remove all listeners associated with the supplied bundle;
-        // it is only possible to know the bundle associated with a
-        // listener if the listener was wrapper by a ListenerWrapper,
-        // so look for those.
-        Object[] listeners = m_dispatchQueue.getListeners();
-        for (int i = listeners.length - 2; i >= 0; i -= 2)
-        {
-            // Check for listener wrappers and then compare the bundle.
-            if (listeners[i + 1] instanceof ListenerWrapper)
-            {
-                ListenerWrapper lw = (ListenerWrapper) listeners[i + 1];
-                if ((lw.getBundle() != null) && (lw.getBundle().equals(bundle)))
-                {
-                    m_dispatchQueue.removeListener(
-                        (Class) listeners[i], (EventListener) listeners[i+1]);
-                }
-            }
-        }
+        m_dispatcher.removeListener(bundle, FrameworkListener.class, l);
     }
 
     /**
@@ -2191,7 +2112,7 @@ public class Felix
             ServiceReference ref = (ServiceReference) refList.get(refIdx);
 
             // Now check for castability.
-            if (!isServiceAssignable(bundle, ref))
+            if (!Felix.isServiceAssignable(bundle, ref))
             {
                 refList.remove(refIdx);
                 refIdx--;
@@ -2215,7 +2136,7 @@ public class Felix
      * @return <tt>true</tt> if the requesting bundle is able to case
      *         the service object to a known type.
     **/
-    protected boolean isServiceAssignable(BundleImpl requester, ServiceReference ref)
+    public static boolean isServiceAssignable(Bundle requester, ServiceReference ref)
     {
         // Boolean flag.
         boolean allow = true;
@@ -2854,19 +2775,7 @@ public class Felix
     private void fireFrameworkEvent(
         int type, Bundle bundle, Throwable throwable)
     {
-        if (m_frameworkDispatcher == null)
-        {
-            m_frameworkDispatcher = new Dispatcher() {
-                public void dispatch(EventListener l, EventObject eventObj)
-                {
-                    ((FrameworkListener) l)
-                        .frameworkEvent((FrameworkEvent) eventObj);
-                }
-            };
-        }
-        FrameworkEvent event = new FrameworkEvent(type, bundle, throwable);
-        m_dispatchQueue.dispatch(
-            m_frameworkDispatcher, FrameworkListener.class, event);
+        m_dispatcher.fireFrameworkEvent(new FrameworkEvent(type, bundle, throwable));
     }
 
     /**
@@ -2877,20 +2786,7 @@ public class Felix
     **/
     private void fireBundleEvent(int type, Bundle bundle)
     {
-        if (m_bundleDispatcher == null)
-        {
-            m_bundleDispatcher = new Dispatcher() {
-                public void dispatch(EventListener l, EventObject eventObj)
-                {
-                    ((BundleListener) l)
-                        .bundleChanged((BundleEvent) eventObj);
-                }
-            };
-        }
-        BundleEvent event = null;
-        event = new BundleEvent(type, bundle);
-        m_dispatchQueue.dispatch(m_bundleDispatcher,
-            BundleListener.class, event);
+        m_dispatcher.fireBundleEvent(new BundleEvent(type, bundle));
     }
 
     /**
@@ -2901,31 +2797,7 @@ public class Felix
     **/
     private void fireServiceEvent(ServiceEvent event)
     {
-        if (m_serviceDispatcher == null)
-        {
-            m_serviceDispatcher = new Dispatcher() {
-                public void dispatch(EventListener l, EventObject eventObj)
-                {
-// TODO: Filter service events based on service permissions.
-                    if (l instanceof ListenerWrapper)
-                    {
-                        BundleImpl bundle = (BundleImpl) ((ServiceListenerWrapper) l).getBundle();
-                        if (isServiceAssignable(bundle, ((ServiceEvent) eventObj).getServiceReference()))
-                        {
-                            ((ServiceListener) l)
-                                .serviceChanged((ServiceEvent) eventObj);
-                        }
-                    }
-                    else
-                    {
-                        ((ServiceListener) l)
-                            .serviceChanged((ServiceEvent) eventObj);
-                    }
-                }
-            };
-        }
-        m_dispatchQueue.dispatch(m_serviceDispatcher,
-            ServiceListener.class, event);
+        m_dispatcher.fireServiceEvent(event);
     }
 
     //
