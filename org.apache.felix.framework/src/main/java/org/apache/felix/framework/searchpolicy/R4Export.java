@@ -20,6 +20,7 @@ import java.util.*;
 
 import org.apache.felix.framework.util.Util;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 
 public class R4Export extends R4Package
 {
@@ -104,26 +105,26 @@ public class R4Export extends R4Package
             }
         }
 
-        // Convert version, if present.
-        String rangeStr = "0.0.0";
+        // Find the version, if present, and convert to Version.
+        // The version attribute value may be a String or a Version,
+        // since the value may be coming from an R4Export that already
+        // converted it to Version.
+        m_version = Version.emptyVersion;
         for (int i = 0; i < m_attrs.length; i++)
         {
-            // Find and parse version attribute, if present.
-            if (m_attrs[i].getName().equals(Constants.VERSION_ATTRIBUTE) ||
-                m_attrs[i].getName().equals(Constants.PACKAGE_SPECIFICATION_VERSION))
+            if (m_attrs[i].getName().equals(Constants.VERSION_ATTRIBUTE))
             {
-                // Normalize version attribute name.
+                String versionStr = (m_attrs[i].getValue() instanceof Version)
+                    ? ((Version) m_attrs[i].getValue()).toString()
+                    : (String) m_attrs[i].getValue();
+                m_version = Version.parseVersion(versionStr);
                 m_attrs[i] = new R4Attribute(
-                    Constants.VERSION_ATTRIBUTE, m_attrs[i].getValue(),
+                    m_attrs[i].getName(),
+                    m_version,
                     m_attrs[i].isMandatory());
-                rangeStr = m_attrs[i].getValue();
                 break;
             }
         }
-        
-        VersionRange range = VersionRange.parse(rangeStr);
-        // For now, ignore if we have a version range.
-        m_version = range.getLow();
     }
 
     public String[] getUses()

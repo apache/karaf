@@ -1,5 +1,5 @@
 /*
- *   Copyright 2005 The Apache Software Foundation
+ *   Copyright 2006 The Apache Software Foundation
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package org.apache.felix.framework.searchpolicy;
 public class R4Attribute
 {
     private String m_name = "";
-    private String m_value = "";
+    private Object m_value = null;
     private boolean m_isMandatory = false;
     
-    public R4Attribute(String name, String value, boolean isMandatory)
+    public R4Attribute(String name, Object value, boolean isMandatory)
     {
         m_name = name;
         m_value = value;
@@ -34,7 +34,7 @@ public class R4Attribute
         return m_name;
     }
 
-    public String getValue()
+    public Object getValue()
     {
         return m_value;
     }

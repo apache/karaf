@@ -33,8 +33,10 @@ public class R4Package
     public R4Package(String name, R4Directive[] directives, R4Attribute[] attrs)
     {
         m_name = name;
-        m_directives = (directives == null) ? new R4Directive[0] : directives;
-        m_attrs = (attrs == null) ? new R4Attribute[0] : attrs;
+        m_directives = (directives == null)
+            ? new R4Directive[0] : (R4Directive[]) directives.clone();
+        m_attrs = (attrs == null)
+            ? new R4Attribute[0] : (R4Attribute[]) attrs.clone();
     }
 
     public String getName()
@@ -191,13 +193,25 @@ public class R4Package
             if ((v != null) && (sv != null))
             {
                 // Verify they are equal.
-                if (!v.getValue().trim().equals(sv.getValue().trim()))
+                if (!((String) v.getValue()).trim().equals(((String) sv.getValue()).trim()))
                 {
                     throw new IllegalArgumentException(
                         "Both version and specificat-version are specified, but they are not equal.");
                 }
-                // Remove spec-version since it isn't needed.
+            }
+
+            // Ensure that only the "version" attribute is used 
+            if (sv != null)
+            {
                 attrsMap.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
+                if (v == null)
+                {
+                    attrsMap.put(Constants.VERSION_ATTRIBUTE,
+                        new R4Attribute(
+                            Constants.VERSION_ATTRIBUTE,
+                            sv.getValue(),
+                            sv.isMandatory()));
+                }
             }
 
             // Create directive array.

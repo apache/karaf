@@ -47,7 +47,10 @@ public class ManifestParser
         }
 
         // Verify bundle version syntax.
-        Version.parseVersion(get(Constants.BUNDLE_VERSION));
+        if (get(Constants.BUNDLE_VERSION) != null)
+        {
+            Version.parseVersion(get(Constants.BUNDLE_VERSION));
+        }
 
         // Create map to check for duplicate imports/exports.
         Map dupeMap = new HashMap();
@@ -212,7 +215,7 @@ public class ManifestParser
                     (!m_exports[i].getAttributes()[0].getName().equals(Constants.VERSION_ATTRIBUTE))))
             {
                 throw new BundleException(
-                    "Export does not conform to R3 syntax: " + m_exports[i]);
+                    "R3 export syntax does not support attributes: " + m_exports[i]);
             }
         }
         
@@ -235,7 +238,7 @@ public class ManifestParser
                     (!m_imports[i].getAttributes()[0].getName().equals(Constants.VERSION_ATTRIBUTE))))
             {
                 throw new BundleException(
-                    "Import does not conform to R3 syntax: " + m_imports[i]);
+                    "R3 import syntax does not support attributes: " + m_imports[i]);
             }
         }
 
@@ -304,18 +307,17 @@ public class ManifestParser
             throw new BundleException("R4 bundle manifests must include bundle symbolic name.");
         }
 
-        // Verify that there are no duplicate directives.
+        // Verify that the exports do not specify bundle symbolic name
+        // or bundle version.
         for (int i = 0; (m_exports != null) && (i < m_exports.length); i++)
         {
             String targetVer = get(Constants.BUNDLE_VERSION);
             targetVer = (targetVer == null) ? "0.0.0" : targetVer;
 
-            // First verify that the exports do not specify
-            // bundle symbolic name or bundle version.
             R4Attribute[] attrs = m_exports[i].getAttributes();
             for (int attrIdx = 0; attrIdx < attrs.length; attrIdx++)
             {
-                // Find and parse version attribute, if present.
+                // Find symbolic name and version attribute, if present.
                 if (attrs[attrIdx].getName().equals(Constants.BUNDLE_VERSION_ATTRIBUTE) ||
                     attrs[attrIdx].getName().equals(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE))
                 {
@@ -331,24 +333,7 @@ public class ManifestParser
             newAttrs[attrs.length] = new R4Attribute(
                 Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symName, false);
             newAttrs[attrs.length + 1] = new R4Attribute(
-                Constants.BUNDLE_VERSION_ATTRIBUTE, targetVer, false);
-            m_exports[i] = new R4Export(
-                m_exports[i].getName(), m_exports[i].getDirectives(), newAttrs);
-        }
-
-        // Need to add symbolic name and bundle version to all R4 exports.
-        for (int i = 0; (m_exports != null) && (i < m_exports.length); i++)
-        {
-            String targetVer = get(Constants.BUNDLE_VERSION);
-            targetVer = (targetVer == null) ? "0.0.0" : targetVer;
-
-            R4Attribute[] attrs = m_exports[i].getAttributes();
-            R4Attribute[] newAttrs = new R4Attribute[attrs.length + 2];
-            System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
-            newAttrs[attrs.length] = new R4Attribute(
-                Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symName, false);
-            newAttrs[attrs.length + 1] = new R4Attribute(
-                Constants.BUNDLE_VERSION_ATTRIBUTE, targetVer, false);
+                Constants.BUNDLE_VERSION_ATTRIBUTE, Version.parseVersion(targetVer), false);
             m_exports[i] = new R4Export(
                 m_exports[i].getName(), m_exports[i].getDirectives(), newAttrs);
         }

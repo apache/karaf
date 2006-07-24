@@ -16,7 +16,7 @@
  */
 package org.apache.felix.framework.searchpolicy;
 
-import org.apache.felix.framework.util.FelixConstants;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
 public class R4Import extends R4Package
@@ -36,30 +36,43 @@ public class R4Import extends R4Package
         // Find all import directives: resolution.
         for (int i = 0; i < m_directives.length; i++)
         {
-            if (m_directives[i].getName().equals(FelixConstants.RESOLUTION_DIRECTIVE))
+            if (m_directives[i].getName().equals(Constants.RESOLUTION_DIRECTIVE))
             {
-                m_isOptional = m_directives[i].getValue().equals(FelixConstants.RESOLUTION_OPTIONAL);
+                m_isOptional = m_directives[i].getValue().equals(Constants.RESOLUTION_OPTIONAL);
             }
         }
 
-        // Find and parse version attribute, if present.
-        String rangeStr = "0.0.0";
+        // Convert version and bundle version attributes to VersionRange.
+        // The attribute value may be a String or a Version, since the
+        // value may be coming from an R4Export that already converted
+        // it to Version.
+        m_versionRange = VersionRange.parse(Version.emptyVersion.toString());
+        m_version = m_versionRange.getLow();
         for (int i = 0; i < m_attrs.length; i++)
         {
-            if (m_attrs[i].getName().equals(FelixConstants.VERSION_ATTRIBUTE) ||
-                m_attrs[i].getName().equals(FelixConstants.PACKAGE_SPECIFICATION_VERSION))
+            if (m_attrs[i].getName().equals(Constants.VERSION_ATTRIBUTE))
             {
-                // Normalize version attribute name.
+                String versionStr = (m_attrs[i].getValue() instanceof Version)
+                    ? ((Version) m_attrs[i].getValue()).toString()
+                    : (String) m_attrs[i].getValue();
+                m_versionRange = VersionRange.parse(versionStr);
+                m_version = m_versionRange.getLow();
                 m_attrs[i] = new R4Attribute(
-                    FelixConstants.VERSION_ATTRIBUTE, m_attrs[i].getValue(),
+                    m_attrs[i].getName(),
+                    m_versionRange,
                     m_attrs[i].isMandatory());
-                rangeStr = m_attrs[i].getValue();
-                break;
+            }
+            else if (m_attrs[i].getName().equals(Constants.BUNDLE_VERSION_ATTRIBUTE))
+            {
+                String versionStr = (m_attrs[i].getValue() instanceof Version)
+                    ? ((Version) m_attrs[i].getValue()).toString()
+                    : (String) m_attrs[i].getValue();
+                m_attrs[i] = new R4Attribute(
+                    m_attrs[i].getName(),
+                    VersionRange.parse(versionStr),
+                    m_attrs[i].isMandatory());
             }
         }
-        
-        m_versionRange = VersionRange.parse(rangeStr);
-        m_version = m_versionRange.getLow();
     }
 
     public Version getVersionHigh()
@@ -108,7 +121,7 @@ public class R4Import extends R4Package
             // Ignore version attribute, since it is a special case that
             // has already been compared using isVersionInRange() before
             // the call to this method was made.
-            if (impAttr.getName().equals(FelixConstants.VERSION_ATTRIBUTE))
+            if (impAttr.getName().equals(Constants.VERSION_ATTRIBUTE))
             {
                 continue;
             }
@@ -124,13 +137,17 @@ public class R4Import extends R4Package
                 // Check if the attribute names are equal.
                 if (impAttr.getName().equals(expAttr.getName()))
                 {
-                    // If the values are not equal, then return false immediately.
-                    // We should not compare version values here, since they are
-                    // a special case and have already been compared by a call to
-                    // isVersionInRange() before getting here; however, it is
-                    // possible for version to be mandatory, so make sure it is
-                    // present below.
-                    if (!impAttr.getValue().equals(expAttr.getValue()))
+                    // We only recognize version types. If the value of the
+                    // attribute is a version/version range, then we use the
+                    // "in range" comparison, otherwise we simply use equals().
+                    if (expAttr.getValue() instanceof Version)
+                    {
+                        if (!((VersionRange) impAttr.getValue()).isInRange((Version) expAttr.getValue()))
+                        {
+                            return false;
+                        }
+                    }
+                    else if (!impAttr.getValue().equals(expAttr.getValue()))
                     {
                         return false;
                     }
