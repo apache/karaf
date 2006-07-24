@@ -4,9 +4,6 @@ import junit.framework.TestCase;
 
 import org.easymock.MockControl;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
 
 public class ServiceDependencyTest extends TestCase {
 	/**
