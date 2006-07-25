@@ -1186,14 +1186,17 @@ public class Felix
                 return;
             case Bundle.INSTALLED:
                 _resolveBundle(bundle);
+                // No break.
             case Bundle.RESOLVED:
                 info.setState(Bundle.STARTING);
+                fireBundleEvent(BundleEvent.STARTING, bundle);
+                break;
         }
 
         try
         {
             // Set the bundle's activator.
-            bundle.getInfo().setActivator(createBundleActivator(bundle.getInfo()));
+            info.setActivator(createBundleActivator(bundle.getInfo()));
 
             // Activate the bundle if it has an activator.
             if (bundle.getInfo().getActivator() != null)
@@ -1215,11 +1218,9 @@ public class Felix
                 }
             }
 
-            info.setState(Bundle.ACTIVE);
-
             // TODO: CONCURRENCY - Reconsider firing event outside of the
             // bundle lock.
-
+            info.setState(Bundle.ACTIVE);
             fireBundleEvent(BundleEvent.STARTED, bundle);
         }
         catch (Throwable th)
@@ -1510,8 +1511,10 @@ public class Felix
             case Bundle.ACTIVE:
                 // Set bundle state..
                 info.setState(Bundle.STOPPING);
+                fireBundleEvent(BundleEvent.STOPPING, bundle);
+                break;
         }
-            
+
         try
         {
             if (bundle.getInfo().getActivator() != null)

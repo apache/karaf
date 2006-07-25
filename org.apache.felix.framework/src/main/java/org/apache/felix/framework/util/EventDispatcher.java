@@ -477,8 +477,14 @@ public class EventDispatcher
         // Fire synchronous bundle listeners immediately on the calling thread.
         fireEventImmediately(m_logger, Request.BUNDLE_EVENT, syncListeners, event);
 
-        // Fire asynchronous bundle listeners on a separate thread.
-        fireEventAsynchronously(m_logger, Request.BUNDLE_EVENT, listeners, event);
+        // The spec says that asynchronous bundle listeners do not get events
+        // of types STARTING or STOPPING.
+        if ((event.getType() != BundleEvent.STARTING) &&
+            (event.getType() != BundleEvent.STOPPING))
+        {
+            // Fire asynchronous bundle listeners on a separate thread.
+            fireEventAsynchronously(m_logger, Request.BUNDLE_EVENT, listeners, event);
+        }
     }
 
     public void fireServiceEvent(ServiceEvent event)
