@@ -311,7 +311,8 @@ public class ComponentManager {
 
 			Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] createInstance -> call setComponentManager");
 			// Invoke the static method setComponentManager on the manipulated class
-			Method method = m_clazz.getMethod("setComponentManager", new Class[] {this.getClass()});
+			Method method = m_clazz.getDeclaredMethod("setComponentManager", new Class[] {this.getClass()});
+			method.setAccessible(true);
 			method.invoke(null, new Object[] {this});
 
 			Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] createInstance -> Try to find the constructor");

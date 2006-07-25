@@ -89,7 +89,7 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             m_owner = name;
 
             // Insert _cm field
-            super.visitField(ACC_PUBLIC + ACC_STATIC, "_cm", ManipulationProperty.IPOJO_INTERNAL_DESCRIPTOR + "ComponentManager;", null, null);
+            super.visitField(ACC_PRIVATE + ACC_STATIC, "_cm", ManipulationProperty.IPOJO_INTERNAL_DESCRIPTOR + "ComponentManager;", null, null);
 
             // Create the _cmSetter(ComponentManager cm) method
             createComponentManagerSetter();
@@ -131,7 +131,7 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
          * The generated method must be called only one time.
          */
         private void createComponentManagerSetter() {
-            MethodVisitor mv = super.visitMethod(ACC_PUBLIC + ACC_STATIC, "setComponentManager", "(" + ManipulationProperty.IPOJO_INTERNAL_DESCRIPTOR + "ComponentManager;)V", null, null);
+            MethodVisitor mv = super.visitMethod(ACC_PRIVATE + ACC_STATIC, "setComponentManager", "(" + ManipulationProperty.IPOJO_INTERNAL_DESCRIPTOR + "ComponentManager;)V", null, null);
 
             mv.visitVarInsn(ALOAD, 0);
             mv.visitFieldInsn(PUTSTATIC, m_owner, "_cm", ManipulationProperty.IPOJO_INTERNAL_DESCRIPTOR + "ComponentManager;");
@@ -203,7 +203,7 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
         }
 
         private void createArraySetter(String name, String desc, Type type) {
-        	MethodVisitor mv = cv.visitMethod(ACC_PUBLIC, "_set" + name, desc, null, null);
+        	MethodVisitor mv = cv.visitMethod(ACC_PRIVATE, "_set" + name, desc, null, null);
 
         	String internalType = desc.substring(1);
         	internalType = internalType.substring(0, internalType.length() - 2);
@@ -236,7 +236,7 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
 //
 
 			String methodName = "_get" + name;
-            MethodVisitor mv = cv.visitMethod(ACC_PUBLIC, methodName, desc, null, null);
+            MethodVisitor mv = cv.visitMethod(ACC_PRIVATE, methodName, desc, null, null);
 
             String internalType = desc.substring(2);
 
@@ -292,7 +292,7 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
         private void createSimpleGetter(String name, String desc, Type type) {
 
             String methodName = "_get" + name;
-            MethodVisitor mv = cv.visitMethod(ACC_PUBLIC, methodName, desc, null, null);
+            MethodVisitor mv = cv.visitMethod(ACC_PRIVATE, methodName, desc, null, null);
 
             switch (type.getSort()) {
             	case Type.BOOLEAN :
@@ -408,7 +408,7 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
          * @param type : type of the property
          */
         private void createSimpleSetter(String name, String desc, Type type) {
-            MethodVisitor mv = cv.visitMethod(ACC_PUBLIC, "_set" + name, desc, null, null);
+            MethodVisitor mv = cv.visitMethod(ACC_PRIVATE, "_set" + name, desc, null, null);
 
             switch(type.getSort()) {
         		case Type.BOOLEAN :
