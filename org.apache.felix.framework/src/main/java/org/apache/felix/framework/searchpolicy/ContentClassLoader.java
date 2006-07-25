@@ -187,10 +187,6 @@ public class ContentClassLoader extends SecureClassLoader
         }
         catch (ResourceNotFoundException ex)
         {
-            m_contentLoader.getLogger().log(
-                Logger.LOG_WARNING,
-                ex.getMessage(),
-                ex);
         }
         return null;
     }
