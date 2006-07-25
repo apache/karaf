@@ -117,12 +117,21 @@ class ServiceRegistrationImpl implements ServiceRegistration
     **/
     protected boolean isClassAccessible(Class clazz)
     {
-        Class sourceClass = (m_factory != null)
-            ? m_factory.getClass() : m_svcObj.getClass();
         try
         {
-            Class target = Util.loadClassUsingClass(sourceClass, clazz.getName());
-            return (target.getClassLoader() == clazz.getClassLoader());
+            // First, try to load the class from the bundle that registered
+            // the service.
+            Class targetClass = m_bundle.loadClass(clazz.getName());
+            if (targetClass != null)
+            {
+                return (targetClass == clazz);
+            }
+            // If it cannot be found from the registering bundle, then try to load
+            // from the service object or service factory class.
+            Class sourceClass = (m_factory != null)
+                ? m_factory.getClass() : m_svcObj.getClass();
+            targetClass = Util.loadClassUsingClass(sourceClass, clazz.getName());
+            return (targetClass == clazz);
         }
         catch (Exception ex)
         {
