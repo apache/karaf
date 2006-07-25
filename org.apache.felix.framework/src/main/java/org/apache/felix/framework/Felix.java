@@ -295,6 +295,7 @@ public class Felix
                             if (bundle.getInfo().getCurrentModule() == event.getModule())
                             {
                                 bundle.getInfo().setState(Bundle.RESOLVED);
+                                fireBundleEvent(BundleEvent.RESOLVED, bundle);
                             }
                         }
                         finally
@@ -1422,8 +1423,9 @@ public class Felix
             // if successful.
             if (rethrow == null)
             {
-                info.setState(Bundle.INSTALLED);
                 info.setLastModified(System.currentTimeMillis());
+                info.setState(Bundle.INSTALLED);
+                fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
                 
                 // Mark previous the bundle's old module for removal since
                 // it can no longer be used to resolve other modules per the spec.
@@ -3160,6 +3162,7 @@ public class Felix
                     BundleInfo newInfo = createBundleInfo(info.getArchive());
                     newInfo.syncLock(info);
                     m_bundle.setInfo(newInfo);
+                    fireBundleEvent(BundleEvent.UNRESOLVED, m_bundle);
                 }
                 catch (Exception ex)
                 {
