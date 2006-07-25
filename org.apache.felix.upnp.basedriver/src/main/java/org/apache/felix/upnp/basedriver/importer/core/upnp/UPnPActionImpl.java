@@ -143,7 +143,7 @@ public class UPnPActionImpl implements UPnPAction {
 			//setting the value related to the input argument
 			argument.setValue(Converter.toString(args.get(argumentName),upnpType));
 		}
-		act.setArgumentValues(argsList);
+		act.setInArgumentValues(argsList); 
 		if(act.postControlAction()==true){
 			//TODO check what happen if I don't have any output argument
 			Properties outDic=new Properties();
