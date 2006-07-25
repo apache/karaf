@@ -75,7 +75,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
                 // service registration ready; if not we wait again
             }
         }
-        if (ILLEGAL_STATE.equals(m_registration)) {
+        if (ILLEGAL_STATE == m_registration) {
             throw new IllegalStateException("Service is not registered.");
         }
     }
