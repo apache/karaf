@@ -137,8 +137,8 @@ public class R4SearchPolicyCore implements ModuleListener
         }
         catch (ClassNotFoundException ex)
         {
-            diagnoseClassLoadError(module, name);
-            throw ex;
+            String msg = diagnoseClassLoadError(module, name);
+            throw new ClassNotFoundException(msg, ex);
         }
 
         // We should never reach this point.
@@ -1528,13 +1528,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         }
     }
 
-    private void diagnoseClassLoadError(IModule module, String name)
+    private String diagnoseClassLoadError(IModule module, String name)
     {
         // We will try to do some diagnostics here to help the developer
         // deal with this exception.
-
-        boolean imported = false;
-        boolean exported = false;
 
         // Get package name.
         String pkgName = Util.getClassPackage(name);
@@ -1548,13 +1545,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         {
             if (wires[i].getExport().getName().equals(pkgName))
             {
-                imported = true;
-
                 long expId = Util.getBundleIdFromModuleId(
                     wires[i].getExporter().getId());
 
-                StringBuffer sb = new StringBuffer("****\n****\n");
-                sb.append("Package '");
+                StringBuffer sb = new StringBuffer("*** Package '");
                 sb.append(pkgName);
                 sb.append("' is imported by bundle ");
                 sb.append(impId);
@@ -1568,85 +1562,25 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 sb.append(impId);
                 sb.append(" and/or that the exported package is correctly bundled in ");
                 sb.append(expId);
-                sb.append(".");
-                sb.append("\n****\n****");
+                sb.append(". ***");
 
-                m_logger.log(Logger.LOG_ERROR, sb.toString());
+                return sb.toString();
             }
         }
 
         // Next, check to see if the package was optionally imported and
         // whether or not there is an exporter available.
-        if (!imported)
+        R4Import[] imports = module.getDefinition().getImports();
+        for (int i = 0; (imports != null) && (i < imports.length); i++)
         {
-            R4Import[] imports = module.getDefinition().getImports();
-            for (int i = 0; (imports != null) && (i < imports.length); i++)
+            if (imports[i].getName().equals(pkgName) && imports[i].isOptional())
             {
-                if (imports[i].getName().equals(pkgName) && imports[i].isOptional())
-                {
-                    imported = true;
-
-                    // Try to see if there is an exporter available. It may be
-                    // the case that the package is exported, but the attributes
-                    // do not match, so check that case too.
-                    IModule[] exporters = getInUseExporters(imports[i], true);
-                    exporters = (exporters.length == 0)
-                        ? getAvailableExporters(imports[i], true) : exporters;
-                    exporters = (exporters.length == 0)
-                        ? getInUseExporters(new R4Import(pkgName, null, null), true) : exporters;
-                    exporters = (exporters.length == 0)
-                        ? getAvailableExporters(new R4Import(pkgName, null, null), true) : exporters;
-                    long expId = (exporters.length == 0)
-                        ? -1 : Util.getBundleIdFromModuleId(exporters[0].getId());
-
-                    StringBuffer sb = new StringBuffer("****\n****\n");
-                    sb.append("Class '");
-                    sb.append(name);
-                    sb.append("' was not found, but this is likely normal since package '");
-                    sb.append(pkgName);
-                    sb.append("' is optionally imported by bundle ");
-                    sb.append(impId);
-                    sb.append(".");
-                    if (exporters.length > 0)
-                    {
-                        sb.append(" However, bundle ");
-                        sb.append(expId);
-                        if (imports[i].isSatisfied(
-                            Util.getExportPackage(exporters[0], imports[i].getName())))
-                        {
-                            sb.append(" does export this package. Bundle ");
-                            sb.append(expId);
-                            sb.append(" must be installed before bundle ");
-                            sb.append(impId);
-                            sb.append(" is resolved or else the optional import will be ignored.");
-                        }
-                        else
-                        {
-                            sb.append(" does export this package with attributes that do not match.");
-                        }
-                    }
-                    sb.append("\n****\n****");
-
-                    m_logger.log(Logger.LOG_ERROR, sb.toString());
-                }
-            }
-        }
-
-        // Next, check to see if the package is dynamically imported
-        // by the module.
-        if (!imported)
-        {
-            R4Import imp = createDynamicImportTarget(module, pkgName);
-            if (imp != null)
-            {
-                imported = true;
-
                 // Try to see if there is an exporter available. It may be
                 // the case that the package is exported, but the attributes
                 // do not match, so check that case too.
-                IModule[] exporters = getInUseExporters(imp, true);
+                IModule[] exporters = getInUseExporters(imports[i], true);
                 exporters = (exporters.length == 0)
-                    ? getAvailableExporters(imp, true) : exporters;
+                    ? getAvailableExporters(imports[i], true) : exporters;
                 exporters = (exporters.length == 0)
                     ? getInUseExporters(new R4Import(pkgName, null, null), true) : exporters;
                 exporters = (exporters.length == 0)
@@ -1654,145 +1588,176 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 long expId = (exporters.length == 0)
                     ? -1 : Util.getBundleIdFromModuleId(exporters[0].getId());
 
-                StringBuffer sb = new StringBuffer("****\n****\n");
-                sb.append("Class '");
+                StringBuffer sb = new StringBuffer("*** Class '");
                 sb.append(name);
                 sb.append("' was not found, but this is likely normal since package '");
                 sb.append(pkgName);
-                sb.append("' is dynamically imported by bundle ");
+                sb.append("' is optionally imported by bundle ");
                 sb.append(impId);
                 sb.append(".");
                 if (exporters.length > 0)
                 {
-                    if (!imp.isSatisfied(
-                        Util.getExportPackage(exporters[0], imp.getName())))
+                    sb.append(" However, bundle ");
+                    sb.append(expId);
+                    if (imports[i].isSatisfied(
+                        Util.getExportPackage(exporters[0], imports[i].getName())))
                     {
-                        sb.append(" However, bundle ");
+                        sb.append(" does export this package. Bundle ");
                         sb.append(expId);
+                        sb.append(" must be installed before bundle ");
+                        sb.append(impId);
+                        sb.append(" is resolved or else the optional import will be ignored.");
+                    }
+                    else
+                    {
                         sb.append(" does export this package with attributes that do not match.");
                     }
                 }
-                sb.append("\n****\n****");
+                sb.append(" ***");
 
-                m_logger.log(Logger.LOG_ERROR, sb.toString());
+                return sb.toString();
             }
+        }
+
+        // Next, check to see if the package is dynamically imported by the module.
+        R4Import imp = createDynamicImportTarget(module, pkgName);
+        if (imp != null)
+        {
+            // Try to see if there is an exporter available. It may be
+            // the case that the package is exported, but the attributes
+            // do not match, so check that case too.
+            IModule[] exporters = getInUseExporters(imp, true);
+            exporters = (exporters.length == 0)
+                ? getAvailableExporters(imp, true) : exporters;
+            exporters = (exporters.length == 0)
+                ? getInUseExporters(new R4Import(pkgName, null, null), true) : exporters;
+            exporters = (exporters.length == 0)
+                ? getAvailableExporters(new R4Import(pkgName, null, null), true) : exporters;
+            long expId = (exporters.length == 0)
+                ? -1 : Util.getBundleIdFromModuleId(exporters[0].getId());
+
+            StringBuffer sb = new StringBuffer("*** Class '");
+            sb.append(name);
+            sb.append("' was not found, but this is likely normal since package '");
+            sb.append(pkgName);
+            sb.append("' is dynamically imported by bundle ");
+            sb.append(impId);
+            sb.append(".");
+            if (exporters.length > 0)
+            {
+                if (!imp.isSatisfied(
+                    Util.getExportPackage(exporters[0], imp.getName())))
+                {
+                    sb.append(" However, bundle ");
+                    sb.append(expId);
+                    sb.append(" does export this package with attributes that do not match.");
+                }
+            }
+            sb.append(" ***");
+
+            return sb.toString();
         }
 
         // Next, if the package is not imported by the module, check to
         // see if there is an exporter for the package.
-        if (!imported)
+        IModule[] exporters = getInUseExporters(new R4Import(pkgName, null, null), true);
+        exporters = (exporters.length == 0)
+            ? getAvailableExporters(new R4Import(pkgName, null, null), true) : exporters;
+        if (exporters.length > 0)
         {
-            IModule[] exporters = getInUseExporters(new R4Import(pkgName, null, null), true);
-            exporters = (exporters.length == 0)
-                ? getAvailableExporters(new R4Import(pkgName, null, null), true) : exporters;
-            if (exporters.length > 0)
-            {
-                exported = true;
-                boolean classpath = false;
-                try
-                {
-                    getClass().getClassLoader().loadClass(name);
-                    classpath = true;
-                }
-                catch (Exception ex)
-                {
-                    // Ignore
-                }
-   
-                long expId = Util.getBundleIdFromModuleId(exporters[0].getId());
-   
-                StringBuffer sb = new StringBuffer("****\n****\n");
-                sb.append("Class '");
-                sb.append(name);
-                sb.append("' was not found because bundle ");
-                sb.append(impId);
-                sb.append(" does not import '");
-                sb.append(pkgName);
-                sb.append("' even though bundle ");
-                sb.append(expId);
-                sb.append(" does export it.");
-                if (classpath)
-                {
-                    sb.append(" Additionally, the class is also available from the system class loader. There are two fixes: 1) Add an import for '");
-                    sb.append(pkgName);
-                    sb.append("' to bundle ");
-                    sb.append(impId);
-                    sb.append("; imports are necessary for each class directly touched by bundle code or indirectly touched, such as super classes if their methods are used. ");
-                    sb.append("2) Add package '");
-                    sb.append(pkgName);
-                    sb.append("' to the '");
-                    sb.append(Constants.FRAMEWORK_BOOTDELEGATION);
-                    sb.append("' property; a library or VM bug can cause classes to be loaded by the wrong class loader. The first approach is preferable for preserving modularity.");
-                }
-                else
-                {
-                    sb.append(" To resolve this issue, add an import for '");
-                    sb.append(pkgName);
-                    sb.append("' to bundle ");
-                    sb.append(impId);
-                    sb.append(".");
-                }
-                sb.append("\n****\n****");
-
-                m_logger.log(Logger.LOG_ERROR, sb.toString());
-            }
-        }
-
-        // Next, try to see if the class is available from the system
-        // class loader.
-        if (!imported && !exported)
-        {
+            boolean classpath = false;
             try
             {
                 getClass().getClassLoader().loadClass(name);
-
-                exported = true;
-
-                StringBuffer sb = new StringBuffer("****\n****\n");
-                sb.append("Package '");
+                classpath = true;
+            }
+            catch (Exception ex)
+            {
+                // Ignore
+            }
+   
+            long expId = Util.getBundleIdFromModuleId(exporters[0].getId());
+   
+            StringBuffer sb = new StringBuffer("*** Class '");
+            sb.append(name);
+            sb.append("' was not found because bundle ");
+            sb.append(impId);
+            sb.append(" does not import '");
+            sb.append(pkgName);
+            sb.append("' even though bundle ");
+            sb.append(expId);
+            sb.append(" does export it.");
+            if (classpath)
+            {
+                sb.append(" Additionally, the class is also available from the system class loader. There are two fixes: 1) Add an import for '");
                 sb.append(pkgName);
-                sb.append("' is not imported by bundle ");
+                sb.append("' to bundle ");
                 sb.append(impId);
-                sb.append(", nor is there any bundle that exports package '");
-                sb.append(pkgName);
-                sb.append("'. However, the class '");
-                sb.append(name);
-                sb.append("' is available from the system class loader. There are two fixes: 1) Add package '");
-                sb.append(pkgName);
-                sb.append("' to the '");
-                sb.append(Constants.FRAMEWORK_SYSTEMPACKAGES);
-                sb.append("' property and modify bundle ");
-                sb.append(impId);
-                sb.append(" to import this package; this causes the system bundle to export class path packages. 2) Add package '");
+                sb.append("; imports are necessary for each class directly touched by bundle code or indirectly touched, such as super classes if their methods are used. ");
+                sb.append("2) Add package '");
                 sb.append(pkgName);
                 sb.append("' to the '");
                 sb.append(Constants.FRAMEWORK_BOOTDELEGATION);
                 sb.append("' property; a library or VM bug can cause classes to be loaded by the wrong class loader. The first approach is preferable for preserving modularity.");
-                sb.append("\n****\n****");
-
-                m_logger.log(Logger.LOG_ERROR, sb.toString());
             }
-            catch (Exception ex2)
+            else
             {
-            }
-
-            // Finally, if there are no imports or exports for the package
-            // and it is not available on the system class path, simply
-            // log a message saying so.
-            if (!imported && !exported)
-            {
-                StringBuffer sb = new StringBuffer("****\n****\n");
-                sb.append("Class '");
-                sb.append(name);
-                sb.append("' was not found. Bundle ");
-                sb.append(impId);
-                sb.append(" does not import package '");
+                sb.append(" To resolve this issue, add an import for '");
                 sb.append(pkgName);
-                sb.append("', nor is the package exported by any other bundle or available from the system class loader.");
-                sb.append("\n****\n****");
-
-                m_logger.log(Logger.LOG_ERROR, sb.toString());
+                sb.append("' to bundle ");
+                sb.append(impId);
+                sb.append(".");
             }
+            sb.append(" ***");
+
+            return sb.toString();
         }
+
+        // Next, try to see if the class is available from the system
+        // class loader.
+        try
+        {
+            getClass().getClassLoader().loadClass(name);
+
+            StringBuffer sb = new StringBuffer("*** Package '");
+            sb.append(pkgName);
+            sb.append("' is not imported by bundle ");
+            sb.append(impId);
+            sb.append(", nor is there any bundle that exports package '");
+            sb.append(pkgName);
+            sb.append("'. However, the class '");
+            sb.append(name);
+            sb.append("' is available from the system class loader. There are two fixes: 1) Add package '");
+            sb.append(pkgName);
+            sb.append("' to the '");
+            sb.append(Constants.FRAMEWORK_SYSTEMPACKAGES);
+            sb.append("' property and modify bundle ");
+            sb.append(impId);
+            sb.append(" to import this package; this causes the system bundle to export class path packages. 2) Add package '");
+            sb.append(pkgName);
+            sb.append("' to the '");
+            sb.append(Constants.FRAMEWORK_BOOTDELEGATION);
+            sb.append("' property; a library or VM bug can cause classes to be loaded by the wrong class loader. The first approach is preferable for preserving modularity.");
+            sb.append(" ***");
+
+            return sb.toString();
+        }
+        catch (Exception ex2)
+        {
+        }
+
+        // Finally, if there are no imports or exports for the package
+        // and it is not available on the system class path, simply
+        // log a message saying so.
+        StringBuffer sb = new StringBuffer("*** Class '");
+        sb.append(name);
+        sb.append("' was not found. Bundle ");
+        sb.append(impId);
+        sb.append(" does not import package '");
+        sb.append(pkgName);
+        sb.append("', nor is the package exported by any other bundle or available from the system class loader.");
+        sb.append(" ***");
+
+        return sb.toString();
     }
 }
