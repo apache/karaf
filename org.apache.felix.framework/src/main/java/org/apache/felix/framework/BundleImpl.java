@@ -52,19 +52,8 @@ class BundleImpl implements Bundle
         m_info = info;
     }
 
-    /**
-     * This method is a hack to make Felix compatible with Equinox'
-     * Declarative Services implementation; this should be revisited
-     * in the future.
-     * @return the bundle context associated with this bundle.
-    **/
     private BundleContext getContext()
     {
-        BundleContext bc = m_info.getContext();
-        if (bc == null)
-        {
-            m_info.setContext(new BundleContextImpl(m_felix, this));
-        }
         return m_info.getContext();
     }
 

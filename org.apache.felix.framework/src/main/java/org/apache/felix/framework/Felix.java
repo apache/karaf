@@ -1195,17 +1195,15 @@ public class Felix
 
         try
         {
+            // Set the bundle's context.
+            info.setContext(new BundleContextImpl(this, bundle));
+
             // Set the bundle's activator.
             info.setActivator(createBundleActivator(bundle.getInfo()));
 
             // Activate the bundle if it has an activator.
             if (bundle.getInfo().getActivator() != null)
             {
-                if (info.getContext() == null)
-                {
-                    info.setContext(new BundleContextImpl(this, bundle));
-                }
-
                 if (System.getSecurityManager() != null)
                 {
                     java.security.AccessController.doPrivileged(
@@ -1229,12 +1227,9 @@ public class Felix
             // then reset its state to RESOLVED.
             info.setState(Bundle.RESOLVED);
 
-            // Clean up the bundle context, if necessary.
-            if (info.getContext() != null)
-            {
-                ((BundleContextImpl) info.getContext()).invalidate();
-                info.setContext(null);
-            }
+            // Clean up the bundle context.
+            ((BundleContextImpl) info.getContext()).invalidate();
+            info.setContext(null);
 
             // Unregister any services offered by this bundle.
             m_registry.unregisterServices(bundle);
@@ -1555,13 +1550,10 @@ public class Felix
             m_logger.log(Logger.LOG_ERROR, "Error stopping bundle.", th);
             rethrow = th;
         }
-                  
-        // Clean up the bundle context, if necessary.
-        if (info.getContext() != null)
-        {
-            ((BundleContextImpl) info.getContext()).invalidate();
-            info.setContext(null);
-        }
+
+        // Clean up the bundle context.
+        ((BundleContextImpl) info.getContext()).invalidate();
+        info.setContext(null);
 
         // Unregister any services offered by this bundle.
         m_registry.unregisterServices(bundle);
