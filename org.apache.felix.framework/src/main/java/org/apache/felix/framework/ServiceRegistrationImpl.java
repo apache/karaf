@@ -121,11 +121,13 @@ class ServiceRegistrationImpl implements ServiceRegistration
         {
             // First, try to load the class from the bundle that registered
             // the service.
-            Class targetClass = m_bundle.loadClass(clazz.getName());
+            Class targetClass = ((BundleImpl) m_bundle)
+                .getInfo().getCurrentModule().getClass(clazz.getName());
             if (targetClass != null)
             {
                 return (targetClass == clazz);
             }
+
             // If it cannot be found from the registering bundle, then try to load
             // from the service object or service factory class.
             Class sourceClass = (m_factory != null)
@@ -135,6 +137,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
         }
         catch (Exception ex)
         {
+            // Ignore this and return false.
         }
         return false;
     }
