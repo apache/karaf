@@ -1319,8 +1319,6 @@ public class Felix
                 throw new BundleException(ex.getMessage());
             }
         }
-
-//        bundle.getInfo().setState(Bundle.RESOLVED);
     }
 
     protected void updateBundle(BundleImpl bundle, InputStream is)
