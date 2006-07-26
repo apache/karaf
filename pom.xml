@@ -20,16 +20,9 @@
     <module>org.apache.felix.daemon</module>
     <module>org.apache.felix.dependencymanager</module>
     <module>org.apache.felix.main</module>
-<!-- prep to reorg examles into tutorials section 
-    <module>org.apache.felix.examples.eventlistener</module>
-    <module>org.apache.felix.examples.dictionaryservice</module>
-    <module>org.apache.felix.examples.frenchdictionary</module>
-    <module>org.apache.felix.examples.dictionaryclient</module>
-    <module>org.apache.felix.examples.dictionaryclient2</module>
-    <module>org.apache.felix.examples.spellcheckservice</module>
-    <module>org.apache.felix.examples.spellcheckclient</module>
-    <module>org.apache.felix.examples.spellcheckbinder</module>
--->
+
+    <module>examples</module>
+
     <module>org.apache.felix.servicebinder</module>
     <module>org.apache.felix.wireadmin</module>
     <module>org.apache.felix.upnp.extra</module>
