@@ -1320,7 +1320,7 @@ public class Felix
             }
         }
 
-        bundle.getInfo().setState(Bundle.RESOLVED);
+//        bundle.getInfo().setState(Bundle.RESOLVED);
     }
 
     protected void updateBundle(BundleImpl bundle, InputStream is)
