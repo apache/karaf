@@ -36,9 +36,6 @@
                	A library used to extend the integration between UPnP and OSGi that is not part of the standard. Also services that allow to change the beahviour of the UPnP Base Driver
             </bundleDescription>
             <bundleSymbolicName>org.apache.felix.upnp.extra</bundleSymbolicName>
-            <importPackage>
-			org.osgi.service.upnp;specification-version=1.1,org.apache.felix.upnp.extra.util;specification-version=1.0,org.apache.felix.upnp.extra.controller;specification-version=1.0
-            </importPackage>
             <exportPackage>
                	org.apache.felix.upnp.extra.util;specification-version=1.0,org.apache.felix.upnp.extra.controller;specification-version=1.0
             </exportPackage>
