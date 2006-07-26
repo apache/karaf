@@ -195,11 +195,10 @@ public class ProvidedServiceHandler implements Handler {
 				}
 
 				if (type != null) {
-					if (type.endsWith("[]")) {
-						// TODO array property
-						Activator.getLogger().log(Level.SEVERE, "[" + m_componentManager.getComponentMetatada().getClassName() + "] An array property was found in the class [Not implemented yet] : " + prop.getMetadata().getField());
-						return false;
-					}
+//					if (type.endsWith("[]")) {
+//						Activator.getLogger().log(Level.SEVERE, "[" + m_componentManager.getComponentMetatada().getClassName() + "] An array property was found in the class [Not implemented yet] : " + prop.getMetadata().getField());
+//						return false;
+//					}
 
 					if (prop.getMetadata().getType() == null) { prop.getMetadata().setType(type); }
 

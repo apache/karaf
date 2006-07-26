@@ -65,7 +65,6 @@ public class PreprocessCodeAdapter extends MethodAdapter implements Opcodes {
                     return;
             } else
             	if (opcode == PUTFIELD) {
-            		// replaces PUTFIELD f by INVOKESPECIAL _setf
             		IPojoPluginConfiguration.getLogger().log(Level.INFO, "Manipulate a PUTFIELD on : " + name);
             		String sDesc = "(" + desc + ")V";
             		visitMethodInsn(INVOKESPECIAL, owner, "_set" + name, sDesc);
@@ -74,5 +73,6 @@ public class PreprocessCodeAdapter extends MethodAdapter implements Opcodes {
         }
         super.visitFieldInsn(opcode, owner, name, desc);
     }
+    
 }
 

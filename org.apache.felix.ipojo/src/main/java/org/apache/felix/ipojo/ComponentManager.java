@@ -18,7 +18,6 @@ package org.apache.felix.ipojo;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.logging.Level;
 
 import org.apache.felix.ipojo.metadata.Element;
@@ -305,23 +304,17 @@ public class ComponentManager {
 	 * @return a new instance
 	 */
 	public Object createInstance() {
+
 		if (!isLoaded()) { load(); }
 		Object instance = null;
 		try {
-
-			Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] createInstance -> call setComponentManager");
-			// Invoke the static method setComponentManager on the manipulated class
-			Method method = m_clazz.getDeclaredMethod("setComponentManager", new Class[] {this.getClass()});
-			method.setAccessible(true);
-			method.invoke(null, new Object[] {this});
-
 			Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] createInstance -> Try to find the constructor");
 
 			// Try to find if there is a constructor with a bundle context as parameter :
 			try {
-				Constructor constructor = m_clazz.getConstructor(new Class[] {BundleContext.class});
+				Constructor constructor = m_clazz.getConstructor(new Class[] {ComponentManager.class, BundleContext.class});
 				constructor.setAccessible(true);
-				instance = constructor.newInstance(new Object[] {m_factory.getBundleContext()});
+				instance = constructor.newInstance(new Object[] {this, m_factory.getBundleContext()});
 			}
 			catch (NoSuchMethodException e) {
 				Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] createInstance -> No constructor with a bundle context");
@@ -329,7 +322,11 @@ public class ComponentManager {
 
 			// Create an instance if no instance are already created with <init>()BundleContext
 			Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] createInstance -> Try to create the object with an empty constructor");
-			if (instance == null) { instance = m_clazz.newInstance(); }
+			if (instance == null) {
+				Constructor constructor = m_clazz.getConstructor(new Class[] {ComponentManager.class});
+				constructor.setAccessible(true);
+				instance = constructor.newInstance(new Object[] {this});
+				}
 
 		} catch (InstantiationException e) {
 			Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] createInstance -> The Component Instance cannot be instancied : " + e.getMessage());
@@ -340,14 +337,11 @@ public class ComponentManager {
 		} catch (SecurityException e) {
 			Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] createInstance -> The Component Instance is not accessible (security reason) : " + e.getMessage());
 			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] createInstance -> Cannot invoke the setComponentManager method (illegal argument) : " + e.getMessage());
-			e.printStackTrace();
 		} catch (InvocationTargetException e) {
-			Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] createInstance -> Cannot invoke the setComponentManager method (illegal target) : " + e.getMessage());
+			Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] createInstance -> Cannot invoke the constructor method (illegal target) : " + e.getMessage());
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
-			Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] createInstance -> Cannot invoke the setComponentManager method (method not found) : " + e.getMessage());
+			Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] createInstance -> Cannot invoke the constructor (method not found) : " + e.getMessage());
 			e.printStackTrace();
 		}
 

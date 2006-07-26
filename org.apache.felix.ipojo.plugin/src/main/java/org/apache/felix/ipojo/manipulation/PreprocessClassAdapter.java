@@ -31,10 +31,10 @@ import org.objectweb.asm.Type;
 
 /**
  * Manipulate the class.
- * - Add a static component manager field (_cm) ok
- * - Create getter and setter for each fields ok
- * - Store information about field ok
- * - Store information about implemented interfaces ok
+ * - Add a component manager field (_cm) 
+ * - Create getter and setter for each fields 
+ * - Store information about field
+ * - Store information about implemented interfaces
  * - Change GETFIELD and PUTFIELD to called the getter and setter method
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  *
@@ -89,8 +89,9 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             m_owner = name;
 
             // Insert _cm field
-            super.visitField(ACC_PRIVATE + ACC_STATIC, "_cm", ManipulationProperty.IPOJO_INTERNAL_DESCRIPTOR + "ComponentManager;", null, null);
-
+            FieldVisitor fv = super.visitField(ACC_PRIVATE, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;", null, null);
+            fv.visitEnd();
+            
             // Create the _cmSetter(ComponentManager cm) method
             createComponentManagerSetter();
 
@@ -99,6 +100,7 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
 
             super.visit(version, access, name, signature, superName, interfaces);
         }
+        
 
         /** visit method method :-).
          * @see org.objectweb.asm.ClassVisitor#visitMethod(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
@@ -115,28 +117,39 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
                 final String desc,
                 final String signature,
                 final String[] exceptions) {
-            MethodVisitor mv = cv.visitMethod(access,
-                    name,
-                    desc,
-                    signature,
-                    exceptions);
+        	// The method is a constructor, adapt the constructor to add a ComponentManager argument
+        	if(name.equals("<init>")) {
+        		// 1) change the constructor descriptor (add a component manager arg as first argument)
+        		String new_desc = desc.substring(1);
+        		new_desc = "(Lorg/apache/felix/ipojo/ComponentManager;"+new_desc;
+        		
+        		// Insert the new constructor
+        		MethodVisitor mv = super.visitMethod(ACC_PUBLIC, "<init>", new_desc, null, null);
 
-            if (mv == null) { return null; }
-            else { return new PreprocessCodeAdapter(mv, m_owner); }
+        		if (mv == null) { return null; }
+        		else {return new ConstructorCodeAdapter(mv, m_owner); } 
+
+            }     
+            else {
+            	 MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
+            	 if (mv == null) { return null; }
+            	 else {return new PreprocessCodeAdapter(mv, m_owner); }
+            	}
 
         }
 
         /**
          * Create the setter method for the _cm field.
-         * The generated method must be called only one time.
          */
-        private void createComponentManagerSetter() {
-            MethodVisitor mv = super.visitMethod(ACC_PRIVATE + ACC_STATIC, "setComponentManager", "(" + ManipulationProperty.IPOJO_INTERNAL_DESCRIPTOR + "ComponentManager;)V", null, null);
-
+        private void createComponentManagerSetter() {            
+            MethodVisitor mv = cv.visitMethod(ACC_PRIVATE, "_setComponentManager", "(Lorg/apache/felix/ipojo/ComponentManager;)V", null, null);
+            
             mv.visitVarInsn(ALOAD, 0);
-            mv.visitFieldInsn(PUTSTATIC, m_owner, "_cm", ManipulationProperty.IPOJO_INTERNAL_DESCRIPTOR + "ComponentManager;");
+            mv.visitVarInsn(ALOAD, 1);
+            mv.visitFieldInsn(PUTFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+            
             mv.visitInsn(RETURN);
-
+           
             mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
@@ -174,7 +187,6 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
                     		m_fields.put(name, nameType);
                     	}
 
-                    	// TODO : Getter & SETTER on array :
                         String gDesc = "()" + desc;
                     	createArrayGetter(name, gDesc, type);
 
@@ -212,7 +224,8 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
         	mv.visitVarInsn(ALOAD, 1);
         	mv.visitFieldInsn(PUTFIELD, m_owner, name, internalType);
 
-        	mv.visitFieldInsn(GETSTATIC, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+        	mv.visitVarInsn(ALOAD, 0);
+        	mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
         	mv.visitLdcInsn(name);
         	mv.visitVarInsn(ALOAD, 1);
         	mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManager", "setterCallback", "(Ljava/lang/String;Ljava/lang/Object;)V");
@@ -244,8 +257,9 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             	//mv.visitFieldInsn(GETFIELD, m_owner, name, "["+type.getInternalName()+";");
             	mv.visitFieldInsn(GETFIELD, m_owner, name, internalType);
             	mv.visitVarInsn(ASTORE, 1);
-
-            	mv.visitFieldInsn(GETSTATIC, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+            	
+            	mv.visitVarInsn(ALOAD, 0);
+            	mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
             	mv.visitLdcInsn(name);
             	mv.visitVarInsn(ALOAD, 1);
             	mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
@@ -318,7 +332,8 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             		mv.visitMethodInsn(INVOKESPECIAL, boxingType, "<init>", "(" + internalName + ")V");
             		mv.visitVarInsn(ASTORE, 2);
 
-            		mv.visitFieldInsn(GETSTATIC, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+            		mv.visitVarInsn(ALOAD, 0);
+            		mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
             		mv.visitLdcInsn(name);
             		mv.visitVarInsn(ALOAD, 2);
             		mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
@@ -357,7 +372,8 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             		mv.visitFieldInsn(GETFIELD, m_owner, name, "L" + type.getInternalName() + ";");
             		mv.visitVarInsn(ASTORE, 1);
 
-            		mv.visitFieldInsn(GETSTATIC, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+            		mv.visitVarInsn(ALOAD, 0);
+            		mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
             		mv.visitLdcInsn(name);
             		mv.visitVarInsn(ALOAD, 1);
             		mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
@@ -437,7 +453,8 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
 
                 	Label l2 = new Label();
                 	mv.visitLabel(l2);
-                	mv.visitFieldInsn(GETSTATIC, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+                	mv.visitVarInsn(ALOAD, 0);
+                	mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
                 	mv.visitLdcInsn(name);
                 	mv.visitVarInsn(ALOAD, 2);
                 	mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManager", "setterCallback", "(Ljava/lang/String;Ljava/lang/Object;)V");
@@ -452,7 +469,8 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
                 	mv.visitVarInsn(ALOAD, 1);
                 	mv.visitFieldInsn(PUTFIELD, m_owner, name, "L" + type.getInternalName() + ";");
 
-                	mv.visitFieldInsn(GETSTATIC, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+                	mv.visitVarInsn(ALOAD, 0);
+                	mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
                 	mv.visitLdcInsn(name);
                 	mv.visitVarInsn(ALOAD, 1);
                 	mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManager", "setterCallback", "(Ljava/lang/String;Ljava/lang/Object;)V");

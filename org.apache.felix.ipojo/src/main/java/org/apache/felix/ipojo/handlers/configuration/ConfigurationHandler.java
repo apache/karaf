@@ -24,6 +24,8 @@ import java.util.logging.Level;
 import org.apache.felix.ipojo.ComponentManager;
 import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.Activator;
+import org.apache.felix.ipojo.handlers.providedservice.Property;
+import org.apache.felix.ipojo.handlers.providedservice.ProvidedService;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.BundleContext;
@@ -140,7 +142,17 @@ public class ConfigurationHandler implements Handler, ManagedService {
 	 * @see org.apache.felix.ipojo.Handler#setterCallback(java.lang.String, java.lang.Object)
 	 */
 	public void setterCallback(String fieldName, Object value) {
-		// Nothing to do
+		//	Verify that the field name correspond to a configurable property
+		for (int i = 0; i < m_configurableProperties.length; i++) {
+			ConfigurableProperty cp = m_configurableProperties[i];
+			if (cp.getName().equals(fieldName)) {
+				// Check if the value has change
+				if (cp.getValue() == null || !cp.getValue().equals(value)) {
+					cp.setValue(value); // Change the value
+			}
+		}
+		}
+		//Else do nothing
 	}
 
 	/**
@@ -193,7 +205,7 @@ public class ConfigurationHandler implements Handler, ManagedService {
 					if (m_configurableProperties[i].getName().equals(name)) {
 						// Check if the value has change
 						if (m_configurableProperties[i].getValue() == null || !m_configurableProperties[i].getValue().equals(value)) {
-							m_configurableProperties[i].setValue(value); // Change the value
+							//m_configurableProperties[i].setValue(value); // Useless, the setterCallback will call the setValue
 							m_manager.setterCallback(m_configurableProperties[i].getField(), value); // says that the value has change
 						}
 						find = true;
