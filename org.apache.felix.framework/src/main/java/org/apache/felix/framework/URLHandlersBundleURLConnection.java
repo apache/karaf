@@ -22,7 +22,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.security.Permission;
 
+import org.apache.felix.framework.searchpolicy.ContentLoaderImpl;
 import org.apache.felix.framework.util.Util;
+import org.apache.felix.moduleloader.IModule;
 
 class URLHandlersBundleURLConnection extends URLConnection
 {
@@ -33,29 +35,46 @@ class URLHandlersBundleURLConnection extends URLConnection
     private InputStream m_is;
 
     public URLHandlersBundleURLConnection(URL url, Felix framework)
+        throws IOException
     {
         super(url);
         m_framework = framework;
+
+        // If we don't have a framework instance, try to find
+        // one from the call context.
+        if (m_framework == null)
+        {
+            m_framework = URLHandlers.getFrameworkFromContext();
+        }
+
+        // If there is still no framework, then error.
+        if (m_framework == null)
+        {
+            throw new IOException("Unable to find framework for URL: " + url);
+        }
+        // Verify that the resource pointed to be the URL exists.
+        // The URL is constructed like this:
+        //     bundle://<module-id>/<resource-path>
+        // Where <module-id> = <bundle-id>.<revision>
+        long bundleId = Util.getBundleIdFromModuleId(url.getHost());
+        BundleImpl bundle = (BundleImpl) m_framework.getBundle(bundleId);
+        if (bundle == null)
+        {
+            throw new IOException("No bundle associated with resource: " + url);
+        }
+        int revision = Util.getModuleRevisionFromModuleId(url.getHost());
+        IModule[] modules = bundle.getInfo().getModules();
+        if ((modules == null) || (revision < 0) || (revision >= modules.length) ||
+            !modules[revision].getContentLoader().hasInputStream(url.getPath()))
+        {
+            throw new IOException("Resource does not exist: " + url);
+        }
     }
 
     public void connect() throws IOException
     {
         if (!connected)
         {
-            // If we don't have a framework instance, try to find
-            // one from the call context.
-            if (m_framework == null)
-            {
-                m_framework = URLHandlers.getFrameworkFromContext();
-            }
-
-            // If the framework has disabled the URL Handlers service,
-            // then it will not be found so just return null.
-            if (m_framework == null)
-            {
-                throw new IOException("Unable to find framework instance from context.");
-            }
-
             // The URL is constructed like this:
             //     bundle://<module-id>/<resource-path>
             // Where <module-id> = <bundle-id>.<revision>
@@ -63,10 +82,15 @@ class URLHandlersBundleURLConnection extends URLConnection
             BundleImpl bundle = (BundleImpl) m_framework.getBundle(bundleId);
             if (bundle == null)
             {
-                throw new IOException("Unable to find bundle.");
+                throw new IOException("No bundle associated with resource: " + url);
             }
             int revision = Util.getModuleRevisionFromModuleId(url.getHost());
-            m_is = bundle.getInfo().getModules()[revision].getContentLoader().getResourceAsStream(url.getPath());
+            IModule[] modules = bundle.getInfo().getModules();
+            if ((modules == null) || (revision < 0) || (revision >= modules.length))
+            {
+                throw new IOException("Resource does not exist: " + url);
+            }
+            m_is = bundle.getInfo().getModules()[revision].getContentLoader().getInputStream(url.getPath());
             m_contentLength = (m_is == null) ? 0 : m_is.available();
             m_contentTime = 0L;
             m_contentType = URLConnection.guessContentTypeFromName(url.getFile());

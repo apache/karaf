@@ -89,9 +89,14 @@ public class SystemBundleContentLoader implements IContentLoader
         return getClass().getClassLoader().getResource(name);
     }
 
-    public InputStream getResourceAsStream(String name) throws IOException
+    public boolean hasInputStream(String urlPath) throws IOException
     {
-        return getClass().getClassLoader().getResourceAsStream(name);
+        return (getClass().getClassLoader().getResource(urlPath) != null);
+    }
+
+    public InputStream getInputStream(String urlPath) throws IOException
+    {
+        return getClass().getClassLoader().getResourceAsStream(urlPath);
     }
 
     public String findLibrary(String name)

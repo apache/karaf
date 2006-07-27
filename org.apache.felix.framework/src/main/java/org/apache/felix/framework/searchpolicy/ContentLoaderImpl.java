@@ -196,25 +196,47 @@ public class ContentLoaderImpl implements IContentLoader
         return url;
     }
 
-    public InputStream getResourceAsStream(String name)
-        throws IOException
+    public boolean hasInputStream(String urlPath)
     {
-        if (name.startsWith("/"))
+        if (urlPath.startsWith("/"))
         {
-            name = name.substring(1);
+            urlPath = urlPath.substring(1);
         }
-        // The name is the path contructed like this:
+        // The urlPath is the path portion of a resource URL
+        // that is contructed above in getResouce() like this:
         // <index> / <relative-resource-path>
         // where <index> == 0 is the module content
         // and <index> > 0 is the index into the class
         // path - 1.
-        int idx = Integer.parseInt(name.substring(0, name.indexOf('/')));
-        name = name.substring(name.indexOf('/') + 1);
+        int idx = Integer.parseInt(urlPath.substring(0, urlPath.indexOf('/')));
+        urlPath = urlPath.substring(urlPath.indexOf('/') + 1);
         if (idx == 0)
         {
-            return m_content.getEntryAsStream(name);
+            return m_content.hasEntry(urlPath);
         }
-        return m_contentPath[idx - 1].getEntryAsStream(name);
+        return m_contentPath[idx - 1].hasEntry(urlPath);
+    }
+
+    public InputStream getInputStream(String urlPath)
+        throws IOException
+    {
+        if (urlPath.startsWith("/"))
+        {
+            urlPath = urlPath.substring(1);
+        }
+        // The urlPath is the path portion of a resource URL
+        // that is contructed above in getResouce() like this:
+        // <index> / <relative-resource-path>
+        // where <index> == 0 is the module content
+        // and <index> > 0 is the index into the class
+        // path - 1.
+        int idx = Integer.parseInt(urlPath.substring(0, urlPath.indexOf('/')));
+        urlPath = urlPath.substring(urlPath.indexOf('/') + 1);
+        if (idx == 0)
+        {
+            return m_content.getEntryAsStream(urlPath);
+        }
+        return m_contentPath[idx - 1].getEntryAsStream(urlPath);
     }
 
     public String toString()
