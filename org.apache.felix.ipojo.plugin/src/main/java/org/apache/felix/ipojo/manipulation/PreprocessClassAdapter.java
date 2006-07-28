@@ -48,17 +48,6 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
         private String  m_owner;
 
         /**
-         * Interfaces implemented by the component.
-         */
-        private String[] m_itfs = new String[0];
-
-		/**
-		 * Field hashmap [field name, type] discovered in the component class.
-		 */
-		private HashMap m_fields = new HashMap();
-
-
-        /**
          * Constructor.
          * @param cv : Class visitor
          */
@@ -94,9 +83,6 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             
             // Create the _cmSetter(ComponentManager cm) method
             createComponentManagerSetter();
-
-            //Store the interfaces :
-            m_itfs = interfaces;
 
             super.visit(version, access, name, signature, superName, interfaces);
         }
@@ -177,15 +163,6 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
                     FieldVisitor fv =  cv.visitField(access, name, desc, signature, value);
 
                     if (type.getSort() == Type.ARRAY) {
-                    	if (type.getInternalName().startsWith("L")) {
-                    		String internalType = type.getInternalName().substring(1);
-                    		String nameType = internalType.replace('/', '.');
-                            m_fields.put(name, nameType + "[]");
-                    	}
-                    	else {
-                    		String nameType = type.getClassName().substring(0, type.getClassName().length() - 2);
-                    		m_fields.put(name, nameType);
-                    	}
 
                         String gDesc = "()" + desc;
                     	createArrayGetter(name, gDesc, type);
@@ -196,8 +173,6 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
 
                     }
                     else {
-                    	// Store information on the fields
-                    	m_fields.put(name, type.getClassName());
 
                     	// Generate the getter method
                     	String gDesc = "()" + desc;
@@ -485,19 +460,5 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
-
-        /**
-         * @return the interfaces implemented by the component class.
-         */
-        public String[] getInterfaces() {
-            return m_itfs;
-        }
-
-		/**
-		 * @return the field hashmap [field_name, type]
-		 */
-		public HashMap getFields() {
-			return m_fields;
-		}
 }
 

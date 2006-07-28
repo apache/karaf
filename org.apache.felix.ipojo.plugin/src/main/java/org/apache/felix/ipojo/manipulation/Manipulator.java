@@ -79,23 +79,38 @@ public class Manipulator {
         //if (url == null) { throw new ClassNotFoundException(name); }
         IPojoPluginConfiguration.getLogger().log(Level.INFO, "Manipulate the class file : " + clazz.getAbsolutePath());
 
-        InputStream is = url.openStream();
+        InputStream is1 = url.openStream();
+        
+        
+        // First check if the class is already manipulated : 
+        ClassReader ckReader = new ClassReader(is1);
+        ClassChecker ck = new ClassChecker();
+        ckReader.accept(ck, true);
+        is1.close();
+        
+        m_fields = ck.getFields();
+        m_interfaces = new String[ck.getInterfaces().length];
+        for (int i = 0; i < m_interfaces.length; i++) {
+        	m_interfaces[i] = ck.getInterfaces()[i].replace('/', '.');
+        }
+        
+        if(!ck.isalreadyManipulated()) {
 
-        //Manipulation  ->
-        // Add the _setComponentManager method
-        // Instrument all fields
-        ClassReader cr0 = new ClassReader(is);
-        ClassWriter cw0 = new ClassWriter(true);
-        PreprocessClassAdapter preprocess = new PreprocessClassAdapter(cw0);
-        cr0.accept(preprocess, false);
-        is.close();
+        	//Manipulation  ->
+        	// Add the _setComponentManager method
+        	// Instrument all fields
+        	InputStream is2 = url.openStream();
+        	ClassReader cr0 = new ClassReader(is2);
+        	ClassWriter cw0 = new ClassWriter(true);
+        	PreprocessClassAdapter preprocess = new PreprocessClassAdapter(cw0);
+        	cr0.accept(preprocess, false);
+        	is2.close();
 
-        File file = null;
-        try {
-                file = new File(url.getFile());
+        	File file = null;
+        	try {
+        		file = new File(url.getFile());
 
-                
-                //file.createNewFile();
+        		//file.createNewFile();
                 FileOutputStream fos = new FileOutputStream(file);
                 
                 fos.write(cw0.toByteArray());
@@ -104,10 +119,6 @@ public class Manipulator {
                 IPojoPluginConfiguration.getLogger().log(Level.INFO, "Put the file " + file.getAbsolutePath() + " in the jar file");
             } catch (Exception e) { System.err.println("Problem to write the adapted class on the file system " + " [ "+ file.getAbsolutePath() +" ] " + e.getMessage()); }
 
-        m_fields = preprocess.getFields();
-        m_interfaces = new String[preprocess.getInterfaces().length];
-        for (int i = 0; i < m_interfaces.length; i++) {
-        	m_interfaces[i] = preprocess.getInterfaces()[i].replace('/', '.');
         }
     }
 
