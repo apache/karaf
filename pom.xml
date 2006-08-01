@@ -24,7 +24,7 @@
     <module>examples</module>
 
     <module>servicebinder</module>
-    <module>org.apache.felix.wireadmin</module>
+    <module>wireadmin</module>
     <module>org.apache.felix.upnp.extra</module>
     <module>org.apache.felix.upnp.basedriver</module>
     <module>org.apache.felix.upnp.tester</module>      
