@@ -32,7 +32,7 @@
     <module>org.apache.felix.upnp.sample.clock</module>
     <module>org.apache.felix.upnp.sample.binaryLight</module>
     <module>http.jetty</module>
-    <module>org.apache.felix.scr</module>
+    <module>scr</module>
     <module>org.apache.felix.eventadmin</module>
     <module>org.apache.felix.eventadmin.bridge.upnp</module>
     <module>org.apache.felix.eventadmin.bridge.configuration</module>
