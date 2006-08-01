@@ -55,11 +55,11 @@
       todir="${basedir}/lib"/>
 <copy file="${basedir}/../org.osgi.core/target/org.osgi.core-${pom.version}.jar"
       todir="${basedir}/lib"/>
-<copy file="${basedir}/../org.apache.felix.shell/target/org.apache.felix.shell-${pom.version}.jar"
+<copy file="${basedir}/../shell/target/org.apache.felix.shell-${pom.version}.jar"
       todir="${basedir}/bundle"/>
-<copy file="${basedir}/../org.apache.felix.shell.tui/target/org.apache.felix.shell.tui-${pom.version}.jar"
+<copy file="${basedir}/../shell.tui/target/org.apache.felix.shell.tui-${pom.version}.jar"
       todir="${basedir}/bundle"/>
-<copy file="${basedir}/../org.apache.felix.bundlerepository/target/org.apache.felix.bundlerepository-${pom.version}.jar"
+<copy file="${basedir}/../bundlerepository/target/org.apache.felix.bundlerepository-${pom.version}.jar"
       todir="${basedir}/bundle"/>
               </tasks>
             </configuration>
