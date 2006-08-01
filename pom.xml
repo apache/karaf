@@ -23,7 +23,7 @@
 
     <module>examples</module>
 
-    <module>org.apache.felix.servicebinder</module>
+    <module>servicebinder</module>
     <module>org.apache.felix.wireadmin</module>
     <module>org.apache.felix.upnp.extra</module>
     <module>org.apache.felix.upnp.basedriver</module>
