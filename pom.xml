@@ -38,10 +38,10 @@
     <module>org.apache.felix.eventadmin.bridge.configuration</module>
     <module>org.apache.felix.eventadmin.bridge.useradmin</module>
     <module>org.apache.felix.eventadmin.bridge.wireadmin</module>
-    <module>org.apache.felix.ipojo</module>
-    <module>org.apache.felix.ipojo.metadata</module>
-    <module>org.apache.felix.ipojo.plugin</module>
-    <module>org.apache.felix.ipojo.arch</module>
+    <module>ipojo</module>
+    <module>ipojo.metadata</module>
+    <module>ipojo.plugin</module>
+    <module>ipojo.arch</module>
   </modules>
 
   <repositories>
