@@ -25,86 +25,86 @@ import org.osgi.service.component.ComponentException;
 public class ReferenceMetadata {
 	// Name for the reference (required)
 	private String m_name = null;
-	
+
 	// Interface name (required)
     private String m_interface = null;
-    
+
     // Cardinality (optional, default="1..1")
     private String m_cardinality = "1..1";
-    
+
     // Target (optional)
     private String m_target;
-    
+
     // Name of the bind method (optional)
     private String m_bind = null;
-    
+
     // Name of the unbind method (optional)
     private String m_unbind = null;
-    
+
     // Policy attribute (optional, default = static)
     private String m_policy = "static";
 
     // Flag that is set once the component is verified (its properties cannot be changed)
     private boolean m_validated = false;
-    
+
     // Flags that store the values passed as strings
     private boolean m_isStatic = true;
     private boolean m_isOptional = false;
     private boolean m_isMultiple = false;
 
     /////////////////////////////////////////////// setters ///////////////////////////////////
-    
+
     /**
      * Setter for the name attribute
-     * 
+     *
      * @param name
      */
     public void setName(String name) {
     	if(m_validated) {
     		return;
     	}
-    		
+
     	m_name = name;
     }
-    
+
     /**
      * Setter for the interfaceName attribute
-     * 
+     *
      * @param interfaceName
      */
     public void setInterface(String interfaceName) {
     	if(m_validated) {
     		return;
     	}
-    		
+
     	m_interface = interfaceName;
-    	
+
     }
-    
+
     /**
      * Setter for the cardinality attribute
-     * 
+     *
      * @param cardinality
      */
     public void setCardinality(String cardinality) {
     	if(m_validated) {
     		return;
     	}
-    		  	
+
+    	m_cardinality = cardinality;
+
     	if(!m_cardinality.equals("0..1") && !m_cardinality.equals("0..n") && !m_cardinality.equals("1..1") && !m_cardinality.equals("1..n")) {
     		throw new IllegalArgumentException ("Cardinality should take one of the following values: 0..1, 0..n, 1..1, 1..n");
-    	}    	
+    	}
     	if(m_cardinality.equals("0..1") || m_cardinality.equals("0..n")) {
             m_isOptional = true;
         }
         if(m_cardinality.equals("0..n") || m_cardinality.equals("1..n")) {
             m_isMultiple = true;
         }
-    
-    	m_cardinality = cardinality;
     }
-    
-    /** 
+
+    /**
      *	Setter for the policy attribute
      *
      * @param policy
@@ -113,27 +113,27 @@ public class ReferenceMetadata {
     	if(m_validated) {
     		return;
     	}
-    		
+
     	if(!m_policy.equals("static") && !m_policy.equals("dynamic")) {
     		throw new IllegalArgumentException ("Policy must be either 'static' or 'dynamic'");
-    	}    	
+    	}
     	if(policy.equals("static") == false) {
             m_isStatic = false;
         }
 
        	m_policy = policy;
     }
-    
+
     /**
      * Setter for the target attribute (filter)
-     * 
+     *
      * @param target
      */
     public void setTarget(String target) {
     	if(m_validated) {
     		return;
     	}
-    		
+
     	//TODO: check if we really need to extend the filter to limit seaches to a particular interface
         String classnamefilter = "(objectClass="+m_interface+")";
         if(target != null) {
@@ -141,36 +141,36 @@ public class ReferenceMetadata {
         }
         else {
             m_target = classnamefilter;
-        }    	
+        }
     }
-    
+
     /**
      * Setter for the bind method attribute
-     * 
+     *
      * @param bind
-     */    
+     */
     public void setBind(String bind) {
     	if(m_validated) {
     		return;
     	}
-    		
+
     	m_bind = bind;
     }
-    
+
     /**
      * Setter for the unbind method attribute
-     * 
+     *
      * @param bind
-     */    
+     */
     public void setUnbind(String unbind) {
     	if(m_validated) {
     		return;
     	}
-    		
+
     	m_unbind = unbind;
     }
-    
-    
+
+
     /////////////////////////////////////////////// getters ///////////////////////////////////
 
     /**
@@ -266,7 +266,7 @@ public class ReferenceMetadata {
     public boolean isMultiple() {
         return m_isMultiple;
     }
-    
+
     /**
      *  Method used to verify if the semantics of this metadata are correct
      *
@@ -275,11 +275,11 @@ public class ReferenceMetadata {
     	if (m_name == null) {
     		throw new ComponentException("the name for the reference must be set");
     	}
-    	
+
     	if (m_interface == null) {
     		throw new ComponentException("the interface for the reference must be set");
     	}
     }
-    
-    
+
+
 }
