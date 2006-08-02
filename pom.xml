@@ -25,12 +25,12 @@
 
     <module>servicebinder</module>
     <module>wireadmin</module>
-    <module>org.apache.felix.upnp.extra</module>
-    <module>org.apache.felix.upnp.basedriver</module>
-    <module>org.apache.felix.upnp.tester</module>      
-    <module>org.apache.felix.upnp.sample.tv</module>
-    <module>org.apache.felix.upnp.sample.clock</module>
-    <module>org.apache.felix.upnp.sample.binaryLight</module>
+    <module>upnp.extra</module>
+    <module>upnp.basedriver</module>
+    <module>upnp.tester</module>      
+    <module>upnp.sample.tv</module>
+    <module>upnp.sample.clock</module>
+    <module>upnp.sample.binaryLight</module>
     <module>http.jetty</module>
     <module>scr</module>
     <module>org.apache.felix.eventadmin</module>
