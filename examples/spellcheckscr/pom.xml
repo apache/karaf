@@ -1,0 +1,68 @@
+<project>
+  <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>0.8.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>osgi-bundle</packaging>
+  <name>Apache Felix Examples: Spell Check w/ SCR</name>
+  <artifactId>org.apache.felix.examples.spellcheckscr</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.examples.dictionaryservice</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.examples.spellcheckservice</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.scr</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix.plugins</groupId>
+        <artifactId>maven-osgi-plugin</artifactId>
+        <version>${pom.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <osgiManifest>
+            <entries>
+              <property>
+                <name>Service-Component</name>
+                <value>OSGI-INF/component.xml</value>
+              </property>
+            </entries>
+            <bundleName>Spell Check w/ SCR Example</bundleName>
+            <bundleVendor>Apache Software Foundation</bundleVendor>
+            <bundleDescription>
+              A bundle that registers a spell checking service based on Service Component Runtime.
+            </bundleDescription>
+            <bundleActivator>
+              org.apache.felix.examples.spellcheckscr.Activator
+            </bundleActivator>
+            <importPackage>
+              org.osgi.framework, org.apache.felix.examples.dictionaryservice, org.apache.felix.scr, org.apache.felix.examples.spellcheckservice
+            </importPackage>
+          </osgiManifest>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

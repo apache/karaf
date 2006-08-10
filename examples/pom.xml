@@ -18,6 +18,7 @@
     <module>spellcheckservice</module>
     <module>spellcheckclient</module>
     <module>spellcheckbinder</module>
+    <module>spellcheckscr</module>
   </modules>
 
   <dependencies>
