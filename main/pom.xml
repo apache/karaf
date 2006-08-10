@@ -51,7 +51,7 @@
       tofile="${basedir}/bin/felix.jar"/>
 <copy file="${basedir}/target/classes/config.properties"
       todir="${basedir}/conf"/>
-<copy file="${basedir}/../org.apache.felix.framework/target/org.apache.felix.framework-${pom.version}.jar"
+<copy file="${basedir}/../framework/target/org.apache.felix.framework-${pom.version}.jar"
       todir="${basedir}/lib"/>
 <copy file="${basedir}/../org.osgi.core/target/org.osgi.core-${pom.version}.jar"
       todir="${basedir}/lib"/>
