@@ -18,7 +18,7 @@
     <module>bundlerepository</module>
     <module>org.apache.felix.daemon</module>
     <module>org.apache.felix.dependencymanager</module>
-    <module>org.apache.felix.main</module>
+    <module>main</module>
 
     <module>examples</module>
 
