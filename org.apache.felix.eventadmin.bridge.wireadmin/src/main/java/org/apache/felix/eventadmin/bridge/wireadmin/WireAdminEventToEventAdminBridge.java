@@ -40,8 +40,7 @@ public class WireAdminEventToEventAdminBridge implements WireAdminListener
     {
         m_context = context;
 
-        m_context
-            .registerService(WireAdminListener.class.getName(), this, null);
+        m_context.registerService(WireAdminListener.class.getName(), this, null);
     }
 
     public void wireAdminEvent(final WireAdminEvent event)
@@ -89,71 +88,69 @@ public class WireAdminEventToEventAdminBridge implements WireAdminListener
                         return;
                 }
 
-                eventAdmin.postEvent(new Event(topic, new Hashtable()
+                final Hashtable properties = new Hashtable();
+                
+                properties.put(EventConstants.EVENT, event);
+
+                properties.put("wire", event.getWire());
+
+                properties.put("wire.flavors", event.getWire().getFlavors());
+
+                properties.put("wire.scope", event.getWire().getScope());
+
+                properties.put("wire.connected", (event.getWire().isConnected()) ? 
+                    Boolean.TRUE : Boolean.FALSE);
+
+                properties.put("wire.valid", (event.getWire().isValid()) ? 
+                    Boolean.TRUE : Boolean.FALSE);
+
+                final Throwable throwable = event.getThrowable();
+
+                if(null != throwable)
                 {
+                    properties.put(EventConstants.EXCEPTION, throwable);
+
+                    properties.put(EventConstants.EXCEPTION_CLASS, throwable
+                        .getClass().getName());
+
+                    final String message = throwable.getMessage();
+
+                    if(null != message)
                     {
-                        put(EventConstants.EVENT, event);
-
-                        put("wire", event.getWire());
-
-                        put("wire.flavors", event.getWire().getFlavors());
-
-                        put("wire.scope", event.getWire().getScope());
-
-                        put("wire.connected", Boolean.valueOf(event.getWire()
-                            .isConnected()));
-
-                        put("wire.valid", Boolean.valueOf(event.getWire()
-                            .isValid()));
-
-                        final Throwable throwable = event.getThrowable();
-
-                        if(null != throwable)
-                        {
-                            put(EventConstants.EXCEPTION, throwable);
-
-                            put(EventConstants.EXCEPTION_CLASS, throwable
-                                .getClass().getName());
-
-                            final String message = throwable.getMessage();
-
-                            if(null != message)
-                            {
-                                put(EventConstants.EXCEPTION_MESSAGE, message);
-                            }
-
-                            final ServiceReference ref = event
-                                .getServiceReference();
-
-                            if(null == ref)
-                            {
-                                throw new IllegalArgumentException(
-                                    "WireAdminEvent.getServiceReference() may not be null");
-                            }
-
-                            put(EventConstants.SERVICE, ref);
-
-                            put(EventConstants.SERVICE_ID, ref
-                                .getProperty(EventConstants.SERVICE_ID));
-
-                            final Object objectClass = ref
-                                .getProperty(Constants.OBJECTCLASS);
-
-                            if(!(objectClass instanceof String[])
-                                || !Arrays.asList((String[]) objectClass)
-                                    .contains(WireAdmin.class.getName()))
-                            {
-                                throw new IllegalArgumentException(
-                                    "Bad objectclass: " + objectClass);
-                            }
-
-                            put(EventConstants.SERVICE_OBJECTCLASS, objectClass);
-
-                            put(EventConstants.SERVICE_PID, ref
-                                .getProperty(EventConstants.SERVICE_PID));
-                        }
+                        properties.put(EventConstants.EXCEPTION_MESSAGE, message);
                     }
-                }));
+                }
+
+                final ServiceReference eventRef = event.getServiceReference();
+
+                if(null == eventRef)
+                {
+                    throw new IllegalArgumentException(
+                        "WireAdminEvent.getServiceReference() may not be null");
+                }
+
+                properties.put(EventConstants.SERVICE, eventRef);
+
+                properties.put(EventConstants.SERVICE_ID, eventRef
+                    .getProperty(EventConstants.SERVICE_ID));
+
+                final Object objectClass = eventRef
+                    .getProperty(Constants.OBJECTCLASS);
+
+                if(!(objectClass instanceof String[])
+                    || !Arrays.asList((String[]) objectClass)
+                        .contains(WireAdmin.class.getName()))
+                {
+                    throw new IllegalArgumentException(
+                        "Bad objectclass: " + objectClass);
+                }
+
+                properties.put(EventConstants.SERVICE_OBJECTCLASS, objectClass);
+
+                properties.put(EventConstants.SERVICE_PID, eventRef
+                    .getProperty(EventConstants.SERVICE_PID));
+                
+                eventAdmin.postEvent(new Event(topic, properties));
 
                 m_context.ungetService(ref);
             }

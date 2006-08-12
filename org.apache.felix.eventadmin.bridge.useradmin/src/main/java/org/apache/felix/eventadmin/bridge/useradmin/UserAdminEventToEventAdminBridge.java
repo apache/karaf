@@ -51,8 +51,7 @@ public class UserAdminEventToEventAdminBridge implements UserAdminListener
 
         if(null != ref)
         {
-            final EventAdmin eventAdmin = (EventAdmin) m_context
-                .getService(ref);
+            final EventAdmin eventAdmin = (EventAdmin) m_context.getService(ref);
 
             if(null != eventAdmin)
             {
@@ -74,48 +73,47 @@ public class UserAdminEventToEventAdminBridge implements UserAdminListener
                         return;
                 }
 
-                eventAdmin.postEvent(new Event(topic, new Hashtable()
+                final Hashtable properties = new Hashtable();
+                
+                properties.put(EventConstants.EVENT, event);
+
+                properties.put("role", event.getRole());
+
+                properties.put("role.name", event.getRole().getName());
+
+                properties.put("role.type", new Integer(event.getRole().getType()));
+
+                final ServiceReference eventRef = event
+                    .getServiceReference();
+
+                if(null == eventRef)
                 {
-                    {
-                        put(EventConstants.EVENT, event);
+                    throw new IllegalArgumentException(
+                        "UserAdminEvent.getServiceReference() may not be null");
+                }
 
-                        put("role", event.getRole());
+                properties.put(EventConstants.SERVICE, eventRef);
 
-                        put("role.name", event.getRole().getName());
+                properties.put(EventConstants.SERVICE_ID, eventRef
+                    .getProperty(EventConstants.SERVICE_ID));
 
-                        put("role.type", new Integer(event.getRole().getType()));
+                final Object objectClass = eventRef
+                    .getProperty(Constants.OBJECTCLASS);
 
-                        final ServiceReference ref = event
-                            .getServiceReference();
+                if(!(objectClass instanceof String[])
+                    || !Arrays.asList((String[]) objectClass).contains(
+                        UserAdmin.class.getName()))
+                {
+                    throw new IllegalArgumentException(
+                        "Bad objectclass: " + objectClass);
+                }
 
-                        if(null == ref)
-                        {
-                            throw new IllegalArgumentException(
-                                "UserAdminEvent.getServiceReference() may not be null");
-                        }
+                properties.put(EventConstants.SERVICE_OBJECTCLASS, objectClass);
 
-                        put(EventConstants.SERVICE, ref);
+                properties.put(EventConstants.SERVICE_PID, eventRef
+                    .getProperty(EventConstants.SERVICE_PID));
 
-                        put(EventConstants.SERVICE_ID, ref
-                            .getProperty(EventConstants.SERVICE_ID));
-
-                        final Object objectClass = ref
-                            .getProperty(Constants.OBJECTCLASS);
-
-                        if(!(objectClass instanceof String[])
-                            || !Arrays.asList((String[]) objectClass).contains(
-                                UserAdmin.class.getName()))
-                        {
-                            throw new IllegalArgumentException(
-                                "Bad objectclass: " + objectClass);
-                        }
-
-                        put(EventConstants.SERVICE_OBJECTCLASS, objectClass);
-
-                        put(EventConstants.SERVICE_PID, ref
-                            .getProperty(EventConstants.SERVICE_PID));
-                    }
-                }));
+                eventAdmin.postEvent(new Event(topic, properties));
 
                 m_context.ungetService(ref);
             }

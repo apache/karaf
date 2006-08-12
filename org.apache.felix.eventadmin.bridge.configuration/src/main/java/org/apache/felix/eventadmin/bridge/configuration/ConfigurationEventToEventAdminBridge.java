@@ -71,47 +71,46 @@ public class ConfigurationEventToEventAdminBridge implements
                         m_context.ungetService(ref);
                         return;
                 }
-
-                eventAdmin.postEvent(new Event(topic, new Hashtable()
+                
+                final Hashtable properties = new Hashtable();
+                
+                if(null != event.getFactoryPid())
                 {
-                    {
-                        if(null != event.getFactoryPid())
-                        {
-                            put("cm.factoryPid", event.getFactoryPid());
-                        }
-                        
-                        put("cm.pid", event.getPid());
-                        
-                        final ServiceReference ref = event.getReference();
+                    properties.put("cm.factoryPid", event.getFactoryPid());
+                }
+                
+                properties.put("cm.pid", event.getPid());
+                
+                final ServiceReference eventRef = event.getReference();
 
-                        if(null == ref)
-                        {
-                            throw new IllegalArgumentException(
-                                "ConfigurationEvent.getReference() may not be null");
-                        }
+                if(null == eventRef)
+                {
+                    throw new IllegalArgumentException(
+                        "ConfigurationEvent.getReference() may not be null");
+                }
 
-                        put(EventConstants.SERVICE, ref);
+                properties.put(EventConstants.SERVICE, eventRef);
 
-                        put(EventConstants.SERVICE_ID, ref
-                            .getProperty(EventConstants.SERVICE_ID));
+                properties.put(EventConstants.SERVICE_ID, eventRef.getProperty(
+                    EventConstants.SERVICE_ID));
 
-                        final Object objectClass = ref
-                            .getProperty(Constants.OBJECTCLASS);
+                final Object objectClass = eventRef.getProperty(
+                    Constants.OBJECTCLASS);
 
-                        if(!(objectClass instanceof String[])
-                            || !Arrays.asList((String[]) objectClass).contains(
-                                ConfigurationAdmin.class.getName()))
-                        {
-                            throw new IllegalArgumentException(
-                                "Bad objectclass: " + objectClass);
-                        }
+                if(!(objectClass instanceof String[])
+                    || !Arrays.asList((String[]) objectClass).contains(
+                    ConfigurationAdmin.class.getName()))
+                {
+                    throw new IllegalArgumentException(
+                        "Bad objectclass: " + objectClass);
+                }
 
-                        put(EventConstants.SERVICE_OBJECTCLASS, objectClass);
+                properties.put(EventConstants.SERVICE_OBJECTCLASS, objectClass);
 
-                        put(EventConstants.SERVICE_PID, ref
-                            .getProperty(EventConstants.SERVICE_PID));
-                    }
-                }));
+                properties.put(EventConstants.SERVICE_PID, eventRef.getProperty(
+                    EventConstants.SERVICE_PID));
+                
+                eventAdmin.postEvent(new Event(topic, properties));
 
                 m_context.ungetService(ref);
             }
