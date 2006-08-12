@@ -59,13 +59,13 @@ public class UPnPEventToEventAdminBridge implements UPnPEventListener
         + EventConstants.EVENT_TOPIC + "=org/osgi/service/upnp/\\*)("
         + EventConstants.EVENT_TOPIC + "=org/osgi/service/upnp/UPnPEvent)))";
 
-    private final Object m_lock = new Object();
+    final Object m_lock = new Object();
 
     // The references to the EventAdmins
-    private final Set m_adminRefs = new HashSet();
+    final Set m_adminRefs = new HashSet();
 
     // The references to the EventHandlers
-    private final Set m_handlerRefs = new HashSet();
+    final Set m_handlerRefs = new HashSet();
 
     private final BundleContext m_context;
 
@@ -181,7 +181,7 @@ public class UPnPEventToEventAdminBridge implements UPnPEventListener
     // least one EventHandler (i.e., !m_handlerRefs.isEmpty()) present and it is
     // not already registers. Respectively, it unregisters itself in case one of
     // the above is false.
-    private void check()
+    void check()
     {
         // do we need to be registered?
         if(m_adminRefs.isEmpty() || m_handlerRefs.isEmpty())
@@ -237,27 +237,24 @@ public class UPnPEventToEventAdminBridge implements UPnPEventListener
                 }
             }
 
-            // parts will one be empty if there is no handler with a valid
-            // filter
-            // and we only need to register with the new filter if it doesn't
-            // equal
-            // the last filter
+            // parts will only be empty if there is no handler with a valid
+            // filter and we only need to register with the new filter if it 
+            // doesn't equals the last filter
             if(!parts.isEmpty() && !parts.equals(last))
             {
                 last = parts;
 
                 try
                 {
-                    change(new Hashtable()
-                    {
-                        {
-                            put(UPnPEventListener.UPNP_FILTER, m_context
-                                .createFilter(result.append(")").toString()
-                                    .replaceAll("upnp.serviceId",
-                                        UPnPService.ID).replaceAll(
-                                        "upnp.deviceId", UPnPDevice.ID)));
-                        }
-                    });
+                    final Hashtable properties = new Hashtable();
+                    
+                    properties.put(UPnPEventListener.UPNP_FILTER, 
+                        m_context.createFilter(replaceAll(replaceAll(
+                        result.append(")").toString().toCharArray(),
+                        serviceChars, UPnPService.ID).toCharArray(), 
+                        deviceChars, UPnPDevice.ID)));
+                    
+                    change(properties);
                 } catch(InvalidSyntaxException e)
                 {
                     // This will never happen
@@ -265,6 +262,52 @@ public class UPnPEventToEventAdminBridge implements UPnPEventListener
                 }
             }
         }
+    }
+    
+    private static final char[] serviceChars = new char[]{'u','p','n','p','.','s','e','r','v','i','c','e','i','d'};
+    private static final char[] deviceChars = new char[]{'u','p','n','p','.','d','e','v','i','c','e','i','d'};
+    
+    private String replaceAll(final char[] source, final char[] pattern, final String target)
+    {
+        StringBuffer result = new StringBuffer();
+        
+        int pos = 0, matchPos = 0;
+        
+        while(true)
+        {   
+            if(pattern[matchPos] == Character.toLowerCase(source[pos]))
+            {
+                matchPos++;
+                if(matchPos == pattern.length)
+                {
+                    result.append(target);
+                    matchPos = 0;
+                }
+            }
+            else if(matchPos > 0 )
+            {
+                result.append(source, pos - matchPos, matchPos + 1);
+                matchPos = 0;
+            }
+            else
+            {
+                result.append(source[pos]);
+            }
+            
+            pos++;
+            
+            if(pos >= source.length)
+            {
+                if(matchPos > 0)
+                {
+                    result.append(source, pos - matchPos, matchPos);
+                }
+                
+                break;
+            }
+        }
+        
+        return result.toString();
     }
 
     private void change(final Dictionary filter)
@@ -361,17 +404,16 @@ public class UPnPEventToEventAdminBridge implements UPnPEventListener
                     }
                 };
 
-                eventAdmin.postEvent(new Event(
-                    "org/osgi/service/upnp/UPnPEvent", new Hashtable()
-                    {
-                        {
-                            put(UPnPDevice.ID, deviceId);
-                            put(UPnPService.ID, serviceId);
-                            put("upnp.serviceId", serviceId);
-                            put("upnp.deviceId", deviceId);
-                            put("upnp.events", immutableEvents);
-                        }
-                    }));
+                final Hashtable properties = new Hashtable();
+                
+                properties.put(UPnPDevice.ID, deviceId);
+                properties.put(UPnPService.ID, serviceId);
+                properties.put("upnp.serviceId", serviceId);
+                properties.put("upnp.deviceId", deviceId);
+                properties.put("upnp.events", immutableEvents);
+                
+                eventAdmin.postEvent(
+                    new Event("org/osgi/service/upnp/UPnPEvent", properties));
 
                 m_context.ungetService(ref);
             }
