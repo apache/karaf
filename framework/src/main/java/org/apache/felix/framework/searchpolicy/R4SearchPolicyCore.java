@@ -401,7 +401,7 @@ public class R4SearchPolicyCore implements ModuleListener
                 }
 
                 // If there were no "in use" candidates, then try "available"
-                // candidates.
+                // candidates and take the first one that can resolve.
                 if (candidate == null)
                 {
                     candidates = getAvailableExporters(impMatch, false);
@@ -411,7 +411,7 @@ public class R4SearchPolicyCore implements ModuleListener
                     {
                         try
                         {
-                            resolve(module);
+                            resolve(candidates[candIdx]);
                             candidate = candidates[candIdx];
                         }
                         catch (ResolveException ex)
