@@ -1,0 +1,5 @@
+.title { position: absolute; left: 1em; right: 1em; top: 10px; height: 52px; }
+.menu { position: absolute; top: 65px; left: 1em; width: 8em; }
+.menu ul { list-style: none; padding-left: 0pt}
+.main { position: absolute; top: 65px; left: 10em; right: 1em; }
+
