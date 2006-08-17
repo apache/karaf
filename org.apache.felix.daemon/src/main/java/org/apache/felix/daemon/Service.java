@@ -57,6 +57,12 @@ public class Service implements DaemonApplication
     /** the felix installation layout */
     private FelixLayout layout;
 
+    
+    public Felix getFelixInstance()
+    {
+        return instance;
+    }
+    
 
     public void init( InstallationLayout suppliedLayout, String[] args ) throws Exception
     {
