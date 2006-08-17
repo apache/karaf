@@ -21,9 +21,38 @@
       <version>${pom.version}</version>
       <scope>provided</scope>
     </dependency>
+
+    <!-- Added to test exclusions: its not a bundle so we want to exclude it -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>provided</scope>
+    </dependency>
+    
   </dependencies>
   <build>
     <plugins>
+    
+      <plugin>
+        <groupId>org.apache.felix.plugins</groupId>
+        <artifactId>maven-felix-plugin</artifactId>
+        <executions>
+          <execution>
+             <id>run</id>
+             <configuration>
+               <felixCacheDir>${basedir}/target/.felix</felixCacheDir>
+               <exclusions>
+                 <exclusion>junit:junit</exclusion>
+               </exclusions>
+             </configuration>
+             <goals>
+               <goal>run</goal>
+             </goals>
+          </execution>
+        </executions>
+      </plugin>
+    
       <plugin>
         <groupId>org.apache.felix.plugins</groupId>
         <artifactId>maven-osgi-plugin</artifactId>
