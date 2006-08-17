@@ -181,7 +181,7 @@ public class R4Export extends R4Package
         int idx = 0;
 
         // We assume (sub)strings can contain leading and trailing blanks
-loop:   for (;;)
+        for (;;)
         {
             if (idx >= target.length())
             {
@@ -199,7 +199,7 @@ loop:   for (;;)
                     // the string "" (!=null)
                 }
                 ss.setLength(0);
-                break loop;
+                break;
             }
 
             char c = target.charAt(idx++);
@@ -256,11 +256,11 @@ loop:   for (;;)
 
         boolean result = false;
         int len = pieces.length;
+        int index = 0;
 
-loop:   for (int i = 0; i < len; i++)
+        for (int i = 0; i < len; i++)
         {
             String piece = (String) pieces[i];
-            int index = 0;
             if (i == len - 1)
             {
                 // this is the last piece
@@ -272,7 +272,7 @@ loop:   for (int i = 0; i < len; i++)
                 {
                     result = false;
                 }
-                break loop;
+                break;
             }
             // initial non-star; assert index == 0
             else if (i == 0)
@@ -280,7 +280,7 @@ loop:   for (int i = 0; i < len; i++)
                 if (!s.startsWith(piece))
                 {
                     result = false;
-                    break loop;
+                    break;
                 }
             }
             // assert i > 0 && i < len-1
@@ -291,7 +291,7 @@ loop:   for (int i = 0; i < len; i++)
                 if (index < 0)
                 {
                     result = false;
-                    break loop;
+                    break;
                 }
             }
             // start beyond the matching piece
