@@ -1090,10 +1090,11 @@ loop:   for (;;)
             Boolean result = Boolean.FALSE;
             int len = pieces.length;
 
-            loop : for (int i = 0; i < len; i++)
+            int index = 0;
+            for (int i = 0; i < len; i++)
             {
                 String piece = (String) pieces[i];
-                int index = 0;
+                
                 if (i == len - 1)
                 {
                     // this is the last piece
@@ -1105,7 +1106,7 @@ loop:   for (;;)
                     {
                         result = Boolean.FALSE;
                     }
-                    break loop;
+                    break;
                 }
                 // initial non-star; assert index == 0
                 else if (i == 0)
@@ -1113,7 +1114,7 @@ loop:   for (;;)
                     if (!s.startsWith(piece))
                     {
                         result = Boolean.FALSE;
-                        break loop;
+                        break;
                     }
                 }
                 // assert i > 0 && i < len-1
@@ -1124,7 +1125,7 @@ loop:   for (;;)
                     if (index < 0)
                     {
                         result = Boolean.FALSE;
-                        break loop;
+                        break;
                     }
                 }
                 // start beyond the matching piece
@@ -1310,13 +1311,11 @@ loop:   for (;;)
             }
             catch (Exception ex)
             {
-                String msg = (ex.getCause() == null)
-                    ? ex.toString() : ex.getCause().toString();
                 throw new EvaluationException(
                     "Could not instantiate class "
                         + lhsClass.getName()
                         + " with constructor String parameter "
-                        + rhs + " " + msg);
+                        + rhs + " " + ex);
             }
 
             Comparable lhsComparable = (Comparable) lhs;
