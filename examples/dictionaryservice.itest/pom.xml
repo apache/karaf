@@ -6,8 +6,8 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <packaging>osgi-bundle</packaging>
-  <name>Apache Felix Examples: Dictionary Client</name>
-  <artifactId>org.apache.felix.examples.dictionaryclient</artifactId>
+  <name>Apache Felix Examples: Dictionary Service Integration Test</name>
+  <artifactId>org.apache.felix.examples.dictionaryservice.itest</artifactId>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
@@ -31,13 +31,13 @@
         <extensions>true</extensions>
         <configuration>
           <osgiManifest>
-            <bundleName>Dictionary Client Example</bundleName>
+            <bundleName>Dictionary Integration Test Example</bundleName>
             <bundleVendor>Apache Software Foundation</bundleVendor>
             <bundleDescription>
-              A bundle using the dictionary service if it finds it at startup.
+              A bundle using the dictionary service to test it.
             </bundleDescription>
             <bundleActivator>
-              org.apache.felix.examples.dictionaryclient.Activator
+              org.apache.felix.examples.dictionaryservice.itest.Activator
             </bundleActivator>
             <importPackage>
               org.osgi.framework, org.apache.felix.examples.dictionaryservice
