@@ -14,7 +14,7 @@
  *   limitations under the License.
  *
  */
-package org.apache.felix.examples.dictionaryclient;
+package org.apache.felix.examples.dictionaryservice.itest;
 
 
 import java.io.BufferedReader;
