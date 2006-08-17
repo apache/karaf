@@ -12,8 +12,9 @@
     </div>
     <div class="menu">
       <ul>
-        <li><a href="http://incubator.apache.org/felix/index.html">home</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/index.html">home</a></li>
         <li><a href="http://cwiki.apache.org/FELIX/about.html">about</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/news.html">news</a></li>
         <li><a href="http://cwiki.apache.org/FELIX/status.html">status</a></li>
         <li><a href="http://cwiki.apache.org/FELIX/license.html">license</a></li>
         <li><a href="http://cwiki.apache.org/FELIX/downloads.html">downloads</a></li>
