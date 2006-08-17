@@ -370,10 +370,9 @@ public class HttpServiceImpl implements HttpService
         
         private String aliasWildcard(String alias)
         {
-            // add wilcard filter at the end of the alias to allow servlet to 
+            // add wilcard filter at the end of the alias to allow servlet to
             // get requests which include sub-paths
-            return alias + "/*";            
-        }
-        
+            return "/".equals(alias) ? "/*" : alias + "/*";
+        } 
     }
 }
