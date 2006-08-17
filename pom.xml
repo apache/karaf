@@ -100,7 +100,7 @@
   <distributionManagement>
     <site>
       <id>felix website</id>
-      <url>file:///Users/marcel/tmp/site/</url>
+      <url>file:///${user.dir}/target/site/</url>
     </site>
     <snapshotRepository>
       <name>Apache Snapshots</name>
