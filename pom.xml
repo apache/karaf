@@ -168,7 +168,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <configuration>
-          <templateDirectory>${user.dir}</templateDirectory>
+          <templateDirectory>${user.dir}/src/site/</templateDirectory>
           <template>maven-site.vm</template>
         </configuration>
       </plugin>
