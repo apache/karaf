@@ -259,7 +259,7 @@ public class EventDispatcher
             {
                 if (listeners[i + LISTENER_BUNDLE_OFFSET].equals(bundle) &&
                     (listeners[i + LISTENER_CLASS_OFFSET] == clazz) &&
-                    listeners[i + LISTENER_OBJECT_OFFSET].equals(l))
+                    (listeners[i + LISTENER_OBJECT_OFFSET] == l))
                 {
                     idx = i;
                     break;
@@ -427,7 +427,7 @@ public class EventDispatcher
             {
                 if (listeners[i + LISTENER_BUNDLE_OFFSET].equals(bundle) &&
                     (listeners[i + LISTENER_CLASS_OFFSET] == clazz) &&
-                    listeners[i + LISTENER_OBJECT_OFFSET].equals(l))
+                    (listeners[i + LISTENER_OBJECT_OFFSET] == l))
                 {
                     if (l instanceof FrameworkListener)
                     {
