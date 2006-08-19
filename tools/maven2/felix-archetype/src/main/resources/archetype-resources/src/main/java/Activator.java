@@ -42,7 +42,7 @@ public class Activator implements BundleActivator, ServiceListener
      */
     public void start( BundleContext bundleContext ) throws Exception 
     {
-        System.out.println( "Starting to listen for service events." );
+        System.out.println( "SimpleBundle: Starting to listen for service events." );
         bundleContext.addServiceListener( this );
     }
 
@@ -59,7 +59,7 @@ public class Activator implements BundleActivator, ServiceListener
     public void stop( BundleContext bundleContext ) throws Exception 
     {
         bundleContext.removeServiceListener( this );
-        System.out.println( "Stopped listening for service events." );
+        System.out.println( "SimpleBundle: Stopped listening for service events." );
 
         // Note: It is not required that we remove the listener here, since
         // the framework will do it automatically anyway.
@@ -75,14 +75,14 @@ public class Activator implements BundleActivator, ServiceListener
     public void serviceChanged( ServiceEvent event ) 
     {
         String[] objectClass = ( String[] ) event.getServiceReference().getProperty( "objectClass" );
-        
+
         switch( event.getType() )
         {
             case( ServiceEvent.REGISTERED ):
                 System.out.println( "SimpleBundle: Service of type " + objectClass[0] + " registered." );
                 break;
-            case( ServiceEvent.UNREGISTERED ):
-                System.out.println( "SimpleBundle: Service of type " + objectClass[0] + " unregistered." );
+            case( ServiceEvent.UNREGISTERING ):
+                System.out.println( "SimpleBundle: Service of type " + objectClass[0] + " unregistering." );
                 break;
             case( ServiceEvent.MODIFIED ):
                 System.out.println( "SimpleBundle: Service of type " + objectClass[0] + " modified." );

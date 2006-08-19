@@ -47,9 +47,6 @@
             <bundleName>Simple Bundle</bundleName>
             <bundleActivator>${groupId}.Activator</bundleActivator>
             <bundleVendor>Apache Software Foundation</bundleVendor>
-            <importPackage>
-              ${groupId}
-            </importPackage>
           </osgiManifest>
         </configuration>
       </plugin>

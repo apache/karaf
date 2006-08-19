@@ -60,9 +60,6 @@
             <bundleName>Simple Bundle</bundleName>
             <bundleActivator>${groupId}.Activator</bundleActivator>
             <bundleVendor>Apache Software Foundation</bundleVendor>
-            <importBundle>
-              ${groupId}
-            </importBundle>
           </osgiManifest>
         </configuration>
       </plugin>
