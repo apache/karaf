@@ -29,7 +29,6 @@
         <groupId>org.apache.felix.plugins</groupId>
         <artifactId>maven-osgi-plugin</artifactId>
         <extensions>true</extensions>
-        <version>0.8.0-SNAPSHOT</version>
         <configuration>
           <!--
           *************************************************
