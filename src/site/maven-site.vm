@@ -13,7 +13,6 @@
     <div class="menu">
       <ul>
         <li><a href="http://cwiki.apache.org/FELIX/index.html">home</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/about.html">about</a></li>
         <li><a href="http://cwiki.apache.org/FELIX/news.html">news</a></li>
         <li><a href="http://cwiki.apache.org/FELIX/status.html">status</a></li>
         <li><a href="http://cwiki.apache.org/FELIX/license.html">license</a></li>
@@ -21,7 +20,7 @@
         <li><a href="http://cwiki.apache.org/FELIX/documentation.html">documentation</a></li>
         <li><a href="http://cwiki.apache.org/FELIX/committers.html">committers</a></li>
         <li><a href="http://cwiki.apache.org/FELIX/mailinglists.html">mailing lists</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/faq.html">FAQ</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/faq.html">faq</a></li>
         <li><a href="http://cwiki.apache.org/FELIX/roadmap.html">roadmap</a></li>
         <li><a href="http://cwiki.apache.org/FELIX/sourcecode.html">source code</a></li>
         <li><a href="http://cwiki.apache.org/FELIX/codingstandards.html">coding standards</a></li>
