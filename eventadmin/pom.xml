@@ -36,6 +36,7 @@
             <bundleDescription>
               This bundle provides an implementation of the OSGi R4 EventAdmin service.
             </bundleDescription>
+            <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
             <bundleActivator>
               org.apache.felix.eventadmin.impl.Activator
             </bundleActivator>
