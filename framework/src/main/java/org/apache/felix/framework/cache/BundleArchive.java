@@ -17,6 +17,7 @@
 package org.apache.felix.framework.cache;
 
 import java.io.*;
+import java.util.Collection;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.ObjectInputStreamX;
@@ -80,7 +81,7 @@ public class BundleArchive
     private static final transient String ACTIVE_STATE = "active";
     private static final transient String INSTALLED_STATE = "installed";
     private static final transient String UNINSTALLED_STATE = "uninstalled";
-    
+
     private Logger m_logger = null;
     private long m_id = -1;
     private File m_archiveRootDir = null;
@@ -89,6 +90,7 @@ public class BundleArchive
     private int m_persistentState = -1;
     private int m_startLevel = -1;
     private BundleRevision[] m_revisions = null;
+    private Collection m_trustedCaCerts = null;
 
     private long m_refreshCount = -1;
 
@@ -120,7 +122,8 @@ public class BundleArchive
      * @throws Exception if any error occurs.
     **/
     public BundleArchive(
-        Logger logger, File archiveRootDir, long id, String location, InputStream is)    
+        Logger logger, File archiveRootDir, long id, String location, InputStream is,
+        Collection trustedCaCerts)
         throws Exception
     {
         m_logger = logger;
@@ -132,6 +135,7 @@ public class BundleArchive
                 "Bundle ID cannot be less than or equal to zero.");
         }
         m_originalLocation = location;
+        m_trustedCaCerts = trustedCaCerts;
 
         // Save state.
         initialize();
@@ -152,11 +156,13 @@ public class BundleArchive
      * @param id the bundle identifier associated with the archive.
      * @throws Exception if any error occurs.
     **/
-    public BundleArchive(Logger logger, File archiveRootDir)    
+    public BundleArchive(Logger logger, File archiveRootDir,
+        Collection trustedCaCerts)
         throws Exception
     {
         m_logger = logger;
         m_archiveRootDir = archiveRootDir;
+        m_trustedCaCerts = trustedCaCerts;
 
         // Add a revision for each one that already exists in the file
         // system. The file system might contain more than one revision
@@ -192,12 +198,12 @@ public class BundleArchive
         }
 
         // Add the revision object for the most recent revision. We first try to read
-        // the location from the current revision - if that fails we likely have 
-        // an old bundle cache and read the location the old way. The next 
+        // the location from the current revision - if that fails we likely have
+        // an old bundle cache and read the location the old way. The next
         // revision will update the bundle cache.
         // TODO: FRAMEWORK - This try catch block can eventually be deleted when we decide to remove
         // support for the old way, then we only need the first call to revise().
-        try 
+        try
         {
             revise(getRevisionLocation(revisionCount - 1), null);
         }
@@ -638,7 +644,7 @@ public class BundleArchive
         setCurrentLocation(location);
 
         setRevisionLocation(location, (m_revisions == null) ? 0 : m_revisions.length);
-        
+
         // Add new revision to revision array.
         if (m_revisions == null)
         {
@@ -672,47 +678,57 @@ public class BundleArchive
         {
             return false;
         }
-        
+
         String location = getRevisionLocation(m_revisions.length - 2);
 
         // TODO: FRAMEWORK - This can eventually be deleted when we removed
         // support for the old way of doing things.
         setCurrentLocation(location);
-        
+
         try
         {
             m_revisions[m_revisions.length - 1].dispose();
-        } 
+        }
         catch(Exception ex)
         {
-           m_logger.log(Logger.LOG_ERROR, getClass().getName() + 
-               ": Unable to dispose latest revision", ex); 
+           m_logger.log(Logger.LOG_ERROR, getClass().getName() +
+               ": Unable to dispose latest revision", ex);
         }
 
-        File revisionDir = new File(m_archiveRootDir, REVISION_DIRECTORY + 
+        File revisionDir = new File(m_archiveRootDir, REVISION_DIRECTORY +
             getRefreshCount() + "." + (m_revisions.length - 1));
-        
+
         if (BundleCache.getSecureAction().fileExists(revisionDir))
         {
             BundleCache.deleteDirectoryTree(revisionDir);
         }
-        
+
         BundleRevision[] tmp = new BundleRevision[m_revisions.length - 1];
         System.arraycopy(m_revisions, 0, tmp, 0, m_revisions.length - 1);
-        
+
         return true;
     }
-    
+
+    public synchronized java.security.cert.Certificate[] getCertificates()
+    {
+        return m_revisions[m_revisions.length -1].getCertificates();
+    }
+
+    public synchronized String[] getDNChains()
+    {
+        return m_revisions[m_revisions.length -1].getDNChains();
+    }
+
     private synchronized String getRevisionLocation(int revision) throws Exception
-    {   
+    {
         InputStream is = null;
         BufferedReader br = null;
         try
         {
             is = BundleCache.getSecureAction().getFileInputStream(new File(
-                new File(m_archiveRootDir, REVISION_DIRECTORY + 
+                new File(m_archiveRootDir, REVISION_DIRECTORY +
                 getRefreshCount() + "." + revision), REVISION_LOCATION_FILE));
-            
+
             br = new BufferedReader(new InputStreamReader(is));
             return br.readLine();
         }
@@ -722,7 +738,7 @@ public class BundleArchive
             if (is != null) is.close();
         }
     }
-    
+
     private synchronized void setRevisionLocation(String location, int revision) throws Exception
     {
         // Save current revision location.
@@ -732,7 +748,7 @@ public class BundleArchive
         {
             os = BundleCache.getSecureAction()
                 .getFileOutputStream(new File(
-                    new File(m_archiveRootDir, REVISION_DIRECTORY + 
+                    new File(m_archiveRootDir, REVISION_DIRECTORY +
                     getRefreshCount() + "." + revision), REVISION_LOCATION_FILE));
             bw = new BufferedWriter(new OutputStreamWriter(os));
             bw.write(location, 0, location.length());
@@ -743,7 +759,7 @@ public class BundleArchive
             if (os != null) os.close();
         }
     }
-    
+
     /**
      * <p>
      * This method removes all old revisions associated with the archive
@@ -785,10 +801,10 @@ public class BundleArchive
         // Save the current revision location for use later when
         // we recreate the revision.
         String location = getRevisionLocation(count -1);
-        
+
         // Increment the refresh count.
         setRefreshCount(refreshCount + 1);
-        
+
         // Rename the current revision directory to be the zero revision
         // of the new refresh level.
         File currentDir = new File(m_archiveRootDir, REVISION_DIRECTORY + (refreshCount + 1) + ".0");
@@ -962,6 +978,8 @@ public class BundleArchive
         File revisionRootDir = new File(m_archiveRootDir,
             REVISION_DIRECTORY + getRefreshCount() + "." + getRevisionCount());
 
+        BundleRevision result = null;
+
         try
         {
             // Check if the location string represents a reference URL.
@@ -986,22 +1004,22 @@ public class BundleArchive
                 // flag set to true.
                 if (BundleCache.getSecureAction().isFileDirectory(file))
                 {
-                    return new DirectoryRevision(m_logger, revisionRootDir, location);
+                    result = new DirectoryRevision(m_logger, revisionRootDir, location);
                 }
                 else
                 {
-                    return new JarRevision(m_logger, revisionRootDir, location, true);
+                    result = new JarRevision(m_logger, revisionRootDir, location, true);
                 }
             }
             else if (location.startsWith(INPUTSTREAM_PROTOCOL))
             {
                 // Assume all input streams point to JAR files.
-                return new JarRevision(m_logger, revisionRootDir, location, false, is);
+                result = new JarRevision(m_logger, revisionRootDir, location, false, is);
             }
             else
             {
                 // Anything else is assumed to be a URL to a JAR file.
-                return new JarRevision(m_logger, revisionRootDir, location, false);
+                result = new JarRevision(m_logger, revisionRootDir, location, false);
             }
         }
         catch (Exception ex)
@@ -1019,6 +1037,10 @@ public class BundleArchive
             }
             throw ex;
         }
+
+        result.setTrustedCaCerts(m_trustedCaCerts);
+
+        return result;
     }
 
     /**

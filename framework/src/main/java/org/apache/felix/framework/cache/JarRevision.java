@@ -20,9 +20,9 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.PrivilegedActionException;
-import java.util.Map;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
+import java.security.cert.X509Certificate;
+import java.util.*;
+import java.util.jar.*;
 import java.util.zip.ZipEntry;
 
 import org.apache.felix.framework.Logger;
@@ -50,7 +50,7 @@ class JarRevision extends BundleRevision
     private Map m_header = null;
 
     public JarRevision(
-        Logger logger, File revisionRootDir, String location, boolean byReference)    
+        Logger logger, File revisionRootDir, String location, boolean byReference)
         throws Exception
     {
         this(logger, revisionRootDir, location, byReference, null);
@@ -58,7 +58,7 @@ class JarRevision extends BundleRevision
 
     public JarRevision(
         Logger logger, File revisionRootDir, String location,
-        boolean byReference, InputStream is)    
+        boolean byReference, InputStream is)
         throws Exception
     {
         super(logger, revisionRootDir, location);
@@ -168,7 +168,7 @@ class JarRevision extends BundleRevision
                     }
                 }
             }
-    
+
             // If there is nothing on the class path, then include
             // "." by default, as per the spec.
             if (contentPath.length == 0)
@@ -272,11 +272,11 @@ class JarRevision extends BundleRevision
             {
                 if (is == null)
                 {
-                    // Do it the manual way to have a chance to 
+                    // Do it the manual way to have a chance to
                     // set request properties such as proxy auth.
                     URL url = new URL(getLocation());
-                    URLConnection conn = url.openConnection(); 
-        
+                    URLConnection conn = url.openConnection();
+
                     // Support for http proxy authentication.
                     String auth = BundleCache.getSecureAction()
                         .getSystemProperty("http.proxyAuth", null);
@@ -292,7 +292,7 @@ class JarRevision extends BundleRevision
                     }
                     is = BundleCache.getSecureAction().getURLConnectionInputStream(conn);
                 }
-    
+
                 // Save the bundle jar file.
                 BundleCache.copyStreamToFile(is, m_bundleFile);
             }
@@ -421,7 +421,7 @@ class JarRevision extends BundleRevision
                             throw new IOException("Unable to create embedded JAR directory.");
                         }
                     }
-    
+
                     // Extract embedded JAR into its directory.
                     is = new BufferedInputStream(bundleJar.getInputStream(ze), BundleCache.BUFSIZE);
                     if (is == null)
@@ -438,5 +438,10 @@ class JarRevision extends BundleRevision
                 if (is != null) is.close();
             }
         }
+    }
+
+    protected X509Certificate[] getRevisionCertificates() throws Exception
+    {
+        return getCertificatesForJar(BundleCache.getSecureAction().openJAR(m_bundleFile, true));
     }
 }

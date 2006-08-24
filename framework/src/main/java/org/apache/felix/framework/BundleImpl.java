@@ -19,10 +19,7 @@ package org.apache.felix.framework;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
 import org.osgi.framework.*;
 
@@ -65,70 +62,70 @@ class BundleImpl implements Bundle
     public URL getEntry(String name)
     {
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
-            try 
+            try
             {
-                ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+                ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                     AdminPermission.RESOURCE));
-            } 
+            }
             catch (Exception e)
             {
                 return null; // No permission
             }
         }
-        
+
         return m_felix.getBundleEntry(this, name);
     }
 
     public Enumeration getEntryPaths(String path)
     {
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
-            try 
+            try
             {
-                ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+                ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                     AdminPermission.RESOURCE));
-            } 
+            }
             catch (Exception e)
             {
                 return null; // No permission
             }
         }
-        
+
         return m_felix.getBundleEntryPaths(this, path);
     }
 
     public Enumeration findEntries(String path, String filePattern, boolean recurse)
     {
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
-            try 
+            try
             {
-                ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+                ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                     AdminPermission.RESOURCE));
-            } 
+            }
             catch (Exception e)
             {
                 return null; // No permission
             }
         }
-        
+
         return m_felix.findBundleEntries(this, path, filePattern, recurse);
     }
 
     public Dictionary getHeaders()
     {
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
-            ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+            ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                 AdminPermission.METADATA));
         }
         return m_felix.getBundleHeaders(this);
@@ -142,10 +139,10 @@ class BundleImpl implements Bundle
     public String getLocation()
     {
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
-            ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+            ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                 AdminPermission.METADATA));
         }
         return m_felix.getBundleLocation(this);
@@ -170,51 +167,51 @@ class BundleImpl implements Bundle
     public ServiceReference[] getRegisteredServices()
     {
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
             ServiceReference[] refs = m_felix.getBundleRegisteredServices(this);
-            
+
             if (refs == null)
             {
                 return refs;
             }
-            
+
             List result = new ArrayList();
-            
+
             for (int i = 0;i < refs.length;i++)
             {
                 String[] objectClass = (String[]) refs[i].getProperty(
                     Constants.OBJECTCLASS);
-                
+
                 if (objectClass == null)
                 {
                     continue;
                 }
-                
+
                 for (int j = 0;j < objectClass.length;j++)
                 {
                     try
                     {
                         ((SecurityManager) sm).checkPermission(new ServicePermission(
                             objectClass[j], ServicePermission.GET));
-                        
+
                         result.add(refs[i]);
-                        
+
                         break;
-                    } 
+                    }
                     catch (Exception e)
                     {
-                        
+
                     }
                 }
             }
-            
+
             if (result.isEmpty())
             {
                 return null;
             }
-            
+
             return (ServiceReference[]) result.toArray(new ServiceReference[result.size()]);
         }
         else
@@ -226,54 +223,54 @@ class BundleImpl implements Bundle
     public ServiceReference[] getServicesInUse()
     {
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
             ServiceReference[] refs = m_felix.getBundleServicesInUse(this);
-            
+
             if (refs == null)
             {
                 return refs;
             }
-            
+
             List result = new ArrayList();
-            
+
             for (int i = 0;i < refs.length;i++)
             {
                 String[] objectClass = (String[]) refs[i].getProperty(
                     Constants.OBJECTCLASS);
-                
+
                 if (objectClass == null)
                 {
                     continue;
                 }
-                
+
                 for (int j = 0;j < objectClass.length;j++)
                 {
                     try
                     {
                         ((SecurityManager) sm).checkPermission(new ServicePermission(
                             objectClass[j], ServicePermission.GET));
-                        
+
                         result.add(refs[i]);
-                        
+
                         break;
-                    } 
+                    }
                     catch (Exception e)
                     {
-                        
+
                     }
                 }
             }
-            
+
             if (result.isEmpty())
             {
                 return null;
             }
-            
+
             return (ServiceReference[]) result.toArray(new ServiceReference[result.size()]);
         }
-        
+
         return m_felix.getBundleServicesInUse(this);
     }
 
@@ -296,33 +293,33 @@ class BundleImpl implements Bundle
     public Class loadClass(String name) throws ClassNotFoundException
     {
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
-            try 
+            try
             {
-                ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+                ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                     AdminPermission.CLASS));
-            } 
+            }
             catch (Exception e)
             {
                 throw new ClassNotFoundException("No permission.", e);
             }
         }
-        
+
         return m_felix.loadBundleClass(this, name);
     }
 
     public void start() throws BundleException
     {
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
-            ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+            ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                 AdminPermission.EXECUTE));
         }
- 
+
         m_felix.startBundle(this, true);
     }
 
@@ -334,39 +331,39 @@ class BundleImpl implements Bundle
     public void update(InputStream is) throws BundleException
     {
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
-            ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+            ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                 AdminPermission.LIFECYCLE));
         }
-        
+
         m_felix.updateBundle(this, is);
     }
 
     public void stop() throws BundleException
     {
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
-            ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+            ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                 AdminPermission.EXECUTE));
         }
-        
+
         m_felix.stopBundle(this, true);
     }
 
     public void uninstall() throws BundleException
     {
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
-            ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+            ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                 AdminPermission.LIFECYCLE));
         }
-        
+
         m_felix.uninstallBundle(this);
     }
 
@@ -384,13 +381,13 @@ class BundleImpl implements Bundle
         // TODO: Implement Bundle.getHeaders(String locale)
         // Should be done after [#FELIX-27] resolution
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
-            ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+            ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                 AdminPermission.METADATA));
         }
-     
+
         return null;
     }
 
@@ -398,20 +395,20 @@ class BundleImpl implements Bundle
     {
         // TODO: Implement Bundle.getResources()
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
-            try 
+            try
             {
-                ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+                ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                     AdminPermission.RESOURCE));
-            } 
+            }
             catch (Exception e)
             {
                 return null; // No permission
             }
         }
-        
+
         return null;
     }
 
@@ -422,5 +419,14 @@ class BundleImpl implements Bundle
             return (((BundleImpl) obj).getInfo().getBundleId() == getInfo().getBundleId());
         }
         return false;
+    }
+
+    /*
+     * This is a hack to get access to the subject-dns of the current revision
+     * from inside the AdminPermission.
+     */
+    String[] getSubjectDNs()
+    {
+        return m_info.getArchive().getDNChains();
     }
 }

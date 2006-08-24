@@ -18,6 +18,7 @@ package org.apache.felix.framework.cache;
 
 import java.io.File;
 import java.io.InputStream;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 
 import org.apache.felix.framework.util.FelixConstants;
@@ -64,6 +65,11 @@ public class SystemBundleArchive extends BundleArchive
 
             public void dispose() throws Exception
             {
+            }
+
+            protected X509Certificate[] getRevisionCertificates()
+            {
+                return null;
             }
         };
     }
@@ -148,7 +154,7 @@ public class SystemBundleArchive extends BundleArchive
     {
         return m_headerMap;
     }
-    
+
     public void setManifestHeader(Map headerMap)
     {
         m_headerMap = headerMap;

@@ -23,6 +23,7 @@ import org.apache.felix.framework.cache.SystemBundleArchive;
 import org.apache.felix.framework.searchpolicy.R4Export;
 import org.apache.felix.framework.searchpolicy.R4Package;
 import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.framework.util.SecureAction;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.moduleloader.IContentLoader;
 import org.osgi.framework.*;
@@ -34,11 +35,14 @@ class SystemBundle extends BundleImpl
     private Thread m_shutdownThread = null;
     private R4Export[] m_exports = null;
     private IContentLoader m_contentLoader = null;
+    private SecureAction m_secureAction = null;
 
-    protected SystemBundle(Felix felix, BundleInfo info, List activatorList)
-        throws BundleException
+    protected SystemBundle(Felix felix, BundleInfo info, List activatorList,
+        SecureAction secureAction) throws BundleException
     {
         super(felix, info);
+
+        m_secureAction = secureAction;
 
         // Create an activator list if necessary.
         if (activatorList == null)
@@ -142,10 +146,13 @@ class SystemBundle extends BundleImpl
 
         getInfo().setState(Bundle.STARTING);
 
-        try {
+        try
+        {
             getInfo().setContext(new BundleContextImpl(getFelix(), this));
             getActivator().start(getInfo().getContext());
-        } catch (Throwable throwable) {
+        }
+        catch (Throwable throwable)
+        {
             throw new BundleException(
                 "Unable to start system bundle.", throwable);
         }
@@ -158,13 +165,13 @@ class SystemBundle extends BundleImpl
     public synchronized void stop() throws BundleException
     {
         Object sm = System.getSecurityManager();
-        
-        if(sm != null)
+
+        if (sm != null)
         {
-            ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+            ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                 AdminPermission.EXECUTE));
         }
-    
+
         // Spec says stop() on SystemBundle should return immediately and
         // shutdown framework on another thread.
         if (getFelix().getStatus() == Felix.RUNNING_STATUS)
@@ -191,23 +198,7 @@ class SystemBundle extends BundleImpl
                         ? false : embedded.equals("true");
                     if (!isEmbedded)
                     {
-                        if (System.getSecurityManager() != null)
-                        {
-                            java.security.AccessController.doPrivileged(
-                                new java.security.PrivilegedAction()
-                                {
-                                    public Object run()
-                                    {
-                                        System.exit(0);
-                                        
-                                        return null;
-                                    }
-                                });
-                        }
-                        else
-                        {
-                            System.exit(0);
-                        }
+                        m_secureAction.exit(0);
                     }
                 }
             };
@@ -243,10 +234,10 @@ class SystemBundle extends BundleImpl
     public synchronized void update(InputStream is) throws BundleException
     {
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
-            ((SecurityManager) sm).checkPermission(new AdminPermission(this, 
+            ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                 AdminPermission.EXECUTE));
         }
 

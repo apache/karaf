@@ -17,8 +17,7 @@
 package org.apache.felix.framework.cache;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.PropertyResolver;
@@ -84,14 +83,17 @@ public class BundleCache
     private Logger m_logger = null;
     private File m_profileDir = null;
     private BundleArchive[] m_archives = null;
+    private Collection m_trustedCaCerts = null;
 
     private static SecureAction m_secureAction = new SecureAction();
 
-    public BundleCache(PropertyResolver cfg, Logger logger)
+    public BundleCache(PropertyResolver cfg, Logger logger,
+        Collection trustedCaCerts)
         throws Exception
     {
         m_cfg = cfg;
         m_logger = logger;
+        m_trustedCaCerts = trustedCaCerts;
         initialize();
     }
 
@@ -143,7 +145,8 @@ public class BundleCache
         {
             // Create the archive and add it to the list of archives.
             BundleArchive ba =
-                new BundleArchive(m_logger, archiveRootDir, id, location, is);
+                new BundleArchive(m_logger, archiveRootDir, id, location, is,
+                m_trustedCaCerts);
             BundleArchive[] tmp = new BundleArchive[m_archives.length + 1];
             System.arraycopy(m_archives, 0, tmp, 0, m_archives.length);
             tmp[m_archives.length] = ba;
@@ -330,7 +333,7 @@ public class BundleCache
                 try
                 {
                     archiveList.add(
-                        new BundleArchive(m_logger, children[i]));
+                        new BundleArchive(m_logger, children[i], m_trustedCaCerts));
                 }
                 catch (Exception ex)
                 {
@@ -340,7 +343,7 @@ public class BundleCache
                 }
             }
         }
-        
+
         m_archives = (BundleArchive[])
             archiveList.toArray(new BundleArchive[archiveList.size()]);
     }

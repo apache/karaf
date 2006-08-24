@@ -18,6 +18,7 @@ package org.apache.felix.framework;
 
 import java.io.*;
 import java.net.*;
+import java.security.*;
 import java.util.*;
 
 import org.apache.felix.framework.cache.*;
@@ -93,6 +94,11 @@ public class Felix
 
     // Reusable bundle URL stream handler.
     private URLStreamHandler m_bundleStreamHandler = null;
+
+    // The secure action used to do privileged calls
+    private SecureAction m_secureAction = new SecureAction();
+
+    private Collection m_trustedCaCerts = null;
 
     /**
      * <p>
@@ -182,21 +188,29 @@ public class Felix
      * able to take advantage of the features it provides; refer to its
      * class documentation for more information.
      * </p>
-     * 
+     *
      * @param configMutable An object for obtaining configuration properties,
      *        may be <tt>null</tt>.
      * @param frameworkProps An object for obtaining framework properties,
      *        may be <tt>null</tt>.
      * @param activatorList A list of System Bundle activators.
     **/
+    public synchronized void start(MutablePropertyResolver configMutable,
+        List activatorList)
+    {
+        start(configMutable, activatorList, (Collection) null);
+    }
+
     public synchronized void start(
         MutablePropertyResolver configMutable,
-        List activatorList)
+        List activatorList, Collection trustedCaCerts)
     {
         if (m_frameworkStatus != INITIAL_STATUS)
         {
             throw new IllegalStateException("Invalid framework status: " + m_frameworkStatus);
         }
+
+        m_trustedCaCerts = trustedCaCerts;
 
         // The framework is now in its startup sequence.
         m_frameworkStatus = STARTING_STATUS;
@@ -227,7 +241,7 @@ public class Felix
 
         try
         {
-            m_cache = new BundleCache(m_config, m_logger);
+            m_cache = new BundleCache(m_config, m_logger, m_trustedCaCerts);
         }
         catch (Exception ex)
         {
@@ -241,23 +255,7 @@ public class Felix
                 ? false : embedded.equals("true");
             if (!isEmbedded)
             {
-                if (System.getSecurityManager() != null)
-                {
-                    java.security.AccessController.doPrivileged(
-                        new java.security.PrivilegedAction()
-                        {
-                            public Object run()
-                            {
-                                System.exit(-1);
-                                
-                                return null;
-                            }
-                        });
-                }
-                else
-                {
-                    System.exit(-1);
-                }
+                m_secureAction.exit(-1);
             }
             else
             {
@@ -339,7 +337,8 @@ public class Felix
             // Create a simple bundle info for the system bundle.
             BundleInfo info = new BundleInfo(
                 m_logger, new SystemBundleArchive(), null);
-            systembundle = new SystemBundle(this, info, activatorList);
+            systembundle = new SystemBundle(this, info, activatorList,
+                m_secureAction);
             // Create a module for the system bundle.
             IModuleDefinition md = new ModuleDefinition(
                 systembundle.getExports(), null, null, null);
@@ -350,6 +349,9 @@ public class Felix
             m_factory.setContentLoader(
                 systembundle.getInfo().getCurrentModule(),
                 systembundle.getContentLoader());
+            m_factory.setSecurityContext(
+                systembundle.getInfo().getCurrentModule(),
+                systembundle.getClass().getProtectionDomain());
 
             m_installedBundleMap.put(
                 systembundle.getInfo().getLocation(), systembundle);
@@ -380,7 +382,7 @@ public class Felix
             m_logger.log(Logger.LOG_ERROR, "Unable to start system bundle.", ex);
             throw new RuntimeException("Unable to start system bundle.");
         }
-        
+
         // Reload and cached bundles.
         BundleArchive[] archives = null;
 
@@ -672,10 +674,10 @@ public class Felix
             // Determine if we are lowering or raising the
             // active start level.
             boolean lowering = (requestedLevel < m_activeStartLevel);
-    
+
             // Record new start level.
             m_activeStartLevel = requestedLevel;
-    
+
             // Get a snapshot of all installed bundles.
             bundles = getBundles();
 
@@ -883,7 +885,7 @@ public class Felix
     {
         // Acquire bundle lock.
         acquireBundleLock((BundleImpl) bundle);
-        
+
         Throwable rethrow = null;
 
         try
@@ -897,7 +899,7 @@ public class Felix
             {
                 BundleImpl impl = (BundleImpl) bundle;
                 impl.getInfo().setStartLevel(startLevel);
-    
+
                 try
                 {
                     // Start the bundle if necessary.
@@ -1070,11 +1072,9 @@ public class Felix
             try
             {
                 return (obj instanceof java.security.Permission)
-                    ? java.security.Policy.getPolicy().getPermissions(
-                        new java.security.CodeSource(
-                            new java.net.URL(bundle.getInfo().getLocation()),
-                            (java.security.cert.Certificate[]) null))
-                                .implies((java.security.Permission) obj)
+                    ? ((ProtectionDomain)
+                    bundle.getInfo().getCurrentModule().getSecurityContext())
+                    .implies((java.security.Permission) obj)
                     : false;
             }
             catch (Exception ex)
@@ -1083,7 +1083,7 @@ public class Felix
                     Logger.LOG_WARNING,
                     "Exception while evaluating the permission.",
                     ex);
-                return false; 
+                return false;
             }
         }
 
@@ -1124,7 +1124,7 @@ public class Felix
         // we only acquire the lock for the bundle being started, because
         // when resolve is called on this bundle, it will eventually
         // call resolve on the module loader search policy, which does
-        // its own locking on the module factory instance. Since the 
+        // its own locking on the module factory instance. Since the
         // resolve algorithm is locking the module factory instance, it
         // is not possible for other bundles to be installed or removed,
         // so we don't have to worry about these possibilities.
@@ -1205,16 +1205,8 @@ public class Felix
             // Activate the bundle if it has an activator.
             if (bundle.getInfo().getActivator() != null)
             {
-                if (System.getSecurityManager() != null)
-                {
-                    java.security.AccessController.doPrivileged(
-                        new PrivilegedActivatorCall(PrivilegedActivatorCall.START,
-                        info.getActivator(), info.getContext()));
-                }
-                else
-                {
-                    info.getActivator().start(info.getContext());
-                }
+                m_secureAction.startActivator(info.getActivator(),
+                    info.getContext());
             }
 
             // TODO: CONCURRENCY - Reconsider firing event outside of the
@@ -1251,7 +1243,7 @@ public class Felix
             {
                 throw (SecurityException) th;
             }
-            else if ((System.getSecurityManager() != null) && 
+            else if ((System.getSecurityManager() != null) &&
                 (th instanceof java.security.PrivilegedActionException))
             {
                 th = ((java.security.PrivilegedActionException) th).getException();
@@ -1269,33 +1261,39 @@ public class Felix
         // to import the necessary packages.
         if (System.getSecurityManager() != null)
         {
-            URL url = null;
-            try
+
+            ProtectionDomain pd = (ProtectionDomain)
+                bundle.getInfo().getCurrentModule().getSecurityContext();
+
+            R4Import[] imports =
+                bundle.getInfo().getCurrentModule().getDefinition().getImports();
+
+            for (int i = 0;i < imports.length; i++)
             {
-                url = new URL(bundle.getInfo().getLocation());
-            }
-            catch (MalformedURLException ex)
-            {
-                throw new BundleException("Cannot resolve, bad URL "
-                    + bundle.getInfo().getLocation());
-            }
-            
-            try
-            {
-                java.security.AccessController.doPrivileged(
-                    new CheckImportsPrivileged(url, bundle));
-            }
-            catch (java.security.PrivilegedActionException ex)
-            {
-                Exception thrown = 
-                    ((java.security.PrivilegedActionException) ex).getException();
-                if (thrown instanceof SecurityException)
+                PackagePermission perm = new PackagePermission(imports[i].getName(),
+                    PackagePermission.IMPORT);
+
+                if (!pd.implies(perm))
                 {
-                    throw (SecurityException) thrown;
+                   throw new java.security.AccessControlException(
+                       "PackagePermission.IMPORT denied for import: " +
+                       imports[i].getName(), perm);
                 }
-                else
+            }
+            // Check export permission for all exports of the current module.
+            R4Export[] implicitImports =
+                bundle.getInfo().getCurrentModule().getDefinition().getExports();
+
+            for (int i = 0;i < implicitImports.length; i++)
+            {
+                PackagePermission perm = new PackagePermission(
+                    implicitImports[i].getName(), PackagePermission.EXPORT);
+
+                if (!pd.implies(perm))
                 {
-                    throw new BundleException("Problem resolving: " + ex);
+                    throw new java.security.AccessControlException(
+                        "PackagePermission.EXPORT denied for implicit export: " +
+                        implicitImports[i].getName(), perm);
                 }
             }
         }
@@ -1343,7 +1341,7 @@ public class Felix
     {
         // We guarantee to close the input stream, so put it in a
         // finally clause.
-    
+
         try
         {
             // Variable to indicate whether bundle is active or not.
@@ -1385,21 +1383,21 @@ public class Felix
                         info.getBundleId(),
                         archive.getRevisionCount() - 1,
                         info.getCurrentHeader());
-                    
+
                     Object sm = System.getSecurityManager();
-                    
+
                     if (sm != null)
                     {
                         ((SecurityManager) sm).checkPermission(
                             new AdminPermission(bundle, AdminPermission.LIFECYCLE));
                     }
-                    
+
                     // Add module to bundle info.
                     info.addModule(module);
-                } 
+                }
                 catch (Exception ex)
                 {
-                    try 
+                    try
                     {
                         archive.undoRevise();
                     }
@@ -1407,7 +1405,7 @@ public class Felix
                     {
                         m_logger.log(Logger.LOG_ERROR, "Unable to rollback.", busted);
                     }
-                    
+
                     throw ex;
                 }
             }
@@ -1417,22 +1415,22 @@ public class Felix
                 rethrow = ex;
             }
 
-            // Set new state, mark as needing a refresh, and fire updated event 
+            // Set new state, mark as needing a refresh, and fire updated event
             // if successful.
             if (rethrow == null)
             {
                 info.setLastModified(System.currentTimeMillis());
                 info.setState(Bundle.INSTALLED);
                 fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
-                
+
                 // Mark previous the bundle's old module for removal since
                 // it can no longer be used to resolve other modules per the spec.
                 ((ModuleImpl) info.getModules()[info.getModules().length - 2])
                     .setRemovalPending(true);
-        
+
                 fireBundleEvent(BundleEvent.UPDATED, bundle);
             }
-    
+
             // Restart bundle, but do not change the persistent state.
             // This will not start the bundle if it was not previously
             // active.
@@ -1441,12 +1439,12 @@ public class Felix
             // If update failed, rethrow exception.
             if (rethrow != null)
             {
-                if ((System.getSecurityManager() != null) && 
+                if ((System.getSecurityManager() != null) &&
                     (rethrow instanceof SecurityException))
                 {
                     throw (SecurityException) rethrow;
                 }
-                
+
                 throw new BundleException("Update failed.", rethrow);
             }
         }
@@ -1484,7 +1482,7 @@ public class Felix
         throws BundleException
     {
         Throwable rethrow = null;
-    
+
         // Set the bundle's persistent state to inactive if necessary.
         if (record)
         {
@@ -1492,7 +1490,7 @@ public class Felix
         }
 
         BundleInfo info = bundle.getInfo();
-        
+
         switch (info.getState())
         {
             case Bundle.UNINSTALLED:
@@ -1514,18 +1512,10 @@ public class Felix
         {
             if (bundle.getInfo().getActivator() != null)
             {
-                if (System.getSecurityManager() != null)
-                {
-                    java.security.AccessController.doPrivileged(
-                        new PrivilegedActivatorCall(PrivilegedActivatorCall.STOP,
-                        info.getActivator(), info.getContext()));
-                }
-                else
-                {
-                    info.getActivator().stop(info.getContext());
-                }
+                m_secureAction.stopActivator(info.getActivator(),
+                    info.getContext());
             }
-        
+
             // Try to save the activator in the cache.
             // NOTE: This is non-standard OSGi behavior and only
             // occurs if strictness is disabled.
@@ -1557,17 +1547,17 @@ public class Felix
 
         // Unregister any services offered by this bundle.
         m_registry.unregisterServices(bundle);
-        
+
         // Release any services being used by this bundle.
         m_registry.ungetServices(bundle);
-        
+
         // The spec says that we must remove all event
         // listeners for a bundle when it is stopped.
         m_dispatcher.removeListeners(bundle);
-        
+
         info.setState(Bundle.RESOLVED);
         fireBundleEvent(BundleEvent.STOPPED, bundle);
-        
+
         // Throw activator error if there was one.
         if (rethrow != null)
         {
@@ -1581,12 +1571,12 @@ public class Felix
             {
                 throw (SecurityException) rethrow;
             }
-            else if ((System.getSecurityManager() != null) && 
+            else if ((System.getSecurityManager() != null) &&
                 (rethrow instanceof java.security.PrivilegedActionException))
             {
                 rethrow = ((java.security.PrivilegedActionException) rethrow).getException();
             }
-    
+
             // Rethrow all other exceptions as a BundleException.
             throw new BundleException("Activator stop error.", rethrow);
         }
@@ -1772,9 +1762,9 @@ public class Felix
             {
                 BundleArchive archive = m_cache.getArchive(id);
                 bundle = new BundleImpl(this, createBundleInfo(archive));
-                
+
                 Object sm = System.getSecurityManager();
-                
+
                 if (sm != null)
                 {
                     ((SecurityManager) sm).checkPermission(
@@ -1798,13 +1788,13 @@ public class Felix
                             "Could not remove from cache.", ex1);
                     }
                 }
-                
-                if ((System.getSecurityManager() != null) && 
+
+                if ((System.getSecurityManager() != null) &&
                     (ex instanceof SecurityException))
                 {
                     throw (SecurityException) ex;
                 }
-                
+
                 throw new BundleException("Could not create bundle object.", ex);
             }
 
@@ -1840,10 +1830,10 @@ public class Felix
                 // Not much else we can do.
             }
         }
-    
+
         // Fire bundle event.
         fireBundleEvent(BundleEvent.INSTALLED, bundle);
-    
+
         // Return new bundle.
         return bundle;
     }
@@ -1982,7 +1972,7 @@ public class Felix
     /**
      * Implementation for BundleContext.removeServiceListener().
      * Removes service listeners from the listener list.
-     * 
+     *
      * @param bundle The context bundle of the listener
      * @param l The service listener to remove from the listener list.
     **/
@@ -2205,7 +2195,7 @@ public class Felix
      * the class was loaded from a bundle from this framework instance. If the
      * class was not loaded from a bundle or was loaded by a bundle in another
      * framework instance, then <tt>null</tt> is returned.
-     * 
+     *
      * @param clazz the class for which to find its associated bundle.
      * @return the bundle associated with the specified class or <tt>null</tt>
      *         if the class was not loaded by a bundle or its associated
@@ -2476,7 +2466,7 @@ public class Felix
                 // At this point the map contains every bundle that has been
                 // updated and/or removed as well as all bundles that import
                 // packages from these bundles.
-                
+
                 // Create refresh helpers for each bundle.
                 RefreshHelper[] helpers = new RefreshHelper[bundles.length];
                 for (int i = 0; i < bundles.length; i++)
@@ -2626,16 +2616,38 @@ public class Felix
                 revision,
                 m_config.get(Constants.FRAMEWORK_OS_NAME),
                 m_config.get(Constants.FRAMEWORK_PROCESSOR)));
-                
+
         // Create the module using the module definition.
         IModule module = m_factory.createModule(
             Long.toString(targetId) + "." + Integer.toString(revision), md);
+
+        ProtectionDomain pd = null;
+
+        if (System.getSecurityManager() != null)
+        {
+            String location = m_cache.getArchive(targetId).getLocation();
+
+            if (location.startsWith("reference:"))
+            {
+                location = location.substring("reference:".length());
+            }
+
+            CodeSource codesource = new CodeSource(
+                new URL(location),
+                m_cache.getArchive(targetId).getCertificates());
+
+            pd = new ProtectionDomain(codesource,
+                m_secureAction.getPolicy().getPermissions(codesource));
+        }
+
+        m_factory.setSecurityContext(module, pd);
 
         // Create the content loader from the module archive.
         IContentLoader contentLoader = new ContentLoaderImpl(
                 m_logger,
                 m_cache.getArchive(targetId).getRevision(revision).getContent(),
-                m_cache.getArchive(targetId).getRevision(revision).getContentPath());
+                m_cache.getArchive(targetId).getRevision(revision).getContentPath(),
+                pd);
         // Set the content loader's search policy.
         contentLoader.setSearchPolicy(
                 new R4SearchPolicy(m_policyCore, module));
@@ -2658,9 +2670,9 @@ public class Felix
         // CONCURRENCY NOTE:
         // This method is called indirectly from startBundle() (via _startBundle()),
         // which has the exclusion lock, so there is no need to do any locking here.
-    
+
         BundleActivator activator = null;
-    
+
         String strict = m_config.get(FelixConstants.STRICT_OSGI_PROP);
         boolean isStrict = (strict == null) ? true : strict.equals("true");
         if (!isStrict)
@@ -2676,7 +2688,7 @@ public class Felix
                 activator = null;
             }
         }
-    
+
         // If there was no cached activator, then get the activator
         // class from the bundle manifest.
         if (activator == null)
@@ -2702,7 +2714,7 @@ public class Felix
                 activator = (BundleActivator) clazz.newInstance();
             }
         }
-    
+
         return activator;
     }
 
@@ -2714,7 +2726,7 @@ public class Felix
         try
         {
             BundleInfo info = bundle.getInfo();
-    
+
             // In case of a refresh, then we want to physically
             // remove the bundle's modules from the module manager.
             // This is necessary for two reasons: 1) because
@@ -2844,8 +2856,8 @@ public class Felix
         catch (IOException ex)
         {
             ex.printStackTrace();
-        } 
- 
+        }
+
         // Maven uses a '-' to separate the version qualifier,
         // while OSGi uses a '.', so we need to convert to a '.'
         StringBuffer sb =
@@ -2858,7 +2870,7 @@ public class Felix
         }
         return sb.toString();
     }
-    
+
     private void processAutoProperties()
     {
         // The auto-install property specifies a space-delimited list of
@@ -3228,7 +3240,7 @@ public class Felix
             {
                 return;
             }
-            
+
             int idx = -1;
             for (int i = 0; i < m_uninstalledBundles.length; i++)
             {
@@ -3238,7 +3250,7 @@ public class Felix
                     break;
                 }
             }
-    
+
             if (idx >= 0)
             {
                 // If this is the only bundle, then point to empty list.
@@ -3280,11 +3292,11 @@ public class Felix
                     throw new BundleException("Unable to install, thread interrupted.");
                 }
             }
-            
+
             m_installRequestMap.put(location, location);
         }
     }
-    
+
     protected void releaseInstallLock(String location)
     {
         synchronized (m_installRequestLock_Priority1)
@@ -3312,7 +3324,7 @@ public class Felix
             bundle.getInfo().lock();
         }
     }
-    
+
     protected boolean acquireBundleLockOrFail(BundleImpl bundle)
     {
         synchronized (m_bundleLock)
@@ -3379,7 +3391,7 @@ public class Felix
                         bundles = (BundleImpl[]) list.toArray(new BundleImpl[list.size()]);
                     }
                 }
-                
+
                 // Check if all unresolved bundles can be locked.
                 boolean lockable = true;
                 if (bundles != null)
@@ -3388,7 +3400,7 @@ public class Felix
                     {
                         lockable = bundles[i].getInfo().isLockable();
                     }
-        
+
                     // If we can lock all bundles, then lock them.
                     if (lockable)
                     {
@@ -3487,10 +3499,10 @@ public class Felix
                         // Add all importing bundles to map.
                         populateImportGraph(target, map);
                     }
-                    
+
                     bundles = (BundleImpl[]) map.values().toArray(new BundleImpl[map.size()]);
                 }
-                
+
                 // Check if all corresponding bundles can be locked.
                 boolean lockable = true;
                 if (bundles != null)
@@ -3499,7 +3511,7 @@ public class Felix
                     {
                         lockable = bundles[i].getInfo().isLockable();
                     }
-        
+
                     // If we can lock all bundles, then lock them.
                     if (lockable)
                     {
@@ -3544,102 +3556,6 @@ public class Felix
                 bundles[i].getInfo().unlock();
             }
             m_bundleLock.notifyAll();
-        }
-    }
-    
-    private static class PrivilegedActivatorCall implements 
-        java.security.PrivilegedExceptionAction
-    {
-        private static final int START = 1;
-        private static final int STOP = 2;
-        private int m_action;
-        private BundleActivator m_activator;
-        private BundleContext m_context;
-        
-        PrivilegedActivatorCall(int action, BundleActivator activator, BundleContext context)
-        {
-            m_action = action;
-            m_activator = activator;
-            m_context = context;
-        }
-        public Object run() throws Exception
-        {
-            switch (m_action)
-            {
-                case START:
-                    m_activator.start(m_context);
-                    break;
-                case STOP:
-                    m_activator.stop(m_context);
-                    break;
-                default:
-                    throw new IllegalStateException("Unknown activator action.");
-            }
-            
-            return null;
-        }
-    }
-    
-    /**
-     * This simple class is used to perform the privileged action of
-     * checking if a bundle has permission to import its packages.
-    **/
-    private class CheckImportsPrivileged implements java.security.PrivilegedExceptionAction
-    {
-        private URL m_url = null;
-        private BundleImpl m_bundle = null;
-
-        public CheckImportsPrivileged(URL url, BundleImpl bundle)
-        {
-            m_url = url;
-            m_bundle = bundle;
-        }
-
-        public Object run() throws Exception
-        {
-            // Get permission collection for code source; we cannot
-            // call AccessController.checkPermission() directly since
-            // the bundle's code is not on the access context yet because
-            // it has not started yet...we are simply resolving it to see
-            // if we can start it. We must check for import permission
-            // on the exports as well, since export implies import.
-            java.security.CodeSource cs = new java.security.CodeSource(m_url,
-                (java.security.cert.Certificate[]) null);
-            
-            java.security.PermissionCollection pc = 
-                java.security.Policy.getPolicy().getPermissions(cs);
-
-            R4Import[] imports =
-                m_bundle.getInfo().getCurrentModule().getDefinition().getImports();
-            
-            for (int i = 0;i < imports.length; i++)
-            {
-                PackagePermission perm = new PackagePermission(imports[i].getName(), 
-                    PackagePermission.IMPORT);
-                if (!pc.implies(perm))
-                {
-                   throw new java.security.AccessControlException(
-                       "PackagePermission.IMPORT denied for import: " + 
-                       imports[i].getName(), perm);
-                }
-            }
-            // Check export permission for all exports of the current module.
-            R4Export[] implicitImports =
-                m_bundle.getInfo().getCurrentModule().getDefinition().getExports();
-            
-            for (int i = 0;i < implicitImports.length; i++)
-            {
-                PackagePermission perm = new PackagePermission(
-                    implicitImports[i].getName(), PackagePermission.EXPORT);
-                if (!pc.implies(perm))
-                {
-                    throw new java.security.AccessControlException(
-                        "PackagePermission.EXPORT denied for implicit export: " + 
-                        implicitImports[i].getName(), perm);
-                }
-            }
-            
-            return null;
         }
     }
 }
