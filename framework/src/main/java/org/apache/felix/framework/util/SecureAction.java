@@ -19,10 +19,13 @@ package org.apache.felix.framework.util;
 import java.io.*;
 import java.net.*;
 import java.security.*;
+import java.util.jar.JarFile;
 
 import org.apache.felix.framework.searchpolicy.ContentClassLoader;
 import org.apache.felix.framework.searchpolicy.ContentLoaderImpl;
 import org.apache.felix.moduleloader.JarFileX;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 /**
  * <p>
@@ -45,7 +48,7 @@ public class SecureAction
             return new Actions();
         }
     };
-    
+
     protected static transient int BUFSIZE = 4096;
 
     private AccessControlContext m_acc = null;
@@ -107,10 +110,10 @@ public class SecureAction
     {
         if (System.getSecurityManager() != null)
         {
-            try 
+            try
             {
                 Actions actions = (Actions) m_actions.get();
-                actions.set(Actions.CREATE_URL_ACTION, protocol, host, port, 
+                actions.set(Actions.CREATE_URL_ACTION, protocol, host, port,
                     path, handler);
                 return (URL) AccessController.doPrivileged(actions, m_acc);
             }
@@ -330,8 +333,8 @@ public class SecureAction
             return new FileOutputStream(file);
         }
     }
-    
-    public InputStream getURLConnectionInputStream(URLConnection conn) 
+
+    public InputStream getURLConnectionInputStream(URLConnection conn)
         throws IOException
     {
         if (System.getSecurityManager() != null)
@@ -386,7 +389,7 @@ public class SecureAction
             try
             {
                 Actions actions = (Actions) m_actions.get();
-                actions.set(Actions.OPEN_JAR_ACTION, file);
+                actions.set(Actions.OPEN_JARX_ACTION, file);
                 return (JarFileX) AccessController.doPrivileged(actions, m_acc);
             }
             catch (PrivilegedActionException ex)
@@ -403,15 +406,46 @@ public class SecureAction
             return new JarFileX(file);
         }
     }
-   
-    public ContentClassLoader createContentClassLoader(ContentLoaderImpl impl)
+
+    public JarFile openJAR(File file, boolean verify) throws IOException
     {
         if (System.getSecurityManager() != null)
         {
             try
             {
                 Actions actions = (Actions) m_actions.get();
-                actions.set(Actions.CREATE_CONTENTCLASSLOADER_ACTION, impl);
+                actions.set(Actions.OPEN_JAR_ACTION, file, (verify ? Boolean.TRUE : Boolean.FALSE));
+                return (JarFile) AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                if (ex.getException() instanceof IOException)
+                {
+                    throw (IOException) ex.getException();
+                }
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return new JarFileX(file);
+        }
+    }
+
+    public ContentClassLoader createContentClassLoader(ContentLoaderImpl impl)
+    {
+        return createContentClassLoader(impl, null);
+    }
+
+    public ContentClassLoader createContentClassLoader(ContentLoaderImpl impl,
+        ProtectionDomain protectionDomain)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.CREATE_CONTENTCLASSLOADER_ACTION, impl, protectionDomain);
                 return (ContentClassLoader) AccessController.doPrivileged(actions, m_acc);
             }
             catch (PrivilegedActionException ex)
@@ -421,7 +455,94 @@ public class SecureAction
         }
         else
         {
-            return new ContentClassLoader(impl);
+            return new ContentClassLoader(impl, protectionDomain);
+        }
+    }
+
+    public void startActivator(BundleActivator activator, BundleContext context)
+        throws Exception
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.START_ACTIVATOR_ACTION, activator, context);
+                AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw ex.getException();
+            }
+        }
+        else
+        {
+            activator.start(context);
+        }
+    }
+
+    public void stopActivator(BundleActivator activator, BundleContext context)
+        throws Exception
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.STOP_ACTIVATOR_ACTION, activator, context);
+                AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw ex.getException();
+            }
+        }
+        else
+        {
+            activator.stop(context);
+        }
+    }
+
+    public void exit(int code)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.SYSTEM_EXIT_ACTION, new Integer(code));
+                AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                // We don't need to rethrow anything since System.exit throws
+                // runtime exceptions only
+            }
+        }
+        else
+        {
+            System.exit(code);
+        }
+    }
+
+    public Policy getPolicy()
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.GET_POLICY_ACTION, null);
+                return (Policy) AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return Policy.getPolicy();
         }
     }
 
@@ -440,9 +561,14 @@ public class SecureAction
         public static final int GET_FILE_INPUT_ACTION = 10;
         public static final int GET_FILE_OUTPUT_ACTION = 11;
         public static final int DELETE_FILE_ACTION = 12;
-        public static final int OPEN_JAR_ACTION = 13;
+        public static final int OPEN_JARX_ACTION = 13;
         public static final int GET_URL_INPUT_ACTION = 14;
         public static final int CREATE_CONTENTCLASSLOADER_ACTION = 15;
+        public static final int START_ACTIVATOR_ACTION = 16;
+        public static final int STOP_ACTIVATOR_ACTION = 17;
+        public static final int SYSTEM_EXIT_ACTION = 18;
+        public static final int OPEN_JAR_ACTION=19;
+        public static final int GET_POLICY_ACTION = 20;
 
         private int m_action = -1;
         private Object m_arg1 = null;
@@ -453,7 +579,7 @@ public class SecureAction
         private int m_port = -1;
         private String m_path = null;
         private URLStreamHandler m_handler = null;
-        
+
         public void set(int action, Object arg1)
         {
             m_action = action;
@@ -505,7 +631,7 @@ public class SecureAction
             m_path = null;
             m_handler = null;
         }
-        
+
         public Object run() throws Exception
         {
             try
@@ -562,9 +688,13 @@ public class SecureAction
                 {
                     return ((File) m_arg1).delete() ? Boolean.TRUE : Boolean.FALSE;
                 }
-                else if (m_action == OPEN_JAR_ACTION)
+                else if (m_action == OPEN_JARX_ACTION)
                 {
                     return new JarFileX((File) m_arg1);
+                }
+                else if (m_action == OPEN_JAR_ACTION)
+                {
+                    return new JarFile((File) m_arg1, ((Boolean) m_arg2).booleanValue());
                 }
                 else if (m_action == GET_URL_INPUT_ACTION)
                 {
@@ -572,7 +702,26 @@ public class SecureAction
                 }
                 else if (m_action == CREATE_CONTENTCLASSLOADER_ACTION)
                 {
-                    return new ContentClassLoader((ContentLoaderImpl) m_arg1);
+                    return new ContentClassLoader((ContentLoaderImpl) m_arg1,
+                        (ProtectionDomain) m_arg2);
+                }
+                else if (m_action == START_ACTIVATOR_ACTION)
+                {
+                    ((BundleActivator) m_arg1).start((BundleContext) m_arg2);
+                    return null;
+                }
+                else if (m_action == STOP_ACTIVATOR_ACTION)
+                {
+                    ((BundleActivator) m_arg1).stop((BundleContext) m_arg2);
+                    return null;
+                }
+                else if (m_action == SYSTEM_EXIT_ACTION)
+                {
+                    System.exit(((Integer) m_arg1).intValue());
+                }
+                else if (m_action == GET_POLICY_ACTION)
+                {
+                    return Policy.getPolicy();
                 }
                 return null;
             }
