@@ -28,6 +28,7 @@ public class ModuleImpl implements IModule
     private IModuleDefinition m_md = null;
     private IContentLoader m_contentLoader = null;
     private IWire[] m_wires = null;
+    private Object m_securityContext = null;
 
     ModuleImpl(Logger logger, String id, IModuleDefinition md)
     {
@@ -54,6 +55,11 @@ public class ModuleImpl implements IModule
     protected void setContentLoader(IContentLoader contentLoader)
     {
         m_contentLoader = contentLoader;
+    }
+
+    protected void setSecurityContext(Object securityContext)
+    {
+        m_securityContext = securityContext;
     }
 
     public IWire[] getWires()
@@ -111,5 +117,10 @@ public class ModuleImpl implements IModule
     public String toString()
     {
         return m_id;
+    }
+
+    public Object getSecurityContext()
+    {
+        return m_securityContext;
     }
 }

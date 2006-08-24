@@ -21,11 +21,13 @@ public interface IModuleFactory
     public IModule[] getModules();
     public IModule getModule(String id);
 
-    public IModule createModule(String id, IModuleDefinition md);    
+    public IModule createModule(String id, IModuleDefinition md);
     public void removeModule(IModule module);
 
     public void setContentLoader(IModule module, IContentLoader contentLoader);
 
     public void addModuleListener(ModuleListener l);
     public void removeModuleListener(ModuleListener l);
+
+    public void setSecurityContext(IModule module, Object securityContext);
 }
