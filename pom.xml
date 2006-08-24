@@ -80,6 +80,8 @@
     <module>ipojo.metadata</module>
     <module>ipojo.plugin</module>
     <module>ipojo.arch</module>
+    
+    <module>tools/mangen</module>
   </modules>
 
   <repositories>
