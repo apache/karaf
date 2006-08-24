@@ -19,6 +19,7 @@ package org.apache.felix.framework.searchpolicy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.ProtectionDomain;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -34,13 +35,22 @@ public class ContentLoaderImpl implements IContentLoader
     private ISearchPolicy m_searchPolicy = null;
     private IURLPolicy m_urlPolicy = null;
     private ContentClassLoader m_classLoader = null;
+    private ProtectionDomain m_protectionDomain = null;
     private static SecureAction m_secureAction = new SecureAction();
 
-    public ContentLoaderImpl(Logger logger, IContent content, IContent[] contentPath)
+    public ContentLoaderImpl(Logger logger, IContent content,
+        IContent[] contentPath)
+    {
+        this(logger, content, contentPath, null);
+    }
+
+    public ContentLoaderImpl(Logger logger, IContent content,
+        IContent[] contentPath, ProtectionDomain protectionDomain)
     {
         m_logger = logger;
         m_content = content;
         m_contentPath = contentPath;
+        m_protectionDomain = protectionDomain;
     }
 
     public Logger getLogger()
@@ -100,7 +110,8 @@ public class ContentLoaderImpl implements IContentLoader
     {
         if (m_classLoader == null)
         {
-            m_classLoader = m_secureAction.createContentClassLoader(this);
+            m_classLoader = m_secureAction.createContentClassLoader(this,
+                m_protectionDomain);
         }
 
         try
@@ -182,7 +193,7 @@ public class ContentLoaderImpl implements IContentLoader
             {
                 name = name.substring(1);
             }
-    
+
             // Check the module content.
             if (getContent().hasEntry(name))
             {

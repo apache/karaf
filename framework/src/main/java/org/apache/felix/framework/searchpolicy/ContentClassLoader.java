@@ -17,12 +17,10 @@
 package org.apache.felix.framework.searchpolicy;
 
 import java.net.URL;
-import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
-import java.security.cert.Certificate;
 import java.util.Enumeration;
 
-import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.IContentLoader;
 import org.apache.felix.moduleloader.ResourceNotFoundException;
@@ -30,10 +28,13 @@ import org.apache.felix.moduleloader.ResourceNotFoundException;
 public class ContentClassLoader extends SecureClassLoader
 {
     private ContentLoaderImpl m_contentLoader = null;
+    private ProtectionDomain m_protectionDomain = null;
 
-    public ContentClassLoader(ContentLoaderImpl contentLoader)
+    public ContentClassLoader(ContentLoaderImpl contentLoader,
+        ProtectionDomain protectionDomain)
     {
         m_contentLoader = contentLoader;
+        m_protectionDomain = protectionDomain;
     }
 
     public IContentLoader getContentLoader()
@@ -131,24 +132,13 @@ public class ContentClassLoader extends SecureClassLoader
                     }
                 }
 
-                // Get the code source URL for this class. For concurrency
-                // purposes, we are performing this call outside of the
-                // synchronized block below since we call out to application
-                // code, which might in turn need to call back into the
-                // module loader code. Because of this, it is better to
-                // not be holding any locks before making the call.
-                URL url = null;
-// TODO: ML - FIX CODE SOURCE URL
-//                URL url = m_mgr.getURLPolicy().createCodeSourceURL(
-//                    m_mgr, m_module);
-
-                // If we have a valid code source URL, then use it to
-                // define the class for security purposes, otherwise
-                // define the class without a code source.
-                if (url != null)
+                // If we have a security context, then use it to
+                // define the class with it for security purposes,
+                // otherwise define the class without a protection domain.
+                if (m_protectionDomain != null)
                 {
-                    CodeSource cs = new CodeSource(url, (Certificate[]) null);
-                    clazz = defineClass(name, bytes, 0, bytes.length, cs);
+                    clazz = defineClass(name, bytes, 0, bytes.length,
+                        m_protectionDomain);
                 }
                 else
                 {
@@ -157,12 +147,7 @@ public class ContentClassLoader extends SecureClassLoader
             }
         }
 
-        if (clazz != null)
-        {
-            return clazz;
-        }
-
-        return null;
+        return clazz;
     }
 
     public URL getResourceFromModule(String name)

@@ -17,12 +17,14 @@
 package org.apache.felix.framework.searchpolicy;
 
 import java.net.URL;
+import java.security.ProtectionDomain;
 import java.util.*;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.*;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.Constants;
+import org.osgi.framework.PackagePermission;
 import org.osgi.framework.Version;
 
 public class R4SearchPolicyCore implements ModuleListener
@@ -160,7 +162,7 @@ public class R4SearchPolicyCore implements ModuleListener
         {
             throw ex;
         }
-    
+
         // We should never reach this point.
         return null;
     }
@@ -196,7 +198,7 @@ public class R4SearchPolicyCore implements ModuleListener
                 {
                     return url;
                 }
-   
+
                 // We need to throw a resource not found exception.
                 throw new ResourceNotFoundException(
                     name + ": cannot resolve package "
@@ -254,7 +256,7 @@ public class R4SearchPolicyCore implements ModuleListener
                 result = searchDynamicImports(module, name, pkgName, isClass);
             }
         }
-     
+
         if (result == null)
         {
             if (isClass)
@@ -266,7 +268,7 @@ public class R4SearchPolicyCore implements ModuleListener
                 throw new ResourceNotFoundException(name);
             }
         }
-     
+
         return result;
     }
 
@@ -524,8 +526,33 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         // modules are added, removed, or resolved.
         synchronized (m_factory)
         {
-            return getCompatibleExporters(
+            IModule[] exporters = getCompatibleExporters(
                 (IModule[]) m_availPkgMap.get(pkg.getName()), pkg, includeRemovalPending);
+
+            if ((exporters != null) && (System.getSecurityManager() != null))
+            {
+                PackagePermission perm = new PackagePermission(pkg.getName(),
+                    PackagePermission.EXPORT);
+
+                for (int i = 0;i < exporters.length;i++)
+                {
+                    if (exporters[i] != null)
+                    {
+                        if (!((ProtectionDomain) exporters[i].getSecurityContext()).implies(perm))
+                        {
+                            m_logger.log(Logger.LOG_DEBUG,
+                                "PackagePermission.EXPORT denied for " + pkg +
+                                "from " + exporters[i].getId());
+
+                            exporters[i] = null;
+                        }
+                    }
+                }
+
+                exporters = shrinkModuleArray(exporters);
+            }
+
+            return exporters;
         }
     }
 
@@ -1538,7 +1565,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
         // First, get the bundle ID of the module doing the class loader.
         long impId = Util.getBundleIdFromModuleId(module.getId());
-        
+
         // Next, check to see if the module imports the package.
         IWire[] wires = module.getWires();
         for (int i = 0; (wires != null) && (i < wires.length); i++)
@@ -1675,9 +1702,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             {
                 // Ignore
             }
-   
+
             long expId = Util.getBundleIdFromModuleId(exporters[0].getId());
-   
+
             StringBuffer sb = new StringBuffer("*** Class '");
             sb.append(name);
             sb.append("' was not found because bundle ");
