@@ -57,7 +57,7 @@ public final class AdminPermission extends BasicPermission
         RESOLVE_MASK | RESOURCE_MASK | STARTLEVEL_MASK;
 
     private String m_actions = null;
-    private int m_actionMask = 0;
+    int m_actionMask = 0;
 
     // Cached filter for permissions created with a filter when
     // granting admin permissions.
@@ -93,7 +93,7 @@ public final class AdminPermission extends BasicPermission
     // This constructor is only used by the admin permission collection
     // when combining admin permissions or by the default constructor when granting
     // an admin permission
-    private AdminPermission(String filter, int actionMask)
+    AdminPermission(String filter, int actionMask)
     {
         super((filter == null) || (filter.equals("*")) ? "(id=*)" : filter);
         m_actionMask = actionMask;
@@ -358,63 +358,6 @@ public final class AdminPermission extends BasicPermission
         sb.append(bundle.getBundleId());
         sb.append(")");
         return sb.toString();
-    }
-
-    final class AdminPermissionCollection extends PermissionCollection
-    {
-        private HashMap m_map = new HashMap();
-
-        public void add(Permission permission)
-        {
-            if (!(permission instanceof AdminPermission))
-            {
-                throw new IllegalArgumentException("Invalid permission: " + permission);
-            }
-            else if (isReadOnly())
-            {
-                throw new SecurityException(
-                    "Cannot add to read-only permission collection.");
-            }
-
-            AdminPermission admin = (AdminPermission) permission;
-            AdminPermission current = (AdminPermission) m_map.get(admin.getName());
-            if (current != null)
-            {
-                if (admin.m_actionMask != current.m_actionMask)
-                {
-                    m_map.put(admin.getName(),
-                        new AdminPermission(admin.getName(),
-                            admin.m_actionMask | current.m_actionMask));
-                }
-            }
-            else
-            {
-                m_map.put(admin.getName(), admin);
-            }
-        }
-
-        public boolean implies(Permission permission)
-        {
-            if (!(permission instanceof AdminPermission))
-            {
-                return false;
-            }
-
-            for (Iterator iter = m_map.values().iterator(); iter.hasNext(); )
-            {
-                if (((AdminPermission) iter.next()).implies(permission))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public Enumeration elements()
-        {
-            return Collections.enumeration(m_map.values());
-        }
     }
 
     public static final class Signer implements PrivilegedAction
@@ -868,5 +811,63 @@ public final class AdminPermission extends BasicPermission
 
             return pos;
         }
+    }
+}
+
+final class AdminPermissionCollection extends PermissionCollection
+{
+	private static final long serialVersionUID = 3747361397420496672L;
+	private HashMap m_map = new HashMap();
+
+    public void add(Permission permission)
+    {
+        if (!(permission instanceof AdminPermission))
+        {
+            throw new IllegalArgumentException("Invalid permission: " + permission);
+        }
+        else if (isReadOnly())
+        {
+            throw new SecurityException(
+                "Cannot add to read-only permission collection.");
+        }
+
+        AdminPermission admin = (AdminPermission) permission;
+        AdminPermission current = (AdminPermission) m_map.get(admin.getName());
+        if (current != null)
+        {
+            if (admin.m_actionMask != current.m_actionMask)
+            {
+                m_map.put(admin.getName(),
+                    new AdminPermission(admin.getName(),
+                        admin.m_actionMask | current.m_actionMask));
+            }
+        }
+        else
+        {
+            m_map.put(admin.getName(), admin);
+        }
+    }
+
+    public boolean implies(Permission permission)
+    {
+        if (!(permission instanceof AdminPermission))
+        {
+            return false;
+        }
+
+        for (Iterator iter = m_map.values().iterator(); iter.hasNext(); )
+        {
+            if (((AdminPermission) iter.next()).implies(permission))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Enumeration elements()
+    {
+        return Collections.enumeration(m_map.values());
     }
 }
