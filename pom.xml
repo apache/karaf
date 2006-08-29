@@ -76,13 +76,49 @@
     <module>eventadmin.bridge.configuration</module>
     <module>eventadmin.bridge.useradmin</module>
     <module>eventadmin.bridge.wireadmin</module>
+
+    <module>tools/mangen</module>
+
     <module>ipojo</module>
     <module>ipojo.metadata</module>
-    <module>ipojo.plugin</module>
-    <module>ipojo.arch</module>
-    
-    <module>tools/mangen</module>
+
   </modules>
+
+  <profiles>
+    <profile>
+      <id>jdk1.5</id>
+      <activation>
+        <jdk>1.5</jdk>
+      </activation>
+      <modules>
+        <module>mosgi.console.ifc</module>
+        <module>mosgi.console.component</module>
+        <module>mosgi.console.gui</module>
+        <module>mosgi.jmx.agent</module>
+        <module>mosgi.jmx.httpconnector</module>
+        <module>mosgi.jmx.registry</module>
+        <module>mosgi.jmx.remotelogger</module>
+        <module>mosgi.jmx.rmiconnector</module>
+        <module>mosgi.managedelements.osgiprobes</module>
+        <module>mosgi.managedelements.osgiprobes.tab</module>
+
+        <module>ipojo.plugin</module>
+        <module>ipojo.arch</module>
+      </modules>
+    </profile>
+    
+    <profile>    
+      <id>jdk1.4</id>
+      <activation>
+        <jdk>1.4</jdk>
+      </activation>
+      <modules>
+        <module>ipojo.plugin</module>
+        <module>ipojo.arch</module>
+      </modules>
+    </profile>
+
+  </profiles>
 
   <repositories>
     <!-- For snapshots (no release jars or non-apache jars)           -->
@@ -158,10 +194,10 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
-      <plugin>
+      <!-- plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
-      </plugin>
+      </plugin -->
     </plugins>
   </build>
   <reporting>

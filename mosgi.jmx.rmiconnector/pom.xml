@@ -57,16 +57,20 @@
             <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
             <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
             <exportPackage>
-	      org.apache.felix.mosgi.jmx.rmiconnector.mx4j.remote.provider.rmi;specification-version="1.0.0"
+              org.apache.felix.mosgi.jmx.rmiconnector.mx4j.remote.provider.rmi;specification-version="1.0.0"
             </exportPackage>
-	    <importPackage>
-  	      org.osgi.service.log;specification-version="1.0.0",
-	      org.osgi.framework;specification-version="1.0.0",
-	      org.apache.felix.mosgi.jmx.registry.mx4j.tools.naming;specification-version="1.0.0",
-	      org.apache.felix.mosgi.jmx.rmiconnector.mx4j.remote.provider.rmi;specification-version="1.0.0",
-	      javax.management;specification-version="1.0.0",
-	      javax.management.remote;specification-version="1.0.0"
-	    </importPackage>
+            <importPackage>
+              org.osgi.service.log;specification-version="1.0.0",
+              org.osgi.framework;specification-version="1.0.0",
+              org.apache.felix.mosgi.jmx.registry.mx4j.tools.naming;specification-version="1.0.0",
+              org.apache.felix.mosgi.jmx.agent.mx4j.util;specification-version="1.0.0",
+              javax.management;specification-version="1.0.0",
+              javax.management.loading;specification-version="1.0.0",
+              javax.management.remote;specification-version="1.0.0",
+              javax.management.remote.rmi;specification-version="1.0.0",
+              javax.naming;specification-version="1.0.0",
+              javax.security.auth;specification-version="1.0.0"
+             </importPackage>
           </osgiManifest>
         </configuration>
       </plugin>

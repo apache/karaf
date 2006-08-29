@@ -50,16 +50,18 @@
             <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>
             <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
             <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
-	    <importPackage>
-  	      org.osgi.service.log;specification-version="1.0.0",
-	      org.osgi.framework;specification-version="1.0.0",
-	      javax.management;specification-version="1.0.0",
-	      org.w3c.dom;specification-version="1.0.0",
-	      javax.xml.parsers;specification-version="1.0.0",
-	      javax.xml.transform;specification-version="1.0.0",
-	      javax.xml.transform.stream;specification-version="1.0.0",
-	      javax.xml.transform.dom;specification-version="1.0.0"
-	    </importPackage>
+            <importPackage>
+              org.osgi.service.log;specification-version="1.0.0",
+              org.osgi.framework;specification-version="1.0.0",
+              org.apache.felix.mosgi.jmx.agent.mx4j.util;specification-version="1.0.0",
+              javax.management.loading;specification-version="1.0.0",
+              javax.management;specification-version="1.0.0",
+              org.w3c.dom;specification-version="1.0.0",
+              javax.xml.parsers;specification-version="1.0.0",
+              javax.xml.transform;specification-version="1.0.0",
+              javax.xml.transform.stream;specification-version="1.0.0",
+              javax.xml.transform.dom;specification-version="1.0.0"
+            </importPackage>
           </osgiManifest>
         </configuration>
       </plugin>
