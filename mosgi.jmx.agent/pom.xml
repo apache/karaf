@@ -47,7 +47,8 @@
             <exportPackage>
                ${pom.artifactId};specification-version="1.0.0",
                org.apache.felix.mosgi.jmx.agent.mx4j.server;specification-version="1.0.0",
-               org.apache.felix.mosgi.jmx.agent.mx4j.server.interceptor;specification-version="1.0.0"
+               org.apache.felix.mosgi.jmx.agent.mx4j.server.interceptor;specification-version="1.0.0",
+               org.apache.felix.mosgi.jmx.agent.mx4j.util;specification-version="1.0.0"
             </exportPackage>
             <importPackage>
               org.osgi.service.log;specification-version="1.0.0",
