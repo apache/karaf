@@ -22,13 +22,16 @@ felix.auto.start.1= \
  file:../mosgi.jmx.rmiconnector/target/org.apache.felix.mosgi.jmx.rmiconnector-0.8.0-SNAPSHOT.jar \
  file:../mosgi.console.ifc/target/org.apache.felix.mosgi.console.ifc-0.8.0-SNAPSHOT.jar \
  file:../mosgi.managedelements.osgiprobes/target/org.apache.felix.mosgi.managedelements.osgiprobes-0.8.0-SNAPSHOT.jar \
- file:../mosgi.managedelements.bundlesprobes/target/org.apache.felix.mosgi.managedelements.bundlesprobes-0.8.0-SNAPSHOT.jar
+ file:../mosgi.managedelements.bundlesprobes/target/org.apache.felix.mosgi.managedelements.bundlesprobes-0.8.0-SNAPSHOT.jar \
+ file:../mosgi.managedelements.obrprobe/target/org.apache.felix.mosgi.managedelements.obrprobe-0.8.0-SNAPSHOT.jar
  
 # if we need the http jmx connector
 # file:../mosgi.jmx.httpconnector/target/org.apache.felix.mosgi.jmx.httpconnector-0.8.0-SNAPSHOT.jar
 
 
 insa.jmxconsole.tab.url.osgiprobestab=file:../mosgi.managedelements.osgiprobes.tab/target/org.apache.felix.mosgi.managedelements.osgiprobes.tab-0.8.0-SNAPSHOT.jar
+insa.jmxconsole.tab.url.bundlesprobestab=file:../mosgi.managedelements.bundlesprobes.tab/target/org.apache.felix.mosgi.managedelements.bundlesprobes.tab-0.8.0-SNAPSHOT.jar
+insa.jmxconsole.tab.url.obrprobetab=file:../mosgi.managedelements.obrprobe.tab/target/org.apache.felix.mosgi.managedelements.obrprobe.tab-0.8.0-SNAPSHOT.jar
 
 #insa.jmxconsole.rmiport.t1=1100
 
@@ -340,10 +343,3 @@ jre-1.5= \
  org.xml.sax.ext; \
  org.xml.sax.helpers; \
  version="1.5.0"
-
-insa.jmxconsole.tab.url.osgiprobestab=file:../mosgi.managedelements.osgiprobes.tab/target/org.apache.felix.mosgi.managedelements.osgiprobes.tab-0.8.0-SNAPSHOT.jar
-insa.jmxconsole.tab.url.bundlesprobestab=file:../mosgi.managedelements.bundlesprobes.tab/target/org.apache.felix.mosgi.managedelements.bundlesprobes.tab-0.8.0-SNAPSHOT.jar
-
-insa.jmxconsole.ip1=127.0.0.1
-insa.jmxconsole.profile1=core
-
