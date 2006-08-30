@@ -63,7 +63,6 @@
               org.osgi.framework;specification-version="1.0.0",
               org.osgi.service.log;specification-version="1.0.0",
               javax.management;specification-version="1.0.0",
-              javax.management.openmbean;specification-version="1.0.0",
               org.osgi.service.obr,
               org.apache.felix.mosgi.console.ifc;specification-version="1.0.0"
             </importPackage>
