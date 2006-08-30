@@ -101,6 +101,8 @@
         <module>mosgi.jmx.rmiconnector</module>
         <module>mosgi.managedelements.osgiprobes</module>
         <module>mosgi.managedelements.osgiprobes.tab</module>
+        <module>mosgi.managedelements.bundlesprobes</module>
+        <module>mosgi.managedelements.bundlesprobes.tab</module>
 
         <module>ipojo.plugin</module>
         <module>ipojo.arch</module>
