@@ -131,7 +131,7 @@ public class RmiConnectorActivator implements BundleActivator, ServiceListener{
       rmiPort="1099";
     }
     String url="service:jmx:rmi:///jndi/rmi://"+ InetAddress.getLocalHost().getHostAddress()+":"+rmiPort+"/"+profile;
-    RmiConnectorActivator.log(LogService.LOG_INFO, "insa.jmx.rmiconnector.url ==> "+url, null);
+    RmiConnectorActivator.log(LogService.LOG_INFO, "jmx connexion string ==> "+url, null);
     
     RmiConnectorActivator.log(LogService.LOG_INFO, "Starting JMX Rmi Connector "+version,null);
     this.mbs=(MBeanServer)bc.getService(this.mBeanServerSR);

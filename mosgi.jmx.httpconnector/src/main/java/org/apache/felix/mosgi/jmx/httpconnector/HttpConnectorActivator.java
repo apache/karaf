@@ -47,7 +47,7 @@ public class HttpConnectorActivator implements BundleActivator{
       HttpConnectorActivator.log(LogService.LOG_INFO, "Starting JMX Http Connector "+version,null);
       MBeanServer server= (MBeanServer)bc.getService(sr);
       
-      String httpPort = bc.getProperty("insa.jmx.httpconnector.port");
+      String httpPort = bc.getProperty("org.osgi.service.http.port");
       if (httpPort==null){
         httpPort="8080";
       }
