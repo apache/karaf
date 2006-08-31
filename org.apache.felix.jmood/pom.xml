@@ -1,0 +1,90 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>0.8.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>osgi-bundle</packaging>
+  <name>JMood JMX Management Agent</name>
+  <artifactId>${groupId}.jmood</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.framework</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix.plugins</groupId>
+        <artifactId>maven-osgi-plugin</artifactId>
+        <version>${pom.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <osgiManifest >
+            <bundleName>${name}</bundleName>
+            <bundleActivator>${artifactId}.Activator</bundleActivator>
+            <bundleDescription>JMood management agent</bundleDescription>
+            <bundleSymbolicName>${artifactId}</bundleSymbolicName>
+            <exportPackage>
+            <!-- TODO -->
+            </exportPackage>
+            <!--Automatic resolution includes not available, unused, mx4j stuff-->
+ 			<importPackage>
+			org.osgi.framework, org.osgi.util.tracker, org.osgi.service.log, org.osgi.service.packageadmin, org.osgi.service.startlevel, org.osgi.service.permissionadmin, org.osgi.service.useradmin, org.osgi.service.cm, javax.management, javax.management.remote
+			</importPackage>
+          </osgiManifest>
+        </configuration>
+      </plugin>
+     <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-surefire-plugin</artifactId>
+      <configuration>
+      <!--
+      Current tests are (unfinished) integration tests, and need 
+      to have the bundle available, so there's a chicken-egg problem there. Temporal workaround: omit tests in pom
+      -->
+      
+        <skip>true</skip>
+      </configuration>
+    </plugin>
+      
+    </plugins>
+  </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </reporting>
+</project>
