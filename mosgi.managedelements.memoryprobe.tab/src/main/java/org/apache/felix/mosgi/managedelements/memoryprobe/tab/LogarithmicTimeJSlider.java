@@ -26,6 +26,10 @@ import javax.swing.event.ChangeListener;
 public class LogarithmicTimeJSlider extends LogarithmicJSlider {
 
     protected static final DecimalFormat format = new DecimalFormat("#.#");
+    public LogarithmicTimeJSlider(int min, int max, int value) {
+      super(min, max, value);
+    }
+
 
     protected void createLabels(Hashtable table, int increment, int start) {
         for (int labelIndex = start; labelIndex <= getMaximum(); labelIndex *= increment) {

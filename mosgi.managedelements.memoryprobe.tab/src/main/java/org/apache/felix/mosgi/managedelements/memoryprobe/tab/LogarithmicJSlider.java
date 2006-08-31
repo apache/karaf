@@ -37,6 +37,11 @@ import javax.swing.plaf.basic.BasicSliderUI;
 
 public class LogarithmicJSlider extends JSlider {
 
+   public LogarithmicJSlider(int min, int max, int value) {
+     super(min, max, value);
+     SliderUI ui = new LogSliderUI(this);
+     this.setUI(ui);
+   }
 
     public static class LogSliderUI extends BasicSliderUI {
 

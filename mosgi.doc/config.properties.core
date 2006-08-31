@@ -23,9 +23,8 @@ felix.auto.start.1= \
  file:../mosgi.console.ifc/target/org.apache.felix.mosgi.console.ifc-0.8.0-SNAPSHOT.jar \
  file:../mosgi.managedelements.osgiprobes/target/org.apache.felix.mosgi.managedelements.osgiprobes-0.8.0-SNAPSHOT.jar \
  file:../mosgi.managedelements.bundlesprobes/target/org.apache.felix.mosgi.managedelements.bundlesprobes-0.8.0-SNAPSHOT.jar \
- file:../mosgi.managedelements.memoryprobe/target/org.apache.felix.mosgi.managedelements.memoryprobe-0.8.0-SNAPSHOT.jar 
- 
-# file:../mosgi.managedelements.obrprobe/target/org.apache.felix.mosgi.managedelements.obrprobe-0.8.0-SNAPSHOT.jar \
+ file:../mosgi.managedelements.memoryprobe/target/org.apache.felix.mosgi.managedelements.memoryprobe-0.8.0-SNAPSHOT.jar \
+ file:../mosgi.managedelements.obrprobe/target/org.apache.felix.mosgi.managedelements.obrprobe-0.8.0-SNAPSHOT.jar 
 
 # if we need the http jmx connector
 # file:../mosgi.jmx.httpconnector/target/org.apache.felix.mosgi.jmx.httpconnector-0.8.0-SNAPSHOT.jar

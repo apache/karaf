@@ -6,7 +6,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <packaging>osgi-bundle</packaging>
-  <name>MOSGi JMX MBean for OSGi bundles management</name>
+  <name>Apache Felix MOSGi JMX MBean for OSGi bundles management</name>
   <artifactId>org.apache.felix.mosgi.managedelements.bundlesprobes</artifactId>
   <dependencies>
     <dependency>

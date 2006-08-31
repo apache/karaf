@@ -6,7 +6,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <packaging>osgi-bundle</packaging>
-  <name>MOSGi JMX Console Interface</name>
+  <name>Apache Felix MOSGi JMX Console Interface</name>
   <artifactId>org.apache.felix.mosgi.console.ifc</artifactId>
   <dependencies>
     <dependency>

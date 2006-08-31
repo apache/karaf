@@ -6,7 +6,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <packaging>osgi-bundle</packaging>
-  <name>MOSGi JMX MBean for obr interaction</name>
+  <name>Apache Felix MOSGi JMX MBean for obr interaction</name>
   <artifactId>org.apache.felix.mosgi.managedelements.memoryprobe</artifactId>
   <dependencies>
     <dependency>
