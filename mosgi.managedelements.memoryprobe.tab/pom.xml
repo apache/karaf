@@ -1,0 +1,97 @@
+<project>
+  <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>0.8.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>osgi-bundle</packaging>
+  <name>Apache Felix MOSGi memory activity presentation tab for the JMX console</name>
+  <artifactId>org.apache.felix.mosgi.managedelements.memoryprobe.tab</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.mosgi.console.ifc</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- dependency>
+      <groupId>jfree</groupId>
+      <artifactId>jcommon</artifactId>
+      <version>1.0.4</version>
+      <scope>provided</scope>
+    </dependency -->
+    <dependency>
+      <groupId>jfree</groupId>
+      <artifactId>jfreechart</artifactId>
+      <version>1.0.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix.plugins</groupId>
+        <artifactId>maven-osgi-plugin</artifactId>
+        <version>${pom.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <osgiManifest>
+            <bundleName>MOSGi memory activity tab for the JMX console</bundleName>
+            <bundleDescription>MOSGi memory activity tab for the JMX console</bundleDescription>
+            <bundleActivator>auto-detect</bundleActivator>
+            <bundleDocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</bundleDocUrl>
+            <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>
+            <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
+            <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
+            <exportPackage>
+              ${pom.artifactId}
+	      <!--
+              org.jfree.data.xy,
+              org.jfree.ui,
+              org.jfree.chart,
+              org.jfree.chart.resources,
+              org.jfree.chart.plot -->
+            </exportPackage>
+            <importPackage>
+              javax.management,
+              javax.management.openmbean,
+              javax.swing.border,
+              javax.swing.event,
+              javax.swing.filechooser,
+              org.osgi.framework,
+              javax.swing,
+              javax.swing.table,
+	      <!--
+              org.jfree.data.xy,
+              org.jfree.chart.plot,
+              org.jfree.chart.resources,
+              org.jfree.chart,
+              org.jfree.ui, -->
+              javax.swing.plaf,
+              org.apache.felix.mosgi.console.ifc,
+	      org.xml.sax,
+	      javax.imageio,
+	      org.xml.sax.helpers,
+	      javax.xml.parsers,
+	      javax.accessibility
+            </importPackage>
+          </osgiManifest>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
