@@ -83,6 +83,8 @@ public class ContentClassLoader extends SecureClassLoader
 
     protected Class findClass(String name) throws ClassNotFoundException
     {
+// TODO: ML - We probably need to do this check closer to defineClass() and
+//       protect it with a synchronized block.
         Class clazz = findLoadedClass(name);
 
         // Search for class in module.
