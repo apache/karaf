@@ -17,8 +17,10 @@
 package org.apache.felix.framework;
 
 import java.io.*;
-import java.net.*;
-import java.security.*;
+import java.net.URL;
+import java.net.URLStreamHandler;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.*;
 
 import org.apache.felix.framework.cache.*;
@@ -2573,7 +2575,7 @@ public class Felix
     private IModule createModule(long targetId, int revision, Map headerMap)
         throws Exception
     {
-        ManifestParser mp = new ManifestParser(m_logger, headerMap);
+        ManifestParser mp = new ManifestParser(m_logger, m_config, headerMap);
 
         // Verify that the bundle symbolic name and version is unique.
         if (mp.getVersion().equals("2"))
@@ -2610,12 +2612,7 @@ public class Felix
             mp.getExports(),
             mp.getImports(),
             mp.getDynamicImports(),
-            mp.getLibraries(
-                m_cache,
-                targetId,
-                revision,
-                m_config.get(Constants.FRAMEWORK_OS_NAME),
-                m_config.get(Constants.FRAMEWORK_PROCESSOR)));
+            mp.getLibraries(m_cache.getArchive(targetId).getRevision(revision)));
 
         // Create the module using the module definition.
         IModule module = m_factory.createModule(
@@ -2828,13 +2825,9 @@ public class Felix
             System.getProperty("os.version"));
 
         String s = null;
-        s = R4Library.normalizePropertyValue(
-            FelixConstants.FRAMEWORK_OS_NAME,
-            System.getProperty("os.name"));
+        s = R4LibraryClause.normalizeOSName(System.getProperty("os.name"));
         m_configMutable.put(FelixConstants.FRAMEWORK_OS_NAME, s);
-        s = R4Library.normalizePropertyValue(
-            FelixConstants.FRAMEWORK_PROCESSOR,
-            System.getProperty("os.arch"));
+        s = R4LibraryClause.normalizeProcessor(System.getProperty("os.arch"));
         m_configMutable.put(FelixConstants.FRAMEWORK_PROCESSOR, s);
         m_configMutable.put(
             FelixConstants.FELIX_VERSION_PROPERTY, getFrameworkVersion());

@@ -16,26 +16,29 @@
  */
 package org.apache.felix.framework.util;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.cache.BundleCache;
+import org.apache.felix.framework.cache.BundleRevision;
 import org.apache.felix.framework.searchpolicy.*;
 import org.osgi.framework.*;
 
 public class ManifestParser
 {
     private Logger m_logger = null;
+    private PropertyResolver m_config = null;
     private Map m_headerMap = null;
     private R4Export[] m_exports = null;
     private R4Import[] m_imports = null;
     private R4Import[] m_dynamics = null;
-    private R4LibraryHeader[] m_libraryHeaders = null;
+    private R4LibraryClause[] m_libraryHeaders = null;
+    private boolean m_libraryHeadersOptional = false;
 
-    public ManifestParser(Logger logger, Map headerMap) throws BundleException
+    public ManifestParser(Logger logger, PropertyResolver config, Map headerMap)
+        throws BundleException
     {
         m_logger = logger;
+        m_config = config;
         m_headerMap = headerMap;
 
         // Verify that only manifest version 2 is specified.
@@ -152,6 +155,17 @@ public class ManifestParser
                 m_logger,
                 Util.parseDelimitedString(get(Constants.BUNDLE_NATIVECODE), ","));
 
+        // Check to see if there was an optional native library clause, which is
+        // represented by a null library header; if so, record it and remove it.
+        if ((m_libraryHeaders.length > 0) &&
+            (m_libraryHeaders[m_libraryHeaders.length - 1].getLibraryFiles() == null))
+        {
+            m_libraryHeadersOptional = true;
+            R4LibraryClause[] tmp = new R4LibraryClause[m_libraryHeaders.length - 1];
+            System.arraycopy(m_libraryHeaders, 0, tmp, 0, m_libraryHeaders.length - 1);
+            m_libraryHeaders = tmp;
+        }
+
         // Do final checks and normalization of manifest.
         if (getVersion().equals("2"))
         {
@@ -189,21 +203,183 @@ public class ManifestParser
         return m_dynamics;
     }
 
-    public R4LibraryHeader[] getLibraryHeaders()
+    public R4LibraryClause[] getLibraryClauses()
     {
         return m_libraryHeaders;
     }
 
-    public R4Library[] getLibraries(
-        BundleCache cache, long id, int revision, String osName, String processor)
+    /**
+     * <p>
+     * This method returns the selected native library metadata from
+     * the manifest. The information is not the raw metadata from the
+     * manifest, but is native library metadata clause selected according
+     * to the OSGi native library clause selection policy. The metadata
+     * returned by this method will be attached directly to a module and
+     * used for finding its native libraries at run time. To inspect the
+     * raw native library metadata refer to <tt>getLibraryClauses()</tt>.
+     * </p>
+     * @param revision the bundle revision for the module.
+     * @return an array of selected library metadata objects from the manifest.
+     * @throws BundleException if any problems arise.
+     */
+    public R4Library[] getLibraries(BundleRevision revision) throws BundleException
     {
-        R4Library[] libraries = new R4Library[m_libraryHeaders.length];
-        for (int i = 0; i < libraries.length; i++)
+        R4LibraryClause clause = getSelectedLibraryClause();
+
+        if (clause != null)
         {
-            libraries[i] = new R4Library(
-                m_logger, cache, id, revision, osName, processor, m_libraryHeaders[i]);
+            R4Library[] libraries = new R4Library[clause.getLibraryFiles().length];
+            for (int i = 0; i < libraries.length; i++)
+            {
+                libraries[i] = new R4Library(
+                    m_logger, revision, clause.getLibraryFiles()[i],
+                    clause.getOSNames(), clause.getProcessors(), clause.getOSVersions(),
+                    clause.getLanguages(), clause.getSelectionFilter());
+            }
+            return libraries;
         }
-        return libraries;
+        return null;
+    }
+
+    private R4LibraryClause getSelectedLibraryClause() throws BundleException
+    {
+        if ((m_libraryHeaders != null) && (m_libraryHeaders.length > 0))
+        {
+            List clauseList = new ArrayList();
+
+            // Search for matching native clauses.
+            for (int i = 0; i < m_libraryHeaders.length; i++)
+            {
+                if (m_libraryHeaders[i].match(m_config))
+                {
+                    clauseList.add(m_libraryHeaders[i]);
+                }
+            }
+
+            // Select the matching native clause.
+            int selected = 0;
+            if (clauseList.size() == 0)
+            {
+                // If optional clause exists, no error thrown.
+                if (m_libraryHeadersOptional)
+                {
+                    return null;
+                }
+                else
+                {
+                    throw new BundleException("Unable to select a native library clause.");
+                }
+            }
+            else if (clauseList.size() == 1)
+            {
+                selected = 0;
+            }
+            else if (clauseList.size() > 1)
+            {
+                selected = firstSortedClause(clauseList);
+            }
+            return ((R4LibraryClause) clauseList.get(selected));
+        }
+
+        return null;
+    }
+
+    private int firstSortedClause(List clauseList)
+    {
+        ArrayList indexList = new ArrayList();
+        ArrayList selection = new ArrayList();
+
+        // Init index list
+        for (int i = 0; i < clauseList.size(); i++)
+        {
+            indexList.add("" + i);
+        }
+
+        // Select clause with 'osversion' range declared
+        // and get back the max floor of 'osversion' ranges.
+        Version osVersionRangeMaxFloor = new Version(0, 0, 0);
+        for (int i = 0; i < indexList.size(); i++)
+        {
+            int index = Integer.parseInt(indexList.get(i).toString());
+            String[] osversions = ((R4LibraryClause) clauseList.get(index)).getOSVersions();
+            if (osversions != null)
+            {
+                selection.add("" + indexList.get(i));
+            }
+            for (int k = 0; (osversions != null) && (k < osversions.length); k++)
+            {
+                VersionRange range = VersionRange.parse(osversions[k]);
+                if ((range.getLow()).compareTo(osVersionRangeMaxFloor) >= 0)
+                {
+                    osVersionRangeMaxFloor = range.getLow();
+                }
+            }
+        }
+
+        if (selection.size() == 1)
+        {
+            return Integer.parseInt(selection.get(0).toString());
+        }
+        else if (selection.size() > 1)
+        {
+            // Keep only selected clauses with an 'osversion'
+            // equal to the max floor of 'osversion' ranges.
+            indexList = selection;
+            selection = new ArrayList();
+            for (int i = 0; i < indexList.size(); i++)
+            {
+                int index = Integer.parseInt(indexList.get(i).toString());
+                String[] osversions = ((R4LibraryClause) clauseList.get(index)).getOSVersions();
+                for (int k = 0; k < osversions.length; k++)
+                {
+                    VersionRange range = VersionRange.parse(osversions[k]);
+                    if ((range.getLow()).compareTo(osVersionRangeMaxFloor) >= 0)
+                    {
+                        selection.add("" + indexList.get(i));
+                    }
+                }
+            }
+        }
+
+        if (selection.size() == 0)
+        {
+            // Re-init index list.
+            selection.clear();
+            indexList.clear();
+            for (int i = 0; i < clauseList.size(); i++)
+            {
+                indexList.add("" + i);
+            }
+        }
+        else if (selection.size() == 1)
+        {
+            return Integer.parseInt(selection.get(0).toString());
+        }
+        else
+        {
+            indexList = selection;
+            selection.clear();
+        }
+
+        // Keep only clauses with 'language' declared.
+        for (int i = 0; i < indexList.size(); i++)
+        {
+            int index = Integer.parseInt(indexList.get(i).toString());
+            if (((R4LibraryClause) clauseList.get(index)).getLanguages() != null)
+            {
+                selection.add("" + indexList.get(i));
+            }
+        }
+
+        // Return the first sorted clause
+        if (selection.size() == 0)
+        {
+            return 0;
+        }
+        else
+        {
+            return Integer.parseInt(selection.get(0).toString());
+        }
     }
 
     private void checkAndNormalizeR3() throws BundleException

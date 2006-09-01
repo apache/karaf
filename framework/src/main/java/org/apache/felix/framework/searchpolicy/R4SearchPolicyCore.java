@@ -23,9 +23,7 @@ import java.util.*;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.*;
 import org.apache.felix.moduleloader.*;
-import org.osgi.framework.Constants;
-import org.osgi.framework.PackagePermission;
-import org.osgi.framework.Version;
+import org.osgi.framework.*;
 
 public class R4SearchPolicyCore implements ModuleListener
 {
@@ -505,18 +503,15 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             name = name.substring(1);
         }
 
-        // TODO: This "matching" algorithm does not fully
-        // match the spec and should be improved.
         R4Library[] libs = module.getDefinition().getLibraries();
         for (int i = 0; (libs != null) && (i < libs.length); i++)
         {
-            String path = libs[i].getPath(name);
-            if (path != null)
+            String lib = libs[i].getPath(name);
+            if (lib != null)
             {
-                return path;
+                return lib;
             }
         }
-
         return null;
     }
 

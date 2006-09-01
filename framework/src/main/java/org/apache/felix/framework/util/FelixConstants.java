@@ -33,6 +33,7 @@ public interface FelixConstants extends org.osgi.framework.Constants
     public static final String PACKAGE_SEPARATOR = ";";
     public static final String VERSION_SEGMENT_SEPARATOR = ".";
     public static final int VERSION_SEGMENT_COUNT = 3;
+    public static final String BUNDLE_NATIVECODE_OPTIONAL = "*";
 
     // Miscellaneous OSGi constants.
     public static final String BUNDLE_URL_PROTOCOL = "bundle";

@@ -303,28 +303,23 @@ public class Util
      * @return an array of <tt>LibraryInfo</tt> objects for the
      *         passed in strings.
     **/
-    public static R4LibraryHeader[] parseLibraryStrings(Logger logger, String[] libStrs)
+    public static R4LibraryClause[] parseLibraryStrings(Logger logger, String[] libStrs)
         throws IllegalArgumentException
     {
         if (libStrs == null)
         {
-            return new R4LibraryHeader[0];
+            return new R4LibraryClause[0];
         }
 
         List libList = new ArrayList();
 
         for (int i = 0; i < libStrs.length; i++)
         {
-            R4LibraryHeader[] libs = R4LibraryHeader.parse(logger, libStrs[i]);
-            for (int libIdx = 0;
-                (libs != null) && (libIdx < libs.length);
-                libIdx++)
-            {
-                libList.add(libs[libIdx]);
-            }
+            R4LibraryClause clause = R4LibraryClause.parse(logger, libStrs[i]);
+            libList.add(clause);
         }
 
-        return (R4LibraryHeader[]) libList.toArray(new R4LibraryHeader[libList.size()]);
+        return (R4LibraryClause[]) libList.toArray(new R4LibraryClause[libList.size()]);
     }
 
     private static final byte encTab[] = { 0x41, 0x42, 0x43, 0x44, 0x45, 0x46,
