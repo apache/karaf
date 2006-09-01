@@ -20,10 +20,10 @@ import org.apache.felix.moduleloader.IModuleDefinition;
 
 public class ModuleDefinition implements IModuleDefinition
 {
-    public R4Export[] m_exports = null;
-    public R4Import[] m_imports = null;
-    public R4Import[] m_dynamicImports = null;
-    public R4Library[] m_libraries = null;
+    private R4Export[] m_exports = null;
+    private R4Import[] m_imports = null;
+    private R4Import[] m_dynamicImports = null;
+    private R4Library[] m_libraries = null;
 
     public ModuleDefinition(
         R4Export[] exports, R4Import[] imports,
