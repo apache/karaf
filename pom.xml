@@ -106,7 +106,6 @@
         <module>mosgi.managedelements.obrprobe</module>
         <module>mosgi.managedelements.obrprobe.tab</module>
         <module>mosgi.managedelements.memoryprobe</module>
-        <module>mosgi.managedelements.memoryprobe.tab</module>
 
         <module>ipojo.plugin</module>
         <module>ipojo.arch</module>

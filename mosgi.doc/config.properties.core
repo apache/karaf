@@ -33,7 +33,7 @@ felix.auto.start.1= \
 insa.jmxconsole.tab.url.osgiprobestab=file:../mosgi.managedelements.osgiprobes.tab/target/org.apache.felix.mosgi.managedelements.osgiprobes.tab-0.8.0-SNAPSHOT.jar
 insa.jmxconsole.tab.url.bundlesprobestab=file:../mosgi.managedelements.bundlesprobes.tab/target/org.apache.felix.mosgi.managedelements.bundlesprobes.tab-0.8.0-SNAPSHOT.jar
 insa.jmxconsole.tab.url.obrprobetab=file:../mosgi.managedelements.obrprobe.tab/target/org.apache.felix.mosgi.managedelements.obrprobe.tab-0.8.0-SNAPSHOT.jar
-insa.jmxconsole.tab.url.memoryprobetab=file:../mosgi.managedelements.memoryprobe.tab/target/org.apache.felix.mosgi.managedelements.memoryprobe.tab-0.8.0-SNAPSHOT.jar
+insa.jmxconsole.tab.url.memoryprobetab=http://perso.citi.insa-lyon.fr/sfrenot/devel/mosgi/managedelements/trunk/mosgi.managedelements.memoryprobe.tab/target/org.apache.felix.mosgi.managedelements.memoryprobe.tab-0.8.0-SNAPSHOT.jar
 
 #insa.jmxconsole.rmiport.t1=1100
 
