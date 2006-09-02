@@ -18,7 +18,7 @@
 package org.osgi.service.io;
 
 import java.io.*;
-import javax.microedition.io.*;
+//import javax.microedition.io.*;
 
 /**
  * The Connector Service should be called to create and open
@@ -48,19 +48,19 @@ public interface ConnectorService {
 	 * 
 	 * @see "javax.microedition.io.Connector.READ"
 	 */
-	public static final int	READ		= Connector.READ;
+	public static final int	READ		= /* Connector.READ */ 1;
 	/**
 	 * Write access mode.
 	 * 
 	 * @see "javax.microedition.io.Connector.WRITE"
 	 */
-	public static final int	WRITE		= Connector.WRITE;
+	public static final int	WRITE		= /* Connector.WRITE */ 2;
 	/**
 	 * Read/Write access mode.
 	 * 
 	 * @see "javax.microedition.io.Connector.READ_WRITE"
 	 */
-	public static final int	READ_WRITE	= Connector.READ_WRITE;
+	public static final int	READ_WRITE	= /* Connector.READ_WRITE */ 3;
 
 	/**
 	 * Create and open a <code>Connection</code> object for the specified name.
@@ -73,7 +73,7 @@ public interface ConnectorService {
 	 * @throws IOException If some other kind of I/O error occurs.
 	 * @see "javax.microedition.io.Connector.open(String name)"
 	 */
-	public Connection open(String name) throws IOException;
+	public /* Connection */ Object open(String name) throws IOException;
 
 	/**
 	 * Create and open a <code>Connection</code> object for the specified name and
@@ -88,7 +88,7 @@ public interface ConnectorService {
 	 * @throws IOException If some other kind of I/O error occurs.
 	 * @see "javax.microedition.io.Connector.open(String name, int mode)"
 	 */
-	public Connection open(String name, int mode) throws IOException;
+	public /* Connection */ Object open(String name, int mode) throws IOException;
 
 	/**
 	 * Create and open a <code>Connection</code> object for the specified name,
@@ -105,7 +105,7 @@ public interface ConnectorService {
 	 * @throws IOException If some other kind of I/O error occurs.
 	 * @see "<code>javax.microedition.io.Connector.open</code>"
 	 */
-	public Connection open(String name, int mode, boolean timeouts)
+	public /* Connection */ Object open(String name, int mode, boolean timeouts)
 			throws IOException;
 
 	/**

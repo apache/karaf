@@ -17,7 +17,7 @@
  */
 package org.osgi.service.io;
 
-import javax.microedition.io.*;
+//import javax.microedition.io.*;
 import java.io.*;
 
 /**
@@ -56,6 +56,6 @@ public interface ConnectionFactory {
 	 * @throws IOException If a <code>javax.microedition.io.Connection</code>
 	 *         object can not not be created.
 	 */
-	public Connection createConnection(String name, int mode, boolean timeouts)
+	public /*Connection*/ Object createConnection(String name, int mode, boolean timeouts)
 			throws IOException;
 }
