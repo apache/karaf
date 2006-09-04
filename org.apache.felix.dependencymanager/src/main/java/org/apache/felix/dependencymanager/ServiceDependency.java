@@ -19,6 +19,7 @@ package org.apache.felix.dependencymanager;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 
 import org.osgi.framework.BundleContext;
@@ -247,56 +248,32 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
         return callbackInstance;
     }
     
-    // TODO a lot of things in this method can be cached instead of done each time
-    // TODO Richard had an example where he could not invoke a private method
     private void invokeCallbackMethod(Object instance, String methodName, ServiceReference reference, Object service) throws NoSuchMethodException {
-        Method method = null;
-        Class clazz = instance.getClass();
-        while (clazz != null) {
-	        AccessibleObject.setAccessible(clazz.getDeclaredMethods(), true);
-	        try {
-	            try {
-	                method = clazz.getDeclaredMethod(methodName, new Class[] {ServiceReference.class, Object.class});
-	                method.invoke(instance, new Object[] {reference, service});
-	                return;
-	            }
-	            catch (NoSuchMethodException e) {
-	                try {
-	                    method = clazz.getDeclaredMethod(methodName, new Class[] {ServiceReference.class});
-	                    method.invoke(instance, new Object[] {reference});
-	                    return;
-	                } 
-	                catch (NoSuchMethodException e1) {
-	                    try {
-	                        method = clazz.getDeclaredMethod(methodName, new Class[] {Object.class});
-	                        method.invoke(instance, new Object[] {service});
-	                        return;
-	                    } 
-	                    catch (NoSuchMethodException e2) {
-	                        try {
-	                            method = clazz.getDeclaredMethod(methodName, new Class[] {m_trackedServiceName});
-	                            method.invoke(instance, new Object[] {service});
-	                            return;
-	                        } 
-	                        catch (NoSuchMethodException e3) {
-	                            method = clazz.getDeclaredMethod(methodName, null);
-	                            method.invoke(instance, null);
-	                            return;
-	                        }
-	                    }
-	                }
-	            }
-	        } 
-	        catch (IllegalArgumentException e1) {
-	        	// ignore this exception
-	        } 
-	        catch (IllegalAccessException e1) {
-	        	// ignore this exception
-	        } 
-	        catch (InvocationTargetException e1) {
-	        	// ignore this exception
-	        }
-	        clazz = clazz.getSuperclass();
+        invokeMethod(instance, instance.getClass(), methodName, 
+            new Class[][] {{ServiceReference.class, Object.class}, {ServiceReference.class}, {Object.class}, {m_trackedServiceName}, {}}, 
+            new Object[][] {{reference, service}, {reference}, {service}, {service}, {}},
+            false);
+    }
+
+    private void invokeMethod(Object object, Class clazz, String name, Class[][] signatures, Object[][] parameters, boolean isSuper) {
+        Method m = null;
+        for (int i = 0; i < signatures.length; i++) {
+            Class[] signature = signatures[i];
+            try {
+                m = clazz.getDeclaredMethod(name, signature);
+                if (!(isSuper && Modifier.isPrivate(m.getModifiers()))) {
+                    m.setAccessible(true);
+                    m.invoke(object, parameters[i]);
+                    return;
+                }
+            }
+            catch (Exception e) {
+                // ignore any exception and keep looking for a method
+            }
+            Class c = clazz.getSuperclass();
+            if (c != null) {
+                invokeMethod(object, c, name, signatures, parameters, true);
+            }
         }
     }
     
