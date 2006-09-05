@@ -24,7 +24,8 @@ felix.auto.start.1= \
  file:../mosgi.managedelements.osgiprobes/target/org.apache.felix.mosgi.managedelements.osgiprobes-0.8.0-SNAPSHOT.jar \
  file:../mosgi.managedelements.bundlesprobes/target/org.apache.felix.mosgi.managedelements.bundlesprobes-0.8.0-SNAPSHOT.jar \
  file:../mosgi.managedelements.memoryprobe/target/org.apache.felix.mosgi.managedelements.memoryprobe-0.8.0-SNAPSHOT.jar \
- file:../mosgi.managedelements.obrprobe/target/org.apache.felix.mosgi.managedelements.obrprobe-0.8.0-SNAPSHOT.jar 
+ file:../mosgi.managedelements.obrprobe/target/org.apache.felix.mosgi.managedelements.obrprobe-0.8.0-SNAPSHOT.jar \
+ http://perso.citi.insa-lyon.fr/sfrenot/devel/mosgi/managedelements/trunk/mosgi.managedelements.linuxprobes/target/org.apache.felix.mosgi.managedelements.linuxprobes-0.8.0-SNAPSHOT.jar
 
 # if we need the http jmx connector
 # file:../mosgi.jmx.httpconnector/target/org.apache.felix.mosgi.jmx.httpconnector-0.8.0-SNAPSHOT.jar
@@ -34,6 +35,7 @@ insa.jmxconsole.tab.url.osgiprobestab=file:../mosgi.managedelements.osgiprobes.t
 insa.jmxconsole.tab.url.bundlesprobestab=file:../mosgi.managedelements.bundlesprobes.tab/target/org.apache.felix.mosgi.managedelements.bundlesprobes.tab-0.8.0-SNAPSHOT.jar
 insa.jmxconsole.tab.url.obrprobetab=file:../mosgi.managedelements.obrprobe.tab/target/org.apache.felix.mosgi.managedelements.obrprobe.tab-0.8.0-SNAPSHOT.jar
 insa.jmxconsole.tab.url.memoryprobetab=http://perso.citi.insa-lyon.fr/sfrenot/devel/mosgi/managedelements/trunk/mosgi.managedelements.memoryprobe.tab/target/org.apache.felix.mosgi.managedelements.memoryprobe.tab-0.8.0-SNAPSHOT.jar
+insa.jmxconsole.tab.url.linuxprobestab=http://perso.citi.insa-lyon.fr/sfrenot/devel/mosgi/managedelements/trunk/mosgi.managedelements.linuxprobes.tab/target/org.apache.felix.mosgi.managedelements.linuxprobes.tab-0.8.0-SNAPSHOT.jar
 
 #insa.jmxconsole.rmiport.t1=1100
 
@@ -47,6 +49,9 @@ felix.startlevel.bundle=1
 org.osgi.service.http.port=8080
 obr.shell.telnet=on
 #obr.repository.url=http://bundles.osgi.org/obr/browse?_xml=1&cmd=repository
+
+#fr.inria.ares.managedelements.linuxprobes.dfcmd=df -h /dev/hda3 | grep /dev/hda3 | awk '{printf "%s", $4}'
+fr.inria.ares.managedelements.linuxprobes.dfcmd=df -h /dev/hda3 | grep /dev/hda3 | xargs | cut -d ' ' -f 3
 
 
 #
