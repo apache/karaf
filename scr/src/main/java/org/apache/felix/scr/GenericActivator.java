@@ -217,7 +217,13 @@ public class GenericActivator implements BundleActivator
         //GenericActivator.trace("GenericActivator : Bundle ["+context.getBundle().getBundleId()+"] STOPPED");
     }
 
-    /**
+    void dispose() throws Exception {
+        if (m_context != null) {
+            stop(m_context);
+        }
+    }
+
+   /**
     * Returns the list of instance references currently associated to this activator
     *
     * @return the list of instance references
