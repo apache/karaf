@@ -16,10 +16,7 @@
  */
 package org.apache.felix.scr;
 
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 import org.osgi.service.component.ComponentException;
 
@@ -43,7 +40,13 @@ public class ComponentMetadata {
     private String m_implementationClassName = null;
     
     // Associated properties (0..*)
-    private Properties m_properties = new Properties();
+    private Dictionary m_properties = new Hashtable();
+    
+    // List of Property metadata - used while building the meta data
+    // while validating the properties contained in the PropertyMetadata
+    // instances are copied to the m_properties Dictionary while this
+    // list will be cleared
+    private List m_propertyMetaData = new ArrayList();
     
     // Provided services (0..1)
     private ServiceMetadata m_service = null;
@@ -128,9 +131,7 @@ public class ComponentMetadata {
     	if(newProperty == null) {
     		throw new IllegalArgumentException ("Cannot add a null property");
     	}
-        String key = newProperty.getName();
-        Object value = newProperty.getValue();
-        m_properties.put(key,value);
+    	m_propertyMetaData.add(newProperty);
     }
 
     /**
@@ -215,11 +216,11 @@ public class ComponentMetadata {
     }
 
     /**
-     * Returns the property descriptors
+     * Returns the properties.
      *
-     * @return the property descriptors as a Collection
+     * @return the properties as a Dictionary
      */
-    public Properties getProperties() {
+    public Dictionary getProperties() {
         return m_properties;
     }
 
@@ -246,11 +247,14 @@ public class ComponentMetadata {
      */
     void validate() {
     	
-    	// First check if the properties are valid
-    	Iterator propertyIterator = m_properties.keySet().iterator();
+        // First check if the properties are valid (and extract property values)
+        Iterator propertyIterator = m_propertyMetaData.iterator();
     	while ( propertyIterator.hasNext() ) {
-    		((PropertyMetadata)propertyIterator.next()).validate();
-    	}
+    	    PropertyMetadata propMeta = (PropertyMetadata) propertyIterator.next();
+            propMeta.validate();
+            m_properties.put(propMeta.getName(), propMeta.getValue());
+        }
+    	m_propertyMetaData.clear();
     	
     	// Check that the provided services are valid too
     	if(m_service != null) {
