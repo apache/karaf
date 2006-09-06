@@ -36,6 +36,7 @@
                 <value>metadata.xml</value>
               </property>
             </entries>
+            <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
             <bundleName>Service Binder</bundleName>
             <bundleVendor>Apache Software Foundation</bundleVendor>
             <!--<bundleVersion>1.1.2</bundleVersion>-->
