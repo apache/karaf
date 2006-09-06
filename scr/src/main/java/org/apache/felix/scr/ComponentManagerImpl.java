@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.BundleContext;
@@ -203,7 +204,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 	            
 	            // 112.4.4 The class must be public and have a public constructor without arguments so component instances
 	            // may be created by the SCR with the newInstance method on Class
-	            m_componentContext = new ComponentContextImpl();
+	            m_componentContext = new ComponentContextImpl(null);
 	            m_implementationObject = c.newInstance();
 	        }
 	        catch (Exception ex)
@@ -909,33 +910,126 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
      */
     class ComponentContextImpl implements ComponentContext {
 
+        private Bundle m_usingBundle;
+
+        ComponentContextImpl(Bundle usingBundle)
+        {
+            m_usingBundle = usingBundle;
+        }
+
     	public Dictionary getProperties() {
     		//TODO: 112.11.3.5 The Dictionary is read-only and cannot be modified
     		return m_componentMetadata.getProperties();
     	}
 
-    	public Object locateService(String arg0) {
-    		// TODO implement this method
-    		return null;
+        public Object locateService(String name) {
+            DependencyManager dm = getDependencyManager(name);
+            if (dm == null || dm.m_boundServicesRefs.isEmpty())
+            {
+                return null;
+            }
+            
+            ServiceReference selectedRef;
+            if (dm.m_boundServicesRefs.size() == 1)
+            {
+                // short cut for single bound service
+                selectedRef = (ServiceReference) dm.m_boundServicesRefs.iterator().next();
+            }
+            else
+            {
+                // is it correct to assume an ordered bound services set ? 
+                int maxRanking = Integer.MIN_VALUE;
+                long minId = Long.MAX_VALUE;
+                selectedRef = null;
+                
+                Iterator it = dm.m_boundServicesRefs.iterator();
+                while (it.hasNext())
+                {
+                    ServiceReference ref = (ServiceReference) it.next();
+                    Integer rank = (Integer) ref.getProperty(Constants.SERVICE_RANKING);
+                    int ranking = (rank == null) ? Integer.MIN_VALUE : rank.intValue();
+                    long id = ((Long) ref.getProperty(Constants.SERVICE_ID)).longValue();
+                    if (maxRanking < ranking || (maxRanking == ranking && id < minId))
+                    {
+                        maxRanking = ranking;
+                        minId = id;
+                        selectedRef = ref;
+                    }
+                }
+            }
+    
+            // this is not realistic, as at least one service is available
+            // whose service id is smaller than Long.MAX_VALUE, still be sure
+            if (selectedRef == null)
+            {
+                return null;
+            }
+            
+            // return the service for the selected reference
+            return getBundleContext().getService(selectedRef);
+   	    }
+
+        public Object locateService(String name, ServiceReference ref) {
+            DependencyManager dm = getDependencyManager(name);
+            if (dm == null || dm.m_boundServicesRefs.isEmpty())
+            {
+                return null;
+            }
+            
+            // is it correct to assume an ordered bound services set ? 
+            Iterator it = dm.m_boundServicesRefs.iterator();
+            while (it.hasNext())
+            {
+                if (it.next().equals(ref))
+                {
+                    return getBundleContext().getService(ref);
+                }
+            }
+            
+            // no matching name and service reference found
+            return null;
     	}
 
-    	public Object locateService(String arg0, ServiceReference arg1) {
-    		// TODO implement this method
-    		return null;
+        public Object[] locateServices(String name) {
+            DependencyManager dm = getDependencyManager(name);
+            if (dm == null || dm.m_boundServicesRefs.isEmpty())
+            {
+                return null;
+            }
+            
+            Object[] services = new Object[dm.m_boundServicesRefs.size()];
+            Iterator it = dm.m_boundServicesRefs.iterator();
+            for (int i=0; i < services.length && it.hasNext(); i++)
+            {
+                ServiceReference ref = (ServiceReference) it.next();
+                services[i] = getBundleContext().getService(ref);
+            }
+            return services;
     	}
 
-    	public Object[] locateServices(String arg0) {
-    		// TODO implement this method
-    		return null;
-    	}
-
+        private DependencyManager getDependencyManager(String name) {
+            Iterator it = m_dependencyManagers.iterator();
+            while (it.hasNext())
+            {
+                DependencyManager dm = (DependencyManager)it.next();
+                
+                // if any of the dependency managers is unable to bind (it is invalid), the component is deactivated
+                if (name.equals(dm.m_dependencyMetadata.getName()))
+                {
+                    return dm;
+                }
+            }
+            
+            // not found
+            return null;
+        }
+        
     	public BundleContext getBundleContext() {
     		return m_activator.getBundleContext();
     	}
 
     	public Bundle getUsingBundle() {
-    		// TODO implement this method
-    		return null;
+            return m_usingBundle;
     	}
 
     	public ComponentInstance getComponentInstance() {
@@ -983,7 +1077,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 	            
 	            // 112.4.4 The class must be public and have a public constructor without arguments so component instances
 	            // may be created by the SCR with the newInstance method on Class
-	            m_componentContext = new ComponentContextImpl();
+	            m_componentContext = new ComponentContextImpl(arg0);
 	            m_implementationObject = c.newInstance();
 	        }
 	        catch (Exception ex)
