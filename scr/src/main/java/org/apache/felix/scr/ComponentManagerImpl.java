@@ -16,26 +16,12 @@
  */
 package org.apache.felix.scr;
 
-import java.util.Dictionary;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.lang.reflect.*;
+import java.util.*;
 
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceFactory;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Bundle;
+import org.osgi.framework.*;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentInstance;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
 
 
 /**
@@ -248,7 +234,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
         {
             // Search for the activate method
         	try {
-        		Method activateMethod = m_implementationObject.getClass().getMethod("activate", new Class[]{ComponentContext.class});
+                Method activateMethod = getMethod(m_implementationObject.getClass(), "activate", new Class[]{ComponentContext.class});
         		activateMethod.invoke(m_implementationObject, new Object[]{m_componentContext});
         	}
         	catch(NoSuchMethodException ex) {        		
@@ -322,7 +308,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 			// is delayed and its service was never requested.
 			if(m_implementationObject != null)
 			{
-				Method activateMethod = m_implementationObject.getClass().getMethod("deactivate", new Class[]{ComponentContext.class});
+				Method activateMethod = getMethod(m_implementationObject.getClass(), "deactivate", new Class[]{ComponentContext.class});
 				activateMethod.invoke(m_implementationObject, new Object[]{m_componentContext});				
 			}
 		}
@@ -604,7 +590,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
             try{
             	// Case 1
             	
-                method = targetClass.getMethod(methodname, new Class[]{ServiceReference.class});
+                method = getMethod(targetClass, methodname, new Class[]{ServiceReference.class});
                
                 m_bindUsesServiceReference = true;                
             }
@@ -617,35 +603,50 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
             		
             		parameterClass = m_activator.getBundleContext().getBundle().loadClass(parameterClassName);
             		
-	                method = targetClass.getMethod(methodname, new Class[]{parameterClass});
+	                method = getMethod(targetClass, methodname, new Class[]{parameterClass});
             	}
-            	catch(NoSuchMethodException ex2) {
+                catch(NoSuchMethodException ex2) {
             		
-            		// Case 3
-            		method = null;
+                    // Case 3
+                    method = null;
             		
-            		// Get all potential bind methods
-            		Method candidateBindMethods[]  = targetClass.getMethods();
-            		
-            		// Iterate over them
-            		for(int i = 0; i < candidateBindMethods.length; i++) {
-            			Method currentMethod = candidateBindMethods[i];
-            			
-            			// Get the parameters for the current method
-            			Class[] parameters = currentMethod.getParameterTypes();
-            			
-            			// Select only the methods that receive a single parameter 
-            			if(parameters.length == 1) {
-            				
-            				// Get the parameter type
-            				Class theParameter = parameters[0];
-            				
-            				// Check if the parameter type is assignable from the type specified by the reference's interface attribute
-            				if(theParameter.isAssignableFrom(parameterClass)) {
-            					method = currentMethod;
-            				}
-            			}            				
-            		}
+                    // iterate on class hierarchy
+                    for ( ; method == null && targetClass != null; targetClass = targetClass.getSuperclass())
+                    {
+                        // Get all potential bind methods
+                        Method candidateBindMethods[]  = targetClass.getDeclaredMethods();
+                       
+                        // Iterate over them
+                        for(int i = 0; method == null && i < candidateBindMethods.length; i++) {
+                            Method currentMethod = candidateBindMethods[i];
+                           
+                            // Get the parameters for the current method
+                            Class[] parameters = currentMethod.getParameterTypes();
+                           
+                            // Select only the methods that receive a single parameter
+                            // and a matching name
+                            if(parameters.length == 1 && currentMethod.getName().equals(methodname)) {
+                               
+                                // Get the parameter type
+                                Class theParameter = parameters[0];
+                               
+                                // Check if the parameter type is assignable from the type specified by the reference's interface attribute
+                                if(theParameter.isAssignableFrom(parameterClass)) {
+                                    
+                                    // Final check: it must be public or protected
+                                    if (Modifier.isPublic(method.getModifiers()) || Modifier.isProtected(method.getModifiers()))
+                                    {
+                                        if (!method.isAccessible())
+                                        {
+                                            method.setAccessible(true);
+                                        }
+                                        method = currentMethod;
+                                        
+                                    }
+                                }
+                            }                           
+                        }
+                    }
             	} 
             	catch(ClassNotFoundException ex2) {
             		GenericActivator.exception("Cannot load class used as parameter "+parameterClassName,m_componentMetadata,ex2);
@@ -1106,20 +1107,22 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 	        // 4. Call the activate method, if present
             // Search for the activate method
         	try {
-        		Method activateMethod = m_implementationObject.getClass().getMethod("activate", new Class[]{ComponentContext.class});
+        		Method activateMethod = getMethod(m_implementationObject.getClass(), "activate", new Class[]{ComponentContext.class});
         		activateMethod.invoke(m_implementationObject, new Object[]{m_componentContext});
         	}
         	catch(NoSuchMethodException ex) {
-        		// We can safely ignore this one
-        	}
-        	catch(IllegalAccessException ex) {
-        		// TODO: Log this exception?
-        		
-        	}
-        	catch(InvocationTargetException ex) {
-        		// TODO: 112.5.8 If the activate method throws an exception, SCR must log an error message
-        		// containing the exception with the Log Service
-        	}
+                // We can safely ignore this one
+                GenericActivator.trace("activate() method is not implemented", m_componentMetadata);
+            }
+            catch(IllegalAccessException ex) {
+                // Ignored, but should it be logged?
+                GenericActivator.trace("activate() method cannot be called", m_componentMetadata);
+            }
+            catch(InvocationTargetException ex) {
+                // TODO: 112.5.8 If the activate method throws an exception, SCR must log an error message
+                // containing the exception with the Log Service
+                GenericActivator.exception("The activate method has thrown and exception", m_componentMetadata, ex);
+            }
     		
     		return m_implementationObject;
     	}
@@ -1130,6 +1133,61 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
     	}
     }
 
-
-    
+    /**
+     * Finds the named public or protected method in the given class or any
+     * super class. If such a method is found, its accessibility is enfored by
+     * calling the <code>Method.setAccessible</code> method if required and
+     * the method is returned. Enforcing accessibility is required to support
+     * invocation of protected methods.
+     * 
+     * @param clazz The <code>Class</code> which provides the method.
+     * @param name The name of the method.
+     * @param parameterTypes The parameters to the method. Passing
+     *      <code>null</code> is equivalent to using an empty array.
+     *      
+     * @return The named method with enforced accessibility
+     * 
+     * @throws NoSuchMethodException If no public or protected method with
+     *      the given name can be found in the class or any of its super classes.
+     */
+    private Method getMethod(Class clazz, String name, Class[] parameterTypes)
+        throws NoSuchMethodException 
+    {
+        // try the default mechanism first, which only yields public methods
+        try
+        {
+            return clazz.getMethod(name, parameterTypes); 
+        }
+        catch (NoSuchMethodException nsme)
+        {
+            // it is ok to not find a public method, try to find a protected now
+        }
+        
+        // now use method declarations, requiring walking up the class
+        // hierarchy manually. this algorithm also returns protected methods
+        // which is, what we need here
+        for ( ; clazz != null; clazz = clazz.getSuperclass()) 
+        {
+            try 
+            {
+                Method method = clazz.getDeclaredMethod(name, parameterTypes);
+                
+                // only accept a protected method, a public method should
+                // have been found above and neither private nor package
+                // protected methods are acceptable here
+                if (Modifier.isProtected(method.getModifiers())) {
+                    method.setAccessible(true);
+                    return method;
+                }
+            }
+            catch (NoSuchMethodException nsme)
+            {
+                // ignore for now
+            }
+        }
+        
+        // walked up the complete super class hierarchy and still not found
+        // anything, sigh ...
+        throw new NoSuchMethodException(name);
+    }    
 }

@@ -158,8 +158,10 @@ public class GenericActivator implements BundleActivator
                 		else if(metadata.isEnabled()) {
 		                	// enable the component
 		                	manager.enable();
-		                	m_managers.add(manager);
 		                }
+
+                		// register the manager
+                		m_managers.add(manager);
 	                } catch (Exception e) {
 						// There is a problem with this particular component, we'll log the error
 	                	// and proceed to the next one
@@ -235,6 +237,125 @@ public class GenericActivator implements BundleActivator
         return m_context;
     }
 
+    /**
+     * Implements the <code>ComponentContext.enableComponent(String)</code>
+     * method by first finding the component(s) for the <code>name</code> and
+     * then starting a thread to actually enable all components found.
+     * <p>
+     * If no component matching the given name is found the thread is not
+     * started and the method does nothing. 
+     * 
+     * @param name The name of the component to enable or <code>null</code> to
+     *      enable all components.
+     */
+    void enableComponent(String name)
+    {
+        final ComponentManager[] cm = getSelectedComponents(name);
+        if (cm == null)
+        {
+            return;
+        }
+        
+        Thread enabler = new Thread("Component Enabling") 
+        {
+            public void run()
+            {
+                for (int i=0; i < cm.length; i++)
+                {
+                    try
+                    {
+                        cm[i].enable();
+                    }
+                    catch (Throwable t) 
+                    {
+                        exception("Cannot enable component",
+                            cm[i].getComponentMetadata(), t);
+                    }
+                }
+            }
+        };
+        enabler.start();
+    }
+    
+    /**
+     * Implements the <code>ComponentContext.disableComponent(String)</code>
+     * method by first finding the component(s) for the <code>name</code> and
+     * then starting a thread to actually disable all components found.
+     * <p>
+     * If no component matching the given name is found the thread is not
+     * started and the method does nothing. 
+     * 
+     * @param name The name of the component to disable or <code>null</code> to
+     *      disable all components.
+     */
+    void disableComponent(String name)
+    {
+        final ComponentManager[] cm = getSelectedComponents(name);
+        if (cm == null)
+        {
+            return;
+        }
+        
+        Thread disabler = new Thread("Component Disabling")
+        {
+            public void run()
+            {
+                for (int i=0; i < cm.length; i++)
+                {
+                    try
+                    {
+                        cm[i].dispose();
+                    }
+                    catch (Throwable t)
+                    {
+                        exception("Cannot disable component",
+                            cm[i].getComponentMetadata(), t);
+                    }
+                }
+            }
+        };
+        disabler.start();
+    }
+    
+    /**
+     * Returns an array of {@link ComponentManager} instances which match the
+     * <code>name</code>. If the <code>name</code> is <code>null</code> an
+     * array of all currently known component managers is returned. Otherwise
+     * an array containing a single component manager matching the name is
+     * returned if one is registered. Finally, if no component manager with the
+     * given name is registered, <code>null</code> is returned.
+     *  
+     * @param name The name of the component manager to return or
+     *      <code>null</code> to return an array of all component managers.
+     *      
+     * @return An array containing one or more component managers according
+     *      to the <code>name</code> parameter or <code>null</code> if no
+     *      component manager with the given name is currently registered.
+     */
+    private ComponentManager[] getSelectedComponents(String name) {
+        // if all components are selected
+        if (name == null)
+        {
+            return (ComponentManager[]) m_managers.toArray(new ComponentManager[m_managers.size()]);
+        }
+        
+        if (m_componentNames.contains(name))
+        {
+            // otherwise just find it
+            Iterator it = m_managers.iterator();
+            while (it.hasNext())
+            {
+                ComponentManager cm = (ComponentManager) it.next();
+                if (name.equals(cm.getComponentMetadata().getName())) {
+                    return new ComponentManager[]{ cm  };
+                }
+            }
+        }
+        
+        // if the component is not known
+        return null;
+    }
+        
     /**
      * Method to display traces
      *
