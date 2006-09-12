@@ -1,0 +1,113 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>0.8.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <name>Management Interactive Shell</name>
+   <packaging>osgi-bundle</packaging>
+  <artifactId>${groupId}.mishell</artifactId>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency><!--BSD -->
+      <groupId>jline</groupId>
+      <artifactId>jline</artifactId>
+      <version>0.9.9</version>
+    </dependency>
+     <dependency><!--Currently needs manual installation-->
+       <groupId>org.jruby</groupId><!--trilicense CPL/GPL/LGPL -->
+       <artifactId>jruby</artifactId>
+       <version>0.9.0</version>
+     </dependency>
+     <dependency><!--Currently needs manual installation-->
+       <groupId>javax.script</groupId><!--BSD-->
+       <artifactId>jruby-engine</artifactId>
+       <version>SNAPSHOT</version>
+     </dependency>
+     <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>${groupId}.jmxintrospector</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
+        <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+        <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.framework</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    
+  </dependencies>
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix.plugins</groupId>
+        <artifactId>maven-osgi-plugin</artifactId>
+        <version>${pom.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+		    <manifestFile>target/classes/manifest.mf</manifestFile>
+		    <!--
+		    We're inlining a lot here. This is nasty for a bundle, nice for an executable jar.
+		    It should be simple to change afterwards
+		    -->
+    	    <inlinedArtifacts>
+        	    <inlinedArtifact>jruby</inlinedArtifact>
+        	    <inlinedArtifact>jruby-engine</inlinedArtifact>
+        	    <inlinedArtifact>org.apache.felix.jmxintrospector</inlinedArtifact>
+        	    <inlinedArtifact>jline</inlinedArtifact>
+          	</inlinedArtifacts>
+          <osgiManifest>
+            <bundleActivator>${artifactId}.Activator</bundleActivator>
+            <bundleName>${name}</bundleName>
+            <bundleDescription>Management Interactive Shell</bundleDescription>
+            <bundleSymbolicName>${artifactId}</bundleSymbolicName>
+            <dynamicImportPackage>
+            *
+            </dynamicImportPackage>
+            <importPackage>
+            <!--Note that we explicitly do not import jmood classes as they we use 
+            dynamically generated interfaces and proxies instead-->
+			org.osgi.framework, javax.management, javax.management.remote, javax.script
+			</importPackage>
+            
+          </osgiManifest>
+        </configuration>
+      </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source><!--should fail if not java6-->
+                    <target>1.6</target>
+                </configuration>
+             </plugin>      
+    </plugins>
+  </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </reporting>
+</project>
