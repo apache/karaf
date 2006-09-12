@@ -19,15 +19,11 @@ package org.apache.felix.jmxintrospector;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.management.MBeanServerConnection;
-import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -70,9 +66,9 @@ public class MBeanProxyManager {
 			try {
 				objects.add(introspector.newProxyInstance(name
 						.toString()));
-			} catch (javassist.NotFoundException nfe) {
-				
-				logger.warning("ERROR"+nfe);
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.warning("ERROR: "+e);
 				continue;
 			}
 		}

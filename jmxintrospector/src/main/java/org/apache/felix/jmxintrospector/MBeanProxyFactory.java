@@ -23,12 +23,12 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
-import javassist.CannotCompileException;
+/*import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.NotFoundException;
-
+*/
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanNotificationInfo;
@@ -38,7 +38,12 @@ import javax.management.MBeanServerInvocationHandler;
 import javax.management.NotificationEmitter;
 import javax.management.ObjectName;
 
-import org.apache.felix.jmxintrospector.classbean.TypeGetterMBean;
+import net.sf.cglib.core.NamingPolicy;
+import net.sf.cglib.core.Predicate;
+import net.sf.cglib.core.Signature;
+import net.sf.cglib.proxy.InterfaceMaker;
+
+import org.objectweb.asm.Type;
 
 public class MBeanProxyFactory {
 	private MBeanServerConnection mbeanServer;
@@ -49,47 +54,40 @@ public class MBeanProxyFactory {
 	public MBeanProxyFactory(MBeanServerConnection mbeanServer) {
 		super();
 		this.mbeanServer = mbeanServer;
-		
 	}
 
 	private Class getInterface(String oname)throws Exception{
 		ObjectName objectName=ObjectName.getInstance(oname);
-		
-		String ifaceName=mbeanServer.getObjectInstance(objectName).getClassName().replace('.', '_');
-		CtClass ctIface=null;
-		try{
-			ctIface=javassist.ClassPool.getDefault().get(ifaceName);
-			return this.getClass().getClassLoader().loadClass(ifaceName);
-		}catch (Exception e) {
-			ctIface=javassist.ClassPool.getDefault().makeInterface(ifaceName);
-			for (CtMethod m : addMethods(ctIface, objectName)) {
-				ctIface.addMethod(m);
+		String ifaceName=mbeanServer.getObjectInstance(objectName).getClassName();
+		InterfaceMaker maker=new MBeanInterfaceMaker(ifaceName);
+			for (Signature s : getSignatures(objectName)) {
+				maker.add(s, null);
 			}
 			try {
-			return ctIface.toClass(this.getClass().getClassLoader(), this.getClass().getProtectionDomain());
-			} catch (CannotCompileException cce) {
-				System.out.println(cce.getCause());
-				throw cce;
+				return maker.create();
+			} catch (Exception e) {
+				System.out.println(e.getCause());
+				throw e;
 			}
 		}
-		
+	private Type getType(String type) throws Exception{
+		System.out.println("getting Type for: "+type);
+		return JmxAsmHelper.getAsmType(type);
 	}
-	private List<CtMethod> addMethods(CtClass ctIface, ObjectName objectName)throws Exception{
-		ClassPool pool=javassist.ClassPool.getDefault();
-		List<CtMethod> methods=new ArrayList<CtMethod>();
+	private List<Signature> getSignatures(ObjectName objectName)throws Exception{
+		List<Signature> methods=new ArrayList<Signature>();
 		MBeanInfo minfo =mbeanServer.getMBeanInfo(objectName);
-		CtMethod m=null;
 		
 		for (MBeanAttributeInfo info : minfo.getAttributes()) {
 			String name=info.getName().substring(0, 1).toUpperCase()+info.getName().substring(1);
 			if(info.isReadable()){
 			if(info.isIs()){
-				m=new CtMethod(CtClass.booleanType, "is"+ name,null, ctIface);
-				methods.add(m);
+				methods.add(new Signature("is"+name, Type.BOOLEAN_TYPE, new Type[0]));
 			}
 			else{
 //				try {
-				m=new CtMethod(pool.get(info.getType()), "get"+ name,null, ctIface);
+				
+				methods.add(new Signature("get"+name, getType(info.getType()), new Type[0]));
 //				}catch (NotFoundException nfe) {
 //					String n=nfe.getMessage();
 //					String notFoundName=n.startsWith("[")?n.substring(1, n.length()):n;
@@ -97,23 +95,21 @@ public class MBeanProxyFactory {
 //					
 //					m=new CtMethod(pool.get(info.getType()), "get"+ name,null, ctIface);
 //				}
-				methods.add(m);
 				}
-
 			}
-			
 			if(info.isWritable()){
-				m=new CtMethod(CtClass.voidType, "set"+ name,new CtClass[]{pool.get(info.getType())} , ctIface);
-				methods.add(m);
+				Type [] params=new Type[]{getType(info.getType())};
+				Signature s=new Signature("set"+name, Type.VOID_TYPE, params);
+				methods.add(s);
 			}
 		}
 		for (MBeanOperationInfo info : minfo.getOperations()) {
-			CtClass[] params=new CtClass[info.getSignature().length];
+			Type[] params=new Type[info.getSignature().length];
 			for (int i = 0; i < params.length; i++) {
-				params[i]=pool.get(info.getSignature()[i].getType());
+				params[i]=getType(info.getSignature()[i].getType());
 			}
-			m=new CtMethod(pool.get(info.getReturnType()), info.getName(),params, ctIface);
-			methods.add(m);
+			Signature s=new Signature(info.getName(), getType(info.getReturnType()), params);
+			methods.add(s);
 
 		}
 		return methods;
@@ -187,6 +183,13 @@ public class MBeanProxyFactory {
 
 	public void setMbeanServer(MBeanServerConnection mbs) {
 		this.mbeanServer = mbs;
+	}
+	private class MBeanInterfaceMaker extends InterfaceMaker{
+		public MBeanInterfaceMaker(String namePrefix) {
+			super();
+			super.setNamePrefix(namePrefix);
+			super.setAttemptLoad(true);
+		}
 	}
 
 }
