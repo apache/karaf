@@ -186,7 +186,12 @@ System.out.println("register service plugin: " + p);
   private void clean(){
     this.removeAll();
     for ( Iterator i=pluginList.keySet().iterator(); i.hasNext();) {
-      ((Plugin) pluginList.get(i.next())).unregisterServicePlugin();
+     Object o=i.next();
+     try {
+      ((Plugin) pluginList.get(o)).unregisterServicePlugin();
+     }catch(Exception e){
+      System.out.println("INFO Something went wrong when unregistering the Plugin. Please control the beavior of the unregisterServicePlugin function of this tab"+o);
+     }
     }
   }
 
