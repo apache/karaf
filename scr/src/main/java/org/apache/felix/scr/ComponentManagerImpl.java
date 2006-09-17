@@ -424,7 +424,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
     }
 
 /**
- * The DependencyManager task is to listen to service events and to call the * bind/unbind methods on a given object. It is also responsible for requesting * the unregistration of a service in case a dependency is broken.
+ * The DependencyManager task is to listen to service events and to call the * bind/unbind methods on a given object. It is also responsible for requesting * the unregistration of a service in case a dependency is broken.
  */
     class DependencyManager implements ServiceListener
     {

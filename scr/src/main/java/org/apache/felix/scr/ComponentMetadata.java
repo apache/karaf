@@ -21,7 +21,7 @@ import java.util.*;
 import org.osgi.service.component.ComponentException;
 
 /**
- * This class holds the information associated to a component in the descriptor *  */
+ * This class holds the information associated to a component in the descriptor *  */
 public class ComponentMetadata {
 	// 112.4.3: A Globally unique component name (required)
 	private String m_name;
@@ -296,6 +296,3 @@ public class ComponentMetadata {
     }
 
 }
-
-
-
