@@ -8,7 +8,7 @@
   </head>
   <body>
     <div class="title">
-      <img alt="Apache Felix" src="$relativePath/images/apache-felix.png" align="left" /><img alt="Logo" src="$relativePath/images/felix-logo.jpg" align="right" />
+      <a href="http://incubator.apache.org"><img alt="Apache Incubator" src="$relativePath/images/apache-incubator-logo.png" align="left" /></a><img alt="Logo" src="$relativePath/images/felix-logo.jpg" align="right" />
     </div>
     <div class="menu">
       <ul>
