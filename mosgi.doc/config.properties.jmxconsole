@@ -22,6 +22,8 @@ felix.auto.start.1= \
 insa.jmxconsole.ip1=127.0.0.1
 insa.jmxconsole.profile1=core
 
+#insa.jmxconsole.rmiport.t1=1100
+
 felix.startlevel.framework=1
 felix.startlevel.bundle=1
 #framework.service.urlhandlers=false
@@ -330,9 +332,4 @@ jre-1.5= \
  org.xml.sax.ext; \
  org.xml.sax.helpers; \
  version="1.5.0"
-
-insa.jmxconsole.tab.url.osgiprobestab=file:/home/sfrenot/.m2/repository/org/apache/felix/org.apache.felix.mosgi.managedelements.osgiprobes.tab/0.8.0-SNAPSHOT/org.apache.felix.mosgi.managedelements.osgiprobes.tab-0.8.0-SNAPSHOT.jar
-
-insa.jmxconsole.ip1=127.0.0.1
-insa.jmxconsole.profile1=core
 
