@@ -1,18 +1,20 @@
-/*
- *   Copyright 2005 The Apache Software Foundation
- *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.    
  */
 package org.apache.felix.mosgi.console.gui;
 
@@ -142,13 +144,13 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
     String ip;
     
     int i=1;
-    profile=bc.getProperty("insa.jmxconsole.profile" + i);
+    profile=bc.getProperty("mosgi.jmxconsole.profile." + i);
 
     while (profile!=null){
-      rmiPort=bc.getProperty("insa.jmxconsole.rmiport."+profile);
+      rmiPort=bc.getProperty("mosgi.jmxconsole.rmiport."+profile);
       if (rmiPort==null){rmiPort="1099";}
-      String virtual=bc.getProperty("insa.jmxconsole.core."+profile);
-      ip=bc.getProperty("insa.jmxconsole.ip" + i);
+      String virtual=bc.getProperty("mosgi.jmxconsole.core."+profile);
+      ip=bc.getProperty("mosgi.jmxconsole.ip." + i);
       String connString=ip+":"+rmiPort+"/"+profile;
       if (createTreeNode){
         DefaultMutableTreeNode dmtn=new DefaultMutableTreeNode(connString);
@@ -163,12 +165,12 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
       }
       this.connectToNode(connString);
       i++;
-      profile=bc.getProperty("insa.jmxconsole.profile" + i);
+      profile=bc.getProperty("mosgi.jmxconsole.profile." + i);
     }
       
     if (i==1){
       try{
-        System.out.println("No property insa.jmxconsole.profile, managing local profile");
+        System.out.println("No property mosgi.jmxconsole.profile., managing local profile");
 		String prof=bc.getProperty(BundleCache.CACHE_PROFILE_PROP);
     	if (prof==null){
 	      prof=System.getProperty(BundleCache.CACHE_PROFILE_PROP);
