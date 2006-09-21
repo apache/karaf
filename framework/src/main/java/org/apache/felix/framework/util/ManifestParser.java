@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -388,46 +388,107 @@ public class ManifestParser
     {
         // Check to make sure that R3 bundles have only specified
         // the 'specification-version' attribute and no directives
-        // on their exports.
-        for (int i = 0; (m_exports != null) && (i < m_exports.length); i++)
+        // on their exports; ignore all unknown attributes.
+        for (int expIdx = 0;
+            (m_exports != null) && (expIdx < m_exports.length);
+            expIdx++)
         {
-            if (m_exports[i].getDirectives().length != 0)
+            if (m_exports[expIdx].getDirectives().length != 0)
             {
                 throw new BundleException("R3 exports cannot contain directives.");
             }
+
+            // Remove and ignore all attributes other than version.
             // NOTE: This is checking for "version" rather than "specification-version"
             // because the package class normalizes to "version" to avoid having
             // future special cases. This could be changed if more strict behavior
             // is required.
-            if ((m_exports[i].getAttributes().length > 1) ||
-                ((m_exports[i].getAttributes().length == 1) &&
-                    (!m_exports[i].getAttributes()[0].getName().equals(Constants.VERSION_ATTRIBUTE))))
+            if (m_exports[expIdx].getAttributes() != null)
             {
-                throw new BundleException(
-                    "R3 export syntax does not support attributes: " + m_exports[i]);
+                R4Attribute versionAttr = null;
+                for (int attrIdx = 0;
+                    attrIdx < m_exports[expIdx].getAttributes().length;
+                    attrIdx++)
+                {
+                    if (m_exports[expIdx].getAttributes()[attrIdx]
+                        .getName().equals(Constants.VERSION_ATTRIBUTE))
+                    {
+                        versionAttr = m_exports[expIdx].getAttributes()[attrIdx];
+                    }
+                    else
+                    {
+                        m_logger.log(Logger.LOG_WARNING,
+                            "Unknown R3 export attribute: "
+                                + m_exports[expIdx].getAttributes()[attrIdx].getName());
+                    }
+                }
+
+                // Recreate the export if necessary to remove other attributes.
+                if ((versionAttr != null) && (m_exports[expIdx].getAttributes().length > 1))
+                {
+                    m_exports[expIdx] = new R4Export(
+                        m_exports[expIdx].getName(),
+                        null,
+                        new R4Attribute[] { versionAttr } );
+                }
+                else if ((versionAttr == null) && (m_exports[expIdx].getAttributes().length > 0))
+                {
+                    m_exports[expIdx] = new R4Export(
+                        m_exports[expIdx].getName(), null, null);
+                }
             }
         }
-        
+
         // Check to make sure that R3 bundles have only specified
         // the 'specification-version' attribute and no directives
-        // on their imports.
-        for (int i = 0; (m_imports != null) && (i < m_imports.length); i++)
+        // on their imports; ignore all unknown attributes.
+        for (int impIdx = 0;
+            (m_imports != null) && (impIdx < m_imports.length);
+            impIdx++)
         {
-            if (m_imports[i].getDirectives().length != 0)
+            if (m_imports[impIdx].getDirectives().length != 0)
             {
                 throw new BundleException("R3 imports cannot contain directives.");
             }
+
+            // Remove and ignore all attributes other than version.
             // NOTE: This is checking for "version" rather than "specification-version"
             // because the package class normalizes to "version" to avoid having
             // future special cases. This could be changed if more strict behavior
             // is required.
-            if ((m_imports[i].getVersionHigh() != null) ||
-                (m_imports[i].getAttributes().length > 1) ||
-                ((m_imports[i].getAttributes().length == 1) &&
-                    (!m_imports[i].getAttributes()[0].getName().equals(Constants.VERSION_ATTRIBUTE))))
+            if (m_imports[impIdx].getAttributes() != null)
             {
-                throw new BundleException(
-                    "R3 import syntax does not support attributes: " + m_imports[i]);
+                R4Attribute versionAttr = null;
+                for (int attrIdx = 0;
+                    attrIdx < m_imports[impIdx].getAttributes().length;
+                    attrIdx++)
+                {
+                    if (m_imports[impIdx].getAttributes()[attrIdx]
+                        .getName().equals(Constants.VERSION_ATTRIBUTE))
+                    {
+                        versionAttr = m_imports[impIdx].getAttributes()[attrIdx];
+                    }
+                    else
+                    {
+                        m_logger.log(Logger.LOG_WARNING,
+                            "Unknown R3 import attribute: "
+                                + m_imports[impIdx].getAttributes()[attrIdx].getName());
+                    }
+                }
+
+                // Recreate the import if necessary to remove other attributes.
+                if ((versionAttr != null) && (m_imports[impIdx].getAttributes().length > 1))
+                {
+                    m_imports[impIdx] = new R4Import(
+                        m_imports[impIdx].getName(),
+                        null,
+                        new R4Attribute[] { versionAttr } );
+                }
+                else if ((versionAttr == null) && (m_imports[impIdx].getAttributes().length > 0))
+                {
+                    m_imports[impIdx] = new R4Import(
+                        m_imports[impIdx].getName(), null, null);
+                }
             }
         }
 
