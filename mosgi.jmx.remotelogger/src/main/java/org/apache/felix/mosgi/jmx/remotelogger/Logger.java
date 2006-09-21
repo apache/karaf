@@ -120,7 +120,7 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
     }
     //System.out.println(message.toString());
     if (this.agent!=null){ // On envoie tous les logs a un MBeanServer
-      System.out.println("this.agent != null => remoteLogger.Logger.sendNotifiaction(...."+message.toString());
+      //System.out.println("this.agent != null => remoteLogger.Logger.sendNotifiaction(...."+message.toString());
       this.sendNotification(new  AttributeChangeNotification(this.remoteLoggerON, 0, 
 						             System.currentTimeMillis(),
 						             message.toString(), null, "Log", null, null));
