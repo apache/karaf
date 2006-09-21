@@ -1,23 +1,22 @@
-/* 
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- * 
- *    http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.    
+/*
+ *   Copyright 2005 The Apache Software Foundation
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
  */
 package org.apache.felix.mosgi.jmx.remotelogger;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -66,48 +65,65 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
     switch (serviceevent.getType()) {
       case ServiceEvent.REGISTERED :
         if (as[0].equals(LogReaderService.class.getName())){
-		      this.registerLogReaderService(servicereference);
+          this.registerLogReaderService(servicereference);
         }else if (as[0].equals(MBeanServer.class.getName())){
           this.registerToAgent(servicereference);
         }
-				break;
-			case ServiceEvent.UNREGISTERING :
+	break;
+      case ServiceEvent.UNREGISTERING :
         if (as[0].equals(LogReaderService.class.getName())){
 				  this.unRegisterLogReaderService(servicereference);
         }else if (as[0].equals(MBeanServer.class.getName())){
           this.unRegisterFromAgent();
         }
-				break;
-		}
-	}
+	break;
+    }
+  }
 
 
 //LogListener Interface
   public void logged(LogEntry log){
+    String reg=new String(":");
     StringBuffer message=new StringBuffer();
+    //System.out.print("mosgi.jmx.remotelogger : new log : ");
+
     synchronized (logMutex){
+      try{
+        message.append(""+log.getBundle().getBundleId());
+      }catch(NullPointerException e){
+        message.append("Unknown source");
+      }
+     
+      String lSymbolicName=log.getBundle().getSymbolicName();
+      if(lSymbolicName != null){
+        message.append(reg+lSymbolicName);
+      }else {
+        message.append(reg+"\"null\"");
+      }
+
+      message.append(reg+log.getBundle().getState());
+
       int lLevel=log.getLevel();
       if(debugLogFlag && lLevel==LogService.LOG_DEBUG){
-        message.append("DEBUG : ");
+        message.append(reg+"DEBUG  ");
       }else if (errorLogFlag && lLevel==LogService.LOG_ERROR){
-        message.append("ERROR : ");
+        message.append(reg+"ERROR  ");
       }else if(infoLogFlag && lLevel==LogService.LOG_INFO){
-        message.append("INFO : ");
+        message.append(reg+"INFO   ");
       }else if(warningLogFlag && lLevel==LogService.LOG_WARNING){
-        message.append("WARNING : ");
+        message.append(reg+"WARNING");
       }else {
-        message.append("NO LEVEL : ");
+        message.append(reg+"NOLEVEL");
       }
-      try{
-        message.append(log.getBundle().getBundleId()+" : ");
-      }catch(NullPointerException e){
-      	message.append("Unknown source");
-      }
-      message.append(log.getMessage());
+
+      message.append(reg+log.getMessage());
     }
-    System.out.println(message.toString());
-    if (this.agent!=null){
-      this.sendNotification(new  AttributeChangeNotification(this.remoteLoggerON, 0, 0,message.toString(), null, "Log", null, null));
+    //System.out.println(message.toString());
+    if (this.agent!=null){ // On envoie tous les logs a un MBeanServer
+      System.out.println("this.agent != null => remoteLogger.Logger.sendNotifiaction(...."+message.toString());
+      this.sendNotification(new  AttributeChangeNotification(this.remoteLoggerON, 0, 
+						             System.currentTimeMillis(),
+						             message.toString(), null, "Log", null, null));
     }
   }
 
@@ -136,7 +152,7 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
     if (sr2!=null){
       this.registerToAgent(sr2);
     }
-		this.log(LogService.LOG_INFO, "Remote Logger started "+version);
+    this.log(LogService.LOG_INFO, "Remote Logger started "+version);
 
   }
      
@@ -159,8 +175,19 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
 
 //private methods 
   private void registerLogReaderService(ServiceReference sr) {
+    //System.out.println("mosgi.jmx.remoteLogger.Logger.registerLogReaderService("+sr.toString()+") : oldLog=");
     this.lrs=(LogReaderService)this.bc.getService(sr);
     this.lrs.addLogListener(this);
+   
+    /*// old log :
+    System.out.println("oldLog=");
+    java.util.Enumeration oldLog = this.lrs.getLog();
+    int i=0;
+    while(oldLog.hasMoreElements()) {
+      LogEntry oldLogEntry = ((LogEntry) oldLog.nextElement());
+      System.out.println("   -"+(i++)+" : "+oldLogEntry.getMessage());
+      //logged(oldLogEntry);
+    }*/
   }
   
   private void unRegisterLogReaderService(ServiceReference sr) {
@@ -173,7 +200,16 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
   private void registerToAgent(ServiceReference sr){
     this.agent=(MBeanServer)bc.getService(sr);
     try{   
-      this.agent.registerMBean(this, this.remoteLoggerON);
+      this.agent.registerMBean(this, this.remoteLoggerON); 
+      /*// old log :
+      System.out.println("oldLog=");
+      java.util.Enumeration oldLog = this.lrs.getLog();
+      int i=0;
+      while(oldLog.hasMoreElements()) {
+        LogEntry oldLogEntry = ((LogEntry) oldLog.nextElement());
+        System.out.println("   -"+(i++)+" : "+oldLogEntry.getMessage());
+        //logged(oldLogEntry);
+      }*/
     }catch(Exception e){
       e.printStackTrace();
     }
@@ -187,7 +223,7 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
     }
   }
 
-	private void log (int level, String message){
+  private void log (int level, String message){
     ServiceReference lsn=bc.getServiceReference(LogService.class.getName());
     if (lsn!=null){
       LogService ls=(LogService)bc.getService(lsn);
@@ -195,7 +231,7 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
     }else{
       System.out.println("ERROR : Logger.start : No service "+LogService.class.getName()+" is present");
     }
-	}
+  }
 
 
 } 

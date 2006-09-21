@@ -19,10 +19,16 @@ felix.auto.start.1= \
  file:../mosgi.console.gui/target/org.apache.felix.mosgi.console.gui-0.8.0-SNAPSHOT.jar \
  file:../mosgi.console.component/target/org.apache.felix.mosgi.console.component-0.8.0-SNAPSHOT.jar
 
+#possible values : both treeonly tableonly none (default=both)
+mosgi.jmxconsole.remotelogger.componentfilter=both
+
 mosgi.jmxconsole.ip.1=127.0.0.1
 mosgi.jmxconsole.profile.1=core
+#mosgi.jmxconsole.rmiport.core=1100
 
-#mosgi.jmxconsole.rmiport.t1=1100
+#mosgi.jmxconsole.ip.2=127.0.0.1
+#mosgi.jmxconsole.profile.2=core2
+#mosgi.jmxconsole.rmiport.core2=1200
 
 felix.startlevel.framework=1
 felix.startlevel.bundle=1
