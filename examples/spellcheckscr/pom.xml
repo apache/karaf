@@ -27,12 +27,6 @@
       <version>${pom.version}</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>${pom.groupId}</groupId>
-      <artifactId>org.apache.felix.scr</artifactId>
-      <version>${pom.version}</version>
-      <scope>provided</scope>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -58,7 +52,7 @@
               org.apache.felix.examples.spellcheckscr.Activator
             </bundleActivator>
             <importPackage>
-              org.osgi.framework, org.apache.felix.examples.dictionaryservice, org.apache.felix.scr, org.apache.felix.examples.spellcheckservice
+              org.osgi.framework, org.apache.felix.examples.dictionaryservice, org.apache.felix.examples.spellcheckservice
             </importPackage>
           </osgiManifest>
         </configuration>
