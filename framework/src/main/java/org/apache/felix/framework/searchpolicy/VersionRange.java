@@ -104,11 +104,11 @@ public class VersionRange
             if (m_high != null)
             {
                 StringBuffer sb = new StringBuffer();
-                sb.append(m_isLowInclusive ? '(' : '[');
+                sb.append(m_isLowInclusive ? '[' : '(');
                 sb.append(m_low.toString());
                 sb.append(',');
                 sb.append(m_high.toString());
-                sb.append(m_isHighInclusive ? ')' : ']');
+                sb.append(m_isHighInclusive ? ']' : ')');
             }
             else
             {
