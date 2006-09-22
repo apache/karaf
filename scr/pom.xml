@@ -45,10 +45,10 @@
             </bundleActivator>
             <bundleSymbolicName>org.apache.felix.scr</bundleSymbolicName>
             <exportPackage>
-			  org.apache.felix.scr
-			</exportPackage>
-			<importPackage>
-              org.osgi.service.component, org.osgi.framework
+              org.apache.felix.scr
+            </exportPackage>
+            <importPackage>
+              org.osgi.service.log, org.osgi.service.component, org.osgi.framework
             </importPackage>			
           </osgiManifest>
         </configuration>

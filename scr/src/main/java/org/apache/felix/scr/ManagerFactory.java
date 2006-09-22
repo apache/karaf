@@ -23,8 +23,8 @@ package org.apache.felix.scr;
  */
 public class ManagerFactory {
 	
-	static ComponentManager createManager(GenericActivator activator, ComponentMetadata metadata) {
-		GenericActivator.trace("ManagerFactory.createManager", metadata);
-		return new ComponentManagerImpl(activator,metadata);
+	static ComponentManager createManager(BundleComponentActivator activator, ComponentMetadata metadata) {
+	    Activator.trace("ManagerFactory.createManager", metadata);
+	    return new ComponentManagerImpl(activator,metadata);
 	}
 }

@@ -29,7 +29,7 @@ import org.osgi.service.component.ComponentInstance;
  * implementation object's lifecycle.  
  *
  */
-public class ComponentManagerImpl implements ComponentManager, ComponentInstance
+class ComponentManagerImpl implements ComponentManager, ComponentInstance
 {
 	// States of the instance manager
 	static final int INSTANCE_CREATING = 0;
@@ -63,8 +63,8 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
     // The ServiceRegistration
     private ServiceRegistration m_serviceRegistration = null;
 
-    // A reference to the GenericActivator
-    private GenericActivator m_activator = null;
+    // A reference to the BundleComponentActivator
+    private BundleComponentActivator m_activator = null;
 
     // The context that will be passed to the implementationObject
     private ComponentContext m_componentContext = null;
@@ -78,7 +78,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
      * @param activator
      * @param metadata
      */
-    ComponentManagerImpl(GenericActivator activator,ComponentMetadata metadata)
+    ComponentManagerImpl(BundleComponentActivator activator, ComponentMetadata metadata)
     {
     	// Store the activator reference
         m_activator = activator;
@@ -94,7 +94,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
      */
     public boolean enable() {
     	
-    	GenericActivator.trace("Enabling component", m_componentMetadata);
+        Activator.trace("Enabling component", m_componentMetadata);
     	
     	try
     	{
@@ -182,7 +182,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
         // If the component is not immediate, this is not done at this moment
         if( m_componentMetadata.isImmediate() == true )
         {
-        	//GenericActivator.trace("Loading implementation class and creating instance for component '"+m_componentMetadata.getName()+"'");
+            //Activator.trace("Loading implementation class and creating instance for component '"+m_componentMetadata.getName()+"'");
         	try
 	        {
 	        	// 112.4.4 The class is retrieved with the loadClass method of the component's bundle
@@ -196,7 +196,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 	        catch (Exception ex)
 	        {
 	            // TODO: manage this exception when implementation object cannot be created
-	            GenericActivator.exception("Error during instantiation", m_componentMetadata, ex);
+	            Activator.exception("Error during instantiation", m_componentMetadata, ex);
 	            deactivate();
 	            //invalidate();
 	            return;
@@ -208,7 +208,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
         // 3. Bind the target services
         it = m_dependencyManagers.iterator();
 
-        //GenericActivator.trace("Binding target services for component '"+m_componentMetadata.getName()+"'");
+        //Activator.trace("Binding target services for component '"+m_componentMetadata.getName()+"'");
         
         while (it.hasNext())
         {
@@ -222,7 +222,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
             }
         }
         
-        //GenericActivator.trace("Calling activate for component '"+m_componentMetadata.getName()+"'");
+        //Activator.trace("Calling activate for component '"+m_componentMetadata.getName()+"'");
         
         // 4. Call the activate method, if present
 	        // We need to check if we are still validating because it is possible that when we
@@ -238,17 +238,17 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
         		activateMethod.invoke(m_implementationObject, new Object[]{m_componentContext});
         	}
         	catch(NoSuchMethodException ex) {        		
-        		// We can safely ignore this one
-        		GenericActivator.trace("activate() method not implemented", m_componentMetadata);
+        	    // We can safely ignore this one
+        	    Activator.trace("activate() method not implemented", m_componentMetadata);
         	}
         	catch(IllegalAccessException ex) {
-        		// TODO: Log this exception?
-        		GenericActivator.trace("activate() method cannot be called", m_componentMetadata);
+        	    // TODO: Log this exception?
+        	    Activator.trace("activate() method cannot be called", m_componentMetadata);
         	}
         	catch(InvocationTargetException ex) {
-        		// TODO: 112.5.8 If the activate method throws an exception, SCR must log an error message
-        		// containing the exception with the Log Service
-        		GenericActivator.exception("The activate method has thrown an exception", m_componentMetadata, ex.getTargetException());
+        	    // TODO: 112.5.8 If the activate method throws an exception, SCR must log an error message
+        	    // containing the exception with the Log Service
+        	    Activator.exception("The activate method has thrown an exception", m_componentMetadata, ex.getTargetException());
         	}
         }
         
@@ -259,7 +259,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
         // 5. Register provided services
         if(m_componentMetadata.getServiceMetadata() != null)
         {
-            GenericActivator.trace("registering services", m_componentMetadata);
+            Activator.trace("registering services", m_componentMetadata);
 
         	if( m_componentMetadata.isImmediate() == true ) {
 	        	// In the case the component is immediate, the implementation object is registered
@@ -298,7 +298,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 	        m_serviceRegistration.unregister();
 	        m_serviceRegistration = null;
 
-	        GenericActivator.trace("unregistering the services", m_componentMetadata);
+	        Activator.trace("unregistering the services", m_componentMetadata);
 	    }
 
         // 1.- Call the deactivate method, if present	    
@@ -313,17 +313,17 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 			}
 		}
 		catch(NoSuchMethodException ex) {
-			// We can safely ignore this one
-			GenericActivator.trace("deactivate() method is not implemented", m_componentMetadata);
+            // We can safely ignore this one
+			Activator.trace("deactivate() method is not implemented", m_componentMetadata);
 		}
 		catch(IllegalAccessException ex) {
 			// Ignored, but should it be logged?
-			GenericActivator.trace("deactivate() method cannot be called", m_componentMetadata);
+			Activator.trace("deactivate() method cannot be called", m_componentMetadata);
 		}
 		catch(InvocationTargetException ex) {
 			// TODO: 112.5.12 If the deactivate method throws an exception, SCR must log an error message
 			// containing the exception with the Log Service
-			GenericActivator.exception("The deactivate method has thrown and exception", m_componentMetadata, ex);
+			Activator.exception("The deactivate method has thrown and exception", m_componentMetadata, ex);
 		}
 
         // 2. Unbind any bound services
@@ -340,7 +340,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
         m_componentContext = null;
         m_delayedComponentServiceFactory = null;
 
-        //GenericActivator.trace("InstanceManager from bundle ["+ m_activator.getBundleContext().getBundle().getBundleId() + "] was invalidated.");
+        //Activator.trace("InstanceManager from bundle ["+ m_activator.getBundleContext().getBundle().getBundleId() + "] was invalidated.");
 
         if (m_state != INSTANCE_DESTROYING)
         {
@@ -353,7 +353,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
      */
     public synchronized void dispose()
     {
-        // CONCURRENCY NOTE: This method is only called from the GenericActivator or by application logic
+        // CONCURRENCY NOTE: This method is only called from the BundleComponentActivator or by application logic
     	// but not by the dependency managers
 
         // Theoretically this should never be in any state other than VALID or INVALID,
@@ -411,7 +411,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
      * sets the state of the manager
     **/
     private synchronized void setState(int newState) {
-    	GenericActivator.trace("State transition : "+m_states[m_state]+" -> "+m_states[newState], m_componentMetadata);
+        Activator.trace("State transition : "+m_states[m_state]+" -> "+m_states[newState], m_componentMetadata);
     	
         m_state = newState;
         
@@ -497,7 +497,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
                     if(retval == false && (max == 1))
                     {
                         // There was an exception when calling the bind method
-                        GenericActivator.error("Dependency Manager: Possible exception in the bind method during initialize()");
+                        Activator.error("Dependency Manager: Possible exception in the bind method during initialize()");
                         m_isValid = false;
                         //setStateDependency(DependencyChangeEvent.DEPENDENCY_INVALID);
                         return m_isValid;
@@ -563,7 +563,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
             }
             catch (Exception e)
             {
-                GenericActivator.error("DependencyManager: exception while getting references :"+e);
+                Activator.error("DependencyManager: exception while getting references :"+e);
                 return null;
             }
         }
@@ -649,9 +649,8 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
                     }
             	} 
             	catch(ClassNotFoundException ex2) {
-            		GenericActivator.exception("Cannot load class used as parameter "+parameterClassName,m_componentMetadata,ex2);
+            		Activator.exception("Cannot load class used as parameter "+parameterClassName,m_componentMetadata,ex2);
             	}
-
             }
                         
             return method;
@@ -678,7 +677,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 		            	// 112.3.1 If the method is not found , SCR must log an error
 		            	// message with the log service, if present, and ignore the method
 		            	// TODO: log error message
-		            	GenericActivator.trace("bind() method not found", m_componentMetadata);
+		                Activator.trace("bind() method not found", m_componentMetadata);
 		            	return false;
 		            }
 		            
@@ -709,7 +708,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 		        }
 		        catch(InvocationTargetException ex)
 		        {
-		        	GenericActivator.exception("DependencyManager : exception while invoking "+m_dependencyMetadata.getBind()+"()", m_componentMetadata, ex);
+		        	Activator.exception("DependencyManager : exception while invoking "+m_dependencyMetadata.getBind()+"()", m_componentMetadata, ex);
 		            return false;
 		        }
         	} else if( m_implementationObject == null && m_componentMetadata.isImmediate() == false) {
@@ -739,7 +738,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 	            try
 	            {
 	            	// TODO: me quede aqui por que el unbind method no funciona
-	            	GenericActivator.trace("getting unbind: "+m_dependencyMetadata.getUnbind(), m_componentMetadata);
+	                Activator.trace("getting unbind: "+m_dependencyMetadata.getUnbind(), m_componentMetadata);
 	            	Method unbindMethod = getBindingMethod(m_dependencyMetadata.getUnbind(), getInstance().getClass(), m_dependencyMetadata.getInterface());
 	            	
 		        	// Recover the object that is bound from the map.
@@ -756,7 +755,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 	                	// 112.3.1 If the method is not found , SCR must log an error
 	                	// message with the log service, if present, and ignore the method
 	                	// TODO: log error message
-	                	GenericActivator.trace("unbind() method not found", m_componentMetadata);
+	            	    Activator.trace("unbind() method not found", m_componentMetadata);
 	                	return false;
 	                }
 	
@@ -775,7 +774,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 	            	return false;
 	            }
 	            catch (InvocationTargetException ex) {
-	            	GenericActivator.exception("DependencyManager : exception while invoking "+m_dependencyMetadata.getUnbind()+"()", m_componentMetadata, ex);
+	                Activator.exception("DependencyManager : exception while invoking "+m_dependencyMetadata.getUnbind()+"()", m_componentMetadata, ex);
 	            	return false;
 	            }
 	            
@@ -829,14 +828,14 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
                             //setStateDependency(DependencyChangeEvent.DEPENDENCY_INVALID);
                             try
                             {
-                                GenericActivator.trace("Dependency Manager: Static dependency is broken", m_componentMetadata);
+                                Activator.trace("Dependency Manager: Static dependency is broken", m_componentMetadata);
                                 deactivate();
-                                GenericActivator.trace("Dependency Manager: RECREATING", m_componentMetadata);
+                                Activator.trace("Dependency Manager: RECREATING", m_componentMetadata);
                                 activate();
                             }
                             catch(Exception ex)
                             {
-                            	GenericActivator.exception("Exception while recreating dependency ",m_componentMetadata, ex);
+                                Activator.exception("Exception while recreating dependency ",m_componentMetadata, ex);
                             }
                         }
                         // dynamic dependency
@@ -859,9 +858,9 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
                                 {
                                     if (!m_dependencyMetadata.isOptional())
                                     {
-                                        GenericActivator.trace("Dependency Manager: Mandatory dependency not fullfilled and no replacements available... unregistering service...", m_componentMetadata);
+                                        Activator.trace("Dependency Manager: Mandatory dependency not fullfilled and no replacements available... unregistering service...", m_componentMetadata);
                                         deactivate();
-                                        GenericActivator.trace("Dependency Manager: Recreating", m_componentMetadata);
+                                        Activator.trace("Dependency Manager: Recreating", m_componentMetadata);
                                         activate();
                                     }
                                 }
@@ -875,7 +874,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
                     if (m_boundServicesRefs.contains(evt.getServiceReference()) == true)
                     {
                         // This is a duplicate
-                        GenericActivator.trace("DependencyManager : ignoring REGISTERED ServiceEvent (already bound)", m_componentMetadata);
+                        Activator.trace("DependencyManager : ignoring REGISTERED ServiceEvent (already bound)", m_componentMetadata);
                     }
                     else
                     {
@@ -1037,14 +1036,12 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
     		return ComponentManagerImpl.this;
     	}
 
-    	public void enableComponent(String arg0) {
-    		// TODO implement this method
-    		
+    	public void enableComponent(String name) {
+    	    m_activator.enableComponent(name);
     	}
 
-    	public void disableComponent(String arg0) {
-    		// TODO implement this method
-    		
+    	public void disableComponent(String name) {
+    	    m_activator.disableComponent(name);
     	}
 
     	public ServiceReference getServiceReference() {
@@ -1065,7 +1062,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
     	
     	public Object getService(Bundle arg0, ServiceRegistration arg1) {
     		
-    		GenericActivator.trace("DelayedComponentServiceFactory.getService()", m_componentMetadata);
+    	    Activator.trace("DelayedComponentServiceFactory.getService()", m_componentMetadata);
     		// When the getServiceMethod is called, the implementation object must be created
     		
             // 1. Load the component implementation class
@@ -1084,7 +1081,7 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 	        catch (Exception ex)
 	        {
 	            // TODO: manage this exception when implementation object cannot be created
-	            GenericActivator.exception("Error during instantiation of the implementation object",m_componentMetadata,ex);
+	            Activator.exception("Error during instantiation of the implementation object",m_componentMetadata,ex);
 	            deactivate();
 	            //invalidate();
 	            return null;
@@ -1112,16 +1109,16 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
         	}
         	catch(NoSuchMethodException ex) {
                 // We can safely ignore this one
-                GenericActivator.trace("activate() method is not implemented", m_componentMetadata);
+                Activator.trace("activate() method is not implemented", m_componentMetadata);
             }
             catch(IllegalAccessException ex) {
                 // Ignored, but should it be logged?
-                GenericActivator.trace("activate() method cannot be called", m_componentMetadata);
+                Activator.trace("activate() method cannot be called", m_componentMetadata);
             }
             catch(InvocationTargetException ex) {
                 // TODO: 112.5.8 If the activate method throws an exception, SCR must log an error message
                 // containing the exception with the Log Service
-                GenericActivator.exception("The activate method has thrown and exception", m_componentMetadata, ex);
+                Activator.exception("The activate method has thrown and exception", m_componentMetadata, ex);
             }
     		
     		return m_implementationObject;
@@ -1129,7 +1126,6 @@ public class ComponentManagerImpl implements ComponentManager, ComponentInstance
 
     	public void ungetService(Bundle arg0, ServiceRegistration arg1, Object arg2) {
     		// TODO Auto-generated method stub
-
     	}
     }
 

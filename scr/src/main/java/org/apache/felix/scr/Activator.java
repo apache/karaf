@@ -20,18 +20,56 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import org.osgi.framework.*;
+import org.osgi.service.log.LogService;
 
 /**
  * This activator is used to cover requirement described in section 112.8.1 @@ -27,14
  * 37,202 @@ in active bundles.
  * 
  */
-public class Activator implements BundleActivator, SynchronousBundleListener
+public class Activator implements BundleActivator, SynchronousBundleListener, ServiceListener
 {
+    // name of the LogService class
+    private static final String LOGSERVICE_CLASS = LogService.class.getName();
+    
+    // Flag that sets tracing messages
+    private static boolean m_trace = true;
+    
+    // Flag that sets error messages
+    private static boolean m_error = true;
 
-    // map of GenericActivator instances per Bundle indexed by Bundle symbolic
+    // A string containing the version number
+    private static String m_version = "1.0.0 (12012006)";
+
+    // this bundle's context
+    private BundleContext m_context;
+    
+    // the log service to log messages to
+    private static /* TODO: not very good, is it ? */ LogService m_logService;
+    
+    // map of BundleComponentActivator instances per Bundle indexed by Bundle symbolic
     // name
     private Map m_componentBundles;
+
+    // Static initializations based on system properties
+    static {
+        // Get system properties to see if traces or errors need to be displayed
+        String result = System.getProperty("ds.showtrace");
+        if(result != null && result.equals("true"))
+        {
+            m_trace = true;
+        }
+        result = System.getProperty("ds.showerrors");
+        if(result != null && result.equals("false"))
+        {
+            m_error = false;
+        }
+        result = System.getProperty("ds.showversion");
+        if(result != null && result.equals("true"))
+        {
+            System.out.println("[ Version = "+m_version+" ]\n");
+        }        
+    }
 
     /**
      * Registers this instance as a (synchronous) bundle listener and loads the
@@ -42,8 +80,17 @@ public class Activator implements BundleActivator, SynchronousBundleListener
      */
     public void start(BundleContext context) throws Exception
     {
+        m_context = context;
         m_componentBundles = new HashMap();
 
+        // require the log service
+        ServiceReference logRef = context.getServiceReference(LOGSERVICE_CLASS);
+        if (logRef != null) {
+            m_logService = (LogService) context.getService(logRef);
+        }
+        context.addServiceListener(this,
+            "(" + Constants.OBJECTCLASS + "=" + LOGSERVICE_CLASS + ")");
+        
         // register for bundle updates
         context.addBundleListener(this);
 
@@ -90,6 +137,22 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         }
     }
 
+    //---------- ServiceListener ----------------------------------------------
+
+    // TODO:
+    public void serviceChanged(ServiceEvent event)
+    {
+        if (event.getType() == ServiceEvent.REGISTERED)
+        {
+            m_logService = (LogService) m_context.getService(event.getServiceReference());
+        }
+        else if (event.getType() == ServiceEvent.UNREGISTERING)
+        {
+            m_logService = null;
+            m_context.ungetService(event.getServiceReference());
+        }
+    }
+    
     // ---------- Component Management -----------------------------------------
 
     // Loads the components of all bundles currently active.
@@ -127,20 +190,19 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         BundleContext context = getBundleContext(bundle);
         if (context == null)
         {
-            GenericActivator.error("Cannot get BundleContext of bundle "
+            error("Cannot get BundleContext of bundle "
                 + bundle.getSymbolicName());
             return;
         }
 
-        GenericActivator ga = new GenericActivator();
         try
         {
-            ga.start(context);
+            BundleComponentActivator ga = new BundleComponentActivator(context);
             m_componentBundles.put(bundle.getSymbolicName(), ga);
         }
         catch (Exception e)
         {
-            GenericActivator.exception("Error while loading components "
+            exception("Error while loading components "
                 + "of bundle " + bundle.getSymbolicName(), null, e);
         }
     }
@@ -152,7 +214,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
     private void disposeComponents(Bundle bundle)
     {
         String name = bundle.getSymbolicName();
-        GenericActivator ga = (GenericActivator) m_componentBundles.remove(name);
+        BundleComponentActivator ga = (BundleComponentActivator) m_componentBundles.remove(name);
         if (ga != null)
         {
             try
@@ -161,7 +223,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
             }
             catch (Exception e)
             {
-                GenericActivator.exception("Error while disposing components "
+                exception("Error while disposing components "
                     + "of bundle " + name, null, e);
             }
         }
@@ -172,14 +234,14 @@ public class Activator implements BundleActivator, SynchronousBundleListener
     {
         for (Iterator it = m_componentBundles.values().iterator(); it.hasNext();)
         {
-            GenericActivator ga = (GenericActivator) it.next();
+            BundleComponentActivator ga = (BundleComponentActivator) it.next();
             try
             {
                 ga.dispose();
             }
             catch (Exception e)
             {
-                GenericActivator.exception(
+                exception(
                     "Error while disposing components of bundle "
                         + ga.getBundleContext().getBundle().getSymbolicName(),
                     null, e);
@@ -220,12 +282,96 @@ public class Activator implements BundleActivator, SynchronousBundleListener
             }
             catch (Throwable t)
             {
-                GenericActivator.exception("Cannot get BundleContext for "
+                exception("Cannot get BundleContext for "
                     + bundle.getSymbolicName(), null, t);
             }
         }
 
         // fall back to nothing
         return null;
+    }
+    
+    
+    /**
+     * Method to display traces
+     *
+     * @param message a string to be displayed
+     * @param metadata ComponentMetadata associated to the message (can be null)
+    **/
+    static void trace(String message, ComponentMetadata metadata)
+    {
+        if(m_trace)
+        {
+            StringBuffer msg = new StringBuffer("--- ");
+            if(metadata != null) {
+                msg.append("[").append(metadata.getName()).append("] ");
+            }
+            msg.append(message);
+
+            LogService log = m_logService;
+            if (log == null)
+            {
+                System.out.println(msg);
+            }
+            else
+            {
+                log.log(LogService.LOG_DEBUG, msg.toString());
+            }
+        }
+    }
+
+    /**
+     * Method to display errors
+     *
+     * @param message a string to be displayed
+     **/
+    static void error(String message)
+    {
+        if(m_error)
+        {
+            StringBuffer msg = new StringBuffer("### ").append(message);
+
+            LogService log = m_logService;
+            if (log == null)
+            {
+                System.err.println(msg);
+            }
+            else
+            {
+                log.log(LogService.LOG_ERROR, msg.toString());
+            }
+        }
+    }
+
+    /**
+     * Method to display exceptions
+     *
+     * @param ex an exception
+     **/   
+    static void exception(String message, ComponentMetadata metadata, Throwable ex)
+    {
+         if(m_error)
+         {
+             StringBuffer msg = new StringBuffer("--- ");
+             if(metadata != null) {
+                 msg.append("[").append(metadata.getName()).append("] ");
+             }
+             msg.append("Exception with component : ");
+             msg.append(message).append(" ---");
+             
+             LogService log = m_logService;
+             if (log == null)
+             {
+                 System.err.println(msg);
+                 if (ex != null)
+                 {
+                     ex.printStackTrace(System.err);
+                 }
+             }
+             else
+             {
+                 log.log(LogService.LOG_ERROR, msg.toString(), ex);
+             }
+         }      
     }
 }
