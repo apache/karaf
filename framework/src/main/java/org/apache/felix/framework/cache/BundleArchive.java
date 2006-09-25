@@ -78,6 +78,7 @@ public class BundleArchive
     private static final transient String BUNDLE_START_LEVEL_FILE = "bundle.startlevel";
     private static final transient String REFRESH_COUNTER_FILE = "refresh.counter";
     private static final transient String BUNDLE_ACTIVATOR_FILE = "bundle.activator";
+    private static final transient String BUNDLE_LASTMODIFIED_FILE = "bundle.lastmodified";
     private static final transient String REVISION_DIRECTORY = "version";
     private static final transient String DATA_DIRECTORY = "data";
     private static final transient String ACTIVE_STATE = "active";
@@ -91,6 +92,7 @@ public class BundleArchive
     private String m_currentLocation = null;
     private int m_persistentState = -1;
     private int m_startLevel = -1;
+    private long m_lastModified = -1;
     private BundleRevision[] m_revisions = null;
     private Collection m_trustedCaCerts = null;
 
@@ -465,6 +467,85 @@ public class BundleArchive
             m_logger.log(
                 Logger.LOG_ERROR,
                 getClass().getName() + ": Unable to record start level - " + ex);
+            throw ex;
+        }
+        finally
+        {
+            if (bw != null) bw.close();
+            if (os != null) os.close();
+        }
+    }
+
+    /**
+     * <p>
+     * Returns the last modification time of this archive.
+     * </p>
+     * @return the last modification time of this archive.
+     * @throws Exception if any error occurs.
+    **/
+    public synchronized long getLastModified() throws Exception
+    {
+        if (m_lastModified >= 0)
+        {
+            return m_lastModified;
+        }
+ 
+        // Get bundle last modification time file.
+        File lastModFile = new File(m_archiveRootDir, BUNDLE_LASTMODIFIED_FILE);
+
+        // If the last modification file doesn't exist, then
+        // return an error.
+        if (!BundleCache.getSecureAction().fileExists(lastModFile))
+        {
+            return 0;
+        }
+
+        // Read the bundle start level.
+        InputStream is = null;
+        BufferedReader br= null;
+        try
+        {
+            is = BundleCache.getSecureAction().getFileInputStream(lastModFile);
+            br = new BufferedReader(new InputStreamReader(is));
+            m_lastModified = Long.parseLong(br.readLine());
+            return m_lastModified;
+        }
+        finally
+        {
+            if (br != null) br.close();
+            if (is != null) is.close();
+        }
+    }
+
+    /**
+     * <p>
+     * Sets the the last modification time of this archive.
+     * </p>
+     * @param lastModified The time of the last modification to set for
+     *      this archive. According to the OSGi specification this time is
+     *      set each time a bundle is installed, updated or uninstalled.
+     *      
+     * @throws Exception if any error occurs.
+    **/
+    public synchronized void setLastModified(long lastModified) throws Exception
+    {
+        // Write the bundle last modification time.
+        OutputStream os = null;
+        BufferedWriter bw = null;
+        try
+        {
+            os = BundleCache.getSecureAction()
+                .getFileOutputStream(new File(m_archiveRootDir, BUNDLE_LASTMODIFIED_FILE));
+            bw = new BufferedWriter(new OutputStreamWriter(os));
+            String s = Long.toString(lastModified);
+            bw.write(s, 0, s.length());
+            m_lastModified = lastModified;
+        }
+        catch (IOException ex)
+        {
+            m_logger.log(
+                Logger.LOG_ERROR,
+                getClass().getName() + ": Unable to record last modification time - " + ex);
             throw ex;
         }
         finally

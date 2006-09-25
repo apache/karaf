@@ -31,7 +31,6 @@ class BundleInfo
     private BundleArchive m_archive = null;
     private IModule[] m_modules = null;
     private int m_state = 0;
-    private long m_modified = 0;
     private BundleActivator m_activator = null;
     private BundleContext m_context = null;
     // Indicates whether the bundle is stale, meaning that it has
@@ -215,12 +214,33 @@ class BundleInfo
 
     public long getLastModified()
     {
-        return m_modified;
+        try
+        {
+            return m_archive.getLastModified();
+        }
+        catch (Exception ex)
+        {
+            m_logger.log(
+                Logger.LOG_ERROR,
+                "Error reading last modification time from bundle archive.",
+                ex);
+            return 0;
+        }
     }
 
     public void setLastModified(long l)
     {
-        m_modified = l;
+        try
+        {
+            m_archive.setLastModified(l);
+        }
+        catch (Exception ex)
+        {
+            m_logger.log(
+                Logger.LOG_ERROR,
+                "Error writing last modification time to bundle archive.",
+                ex);
+        }
     }
 
     public int getPersistentState()
