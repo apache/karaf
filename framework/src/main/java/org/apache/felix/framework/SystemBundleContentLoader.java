@@ -91,6 +91,12 @@ public class SystemBundleContentLoader implements IContentLoader
         return getClass().getClassLoader().getResource(name);
     }
 
+    public URL getResourceFromContent(String name)
+    {
+        // There is no content for the system bundle, so return null.
+        return null;
+    }
+
     public boolean hasInputStream(String urlPath) throws IOException
     {
         return (getClass().getClassLoader().getResource(urlPath) != null);

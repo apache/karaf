@@ -176,7 +176,8 @@ public class ContentLoaderImpl implements IContentLoader
         return v.elements();
     }
 
-    // TODO: API: Investigate making this an API call.
+    // TODO: API: Investigate how to handle this better, perhaps we need
+    // multiple URL policies, one for content -- one for class path.
     public URL getResourceFromContent(String name)
     {
         URL url = null;

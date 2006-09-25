@@ -1003,8 +1003,8 @@ public class Felix
         {
             throw new IllegalStateException("The bundle is uninstalled.");
         }
-        return ((ContentLoaderImpl) bundle.getInfo().getCurrentModule()
-            .getContentLoader()).getResourceFromContent(name);
+        return bundle.getInfo().getCurrentModule()
+            .getContentLoader().getResourceFromContent(name);
     }
 
     /**

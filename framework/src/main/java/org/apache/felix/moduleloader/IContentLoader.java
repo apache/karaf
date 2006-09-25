@@ -37,6 +37,7 @@ public interface IContentLoader
 
     public Class getClass(String name);
     public URL getResource(String name);
+    public URL getResourceFromContent(String name);
 
     public boolean hasInputStream(String urlPath)
         throws IOException;
