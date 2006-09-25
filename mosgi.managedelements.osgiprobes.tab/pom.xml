@@ -1,39 +1,49 @@
 <project>
+
   <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
     <version>0.8.0-SNAPSHOT</version>
   </parent>
+  
+  <properties>
+    <felix.version>0.8.0-SNAPSHOT</felix.version>
+    <mosgi.console.ifc.version>0.9.0-SNAPSHOT</mosgi.console.ifc.version>
+  </properties>
+  
   <modelVersion>4.0.0</modelVersion>
   <packaging>osgi-bundle</packaging>
   <name>Apache Felix MOSGi OSGi gateway status tab for the JMX console</name>
   <artifactId>org.apache.felix.mosgi.managedelements.osgiprobes.tab</artifactId>
+  <version>0.9.0-SNAPSHOT</version>
+
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>${pom.version}</version>
+      <version>${felix.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.compendium</artifactId>
-      <version>${pom.version}</version>
+      <version>${felix.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.mosgi.console.ifc</artifactId>
-      <version>${pom.version}</version>
+      <version>${mosgi.console.ifc.version}</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.felix.plugins</groupId>
         <artifactId>maven-osgi-plugin</artifactId>
-        <version>${pom.version}</version>
+        <version>${felix.version}</version>
         <extensions>true</extensions>
         <configuration>
           <osgiManifest>
@@ -45,18 +55,19 @@
             <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
             <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
             <exportPackage>
-	                   ${pom.artifactId};specification-version="1.0.0"
+	      ${pom.artifactId};specification-version="1.0.0"
             </exportPackage>
-	          <importPackage>
-	            javax.management;specification-version="1.0.0",
-	            org.osgi.framework;specification-version="1.0.0",
-	            javax.swing;specification-version="1.0.0",
-	            javax.swing.table;specification-version="1.0.0",
-	            org.apache.felix.mosgi.console.ifc;specification-version="1.0.0"
-	          </importPackage>
+	    <importPackage>
+	      javax.management;specification-version="1.0.0",
+	      org.osgi.framework;specification-version="1.0.0",
+	      javax.swing;specification-version="1.0.0",
+	      javax.swing.table;specification-version="1.0.0",
+	      org.apache.felix.mosgi.console.ifc;specification-version="1.0.0"
+	    </importPackage>
           </osgiManifest>
         </configuration>
       </plugin>
     </plugins>
   </build>
+
 </project>

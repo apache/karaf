@@ -15,9 +15,9 @@ felix.auto.start.1= \
  file:bundle/org.apache.felix.shell-0.8.0-SNAPSHOT.jar \
  file:bundle/org.apache.felix.shell.tui-0.8.0-SNAPSHOT.jar \
  file:bundle/org.apache.felix.bundlerepository-0.8.0-SNAPSHOT.jar \
- file:../mosgi.console.ifc/target/org.apache.felix.mosgi.console.ifc-0.8.0-SNAPSHOT.jar \
- file:../mosgi.console.gui/target/org.apache.felix.mosgi.console.gui-0.8.0-SNAPSHOT.jar \
- file:../mosgi.console.component/target/org.apache.felix.mosgi.console.component-0.8.0-SNAPSHOT.jar
+ file:../mosgi.console.ifc/target/org.apache.felix.mosgi.console.ifc-0.9.0-SNAPSHOT.jar \
+ file:../mosgi.console.gui/target/org.apache.felix.mosgi.console.gui-0.9.0-SNAPSHOT.jar \
+ file:../mosgi.console.component/target/org.apache.felix.mosgi.console.component-0.9.0-SNAPSHOT.jar
 
 #possible values : both treeonly tableonly none (default=both)
 mosgi.jmxconsole.remotelogger.componentfilter=both
