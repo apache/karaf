@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,6 +21,7 @@ package org.apache.felix.moduleloader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Enumeration;
 
 public interface IContentLoader
 {
@@ -37,6 +38,7 @@ public interface IContentLoader
 
     public Class getClass(String name);
     public URL getResource(String name);
+    public Enumeration getResources(String name);
     public URL getResourceFromContent(String name);
 
     public boolean hasInputStream(String urlPath)

@@ -19,13 +19,13 @@
 package org.apache.felix.moduleloader;
 
 import java.net.URL;
-
-import org.apache.felix.moduleloader.ResourceNotFoundException;
+import java.util.Enumeration;
 
 public interface ISearchPolicy
 {
     public Object[] definePackage(String name);
     public Class findClass(String name) throws ClassNotFoundException;
     public URL findResource(String name) throws ResourceNotFoundException;
+    public Enumeration findResources(String name) throws ResourceNotFoundException;
     public String findLibrary(String name);
 }

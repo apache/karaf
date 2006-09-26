@@ -995,6 +995,18 @@ public class Felix
     }
 
     /**
+     * Implementation for Bundle.getResources().
+    **/
+    protected Enumeration getBundleResources(BundleImpl bundle, String name)
+    {
+        if (bundle.getInfo().getState() == Bundle.UNINSTALLED)
+        {
+            throw new IllegalStateException("The bundle is uninstalled.");
+        }
+        return bundle.getInfo().getCurrentModule().getResources(name);
+    }
+
+    /**
      * Implementation for Bundle.getEntry().
     **/
     protected URL getBundleEntry(BundleImpl bundle, String name)

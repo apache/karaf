@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,6 +19,7 @@
 package org.apache.felix.framework.searchpolicy;
 
 import java.net.URL;
+import java.util.Enumeration;
 
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.*;
@@ -123,6 +124,31 @@ public class R4Wire implements IWire
         }
 
         return url;
+    }
+
+    public Enumeration getResources(String name) throws ResourceNotFoundException
+    {
+        Enumeration urls = null;
+
+        // Get the package of the target class.
+        String pkgName = Util.getResourcePackage(name);
+
+        // Only check when the package of the target resource is
+        // the same as the package for the wire.
+        if (m_export.getName().equals(pkgName))
+        {
+            urls = m_exporter.getContentLoader().getResources(name);
+
+            // If no resource was found, then we must throw an exception
+            // since the exporter for this package did not contain the
+            // requested class.
+            if (urls == null)
+            {
+                throw new ResourceNotFoundException(name);
+            }
+        }
+
+        return urls;
     }
 
     public String toString()

@@ -150,7 +150,7 @@ public class ContentLoaderImpl implements IContentLoader
         return url;
     }
 
-    protected Enumeration getResources(String name)
+    public Enumeration getResources(String name)
     {
         Vector v = new Vector();
 

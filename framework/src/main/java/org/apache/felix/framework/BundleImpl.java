@@ -160,6 +160,26 @@ class BundleImpl implements Bundle
         return m_felix.getBundleResource(this, name);
     }
 
+    public Enumeration getResources(String name) throws IOException
+    {
+        Object sm = System.getSecurityManager();
+
+        if (sm != null)
+        {
+            try
+            {
+                ((SecurityManager) sm).checkPermission(new AdminPermission(this,
+                    AdminPermission.RESOURCE));
+            }
+            catch (Exception e)
+            {
+                return null; // No permission
+            }
+        }
+
+        return m_felix.getBundleResources(this, name);
+    }
+
     /**
      * Returns an array of service references corresponding to
      * the bundle's registered services.
@@ -388,27 +408,6 @@ class BundleImpl implements Bundle
         {
             ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                 AdminPermission.METADATA));
-        }
-
-        return null;
-    }
-
-    public Enumeration getResources(String name) throws IOException
-    {
-        // TODO: Implement Bundle.getResources()
-        Object sm = System.getSecurityManager();
-
-        if (sm != null)
-        {
-            try
-            {
-                ((SecurityManager) sm).checkPermission(new AdminPermission(this,
-                    AdminPermission.RESOURCE));
-            }
-            catch (Exception e)
-            {
-                return null; // No permission
-            }
         }
 
         return null;

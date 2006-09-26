@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,6 +21,7 @@ package org.apache.felix.framework;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Enumeration;
 
 import org.apache.felix.moduleloader.*;
 
@@ -89,6 +90,18 @@ public class SystemBundleContentLoader implements IContentLoader
     public URL getResource(String name)
     {
         return getClass().getClassLoader().getResource(name);
+    }
+
+    public Enumeration getResources(String name)
+    {
+       try
+       {
+           return getClass().getClassLoader().getResources(name);
+       }
+       catch (IOException ex)
+       {
+           return null;
+       }
     }
 
     public URL getResourceFromContent(String name)

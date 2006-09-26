@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,6 +19,7 @@
 package org.apache.felix.framework.searchpolicy;
 
 import java.net.URL;
+import java.util.Enumeration;
 
 import org.apache.felix.moduleloader.*;
 
@@ -48,6 +49,12 @@ public class R4SearchPolicy implements ISearchPolicy
         throws ResourceNotFoundException
     {
         return m_policyCore.findResource(m_module, name);
+    }
+
+    public Enumeration findResources(String name)
+        throws ResourceNotFoundException
+    {
+        return m_policyCore.findResources(m_module, name);
     }
 
     public String findLibrary(String name)

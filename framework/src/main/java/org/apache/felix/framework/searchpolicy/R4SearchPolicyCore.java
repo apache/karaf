@@ -18,6 +18,7 @@
  */
 package org.apache.felix.framework.searchpolicy;
 
+import java.io.IOException;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
@@ -88,7 +89,8 @@ public class R4SearchPolicyCore implements ModuleListener
         }
         else
         {
-            throw new IllegalStateException("Module manager is already initialized");
+            throw new IllegalStateException(
+                "Module manager is already initialized");
         }
     }
 
@@ -162,9 +164,116 @@ public class R4SearchPolicyCore implements ModuleListener
         {
             throw ex;
         }
-
+    
         // We should never reach this point.
         return null;
+    }
+
+    public Enumeration findResources(IModule module, String name)
+        throws ResourceNotFoundException
+    {
+        Enumeration urls;
+        // First, try to resolve the originating module.
+        // TODO: Consider opimizing this call to resolve, since it is called
+        // for each class load.
+        try
+        {
+            resolve(module);
+        }
+        catch (ResolveException ex)
+        {
+            // The spec states that if the bundle cannot be resolved, then
+            // only the local bundle's resources should be searched. So we
+            // will ask the module's own class path.
+            urls = module.getContentLoader().getResources(name);
+            if (urls != null)
+            {
+                return urls;
+            }
+            // We need to throw a resource not found exception.
+            throw new ResourceNotFoundException(name
+                + ": cannot resolve package " + ex.getPackage());
+        }
+
+        // Get the package of the target class/resource.
+        String pkgName = Util.getResourcePackage(name);
+
+        // Delegate any packages listed in the boot delegation
+        // property to the parent class loader.
+        // NOTE for the default package:
+        // Only consider delegation if we have a package name, since
+        // we don't want to promote the default package. The spec does
+        // not take a stand on this issue.
+        if (pkgName.length() > 0)
+        {
+            for (int i = 0; i < m_bootPkgs.length; i++)
+            {
+                // A wildcarded boot delegation package will be in the form of
+                // "foo.", so if the package is wildcarded do a startsWith() or a
+                // regionMatches() to ignore the trailing "." to determine if the
+                // request should be delegated to the parent class loader. If the
+                // package is not wildcarded, then simply do an equals() test to
+                // see if the request should be delegated to the parent class loader.
+                if ((m_bootPkgWildcards[i] &&
+                    (pkgName.startsWith(m_bootPkgs[i]) ||
+                    m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
+                    || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
+                {
+                    try
+                    {
+                        urls = getClass().getClassLoader().getResources(name);
+                        return urls;
+                    }
+                    catch (IOException ex)
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
+
+        // Look in the module's imports.
+        // We delegate to the module's wires to the resources.
+        // If any resources are found, this means that the package of these
+        // resources is imported, we must not keep looking since we do not
+        // support split-packages.
+
+        // Note that the search may be aborted if this method throws an
+        // exception, otherwise it continues if a null is returned.
+        IWire[] wires = module.getWires();
+        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        {
+            // If we find the class or resource, then return it.
+            urls = wires[i].getResources(name);
+            if (urls != null)
+            {
+                return urls;
+            }
+        }
+
+        // If not found, try the module's own class path.
+        urls = module.getContentLoader().getResources(name);
+        if (urls != null)
+        {
+            return urls;
+        }
+
+        // If still not found, then try the module's dynamic imports.
+        // At this point, the module's imports were searched and so was the
+        // the module's content. Now we make an attempt to load the
+        // class/resource via a dynamic import, if possible.
+        IWire wire = attemptDynamicImport(module, pkgName);
+        if (wire != null)
+        {
+            urls = wire.getResources(name);
+        }
+
+        if (urls == null)
+        {
+            throw new ResourceNotFoundException(name);
+        }
+
+        return urls;
     }
 
     private Object findClassOrResource(IModule module, String name, boolean isClass)
@@ -531,7 +640,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 PackagePermission perm = new PackagePermission(pkg.getName(),
                     PackagePermission.EXPORT);
 
-                for (int i = 0;i < exporters.length;i++)
+                for (int i = 0; i < exporters.length; i++)
                 {
                     if (exporters[i] != null)
                     {

@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,6 +19,7 @@
 package org.apache.felix.moduleloader;
 
 import java.net.URL;
+import java.util.Enumeration;
 
 import org.apache.felix.framework.Logger;
 
@@ -105,6 +106,22 @@ public class ModuleImpl implements IModule
         try
         {
             return m_contentLoader.getSearchPolicy().findResource(name);
+        }
+        catch (ResourceNotFoundException ex)
+        {
+            m_logger.log(
+                Logger.LOG_WARNING,
+                ex.getMessage(),
+                ex);
+        }
+        return null;
+    }
+
+    public Enumeration getResources(String name)
+    {
+        try
+        {
+           return m_contentLoader.getSearchPolicy().findResources(name);
         }
         catch (ResourceNotFoundException ex)
         {

@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,6 +19,7 @@
 package org.apache.felix.moduleloader;
 
 import java.net.URL;
+import java.util.Enumeration;
 
 public interface IModule
 {
@@ -31,6 +32,7 @@ public interface IModule
 
     public Class getClass(String name);
     public URL getResource(String name);
+    public Enumeration getResources(String name);
 
     public Object getSecurityContext();
 }
