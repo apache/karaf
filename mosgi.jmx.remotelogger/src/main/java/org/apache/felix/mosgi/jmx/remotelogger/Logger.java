@@ -227,7 +227,7 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
     ServiceReference lsn=bc.getServiceReference(LogService.class.getName());
     if (lsn!=null){
       LogService ls=(LogService)bc.getService(lsn);
-      ls.log(LogService.LOG_INFO, message);
+      ls.log(level, message);
     }else{
       System.out.println("ERROR : Logger.start : No service "+LogService.class.getName()+" is present");
     }
