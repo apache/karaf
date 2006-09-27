@@ -24,25 +24,54 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.management.MBeanServerConnection;
+import javax.management.NotificationBroadcaster;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+/**
+ * This class is the main entry point to the jmxintrospector library. 
+ * It uses the {@link MBeanProxyFactory#newProxyInstance(String)} to create
+ * proxies for the mbeans found in the mbean servers. 
+ * MBean servers can be added through the addXXServer methods. Some helper methods
+ * for browsing through the MBeans are also provided. 
+ *
+ */
 public class MBeanProxyManager {
 	//FIXME: mixing up Server and MBeanServerConnections is dirty and error-prone
+	/*
+	 *Currently, we wrap the MBeanProxy Server with a Server in order to add identification
+	 *this is quite dirty.
+	 */
 	private List<Server> servers = new ArrayList<Server>();
 
 	private List<Object> objects = new ArrayList<Object>();
 
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 
+	
+	/**
+	 * Adds a remote MBean server that has a RMI connector at host:1099/path
+	 * Same as {@link MBeanProxyManager}{@link #addRMIServer(host, path, 1099)}
+	 * @param host
+	 * @param path
+	 * @throws Exception
+	 */
 	public void addRMIServer(String host, String path) throws Exception {
 		addRMIServer(host, path, 1099);
 	}
-
+	/**
+	 * Adds a remote MBean server that has a RMI connector running at
+	 * {@literal service:jmx:rmi:///jndi/rmi://host:port/path}
+	 * Same as {@link MBeanProxyManager#addRemoteServer(service:jmx:rmi:///jndi/rmi://host:port/path)} 
+	 * @param host
+	 * @param path
+	 * @param port
+	 * @throws Exception
+	 */
 	public void addRMIServer(String host, String path, int port)
 			throws Exception {
-		addRemoteServer("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + path);
+		addRemoteServer("service:jmx:rmi:///jndi/rmi://" + host + ":" + port +"/" +path);
 	}
 
 	public void addRemoteServer(String url) throws Exception {
@@ -51,7 +80,10 @@ public class MBeanProxyManager {
 				.getMBeanServerConnection();
 		add(url, s);
 	}
-
+	/**
+	 * The same for the local server. Note that this will make an MBeanServer if it was not already available.
+	 * @throws Exception
+	 */
 	public void addLocalServer() throws Exception {
 			MBeanServerConnection s=ManagementFactory.getPlatformMBeanServer();
 			add(s.getDefaultDomain(), s);
@@ -60,10 +92,11 @@ public class MBeanProxyManager {
 	private void add(String id, MBeanServerConnection s) throws Exception {
 		Server server=new Server(s,id);
 		servers.add(server);
-		Set<ObjectName> onames = s.queryNames(ObjectName.WILDCARD, null);
+		Set onames = s.queryNames(ObjectName.getInstance("*:*"), null);
 		MBeanProxyFactory introspector = new MBeanProxyFactory(server);
-		for (ObjectName name : onames) {
+		for (Object o : onames) {
 			try {
+				ObjectName name=(ObjectName) o;
 				objects.add(introspector.newProxyInstance(name
 						.toString()));
 			} catch (Exception e) {
@@ -74,6 +107,10 @@ public class MBeanProxyManager {
 		}
 	}
 
+	/**
+	 * it removes the specified server
+	 * @param server
+	 */
 	public void removeServer(Server server) {
 				servers.remove(server);
 				for (Object o : objects) {
@@ -83,6 +120,18 @@ public class MBeanProxyManager {
 	///////////
 	//Finders//
 	///////////
+
+	/**
+	 * Returns all the created proxies.
+	 * Remember that each proxy object can implement up to 3 interfaces:
+	 * <ol>
+	 * <li>{@link MBean}. Always implemented</li>
+	 * <li>The implicit interface (dynamically generated) of the remote MBean. This can only be called through reflection
+	 * or using a dynamic language on top of Java</li>
+	 * <li>{@link NotificationBroadcaster} if the underlying mbean broadcasts notifications. 
+	 * </li>
+	 * </ol>
+	 */
 	public List<Object> getObjects() {
 		return objects;
 	}

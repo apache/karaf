@@ -21,6 +21,7 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 
 /**
+ * 
  * Proxies returned implement this interface, to ease handling of mbeans (filtering and so on) 
  *
  */
