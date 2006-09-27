@@ -50,7 +50,7 @@ import org.osgi.service.useradmin.UserAdmin;
  * 
  * 
  */
-public class CompendiumController {
+public class CompendiumHandler {
 
     private AgentContext ac;
 
@@ -60,7 +60,7 @@ public class CompendiumController {
 
     private MBeanServer server;
 
-    public CompendiumController(MBeanServer server, AgentContext ac) {
+    public CompendiumHandler(MBeanServer server, AgentContext ac) {
         super();
         this.ac = ac;
         this.server = server;
