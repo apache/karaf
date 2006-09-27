@@ -23,7 +23,9 @@ Dependencies that need to be manually installed:
 1. It needs Java 6 to work (as it depends on javax.script API). 
 Once that API is stable and released standalone, it should also work in Java 5.
 2. It needs JMX introspector.
-3. It needs classes from com.sun.jruby.* and from org.jruby. The easiest way is to bundle both together
+By default, the only available engine is the javascript bundled with Java 6. To add new ones, you need to
+install the bundles. For example for ruby:
+- It needs classes from com.sun.jruby.* and from org.jruby. The easiest way is to bundle both together
 and export both packages in order to run ruby. 
 	- The binding is available at https://scripting.dev.java.net/ and licensed
 	under the BSD license. Download the jsr223-engines.[zip|tar.gz]

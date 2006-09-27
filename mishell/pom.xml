@@ -16,23 +16,6 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
-<!--     <dependency>
-       <groupId>org.jruby</groupId>
-       <artifactId>jruby</artifactId>
-       <version>0.9.0</version>
-     </dependency>
-     <dependency>
-       <groupId>javax.script</groupId>
-       <artifactId>jruby-engine</artifactId>
-       <version>SNAPSHOT</version>
-     </dependency> -->
-     <dependency>
-       <groupId>org.jruby</groupId>
-       <artifactId>jruby-bundle</artifactId>
-       <scope>provided</scope>
-       <version>0.8.0-SNAPSHOT</version>
-     </dependency>
-     
      <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>${groupId}.jmxintrospector</artifactId>
@@ -78,10 +61,7 @@
 		    It should be simple to change afterwards
 		    -->
     	    <inlinedArtifacts>
-        	    <inlinedArtifact>jruby</inlinedArtifact>
-        	    <inlinedArtifact>jruby-engine</inlinedArtifact>
         	    <inlinedArtifact>org.apache.felix.jmxintrospector</inlinedArtifact>
-        	    <inlinedArtifact>jline</inlinedArtifact>
           	</inlinedArtifacts>
           <osgiManifest>
             <bundleActivator>${artifactId}.Activator</bundleActivator>
