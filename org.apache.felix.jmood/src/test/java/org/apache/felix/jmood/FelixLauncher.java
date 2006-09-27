@@ -1,4 +1,3 @@
-package org.apache.felix.jmood;
 /*
  *   Copyright 2005 The Apache Software Foundation
  *
@@ -15,10 +14,13 @@ package org.apache.felix.jmood;
  *   limitations under the License.
  *
  */
+package org.apache.felix.jmood;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -127,16 +129,31 @@ public class FelixLauncher {
 			return true;
 		}
 	}
+	public String getFelixBundleUrl(String artifactId) throws IOException{
+		return getM2Url("org.apache.felix", artifactId, "0.8.0-SNAPSHOT");
+	}
+	public String getM2Url(String groupId, String artifactId, String version)throws IOException{
+		File userHome=new File(System.getProperty("user.home"));
+    	String M2_REPO="file:/"+userHome.getCanonicalPath()+"/.m2/repository";
+    	String PROJECT_HOME=M2_REPO+"/"+groupId.replace('.', '/');
+    	String VERSION="0.8.0-SNAPSHOT";
+    	String u=PROJECT_HOME+"/"+artifactId+"/"+VERSION+"/"+artifactId+"-"+VERSION+".jar";
+    	return "\""+u+"\"";
+
+	}
 
     /**
      * @param args
+     * 
      */
     public static void main(String[] args) throws Exception{
     	FelixLauncher launcher=new FelixLauncher();
-        String jmood="file:target/org.apache.felix.jmood-0.8.0-SNAPSHOT.jar";
-        String jmxintrospector="file:../org.apache.felix.mishell/target/org.apache.felix.mishell-0.8.0-SNAPSHOT.jar";
-    	launcher.addBundle(jmood);
-    	launcher.addBundle(jmxintrospector);
+    	String jmood=launcher.getFelixBundleUrl("org.apache.felix.jmood");
+    	String mishell=launcher.getFelixBundleUrl("org.apache.felix.mishell");
+    	String jruby=launcher.getM2Url("org.jruby", "jruby-bundle", "0.8.0-SNAPSHOT");
+    	launcher.addBundle(jruby);
+        launcher.addBundle(jmood);
+    	launcher.addBundle(mishell);
         launcher.addPackage("org.osgi.framework");
         launcher.addPackage("org.osgi.util.tracker");
         launcher.addPackage("org.osgi.service.log");
@@ -147,6 +164,7 @@ public class FelixLauncher {
         launcher.addPackage("org.osgi.service.cm");
         launcher.addPackage("javax.management");
         launcher.addPackage("javax.management.remote");
+        launcher.addPackage("javax.management.openmbean");  
         launcher.addPackage("javax.script");
     	launcher.start();
     }
