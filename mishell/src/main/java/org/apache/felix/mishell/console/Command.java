@@ -14,12 +14,12 @@
  *   limitations under the License.
  *
  */
-package org.apache.felix.mishell;
+package org.apache.felix.mishell.console;
 
-public class EngineNotFoundException extends Exception {
+import java.io.PrintStream;
 
-	public EngineNotFoundException(String language) {
-		super(language);
-	}
-
+public interface Command {
+	public void executeCommand(String cmd, PrintStream out) throws Exception;
+	public String getName();
+	public String getHelp();
 }

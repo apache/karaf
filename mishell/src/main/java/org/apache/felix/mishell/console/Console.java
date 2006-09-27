@@ -1,4 +1,20 @@
-package org.apache.felix.mishell;
+/*
+ *   Copyright 2005 The Apache Software Foundation
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
+ */
+package org.apache.felix.mishell.console;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -18,12 +34,13 @@ import javax.script.ScriptContext;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptException;
 
-import jline.ConsoleReader;
-import jline.ConsoleReaderInputStream;
+import org.apache.felix.mishell.EngineNotFoundException;
+import org.apache.felix.mishell.JMXEngineContext;
+
 
 public class Console implements Runnable{
 	public static final String DEFAULT_LANGUAGE = "javascript";
-Logger log = Logger.getLogger(this.getClass().getCanonicalName());
+	Logger log = Logger.getLogger(this.getClass().getCanonicalName());
 	Level l=Level.FINEST;
 	private String language=DEFAULT_LANGUAGE;
 	private String prompt;
@@ -32,69 +49,40 @@ Logger log = Logger.getLogger(this.getClass().getCanonicalName());
 	private Commander commander;
 	private boolean stop = false;
 	private JMXEngineContext engineContext;
-	private String scriptPath;
-
-	public Console(String language, String scriptPath) throws IOException{
-		if (language != null) this.language=language;
-		prompt="mishell."+language+"$ ";
-		/*
-		 * Not used for the moment. It does not work inside Eclipse, and presents 
-		problems from the command line
-		*/
-		//useJline();
+	public Console(JMXEngineContext engineContext) throws IOException{
+		this.engineContext=engineContext;
+		prompt="mishell."+engineContext.getLanguage()+"$ ";
 		in=new BufferedReader(new InputStreamReader(System.in));
 		out=System.out;
 		commander= new Commander();
-		this.scriptPath=scriptPath;
 		addBuiltInCmds();
 		stop=false;	
 	}
-	private void useJline() throws IOException{
-		ConsoleReader cr=new ConsoleReader();
-		ConsoleReaderInputStream.setIn(cr);
-
-	}
-	private void initLanguage() throws Exception{
-		initLanguage(null);
-	}
-	private void initLanguage(String name) throws Exception{
-		if(name!=null) {
-			engineContext = new JMXEngineContext(name);
-		}
-		else {
-			engineContext=new JMXEngineContext(language);
-		}
+	private void setLanguage(String name)throws EngineNotFoundException{
+		engineContext.setLanguage(name);
 		language=engineContext.getEngine().getFactory().getLanguageName();
 		prompt="mishell."+language+"$ ";
+
 	}
 	public void run() {
 				try {
-					initLanguage();
-					if (scriptPath==null)
-					runConsole();
-					else engineContext.getEngine().eval(new FileReader(scriptPath));
+					out.println("Welcome to Apache Mishell!!");
+					out.println("For getting help type 'help' ");
+					out.print(prompt);
+					while (!stop) {
+						try {
+							String cmd = in.readLine();
+							executeCommand(cmd);
+							out.print(prompt);
+							out.flush();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-
-
-	private void runConsole() throws Exception {
-		out.println("Welcome to Apache Mishell!!");
-		out.println("For getting help type 'help' ");
-		out.print(prompt);
-		while (!stop) {
-			try {
-				String cmd = in.readLine();
-				executeCommand(cmd);
-				out.print(prompt);
-				out.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
 
 	public void stop() {
 		stop = true;
@@ -114,6 +102,17 @@ Logger log = Logger.getLogger(this.getClass().getCanonicalName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	public void addCommand(Command cmd){
+		commander.add(cmd);
+	}
+	/**
+	 * This method is needed for non-trivial commands that could eventually be added, as 
+	 * they will need to use the engineContext to do useful things
+	 * @return
+	 */
+	public JMXEngineContext getEngineContext(){
+		return engineContext;
 	}
 	private void addBuiltInCmds(){
 		commander.add(new Command(){
@@ -145,14 +144,16 @@ Logger log = Logger.getLogger(this.getClass().getCanonicalName());
 		});
 		commander.add(new Command(){
 			public void executeCommand(String cmd, PrintStream out) throws Exception {
-				String[] args=cmd.split(" ");//TODO implement scape seqs
-				if(args.length>1)initLanguage(args[1]);
-				else for (ScriptEngineFactory factory: engineContext.getEngineManager().getEngineFactories()) {
-					out.print(factory.getLanguageName()+"; version "+factory.getLanguageVersion());
-					out.print("; AKA: ");
-					for(String alias: factory.getNames()) out.print(alias+" ");
-					out.print("\n");
-				
+				String[] args=cmd.split(" ");//TODO implement scape seqs, that is, if path contains spaces, for example.
+				if(args.length>1){
+					setLanguage(args[1]);
+				} else{
+					for (ScriptEngineFactory factory: engineContext.getEngineManager().getEngineFactories()) {
+						out.print(factory.getLanguageName()+"; version "+factory.getLanguageVersion());
+						out.print("; AKA: ");
+						for(String alias: factory.getNames()) out.print(alias+" ");
+							out.print("\n");
+						}
 				}
 			}
 			public String getName() {

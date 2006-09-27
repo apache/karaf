@@ -14,12 +14,8 @@
  *   limitations under the License.
  *
  */
-package org.apache.felix.mishell;
+package org.apache.felix.mishell.console;
 
-public class EngineNotFoundException extends Exception {
-
-	public EngineNotFoundException(String language) {
-		super(language);
-	}
+public class CommandNotFoundException extends Exception {
 
 }
