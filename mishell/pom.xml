@@ -16,21 +16,23 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
-    <dependency><!--BSD -->
-      <groupId>jline</groupId>
-      <artifactId>jline</artifactId>
-      <version>0.9.9</version>
-    </dependency>
-     <dependency><!--Currently needs manual installation-->
-       <groupId>org.jruby</groupId><!--trilicense CPL/GPL/LGPL -->
+<!--     <dependency>
+       <groupId>org.jruby</groupId>
        <artifactId>jruby</artifactId>
        <version>0.9.0</version>
      </dependency>
-     <dependency><!--Currently needs manual installation-->
-       <groupId>javax.script</groupId><!--BSD-->
+     <dependency>
+       <groupId>javax.script</groupId>
        <artifactId>jruby-engine</artifactId>
        <version>SNAPSHOT</version>
+     </dependency> -->
+     <dependency>
+       <groupId>org.jruby</groupId>
+       <artifactId>jruby-bundle</artifactId>
+       <scope>provided</scope>
+       <version>0.8.0-SNAPSHOT</version>
      </dependency>
+     
      <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>${groupId}.jmxintrospector</artifactId>
@@ -42,6 +44,13 @@
       <version>${pom.version}</version>
       <scope>provided</scope>
     </dependency>
+        <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <version>${pom.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    
         <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.framework</artifactId>
@@ -64,7 +73,6 @@
         <version>${pom.version}</version>
         <extensions>true</extensions>
         <configuration>
-		    <manifestFile>target/classes/manifest.mf</manifestFile>
 		    <!--
 		    We're inlining a lot here. This is nasty for a bundle, nice for an executable jar.
 		    It should be simple to change afterwards
@@ -102,12 +110,4 @@
              </plugin>      
     </plugins>
   </build>
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </reporting>
 </project>
