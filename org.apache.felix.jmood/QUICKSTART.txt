@@ -1,0 +1,31 @@
+WITH ECLIPSE
+If you are using eclipse: 
+1. Init a workspace to be maven-compatible (see maven site)
+2. Run maven eclipse:eclipse to create the .project file
+FOR ALL
+3. Run maven install to add jmood to your M2_REPO 
+or just mvn package to generate the bundle in target/
+4. To test it you can just run the FelixLauncher class under
+src/test/java. This creates a temporary './cache' directory for Felix.
+Note that no shell is available so you can only interact with felix
+remotely through JMood
+5. Connect to JMood using your favorite general purpose JMX console 
+(for example, jconsole, bundled with java 5) or help us building one ;-)
+The url is printed in the console but it should be:
+-> service:jmx:rmi:///jndi/rmi://${host}:1199/server
+where ${host}=your_hostname or 'localhost' if no non-loopback interface is found.
+
+ISSUES
+- If you are using java1.4 the framework won't find the javax.management and
+javax.management.remote packages so it will not resolve JMood. You can choose between Sun's reference 
+or mx4j (http://mx4j.sourceforge.net) implementations. Just bundle them and export those
+two packages and everything should work fine. 
+- If running on Java 5+, JMood uses the java.lang.management PlatformMBeanServer
+else (java.version<1.5.0) it creates an independent MBeanServer and 
+JVM MBeans are not available any more. 
+- MBeans for some compendium services are created if those services are available
+but no static dependency is needed. 
+- JMood creates an RMIRegistry on port 1199, this value is hard-coded for the moment, so be sure it is free
+- JMood automatically creates a policy manager with a dummy policy if none found. Note that it has not been 
+very much tested with *real* security, and that many management operations need AdminPermission to work fine.
+
