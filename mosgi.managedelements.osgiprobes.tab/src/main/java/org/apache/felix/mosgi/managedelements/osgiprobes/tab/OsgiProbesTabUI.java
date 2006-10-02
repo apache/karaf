@@ -68,10 +68,14 @@ public class OsgiProbesTabUI extends JPanel implements Plugin, BundleActivator {
   //////////////////////////////////////////
   public void registerServicePlugin(){
     sreg = m_context.registerService(Plugin.class.getName(), this, null);
+    
   }
   
   public void unregisterServicePlugin(){
-    sreg.unregister();   
+    if (sreg!=null){
+      sreg.unregister();   
+      sreg=null;
+    }
   }
   
   public String pluginLocation(){
