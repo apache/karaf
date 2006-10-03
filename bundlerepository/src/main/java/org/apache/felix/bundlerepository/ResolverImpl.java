@@ -560,6 +560,10 @@ public class ResolverImpl implements Resolver
         // Get all of the local resolvable requirements for the old
         // version of the resource from the specified resource array.
         Requirement[] reqs = getResolvableRequirements(oldVersion, resources);
+        if (reqs == null)
+        {
+            return true;
+        }
 
         // Now make sure that all of the requirements resolved by the
         // old version of the resource can also be resolved by the new
