@@ -21,9 +21,13 @@ package org.apache.felix.upnp.sample.binaryLight;
 
 import java.util.Dictionary;
 
+import javax.servlet.Servlet;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.HttpService;
 import org.osgi.service.upnp.UPnPDevice;
 
 
@@ -36,6 +40,7 @@ public class Activator implements BundleActivator {
 	static BundleContext context;
 	private ServiceRegistration serviceRegistration;
 	private LightDevice light;
+	private HttpService httpServ;
 	
 	/**
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
@@ -43,7 +48,9 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		Activator.context = context;
 		doServiceRegistration();
+		doServletRegistration();
 	}
+
 
 	private void doServiceRegistration() {
 		light = new LightDevice(context);
@@ -54,6 +61,35 @@ public class Activator implements BundleActivator {
 				light,
 				dict
 			);
+	}
+	
+	private void doServletRegistration() {
+        ServiceReference sr = context.getServiceReference(HttpService.class.getName());
+        if (sr != null){
+        	httpServ = (HttpService) context.getService(sr);
+        	
+            try
+            {
+             Servlet presentationServlet = new PresentationServlet(light.getModel());
+             httpServ.registerServlet("/upnp/binaryLight", presentationServlet,null, null);
+            }
+            catch (Exception e)
+            {
+                System.err.println("Exception registering presentationServlet:" + e);
+            }
+            
+            
+            try
+            {
+                httpServ.registerResources("/upnp/binaryLight/images",
+                        "/org/apache/felix/upnp/sample/binaryLight/images", null);
+            }
+            catch (Exception e)
+            {
+                System.err.println("Exception registering /resource:" + e);
+            }
+
+        }		
 	}
 
 	/**

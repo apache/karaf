@@ -19,6 +19,8 @@
 
 package org.apache.felix.upnp.sample.binaryLight;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Dictionary;
 import java.util.Properties;
 
@@ -52,6 +54,9 @@ public class LightDevice implements UPnPDevice {
 		buildEventNotifyer();
 	}
 
+	public LightModel getModel(){
+		return model;
+	}
 	/**
 	 * 
 	 */
@@ -75,7 +80,16 @@ public class LightDevice implements UPnPDevice {
 		dictionary.put(UPnPDevice.MODEL_NAME,"Lucciola");
 		dictionary.put(UPnPDevice.MODEL_NUMBER,"1.0");
 		dictionary.put(UPnPDevice.MODEL_URL,"http://incubator.apache.org/felix/lucciola");
-		dictionary.put(UPnPDevice.PRESENTATION_URL,"http://incubator.apache.org/felix/lucciola/presentation");
+		String port = context.getProperty("org.osgi.service.http.port");
+        InetAddress inet;
+		try {
+			inet = InetAddress.getLocalHost();
+	        String hostname = inet.getHostName();
+            //String hostname = inet.getHostAddress();
+		dictionary.put(UPnPDevice.PRESENTATION_URL,"http://"+hostname + ":"+port+"/upnp/binaryLight/");
+		} catch (UnknownHostException e) {
+			System.out.println("Warning: enable to cacth localhost name");
+		}
 		dictionary.put(UPnPDevice.SERIAL_NUMBER,"123456789");
 		dictionary.put(UPnPDevice.TYPE,"urn:schemas-upnp-org:device:BinaryLight:1");
 		dictionary.put(UPnPDevice.UDN,DEVICE_ID);
