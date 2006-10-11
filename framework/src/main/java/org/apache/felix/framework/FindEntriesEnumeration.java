@@ -36,8 +36,8 @@ class FindEntriesEnumeration implements Enumeration
     {
         m_bundle = bundle;
         m_path = path;
-        m_enumeration = m_bundle.getInfo().getCurrentModule()
-            .getContentLoader().getContent().getEntries();
+        m_enumeration = (m_bundle.getInfo().getCurrentModule().getContentLoader().getContent() == null)
+            ? null : m_bundle.getInfo().getCurrentModule().getContentLoader().getContent().getEntries();
         m_recurse = recurse;
 
         // Sanity check the parameters.
@@ -86,7 +86,7 @@ class FindEntriesEnumeration implements Enumeration
         // it only displays the contents of the directory specified by
         // the path argument either recursively or not; much like using
         // "ls -R" or "ls" to list the contents of a directory, respectively.
-        while (m_enumeration.hasMoreElements())
+        while ((m_enumeration != null) && m_enumeration.hasMoreElements())
         {
             // Get the next entry name.
             String entryName = (String) m_enumeration.nextElement();
