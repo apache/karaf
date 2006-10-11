@@ -3153,6 +3153,7 @@ public class Felix
                     // This physically removes the bundle from memory
                     // as well as the bundle cache.
                     garbageCollectBundle(m_bundle);
+                    m_bundle.setInfo(null);
                     m_bundle = null;
                 }
                 else
