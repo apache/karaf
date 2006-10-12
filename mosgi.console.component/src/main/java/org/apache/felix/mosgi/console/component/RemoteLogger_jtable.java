@@ -153,7 +153,7 @@ public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlug
       try{
         MBeanServerConnection mbs=(MBeanServerConnection)e.getNewValue();
         if (nodes.get(mbs)==null){
-	  System.out.println("Ajout d'un listener " +mbs);
+	  //System.out.println("Ajout d'un listener " +mbs);
           ((MBeanServerConnection)e.getNewValue()).addNotificationListener(new ObjectName("OSGI:name=Remote Logger"), this, null, e.getOldValue());
           nodes.put(mbs, "ok");
         }
@@ -164,18 +164,24 @@ public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlug
   }
 
   public void handleNotification(Notification notification, Object handback) {
-    StringTokenizer st = new StringTokenizer(notification.getMessage(),":");
-    Date d=new Date(notification.getTimeStamp());
-    //DateFormat dateFormat = new SimpleDateFormat("hh'h'mm dd-MM-yy");
-    DateFormat df = DateFormat.getTimeInstance(DateFormat.MEDIUM); // utilise le format de date local
-    DateFormat df2 = DateFormat.getDateInstance(DateFormat.SHORT);
+    StringTokenizer st = new StringTokenizer(notification.getMessage(),"*");
+    
+    long ts=notification.getTimeStamp();
+    String date="??/??/??";
+    String time="??/??/??";
+    if (ts!=0){ // means it's not an old log
+      Date d=new Date(ts);
+      //DateFormat dateFormat = new SimpleDateFormat("hh'h'mm dd-MM-yy");
+      date=DateFormat.getDateInstance(DateFormat.SHORT).format(d);
+      time=DateFormat.getTimeInstance(DateFormat.MEDIUM).format(d);
+    }
     String id=st.nextToken();
     String name=st.nextToken();
     String shortName=name.substring(name.lastIndexOf(".")+1,name.length());
     String state=st.nextToken();
     String lvl=st.nextToken();
     String msg=st.nextToken();
-    Object [] event = new Object []{df2.format(d),df.format(d),handback,id,shortName,state,lvl,msg};
+    Object [] event = new Object []{date,time,handback,id,shortName,state,lvl,msg};
 				    
     this.insertRow(0,event); 
     this.fireTableRowsInserted(0, 0);

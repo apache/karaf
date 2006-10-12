@@ -40,8 +40,7 @@ public class JtableCellRenderer extends JLabel implements TableCellRenderer {
     eventName.put(new Integer( Bundle.UNINSTALLED ), Color.black  );
   }
 
-  public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-  						 boolean hasFocus, int row, int column) {
+  public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
     setOpaque(true);
     if (column==0){
       Integer state;
@@ -50,7 +49,11 @@ public class JtableCellRenderer extends JLabel implements TableCellRenderer {
       }catch (NumberFormatException nfe) {
         state=new Integer(-1);
       }
-      setBackground((Color) eventName.get(state));
+      if (((String) value).equals("??/??/??")) {
+	setBackground(Color.white);
+      } else{
+	setBackground((Color) eventName.get(state));
+      }
     }
     setText((String) value);
 

@@ -41,12 +41,13 @@ import org.osgi.framework.InvalidSyntaxException;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-
 public class Activator implements BundleActivator {
   protected BundleContext m_context = null;
+
   protected ArrayList m_pluginList = null;
   protected ArrayList m_commonpluginList = null; //TODO To I need this table ?
   private EventListenerList m_listenerList = null;
+  
   private JFrame m_frame = null;
   private NodesTree nodesTree=null;
 
@@ -71,6 +72,9 @@ public class Activator implements BundleActivator {
               if(svcObj instanceof CommonPlugin){
                 m_commonpluginList.add(svcObj);
                 firePropertyChangedEvent(CommonPlugin.COMMON_PLUGIN_ADDED, null, svcObj);
+		//evite d'attendre le Thread pr que le common plugin remotelogger_jtree/jtable chope le MBean remote logger :
+		//nodesTree.tryToConnectAllNodes();
+		//createDefaultNodes(false);
               }else if (svcObj instanceof Plugin){
                 m_pluginList.add(svcObj);
                 firePropertyChangedEvent(Plugin.PLUGIN_ADDED, null, svcObj);
@@ -154,7 +158,8 @@ public class Activator implements BundleActivator {
     m_frame.setVisible(true);
   }
 
-  private synchronized void initializePlugins() {
+  private synchronized void initializePlugins() { // Never used ?
+    System.out.println("??? private synchronized void initializePlugins() ???");
     try {
       // Get all model services.
       Object svcObj=null;
@@ -166,6 +171,7 @@ public class Activator implements BundleActivator {
           if (!m_pluginList.contains(svcObj)) {
             m_pluginList.add(svcObj);
             firePropertyChangedEvent(Plugin.PLUGIN_ADDED, null, (Plugin)svcObj);
+	    //this.nodesTree.valueChanged(null);
           }
         }
       }
@@ -177,6 +183,7 @@ public class Activator implements BundleActivator {
           if (!m_commonpluginList.contains(svcObj)) {
             m_commonpluginList.add(svcObj);
             firePropertyChangedEvent(CommonPlugin.COMMON_PLUGIN_ADDED, null, (CommonPlugin)svcObj);
+	    //this.nodesTree.valueChanged(null);
           }
         }
       }
@@ -196,9 +203,9 @@ public class Activator implements BundleActivator {
     }
   }
 
-  //
-  // Event methods.
-  //
+  //////////////////////////////
+  // Event methods.           //
+  //////////////////////////////
   public void addPropertyChangeListener(PropertyChangeListener l) {
     m_listenerList.add(PropertyChangeListener.class, l);
   }
@@ -209,12 +216,23 @@ public class Activator implements BundleActivator {
 
   public void firePropertyChangedEvent(String name, Object oldValue, Object newValue) {
     PropertyChangeEvent event = null;
-
     // Guaranteed to return a non-null array
     Object[] listeners = m_listenerList.getListenerList();
 
+/* a supprimer de ici
+    String mb="";
+    //System.out.println("name="+name);
+    if(name.equals("pluggin_added") | name.equals("pluggin_removed")){
+      mb="java.awt.Component";
+    } else {
+      mb=newValue.toString();
+      mb=mb.substring((mb.indexOf("$")==-1)?0:mb.indexOf("$")+1,mb.length());
+    }
+    System.out.println("console.gui whill firePCE "+(int)(listeners.length/2)+"* : (this,"+name+","+oldValue+","+mb+")");
+/* a ici */
+
     // Process the listeners last to first, notifying
-    // those that are interested in this event
+    // those that are interested in this event 
     for (int i = listeners.length - 2; i >= 0; i -= 2) {
       if (listeners[i] == PropertyChangeListener.class) {
         // Lazily create the event:

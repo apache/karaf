@@ -39,16 +39,18 @@ import java.awt.Toolkit;
 public class JtreeCellRenderer extends DefaultTreeCellRenderer {
 
   private boolean isLeaf=false;
-  //private int maxL;
 
   private String[] states=new String[]{"ACTIVE","INSTALLED","RESOLVED","STARTING","STOPPING","UNINSTALLED"};
   private Color[] colors=new Color[]{Color.green,Color.orange,Color.red,Color.white,Color.white,Color.black};
   private ImageIcon[] ii=new ImageIcon[6];
+  private ImageIcon iiOldLog=null;
 
   public JtreeCellRenderer(BundleContext bdlCtx){
     for (int i=0 ; i<states.length ; i++){
       this.ii[i]=new ImageIcon(Toolkit.getDefaultToolkit().getImage(bdlCtx.getBundle().getResource("icons/"+states[i]+".gif")));
     }
+    this.iiOldLog=new ImageIcon(Toolkit.getDefaultToolkit().getImage(bdlCtx.getBundle().getResource("icons/OLDLOG.gif")));
+
   }
 
   public Dimension getPreferredSize() {
@@ -65,6 +67,7 @@ public class JtreeCellRenderer extends DefaultTreeCellRenderer {
     setOpaque(true);
     setBackground(Color.white);
     setFont(new Font("Monospaced",Font.BOLD,12));
+    setToolTipText(null);
 
     StringTokenizer st=null;
     DefaultMutableTreeNode dmtn=(DefaultMutableTreeNode)value;
@@ -77,17 +80,21 @@ public class JtreeCellRenderer extends DefaultTreeCellRenderer {
     }
 
     if(st!=null){
-      st.nextToken();
+      String date=st.nextToken();
       st.nextToken();
       String state=st.nextToken();
       for (int i=0 ; i<states.length ; i++){
         if (state.equals(states[i])){
           if (lvl==4){
-            setIcon(ii[i]);
+	    if(!date.equals("??/??/??")){
+	      setIcon(ii[i]);
+	    }else{
+	      setIcon(iiOldLog);
+	    }
 	    setFont(new Font("Monospaced",Font.PLAIN,10));
           }else{ 
             StringTokenizer st2 = new StringTokenizer(((DefaultMutableTreeNode)dmtn.getFirstChild()).toString()," | ");
-            setToolTipText("<html><B>IP = </B>"+/*IP=<ip> Profil=<port>/<profil>*/dmtn.getParent().getParent()+"<B> Profil =</B>"+dmtn.getParent()+"<br><B>Bundle : </B>"+/*Bundle : Id=<bundleId> : <bundleSymbolicName>*/dmtn+"<br><B>Date : </B>"+/*<date> - <time>*/st2.nextToken()+" - "+st2.nextToken()+"<br><B>State : </B>"+/*<bundleState>*/st2.nextToken()+"<B><br>Event "+/*Event <eventNumber> : <logLevel> : <message>*/dmtn.getChildCount()+" : "+st2.nextToken()+" : "+st2.nextToken()+"</B></html>");
+            setToolTipText("<html><B>IP = </B>"+/*IP=<ip> Profil=<port>/<profil>*/dmtn.getParent().getParent()+"<B> Profil =</B>"+dmtn.getParent()+"<br><B>Bundle : </B>"+/*Bundle : Id=<bundleId> : <bundleSymbolicName>*/dmtn+"<br><B>Date : </B>"+/*<date> - <time>*/st2.nextToken()+" - "+st2.nextToken()+"<br><B>State : "+/*<bundleState>*/st2.nextToken()+"<br>Event "+/*Event <eventNumber> : <logLevel> : <message>*/dmtn.getChildCount()+" : "+st2.nextToken()+" : "+st2.nextToken()+"</B></html>");
             setBackground(colors[i]);
           }
 	break;

@@ -38,12 +38,8 @@ public class NodeCellRenderer extends DefaultTreeCellRenderer {
     this.nodesTree=nt;
   }
 
-	public Component getTreeCellRendererComponent(JTree tree, Object value,
-			boolean sel, boolean expanded, boolean leaf, int row,
-			boolean hasFocus) {
-
-		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,
-				row, hasFocus);
+  public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+    super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
     String val=value.toString();
     if (!val.equals(NodesTree.TOP_NAME)){ 
       if (nodesTree.isNodeConnected(val)){

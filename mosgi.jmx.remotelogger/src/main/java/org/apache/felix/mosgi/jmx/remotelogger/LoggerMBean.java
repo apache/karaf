@@ -18,4 +18,8 @@
  */
 package org.apache.felix.mosgi.jmx.remotelogger;
 
-public interface LoggerMBean{}
+public interface LoggerMBean{
+
+  public void sendOldLog();
+
+}

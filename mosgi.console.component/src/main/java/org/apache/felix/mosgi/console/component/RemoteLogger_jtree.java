@@ -61,16 +61,24 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.JFrame;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
-
+import javax.swing.JOptionPane;
 //import org.osgi.service.prefs.Preferences;
+
+import java.awt.event.MouseListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
 
 public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin, NotificationListener{
 
   private MyTree logTree;
+  private MouseListener ml;
+  private TreePath selPath;
   private JPanel jp;
-  private Hashtable nodes=new Hashtable();
   private DefaultMutableTreeNode rootNode=new DefaultMutableTreeNode("root");
   private Hashtable eventName=new Hashtable();
+  private Hashtable nodes=new Hashtable();
 
   public RemoteLogger_jtree (BundleContext bdlCtx){
     super(null);
@@ -84,11 +92,31 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
     JtreeCellRenderer treeCellRenderer=new JtreeCellRenderer(bdlCtx);
     this.logTree.setCellRenderer(treeCellRenderer);
     this.logTree.setLargeModel(true);
-    this.logTree.setToggleClickCount(1); 
+    this.logTree.setToggleClickCount(2); 
     this.logTree.setRootVisible(false);
     // this create an invisible tree even if I use *expand* so...
     // I use expand after the first insert into the tree
-  
+
+    MouseListener ml = new MouseAdapter() {
+      public void mousePressed(MouseEvent e) {
+        int selRow = logTree.getRowForLocation(e.getX(), e.getY());
+        selPath = logTree.getPathForLocation(e.getX(), e.getY());
+        if(selRow != -1 & e.getButton()>1) {
+	  String nodeString="\""+((DefaultMutableTreeNode) selPath.getLastPathComponent()).getUserObject()+"\"";
+	  JMenuItem itemm=new JMenuItem("Delete logs "+nodeString+"");
+	  itemm.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+	      removeNodeFromParent((DefaultMutableTreeNode) selPath.getLastPathComponent());
+	    }
+	  });
+	  JPopupMenu jpopup=new JPopupMenu();
+	  jpopup.add(itemm);
+          jpopup.show(jp, e.getX(), e.getY());
+        }
+      }
+    };
+    this.logTree.addMouseListener(ml);
+
     jp.add(new JScrollPane(logTree), BorderLayout.CENTER);    
     
     eventName.put(new Integer(Bundle.ACTIVE),     "ACTIVE     ");
@@ -112,16 +140,24 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
   public void registerServicePlugin(){}
   public void unregisterServicePlugin(){}
 /* fin a supprimer */
-
-  
+ 
   public void propertyChange(PropertyChangeEvent e){
+    //System.out.println("PCE : "+e.getPropertyName());
     if (e.getPropertyName().equals(Plugin.NEW_NODE_CONNECTION)){
       try{
         MBeanServerConnection mbs=(MBeanServerConnection)e.getNewValue();
         if (nodes.get(mbs)==null){
-System.out.println("Ajout d'un listener " +mbs);
-          ((MBeanServerConnection)e.getNewValue()).addNotificationListener(new ObjectName("OSGI:name=Remote Logger"), this, null, e.getOldValue());
+          //System.out.println("RemoteLogger_jtree add a notification listener on this Remote Logger : "+mbs);
+	  ((MBeanServerConnection)e.getNewValue()).addNotificationListener(new ObjectName("OSGI:name=Remote Logger"), this, null, e.getOldValue());
           nodes.put(mbs, "ok");
+          if(JOptionPane.showConfirmDialog(null,"Do you want \""+this.getName()+"\" ask old log to this gateway :\n"+((String) e.getOldValue())+" ?")==JOptionPane.YES_OPTION) {
+            try {
+	      //System.out.println("   => mosgi.console.component.RemoteLoger_jtree gonna ask the oldLog");
+	      mbs.invoke(new ObjectName("OSGI:name=Remote Logger"), "sendOldLog", new Object[]{}, new String[]{});
+	    } catch (Exception ee) {
+	      System.out.println("   => mosgi.console.component.RemoteLoger_jtree : getOldLog : "+ee);
+	    }
+	  }
         }
       }catch(Exception ex){
         ex.printStackTrace();
@@ -129,59 +165,72 @@ System.out.println("Ajout d'un listener " +mbs);
     }
   }
 
-  private DefaultMutableTreeNode createIfNeed(String nodeToCreateAndGet, DefaultMutableTreeNode parent){
+  private DefaultMutableTreeNode createIfNeed(String nodeToCreateAndGet, DefaultMutableTreeNode parent, boolean isOldLog){
     int childNumber=this.getChildCount(parent);
     DefaultMutableTreeNode theNode=null;
     for (int i=0 ; i<childNumber ; i++){ // is node even exist ?
       String string_pool=((DefaultMutableTreeNode)(this.getChild(parent, i))).toString();
       if (string_pool.equals(nodeToCreateAndGet)){
         theNode=(DefaultMutableTreeNode) (this.getChild(parent, i));
-          break;
+        break;
       }
     }
     if (theNode==null){ // create the node
-      theNode=new DefaultMutableTreeNode(nodeToCreateAndGet);	
-      // Unable to set tree expand whithout a first node
+      theNode=new DefaultMutableTreeNode(nodeToCreateAndGet);
+      // Unable to set tree expand whithout a first node:
       if (rootNode.getChildCount()==0){
         this.insertNodeInto(theNode, parent, 0);
         logTree.expandPath(new TreePath(rootNode.getPath()));
-      }else{
-        this.insertNodeInto(theNode, parent, 0);
+      } else{
+        if(isOldLog){
+          this.insertNodeInto(theNode, parent, parent.getChildCount());
+        } else {
+          this.insertNodeInto(theNode, parent, 0);
+        }
       }
     }
-  return theNode;
+    return theNode;
   }
 
   public void handleNotification(Notification notification, Object handback) {
     StringTokenizer st=new StringTokenizer(handback.toString(),":");
+    boolean isOldLog=false;
     String ip=st.nextToken();
     String ref=st.nextToken();
     
-    st = new StringTokenizer(notification.getMessage(),":");
-    Date timeDate=new Date(notification.getTimeStamp());
-    //DateFormat dateFormat = new SimpleDateFormat("hh'h'mm dd-MM-yy");
-    DateFormat df = DateFormat.getTimeInstance(DateFormat.MEDIUM); // use local date format 
-    DateFormat df2 = DateFormat.getDateInstance(DateFormat.SHORT);
-    String time=df.format(timeDate);
-    String date=df2.format(timeDate);
-
+    st = new StringTokenizer(notification.getMessage(),"*");
+    long ts=notification.getTimeStamp();
+    String time="??:??:??";
+    String date="??/??/??";
+    if (ts==0) {
+      isOldLog=true;
+    }
+    if (!isOldLog){
+      Date timeDate=new Date(ts);
+      //DateFormat dateFormat = new SimpleDateFormat("hh'h'mm dd-MM-yy");
+      DateFormat df = DateFormat.getTimeInstance(DateFormat.MEDIUM); // use local date format
+      DateFormat df2 = DateFormat.getDateInstance(DateFormat.SHORT);
+      time=df.format(timeDate);
+      date=df2.format(timeDate);
+    }
     String id=st.nextToken();
     String name=st.nextToken();
     String idname=new String(id+" : "+name);
     String state=""+eventName.get(new Integer((int) Integer.parseInt(st.nextToken())));
     String lvl=st.nextToken();
     String msg=st.nextToken();
-
     // Get and maybe create parents nodes : ip, ref, idname
-    DefaultMutableTreeNode dmtn_ip=createIfNeed(ip, rootNode);
-    DefaultMutableTreeNode dmtn_ref=createIfNeed(ref, dmtn_ip);
-    DefaultMutableTreeNode dmtn_idname=createIfNeed(idname, dmtn_ref);
-
+    DefaultMutableTreeNode dmtn_ip=createIfNeed(ip, rootNode, isOldLog);
+    DefaultMutableTreeNode dmtn_ref=createIfNeed(ref, dmtn_ip, isOldLog);
+    DefaultMutableTreeNode dmtn_idname=createIfNeed(idname, dmtn_ref, isOldLog);
     // insert the leaf with message under id/ref/idname
-    DefaultMutableTreeNode dmtn=new DefaultMutableTreeNode(date+" | "+time+" | "+state+" | "+lvl+" | "+msg,false); 
-    this.insertNodeInto(dmtn, dmtn_idname, 0);
-
-    this.reload(dmtn_idname);
+    DefaultMutableTreeNode dmtn=new DefaultMutableTreeNode(date+" | "+time+" | "+state+" | "+lvl+" | "+msg,false);
+    if (isOldLog){
+      this.insertNodeInto(dmtn, dmtn_idname, dmtn_idname.getChildCount());
+    } else{
+      this.insertNodeInto(dmtn, dmtn_idname, 0);
     }
+    this.reload(dmtn_idname);
+  }
   
 }
