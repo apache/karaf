@@ -820,6 +820,12 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             // resolve exception unless the import is optional.
             if ((candidates.length == 0) && !imports[impIdx].isOptional())
             {
+                // Since we are not able to resolve the module, we must
+                // remove the module from the resolve map so that subsequent
+                // resolves do not think that the module is resolvable due
+                // to the cycle check at the beginning of this method.
+                resolverMap.remove(module);
+                
                 // If we have received an exception while trying to populate
                 // the resolver map, rethrow that exception since it might
                 // be useful. NOTE: This is not necessarily the "only"
