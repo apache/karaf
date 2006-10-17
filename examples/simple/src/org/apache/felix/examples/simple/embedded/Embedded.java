@@ -1,4 +1,4 @@
-package org.apache.felix.simple.embedded;
+package org.apache.felix.examples.simple.embedded;
 
 public class Embedded
 {

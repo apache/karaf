@@ -1,10 +1,10 @@
-package org.apache.felix.simple;
+package org.apache.felix.examples.simple;
 
 import javax.servlet.Servlet;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.apache.felix.simple.embedded.Embedded;
+import org.apache.felix.examples.simple.embedded.Embedded;
 
 /**
  * A very simple bundle that prints out a message when it is started and

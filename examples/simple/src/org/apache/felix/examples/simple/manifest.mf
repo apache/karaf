@@ -1,10 +1,10 @@
 Bundle-ManifestVersion: 2
-Bundle-SymbolicName: org.apache.felix.simple
+Bundle-SymbolicName: org.apache.felix.examples.simple
 Bundle-Version: 1.0.0
 Bundle-Name: Simple Bundle
 Bundle-Description: Simple bundle that demonstates OSGi features.
-Bundle-Activator: org.apache.felix.simple.Activator
-Bundle-ClassPath: .,org/apache/felix/simple/embedded.jar
+Bundle-Activator: org.apache.felix.examples.simple.Activator
+Bundle-ClassPath: .,org/apache/felix/examples/simple/embedded.jar
 Bundle-NativeCode: /libfoo.so; osname=Linux; processor=x86
 Import-Package: org.osgi.framework
 DynamicImport-Package: javax.servlet.*
