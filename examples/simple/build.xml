@@ -42,9 +42,9 @@
 
     <!-- JAR the bundle. -->
     <target name="jar" depends="compile">
-        <jar jarfile="${output.dir}/org/apache/felix/${bundle.name}/embedded.jar"
+        <jar jarfile="${output.dir}/org/apache/felix/examples/${bundle.name}/embedded.jar"
             basedir="${output.dir}">
-            <include name="org/apache/felix/${bundle.name}/embedded/**"/>
+            <include name="org/apache/felix/examples/${bundle.name}/embedded/**"/>
         </jar>
 
         <copy todir="${output.dir}">
@@ -53,12 +53,12 @@
             </fileset>
         </copy>
 
-        <jar manifest="${src.dir}/org/apache/felix/${bundle.name}/manifest.mf"
+        <jar manifest="${src.dir}/org/apache/felix/examples/${bundle.name}/manifest.mf"
             jarfile="${bundle.dir}/${bundle.name}.jar"
             basedir="${output.dir}">
-            <include name="org/apache/felix/${bundle.name}/**"/>
+            <include name="org/apache/felix/examples/${bundle.name}/**"/>
             <include name="libfoo.so"/>
-            <exclude name="org/apache/felix/${bundle.name}/embedded/"/>
+            <exclude name="org/apache/felix/examples/${bundle.name}/embedded/"/>
         </jar>
     </target>
 
