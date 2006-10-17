@@ -422,10 +422,6 @@ class BundleImpl implements Bundle
         return false;
     }
 
-    /*
-     * This is a hack to get access to the subject-dns of the current revision
-     * from inside the AdminPermission.
-     */
     String[] getSubjectDNs()
     {
         return m_info.getArchive().getDNChains();
