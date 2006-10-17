@@ -1,0 +1,6 @@
+cd ..; ant ; cd native
+javah -classpath ../simple.jar -jni org.apache.felix.simple.Activator
+gcc -I/usr/java/jdk/include \
+    -I/usr/java/jdk/include/linux \
+    -c simple_bundle_foo_method.c -o simple_bundle_foo_method.o
+ld -G simple_bundle_foo_method.o -o libfoo.so

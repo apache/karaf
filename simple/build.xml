@@ -1,0 +1,94 @@
+<project name="simplebundle" default="all" basedir=".">
+
+    <!-- Set global properties. -->
+    <property name="bundle.name" value="simple"/>
+    <property name="src.dir" value="src"/>
+    <property name="lib.dir" value="lib"/>
+    <property name="output.dir" value="classes"/>
+    <property name="bundle.dir" value="."/>
+    <property name="doc.dir" value="doc"/>
+    <property name="apidoc.dir" value="${doc.dir}/api"/>
+    <property name="dist.dir" value="."/>
+    <property name="native.dir" value="native"/>
+    <property name="debug.flag" value="on"/>
+
+    <!-- Create class path from lib and output directories. -->
+    <path id="classpath">
+        <pathelement location="${output.dir}"/>
+        <fileset dir="${lib.dir}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- Create output directory. -->
+    <target name="init">
+        <mkdir dir="${output.dir}"/>
+    </target>
+
+    <!-- Compile and JAR everything -->
+    <target name="all" depends="init">
+        <antcall target="compile"/>
+        <antcall target="jar"/>
+    </target>
+
+    <!-- Compile everything. -->
+    <target name="compile" depends="init">
+        <javac srcdir="${src.dir}" destdir="${output.dir}"
+         debug="${debug.flag}" verbose="no" deprecation="no">
+            <classpath refid="classpath"/>
+            <include name="**/*.java"/>
+        </javac>
+    </target>
+
+    <!-- JAR the bundle. -->
+    <target name="jar" depends="compile">
+        <jar jarfile="${output.dir}/org/apache/felix/${bundle.name}/embedded.jar"
+            basedir="${output.dir}">
+            <include name="org/apache/felix/${bundle.name}/embedded/**"/>
+        </jar>
+
+        <copy todir="${output.dir}">
+            <fileset dir="${native.dir}">
+                <include name="libfoo.so"/>
+            </fileset>
+        </copy>
+
+        <jar manifest="${src.dir}/org/apache/felix/${bundle.name}/manifest.mf"
+            jarfile="${bundle.dir}/${bundle.name}.jar"
+            basedir="${output.dir}">
+            <include name="org/apache/felix/${bundle.name}/**"/>
+            <include name="libfoo.so"/>
+            <exclude name="org/apache/felix/${bundle.name}/embedded/"/>
+        </jar>
+    </target>
+
+    <!-- Create the source distribution JAR file. -->
+    <target name="dist">
+        <!-- Create API doc directory. -->
+        <mkdir dir="${apidoc.dir}"/>
+        <!-- Generate API documentation. -->
+        <javadoc sourcepath="${src.dir}"
+                 packagenames="*"
+                 destdir="${apidoc.dir}"
+                 author="true"
+                 windowtitle="${bundle.name} API Documentation"/>
+        <!-- JAR the source and doc trees. -->
+        <jar jarfile="${dist.dir}/${bundle.name}-src.jar"
+            basedir="..">
+            <include name="${bundle.name}/LICENSE.txt"/>
+            <include name="${bundle.name}/build.xml"/>
+            <include name="${bundle.name}/${lib.dir}/**"/>
+            <include name="${bundle.name}/${doc.dir}/**"/>
+            <include name="${bundle.name}/${src.dir}/**"/>
+        </jar>
+    </target>
+
+    <!-- Clean up everything. -->
+    <target name="clean">
+        <delete dir="${output.dir}"/>
+        <delete dir="${apidoc.dir}"/>
+        <delete file="${bundle.dir}/${bundle.name}.jar"/>
+        <delete file="${dist.dir}/${bundle.name}-src.jar"/>
+    </target>
+
+</project>
