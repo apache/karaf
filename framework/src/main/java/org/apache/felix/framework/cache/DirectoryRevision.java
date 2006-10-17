@@ -20,7 +20,7 @@ package org.apache.felix.framework.cache;
 
 import java.io.*;
 import java.security.cert.X509Certificate;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.*;
 
 import org.apache.felix.framework.Logger;
@@ -132,12 +132,12 @@ class DirectoryRevision extends BundleRevision
 
         // Create the bundles class path.
         IContent self = new DirectoryContent(m_refDir);
-        IContent[] contentPath = new IContent[classPathStrings.length];
+        List contentList = new ArrayList();
         for (int i = 0; i < classPathStrings.length; i++)
         {
             if (classPathStrings[i].equals(FelixConstants.CLASS_PATH_DOT))
             {
-                contentPath[i] = self;
+                contentList.add(self);
             }
             else
             {
@@ -145,23 +145,27 @@ class DirectoryRevision extends BundleRevision
                 File file = new File(m_refDir, classPathStrings[i]);
                 if (BundleCache.getSecureAction().isFileDirectory(file))
                 {
-                    contentPath[i] = new DirectoryContent(file);
+                    contentList.add(new DirectoryContent(file));
                 }
                 else
                 {
-                    contentPath[i] = new JarContent(file);
+                    // Ignore any entries that do not exist per the spec.
+                    if (BundleCache.getSecureAction().fileExists(file))
+                    {
+                        contentList.add(new JarContent(file));
+                    }
                 }
             }
         }
 
         // If there is nothing on the class path, then include
         // "." by default, as per the spec.
-        if (contentPath.length == 0)
+        if (contentList.size() == 0)
         {
-            contentPath = new IContent[] { self };
+            contentList.add(new IContent[] { self });
         }
 
-        return contentPath;
+        return (IContent[]) contentList.toArray(new IContent[contentList.size()]);
     }
 
 // TODO: This will need to consider security.

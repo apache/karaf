@@ -19,9 +19,7 @@
 package org.apache.felix.moduleloader;
 
 import java.io.*;
-import java.util.*;
 import java.util.Enumeration;
-import java.util.NoSuchElementException;
 import java.util.zip.ZipEntry;
 
 import org.apache.felix.framework.util.SecureAction;
@@ -274,7 +272,6 @@ public class JarContent implements IContent
     private static class EntriesEnumeration implements Enumeration
     {
         private Enumeration m_enumeration = null;
-        private Object m_next = null;
 
         public EntriesEnumeration(Enumeration enumeration)
         {

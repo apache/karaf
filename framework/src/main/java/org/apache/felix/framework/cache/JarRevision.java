@@ -148,12 +148,12 @@ class JarRevision extends BundleRevision
         {
             bundleJar = BundleCache.getSecureAction().openJAR(m_bundleFile);
             IContent self = new JarContent(m_bundleFile);
-            IContent[] contentPath = new IContent[classPathStrings.length];
+            List contentList = new ArrayList();
             for (int i = 0; i < classPathStrings.length; i++)
             {
                 if (classPathStrings[i].equals(FelixConstants.CLASS_PATH_DOT))
                 {
-                    contentPath[i] = self;
+                    contentList.add(self);
                 }
                 else
                 {
@@ -162,23 +162,28 @@ class JarRevision extends BundleRevision
                     ZipEntry entry = bundleJar.getEntry(classPathStrings[i]);
                     if ((entry != null) && entry.isDirectory())
                     {
-                        contentPath[i] = new ContentDirectoryContent(self, classPathStrings[i]);
+                        contentList.add(new ContentDirectoryContent(self, classPathStrings[i]));
                     }
                     else
                     {
-                        contentPath[i] = new JarContent(new File(embedDir, classPathStrings[i]));
+                        // Ignore any entries that do not exist per the spec.
+                        File extractedJar = new File(embedDir, classPathStrings[i]);
+                        if (BundleCache.getSecureAction().fileExists(extractedJar))
+                        {
+                            contentList.add(new JarContent(extractedJar));
+                        }
                     }
                 }
             }
 
             // If there is nothing on the class path, then include
             // "." by default, as per the spec.
-            if (contentPath.length == 0)
+            if (contentList.size() == 0)
             {
-                contentPath = new IContent[] { self };
+                contentList.add(new IContent[] { self });
             }
 
-            return contentPath;
+            return (IContent[]) contentList.toArray(new IContent[contentList.size()]);
         }
         finally
         {
