@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.device/src/org/osgi/service/device/DriverLocator.java,v 1.8 2006/03/14 01:20:43 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.device/src/org/osgi/service/device/DriverLocator.java,v 1.10 2006/07/12 21:22:12 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
  */
 package org.osgi.service.device;
 
-import java.util.Dictionary;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Dictionary;
 
 /**
  * A Driver Locator service can find and load device driver bundles given a
@@ -30,7 +30,7 @@ import java.io.IOException;
  * providers and encapsulate all provider-specific details related to the
  * location and acquisition of driver bundles.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.10 $
  * @see Driver
  */
 public interface DriverLocator {

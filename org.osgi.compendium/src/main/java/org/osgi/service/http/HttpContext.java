@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.http/src/org/osgi/service/http/HttpContext.java,v 1.9 2006/03/14 01:20:39 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.http/src/org/osgi/service/http/HttpContext.java,v 1.12 2006/07/12 21:22:13 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.osgi.service.http;
 
 import java.io.IOException;
 import java.net.URL;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -36,7 +37,7 @@ import javax.servlet.http.HttpServletResponse;
  * <p>
  * This interface is implemented by users of the <code>HttpService</code>.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.12 $
  */
 public interface HttpContext {
 	/**
@@ -99,15 +100,15 @@ public interface HttpContext {
 	 * 
 	 * <p>
 	 * If the specified request has been authenticated, this method must set the
-	 * {@link #AUTHENTICATION_TYPE}request attribute to the type of
-	 * authentication used, and the {@link #REMOTE_USER}request attribute to
+	 * {@link #AUTHENTICATION_TYPE} request attribute to the type of
+	 * authentication used, and the {@link #REMOTE_USER} request attribute to
 	 * the remote user (request attributes are set using the
 	 * <code>setAttribute</code> method on the request). If this method does not
 	 * perform any authentication, it must not set these attributes.
 	 * 
 	 * <p>
 	 * If the authenticated user is also authorized to access certain resources,
-	 * this method must set the {@link #AUTHORIZATION}request attribute to the
+	 * this method must set the {@link #AUTHORIZATION} request attribute to the
 	 * <code>Authorization</code> object obtained from the
 	 * <code>org.osgi.service.useradmin.UserAdmin</code> service.
 	 * 

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/Consumer.java,v 1.8 2006/03/14 01:20:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/Consumer.java,v 1.10 2006/07/11 00:54:10 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,27 +19,27 @@ package org.osgi.service.wireadmin;
 
 /**
  * Data Consumer, a service that can receive udpated values from
- * {@link Producer}services.
+ * {@link Producer} services.
  * 
  * <p>
  * Service objects registered under the <code>Consumer</code> interface are
  * expected to consume values from a Producer service via a <code>Wire</code>
  * object. A Consumer service may poll the Producer service by calling the
- * {@link Wire#poll}method. The Consumer service will also receive an updated
- * value when called at it's {@link #updated}method. The Producer service
+ * {@link Wire#poll} method. The Consumer service will also receive an updated
+ * value when called at it's {@link #updated} method. The Producer service
  * should have coerced the value to be an instance of one of the types specified
- * by the {@link Wire#getFlavors}method, or one of their subclasses.
+ * by the {@link Wire#getFlavors} method, or one of their subclasses.
  * 
  * <p>
  * Consumer service objects must register with a <code>service.pid</code> and a
- * {@link WireConstants#WIREADMIN_CONSUMER_FLAVORS}property. It is recommended
+ * {@link WireConstants#WIREADMIN_CONSUMER_FLAVORS} property. It is recommended
  * that Consumer service objects also register with a
  * <code>service.description</code> property.
  * 
  * <p>
  * If an <code>Exception</code> is thrown by any of the <code>Consumer</code>
  * methods, a <code>WireAdminEvent</code> of type
- * {@link WireAdminEvent#CONSUMER_EXCEPTION}is broadcast by the Wire Admin
+ * {@link WireAdminEvent#CONSUMER_EXCEPTION} is broadcast by the Wire Admin
  * service.
  * 
  * <p>
@@ -53,7 +53,7 @@ package org.osgi.service.wireadmin;
  * different types of objects from the Producer service. The Consumer service
  * should have <code>WirePermission</code> for each of these scope names.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.10 $
  */
 public interface Consumer {
 	/**
@@ -63,7 +63,7 @@ public interface Consumer {
 	 * <p>
 	 * Note: This method may be called by a <code>Wire</code> object prior to this
 	 * object being notified that it is connected to that <code>Wire</code> object
-	 * (via the {@link #producersConnected}method).
+	 * (via the {@link #producersConnected} method).
 	 * <p>
 	 * When the Consumer service can receive <code>Envelope</code> objects, it
 	 * must have registered all scope names together with the service object,
@@ -75,7 +75,7 @@ public interface Consumer {
 	 * @param wire The <code>Wire</code> object which is delivering the updated
 	 *        value.
 	 * @param value The updated value. The value should be an instance of one of
-	 *        the types specified by the {@link Wire#getFlavors}method.
+	 *        the types specified by the {@link Wire#getFlavors} method.
 	 */
 	public void updated(Wire wire, Object value);
 

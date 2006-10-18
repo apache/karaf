@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.provisioning/src/org/osgi/service/provisioning/ProvisioningService.java,v 1.9 2006/03/14 01:21:04 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.provisioning/src/org/osgi/service/provisioning/ProvisioningService.java,v 1.11 2006/07/12 21:21:31 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
  */
 package org.osgi.service.provisioning;
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.zip.ZipInputStream;
-import java.io.IOException;
 
 /**
  * Service for managing the initial provisioning information.
@@ -58,7 +58,7 @@ import java.io.IOException;
  * the provisioning information, so care must be taken not to leak the
  * Provisioning Dictionary received from <code>getInformation</code> method.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.11 $
  */
 public interface ProvisioningService {
 	/**

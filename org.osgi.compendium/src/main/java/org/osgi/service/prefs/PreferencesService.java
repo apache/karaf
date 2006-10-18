@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.prefs/src/org/osgi/service/prefs/PreferencesService.java,v 1.9 2006/03/14 01:21:15 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.prefs/src/org/osgi/service/prefs/PreferencesService.java,v 1.10 2006/06/16 16:31:30 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

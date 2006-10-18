@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ConfigurationAdmin.java,v 1.14 2006/03/14 01:21:09 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ConfigurationAdmin.java,v 1.16 2006/07/11 00:54:03 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * When the ConfigurationAdmin detects the registration of a Managed Service, it
  * checks its persistent storage for a configuration object whose PID matches
  * the PID registration property (<code>service.pid</code>) of the Managed
- * Service. If found, it calls {@link ManagedService#updated}method with the
+ * Service. If found, it calls {@link ManagedService#updated} method with the
  * new properties. The implementation of a Configuration Admin service must run
  * these call-backs asynchronously to allow proper synchronization.
  * 
@@ -98,9 +98,9 @@ import org.osgi.framework.InvalidSyntaxException;
  * bundle". This is a loose way of referring to the bundle which obtained the
  * Configuration Admin service from the service registry. Implementations of
  * <code>ConfigurationAdmin</code> must use a
- * {@link org.osgi.framework.ServiceFactory}to support this concept.
+ * {@link org.osgi.framework.ServiceFactory} to support this concept.
  * 
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.16 $
  */
 public interface ConfigurationAdmin {
 	/**
@@ -125,7 +125,7 @@ public interface ConfigurationAdmin {
 	 * 
 	 * The properties of the new <code>Configuration</code> object are
 	 * <code>null</code> until the first time that its
-	 * {@link Configuration#update(Dictionary)}method is called.
+	 * {@link Configuration#update(Dictionary)} method is called.
 	 * 
 	 * <p>
 	 * It is not required that the <code>factoryPid</code> maps to a
@@ -147,7 +147,7 @@ public interface ConfigurationAdmin {
 	 * 
 	 * The properties of the new <code>Configuration</code> object are
 	 * <code>null</code> until the first time that its
-	 * {@link Configuration#update(Dictionary)}method is called.
+	 * {@link Configuration#update(Dictionary)} method is called.
 	 * 
 	 * <p>
 	 * It is not required that the <code>factoryPid</code> maps to a

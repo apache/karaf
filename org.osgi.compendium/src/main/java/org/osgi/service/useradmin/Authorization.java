@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.useradmin/src/org/osgi/service/useradmin/Authorization.java,v 1.7 2006/03/14 01:20:47 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.useradmin/src/org/osgi/service/useradmin/Authorization.java,v 1.9 2006/07/11 00:54:01 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ package org.osgi.service.useradmin;
  * the required role, by calling its <code>hasRole</code> method.
  * <p>
  * Authorization contexts are instantiated by calling the
- * {@link UserAdmin#getAuthorization}method.
+ * {@link UserAdmin#getAuthorization} method.
  * 
  * <p>
  * <i>Trusting Authorization objects </i>
@@ -60,14 +60,14 @@ package org.osgi.service.useradmin;
  * <code>Authorization</code> object), the service explicitly checks that the
  * calling bundle has permission to make the call.
  * 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.9 $
  */
 public interface Authorization {
 	/**
-	 * Gets the name of the {@link User}that this <code>Authorization</code>
+	 * Gets the name of the {@link User} that this <code>Authorization</code>
 	 * context was created for.
 	 * 
-	 * @return The name of the {@link User}object that this
+	 * @return The name of the {@link User} object that this
 	 *         <code>Authorization</code> context was created for, or
 	 *         <code>null</code> if no user was specified when this
 	 *         <code>Authorization</code> context was created.
@@ -82,7 +82,7 @@ public interface Authorization {
 	 * Bundles must define globally unique role names that are associated with
 	 * the privilege of accessing restricted resources or operations. Operators
 	 * will grant users access to these resources, by creating a {@link Group}
-	 * object for each role and adding {@link User}objects to it.
+	 * object for each role and adding {@link User} objects to it.
 	 * 
 	 * @param name The name of the role to check for.
 	 * 

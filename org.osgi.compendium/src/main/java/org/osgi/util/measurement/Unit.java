@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.measurement/src/org/osgi/util/measurement/Unit.java,v 1.14 2006/03/14 01:19:37 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.util.measurement/src/org/osgi/util/measurement/Unit.java,v 1.15 2006/06/16 16:31:34 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import java.util.Hashtable;
  * +63. Any operation which produces an exponent outside of this range will
  * result in a <code>Unit</code> object with undefined exponents.
  * 
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 /*
  * This local class maintains the information about units. It can calculate new

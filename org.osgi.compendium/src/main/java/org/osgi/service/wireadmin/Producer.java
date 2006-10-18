@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/Producer.java,v 1.8 2006/03/14 01:20:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/Producer.java,v 1.10 2006/07/11 00:54:10 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.osgi.service.wireadmin;
 
 /**
  * Data Producer, a service that can generate values to be used by
- * {@link Consumer}services.
+ * {@link Consumer} services.
  * 
  * <p>
  * Service objects registered under the Producer interface are expected to
@@ -33,7 +33,7 @@ package org.osgi.service.wireadmin;
  * When the data represented by the Producer object changes, this object should
  * send the updated value by calling the <code>update</code> method on each of
  * <code>Wire</code> objects passed in the most recent call to this object's
- * {@link #consumersConnected}method. These <code>Wire</code> objects will pass
+ * {@link #consumersConnected} method. These <code>Wire</code> objects will pass
  * the value on to the associated <code>Consumer</code> service object.
  * 
  * <p>
@@ -42,10 +42,10 @@ package org.osgi.service.wireadmin;
  * 
  * <p>
  * Producer service objects must register with a <code>service.pid</code> and a
- * {@link WireConstants#WIREADMIN_PRODUCER_FLAVORS}property. It is recommended
+ * {@link WireConstants#WIREADMIN_PRODUCER_FLAVORS} property. It is recommended
  * that a Producer service object also registers with a
  * <code>service.description</code> property. Producer service objects must
- * register with a {@link WireConstants#WIREADMIN_PRODUCER_FILTERS}property if
+ * register with a {@link WireConstants#WIREADMIN_PRODUCER_FILTERS} property if
  * the Producer service will be performing filtering instead of the
  * <code>Wire</code> object.
  * 
@@ -66,7 +66,7 @@ package org.osgi.service.wireadmin;
  * different types of objects (composite) to the Consumer service. The Producer
  * service should have <code>WirePermission</code> for each of these scope names.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.10 $
  */
 public interface Producer {
 	/**
@@ -83,7 +83,7 @@ public interface Producer {
 	 * <p>
 	 * Note: This method may be called by a <code>Wire</code> object prior to this
 	 * object being notified that it is connected to that <code>Wire</code> object
-	 * (via the {@link #consumersConnected}method).
+	 * (via the {@link #consumersConnected} method).
 	 * <p>
 	 * If the Producer service returns an <code>Envelope</code> object that has an
 	 * unpermitted scope name, then the Wire object must ignore (or remove) the

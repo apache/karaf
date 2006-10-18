@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.http/src/org/osgi/service/http/HttpService.java,v 1.10 2006/03/14 01:20:39 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.http/src/org/osgi/service/http/HttpService.java,v 1.13 2006/07/12 21:22:13 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,17 @@
  */
 package org.osgi.service.http;
 
+import java.util.Dictionary;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import java.util.Dictionary;
 
 /**
  * The Http Service allows other bundles in the OSGi environment to dynamically
  * register resources and servlets into the URI namespace of Http Service. A
  * bundle may later unregister its resources or servlets.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.13 $
  * @see HttpContext
  */
 public interface HttpService {
@@ -132,11 +133,11 @@ public interface HttpService {
 	 * returning.
 	 * <p>
 	 * If the bundle which performed the registration is stopped or otherwise
-	 * "unget"s the Http Service without calling {@link #unregister}then Http
+	 * "unget"s the Http Service without calling {@link #unregister} then Http
 	 * Service must automatically unregister the registration. However, if the
 	 * registration was for a servlet, the <code>destroy</code> method of the
 	 * servlet will not be called in this case since the bundle may be stopped.
-	 * {@link #unregister}must be explicitly called to cause the
+	 * {@link #unregister} must be explicitly called to cause the
 	 * <code>destroy</code> method of the servlet to be called. This can be done
 	 * in the <code>BundleActivator.stop</code> method of the
 	 * bundle registering the servlet.

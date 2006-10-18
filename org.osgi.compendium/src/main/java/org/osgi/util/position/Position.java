@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.position/src/org/osgi/util/position/Position.java,v 1.7 2006/03/14 01:20:44 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.util.position/src/org/osgi/util/position/Position.java,v 1.9 2006/07/12 21:21:35 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
  */
 package org.osgi.util.position;
 
-import org.osgi.util.measurement.*;
+import org.osgi.util.measurement.Measurement;
+import org.osgi.util.measurement.Unit;
 
 /**
  * Position represents a geographic location, based on the WGS84 System (World

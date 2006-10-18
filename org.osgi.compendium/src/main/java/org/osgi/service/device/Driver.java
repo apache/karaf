@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.device/src/org/osgi/service/device/Driver.java,v 1.9 2006/03/14 01:20:43 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.device/src/org/osgi/service/device/Driver.java,v 1.11 2006/07/11 00:54:08 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import org.osgi.framework.ServiceReference;
 /**
  * A <code>Driver</code> service object must be registered by each Driver bundle
  * wishing to attach to Device services provided by other drivers. For each
- * newly discovered {@link Device}object, the device manager enters a bidding
- * phase. The <code>Driver</code> object whose {@link #match}method bids the
+ * newly discovered {@link Device} object, the device manager enters a bidding
+ * phase. The <code>Driver</code> object whose {@link #match} method bids the
  * highest for a particular <code>Device</code> object will be instructed by the
  * device manager to attach to the <code>Device</code> object.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.11 $
  * @see Device
  * @see DriverLocator
  */
@@ -37,7 +37,7 @@ public interface Driver {
 	 * 
 	 * The Device service is represented by the given {@link ServiceReference}
 	 * and returns a value indicating how well this driver can support the given
-	 * Device service, or {@link Device#MATCH_NONE}if it cannot support the
+	 * Device service, or {@link Device#MATCH_NONE} if it cannot support the
 	 * given Device service at all.
 	 * 
 	 * <p>

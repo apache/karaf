@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.event/src/org/osgi/service/event/EventAdmin.java,v 1.5 2006/03/14 01:21:30 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.event/src/org/osgi/service/event/EventAdmin.java,v 1.6 2006/06/16 16:31:48 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ package org.osgi.service.event;
  * The Event Admin service. Bundles wishing to publish events must obtain the
  * Event Admin service and call one of the event delivery methods.
  * 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public interface EventAdmin {
 	/**

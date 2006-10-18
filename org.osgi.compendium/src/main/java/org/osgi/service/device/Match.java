@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.device/src/org/osgi/service/device/Match.java,v 1.8 2006/03/14 01:20:43 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.device/src/org/osgi/service/device/Match.java,v 1.9 2006/06/16 16:31:29 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.osgi.framework.ServiceReference;
  * Instances of <code>Match</code> are used in the {@link DriverSelector#select}
  * method to identify Driver services matching a Device service.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 1.1
  * @see DriverSelector
  */

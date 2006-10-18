@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ConfigurationException.java,v 1.11 2006/03/14 01:21:09 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ConfigurationException.java,v 1.13 2006/07/11 13:15:52 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,18 @@ package org.osgi.service.cm;
  * An <code>Exception</code> class to inform the Configuration Admin service
  * of problems with configuration data.
  * 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.13 $
  */
 public class ConfigurationException extends Exception {
 	static final long	serialVersionUID	= -1690090413441769377L;
 
-	private String		property;
-	private String		reason;
+	private final String		property;
+	private final String		reason;
 
 	/**
 	 * Nested exception.
 	 */
-	private Throwable	cause;
+	private final Throwable	cause;
 
 	/**
 	 * Create a <code>ConfigurationException</code> object.

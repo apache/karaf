@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/WireAdminListener.java,v 1.8 2006/03/14 01:20:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/WireAdminListener.java,v 1.10 2006/07/11 00:54:10 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ package org.osgi.service.wireadmin;
  * 
  * <p>
  * <code>WireAdminListener</code> objects must be registered with a service
- * property {@link WireConstants#WIREADMIN_EVENTS}whose value is a bitwise OR
+ * property {@link WireConstants#WIREADMIN_EVENTS} whose value is a bitwise OR
  * of all the event types the listener is interested in receiving.
  * <p>
  * For example:
@@ -58,7 +58,7 @@ package org.osgi.service.wireadmin;
  * 
  * @see WireAdminEvent
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.10 $
  */
 public interface WireAdminListener {
 	/**
@@ -66,7 +66,7 @@ public interface WireAdminListener {
 	 * 
 	 * The event object will be of an event type specified in this
 	 * <code>WireAdminListener</code> service's
-	 * {@link WireConstants#WIREADMIN_EVENTS}service property.
+	 * {@link WireConstants#WIREADMIN_EVENTS} service property.
 	 * 
 	 * @param event The <code>WireAdminEvent</code> object.
 	 */

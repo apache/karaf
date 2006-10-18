@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.metatype/src/org/osgi/service/metatype/AttributeDefinition.java,v 1.11 2006/03/14 01:20:46 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.metatype/src/org/osgi/service/metatype/AttributeDefinition.java,v 1.13 2006/06/16 16:31:23 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ package org.osgi.service.metatype;
  * An <code>AttributeDefinition</code> object defines a description of the data
  * type of a property/attribute.
  * 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.13 $
  */
 public interface AttributeDefinition {
 	/**
@@ -99,7 +99,7 @@ public interface AttributeDefinition {
 	 * <code>Vector</code> with <code>BigInteger</code> or <code>BigInteger[]</code>
 	 * objects, depending on the <code>getCardinality()</code> value.
 	 * 
-	 * @deprecated Since 1.1
+	 * @deprecated As of 1.1.
 	 */
 	public static final int	BIGINTEGER	= 9;
 	/**
@@ -109,7 +109,7 @@ public interface AttributeDefinition {
 	 * <code>Vector</code> with <code>BigDecimal</code> or <code>BigDecimal[]</code>
 	 * objects depending on <code>getCardinality()</code>.
 	 * 
-	 * @deprecated Since 1.1
+	 * @deprecated As of 1.1.
 	 */
 	public static final int	BIGDECIMAL	= 10;
 	/**

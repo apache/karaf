@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.event/src/org/osgi/service/event/EventHandler.java,v 1.8 2006/03/14 01:21:30 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.event/src/org/osgi/service/event/EventHandler.java,v 1.10 2006/07/11 16:43:59 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ package org.osgi.service.event;
  * ht.put(EVENT_TOPIC, topics);
  * context.registerService(EventHandler.class.getName(), this, ht);
  * </pre>
- * Event Handler services can also be registered with an @link EventConstants#EVENT_FILTER}
+ * Event Handler services can also be registered with an {@link EventConstants#EVENT_FILTER}
  * service propery to further filter the events. If the syntax of this filter is invalid,
  * then the Event Handler must be ignored by the Event Admin service. The Event Admin
  * service should log a warning.
@@ -55,7 +55,7 @@ package org.osgi.service.event;
  * 
  * @see Event
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.10 $
  */
 public interface EventHandler {
 	/**

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.component/src/org/osgi/service/component/ComponentFactory.java,v 1.17 2006/03/14 01:20:50 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.component/src/org/osgi/service/component/ComponentFactory.java,v 1.19 2006/06/16 16:31:26 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,15 @@ import java.util.Dictionary;
  * created and activated rather than automatically creating and activating
  * component configuration as necessary.
  * 
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.19 $
  */
 public interface ComponentFactory {
 	/**
 	 * Create and activate a new component configuration. Additional properties
 	 * may be provided for the component configuration.
 	 * 
-	 * @param properties Additional properties for the component configuration.
+	 * @param properties Additional properties for the component configuration
+	 *        or <code>null</code> if there are no additional properties.
 	 * @return A <code>ComponentInstance</code> object encapsulating the
 	 *         component instance of the component configuration. The component
 	 *         configuration has been activated and, if the component specifies

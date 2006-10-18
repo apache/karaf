@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.component/src/org/osgi/service/component/ComponentContext.java,v 1.19 2006/03/14 01:20:50 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.component/src/org/osgi/service/component/ComponentContext.java,v 1.20 2006/06/16 16:31:26 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import org.osgi.framework.*;
  * the method. If the method is found, if it is declared protected or public,
  * the method will be called. Otherwise, the method will not be called.
  * 
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public interface ComponentContext {
 	/**

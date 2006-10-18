@@ -21,14 +21,12 @@
       <version>${pom.version}</version>
       <scope>provided</scope>
     </dependency>
-<!--
     <dependency>
-      <groupId>javax.microedition</groupId>
-      <artifactId>javax.microedition</artifactId>
-      <version>1.0.4</version>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.osgi.foundation</artifactId>
+      <version>${pom.version}</version>
       <scope>provided</scope>
     </dependency>
--->
   </dependencies>
   <build>
     <plugins>
@@ -47,7 +45,7 @@
             <bundleCopyright>Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.</bundleCopyright>
             <bundleCategory>osgi</bundleCategory>
             <bundleDocUrl>http://www.osgi.org/</bundleDocUrl>
-            <exportPackage>org.osgi.service.cm ;specification-version="1.2",org.osgi.service.component ;specification-version="1.0",org.osgi.service.device ;specification-version="1.1",org.osgi.service.event ;specification-version="1.0.1",org.osgi.service.http ;specification-version="1.2",org.osgi.service.io ;specification-version="1.0",org.osgi.service.log ;specification-version="1.3",org.osgi.service.metatype ;specification-version="1.1",org.osgi.service.prefs ;specification-version="1.1",org.osgi.service.provisioning ;specification-version="1.1",org.osgi.service.upnp ;specification-version="1.1",org.osgi.service.useradmin ;specification-version="1.1",org.osgi.service.wireadmin ;specification-version="1.0",org.osgi.util.measurement ;specification-version="1.0",org.osgi.util.position ;specification-version="1.0",org.osgi.util.tracker ;specification-version="1.3.1",org.osgi.util.xml ;specification-version="1.0"</exportPackage>
+            <exportPackage>org.osgi.service.cm ;specification-version="1.2",org.osgi.service.component ;specification-version="1.0",org.osgi.service.device ;specification-version="1.1",org.osgi.service.event ;specification-version="1.1",org.osgi.service.http ;specification-version="1.2",org.osgi.service.io ;specification-version="1.0",org.osgi.service.log ;specification-version="1.3",org.osgi.service.metatype ;specification-version="1.1",org.osgi.service.prefs ;specification-version="1.1",org.osgi.service.provisioning ;specification-version="1.1",org.osgi.service.upnp ;specification-version="1.1",org.osgi.service.useradmin ;specification-version="1.1",org.osgi.service.wireadmin ;specification-version="1.0",org.osgi.util.measurement ;specification-version="1.0",org.osgi.util.position ;specification-version="1.0",org.osgi.util.tracker ;specification-version="1.3.2",org.osgi.util.xml ;specification-version="1.0"</exportPackage>
             <dynamicImportPackage>*</dynamicImportPackage>
           </osgiManifest>
         </configuration>

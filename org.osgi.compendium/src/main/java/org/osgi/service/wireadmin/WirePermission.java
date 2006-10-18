@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/WirePermission.java,v 1.11 2006/03/14 01:20:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/WirePermission.java,v 1.13 2006/07/12 21:22:14 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,9 @@
 package org.osgi.service.wireadmin;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.security.*;
 import java.util.Enumeration;
-import java.security.Permission;
-import java.security.BasicPermission;
-import java.security.PermissionCollection;
+import java.util.Hashtable;
 
 /**
  * Permission for the scope of a <code>Wire</code> object. When a
@@ -37,7 +35,7 @@ import java.security.PermissionCollection;
  * scope names starting with the string "Door". The last period is required due
  * to the implementations of the <code>BasicPermission</code> class.
  * 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.13 $
  */
 final public class WirePermission extends BasicPermission {
     static final long serialVersionUID = -5583709391516569321L;

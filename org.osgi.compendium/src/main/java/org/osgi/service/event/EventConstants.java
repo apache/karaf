@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.event/src/org/osgi/service/event/EventConstants.java,v 1.12 2006/03/14 01:21:30 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.event/src/org/osgi/service/event/EventConstants.java,v 1.14 2006/07/12 21:06:18 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.osgi.framework.Constants;
  * 
  * Defines standard names for <code>EventHandler</code> properties.
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.14 $
  */
 public interface EventConstants {
 
@@ -35,14 +35,14 @@ public interface EventConstants {
 	 * <p>
 	 * Event handlers SHOULD be registered with this property. The value of the
 	 * property is an array of strings that describe the topics in which the
-	 * handler is interested. An asterisk ('*') may be used as a
-	 * trailing wildcard. Event Handlers which do not have a value for this property
-	 * must not receive events. More precisely, the value of each entry in the
-	 * array must conform to the following grammar:
+	 * handler is interested. An asterisk ('*') may be used as a trailing
+	 * wildcard. Event Handlers which do not have a value for this property must
+	 * not receive events. More precisely, the value of each entry in the array
+	 * must conform to the following grammar:
 	 * 
 	 * <pre>
-	 *          topic-description := '*' | topic ( '/*' )?
-	 *          topic := token ( '/' token )*
+	 *            topic-description := '*' | topic ( '/*' )?
+	 *            topic := token ( '/' token )*
 	 * </pre>
 	 * 
 	 * @see Event
@@ -63,8 +63,8 @@ public interface EventConstants {
 	 * must also match the filter for the event to be delivered to the event
 	 * handler.
 	 * <p>
-	 * If the filter syntax is invalid, then the Event Handler must be ignored and a 
-	 * warning should be logged.
+	 * If the filter syntax is invalid, then the Event Handler must be ignored
+	 * and a warning should be logged.
 	 * 
 	 * @see Event
 	 * @see org.osgi.framework.Filter
@@ -82,6 +82,20 @@ public interface EventConstants {
 	public static final String	BUNDLE_SYMBOLICNAME	= "bundle.symbolicName";
 
 	/**
+	 * The Bundle id of the bundle relevant to the event.
+	 * 
+	 * @since 1.1
+	 */
+	public static final String	BUNDLE_ID			= "bundle.id";
+
+	/**
+	 * The Bundle object of the bundle relevant to the event.
+	 * 
+	 * @since 1.1
+	 */
+	public static final String	BUNDLE				= "bundle";
+
+	/**
 	 * The actual event object. Used when rebroadcasting an event that was sent
 	 * via some other event mechanism.
 	 */
@@ -94,15 +108,10 @@ public interface EventConstants {
 
 	/**
 	 * Must be equal to the name of the Exception class.
+	 * 
+	 * @since 1.1
 	 */
 	public static final String	EXCEPTION_CLASS		= "exception.class";
-	
-	/**
-	 * This constant was released with an incorrect spelling. It has been
-	 * replaced by {@link #EXCEPTION_CLASS}
-	 * @deprecated As of 1.0.1, replaced by EXCEPTION_CLASS
-	 */
-	public static final String	EXECPTION_CLASS		= "exception.class";
 
 	/**
 	 * Must be equal to exception.getMessage()
@@ -121,7 +130,7 @@ public interface EventConstants {
 	public static final String	SERVICE				= "service";
 
 	/**
-	 * A service’s id.
+	 * A service's id.
 	 */
 	public static final String	SERVICE_ID			= Constants.SERVICE_ID;
 
@@ -133,7 +142,7 @@ public interface EventConstants {
 
 	/**
 	 * 
-	 * A service’s persistent identity.
+	 * A service's persistent identity.
 	 */
 	public static final String	SERVICE_PID			= Constants.SERVICE_PID;
 
@@ -144,4 +153,11 @@ public interface EventConstants {
 	 */
 	public static final String	TIMESTAMP			= "timestamp";
 
+	/**
+	 * This constant was released with an incorrect spelling. It has been
+	 * replaced by {@link #EXCEPTION_CLASS}
+	 * 
+	 * @deprecated As of 1.1, replaced by EXCEPTION_CLASS
+	 */
+	public static final String	EXECPTION_CLASS		= "exception.class";
 }

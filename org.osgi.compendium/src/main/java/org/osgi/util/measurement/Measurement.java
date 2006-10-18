@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.measurement/src/org/osgi/util/measurement/Measurement.java,v 1.12 2006/03/14 01:19:37 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.util.measurement/src/org/osgi/util/measurement/Measurement.java,v 1.14 2006/07/11 00:54:06 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ package org.osgi.util.measurement;
  * incompatible way. E.g., when a speed (m/s) is added to a distance (m). The
  * measurement class will correctly track changes in unit during multiplication
  * and division, always coercing the result to the most simple form. See
- * {@link Unit}for more information on the supported units.
+ * {@link Unit} for more information on the supported units.
  * 
  * <p>
  * Errors in the measurement class are absolute errors. Measurement errors
@@ -46,7 +46,7 @@ package org.osgi.util.measurement;
  * Note: This class has a natural ordering that is inconsistent with equals. See
  * {@link #compareTo}.
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.14 $
  */
 public class Measurement implements Comparable {
 	/* package private so it can be accessed by Unit */
@@ -102,7 +102,7 @@ public class Measurement implements Comparable {
 
 	/**
 	 * Create a new <code>Measurement</code> object with an error of 0.0, a unit
-	 * of {@link Unit#unity}and a time of zero.
+	 * of {@link Unit#unity} and a time of zero.
 	 * 
 	 * @param value The value of the <code>Measurement</code>.
 	 */

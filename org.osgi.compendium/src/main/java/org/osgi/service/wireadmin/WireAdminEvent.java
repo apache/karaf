@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/WireAdminEvent.java,v 1.7 2006/03/14 01:20:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/WireAdminEvent.java,v 1.9 2006/07/11 00:54:10 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.osgi.framework.ServiceReference;
  * <code>WireAdminListener</code> service objects which specify an interest in the
  * <code>WireAdminEvent</code> type. Events must be delivered in chronological
  * order with respect to each listener. For example, a <code>WireAdminEvent</code>
- * of type {@link #WIRE_CONNECTED}must be delivered before a
- * <code>WireAdminEvent</code> of type {@link #WIRE_DISCONNECTED}for a particular
+ * of type {@link #WIRE_CONNECTED} must be delivered before a
+ * <code>WireAdminEvent</code> of type {@link #WIRE_DISCONNECTED} for a particular
  * <code>Wire</code> object.
  * 
  * <p>
@@ -56,7 +56,7 @@ import org.osgi.framework.ServiceReference;
  * 
  * @see WireAdminListener
  * 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.9 $
  */
 public class WireAdminEvent {
 	/**
@@ -108,8 +108,8 @@ public class WireAdminEvent {
 	 * This <code>WireAdminEvent</code> type that indicates that a new
 	 * <code>Wire</code> object has been created.
 	 * 
-	 * An event is broadcast when {@link WireAdmin#createWire}is called. The
-	 * {@link WireAdminEvent#getWire}method will return the <code>Wire</code>
+	 * An event is broadcast when {@link WireAdmin#createWire} is called. The
+	 * {@link WireAdminEvent#getWire} method will return the <code>Wire</code>
 	 * object that has just been created.
 	 * 
 	 * <p>
@@ -123,8 +123,8 @@ public class WireAdminEvent {
 	 * This <code>WireAdminEvent</code> type that indicates that an existing
 	 * <code>Wire</code> object has been updated with new properties.
 	 * 
-	 * An event is broadcast when {@link WireAdmin#updateWire}is called with a
-	 * valid wire. The {@link WireAdminEvent#getWire}method will return the
+	 * An event is broadcast when {@link WireAdmin#updateWire} is called with a
+	 * valid wire. The {@link WireAdminEvent#getWire} method will return the
 	 * <code>Wire</code> object that has just been updated.
 	 * 
 	 * <p>
@@ -138,8 +138,8 @@ public class WireAdminEvent {
 	 * This <code>WireAdminEvent</code> type that indicates that an existing wire
 	 * has been deleted.
 	 * 
-	 * An event is broadcast when {@link WireAdmin#deleteWire}is called with a
-	 * valid wire. {@link WireAdminEvent#getWire}will return the <code>Wire</code>
+	 * An event is broadcast when {@link WireAdmin#deleteWire} is called with a
+	 * valid wire. {@link WireAdminEvent#getWire} will return the <code>Wire</code>
 	 * object that has just been deleted.
 	 * 
 	 * <p>
@@ -152,7 +152,7 @@ public class WireAdminEvent {
 	 * 
 	 * The Consumer object and the Producer object that are associated with the
 	 * <code>Wire</code> object have both been registered and the <code>Wire</code>
-	 * object is connected. See {@link Wire#isConnected}for a description of
+	 * object is connected. See {@link Wire#isConnected} for a description of
 	 * the connected state. This event may come before the
 	 * <code>producersConnected</code> and <code>consumersConnected</code> method
 	 * have returned or called to allow synchronous delivery of the events. Both
@@ -169,7 +169,7 @@ public class WireAdminEvent {
 	 * <code>Wire</code> object has become disconnected.
 	 * 
 	 * The Consumer object or/and Producer object is/are unregistered breaking
-	 * the connection between the two. See {@link Wire#isConnected}for a
+	 * the connection between the two. See {@link Wire#isConnected} for a
 	 * description of the connected state.
 	 * 
 	 * <p>
@@ -181,10 +181,10 @@ public class WireAdminEvent {
 	 * transferred over the <code>Wire</code> object.
 	 * 
 	 * This event is sent after the Consumer service has been notified by
-	 * calling the {@link Consumer#updated}method or the Consumer service
-	 * requested a new value with the {@link Wire#poll}method. This is an
+	 * calling the {@link Consumer#updated} method or the Consumer service
+	 * requested a new value with the {@link Wire#poll} method. This is an
 	 * advisory event meaning that when this event is received, another update
-	 * may already have occurred and this the {@link Wire#getLastValue}method
+	 * may already have occurred and this the {@link Wire#getLastValue} method
 	 * returns a newer value then the value that was communicated for this
 	 * event.
 	 * 

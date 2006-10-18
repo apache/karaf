@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.event/src/org/osgi/service/event/TopicPermission.java,v 1.10 2006/03/14 01:21:30 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.event/src/org/osgi/service/event/TopicPermission.java,v 1.11 2006/06/16 16:31:48 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import java.util.Hashtable;
  * <code>TopicPermission</code> has two actions: <code>publish</code> and
  * <code>subscribe</code>.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public final class TopicPermission extends Permission {
 	static final long			serialVersionUID	= -5855563886961618300L;

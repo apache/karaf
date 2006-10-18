@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.http/src/org/osgi/service/http/NamespaceException.java,v 1.9 2006/03/14 01:20:39 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.http/src/org/osgi/service/http/NamespaceException.java,v 1.11 2006/07/11 13:15:56 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ package org.osgi.service.http;
  * to register a servlet or resources into the URI namespace of the Http
  * Service. This exception indicates that the requested alias already is in use.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.11 $
  */
 public class NamespaceException extends Exception {
     static final long serialVersionUID = 7235606031147877747L;
 	/**
 	 * Nested exception.
 	 */
-	private Throwable	cause;
+	private final Throwable	cause;
 
 	/**
 	 * Construct a <code>NamespaceException</code> object with a detail message.

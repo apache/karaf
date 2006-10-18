@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.prefs/src/org/osgi/service/prefs/BackingStoreException.java,v 1.10 2006/03/14 01:21:15 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.prefs/src/org/osgi/service/prefs/BackingStoreException.java,v 1.12 2006/07/11 13:15:55 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,14 @@ package org.osgi.service.prefs;
  * Thrown to indicate that a preferences operation could not complete because of
  * a failure in the backing store, or a failure to contact the backing store.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.12 $
  */
 public class BackingStoreException extends Exception {
     static final long serialVersionUID = -1415637364122829574L;
 	/**
 	 * Nested exception.
 	 */
-	private Throwable	cause;
+	private final Throwable	cause;
 
 	/**
 	 * Constructs a <code>BackingStoreException</code> with the specified detail
@@ -38,6 +38,7 @@ public class BackingStoreException extends Exception {
 	 */
 	public BackingStoreException(String s) {
 		super(s);
+		this.cause = null;
 	}
 	
 	/**

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.useradmin/src/org/osgi/service/useradmin/UserAdminPermission.java,v 1.10 2006/03/14 01:20:47 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.useradmin/src/org/osgi/service/useradmin/UserAdminPermission.java,v 1.13 2006/07/12 21:21:33 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,18 @@
 package org.osgi.service.useradmin;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.security.*;
 import java.util.Enumeration;
-import java.security.Permission;
-import java.security.BasicPermission;
-import java.security.PermissionCollection;
+import java.util.Hashtable;
 
 /**
- * Permission to configure and access the {@link Role}objects managed by a User
+ * Permission to configure and access the {@link Role} objects managed by a User
  * Admin service.
  * 
  * <p>
  * This class represents access to the <code>Role</code> objects managed by a User
  * Admin service and their properties and credentials (in the case of
- * {@link User}objects).
+ * {@link User} objects).
  * <p>
  * The permission name is the name (or name prefix) of a property or credential.
  * The naming convention follows the hierarchical property naming convention.
@@ -116,7 +114,7 @@ import java.security.PermissionCollection;
  * validate any password credentials (for authentication purposes), but the
  * bundle is not allowed to change any properties or credentials.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.13 $
  */
 public final class UserAdminPermission extends BasicPermission {
     static final long serialVersionUID = -1179971692401603789L;

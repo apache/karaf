@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.log/src/org/osgi/service/log/LogService.java,v 1.8 2006/03/14 01:21:24 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.log/src/org/osgi/service/log/LogService.java,v 1.9 2006/06/16 16:31:49 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.osgi.framework.ServiceReference;
  * <li>{@link #LOG_DEBUG}
  * </ol>
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public interface LogService {
 	/**

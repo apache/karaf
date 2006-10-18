@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/Wire.java,v 1.8 2006/03/14 01:20:55 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/Wire.java,v 1.10 2006/07/11 00:54:10 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import java.util.Dictionary;
  * <code>service.pid</code> values. The Producer and Consumer services may
  * communicate with each other via <code>Wire</code> objects that connect them.
  * The Producer service may send updated values to the Consumer service by
- * calling the {@link #update}method. The Consumer service may request an
- * updated value from the Producer service by calling the {@link #poll}method.
+ * calling the {@link #update} method. The Consumer service may request an
+ * updated value from the Producer service by calling the {@link #poll} method.
  * 
  * <p>
  * A Producer service and a Consumer service may be connected through multiple
@@ -55,7 +55,7 @@ import java.util.Dictionary;
  * is used in communication. The semantics of the names depend on the Producer
  * service and must not be interpreted by the Wire Admin service.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.10 $
  */
 public interface Wire {
 	/**
@@ -92,7 +92,7 @@ public interface Wire {
 	 * deleted.
 	 * <p>
 	 * A <code>WireAdminEvent</code> of type
-	 * {@link WireAdminEvent#WIRE_DISCONNECTED}must be broadcast by the Wire
+	 * {@link WireAdminEvent#WIRE_DISCONNECTED} must be broadcast by the Wire
 	 * Admin service when the <code>Wire</code> becomes disconnected.
 	 * 
 	 * @return <code>true</code> if both the Producer and Consumer for this
@@ -108,7 +108,7 @@ public interface Wire {
 	 * 
 	 * <p>
 	 * The list is the value of the
-	 * {@link WireConstants#WIREADMIN_CONSUMER_FLAVORS}service property of the
+	 * {@link WireConstants#WIREADMIN_CONSUMER_FLAVORS} service property of the
 	 * Consumer service object connected to this object. If no such property was
 	 * registered or the type of the property value is not <code>Class[]</code>,
 	 * this method must return <code>null</code>.
@@ -116,7 +116,7 @@ public interface Wire {
 	 * @return An array containing the list of classes understood by the
 	 *         Consumer service or <code>null</code> if the <code>Wire</code> is not
 	 *         connected, or the consumer did not register a
-	 *         {@link WireConstants#WIREADMIN_CONSUMER_FLAVORS}property or the
+	 *         {@link WireConstants#WIREADMIN_CONSUMER_FLAVORS} property or the
 	 *         value of the property is not of type <code>Class[]</code>.
 	 */
 	public Class[] getFlavors();
@@ -129,7 +129,7 @@ public interface Wire {
 	 * service connected to this <code>Wire</code> object of an updated value.
 	 * <p>
 	 * If the properties of this <code>Wire</code> object contain a
-	 * {@link WireConstants#WIREADMIN_FILTER}property, then filtering is
+	 * {@link WireConstants#WIREADMIN_FILTER} property, then filtering is
 	 * performed. If the Producer service connected to this <code>Wire</code>
 	 * object was registered with the service property
 	 * {@link WireConstants#WIREADMIN_PRODUCER_FILTERS}, the Producer service
@@ -139,7 +139,7 @@ public interface Wire {
 	 * <p>
 	 * If no filtering is done, or the filter indicates the updated value should
 	 * be delivered to the Consumer service, then this <code>Wire</code> object
-	 * must call the {@link Consumer#updated}method with the updated value. If
+	 * must call the {@link Consumer#updated} method with the updated value. If
 	 * this <code>Wire</code> object is not connected, then the Consumer service
 	 * must not be called and the value is ignored.
 	 * <p>
@@ -196,7 +196,7 @@ public interface Wire {
 	 * 
 	 * <p>
 	 * The returned value is the most recent, valid value passed to the
-	 * {@link #update}method or returned by the {@link #poll}method of this
+	 * {@link #update} method or returned by the {@link #poll} method of this
 	 * object. If filtering is performed by this <code>Wire</code> object, this
 	 * methods returns the last value provided by the Producer service. This
 	 * value may be an <code>Envelope[]</code> when the Producer service uses

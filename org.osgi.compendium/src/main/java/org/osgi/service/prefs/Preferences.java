@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.prefs/src/org/osgi/service/prefs/Preferences.java,v 1.9 2006/03/14 01:21:15 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.prefs/src/org/osgi/service/prefs/Preferences.java,v 1.11 2006/07/11 00:54:04 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ package org.osgi.service.prefs;
  * preference data.
  * 
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.11 $
  */
 public interface Preferences {
 	/**
@@ -121,7 +121,7 @@ public interface Preferences {
 	 * @throws NullPointerException if <code>key</code> or <code>value</code> is
 	 *         <code>null</code>.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 */
 	public void put(String key, String value);
 
@@ -137,7 +137,7 @@ public interface Preferences {
 	 * @return the value associated with <code>key</code>, or <code>def</code> if
 	 *         no value is associated with <code>key</code>.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @throws NullPointerException if <code>key</code> is <code>null</code>. (A
 	 *         <code>null</code> default <i>is </i> permitted.)
 	 */
@@ -150,7 +150,7 @@ public interface Preferences {
 	 * @param key key whose mapping is to be removed from this node.
 	 * @see #get(String,String)
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 */
 	public void remove(String key);
 
@@ -162,7 +162,7 @@ public interface Preferences {
 	 *         to a failure in the backing store, or inability to communicate
 	 *         with it.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @see #remove(String)
 	 */
 	public void clear() throws BackingStoreException;
@@ -172,7 +172,7 @@ public interface Preferences {
 	 * <code>int</code> value with the specified <code>key</code> in this node. The
 	 * associated string is the one that would be returned if the <code>int</code>
 	 * value were passed to <code>Integer.toString(int)</code>. This method is
-	 * intended for use in conjunction with {@link #getInt}method.
+	 * intended for use in conjunction with {@link #getInt} method.
 	 * 
 	 * <p>
 	 * Implementor's note: it is <i>not </i> necessary that the property value
@@ -188,7 +188,7 @@ public interface Preferences {
 	 *        <code>key</code>.
 	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @see #getInt(String,int)
 	 */
 	public void putInt(String key, int value);
@@ -202,7 +202,7 @@ public interface Preferences {
 	 * is inaccessible, or if <code>Integer.parseInt(String)</code> would throw a
 	 * <code>NumberFormatException</code> if the associated <code>value</code> were
 	 * passed. This method is intended for use in conjunction with the
-	 * {@link #putInt}method.
+	 * {@link #putInt} method.
 	 * 
 	 * @param key key whose associated value is to be returned as an
 	 *        <code>int</code>.
@@ -216,7 +216,7 @@ public interface Preferences {
 	 *         be interpreted as an <code>int</code> type.
 	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @see #putInt(String,int)
 	 * @see #get(String,String)
 	 */
@@ -245,7 +245,7 @@ public interface Preferences {
 	 *        <code>key</code>.
 	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @see #getLong(String,long)
 	 */
 	public void putLong(String key, long value);
@@ -259,7 +259,7 @@ public interface Preferences {
 	 * is inaccessible, or if <code>Long.parseLong(String)</code> would throw a
 	 * <code>NumberFormatException</code> if the associated <code>value</code> were
 	 * passed. This method is intended for use in conjunction with the
-	 * {@link #putLong}method.
+	 * {@link #putLong} method.
 	 * 
 	 * @param key <code>key</code> whose associated value is to be returned as a
 	 *        <code>long</code> value.
@@ -273,7 +273,7 @@ public interface Preferences {
 	 *         be interpreted as a <code>long</code> type.
 	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @see #putLong(String,long)
 	 * @see #get(String,String)
 	 */
@@ -284,7 +284,7 @@ public interface Preferences {
 	 * <code>boolean</code> value with the specified key in this node. The
 	 * associated string is "true" if the value is <code>true</code>, and "false"
 	 * if it is <code>false</code>. This method is intended for use in
-	 * conjunction with the {@link #getBoolean}method.
+	 * conjunction with the {@link #getBoolean} method.
 	 * 
 	 * <p>
 	 * Implementor's note: it is <i>not </i> necessary that the value be
@@ -301,7 +301,7 @@ public interface Preferences {
 	 *        <code>key</code>.
 	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @see #getBoolean(String,boolean)
 	 * @see #get(String,String)
 	 */
@@ -313,7 +313,7 @@ public interface Preferences {
 	 * strings are "true", which represents <code>true</code>, and "false", which
 	 * represents <code>false</code>. Case is ignored, so, for example, "TRUE"
 	 * and "False" are also valid. This method is intended for use in
-	 * conjunction with the {@link #putBoolean}method.
+	 * conjunction with the {@link #putBoolean} method.
 	 * 
 	 * <p>
 	 * Returns the specified default if there is no value associated with the
@@ -332,7 +332,7 @@ public interface Preferences {
 	 *         be interpreted as a <code>boolean</code>.
 	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @see #get(String,String)
 	 * @see #putBoolean(String,boolean)
 	 */
@@ -344,7 +344,7 @@ public interface Preferences {
 	 * The associated <code>String</code> object is the one that would be returned
 	 * if the <code>float</code> value were passed to
 	 * <code>Float.toString(float)</code>. This method is intended for use in
-	 * conjunction with the {@link #getFloat}method.
+	 * conjunction with the {@link #getFloat} method.
 	 * 
 	 * <p>
 	 * Implementor's note: it is <i>not </i> necessary that the value be
@@ -360,7 +360,7 @@ public interface Preferences {
 	 *        <code>key</code>.
 	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @see #getFloat(String,float)
 	 */
 	public void putFloat(String key, float value);
@@ -387,7 +387,7 @@ public interface Preferences {
 	 *         associated value does not exist or cannot be interpreted as a
 	 *         <code>float</code> type.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 * @see #putFloat(String,float)
 	 * @see #get(String,String)
@@ -400,7 +400,7 @@ public interface Preferences {
 	 * The associated <code>String</code> object is the one that would be returned
 	 * if the <code>double</code> value were passed to
 	 * <code>Double.toString(double)</code>. This method is intended for use in
-	 * conjunction with the {@link #getDouble}method
+	 * conjunction with the {@link #getDouble} method
 	 * 
 	 * <p>
 	 * Implementor's note: it is <i>not </i> necessary that the value be
@@ -417,7 +417,7 @@ public interface Preferences {
 	 *        <code>key</code>.
 	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @see #getDouble(String,double)
 	 */
 	public void putDouble(String key, double value);
@@ -431,7 +431,7 @@ public interface Preferences {
 	 * is inaccessible, or if <code>Double.parseDouble(String)</code> would throw
 	 * a <code>NumberFormatException</code> if the associated value were passed.
 	 * This method is intended for use in conjunction with the
-	 * {@link #putDouble}method.
+	 * {@link #putDouble} method.
 	 * 
 	 * @param key <code>key</code> whose associated value is to be returned as a
 	 *        <code>double</code> value.
@@ -444,7 +444,7 @@ public interface Preferences {
 	 *         <code>def</code> if the associated value does not exist or cannot
 	 *         be interpreted as a <code>double</code> type.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the the {@link #removeNode()}method.
+	 *         removed with the the {@link #removeNode()} method.
 	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 * @see #putDouble(String,double)
 	 * @see #get(String,String)
@@ -460,7 +460,7 @@ public interface Preferences {
 	 * with one minor change: the string will consist solely of characters from
 	 * the <i>Base64 Alphabet </i>; it will not contain any newline characters.
 	 * This method is intended for use in conjunction with the
-	 * {@link #getByteArray}method.
+	 * {@link #getByteArray} method.
 	 * 
 	 * <p>
 	 * Implementor's note: it is <i>not </i> necessary that the value be
@@ -478,7 +478,7 @@ public interface Preferences {
 	 * @throws NullPointerException if <code>key</code> or <code>value</code> is
 	 *         <code>null</code>.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @see #getByteArray(String,byte[])
 	 * @see #get(String,String)
 	 */
@@ -492,7 +492,7 @@ public interface Preferences {
 	 * Section 6.8, with one minor change: the string must consist solely of
 	 * characters from the <i>Base64 Alphabet </i>; no newline characters or
 	 * extraneous characters are permitted. This method is intended for use in
-	 * conjunction with the {@link #putByteArray}method.
+	 * conjunction with the {@link #putByteArray} method.
 	 * 
 	 * <p>
 	 * Returns the specified default if there is no value associated with the
@@ -512,7 +512,7 @@ public interface Preferences {
 	 * @throws NullPointerException if <code>key</code> is <code>null</code>. (A
 	 *         <code>null</code> value for <code>def</code> <i>is </i> permitted.)
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @see #get(String,String)
 	 * @see #putByteArray(String,byte[])
 	 */
@@ -528,7 +528,7 @@ public interface Preferences {
 	 *         to a failure in the backing store, or inability to communicate
 	 *         with it.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 */
 	public String[] keys() throws BackingStoreException;
 
@@ -541,7 +541,7 @@ public interface Preferences {
 	 *         to a failure in the backing store, or inability to communicate
 	 *         with it.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 */
 	public String[] childrenNames() throws BackingStoreException;
 
@@ -550,7 +550,7 @@ public interface Preferences {
 	 * 
 	 * @return the parent of this node.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 */
 	public Preferences parent();
 
@@ -574,7 +574,7 @@ public interface Preferences {
 	 * @return the specified <code>Preferences</code> object.
 	 * @throws IllegalArgumentException if the path name is invalid.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @throws NullPointerException if path name is <code>null</code>.
 	 * @see #flush()
 	 */
@@ -590,7 +590,7 @@ public interface Preferences {
 	 * 
 	 * <p>
 	 * If this node (or an ancestor) has already been removed with the
-	 * {@link #removeNode()}method, it <i>is </i> legal to invoke this method,
+	 * {@link #removeNode()} method, it <i>is </i> legal to invoke this method,
 	 * but only with the pathname <code>""</code>; the invocation will return
 	 * <code>false</code>. Thus, the idiom <code>p.nodeExists("")</code> may be
 	 * used to test whether <code>p</code> has been removed.
@@ -602,7 +602,7 @@ public interface Preferences {
 	 *         to a failure in the backing store, or inability to communicate
 	 *         with it.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method and
+	 *         removed with the {@link #removeNode()} method and
 	 *         <code>pathname</code> is not the empty string (<code>""</code>).
 	 * @throws IllegalArgumentException if the path name is invalid (i.e., it
 	 *         contains multiple consecutive slash characters, or ends with a
@@ -625,7 +625,7 @@ public interface Preferences {
 	 * method is called on the parent of this node.
 	 * 
 	 * @throws IllegalStateException if this node (or an ancestor) has already
-	 *         been removed with the {@link #removeNode()}method.
+	 *         been removed with the {@link #removeNode()} method.
 	 * @throws BackingStoreException if this operation cannot be completed due
 	 *         to a failure in the backing store, or inability to communicate
 	 *         with it.
@@ -679,7 +679,7 @@ public interface Preferences {
 	 *         to a failure in the backing store, or inability to communicate
 	 *         with it.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @see #sync()
 	 */
 	public void flush() throws BackingStoreException;
@@ -695,7 +695,7 @@ public interface Preferences {
 	 *         to a failure in the backing store, or inability to communicate
 	 *         with it.
 	 * @throws IllegalStateException if this node (or an ancestor) has been
-	 *         removed with the {@link #removeNode()}method.
+	 *         removed with the {@link #removeNode()} method.
 	 * @see #flush()
 	 */
 	public void sync() throws BackingStoreException;

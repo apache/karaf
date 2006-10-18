@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.useradmin/src/org/osgi/service/useradmin/Role.java,v 1.8 2006/03/14 01:20:47 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.useradmin/src/org/osgi/service/useradmin/Role.java,v 1.10 2006/07/11 00:54:01 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import java.util.Dictionary;
  * classes: a name, a type, and a set of properties.
  * <p>
  * Properties represent public information about the <code>Role</code> object that
- * can be read by anyone. Specific {@link UserAdminPermission}objects are
+ * can be read by anyone. Specific {@link UserAdminPermission} objects are
  * required to change a <code>Role</code> object's properties.
  * <p>
  * <code>Role</code> object properties are <code>Dictionary</code> objects. Changes
@@ -47,7 +47,7 @@ import java.util.Dictionary;
  * <code>UserAdminPermission</code> in the same way that properties for other
  * <code>Role</code> objects are.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.10 $
  */
 public interface Role {
 	/**
@@ -64,14 +64,14 @@ public interface Role {
 	 */
 	public static final int		ROLE		= 0;
 	/**
-	 * The type of a {@link User}role.
+	 * The type of a {@link User} role.
 	 * 
 	 * <p>
 	 * The value of <code>USER</code> is 1.
 	 */
 	public static final int		USER		= 1;
 	/**
-	 * The type of a {@link Group}role.
+	 * The type of a {@link Group} role.
 	 * 
 	 * <p>
 	 * The value of <code>GROUP</code> is 2.
@@ -97,7 +97,7 @@ public interface Role {
 	 * <code>Role</code> object. Any changes to the returned <code>Dictionary</code>
 	 * will change the properties of this <code>Role</code> object. This will
 	 * cause a <code>UserAdminEvent</code> object of type
-	 * {@link UserAdminEvent#ROLE_CHANGED}to be broadcast to any
+	 * {@link UserAdminEvent#ROLE_CHANGED} to be broadcast to any
 	 * <code>UserAdminListener</code> objects.
 	 * 
 	 * <p>
@@ -108,7 +108,7 @@ public interface Role {
 	 * 
 	 * <p>
 	 * In order to add, change, or remove a property in the returned
-	 * <code>Dictionary</code>, a {@link UserAdminPermission}named after the
+	 * <code>Dictionary</code>, a {@link UserAdminPermission} named after the
 	 * property name (or a prefix of it) with action <code>changeProperty</code>
 	 * is required.
 	 * 

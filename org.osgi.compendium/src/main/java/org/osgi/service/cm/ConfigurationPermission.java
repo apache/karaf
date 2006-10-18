@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ConfigurationPermission.java,v 1.20 2006/03/14 01:21:09 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ConfigurationPermission.java,v 1.22 2006/07/08 00:42:00 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.util.NoSuchElementException;
  * 
  * This permission has only a single action: CONFIGURE.
  * 
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.22 $
  * @since 1.2
  */
 
@@ -193,8 +193,9 @@ final class ConfigurationPermissionCollection extends PermissionCollection {
 	 */
 
 	public Enumeration elements() {
+		final boolean nonEmpty = hasElement;
 		return new Enumeration() {
-			private boolean	more	= hasElement;
+			private boolean	more = nonEmpty;
 
 			public boolean hasMoreElements() {
 				return more;
