@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleException.java,v 1.13 2006/03/14 01:21:02 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleException.java,v 1.15 2006/07/11 13:15:54 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ package org.osgi.framework;
  * This exception is updated to conform to the general purpose exception
  * chaining mechanism.
  * 
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.15 $
  */
 
 public class BundleException extends Exception {
@@ -39,7 +39,7 @@ public class BundleException extends Exception {
 	/**
 	 * Nested exception.
 	 */
-	private Throwable	cause;
+	private final Throwable	cause;
 
 	/**
 	 * Creates a <code>BundleException</code> that wraps another exception.

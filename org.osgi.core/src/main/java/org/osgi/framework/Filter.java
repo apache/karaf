@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Filter.java,v 1.13 2006/03/14 01:21:02 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Filter.java,v 1.14 2006/06/16 16:31:18 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import java.util.Dictionary;
  *      &quot;(o=univ*of*mich*)&quot;
  * </pre>
  * 
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @since 1.1
  * @see "Framework specification for a description of the filter string syntax."
  */

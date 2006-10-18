@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.url/src/org/osgi/service/url/URLConstants.java,v 1.7 2006/03/14 01:21:36 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.url/src/org/osgi/service/url/URLConstants.java,v 1.9 2006/07/11 00:53:59 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ package org.osgi.service.url;
 
 /**
  * Defines standard names for property keys associated with
- * {@link URLStreamHandlerService}and <code>java.net.ContentHandler</code>
+ * {@link URLStreamHandlerService} and <code>java.net.ContentHandler</code>
  * services.
  * 
  * <p>
  * The values associated with these keys are of type <code>java.lang.String[]</code>,
  * unless otherwise indicated.
  * 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.9 $
  */
 public interface URLConstants {
 	/**

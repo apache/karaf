@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/Condition.java,v 1.12 2006/03/14 01:20:40 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/Condition.java,v 1.13 2006/06/16 16:31:37 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.Dictionary;
  * using Conditional Permission Info. The Permissions of a ConditionalPermission
  * Info can only be used if the associated Conditions are satisfied.
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public interface Condition {
 	/**

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkEvent.java,v 1.12 2006/03/14 01:21:02 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkEvent.java,v 1.14 2006/06/16 16:31:18 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2004, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import java.util.EventObject;
  * <p>
  * OSGi Alliance reserves the right to extend the set of event types.
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.14 $
  */
 
 public class FrameworkEvent extends EventObject {
@@ -140,7 +140,7 @@ public class FrameworkEvent extends EventObject {
 	 * 
 	 * @param type The event type.
 	 * @param source The event source object. This may not be <code>null</code>.
-	 * @deprecated Since 1.2. This constructor is deprecated in favor of using
+	 * @deprecated As of 1.2. This constructor is deprecated in favor of using
 	 *             the other constructor with the System Bundle as the event
 	 *             source.
 	 */

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleLocationCondition.java,v 1.17 2006/03/14 01:20:40 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleLocationCondition.java,v 1.18 2006/06/16 16:31:37 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.osgi.framework.*;
  * Condition to test if the location of a bundle matches a pattern. Pattern
  * matching is done according to the filter string matching rules.
  * 
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class BundleLocationCondition {
 	private static final String	CONDITION_TYPE	= "org.osgi.service.condpermadmin.BundleLocationCondition";

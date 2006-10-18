@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.url/src/org/osgi/service/url/URLStreamHandlerService.java,v 1.7 2006/03/14 01:21:36 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.url/src/org/osgi/service/url/URLStreamHandlerService.java,v 1.9 2006/07/11 00:53:59 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.net.*;
  * The important differences between this interface and the
  * <code>URLStreamHandler</code> class are that the <code>setURL</code> method is
  * absent and the <code>parseURL</code> method takes a
- * {@link URLStreamHandlerSetter}object as the first argument. Classes
+ * {@link URLStreamHandlerSetter} object as the first argument. Classes
  * implementing this interface must call the <code>setURL</code> method on the
  * <code>URLStreamHandlerSetter</code> object received in the <code>parseURL</code>
  * method instead of <code>URLStreamHandler.setURL</code> to avoid a
@@ -35,7 +35,7 @@ import java.net.*;
  * 
  * @see AbstractURLStreamHandlerService
  * 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.9 $
  */
 public interface URLStreamHandlerService {
 	/**

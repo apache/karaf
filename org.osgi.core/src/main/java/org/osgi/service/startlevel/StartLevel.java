@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.startlevel/src/org/osgi/service/startlevel/StartLevel.java,v 1.12 2006/03/14 01:21:38 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.startlevel/src/org/osgi/service/startlevel/StartLevel.java,v 1.13 2006/06/16 16:31:38 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2002, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ import org.osgi.framework.Bundle;
  * The StartLevel service can be used by management bundles to alter the active
  * start level of the framework.
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public interface StartLevel {
 	/**

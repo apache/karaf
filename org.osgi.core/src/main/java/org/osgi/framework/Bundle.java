@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.35 2006/03/14 01:21:02 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.37 2006/06/27 13:13:30 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ import java.util.Enumeration;
  * <code>Bundle</code> objects, and these objects are only valid within the
  * Framework that created them.
  * 
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.37 $
  */
 public interface Bundle {
 	/**
@@ -695,6 +695,8 @@ public interface Bundle {
 	 * @since 1.1
 	 * @throws java.lang.IllegalStateException If this bundle has been
 	 *         uninstalled.
+	 * @see #getEntry
+	 * @see #findEntries
 	 */
 	public URL getResource(String name);
 

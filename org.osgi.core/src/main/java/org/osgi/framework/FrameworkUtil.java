@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkUtil.java,v 1.5 2006/03/14 01:21:02 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkUtil.java,v 1.6 2006/06/16 16:31:18 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import java.security.PrivilegedAction;
  * This class contains utility methods which access Framework functions that may
  * be useful to bundles.
  * 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.3
  */
 public class FrameworkUtil {

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleSignerCondition.java,v 1.9 2006/03/14 01:20:40 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleSignerCondition.java,v 1.10 2006/06/16 16:31:37 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.osgi.framework.Bundle;
  * must be the first RDN and will match any number of RDNs (including zero
  * RDNs).
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class BundleSignerCondition {
 	/*

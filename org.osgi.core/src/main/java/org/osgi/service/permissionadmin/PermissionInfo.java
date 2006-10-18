@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.permissionadmin/src/org/osgi/service/permissionadmin/PermissionInfo.java,v 1.15 2006/03/14 01:21:28 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.permissionadmin/src/org/osgi/service/permissionadmin/PermissionInfo.java,v 1.16 2006/06/16 16:31:44 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ package org.osgi.service.permissionadmin;
  * <code>PermissionInfo</code> may be delayed until the package containing its
  * Permission class has been exported by a bundle.
  * 
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class PermissionInfo {
 	private String	type;

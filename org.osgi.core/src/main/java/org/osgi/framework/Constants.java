@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.23 2006/03/14 01:21:02 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Constants.java,v 1.25 2006/06/16 16:31:18 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ package org.osgi.framework;
  * The values associated with these keys are of type
  * <code>java.lang.String</code>, unless otherwise indicated.
  * 
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.25 $
  * @since 1.1
  */
 
@@ -121,6 +121,8 @@ public interface Constants {
 	 * <p>
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * 
+	 * @deprecated As of 1.2.
 	 */
 	public static final String	EXPORT_SERVICE							= "Export-Service";
 
@@ -154,6 +156,8 @@ public interface Constants {
 	 * <p>
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 *
+	 * @deprecated As of 1.2.
 	 */
 	public static final String	IMPORT_SERVICE							= "Import-Service";
 
@@ -239,7 +243,7 @@ public interface Constants {
 	 *   Import-Package: org.osgi.framework ; specification-version=&quot;1.1&quot;
 	 * </pre>
 	 * 
-	 * @deprecated Since 1.3. This has been replaced by
+	 * @deprecated As of 1.3. This has been replaced by
 	 *             {@link #VERSION_ATTRIBUTE}.
 	 */
 	public static final String	PACKAGE_SPECIFICATION_VERSION			= "specification-version";

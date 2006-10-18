@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.packageadmin/src/org/osgi/service/packageadmin/ExportedPackage.java,v 1.12 2006/03/14 01:20:05 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.packageadmin/src/org/osgi/service/packageadmin/ExportedPackage.java,v 1.14 2006/06/16 16:31:49 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.osgi.framework.Version;
  * <code>getExportingBundle()</code> and <code>getImportingBundles()</code>
  * return <code>null</code>.
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.14 $
  */
 public interface ExportedPackage {
 	/**
@@ -82,8 +82,7 @@ public interface ExportedPackage {
 	 * 
 	 * @return The version of this exported package, or <code>null</code> if
 	 *         no version information is available.
-	 * @deprecated Since 1.2. This method has been replaced by
-	 *             {@link #getVersion}.
+	 * @deprecated As of 1.2, replaced by {@link #getVersion}.
 	 */
 	public String getSpecificationVersion();
 
