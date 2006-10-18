@@ -162,7 +162,7 @@ class DirectoryRevision extends BundleRevision
         // "." by default, as per the spec.
         if (contentList.size() == 0)
         {
-            contentList.add(new IContent[] { self });
+            contentList.add(self);
         }
 
         return (IContent[]) contentList.toArray(new IContent[contentList.size()]);
