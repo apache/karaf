@@ -49,6 +49,7 @@
     <module>javax.servlet</module>
     <module>org.osgi.core</module>
     <module>org.osgi.compendium</module>
+    <module>org.osgi.foundation</module>
     <module>framework</module>
     <module>shell</module>
     <module>shell.tui</module>
