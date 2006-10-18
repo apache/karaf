@@ -18,17 +18,35 @@ package org.apache.felix.mosgi.console.component;
 
 import org.apache.felix.mosgi.console.ifc.CommonPlugin;
 import org.apache.felix.mosgi.console.ifc.Plugin;
-//import org.apache.felix.mosgi.console.component.JtreeCellRenderer;
 import org.apache.felix.mosgi.console.component.MyTree;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Bundle;
 
-import javax.swing.table.DefaultTableModel;
-import javax.swing.JTable;
+import java.beans.PropertyChangeEvent;
+
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JFileChooser;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
+import javax.swing.JOptionPane;
+
 import java.awt.Component;
+import java.awt.BorderLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.ActionEvent;
 
 import javax.management.Notification;
 import javax.management.NotificationListener;
@@ -38,37 +56,16 @@ import javax.swing.ListSelectionModel;
 
 import java.util.Hashtable;
 import java.util.StringTokenizer;
-
-import java.beans.PropertyChangeEvent;
-
-import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.util.Vector;
+import java.util.Date;
+import java.text.DateFormat;
 
 import java.io.PrintStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import javax.swing.JFileChooser;
 		
-import java.util.Date;
-import java.text.DateFormat;
 //import java.text.SimpleDateFormat;
-
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.JTree;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.JFrame;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
-import javax.swing.JOptionPane;
 //import org.osgi.service.prefs.Preferences;
-
-import java.awt.event.MouseListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
 
 public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin, NotificationListener{
 
@@ -92,7 +89,7 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
     JtreeCellRenderer treeCellRenderer=new JtreeCellRenderer(bdlCtx);
     this.logTree.setCellRenderer(treeCellRenderer);
     this.logTree.setLargeModel(true);
-    this.logTree.setToggleClickCount(2); 
+    //this.logTree.setToggleClickCount(2); 
     this.logTree.setRootVisible(false);
     // this create an invisible tree even if I use *expand* so...
     // I use expand after the first insert into the tree
@@ -101,9 +98,9 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
       public void mousePressed(MouseEvent e) {
         int selRow = logTree.getRowForLocation(e.getX(), e.getY());
         selPath = logTree.getPathForLocation(e.getX(), e.getY());
-        if(selRow != -1 & e.getButton()>1) {
+        if ( selRow!=-1 & e.getButton()>1 ) {
 	  String nodeString="\""+((DefaultMutableTreeNode) selPath.getLastPathComponent()).getUserObject()+"\"";
-	  JMenuItem itemm=new JMenuItem("Delete logs "+nodeString+"");
+	  JMenuItem itemm=new JMenuItem("Delete logs "+nodeString);
 	  itemm.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
 	      removeNodeFromParent((DefaultMutableTreeNode) selPath.getLastPathComponent());
@@ -150,16 +147,11 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
           //System.out.println("RemoteLogger_jtree add a notification listener on this Remote Logger : "+mbs);
 	  ((MBeanServerConnection)e.getNewValue()).addNotificationListener(new ObjectName("OSGI:name=Remote Logger"), this, null, e.getOldValue());
           nodes.put(mbs, "ok");
-          if(JOptionPane.showConfirmDialog(null,"Do you want \""+this.getName()+"\" ask old log to this gateway :\n"+((String) e.getOldValue())+" ?")==JOptionPane.YES_OPTION) {
-            try {
-	      //System.out.println("   => mosgi.console.component.RemoteLoger_jtree gonna ask the oldLog");
-	      mbs.invoke(new ObjectName("OSGI:name=Remote Logger"), "sendOldLog", new Object[]{}, new String[]{});
-	    } catch (Exception ee) {
-	      System.out.println("   => mosgi.console.component.RemoteLoger_jtree : getOldLog : "+ee);
-	    }
+          if (JOptionPane.showConfirmDialog(jp,"Do you want \""+this.getName()+"\" ask old log to this gateway :\n"+((String) e.getOldValue())+" ?")==JOptionPane.YES_OPTION) {
+	    mbs.invoke(new ObjectName("OSGI:name=Remote Logger"), "sendOldLog", new Object[]{}, new String[]{});
 	  }
         }
-      }catch(Exception ex){
+      } catch(Exception ex){
         ex.printStackTrace();
       }
     }
@@ -177,7 +169,7 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
     }
     if (theNode==null){ // create the node
       theNode=new DefaultMutableTreeNode(nodeToCreateAndGet);
-      // Unable to set tree expand whithout a first node:
+      // Unable to set tree expand whithout a first node so :
       if (rootNode.getChildCount()==0){
         this.insertNodeInto(theNode, parent, 0);
         logTree.expandPath(new TreePath(rootNode.getPath()));
@@ -204,8 +196,7 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
     String date="??/??/??";
     if (ts==0) {
       isOldLog=true;
-    }
-    if (!isOldLog){
+    } else {
       Date timeDate=new Date(ts);
       //DateFormat dateFormat = new SimpleDateFormat("hh'h'mm dd-MM-yy");
       DateFormat df = DateFormat.getTimeInstance(DateFormat.MEDIUM); // use local date format
@@ -219,17 +210,13 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
     String state=""+eventName.get(new Integer((int) Integer.parseInt(st.nextToken())));
     String lvl=st.nextToken();
     String msg=st.nextToken();
-    // Get and maybe create parents nodes : ip, ref, idname
+    // Get and maybe create parents nodes : ip / ref / idname
     DefaultMutableTreeNode dmtn_ip=createIfNeed(ip, rootNode, isOldLog);
     DefaultMutableTreeNode dmtn_ref=createIfNeed(ref, dmtn_ip, isOldLog);
     DefaultMutableTreeNode dmtn_idname=createIfNeed(idname, dmtn_ref, isOldLog);
     // insert the leaf with message under id/ref/idname
     DefaultMutableTreeNode dmtn=new DefaultMutableTreeNode(date+" | "+time+" | "+state+" | "+lvl+" | "+msg,false);
-    if (isOldLog){
-      this.insertNodeInto(dmtn, dmtn_idname, dmtn_idname.getChildCount());
-    } else{
-      this.insertNodeInto(dmtn, dmtn_idname, 0);
-    }
+    this.insertNodeInto(dmtn, dmtn_idname, (isOldLog)?dmtn_idname.getChildCount():0);
     this.reload(dmtn_idname);
   }
   

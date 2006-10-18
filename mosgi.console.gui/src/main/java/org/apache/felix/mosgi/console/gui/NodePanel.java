@@ -18,6 +18,12 @@
 */
 package org.apache.felix.mosgi.console.gui;
 
+import org.apache.felix.mosgi.console.ifc.Plugin;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -25,26 +31,21 @@ import java.net.URLClassLoader;
 import java.rmi.server.RMIClassLoader;
 import java.rmi.server.RMIClassLoaderSpi;
 import java.security.SecureClassLoader;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Vector;
 import java.util.Set;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 import javax.swing.JTabbedPane;
+import java.lang.IllegalStateException;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
-//import javax.management.MalformedObjectNameException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import org.apache.felix.mosgi.console.ifc.Plugin;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
+//import javax.management.MalformedObjectNameException;
 
 public class NodePanel extends JTabbedPane implements PropertyChangeListener, ChangeListener {
   //private String repo;
@@ -73,6 +74,7 @@ public class NodePanel extends JTabbedPane implements PropertyChangeListener, Ch
   }
 
   public void propertyChange(PropertyChangeEvent event) {
+    //System.out.println("   PCE : "+event.getPropertyName());
     if (event.getPropertyName().equals(Plugin.PLUGIN_ADDED)) {
       Plugin cp=(Plugin) event.getNewValue();
       this.add(cp.getName(), cp.getGUI());
@@ -81,37 +83,33 @@ public class NodePanel extends JTabbedPane implements PropertyChangeListener, Ch
       this.pluginList.put(cp.pluginLocation(), cp); 
     }else if(event.getPropertyName().equals(Plugin.PLUGIN_REMOVED)) {
       Plugin cp = (Plugin) event.getNewValue();
+      String cpLoc=cp.pluginLocation();
       this.remove(cp.getGUI());
-      this.a.removePropertyChangeListener(cp);
-      //	this.pluginList.remove(cp.pluginLocation());
+      //this.a.removePropertyChangeListener(cp);
+      //this.pluginList.remove(cpLoc);
     }else if(event.getPropertyName().equals(Plugin.EMPTY_NODE)) {
-      System.out.println("******* Debug No node selected");
+      //System.out.println("******* Debug No node selected");
       this.clean();
     }else if (event.getPropertyName().equals(Plugin.NEW_NODE_SELECTED)) {
-      //System.out.println("Event NEW_NODE_SELECTED");
       /* Update the tabs (Plugin) in the JTabbedPane (NodePanel) */
       MBeanServerConnection mbsc = (MBeanServerConnection)event.getNewValue();
       try {
 	this.clean();
         Set ons = mbsc.queryNames( null, null );
-        String msg="";
         for( Iterator i=ons.iterator(); i.hasNext(); ) {
 	  ObjectName name = ( ObjectName )i.next();
-          msg="Queried name: "+name.toString();
           if ( "TabUI".equals(name.getDomain()) ) {
-            msg+=" New tab: "+name.toString();
 	    /* Get the plugin implementation via a bundle */
 	    String tabBundle = (String) mbsc.getAttribute(name, "BundleName");
-            msg+=" Bundle name for current Plugin: "+tabBundle;
 	    if (tabBundle!=null){
               Plugin p = (Plugin) this.pluginList.get(tabBundle);
               if (p == null){
-  	          Bundle b = m_context.installBundle(tabBundle);
-		  b.start();
-                  System.out.println(msg+" Bundle started");
-                  //Thread.sleep(5000);
+  	        Bundle b = m_context.installBundle(tabBundle);
+	        b.start();
+                System.out.println(" - Bundle started: \""+name.toString()+"\" - "+tabBundle);
+                //Thread.sleep(5000);
               }else{
-                System.out.println(msg+" Register service plugin: " + p);
+                System.out.println(" - Register service plugin: "+p);
                 p.registerServicePlugin();
               }
 
@@ -151,8 +149,8 @@ public class NodePanel extends JTabbedPane implements PropertyChangeListener, Ch
 //            Plugin tab = (Plugin)tabObj;
               /* register the tab on the JTabbedPane */
 //            this.add(tab.getName(), tab.getGUI());
-            }else{
-	      System.out.println(msg+" No "+tabBundle+" property defined. I cannot install "+tabBundle+" tab");
+            } else{
+	      System.out.println(" - No bundleName attribute defined for \""+name.toString()+"\". I cannot install tab");
             }
           }
         }
@@ -184,14 +182,19 @@ public class NodePanel extends JTabbedPane implements PropertyChangeListener, Ch
 
   private void clean(){
     this.removeAll();
+    Vector pluginList_tmp=new Vector();
     for ( Iterator i=pluginList.keySet().iterator(); i.hasNext();) {
       Object o=i.next();
-      try {
-        ((Plugin) pluginList.get(o)).unregisterServicePlugin();
-      } catch(Exception e){
-        System.out.println("INFO Something went wrong when unregistering the Plugin. Please control the beavior of the unregisterServicePlugin function of this tab"+o);
-      }
+      pluginList_tmp.add(o);
     }
+    for ( int i = 0 ; i < pluginList_tmp.size() ; i++) {
+      Plugin p=(Plugin) pluginList.get(pluginList_tmp.elementAt(i));
+      try {
+        p.unregisterServicePlugin();
+      } catch (Exception ex) {
+	//System.out.println("\""+p.getName()+"\" : "+ex);
+      }
+    } 
   }
 
 }
