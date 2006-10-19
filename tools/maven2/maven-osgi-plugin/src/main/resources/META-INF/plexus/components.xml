@@ -30,7 +30,6 @@
       <implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>
       <configuration>
         <type>osgi-bundle</type>
-        <includesDependencies>true</includesDependencies>
         <language>java</language>
         <extension>jar</extension>
         <addedToClasspath>true</addedToClasspath>

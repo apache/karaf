@@ -629,6 +629,7 @@ public class OsgiJarMojo extends AbstractMojo {
 	 */
 	private void addEmbeddedJars() throws MojoExecutionException {
 		Set artifacts = project.getArtifacts();
+		Map artifactMap = ArtifactUtils.artifactMapByArtifactId( artifacts );
 
 		for (Iterator it = artifacts.iterator(); it.hasNext();) {
 			Artifact artifact = (Artifact) it.next();
@@ -639,6 +640,25 @@ public class OsgiJarMojo extends AbstractMojo {
 				if ("jar".equals(type)) {
                     // Do not include artifacts which are inlined
                     if (!(inlinedArtifacts.contains(artifact.getArtifactId()))) {
+                      
+                        // Do not include artifacts provided by another bundle
+                        boolean isProvidedByBundle = false;
+                        Iterator iter = artifact.getDependencyTrail().iterator();
+                        iter.next(); // skip this project
+                        while ( iter.hasNext() )
+                        {  
+                            String id = (String) iter.next();
+                            Artifact element = (Artifact) artifactMap.get( id );
+                            if ( element != null 
+                                    && "osgi-bundle".equals( element.getType() ) )
+                            {
+                                isProvidedByBundle = true;
+                                break;
+                            }
+                        }
+                        if ( isProvidedByBundle )
+                            continue;
+                        
                         File depFile = artifact.getFile();
 
                         try {
