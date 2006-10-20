@@ -69,6 +69,11 @@ import java.io.FileNotFoundException;
 
 public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin, NotificationListener{
 
+  private static final int OLDLOG_THIS_TIME = 0;
+  private static final int OLDLOG_ALWAYS = 1;
+  private static final int OLDLOG_NEVER = 2;
+  
+  private int oldLogChoice=OLDLOG_THIS_TIME;
   private MyTree logTree;
   private MouseListener ml;
   private TreePath selPath;
@@ -147,8 +152,20 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
           //System.out.println("RemoteLogger_jtree add a notification listener on this Remote Logger : "+mbs);
 	  ((MBeanServerConnection)e.getNewValue()).addNotificationListener(new ObjectName("OSGI:name=Remote Logger"), this, null, e.getOldValue());
           nodes.put(mbs, "ok");
-          if (JOptionPane.showConfirmDialog(jp,"Do you want \""+this.getName()+"\" ask old log to this gateway :\n"+((String) e.getOldValue())+" ?")==JOptionPane.YES_OPTION) {
-	    mbs.invoke(new ObjectName("OSGI:name=Remote Logger"), "sendOldLog", new Object[]{}, new String[]{});
+	  if (oldLogChoice==OLDLOG_THIS_TIME | oldLogChoice==JOptionPane.CLOSED_OPTION ) {
+	    oldLogChoice=JOptionPane.showOptionDialog(jp,"Do you want old log from gateway :\n"+((String) e.getOldValue())+" ?","Old log management",JOptionPane.DEFAULT_OPTION,JOptionPane.QUESTION_MESSAGE,null,new Object[] {"This time", "Always", "Never"},"This time");
+	  }
+          switch (oldLogChoice) {
+            case (OLDLOG_ALWAYS) : { 
+	    }
+	    case (OLDLOG_THIS_TIME) : {
+	    }
+	    case (JOptionPane.CLOSED_OPTION) : {
+	      mbs.invoke(new ObjectName("OSGI:name=Remote Logger"), "sendOldLog", new Object[]{}, new String[]{});
+              break;
+	    }
+	    case (OLDLOG_NEVER) : { 
+	    }
 	  }
         }
       } catch(Exception ex){
