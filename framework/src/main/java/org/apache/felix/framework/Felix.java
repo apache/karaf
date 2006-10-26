@@ -3152,6 +3152,13 @@ public class Felix
                     // This physically removes the bundle from memory
                     // as well as the bundle cache.
                     garbageCollectBundle(m_bundle);
+// TODO: FRAMEWORK - There is some indication that there is a memory leak
+//                   if we do not null the BundleInfo here. We should verify
+//                   that this is true, because if we null here then we have
+//                   check for nulls when we are releasing bundle locks, which
+//                   maybe cascading unnecessary ugliness. For now, I will
+//                   leave this commented out until we can investigate further.
+//                    m_bundle.setInfo(null);
                     m_bundle = null;
                 }
                 else
