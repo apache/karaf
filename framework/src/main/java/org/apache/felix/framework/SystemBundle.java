@@ -22,11 +22,8 @@ import java.io.InputStream;
 import java.util.*;
 
 import org.apache.felix.framework.cache.SystemBundleArchive;
-import org.apache.felix.framework.searchpolicy.R4Export;
-import org.apache.felix.framework.searchpolicy.R4Package;
-import org.apache.felix.framework.util.FelixConstants;
-import org.apache.felix.framework.util.SecureAction;
-import org.apache.felix.framework.util.StringMap;
+import org.apache.felix.framework.searchpolicy.*;
+import org.apache.felix.framework.util.*;
 import org.apache.felix.moduleloader.IContentLoader;
 import org.osgi.framework.*;
 
@@ -72,7 +69,7 @@ class SystemBundle extends BundleImpl
         R4Package[] classPathPkgs = null;
         try
         {
-            classPathPkgs = R4Package.parseImportOrExportHeader(
+            classPathPkgs = ManifestParser.parseImportExportHeader(
                 getFelix().getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES));
         }
         catch (Exception ex)
@@ -80,7 +77,8 @@ class SystemBundle extends BundleImpl
             classPathPkgs = new R4Package[0];
             getFelix().getLogger().log(
                 Logger.LOG_ERROR,
-                "Error parsing system bundle export statement.", ex);
+                "Error parsing system bundle export statement: "
+                + getFelix().getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES), ex);
         }
 
         // Now, create the list of standard framework exports for

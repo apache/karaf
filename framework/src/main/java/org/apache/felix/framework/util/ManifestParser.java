@@ -30,6 +30,8 @@ public class ManifestParser
     private Logger m_logger = null;
     private PropertyResolver m_config = null;
     private Map m_headerMap = null;
+    private String m_bundleSymbolicName = null;
+    private Version m_bundleVersion = null;
     private R4Export[] m_exports = null;
     private R4Import[] m_imports = null;
     private R4Import[] m_dynamics = null;
@@ -44,7 +46,7 @@ public class ManifestParser
         m_headerMap = headerMap;
 
         // Verify that only manifest version 2 is specified.
-        String manifestVersion = get(Constants.BUNDLE_MANIFESTVERSION);
+        String manifestVersion = (String) m_headerMap.get(Constants.BUNDLE_MANIFESTVERSION);
         if ((manifestVersion != null) && !manifestVersion.equals("2"))
         {
             throw new BundleException(
@@ -52,19 +54,20 @@ public class ManifestParser
         }
 
         // Verify bundle version syntax.
-        if (get(Constants.BUNDLE_VERSION) != null)
+        if (m_headerMap.get(Constants.BUNDLE_VERSION) != null)
         {
             try
             {
-                Version.parseVersion(get(Constants.BUNDLE_VERSION));
+                m_bundleVersion = Version.parseVersion((String) m_headerMap.get(Constants.BUNDLE_VERSION));
             }
             catch (RuntimeException ex)
             {
                 // R4 bundle versions must parse, R3 bundle version may not.
-                if (getVersion().equals("2"))
+                if (getManifestVersion().equals("2"))
                 {
                     throw ex;
                 }
+                m_bundleVersion = Version.emptyVersion;
             }
         }
 
@@ -72,62 +75,120 @@ public class ManifestParser
         Map dupeMap = new HashMap();
 
         //
+        // Get bundle version.
+        //
+
+        //
+        // Parse bundle symbolic name.
+        //
+
+        Object[][][] clauses = parseStandardHeader(
+            (String) headerMap.get(Constants.BUNDLE_SYMBOLICNAME));
+        if (clauses.length > 0)
+        {
+            if (clauses.length > 1)
+            {
+                throw new BundleException(
+                    "Cannot have multiple symbolic names: "
+                        + headerMap.get(Constants.BUNDLE_SYMBOLICNAME));
+            }
+            else if (clauses[0][CLAUSE_PATHS_INDEX].length > 1)
+            {
+                throw new BundleException(
+                    "Cannot have multiple symbolic names: "
+                        + headerMap.get(Constants.BUNDLE_SYMBOLICNAME));
+            }
+            m_bundleSymbolicName = (String) clauses[0][CLAUSE_PATHS_INDEX][0];
+//            Map propMap = new HashMap();
+//            propMap.put("symbolicname", m_bundleSymbolicName);
+//            propMap.put("version", m_bundleVersion);
+//            capList.add(new Capability(ICapability.MODULE_NAMESPACE, propMap));
+        }
+
+        //
         // Parse Export-Package.
         //
 
         // Get export packages from bundle manifest.
-        R4Package[] pkgs = R4Package.parseImportOrExportHeader(
+        R4Package[] pkgs = parseImportExportHeader(
             (String) headerMap.get(Constants.EXPORT_PACKAGE));
 
         // Create non-duplicated export array.
         dupeMap.clear();
-        for (int i = 0; i < pkgs.length; i++)
+        for (int pkgIdx = 0; pkgIdx < pkgs.length; pkgIdx++)
         {
-            if (dupeMap.get(pkgs[i].getName()) == null)
+            // Verify that the named package has not already been declared.
+            if (dupeMap.get(pkgs[pkgIdx].getName()) == null)
             {
                 // Verify that java.* packages are not exported.
-                if (pkgs[i].getName().startsWith("java."))
+                if (pkgs[pkgIdx].getName().startsWith("java."))
                 {
                     throw new BundleException(
-                        "Exporting java.* packages not allowed: " + pkgs[i].getName());
+                        "Exporting java.* packages not allowed: " + pkgs[pkgIdx].getName());
                 }
-                dupeMap.put(pkgs[i].getName(), new R4Export(pkgs[i]));
+                dupeMap.put(pkgs[pkgIdx].getName(), new R4Export(pkgs[pkgIdx]));
             }
             else
             {
                 // TODO: FRAMEWORK - Exports can be duplicated, so fix this.
-                m_logger.log(Logger.LOG_WARNING,
-                    "Duplicate export - " + pkgs[i].getName());
+                m_logger.log(Logger.LOG_WARNING, "Duplicate export - " + pkgs[pkgIdx].getName());
             }
         }
         m_exports = (R4Export[]) dupeMap.values().toArray(new R4Export[dupeMap.size()]);
+
+        //
+        // Parse Require-Bundle
+        //
+        clauses = parseStandardHeader(
+            (String) headerMap.get(Constants.REQUIRE_BUNDLE));
+        if (clauses.length > 0)
+        {
+            for (int clauseIdx = 0; clauseIdx < clauses.length; clauseIdx++)
+            {
+                for (int pathIdx = 0; pathIdx < clauses[clauseIdx][CLAUSE_PATHS_INDEX].length; pathIdx++)
+                {
+//                    try
+//                    {
+//                        reqList.add(
+//                            new Requirement(
+//                                ICapability.MODULE_NAMESPACE,
+//                                "(symbolicname=" + clauses[clauseIdx][HEADER_PATHS_INDEX][pathIdx] + ")"));
+//                    }
+//                    catch (InvalidSyntaxException ex)
+//                    {
+                        // Should never happen.
+//                    }
+                }
+            }
+        }
 
         //
         // Parse Import-Package.
         //
 
         // Get import packages from bundle manifest.
-        pkgs = R4Package.parseImportOrExportHeader(
+        pkgs = parseImportExportHeader(
             (String) headerMap.get(Constants.IMPORT_PACKAGE));
 
         // Create non-duplicated import array.
         dupeMap.clear();
-        for (int i = 0; i < pkgs.length; i++)
+        for (int pkgIdx = 0; pkgIdx < pkgs.length; pkgIdx++)
         {
-            if (dupeMap.get(pkgs[i].getName()) == null)
+            // Verify that the named package has not already been declared.
+            if (dupeMap.get(pkgs[pkgIdx].getName()) == null)
             {
                 // Verify that java.* packages are not imported.
-                if (pkgs[i].getName().startsWith("java."))
+                if (pkgs[pkgIdx].getName().startsWith("java."))
                 {
                     throw new BundleException(
-                        "Importing java.* packages not allowed: " + pkgs[i].getName());
+                        "Importing java.* packages not allowed: " + pkgs[pkgIdx].getName());
                 }
-                dupeMap.put(pkgs[i].getName(), new R4Import(pkgs[i]));
+                dupeMap.put(pkgs[pkgIdx].getName(), new R4Import(pkgs[pkgIdx]));
             }
             else
             {
                 throw new BundleException(
-                    "Duplicate import - " + pkgs[i].getName());
+                    "Duplicate import - " + pkgs[pkgIdx].getName());
             }
         }
         m_imports = (R4Import[]) dupeMap.values().toArray(new R4Import[dupeMap.size()]);
@@ -137,15 +198,23 @@ public class ManifestParser
         //
 
         // Get dynamic import packages from bundle manifest.
-        pkgs = R4Package.parseImportOrExportHeader(
+        pkgs = parseImportExportHeader(
             (String) headerMap.get(Constants.DYNAMICIMPORT_PACKAGE));
 
         // Dynamic imports can have duplicates, so just create an array.
-        m_dynamics = new R4Import[pkgs.length];
-        for (int i = 0; i < pkgs.length; i++)
+        List dynList = new ArrayList();
+        for (int pkgIdx = 0; pkgIdx < pkgs.length; pkgIdx++)
         {
-            m_dynamics[i] = new R4Import(pkgs[i]);
+            // Verify that java.* packages are not imported.
+            if (pkgs[pkgIdx].getName().startsWith("java."))
+            {
+                throw new BundleException(
+                    "Dynamically importing java.* packages not allowed: "
+                    + pkgs[pkgIdx].getName());
+            }
+            dynList.add(new R4Import(pkgs[pkgIdx]));
         }
+        m_dynamics = (R4Import[]) dynList.toArray(new R4Import[dynList.size()]);
 
         //
         // Parse Bundle-NativeCode.
@@ -155,7 +224,7 @@ public class ManifestParser
         m_libraryHeaders =
             Util.parseLibraryStrings(
                 m_logger,
-                Util.parseDelimitedString(get(Constants.BUNDLE_NATIVECODE), ","));
+                Util.parseDelimitedString((String) m_headerMap.get(Constants.BUNDLE_NATIVECODE), ","));
 
         // Check to see if there was an optional native library clause, which is
         // represented by a null library header; if so, record it and remove it.
@@ -169,7 +238,7 @@ public class ManifestParser
         }
 
         // Do final checks and normalization of manifest.
-        if (getVersion().equals("2"))
+        if (getManifestVersion().equals("2"))
         {
             checkAndNormalizeR4();
         }
@@ -179,15 +248,20 @@ public class ManifestParser
         }
     }
 
-    public String get(String key)
+    public String getManifestVersion()
     {
-        return (String) m_headerMap.get(key);
+        String manifestVersion = (String) m_headerMap.get(Constants.BUNDLE_MANIFESTVERSION);
+        return (manifestVersion == null) ? "1" : manifestVersion;
     }
 
-    public String getVersion()
+    public String getSymbolicName()
     {
-        String manifestVersion = get(Constants.BUNDLE_MANIFESTVERSION);
-        return (manifestVersion == null) ? "1" : manifestVersion;
+        return m_bundleSymbolicName;
+    }
+
+    public Version getBundleVersion()
+    {
+        return m_bundleVersion;
     }
 
     public R4Export[] getExports()
@@ -551,7 +625,7 @@ public class ManifestParser
     private void checkAndNormalizeR4() throws BundleException
     {
         // Verify that bundle symbolic name is specified.
-        String symName = get(Constants.BUNDLE_SYMBOLICNAME);
+        String symName = (String) m_headerMap.get(Constants.BUNDLE_SYMBOLICNAME);
         if (symName == null)
         {
             throw new BundleException("R4 bundle manifests must include bundle symbolic name.");
@@ -561,7 +635,7 @@ public class ManifestParser
         // or bundle version.
         for (int i = 0; (m_exports != null) && (i < m_exports.length); i++)
         {
-            String targetVer = get(Constants.BUNDLE_VERSION);
+            String targetVer = (String) m_headerMap.get(Constants.BUNDLE_VERSION);
             targetVer = (targetVer == null) ? "0.0.0" : targetVer;
 
             R4Attribute[] attrs = m_exports[i].getAttributes();
@@ -587,5 +661,213 @@ public class ManifestParser
             m_exports[i] = new R4Export(
                 m_exports[i].getName(), m_exports[i].getDirectives(), newAttrs);
         }
+    }
+
+    public static R4Package[] parseImportExportHeader(String header)
+    {
+        Object[][][] clauses = parseStandardHeader(header);
+
+// TODO: FRAMEWORK - Perhaps verification/normalization should be completely
+// separated from parsing, since verification/normalization may vary.
+
+        // Verify that the values are equals if the package specifies
+        // both version and specification-version attributes.
+        Map attrMap = new HashMap();
+        for (int clauseIdx = 0; clauseIdx < clauses.length; clauseIdx++)
+        {
+            // Put attributes for current clause in a map for easy lookup.
+            attrMap.clear();
+            for (int attrIdx = 0;
+                attrIdx < clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX].length;
+                attrIdx++)
+            {
+                R4Attribute attr = (R4Attribute) clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX][attrIdx];
+                attrMap.put(attr.getName(), attr);
+            }
+
+            // Check for "version" and "specification-version" attributes
+            // and verify they are the same if both are specified.
+            R4Attribute v = (R4Attribute) attrMap.get(Constants.VERSION_ATTRIBUTE);
+            R4Attribute sv = (R4Attribute) attrMap.get(Constants.PACKAGE_SPECIFICATION_VERSION);
+            if ((v != null) && (sv != null))
+            {
+                // Verify they are equal.
+                if (!((String) v.getValue()).trim().equals(((String) sv.getValue()).trim()))
+                {
+                    throw new IllegalArgumentException(
+                        "Both version and specificat-version are specified, but they are not equal.");
+                }
+            }
+    
+            // Ensure that only the "version" attribute is used
+            if (sv != null)
+            {
+                attrMap.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
+                if (v == null)
+                {
+                    attrMap.put(Constants.VERSION_ATTRIBUTE,
+                        new R4Attribute(
+                            Constants.VERSION_ATTRIBUTE,
+                            sv.getValue(),
+                            sv.isMandatory()));
+                    clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX] =
+                        attrMap.values().toArray(new R4Attribute[attrMap.size()]);
+                }
+            }
+        }
+
+        // Now convert generic header clauses into packages.
+        List pkgList = new ArrayList();
+        for (int clauseIdx = 0; clauseIdx < clauses.length; clauseIdx++)
+        {
+            for (int pathIdx = 0;
+                pathIdx < clauses[clauseIdx][CLAUSE_PATHS_INDEX].length;
+                pathIdx++)
+            {
+                pkgList.add(
+                    new R4Package(
+                        (String) clauses[clauseIdx][CLAUSE_PATHS_INDEX][pathIdx],
+                        (R4Directive[]) clauses[clauseIdx][CLAUSE_DIRECTIVES_INDEX],
+                        (R4Attribute[]) clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX]));
+            }
+        }
+        return (R4Package[]) pkgList.toArray(new R4Package[pkgList.size()]);
+    }
+
+    public static final int CLAUSE_PATHS_INDEX = 0;
+    public static final int CLAUSE_DIRECTIVES_INDEX = 1;
+    public static final int CLAUSE_ATTRIBUTES_INDEX = 2;
+
+    // Like this: path; path; dir1:=dirval1; dir2:=dirval2; attr1=attrval1; attr2=attrval2,
+    //            path; path; dir1:=dirval1; dir2:=dirval2; attr1=attrval1; attr2=attrval2
+    public static Object[][][] parseStandardHeader(String header)
+    {
+        Object[][][] clauses = null;
+
+        if (header != null)
+        {
+            if (header.length() == 0)
+            {
+                throw new IllegalArgumentException(
+                    "A header cannot be an empty string.");
+            }
+
+            String[] clauseStrings = Util.parseDelimitedString(
+                header, FelixConstants.CLASS_PATH_SEPARATOR);
+
+            List completeList = new ArrayList();
+            for (int i = 0; (clauseStrings != null) && (i < clauseStrings.length); i++)
+            {
+                completeList.add(parseStandardHeaderClause(clauseStrings[i]));
+            }
+            clauses = (Object[][][]) completeList.toArray(new Object[completeList.size()][][]);
+        }
+
+        return (clauses == null) ? new Object[0][][] : clauses;
+    }
+
+    // Like this: path; path; dir1:=dirval1; dir2:=dirval2; attr1=attrval1; attr2=attrval2
+    public static Object[][] parseStandardHeaderClause(String clauseString)
+        throws IllegalArgumentException
+    {
+        // Break string into semi-colon delimited pieces.
+        String[] pieces = Util.parseDelimitedString(
+            clauseString, FelixConstants.PACKAGE_SEPARATOR);
+
+        // Count the number of different paths; paths
+        // will not have an '=' in their string. This assumes
+        // that paths come first, before directives and
+        // attributes.
+        int pathCount = 0;
+        for (int pieceIdx = 0; pieceIdx < pieces.length; pieceIdx++)
+        {
+            if (pieces[pieceIdx].indexOf('=') >= 0)
+            {
+                break;
+            }
+            pathCount++;
+        }
+
+        // Error if no paths were specified.
+        if (pathCount == 0)
+        {
+            throw new IllegalArgumentException(
+                "No paths specified in header: " + clauseString);
+        }
+
+        // Create an array of paths.
+        String[] paths = new String[pathCount];
+        System.arraycopy(pieces, 0, paths, 0, pathCount);
+
+        // Parse the directives/attributes.
+        Map dirsMap = new HashMap();
+        Map attrsMap = new HashMap();
+        int idx = -1;
+        String sep = null;
+        for (int pieceIdx = pathCount; pieceIdx < pieces.length; pieceIdx++)
+        {
+            // Check if it is a directive.
+            if ((idx = pieces[pieceIdx].indexOf(FelixConstants.DIRECTIVE_SEPARATOR)) >= 0)
+            {
+                sep = FelixConstants.DIRECTIVE_SEPARATOR;
+            }
+            // Check if it is an attribute.
+            else if ((idx = pieces[pieceIdx].indexOf(FelixConstants.ATTRIBUTE_SEPARATOR)) >= 0)
+            {
+                sep = FelixConstants.ATTRIBUTE_SEPARATOR;
+            }
+            // It is an error.
+            else
+            {
+                throw new IllegalArgumentException("Not a directive/attribute: " + clauseString);
+            }
+
+            String key = pieces[pieceIdx].substring(0, idx).trim();
+            String value = pieces[pieceIdx].substring(idx + sep.length()).trim();
+
+            // Remove quotes, if value is quoted.
+            if (value.startsWith("\"") && value.endsWith("\""))
+            {
+                value = value.substring(1, value.length() - 1);
+            }
+
+            // Save the directive/attribute in the appropriate array.
+            if (sep.equals(FelixConstants.DIRECTIVE_SEPARATOR))
+            {
+                // Check for duplicates.
+                if (dirsMap.get(key) != null)
+                {
+                    throw new IllegalArgumentException(
+                        "Duplicate directive: " + key);
+                }
+                dirsMap.put(key, new R4Directive(key, value));
+            }
+            else
+            {
+                // Check for duplicates.
+                if (attrsMap.get(key) != null)
+                {
+                    throw new IllegalArgumentException(
+                        "Duplicate attribute: " + key);
+                }
+                attrsMap.put(key, new R4Attribute(key, value, false));
+            }
+        }
+
+        // Create directive array.
+        R4Directive[] dirs = (R4Directive[])
+            dirsMap.values().toArray(new R4Directive[dirsMap.size()]);
+
+        // Create attribute array.
+        R4Attribute[] attrs = (R4Attribute[])
+            attrsMap.values().toArray(new R4Attribute[attrsMap.size()]);
+
+        // Create an array to hold the parsed paths, directives, and attributes.
+        Object[][] clause = new Object[3][];
+        clause[CLAUSE_PATHS_INDEX] = paths;
+        clause[CLAUSE_DIRECTIVES_INDEX] = dirs;
+        clause[CLAUSE_ATTRIBUTES_INDEX] = attrs;
+
+        return clause;
     }
 }

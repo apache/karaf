@@ -16,12 +16,10 @@
  */
 package org.apache.felix.tool.mangen;
 
-import java.util.Comparator;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
+import java.util.*;
 
-import org.apache.felix.framework.searchpolicy.*;
+import org.apache.felix.framework.searchpolicy.R4Package;
+import org.apache.felix.framework.util.ManifestParser;
 import org.osgi.framework.Version;
 
 /** 
@@ -72,7 +70,7 @@ public abstract class OsgiPackage
                 if (pkgString.indexOf(';') != -1)
                 {
                     // parse and add all R4 packages contained (can be multiple)
-                    R4Package[]  pkgs = R4Package.parseImportOrExportHeader(pkgString);
+                    R4Package[]  pkgs = ManifestParser.parseImportExportHeader(pkgString);
                     for (int ix = 0; ix < pkgs.length; ix++)
                     {
                         set.add(new OsgiR4Package(pkgs[ix]));

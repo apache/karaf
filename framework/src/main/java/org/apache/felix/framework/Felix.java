@@ -2592,11 +2592,11 @@ public class Felix
         ManifestParser mp = new ManifestParser(m_logger, m_config, headerMap);
 
         // Verify that the bundle symbolic name and version is unique.
-        if (mp.getVersion().equals("2"))
+        if (mp.getManifestVersion().equals("2"))
         {
-            String bundleVersion = mp.get(FelixConstants.BUNDLE_VERSION);
-            bundleVersion = (bundleVersion == null) ? "0.0.0" : bundleVersion;
-            String symName = (String) mp.get(FelixConstants.BUNDLE_SYMBOLICNAME);
+            Version bundleVersion = mp.getBundleVersion();
+            bundleVersion = (bundleVersion == null) ? Version.emptyVersion : bundleVersion;
+            String symName = (String) mp.getSymbolicName();
 
             Bundle[] bundles = getBundles();
             for (int i = 0; (bundles != null) && (i < bundles.length); i++)
@@ -2604,9 +2604,8 @@ public class Felix
                 long id = ((BundleImpl) bundles[i]).getInfo().getBundleId();
                 String sym = (String) ((BundleImpl) bundles[i])
                     .getInfo().getCurrentHeader().get(Constants.BUNDLE_SYMBOLICNAME);
-                String ver = (String) ((BundleImpl) bundles[i])
-                    .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION);
-                ver = (ver == null) ? "0.0.0" : ver;
+                Version ver = Version.parseVersion((String) ((BundleImpl) bundles[i])
+                    .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION));
                 if (symName.equals(sym) && bundleVersion.equals(ver) && (targetId != id))
                 {
                     throw new BundleException("Bundle symbolic name and version are not unique.");
@@ -3153,7 +3152,6 @@ public class Felix
                     // This physically removes the bundle from memory
                     // as well as the bundle cache.
                     garbageCollectBundle(m_bundle);
-                    m_bundle.setInfo(null);
                     m_bundle = null;
                 }
                 else
