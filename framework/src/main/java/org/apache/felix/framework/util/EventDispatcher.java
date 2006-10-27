@@ -334,11 +334,11 @@ public class EventDispatcher
             {
                 // Check if the bundle associated with the current listener
                 // is the same as the specified bundle, if so remove the listener.
-                Bundle registeredBundle = (Bundle) listeners[LISTENER_BUNDLE_OFFSET];
+                Bundle registeredBundle = (Bundle) listeners[i + LISTENER_BUNDLE_OFFSET];
                 if (bundle.equals(registeredBundle))
                 {
-                    Class clazz = (Class) listeners[LISTENER_CLASS_OFFSET];
-                    EventListener l = (EventListener) listeners[LISTENER_OBJECT_OFFSET];
+                    Class clazz = (Class) listeners[i + LISTENER_CLASS_OFFSET];
+                    EventListener l = (EventListener) listeners[i + LISTENER_OBJECT_OFFSET];
                     removeListener(bundle, clazz, l);
                 }
             }
@@ -351,11 +351,11 @@ public class EventDispatcher
             {
                 // Check if the bundle associated with the current listener
                 // is the same as the specified bundle, if so remove the listener.
-                Bundle registeredBundle = (Bundle) listeners[LISTENER_BUNDLE_OFFSET];
+                Bundle registeredBundle = (Bundle) listeners[i + LISTENER_BUNDLE_OFFSET];
                 if (bundle.equals(registeredBundle))
                 {
-                    Class clazz = (Class) listeners[LISTENER_CLASS_OFFSET];
-                    EventListener l = (EventListener) listeners[LISTENER_OBJECT_OFFSET];
+                    Class clazz = (Class) listeners[i + LISTENER_CLASS_OFFSET];
+                    EventListener l = (EventListener) listeners[i + LISTENER_OBJECT_OFFSET];
                     removeListener(bundle, clazz, l);
                 }
             }
@@ -369,11 +369,11 @@ public class EventDispatcher
             {
                 // Check if the bundle associated with the current listener
                 // is the same as the specified bundle, if so remove the listener.
-                Bundle registeredBundle = (Bundle) listeners[LISTENER_BUNDLE_OFFSET];
+                Bundle registeredBundle = (Bundle) listeners[i + LISTENER_BUNDLE_OFFSET];
                 if (bundle.equals(registeredBundle))
                 {
-                    Class clazz = (Class) listeners[LISTENER_CLASS_OFFSET];
-                    EventListener l = (EventListener) listeners[LISTENER_OBJECT_OFFSET];
+                    Class clazz = (Class) listeners[i + LISTENER_CLASS_OFFSET];
+                    EventListener l = (EventListener) listeners[i + LISTENER_OBJECT_OFFSET];
                     removeListener(bundle, clazz, l);
                 }
             }
@@ -386,11 +386,11 @@ public class EventDispatcher
             {
                 // Check if the bundle associated with the current listener
                 // is the same as the specified bundle, if so remove the listener.
-                Bundle registeredBundle = (Bundle) listeners[LISTENER_BUNDLE_OFFSET];
+                Bundle registeredBundle = (Bundle) listeners[i + LISTENER_BUNDLE_OFFSET];
                 if (bundle.equals(registeredBundle))
                 {
-                    Class clazz = (Class) listeners[LISTENER_CLASS_OFFSET];
-                    EventListener l = (EventListener) listeners[LISTENER_OBJECT_OFFSET];
+                    Class clazz = (Class) listeners[i + LISTENER_CLASS_OFFSET];
+                    EventListener l = (EventListener) listeners[i + LISTENER_OBJECT_OFFSET];
                     removeListener(bundle, clazz, l);
                 }
             }
