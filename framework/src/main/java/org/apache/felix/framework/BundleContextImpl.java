@@ -173,7 +173,7 @@ class BundleContextImpl implements FelixBundleContext
         
         if (sm != null)
         {
-            if(l instanceof SynchronousBundleListener)
+            if (l instanceof SynchronousBundleListener)
             {
                 ((SecurityManager) sm).checkPermission(new AdminPermission(m_bundle, 
                     AdminPermission.LISTENER));
