@@ -281,7 +281,18 @@ public class ServiceRegistry
         // bundle.
         if (usage.m_count == 0)
         {
-            m_inUseMap.put(bundle, removeUsageCount(usages, ref));
+            // Remove reference from usages array.
+            usages = removeUsageCount(usages, ref);
+            // If there are no more usages in the array, then remove
+            // the bundle from the inUseMap to allow for garbage collection.
+            if (usages.length == 0)
+            {
+                m_inUseMap.remove(bundle);
+            }
+            else
+            {
+                m_inUseMap.put(bundle, usages);
+            }
             ServiceRegistrationImpl reg =
                 ((ServiceReferenceImpl) ref).getServiceRegistration();
             reg.ungetService(bundle, usage.m_svcObj);
