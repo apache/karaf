@@ -129,8 +129,13 @@ public class FilterImpl implements Filter
     {
         try
         {
+            // Since the mapper instance is reused, we should
+            // null the source after use to avoid potential
+            // garbage collection issues.
             m_mapper.setSource(dict, false);
-            return m_evaluator.evaluate(m_mapper);
+            boolean result = m_evaluator.evaluate(m_mapper);
+            m_mapper.setSource(null, false);
+            return result;
         }
         catch (AttributeNotFoundException ex)
         {
@@ -155,8 +160,13 @@ public class FilterImpl implements Filter
     {
         try
         {
+            // Since the mapper instance is reused, we should
+            // null the source after use to avoid potential
+            // garbage collection issues.
             m_mapper.setSource(ref);
-            return m_evaluator.evaluate(m_mapper);
+            boolean result = m_evaluator.evaluate(m_mapper);
+            m_mapper.setSource(null);
+            return result;
         }
         catch (AttributeNotFoundException ex)
         {
@@ -169,12 +179,17 @@ public class FilterImpl implements Filter
         return false;
     }
 
-    public boolean matchCase(Dictionary dictionary)
+    public boolean matchCase(Dictionary dict)
     {
         try
         {
-            m_mapper.setSource(dictionary, true);
-            return m_evaluator.evaluate(m_mapper);
+            // Since the mapper instance is reused, we should
+            // null the source after use to avoid potential
+            // garbage collection issues.
+            m_mapper.setSource(dict, true);
+            boolean result = m_evaluator.evaluate(m_mapper);
+            m_mapper.setSource(null, true);
+            return result;
         }
         catch (AttributeNotFoundException ex)
         {
