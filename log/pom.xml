@@ -32,6 +32,7 @@
         <configuration>
           <osgiManifest>
             <bundleName>LogService</bundleName>
+            <bundleSymbolicName>${pom.artifacfId}</bundleSymbolicName>
             <bundleVendor>Apache Software Foundation</bundleVendor>
             <bundleDescription>
               This bundle provides an implementation of the OSGi R4 Log service.
