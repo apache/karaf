@@ -639,9 +639,9 @@ public class Main
                             {
                                 KeyStore ks = KeyStore.getInstance(m_types[i]);
                                 ks.load(new FileInputStream(m_keystores[i]), m_passwds[i].toCharArray());
-                                for (Enumeration enum = ks.aliases();enum.hasMoreElements();)
+                                for (Enumeration e = ks.aliases(); e.hasMoreElements();)
                                 {
-                                    String alias = (String) enum.nextElement();
+                                    String alias = (String) e.nextElement();
                                     if (ks.isCertificateEntry(alias))
                                     {
                                         certs.add(ks.getCertificate(alias));
