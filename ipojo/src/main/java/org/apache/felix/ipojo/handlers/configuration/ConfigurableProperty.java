@@ -1,18 +1,20 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo.handlers.configuration;
 
@@ -30,63 +32,80 @@ import org.apache.felix.ipojo.metadata.Element;
  */
 public class ConfigurableProperty {
 
-	/**
-	 * Name of the property (filed name if not set).
-	 */
-	private String m_name;
+    /**
+     * Name of the property (filed name if not set).
+     */
+    private String m_name;
 
-	/**
-	 * Field of the property.
-	 */
-	private String m_field;
+    /**
+     * Field of the property.
+     */
+    private String m_field;
 
-	/**
-	 * Value of the property.
-	 */
-	private Object m_value;
+    /**
+     * Value of the property.
+     */
+    private Object m_value;
 
-	/**
-	 * Configuration Handler managing this property.
-	 */
-	private ConfigurationHandler m_handler;
+    /**
+     * Configuration Handler managing this property.
+     */
+    private ConfigurationHandler m_handler;
 
-	/**
-	 * Configurable Property Constructor.
-	 * @param name : name of the property (optional)
-	 * @param field : name of the field (mandatory)
-	 * @param value : initial value of the property (optional)
-	 * @param ch : configuration handler managing this configurable property
-	 */
-	public ConfigurableProperty(String name, String field, String value, ConfigurationHandler ch) {
-		m_handler = ch;
-		if (name != null) { m_name = name; }
-		else { m_name = field; }
-		m_field = field;
+    /**
+     * Configurable Property Constructor.
+     * @param name : name of the property (optional)
+     * @param field : name of the field (mandatory)
+     * @param value : initial value of the property (optional)
+     * @param ch : configuration handler managing this configurable property
+     */
+    public ConfigurableProperty(String name, String field, String value, ConfigurationHandler ch) {
+        m_handler = ch;
+        if (name != null) { m_name = name; }
+        else { m_name = field; }
+        m_field = field;
 
-		if (value != null) { setValue(m_field, value); }
+        if (value != null) { setValue(m_field, value); }
 
-	}
+    }
 
-	/**
+    /**
+     * @return the type of a configurable property.
+     */
+    public String getType() {
+        Element manipulation = m_handler.getComponentManager().getComponentMetatada().getMetadata().getElements("Manipulation")[0];
+        String type = null;
+        for (int i = 0; i < manipulation.getElements("Field").length; i++) {
+            if (m_field.equals(manipulation.getElements("Field")[i].getAttribute("name"))) {
+                return manipulation.getElements("Field")[i].getAttribute("type");
+            }
+        }
+
+        if (type == null) { Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] The field " + m_field + " does not exist in the implementation"); }
+        return null;
+
+    }
+
+    /**
      * Set the value of the property.
      * @param strValue : value of the property (String)
      */
     private void setValue(String field, String strValue) {
-    	// Look for the type of the field
-    	Element manipulation = m_handler.getComponentManager().getComponentMetatada().getMetadata().getElements("Manipulation")[0];
-    	String type = null;
-    	for (int i = 0; i < manipulation.getElements("Field").length; i++) {
-    		if (field.equals(manipulation.getElements("Field")[i].getAttribute("name"))) {
-    			type = manipulation.getElements("Field")[i].getAttribute("type");
-    			break;
-    		}
-    	}
+        // Look for the type of the field
+        Element manipulation = m_handler.getComponentManager().getComponentMetatada().getMetadata().getElements("Manipulation")[0];
+        String type = null;
+        for (int i = 0; i < manipulation.getElements("Field").length; i++) {
+            if (field.equals(manipulation.getElements("Field")[i].getAttribute("name"))) {
+                type = manipulation.getElements("Field")[i].getAttribute("type");
+                break;
+            }
+        }
 
-    	if (type == null) { Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] The field " + field + " does not exist in the implementation"); return; }
+        if (type == null) { Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] The field " + field + " does not exist in the implementation"); return; }
 
-    	Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Set the value of the configurable property " + field + " [" + type + "] " + " with the value : " + strValue);
+        Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Set the value of the configurable property " + field + " [" + type + "] " + " with the value : " + strValue);
 
-    	Object value = null;
+        Object value = null;
 
         if (type.equals("string") || type.equals("String")) { value = new String(strValue); }
         if (type.equals("boolean")) { value = new Boolean(strValue); }
@@ -96,95 +115,100 @@ public class ConfigurableProperty {
         if (type.equals("long")) { value = new Long(strValue); }
         if (type.equals("float")) { value = new Float(strValue); }
         if (type.equals("double")) { value = new Double(strValue); }
-    	// Array :
-    	if (type.endsWith("[]")) {
-    		String internalType = type.substring(0, type.length() - 2);
-    		strValue = strValue.substring(1, strValue.length() - 1);
-    		String[] values = strValue.split(",");
-    		setArrayValue(internalType, values);
-    		return;
-    	}
+        // Array :
+        if (type.endsWith("[]")) {
+            String internalType = type.substring(0, type.length() - 2);
+            strValue = strValue.substring(1, strValue.length() - 1);
+            String[] values = strValue.split(",");
+            setArrayValue(internalType, values);
+            return;
+        }
 
         if (value == null) {
-        	// Else it is a neither a primitive type neither a String -> create the object by calling a constructor with a string in argument.
-        	try {
-        		Class c = m_handler.getComponentManager().getContext().getBundle().loadClass(type);
-        		Constructor cst = c.getConstructor(new Class[] {String.class});
-        		value = cst.newInstance(new Object[] {strValue});
-        	} catch (ClassNotFoundException e) {
-        		System.err.println("Class not found exception in setValue on " + type);
-        		e.printStackTrace();
-        		return;
-        	} catch (SecurityException e) {
-        		e.printStackTrace();
-        		return;
-        	} catch (NoSuchMethodException e) {
-        		System.err.println("Constructor not found exeption in setValue on " + type);
-        		e.printStackTrace();
-        		return;
-        	} catch (IllegalArgumentException e) {
-        		System.err.println("Argument problem to call the constructor of the type " + type);
-        		e.printStackTrace();
-        		return;
-        	} catch (InstantiationException e) {
-        		System.err.println("Instantiation problem  " + type);
-        		e.printStackTrace();
-        		return;
-        	} catch (IllegalAccessException e) {
-        		e.printStackTrace();
-        	} catch (InvocationTargetException e) {
-        		System.err.println("Invocation problem " + type);
-        		e.printStackTrace();
-        		return;
-        	}
+            // Else it is a neither a primitive type neither a String -> create the object by calling a constructor with a string in argument.
+            try {
+                Class c = m_handler.getComponentManager().getContext().getBundle().loadClass(type);
+                Constructor cst = c.getConstructor(new Class[] {String.class});
+                value = cst.newInstance(new Object[] {strValue});
+            } catch (ClassNotFoundException e) {
+                System.err.println("Class not found exception in setValue on " + type);
+                e.printStackTrace();
+                return;
+            } catch (SecurityException e) {
+                e.printStackTrace();
+                return;
+            } catch (NoSuchMethodException e) {
+                System.err.println("Constructor not found exeption in setValue on " + type);
+                e.printStackTrace();
+                return;
+            } catch (IllegalArgumentException e) {
+                System.err.println("Argument problem to call the constructor of the type " + type);
+                e.printStackTrace();
+                return;
+            } catch (InstantiationException e) {
+                System.err.println("Instantiation problem  " + type);
+                e.printStackTrace();
+                return;
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                System.err.println("Invocation problem " + type);
+                e.printStackTrace();
+                return;
+            }
         }
 
         m_value = value;
 
     }
 
+    /**
+     * Set array value to the current property.
+     * @param internalType : type of the property
+     * @param values : new property value
+     */
     private void setArrayValue(String internalType, String[] values) {
-   	 if (internalType.equals("string") || internalType.equals("String")) { m_value = values; return; }
+        if (internalType.equals("string") || internalType.equals("String")) { m_value = values; return; }
         if (internalType.equals("boolean")) {
-       	 boolean[] bool = new boolean[values.length];
-       	 for (int i = 0; i < values.length; i++) { bool[i] = new Boolean(values[i]).booleanValue(); }
-       	 m_value = bool;
-       	 return;
-       }
-       if (internalType.equals("byte")) {
-       	byte[] byt = new byte[values.length];
-      	 	for (int i = 0; i < values.length; i++) { byt[i] = new Byte(values[i]).byteValue(); }
-      	 	m_value = byt;
-       	return;
-       }
+            boolean[] bool = new boolean[values.length];
+            for (int i = 0; i < values.length; i++) { bool[i] = new Boolean(values[i]).booleanValue(); }
+            m_value = bool;
+            return;
+        }
+        if (internalType.equals("byte")) {
+            byte[] byt = new byte[values.length];
+            for (int i = 0; i < values.length; i++) { byt[i] = new Byte(values[i]).byteValue(); }
+            m_value = byt;
+            return;
+        }
         if (internalType.equals("short")) {
-       	 short[] shor = new short[values.length];
-       	 for (int i = 0; i < values.length; i++) { shor[i] = new Short(values[i]).shortValue(); }
-       	 m_value = shor;
-       	 return;
-       }
+            short[] shor = new short[values.length];
+            for (int i = 0; i < values.length; i++) { shor[i] = new Short(values[i]).shortValue(); }
+            m_value = shor;
+            return;
+        }
         if (internalType.equals("int")) {
-       	 int[] in = new int[values.length];
-       	 for (int i = 0; i < values.length; i++) { in[i] = new Integer(values[i]).intValue(); }
-       	 m_value = in;
-       	 return;
-       }
+            int[] in = new int[values.length];
+            for (int i = 0; i < values.length; i++) { in[i] = new Integer(values[i]).intValue(); }
+            m_value = in;
+            return;
+        }
         if (internalType.equals("long")) {
-       	 long[] ll = new long[values.length];
-       	 for (int i = 0; i < values.length; i++) { ll[i] = new Long(values[i]).longValue(); }
-       	 m_value = ll;
-       	 return;
-       }
+            long[] ll = new long[values.length];
+            for (int i = 0; i < values.length; i++) { ll[i] = new Long(values[i]).longValue(); }
+            m_value = ll;
+            return;
+        }
         if (internalType.equals("float")) {
-       	 float[] fl = new float[values.length];
-       	 for (int i = 0; i < values.length; i++) { fl[i] = new Float(values[i]).floatValue(); }
-       	 m_value = fl;
-       	 return; }
+            float[] fl = new float[values.length];
+            for (int i = 0; i < values.length; i++) { fl[i] = new Float(values[i]).floatValue(); }
+            m_value = fl;
+            return; }
         if (internalType.equals("double")) {
-       	 double[] dl = new double[values.length];
-       	 for (int i = 0; i < values.length; i++) { dl[i] = new Double(values[i]).doubleValue(); }
-       	 m_value = dl;
-       	 return; }
+            double[] dl = new double[values.length];
+            for (int i = 0; i < values.length; i++) { dl[i] = new Double(values[i]).doubleValue(); }
+            m_value = dl;
+            return; }
 
         // Else it is a neither a primitive type neither a String -> create the object by calling a constructor with a string in argument.
         try {
@@ -192,7 +216,7 @@ public class ConfigurableProperty {
             Constructor cst = c.getConstructor(new Class[] {String.class});
             Object[] ob = (Object[]) Array.newInstance(c, values.length);
             for (int i = 0; i < values.length; i++) {
-           	 ob[i] = cst.newInstance(new Object[] {values[i]});
+                ob[i] = cst.newInstance(new Object[] {values[i]});
             }
             m_value = ob;
             return;
@@ -216,7 +240,7 @@ public class ConfigurableProperty {
             System.err.println("Invocation problem " + internalType);
             e.printStackTrace();
         }
-	}
+    }
 
     /**
      * @return the name of the property.

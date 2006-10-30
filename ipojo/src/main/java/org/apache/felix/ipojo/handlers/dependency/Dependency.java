@@ -1,18 +1,20 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo.handlers.dependency;
 
@@ -22,7 +24,8 @@ import java.util.HashMap;
 import java.util.logging.Level;
 
 import org.apache.felix.ipojo.Activator;
-import org.apache.felix.ipojo.ComponentManager;
+import org.apache.felix.ipojo.ComponentManagerImpl;
+import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -90,6 +93,11 @@ public class Dependency implements ServiceListener {
      */
     private Class m_clazz;
 
+    /**
+     * LDAP Filter of the dependency.
+     */
+    private Filter m_filter;
+
 
     /**
      * Dependency contructor. After the creation the dependency is not started.
@@ -97,7 +105,7 @@ public class Dependency implements ServiceListener {
      * @param dm : the depednency metadata
      */
     public Dependency(DependencyHandler dh, DependencyMetadata dm) {
-    	m_handler = dh;
+        m_handler = dh;
         m_metadata = dm;
     }
 
@@ -115,15 +123,15 @@ public class Dependency implements ServiceListener {
      * @return the used service.
      */
     public HashMap getUsedServices() {
-    	HashMap hm = new HashMap();
-    	if (m_metadata.isMultiple()) {
-    		for (int i = 0; i < m_ref.length; i++) {
-    			if (i < m_services.length) { hm.put(((Object)m_services[i]).toString(), m_ref[i]); }
-    		}
-    	} else {
-    		if (m_ref.length != 0 && m_services.length != 0) { hm.put(((Object)m_services[0]).toString(), m_ref[0]); }
-    	}
-    	return hm;
+        HashMap hm = new HashMap();
+        if (m_metadata.isMultiple()) {
+            for (int i = 0; i < m_ref.length; i++) {
+                if (i < m_services.length) { hm.put(((Object) m_services[i]).toString(), m_ref[i]); }
+            }
+        } else {
+            if (m_ref.length != 0 && m_services.length != 0) { hm.put(((Object) m_services[0]).toString(), m_ref[0]); }
+        }
+        return hm;
     }
 
     /**
@@ -141,7 +149,7 @@ public class Dependency implements ServiceListener {
      */
     protected Object get() {
         Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Call get for a dependency on : " + m_metadata.getServiceSpecification()
-                        + " Multiple : " + m_metadata.isMultiple() + " Optional : " + m_metadata.isOptional());
+                + " Multiple : " + m_metadata.isMultiple() + " Optional : " + m_metadata.isOptional());
         try {
 
             // 1 : Test if there is any change in the reference list :
@@ -149,15 +157,15 @@ public class Dependency implements ServiceListener {
                 if (!m_metadata.isMultiple()) {
                     if (m_services.length > 0) {
                         return m_services[0]; }
-                    }
+                }
                 else {
                     return m_services;
-               }
+                }
             }
 
             // 2 : Else there is a change in the list -> recompute the m_services array
             Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Create a service array of " + m_clazz.getName());
-            m_services = (Object[])Array.newInstance(m_clazz, m_ref.length);
+            m_services = (Object[]) Array.newInstance(m_clazz, m_ref.length);
 
             for (int i = 0; i < m_ref.length; i++) {
                 m_services[i] = m_handler.getComponentManager().getContext().getService(m_ref[i]);
@@ -173,33 +181,33 @@ public class Dependency implements ServiceListener {
                 if (m_services.length > 0) {
                     return m_services[0];
                 } else {
-                		// Load the nullable class
-                		String[] segment = m_metadata.getServiceSpecification().split("[.]");
-                		String className = "org.apache.felix.ipojo." + segment[segment.length - 1] + "Nullable";
-                		Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Try to load the nullable class for " + getMetadata().getServiceSpecification() + " -> " + className);
-                		Class nullableClazz = m_handler.getNullableClass(className);
+                    // Load the nullable class
+                    String[] segment = m_metadata.getServiceSpecification().split("[.]");
+                    String className = "org.apache.felix.ipojo." + segment[segment.length - 1] + "Nullable";
+                    Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Try to load the nullable class for " + getMetadata().getServiceSpecification() + " -> " + className);
+                    Class nullableClazz = m_handler.getNullableClass(className);
 
-                		if (nullableClazz == null) {
-                			Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Cannot load the nullable class to return a dependency object for " + m_metadata.getField() + " -> " + m_metadata.getServiceSpecification());
-                			return null;
-                		}
+                    if (nullableClazz == null) {
+                        Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Cannot load the nullable class to return a dependency object for " + m_metadata.getField() + " -> " + m_metadata.getServiceSpecification());
+                        return null;
+                    }
 
-                		// The nullable class is loaded, create the object and return it
-                		Object instance = nullableClazz.newInstance();
-                		Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Nullable object created for " + getMetadata().getServiceSpecification() + " -> " + instance);
-                		return instance;
-                	}
+                    // The nullable class is loaded, create the object and return it
+                    Object instance = nullableClazz.newInstance();
+                    Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Nullable object created for " + getMetadata().getServiceSpecification() + " -> " + instance);
+                    return instance;
+                }
             }
             else { // Multiple dependency
-                    return m_services;
+                return m_services;
             }
         } catch (Exception e) {
             // There is a problem in the dependency resolving (like in stopping method)
             if (!m_metadata.isMultiple()) {
-            	Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Return null, an exception was throwed in the get method -> " + e.getMessage());
+                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Return null, an exception was throwed in the get method -> " + e.getMessage());
                 return null; }
             else {
-            	Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Return an empty array, an exception was throwed in the get method" + e.getMessage());
+                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Return an empty array, an exception was throwed in the get method" + e.getMessage());
                 return Array.newInstance(m_clazz, 0); }
         }
     }
@@ -215,133 +223,272 @@ public class Dependency implements ServiceListener {
             // If a service goes way.
             if (event.getType() == ServiceEvent.UNREGISTERING) {
                 Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] A service is gone -> " + event.getServiceReference().getBundle());
-                if (containsSR(event.getServiceReference())) {
-                		// Call unbind method
-                		callUnbindMethod(event.getServiceReference());
-                		// Unget the service reference
-                    	m_handler.getComponentManager().getContext().ungetService(event.getServiceReference());
-                        int index = removeReference(event.getServiceReference());
-
-                        // Is the state valid or invalid
-                        if (m_ref.length == 0 && !m_metadata.isOptional()) {
-                            m_state = UNRESOLVED;
-                        }
-                        if (m_ref.length == 0 && m_metadata.isOptional()) {
-                            m_state = RESOLVED;
-                        }
-                        // Is there any change ?
-                        if (!m_metadata.isMultiple() && index == 0) { m_change = true; }
-                        if (!m_metadata.isMultiple() && index != 0) { m_change = false; }
-                        if (m_metadata.isMultiple()) { m_change = true;  }
-                    }
-                    m_handler.checkContext();
-                    return;
+                if (containsSR(event.getServiceReference())) { departureManagement(event.getServiceReference()); }
+                return;
             }
 
             // If a service arrives
             if (event.getType() == ServiceEvent.REGISTERED) {
-                // Add the new service inside the ref list
-                Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Add a service for a dependency");
-                addReference(event.getServiceReference());
-                if (isSatisfied()) {
-                    m_state = RESOLVED;
-                    if (m_metadata.isMultiple() || m_ref.length == 1) { m_change = true; }
-                    callBindMethod(event.getServiceReference());
+                if (m_filter.match(event.getServiceReference())) { arrivalManagement(event.getServiceReference()); return; }
+                else { return; }
+            }
+
+            // If a service is modified
+            if (event.getType() == ServiceEvent.MODIFIED) {
+                if (m_filter.match(event.getServiceReference())) {
+                    Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] A service with a filter matching is arrived -> " + event.getServiceReference().getBundle());
+                    if (!containsSR(event.getServiceReference())) { arrivalManagement(event.getServiceReference()); }
                 }
-                m_handler.checkContext();
+                else {
+                    Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] A service with a filter matching has gone -> " + event.getServiceReference().getBundle());
+                    if (containsSR(event.getServiceReference())) { departureManagement(event.getServiceReference()); }
+                }
+                return;
             }
 
         }
     }
 
-    private void callUnbindMethod(ServiceReference ref) {
-        if (m_handler.getComponentManager().getState() == ComponentManager.VALID && m_metadata.isMultiple()) {
-        	for (int i = 0; i < m_metadata.getCallbacks().length; i++) {
-        		if (m_metadata.getCallbacks()[i].getMethodType() == DependencyCallback.UNBIND) {
-        			// Try to call the bind method with a service reference inside
-        			try {
-						m_metadata.getCallbacks()[i].call(new Object[] {ref});
-					} catch (NoSuchMethodException e) {
-						// The method was not found : try without service reference
-						try {
-							m_metadata.getCallbacks()[i].call();
-						} catch (NoSuchMethodException e1) {
-							// The method was not found : try with the service object
-							try {
-								m_metadata.getCallbacks()[i].call(new Object[] {m_handler.getComponentManager().getContext().getService(ref)});
-							} catch (NoSuchMethodException e2) {
-								Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Unbind method not found : " + e1.getMessage());
-								return;
-							} catch (IllegalAccessException e2) {
-								Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on unbind method : " + e2.getMessage());
-								return;
-							} catch (InvocationTargetException e2) {
-								Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the unbind method " + e2.getMessage());
-								return;
-							}
-						} catch (IllegalAccessException e1) {
-							Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on unbind method : " + e1.getMessage());
-							return;
-						} catch (InvocationTargetException e1) {
-							Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the unbind method " + e1.getMessage());
-							return;
-						}
+    /**
+     * Method called when a service arrives.
+     * @param ref : the arriving service reference
+     */
+    private void arrivalManagement(ServiceReference ref) {
+        // Add the new service inside the ref list
+        Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Add a service for a dependency");
+        addReference(ref);
+        if (isSatisfied()) {
+            m_state = RESOLVED;
+            if (m_metadata.isMultiple() || m_ref.length == 1) { m_change = true; callBindMethod(ref); }
+        }
+        m_handler.checkContext();
+    }
 
-					} catch (IllegalAccessException e) {
-						Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e.getMessage());
-						return;
-					} catch (InvocationTargetException e) {
-						Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e.getMessage());
-						return;
-					}
-        		}
-        	}
+    /**
+     * Method called when a service goes away.
+     * @param ref : the leaving service reference
+     */
+    private void departureManagement(ServiceReference ref) {
+        // Call unbind method
+        if (!m_metadata.isMultiple() && ref == m_ref[0]) { callUnbindMethod(ref); }
+        if (m_metadata.isMultiple()) { callUnbindMethod(ref); }
+
+        // Unget the service reference
+        m_handler.getComponentManager().getContext().ungetService(ref);
+        int index = removeReference(ref);
+
+        // Is the state valid or invalid
+        if (m_ref.length == 0 && !m_metadata.isOptional()) {
+            m_state = UNRESOLVED;
+        }
+        if (m_ref.length == 0 && m_metadata.isOptional()) {
+            m_state = RESOLVED;
+        }
+        // Is there any change ?
+        if (!m_metadata.isMultiple() && index == 0) {
+            m_change = true;
+            if (m_ref.length != 0) { callBindMethod(m_ref[0]); }
+        }
+        if (!m_metadata.isMultiple() && index != 0) { m_change = false; }
+        if (m_metadata.isMultiple()) { m_change = true;  }
+
+        m_handler.checkContext();
+        return;
+    }
+
+    /**
+     * Call unbind callback method.
+     * @param ref : reference to send (if accepted) to the method
+     */
+    private void callUnbindMethod(ServiceReference ref) {
+        if (m_handler.getComponentManager().getState() == ComponentManagerImpl.VALID) {
+            for (int i = 0; i < m_metadata.getCallbacks().length; i++) {
+                if (m_metadata.getCallbacks()[i].getMethodType() == DependencyCallback.UNBIND) {
+                    // Try to call the bind method with a service reference inside
+                    try {
+                        m_metadata.getCallbacks()[i].call(new Object[] {ref});
+                    } catch (NoSuchMethodException e) {
+                        // The method was not found : try without service reference
+                        try {
+                            m_metadata.getCallbacks()[i].call();
+                        } catch (NoSuchMethodException e1) {
+                            // The method was not found : try with the service object
+                            try {
+                                m_metadata.getCallbacks()[i].call(new Object[] {m_handler.getComponentManager().getContext().getService(ref)});
+                            } catch (NoSuchMethodException e2) {
+                                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Unbind method not found : " + e1.getMessage());
+                                return;
+                            } catch (IllegalAccessException e2) {
+                                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on unbind method : " + e2.getMessage());
+                                return;
+                            } catch (InvocationTargetException e2) {
+                                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the unbind method " + e2.getMessage());
+                                return;
+                            }
+                        } catch (IllegalAccessException e1) {
+                            Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on unbind method : " + e1.getMessage());
+                            return;
+                        } catch (InvocationTargetException e1) {
+                            Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the unbind method " + e1.getMessage());
+                            return;
+                        }
+
+                    } catch (IllegalAccessException e) {
+                        Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e.getMessage());
+                        return;
+                    } catch (InvocationTargetException e) {
+                        Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e.getMessage());
+                        return;
+                    }
+                }
+            }
         }
     }
 
-    private void callBindMethod(ServiceReference ref) {
-    	// call bind method :
-        if (m_handler.getComponentManager().getState() == ComponentManager.VALID && m_metadata.isMultiple()) {
-        	for (int i = 0; i < m_metadata.getCallbacks().length; i++) {
-        		if (m_metadata.getCallbacks()[i].getMethodType() == DependencyCallback.BIND) {
-        			// Try to call the bind method with a service reference inside
-        			try {
-						m_metadata.getCallbacks()[i].call(new Object[] {ref});
-					} catch (NoSuchMethodException e) {
-						// The method was not found : try without service reference
-						try {
-							m_metadata.getCallbacks()[i].call();
-						} catch (NoSuchMethodException e1) {
-							// The method was not found : try with the service object
-							try {
-								m_metadata.getCallbacks()[i].call(new Object[] {m_handler.getComponentManager().getContext().getService(ref)});
-							} catch (NoSuchMethodException e2) {
-								Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Bind method not found : " + e1.getMessage());
-								return;
-							} catch (IllegalAccessException e2) {
-								Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e2.getMessage());
-								return;
-							} catch (InvocationTargetException e2) {
-								Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e2.getMessage());
-								return;
-							}
-						} catch (IllegalAccessException e1) {
-							Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e1.getMessage());
-							return;
-						} catch (InvocationTargetException e1) {
-							Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e1.getMessage());
-							return;
-						}
+    /**
+     * Call the bind method.
+     * @param instance : instance on which calling the bind method.
+     */
+    protected void callBindMethod(Object instance) {
+        // Check optional case : nullable object case : do not call bind on nullable object
+        if (m_metadata.isOptional() && m_ref.length == 0) { return; }
 
-					} catch (IllegalAccessException e) {
-						Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e.getMessage());
-						return;
-					} catch (InvocationTargetException e) {
-						Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e.getMessage());
-						return;
-					}
-        		}
-        	}
+
+        if (m_metadata.isMultiple()) {
+            for (int i = 0; i < m_ref.length; i++) {
+                for (int j = 0; j < m_metadata.getCallbacks().length; j++) {
+                    if (m_metadata.getCallbacks()[j].getMethodType() == DependencyCallback.BIND) {
+                        // Try to call the bind method with a service reference inside
+                        try {
+                            m_metadata.getCallbacks()[j].call(instance, new Object[] {m_ref[i]});
+                        } catch (NoSuchMethodException e) {
+                            // The method was not found : try without service reference
+                            try {
+                                m_metadata.getCallbacks()[j].call(instance);
+                            } catch (NoSuchMethodException e1) {
+                                // The method was not found : try with the service object
+                                try {
+                                    m_metadata.getCallbacks()[j].call(instance, new Object[] {m_handler.getComponentManager().getContext().getService(m_ref[i])});
+                                } catch (NoSuchMethodException e2) {
+                                    Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Bind method not found : " + e1.getMessage());
+                                    return;
+                                } catch (IllegalAccessException e2) {
+                                    Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e2.getMessage());
+                                    return;
+                                } catch (InvocationTargetException e2) {
+                                    Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e2.getMessage());
+                                    return;
+                                }
+                            } catch (IllegalAccessException e1) {
+                                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e1.getMessage());
+                                return;
+                            } catch (InvocationTargetException e1) {
+                                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e1.getMessage());
+                                return;
+                            }
+                        } catch (IllegalAccessException e) {
+                            Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e.getMessage());
+                            return;
+                        } catch (InvocationTargetException e) {
+                            Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e.getMessage());
+                            return;
+                        }
+                    }
+                }
+            }
+        } else {
+            for (int j = 0; j < m_metadata.getCallbacks().length; j++) {
+                if (m_metadata.getCallbacks()[j].getMethodType() == DependencyCallback.BIND) {
+                    // Try to call the bind method with a service reference inside
+                    try {
+                        m_metadata.getCallbacks()[j].call(instance, new Object[] {m_ref[0]});
+                    } catch (NoSuchMethodException e) {
+                        // The method was not found : try without service reference
+                        try {
+                            Activator.getLogger().log(Level.WARNING, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Call the Bind method");
+                            m_metadata.getCallbacks()[j].call(instance);
+                        } catch (NoSuchMethodException e1) {
+                            // The method was not found : try with the service object
+                            try {
+                                m_metadata.getCallbacks()[j].call(new Object[] {m_handler.getComponentManager().getContext().getService(m_ref[0])});
+                            } catch (NoSuchMethodException e2) {
+                                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Bind method not found : " + e1.getMessage());
+                                return;
+                            } catch (IllegalAccessException e2) {
+                                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e2.getMessage());
+                                return;
+                            } catch (InvocationTargetException e2) {
+                                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e2.getMessage());
+                                return;
+                            }
+                        } catch (IllegalAccessException e1) {
+                            Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e1.getMessage());
+                            return;
+                        } catch (InvocationTargetException e1) {
+                            Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e1.getMessage());
+                            return;
+                        }
+
+                    } catch (IllegalAccessException e) {
+                        Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e.getMessage());
+                        return;
+                    } catch (InvocationTargetException e) {
+                        Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e.getMessage());
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Call bind method with the service reference in parameter (if accepted).
+     * @param ref : the service reference of the new service
+     */
+    private void callBindMethod(ServiceReference ref) {
+        // call bind method :
+        if (m_handler.getComponentManager().getState() == ComponentManagerImpl.VALID) {
+            for (int i = 0; i < m_metadata.getCallbacks().length; i++) {
+                if (m_metadata.getCallbacks()[i].getMethodType() == DependencyCallback.BIND) {
+                    // Try to call the bind method with a service reference inside
+                    try {
+                        m_metadata.getCallbacks()[i].call(new Object[] {ref});
+                    } catch (NoSuchMethodException e) {
+                        // The method was not found : try without service reference
+                        try {
+                            Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Call the Bind method");
+                            m_metadata.getCallbacks()[i].call();
+                        } catch (NoSuchMethodException e1) {
+                            // The method was not found : try with the service object
+                            try {
+                                m_metadata.getCallbacks()[i].call(new Object[] {m_handler.getComponentManager().getContext().getService(ref)});
+                            } catch (NoSuchMethodException e2) {
+                                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Bind method not found : " + e1.getMessage());
+                                return;
+                            } catch (IllegalAccessException e2) {
+                                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e2.getMessage());
+                                return;
+                            } catch (InvocationTargetException e2) {
+                                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e2.getMessage());
+                                return;
+                            }
+                        } catch (IllegalAccessException e1) {
+                            Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e1.getMessage());
+                            return;
+                        } catch (InvocationTargetException e1) {
+                            Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e1.getMessage());
+                            return;
+                        }
+
+                    } catch (IllegalAccessException e) {
+                        Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Illegal access on bind method : " + e.getMessage());
+                        return;
+                    } catch (InvocationTargetException e) {
+                        Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Dependency Callback Error : Invocation Target Exception in the bind method " + e.getMessage());
+                        return;
+                    }
+                }
+            }
         }
     }
 
@@ -372,13 +519,16 @@ public class Dependency implements ServiceListener {
         try {
             // Look if the service is already present :
             ServiceReference[] sr = m_handler.getComponentManager().getContext().getServiceReferences(
-            		m_metadata.getServiceSpecification(), filter);
+                    m_metadata.getServiceSpecification(), filter);
             if (sr != null) {
                 for (int i = 0; i < sr.length; i++) { addReference(sr[i]); }
                 m_state = RESOLVED;
-                }
+            }
             // Register a listener :
-            m_handler.getComponentManager().getContext().addServiceListener(this, filter);
+            //m_handler.getComponentManager().getContext().addServiceListener(this, filter); // Try without filter
+            m_handler.getComponentManager().getContext().addServiceListener(this);
+            m_filter = m_handler.getComponentManager().getContext().createFilter(filter); // Store the filter
+            Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Create a filter from : " + filter);
             m_change = true;
         }
         catch (InvalidSyntaxException e1) {
@@ -396,7 +546,7 @@ public class Dependency implements ServiceListener {
 
         // Unget all services references
         for (int i = 0; i < m_ref.length; i++) {
-        	m_handler.getComponentManager().getContext().ungetService(m_ref[i]);
+            m_handler.getComponentManager().getContext().ungetService(m_ref[i]);
         }
 
         m_ref = new ServiceReference[0];
@@ -410,7 +560,8 @@ public class Dependency implements ServiceListener {
      * @return the state of the dependency (1 : valid, 2 : invalid)
      */
     public int getState() {
-        return m_state;
+        if (m_metadata.isOptional()) { return 1; }
+        else { return m_state; }
     }
 
     /**

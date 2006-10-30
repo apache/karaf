@@ -1,18 +1,20 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo.manipulation;
 
@@ -66,14 +68,16 @@ public class Manipulator {
      * @param bundle    The component's m_bundle
      * @param name      The name of the class
      * @param cm        The component manager attached to this manipulation
-     * @return          A byte array.
      * @throws Exception : throwed if the manipulation failed.
      */
-    public void preProcess(String name, File outputDirectory) throws Exception {
+    public boolean preProcess(String name, File outputDirectory) throws Exception {
 
         // gets an input stream to read the bytecode of the class
         String path = outputDirectory+"/"+name.replace('.', '/') + ".class";
         File clazz = new File(path);
+        
+        if(!clazz.exists()) { return false; }
+        
 		URL url = clazz.toURI().toURL();
 
         //if (url == null) { throw new ClassNotFoundException(name); }
@@ -118,8 +122,9 @@ public class Manipulator {
                 fos.close();
                 IPojoPluginConfiguration.getLogger().log(Level.INFO, "Put the file " + file.getAbsolutePath() + " in the jar file");
             } catch (Exception e) { System.err.println("Problem to write the adapted class on the file system " + " [ "+ file.getAbsolutePath() +" ] " + e.getMessage()); }
-
         }
+        // The file is in the bundle
+        return true;
     }
 
 

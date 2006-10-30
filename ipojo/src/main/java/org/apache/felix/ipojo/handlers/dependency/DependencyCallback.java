@@ -1,18 +1,20 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo.handlers.dependency;
 
@@ -27,20 +29,20 @@ import org.apache.felix.ipojo.Callback;
  */
 public class DependencyCallback {
 
-	/**
-	 * Bind method (called when a service arrives).
-	 */
-	public static final int BIND = 0;
+    /**
+     * Bind method (called when a service arrives).
+     */
+    public static final int BIND = 0;
 
-	/**
-	 * Unbind method (called when a service disappears).
-	 */
-	public static final int UNBIND = 1;
+    /**
+     * Unbind method (called when a service disappears).
+     */
+    public static final int UNBIND = 1;
 
-	/**
-	 * Is the method a bind method or an unbind method ?
-	 */
-	private int m_methodType;
+    /**
+     * Is the method a bind method or an unbind method ?
+     */
+    private int m_methodType;
 
     /**
      * Callback object.
@@ -56,7 +58,7 @@ public class DependencyCallback {
      * @param isStatic : is the method to call static ?
      */
     public DependencyCallback(Dependency dep, String method, int methodType, boolean isStatic) {
-    	m_methodType = methodType;
+        m_methodType = methodType;
         m_callback = new Callback(method, isStatic, dep.getDependencyHandler().getComponentManager());
     }
 
@@ -72,7 +74,7 @@ public class DependencyCallback {
      * @throws IllegalAccessException : The method can not be invoked
      */
     protected void call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-    	m_callback.call();
+        m_callback.call();
     }
 
     /**
@@ -82,6 +84,28 @@ public class DependencyCallback {
      * @throws IllegalAccessException : The method can not be invoked
      */
     protected void call(Object[] arg) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-    	m_callback.call(arg);
+        m_callback.call(arg);
+    }
+
+    /**
+     * Call the callback on the given instance.
+     * @param instance : the instance on which call the callback
+     * @throws NoSuchMethodException : the method is not found
+     * @throws IllegalAccessException : the method could not be called
+     * @throws InvocationTargetException : an error happens in the called method
+     */
+    protected void call(Object instance) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException { m_callback.call(instance); }
+
+    /**
+     * Call the callback on the given instance with the given argument.
+     * @param instance : the instance on which call the callback
+     * @param arg : the argument of the callback
+     * @throws NoSuchMethodException : the method is not found
+     * @throws IllegalAccessException : the method could not be called
+     * @throws InvocationTargetException : an error happens in the called method
+     * @throws InvocationTargetException
+     */
+    protected void call(Object instance, Object[] arg) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        m_callback.call(instance, arg);
     }
 }

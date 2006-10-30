@@ -1,18 +1,20 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo.handlers.providedservice;
 
@@ -23,7 +25,7 @@ package org.apache.felix.ipojo.handlers.providedservice;
  */
 public class ProvidedServiceMetadata {
 
-	 /**
+    /**
      * Factory Policy : SINGLETON_FACTORY.
      */
     public static final int SINGLETON_FACTORY = 0;
@@ -34,63 +36,57 @@ public class ProvidedServiceMetadata {
     public static final int SERVICE_FACTORY = 1;
 
     /**
-     * Factory policy : COMPONENT_FACTORY.
-     * TODO : Component_factory behavior
+     * At this time, it is only the java interface full name.
      */
-    public static final int COMPONENT_FACTORY = 2;
+    private String[] m_serviceSpecification = new String[0];
 
-	/**
-	 * At this time, it is only the java interface full name.
-	 */
-	private String[] m_serviceSpecification = new String[0];
+    /**
+     * List of proeprty metadata.
+     */
+    private PropertyMetadata[] m_properties = new PropertyMetadata[0];
 
-	/**
-	 * List of proeprty metadata.
-	 */
-	private PropertyMetadata[] m_properties = new PropertyMetadata[0];
+    /**
+     * Foactory policy.
+     */
+    private int m_factoryPolicy = SINGLETON_FACTORY;
 
-	/**
-	 * Foactory policy.
-	 */
-	private int m_factoryPolicy = SINGLETON_FACTORY;
+    //CONSTRUCTOR :
 
-	//CONSTRUCTOR :
-
-	/**
+    /**
      * Constructor.
-	 * @param specification : service specification (i.e. the interface)
-	 * @param factoryPolicy : the facotry policy.
-	 */
-	public ProvidedServiceMetadata(String[] specification, int factoryPolicy) {
-		m_serviceSpecification = specification;
-		m_factoryPolicy = factoryPolicy;
-	}
+     * @param specification : service specification (i.e. the interface)
+     * @param factoryPolicy : the facotry policy.
+     */
+    public ProvidedServiceMetadata(String[] specification, int factoryPolicy) {
+        m_serviceSpecification = specification;
+        m_factoryPolicy = factoryPolicy;
+    }
 
-	// GETTERS :
+    // GETTERS :
 
 
-	/**
-	 * @return the service specification (i.e. the interface)
-	 */
-	public String[] getServiceSpecification() { return m_serviceSpecification; }
+    /**
+     * @return the service specification (i.e. the interface)
+     */
+    public String[] getServiceSpecification() { return m_serviceSpecification; }
 
-	/**
-	 * @return the property metadata list.
-	 */
-	public PropertyMetadata[] getProperties() { return m_properties; }
+    /**
+     * @return the property metadata list.
+     */
+    public PropertyMetadata[] getProperties() { return m_properties; }
 
-	/**
-	 * @return the factory policy.
-	 */
-	public int getFactoryPolicy() { return m_factoryPolicy; }
+    /**
+     * @return the factory policy.
+     */
+    public int getFactoryPolicy() { return m_factoryPolicy; }
 
-	// SETTERS  :
+    // SETTERS  :
 
-	/**
+    /**
      * Add the given property metadata to the property metadata list.
-	 * @param p : property metdata to add
-	 */
-	protected void addProperty(PropertyMetadata p) {
+     * @param p : property metdata to add
+     */
+    protected void addProperty(PropertyMetadata p) {
         for (int i = 0; (m_properties != null) && (i < m_properties.length); i++) {
             if (m_properties[i] == p) { return; }
         }
@@ -101,8 +97,6 @@ public class ProvidedServiceMetadata {
             newProp[m_properties.length] = p;
             m_properties = newProp;
         }
-        else {
-        	m_properties = new PropertyMetadata[] {p};
-        }
-	}
+        else { m_properties = new PropertyMetadata[] {p}; }
+    }
 }

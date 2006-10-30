@@ -19,52 +19,59 @@
 package org.apache.felix.ipojo;
 
 /**
- * The component manager class manages one instance of a component type.
+ * Property Information.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public interface ComponentManager {
+public class PropertyInfo {
 
     /**
-     * Component State : INVALID.
-     * The component is invalid when it start or when a component dependency is unvalid.
+     * Name of the property.
      */
-    int INVALID = 1;
+    private String m_name;
 
     /**
-     * Component State : VALID.
-     * The component is resolved when it is running and all its component dependencies are valid.
+     * Type of the property.
      */
-    int VALID = 2;
+    private String m_type;
 
     /**
-     * Start the component manager.
+     * Default value of the property.
      */
-    void start();
+    private String m_value = null;
 
     /**
-     * Stop the component manager.
+     * Constructor.
+     * @param name : name of the property
+     * @param type : type of the property
+     * @param value : default value of the property
      */
-    void stop();
+    public PropertyInfo(String name, String type, String value) {
+        m_name = name;
+        m_type = type;
+        m_value = value;
+    }
 
     /**
-     * @return the actual state of the component.
+     * @return the property name.
      */
-    int getState();
+    public String getName() { return m_name; }
 
     /**
-     * @return the component type information.
+     * @return the property type.
      */
-    ComponentInfo getComponentInfo();
+    public String getType() { return m_type; }
 
     /**
-     * @return the component metadata.
+     * @return the default value for the property.
      */
-    ComponentMetadata getComponentMetatada();
+    public String getValue() { return m_value; }
 
     /**
-     * @return the factory of the component
+     * @see java.lang.Object#toString()
      */
-    ComponentManagerFactory getFactory();
-
+    public String toString() {
+        if (m_value != null) { return getName() + " - " + getType() + " - " + getValue(); }
+        else { return getName() + " - " + getType() + " - CONFIGURABLE"; }
+    }
 
 }

@@ -16,12 +16,50 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo;
+package org.apache.felix.ipojo.architecture;
+
 
 /**
- * A nullable object must implement this interface.
+ * Handler Description.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public interface Nullable {
-    // Nothing
+public class HandlerDescription {
+
+
+    /**
+     * Handler Class Name (i.e namespace).
+     */
+    private String m_handlerName;
+
+    /**
+     * Is the handler valid.
+     */
+    private boolean m_isValid;
+
+
+    /**
+     * Constructor.
+     * @param name : handler name
+     * @param isValid : is the handler valid
+     */
+    public HandlerDescription(String name, boolean isValid) {
+        m_handlerName = name;
+        m_isValid = isValid;
+    }
+
+    /**
+     * @return true if the handler is valid.
+     */
+    public boolean isValid() { return m_isValid; }
+
+    /**
+     * @return the handler name (i.e. namespace).
+     */
+    public String getHandlerName() { return m_handlerName; }
+
+    /**
+     * @return the handler information.
+     */
+    public String getHandlerInfo() { return ""; };
+
 }

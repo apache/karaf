@@ -1,18 +1,20 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo.architecture;
 
@@ -50,11 +52,11 @@ public class DependencyDescription {
      * Filter.
      */
     private String m_filter;
+
     /**
      * Hashmap [Instance reference, service reference] of the used service.
      */
     private HashMap m_usedServices = new HashMap();
-
 
     /**
      * The list of service reference.
@@ -62,45 +64,29 @@ public class DependencyDescription {
     private ServiceReference[] m_serviceReferences;
 
     /**
-     * Parent of the dependency either de ProvidedServiceDescription or a ComponentDescription.
-     */
-    private Object m_parent;
-
-
-    /**
      * @return true if the dependency is a multiple dependency.
      */
-    public boolean isMultiple() {
-        return m_multiple;
-    }
+    public boolean isMultiple() { return m_multiple; }
 
     /**
      * @return true if the dependency is an optional dependency.
      */
-    public boolean isOptional() {
-        return m_optional;
-    }
+    public boolean isOptional() { return m_optional; }
 
     /**
      * @return the filter.
      */
-    public String getFilter() {
-        return m_filter;
-    }
+    public String getFilter() { return m_filter; }
 
     /**
      * @return the needed interface.
      */
-    public String getInterface() {
-        return m_interface;
-    }
+    public String getInterface() { return m_interface; }
 
     /**
      * @return the state of the dependency.
      */
-    public int getState() {
-        return m_state;
-    }
+    public int getState() { return m_state; }
 
     /**
      * Constructor.
@@ -119,37 +105,23 @@ public class DependencyDescription {
         m_filter = filter;
         m_state = state;
         m_serviceReferences = new ServiceReference[0];
-        m_parent = parent;
     }
 
     /**
      * @return the array of service reference (only if the cardinality could be n).
      */
-    public ServiceReference[] getServiceReferences() {
-        return m_serviceReferences;
-    }
+    public ServiceReference[] getServiceReferences() { return m_serviceReferences; }
 
     /**
      * @return the ServiceReference (only if the cardinality could be 1).
      */
-    public ServiceReference getServiceReference() {
-        return m_serviceReferences[0];
-    }
+    public ServiceReference getServiceReference() { return m_serviceReferences[0]; }
 
     /**
      * Set the service reference array.
      * @param sr : the array of service reference
      */
-    public void setServiceReferences(ServiceReference[] sr) {
-        m_serviceReferences = sr;
-    }
-
-    /**
-     * @return the parent of the dependency
-     */
-    public Object getParent() {
-        return m_parent;
-    }
+    public void setServiceReferences(ServiceReference[] sr) { m_serviceReferences = sr; }
 
     /**
      * @return the hashmap [object reference, service reference] containing the used services
@@ -161,7 +133,7 @@ public class DependencyDescription {
      * @param hm : the new usedService
      */
     public void setUsedServices(HashMap hm) {
-    	m_usedServices = hm;
+        m_usedServices = hm;
     }
 
 

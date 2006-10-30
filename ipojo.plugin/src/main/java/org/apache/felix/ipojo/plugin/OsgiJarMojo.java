@@ -1,20 +1,21 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.felix.ipojo.plugin;
 
 import java.io.*;
@@ -505,7 +506,8 @@ public class OsgiJarMojo extends AbstractMojo {
 	 * Calculate the bundle class path based on the list of JARs in our bundle.
 	 * This list includes outselves. We also calculate the Bundle-Classpath
 	 * header (a bit clumsy) This is a bit cheap, so maybe this needs to be
-	 * changed TODO
+	 * changed 
+
 	 * 
 	 * @param mainJar
 	 * @return
@@ -848,7 +850,7 @@ public class OsgiJarMojo extends AbstractMojo {
 	private Element[] parseXMLMetadata(String path) throws MojoExecutionException {
 		File metadata = new File(outputDirectory+path);
 		URL url;
-		Element[] components = null;
+		Element[] meta = null;
 		try {
 			url = metadata.toURI().toURL();
 			if (url == null) { 
@@ -863,7 +865,7 @@ public class OsgiJarMojo extends AbstractMojo {
 			InputSource is = new InputSource(stream);
 			parser.parse(is);
 		    
-		    components = handler.getComponentsMetadata();
+		    meta = handler.getMetadata();
 		    
 		} catch (MalformedURLException e) {
 			getLog().error("Malformed URL for " + outputDirectory+path+ "("+e.getMessage()+")");
@@ -876,12 +878,12 @@ public class OsgiJarMojo extends AbstractMojo {
 			throw new MojoExecutionException("[iPOJO] Parsing Error when parsing the XML file " + outputDirectory+path);
 		}
 		
-		if(components == null || components.length == 0) {
-			getLog().error("No component in " + outputDirectory+path);
+		if(meta == null || meta.length == 0) {
+			getLog().error("No component in " + outputDirectory+path); //TODO : change the message
 			throw new MojoExecutionException("[iPOJO] No component in " + outputDirectory+path);
 		}
 		
-		return components;
+		return meta;
 	}
 	
 	private Element[] parseManifestMetadata(String metadata) throws MojoExecutionException {
@@ -908,18 +910,18 @@ public class OsgiJarMojo extends AbstractMojo {
 		//Try to read the content of a file of the ouptut directory
 		getLog().info("iPOJO Manipulation ...");
 		
-		Element[] components = null;
+		Element[] original_meta = null;
 		
 		// Get the metadata.xml location 
 		String path = (String) osgiManifest.getEntries().get("iPOJO-Metadata");
 		
 		if(path != null) {
 			if(!path.startsWith("/")) { path = "/" + path; }
-			components = parseXMLMetadata(path);
+			original_meta = parseXMLMetadata(path);
 		} else {
 			String meta_ = (String) osgiManifest.getEntries().get("iPOJO-Components");
 			if(meta_ != null) {
-				components = parseManifestMetadata(meta_);
+				original_meta = parseManifestMetadata(meta_);
 			} else {
 				getLog().error("Neither iPOJO-Metadata nor iPOJO-Components are in the manifest, please in the osgi-bundle packaging instead og ipojo-bundle");
 				throw new MojoExecutionException("[iPOJO] Neither iPOJO-Metadata nor iPOJO-Components are in the manifest");
@@ -927,45 +929,49 @@ public class OsgiJarMojo extends AbstractMojo {
 		}
 		
 		Manipulator manipulator = new Manipulator();
-		String[] metadata = new String[components.length];
+		String[] metadata = new String[original_meta.length];
 		String meta = "";
-		if(namespaces == null) { namespaces = new String[components.length][]; }
-        for(int i = 0; i < components.length; i++) {
-        	getLog().info("Component Class Name : " + components[i].getAttribute("className"));
-        	namespaces[i] = components[i].getNamespaces();
-        	try {
-				manipulator.preProcess(components[i].getAttribute("className"), outputDirectory);
-			} catch (Exception e) {
-				getLog().error("Manipulation error in the class : " + components[i].getAttribute("className") + "("+e.getMessage()+")");
-				throw new MojoExecutionException("[iPOJO] Manipulation error in the class : " + components[i].getAttribute("className"));
-			}
+		
+		if(namespaces == null) { namespaces = new String[original_meta.length][]; } //NO
+        for(int i = 0; i < original_meta.length; i++) {
+        	if(original_meta[i].getName().equalsIgnoreCase("component")) { 
+        		getLog().info("Component Class Name : " + original_meta[i].getAttribute("className"));
+        		namespaces[i] = original_meta[i].getNamespaces(); 
+        		try {
+        			manipulator.preProcess(original_meta[i].getAttribute("className"), outputDirectory);
+        		} catch (Exception e) {
+        			getLog().error("Manipulation error in the class : " + original_meta[i].getAttribute("className") + "("+e.getMessage()+")");
+        			throw new MojoExecutionException("[iPOJO] Manipulation error in the class : " + original_meta[i].getAttribute("className"));
+        		}
         	
-        	getLog().info("Add manipulation metadata for : " + components[i].getAttribute("className"));
-        	// Insert information to metadata
-        	Element elem = new Element("Manipulation", "");
-        	for(int j = 0; j < manipulator.getInterfaces().length; j++) {
-        		// Create an interface element for each implemented interface
-        		Element itf = new Element("Interface", "");
-        		Attribute att =new Attribute("name", manipulator.getInterfaces()[j]);
-        		itf.addAttribute(att);
-        		elem.addElement(itf);
-        	}
+        		getLog().info("Add manipulation metadata for : " + original_meta[i].getAttribute("className"));
+        		// Insert information to metadata
+        		Element elem = new Element("Manipulation", "");
+        		for(int j = 0; j < manipulator.getInterfaces().length; j++) {
+        			// Create an interface element for each implemented interface
+        			Element itf = new Element("Interface", "");
+        			Attribute att =new Attribute("name", manipulator.getInterfaces()[j]);
+        			itf.addAttribute(att);
+        			elem.addElement(itf);
+        		}
 
-        	for(Iterator it = manipulator.getFields().keySet().iterator(); it.hasNext(); ) {
-        		Element field = new Element("Field", "");
-        		String name = (String) it.next();
-        		String type = (String) manipulator.getFields().get(name);
-        		Attribute attName =new Attribute("name", name);
-        		Attribute attType =new Attribute("type", type);
-        		field.addAttribute(attName);
-        		field.addAttribute(attType);
-        		elem.addElement(field);
-        	}
+        		for(Iterator it = manipulator.getFields().keySet().iterator(); it.hasNext(); ) {
+        			Element field = new Element("Field", "");
+        			String name = (String) it.next();
+        			String type = (String) manipulator.getFields().get(name);
+        			Attribute attName =new Attribute("name", name);
+        			Attribute attType =new Attribute("type", type);
+        			field.addAttribute(attName);
+        			field.addAttribute(attType);
+        			elem.addElement(field);
+        		}
 
-        	components[i].addElement(elem);
+        		original_meta[i].addElement(elem);
+        	} else { namespaces[i] = new String[0]; }
+
         	
         	// Transform the metadate to manifest metadata
-        	metadata[i] = buildManifestMetadata(components[i], "");
+        	metadata[i] = buildManifestMetadata(original_meta[i], "");
         	meta = meta + metadata[i];
         }
         

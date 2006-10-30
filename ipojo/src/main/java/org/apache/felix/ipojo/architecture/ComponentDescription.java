@@ -1,23 +1,22 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo.architecture;
-
-import java.util.HashMap;
-
 
 /**
  * Component Description.
@@ -32,19 +31,14 @@ public class ComponentDescription {
     private String m_className;
 
     /**
-     * List of provided service.
+     * The name of the component (instance).
      */
-    private ProvidedServiceDescription[] m_provideServices = new ProvidedServiceDescription[0];
+    private String m_name;
 
     /**
-     * List of dependencies.
+     * Handlers of the component instance.
      */
-    private DependencyDescription[] m_dependencies = new DependencyDescription[0];
-
-    /**
-     * Hashmap [Instance reference, service reference] of the used service.
-     */
-    private HashMap m_usedServices = new HashMap();
+    private HandlerDescription[] m_handlers = new HandlerDescription[0];
 
     /**
      * Created Instances of the components.
@@ -57,16 +51,28 @@ public class ComponentDescription {
     private int m_state;
 
     /**
+     * BundleId of the component.
+     */
+    private long m_bundleId;
+
+    /**
      * Constructor.
      * @param name : the name of the component (the class name).
      * @param state : the state of the component.
      */
-    public ComponentDescription(String name, int state) {
-        m_className = name;
+    public ComponentDescription(String name, String className, int state, long bundleId) {
+        m_name = name;
+        m_className = className;
         m_state = state;
-        m_usedServices.clear();
         m_instances = new String[0];
+        m_handlers = new HandlerDescription[0];
+        m_bundleId = bundleId;
     }
+
+    /**
+     * @return the name of the component.
+     */
+    public String getName() { return m_name; }
 
     /**
      * @return the created instances
@@ -84,67 +90,43 @@ public class ComponentDescription {
     public String getClassName() { return m_className; }
 
     /**
-     * @return the live dependency list
+     * @return the live handler list
      */
-    public DependencyDescription[] getDependencies() { return m_dependencies; }
+    public HandlerDescription[] getHandlers() { return m_handlers; }
 
     /**
-     * @return the live provided service list
+     * Add an handler description to the list.
+     * @param hd : the handler description to add
      */
-    public ProvidedServiceDescription[] getProvideServices() { return m_provideServices; }
-
-    /**
-     * Add a dependency.
-     * @param dep : the dependency to add
-     */
-    public void addDependency(DependencyDescription dep) {
+    public void addHandler(HandlerDescription hd) {
         // Verify that the dependency description is not already in the array.
-        for (int i = 0; (i < m_dependencies.length); i++) {
-            if (m_dependencies[i] == dep) {
+        for (int i = 0; (i < m_handlers.length); i++) {
+            if (m_handlers[i] == hd) {
                 return; //NOTHING TO DO, the description is already in the array
             }
         }
             // The component Description is not in the array, add it
-            DependencyDescription[] newDep = new DependencyDescription[m_dependencies.length + 1];
-            System.arraycopy(m_dependencies, 0, newDep, 0, m_dependencies.length);
-            newDep[m_dependencies.length] = dep;
-            m_dependencies = newDep;
-    }
-
-    /**
-     * Add a provided service.
-     * @param pds : the provided service to add
-     */
-    public void addProvidedService(ProvidedServiceDescription pds) {
-        //Verify that the provided service description is not already in the array.
-        for (int i = 0; (i < m_provideServices.length); i++) {
-            if (m_provideServices[i] == pds) {
-                return; //NOTHING DO DO, the description is already in the array
-            }
-        }
-
-            // The component Description is not in the array, add it
-            ProvidedServiceDescription[] newPSD = new ProvidedServiceDescription[m_provideServices.length + 1];
-            System.arraycopy(m_provideServices, 0, newPSD, 0, m_provideServices.length);
-            newPSD[m_provideServices.length] = pds;
-            m_provideServices = newPSD;
-
+            HandlerDescription[] newHd = new HandlerDescription[m_handlers.length + 1];
+            System.arraycopy(m_handlers, 0, newHd, 0, m_handlers.length);
+            newHd[m_handlers.length] = hd;
+            m_handlers = newHd;
     }
 
     /**
      * Set the state of the component.
      * @param i : the state
      */
-    public void setState(int i) {
-        m_state = i;
-    }
+    public void setState(int i) { m_state = i; }
 
     /**
      * @return the state of the component.
      */
-    public int getState() {
-        return m_state;
-    }
+    public int getState() { return m_state; }
+
+    /**
+     * @return the bundle id owning the component implementation class.
+     */
+    public long getBundleId() { return m_bundleId; }
 
 
 }

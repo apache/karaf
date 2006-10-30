@@ -1,18 +1,20 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo.architecture;
 
@@ -36,7 +38,6 @@ public class ProvidedServiceDescription {
      */
     private DependencyDescription[] m_dependencies = new DependencyDescription[0];
 
-
     /**
      * State.
      */
@@ -46,7 +47,6 @@ public class ProvidedServiceDescription {
      * The service reference.
      */
     private ServiceReference m_serviceReference;
-
 
     /**
      * Handler on the component description who contains this description.
@@ -91,11 +91,11 @@ public class ProvidedServiceDescription {
                 return; //NOTHING DO DO, the description is already in the array
             }
         }
-            // The component Description is not in the array, add it
-            DependencyDescription[] newDep = new DependencyDescription[m_dependencies.length + 1];
-            System.arraycopy(m_dependencies, 0, newDep, 0, m_dependencies.length);
-            newDep[m_dependencies.length] = dep;
-            m_dependencies = newDep;
+        // The component Description is not in the array, add it
+        DependencyDescription[] newDep = new DependencyDescription[m_dependencies.length + 1];
+        System.arraycopy(m_dependencies, 0, newDep, 0, m_dependencies.length);
+        newDep[m_dependencies.length] = dep;
+        m_dependencies = newDep;
     }
 
     /**
@@ -112,7 +112,7 @@ public class ProvidedServiceDescription {
      * @param props : the properties
      */
     public void setProperty(Properties props) {
-        m_properties = (Properties)props.clone();
+        m_properties = (Properties) props.clone();
     }
 
     /**

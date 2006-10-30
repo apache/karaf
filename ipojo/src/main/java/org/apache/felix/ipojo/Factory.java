@@ -18,10 +18,26 @@
  */
 package org.apache.felix.ipojo;
 
+import java.util.Dictionary;
+
 /**
- * A nullable object must implement this interface.
+ * Component Type Factory Service.
+ * This service is exposed by a component manager factory, and allows the dynamic creation of component instance.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public interface Nullable {
-    // Nothing
+public interface Factory {
+
+    /**
+     * Create a component manager (i.e. component type instance).
+     * @param configuration : the configuration property for this component.
+     * @return the created component manager.
+     */
+    ComponentManager createComponent(Dictionary configuration);
+
+    /**
+     * Get the component type information containing provided service, configuration properties ...
+     * @return the compionent type information.
+     */
+    ComponentInfo getComponentInfo();
+
 }

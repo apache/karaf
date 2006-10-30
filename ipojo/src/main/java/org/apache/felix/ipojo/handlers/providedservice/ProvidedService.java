@@ -1,18 +1,20 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo.handlers.providedservice;
 
@@ -21,7 +23,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import org.apache.felix.ipojo.ComponentManager;
+import org.apache.felix.ipojo.ComponentManagerImpl;
 import org.apache.felix.ipojo.Activator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
@@ -54,12 +56,6 @@ public class ProvidedService implements ServiceFactory {
      * Factory policy : SERVICE_FACTORY.
      */
     public static final int SERVICE_FACTORY = 1;
-
-    /**
-     * Factory policy : COMPONENT_FACTORY.
-     * TODO : Component_factory behavior
-     */
-    public static final int COMPONENT_FACTORY = 2;
 
     /**
      * The service registration.
@@ -99,8 +95,8 @@ public class ProvidedService implements ServiceFactory {
         m_handler = handler;
         m_metadata = psm;
         for (int i = 0; i < psm.getProperties().length; i++) {
-        	Property prop = new Property(this, ((PropertyMetadata)psm.getProperties()[i]));
-        	addProperty(prop);
+            Property prop = new Property(this, ((PropertyMetadata) psm.getProperties()[i]));
+            addProperty(prop);
         }
     }
 
@@ -122,30 +118,34 @@ public class ProvidedService implements ServiceFactory {
         else { m_properties = new Property[] {p}; }
     }
 
+    /**
+     * Remove a property.
+     * @param name : the property to remove
+     */
     private synchronized void removeProperty(String name) {
-    	 int idx = -1;
-         for (int i = 0; i < m_properties.length; i++) {
-             if (m_properties[i].getMetadata().getName() == name) { idx = i; break; }
-         }
+        int idx = -1;
+        for (int i = 0; i < m_properties.length; i++) {
+            if (m_properties[i].getMetadata().getName() == name) { idx = i; break; }
+        }
 
-         if (idx >= 0) {
-             if ((m_properties.length - 1) == 0) { m_properties = new Property[0]; }
-             else {
-            	 Property[] newPropertiesList = new Property[m_properties.length - 1];
-                 System.arraycopy(m_properties, 0, newPropertiesList, 0, idx);
-                 if (idx < newPropertiesList.length) {
-                     System.arraycopy(m_properties, idx + 1, newPropertiesList, idx, newPropertiesList.length - idx); }
-                 m_properties = newPropertiesList;
-             }
-         }
+        if (idx >= 0) {
+            if ((m_properties.length - 1) == 0) { m_properties = new Property[0]; }
+            else {
+                Property[] newPropertiesList = new Property[m_properties.length - 1];
+                System.arraycopy(m_properties, 0, newPropertiesList, 0, idx);
+                if (idx < newPropertiesList.length) {
+                    System.arraycopy(m_properties, idx + 1, newPropertiesList, idx, newPropertiesList.length - idx); }
+                m_properties = newPropertiesList;
+            }
+        }
     }
 
     /**
      * @return the service reference of the provided service (null if the service is not published).
      */
     public ServiceReference getServiceReference() {
-    	if (m_serviceRegistration != null) { return m_serviceRegistration.getReference(); }
-    	else { return null; }
+        if (m_serviceRegistration != null) { return m_serviceRegistration.getReference(); }
+        else { return null; }
     }
 
     /**
@@ -157,22 +157,18 @@ public class ProvidedService implements ServiceFactory {
      */
     public Object getService(Bundle bundle, ServiceRegistration registration) {
 
-    	switch(m_metadata.getFactoryPolicy()) {
+        switch(m_metadata.getFactoryPolicy()) {
 
-    	case SINGLETON_FACTORY :
-            return m_handler.getComponentManager().getInstance();
+            case SINGLETON_FACTORY :
+                return m_handler.getComponentManager().getInstance();
 
-    	case SERVICE_FACTORY :
-    		return m_handler.getComponentManager().createInstance();
+            case SERVICE_FACTORY :
+                return m_handler.getComponentManager().createInstance();
 
-    	case COMPONENT_FACTORY :
-    		//TODO Component Factory Behavior
-    		return null;
-
-    	default :
-    		Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Unknown factory policy for " + m_metadata.getServiceSpecification() + " : " + m_metadata.getFactoryPolicy());
-    		return null;
-    	}
+            default :
+                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Unknown factory policy for " + m_metadata.getServiceSpecification() + " : " + m_metadata.getFactoryPolicy());
+            return null;
+        }
 
     }
 
@@ -187,23 +183,23 @@ public class ProvidedService implements ServiceFactory {
         //Nothing to do
     }
 
-//    /**
-//     * Validate the service dependencies of the current provided service.
-//     * @return true if the service dependencies are valid
-//     */
-//    public boolean validate() {
-//        boolean valide = true;
-//        for (int i = 0; i < m_dependencies.length; i++) {
-//            Dependency dep = m_dependencies[i];
-//            valide = valide & dep.isSatisfied();
-//            if (!valide) {
-//                ComponentManager.getLogger().log(Level.INFO, "Service Dependency  for " + m_interface + " not valid : " + dep.getInterface());
-//                return false;
-//            }
-//        }
-//        ComponentManager.getLogger().log(Level.INFO, "Service dependencies for " + m_interface + " are valid");
-//        return valide;
-//    }
+//  /**
+//  * Validate the service dependencies of the current provided service.
+//  * @return true if the service dependencies are valid
+//  */
+//  public boolean validate() {
+//  boolean valide = true;
+//  for (int i = 0; i < m_dependencies.length; i++) {
+//  Dependency dep = m_dependencies[i];
+//  valide = valide & dep.isSatisfied();
+//  if (!valide) {
+//  ComponentManager.getLogger().log(Level.INFO, "Service Dependency  for " + m_interface + " not valid : " + dep.getInterface());
+//  return false;
+//  }
+//  }
+//  ComponentManager.getLogger().log(Level.INFO, "Service dependencies for " + m_interface + " are valid");
+//  return valide;
+//  }
 
     /**
      * Register the service.
@@ -211,35 +207,35 @@ public class ProvidedService implements ServiceFactory {
      * To avoid cycle in Check Context, the registred service is set to registred before the real registration.
      */
     protected void registerService() {
-    	if (m_state != REGISTERED) {
+        if (m_state != REGISTERED) {
             String spec = "";
             for (int i = 0; i < m_metadata.getServiceSpecification().length; i++) {
                 spec = spec + m_metadata.getServiceSpecification()[i] + ", ";
             }
-    			Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Register the service : " + spec);
-    			// Contruct the service properties list
-    			Properties serviceProperties = getServiceProperties();
+            Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Register the service : " + spec);
+            // Contruct the service properties list
+            Properties serviceProperties = getServiceProperties();
 
-    			m_state = REGISTERED;
-                synchronized (this) {
-                    m_serviceRegistration =
-                        m_handler.getComponentManager().getContext().registerService(
+            m_state = REGISTERED;
+            synchronized (this) {
+                m_serviceRegistration =
+                    m_handler.getComponentManager().getContext().registerService(
                             m_metadata.getServiceSpecification(), this, serviceProperties);
-                }
-    	}
+            }
+        }
     }
 
     /**
      * Unregister the service.
      */
     protected void unregisterService() {
-    	if (m_state == REGISTERED) {
-    		try {
-    			m_serviceRegistration.unregister();
-    			m_serviceRegistration = null;
-    		} catch (Exception e) { return; }
-			m_state = UNREGISTERED;
-    	}
+        if (m_state == REGISTERED) {
+            try {
+                m_serviceRegistration.unregister();
+                m_serviceRegistration = null;
+            } catch (Exception e) { return; }
+            m_state = UNREGISTERED;
+        }
     }
 
     /**
@@ -252,8 +248,8 @@ public class ProvidedService implements ServiceFactory {
     /**
      * @return the component manager.
      */
-    protected ComponentManager getComponentManager() {
-    	return m_handler.getComponentManager();
+    protected ComponentManagerImpl getComponentManager() {
+        return m_handler.getComponentManager();
     }
 
     /**
@@ -280,11 +276,10 @@ public class ProvidedService implements ServiceFactory {
     }
 
     /**
-     * Update refresh the service properties.
+     * Update the service properties.
      * The new list of properties is sended to the service registry.
      */
     public void update() {
-        // Update the service properties
 
         // Contruct the service properties list
         Properties serviceProperties = getServiceProperties();
@@ -297,39 +292,39 @@ public class ProvidedService implements ServiceFactory {
         }
     }
 
-	/**
-	 * @return the propvided service metadata.
-	 */
-	public ProvidedServiceMetadata getMetadata() {
-		return m_metadata;
-	}
+    /**
+     * @return the propvided service metadata.
+     */
+    public ProvidedServiceMetadata getMetadata() {
+        return m_metadata;
+    }
 
-	/**
-	 * Add properties to the list.
-	 * @param props : properties to add
-	 */
-	protected void addProperties(Dictionary props) {
-		Enumeration keys = props.keys();
-		while (keys.hasMoreElements()) {
-			String key = (String) keys.nextElement();
-			Object value = props.get(key);
-			Property prop = new Property(this, key, value);
-			addProperty(prop);
-		}
-		update();
-	}
+    /**
+     * Add properties to the list.
+     * @param props : properties to add
+     */
+    protected void addProperties(Dictionary props) {
+        Enumeration keys = props.keys();
+        while (keys.hasMoreElements()) {
+            String key = (String) keys.nextElement();
+            Object value = props.get(key);
+            Property prop = new Property(this, key, value);
+            addProperty(prop);
+        }
+        update();
+    }
 
-	/**
-	 * Remove properties from the list.
-	 * @param props : properties to remove
-	 */
-	protected void deleteProperties(Dictionary props) {
-		Enumeration keys = props.keys();
-		while (keys.hasMoreElements()) {
-			String key = (String) keys.nextElement();
-			removeProperty(key);
-		}
-		update();
-	}
+    /**
+     * Remove properties from the list.
+     * @param props : properties to remove
+     */
+    protected void deleteProperties(Dictionary props) {
+        Enumeration keys = props.keys();
+        while (keys.hasMoreElements()) {
+            String key = (String) keys.nextElement();
+            removeProperty(key);
+        }
+        update();
+    }
 
 }

@@ -1,22 +1,23 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo.manipulation;
 
-import java.util.HashMap;
 import java.util.logging.Level;
 
 import org.apache.felix.ipojo.plugin.IPojoPluginConfiguration;
@@ -78,7 +79,7 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             m_owner = name;
 
             // Insert _cm field
-            FieldVisitor fv = super.visitField(ACC_PRIVATE, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;", null, null);
+            FieldVisitor fv = super.visitField(ACC_PRIVATE, "_cm", "Lorg/apache/felix/ipojo/ComponentManagerImpl;", null, null);
             fv.visitEnd();
             
             // Create the _cmSetter(ComponentManager cm) method
@@ -107,7 +108,7 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
         	if(name.equals("<init>")) {
         		// 1) change the constructor descriptor (add a component manager arg as first argument)
         		String new_desc = desc.substring(1);
-        		new_desc = "(Lorg/apache/felix/ipojo/ComponentManager;"+new_desc;
+        		new_desc = "(Lorg/apache/felix/ipojo/ComponentManagerImpl;"+new_desc;
         		
         		// Insert the new constructor
         		MethodVisitor mv = super.visitMethod(ACC_PUBLIC, "<init>", new_desc, null, null);
@@ -128,11 +129,11 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
          * Create the setter method for the _cm field.
          */
         private void createComponentManagerSetter() {            
-            MethodVisitor mv = cv.visitMethod(ACC_PRIVATE, "_setComponentManager", "(Lorg/apache/felix/ipojo/ComponentManager;)V", null, null);
+            MethodVisitor mv = cv.visitMethod(ACC_PRIVATE, "_setComponentManager", "(Lorg/apache/felix/ipojo/ComponentManagerImpl;)V", null, null);
             
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 1);
-            mv.visitFieldInsn(PUTFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+            mv.visitFieldInsn(PUTFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManagerImpl;");
             
             mv.visitInsn(RETURN);
            
@@ -200,10 +201,10 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
         	mv.visitFieldInsn(PUTFIELD, m_owner, name, internalType);
 
         	mv.visitVarInsn(ALOAD, 0);
-        	mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+        	mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManagerImpl;");
         	mv.visitLdcInsn(name);
         	mv.visitVarInsn(ALOAD, 1);
-        	mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManager", "setterCallback", "(Ljava/lang/String;Ljava/lang/Object;)V");
+        	mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManagerImpl", "setterCallback", "(Ljava/lang/String;Ljava/lang/Object;)V");
 
         	mv.visitInsn(RETURN);
 
@@ -234,10 +235,10 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             	mv.visitVarInsn(ASTORE, 1);
             	
             	mv.visitVarInsn(ALOAD, 0);
-            	mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+            	mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManagerImpl;");
             	mv.visitLdcInsn(name);
             	mv.visitVarInsn(ALOAD, 1);
-            	mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
+            	mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManagerImpl", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
             	mv.visitVarInsn(ASTORE, 2);
 
             	mv.visitVarInsn(ALOAD, 2);
@@ -308,10 +309,10 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             		mv.visitVarInsn(ASTORE, 2);
 
             		mv.visitVarInsn(ALOAD, 0);
-            		mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+            		mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManagerImpl;");
             		mv.visitLdcInsn(name);
             		mv.visitVarInsn(ALOAD, 2);
-            		mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
+            		mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManagerImpl", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
             		mv.visitVarInsn(ASTORE, 3);
 
             		mv.visitVarInsn(ALOAD, 3);
@@ -348,10 +349,10 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             		mv.visitVarInsn(ASTORE, 1);
 
             		mv.visitVarInsn(ALOAD, 0);
-            		mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+            		mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManagerImpl;");
             		mv.visitLdcInsn(name);
             		mv.visitVarInsn(ALOAD, 1);
-            		mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
+            		mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManagerImpl", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
             		mv.visitVarInsn(ASTORE, 2);
 
             		mv.visitVarInsn(ALOAD, 2);
@@ -429,10 +430,10 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
                 	Label l2 = new Label();
                 	mv.visitLabel(l2);
                 	mv.visitVarInsn(ALOAD, 0);
-                	mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+                	mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManagerImpl;");
                 	mv.visitLdcInsn(name);
                 	mv.visitVarInsn(ALOAD, 2);
-                	mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManager", "setterCallback", "(Ljava/lang/String;Ljava/lang/Object;)V");
+                	mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManagerImpl", "setterCallback", "(Ljava/lang/String;Ljava/lang/Object;)V");
 
                 	Label l3 = new Label();
                 	mv.visitLabel(l3);
@@ -445,10 +446,10 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
                 	mv.visitFieldInsn(PUTFIELD, m_owner, name, "L" + type.getInternalName() + ";");
 
                 	mv.visitVarInsn(ALOAD, 0);
-                	mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManager;");
+                	mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/ComponentManagerImpl;");
                 	mv.visitLdcInsn(name);
                 	mv.visitVarInsn(ALOAD, 1);
-                	mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManager", "setterCallback", "(Ljava/lang/String;Ljava/lang/Object;)V");
+                	mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/ComponentManagerImpl", "setterCallback", "(Ljava/lang/String;Ljava/lang/Object;)V");
 
                 	mv.visitInsn(RETURN);
                 	break;

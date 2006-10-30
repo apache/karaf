@@ -1,270 +1,318 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo;
 
 import java.io.IOException;
 import java.net.URL;
 import java.security.ProtectionDomain;
+import java.util.Collection;
+import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Properties;
 import java.util.logging.Level;
 
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedServiceFactory;
 
 /**
  * The component manager factory class manages component manager object.
+ * This class could export Factory and ManagedServiceFactory services.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public class ComponentManagerFactory {
+public class ComponentManagerFactory implements Factory, ManagedServiceFactory {
 
-	// Fields :
-	/**
-	 * List of the managed component manager.
-	 */
-	private ComponentManager[] m_componentManagers = new ComponentManager[0];
-
-	/**
-	 * The bundle context reference.
-	 */
-	private BundleContext m_bundleContext = null;
-
-	/**
-	 * Component class.
-	 */
-	private byte[] m_clazz = null;
-
-	/**
-	 * Component Class Name.
-	 */
-	private String m_componentClassName = null;
-
-	/**
-	 * Classloader to delegate loading.
-	 */
-	private FactoryClassloader m_classLoader = null;
-
-	//End field
-
-	/**
-	 * FactoryClassloader.
-	 */
-	private class FactoryClassloader extends ClassLoader {
-
-	    /**
-	     * load the class.
-	     * @see java.lang.ClassLoader#loadClass(java.lang.String, boolean)
-	     * @param name : the name of the class
-	     * @param resolve : should be the class resolve now ?
-	     * @return : the loaded class
-	     * @throws ClassNotFoundException : the class to load is not found
-	     */
-	    protected synchronized Class loadClass(final String name,
-	            final boolean resolve) throws ClassNotFoundException {
-	       return m_bundleContext.getBundle().loadClass(name);
-	    }
-
-
-	    /**
-	     * Return the URL of the asked ressource.
-	     * @param arg : the name of the resource to find.
-	     * @return the URL of the resource.
-	     * @see java.lang.ClassLoader#getResource(java.lang.String)
-	     */
-	    public URL getResource(String arg) {
-	        return m_bundleContext.getBundle().getResource(arg);
-	    }
-
-	    /**
-	     * .
-	     * @param arg : resource to find
-	     * @return : the enumeration found
-	     * @throws IOException : if the lookup failed.
-	     * @see java.lang.ClassLoader#getResources(java.lang.String)
-	     */
-	    public Enumeration getRessources(String arg) throws IOException {
-	        return m_bundleContext.getBundle().getResources(arg);
-	    }
-
-	    /**
-	     * The defineClass method.
-	     * @param name : name of the class
-	     * @param b : the byte array of the class
-	     * @param domain : the protection domain
-	     * @return : the defined class.
-	     * @throws Exception : if a problem is detected during the loading
-	     */
-	    public Class defineClass(String name, byte[] b,
-	            ProtectionDomain domain) throws Exception {
-	    	return super.defineClass(name, b, 0, b.length, domain);
-	    }
-	}
-
-	// Field accessors
-
-	 /**
-     * Add a component manager factory to the component manager list.
-     * @param cm : the new component metadata.
+    // Fields :
+    /**
+     * List of the managed component manager.
+     * The key of tis hashmap is the name (pid) of the component created
      */
-    private void addComponent(ComponentManager cm) {
+    private HashMap m_componentManagers = new HashMap();
 
-    	// If the component manager array is not empty add the new factory at the end
-        if (m_componentManagers.length != 0) {
-        	ComponentManager[] newCM = new ComponentManager[m_componentManagers.length + 1];
-            System.arraycopy(m_componentManagers, 0, newCM, 0, m_componentManagers.length);
-            newCM[m_componentManagers.length] = cm;
-            m_componentManagers = newCM;
+    /**
+     * The bundle context reference.
+     */
+    private BundleContext m_bundleContext = null;
+
+    /**
+     * Component class.
+     */
+    private byte[] m_clazz = null;
+
+    /**
+     * Component Class Name.
+     */
+    private String m_componentClassName = null;
+
+    /**
+     * Classloader to delegate loading.
+     */
+    private FactoryClassloader m_classLoader = null;
+
+    /**
+     * Component Type provided by this factory.
+     */
+    private Element m_componentMetadata;
+
+    /**
+     * Service Registration of this factory (Facotry & ManagedServiceFactory).
+     */
+    private ServiceRegistration m_sr;
+
+    /**
+     * Component-Type info exposed by the factory service.
+     */
+    private ComponentInfo m_componentInfo;
+
+    //End field
+
+    /**
+     * FactoryClassloader.
+     */
+    private class FactoryClassloader extends ClassLoader  {
+
+        /**
+         * load the class.
+         * @see java.lang.ClassLoader#loadClass(java.lang.String, boolean)
+         * @param name : the name of the class
+         * @param resolve : should be the class resolve now ?
+         * @return : the loaded class
+         * @throws ClassNotFoundException : the class to load is not found
+         */
+        protected synchronized Class loadClass(final String name,
+                final boolean resolve) throws ClassNotFoundException {
+            return m_bundleContext.getBundle().loadClass(name);
         }
-        // Else create an array of size one with the new component manager
-        else {
-            m_componentManagers = new ComponentManager[] {cm};
+
+
+        /**
+         * Return the URL of the asked ressource.
+         * @param arg : the name of the resource to find.
+         * @return the URL of the resource.
+         * @see java.lang.ClassLoader#getResource(java.lang.String)
+         */
+        public URL getResource(String arg) {
+            return m_bundleContext.getBundle().getResource(arg);
+        }
+
+        /**
+         * .
+         * @param arg : resource to find
+         * @return : the enumeration found
+         * @throws IOException : if the lookup failed.
+         * @see java.lang.ClassLoader#getResources(java.lang.String)
+         */
+        public Enumeration getRessources(String arg) throws IOException {
+            return m_bundleContext.getBundle().getResources(arg);
+        }
+
+        /**
+         * The defineClass method.
+         * @param name : name of the class
+         * @param b : the byte array of the class
+         * @param domain : the protection domain
+         * @return : the defined class.
+         * @throws Exception : if a problem is detected during the loading
+         */
+        public Class defineClass(String name, byte[] b,
+                ProtectionDomain domain) throws Exception {
+            return super.defineClass(name, b, 0, b.length, domain);
         }
     }
 
-    /**
-     * Remove the component manager for m the list.
-     * @param cm : the component manager to remove
-     */
-    public void removeComponent(ComponentManager cm) {
-    	cm.stop();
-    	int idx = -1;
-
-    	for (int i = 0; i < m_componentManagers.length; i++) {
-    		if (m_componentManagers[i] == cm) { idx = i; }
-    	}
-
-        if (idx >= 0) {
-            if ((m_componentManagers.length - 1) == 0) { m_componentManagers = new ComponentManager[0]; }
-            else {
-            	ComponentManager[] newCMList = new ComponentManager[m_componentManagers.length - 1];
-                System.arraycopy(m_componentManagers, 0, newCMList, 0, idx);
-                if (idx < newCMList.length) {
-                    System.arraycopy(m_componentManagers, idx + 1, newCMList, idx, newCMList.length - idx); }
-                m_componentManagers = newCMList;
-            }
-            }
-       }
 
     /**
      * @return the iPOJO activator reference
      */
     public BundleContext getBundleContext() { return m_bundleContext; }
 
-	// End field accessors
+    /**
+     * @return the class name of the component-type provided by this factory.
+     */
+    protected String getComponentClassName() { return m_componentClassName; }
 
-	/**
-	 * Create a component manager factory and create a component manager with the given medatada.
-	 * @param bc : bundle context
-	 * @param cm : metadata of the component to create
-	 */
-	public ComponentManagerFactory(BundleContext bc, Element cm) {
-		m_bundleContext = bc;
-		createComponentManager(cm);
-		m_componentClassName = cm.getAttribute("className");
-	}
+    /**
+     * Create a component manager factory.
+     * @param bc : bundle context
+     * @param cm : metadata of the component to create
+     */
+    public ComponentManagerFactory(BundleContext bc, Element cm) {
+        m_bundleContext = bc;
+        m_componentClassName = cm.getAttribute("className");
+        m_componentMetadata = cm;
+    }
 
-	/**
-	 * Create a component manager factory and create a component manager with the given medatada.
-	 * @param bc : bundle context
-	 * @param clazz : the component class
-	 * @param cm : metadata of the component
-	 */
-	public ComponentManagerFactory(BundleContext bc, byte[] clazz, Element cm) {
-		m_bundleContext = bc;
-		m_clazz = clazz;
-		m_componentClassName = cm.getAttribute("className");
-		createComponentManager(cm);
-	}
+    /**
+     * Create a component manager factory. The class is given in parameter.
+     * @param bc : bundle context
+     * @param clazz : the component class
+     * @param cm : metadata of the component
+     */
+    public ComponentManagerFactory(BundleContext bc, byte[] clazz, Element cm) {
+        m_bundleContext = bc;
+        m_clazz = clazz;
+        m_componentClassName = cm.getAttribute("className");
+        m_componentMetadata = cm;
+    }
 
-	/**
-	 * Create a component manager factory, no component manager are created.
-	 * @param bc
-	 */
-	public ComponentManagerFactory(BundleContext bc) {
-		m_bundleContext = bc;
-	}
+    /**
+     * Create a component manager factory, no component manager are created.
+     * @param bc
+     */
+    public ComponentManagerFactory(BundleContext bc) { m_bundleContext = bc; }
 
-	/**
-	 * Create a component manager form the component metadata.
-	 * @param cm : Component Metadata
-	 * @return a component manager configured with the metadata
-	 */
-	public ComponentManager createComponentManager(Element cm) {
-		ComponentManager component = new ComponentManager(this);
-		component.configure(cm);
-		addComponent(component);
-		return component;
-	}
 
-	// Factory lifecycle management
+    // Factory lifecycle management
 
-	/**
-	 * Stop all the component managers.
-	 */
-	public void stop() {
-		Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Stop the component factory");
-		for (int i = 0; i < m_componentManagers.length; i++) {
-			ComponentManager cm = m_componentManagers[i];
-			cm.stop();
-		}
-	}
+    /**
+     * Stop all the component managers.
+     */
+    public void stop() {
+        Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Stop the component factory");
+        Collection col = m_componentManagers.values();
+        Iterator it = col.iterator();
+        while (it.hasNext()) {
+            ComponentManagerImpl cm = (ComponentManagerImpl) it.next();
+            cm.stop();
+        }
+        m_componentManagers.clear();
+        if (m_sr != null) { m_sr.unregister(); }
+        m_sr = null;
+    }
 
-	/**
-	 * Start all the component managers.
-	 */
-	public void start() {
-		Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Start the component factory");
-		for (int i = 0; i < m_componentManagers.length; i++) {
-			ComponentManager cm = m_componentManagers[i];
-			cm.start();
-		}
-	}
+    /**
+     * Start all the component managers.
+     */
+    public void start() {
+        Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Start the component factory");
 
-	/**
-	 * Load a class.
-	 * @param className : name of the class to load
-	 * @return the resulting Class object
-	 * @throws ClassNotFoundException : happen when the class is not found
-	 */
-	public Class loadClass(String className) throws ClassNotFoundException {
-		Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] In load for : " + className);
-		if (m_clazz != null && className.equals(m_componentClassName)) {
-			if (m_classLoader == null) {
-				Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Create the FactoryClassLoader for : " + className);
-				m_classLoader = new FactoryClassloader();
-				}
-			try {
-				Class c = m_classLoader.defineClass(m_componentClassName, m_clazz, null);
-				Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Return " + c + " for " + className);
-				return c;
-			} catch (Exception e) {
-				Activator.getLogger().log(Level.SEVERE, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Cannot define the class : " + className);
-				return null;
-			}
-		}
-		return m_bundleContext.getBundle().loadClass(className);
-	}
+        // Check if the factory should be exposed
+        if (m_componentMetadata.containsAttribute("factory") && m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) { return; }
+        Properties props = new Properties();
+        props.put("component.class", m_componentClassName);
 
-	/**
-	 * Return the URL of a resource.
-	 * @param resName : resource name
-	 * @return the URL of the resource
-	 */
-	public URL getResource(String resName) {
-		return m_bundleContext.getBundle().getResource(resName);
-	}
+        // create a ghost component
+        ComponentManagerImpl ghost = new ComponentManagerImpl(this);
+        ghost.configure(m_componentMetadata, new Properties());
+        m_componentInfo = ghost.getComponentInfo();
+
+        props.put("component.providedServiceSpecifications", m_componentInfo.getprovidedServiceSpecification());
+        props.put("component.properties", m_componentInfo.getProperties());
+        props.put("component.information", m_componentInfo.toString());
+
+        // Get factory PID :
+        if (m_componentMetadata.containsAttribute("name")) { props.put(Constants.SERVICE_PID, m_componentMetadata.getAttribute("name")); }
+        else { props.put(Constants.SERVICE_PID, m_componentMetadata.getAttribute("className")); }
+
+        // Exposition of the factory service
+        m_sr = m_bundleContext.registerService(new String[] {Factory.class.getName(), ManagedServiceFactory.class.getName()}, this, props);
+    }
+
+    /**
+     * @see org.apache.felix.ipojo.Factory#getComponentInfo()
+     */
+    public ComponentInfo getComponentInfo() { return m_componentInfo; }
+
+    /**
+     * Load a class.
+     * @param className : name of the class to load
+     * @return the resulting Class object
+     * @throws ClassNotFoundException : happen when the class is not found
+     */
+    public Class loadClass(String className) throws ClassNotFoundException {
+        Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] In load for : " + className);
+        if (m_clazz != null && className.equals(m_componentClassName)) {
+            if (m_classLoader == null) {
+                Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Create the FactoryClassLoader for : " + className);
+                m_classLoader = new FactoryClassloader();
+            }
+            try {
+                Class c = m_classLoader.defineClass(m_componentClassName, m_clazz, null);
+                Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Return " + c + " for " + className);
+                return c;
+            } catch (Exception e) {
+                Activator.getLogger().log(Level.SEVERE, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Cannot define the class : " + className);
+                return null;
+            }
+        }
+        return m_bundleContext.getBundle().loadClass(className);
+    }
+
+    /**
+     * Return the URL of a resource.
+     * @param resName : resource name
+     * @return the URL of the resource
+     */
+    public URL getResource(String resName) {
+        return m_bundleContext.getBundle().getResource(resName);
+    }
+
+    /**
+     * @see org.apache.felix.ipojo.Factory#createComponent(java.util.Dictionary)
+     */
+    public ComponentManager createComponent(Dictionary configuration) {
+        Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Create a component and start it");
+        ComponentManagerImpl component = new ComponentManagerImpl(this);
+        component.configure(m_componentMetadata, configuration);
+
+        String pid = null;
+        if (configuration.get("name") != null) { pid = (String) configuration.get("name"); }
+        else { pid = m_componentMetadata.getAttribute("className"); }
+
+        m_componentManagers.put(pid, component);
+        component.start();
+        return component;
+    }
+
+    /**
+     * @see org.osgi.service.cm.ManagedServiceFactory#deleted(java.lang.String)
+     */
+    public void deleted(String pid) {
+        ComponentManagerImpl cm = (ComponentManagerImpl) m_componentManagers.remove(pid);
+        if (cm == null) { return;  } // do nothing, the component does not exist !
+        else { cm.stop(); }
+    }
+
+    /**
+     * @see org.osgi.service.cm.ManagedServiceFactory#getName()
+     */
+    public String getName() {
+        if (m_componentMetadata.containsAttribute("name")) { return m_componentMetadata.getAttribute("name"); }
+        else { return m_componentMetadata.getAttribute("className"); }
+    }
+
+    /**
+     * @see org.osgi.service.cm.ManagedServiceFactory#updated(java.lang.String, java.util.Dictionary)
+     */
+    public void updated(String pid, Dictionary properties) throws ConfigurationException {
+        ComponentManagerImpl cm = (ComponentManagerImpl) m_componentManagers.get(pid);
+        if (cm == null) { createComponent(properties); } // Create the component
+        else {
+            cm.stop(); // Stop the component
+            cm.configure(m_componentMetadata, properties); // re-configure the component
+            cm.start(); // restart it
+        }
+    }
 
 }

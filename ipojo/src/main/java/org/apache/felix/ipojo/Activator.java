@@ -1,22 +1,22 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo;
-
-
 
 import java.io.IOException;
 import java.util.Dictionary;
@@ -36,19 +36,16 @@ import org.osgi.framework.BundleContext;
  */
 public class Activator implements BundleActivator {
 
+    // STATIC
+    /**
+     * The iPOJO static logger. This logger is used by each iPOJO instance.
+     */
+    private static Logger m_logger = Logger.getLogger("org.apache.felix.ipojo");
 
-	// STATIC
-	/**
-	 * The iPOJO static logger. This logger is used by each iPOJO instance.
-	 */
-	private static Logger m_logger = Logger.getLogger("org.apache.felix.ipojo");
-
-	 /**
+    /**
      * @return Returns the static ipojo logger : org.apache.felix.ipojo
      */
-    public static Logger getLogger() {
-        return Activator.m_logger;
-    }
+    public static Logger getLogger() { return Activator.m_logger; }
     // END STATIC
 
     // NON STATIC PART
@@ -65,6 +62,12 @@ public class Activator implements BundleActivator {
      */
     private ComponentManagerFactory[] m_factories;
 
+    /**
+     * The configuration to create.
+     * m_configuration : Array of Dictionary
+     */
+    private Dictionary[] m_configurations;
+
     // Field accessors  :
 
     /**
@@ -79,10 +82,10 @@ public class Activator implements BundleActivator {
      * @param cm : the new component metadata.
      */
     public void addComponentFactory(Element cm) {
-    	// Create the factory :
-    	ComponentManagerFactory factory = new ComponentManagerFactory(m_bundleContext, cm);
+        // Create the factory :
+        ComponentManagerFactory factory = new ComponentManagerFactory(m_bundleContext, cm);
 
-    	// If the factory array is not empty add the new factory at the end
+        // If the factory array is not empty add the new factory at the end
         if (m_factories.length != 0) {
             ComponentManagerFactory[] newFactory = new ComponentManagerFactory[m_factories.length + 1];
             System.arraycopy(m_factories, 0, newFactory, 0, m_factories.length);
@@ -110,7 +113,7 @@ public class Activator implements BundleActivator {
         if (idx >= 0) {
             // If this is the factory, then point to empty list.
             if ((m_factories.length - 1) == 0) {
-            	m_factories = new ComponentManagerFactory[0];
+                m_factories = new ComponentManagerFactory[0];
             }
             // Otherwise, we need to do some array copying.
             else {
@@ -147,33 +150,18 @@ public class Activator implements BundleActivator {
      * @throws Exception : when a problem occurs
      */
     public void start(final BundleContext bc) throws Exception {
-      m_bundleContext = bc;
+        m_bundleContext = bc;
+        Activator.getLogger().setLevel(IPojoConfiguration.LOG_LEVEL);
 
-      // Set the trace level
-      String level = System.getProperty("ipojo.loglevel");
-      if (level != null) {
-         if (level.equals("ALL")) {
-        	 Activator.getLogger().setLevel(Level.ALL);
-         }
-         if (level.equals("FINEST")) {
-        	 Activator.getLogger().setLevel(Level.FINEST);
-         }
-         if (level.equals("WARNING")) {
-        	 Activator.getLogger().setLevel(Level.WARNING);
-         }
-      }
-      else { Activator.getLogger().setLevel(IPojoConfiguration.LOG_LEVEL); }
+        try {
+            parse();
+        } catch (Exception e) {
+            Activator.getLogger().log(Level.SEVERE, "Parse error for the bundle " + m_bundleContext.getBundle().getBundleId() + " : " + e.getMessage());
+            return;
+        }
+        Activator.getLogger().log(Level.INFO, "[Bundle" + m_bundleContext.getBundle().getBundleId() + "] Called start after the parsing");
 
-      try {
-          parse();
-      } catch (Exception e) {
-    	  Activator.getLogger().log(Level.SEVERE, "Parse error for the bundle " + m_bundleContext.getBundle().getBundleId() + " : " + e.getMessage());
-         return;
-      }
-      Activator.getLogger().log(Level.INFO, "[Bundle" + m_bundleContext.getBundle().getBundleId() + "] Called start after the parsing");
-
-      // Call the internal start method
-      start();
+        start(); // Call the internal start method
 
     }
 
@@ -185,8 +173,8 @@ public class Activator implements BundleActivator {
      */
     public void stop(BundleContext arg0) throws Exception {
         for (int i = 0; i < m_factories.length; i++) {
-        	ComponentManagerFactory factory = m_factories[i];
-        	factory.stop();
+            ComponentManagerFactory factory = m_factories[i];
+            factory.stop();
         }
     }
 
@@ -197,29 +185,36 @@ public class Activator implements BundleActivator {
     /**
      * Parse the file who is at the Metadata-Location place, manipulate the bytecode of the component implementation class
      * and set the manager.
-     * @throws IOException
-     * @throws ParseException
+     * @throws IOException : the manisfest could not be found
+     * @throws ParseException : the parsing process failed
      */
     private void parse() throws IOException, ParseException {
 
-       String componentClasses = (String)m_bundleContext.getBundle().getHeaders().get("iPOJO-Components");
+        String componentClasses = (String) m_bundleContext.getBundle().getHeaders().get("iPOJO-Components");
         if (componentClasses != null) {
-        	parseManifest(m_bundleContext.getBundle().getHeaders());
+            parseManifest(m_bundleContext.getBundle().getHeaders());
         } else {
-        	Activator.getLogger().log(Level.SEVERE, "[Bundle" + m_bundleContext.getBundle().getBundleId() + "] Components-Metadata are not in the manifest");
-        	throw new ParseException("[Bundle" + m_bundleContext.getBundle().getBundleId() + "] Component-Metadata are not in the manifest");
+            Activator.getLogger().log(Level.SEVERE, "[Bundle" + m_bundleContext.getBundle().getBundleId() + "] Components-Metadata are not in the manifest");
+            throw new ParseException("[Bundle" + m_bundleContext.getBundle().getBundleId() + "] Component-Metadata are not in the manifest");
         }
     }
 
+    /**
+     * Parse the manifest.
+     * @param dict : Manifest Entries
+     * @throws ParseException : throwed when the parsing failed
+     */
     private void parseManifest(Dictionary dict) throws ParseException {
-    	ManifestMetadataParser parser = new ManifestMetadataParser();
-    	parser.parse(dict);
-    	// Create the components Factory according to the declared component
+        ManifestMetadataParser parser = new ManifestMetadataParser();
+        parser.parse(dict);
+        // Create the components Factory according to the declared component
         Element[] componentsMetadata = parser.getComponentsMetadata();
+        m_configurations = parser.getInstances();
         for (int i = 0; i < componentsMetadata.length; i++) {
-        	Activator.getLogger().log(Level.INFO, "[Bundle" + m_bundleContext.getBundle().getBundleId() + "] Create a component factory for " + componentsMetadata[i].getAttribute("classname"));
-        	addComponentFactory(componentsMetadata[i]);
+            Activator.getLogger().log(Level.INFO, "[Bundle" + m_bundleContext.getBundle().getBundleId() + "] Create a component factory for " + componentsMetadata[i].getAttribute("classname"));
+            addComponentFactory(componentsMetadata[i]);
         }
+
     }
 
     /**
@@ -228,7 +223,14 @@ public class Activator implements BundleActivator {
     private void start() {
         for (int i = 0; i < m_factories.length; i++) {
             ComponentManagerFactory factory = m_factories[i];
-            factory.start(); // Start the management
+            String componentClass = factory.getComponentClassName();
+            for (int j = 0; j < m_configurations.length; j++) {
+                Dictionary conf = m_configurations[j];
+                if (conf.get("component") != null && conf.get("component").equals(componentClass)) {
+                    factory.createComponent(m_configurations[j]); // create a component
+                }
+            }
+            factory.start(); // Start the factory exposition
         }
     }
 

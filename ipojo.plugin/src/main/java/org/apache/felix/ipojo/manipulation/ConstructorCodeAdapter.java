@@ -1,18 +1,20 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo.manipulation;
 
@@ -46,7 +48,6 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
     public ConstructorCodeAdapter(final MethodVisitor mv, final String owner) {
     	super(mv);
         m_owner = owner;
-        System.out.println("Create a constructor adapter");
         m_superDetected = false;
     }
 
@@ -95,7 +96,7 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
     		//mv.visitVarInsn(ALOAD, Type.getArgumentTypes(m_constructorDesc).length);
     		mv.visitVarInsn(ALOAD, 1);  // CM is always the first argument
     		// 3) Initialize the field 
-    		mv.visitMethodInsn(INVOKESPECIAL, m_owner, "_setComponentManager", "(Lorg/apache/felix/ipojo/ComponentManager;)V");
+    		mv.visitMethodInsn(INVOKESPECIAL, m_owner, "_setComponentManager", "(Lorg/apache/felix/ipojo/ComponentManagerImpl;)V");
     		// insertion finished	
     	} 
     	else { mv.visitMethodInsn(opcode, owner, name, desc); }
@@ -117,9 +118,9 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
     public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
     	if(index == 0) {
     		mv.visitLocalVariable(name, desc, signature, start, end, index);
-    		mv.visitLocalVariable("_manager", "Lorg/apache/felix/ipojo/ComponentManager;", null, start, end, 1);
+    		mv.visitLocalVariable("_manager", "Lorg/apache/felix/ipojo/ComponentManagerImpl;", null, start, end, 1);
     		IPojoPluginConfiguration.getLogger().log(Level.INFO, "Local Variable : " + name + " index = " + index + " desc = " + desc);
-    		IPojoPluginConfiguration.getLogger().log(Level.INFO, "Local Variable : " + "_manager" + " index = " + 1 + " desc = " + "Lorg/apache/felix/ipojo/ComponentManager;");
+    		IPojoPluginConfiguration.getLogger().log(Level.INFO, "Local Variable : " + "_manager" + " index = " + 1 + " desc = " + "Lorg/apache/felix/ipojo/ComponentManagerImpl;");
     	}
     	mv.visitLocalVariable(name, desc, signature, start, end, index+1);
     	IPojoPluginConfiguration.getLogger().log(Level.INFO, "Local Variable : " + name + " index = " + index + " desc = " + desc);

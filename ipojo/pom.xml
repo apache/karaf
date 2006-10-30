@@ -8,7 +8,7 @@
   <packaging>osgi-bundle</packaging>
   <name>Apache Felix iPOJO</name>
   <artifactId>org.apache.felix.ipojo</artifactId>
-  <version>0.6.0-SNAPSHOT</version>
+  <version>0.7.0-incubator-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.ipojo.metadata</artifactId>
-      <version>${pom.version}</version>
+      <version>0.7.0-incubator-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
@@ -40,10 +40,15 @@
             <bundleVendor>Clement ESCOFFIER</bundleVendor>
             <bundleDescription> iPOJO </bundleDescription>
             <importPackage>
-              org.osgi.framework, org.osgi.service.cm
+              org.osgi.framework; specification-version="1.3", 
+              org.osgi.service.cm; specification-version="1.2"
             </importPackage>
             <exportPackage>
-              org.apache.felix.ipojo, org.apache.felix.ipojo.metadata, org.apache.felix.ipojo.architecture, org.apache.felix.ipojo.parser, org.osgi.service.cm
+              org.apache.felix.ipojo, 
+              org.apache.felix.ipojo.metadata, 
+              org.apache.felix.ipojo.architecture, 
+              org.apache.felix.ipojo.parser, 
+              org.osgi.service.cm; specification-version="1.2"
             </exportPackage>
           </osgiManifest>
         </configuration>
