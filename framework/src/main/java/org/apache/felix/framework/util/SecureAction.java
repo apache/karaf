@@ -133,6 +133,33 @@ public class SecureAction
             return new URL(protocol, host, port, path, handler);
         }
     }
+    
+    public URL createURL(URL context, String spec, URLStreamHandler handler)
+        throws MalformedURLException
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.CREATE_URL_WITH_CONTEXT_ACTION, context, 
+                    spec, handler);
+                return (URL) AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                if (ex.getException() instanceof MalformedURLException)
+                {
+                    throw (MalformedURLException) ex.getException();
+                }
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return new URL(context, spec, handler);
+        }
+    }
 
     public String getAbsolutePath(File file)
     {
@@ -553,25 +580,26 @@ public class SecureAction
         public static final int GET_PROPERTY_ACTION = 0;
         public static final int FOR_NAME_ACTION = 1;
         public static final int CREATE_URL_ACTION = 2;
-        public static final int GET_ABSOLUTE_PATH_ACTION = 3;
-        public static final int FILE_EXISTS_ACTION = 4;
-        public static final int FILE_IS_DIRECTORY_ACTION = 5;
-        public static final int MAKE_DIRECTORY_ACTION = 6;
-        public static final int MAKE_DIRECTORIES_ACTION = 7;
-        public static final int LIST_DIRECTORY_ACTION = 8;
-        public static final int RENAME_FILE_ACTION = 9;
-        public static final int GET_FILE_INPUT_ACTION = 10;
-        public static final int GET_FILE_OUTPUT_ACTION = 11;
-        public static final int DELETE_FILE_ACTION = 12;
-        public static final int OPEN_JARX_ACTION = 13;
-        public static final int GET_URL_INPUT_ACTION = 14;
-        public static final int CREATE_CONTENTCLASSLOADER_ACTION = 15;
-        public static final int START_ACTIVATOR_ACTION = 16;
-        public static final int STOP_ACTIVATOR_ACTION = 17;
-        public static final int SYSTEM_EXIT_ACTION = 18;
-        public static final int OPEN_JAR_ACTION=19;
-        public static final int GET_POLICY_ACTION = 20;
-
+        public static final int CREATE_URL_WITH_CONTEXT_ACTION = 3;
+        public static final int GET_ABSOLUTE_PATH_ACTION = 4;
+        public static final int FILE_EXISTS_ACTION = 5;
+        public static final int FILE_IS_DIRECTORY_ACTION = 6;
+        public static final int MAKE_DIRECTORY_ACTION = 7;
+        public static final int MAKE_DIRECTORIES_ACTION = 8;
+        public static final int LIST_DIRECTORY_ACTION = 9;
+        public static final int RENAME_FILE_ACTION = 10;
+        public static final int GET_FILE_INPUT_ACTION = 11;
+        public static final int GET_FILE_OUTPUT_ACTION = 12;
+        public static final int DELETE_FILE_ACTION = 13;
+        public static final int OPEN_JARX_ACTION = 14;
+        public static final int GET_URL_INPUT_ACTION = 15;
+        public static final int CREATE_CONTENTCLASSLOADER_ACTION = 16;
+        public static final int START_ACTIVATOR_ACTION = 17;
+        public static final int STOP_ACTIVATOR_ACTION = 18;
+        public static final int SYSTEM_EXIT_ACTION = 19;
+        public static final int OPEN_JAR_ACTION= 20;
+        public static final int GET_POLICY_ACTION = 21;
+        
         private int m_action = -1;
         private Object m_arg1 = null;
         private Object m_arg2 = null;
@@ -622,6 +650,14 @@ public class SecureAction
             m_arg2 = null;
         }
 
+        public void set(int action, URL context, String spec, URLStreamHandler handler)
+        {
+            m_action = action;
+            m_arg1 = context;
+            m_arg2 = spec;
+            m_handler = handler;
+        }
+        
         private void unset()
         {
             m_action = -1;
@@ -649,6 +685,10 @@ public class SecureAction
                 else if (m_action == CREATE_URL_ACTION)
                 {
                     return new URL(m_protocol, m_host, m_port, m_path, m_handler);
+                }
+                else if (m_action == CREATE_URL_WITH_CONTEXT_ACTION)
+                {
+                    return new URL((URL) m_arg1, (String) m_arg2, m_handler);
                 }
                 else if (m_action == GET_ABSOLUTE_PATH_ACTION)
                 {

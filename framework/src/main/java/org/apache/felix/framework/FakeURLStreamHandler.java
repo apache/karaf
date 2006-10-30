@@ -36,6 +36,6 @@ class FakeURLStreamHandler extends URLStreamHandler
 {
     protected URLConnection openConnection(URL url) throws IOException
     {
-        return null;
+        throw new IOException("FakeURLStreamHandler can not be used!");
     }
 }

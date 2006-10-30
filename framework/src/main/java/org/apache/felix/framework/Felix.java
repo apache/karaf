@@ -20,6 +20,7 @@ package org.apache.felix.framework;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
@@ -1291,9 +1292,9 @@ public class Felix
 
                 if (!pd.implies(perm))
                 {
-                   throw new java.security.AccessControlException(
-                       "PackagePermission.IMPORT denied for import: " +
-                       imports[i].getName(), perm);
+                    throw new java.security.AccessControlException(
+                        "PackagePermission.IMPORT denied for import: " +
+                        imports[i].getName(), perm);
                 }
             }
             // Check export permission for all exports of the current module.
@@ -2631,33 +2632,23 @@ public class Felix
         IModule module = m_factory.createModule(
             Long.toString(targetId) + "." + Integer.toString(revision), md);
 
-        ProtectionDomain pd = null;
-
         if (System.getSecurityManager() != null)
         {
-            String location = m_cache.getArchive(targetId).getLocation();
-
-            if (location.startsWith("reference:"))
-            {
-                location = location.substring("reference:".length());
-            }
-
-            CodeSource codesource = new CodeSource(
-                new URL(location),
+            CodeSource codesource = new CodeSource(m_secureAction.createURL(null, 
+                m_cache.getArchive(targetId).getLocation(), 
+                new FakeURLStreamHandler()), 
                 m_cache.getArchive(targetId).getCertificates());
 
-            pd = new ProtectionDomain(codesource,
-                m_secureAction.getPolicy().getPermissions(codesource));
+            m_factory.setSecurityContext(module, new ProtectionDomain(codesource,
+                m_secureAction.getPolicy().getPermissions(codesource)));
         }
-
-        m_factory.setSecurityContext(module, pd);
 
         // Create the content loader from the module archive.
         IContentLoader contentLoader = new ContentLoaderImpl(
                 m_logger,
                 m_cache.getArchive(targetId).getRevision(revision).getContent(),
                 m_cache.getArchive(targetId).getRevision(revision).getContentPath(),
-                pd);
+                (ProtectionDomain) module.getSecurityContext());
         // Set the content loader's search policy.
         contentLoader.setSearchPolicy(
                 new R4SearchPolicy(m_policyCore, module));
