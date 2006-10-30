@@ -20,7 +20,6 @@ package org.apache.felix.framework;
 
 import java.io.*;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
