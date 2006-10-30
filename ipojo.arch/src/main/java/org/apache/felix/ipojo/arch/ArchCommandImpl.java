@@ -1,32 +1,29 @@
-/*
- *   Copyright 2006 The Apache Software Foundation
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.ipojo.arch;
 
 
 import java.io.PrintStream;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
 
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.ComponentDescription;
-import org.apache.felix.ipojo.architecture.DependencyDescription;
-import org.apache.felix.ipojo.architecture.ProvidedServiceDescription;
-import org.apache.felix.ipojo.architecture.State;
+import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.ungoverned.osgi.service.shell.Command;
 
 
@@ -61,6 +58,25 @@ public class ArchCommandImpl implements Command {
     public String getShortDescription() {
         return "Architecture command : display the architecture";
     }
+    
+    
+    /**
+     * Return the String corresponding to a component state.
+     * @param state : the state in int
+     * @return : the string of the state (Stopped, Unresolved, Resolved) or "Unknown" if state is not revelant
+     */
+    private String getComponentState(int state) {
+        switch(state) {
+        case(0) :
+            return "STOPPED";
+        case(1) :
+            return "INVALID";
+        case(2) :
+            return  "VALID";
+        default :
+            return "UNKNOWN";
+        }
+    }
 
     /**
      * @see org.ungoverned.osgi.service.shell.Command#execute(java.lang.String, java.io.PrintStream, java.io.PrintStream)
@@ -69,34 +85,20 @@ public class ArchCommandImpl implements Command {
         synchronized(this) { 
         	for(int i=0; i < archiService.length; i++) {
         		ComponentDescription component = archiService[i].getComponentDescription();       
-        		out.println("Component : " + component.getClassName() + " - " + State.printComponentState(component.getState()));
-        		for(int j = 0; j < component.getDependencies().length; j++) {
-        			DependencyDescription dd = component.getDependencies()[j];
-        			out.println("\t Dependency : " + dd.getInterface() + " - " + State.printDependencyState(dd.getState()) + " - Optional : " + dd.isOptional() + " - Multiple : " + dd.isMultiple());
-        			// getUsedServices :
-        			HashMap hm = dd.getUsedServices();
-        			Iterator it = hm.keySet().iterator();
-        			while(it.hasNext()) {
-        				String key = (String) it.next();
-        				out.println("\t\t Used Service : " + key + " - " + hm.get(key));
-        			}
+        		out.println("Component : " + component.getClassName() + " - " + getComponentState(component.getState()) + " from bundle " + component.getBundleId());
+        		for(int j = 0; j < component.getHandlers().length; j++) {
+        			HandlerDescription hd = component.getHandlers()[j];
+        			String hn = hd.getHandlerName();
+        			String hv = "valid";
+        			if(!hd.isValid()) { hv = "invalid"; }
+        			String hi = hd.getHandlerInfo();
+        			out.println("Handler : " + hn + " : " + hv);
+        			if(!hi.equals("")) { out.println(hi); }
         		}
-        		for(int j=0;  j < component.getProvideServices().length; j++) {
-        			ProvidedServiceDescription ps = component.getProvideServices()[j];
-        			String spec = "";
-        			for(int k = 0; k < ps.getServiceSpecification().length; k++) {
-        				spec = spec + " " + ps.getServiceSpecification()[k];
-        			}
-        			out.println("\t Provides : " + spec + " - " + State.printProvidedServiceState(ps.getState()));
-        			Enumeration e = ps.getProperties().propertyNames();
-        			while(e.hasMoreElements()) {
-        				Object key = e.nextElement();
-        				out.println("\t\t Service Property : " + key.toString() + " = " + ps.getProperties().getProperty(key.toString()));  
-        			}
-        		}
-        		out.println("\tCreated Instances : ");
+        		
+        		out.println("Created Instances of the POJO : ");
         		for(int j=0;  j < component.getInstances().length; j++) {
-        			out.println("\t\t" + component.getInstances()[j]);
+        			out.println("\t" + component.getInstances()[j]);
         		}
         		
         		out.print("\n");

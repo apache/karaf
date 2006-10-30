@@ -4,4 +4,5 @@
 		  <Provides interface="org.ungoverned.osgi.service.shell.Command"/>
 		  <Dependency field="archiService" optional="true"/>
 	</Component>
+	<instance component="org.apache.felix.ipojo.arch.ArchCommandImpl" name="ArchCommand"/>
 </iPOJO>
