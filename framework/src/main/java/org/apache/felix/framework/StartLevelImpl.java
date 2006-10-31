@@ -86,7 +86,8 @@ public class StartLevelImpl implements StartLevel, Runnable
     }
 
     /**
-     * This method is currently only called by the shutdown thread when the
+     * This method is currently only called by the by the thread that calls
+     * the Felix.start() method and the shutdown thread when the
      * framework is shutting down.
      * @param startlevel
     **/

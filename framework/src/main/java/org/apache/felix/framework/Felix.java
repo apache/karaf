@@ -474,17 +474,19 @@ public class Felix
         // Set the start level using the start level service;
         // this ensures that all start level requests are
         // serialized.
-        // NOTE: There is potentially a specification compliance
-        // issue here, since the start level request is asynchronous;
-        // this means that the framework will fire its STARTED event
-        // before all bundles have officially been restarted and it
-        // is not clear if this is really an issue or not.
         try
         {
             StartLevel sl = (StartLevel) getService(
                 getBundle(0),
                 getServiceReferences((BundleImpl) getBundle(0), StartLevel.class.getName(), null)[0]);
-            sl.setStartLevel(startLevel);
+            if (sl instanceof StartLevelImpl)
+            {
+                ((StartLevelImpl) sl).setStartLevelAndWait(startLevel);
+            }
+            else
+            {
+                sl.setStartLevel(startLevel);
+            }
         }
         catch (InvalidSyntaxException ex)
         {
@@ -805,7 +807,10 @@ public class Felix
             }
         }
 
-        fireFrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, getBundle(0), null);
+        if (m_frameworkStatus == RUNNING_STATUS)
+        {
+            fireFrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, getBundle(0), null);
+        }
     }
 
     /**
