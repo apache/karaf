@@ -1,0 +1,51 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+ 
+ <modelVersion>4.0.0</modelVersion>
+ <groupId>org.apache.felix</groupId>
+ <artifactId>maven-bundle-plugin</artifactId>
+
+ <repositories>
+  <repository>
+   <id>aQute</id>
+   <url>http://www.aQute.biz/repo</url>
+   </repository>
+ </repositories>
+ 
+ <packaging>maven-plugin</packaging>
+ <name>Maven Plugin OSGi Bundle</name>
+ <description> provides a maven plugin that allows that builds the jar by
+  embedding packages from the classpath (wildcarded). Plus a zillion
+  other features. See http://www.aqute.biz/php/tools/bnd.php
+  </description>
+ <version>0.9.0-SNAPSHOT</version>
+ 
+ <dependencies>
+  <dependency>
+   <groupId>biz.aQute</groupId>
+   <artifactId>bnd</artifactId>
+   <version>0.0.95</version>
+  </dependency>
+  <dependency>
+   <groupId>junit</groupId>
+   <artifactId>junit</artifactId>
+   <version>3.8.1</version>
+  </dependency>
+  <dependency>
+   <groupId>org.apache.maven</groupId>
+   <artifactId>maven-plugin-api</artifactId>
+   <version>2.0</version>
+  </dependency>
+  <dependency>
+   <groupId>org.apache.maven</groupId>
+   <artifactId>maven-archiver</artifactId>
+   <version>2.0</version>
+  </dependency>
+  <dependency>
+   <groupId>org.apache.maven</groupId>
+   <artifactId>maven-artifact</artifactId>
+   <version>2.0</version>
+  </dependency>
+ </dependencies>
+</project>
