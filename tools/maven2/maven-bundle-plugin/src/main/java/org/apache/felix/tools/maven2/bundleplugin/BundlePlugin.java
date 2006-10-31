@@ -99,7 +99,7 @@ public class BundlePlugin extends AbstractMojo {
    header(properties, Analyzer.BUNDLE_NAME, project.getName());
    header(properties, Analyzer.BUNDLE_VENDOR, project
      .getOrganization());
-   header(properties, Analyzer.INCLUDE_RESOURCE, "src/main/resources");
+//   header(properties, Analyzer.INCLUDE_RESOURCE, "src/main/resources");
  
    properties.putAll(project.getProperties());
    properties.putAll(project.getModel().getProperties());
