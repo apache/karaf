@@ -63,84 +63,18 @@
   </scm>
         
   <modules>
-    <module>tools/maven2/maven-osgi-plugin</module>
+    <module>org.osgi.foundation</module>
+    <module>tools/maven2/maven-bundle-plugin</module>
     <module>javax.servlet</module>
     <module>org.osgi.core</module>
     <module>org.osgi.compendium</module>
-    <module>org.osgi.foundation</module>
     <module>framework</module>
+    <module>main</module>
     <module>shell</module>
     <module>shell.tui</module>
-    <module>shell.gui</module>
-    <module>shell.gui.plugin</module>
     <module>bundlerepository</module>
-    <module>org.apache.felix.daemon</module>
-    <module>org.apache.felix.dependencymanager</module>
-    <module>main</module>
-
-    <module>examples</module>
-
-    <module>servicebinder</module>
-    <module>wireadmin</module>
-    <module>upnp.extra</module>
-    <module>upnp.basedriver</module>
-    <module>upnp.tester</module>      
-    <module>upnp.sample.tv</module>
-    <module>upnp.sample.clock</module>
-    <module>upnp.sample.binaryLight</module>
-    <module>http.jetty</module>
-    <module>scr</module>
-    <module>eventadmin</module>
-    <module>eventadmin.bridge.upnp</module>
-    <module>eventadmin.bridge.configuration</module>
-    <module>eventadmin.bridge.useradmin</module>
-    <module>eventadmin.bridge.wireadmin</module>
     <module>log</module>
-
-    <module>tools/mangen</module>
-
-    <module>ipojo</module>
-    <module>ipojo.metadata</module>
-
   </modules>
-
-  <profiles>
-    <profile>
-      <id>jdk1.5</id>
-      <activation>
-        <jdk>1.5</jdk>
-      </activation>
-      <modules>
-        <module>mosgi.console.ifc</module>
-        <module>mosgi.console.component</module>
-        <module>mosgi.console.gui</module>
-        <module>mosgi.jmx.agent</module>
-        <module>mosgi.jmx.httpconnector</module>
-        <module>mosgi.jmx.registry</module>
-        <module>mosgi.jmx.remotelogger</module>
-        <module>mosgi.jmx.rmiconnector</module>
-        <module>mosgi.managedelements.osgiprobes</module>
-        <module>mosgi.managedelements.osgiprobes.tab</module>
-        <module>mosgi.managedelements.bundlesprobes</module>
-        <module>mosgi.managedelements.bundlesprobes.tab</module>
-        <module>mosgi.managedelements.obrprobe</module>
-        <module>mosgi.managedelements.obrprobe.tab</module>
-        <module>mosgi.managedelements.memoryprobe</module>
-        <module>ipojo.plugin</module>
-        <module>ipojo.arch</module>
-      </modules>
-    </profile>
-    <profile>    
-      <id>jdk1.4</id>
-      <activation>
-        <jdk>1.4</jdk>
-      </activation>
-      <modules>
-        <module>ipojo.plugin</module>
-        <module>ipojo.arch</module>
-      </modules>
-    </profile>
-  </profiles>
 
   <!-- Specify a default version number for dependencies -->
   <dependencyManagement>

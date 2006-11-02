@@ -1,0 +1,26 @@
+<project default="all">
+    <target name="clean">
+        <exec executable="mvn" failonerror="true">
+            <arg line="-f pom-new-plugin.xml clean" />
+        </exec>
+        <exec executable="mvn" failonerror="true">
+            <arg line="-f pom-old-plugin.xml clean" />
+        </exec>
+    </target>
+    <target name="install">
+        <exec executable="mvn" failonerror="true">
+            <arg line="-f pom-new-plugin.xml install" />
+        </exec>
+        <exec executable="mvn" failonerror="true">
+            <arg line="-f pom-old-plugin.xml install" />
+        </exec>
+    </target>
+    <target name="all">
+        <exec executable="mvn" failonerror="true">
+            <arg line="-f pom-new-plugin.xml clean install" />
+        </exec>
+        <exec executable="mvn" failonerror="true">
+            <arg line="-f pom-old-plugin.xml clean install" />
+        </exec>
+    </target>
+</project>
