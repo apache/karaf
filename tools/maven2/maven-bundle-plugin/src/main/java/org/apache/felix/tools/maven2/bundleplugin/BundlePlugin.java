@@ -21,6 +21,7 @@ package org.apache.felix.tools.maven2.bundleplugin;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.regex.*;
 import java.util.zip.ZipException;
  
 import org.apache.maven.artifact.Artifact;
@@ -90,7 +91,12 @@ public class BundlePlugin extends AbstractMojo {
    properties.put(Analyzer.BUNDLE_SYMBOLICNAME, bsn);
    properties.put(Analyzer.IMPORT_PACKAGE, "*");
    properties.put(Analyzer.EXPORT_PACKAGE, bsn + ".*");
-   String version = project.getVersion().replace('-', '.');
+   String version = project.getVersion();
+   Pattern P_VERSION = Pattern.compile("([0-9]+(\\.[0-9])*)-(.*)");
+   Matcher m = P_VERSION.matcher(version);
+   if (m.matches()) {
+     version = m.group(1) + "." + m.group(3);
+   }
    properties.put(Analyzer.BUNDLE_VERSION, version);
    header(properties, Analyzer.BUNDLE_DESCRIPTION, project
      .getDescription());
@@ -99,7 +105,6 @@ public class BundlePlugin extends AbstractMojo {
    header(properties, Analyzer.BUNDLE_NAME, project.getName());
    header(properties, Analyzer.BUNDLE_VENDOR, project
      .getOrganization());
-   header(properties, Analyzer.INCLUDE_RESOURCE, "src/main/resources");
  
    properties.putAll(project.getProperties());
    properties.putAll(project.getModel().getProperties());

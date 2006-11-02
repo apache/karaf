@@ -2,13 +2,11 @@
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
  
-<!--
  <parent>
    <artifactId>felix</artifactId>
    <groupId>org.apache.felix</groupId>
    <version>0.8.0-SNAPSHOT</version>
  </parent>
--->
 
  <modelVersion>4.0.0</modelVersion>
  <groupId>org.apache.felix</groupId>
@@ -22,7 +20,7 @@
  </repositories>
  
  <packaging>maven-plugin</packaging>
- <name>Maven Plugin OSGi Bundle</name>
+ <name>Maven Bundle Plugin</name>
  <description> provides a maven plugin that allows that builds the jar by
   embedding packages from the classpath (wildcarded). Plus a zillion
   other features. See http://www.aqute.biz/php/tools/bnd.php
@@ -33,7 +31,7 @@
   <dependency>
    <groupId>biz.aQute</groupId>
    <artifactId>bnd</artifactId>
-   <version>0.0.95</version>
+   <version>0.0.96</version>
   </dependency>
   <dependency>
    <groupId>junit</groupId>
