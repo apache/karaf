@@ -23,37 +23,31 @@
     <version>0.8.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <packaging>osgi-bundle</packaging>
+  <packaging>bundle</packaging>
   <name>Apache Felix Shell Service</name>
+  <description>A simple OSGi command shell service.</description>
   <artifactId>org.apache.felix.shell</artifactId>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.core</artifactId>
       <version>${pom.version}</version>
-      <scope>provided</scope>
     </dependency>
   </dependencies>
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.felix.plugins</groupId>
-        <artifactId>maven-osgi-plugin</artifactId>
-        <version>${pom.version}</version>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
-          <osgiManifest>
-            <bundleName>ShellService</bundleName>
-            <bundleDescription>A simple OSGi command shell service.</bundleDescription>
-            <bundleActivator>auto-detect</bundleActivator>
-            <bundleDocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</bundleDocUrl>
-            <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>
-            <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
-            <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
-            <exportPackage>${pom.artifactId}; specification-version="1.0.0", org.ungoverned.osgi.service.shell; specification-version="1.0.0"</exportPackage>
-            <exportService>${pom.artifactId}.ShellService, org.ungoverned.osgi.service.shell.ShellService</exportService>
-            <importService>org.osgi.service.startlevel.StartLevel, org.osgi.service.packageadmin.PackageAdmin</importService>
-          </osgiManifest>
+          <instructions>
+            <Export-Package>org.apache.felix.shell; org.ungoverned.osgi.service.shell; version=1.0.0</Export-Package>
+            <Private-Package>org.apache.felix.*</Private-Package>
+            <Bundle-Activator>org.apache.felix.shell.impl.Activator</Bundle-Activator>
+            <Export-Service>org.apache.felix.shell.ShellService, org.ungoverned.osgi.service.shell.ShellService</Export-Service>
+            <Import-Service>org.osgi.service.startlevel.StartLevel, org.osgi.service.packageadmin.PackageAdmin</Import-Service>
+          </instructions>
         </configuration>
       </plugin>
     </plugins>

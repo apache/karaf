@@ -23,21 +23,20 @@
     <version>0.8.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <packaging>osgi-bundle</packaging>
-  <name>Apache Felix Bundle Repository Service</name>
+  <packaging>bundle</packaging>
+  <name>Apache Felix Bundle Repository</name>
+  <description>Bundle repository service.</description>
   <artifactId>org.apache.felix.bundlerepository</artifactId>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.core</artifactId>
       <version>${pom.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell</artifactId>
       <version>${pom.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>kxml2</groupId>
@@ -48,24 +47,22 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.felix.plugins</groupId>
-        <artifactId>maven-osgi-plugin</artifactId>
-        <version>${pom.version}</version>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
-          <ignorePackage>javax.xml.parsers,org.xml.sax</ignorePackage>
-          <osgiManifest>
-            <bundleName>BundleRepository</bundleName>
-            <bundleActivator>auto-detect</bundleActivator>
-            <bundleDescription>Bundle repository service.</bundleDescription>
-            <bundleDocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</bundleDocUrl>
-            <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>
-            <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
-            <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
-            <dynamicImportPackage>org.apache.felix.shell</dynamicImportPackage>
-            <exportPackage>org.osgi.service.obr</exportPackage>
-            <exportService>org.osgi.service.obr.RepositoryAdmin</exportService>
-          </osgiManifest>
+          <instructions>
+            <Export-Package>org.osgi.service.obr</Export-Package>
+            <Private-Package>org.kxml2.*,org.xmlpull.*,org.apache.felix.bundlerepository.*</Private-Package>
+            <Import-Package>!javax.xml.parsers,!org.xml.sax,*</Import-Package>
+            <Dynamic-ImportPackage>org.apache.felix.shell</Dynamic-ImportPackage>
+            <Bundle-Activator>${pom.artifactId}.Activator</Bundle-Activator>
+            <Bundle-DocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</Bundle-DocUrl>
+            <Bundle-Url>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</Bundle-Url>
+            <Bundle-Source>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</Bundle-Source>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Export-Service>org.osgi.service.obr.RepositoryAdmin</Export-Service>
+          </instructions>
         </configuration>
       </plugin>
     </plugins>

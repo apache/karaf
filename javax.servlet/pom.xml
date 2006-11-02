@@ -6,26 +6,22 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <name>Servlet 2.1 API</name>
+  <description>Servlet 2.1 API</description>
   <artifactId>javax.servlet</artifactId>
-  <packaging>osgi-bundle</packaging>
+  <packaging>bundle</packaging>
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.felix.plugins</groupId>
-        <artifactId>maven-osgi-plugin</artifactId>
-        <version>${pom.version}</version>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
-          <osgiManifest>
-            <bundleName>servlet</bundleName>
-            <bundleVendor>Apache Software Foundation</bundleVendor>
-            <bundleVersion>2.1</bundleVersion>
-            <bundleSymbolicName>javax.servlet</bundleSymbolicName>
-            <bundleDescription>Servlet 2.1 API</bundleDescription>
-            <bundleCopyright>Copyright 1999,2005 The Apache Software Foundation</bundleCopyright>
-            <bundleCategory>servlet</bundleCategory>
-            <exportPackage>javax.servlet;specification-version="2.1",javax.servlet.http;specification-version="2.1"</exportPackage>
-          </osgiManifest>
+          <instructions>
+            <Bundle-Copyright>Copyright 1999,2005 The Apache Software Foundation</Bundle-Copyright>
+            <Bundle-Category>servlet</Bundle-Category>
+            <Export-Package>javax.servlet;specification-version="2.1",javax.servlet.http;specification-version="2.1"</Export-Package>
+            <Import-Package>!javax.servlet.*,*</Import-Package>
+          </instructions>
         </configuration>
       </plugin>
     </plugins>

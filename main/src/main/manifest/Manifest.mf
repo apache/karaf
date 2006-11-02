@@ -1,4 +1,0 @@
-Main-Class: org.apache.felix.main.Main
-Class-Path: ../lib/org.apache.felix.framework-0.8.0-SNAPSHOT.jar 
- ../lib/org.osgi.core-0.8.0-SNAPSHOT.jar 
-
