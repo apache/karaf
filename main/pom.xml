@@ -62,7 +62,7 @@
             <Main-Class>org.apache.felix.main.Main</Main-Class>
             <Bundle-Name>Apache Felix</Bundle-Name>
             <Bundle-Description>OSGi R4 framework.</Bundle-Description>
-            <Private-Package>org.apache.felix.*,org.osgi.*</Private-Package>
+            <Private-Package>org.apache.felix.main.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.osgi.*</Private-Package>
             <Import-Package>!*</Import-Package>
             <Include-Resource>{src/main/resources/}</Include-Resource>
           </instructions>
