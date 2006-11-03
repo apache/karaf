@@ -35,7 +35,7 @@
         <configuration>
           <instructions>
             <Export-Package>!org.osgi.framework,!org.osgi.service.condpermadmin,!org.osgi.service.packageadmin,!org.osgi.service.permissionadmin,!org.osgi.service.startlevel,!org.osgi.service.url,org.osgi.*</Export-Package>
-            <Import-Package>!org.osgi,*</Import-Package>
+            <Import-Package>javax.microedition.io;resolution:=optional,!org.osgi.*,*</Import-Package>
             <Dynamic-ImportPackage>*</Dynamic-ImportPackage>
             <Bundle-Version>4</Bundle-Version>
             <Bundle-Vendor>OSGi Alliance</Bundle-Vendor>
