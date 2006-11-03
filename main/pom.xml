@@ -32,6 +32,21 @@
       <artifactId>org.apache.felix.framework</artifactId>
       <version>${pom.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.shell</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.shell.tui</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.bundlerepository</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
   </dependencies>
   <properties>
     <property name="install.home" value="${basedir.absolutePath}"/>
