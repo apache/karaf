@@ -75,6 +75,10 @@
     <module>bundlerepository</module>
     <module>log</module>
     <module>eventadmin</module>
+    <module>eventadmin.bridge.upnp</module>
+    <module>eventadmin.bridge.configuration</module>
+    <module>eventadmin.bridge.useradmin</module>
+    <module>eventadmin.bridge.wireadmin</module>
  </modules>
 
   <!-- Specify a default version number for dependencies -->
