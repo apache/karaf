@@ -34,9 +34,6 @@
             <Bundle-Activator>${pom.artifactId}.Activator</Bundle-Activator>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Private-Package>${pom.artifactId}.*</Private-Package>
-	    <Include-Resource>
-		src/main/resources
-	    </Include-Resource>
           </instructions>
         </configuration>
       </plugin>

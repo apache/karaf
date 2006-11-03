@@ -43,9 +43,6 @@
             <Import-Package>!org.osgi.service.log,*</Import-Package>
             <Export-Package>org.osgi.service.event</Export-Package>
             <Private-Package>org.apache.felix.eventadmin.impl.*</Private-Package>
-            <Include-Resource>
-		src/main/resources
-            </Include-Resource>
             <Import-Service>
             	 org.osgi.service.event.EventHandler, org.osgi.service.log.LogService, org.osgi.service.log.LogReaderService
             </Import-Service>

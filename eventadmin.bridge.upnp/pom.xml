@@ -41,9 +41,6 @@
             	 org.osgi.service.upnp.UPnPEventListener
             </Export-Service>
             <Private-Package>${pom.artifactId}.*</Private-Package>
-            <Include-Resource>
-		src/main/resources
-	    </Include-Resource>
           </instructions>
         </configuration>
       </plugin>
