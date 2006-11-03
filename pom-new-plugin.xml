@@ -74,7 +74,8 @@
     <module>shell.tui</module>
     <module>bundlerepository</module>
     <module>log</module>
-  </modules>
+    <module>eventadmin</module>
+ </modules>
 
   <!-- Specify a default version number for dependencies -->
   <dependencyManagement>

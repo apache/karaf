@@ -81,7 +81,6 @@
     <module>upnp.sample.binaryLight</module>
     <module>http.jetty</module>
     <module>scr</module>
-    <module>eventadmin</module>
     <module>eventadmin.bridge.upnp</module>
     <module>eventadmin.bridge.configuration</module>
     <module>eventadmin.bridge.useradmin</module>
