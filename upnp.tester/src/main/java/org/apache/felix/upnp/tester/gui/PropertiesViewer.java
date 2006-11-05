@@ -183,10 +183,7 @@ class DataModel extends  AbstractTableModel {
     */
     
     public void setData(String[]names,String[]values){
-        String[] lowerNames = new String[names.length];
-        for (int i=0;i<names.length;i++)
-            lowerNames[i]= names[i].toLowerCase();
-    	this.names=lowerNames;
+    	this.names=names;
     	this.values=values;
     	size = names.length;
 		this.fireTableChanged(new TableModelEvent(this));

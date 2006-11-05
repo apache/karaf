@@ -56,7 +56,6 @@ import org.osgi.framework.BundleException;
 * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
 */
 public class ControlPoint implements PopupMenuListener {
-	RootDeviceListener x;
 	RootDeviceListener listener;
 	TreeViewer viewer;
 	PropertiesViewer properties;
@@ -92,7 +91,6 @@ public class ControlPoint implements PopupMenuListener {
 		doControlPanel();
         Mediator.setControlPoint(this);
         Mediator.setMainFrame(frame);
-        Mediator.setRootDeviceListener(listener);
 		listener = new RootDeviceListener();
         Mediator.setRootDeviceListener(listener);
 		listener.setDeviceNodeListener(viewer);
