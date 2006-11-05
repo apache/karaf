@@ -64,7 +64,6 @@ import org.apache.felix.upnp.basedriver.importer.core.event.structs.NotifierQueu
 import org.apache.felix.upnp.basedriver.importer.core.event.structs.SubscriptionQueue;
 import org.apache.felix.upnp.basedriver.importer.core.upnp.UPnPDeviceImpl;
 import org.apache.felix.upnp.basedriver.importer.core.upnp.UPnPServiceImpl;
-import org.apache.felix.upnp.basedriver.importer.util.DictionaryProp;
 import org.apache.felix.upnp.basedriver.importer.util.ParseUSN;
 import org.apache.felix.upnp.extra.util.Converter;
 
@@ -468,7 +467,7 @@ public class MyCtrlPoint extends ControlPoint
 										   * 
 										   * only if there is a compatibile device
 										   */
-					Dictionary dic = new DictionaryProp();
+					Dictionary dic = new Hashtable();
 					for (int i = 0; i < devicesRefs.length; i++) {
 						UPnPDevice device = (UPnPDevice) context.getService(devicesRefs[i]);
 						dic.put(UPnPDevice.ID, device.getDescriptions(null).get(UPnPDevice.UDN));
@@ -560,7 +559,7 @@ public class MyCtrlPoint extends ControlPoint
 										   * 
 										   * only if there is a compatibile device
 										   */
-					Dictionary dic = new DictionaryProp();
+					Dictionary dic = new Hashtable();
 					/* 
 					 * look for the service that match
 					 */
@@ -577,9 +576,7 @@ public class MyCtrlPoint extends ControlPoint
 						if (services != null) {
 							for (int j = 0; j < services.length; j++) {
 								dic.put(UPnPService.ID, services[j].getId());
-								dic
-										.put(UPnPService.TYPE, services[j]
-												.getType());
+								dic.put(UPnPService.TYPE, services[j].getType());
 
 								UPnPStateVariable[] stateVars = services[j]
 										.getStateVariables();

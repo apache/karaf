@@ -25,15 +25,12 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import org.apache.felix.upnp.basedriver.importer.util.DeviceSetup;
 import org.cybergarage.upnp.Device;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPIcon;
 import org.osgi.service.upnp.UPnPService;
-
-import org.apache.felix.upnp.basedriver.importer.util.DeviceSetup;
-import org.apache.felix.upnp.basedriver.importer.util.DictionaryProp;
 
 /* 
 * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
@@ -43,7 +40,7 @@ public class UPnPDeviceImpl implements UPnPDevice {
 	/**
 	 * <code>properties</code> Dictionary that contains Device properties
 	 */
-	private DictionaryProp properties;
+	private Dictionary properties;
 	private Vector icons;
 	private Hashtable services;
 	/**
@@ -52,7 +49,7 @@ public class UPnPDeviceImpl implements UPnPDevice {
 	 *            Device
 	 */
 	public UPnPDeviceImpl(Device dev, BundleContext context) {
-		properties = new DictionaryProp();
+		properties = new Hashtable();
 		this.services=new Hashtable();
 		this.icons=new Vector();
 		DeviceSetup.deviceSetup(properties,dev,icons,services);

@@ -20,6 +20,7 @@
 package org.apache.felix.upnp.basedriver.importer.util;
 
 
+import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -45,7 +46,7 @@ import org.apache.felix.upnp.extra.util.Constants;
 
 public class DeviceSetup {
 
-	public static void deviceSetup(DictionaryProp properties, Device dev,Vector icons,Hashtable services) {
+	public static void deviceSetup(Dictionary properties, Device dev,Vector icons,Hashtable services) {
 		//TODO if I don't have any device, the size of devlist is 0 
 		DeviceList devList = dev.getDeviceList();
 		/* childrenUDN property */
