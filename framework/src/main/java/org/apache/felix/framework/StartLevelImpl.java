@@ -39,16 +39,43 @@ public class StartLevelImpl implements StartLevel, Runnable
     private Felix m_felix = null;
     private List m_requestList = null;
     private Bundle m_systemBundle = null;
-    
+    private Thread m_thread = null;
+
     public StartLevelImpl(Felix felix)
     {
         m_felix = felix;
         m_requestList = new ArrayList();
         m_systemBundle = m_felix.getBundle(0);
         // Start a thread to perform asynchronous package refreshes.
-        Thread t = new Thread(this, "FelixStartLevel");
-        t.setDaemon(true);
-        t.start();
+        m_thread = new Thread(this, "FelixStartLevel");
+        m_thread.setDaemon(true);
+        m_thread.start();
+    }
+    
+    /**
+     * Stops the FelixStartLevel thread on system shutdown. Shutting down the
+     * thread explicitly is required in the embedded case, where Felix may be
+     * stopped without the Java VM being stopped. In this case the
+     * FelixStartLevel thread must be stopped explicitly.
+     * <p>
+     * This method is called by the
+     * {@link StartLevelActivator#stop(BundleContext)} method.
+     */
+    void stop()
+    {
+        synchronized (m_requestList)
+        {
+            if (m_thread != null)
+            {
+                // Null thread variable to signal to the thread that
+                // we want it to exit.
+                m_thread = null;
+                
+                // Wake up the thread, if it is currently in the wait() state
+                // for more work.
+                m_requestList.notifyAll();
+            }
+        }
     }
     
     /* (non-Javadoc)
@@ -199,6 +226,12 @@ public class StartLevelImpl implements StartLevel, Runnable
                 // Wait for a request.
                 while (m_requestList.size() == 0)
                 {
+                    // Terminate the thread if requested to do so (see stop()).
+                    if (m_thread == null)
+                    {
+                        return;
+                    }
+                    
                     try
                     {
                         m_requestList.wait();

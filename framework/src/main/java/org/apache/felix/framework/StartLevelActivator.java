@@ -23,6 +23,7 @@ import org.osgi.framework.*;
 class StartLevelActivator implements BundleActivator
 {
     private Felix m_felix = null;
+    private StartLevelImpl m_startLevel = null;
     private ServiceRegistration m_reg = null;
 
     public StartLevelActivator(Felix felix)
@@ -32,13 +33,15 @@ class StartLevelActivator implements BundleActivator
 
     public void start(BundleContext context) throws Exception
     {
+        m_startLevel = new StartLevelImpl(m_felix);
         m_reg = context.registerService(
             org.osgi.service.startlevel.StartLevel.class.getName(),
-            new StartLevelImpl(m_felix), null);
+            m_startLevel, null);
     }
 
     public void stop(BundleContext context) throws Exception
     {
         m_reg.unregister();
+        m_startLevel.stop();
     }
 }

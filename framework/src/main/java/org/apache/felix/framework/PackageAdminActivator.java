@@ -24,6 +24,7 @@ class PackageAdminActivator implements BundleActivator
 {
     private Felix m_felix = null;
     private ServiceRegistration m_reg = null;
+    private PackageAdminImpl m_packageAdmin = null;
 
     public PackageAdminActivator(Felix felix)
     {
@@ -32,13 +33,15 @@ class PackageAdminActivator implements BundleActivator
 
     public void start(BundleContext context) throws Exception
     {
+        m_packageAdmin = new PackageAdminImpl(m_felix);
         m_reg = context.registerService(
             org.osgi.service.packageadmin.PackageAdmin.class.getName(),
-            new PackageAdminImpl(m_felix), null);
+            m_packageAdmin, null);
     }
 
     public void stop(BundleContext context) throws Exception
     {
         m_reg.unregister();
+        m_packageAdmin.stop();
     }
 }

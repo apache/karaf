@@ -29,6 +29,7 @@ class PackageAdminImpl implements PackageAdmin, Runnable
     private Felix m_felix = null;
     private Bundle[][] m_reqBundles = null;
     private Bundle m_systemBundle = null;
+    private Thread m_thread = null;
 
     public PackageAdminImpl(Felix felix)
     {
@@ -36,11 +37,34 @@ class PackageAdminImpl implements PackageAdmin, Runnable
         m_systemBundle = m_felix.getBundle(0);
 
         // Start a thread to perform asynchronous package refreshes.
-        Thread t = new Thread(this, "FelixPackageAdmin");
-        t.setDaemon(true);
-        t.start();
+        m_thread = new Thread(this, "FelixPackageAdmin");
+        m_thread.setDaemon(true);
+        m_thread.start();
     }
 
+    /**
+     * Stops the FelixPackageAdmin thread on system shutdown. Shutting down the
+     * thread explicitly is required in the embedded case, where Felix may be
+     * stopped without the Java VM being stopped. In this case the
+     * FelixPackageAdmin thread must be stopped explicitly.
+     * <p>
+     * This method is called by the
+     * {@link PackageAdminActivator#stop(BundleContext)} method.
+     */
+    synchronized void stop()
+    {
+        if (m_thread != null)
+        {
+            // Null thread variable to signal to the thread that
+            // we want it to exit.
+            m_thread = null;
+            
+            // Wake up the thread, if it is currently in the wait() state
+            // for more work.
+            notifyAll();
+        }
+    }
+    
     /**
      * Returns the bundle associated with this class if the class was
      * loaded from a bundle, otherwise returns null.
@@ -210,6 +234,12 @@ class PackageAdminImpl implements PackageAdmin, Runnable
                 // Wait for a refresh request.
                 while (m_reqBundles == null)
                 {
+                    // Terminate the thread if requested to do so (see stop()).
+                    if (m_thread == null)
+                    {
+                        return;
+                    }
+                    
                     try
                     {
                         wait();
