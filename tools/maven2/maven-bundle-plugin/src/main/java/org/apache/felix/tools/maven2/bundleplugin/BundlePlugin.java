@@ -105,9 +105,15 @@ public class BundlePlugin extends AbstractMojo {
    header(properties, Analyzer.BUNDLE_LICENSE, printLicenses(project
      .getLicenses()));
    header(properties, Analyzer.BUNDLE_NAME, project.getName());
-   header(properties, Analyzer.BUNDLE_VENDOR, project
-     .getOrganization());
-   header(properties, Analyzer.INCLUDE_RESOURCE, "src/main/resources/");
+   
+   if (project.getOrganization() != null) {
+     header(properties, Analyzer.BUNDLE_VENDOR, project
+       .getOrganization().getName());
+   }
+     
+   if (new File("src/main/resources").exists()) {
+     header(properties, Analyzer.INCLUDE_RESOURCE, "src/main/resources/");
+   }
  
    properties.putAll(project.getProperties());
    properties.putAll(project.getModel().getProperties());
@@ -144,6 +150,7 @@ public class BundlePlugin extends AbstractMojo {
     throw new MojoFailureException("Found errors, see log");
    }
    else {
+    jarFile.getParentFile().mkdirs();
     builder.getJar().write(jarFile);
     project.getArtifact().setFile(jarFile);
    }
@@ -226,7 +233,10 @@ public class BundlePlugin extends AbstractMojo {
   */
  private Jar[] getClasspath() throws ZipException, IOException {
   List list = new ArrayList();
-  list.add(new Jar(".", outputDirectory));
+  
+  if (outputDirectory != null && outputDirectory.exists()) {
+    list.add(new Jar(".", outputDirectory));
+  }
  
   Set artifacts = project.getArtifacts();
   for (Iterator it = artifacts.iterator(); it.hasNext();) {
