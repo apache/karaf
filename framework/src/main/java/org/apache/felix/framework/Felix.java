@@ -341,8 +341,7 @@ public class Felix
             // Create a simple bundle info for the system bundle.
             BundleInfo info = new BundleInfo(
                 m_logger, new SystemBundleArchive(), null);
-            systembundle = new SystemBundle(this, info, activatorList,
-                m_secureAction);
+            systembundle = new SystemBundle(this, info, activatorList);
             // Create a module for the system bundle.
             IModuleDefinition md = new ModuleDefinition(
                 systembundle.getExports(), null, null, null);
@@ -522,6 +521,35 @@ public class Felix
         // The framework is now in its shutdown sequence.
         m_frameworkStatus = STOPPING_STATUS;
 
+        // Do the real shutdown work in a separate method to catch any problems
+        // without requiring a huge and ugly try-catch statement.
+        try
+        {
+            shutdownInternal();
+        }
+        catch (Exception ex)
+        {
+            fireFrameworkEvent(FrameworkEvent.ERROR, getBundle(0), ex);
+            m_logger.log(Logger.LOG_ERROR, "Error stopping framework.", ex);
+        }
+        
+        // Finally shutdown the JVM if the framework is running stand-alone.
+        String embedded = m_config.get(FelixConstants.EMBEDDED_EXECUTION_PROP);
+        boolean isEmbedded = (embedded == null) ? false : embedded.equals("true");
+        if (!isEmbedded)
+        {
+            m_secureAction.exit(0);
+        }
+    }
+    
+    /**
+     * This method actually performs the real shutdown operations of the
+     * framework in terms of setting the start level to zero, really stopping
+     * the system bundle, cleaning up any bundle remains and shutting down event
+     * dispatching.
+     */
+    private void shutdownInternal()
+    {
         // Use the start level service to set the start level to zero
         // in order to stop all bundles in the framework. Since framework
         // shutdown happens on its own thread, we can wait for the start
@@ -542,9 +570,12 @@ public class Felix
         // Just like initialize() called the system bundle's start()
         // method, we must call its stop() method here so that it
         // can perform any necessary clean up.
+        // Actually, the stop() method just asynchronously would call
+        // this method through shutdown(), hence we call the real SystemBundle
+        // shutdown method.
         try
         {
-            getBundle(0).stop();
+            ((SystemBundle) getBundle(0)).shutdown();
         }
         catch (Exception ex)
         {

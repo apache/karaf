@@ -34,14 +34,10 @@ class SystemBundle extends BundleImpl
     private Thread m_shutdownThread = null;
     private R4Export[] m_exports = null;
     private IContentLoader m_contentLoader = null;
-    private SecureAction m_secureAction = null;
 
-    protected SystemBundle(Felix felix, BundleInfo info, List activatorList,
-        SecureAction secureAction) throws BundleException
+    protected SystemBundle(Felix felix, BundleInfo info, List activatorList)
     {
         super(felix, info);
-
-        m_secureAction = secureAction;
 
         // Create an activator list if necessary.
         if (activatorList == null)
@@ -162,7 +158,13 @@ class SystemBundle extends BundleImpl
         // This will be done after the framework is initialized.
     }
 
-    public synchronized void stop() throws BundleException
+    /**
+     * According to the spec, this method asynchronously stops the framework.
+     * To prevent multiple creations of useless separate threads in case of
+     * multiple calls to this method, the shutdown thread is only started if
+     * the framework is still in running state.
+     */
+    public synchronized void stop()
     {
         Object sm = System.getSecurityManager();
 
@@ -190,34 +192,10 @@ class SystemBundle extends BundleImpl
                             Logger.LOG_ERROR,
                             "SystemBundle: Error while shutting down.", ex);
                     }
-
-                    // Only shutdown the JVM if the framework is running stand-alone.
-                    String embedded = getFelix().getConfig()
-                        .get(FelixConstants.EMBEDDED_EXECUTION_PROP);
-                    boolean isEmbedded = (embedded == null)
-                        ? false : embedded.equals("true");
-                    if (!isEmbedded)
-                    {
-                        m_secureAction.exit(0);
-                    }
                 }
             };
             getInfo().setState(Bundle.STOPPING);
             m_shutdownThread.start();
-        }
-        else if ((getFelix().getStatus() == Felix.STOPPING_STATUS) &&
-                 (Thread.currentThread() == m_shutdownThread))
-        {
-            // Callback from shutdown thread, so do our own stop.
-            try
-            {
-                getActivator().stop(getInfo().getContext());
-            }
-            catch (Throwable throwable)
-            {
-                throw new BundleException(
-                        "Unable to stop system bundle.", throwable);
-            }
         }
     }
 
@@ -252,5 +230,27 @@ class SystemBundle extends BundleImpl
             m_activator = new SystemBundleActivator(getFelix(), m_activatorList);
         }
         return m_activator;
+    }
+    
+    /**
+     * Actually shuts down the system bundle. This method does what actually
+     * the {@link #stop()} method would do for regular bundles. Since the system
+     * bundle has to shutdown the framework, a separate method is used to stop
+     * the system bundle during framework shutdown.
+     * 
+     * @throws BundleException If an error occurrs stopping the system bundle
+     *      and any activators "started" on framework start time.
+     */
+    void shutdown() throws BundleException
+    {
+        // Callback from shutdown thread, so do our own stop.
+        try
+        {
+            getActivator().stop(getInfo().getContext());
+        }
+        catch (Throwable throwable)
+        {
+            throw new BundleException( "Unable to stop system bundle.", throwable );
+        }
     }
 }
