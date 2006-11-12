@@ -20,7 +20,7 @@ felix.auto.start.1= \
  file:../mosgi.console.component/target/org.apache.felix.mosgi.console.component-0.9.0-SNAPSHOT.jar \
  file:../javax.servlet/target/javax.servlet-0.8.0-SNAPSHOT.jar \
  file:../org.osgi.compendium/target/org.osgi.compendium-0.8.0-SNAPSHOT.jar \
- file:../../sandbox/furfari/upnp.jmxbridge.tab/target/org.apache.felix.upnp.jmxbridge.tab-0.1.0-SNAPSHOT.jar
+ file:../../sandbox/furfari/upnp.jmxbridge.tab/target/org.apache.felix.upnp.jmxbridge.tab-0.2.0-SNAPSHOT.jar
 
 #possible values : both treeonly tableonly none (default=both)
 mosgi.jmxconsole.remotelogger.componentfilter=both

@@ -32,7 +32,7 @@ felix.auto.start.1= \
  file:../upnp.tester/target/org.apache.felix.upnp.tester-0.1.0-SNAPSHOT.jar \
  file:../upnp.sample.tv/target/org.apache.felix.upnp.sample.tv-0.1.0-SNAPSHOT.jar \
  file:../upnp.sample.clock/target/org.apache.felix.upnp.sample.clock-0.1.0-SNAPSHOT.jar \
- file:../../sandbox/furfari/upnp.jmxbridge/target/org.apache.felix.upnp.jmxbridge-0.1.0-SNAPSHOT.jar
+ file:../../sandbox/furfari/upnp.jmxbridge/target/org.apache.felix.upnp.jmxbridge-0.2.0-SNAPSHOT.jar
 
 # file:../mosgi.managedelements.memoryprobe/target/org.apache.felix.mosgi.managedelements.memoryprobe-0.9.0-SNAPSHOT.jar \
 
@@ -47,7 +47,7 @@ mosgi.jmxconsole.tab.url.bundlesprobestab=file:../mosgi.managedelements.bundlesp
 mosgi.jmxconsole.tab.url.obrprobetab=file:../mosgi.managedelements.obrprobe.tab/target/org.apache.felix.mosgi.managedelements.obrprobe.tab-0.9.0-SNAPSHOT.jar
 mosgi.jmxconsole.tab.url.memoryprobetab=http://perso.citi.insa-lyon.fr/sfrenot/devel/mosgi/managedelements/trunk/mosgi.managedelements.memoryprobe.tab/target/org.apache.felix.mosgi.managedelements.memoryprobe.tab-0.8.0-SNAPSHOT.jar
 mosgi.jmxconsole.tab.url.linuxprobestab=http://perso.citi.insa-lyon.fr/sfrenot/devel/mosgi/managedelements/trunk/mosgi.managedelements.linuxprobes.tab/target/org.apache.felix.mosgi.managedelements.linuxprobes.tab-0.8.0-SNAPSHOT.jar
-mosgi.jmxconsole.tab.url.upnptab= file:../../sandbox/furfari/upnp.jmxbridge.tab/target/org.apache.felix.upnp.jmxbridge.tab-0.1.0-SNAPSHOT.jar
+mosgi.jmxconsole.tab.url.upnptab= file:../../sandbox/furfari/upnp.jmxbridge.tab/target/org.apache.felix.upnp.jmxbridge.tab-0.2.0-SNAPSHOT.jar
 mosgi.jmxconsole.rmiport.core=8888
 
 felix.startlevel.framework=1
