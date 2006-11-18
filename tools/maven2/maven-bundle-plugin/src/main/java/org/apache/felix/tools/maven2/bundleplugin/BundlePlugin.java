@@ -241,9 +241,9 @@ public class BundlePlugin extends AbstractMojo {
   Set artifacts = project.getArtifacts();
   for (Iterator it = artifacts.iterator(); it.hasNext();) {
    Artifact artifact = (Artifact) it.next();
-   if (artifact.getScope() == Artifact.SCOPE_COMPILE
-     || artifact.getScope() == Artifact.SCOPE_SYSTEM
-     || artifact.getScope() == Artifact.SCOPE_PROVIDED) {
+   if (Artifact.SCOPE_COMPILE.equals(artifact.getScope()) 
+     || Artifact.SCOPE_SYSTEM.equals(artifact.getScope()) 
+     || Artifact.SCOPE_PROVIDED.equals(artifact.getScope())) {
     Jar jar = new Jar(artifact.getArtifactId(), artifact.getFile());
     list.add(jar);
    }
