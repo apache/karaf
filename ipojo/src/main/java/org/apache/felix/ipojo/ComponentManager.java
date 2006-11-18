@@ -18,6 +18,8 @@
  */
 package org.apache.felix.ipojo;
 
+import org.osgi.framework.BundleContext;
+
 /**
  * The component manager class manages one instance of a component type.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
@@ -65,6 +67,16 @@ public interface ComponentManager {
      * @return the factory of the component
      */
     ComponentManagerFactory getFactory();
+    
+    /**
+     * @return the context of the component manager
+     */
+    BundleContext getContext();
+    
+    /**
+     * @return the name of the component instance
+     */
+    String getName();
 
 
 }

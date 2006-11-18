@@ -98,6 +98,12 @@ public class ProvidedService implements ServiceFactory {
             Property prop = new Property(this, ((PropertyMetadata) psm.getProperties()[i]));
             addProperty(prop);
         }
+        //Add service pid and factory pid
+        //TODO : test this 
+        PropertyMetadata pid_meta = new PropertyMetadata(org.osgi.framework.Constants.SERVICE_PID, null, "java.lang.String", handler.getComponentManager().getComponentName()); 
+        PropertyMetadata factory_meta = new PropertyMetadata("factory.pid", null, "java.lang.String", handler.getComponentManager().getFactory().getFactoryName());
+        addProperty(new Property(this, pid_meta));
+        addProperty(new Property(this, factory_meta));
     }
 
     /**

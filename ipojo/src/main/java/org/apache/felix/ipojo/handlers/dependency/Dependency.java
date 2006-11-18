@@ -525,7 +525,6 @@ public class Dependency implements ServiceListener {
                 m_state = RESOLVED;
             }
             // Register a listener :
-            //m_handler.getComponentManager().getContext().addServiceListener(this, filter); // Try without filter
             m_handler.getComponentManager().getContext().addServiceListener(this);
             m_filter = m_handler.getComponentManager().getContext().createFilter(filter); // Store the filter
             Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Create a filter from : " + filter);

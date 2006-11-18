@@ -29,15 +29,31 @@ public interface Factory {
 
     /**
      * Create a component manager (i.e. component type instance).
-     * @param configuration : the configuration property for this component.
+     * @param configuration : the configuration properties for this component.
      * @return the created component manager.
      */
     ComponentManager createComponent(Dictionary configuration);
+    
+    /**
+     * Create a component manager (i.e. component type instance).
+     * This has these service interaction in the scope given in argument.
+     * @param configuration : the configuration properties for this component.
+     * @param serviceContext : the service context of the component.
+     * @return the created component manager.
+     */
+    ComponentManager createComponent(Dictionary configuration, ServiceContext serviceContext);
 
     /**
      * Get the component type information containing provided service, configuration properties ...
      * @return the compionent type information.
      */
     ComponentInfo getComponentInfo();
+    
+    /**
+     * Check if the given configuration is acceptable as a configuration of a component instance.
+     * @param conf : the configuration to test
+     * @return true if the configuration is acceptable
+     */
+    boolean isAcceptable(Dictionary conf);
 
 }

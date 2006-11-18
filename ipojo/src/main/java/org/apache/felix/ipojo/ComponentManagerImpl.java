@@ -43,6 +43,11 @@ public class ComponentManagerImpl implements ComponentManager {
      * Attached metadata of the managed component.
      */
     private ComponentMetadata m_metadata;
+    
+    /**
+     * Name of the component instance.
+     */
+    private String m_name;
 
     /**
      * The context of the component.
@@ -86,9 +91,9 @@ public class ComponentManagerImpl implements ComponentManager {
      * Construct a new Component Manager.
      * @param factory : the factory managing the component manager
      */
-    public ComponentManagerImpl(ComponentManagerFactory factory) {
+    public ComponentManagerImpl(ComponentManagerFactory factory, BundleContext bc) {
         m_factory = factory;
-        m_context = factory.getBundleContext();
+        m_context = bc;
         Activator.getLogger().log(Level.INFO, "[Bundle " + m_context.getBundle().getBundleId() + "] Create a component manager from the factory " + m_factory);
     }
 
@@ -109,9 +114,12 @@ public class ComponentManagerImpl implements ComponentManager {
         // Change the metadata
         m_metadata = new ComponentMetadata(cm);
 
-        // COmponentInfo initialization
+        // ComponentInfo initialization
         m_componentInfo = new ComponentInfo();
         m_componentInfo.setClassName(m_metadata.getClassName());
+        
+        // Add the name
+        m_name = (String) configuration.get("name");
 
         // Create the standard handlers and add these handlers to the list
         for (int i = 0; i < IPojoConfiguration.INTERNAL_HANDLERS.length; i++) {
@@ -174,6 +182,11 @@ public class ComponentManagerImpl implements ComponentManager {
         }
         return null;
     }
+    
+    /**
+     * @return the component instance name.
+     */
+    public String getComponentName() { return m_name; }
 
     // ===================== Lifecycle management =====================
 
@@ -330,7 +343,7 @@ public class ComponentManagerImpl implements ComponentManager {
             try {
                 Constructor constructor = m_clazz.getConstructor(new Class[] {ComponentManagerImpl.class, BundleContext.class});
                 constructor.setAccessible(true);
-                instance = constructor.newInstance(new Object[] {this, m_factory.getBundleContext()});
+                instance = constructor.newInstance(new Object[] {this, m_context});
             }
             catch (NoSuchMethodException e) {
                 Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] createInstance -> No constructor with a bundle context");
@@ -537,7 +550,7 @@ public class ComponentManagerImpl implements ComponentManager {
         Handler[] list = (Handler[]) m_fieldRegistration.get(fieldName);
 
         for (int i = 0; list != null && i < list.length; i++) {
-            m_handlers[i].setterCallback(fieldName, objectValue);
+            list[i].setterCallback(fieldName, objectValue);
         }
     }
 
@@ -572,6 +585,8 @@ public class ComponentManagerImpl implements ComponentManager {
 
         Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] Component Manager : " + m_state);
     }
+
+	public String getName() { return m_name; }
 
 
     // ======================= end Handlers Management =====================
