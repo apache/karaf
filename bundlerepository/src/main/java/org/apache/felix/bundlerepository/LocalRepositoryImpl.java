@@ -245,36 +245,34 @@ public class LocalRepositoryImpl implements Repository
 
                 for (int impIdx = 0; impIdx < imports.length; impIdx++)
                 {
+                    RequirementImpl req = new RequirementImpl();
+                    req.setMultiple("false");
+                    req.setOptional(Boolean.toString(imports[impIdx].isOptional()));
+                    req.setName("package");
+                    req.addText("Import package " + imports[impIdx].toString());
+                    
                     String low = imports[impIdx].isLowInclusive()
-                        ? "(version>=" + imports[impIdx].getVersion() + ")"
-                        : "(!(version<=" + imports[impIdx].getVersion() + ")";
+                                ? "(version>=" + imports[impIdx].getVersion() + ")"
+                                : "(!(version<=" + imports[impIdx].getVersion() + ")";
 
                     if (imports[impIdx].getVersionHigh() != null)
                     {
                         String high = imports[impIdx].isHighInclusive()
                             ? "(version<=" + imports[impIdx].getVersionHigh() + ")"
                             : "(!(version>=" + imports[impIdx].getVersionHigh() + ")";
-                        RequirementImpl req = new RequirementImpl();
-                        req.setMultiple("false");
-                        req.setName("package");
-                        req.addText("Import package " + imports[impIdx].toString());
                         req.setFilter("(&(package="
                             + imports[impIdx].getName() + ")"
                             + low + high + ")");
-                        addRequire(req);
                     }
                     else
                     {
-                        RequirementImpl req = new RequirementImpl();
-                        req.setMultiple("false");
-                        req.setName("package");
-                        req.addText("Import package " + imports[impIdx].toString());
                         req.setFilter(
                             "(&(package="
                             + imports[impIdx].getName() + ")"
                             + low + ")");
-                        addRequire(req);
                     }
+                    
+                    addRequire(req);
                 }
             }
         }
