@@ -60,10 +60,27 @@ public class InstallCommandImpl implements Command
         // There should be at least one URL.
         if (st.countTokens() >= 1)
         {
+            StringBuffer sb = new StringBuffer();
             while (st.hasMoreTokens())
             {
                 String location = st.nextToken().trim();
-                install(location, out, err);
+                Bundle bundle = install(location, out, err);
+                if (bundle != null)
+                {
+                    if (sb.length() > 0)
+                    {
+                        sb.append(", ");
+                    }
+                    sb.append(bundle.getBundleId());
+                }
+            }
+            if (sb.toString().indexOf(',') > 0)
+            {
+                out.println("Bundle IDs: " + sb.toString());
+            }
+            else
+            {
+                out.println("Bundle ID: " + sb.toString());
             }
         }
         else
