@@ -34,8 +34,9 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>!org.osgi.framework,!org.osgi.service.condpermadmin,!org.osgi.service.packageadmin,!org.osgi.service.permissionadmin,!org.osgi.service.startlevel,!org.osgi.service.url,org.osgi.*</Export-Package>
-            <Import-Package>javax.microedition.io;resolution:=optional,!org.osgi.*,*</Import-Package>
+            <Export-Package>org.osgi.service.cm,org.osgi.service.component,org.osgi.service.device,org.osgi.service.event,org.osgi.service.http,org.osgi.service.io,org.osgi.service.log,org.osgi.service.metatype,org.osgi.service.prefs,org.osgi.service.provisioning,org.osgi.service.upnp,org.osgi.service.useradmin,org.osgi.service.wireadmin,org.osgi.util.measurement,org.osgi.util.position,org.osgi.util.tracker,org.osgi.util.xml</Export-Package>
+<!--            <Export-Package>!org.osgi.framework,!org.osgi.service.condpermadmin,!org.osgi.service.packageadmin,!org.osgi.service.permissionadmin,!org.osgi.service.startlevel,!org.osgi.service.url,org.osgi.*</Export-Package> -->
+            <Import-Package>javax.microedition.io;resolution:=optional,org.osgi.framework,!org.osgi.*,*</Import-Package>
             <Dynamic-ImportPackage>*</Dynamic-ImportPackage>
             <Bundle-Version>4</Bundle-Version>
             <Bundle-Vendor>OSGi Alliance</Bundle-Vendor>
