@@ -78,7 +78,7 @@ public class InstallCommandImpl implements Command
             {
                 out.println("Bundle IDs: " + sb.toString());
             }
-            else
+            else if (sb.length() > 0)
             {
                 out.println("Bundle ID: " + sb.toString());
             }
