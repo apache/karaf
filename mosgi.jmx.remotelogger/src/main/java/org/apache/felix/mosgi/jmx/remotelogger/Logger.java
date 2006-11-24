@@ -39,6 +39,7 @@ import javax.management.MalformedObjectNameException;
 
 import java.io.Serializable;
 import java.util.Enumeration;
+import java.util.Vector;
 
 public class Logger extends NotificationBroadcasterSupport implements LogListener,BundleActivator,ServiceListener, LoggerMBean, Serializable{
 
@@ -51,24 +52,42 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
 
   private Object logMutex=new Object();
 
-  private boolean debugLogFlag=true;
-  private boolean errorLogFlag=true;
-  private boolean infoLogFlag=true;
-  private boolean warningLogFlag=true;
+  private static final String[] LOG_LVL=new String[] {"","ERROR  ","WARNING ","INFO   ","DEBUG  "};
+  private Integer logLvl=new Integer(4);
 
   private MBeanServer agent=null;
   private ObjectName remoteLoggerON=null;
 
-//LogerMBean Interface
+  /////////////////////////////////
+  //     LogerMBean Interface    //
+  /////////////////////////////////
   public void sendOldLog(){
-    System.out.println("mosgi.jmx.remoteLogger.Logger : send old log");
+    System.out.println("[remoteLogger.Logger] send old log");
     Enumeration oldLog = this.lrs.getLog();
+    Vector invert=new Vector();
     while(oldLog.hasMoreElements()) {
-      logged((LogEntry)(oldLog.nextElement()),true);
+      LogEntry le=(LogEntry) (oldLog.nextElement());
+      invert.insertElementAt(le,0);
+    }
+    for (int i=0 ; i<invert.size() ; i++) {
+      logged( (LogEntry) invert.elementAt(i), true );
     }
   }
 
-//ServiceListener Interface
+  public void setLogLvl(Integer lvl) {
+    this.logLvl=lvl;
+    String logLvlToString=(new String[] {"Error", "Warning", "Info", "Debug"})[lvl.intValue()-1];
+    this.log(LogService.LOG_INFO, "Log level is now \""+logLvlToString+"\".");
+    System.out.println("[Logger] : modification of log lvl : logLvl="+logLvl+" ("+logLvlToString+")");
+  }
+
+  public Integer getLogLvl() {
+    return logLvl;
+  }
+
+  ///////////////////////////////////////
+  //      ServiceListener Interface    //
+  ///////////////////////////////////////
   public void serviceChanged(ServiceEvent serviceevent) {
     ServiceReference servicereference= serviceevent.getServiceReference();
     String as[]=(String[])servicereference.getProperty("objectClass");
@@ -90,69 +109,44 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
     }
   }
 
-
-//LogListener Interface
+  /////////////////////////////////////////
+  //      LogListener Interface          //
+  /////////////////////////////////////////
   public void logged(LogEntry log){
     logged(log, false);
   }
+
   public void logged(LogEntry log, boolean oldLog){
-    String reg=new String("*");
-    StringBuffer message=new StringBuffer();
-    //System.out.print("mosgi.jmx.remotelogger : new log : ");
-
     synchronized (logMutex){
-      try{
-        long id=log.getBundle().getBundleId();
-	if (id<10) {
-	  message.append(" "+id);
-	} else{
-          message.append(""+id);
-	}
-      }catch(NullPointerException e){
-        message.append("Unknown source");
-      }
+      if (log.getLevel() <= logLvl.intValue() & this.agent!=null) {
+        String reg=new String("*");
+        StringBuffer message=new StringBuffer();
+        try{
+          long id=log.getBundle().getBundleId();
+	  message.append( ((id<10)?" ":"")+id );
+        } catch(NullPointerException e){
+          message.append("Unknown source");
+        }
      
-      String lSymbolicName=log.getBundle().getSymbolicName();
-      if(lSymbolicName != null){
-        message.append(reg+lSymbolicName);
-      }else {
-        message.append(reg+"\"null\"");
-      }
+        String lSymbolicName=log.getBundle().getSymbolicName();
+        message.append( reg+ ((lSymbolicName!=null)?lSymbolicName:"\"null\"") );
 
-      message.append(reg+log.getBundle().getState());
+        message.append(reg+log.getBundle().getState());
 
-      int lLevel=log.getLevel();
-      if(debugLogFlag && lLevel==LogService.LOG_DEBUG){
-        message.append(reg+"DEBUG  ");
-      }else if (errorLogFlag && lLevel==LogService.LOG_ERROR){
-        message.append(reg+"ERROR  ");
-      }else if(infoLogFlag && lLevel==LogService.LOG_INFO){
-        message.append(reg+"INFO   ");
-      }else if(warningLogFlag && lLevel==LogService.LOG_WARNING){
-        message.append(reg+"WARNING");
-      }else {
-        message.append(reg+"NOLEVEL");
-      }
+	message.append(reg+LOG_LVL[log.getLevel()]);
 	 
-      // into log.getMessage() replaceAll regex char by an other
-      String msg=log.getMessage();
-      if (msg!=null){
-	message.append(reg+msg.replace('*','X'));
-      } else {
-	message.append(reg+"\"null\"");
+        // into log.getMessage() replaceAll regex char by an other
+        String msg=log.getMessage();
+        message.append( reg+ ((msg!=null)?msg.replace('*','X'):"\"null\"") );
+
+        this.sendNotification(new  AttributeChangeNotification(this.remoteLoggerON, 0, (oldLog)?0:System.currentTimeMillis(), message.toString(), null, "Log", null, null));
       }
-    }
-    //System.out.println(message.toString());
-    if (this.agent!=null){ // On envoie tous les logs a un MBeanServer
-      //System.out.println("this.agent != null => remoteLogger.Logger.sendNotifiaction(...."+message.toString());
-      //System.out.println("RemoteLogger send notification : "+oldLog+" : "+message.toString()); 
-      this.sendNotification(new  AttributeChangeNotification(this.remoteLoggerON, 0, 
-						             (oldLog)?0:System.currentTimeMillis(),
-						             message.toString(), null, "Log", null, null));
     }
   }
 
-//BundleActivator Interface
+  //////////////////////////////////
+  //  BundleActivator Interface   //
+  //////////////////////////////////
   public void start(BundleContext bc) throws Exception{
     this.version=(String)bc.getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
     this.bc=bc;
@@ -177,28 +171,29 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
     if (sr2!=null){
       this.registerToAgent(sr2);
     }
-    this.log(LogService.LOG_INFO, "Remote Logger started "+version);
-
+    this.log(LogService.LOG_INFO, "Remote Logger started (logLvl="+logLvl+")"+version);
   }
      
   public void stop(BundleContext bc) throws Exception{
-   this.log(LogService.LOG_INFO, "Stopping remote Logger "+version);
-   if (this.lrs==null){
-      System.out.println("ERROR : Logger.stop : there is no logger or reader to stop");
-   } else {
-     this.lrs.removeLogListener(this);
-     this.bc.removeServiceListener(this);
-   }
-   if (this.agent!=null){
-     this.unRegisterFromAgent();
-   }
-   this.agent=null;
-   this.lrs=null; 
-   this.log(LogService.LOG_INFO, "Remote Logger stopped"+version);
-   this.bc=null;
- }
+    this.log(LogService.LOG_INFO, "Stopping remote Logger "+version);
+    if (this.lrs==null){
+       System.out.println("ERROR : Logger.stop : there is no logger or reader to stop");
+    } else {
+      this.lrs.removeLogListener(this);
+      this.bc.removeServiceListener(this);
+    }
+    if (this.agent!=null){
+      this.unRegisterFromAgent();
+    }
+    this.agent=null;
+    this.lrs=null; 
+    this.log(LogService.LOG_INFO, "Remote Logger stopped"+version);
+    this.bc=null;
+  }
 
-//private methods 
+  //////////////////////////////
+  //     private methods      //
+  //////////////////////////////
   private void registerLogReaderService(ServiceReference sr) {
     //System.out.println("mosgi.jmx.remoteLogger.Logger.registerLogReaderService("+sr.toString()+") : oldLog=");
     this.lrs=(LogReaderService)this.bc.getService(sr);

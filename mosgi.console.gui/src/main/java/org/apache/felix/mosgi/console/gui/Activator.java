@@ -45,7 +45,7 @@ public class Activator implements BundleActivator {
   protected BundleContext m_context = null;
 
   protected ArrayList m_pluginList = null;
-  protected ArrayList m_commonpluginList = null; //TODO To I need this table ?
+  protected ArrayList m_commonpluginList = null;  //TODO Do I need this table ?
   private EventListenerList m_listenerList = null;
   
   private JFrame m_frame = null;
@@ -57,6 +57,9 @@ public class Activator implements BundleActivator {
     m_listenerList = new EventListenerList();
   }
 
+  ///////////////////////////////////////
+  //         BundleActivator           //
+  ///////////////////////////////////////
   public void start(BundleContext context) {
     m_context = context;
 
@@ -72,9 +75,6 @@ public class Activator implements BundleActivator {
               if(svcObj instanceof CommonPlugin){
                 m_commonpluginList.add(svcObj);
                 firePropertyChangedEvent(CommonPlugin.COMMON_PLUGIN_ADDED, null, svcObj);
-		//evite d'attendre le Thread pr que le common plugin remotelogger_jtree/jtable chope le MBean remote logger :
-		//nodesTree.tryToConnectAllNodes();
-		//createDefaultNodes(false);
               }else if (svcObj instanceof Plugin){
                 m_pluginList.add(svcObj);
                 firePropertyChangedEvent(Plugin.PLUGIN_ADDED, null, svcObj);
@@ -117,7 +117,7 @@ public class Activator implements BundleActivator {
       m_frame.setIconImage(Toolkit.getDefaultToolkit().getImage(m_context.getBundle().getResource("images/logo.gif")));
       //m_frame.setResizable(false);
       //m_frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-      //add a windowListener to save screen size preference
+      // TODO : add a windowListener and use a Preferences service to save screen size
       m_frame.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent we) {
           JFrame jf=(JFrame) we.getWindow();
@@ -129,8 +129,6 @@ public class Activator implements BundleActivator {
         }
       });
 	    
-      //Dimension wndSize = m_frame.getToolkit().getScreenSize();
-      //m_frame.setBounds(wndSize.width / 8, wndSize.height / 8, 1000, 700);
       Dimension maxdim = m_frame.getToolkit().getScreenSize();
       int m_width=maxdim.width-100;
       int m_height=maxdim.height-100;
@@ -152,13 +150,25 @@ public class Activator implements BundleActivator {
 
     // Now try to manually initialize the plugin list
     // since some might already be available.
-    //initializePlugins();
-    this.nodesTree.runDiscovery();
-
+    // initializePlugins();
+    
     m_frame.setVisible(true);
+    this.nodesTree.runDiscovery();
+  }
+ 
+  public void stop(BundleContext context) {
+    if (m_frame != null) {
+      this.nodesTree.stop();
+      m_frame.setVisible(false);
+      m_frame.dispose();
+      m_frame = null;
+    }
   }
 
-  private synchronized void initializePlugins() { // Never used ?
+  ////////////////////////////////////
+  //
+  ////////////////////////////////////
+  /*private synchronized void initializePlugins() { // Never used ?
     System.out.println("??? private synchronized void initializePlugins() ???");
     try {
       // Get all model services.
@@ -171,7 +181,6 @@ public class Activator implements BundleActivator {
           if (!m_pluginList.contains(svcObj)) {
             m_pluginList.add(svcObj);
             firePropertyChangedEvent(Plugin.PLUGIN_ADDED, null, (Plugin)svcObj);
-	    //this.nodesTree.valueChanged(null);
           }
         }
       }
@@ -183,7 +192,6 @@ public class Activator implements BundleActivator {
           if (!m_commonpluginList.contains(svcObj)) {
             m_commonpluginList.add(svcObj);
             firePropertyChangedEvent(CommonPlugin.COMMON_PLUGIN_ADDED, null, (CommonPlugin)svcObj);
-	    //this.nodesTree.valueChanged(null);
           }
         }
       }
@@ -192,16 +200,7 @@ public class Activator implements BundleActivator {
       System.err.println("ShellGuiActivator: " + ex);
       ex.printStackTrace();
     }
-  }
-
-  public void stop(BundleContext context) {
-    if (m_frame != null) {
-      this.nodesTree.stop();
-      m_frame.setVisible(false);
-      m_frame.dispose();
-      m_frame = null;
-    }
-  }
+  }*/
 
   //////////////////////////////
   // Event methods.           //
@@ -215,21 +214,10 @@ public class Activator implements BundleActivator {
   }
 
   public void firePropertyChangedEvent(String name, Object oldValue, Object newValue) {
+    //System.out.println("[Gui Activator] fire PCE("+name+","+oldValue+","+newValue+")");
     PropertyChangeEvent event = null;
     // Guaranteed to return a non-null array
     Object[] listeners = m_listenerList.getListenerList();
-
-/* a supprimer de ici
-    String mb="";
-    //System.out.println("name="+name);
-    if(name.equals("pluggin_added") | name.equals("pluggin_removed")){
-      mb="java.awt.Component";
-    } else {
-      mb=newValue.toString();
-      mb=mb.substring((mb.indexOf("$")==-1)?0:mb.indexOf("$")+1,mb.length());
-    }
-    System.out.println("console.gui whill firePCE "+(int)(listeners.length/2)+"* : (this,"+name+","+oldValue+","+mb+")");
-/* a ici */
 
     // Process the listeners last to first, notifying
     // those that are interested in this event 

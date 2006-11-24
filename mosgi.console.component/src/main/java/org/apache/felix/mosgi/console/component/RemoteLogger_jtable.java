@@ -25,92 +25,68 @@ import javax.swing.JTable;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.JFileChooser;
+import javax.swing.table.JTableHeader;
+import javax.swing.JOptionPane;
 import java.awt.Component;
-
+import java.awt.BorderLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
 import javax.management.Notification;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
 import javax.management.MBeanServerConnection;
-import javax.swing.ListSelectionModel;
-
 import java.util.Hashtable;
 import java.util.StringTokenizer;
-
-import java.beans.PropertyChangeEvent;
-
-import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.util.Vector;
-
+import java.util.Date;
 import java.io.PrintStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import javax.swing.JFileChooser;
-		
-import java.util.Date;
 import java.text.DateFormat;
 //import java.text.SimpleDateFormat;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.tree.DefaultMutableTreeNode;
 
-public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlugin, NotificationListener{
+public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlugin, NotificationListener, ActionListener{
 
   private JTable logList;
   private JButton jb_save;
+  private String[] columnToolTips=new String[]{"","","","","",
+          "<html><pre> 1 UNINSTALLED black<br> 2 INSTALLED   orange<br> 4 RESOLVED    red<br> 8 STARTING    gray<br>16 STOPPING    gray<br>32 ACTIVE      green",
+	  "",""};
   private JPanel jbPanel;
   private JPanel jp;
   private Hashtable nodes=new Hashtable();
 
-  public void jb_actionPerformed(ActionEvent e) {
-    String compoName=((Component) e.getSource()).getName();
-	
-    if (compoName.equals("jb_save")){
-      PrintStream ps=System.out;
-      JFileChooser jfc=new JFileChooser();
-      if (jfc.showSaveDialog(null)==JFileChooser.APPROVE_OPTION & jfc.getSelectedFile()!=null){	
-      try{
-        ps=new PrintStream(jfc.getSelectedFile());
-        System.out.println("Save remote log into \""+jfc.getSelectedFile().getName()+"\""); }
-      catch (FileNotFoundException fnfe){
-        System.out.println("err : "+fnfe); }
-      }
-      int col=this.logList.getColumnCount(); // TODO : try this.getColumnCount()
-      int line=this.logList.getRowCount() - 1; // last line always empty
-      //ps.print(col+" "+line);
-      Vector tableData=new Vector();
-      tableData=this.getDataVector();
-      for (int i=0 ; i<line ; i++){
-        ps.print(i+" : ");
-        for (int j=0 ; j<col ; j++){
-	  ps.print((String) ( ((Vector) (tableData.elementAt(i))).elementAt(j) )+" | ");	
-        }
-        ps.print("\n");
-      }
-    }
-  }
-
   public RemoteLogger_jtable (){
     super(new String[]{"Date","Time", "Src", "Id", "Name", "State", "Lvl", "Msg"},1);
     System.out.println("JTable Remote logger");
-   
-    this.jp=new JPanel();
-    this.jp.setLayout(new BorderLayout());
-   
-    this.jbPanel=new JPanel();
-    this.jbPanel.setSize(300,25);
 
-    this.jb_save=new JButton("Save log on file");
-    this.jb_save.setName("jb_save");
+    jp=new JPanel();
+    jp.setLayout(new BorderLayout());
+   
+    jbPanel=new JPanel();
+    jbPanel.setSize(300,25);
 
-    ActionListener al = new ActionListener(){
-        public void actionPerformed(ActionEvent e){
-            jb_actionPerformed(e);
-        }
+    jb_save=new JButton("Save log on file");
+    jb_save.setName("jb_save");
+    jb_save.addActionListener(this);
+    
+    logList=new JTable(this){
+      protected JTableHeader createDefaultTableHeader() {
+        return new JTableHeader(columnModel) {
+          public String getToolTipText(MouseEvent e) {
+            String tip = null;
+            java.awt.Point p = e.getPoint();
+            int index = columnModel.getColumnIndexAtX(p.x);
+            int realIndex = columnModel.getColumn(index).getModelIndex();
+            return columnToolTips[realIndex];
+          }
+        };
+      }
     };
-    this.jb_save.addActionListener(al);
-
-    logList=new JTable(this);
     JtableCellRenderer cellRenderer=new JtableCellRenderer();
     logList.setDefaultRenderer(Object.class,cellRenderer);
 
@@ -126,10 +102,10 @@ public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlug
     logList.getColumnModel().getColumn(7).setPreferredWidth(180);    
 
     logList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    logList.getTableHeader().setReorderingAllowed(true);//false); // true c'est sympa pourtant... ?
+    logList.getTableHeader().setReorderingAllowed(true);//false);
     
-    this.jbPanel.add(jb_save);
-    jp.add(this.jbPanel, BorderLayout.NORTH);
+    jbPanel.add(jb_save);
+    jp.add(jbPanel, BorderLayout.NORTH);
     jp.add(new JScrollPane(logList), BorderLayout.CENTER);    
   }
 
@@ -146,7 +122,6 @@ public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlug
   public void registerServicePlugin(){}
   public void unregisterServicePlugin(){}
 /* fin a supprimer */
-
   
   public void propertyChange(PropertyChangeEvent e){
     if (e.getPropertyName().equals(Plugin.NEW_NODE_CONNECTION)){
@@ -186,5 +161,33 @@ public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlug
     this.insertRow(0,event); 
     this.fireTableRowsInserted(0, 0);
   }
-  
+ 
+  public void actionPerformed(ActionEvent e) {
+    Object o=e.getSource();
+    if ( o==jb_save){
+      PrintStream ps=System.out;
+      JFileChooser jfc=new JFileChooser();
+      if (jfc.showSaveDialog(null)==JFileChooser.APPROVE_OPTION & jfc.getSelectedFile()!=null){	
+      try{
+        ps=new PrintStream(jfc.getSelectedFile());
+        System.out.println("Save remote log into \""+jfc.getSelectedFile().getName()+"\""); }
+      catch (FileNotFoundException fnfe){
+        System.out.println("err : "+fnfe); }
+      }
+      int col=this.logList.getColumnCount();
+      int line=this.logList.getRowCount() - 1; // last line always empty
+      //ps.print(col+" "+line);
+      Vector tableData=new Vector();
+      tableData=this.getDataVector();
+      for (int i=0 ; i<line ; i++){
+        ps.print(i+" : ");
+        for (int j=0 ; j<col ; j++){
+	  ps.print((String) ( ((Vector) (tableData.elementAt(i))).elementAt(j) )+" | ");	
+        }
+        ps.print("\n");
+      }
+    }
+  }
+
+ 
 }

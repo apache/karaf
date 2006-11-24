@@ -21,6 +21,7 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
+import javax.swing.tree.TreePath;
 
 public class MyTree extends JTree{
 

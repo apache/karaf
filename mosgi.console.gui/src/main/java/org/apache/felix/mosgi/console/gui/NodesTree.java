@@ -18,14 +18,14 @@
  */
 package org.apache.felix.mosgi.console.gui;
 
-//import java.awt.GridLayout;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JOptionPane;
-
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
@@ -41,6 +41,7 @@ import java.util.Hashtable;
 import java.util.Enumeration;
 import org.osgi.framework.BundleContext;
 import org.apache.felix.mosgi.console.ifc.Plugin;
+import org.apache.felix.mosgi.console.ifc.CommonPlugin;
 import org.apache.felix.framework.cache.BundleCache;
 
 import javax.management.MBeanServerConnection;
@@ -55,7 +56,7 @@ import javax.management.remote.JMXConnectionNotification;
 
 //import javax.jmdns.ServiceInfo;
 
-public class NodesTree extends JPanel implements TreeSelectionListener, NotificationListener, ActionListener {
+public class NodesTree extends JPanel implements TreeSelectionListener, NotificationListener, ActionListener, PropertyChangeListener {
 
   static String TOP_NAME="Servers";
   static int POOLING_TIME=2000;
@@ -84,7 +85,6 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
 
   public NodesTree(Activator a,BundleContext bc) {
     super(new BorderLayout());
-    //super(new GridLayout(1, 0));
     this.a=a;
     this.bc=bc;
     this.pt=new PoolingThread();
@@ -108,8 +108,20 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
     poolThread.start();
   }
 
-
-
+  //////////////////////////////////////////////////
+  //          PropertyChangeListener              //
+  //////////////////////////////////////////////////
+  public void propertyChange(PropertyChangeEvent event) {
+    if (event.getPropertyName().equals(CommonPlugin.COMMON_PLUGIN_ADDED)) {
+      Enumeration enu=connectedNodes.keys();
+      while (enu.hasMoreElements()) {
+        // Common plugin added after a gateway connection so firePCE(Plugin.NEW_NODE_CONNECTION, connString , mbsc) again :
+        String key=(String) enu.nextElement();
+        System.out.println("   "+key+"="+connectedNodes.get(key));
+        a.firePropertyChangedEvent(Plugin.NEW_NODE_CONNECTION, key, connectedNodes.get(key));
+      }
+    }
+  }
 
   //////////////////////////////////////////////////////
   //               TreeSelectionListener              //
@@ -160,8 +172,9 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
   }
 
   public void actionPerformed(ActionEvent e) {
+    // TODO : 
     Object object = e.getSource();
-    if (object==addNodeButton) {
+    if (object==addNodeButton) { // Add a new node into tree
       String connString = JOptionPane.showInputDialog("Please input a connection string : ", "127.0.0.1:1099/vosgi");
       TreePath tp=tree.getSelectionPath();
       if (connString!=null) {
@@ -170,7 +183,7 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
 	isAllNodesConnected=false;
 	tree.setSelectionPath(tp);
       }
-    } else if (object==removeNodeButton) {
+    } else if (object==removeNodeButton) { // Remove a nod from tree
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
       String connString=(String) node.getUserObject();
       if (connString!=null){
@@ -270,13 +283,12 @@ java.util.logging.Logger.getLogger("javax.management.remote.rmi").addHandler(ch)
       }catch(MalformedObjectNameException e){
         e.printStackTrace();
       }catch(Exception e){
-        //e.printStackTrace();
+	//use one thread per node to avoid being freeze by a timeOutConnection
 	System.out.println("gui.NodesTree.connectToNode("+connString+") : "+e);
 	System.out.println("  => Delete this node ? to implement... ?");
 
       }
     }else{
-      // a.firePCE(NEW_NODE_CONNECTION, connString, ls) inutile maintenant je sais plus pourqouoi ca l'etait d'ailleur ???
       return true;
     }
   return false;

@@ -21,5 +21,7 @@ package org.apache.felix.mosgi.jmx.remotelogger;
 public interface LoggerMBean{
 
   public void sendOldLog();
+  public void setLogLvl(Integer lvl);
+  public Integer getLogLvl();
 
 }

@@ -49,10 +49,12 @@ public class JtableCellRenderer extends JLabel implements TableCellRenderer {
       }catch (NumberFormatException nfe) {
         state=new Integer(-1);
       }
-      if (((String) value).equals("??/??/??")) {
-	setBackground(Color.white);
-      } else{
-	setBackground((Color) eventName.get(state));
+      if (value!=null) {
+        if (((String) value).equals("??/??/??")) {
+	  setBackground(Color.white);
+        } else{
+	  setBackground((Color) eventName.get(state));
+        }
       }
     }
     setText((String) value);
