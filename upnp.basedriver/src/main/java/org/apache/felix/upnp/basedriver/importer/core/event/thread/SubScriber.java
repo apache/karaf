@@ -40,66 +40,53 @@ public class SubScriber extends Thread {
 
 	private MyCtrlPoint ctrl;
 	private SubscriptionQueue subQueue;
-    private boolean stopCond = true;
-	//##renew private SidRenewer sidRenew;
+    private boolean running = true;
 	private Monitor monitor;
 
     
     public SubScriber(MyCtrlPoint ctrl, SubscriptionQueue subQueue, Monitor monitor) {
-		super("Subscriber");
+		super("upnp.basedriver.Subscriber");
 		this.ctrl = ctrl;
 		this.subQueue = subQueue;
 		this.monitor=monitor;
-		//##renew this.sidRenew = new SidRenewer();
 		
 	}
 
 	public void run() {
-		while (stopCond) {
+		while (running) {
 			Object msg = subQueue.dequeue();
-			if (msg instanceof FirstMessage) {
-				FirstMessage firstmsg = (FirstMessage) msg;
-				Service service = firstmsg.getService();
-				if (!service.isSubscribed()) {//is not subscribe
-					boolean ok = ctrl.subscribe(service,120000);
-					String sid = "";
-					if (ok) {//subcribe ok
-                        
-						sid = service.getSID();
-						firstmsg.setSid(sid);
-                        // ########### Renew ########################
-//                      ##renew Renewer renewer = new Renewer((service.getTimeout()),
-//                      ##renew 		sid, service, ctrl,	subQueue);
-//                      ##renew sidRenew.put(sid, renewer);
-//                      ##renew renewer.start();
-                        // ########### Renew ########################
-						//StateVarsToNotify vars=monitor.getStateVars(sid);
-                        
-						monitor.addListener(sid,firstmsg.getListener());						
-					} else {//subscribe not ok
-						Activator.logger.log(LogService.LOG_ERROR,"Sucribe failed");
+			if (running) {
+				if (msg instanceof FirstMessage) {
+					FirstMessage firstmsg = (FirstMessage) msg;
+					Service service = firstmsg.getService();
+					if (!service.isSubscribed()) {//is not subscribe
+						boolean ok = ctrl.subscribe(service,120000);
+						String sid = "";
+						if (ok) {//subcribe ok	                        
+							sid = service.getSID();
+							firstmsg.setSid(sid);                        
+							monitor.addListener(sid,firstmsg.getListener());						
+						} else {//subscribe not ok
+							Activator.logger.log(LogService.LOG_ERROR,"Sucribe failed");
+						}
+					} else {// already subscribe
+						monitor.addListener(service.getSID(),firstmsg.getListener());
 					}
-				} else {// already subscribe
-					monitor.addListener(service.getSID(),firstmsg.getListener());
+				} else if (msg instanceof ListenerModified) {
+					monitor.updateListener((ListenerModified)msg,subQueue,ctrl);
+				} else if (msg instanceof ListenerUnRegistration) {
+					ListenerUnRegistration unreg=(ListenerUnRegistration)msg;
+					monitor.delListener(unreg.getListener(),ctrl);
+				} else if(msg instanceof SidExipired){
+				    Activator.logger.WARNING("[Importer] Please report the bug. Used code - should be checked and removed");
 				}
-			} else if (msg instanceof ListenerModified) {
-                // ########### Renew ########################
-				monitor.updateListener((ListenerModified)msg,subQueue,ctrl/*##renew ,sidRenew*/);
-                // ########### Renew ########################
-			} else if (msg instanceof ListenerUnRegistration) {
-				ListenerUnRegistration unreg=(ListenerUnRegistration)msg;
-                // ########### Renew ########################
-				monitor.delListener(unreg.getListener(),ctrl/*##renew,sidRenew*/);
-                // ########### Renew ########################
-			} else if(msg instanceof SidExipired){
-			    Activator.logger.WARNING("[Importer] Please report the bug.Used code - should be checked and removed");
-			    /*
-				Activator.logger.INFO("Removing Expired Subscribe Service");
-				SidExipired sidExpired=(SidExipired)msg;
-				monitor.clearAll(sidExpired.getSid(),sidExpired.getService());
-				*/
 			}
 		}
+	}
+
+	public void close() {
+		running  = false;	
+		subQueue.close();
 	}
 
 }

@@ -82,7 +82,7 @@ public class Activator implements BundleActivator {
 		this.producerDeviceToExport = new RootDeviceListener(queue);
 		producerDeviceToExport.activate();
 		consumerDeviceToExport = new ThreadExporter(queue);
-		new Thread(consumerDeviceToExport, "Exporter").start();
+		new Thread(consumerDeviceToExport, "upnp.basedriver.Exporter").start();
 
 		//Setting up Base Driver Importer
 		this.notifierQueue = new NotifierQueue();
@@ -129,6 +129,8 @@ public class Activator implements BundleActivator {
 
 		//Setting up Base Driver Importer
 		ctrl.stop();
+		subScriber.close();
+		notifier.close();
 		Activator.logger.close();
 		Activator.logger=null;
 		Activator.bc = null;

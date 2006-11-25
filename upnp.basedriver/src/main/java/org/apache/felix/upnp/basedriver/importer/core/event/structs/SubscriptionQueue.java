@@ -28,6 +28,7 @@ import java.util.Vector;
 */
 public class SubscriptionQueue {
 	private Vector queue;
+	private boolean running = true;
 	
 	public SubscriptionQueue(){
 		queue=new Vector();
@@ -39,7 +40,7 @@ public class SubscriptionQueue {
 		}
 	}
 	public synchronized Object dequeue(){
-		while(queue.size()==0){
+		while(queue.size()==0 && running){
 			try {
 				wait();
 			} catch (InterruptedException e) {
@@ -47,7 +48,15 @@ public class SubscriptionQueue {
 				e.printStackTrace();
 			}
 		}
-		return queue.remove(0); 
+		if (running)
+			return queue.remove(0); 
+		else		
+			return null;
+	}
+	
+	public synchronized void close() {
+		running  = false;
+		notify();		
 	}	
 	
 

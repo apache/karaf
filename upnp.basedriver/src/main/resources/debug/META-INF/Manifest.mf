@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bundle-ClassPath: .,lib/cyberlink-1.7.2-patched-debug.jar
+Bundle-ClassPath: .,lib/cyberlink-1.7.3-patched-debug.jar
 Bundle-Author: Matteo Demuru <matte-d@users.sourceforge.net>,Stefano "
  Kismet" Lenzi <kismet-sl@users.sourceforge.net>,Francesco Furfari <fr
  ancesco.furfari@isti.cnr.it>,Satoshi Konno

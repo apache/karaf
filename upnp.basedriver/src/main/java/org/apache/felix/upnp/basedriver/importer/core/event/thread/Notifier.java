@@ -33,17 +33,19 @@ public class Notifier extends Thread {
 
 	private NotifierQueue notifierQueue;
 	private Monitor monitor;
+	private boolean running = true;
 
     public Notifier(NotifierQueue notifierQueue,Monitor monitor) {
-		super("Notifier");
+		super("upnp.basedriver.Notifier");
 		this.notifierQueue = notifierQueue;
 		this.monitor = monitor;
 		
 	}
 
 	public void run() {
-		while (true) {
+		while (running) {
             StateChanged msg = (StateChanged) notifierQueue.dequeue();
+            if (running) {
 				StateVarsToNotify vars = null;
 				if (msg.getSeq() == 0) {
 					vars = new StateVarsToNotify(msg);
@@ -51,6 +53,12 @@ public class Notifier extends Thread {
 				} else {
 					monitor.updateStateVars(msg.getSid(),msg.getDictionary());
 				}
+            }
 		}
+	}
+
+	public void close() {
+		running  = false;
+		notifierQueue.close();
 	}
 }
