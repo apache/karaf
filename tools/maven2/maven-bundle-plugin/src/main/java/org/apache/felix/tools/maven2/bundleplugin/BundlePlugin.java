@@ -109,6 +109,10 @@ public class BundlePlugin extends AbstractMojo {
    if (project.getOrganization() != null) {
      header(properties, Analyzer.BUNDLE_VENDOR, project
        .getOrganization().getName());
+     if (project.getOrganization().getUrl() != null) {
+       header(properties, Analyzer.BUNDLE_DOCURL, project
+         .getOrganization().getUrl());
+     }
    }
      
    if (new File("src/main/resources").exists()) {
@@ -125,7 +129,6 @@ public class BundlePlugin extends AbstractMojo {
    properties.put("project.build.outputdirectory", outputDirectory );
    
    properties.putAll(instructions);
-   
  
    Builder builder = new Builder();
    builder.setBase(baseDir);
