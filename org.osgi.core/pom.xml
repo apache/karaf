@@ -22,6 +22,10 @@
     <artifactId>felix</artifactId>
     <version>0.8.0-SNAPSHOT</version>
   </parent>
+  <organization>
+    <name>OSGi Alliance</name>
+    <url>http://www.osgi.org/</url>
+  </organization>
   <modelVersion>4.0.0</modelVersion>
   <name>OSGi R4 Core Bundle</name>
   <description>OSGi Service Platform Release 4 Core Interfaces and Classes.</description>
@@ -35,13 +39,12 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Bundle-SymbolicName>org.osgi.core</Bundle-SymbolicName>
             <Export-Package>org.osgi.framework, org.osgi.service.condpermadmin, org.osgi.service.packageadmin, org.osgi.service.permissionadmin, org.osgi.service.startlevel, org.osgi.service.url</Export-Package>
             <Import-Package>!org.osgi.*,*</Import-Package>
             <Bundle-Version>4</Bundle-Version>
-            <Bundle-Vendor>OSGi Alliance</Bundle-Vendor>
             <Bundle-Copyright>Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.</Bundle-Copyright>
             <Bundle-Category>osgi</Bundle-Category>
-            <Bundle-DocUrl>http://www.osgi.org/</Bundle-DocUrl>
           </instructions>
         </configuration>
       </plugin>
