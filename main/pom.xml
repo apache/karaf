@@ -31,21 +31,45 @@
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.framework</artifactId>
       <version>${pom.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>${pom.groupId}</groupId>
+          <artifactId>org.osgi.core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell</artifactId>
       <version>${pom.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>${pom.groupId}</groupId>
+          <artifactId>org.osgi.core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell.tui</artifactId>
       <version>${pom.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>${pom.groupId}</groupId>
+          <artifactId>org.osgi.core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.bundlerepository</artifactId>
       <version>${pom.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>${pom.groupId}</groupId>
+          <artifactId>org.osgi.core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
   <properties>
