@@ -201,21 +201,11 @@ public class BundleArchive
             m_revisions = new BundleRevision[revisionCount - 1];
         }
 
-        // Add the revision object for the most recent revision. We first try to read
-        // the location from the current revision - if that fails we likely have
-        // an old bundle cache and read the location the old way. The next
-        // revision will update the bundle cache.
-        // TODO: FRAMEWORK - This try catch block can eventually be deleted when we decide to remove
-        // support for the old way, then we only need the first call to revise().
-        try
-        {
-            revise(getRevisionLocation(revisionCount - 1), null);
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(Logger.LOG_WARNING, getClass().getName() + ": Updating old bundle cache format.");
-            revise(getCurrentLocation(), null);
-        }
+        // Add the revision object for the most recent revision. We first try
+        // to read the location from the current revision - if that fails we
+        // likely have an old bundle cache and read the location the old way.
+        // The next revision will update the bundle cache.
+        revise(getRevisionLocation(revisionCount - 1), null);
     }
 
     /**
@@ -721,11 +711,6 @@ public class BundleArchive
             throw new Exception("Unable to revise archive.");
         }
 
-        // Set the current revision location to match.
-        // TODO: FRAMEWORK - This can eventually be deleted when we removed
-        // support for the old way of doing things.
-        setCurrentLocation(location);
-
         setRevisionLocation(location, (m_revisions == null) ? 0 : m_revisions.length);
 
         // Add new revision to revision array.
@@ -763,10 +748,6 @@ public class BundleArchive
         }
 
         String location = getRevisionLocation(m_revisions.length - 2);
-
-        // TODO: FRAMEWORK - This can eventually be deleted when we removed
-        // support for the old way of doing things.
-        setCurrentLocation(location);
 
         try
         {
