@@ -55,7 +55,7 @@
             <Export-Package>org.osgi.service.obr</Export-Package>
             <Private-Package>org.kxml2.*,org.xmlpull.*,org.apache.felix.bundlerepository.*</Private-Package>
             <Import-Package>!javax.xml.parsers,!org.xml.sax,*</Import-Package>
-            <Dynamic-ImportPackage>org.apache.felix.shell</Dynamic-ImportPackage>
+            <DynamicImport-Package>org.apache.felix.shell</DynamicImport-Package>
             <Bundle-Activator>${pom.artifactId}.Activator</Bundle-Activator>
             <Bundle-DocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</Bundle-DocUrl>
             <Bundle-Url>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</Bundle-Url>
