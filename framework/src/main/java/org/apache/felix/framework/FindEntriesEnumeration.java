@@ -20,8 +20,6 @@ package org.apache.felix.framework;
 
 import java.util.*;
 
-import org.apache.felix.framework.searchpolicy.ContentLoaderImpl;
-
 class FindEntriesEnumeration implements Enumeration
 {
     private BundleImpl m_bundle = null;
