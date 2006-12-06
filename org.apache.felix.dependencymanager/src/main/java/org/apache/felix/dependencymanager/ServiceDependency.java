@@ -249,13 +249,20 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
     }
     
     private void invokeCallbackMethod(Object instance, String methodName, ServiceReference reference, Object service) throws NoSuchMethodException {
-        invokeMethod(instance, instance.getClass(), methodName, 
-            new Class[][] {{ServiceReference.class, Object.class}, {ServiceReference.class}, {Object.class}, {m_trackedServiceName}, {}}, 
-            new Object[][] {{reference, service}, {reference}, {service}, {service}, {}},
-            false);
+        Class currentClazz = instance.getClass();
+        boolean done = false;
+        while (!done && currentClazz != null) {
+            done = invokeMethod(instance, currentClazz, methodName,
+                new Class[][] {{ServiceReference.class, Object.class}, {ServiceReference.class}, {Object.class}, {m_trackedServiceName}, {}},
+                new Object[][] {{reference, service}, {reference}, {service}, {service}, {}},
+                false);
+            if (!done) {
+                currentClazz = currentClazz.getSuperclass();
+            }
+        }
     }
 
-    private void invokeMethod(Object object, Class clazz, String name, Class[][] signatures, Object[][] parameters, boolean isSuper) {
+    private boolean invokeMethod(Object object, Class clazz, String name, Class[][] signatures, Object[][] parameters, boolean isSuper) {
         Method m = null;
         for (int i = 0; i < signatures.length; i++) {
             Class[] signature = signatures[i];
@@ -263,18 +270,21 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
                 m = clazz.getDeclaredMethod(name, signature);
                 if (!(isSuper && Modifier.isPrivate(m.getModifiers()))) {
                     m.setAccessible(true);
-                    m.invoke(object, parameters[i]);
-                    return;
+                    try {
+                        m.invoke(object, parameters[i]);
+                    }
+                    catch (InvocationTargetException e) {
+                        // thrown by the underlying method, we ignore this exception
+                        // and still return true because we could invoke the method
+                    }
+                    return true;
                 }
             }
             catch (Exception e) {
                 // ignore any exception and keep looking for a method
             }
-            Class c = clazz.getSuperclass();
-            if (c != null) {
-                invokeMethod(object, c, name, signatures, parameters, true);
-            }
         }
+        return false;
     }
     
     // ----- CREATION
