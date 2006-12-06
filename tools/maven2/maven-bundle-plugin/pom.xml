@@ -23,7 +23,7 @@
  <parent>
    <artifactId>felix</artifactId>
    <groupId>org.apache.felix</groupId>
-   <version>0.8.0-SNAPSHOT</version>
+   <version>0.8.0-incubator</version>
  </parent>
 
  <modelVersion>4.0.0</modelVersion>
@@ -43,7 +43,7 @@
   embedding packages from the classpath (wildcarded). Plus a zillion
   other features. See http://www.aqute.biz/php/tools/bnd.php
   </description>
- <version>0.8.0-SNAPSHOT</version>
+ <version>0.8.0-incubator</version>
  
  <dependencies>
   <dependency>
