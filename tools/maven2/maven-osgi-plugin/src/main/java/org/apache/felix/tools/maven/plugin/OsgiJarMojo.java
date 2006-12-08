@@ -692,16 +692,14 @@ public class OsgiJarMojo extends AbstractMojo {
         if (!matcher.lookingAt())
             return version;
 
-        final StringBuffer sb = new StringBuffer(version.length());
+        // Leave extra space for worst-case additional insertion:
+        final StringBuffer sb = new StringBuffer(version.length() + 4);
         sb.append(matcher.group(1));
 
-        int count = 0;
-        for ( int i = matcher.groupCount(); i != 0; --i )
-            if ( null != matcher.group( i ) )
-                ++count;
-
-        if ( 3 != count )
-            sb.append(versionCompleters[count - 1]);
+        if (null == matcher.group(3)) {
+           final int count = null != matcher.group(2) ? 2 : 1;
+           sb.append(versionCompleters[count - 1]);
+        }
 
         sb.append('.');
         sb.append(version.substring(matcher.end(), version.length()));
