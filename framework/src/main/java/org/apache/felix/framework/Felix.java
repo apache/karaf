@@ -36,7 +36,7 @@ import org.osgi.service.startlevel.StartLevel;
 public class Felix
 {
     // Logging related member variables.
-    private Logger m_logger = new Logger();
+    private Logger m_logger = null;
     // Config properties.
     private PropertyResolver m_config = new ConfigImpl();
     // Configuration properties passed into constructor.
@@ -131,6 +131,13 @@ public class Felix
      * The following configuration properties can be specified:
      * </p>
      * <ul>
+     *   <li><tt>felix.log.level</tt> - An integer value indicating the degree
+     *       of logging reported by the framework; the higher the value the more
+     *       logging is reported. If zero ('0') is specified, then logging is
+     *       turned off completely. The log levels match those specified in the
+     *       OSGi Log Service (i.e., 1 = error, 2 = warning, 3 = information,
+     *       and 4 = debug). The default value is 1.
+     *   </li>
      *   <li><tt>felix.auto.install.&lt;n&gt;</tt> - Space-delimited list of
      *       bundles to automatically install into start level <tt>n</tt> when
      *       the framework is started. Append a specific start level to this
@@ -223,6 +230,15 @@ public class Felix
         m_factory = null;
         m_configMutable = (configMutable == null)
             ? new MutablePropertyResolverImpl(new StringMap(false)) : configMutable;
+
+        // Create logger with appropriate log level. Even though the
+        // logger needs the system bundle's context for tracking log
+        // services, it is created now because it is needed before
+        // the system bundle is created. The system bundle's context
+        // will be set below after the system bundle is created.
+        m_logger = new Logger(m_configMutable.get(FelixConstants.LOG_LEVEL_PROP));
+
+        // Initialize other member variables.
         m_activeStartLevel = FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
         m_installRequestMap = new HashMap();
         m_installedBundleMap = new HashMap();
@@ -386,7 +402,11 @@ public class Felix
             throw new RuntimeException("Unable to start system bundle.");
         }
 
-        // Reload and cached bundles.
+        // Now that the system bundle is successfully created we can give
+        // its bundle context to the logger so that it can track log services.
+        m_logger.setSystemBundleContext(systembundle.getInfo().getContext());
+
+        // Now reload the cached bundles.
         BundleArchive[] archives = null;
 
         // First get cached bundle identifiers.

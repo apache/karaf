@@ -41,6 +41,7 @@ public interface FelixConstants extends org.osgi.framework.Constants
     public static final String BUNDLE_URL_PROTOCOL = "bundle";
 
     // Miscellaneous framework configuration property names.
+    public static final String LOG_LEVEL_PROP = "felix.log.level";
     public static final String AUTO_INSTALL_PROP = "felix.auto.install";
     public static final String AUTO_START_PROP = "felix.auto.start";
     public static final String EMBEDDED_EXECUTION_PROP = "felix.embedded.execution";
