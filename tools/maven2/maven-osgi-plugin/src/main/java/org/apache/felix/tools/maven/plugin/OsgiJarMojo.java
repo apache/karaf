@@ -42,6 +42,11 @@ import org.codehaus.plexus.util.FileUtils;
  * @description build an OSGi bundle jar
  */
 public class OsgiJarMojo extends AbstractMojo {
+    private static final java.util.regex.Pattern versionPattern =
+        java.util.regex.Pattern.compile("^(\\d+(\\.\\d+(\\.\\d+)?)?)-");
+    private static final String[] versionCompleters =
+        new String[] { ".0.0", ".0" };
+
     public static final String OSGI_REFERENCES = "osgi.references";
     public static final String AUTO_DETECT = "auto-detect";
 
@@ -678,14 +683,36 @@ public class OsgiJarMojo extends AbstractMojo {
 		}
 	}
 
+    private static String fixBundleVersion(String version) {
+        // Maven uses a '-' to separate the version qualifier, while
+        // OSGi uses a '.', so we need to convert the first '-' to a
+        // '.' and fill in any missing minor or micro version
+        // components if necessary.
+        final java.util.regex.Matcher matcher = versionPattern.matcher(version);
+        if (!matcher.lookingAt())
+            return version;
+
+        final StringBuffer sb = new StringBuffer(version.length());
+        sb.append(matcher.group(1));
+
+        int count = 0;
+        for ( int i = matcher.groupCount(); i != 0; --i )
+            if ( null != matcher.group( i ) )
+                ++count;
+
+        if ( 3 != count )
+            sb.append(versionCompleters[count - 1]);
+
+        sb.append('.');
+        sb.append(version.substring(matcher.end(), version.length()));
+        return sb.toString();
+    }
+
 	/**
 	 * Auto-set the bundle version.
 	 */
 	private void addBundleVersion() {
-        // Maven uses a '-' to separate the version qualifier,
-	    // while OSGi uses a '.', so we need to convert to a '.'
-        String version = project.getVersion().replace('-', '.');
-        osgiManifest.setBundleVersion(version);
+        osgiManifest.setBundleVersion(fixBundleVersion(project.getVersion()));
 	}
 
 	/**
