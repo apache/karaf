@@ -114,8 +114,8 @@ public class BundlePlugin extends AbstractMojo {
          .getOrganization().getUrl());
      }
    }
-     
-   if (new File("src/main/resources").exists()) {
+
+   if (new File(baseDir, "src/main/resources").exists()) {
      header(properties, Analyzer.INCLUDE_RESOURCE, "src/main/resources/");
    }
  
