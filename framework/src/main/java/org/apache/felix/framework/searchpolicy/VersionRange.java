@@ -109,6 +109,7 @@ public class VersionRange
                 sb.append(',');
                 sb.append(m_high.toString());
                 sb.append(m_isHighInclusive ? ']' : ')');
+                m_toString = sb.toString();
             }
             else
             {

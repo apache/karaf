@@ -62,15 +62,15 @@ class SystemBundle extends BundleImpl
 
         // Get system property that specifies which class path
         // packages should be exported by the system bundle.
-        R4Package[] classPathPkgs = null;
+        R4Export[] classPathPkgs = null;
         try
         {
-            classPathPkgs = ManifestParser.parseImportExportHeader(
-                getFelix().getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES));
+            classPathPkgs = (R4Export[]) ManifestParser.parseImportExportHeader(
+                getFelix().getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES), true);
         }
         catch (Exception ex)
         {
-            classPathPkgs = new R4Package[0];
+            classPathPkgs = new R4Export[0];
             getFelix().getLogger().log(
                 Logger.LOG_ERROR,
                 "Error parsing system bundle export statement: "
@@ -84,7 +84,7 @@ class SystemBundle extends BundleImpl
         // Copy the class path exported packages.
         for (int i = 0; i < classPathPkgs.length; i++)
         {
-            m_exports[i] = new R4Export(classPathPkgs[i]);
+            m_exports[i] = classPathPkgs[i];
         }
 
         m_contentLoader = new SystemBundleContentLoader(getFelix().getLogger());

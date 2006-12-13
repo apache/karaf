@@ -26,11 +26,6 @@ public class R4Import extends R4Package
     private VersionRange m_versionRange = null;
     private boolean m_isOptional = false;
 
-    public R4Import(R4Package pkg)
-    {
-        this(pkg.getName(), pkg.getDirectives(), pkg.getAttributes());
-    }
-
     public R4Import(String name, R4Directive[] directives, R4Attribute[] attrs)
     {
         super(name, directives, attrs);
@@ -44,35 +39,16 @@ public class R4Import extends R4Package
             }
         }
 
-        // Convert version and bundle version attributes to VersionRange.
-        // The attribute value may be a String or a Version, since the
-        // value may be coming from an R4Export that already converted
-        // it to Version.
+        // Cache version and version range, if present.
         m_versionRange = VersionRange.parse(Version.emptyVersion.toString());
         m_version = m_versionRange.getLow();
         for (int i = 0; i < m_attrs.length; i++)
         {
             if (m_attrs[i].getName().equals(Constants.VERSION_ATTRIBUTE))
             {
-                String versionStr = (m_attrs[i].getValue() instanceof Version)
-                    ? ((Version) m_attrs[i].getValue()).toString()
-                    : (String) m_attrs[i].getValue();
-                m_versionRange = VersionRange.parse(versionStr);
+                m_versionRange = (VersionRange) m_attrs[i].getValue();
                 m_version = m_versionRange.getLow();
-                m_attrs[i] = new R4Attribute(
-                    m_attrs[i].getName(),
-                    m_versionRange,
-                    m_attrs[i].isMandatory());
-            }
-            else if (m_attrs[i].getName().equals(Constants.BUNDLE_VERSION_ATTRIBUTE))
-            {
-                String versionStr = (m_attrs[i].getValue() instanceof Version)
-                    ? ((Version) m_attrs[i].getValue()).toString()
-                    : (String) m_attrs[i].getValue();
-                m_attrs[i] = new R4Attribute(
-                    m_attrs[i].getName(),
-                    VersionRange.parse(versionStr),
-                    m_attrs[i].isMandatory());
+                break;
             }
         }
     }

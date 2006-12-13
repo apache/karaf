@@ -30,11 +30,6 @@ public class R4Export extends R4Package
     private String[][] m_includeFilter = null;
     private String[][] m_excludeFilter = null;
 
-    public R4Export(R4Package pkg)
-    {
-        this(pkg.getName(), pkg.getDirectives(), pkg.getAttributes());
-    }
-
     public R4Export(String name, R4Directive[] directives, R4Attribute[] attrs)
     {
         super(name, directives, attrs);
@@ -107,23 +102,12 @@ public class R4Export extends R4Package
             }
         }
 
-        // Find the version, if present, and convert to Version.
-        // The version attribute value may be a String or a Version,
-        // since the value may be coming from an R4Export that already
-        // converted it to Version.
-        m_version = Version.emptyVersion;
+        // Cache version, if present.
         for (int i = 0; i < m_attrs.length; i++)
         {
             if (m_attrs[i].getName().equals(Constants.VERSION_ATTRIBUTE))
             {
-                String versionStr = (m_attrs[i].getValue() instanceof Version)
-                    ? ((Version) m_attrs[i].getValue()).toString()
-                    : (String) m_attrs[i].getValue();
-                m_version = Version.parseVersion(versionStr);
-                m_attrs[i] = new R4Attribute(
-                    m_attrs[i].getName(),
-                    m_version,
-                    m_attrs[i].isMandatory());
+                m_version = (Version) m_attrs[i].getValue();
                 break;
             }
         }
