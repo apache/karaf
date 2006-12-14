@@ -106,26 +106,23 @@ public class Logger implements ServiceListener
         // more conservative locking here, but let's be optimistic.
         Object[] logger = m_logger;
 
-        if (logger != null)
+        if (m_logLevel >= level)
         {
-            _logReflectively(logger, sr, level, msg, throwable);
-        }
-        else
-        {
-            String s = (sr == null) ? null : "SvcRef " + sr;
-            s = (s == null) ? msg : s + " " + msg;
-            s = (throwable == null) ? s : s + " (" + throwable + ")";
-            switch (level)
+            if (logger != null)
             {
-                case LOG_DEBUG:
-                    if (m_logLevel >= LOG_DEBUG)
-                    {
+                _logReflectively(logger, sr, level, msg, throwable);
+            }
+            else
+            {
+                String s = (sr == null) ? null : "SvcRef " + sr;
+                s = (s == null) ? msg : s + " " + msg;
+                s = (throwable == null) ? s : s + " (" + throwable + ")";
+                switch (level)
+                {
+                    case LOG_DEBUG:
                         System.out.println("DEBUG: " + s);
-                    }
-                    break;
-                case LOG_ERROR:
-                    if (m_logLevel >= LOG_ERROR)
-                    {
+                        break;
+                    case LOG_ERROR:
                         System.out.println("ERROR: " + s);
                         if (throwable != null)
                         {
@@ -136,22 +133,16 @@ public class Logger implements ServiceListener
                             }
                             throwable.printStackTrace();
                         }
-                    }
-                    break;
-                case LOG_INFO:
-                    if (m_logLevel >= LOG_INFO)
-                    {
+                        break;
+                    case LOG_INFO:
                         System.out.println("INFO: " + s);
-                    }
-                    break;
-                case LOG_WARNING:
-                    if (m_logLevel >= LOG_WARNING)
-                    {
+                        break;
+                    case LOG_WARNING:
                         System.out.println("WARNING: " + s);
-                    }
-                    break;
-                default:
-                    System.out.println("UNKNOWN[" + level + "]: " + s);
+                        break;
+                    default:
+                        System.out.println("UNKNOWN[" + level + "]: " + s);
+                }
             }
         }
     }
