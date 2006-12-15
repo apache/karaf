@@ -44,6 +44,7 @@
           <instructions>
             <Export-Package>org.apache.felix.shell; org.ungoverned.osgi.service.shell; version=1.0.0</Export-Package>
             <Private-Package>org.apache.felix.*</Private-Package>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Activator>org.apache.felix.shell.impl.Activator</Bundle-Activator>
             <Export-Service>org.apache.felix.shell.ShellService, org.ungoverned.osgi.service.shell.ShellService</Export-Service>
             <Import-Service>org.osgi.service.startlevel.StartLevel, org.osgi.service.packageadmin.PackageAdmin</Import-Service>
