@@ -18,65 +18,62 @@
  */
 package org.apache.felix.ipojo;
 
+import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.osgi.framework.BundleContext;
 
 /**
- * The component manager class manages one instance of a component type.
+ * The component instance class manages one instance of a component type.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public interface ComponentManager {
+public interface ComponentInstance {
 
     /**
-     * Component State : INVALID.
+     * Component Instance State : INVALID.
      * The component is invalid when it start or when a component dependency is unvalid.
      */
     int INVALID = 1;
 
     /**
-     * Component State : VALID.
+     * Component Instance State : VALID.
      * The component is resolved when it is running and all its component dependencies are valid.
      */
     int VALID = 2;
 
     /**
-     * Start the component manager.
+     * Start the component instance.
      */
     void start();
 
     /**
-     * Stop the component manager.
+     * Stop the component instance.
      */
     void stop();
 
     /**
-     * @return the actual state of the component.
+     * @return the actual state of the component instance.
      */
     int getState();
 
     /**
      * @return the component type information.
+     * Each handler can participate to the component description.
      */
-    ComponentInfo getComponentInfo();
+    ComponentDescription getComponentDescription();
 
     /**
-     * @return the component metadata.
+     * @return the factory of the component instance.
      */
-    ComponentMetadata getComponentMetatada();
-
-    /**
-     * @return the factory of the component
-     */
-    ComponentManagerFactory getFactory();
+    ComponentFactory getFactory();
     
     /**
-     * @return the context of the component manager
+     * @return the context of the instance manager
      */
     BundleContext getContext();
     
     /**
      * @return the name of the component instance
      */
-    String getName();
+    String getInstanceName();
 
 
 }

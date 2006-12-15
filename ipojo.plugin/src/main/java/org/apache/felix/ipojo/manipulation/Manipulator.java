@@ -65,7 +65,6 @@ public class Manipulator {
 
 	/**
      * Manipulate the class.
-     * @param bundle    The component's m_bundle
      * @param name      The name of the class
      * @param cm        The component manager attached to this manipulation
      * @throws Exception : throwed if the manipulation failed.

@@ -20,8 +20,6 @@ package org.apache.felix.ipojo;
 
 import java.io.IOException;
 import java.util.Dictionary;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ManifestMetadataParser;
@@ -31,25 +29,11 @@ import org.osgi.framework.BundleContext;
 
 
 /**
- * iPOJO generic activator.
+ * iPOJO generic activator. 
+ * All iPOJO bundle (bundle containing iPOJO components) must used this activator to be able to start the component management.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class Activator implements BundleActivator {
-
-    // STATIC
-    /**
-     * The iPOJO static logger. This logger is used by each iPOJO instance.
-     */
-    private static Logger m_logger = Logger.getLogger("org.apache.felix.ipojo");
-
-    /**
-     * @return Returns the static ipojo logger : org.apache.felix.ipojo
-     */
-    public static Logger getLogger() { return Activator.m_logger; }
-    // END STATIC
-
-    // NON STATIC PART
-
     /**
      * The m_bundle context.
      * m_bundleContext : BundleContext
@@ -57,91 +41,44 @@ public class Activator implements BundleActivator {
     private BundleContext m_bundleContext = null;
 
     /**
-     * The component manager for this activator.
-     * m_handler : ComponentManagerFactory
+     * Component Factories managed by the current bundle.
+     * m_handler : ComponentFactory
      */
-    private ComponentManagerFactory[] m_factories;
+    private ComponentFactory[] m_factories = new ComponentFactory[0];
+    
+    /**
+     * The instance creator aims to manage instance from outside factory.
+     */
+    private InstanceCreator m_creator;
 
     /**
-     * The configuration to create.
-     * m_configuration : Array of Dictionary
+     * The configurations to create.
+     * m_configuration : Array of Dictionary (each dictionary represents one configuration)
      */
     private Dictionary[] m_configurations;
 
-    // Field accessors  :
-
     /**
-     * @return the m_bundle context
+     * @return the bundle context
      */
-    public BundleContext getBundleContext() {
-        return m_bundleContext;
-    }
+    public BundleContext getBundleContext() { return m_bundleContext; }
 
     /**
-     * Add a component manager factory to the factory list.
+     * Add a component factory to the factory list.
      * @param cm : the new component metadata.
      */
-    public void addComponentFactory(Element cm) {
-        // Create the factory :
-        ComponentManagerFactory factory = new ComponentManagerFactory(m_bundleContext, cm);
+    private void addComponentFactory(Element cm) {
+        ComponentFactory factory = new ComponentFactory(m_bundleContext, cm);
 
         // If the factory array is not empty add the new factory at the end
         if (m_factories.length != 0) {
-            ComponentManagerFactory[] newFactory = new ComponentManagerFactory[m_factories.length + 1];
+            ComponentFactory[] newFactory = new ComponentFactory[m_factories.length + 1];
             System.arraycopy(m_factories, 0, newFactory, 0, m_factories.length);
             newFactory[m_factories.length] = factory;
             m_factories = newFactory;
         }
         // Else create an array of size one with the new Factory
-        else { m_factories = new ComponentManagerFactory[] {factory}; }
+        else { m_factories = new ComponentFactory[] {factory}; }
     }
-
-    /**
-     * Remove a component manager factory to the factory list.
-     * @param factory : the componet facotry to remove
-     */
-    public void removeComponentFactory(ComponentManagerFactory factory) {
-
-        int idx = -1;
-        for (int i = 0; i < m_factories.length; i++) {
-            if (m_factories[i] == factory) {
-                idx = i;
-                break;
-            }
-        }
-
-        if (idx >= 0) {
-            // If this is the factory, then point to empty list.
-            if ((m_factories.length - 1) == 0) {
-                m_factories = new ComponentManagerFactory[0];
-            }
-            // Otherwise, we need to do some array copying.
-            else {
-                ComponentManagerFactory[] newFactories = new ComponentManagerFactory[m_factories.length - 1];
-                System.arraycopy(m_factories, 0, newFactories, 0, idx);
-                if (idx < newFactories.length) {
-                    System.arraycopy(m_factories, idx + 1, newFactories, idx, newFactories.length - idx);
-                }
-                m_factories = newFactories;
-            }
-        }
-    }
-
-    // End field accesors
-
-    // Constructors :
-
-    /**
-     * Constructor used by Felix.
-     */
-    public Activator() {
-        super();
-        m_factories = new ComponentManagerFactory[0];
-    }
-
-    // End constuctors
-
-    // Bundle Lifecycle CallBack
 
     /**
      * Start method.
@@ -151,15 +88,13 @@ public class Activator implements BundleActivator {
      */
     public void start(final BundleContext bc) throws Exception {
         m_bundleContext = bc;
-        Activator.getLogger().setLevel(IPojoConfiguration.LOG_LEVEL);
 
         try {
             parse();
         } catch (Exception e) {
-            Activator.getLogger().log(Level.SEVERE, "Parse error for the bundle " + m_bundleContext.getBundle().getBundleId() + " : " + e.getMessage());
+            System.err.println("Parse error for the bundle " + m_bundleContext.getBundle().getBundleId() + " : " + e.getMessage());
             return;
         }
-        Activator.getLogger().log(Level.INFO, "[Bundle" + m_bundleContext.getBundle().getBundleId() + "] Called start after the parsing");
 
         start(); // Call the internal start method
 
@@ -173,18 +108,15 @@ public class Activator implements BundleActivator {
      */
     public void stop(BundleContext arg0) throws Exception {
         for (int i = 0; i < m_factories.length; i++) {
-            ComponentManagerFactory factory = m_factories[i];
+            ComponentFactory factory = m_factories[i];
             factory.stop();
         }
+        m_creator.stop();
+        m_factories = new ComponentFactory[0]; // Release all factories
     }
 
-    // End Bundle Lifecycle CallBack
-
-    // Parsing methods :
-
     /**
-     * Parse the file who is at the Metadata-Location place, manipulate the bytecode of the component implementation class
-     * and set the manager.
+     * Parse the internal metadata (from the manifest (in the iPOJO-Components property)).
      * @throws IOException : the manisfest could not be found
      * @throws ParseException : the parsing process failed
      */
@@ -192,46 +124,48 @@ public class Activator implements BundleActivator {
 
         String componentClasses = (String) m_bundleContext.getBundle().getHeaders().get("iPOJO-Components");
         if (componentClasses != null) {
-            parseManifest(m_bundleContext.getBundle().getHeaders());
+            ManifestMetadataParser parser = new ManifestMetadataParser();
+            parser.parse(m_bundleContext.getBundle().getHeaders());
+            
+            Element[] componentsMetadata = parser.getComponentsMetadata(); // Get the component type declaration
+            for (int i = 0; i < componentsMetadata.length; i++) { addComponentFactory(componentsMetadata[i]); }
+            m_configurations = parser.getInstances(); // Get the component instances declaration
         } else {
-            Activator.getLogger().log(Level.SEVERE, "[Bundle" + m_bundleContext.getBundle().getBundleId() + "] Components-Metadata are not in the manifest");
-            throw new ParseException("[Bundle" + m_bundleContext.getBundle().getBundleId() + "] Component-Metadata are not in the manifest");
+            throw new ParseException("[Bundle" + m_bundleContext.getBundle().getBundleId() + "] iPOJO-Components are not in the manifest");
         }
     }
 
     /**
-     * Parse the manifest.
-     * @param dict : Manifest Entries
-     * @throws ParseException : throwed when the parsing failed
-     */
-    private void parseManifest(Dictionary dict) throws ParseException {
-        ManifestMetadataParser parser = new ManifestMetadataParser();
-        parser.parse(dict);
-        // Create the components Factory according to the declared component
-        Element[] componentsMetadata = parser.getComponentsMetadata();
-        m_configurations = parser.getInstances();
-        for (int i = 0; i < componentsMetadata.length; i++) {
-            Activator.getLogger().log(Level.INFO, "[Bundle" + m_bundleContext.getBundle().getBundleId() + "] Create a component factory for " + componentsMetadata[i].getAttribute("classname"));
-            addComponentFactory(componentsMetadata[i]);
-        }
-
-    }
-
-    /**
-     * Start the management : Manipulate the classes and start the component manager.
+     * Start the management factories and create instances.
      */
     private void start() {
-        for (int i = 0; i < m_factories.length; i++) {
-            ComponentManagerFactory factory = m_factories[i];
-            String componentClass = factory.getComponentClassName();
-            for (int j = 0; j < m_configurations.length; j++) {
-                Dictionary conf = m_configurations[j];
-                if (conf.get("component") != null && conf.get("component").equals(componentClass)) {
-                    factory.createComponent(m_configurations[j]); // create a component
-                }
-            }
-            factory.start(); // Start the factory exposition
-        }
+    	// Start the factories
+    	for(int j = 0; j < m_factories.length; j++) { m_factories[j].start(); }
+    	
+    	Dictionary[] outsiders = new Dictionary[0];
+    	for(int i = 0; i < m_configurations.length; i++) {
+    		Dictionary conf = m_configurations[i];
+    		boolean created = false;
+    		for(int j = 0; j < m_factories.length; j++) {
+    			String componentClass = m_factories[j].getComponentClassName();
+    			String factoryName = m_factories[j].getFactoryName();
+    			if(conf.get("component") != null && (conf.get("component").equals(componentClass) || conf.get("component").equals(factoryName))) {
+    				if(m_factories[j].isAcceptable(conf)) { m_factories[j].createComponentInstance(conf); created = true;}
+    			}
+    		}
+    		if(!created && conf.get("component") != null) {
+    	        if (outsiders.length != 0) {
+    	            Dictionary[] newList = new Dictionary[outsiders.length + 1];
+    	            System.arraycopy(outsiders, 0, newList, 0, outsiders.length);
+    	            newList[outsiders.length] = conf;
+    	            outsiders = newList;
+    	        }
+    	        else { outsiders = new Dictionary[] {conf}; }
+    		}
+    	}
+    	
+    	// Create the instance creator
+    	m_creator = new InstanceCreator(m_bundleContext, outsiders);
     }
 
 }

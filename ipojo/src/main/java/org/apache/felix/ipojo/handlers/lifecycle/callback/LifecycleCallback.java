@@ -19,40 +19,49 @@
 package org.apache.felix.ipojo.handlers.lifecycle.callback;
 
 import java.lang.reflect.InvocationTargetException;
-import org.apache.felix.ipojo.Callback;
+
+import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.util.Callback;
 
 /**
  * This class is the implementation of callback on lifecycle transition.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class LifecycleCallback {
-
+	
+	 /**
+     * Initial state of the transition.
+     */
+    private int m_initialState;
 
     /**
-     * Metadata of the callback.
+     * Final state of the transition.
      */
-    private LifecycleCallbackMetadata m_metadata;
+    private int m_finalState;
 
     /**
      * Callback object.
      */
     private Callback m_callback;
+    
+    /**
+     * Method called by the callback.
+     */
+    private String m_method;
 
     /**
      * LifecycleCallback constructor.
      * @param hh : the callback handler calling the callback
      * @param hm : the callback metadata
      */
-    public LifecycleCallback(LifecycleCallbackHandler hh, LifecycleCallbackMetadata hm) {
-        m_metadata = hm;
-        m_callback = new Callback(hm.getMethod(), hm.isStatic(), hh.getComponentManager());
-    }
-
-    /**
-     * @return : the metadata of the hook
-     */
-    public LifecycleCallbackMetadata getMetadata() {
-        return m_metadata;
+    public LifecycleCallback(LifecycleCallbackHandler hh, String initialState, String finalState, String method, boolean isStatic) {
+    	if (initialState.equals("VALID")) { m_initialState = InstanceManager.VALID; }
+        if (initialState.equals("INVALID")) { m_initialState = InstanceManager.INVALID; }
+        if (finalState.equals("VALID")) { m_finalState = InstanceManager.VALID; }
+        if (finalState.equals("INVALID")) { m_finalState = InstanceManager.INVALID; }
+        
+        m_method = method;
+        m_callback = new Callback(method, isStatic, hh.getInstanceManager());
     }
 
     /**
@@ -64,5 +73,24 @@ public class LifecycleCallback {
     protected void call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         m_callback.call();
     }
+    
+    /**
+     * @return Returns the m_finalState.
+     */
+    public int getFinalState() {
+        return m_finalState;
+    }
+
+    /**
+     * @return Returns the m_initialState.
+     */
+    public int getInitialState() {
+        return m_initialState;
+    }
+    
+    /**
+     * @return the method called by this callback.
+     */
+    public String getMethod() { return m_method; }
 
 }

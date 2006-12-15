@@ -96,7 +96,7 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
     		//mv.visitVarInsn(ALOAD, Type.getArgumentTypes(m_constructorDesc).length);
     		mv.visitVarInsn(ALOAD, 1);  // CM is always the first argument
     		// 3) Initialize the field 
-    		mv.visitMethodInsn(INVOKESPECIAL, m_owner, "_setComponentManager", "(Lorg/apache/felix/ipojo/ComponentManagerImpl;)V");
+    		mv.visitMethodInsn(INVOKESPECIAL, m_owner, "_setComponentManager", "(Lorg/apache/felix/ipojo/InstanceManager;)V");
     		// insertion finished	
     	} 
     	else { mv.visitMethodInsn(opcode, owner, name, desc); }
@@ -118,9 +118,9 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
     public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
     	if(index == 0) {
     		mv.visitLocalVariable(name, desc, signature, start, end, index);
-    		mv.visitLocalVariable("_manager", "Lorg/apache/felix/ipojo/ComponentManagerImpl;", null, start, end, 1);
+    		mv.visitLocalVariable("_manager", "Lorg/apache/felix/ipojo/InstanceManager;", null, start, end, 1);
     		IPojoPluginConfiguration.getLogger().log(Level.INFO, "Local Variable : " + name + " index = " + index + " desc = " + desc);
-    		IPojoPluginConfiguration.getLogger().log(Level.INFO, "Local Variable : " + "_manager" + " index = " + 1 + " desc = " + "Lorg/apache/felix/ipojo/ComponentManagerImpl;");
+    		IPojoPluginConfiguration.getLogger().log(Level.INFO, "Local Variable : " + "_manager" + " index = " + 1 + " desc = " + "Lorg/apache/felix/ipojo/InstanceManager;");
     	}
     	mv.visitLocalVariable(name, desc, signature, start, end, index+1);
     	IPojoPluginConfiguration.getLogger().log(Level.INFO, "Local Variable : " + name + " index = " + index + " desc = " + desc);

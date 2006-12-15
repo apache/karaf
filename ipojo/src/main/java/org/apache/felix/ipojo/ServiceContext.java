@@ -47,8 +47,8 @@ public interface ServiceContext {
 	
 	boolean ungetService(ServiceReference reference);
 	
-	ComponentManager getComponentInstance();
+	ComponentInstance getComponentInstance();
 	
-	void setComponentInstance(ComponentManager cm);
+	void setComponentInstance(ComponentInstance ci);
 
 }

@@ -113,7 +113,7 @@ public class ManifestMetadataParser {
     }
 
     /**
-     * Parse the given dictionnary and create the components manager.
+     * Parse the given dictionnary and create the instance managers.
      * @param dict : the given headers of the manifest file
      * @throws ParseException : if any error occurs
      */

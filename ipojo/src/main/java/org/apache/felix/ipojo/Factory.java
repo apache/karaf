@@ -20,34 +20,36 @@ package org.apache.felix.ipojo;
 
 import java.util.Dictionary;
 
+import org.apache.felix.ipojo.architecture.ComponentDescription;
+
 /**
  * Component Type Factory Service.
- * This service is exposed by a component manager factory, and allows the dynamic creation of component instance.
+ * This service is exposed by a instance manager factory, and allows the dynamic creation of component instance.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public interface Factory {
 
     /**
-     * Create a component manager (i.e. component type instance).
+     * Create an instance manager (i.e. component type instance).
      * @param configuration : the configuration properties for this component.
-     * @return the created component manager.
+     * @return the created instance manager.
      */
-    ComponentManager createComponent(Dictionary configuration);
+    ComponentInstance createComponentInstance(Dictionary configuration);
     
     /**
-     * Create a component manager (i.e. component type instance).
+     * Create an instance manager (i.e. component type instance).
      * This has these service interaction in the scope given in argument.
      * @param configuration : the configuration properties for this component.
      * @param serviceContext : the service context of the component.
-     * @return the created component manager.
+     * @return the created instance manager.
      */
-    ComponentManager createComponent(Dictionary configuration, ServiceContext serviceContext);
+    ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext);
 
     /**
      * Get the component type information containing provided service, configuration properties ...
      * @return the compionent type information.
      */
-    ComponentInfo getComponentInfo();
+    ComponentDescription getComponentDescription();
     
     /**
      * Check if the given configuration is acceptable as a configuration of a component instance.
@@ -55,5 +57,10 @@ public interface Factory {
      * @return true if the configuration is acceptable
      */
     boolean isAcceptable(Dictionary conf);
+    
+    /**
+     * @return the name of the factory.
+     */
+    String getName();
 
 }

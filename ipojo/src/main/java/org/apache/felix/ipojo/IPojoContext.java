@@ -56,7 +56,7 @@ public class IPojoContext implements BundleContext {
 	 */
 	public IPojoContext(BundleContext bc) {
 		m_bundleContext = bc;
-		m_serviceContext = new ServiceContextImpl(bc);
+		m_serviceContext = new DefaultServiceContext(bc);
 	}
 	
 	/**
@@ -187,15 +187,15 @@ public class IPojoContext implements BundleContext {
 	public boolean ungetService(ServiceReference reference) { return m_serviceContext.ungetService(reference); }
 	
 	/**
-	 * Set the component manager to the service context.
+	 * Set the instance manager to the service context.
 	 * @param cm : the component manager
 	 */
-	public void setComponentInstance(ComponentManager cm) {m_serviceContext.setComponentInstance(cm); }
+	public void setComponentInstance(ComponentInstance ci) {m_serviceContext.setComponentInstance(ci); }
 	
 	/**
-	 * Get the component manager from the service context.
+	 * Get the instance manager from the service context.
 	 * @return the component manager of the service context
 	 */
-	public ComponentManager getComponentInstance() { return m_serviceContext.getComponentInstance(); }
+	public ComponentInstance getComponentInstance() { return m_serviceContext.getComponentInstance(); }
 
 }

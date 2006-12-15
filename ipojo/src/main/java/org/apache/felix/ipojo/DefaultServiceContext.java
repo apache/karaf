@@ -26,13 +26,13 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
-public class ServiceContextImpl implements ServiceContext {
+public class DefaultServiceContext implements ServiceContext {
 	
 	private BundleContext m_context;
 	
-	private ComponentManagerImpl m_instance;
+	private ComponentInstance m_instance;
 	
-	public ServiceContextImpl(BundleContext bc) { m_context = bc; }
+	public DefaultServiceContext(BundleContext bc) { m_context = bc; }
 
 	public void addServiceListener(ServiceListener listener, String filter)
 			throws InvalidSyntaxException {
@@ -80,10 +80,10 @@ public class ServiceContextImpl implements ServiceContext {
 		return m_context.ungetService(reference);
 	}
 
-	public ComponentManager getComponentInstance() {
+	public ComponentInstance getComponentInstance() {
 		return m_instance;
 	}
 	
-	public void setComponentInstance(ComponentManager cm) { m_instance = (ComponentManagerImpl) cm; }
+	public void setComponentInstance(ComponentInstance ci) { m_instance =  ci; }
 
 }

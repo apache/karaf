@@ -26,11 +26,12 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
 
+import org.apache.felix.ipojo.architecture.ComponentDescription;
+import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -38,62 +39,64 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
 
 /**
- * The component manager factory class manages component manager object.
+ * The component factory manages component instance objects.
+ * This management consist in creating and managing component instance build with the component factory.
  * This class could export Factory and ManagedServiceFactory services.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public class ComponentManagerFactory implements Factory, ManagedServiceFactory {
+public class ComponentFactory implements Factory, ManagedServiceFactory {
 
-    // Fields :
     /**
-     * List of the managed component manager.
-     * The key of tis hashmap is the name (pid) of the component created
+     * List of the managed instance managers.
+     * The key of this hashmap is the name (i.e. pid) of the created instance
      */
-    private HashMap m_componentManagers = new HashMap();
+    private HashMap m_componentInstances = new HashMap();
 
     /**
      * The bundle context reference.
      */
-    private BundleContext m_bundleContext = null;
+    private BundleContext m_context = null;
 
     /**
-     * Component class.
+     * Component Implementation class.
      */
     private byte[] m_clazz = null;
 
     /**
-     * Component Class Name.
+     * Component Implementation Class Name.
      */
     private String m_componentClassName = null;
 
     /**
      * Classloader to delegate loading.
      */
-    private FactoryClassloader m_classLoader = null;
+    private FactoryClassloader m_classLoader = null;  //TODO is this classloader really useful ?
 
     /**
-     * Component Type provided by this factory.
+     * Component Type provided by this factory.  //TODO Should be keep this reference ?
      */
     private Element m_componentMetadata;
     
     /**
-     * Factory Name / PID.
+     * Factory Name (i.e. Factory PID).
      * Could be the component class name if the factory name is not set.
      */
     private String m_factoryName;
 
     /**
-     * Service Registration of this factory (Facotry & ManagedServiceFactory).
+     * Service Registration of this factory (Factory & ManagedServiceFactory).
      */
     private ServiceRegistration m_sr;
 
     /**
-     * Component-Type info exposed by the factory service.
+     * Component-Type description exposed by the factory service.
      */
-    private ComponentInfo m_componentInfo;
+    private ComponentDescription m_componentDesc;
     
-
-    //End field
+    /**
+     * Logger for the factory (and all component instance)
+     */
+    private Logger m_logger;
 
     /**
      * FactoryClassloader.
@@ -110,7 +113,7 @@ public class ComponentManagerFactory implements Factory, ManagedServiceFactory {
          */
         protected synchronized Class loadClass(final String name,
                 final boolean resolve) throws ClassNotFoundException {
-            return m_bundleContext.getBundle().loadClass(name);
+            return m_context.getBundle().loadClass(name);
         }
 
 
@@ -121,7 +124,7 @@ public class ComponentManagerFactory implements Factory, ManagedServiceFactory {
          * @see java.lang.ClassLoader#getResource(java.lang.String)
          */
         public URL getResource(String arg) {
-            return m_bundleContext.getBundle().getResource(arg);
+            return m_context.getBundle().getResource(arg);
         }
 
         /**
@@ -132,7 +135,7 @@ public class ComponentManagerFactory implements Factory, ManagedServiceFactory {
          * @see java.lang.ClassLoader#getResources(java.lang.String)
          */
         public Enumeration getRessources(String arg) throws IOException {
-            return m_bundleContext.getBundle().getResources(arg);
+            return m_context.getBundle().getResources(arg);
         }
 
         /**
@@ -153,37 +156,43 @@ public class ComponentManagerFactory implements Factory, ManagedServiceFactory {
     /**
      * @return the Bundle Context
      */
-    public BundleContext getBundleContext() { return m_bundleContext; }
+    protected BundleContext getBundleContext() { return m_context; }
 
     /**
-     * @return the class name of the component-type provided by this factory.
+     * @return the name of the component-type implementation class.
      */
     protected String getComponentClassName() { return m_componentClassName; }
+    
+    /**
+     * @return the factory logger.
+     */
+    public Logger getLogger() { return m_logger; }
 
     /**
-     * Create a component manager factory.
+     * Create a instance manager factory.
      * @param bc : bundle context
      * @param cm : metadata of the component to create
      */
-    public ComponentManagerFactory(BundleContext bc, Element cm) {
-        m_bundleContext = bc;
+    public ComponentFactory(BundleContext bc, Element cm) {
+        m_context = bc;
         m_componentClassName = cm.getAttribute("className");
         m_componentMetadata = cm;
         
         // Get factory PID :
         if (m_componentMetadata.containsAttribute("factory") && !m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) { m_factoryName = m_componentMetadata.getAttribute("factory"); }
         else { m_factoryName = m_componentMetadata.getAttribute("className"); }
-
+        
+        m_logger = new Logger(m_context, m_factoryName, Logger.WARNING);
     }
 
     /**
-     * Create a component manager factory. The class is given in parameter.
+     * Create a instance manager factory. The class is given in parameter.
      * @param bc : bundle context
      * @param clazz : the component class
      * @param cm : metadata of the component
      */
-    public ComponentManagerFactory(BundleContext bc, byte[] clazz, Element cm) {
-    	m_bundleContext = bc;
+    public ComponentFactory(BundleContext bc, byte[] clazz, Element cm) {
+    	m_context = bc;
         m_clazz = clazz;
         m_componentClassName = cm.getAttribute("className");
         m_componentMetadata = cm;
@@ -191,64 +200,58 @@ public class ComponentManagerFactory implements Factory, ManagedServiceFactory {
         // Get factory PID :
         if (m_componentMetadata.containsAttribute("factory") && !m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) { m_factoryName = m_componentMetadata.getAttribute("factory"); }
         else { m_factoryName = m_componentMetadata.getAttribute("className"); }
+        
+        m_logger = new Logger(m_context, m_factoryName, Logger.WARNING);
     }
 
     /**
-     * Create a component manager factory, no component manager are created.
-     * @param bc
-     */
-    public ComponentManagerFactory(BundleContext bc) { m_bundleContext = bc; }
-
-
-    // Factory lifecycle management
-
-    /**
-     * Stop all the component managers.
+     * Stop all the instance managers.
      */
     public void stop() {
-        Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Stop the component factory");
-        Collection col = m_componentManagers.values();
+        Collection col = m_componentInstances.values();
         Iterator it = col.iterator();
         while (it.hasNext()) {
-            ComponentManagerImpl cm = (ComponentManagerImpl) it.next();
+            InstanceManager cm = (InstanceManager) it.next();
             cm.stop();
         }
-        m_componentManagers.clear();
+        m_componentInstances.clear();
         if (m_sr != null) { m_sr.unregister(); }
         m_sr = null;
     }
 
     /**
-     * Start all the component managers.
+     * Start all the instance managers.
      */
-    public void start() {
-        Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Start the component factory");
+    public void start() {        
+        Properties props = new Properties();
+
+        // create a ghost component
+        InstanceManager ghost = new InstanceManager(this, m_context);
+        Properties p = new Properties();
+        p.put("name", "ghost");
+        ghost.configure(m_componentMetadata, p);
+        m_componentDesc = ghost.getComponentDescription();
         
         // Check if the factory should be exposed
         if (m_componentMetadata.containsAttribute("factory") && m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) { return; }
-        Properties props = new Properties();
+        
         props.put("component.class", m_componentClassName);
-
-        // create a ghost component
-        ComponentManagerImpl ghost = new ComponentManagerImpl(this, m_bundleContext);
-        ghost.configure(m_componentMetadata, new Properties());
-        m_componentInfo = ghost.getComponentInfo();
-
-        props.put("component.providedServiceSpecifications", m_componentInfo.getprovidedServiceSpecification());
-        props.put("component.properties", m_componentInfo.getProperties());
-        props.put("component.information", m_componentInfo.toString());
-
+        props.put("component.providedServiceSpecifications", m_componentDesc.getprovidedServiceSpecification());
+        props.put("component.properties", m_componentDesc.getProperties());
+        props.put("component.description", m_componentDesc);
+        props.put("component.desc", m_componentDesc.toString());
+        
         // Add Facotry PID to the component properties
         props.put(Constants.SERVICE_PID, m_factoryName);
 
         // Exposition of the factory service
-        m_sr = m_bundleContext.registerService(new String[] {Factory.class.getName(), ManagedServiceFactory.class.getName()}, this, props);
+        m_sr = m_context.registerService(new String[] {Factory.class.getName(), ManagedServiceFactory.class.getName()}, this, props);
     }
 
     /**
      * @see org.apache.felix.ipojo.Factory#getComponentInfo()
      */
-    public ComponentInfo getComponentInfo() { return m_componentInfo; }
+    public ComponentDescription getComponentDescription() { return m_componentDesc; }
 
     /**
      * Load a class.
@@ -257,22 +260,18 @@ public class ComponentManagerFactory implements Factory, ManagedServiceFactory {
      * @throws ClassNotFoundException : happen when the class is not found
      */
     public Class loadClass(String className) throws ClassNotFoundException {
-        Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] In load for : " + className);
-        if (m_clazz != null && className.equals(m_componentClassName)) {
+        getLogger().log(Logger.INFO, "[Bundle " + m_context.getBundle().getBundleId() + "] In load for : " + className);
+        if (m_clazz != null && className.equals(m_componentClassName)) {  // Used the factory classloader to load the component implementation class
             if (m_classLoader == null) {
-                Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Create the FactoryClassLoader for : " + className);
                 m_classLoader = new FactoryClassloader();
             }
             try {
-                Class c = m_classLoader.defineClass(m_componentClassName, m_clazz, null);
-                Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Return " + c + " for " + className);
-                return c;
+                return m_classLoader.defineClass(m_componentClassName, m_clazz, null);
             } catch (Exception e) {
-                Activator.getLogger().log(Level.SEVERE, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Cannot define the class : " + className);
-                return null;
+                throw new ClassNotFoundException("[Bundle " + m_context.getBundle().getBundleId() + "] Cannot define the class : " + className, e);
             }
         }
-        return m_bundleContext.getBundle().loadClass(className);
+        return m_context.getBundle().loadClass(className);
     }
 
     /**
@@ -281,45 +280,54 @@ public class ComponentManagerFactory implements Factory, ManagedServiceFactory {
      * @return the URL of the resource
      */
     public URL getResource(String resName) {
-        return m_bundleContext.getBundle().getResource(resName);
+        return m_context.getBundle().getResource(resName);
     }
 
     /**
-     * @see org.apache.felix.ipojo.Factory#createComponent(java.util.Dictionary)
+     * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
-    public ComponentManager createComponent(Dictionary configuration) {
-        Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Create a component and start it");
-        IPojoContext context = new IPojoContext(m_bundleContext);
-        ComponentManagerImpl component = new ComponentManagerImpl(this, context);
-        context.setComponentInstance(component);
-        component.configure(m_componentMetadata, configuration);
+    public ComponentInstance createComponentInstance(Dictionary configuration) {
+    	if(!isAcceptable(configuration)) {
+    		m_logger.log(Logger.ERROR, "The configuration is not acceptable");
+    		return null; 
+    	}
+    	
+        IPojoContext context = new IPojoContext(m_context);
+        InstanceManager instance = new InstanceManager(this, context);
+        context.setComponentInstance(instance);
+        instance.configure(m_componentMetadata, configuration);
 
         String pid = null;
         if (configuration.get("name") != null) { pid = (String) configuration.get("name"); }
         else { pid = m_componentMetadata.getAttribute("className"); }
 
-        m_componentManagers.put(pid, component);
-        component.start();
-        return component;
+        m_componentInstances.put(pid, instance);
+        instance.start();
+        return instance;
     }
     
     /**
-     * @see org.apache.felix.ipojo.Factory#createComponent(java.util.Dictionary)
+     * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
-    public ComponentManager createComponent(Dictionary configuration, ServiceContext serviceContext) {
-        Activator.getLogger().log(Level.INFO, "[Bundle " + m_bundleContext.getBundle().getBundleId() + "] Create a component and start it");
-        IPojoContext context = new IPojoContext(m_bundleContext, serviceContext);
-        ComponentManagerImpl component = new ComponentManagerImpl(this, context);
-        context.setComponentInstance(component);
-        component.configure(m_componentMetadata, configuration);
+    public ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) {
+    	if(!isAcceptable(configuration)) {
+    		//TODO : extend the message with infomation about the non acceptability
+    		m_logger.log(Logger.ERROR, "The configuration is not acceptable");
+    		return null; 
+    	}
+    	
+    	IPojoContext context = new IPojoContext(m_context, serviceContext);
+        InstanceManager instance = new InstanceManager(this, context);
+        context.setComponentInstance(instance);
+        instance.configure(m_componentMetadata, configuration);
 
         String pid = null;
         if (configuration.get("name") != null) { pid = (String) configuration.get("name"); }
         else { pid = m_componentMetadata.getAttribute("className"); }
 
-        m_componentManagers.put(pid, component);
-        component.start();
-        return component;
+        m_componentInstances.put(pid, instance);
+        instance.start();
+        return instance;
     }
     
     
@@ -328,7 +336,7 @@ public class ComponentManagerFactory implements Factory, ManagedServiceFactory {
      * @see org.osgi.service.cm.ManagedServiceFactory#deleted(java.lang.String)
      */
     public void deleted(String pid) {
-        ComponentManagerImpl cm = (ComponentManagerImpl) m_componentManagers.remove(pid);
+        InstanceManager cm = (InstanceManager) m_componentInstances.remove(pid);
         if (cm == null) { return;  } // do nothing, the component does not exist !
         else { cm.stop(); }
     }
@@ -342,8 +350,8 @@ public class ComponentManagerFactory implements Factory, ManagedServiceFactory {
      * @see org.osgi.service.cm.ManagedServiceFactory#updated(java.lang.String, java.util.Dictionary)
      */
     public void updated(String pid, Dictionary properties) throws ConfigurationException {
-        ComponentManagerImpl cm = (ComponentManagerImpl) m_componentManagers.get(pid);
-        if (cm == null) { createComponent(properties); } // Create the component
+        InstanceManager cm = (InstanceManager) m_componentInstances.get(pid);
+        if (cm == null) { createComponentInstance(properties); } // Create the component
         else {
             cm.stop(); // Stop the component
             cm.configure(m_componentMetadata, properties); // re-configure the component
@@ -360,16 +368,18 @@ public class ComponentManagerFactory implements Factory, ManagedServiceFactory {
      * Check if the given configuration is acceptable as a component instance configuration.
      * This checks that a name is given in the configuration and if all the configurable properties have a value.
      * @param conf : the configuration to check
-     * @return true when the configuration is acceptable
+     * @return true when the configuration seems to be acceptable
      */
     public boolean isAcceptable(Dictionary conf) {
     	// First check that the configuration contains a name : 
     	if(conf.get("name") == null) { return false; }
-    	List props = m_componentInfo.getProperties();
-    	for(int i = 0; i < props.size(); i++) {
-    		PropertyInfo pi = (PropertyInfo) props.get(i);
+    	PropertyDescription[] props = m_componentDesc.getProperties();
+    	for(int i = 0; i < props.length; i++) {
+    		PropertyDescription pd = props[i];
     		// Failed if the props has no default value and the configuration does not push a value 
-    		if(pi.getValue() == null && conf.get(pi.getName()) == null) { return false; }
+    		if(pd.getValue() == null && conf.get(pd.getName()) == null) {
+    			return false;
+    		}
     	}
     	return true;
     }

@@ -21,23 +21,21 @@ package org.apache.felix.ipojo.handlers.architecture;
 import java.util.Dictionary;
 import java.util.Properties;
 
-import org.apache.felix.ipojo.ComponentManagerImpl;
 import org.apache.felix.ipojo.Handler;
+import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.architecture.Architecture;
-import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.architecture.DependencyDescription;
 import org.apache.felix.ipojo.architecture.DependencyHandlerDescription;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
+import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.architecture.ProvidedServiceDescription;
 import org.apache.felix.ipojo.architecture.ProvidedServiceHandlerDescription;
 import org.apache.felix.ipojo.handlers.dependency.Dependency;
 import org.apache.felix.ipojo.handlers.dependency.DependencyHandler;
 import org.apache.felix.ipojo.handlers.dependency.DependencyMetadata;
 import org.apache.felix.ipojo.handlers.providedservice.Property;
-import org.apache.felix.ipojo.handlers.providedservice.PropertyMetadata;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedService;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
-import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceMetadata;
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -50,9 +48,9 @@ import org.osgi.framework.ServiceRegistration;
 public class ArchitectureHandler extends Handler implements Architecture {
 
     /**
-     * Component Manager.
+     * Instance Manager.
      */
-    private ComponentManagerImpl m_manager;
+    private InstanceManager m_manager;
 
     /**
      * Service Registration of the Architecture service provided by this handler.
@@ -70,19 +68,19 @@ public class ArchitectureHandler extends Handler implements Architecture {
     private String m_className;
 
     /**
-     * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.ComponentManagerImpl, org.apache.felix.ipojo.metadata.Element)
+     * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager, org.apache.felix.ipojo.metadata.Element)
      */
-    public void configure(ComponentManagerImpl cm, Element metadata, Dictionary configuration) {
+    public void configure(InstanceManager im, Element metadata, Dictionary configuration) {
         if (metadata.containsAttribute("architecture")) {
             String isArchitectureEnabled = (metadata.getAttribute("architecture")).toLowerCase();
-            if (isArchitectureEnabled.equals("true")) { cm.register(this); }
+            if (isArchitectureEnabled.equalsIgnoreCase("true")) { im.register(this); }
         }
 
         m_className = metadata.getAttribute("className");
 
         m_name = (String) configuration.get("name");
 
-        m_manager = cm;
+        m_manager = im;
     }
 
     /**
@@ -104,7 +102,7 @@ public class ArchitectureHandler extends Handler implements Architecture {
         // Register the ManagedService
         BundleContext bc = m_manager.getContext();
         Dictionary properties = new Properties();
-        properties.put("Component Implementation Class", m_manager.getComponentMetatada().getClassName());
+        properties.put("Component.Implementation.Class", m_manager.getClassName());
         properties.put(Constants.SERVICE_PID, m_name);
 
         m_sr = bc.registerService(Architecture.class.getName(), this, properties);
@@ -114,15 +112,15 @@ public class ArchitectureHandler extends Handler implements Architecture {
     /**
      * @see org.apache.felix.ipojo.architecture.Architecture#getComponentDescription()
      */
-    public ComponentDescription getComponentDescription() {
+    public InstanceDescription getInstanceDescription() {
         int componentState = m_manager.getState();
-        ComponentDescription componentDescription = new ComponentDescription(m_className, m_name, componentState, m_manager.getContext().getBundle().getBundleId());
+        InstanceDescription instanceDescription = new InstanceDescription(m_className, m_name, componentState, m_manager.getContext().getBundle().getBundleId());
 
-        String[] instances = new String[m_manager.getInstances().length];
-        for (int i = 0; i < m_manager.getInstances().length; i++) {
-            instances[i] = m_manager.getInstances()[i].toString();
+        String[] objects = new String[m_manager.getPojoObjects().length];
+        for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
+        	objects[i] = m_manager.getPojoObjects()[i].toString();
         }
-        componentDescription.setInstances(instances);
+        instanceDescription.setCreatedObjects(objects);
 
         Handler[] handlers = m_manager.getRegistredHandlers();
         for (int i = 0; i < handlers.length; i++) {
@@ -134,11 +132,11 @@ public class ArchitectureHandler extends Handler implements Architecture {
                     Dependency dep = dh.getDependencies()[j];
                     DependencyMetadata dm = dep.getMetadata();
                     // Create & add the dependency description
-                    DependencyDescription dd = new DependencyDescription(dm.getServiceSpecification(), dm.isMultiple(), dm.isOptional(), dm.getFilter(), dep.getState(), componentDescription);
+                    DependencyDescription dd = new DependencyDescription(dm.getServiceSpecification(), dm.isMultiple(), dm.isOptional(), dm.getFilter(), dep.getState(), instanceDescription);
                     dd.setUsedServices(dep.getUsedServices());
                     dhd.addDependency(dd);
                 }
-                componentDescription.addHandler(dhd);
+                instanceDescription.addHandler(dhd);
                 break;
             }
 
@@ -148,25 +146,23 @@ public class ArchitectureHandler extends Handler implements Architecture {
 
                 for (int j = 0; j < psh.getProvidedService().length; j++) {
                     ProvidedService ps = psh.getProvidedService()[j];
-                    ProvidedServiceMetadata psm = ps.getMetadata();
-                    ProvidedServiceDescription psd = new ProvidedServiceDescription(psm.getServiceSpecification(), ps.getState(), ps.getServiceReference(), componentDescription);
+                    ProvidedServiceDescription psd = new ProvidedServiceDescription(ps.getServiceSpecification(), ps.getState(), ps.getServiceReference(), instanceDescription);
 
                     Properties props = new Properties();
                     for (int k = 0; k < ps.getProperties().length; k++) {
                         Property prop = ps.getProperties()[k];
-                        PropertyMetadata pm = prop.getMetadata();
-                        if (prop.getValue() != null) { props.put(pm.getName(), prop.getValue().toString()); }
+                        if (prop.getValue() != null) { props.put(prop.getName(), prop.getValue().toString()); }
                     }
                     psd.setProperty(props);
                     pshd.addProvidedService(psd);
                 }
-                componentDescription.addHandler(pshd);
+                instanceDescription.addHandler(pshd);
                 break;
             }
             // Else add a generic handler to the description
-            componentDescription.addHandler(new HandlerDescription(handlers[i].getClass().getName(), handlers[i].isValid()));
+            instanceDescription.addHandler(new HandlerDescription(handlers[i].getClass().getName(), handlers[i].isValid()));
         }
-        return componentDescription;
+        return instanceDescription;
     }
 
 }

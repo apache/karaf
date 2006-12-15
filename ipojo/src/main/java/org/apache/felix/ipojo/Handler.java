@@ -31,10 +31,10 @@ public abstract class Handler {
 
     /**
      * Configure the handler.
-     * @param cm : the component manager
+     * @param im : the instance manager
      * @param metadata : the metadata of the component
      */
-    public abstract void configure(ComponentManagerImpl cm, Element metadata, Dictionary configuration);
+    public abstract void configure(InstanceManager im, Element metadata, Dictionary configuration);
 
     /**
      * Stop the handler : stop the management.

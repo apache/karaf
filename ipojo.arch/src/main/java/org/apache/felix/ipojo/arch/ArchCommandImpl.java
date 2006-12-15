@@ -22,8 +22,8 @@ package org.apache.felix.ipojo.arch;
 import java.io.PrintStream;
 
 import org.apache.felix.ipojo.architecture.Architecture;
-import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
+import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.ungoverned.osgi.service.shell.Command;
 
 
@@ -65,7 +65,7 @@ public class ArchCommandImpl implements Command {
      * @param state : the state in int
      * @return : the string of the state (Stopped, Unresolved, Resolved) or "Unknown" if state is not revelant
      */
-    private String getComponentState(int state) {
+    private String getInstanceState(int state) {
         switch(state) {
         case(0) :
             return "STOPPED";
@@ -84,10 +84,10 @@ public class ArchCommandImpl implements Command {
     public void execute(String line, PrintStream out, PrintStream err) {
         synchronized(this) { 
         	for(int i=0; i < archiService.length; i++) {
-        		ComponentDescription component = archiService[i].getComponentDescription();       
-        		out.println("Component : " + component.getClassName() + " - " + getComponentState(component.getState()) + " from bundle " + component.getBundleId());
-        		for(int j = 0; j < component.getHandlers().length; j++) {
-        			HandlerDescription hd = component.getHandlers()[j];
+        		InstanceDescription instance = archiService[i].getInstanceDescription();       
+        		out.println("Instance : " + instance.getClassName() + " - " + getInstanceState(instance.getState()) + " from bundle " + instance.getBundleId());
+        		for(int j = 0; j < instance.getHandlers().length; j++) {
+        			HandlerDescription hd = instance.getHandlers()[j];
         			String hn = hd.getHandlerName();
         			String hv = "valid";
         			if(!hd.isValid()) { hv = "invalid"; }
@@ -96,11 +96,10 @@ public class ArchCommandImpl implements Command {
         			if(!hi.equals("")) { out.println(hi); }
         		}
         		
-        		out.println("Created Instances of the POJO : ");
-        		for(int j=0;  j < component.getInstances().length; j++) {
-        			out.println("\t" + component.getInstances()[j]);
+        		out.println("Created POJO Objects : ");
+        		for(int j=0;  j < instance.getCreatedObjects().length; j++) {
+        			out.println("\t" + instance.getCreatedObjects()[j]);
         		}
-        		
         		out.print("\n");
         	}
         }

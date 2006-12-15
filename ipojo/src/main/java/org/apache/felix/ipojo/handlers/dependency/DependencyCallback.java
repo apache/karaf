@@ -20,7 +20,7 @@ package org.apache.felix.ipojo.handlers.dependency;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.felix.ipojo.Callback;
+import org.apache.felix.ipojo.util.Callback;
 
 
 /**
@@ -59,7 +59,7 @@ public class DependencyCallback {
      */
     public DependencyCallback(Dependency dep, String method, int methodType, boolean isStatic) {
         m_methodType = methodType;
-        m_callback = new Callback(method, isStatic, dep.getDependencyHandler().getComponentManager());
+        m_callback = new Callback(method, isStatic, dep.getDependencyHandler().getInstanceManager());
     }
 
     /**

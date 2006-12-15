@@ -481,6 +481,9 @@ public class OsgiJarMojo extends AbstractMojo {
 			}
 		}
 		
+		// Add org.apache.felix.ipojo is not already in the set
+		referred.add("org.apache.felix.ipojo");
+		
 		if (referred.isEmpty())
 			return;
 
@@ -1004,6 +1007,6 @@ public class OsgiJarMojo extends AbstractMojo {
 	}
 
 	private void setBundleActivator() throws MojoExecutionException {
-		archiveConfig.addManifestEntry("Bundle-Activator", "org.apache.felix.ipojo.Activator");		
+		archiveConfig.addManifestEntry("Bundle-Activator", "org.apache.felix.ipojo.Activator");
 	}
 }

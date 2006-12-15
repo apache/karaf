@@ -21,15 +21,14 @@ package org.apache.felix.ipojo.handlers.configuration;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Properties;
-import java.util.logging.Level;
 
-import org.apache.felix.ipojo.Activator;
-import org.apache.felix.ipojo.ComponentInfo;
-import org.apache.felix.ipojo.ComponentManagerImpl;
 import org.apache.felix.ipojo.Handler;
-import org.apache.felix.ipojo.PropertyInfo;
+import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.architecture.ComponentDescription;
+import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -43,9 +42,9 @@ import org.osgi.service.cm.ManagedService;
 public class ConfigurationHandler extends Handler implements ManagedService {
 
     /**
-     * Reference on the component manager.
+     * Reference on the instance manager.
      */
-    private ComponentManagerImpl m_manager;
+    private InstanceManager m_manager;
 
     /**
      * List of the configurable fields.
@@ -59,7 +58,7 @@ public class ConfigurationHandler extends Handler implements ManagedService {
     private ProvidedServiceHandler m_providedServiceHandler;
 
     /**
-     * Properties porpagated at the last "updated".
+     * Properties propagated at the last "updated".
      */
     private Dictionary m_propagated = new Properties();
 
@@ -79,17 +78,17 @@ public class ConfigurationHandler extends Handler implements ManagedService {
     private ServiceRegistration m_sr;
 
     /**
-     * @return component manager of this handler.
+     * @return instance manager of this handler.
      */
-    protected ComponentManagerImpl getComponentManager() { return m_manager; }
+    protected InstanceManager getInstanceManager() { return m_manager; }
 
     /**
-     * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.ComponentManagerImpl, org.apache.felix.ipojo.metadata.Element)
+     * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager, org.apache.felix.ipojo.metadata.Element)
      */
-    public void configure(ComponentManagerImpl cm, Element metadata, Dictionary configuration) {
+    public void configure(InstanceManager im, Element metadata, Dictionary configuration) {
         // Store the component manager
-        m_manager = cm;
-        ComponentInfo ci = cm.getComponentInfo();
+        m_manager = im;
+        ComponentDescription cd = im.getComponentDescription();
         m_configurableProperties = new ConfigurableProperty[0];
 
         // Build the hashmap
@@ -113,10 +112,20 @@ public class ConfigurationHandler extends Handler implements ManagedService {
             if (name != null && configuration.get(name) != null && configuration.get(name) instanceof String) { value = (String) configuration.get(name); }
             else { if (fieldName != null &&  configuration.get(fieldName) != null && configuration.get(fieldName) instanceof String) { value = (String) configuration.get(fieldName); } }
 
-            ConfigurableProperty cp = new ConfigurableProperty(name, fieldName, value, this);
-
-            if (cp.getValue() != null) { ci.addProperty(new PropertyInfo(name, cp.getType(), cp.getValue().toString())); }
-            else { ci.addProperty(new PropertyInfo(name, cp.getType(), "")); }
+            // Detect the type of the property 
+            Element manipulation = metadata.getElements("Manipulation")[0];
+            String type = null;
+            for (int kk = 0; kk < manipulation.getElements("Field").length; kk++) {
+                if (fieldName.equals(manipulation.getElements("Field")[kk].getAttribute("name"))) {
+                    type = manipulation.getElements("Field")[kk].getAttribute("type");
+                }
+            }
+            if (type == null) { m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The field " + fieldName + " does not exist in the implementation"); return; }
+            
+            ConfigurableProperty cp = new ConfigurableProperty(name, fieldName, value, type, this);
+            
+            if (cp.getValue() != null) { cd.addProperty(new PropertyDescription(name, type, cp.getValue().toString())); }
+            else { cd.addProperty(new PropertyDescription(name, type, "")); }
 
             addProperty(cp);
         }
@@ -154,7 +163,7 @@ public class ConfigurationHandler extends Handler implements ManagedService {
     public void stop() {
         // Unregister the service
         if (m_isConfigurable && m_sr != null) {
-            Activator.getLogger().log(Level.INFO, "[" + m_manager.getComponentMetatada().getClassName() + "] Unregister Managed Service");
+            m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Unregister Managed Service");
             m_sr.unregister();
             m_sr = null;
         }
@@ -174,7 +183,7 @@ public class ConfigurationHandler extends Handler implements ManagedService {
             Dictionary properties = new Properties();
             properties.put(Constants.SERVICE_PID, m_pid);
 
-            Activator.getLogger().log(Level.INFO, "[" + m_manager.getComponentMetatada().getClassName() + "] Register Managed Service");
+            m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Register Managed Service");
             m_sr = bc.registerService(ManagedService.class.getName(), this, properties);
         }
     }
@@ -186,8 +195,8 @@ public class ConfigurationHandler extends Handler implements ManagedService {
         // Verify that the field name correspond to a configurable property
         for (int i = 0; i < m_configurableProperties.length; i++) {
             ConfigurableProperty cp = m_configurableProperties[i];
-            if (cp.getName().equals(fieldName)) {
-                // Check if the value has change
+            if (cp.getField().equals(fieldName)) {
+                // Check if the value has changed
                 if (cp.getValue() == null || !cp.getValue().equals(value)) {
                     cp.setValue(value); // Change the value
                 }
@@ -213,11 +222,11 @@ public class ConfigurationHandler extends Handler implements ManagedService {
      * @see org.apache.felix.ipojo.Handler#stateChanged(int)
      */
     public void stateChanged(int state) {
-        if (state == ComponentManagerImpl.VALID) {
+        if (state == InstanceManager.VALID) {
             if (m_sr == null) { start(); }
             return;
         }
-        if (state == ComponentManagerImpl.INVALID) {
+        if (state == InstanceManager.INVALID) {
             if (m_sr != null) { stop(); }
             return;
         }
@@ -239,7 +248,6 @@ public class ConfigurationHandler extends Handler implements ManagedService {
                     if (m_configurableProperties[i].getName().equals(name)) {
                         // Check if the value has change
                         if (m_configurableProperties[i].getValue() == null || !m_configurableProperties[i].getValue().equals(value)) {
-                            //m_configurableProperties[i].setValue(value); // Useless, the setterCallback will call the setValue
                             m_manager.setterCallback(m_configurableProperties[i].getField(), value); // says that the value has change
                         }
                         find = true;
@@ -248,16 +256,16 @@ public class ConfigurationHandler extends Handler implements ManagedService {
                 }
                 if (!find) {
                     //The property is not a configurable property
-                    Activator.getLogger().log(Level.INFO, "[" + m_manager.getComponentMetatada().getClassName() + "] The property " + name + " will be propagated to service registrations");
+                    m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] The property " + name + " will be propagated to service registrations");
                     toPropagate.put(name, value);
                 }
             }
         }
-        else { Activator.getLogger().log(Level.WARNING, "[" + m_manager.getComponentMetatada().getClassName() + "] The pushed configuration is null for " + m_pid); }
+        else { m_manager.getFactory().getLogger().log(Logger.WARNING, "[" + m_manager.getClassName() + "] The pushed configuration is null for " + m_pid); }
 
         // Propagation of the properties to service registrations :
         if (m_providedServiceHandler != null && !toPropagate.isEmpty()) {
-            Activator.getLogger().log(Level.INFO, "[" + m_manager.getComponentMetatada().getClassName() + "] Properties will be propagated");
+            m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Properties will be propagated");
             m_providedServiceHandler.removeProperties(m_propagated);
             m_providedServiceHandler.addProperties(toPropagate);
             m_propagated = toPropagate;

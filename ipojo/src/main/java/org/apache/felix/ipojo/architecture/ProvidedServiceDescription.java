@@ -51,7 +51,7 @@ public class ProvidedServiceDescription {
     /**
      * Handler on the component description who contains this description.
      */
-    private ComponentDescription m_parent;
+    private InstanceDescription m_parent;
 
     /**
      * Properties of the provided service.
@@ -66,7 +66,7 @@ public class ProvidedServiceDescription {
      * @param sr : Service Registration (to obtain the reference), or null if state is UNREGISTRED
      * @param parent : the component description declaring this proided service
      */
-    public ProvidedServiceDescription(String[] serviceSpecification, int state, ServiceReference sr, ComponentDescription parent) {
+    public ProvidedServiceDescription(String[] serviceSpecification, int state, ServiceReference sr, InstanceDescription parent) {
         m_serviceSpecification = serviceSpecification;
         m_state = state;
         m_serviceReference = sr;
@@ -78,24 +78,6 @@ public class ProvidedServiceDescription {
      */
     public String[] getServiceSpecification() {
         return m_serviceSpecification;
-    }
-
-    /**
-     * Add a dependency descriptino to this provided service description.
-     * @param dep : the dependency description to add
-     */
-    public void addDependency(DependencyDescription dep) {
-        // Verify that the dependency description is not already in the array.
-        for (int i = 0; (i < m_dependencies.length); i++) {
-            if (m_dependencies[i] == dep) {
-                return; //NOTHING DO DO, the description is already in the array
-            }
-        }
-        // The component Description is not in the array, add it
-        DependencyDescription[] newDep = new DependencyDescription[m_dependencies.length + 1];
-        System.arraycopy(m_dependencies, 0, newDep, 0, m_dependencies.length);
-        newDep[m_dependencies.length] = dep;
-        m_dependencies = newDep;
     }
 
     /**
@@ -146,7 +128,7 @@ public class ProvidedServiceDescription {
     /**
      * @return the parent description.
      */
-    public ComponentDescription getComponentDescription() {
+    public InstanceDescription getInstanceDescription() {
         return m_parent;
     }
 

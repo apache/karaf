@@ -21,10 +21,9 @@ package org.apache.felix.ipojo.handlers.providedservice;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Properties;
-import java.util.logging.Level;
 
-import org.apache.felix.ipojo.ComponentManagerImpl;
-import org.apache.felix.ipojo.Activator;
+import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
@@ -58,6 +57,16 @@ public class ProvidedService implements ServiceFactory {
     public static final int SERVICE_FACTORY = 1;
 
     /**
+     * At this time, it is only the java interface full name.
+     */
+    private String[] m_serviceSpecification = new String[0];
+
+    /**
+     * Factory policy.
+     */
+    private int m_factoryPolicy = SINGLETON_FACTORY;
+
+    /**
      * The service registration.
      * is null when the service is not registred.
      * m_serviceRegistration : ServiceRegistration
@@ -65,15 +74,10 @@ public class ProvidedService implements ServiceFactory {
     private ServiceRegistration m_serviceRegistration;
 
     /**
-     * Link to the component manager.
-     * m_handler : ComponentManager
+     * Link to the owner handler.
+     * m_handler : Provided Service Handler
      */
     private ProvidedServiceHandler m_handler;
-
-    /**
-     * Provided service metadata.
-     */
-    private ProvidedServiceMetadata m_metadata;
 
     /**
      * State of the provided service.
@@ -91,19 +95,26 @@ public class ProvidedService implements ServiceFactory {
      * @param handler : the provided service handler.
      * @param psm : the provided service metadata.
      */
-    public ProvidedService(ProvidedServiceHandler handler, ProvidedServiceMetadata psm) {
+    public ProvidedService(ProvidedServiceHandler handler, String[] specification, int factoryPolicy) {
         m_handler = handler;
-        m_metadata = psm;
-        for (int i = 0; i < psm.getProperties().length; i++) {
-            Property prop = new Property(this, ((PropertyMetadata) psm.getProperties()[i]));
-            addProperty(prop);
-        }
+        
+        m_serviceSpecification = specification;
+        m_factoryPolicy = factoryPolicy;
+        
         //Add service pid and factory pid
-        //TODO : test this 
-        PropertyMetadata pid_meta = new PropertyMetadata(org.osgi.framework.Constants.SERVICE_PID, null, "java.lang.String", handler.getComponentManager().getComponentName()); 
-        PropertyMetadata factory_meta = new PropertyMetadata("factory.pid", null, "java.lang.String", handler.getComponentManager().getFactory().getFactoryName());
-        addProperty(new Property(this, pid_meta));
-        addProperty(new Property(this, factory_meta));
+        addProperty(new Property(this, org.osgi.framework.Constants.SERVICE_PID, handler.getInstanceManager().getInstanceName()));
+        addProperty(new Property(this, "factory.pid", handler.getInstanceManager().getFactory().getFactoryName()));
+    }
+    
+    //TODO check if we need to erase previous props or add to the previous props.
+    /**
+     * Add properties to the provided service.
+     * @param props : the properties to attached to the service registration
+     */
+    protected void setProperties(Property[] props) { 
+    	for(int i = 0; i < props.length; i++) {
+    		addProperty(props[i]);
+    	}
     }
 
     /**
@@ -131,7 +142,7 @@ public class ProvidedService implements ServiceFactory {
     private synchronized void removeProperty(String name) {
         int idx = -1;
         for (int i = 0; i < m_properties.length; i++) {
-            if (m_properties[i].getMetadata().getName() == name) { idx = i; break; }
+            if (m_properties[i].getName() == name) { idx = i; break; }
         }
 
         if (idx >= 0) {
@@ -163,16 +174,16 @@ public class ProvidedService implements ServiceFactory {
      */
     public Object getService(Bundle bundle, ServiceRegistration registration) {
 
-        switch(m_metadata.getFactoryPolicy()) {
+        switch(m_factoryPolicy) {
 
             case SINGLETON_FACTORY :
-                return m_handler.getComponentManager().getInstance();
+                return m_handler.getInstanceManager().getPojoObject();
 
             case SERVICE_FACTORY :
-                return m_handler.getComponentManager().createInstance();
+                return m_handler.getInstanceManager().createPojoObject();
 
             default :
-                Activator.getLogger().log(Level.SEVERE, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Unknown factory policy for " + m_metadata.getServiceSpecification() + " : " + m_metadata.getFactoryPolicy());
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] Unknown factory policy for " + m_serviceSpecification + " : " + m_factoryPolicy);
             return null;
         }
 
@@ -189,24 +200,6 @@ public class ProvidedService implements ServiceFactory {
         //Nothing to do
     }
 
-//  /**
-//  * Validate the service dependencies of the current provided service.
-//  * @return true if the service dependencies are valid
-//  */
-//  public boolean validate() {
-//  boolean valide = true;
-//  for (int i = 0; i < m_dependencies.length; i++) {
-//  Dependency dep = m_dependencies[i];
-//  valide = valide & dep.isSatisfied();
-//  if (!valide) {
-//  ComponentManager.getLogger().log(Level.INFO, "Service Dependency  for " + m_interface + " not valid : " + dep.getInterface());
-//  return false;
-//  }
-//  }
-//  ComponentManager.getLogger().log(Level.INFO, "Service dependencies for " + m_interface + " are valid");
-//  return valide;
-//  }
-
     /**
      * Register the service.
      * The service object must be able to serve this service.
@@ -215,18 +208,17 @@ public class ProvidedService implements ServiceFactory {
     protected void registerService() {
         if (m_state != REGISTERED) {
             String spec = "";
-            for (int i = 0; i < m_metadata.getServiceSpecification().length; i++) {
-                spec = spec + m_metadata.getServiceSpecification()[i] + ", ";
+            for (int i = 0; i < m_serviceSpecification.length; i++) {
+                spec = spec + m_serviceSpecification[i] + ", ";
             }
-            Activator.getLogger().log(Level.INFO, "[" + m_handler.getComponentManager().getComponentMetatada().getClassName() + "] Register the service : " + spec);
             // Contruct the service properties list
             Properties serviceProperties = getServiceProperties();
 
             m_state = REGISTERED;
             synchronized (this) {
                 m_serviceRegistration =
-                    m_handler.getComponentManager().getContext().registerService(
-                            m_metadata.getServiceSpecification(), this, serviceProperties);
+                    m_handler.getInstanceManager().getContext().registerService(
+                    		m_serviceSpecification, this, serviceProperties);
             }
         }
     }
@@ -252,10 +244,10 @@ public class ProvidedService implements ServiceFactory {
     }
 
     /**
-     * @return the component manager.
+     * @return the instance manager.
      */
-    protected ComponentManagerImpl getComponentManager() {
-        return m_handler.getComponentManager();
+    protected InstanceManager getInstanceManager() {
+        return m_handler.getInstanceManager();
     }
 
     /**
@@ -268,7 +260,7 @@ public class ProvidedService implements ServiceFactory {
         Properties serviceProperties = new Properties();
         for (int i = 0; i < m_properties.length; i++) {
             if (m_properties[i].get() != null) {
-                serviceProperties.put(m_properties[i].getMetadata().getName(), m_properties[i].get().toString());
+                serviceProperties.put(m_properties[i].getName(), m_properties[i].get());
             }
         }
         return serviceProperties;
@@ -299,13 +291,6 @@ public class ProvidedService implements ServiceFactory {
     }
 
     /**
-     * @return the propvided service metadata.
-     */
-    public ProvidedServiceMetadata getMetadata() {
-        return m_metadata;
-    }
-
-    /**
      * Add properties to the list.
      * @param props : properties to add
      */
@@ -332,5 +317,10 @@ public class ProvidedService implements ServiceFactory {
         }
         update();
     }
+
+	/**
+	 * @return the list of provided service specifications (i.e. java interface).
+	 */
+	public String[] getServiceSpecification() { return m_serviceSpecification; }
 
 }

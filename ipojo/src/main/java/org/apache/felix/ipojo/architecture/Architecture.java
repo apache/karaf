@@ -26,9 +26,9 @@ package org.apache.felix.ipojo.architecture;
 public interface Architecture {
 
     /**
-     * Return the full architecture.
-     * @return : the current component description
+     * Return the description of the instance.
+     * @return : the current component instance description
      */
-    ComponentDescription getComponentDescription();
+    InstanceDescription getInstanceDescription();
 
 }

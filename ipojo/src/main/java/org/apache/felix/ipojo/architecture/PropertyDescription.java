@@ -16,18 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo.handlers.providedservice;
+package org.apache.felix.ipojo.architecture;
 
 /**
- * Property metadata : either static either dynamic.
+ * Property Information.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public class PropertyMetadata {
-
-    /**
-     * Field of the property.
-     */
-    private String m_field;
+public class PropertyDescription {
 
     /**
      * Name of the property.
@@ -40,56 +35,50 @@ public class PropertyMetadata {
     private String m_type;
 
     /**
-     * String value of the property (initial value).
+     * Default value of the property.
      */
-    private String m_value;
-
-    //Constructor
+    private String m_value = null;
+    
+    private boolean m_needed;
 
     /**
      * Constructor.
      * @param name : name of the property
-     * @param field : field of the property
      * @param type : type of the property
-     * @param value : initial value of the property
+     * @param value : default value of the property
      */
-    public PropertyMetadata(String name, String field, String type, String value) {
+    public PropertyDescription(String name, String type, String value) {
         m_name = name;
-        m_field = field;
         m_type = type;
         m_value = value;
-
-        // Dynamic property case :
-        if (m_field != null) {
-            if (m_name == null) { m_name = m_field; }
-        }
     }
-
-    /**
-     * @return the field name.
-     */
-    public String getField() { return m_field; };
 
     /**
      * @return the property name.
      */
-    public String getName() { return m_name; };
-
+    public String getName() { return m_name; }
+    
     /**
-     * @return the type of the property.
+     * @return true is the property need to be configured.
      */
-    public String getType() { return m_type; };
+    public boolean isNeeded() { return m_needed; }
 
     /**
-     * @return the initial value.
+     * @return the property type.
+     */
+    public String getType() { return m_type; }
+
+    /**
+     * @return the default value for the property.
      */
     public String getValue() { return m_value; }
 
     /**
-     * Set the type of the property (dynamic property only).
-     * @param type : the type of the property.
+     * @see java.lang.Object#toString()
      */
-    public void setType(String type) { m_type = type; }
-
+    public String toString() {
+        if (m_value != null) { return getName() + " - " + getType() + " - " + getValue(); }
+        else { return getName() + " - " + getType() + " - CONFIGURABLE"; }
+    }
 
 }

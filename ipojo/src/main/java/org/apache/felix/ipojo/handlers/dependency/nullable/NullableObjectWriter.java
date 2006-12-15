@@ -84,7 +84,7 @@ public class NullableObjectWriter implements Opcodes {
                 MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, name, desc, sign, exc);
 
                 Type returnType = Type.getReturnType(desc);
-                    // TODO : manage the other type primitive
+                    // TODO : manage the other type primitive for Nullable
                     // Primitive type :
                     switch (returnType.getSort()) {
                     case Type.BOOLEAN:

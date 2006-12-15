@@ -18,13 +18,12 @@
  */
 package org.apache.felix.ipojo;
 
-import java.util.logging.Level;
-
 import org.apache.felix.ipojo.handlers.architecture.ArchitectureHandler;
 import org.apache.felix.ipojo.handlers.configuration.ConfigurationHandler;
 import org.apache.felix.ipojo.handlers.dependency.DependencyHandler;
 import org.apache.felix.ipojo.handlers.lifecycle.callback.LifecycleCallbackHandler;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
+import org.apache.felix.ipojo.util.Logger;
 
 /**
  * Activator Basic Configuration.
@@ -37,7 +36,7 @@ public class IPojoConfiguration {
     /**
      * iPOJO logger log level.
      */
-    public static final Level LOG_LEVEL = Level.WARNING;
+    public static final int LOG_LEVEL = Logger.WARNING;
 
     /**
      * Available handlers in the iPOJO bundle.

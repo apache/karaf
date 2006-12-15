@@ -22,32 +22,38 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.logging.Level;
 
+import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 
 /**
- * The component manager implementation class manages one instance of a component type.
+ * The instance manager class manages one instance of a component type.
  * It manages component lifecycle, component instance creation and handlers.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public class ComponentManagerImpl implements ComponentManager {
+public class InstanceManager implements ComponentInstance {
 
     /**
-     * Parent factory (ComponentManagerFactory).
+     * Parent factory (ComponentFactory).
      */
-    private ComponentManagerFactory m_factory;
-
-    /**
-     * Attached metadata of the managed component.
-     */
-    private ComponentMetadata m_metadata;
+    private ComponentFactory m_factory;
     
     /**
      * Name of the component instance.
      */
     private String m_name;
+    
+    /**
+     * Name of the component type implementation class.
+     */
+    private String m_className;
+
+    /**
+     * Is the component an immediate component ?
+     */
+    private boolean m_isImmediate = false;
 
     /**
      * The context of the component.
@@ -69,8 +75,6 @@ public class ComponentManagerImpl implements ComponentManager {
      */
     private int m_state = INVALID;
 
-    // Fields use for the manipulation, the loading of the class and for the instance creation
-
     /**
      * Manipulatd clazz.
      */
@@ -79,44 +83,46 @@ public class ComponentManagerImpl implements ComponentManager {
     /**
      * Instances of the components.
      */
-    private Object[] m_instances = new Object[0];
+    private Object[] m_pojoObjects = new Object[0];
 
     /**
      * Component type information.
      */
-    private ComponentInfo m_componentInfo;
+    private ComponentDescription m_componentDesc;
 
     // Constructor
     /**
      * Construct a new Component Manager.
-     * @param factory : the factory managing the component manager
+     * @param factory : the factory managing the instance manager
      */
-    public ComponentManagerImpl(ComponentManagerFactory factory, BundleContext bc) {
+    public InstanceManager(ComponentFactory factory, BundleContext bc) {
         m_factory = factory;
         m_context = bc;
-        Activator.getLogger().log(Level.INFO, "[Bundle " + m_context.getBundle().getBundleId() + "] Create a component manager from the factory " + m_factory);
+        m_factory.getLogger().log(Logger.INFO, "[Bundle " + m_context.getBundle().getBundleId() + "] Create an instance manager from the factory " + m_factory);
     }
 
     /**
-     * Configure the component manager.
+     * Configure the instance manager.
      * Stop the existings handler, clear the handler list, change the metadata, recreate the handlers
      * @param cm
      */
     public void configure(Element cm, Dictionary configuration) {
-        Activator.getLogger().log(Level.INFO, "[Bundle " + m_context.getBundle().getBundleId() + "] Configure the component manager " + cm.getAttribute("className"));
-
         // Stop all previous registred handler
         if (m_handlers.length != 0) { stop(); }
 
         // Clear the handler list
         m_handlers = new Handler[0];
 
-        // Change the metadata
-        m_metadata = new ComponentMetadata(cm);
+        // Set the component-type metadata
+        m_className = cm.getAttribute("className");
+        if (m_className == null) {
+            m_factory.getLogger().log(Logger.ERROR, "The class name of the component cannot be setted, it does not exist in the metadata");
+        }
+        if (cm.containsAttribute("immediate") && cm.getAttribute("immediate").equalsIgnoreCase("true")) { m_isImmediate = true; }
 
         // ComponentInfo initialization
-        m_componentInfo = new ComponentInfo();
-        m_componentInfo.setClassName(m_metadata.getClassName());
+        m_componentDesc = new ComponentDescription();
+        m_componentDesc.setClassName(m_className);
         
         // Add the name
         m_name = (String) configuration.get("name");
@@ -128,27 +134,26 @@ public class ComponentManagerImpl implements ComponentManager {
                 Handler h = (Handler) IPojoConfiguration.INTERNAL_HANDLERS[i].newInstance();
                 h.configure(this, cm, configuration);
             } catch (InstantiationException e) {
-                Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] Cannot instantiate the handler " + IPojoConfiguration.INTERNAL_HANDLERS[i] + " : " + e.getMessage());
+                m_factory.getLogger().log(Logger.ERROR, "[" + m_className + "] Cannot instantiate the handler " + IPojoConfiguration.INTERNAL_HANDLERS[i] + " : " + e.getMessage());
             } catch (IllegalAccessException e) {
-                Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] Cannot instantiate the handler " + IPojoConfiguration.INTERNAL_HANDLERS[i] + " : " + e.getMessage());
+                m_factory.getLogger().log(Logger.ERROR, "[" + m_className + "] Cannot instantiate the handler " + IPojoConfiguration.INTERNAL_HANDLERS[i] + " : " + e.getMessage());
             }
         }
 
         // Look for namespaces
         for (int i = 0; i < cm.getNamespaces().length; i++) {
             if (!cm.getNamespaces()[i].equals("")) {
-                Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] Look for class for the namespace : " + cm.getNamespaces()[i]);
                 // It is not an internal handler, try to load it
                 try {
                     Class c = m_context.getBundle().loadClass(cm.getNamespaces()[i]);
                     Handler h = (Handler) c.newInstance();
                     h.configure(this, cm, configuration);
                 } catch (ClassNotFoundException e) {
-                    Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] Cannot instantiate the handler " + cm.getNamespaces()[i] + " : " + e.getMessage());
+                    m_factory.getLogger().log(Logger.ERROR, "[" + m_className + "] Cannot instantiate the handler " + cm.getNamespaces()[i] + " : " + e.getMessage());
                 } catch (InstantiationException e) {
-                    Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] Cannot instantiate the handler " + cm.getNamespaces()[i] + " : " + e.getMessage());
+                    m_factory.getLogger().log(Logger.ERROR, "[" + m_className + "] Cannot instantiate the handler " + cm.getNamespaces()[i] + " : " + e.getMessage());
                 } catch (IllegalAccessException e) {
-                    Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] Cannot instantiate the handler " + cm.getNamespaces()[i] + " : " + e.getMessage());
+                    m_factory.getLogger().log(Logger.ERROR, "[" + m_className + "] Cannot instantiate the handler " + cm.getNamespaces()[i] + " : " + e.getMessage());
                 }
 
             }
@@ -159,12 +164,7 @@ public class ComponentManagerImpl implements ComponentManager {
     /**
      * @return the component type information.
      */
-    public ComponentInfo getComponentInfo() { return m_componentInfo; }
-
-    /**
-     * @return the component metadata.
-     */
-    public ComponentMetadata getComponentMetatada() { return m_metadata; }
+    public ComponentDescription getComponentDescription() { return m_componentDesc; }
 
     /**
      * @return the list of the registred handlers.
@@ -187,15 +187,17 @@ public class ComponentManagerImpl implements ComponentManager {
      * @return the component instance name.
      */
     public String getComponentName() { return m_name; }
+    
+    public String getClassName() { return m_className; }
 
     // ===================== Lifecycle management =====================
 
     /**
-     * Start the component manager.
+     * Start the instance manager.
      */
     public void start() {
         // Start all the handlers
-        Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] Start the component manager with " + m_handlers.length + " handlers");
+        m_factory.getLogger().log(Logger.INFO, "[" + m_className + "] Start the instance manager with " + m_handlers.length + " handlers");
 
         // The new state of the component is UNRESOLVED
         m_state = INVALID;
@@ -205,11 +207,11 @@ public class ComponentManagerImpl implements ComponentManager {
         }
 
         // Defines the state of the component :
-        checkComponentState();
+        checkInstanceState();
     }
 
     /**
-     * Stop the component manager.
+     * Stop the instance manager.
      */
     public void stop() {
         setState(INVALID);
@@ -217,7 +219,7 @@ public class ComponentManagerImpl implements ComponentManager {
         for (int i = m_handlers.length - 1; i > -1; i--) {
             m_handlers[i].stop();
         }
-        m_instances = new Object[0];
+        m_pojoObjects = new Object[0];
     }
 
     /**
@@ -228,8 +230,8 @@ public class ComponentManagerImpl implements ComponentManager {
         if (m_state != state) {
 
             // Log the state change
-            if (state == INVALID) { Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] Component " + m_metadata.getClassName() + " State -> UNRESOLVED"); }
-            if (state == VALID) { Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] Component " + m_metadata.getClassName() + " State -> VALID"); }
+            if (state == INVALID) { m_factory.getLogger().log(Logger.INFO, "[" + m_className + "]  State -> UNRESOLVED"); }
+            if (state == VALID) { m_factory.getLogger().log(Logger.INFO, "[" + m_className + "] State -> VALID"); }
 
             // The state changed call the handler stateChange method
             m_state = state;
@@ -253,16 +255,16 @@ public class ComponentManagerImpl implements ComponentManager {
     /**
      * @return the factory of the component
      */
-    public ComponentManagerFactory getFactory() { return m_factory; }
+    public ComponentFactory getFactory() { return m_factory; }
 
     /**
      * Load the manipulated class.
      */
     private void load() {
         try {
-            m_clazz = m_factory.loadClass(m_metadata.getClassName());
+            m_clazz = m_factory.loadClass(m_className);
         } catch (ClassNotFoundException  e) {
-            Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] Class not found during the loading phase : " + e.getMessage());
+            m_factory.getLogger().log(Logger.ERROR, "[" + m_className + "] Class not found during the loading phase : " + e.getMessage());
             return;
         }
     }
@@ -279,18 +281,18 @@ public class ComponentManagerImpl implements ComponentManager {
      * @param o : the instance to add
      */
     private void addInstance(Object o) {
-        for (int i = 0; (m_instances != null) && (i < m_instances.length); i++) {
-            if (m_instances[i] == o) { return; }
+        for (int i = 0; (m_pojoObjects != null) && (i < m_pojoObjects.length); i++) {
+            if (m_pojoObjects[i] == o) { return; }
         }
 
-        if (m_instances.length > 0) {
-            Object[] newInstances = new Object[m_instances.length + 1];
-            System.arraycopy(m_instances, 0, newInstances, 0, m_instances.length);
-            newInstances[m_instances.length] = o;
-            m_instances = newInstances;
+        if (m_pojoObjects.length > 0) {
+            Object[] newInstances = new Object[m_pojoObjects.length + 1];
+            System.arraycopy(m_pojoObjects, 0, newInstances, 0, m_pojoObjects.length);
+            newInstances[m_pojoObjects.length] = o;
+            m_pojoObjects = newInstances;
         }
         else {
-            m_instances = new Object[] {o};
+            m_pojoObjects = new Object[] {o};
         }
     }
 
@@ -300,18 +302,18 @@ public class ComponentManagerImpl implements ComponentManager {
      */
     private void removeInstance(Object o) {
         int idx = -1;
-        for (int i = 0; i < m_instances.length; i++) {
-            if (m_instances[i] == o) { idx = i; break; }
+        for (int i = 0; i < m_pojoObjects.length; i++) {
+            if (m_pojoObjects[i] == o) { idx = i; break; }
         }
 
         if (idx >= 0) {
-            if ((m_instances.length - 1) == 0) { m_instances = new Element[0]; }
+            if ((m_pojoObjects.length - 1) == 0) { m_pojoObjects = new Element[0]; }
             else {
-                Object[] newInstances = new Object[m_instances.length - 1];
-                System.arraycopy(m_instances, 0, newInstances, 0, idx);
+                Object[] newInstances = new Object[m_pojoObjects.length - 1];
+                System.arraycopy(m_pojoObjects, 0, newInstances, 0, idx);
                 if (idx < newInstances.length) {
-                    System.arraycopy(m_instances, idx + 1, newInstances, idx, newInstances.length - idx); }
-                m_instances = newInstances;
+                    System.arraycopy(m_pojoObjects, idx + 1, newInstances, idx, newInstances.length - idx); }
+                m_pojoObjects = newInstances;
             }
         }
     }
@@ -319,62 +321,59 @@ public class ComponentManagerImpl implements ComponentManager {
     /**
      * @return the created instance of the component.
      */
-    public Object[] getInstances() { return m_instances; }
+    public Object[] getPojoObjects() { return m_pojoObjects; }
 
     /**
      * Delete the created instance (remove it from the list, to allow the garbage collector to eat the instance).
      * @param o : the instance to delete
      */
-    public void deleteInstance(Object o) { removeInstance(o); }
+    public void deletePojoObject(Object o) { removeInstance(o); }
 
     /**
      * Create an instance of the component.
      * This method need to be called one time only for singleton provided service
      * @return a new instance
      */
-    public Object createInstance() {
+    public Object createPojoObject() {
 
         if (!isLoaded()) { load(); }
         Object instance = null;
         try {
-            Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] createInstance -> Try to find the constructor");
+            m_factory.getLogger().log(Logger.INFO, "[" + m_className + "] createInstance -> Try to find the constructor");
 
             // Try to find if there is a constructor with a bundle context as parameter :
             try {
-                Constructor constructor = m_clazz.getConstructor(new Class[] {ComponentManagerImpl.class, BundleContext.class});
+                Constructor constructor = m_clazz.getConstructor(new Class[] {InstanceManager.class, BundleContext.class});
                 constructor.setAccessible(true);
                 instance = constructor.newInstance(new Object[] {this, m_context});
             }
-            catch (NoSuchMethodException e) {
-                Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] createInstance -> No constructor with a bundle context");
-            }
+            catch (NoSuchMethodException e) { }
 
             // Create an instance if no instance are already created with <init>()BundleContext
-            Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] createInstance -> Try to create the object with an empty constructor");
             if (instance == null) {
-                Constructor constructor = m_clazz.getConstructor(new Class[] {ComponentManagerImpl.class});
+                Constructor constructor = m_clazz.getConstructor(new Class[] {InstanceManager.class});
                 constructor.setAccessible(true);
                 instance = constructor.newInstance(new Object[] {this});
             }
 
         } catch (InstantiationException e) {
-            Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] createInstance -> The Component Instance cannot be instancied : " + e.getMessage());
+            m_factory.getLogger().log(Logger.ERROR, "[" + m_className + "] createInstance -> The Component Instance cannot be instancied : " + e.getMessage());
             e.printStackTrace();
         } catch (IllegalAccessException e) {
-            Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] createInstance -> The Component Instance is not accessible : " + e.getMessage());
+            m_factory.getLogger().log(Logger.ERROR, "[" + m_className + "] createInstance -> The Component Instance is not accessible : " + e.getMessage());
             e.printStackTrace();
         } catch (SecurityException e) {
-            Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] createInstance -> The Component Instance is not accessible (security reason) : " + e.getMessage());
+            m_factory.getLogger().log(Logger.ERROR, "[" + m_className + "] createInstance -> The Component Instance is not accessible (security reason) : " + e.getMessage());
             e.printStackTrace();
         } catch (InvocationTargetException e) {
-            Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] createInstance -> Cannot invoke the constructor method (illegal target) : " + e.getMessage());
+            m_factory.getLogger().log(Logger.ERROR, "[" + m_className + "] createInstance -> Cannot invoke the constructor method (illegal target) : " + e.getMessage());
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
-            Activator.getLogger().log(Level.SEVERE, "[" + m_metadata.getClassName() + "] createInstance -> Cannot invoke the constructor (method not found) : " + e.getMessage());
+            m_factory.getLogger().log(Logger.ERROR, "[" + m_className + "] createInstance -> Cannot invoke the constructor (method not found) : " + e.getMessage());
             e.printStackTrace();
         }
 
-        Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] createInstance -> Return the instance " + instance);
+        m_factory.getLogger().log(Logger.INFO, "[" + m_className + "] createInstance -> Return the instance " + instance);
 
         // Register the new instance
         addInstance(instance);
@@ -386,9 +385,9 @@ public class ComponentManagerImpl implements ComponentManager {
     /**
      * @return the instance of the component to use for singleton component
      */
-    public Object getInstance() {
-        if (m_instances.length == 0) { createInstance(); }
-        return m_instances[0];
+    public Object getPojoObject() {
+        if (m_pojoObjects.length == 0) { createPojoObject(); }
+        return m_pojoObjects[0];
     }
 
     /**
@@ -404,7 +403,7 @@ public class ComponentManagerImpl implements ComponentManager {
     //  ======================== Handlers Management ======================
 
     /**
-     * Register the given handler to the current component manager.
+     * Register the given handler to the current instance manager.
      * @param h : the handler to register
      */
     public void register(Handler h) {
@@ -436,7 +435,7 @@ public class ComponentManagerImpl implements ComponentManager {
             }
             else {
                 Handler[] list = (Handler[]) m_fieldRegistration.get(fields[i]);
-                for (int j = 0; j < list.length; i++) { if (list[i] == h) { return; } }
+                for (int j = 0; j < list.length; j++) { if (list[j] == h) { return; } }
                 Handler[] newList = new Handler[list.length + 1];
                 System.arraycopy(list, 0, newList, 0, list.length);
                 newList[list.length] = h;
@@ -447,7 +446,7 @@ public class ComponentManagerImpl implements ComponentManager {
 
     /**
      * Unregister an handler for the field list.
-     * The handler will not be notified of field access but is allways register on the component manager.
+     * The handler will not be notified of field access but is allways register on the instance manager.
      * @param h : the handler to unregister.
      * @param fields : the fields list
      */
@@ -520,7 +519,6 @@ public class ComponentManagerImpl implements ComponentManager {
      * @return the value decided by the last asked handler (throw a warining if two fields decide two different values)
      */
     public Object getterCallback(String fieldName, Object initialValue) {
-        Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] Call the getterCallbackMethod on " + fieldName +  " with " + initialValue);
         Object result = null;
         // Get the list of registered handlers
         Handler[] list = (Handler[]) m_fieldRegistration.get(fieldName);
@@ -530,10 +528,8 @@ public class ComponentManagerImpl implements ComponentManager {
         }
 
         if (result != null) {
-            Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] getterCallbackMethod return for " + fieldName +  " -> " + result);
             return result;
         } else {
-            Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] getterCallbackMethod return for " + fieldName +  " -> " + initialValue);
             return initialValue;
         }
     }
@@ -545,7 +541,6 @@ public class ComponentManagerImpl implements ComponentManager {
      * @param objectValue : the value of the field
      */
     public void setterCallback(String fieldName, Object objectValue) {
-        Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] Call the setterCallbackMethod on " + fieldName +  " with " + objectValue);
         // Get the list of registered handlers
         Handler[] list = (Handler[]) m_fieldRegistration.get(fieldName);
 
@@ -562,12 +557,11 @@ public class ComponentManagerImpl implements ComponentManager {
     /**
      * Check the state of all handlers.
      */
-    public void checkComponentState() {
-        Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] Check the component state");
+    public void checkInstanceState() {
+        m_factory.getLogger().log(Logger.INFO, "[" + m_className + "] Check the component state");
         boolean isValid = true;
         for (int i = 0; i < m_handlers.length; i++) {
             boolean b = m_handlers[i].isValid();
-            Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] Validity of the handler : " + m_handlers[i] + " = " + b);
             isValid = isValid && b;
         }
 
@@ -575,18 +569,18 @@ public class ComponentManagerImpl implements ComponentManager {
         if (!isValid && m_state == VALID) {
             // Need to update the state to UNRESOLVED
             setState(INVALID);
-            m_instances = new Object[0];
+            m_pojoObjects = new Object[0];
             return;
         }
         if (isValid && m_state == INVALID) {
             setState(VALID);
-            if (m_metadata.isImmediate() && m_instances.length == 0) { createInstance(); }
+            if (m_isImmediate && m_pojoObjects.length == 0) { createPojoObject(); }
         }
 
-        Activator.getLogger().log(Level.INFO, "[" + m_metadata.getClassName() + "] Component Manager : " + m_state);
+        m_factory.getLogger().log(Logger.INFO, "[" + m_className + "] Component Manager : " + m_state);
     }
 
-	public String getName() { return m_name; }
+	public String getInstanceName() { return m_name; }
 
 
     // ======================= end Handlers Management =====================

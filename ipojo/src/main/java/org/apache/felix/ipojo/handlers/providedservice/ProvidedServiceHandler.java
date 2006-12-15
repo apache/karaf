@@ -19,14 +19,14 @@
 package org.apache.felix.ipojo.handlers.providedservice;
 
 import java.util.Dictionary;
-import java.util.logging.Level;
 
-import org.apache.felix.ipojo.Activator;
-import org.apache.felix.ipojo.ComponentInfo;
-import org.apache.felix.ipojo.ComponentManagerImpl;
 import org.apache.felix.ipojo.Handler;
-import org.apache.felix.ipojo.PropertyInfo;
+import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.architecture.ComponentDescription;
+import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.util.Logger;
+import org.osgi.framework.Constants;
 
 /**
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
@@ -40,9 +40,9 @@ public class ProvidedServiceHandler extends Handler {
     private ProvidedService[] m_providedServices = new ProvidedService[0];
 
     /**
-     * The component manager.
+     * The instance manager.
      */
-    private ComponentManagerImpl m_componentManager;
+    private InstanceManager m_manager;
 
     /**
      * Add a provided service to the list .
@@ -64,9 +64,9 @@ public class ProvidedServiceHandler extends Handler {
     }
 
     /**
-     * @return the component manager.
+     * @return the instance manager.
      */
-    public ComponentManagerImpl getComponentManager() { return m_componentManager; }
+    public InstanceManager getInstanceManager() { return m_manager; }
 
     /**
      * @return the list of the provided service.
@@ -74,17 +74,18 @@ public class ProvidedServiceHandler extends Handler {
     public ProvidedService[] getProvidedService() { return m_providedServices; }
 
     /**
-     * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.ComponentManagerImpl, org.apache.felix.ipojo.metadata.Element)
+     * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager, org.apache.felix.ipojo.metadata.Element)
      */
-    public void configure(ComponentManagerImpl cm, Element componentMetadata, Dictionary configuration) {
-        // Fix the component manager & clean the provided service list
-        m_componentManager = cm;
+    public void configure(InstanceManager im, Element componentMetadata, Dictionary configuration) {
+        // Fix the instance manager & clean the provided service list
+        m_manager = im;
 
-        ComponentInfo ci = cm.getComponentInfo();
+        ComponentDescription cd = im.getComponentDescription();
 
         m_providedServices = new ProvidedService[0];
         // Create the dependency according to the component metadata
         Element[] providedServices = componentMetadata.getElements("Provides");
+        Element manipulation = componentMetadata.getElements("Manipulation")[0];
         for (int i = 0; i < providedServices.length; i++) {
             // Create a ProvidedServiceMetadata object
 
@@ -97,7 +98,6 @@ public class ProvidedServiceHandler extends Handler {
                 serviceSpecification = new String[spec.length];
                 for (int j = 0; j < spec.length; j++) { serviceSpecification[j] = spec[j].trim(); }
             } else {
-                Element manipulation = m_componentManager.getComponentMetatada().getMetadata().getElements("Manipulation")[0];
                 serviceSpecification = new String[manipulation.getElements("Interface").length];
                 for (int j = 0; j < manipulation.getElements("Interface").length; j++) {
                     serviceSpecification[j] = manipulation.getElements("Interface")[j].getAttribute("name");
@@ -105,13 +105,14 @@ public class ProvidedServiceHandler extends Handler {
             }
 
             // Get the factory policy
-            int factory = ProvidedServiceMetadata.SINGLETON_FACTORY;
+            int factory = ProvidedService.SINGLETON_FACTORY;
             if (providedServices[i].containsAttribute("factory") && providedServices[i].getAttribute("factory").equals("service")) { factory = ProvidedService.SERVICE_FACTORY; }
 
-            // Then create the provided service metadata
-            ProvidedServiceMetadata psm = new ProvidedServiceMetadata(serviceSpecification, factory);
+            // Then create the provided service
+            ProvidedService ps = new ProvidedService(this, serviceSpecification, factory);
 
             Element[] props = providedServices[i].getElements("Property");
+            Property[] properties = new Property[props.length];
             for (int j = 0; j < props.length; j++) {
                 String name = null;
                 if (props[j].containsAttribute("name")) { name = props[j].getAttribute("name"); }
@@ -125,24 +126,29 @@ public class ProvidedServiceHandler extends Handler {
                 if (name != null && configuration.get(name) != null && configuration.get(name) instanceof String) { value = (String) configuration.get(name); }
                 else { if (field != null &&  configuration.get(field) != null && configuration.get(field) instanceof String) { value = (String) configuration.get(field); } }
 
-                PropertyMetadata pm = new PropertyMetadata(name, field, type, value);
-                psm.addProperty(pm);
+                Property prop = new Property(ps, name, field, type, value, manipulation);
+                properties[j] = prop;
             }
 
-            // Create the provided service object
-            ProvidedService ps = new ProvidedService(this, psm);
-            if (checkProvidedService(ps)) {
+            // Attached to properties to the provided service
+            ps.setProperties(properties);
+            
+            if (checkProvidedService(ps, manipulation)) {
                 addProvidedService(ps);
                 // Change ComponentInfo
-                for (int k = 0; k < ps.getMetadata().getServiceSpecification().length; k++) { ci.addProvidedServiceSpecification(ps.getMetadata().getServiceSpecification()[k]); }
-                for (int k = 0; k < ps.getMetadata().getProperties().length; k++) { ci.addProperty(new PropertyInfo(ps.getMetadata().getProperties()[k].getName(), ps.getMetadata().getProperties()[k].getType(), ps.getMetadata().getProperties()[k].getValue())); }
+                for (int k = 0; k < ps.getServiceSpecification().length; k++) { cd.addProvidedServiceSpecification(ps.getServiceSpecification()[k]); }
+                for (int k = 0; k < ps.getProperties().length; k++) { 
+                	if(!ps.getProperties()[k].getName().equals(Constants.SERVICE_PID) && !ps.getProperties()[k].getName().equals("factory.pid")) {
+                		cd.addProperty(new PropertyDescription(ps.getProperties()[k].getName(), ps.getProperties()[k].getType(), ps.getProperties()[k].getInitialValue())); 
+                	}
+                }
             }
             else {
                 String itfs = "";
                 for (int j = 0; j < serviceSpecification.length; j++) {
                     itfs = itfs + " " + serviceSpecification[j];
                 }
-                Activator.getLogger().log(Level.SEVERE, "[" + m_componentManager.getComponentMetatada().getClassName() + "] The provided service" + itfs + " is not valid, it will be removed");
+                m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The provided service" + itfs + " is not valid, it will be removed");
                 ps = null;
             }
 
@@ -156,34 +162,19 @@ public class ProvidedServiceHandler extends Handler {
                     Property prop = ps.getProperties()[j];
 
                     // Check if the instance configuration has a value for this property
-                    if (prop.getMetadata().getName() != null && configuration.get(prop.getMetadata().getName()) != null && !(configuration.get(prop.getMetadata().getName()) instanceof String)) { prop.set(configuration.get(prop.getMetadata().getName())); }
-                    else { if (prop.getMetadata().getField() != null && configuration.get(prop.getMetadata().getField()) != null && !(configuration.get(prop.getMetadata().getField()) instanceof String)) { prop.set(configuration.get(prop.getMetadata().getField())); } }
+                    if (prop.getName() != null && configuration.get(prop.getName()) != null && !(configuration.get(prop.getName()) instanceof String)) { prop.set(configuration.get(prop.getName())); }
+                    else { if (prop.getField() != null && configuration.get(prop.getField()) != null && !(configuration.get(prop.getField()) instanceof String)) { prop.set(configuration.get(prop.getField())); } }
 
-                    if (prop.getMetadata().getField() != null) {
+                    if (prop.getField() != null) {
                         String[] newFields = new String[fields.length + 1];
                         System.arraycopy(fields, 0, newFields, 0, fields.length);
-                        newFields[fields.length] = prop.getMetadata().getField();
+                        newFields[fields.length] = prop.getField();
                         fields = newFields;
                     }
                 }
             }
 
-            m_componentManager.register(this, fields); }
-    }
-
-    /**
-     * Is the specicifaction s in the list ?
-     * @param s : the specitication to search
-     * @return true if s is in the list
-     */
-    private boolean containsInterface(String s) {
-        Element manipulation = m_componentManager.getComponentMetatada().getMetadata().getElements("Manipulation")[0];
-        for (int i = 0; i < manipulation.getElements("Interface").length; i++) {
-            if (manipulation.getElements("Interface")[i].getAttribute("name").equals(s)) {
-                return true;
-            }
-        }
-        return false;
+            m_manager.register(this, fields); }
     }
 
     /**
@@ -191,25 +182,30 @@ public class ProvidedServiceHandler extends Handler {
      * @param ps : the provided service to check
      * @return true if the provided service is correct
      */
-    private boolean checkProvidedService(ProvidedService ps) {
+    private boolean checkProvidedService(ProvidedService ps, Element manipulation) {
 
-        for (int i = 0; i < ps.getMetadata().getServiceSpecification().length; i++) {
-            if (!containsInterface(ps.getMetadata().getServiceSpecification()[i])) {
-                Activator.getLogger().log(Level.SEVERE, "[" + m_componentManager.getComponentMetatada().getClassName() + "] The service specification " + ps.getMetadata().getServiceSpecification()[i] + " is not implemented by the component class");
-                return false;
+        for (int i = 0; i < ps.getServiceSpecification().length; i++) {
+        	boolean b = false;
+        	for (int ii = 0; ii < manipulation.getElements("Interface").length; ii++) {
+                if (manipulation.getElements("Interface")[ii].getAttribute("name").equals(ps.getServiceSpecification()[i])) {
+                    b = true;
+                }
             }
+        	if(!b) { 
+        		m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The service specification " + ps.getServiceSpecification()[i] + " is not implemented by the component class");
+        		return false; 
+        	}
+
         }
 
         // Fix internal property type
         for (int i = 0; i < ps.getProperties().length; i++) {
             Property prop = ps.getProperties()[i];
-            String field = prop.getMetadata().getField();
+            String field = prop.getField();
 
             if (field == null) {
-                // Static dependency -> Nothing to check
-                return true;
+                return true; // Static dependency -> Nothing to check
             } else {
-                Element manipulation = getComponentManager().getComponentMetatada().getMetadata().getElements("Manipulation")[0];
                 String type = null;
                 for (int j = 0; j < manipulation.getElements("Field").length; j++) {
                     if (field.equals(manipulation.getElements("Field")[j].getAttribute("name"))) {
@@ -218,26 +214,10 @@ public class ProvidedServiceHandler extends Handler {
                     }
                 }
                 if (type == null) {
-                    Activator.getLogger().log(Level.SEVERE, "[" + m_componentManager.getComponentMetatada().getClassName() + "] A declared property was not found in the class : " + prop.getMetadata().getField());
+                	m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] A declared property was not found in the class : " + prop.getField());
                     return false;
                 }
-
-                if (type != null) {
-//                  if (type.endsWith("[]")) {
-//                  Activator.getLogger().log(Level.SEVERE, "[" + m_componentManager.getComponentMetatada().getClassName() + "] An array property was found in the class [Not implemented yet] : " + prop.getMetadata().getField());
-//                  return false;
-//                  }
-
-                    if (prop.getMetadata().getType() == null) { prop.getMetadata().setType(type); }
-
-                    if (!prop.getMetadata().getType().equals(type)) {
-                        Activator.getLogger().log(Level.WARNING, "[" + m_componentManager.getComponentMetatada().getClassName() + "] The field type [" + type + "] and the declared type [" + prop.getMetadata().getType() + "] are not the same for " + prop.getMetadata().getField());
-                        prop.getMetadata().setType(type);
-                    }
-                }
-                else {
-                    Activator.getLogger().log(Level.WARNING, "[" + m_componentManager.getComponentMetatada().getClassName() + "] The declared property " + prop.getMetadata().getField() + "  does not exist in the code");
-                }
+                prop.setType(type); //Set the type
             }
         }
         return true;
@@ -259,8 +239,8 @@ public class ProvidedServiceHandler extends Handler {
      * @see org.apache.felix.ipojo.Handler#start()
      */
     public void start() {
-        Activator.getLogger().log(Level.INFO, "[" + m_componentManager.getComponentMetatada().getClassName() + "] Start the provided service handler");
-        for (int i = 0; (m_componentManager.getState() == ComponentManagerImpl.VALID) && i < m_providedServices.length; i++) {
+    	m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Start the provided service handler");
+        for (int i = 0; (m_manager.getState() == InstanceManager.VALID) && i < m_providedServices.length; i++) {
             m_providedServices[i].registerService();
         }
     }
@@ -274,7 +254,7 @@ public class ProvidedServiceHandler extends Handler {
             ProvidedService ps = m_providedServices[i];
             for (int j = 0; j < ps.getProperties().length; j++) {
                 Property prop = ps.getProperties()[j];
-                if (fieldName.equals(prop.getMetadata().getField())) {
+                if (fieldName.equals(prop.getField())) {
                     // it is the associated property
                     prop.set(value);
                 }
@@ -291,7 +271,7 @@ public class ProvidedServiceHandler extends Handler {
             ProvidedService ps = m_providedServices[i];
             for (int j = 0; j < ps.getProperties().length; j++) {
                 Property prop = ps.getProperties()[j];
-                if (fieldName.equals(prop.getMetadata().getField())) {
+                if (fieldName.equals(prop.getField())) {
                     // it is the associated property
                     return prop.get();
                 }
@@ -308,13 +288,13 @@ public class ProvidedServiceHandler extends Handler {
      */
     public void stateChanged(int state) {
         // If the new state is UNRESOLVED => unregister all the services
-        if (state == ComponentManagerImpl.INVALID) {
+        if (state == InstanceManager.INVALID) {
             stop();
             return;
         }
 
         // If the new state is VALID => regiter all the services
-        if (state == ComponentManagerImpl.VALID) {
+        if (state == InstanceManager.VALID) {
             start();
             return;
         }

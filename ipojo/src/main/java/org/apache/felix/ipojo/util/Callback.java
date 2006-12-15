@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo;
+package org.apache.felix.ipojo.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.logging.Level;
+
+import org.apache.felix.ipojo.InstanceManager;
 
 
 
@@ -41,20 +42,20 @@ public class Callback {
     private boolean m_isStatic;
 
     /**
-     * Reference on the component manager.
+     * Reference on the instance manager.
      */
-    private ComponentManagerImpl m_manager;
+    private InstanceManager m_manager;
 
     /**
      * LifecycleCallback constructor.
      * @param method : the name of the method to call
      * @param isStatic : is the method a static method
-     * @param cm : the component manager of the component containing the method
+     * @param im : the instance manager of the component containing the method
      */
-    public Callback(String method, boolean isStatic, ComponentManagerImpl cm) {
+    public Callback(String method, boolean isStatic, InstanceManager im) {
         m_method = method;
         m_isStatic = isStatic;
-        m_manager = cm;
+        m_manager = im;
     }
 
     /**
@@ -64,7 +65,7 @@ public class Callback {
      * @throws IllegalAccessException : The method can not be invoked
      */
     public void call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Activator.getLogger().log(Level.INFO, "[" + m_manager.getComponentMetatada().getClassName() + "] Call an callback method : " + m_method);
+    	m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Call an callback method : " + m_method);
         Method method = m_manager.getClazz().getMethod(m_method, new Class[] {});
         method.setAccessible(true);
 
@@ -73,13 +74,13 @@ public class Callback {
             // Two cases :
             // - if instances already exists : call on each instances
             // - if no instance exists : create an instance
-            if (m_manager.getInstances().length == 0) {
-                Activator.getLogger().log(Level.INFO, "[" + m_manager.getComponentMetatada().getClassName() + "] Create the first instance " + m_manager.getInstance());
-                method.invoke(m_manager.getInstance(), new Object[]{});
+            if (m_manager.getPojoObjects().length == 0) {
+            	m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Create the first instance " + m_manager.getPojoObject());
+                method.invoke(m_manager.getPojoObject(), new Object[]{});
             } else {
-                for (int i = 0; i < m_manager.getInstances().length; i++) {
-                    Activator.getLogger().log(Level.INFO, "[" + m_manager.getComponentMetatada().getClassName() + "] Call the callback on the instance " + m_manager.getInstances()[i]);
-                    method.invoke(m_manager.getInstances()[i], new Object[]{});
+                for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
+                	m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Call the callback on the instance " + m_manager.getPojoObjects()[i]);
+                    method.invoke(m_manager.getPojoObjects()[i], new Object[]{});
                 }
             }
         }
@@ -107,7 +108,7 @@ public class Callback {
      * @throws InvocationTargetException : an error occurs inside the called method
      */
     public void call(Object[] arg) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Activator.getLogger().log(Level.INFO, "[" + m_manager.getComponentMetatada().getClassName() + "] Call an callback method : " + m_method);
+    	m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Call an callback method : " + m_method);
 
         // Build an array of call for arg :
         Class[] classes = new Class[arg.length];
@@ -122,12 +123,12 @@ public class Callback {
             // Two cases :
             // - if instances already exists : call on each instances
             // - if no instance exists : create an instance
-            if (m_manager.getInstances().length == 0) {
-                Activator.getLogger().log(Level.INFO, "[" + m_manager.getComponentMetatada().getClassName() + "] Create the first instance " + m_manager.getInstance());
-                method.invoke(m_manager.getInstance(), new Object[]{});
+            if (m_manager.getPojoObjects().length == 0) {
+                m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Create the first instance " + m_manager.getPojoObject());
+                method.invoke(m_manager.getPojoObject(), new Object[]{});
             } else {
-                for (int i = 0; i < m_manager.getInstances().length; i++) {
-                    method.invoke(m_manager.getInstances()[i], arg);
+                for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
+                    method.invoke(m_manager.getPojoObjects()[i], arg);
                 }
             }
         }

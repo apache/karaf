@@ -50,7 +50,7 @@ public class ClassChecker implements ClassVisitor, Opcodes {
 	 */
 	public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
 		
-		if (access == ACC_PRIVATE && name.equals("_cm") && desc.equals("Lorg/apache/felix/ipojo/ComponentManagerImpl;")) {
+		if (access == ACC_PRIVATE && name.equals("_cm") && desc.equals("Lorg/apache/felix/ipojo/InstanceManager;")) {
 			isAlreadyManipulated = true;
 		}
 		
