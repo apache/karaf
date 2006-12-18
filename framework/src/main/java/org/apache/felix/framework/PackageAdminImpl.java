@@ -20,7 +20,7 @@ package org.apache.felix.framework;
 
 import java.util.*;
 
-import org.apache.felix.framework.searchpolicy.VersionRange;
+import org.apache.felix.framework.util.VersionRange;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.*;
 

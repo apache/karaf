@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.framework.searchpolicy;
+package org.apache.felix.framework.util.manifestparser;
 
 import java.util.*;
-
 import org.apache.felix.framework.util.Util;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -48,7 +47,7 @@ public class R4Export extends R4Package
             }
             else if (m_directives[i].getName().equals(Constants.INCLUDE_DIRECTIVE))
             {
-                String[] ss = Util.parseDelimitedString(m_directives[i].getValue(), ",");
+                String[] ss = ManifestParser.parseDelimitedString(m_directives[i].getValue(), ",");
                 m_includeFilter = new String[ss.length][];
                 for (int filterIdx = 0; filterIdx < ss.length; filterIdx++)
                 {
@@ -57,7 +56,7 @@ public class R4Export extends R4Package
             }
             else if (m_directives[i].getName().equals(Constants.EXCLUDE_DIRECTIVE))
             {
-                String[] ss = Util.parseDelimitedString(m_directives[i].getValue(), ",");
+                String[] ss = ManifestParser.parseDelimitedString(m_directives[i].getValue(), ",");
                 m_excludeFilter = new String[ss.length][];
                 for (int filterIdx = 0; filterIdx < ss.length; filterIdx++)
                 {

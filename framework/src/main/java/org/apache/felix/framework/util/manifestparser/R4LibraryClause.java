@@ -16,14 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.framework.searchpolicy;
+package org.apache.felix.framework.util.manifestparser;
 
 import java.util.*;
-
 import org.apache.felix.framework.FilterImpl;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.PropertyResolver;
+
+import org.apache.felix.framework.util.VersionRange;
 import org.osgi.framework.*;
 
 public class R4LibraryClause

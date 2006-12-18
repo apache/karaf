@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.framework.util;
+package org.apache.felix.framework.util.manifestparser;
 
 import java.util.*;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.cache.BundleRevision;
 import org.apache.felix.framework.searchpolicy.*;
+import org.apache.felix.framework.util.*;
 import org.osgi.framework.*;
 
 public class ManifestParser
@@ -224,9 +225,9 @@ public class ManifestParser
 
         // Get native library entry names for module library sources.
         m_libraryHeaders =
-            Util.parseLibraryStrings(
+            parseLibraryStrings(
                 m_logger,
-                Util.parseDelimitedString((String) m_headerMap.get(Constants.BUNDLE_NATIVECODE), ","));
+                parseDelimitedString((String) m_headerMap.get(Constants.BUNDLE_NATIVECODE), ","));
 
         // Check to see if there was an optional native library clause, which is
         // represented by a null library header; if so, record it and remove it.
@@ -808,7 +809,7 @@ public class ManifestParser
                     "A header cannot be an empty string.");
             }
 
-            String[] clauseStrings = Util.parseDelimitedString(
+            String[] clauseStrings = parseDelimitedString(
                 header, FelixConstants.CLASS_PATH_SEPARATOR);
 
             List completeList = new ArrayList();
@@ -827,7 +828,7 @@ public class ManifestParser
         throws IllegalArgumentException
     {
         // Break string into semi-colon delimited pieces.
-        String[] pieces = Util.parseDelimitedString(
+        String[] pieces = parseDelimitedString(
             clauseString, FelixConstants.PACKAGE_SEPARATOR);
 
         // Count the number of different paths; paths
@@ -925,5 +926,99 @@ public class ManifestParser
         clause[CLAUSE_ATTRIBUTES_INDEX] = attrs;
 
         return clause;
+    }
+
+    /**
+     * Parses delimited string and returns an array containing the tokens. This
+     * parser obeys quotes, so the delimiter character will be ignored if it is
+     * inside of a quote. This method assumes that the quote character is not
+     * included in the set of delimiter characters.
+     * @param value the delimited string to parse.
+     * @param delim the characters delimiting the tokens.
+     * @return an array of string tokens or null if there were no tokens.
+    **/
+    public static String[] parseDelimitedString(String value, String delim)
+    {
+        if (value == null)
+        {
+           value = "";
+        }
+
+        List list = new ArrayList();
+
+        int CHAR = 1;
+        int DELIMITER = 2;
+        int STARTQUOTE = 4;
+        int ENDQUOTE = 8;
+
+        StringBuffer sb = new StringBuffer();
+
+        int expecting = (CHAR | DELIMITER | STARTQUOTE);
+        
+        for (int i = 0; i < value.length(); i++)
+        {
+            char c = value.charAt(i);
+
+            boolean isDelimiter = (delim.indexOf(c) >= 0);
+            boolean isQuote = (c == '"');
+
+            if (isDelimiter && ((expecting & DELIMITER) > 0))
+            {
+                list.add(sb.toString().trim());
+                sb.delete(0, sb.length());
+                expecting = (CHAR | DELIMITER | STARTQUOTE);
+            }
+            else if (isQuote && ((expecting & STARTQUOTE) > 0))
+            {
+                sb.append(c);
+                expecting = CHAR | ENDQUOTE;
+            }
+            else if (isQuote && ((expecting & ENDQUOTE) > 0))
+            {
+                sb.append(c);
+                expecting = (CHAR | STARTQUOTE | DELIMITER);
+            }
+            else if ((expecting & CHAR) > 0)
+            {
+                sb.append(c);
+            }
+            else
+            {
+                throw new IllegalArgumentException("Invalid delimited string: " + value);
+            }
+        }
+
+        if (sb.length() > 0)
+        {
+            list.add(sb.toString().trim());
+        }
+
+        return (String[]) list.toArray(new String[list.size()]);
+    }
+
+    /**
+     * Parses native code manifest headers.
+     * @param libStrs an array of native library manifest header
+     *        strings from the bundle manifest.
+     * @return an array of <tt>LibraryInfo</tt> objects for the
+     *         passed in strings.
+    **/
+    public static R4LibraryClause[] parseLibraryStrings(Logger logger, String[] libStrs)
+        throws IllegalArgumentException
+    {
+        if (libStrs == null)
+        {
+            return new R4LibraryClause[0];
+        }
+
+        List libList = new ArrayList();
+
+        for (int i = 0; i < libStrs.length; i++)
+        {
+            R4LibraryClause clause = R4LibraryClause.parse(logger, libStrs[i]);
+            libList.add(clause);
+        }
+
+        return (R4LibraryClause[]) libList.toArray(new R4LibraryClause[libList.size()]);
     }
 }

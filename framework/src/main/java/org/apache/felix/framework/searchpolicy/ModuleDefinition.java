@@ -18,6 +18,9 @@
  */
 package org.apache.felix.framework.searchpolicy;
 
+import org.apache.felix.framework.util.manifestparser.R4Export;
+import org.apache.felix.framework.util.manifestparser.R4Import;
+import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.moduleloader.IModuleDefinition;
 
 public class ModuleDefinition implements IModuleDefinition

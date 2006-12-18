@@ -24,7 +24,9 @@ import java.util.*;
 import java.util.jar.*;
 
 import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.util.*;
+import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.framework.util.StringMap;
+import org.apache.felix.framework.util.manifestparser.ManifestParser;
 import org.apache.felix.moduleloader.*;
 
 /**
@@ -122,7 +124,7 @@ class DirectoryRevision extends BundleRevision
             ? null : (String) map.get(FelixConstants.BUNDLE_CLASSPATH);
 
         // Parse the class path into strings.
-        String[] classPathStrings = Util.parseDelimitedString(
+        String[] classPathStrings = ManifestParser.parseDelimitedString(
             classPath, FelixConstants.CLASS_PATH_SEPARATOR);
 
         if (classPathStrings == null)

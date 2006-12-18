@@ -16,19 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.framework.searchpolicy;
+package org.apache.felix.framework.util.manifestparser;
 
-public class R4Attribute
+public class R4Directive
 {
     private String m_name = "";
-    private Object m_value = null;
-    private boolean m_isMandatory = false;
+    private String m_value = "";
     
-    public R4Attribute(String name, Object value, boolean isMandatory)
+    public R4Directive(String name, String value)
     {
         m_name = name;
         m_value = value;
-        m_isMandatory = isMandatory;
     }
 
     public String getName()
@@ -36,13 +34,8 @@ public class R4Attribute
         return m_name;
     }
 
-    public Object getValue()
+    public String getValue()
     {
         return m_value;
-    }
-
-    public boolean isMandatory()
-    {
-        return m_isMandatory;
     }
 }

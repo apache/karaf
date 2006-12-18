@@ -25,6 +25,7 @@ import java.util.*;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.*;
+import org.apache.felix.framework.util.manifestparser.*;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.*;
 

@@ -22,8 +22,10 @@ import java.io.InputStream;
 import java.util.*;
 
 import org.apache.felix.framework.cache.SystemBundleArchive;
-import org.apache.felix.framework.searchpolicy.*;
-import org.apache.felix.framework.util.*;
+import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.framework.util.StringMap;
+import org.apache.felix.framework.util.manifestparser.ManifestParser;
+import org.apache.felix.framework.util.manifestparser.R4Export;
 import org.apache.felix.moduleloader.IContentLoader;
 import org.osgi.framework.*;
 

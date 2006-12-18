@@ -22,6 +22,7 @@ import java.net.URL;
 import java.util.Enumeration;
 
 import org.apache.felix.framework.util.Util;
+import org.apache.felix.framework.util.manifestparser.R4Export;
 import org.apache.felix.moduleloader.*;
 
 public class R4Wire implements IWire

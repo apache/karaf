@@ -24,12 +24,15 @@ import java.net.URLStreamHandler;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
-
-import org.apache.felix.framework.cache.*;
+import org.apache.felix.framework.cache.BundleArchive;
+import org.apache.felix.framework.cache.BundleCache;
+import org.apache.felix.framework.cache.SystemBundleArchive;
 import org.apache.felix.framework.searchpolicy.*;
 import org.apache.felix.framework.util.*;
+import org.apache.felix.framework.util.manifestparser.*;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.*;
+
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.startlevel.StartLevel;
 

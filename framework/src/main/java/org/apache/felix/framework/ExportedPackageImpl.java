@@ -18,7 +18,7 @@
  */
 package org.apache.felix.framework;
 
-import org.apache.felix.framework.searchpolicy.R4Export;
+import org.apache.felix.framework.util.manifestparser.R4Export;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;

@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.framework.searchpolicy;
+package org.apache.felix.framework.util.manifestparser;
 
+import org.apache.felix.framework.searchpolicy.*;
+import org.apache.felix.framework.util.VersionRange;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 

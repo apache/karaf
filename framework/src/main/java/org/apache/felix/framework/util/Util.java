@@ -24,6 +24,9 @@ import java.util.List;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.searchpolicy.*;
+import org.apache.felix.framework.util.manifestparser.R4Export;
+import org.apache.felix.framework.util.manifestparser.R4Import;
+import org.apache.felix.framework.util.manifestparser.R4LibraryClause;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IWire;
 
@@ -228,100 +231,6 @@ public class Util
             }
         }
         return null;
-    }
-
-    /**
-     * Parses delimited string and returns an array containing the tokens. This
-     * parser obeys quotes, so the delimiter character will be ignored if it is
-     * inside of a quote. This method assumes that the quote character is not
-     * included in the set of delimiter characters.
-     * @param value the delimited string to parse.
-     * @param delim the characters delimiting the tokens.
-     * @return an array of string tokens or null if there were no tokens.
-    **/
-    public static String[] parseDelimitedString(String value, String delim)
-    {
-        if (value == null)
-        {
-           value = "";
-        }
-
-        List list = new ArrayList();
-
-        int CHAR = 1;
-        int DELIMITER = 2;
-        int STARTQUOTE = 4;
-        int ENDQUOTE = 8;
-
-        StringBuffer sb = new StringBuffer();
-
-        int expecting = (CHAR | DELIMITER | STARTQUOTE);
-        
-        for (int i = 0; i < value.length(); i++)
-        {
-            char c = value.charAt(i);
-
-            boolean isDelimiter = (delim.indexOf(c) >= 0);
-            boolean isQuote = (c == '"');
-
-            if (isDelimiter && ((expecting & DELIMITER) > 0))
-            {
-                list.add(sb.toString().trim());
-                sb.delete(0, sb.length());
-                expecting = (CHAR | DELIMITER | STARTQUOTE);
-            }
-            else if (isQuote && ((expecting & STARTQUOTE) > 0))
-            {
-                sb.append(c);
-                expecting = CHAR | ENDQUOTE;
-            }
-            else if (isQuote && ((expecting & ENDQUOTE) > 0))
-            {
-                sb.append(c);
-                expecting = (CHAR | STARTQUOTE | DELIMITER);
-            }
-            else if ((expecting & CHAR) > 0)
-            {
-                sb.append(c);
-            }
-            else
-            {
-                throw new IllegalArgumentException("Invalid delimited string: " + value);
-            }
-        }
-
-        if (sb.length() > 0)
-        {
-            list.add(sb.toString().trim());
-        }
-
-        return (String[]) list.toArray(new String[list.size()]);
-    }
-
-    /**
-     * Parses native code manifest headers.
-     * @param libStrs an array of native library manifest header
-     *        strings from the bundle manifest.
-     * @return an array of <tt>LibraryInfo</tt> objects for the
-     *         passed in strings.
-    **/
-    public static R4LibraryClause[] parseLibraryStrings(Logger logger, String[] libStrs)
-        throws IllegalArgumentException
-    {
-        if (libStrs == null)
-        {
-            return new R4LibraryClause[0];
-        }
-
-        List libList = new ArrayList();
-
-        for (int i = 0; i < libStrs.length; i++)
-        {
-            R4LibraryClause clause = R4LibraryClause.parse(logger, libStrs[i]);
-            libList.add(clause);
-        }
-
-        return (R4LibraryClause[]) libList.toArray(new R4LibraryClause[libList.size()]);
     }
 
     private static final byte encTab[] = { 0x41, 0x42, 0x43, 0x44, 0x45, 0x46,

@@ -18,6 +18,7 @@
  */
 package org.apache.felix.framework.searchpolicy;
 
+import org.apache.felix.framework.util.manifestparser.R4Package;
 import org.apache.felix.moduleloader.IModule;
 
 /**

@@ -21,7 +21,7 @@ package org.apache.felix.moduleloader;
 import java.net.URL;
 import java.util.Enumeration;
 
-import org.apache.felix.framework.searchpolicy.R4Export;
+import org.apache.felix.framework.util.manifestparser.R4Export;
 
 public interface IWire
 {
