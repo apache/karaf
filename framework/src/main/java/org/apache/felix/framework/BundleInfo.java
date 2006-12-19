@@ -21,7 +21,6 @@ package org.apache.felix.framework;
 import java.util.Map;
 
 import org.apache.felix.framework.cache.BundleArchive;
-import org.apache.felix.framework.searchpolicy.R4SearchPolicy;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
