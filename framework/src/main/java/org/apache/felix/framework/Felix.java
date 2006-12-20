@@ -456,6 +456,8 @@ public class Felix
             }
             catch (Exception ex)
             {
+// TODO: RB - Should this be system bundle, since bundle could be null?
+//                fireFrameworkEvent(FrameworkEvent.ERROR, systembundle, ex);
                 fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
                 try
                 {
