@@ -233,6 +233,7 @@ public class OsgiJarMojo extends AbstractMojo {
 
 		Map exports = parseHeader(osgiManifest.getExportPackage());
 		Map imports = parseHeader(osgiManifest.getImportPackage());
+		Map explicitImports = parseHeader(osgiManifest.getExplicitImportPackage());
 		Map dynamicImports = parseHeader(osgiManifest.getDynamicImportPackage());
 
 		if (dynamicImports != null) {
@@ -250,6 +251,10 @@ public class OsgiJarMojo extends AbstractMojo {
         Set ignorePackageSet = parseIgnorePackage();
         referred.removeAll(ignorePackageSet);
 
+        if (explicitImports != null) {
+        	referred.addAll(explicitImports.keySet());
+        }
+        
 		// If the POM file contains an import declaration,
 		// we verify its validity. Otherwise, we generate the
 		// import package header from the referred. Exports

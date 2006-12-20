@@ -86,6 +86,7 @@ public class OsgiManifest
     private String requireBundle;
     private String fragmentHost;
     private String bundleManifestVersion;
+    private String explicitImportPackage;
 
     /**
      * Instance variables supporting non-framework manifest headers
@@ -222,6 +223,16 @@ public class OsgiManifest
         this.importPackage = trim(importPackage);
     }
 
+    public String getExplicitImportPackage()
+    {
+		return explicitImportPackage;
+	}
+    
+    public void setExplicitImportPackage(String explicitImportPackage)
+    {
+		this.explicitImportPackage = trim(explicitImportPackage);
+	}
+    
     public String getDynamicImportPackage()
     {
         return dynamicImportPackage;
