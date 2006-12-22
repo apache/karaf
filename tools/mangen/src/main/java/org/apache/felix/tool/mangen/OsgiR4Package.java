@@ -19,7 +19,7 @@ package org.apache.felix.tool.mangen;
 import java.util.Iterator;
 import java.util.Properties;
 
-import org.apache.felix.framework.searchpolicy.*;
+import org.apache.felix.framework.util.manifestparser.*;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 

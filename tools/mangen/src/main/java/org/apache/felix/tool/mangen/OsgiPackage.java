@@ -18,8 +18,8 @@ package org.apache.felix.tool.mangen;
 
 import java.util.*;
 
-import org.apache.felix.framework.searchpolicy.R4Package;
-import org.apache.felix.framework.util.ManifestParser;
+import org.apache.felix.framework.util.manifestparser.R4Package;
+import org.apache.felix.framework.util.manifestparser.ManifestParser;
 import org.osgi.framework.Version;
 
 /** 
