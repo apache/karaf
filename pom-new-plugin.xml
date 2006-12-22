@@ -107,17 +107,17 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.mosgi.jmx.registry</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <version>0.9.0-incubator-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.mosgi.jmx.agent</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <version>0.9.0-incubator-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.mosgi.console.ifc</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <version>0.9.0-incubator-SNAPSHOT</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -127,7 +127,7 @@
     <repository>
       <id>apache.snapshots</id>
       <name>Apache Snapshot Repository</name>
-      <url>http://cvs.apache.org/maven-snapshot-repository</url>
+      <url>http://people.apache.org/repo/m2-snapshot-repository</url>
     </repository>
 
     <repository>
@@ -153,7 +153,7 @@
       <name>ASF Mirrored M2 Distributions</name>
       <id>apache.distributions</id>
       <url>
-        scp://minotaur.apache.org/www/www.apache.org/dist/maven-repository
+        scp://people.apache.org/www/people.apache.org/repo/m2-incubating-repository
       </url>
     </repository>
   </distributionManagement>
@@ -163,7 +163,7 @@
       <id>apache.snapshots</id>
       <name>snapshot plugins</name>
       <url>
-        http://cvs.apache.org/maven-snapshot-repository
+        http://people.apache.org/repo/m2-snapshot-repository
       </url>
     </pluginRepository>
   </pluginRepositories>
