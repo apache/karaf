@@ -82,7 +82,7 @@
 <!--    <module>http.jetty</module> -->
     <module>scr</module>
 
-    <module>tools/mangen</module>
+<!--    <module>tools/mangen</module> -->
 
     <module>ipojo</module>
     <module>ipojo.metadata</module>
