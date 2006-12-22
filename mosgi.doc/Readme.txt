@@ -6,8 +6,7 @@ Properties List
 ---------------
 ** Core profile Properties **
 
--> mosgi.jmxconsole.tab.url.<mbeanname>tab : indicates an URL where the
-                                          jmx console tab should be found
+-> mosgi.jmxconsole.tab.url.<mbeanname>tab : indicates an URL where the jmx console tab should be found
       example : mosgi.jmxconsole.tab.url.osgiprobestab=file:../org.apache.felix.mosgi.managedelements.osgiprobes.tab-0.8.0-SNAPSHOT.jar
 -> mosgi.jmxconsole.rmiport.<profile> : indicates a registry port for a specif profile (defaults to 1099)
       example : mosgi.jmxconsole.rmiport.t1=1100

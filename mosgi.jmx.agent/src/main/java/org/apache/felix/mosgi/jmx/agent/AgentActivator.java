@@ -125,7 +125,7 @@ public class AgentActivator implements BundleActivator, ServiceListener {
   }
 
   private boolean isMBean(ServiceReference serviceReference) {
-    String[] objectClasses = (String[]) serviceReference .getProperty(Constants.OBJECTCLASS);
+    String[] objectClasses = (String[]) serviceReference.getProperty(Constants.OBJECTCLASS);
     if (objectClasses == null){
       return false;
     }

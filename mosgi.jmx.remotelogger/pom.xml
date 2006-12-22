@@ -10,7 +10,7 @@
   <packaging>osgi-bundle</packaging>
   <name>Apache Felix MOSGi JMX remotelogger</name>
   <artifactId>org.apache.felix.mosgi.jmx.remotelogger</artifactId>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>0.9.0-incubator-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
