@@ -12,7 +12,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>0.8.0-SNAPSHOT</version>
+      <version>0.9.0-incubator-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

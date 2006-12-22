@@ -22,7 +22,7 @@
   <artifactId>felix</artifactId>
   <packaging>pom</packaging>
   <name>Apache Felix</name>
-  <version>0.8.0-SNAPSHOT</version>
+  <version>0.9.0-incubator-SNAPSHOT</version>
   <url>http://incubator.apache.org/felix/</url>
   <description>Apache felix is an OSGi implementation.</description>
 
@@ -79,7 +79,7 @@
     <module>upnp.sample.tv</module>
     <module>upnp.sample.clock</module>
     <module>upnp.sample.binaryLight</module>
-    <module>http.jetty</module>
+<!--    <module>http.jetty</module> -->
     <module>scr</module>
 
     <module>tools/mangen</module>
@@ -111,18 +111,6 @@
         <module>mosgi.managedelements.obrprobe</module>
         <module>mosgi.managedelements.obrprobe.tab</module>
         <module>mosgi.managedelements.memoryprobe</module>
-        <module>ipojo.plugin</module>
-        <module>ipojo.arch</module>
-      </modules>
-    </profile>
-    <profile>    
-      <id>jdk1.4</id>
-      <activation>
-        <jdk>1.4</jdk>
-      </activation>
-      <modules>
-        <module>ipojo.plugin</module>
-        <module>ipojo.arch</module>
       </modules>
     </profile>
   </profiles>
@@ -133,37 +121,37 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.osgi.core</artifactId>
-        <version>0.8.0-SNAPSHOT</version>
+        <version>0.9.0-incubator-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.osgi.compendium</artifactId>
-        <version>0.8.0-SNAPSHOT</version>
+        <version>0.9.0-incubator-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.framework</artifactId>
-        <version>0.8.0-SNAPSHOT</version>
+        <version>0.9.0-incubator-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
 	<artifactId>org.apache.felix.bundlerepository</artifactId>
-	<version>0.8.0-SNAPSHOT</version>
+	<version>0.9.0-incubator-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.mosgi.jmx.registry</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <version>0.9.0-incubator-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.mosgi.jmx.agent</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <version>0.9.0-incubator-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.mosgi.console.ifc</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <version>0.9.0-incubator-SNAPSHOT</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -173,7 +161,7 @@
     <repository>
       <id>apache.snapshots</id>
       <name>Apache Snapshot Repository</name>
-      <url>http://cvs.apache.org/maven-snapshot-repository</url>
+      <url>http://people.apache.org/repo/m2-snapshot-repository</url>
     </repository>
 
     <repository>
@@ -199,7 +187,7 @@
       <name>ASF Mirrored M2 Distributions</name>
       <id>apache.distributions</id>
       <url>
-        scp://minotaur.apache.org/www/www.apache.org/dist/maven-repository
+        scp://people.apache.org/www/people.apache.org/repo/m2-incubating-repository
       </url>
     </repository>
   </distributionManagement>
@@ -209,7 +197,7 @@
       <id>apache.snapshots</id>
       <name>snapshot plugins</name>
       <url>
-        http://cvs.apache.org/maven-snapshot-repository
+        http://people.apache.org/repo/m2-snapshot-repository
       </url>
     </pluginRepository>
   </pluginRepositories>

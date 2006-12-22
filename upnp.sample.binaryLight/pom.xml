@@ -3,32 +3,32 @@
   <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.9.0-incubator-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <packaging>osgi-bundle</packaging>
   <groupId>org.apache.felix</groupId>
   <name>Apache Felix UPnP Sample Binary-Light</name>
   <artifactId>org.apache.felix.upnp.sample.binaryLight</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0-incubator-SNAPSHOT</version>
   <!-- <url>http://maven.apache.org</url> -->
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>0.8.0-SNAPSHOT</version>
+      <version>0.9.0-incubator-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.compendium</artifactId>
-      <version>0.8.0-SNAPSHOT</version>
+      <version>0.9.0-incubator-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>javax.servlet</artifactId>
-      <version>0.8.0-SNAPSHOT</version>
+      <version>0.9.0-incubator-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
