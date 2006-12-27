@@ -108,8 +108,10 @@ public class ManifestParser
             }
             m_bundleSymbolicName = (String) clauses[0][CLAUSE_PATHS_INDEX][0];
             R4Attribute[] attrs = new R4Attribute[2];
-            attrs[0] = new R4Attribute("symbolicname", m_bundleSymbolicName, false);
-            attrs[1] = new R4Attribute("version", m_bundleVersion, false);
+            attrs[0] = new R4Attribute(
+                Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, m_bundleSymbolicName, false);
+            attrs[1] = new R4Attribute(
+                Constants.BUNDLE_VERSION_ATTRIBUTE, m_bundleVersion, false);
             capList.add(new Capability(ICapability.MODULE_NAMESPACE, null, attrs));
         }
 
@@ -159,28 +161,13 @@ public class ManifestParser
         //
         // Parse Require-Bundle
         //
-        clauses = parseStandardHeader(
+        IRequirement[] bundleReq = parseRequireBundleHeader(
             (String) headerMap.get(Constants.REQUIRE_BUNDLE));
-        if (clauses.length > 0)
-        {
-            for (int clauseIdx = 0; clauseIdx < clauses.length; clauseIdx++)
-            {
-                for (int pathIdx = 0; pathIdx < clauses[clauseIdx][CLAUSE_PATHS_INDEX].length; pathIdx++)
-                {
-//                    try
-//                    {
-//                        reqList.add(
-//                            new Requirement(
-//                                ICapability.MODULE_NAMESPACE,
-//                                "(symbolicname=" + clauses[clauseIdx][HEADER_PATHS_INDEX][pathIdx] + ")"));
-//                    }
-//                    catch (InvalidSyntaxException ex)
-//                    {
-                        // Should never happen.
-//                    }
-                }
-            }
-        }
+//System.out.println("PARSED BUNDLE REQUIREMENTS:");
+//for (int reqIdx = 0; reqIdx < bundleReq.length; reqIdx++)
+//{
+//    System.out.println(bundleReq[reqIdx]);
+//}
 
         //
         // Parse Import-Package.
@@ -836,7 +823,7 @@ public class ManifestParser
             }
     
             // Ensure that only the "version" attribute is used and convert
-            // it to the appropriate type.
+            // it to the VersionRange type.
             if ((v != null) || (sv != null))
             {
                 attrMap.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
@@ -848,8 +835,7 @@ public class ManifestParser
                         v.isMandatory()));
             }
 
-            // If bundle version is specified, then convert its type to Version.
-            // Only imports can specify this attribue.
+            // If bundle version is specified, then convert its type to VersionRange.
             v = (R4Attribute) attrMap.get(Constants.BUNDLE_VERSION_ATTRIBUTE);
             if (v != null)
             {
@@ -885,6 +871,60 @@ public class ManifestParser
                 reqList.add(
                     new Requirement(
                         ICapability.PACKAGE_NAMESPACE,
+                        (R4Directive[]) clauses[clauseIdx][CLAUSE_DIRECTIVES_INDEX],
+                        newAttrs));
+            }
+        }
+
+        return (IRequirement[]) reqList.toArray(new IRequirement[reqList.size()]);
+    }
+
+    public static IRequirement[] parseRequireBundleHeader(String header)
+    {
+        Object[][][] clauses = parseStandardHeader(header);
+
+// TODO: FRAMEWORK - Perhaps verification/normalization should be completely
+// separated from parsing, since verification/normalization may vary.
+
+        // Convert bundle version attribute to VersionRange type.
+        for (int clauseIdx = 0; clauseIdx < clauses.length; clauseIdx++)
+        {
+            for (int attrIdx = 0;
+                attrIdx < clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX].length;
+                attrIdx++)
+            {
+                R4Attribute attr = (R4Attribute) clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX][attrIdx];
+                if (attr.getName().equals(Constants.BUNDLE_VERSION_ATTRIBUTE))
+                {
+                    clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX][attrIdx] =
+                        new R4Attribute(
+                            Constants.BUNDLE_VERSION_ATTRIBUTE,
+                            VersionRange.parse(attr.getValue().toString()),
+                            attr.isMandatory());
+                }
+            }
+        }
+
+        // Now convert generic header clauses into requirements.
+        List reqList = new ArrayList();
+        for (int clauseIdx = 0; clauseIdx < clauses.length; clauseIdx++)
+        {
+            for (int pathIdx = 0;
+                pathIdx < clauses[clauseIdx][CLAUSE_PATHS_INDEX].length;
+                pathIdx++)
+            {
+                // Prepend the symbolic name to the array of attributes.
+                R4Attribute[] attrs = (R4Attribute[]) clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX];
+                R4Attribute[] newAttrs = new R4Attribute[attrs.length + 1];
+                newAttrs[0] = new R4Attribute(
+                    Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE,
+                    (String) clauses[clauseIdx][CLAUSE_PATHS_INDEX][pathIdx], false);
+                System.arraycopy(attrs, 0, newAttrs, 1, attrs.length);
+
+                // Create package requirement and add to requirement list.
+                reqList.add(
+                    new Requirement(
+                        ICapability.MODULE_NAMESPACE,
                         (R4Directive[]) clauses[clauseIdx][CLAUSE_DIRECTIVES_INDEX],
                         newAttrs));
             }
