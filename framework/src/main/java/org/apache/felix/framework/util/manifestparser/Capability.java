@@ -18,19 +18,21 @@
  */
 package org.apache.felix.framework.util.manifestparser;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import org.apache.felix.moduleloader.ICapability;
 
 public class Capability implements ICapability
 {
     private String m_namespace = null;
-    private Map m_propMap = null;
+    private R4Directive[] m_dirs = null;
+    private R4Attribute[] m_attrs = null;
+    private Map m_attrMap = null;
 
-    public Capability(String namespace, Map propMap)
+    public Capability(String namespace, R4Directive[] dirs, R4Attribute[] attrs)
     {
         m_namespace = namespace;
-        m_propMap = Collections.unmodifiableMap(propMap);
+        m_dirs = dirs;
+        m_attrs = attrs;
     }
 
     public String getNamespace()
@@ -38,13 +40,119 @@ public class Capability implements ICapability
         return m_namespace;
     }
 
-    public Map getProperties()
+    public R4Directive[] getDirectives()
     {
-        return m_propMap;
+        return m_dirs;
     }
 
-    public String[] getUses()
+    public Map getProperties()
     {
-        return null;
+        if (m_attrMap == null)
+        {
+            m_attrMap = new Map() {
+
+                public int size()
+                {
+                    return m_attrs.length;
+                }
+
+                public boolean isEmpty()
+                {
+                    return false;
+                }
+
+                public boolean containsKey(Object key)
+                {
+                    return (get(key) != null);
+                }
+
+                public boolean containsValue(Object value)
+                {
+                    for (int i = 0; i < m_attrs.length; i++)
+                    {
+                        if (m_attrs[i].getValue().equals(value))
+                        {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                public Object get(Object key)
+                {
+                    for (int i = 0; i < m_attrs.length; i++)
+                    {
+                        if (m_attrs[i].getName().equals(key))
+                        {
+                            return m_attrs[i].getValue();
+                        }
+                    }
+                    return null;
+                }
+
+                public Object put(Object key, Object value)
+                {
+                    throw new UnsupportedOperationException("Map.put() not implemented.");
+                }
+
+                public Object remove(Object key)
+                {
+                    throw new UnsupportedOperationException("Map.remove() not implemented.");
+                }
+
+                public void putAll(Map t)
+                {
+                    throw new UnsupportedOperationException("Map.putAll() not implemented.");
+                }
+
+                public void clear()
+                {
+                    throw new UnsupportedOperationException("Map.clear() not implemented.");
+                }
+
+                public Set keySet()
+                {
+                    Set set = new HashSet();
+                    for (int i = 0; i < m_attrs.length; i++)
+                    {
+                        set.add(m_attrs[i].getName());
+                    }
+                    return set;
+                }
+
+                public Collection values()
+                {
+                    throw new java.lang.UnsupportedOperationException("Map.values() not implemented.");
+                }
+
+                public Set entrySet()
+                {
+                    throw new java.lang.UnsupportedOperationException("Map.entrySet() not implemented.");
+                }
+            };
+        }
+        return m_attrMap;
+    }
+
+// TODO: RB - Remove or simplify toString() for final version.
+    public String toString()
+    {
+        StringBuffer sb = new StringBuffer();
+        sb.append(m_namespace);
+        for (int i = 0; (m_dirs != null) && (i < m_dirs.length); i++)
+        {
+            sb.append(";");
+            sb.append(m_dirs[i].getName());
+            sb.append(":=");
+            sb.append(m_dirs[i].getValue());
+        }
+        for (int i = 0; (m_attrs != null) && (i < m_attrs.length); i++)
+        {
+            sb.append(";");
+            sb.append(m_attrs[i].getName());
+            sb.append("=");
+            sb.append(m_attrs[i].getValue());
+        }
+        return sb.toString();
     }
 }

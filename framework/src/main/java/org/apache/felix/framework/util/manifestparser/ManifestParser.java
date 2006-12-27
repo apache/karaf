@@ -24,6 +24,8 @@ import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.cache.BundleRevision;
 import org.apache.felix.framework.searchpolicy.*;
 import org.apache.felix.framework.util.*;
+import org.apache.felix.moduleloader.ICapability;
+import org.apache.felix.moduleloader.IRequirement;
 import org.osgi.framework.*;
 
 public class ManifestParser
@@ -33,6 +35,9 @@ public class ManifestParser
     private Map m_headerMap = null;
     private String m_bundleSymbolicName = null;
     private Version m_bundleVersion = null;
+    private ICapability[] m_capabilities = null;
+    private IRequirement[] m_requirements = null;
+    private IRequirement[] m_dynamicReqs = null;
     private R4Export[] m_exports = null;
     private R4Import[] m_imports = null;
     private R4Import[] m_dynamics = null;
@@ -54,7 +59,16 @@ public class ManifestParser
                 "Unknown 'Bundle-ManifestVersion' value: " + manifestVersion);
         }
 
-        // Verify bundle version syntax.
+        // Create map to check for duplicate imports/exports
+        // and lists to hold capabilities and requirements.
+        List capList = new ArrayList();
+        List reqList = new ArrayList();
+        Map dupeMap = new HashMap();
+
+        //
+        // Get bundle version.
+        //
+
         if (m_headerMap.get(Constants.BUNDLE_VERSION) != null)
         {
             try
@@ -71,13 +85,6 @@ public class ManifestParser
                 m_bundleVersion = Version.emptyVersion;
             }
         }
-
-        // Create map to check for duplicate imports/exports.
-        Map dupeMap = new HashMap();
-
-        //
-        // Get bundle version.
-        //
 
         //
         // Parse bundle symbolic name.
@@ -100,10 +107,10 @@ public class ManifestParser
                         + headerMap.get(Constants.BUNDLE_SYMBOLICNAME));
             }
             m_bundleSymbolicName = (String) clauses[0][CLAUSE_PATHS_INDEX][0];
-//            Map propMap = new HashMap();
-//            propMap.put("symbolicname", m_bundleSymbolicName);
-//            propMap.put("version", m_bundleVersion);
-//            capList.add(new Capability(ICapability.MODULE_NAMESPACE, propMap));
+            R4Attribute[] attrs = new R4Attribute[2];
+            attrs[0] = new R4Attribute("symbolicname", m_bundleSymbolicName, false);
+            attrs[1] = new R4Attribute("version", m_bundleVersion, false);
+            capList.add(new Capability(ICapability.MODULE_NAMESPACE, null, attrs));
         }
 
         //
@@ -113,6 +120,15 @@ public class ManifestParser
         // Get export packages from bundle manifest.
         m_exports = (R4Export[]) parseImportExportHeader(
             (String) headerMap.get(Constants.EXPORT_PACKAGE), true);
+
+        // Get export packages from bundle manifest.
+        ICapability[] exportCaps = parseExportHeader(
+            (String) headerMap.get(Constants.EXPORT_PACKAGE));
+//System.out.println("PARSED EXPORT CAPABILITIES:");
+//for (int capIdx = 0; capIdx < exportCaps.length; capIdx++)
+//{
+//    System.out.println(exportCaps[capIdx]);
+//}
 
         // Create non-duplicated export array.
         dupeMap.clear();
@@ -174,6 +190,15 @@ public class ManifestParser
         m_imports = (R4Import[]) parseImportExportHeader(
             (String) headerMap.get(Constants.IMPORT_PACKAGE), false);
 
+        // Get import packages from bundle manifest.
+        IRequirement[] importReqs = parseImportHeader(
+            (String) headerMap.get(Constants.IMPORT_PACKAGE));
+//System.out.println("PARSED IMPORT REQUIREMENTS:");
+//for (int reqIdx = 0; reqIdx < importReqs.length; reqIdx++)
+//{
+//    System.out.println(importReqs[reqIdx]);
+//}
+
         // Create non-duplicated import array.
         dupeMap.clear();
         for (int pkgIdx = 0; pkgIdx < m_imports.length; pkgIdx++)
@@ -204,6 +229,15 @@ public class ManifestParser
         // Get dynamic import packages from bundle manifest.
         m_dynamics = (R4Import[]) parseImportExportHeader(
             (String) headerMap.get(Constants.DYNAMICIMPORT_PACKAGE), false);
+
+        // Get import packages from bundle manifest.
+        IRequirement[] dynReqs = parseImportHeader(
+            (String) headerMap.get(Constants.DYNAMICIMPORT_PACKAGE));
+//System.out.println("PARSED DYNAMIC IMPORT REQUIREMENTS:");
+//for (int reqIdx = 0; reqIdx < dynReqs.length; reqIdx++)
+//{
+//    System.out.println(dynReqs[reqIdx]);
+//}
 
         // Dynamic imports can have duplicates, so just check for import
         // of java.*.
@@ -680,6 +714,183 @@ public class ManifestParser
             m_exports[i] = new R4Export(
                 m_exports[i].getName(), m_exports[i].getDirectives(), newAttrs);
         }
+    }
+
+    public static ICapability[] parseExportHeader(String header)
+    {
+        Object[][][] clauses = parseStandardHeader(header);
+
+// TODO: FRAMEWORK - Perhaps verification/normalization should be completely
+// separated from parsing, since verification/normalization may vary.
+
+        // If both version and specification-version attributes are specified,
+        // then verify that the values are equal.
+        Map attrMap = new HashMap();
+        for (int clauseIdx = 0; clauseIdx < clauses.length; clauseIdx++)
+        {
+            // Put attributes for current clause in a map for easy lookup.
+            attrMap.clear();
+            for (int attrIdx = 0;
+                attrIdx < clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX].length;
+                attrIdx++)
+            {
+                R4Attribute attr = (R4Attribute) clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX][attrIdx];
+                attrMap.put(attr.getName(), attr);
+            }
+
+            // Check for "version" and "specification-version" attributes
+            // and verify they are the same if both are specified.
+            R4Attribute v = (R4Attribute) attrMap.get(Constants.VERSION_ATTRIBUTE);
+            R4Attribute sv = (R4Attribute) attrMap.get(Constants.PACKAGE_SPECIFICATION_VERSION);
+            if ((v != null) && (sv != null))
+            {
+                // Verify they are equal.
+                if (!((String) v.getValue()).trim().equals(((String) sv.getValue()).trim()))
+                {
+                    throw new IllegalArgumentException(
+                        "Both version and specificat-version are specified, but they are not equal.");
+                }
+            }
+    
+            // Ensure that only the "version" attribute is used and convert
+            // it to the appropriate type.
+            if ((v != null) || (sv != null))
+            {
+                // Convert version attribute to type Version.
+                attrMap.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
+                v = (v == null) ? sv : v;
+                attrMap.put(Constants.VERSION_ATTRIBUTE,
+                    new R4Attribute(
+                        Constants.VERSION_ATTRIBUTE,
+                        Version.parseVersion(v.getValue().toString()),
+                        v.isMandatory()));
+
+                // Re-copy the attribute array since it has changed.
+                clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX] =
+                    attrMap.values().toArray(new R4Attribute[attrMap.size()]);
+            }
+        }
+
+        // Now convert generic header clauses into capabilities.
+        List capList = new ArrayList();
+        for (int clauseIdx = 0; clauseIdx < clauses.length; clauseIdx++)
+        {
+            for (int pathIdx = 0;
+                pathIdx < clauses[clauseIdx][CLAUSE_PATHS_INDEX].length;
+                pathIdx++)
+            {
+                // Prepend the package name to the array of attributes.
+                R4Attribute[] attrs = (R4Attribute[]) clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX];
+                R4Attribute[] newAttrs = new R4Attribute[attrs.length + 1];
+                newAttrs[0] = new R4Attribute(
+                    ICapability.PACKAGE_PROPERTY,
+                    (String) clauses[clauseIdx][CLAUSE_PATHS_INDEX][pathIdx], false);
+                System.arraycopy(attrs, 0, newAttrs, 1, attrs.length);
+
+                // Create package capability and add to capability list.
+                capList.add(
+                    new Capability(
+                        ICapability.PACKAGE_NAMESPACE,
+                        (R4Directive[]) clauses[clauseIdx][CLAUSE_DIRECTIVES_INDEX],
+                        newAttrs));
+            }
+        }
+
+        return (ICapability[]) capList.toArray(new ICapability[capList.size()]);
+    }
+
+    public static IRequirement[] parseImportHeader(String header)
+    {
+        Object[][][] clauses = parseStandardHeader(header);
+
+// TODO: FRAMEWORK - Perhaps verification/normalization should be completely
+// separated from parsing, since verification/normalization may vary.
+
+        // Verify that the values are equals if the package specifies
+        // both version and specification-version attributes.
+        Map attrMap = new HashMap();
+        for (int clauseIdx = 0; clauseIdx < clauses.length; clauseIdx++)
+        {
+            // Put attributes for current clause in a map for easy lookup.
+            attrMap.clear();
+            for (int attrIdx = 0;
+                attrIdx < clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX].length;
+                attrIdx++)
+            {
+                R4Attribute attr = (R4Attribute) clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX][attrIdx];
+                attrMap.put(attr.getName(), attr);
+            }
+
+            // Check for "version" and "specification-version" attributes
+            // and verify they are the same if both are specified.
+            R4Attribute v = (R4Attribute) attrMap.get(Constants.VERSION_ATTRIBUTE);
+            R4Attribute sv = (R4Attribute) attrMap.get(Constants.PACKAGE_SPECIFICATION_VERSION);
+            if ((v != null) && (sv != null))
+            {
+                // Verify they are equal.
+                if (!((String) v.getValue()).trim().equals(((String) sv.getValue()).trim()))
+                {
+                    throw new IllegalArgumentException(
+                        "Both version and specificat-version are specified, but they are not equal.");
+                }
+            }
+    
+            // Ensure that only the "version" attribute is used and convert
+            // it to the appropriate type.
+            if ((v != null) || (sv != null))
+            {
+                attrMap.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
+                v = (v == null) ? sv : v;
+                attrMap.put(Constants.VERSION_ATTRIBUTE,
+                    new R4Attribute(
+                        Constants.VERSION_ATTRIBUTE,
+                        VersionRange.parse(v.getValue().toString()),
+                        v.isMandatory()));
+            }
+
+            // If bundle version is specified, then convert its type to Version.
+            // Only imports can specify this attribue.
+            v = (R4Attribute) attrMap.get(Constants.BUNDLE_VERSION_ATTRIBUTE);
+            if (v != null)
+            {
+                attrMap.put(Constants.BUNDLE_VERSION_ATTRIBUTE,
+                    new R4Attribute(
+                        Constants.BUNDLE_VERSION_ATTRIBUTE,
+                        VersionRange.parse(v.getValue().toString()),
+                        v.isMandatory()));
+            }
+
+            // Re-copy the attribute array in case it has changed.
+            clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX] =
+                attrMap.values().toArray(new R4Attribute[attrMap.size()]);
+        }
+
+        // Now convert generic header clauses into requirements.
+        List reqList = new ArrayList();
+        for (int clauseIdx = 0; clauseIdx < clauses.length; clauseIdx++)
+        {
+            for (int pathIdx = 0;
+                pathIdx < clauses[clauseIdx][CLAUSE_PATHS_INDEX].length;
+                pathIdx++)
+            {
+                // Prepend the package name to the array of attributes.
+                R4Attribute[] attrs = (R4Attribute[]) clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX];
+                R4Attribute[] newAttrs = new R4Attribute[attrs.length + 1];
+                newAttrs[0] = new R4Attribute(
+                    ICapability.PACKAGE_PROPERTY,
+                    (String) clauses[clauseIdx][CLAUSE_PATHS_INDEX][pathIdx], false);
+                System.arraycopy(attrs, 0, newAttrs, 1, attrs.length);
+
+                // Create package requirement and add to requirement list.
+                reqList.add(
+                    new Requirement(
+                        ICapability.PACKAGE_NAMESPACE,
+                        (R4Directive[]) clauses[clauseIdx][CLAUSE_DIRECTIVES_INDEX],
+                        newAttrs));
+            }
+        }
+
+        return (IRequirement[]) reqList.toArray(new IRequirement[reqList.size()]);
     }
 
     public static R4Package[] parseImportExportHeader(String header, boolean export)

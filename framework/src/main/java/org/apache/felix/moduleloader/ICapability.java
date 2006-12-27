@@ -30,5 +30,4 @@ public interface ICapability
 
     String getNamespace();
     Map getProperties();
-    String[] getUses();
 }

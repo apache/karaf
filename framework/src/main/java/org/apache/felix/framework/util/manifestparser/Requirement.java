@@ -20,6 +20,7 @@ package org.apache.felix.framework.util.manifestparser;
 
 import org.apache.felix.framework.FilterImpl;
 import org.apache.felix.framework.util.MapToDictionary;
+import org.apache.felix.framework.util.VersionRange;
 import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IRequirement;
 import org.osgi.framework.Filter;
@@ -28,12 +29,16 @@ import org.osgi.framework.InvalidSyntaxException;
 public class Requirement implements IRequirement
 {
     private String m_namespace = null;
+    private R4Directive[] m_dirs = null;
+    private R4Attribute[] m_attrs = null;
     private Filter m_filter = null;
 
-    public Requirement(String namespace, String filterStr) throws InvalidSyntaxException
+    public Requirement(String namespace, R4Directive[] dirs, R4Attribute[] attrs)
     {
         m_namespace = namespace;
-        m_filter = new FilterImpl(filterStr);
+        m_dirs = dirs;
+        m_attrs = attrs;
+        m_filter = convertToFilter();
     }
 
     public String getNamespace()
@@ -68,6 +73,83 @@ public class Requirement implements IRequirement
 
     public String toString()
     {
-        return m_filter.toString();
+        return getFilter().toString();
+    }
+
+    private Filter convertToFilter()
+    {
+        String filterStr = null;
+
+        StringBuffer sb = new StringBuffer("(&");
+
+        for (int i = 0; (m_attrs != null) && (i < m_attrs.length); i++)
+        {
+            // If this is a package import, then convert wild-carded
+            // dynamically imported package names to an OR comparison.
+            if (m_namespace.equals(ICapability.PACKAGE_NAMESPACE) &&
+                m_attrs[i].getName().equals(ICapability.PACKAGE_PROPERTY) &&
+                m_attrs[i].getValue().toString().endsWith(".*"))
+            {
+                int idx = m_attrs[i].getValue().toString().indexOf(".*");
+                sb.append("(|(package=");
+                sb.append(m_attrs[i].getValue().toString().substring(0, idx));
+                sb.append(")(package=");
+                sb.append(m_attrs[i].getValue().toString());
+                sb.append("))");
+            }
+            else if (m_attrs[i].getValue() instanceof VersionRange)
+            {
+                VersionRange vr = (VersionRange) m_attrs[i].getValue();
+                if (vr.isLowInclusive())
+                {
+                    sb.append("(version>=");
+                    sb.append(vr.getLow().toString());
+                    sb.append(")");
+                }
+                else
+                {
+                    sb.append("(!(version<=");
+                    sb.append(vr.getLow().toString());
+                    sb.append("))");
+                }
+
+                if (vr.getHigh() != null)
+                {
+                    if (vr.isHighInclusive())
+                    {
+                        sb.append("(version<=");
+                        sb.append(vr.getHigh().toString());
+                        sb.append(")");
+                    }
+                    else
+                    {
+                        sb.append("(!(version>=");
+                        sb.append(vr.getHigh().toString());
+                        sb.append("))");
+                    }
+                }
+            }
+            else
+            {
+                sb.append("(");
+                sb.append(m_attrs[i].getName());
+                sb.append("=");
+                sb.append(m_attrs[i].getValue().toString());
+                sb.append(")");
+            }
+        }
+
+        sb.append(")");
+
+        try
+        {
+            return new FilterImpl(sb.toString());
+        }
+        catch (InvalidSyntaxException ex)
+        {
+            // This should never happen, so we can safely ignore.
+        }
+
+        return null;
     }
 }
