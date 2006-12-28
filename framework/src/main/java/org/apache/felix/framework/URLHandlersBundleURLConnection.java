@@ -24,7 +24,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.security.Permission;
 
-import org.apache.felix.framework.searchpolicy.ContentLoaderImpl;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.IModule;
 

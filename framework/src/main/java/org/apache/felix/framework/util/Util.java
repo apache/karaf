@@ -19,14 +19,9 @@
 package org.apache.felix.framework.util;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.searchpolicy.*;
 import org.apache.felix.framework.util.manifestparser.R4Export;
 import org.apache.felix.framework.util.manifestparser.R4Import;
-import org.apache.felix.framework.util.manifestparser.R4LibraryClause;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IWire;
 

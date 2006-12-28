@@ -22,7 +22,6 @@ import java.util.*;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.cache.BundleRevision;
-import org.apache.felix.framework.searchpolicy.*;
 import org.apache.felix.framework.util.*;
 import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IRequirement;

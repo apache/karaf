@@ -27,8 +27,6 @@ import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.url.URLConstants;
 
-import sun.security.action.GetIntegerAction;
-
 /**
  * <p>
  * This class implements a content handler proxy. When the content handler
