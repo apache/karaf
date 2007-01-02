@@ -137,30 +137,30 @@ public class ArchitectureHandler extends Handler implements Architecture {
                     dhd.addDependency(dd);
                 }
                 instanceDescription.addHandler(dhd);
-                break;
+            } else { 
+            	if (handlers[i] instanceof ProvidedServiceHandler) {
+            		ProvidedServiceHandler psh = (ProvidedServiceHandler) handlers[i];
+            		ProvidedServiceHandlerDescription pshd = new ProvidedServiceHandlerDescription(psh.isValid());
+
+            		for (int j = 0; j < psh.getProvidedService().length; j++) {
+            			ProvidedService ps = psh.getProvidedService()[j];
+            			ProvidedServiceDescription psd = new ProvidedServiceDescription(ps.getServiceSpecification(), ps.getState(), ps.getServiceReference(), instanceDescription);
+
+            			Properties props = new Properties();
+            			for (int k = 0; k < ps.getProperties().length; k++) {
+            				Property prop = ps.getProperties()[k];
+            				if (prop.getValue() != null) { props.put(prop.getName(), prop.getValue().toString()); }
+            			}
+            			psd.setProperty(props);
+            			pshd.addProvidedService(psd);
+            		}
+            		instanceDescription.addHandler(pshd);
+            	}
+            	else { 
+            		// Else add a generic handler to the description
+            		instanceDescription.addHandler(new HandlerDescription(handlers[i].getClass().getName(), handlers[i].isValid()));
+            	}
             }
-
-            if (handlers[i] instanceof ProvidedServiceHandler) {
-                ProvidedServiceHandler psh = (ProvidedServiceHandler) handlers[i];
-                ProvidedServiceHandlerDescription pshd = new ProvidedServiceHandlerDescription(psh.isValid());
-
-                for (int j = 0; j < psh.getProvidedService().length; j++) {
-                    ProvidedService ps = psh.getProvidedService()[j];
-                    ProvidedServiceDescription psd = new ProvidedServiceDescription(ps.getServiceSpecification(), ps.getState(), ps.getServiceReference(), instanceDescription);
-
-                    Properties props = new Properties();
-                    for (int k = 0; k < ps.getProperties().length; k++) {
-                        Property prop = ps.getProperties()[k];
-                        if (prop.getValue() != null) { props.put(prop.getName(), prop.getValue().toString()); }
-                    }
-                    psd.setProperty(props);
-                    pshd.addProvidedService(psd);
-                }
-                instanceDescription.addHandler(pshd);
-                break;
-            }
-            // Else add a generic handler to the description
-            instanceDescription.addHandler(new HandlerDescription(handlers[i].getClass().getName(), handlers[i].isValid()));
         }
         return instanceDescription;
     }
