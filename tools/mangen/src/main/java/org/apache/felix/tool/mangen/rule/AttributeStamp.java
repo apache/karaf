@@ -81,8 +81,8 @@ public class AttributeStamp
             rptOut.println("");            
             rptOut.println("> " + bund.getName() + " :");            
 
-            stampPackages(bund.getPossibleImports(), "imports");
-            stampPackages(bund.getPossibleExports(), "exports");
+            stampPackages(bund.getPossibleImports(), "imports", false);
+            stampPackages(bund.getPossibleExports(), "exports", true);
         }
     }
     
@@ -113,7 +113,7 @@ public class AttributeStamp
      * match will generate warnings and be skipped. 
      *
      */
-    protected void stampPackages(Set set, String qualName)
+    protected void stampPackages(Set set, String qualName, boolean export)
     {
         rptOut.println("");
         rptOut.println("... stamping packages in " + qualName);
@@ -123,7 +123,7 @@ public class AttributeStamp
             String stamp = getMatchingPatternString(pkg, qualName, true);
             if (stamp != null)
             {
-                stamp(pkg, stamp, set);
+                stamp(pkg, stamp, set, export);
             }
         }
     }
@@ -132,7 +132,7 @@ public class AttributeStamp
      * Stamp the supplied package with the specified attributes. This will be 
      * an error if the package is already an R4 pakage with conflicting attributes.
      */
-    protected void stamp(OsgiPackage pkg, String stamp, Set set)
+    protected void stamp(OsgiPackage pkg, String stamp, Set set, boolean export)
     {
         int delim = stamp.indexOf(";");
         
@@ -145,7 +145,7 @@ public class AttributeStamp
         // simple thing is to rebuild an OSGi header with attributes and use OsgiPackage 
         // methods to parse this into an R4 package.
         String hdr = pkg.getName() + stamp.substring(delim);
-        OsgiPackage[] newPkgs = (OsgiPackage[]) OsgiPackage.createFromHeaders(hdr).toArray(new OsgiPackage[0]);
+        OsgiPackage[] newPkgs = (OsgiPackage[]) OsgiPackage.createFromHeaders(hdr, export).toArray(new OsgiPackage[0]);
         if (newPkgs.length != 1)
         {
             MangenMain.error(rptOut, "*** ERROR *** stamp doesn't create a single package : " + stamp);

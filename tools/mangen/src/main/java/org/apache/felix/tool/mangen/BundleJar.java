@@ -173,7 +173,7 @@ public class BundleJar
      */
     public Set getCurrentExports()
     {
-        return OsgiPackage.createFromHeaders(mainAttributes.getValue(Constants.EXPORT_PACKAGE));
+        return OsgiPackage.createFromHeaders(mainAttributes.getValue(Constants.EXPORT_PACKAGE), true);
     }
     
     /**
@@ -181,7 +181,7 @@ public class BundleJar
      */
     public Set getCurrentImports()
     {
-        return OsgiPackage.createFromHeaders(mainAttributes.getValue(Constants.IMPORT_PACKAGE));
+        return OsgiPackage.createFromHeaders(mainAttributes.getValue(Constants.IMPORT_PACKAGE), false);
     }
     
     /**
@@ -190,7 +190,7 @@ public class BundleJar
      */
     public Set getFixedExports()
     {
-        return OsgiPackage.createFromHeaders(mangenAttributes.getValue(Constants.EXPORT_PACKAGE));
+        return OsgiPackage.createFromHeaders(mangenAttributes.getValue(Constants.EXPORT_PACKAGE), true);
     }
     
     /**
@@ -199,7 +199,7 @@ public class BundleJar
      */
     public Set getFixedImports()
     {
-        return OsgiPackage.createFromHeaders(mangenAttributes.getValue(Constants.IMPORT_PACKAGE));
+        return OsgiPackage.createFromHeaders(mangenAttributes.getValue(Constants.IMPORT_PACKAGE), false);
     }
     
     /**

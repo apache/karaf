@@ -56,7 +56,7 @@ public abstract class OsgiPackage
      * strings which contain ";" (the header attribute separator char). All
      * others we create as simple string packages
      */
-    public static Set createFromHeaders(String headers)
+    public static Set createFromHeaders(String headers, boolean export)
     {
         Set set = getNewSet();
         
@@ -70,7 +70,7 @@ public abstract class OsgiPackage
                 if (pkgString.indexOf(';') != -1)
                 {
                     // parse and add all R4 packages contained (can be multiple)
-                    R4Package[]  pkgs = ManifestParser.parseImportExportHeader(pkgString);
+                    R4Package[]  pkgs = ManifestParser.parseImportExportHeader(pkgString, export);
                     for (int ix = 0; ix < pkgs.length; ix++)
                     {
                         set.add(new OsgiR4Package(pkgs[ix]));
