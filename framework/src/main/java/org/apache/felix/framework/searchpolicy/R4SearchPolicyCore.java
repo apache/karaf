@@ -23,6 +23,7 @@ import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
 
+import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.*;
 import org.apache.felix.framework.util.manifestparser.*;
@@ -451,10 +452,15 @@ public class R4SearchPolicyCore implements ModuleListener
             // of the R4 search policy classes, nor a class loader or
             // class itself, because we want to ignore the calls to
             // ClassLoader.loadClass() and Class.forName().
-            if (!R4SearchPolicyCore.class.equals(classes[i])
-                && !R4SearchPolicy.class.equals(classes[i])
-                && !ClassLoader.class.isAssignableFrom(classes[i])
-                && !Class.class.isAssignableFrom(classes[i]))
+// TODO: FRAMEWORK - This check is a hack and we should see if we can think
+// of another way to do it, since it won't necessarily work in all situations.
+             if (!R4SearchPolicyCore.class.equals(classes[i])
+                 && !R4SearchPolicy.class.equals(classes[i])
+                 && !IModule.class.isAssignableFrom(classes[i])
+                 && !Felix.class.equals(classes[i])
+                 && !Bundle.class.isAssignableFrom(classes[i])
+                 && !ClassLoader.class.isAssignableFrom(classes[i])
+                 && !Class.class.isAssignableFrom(classes[i]))
             {
                 // If the instigating class was not from a bundle, then
                 // delegate to the parent class loader. Otherwise, break
