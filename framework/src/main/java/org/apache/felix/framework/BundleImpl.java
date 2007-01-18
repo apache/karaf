@@ -309,7 +309,7 @@ class BundleImpl implements Bundle
 
     public String getSymbolicName()
     {
-        return (String) m_felix.getBundleSymbolicName(this);
+        return m_felix.getBundleSymbolicName(this);
     }
 
     public boolean hasPermission(Object obj)
