@@ -18,9 +18,12 @@
  */
 package org.apache.felix.framework;
 
-import java.util.Map;
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
 
 import org.apache.felix.framework.cache.BundleArchive;
+import org.apache.felix.moduleloader.IContentLoader;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
@@ -32,6 +35,9 @@ class BundleInfo
     private int m_state = 0;
     private BundleActivator m_activator = null;
     private BundleContext m_context = null;
+    private Map m_cachedHeaders = new HashMap();
+    private long m_cachedHeadersTimestamp;
+
     // Indicates whether the bundle is stale, meaning that it has
     // been refreshed and completely removed from the framework.
     private boolean m_stale = false;
@@ -201,6 +207,143 @@ class BundleInfo
         }
     }
 
+    public Map getCurrentLocalizedHeader(String locale)
+    {
+        synchronized (m_cachedHeaders)
+        {
+            // If the bundle has been updated, clear the cached headers
+            if (getLastModified() > m_cachedHeadersTimestamp)
+            {
+                m_cachedHeaders.clear();
+            }
+            else
+            {
+                // Check if headers for this locale have already been resolved
+                if (m_cachedHeaders.containsKey(locale))
+                {
+                    return (Map) m_cachedHeaders.get(locale);
+                }
+            }
+        }
+
+        Map headers;
+        try
+        {
+            Map rawHeaders = m_archive.getRevision(m_archive.getRevisionCount() - 1).getManifestHeader();
+            headers = new HashMap(rawHeaders.size());
+            headers.putAll(rawHeaders);
+        }
+        catch (Exception ex)
+        {
+            m_logger.log(
+                Logger.LOG_ERROR,
+                "Error reading manifest from bundle archive.",
+                ex);
+            return null;
+        }
+
+        // Check to see if we actually need to localize anything
+        boolean needsLocalization = false;
+        for (Iterator it = headers.values().iterator(); it.hasNext(); )
+        {
+            if (((String) it.next()).startsWith("%"))
+            {
+                needsLocalization = true;
+                break;
+            }
+        }
+
+        if (!needsLocalization)
+        {
+            // If localization is not needed, just cache the headers and return them as-is
+            // Not sure if this is useful
+            updateHeaderCache(locale, headers);
+            return headers;
+        }
+
+        // Do localization here and return the localized headers
+        IContentLoader loader = this.getCurrentModule().getContentLoader();
+
+        String basename = (String) headers.get(Constants.BUNDLE_LOCALIZATION);
+        if (basename == null)
+        {
+            basename = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+        }
+
+        // Create ordered list of files to load properties from
+        List resourceList = createResourceList(basename, locale);
+
+        // Create a merged props file with all available props for this locale
+        Properties mergedProperties = new Properties();
+        for (Iterator it = resourceList.iterator(); it.hasNext(); )
+        {
+            URL temp = loader.getResource(it.next() + ".properties");
+            if (temp == null)
+            {
+                continue;
+            }
+            try
+            {
+                mergedProperties.load(temp.openConnection().getInputStream());
+            }
+            catch (IOException ex)
+            {
+                // File doesn't exist, just continue loop
+            }
+        }
+
+        // Resolve all localized header entries
+        for (Iterator it = headers.entrySet().iterator(); it.hasNext(); )
+        {
+            Map.Entry entry = (Map.Entry) it.next();
+            String value = (String) entry.getValue();
+            if (value.startsWith("%"))
+            {
+                String newvalue;
+                String key = value.substring(value.indexOf("%") + 1);
+                newvalue = mergedProperties.getProperty(key);
+                if (newvalue==null)
+                {
+                    newvalue = key;
+                }
+                entry.setValue(newvalue);
+            }
+        }
+
+        updateHeaderCache(locale, headers);
+        return headers;
+    }
+
+    private void updateHeaderCache(String locale, Map localizedHeaders)
+    {
+        synchronized(m_cachedHeaders)
+        {
+            m_cachedHeaders.put(locale, localizedHeaders);
+            m_cachedHeadersTimestamp = System.currentTimeMillis();
+        }
+    }
+
+    private List createResourceList(String basename, String locale)
+    {
+        List result = new ArrayList(4);
+
+        StringTokenizer tokens;
+        StringBuffer tempLocale = new StringBuffer(basename);
+
+        result.add(tempLocale.toString());
+
+        if (locale.length() > 0)
+        {
+            tokens = new StringTokenizer(locale, "_");
+            while (tokens.hasMoreTokens())
+            {
+                tempLocale.append("_").append(tokens.nextToken());
+                result.add(tempLocale.toString());
+            }
+        }
+        return result;
+    }
+    
     public int getState()
     {
         return m_state;

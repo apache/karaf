@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 
+import org.apache.felix.framework.util.MapToDictionary;
 import org.osgi.framework.*;
 
 class BundleImpl implements Bundle
@@ -123,6 +124,11 @@ class BundleImpl implements Bundle
 
     public Dictionary getHeaders()
     {
+        return getHeaders(Locale.getDefault().toString());
+    }
+
+    public Dictionary getHeaders(String locale)
+    {
         Object sm = System.getSecurityManager();
 
         if (sm != null)
@@ -130,7 +136,7 @@ class BundleImpl implements Bundle
             ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                 AdminPermission.METADATA));
         }
-        return m_felix.getBundleHeaders(this);
+        return m_felix.getBundleHeaders(this, locale);
     }
 
     public long getLastModified()
@@ -303,8 +309,7 @@ class BundleImpl implements Bundle
 
     public String getSymbolicName()
     {
-        return (String) m_felix.getBundleHeaders(this).get(
-            Constants.BUNDLE_SYMBOLICNAME);
+        return (String) m_felix.getBundleSymbolicName(this);
     }
 
     public boolean hasPermission(Object obj)
@@ -392,25 +397,6 @@ class BundleImpl implements Bundle
     public String toString()
     {
         return "[" + getBundleId() +"]";
-    }
-
-    //
-    // PLACE FOLLOWING METHODS INTO PROPER LOCATION ONCE IMPLEMENTED.
-    //
-
-    public Dictionary getHeaders(String locale)
-    {
-        // TODO: Implement Bundle.getHeaders(String locale)
-        // Should be done after [#FELIX-27] resolution
-        Object sm = System.getSecurityManager();
-
-        if (sm != null)
-        {
-            ((SecurityManager) sm).checkPermission(new AdminPermission(this,
-                AdminPermission.METADATA));
-        }
-
-        return null;
     }
 
     public boolean equals(Object obj)
