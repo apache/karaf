@@ -86,6 +86,8 @@
 
     <module>ipojo</module>
     <module>ipojo.metadata</module>
+    <module>ipojo.plugin</module>
+    <module>ipojo.arch</module>
 
   </modules>
 
