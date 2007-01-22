@@ -279,7 +279,7 @@ public class ConfigurationHandler extends Handler implements ManagedService {
      */
     protected void addProperty(ConfigurableProperty p) {
         for (int i = 0; (m_configurableProperties != null) && (i < m_configurableProperties.length); i++) {
-            if (m_configurableProperties[i] == p) { return; }
+            if (m_configurableProperties[i].getName().equals(p.getName())) { return; }
         }
 
         if (m_configurableProperties.length > 0) {
@@ -300,7 +300,7 @@ public class ConfigurationHandler extends Handler implements ManagedService {
      */
     protected boolean containsProperty(String name) {
         for (int i = 0; (m_configurableProperties != null) && (i < m_configurableProperties.length); i++) {
-            if (m_configurableProperties[i].getName() == name) { return true; }
+            if (m_configurableProperties[i].getName().equals(name)) { return true; }
         }
         return false;
     }

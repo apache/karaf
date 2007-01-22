@@ -31,8 +31,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
 /**
- * Represent a service dependency either for a componenet dependency either for
- * a provided service dependency.
+ * Represent a service dependency of the component instance.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class Dependency implements ServiceListener {
@@ -48,17 +47,40 @@ public class Dependency implements ServiceListener {
     public static final int UNRESOLVED = 2;
 
     /**
-     * Link to the Component Manager.
-     * m_handler : ComponentManager
+     * Reference on the Dependency Handler.
      */
     private DependencyHandler m_handler;
-
-
+    
     /**
-     * Metadata of the dependency.
-     * m_metadata : dependency metadata
+     * Field of the dependency.
      */
-    private DependencyMetadata m_metadata;
+    private String m_field;
+    
+    /**
+     * List of dependency callback. 
+     */
+    private DependencyCallback[] m_callbacks = new DependencyCallback[0];
+    
+    /**
+     * Service Specification required by the dependency.
+     */
+    private String m_specification;
+    
+    /**
+     * Is the dependency a multiple dependency ?
+     */
+    private boolean m_isMultiple = false;
+    
+    /**
+     * Is the Dependency an optional dependency ?
+     */
+    private boolean m_isOptional = false;
+    
+    /**
+     * LDAP Filter of the Dependency (String form).
+     */
+    private String m_strFilter;
+    
 
     /**
      * Array of Service Objects.
@@ -103,15 +125,62 @@ public class Dependency implements ServiceListener {
      * @param dh : the dependency handler managing this dependency
      * @param dm : the depednency metadata
      */
-    public Dependency(DependencyHandler dh, DependencyMetadata dm) {
+    public Dependency(DependencyHandler dh, String field, String spec, String filter, boolean isOptional) {
         m_handler = dh;
-        m_metadata = dm;
+        m_field = field;
+        m_specification = spec;
+        m_isOptional = isOptional;
+        m_strFilter = filter;
     }
 
     /**
-     * @return the dependency metadata.
+     * @return the field attached to the dependency.
      */
-    public DependencyMetadata getMetadata() { return m_metadata; }
+    public String getField() { return m_field; }
+    
+    /**
+     * @return the specification tracked by the dependency.
+     */
+    public String getSpecification() { return m_specification; }
+    
+    /**
+     * @return true is the dependency is optional.
+     */
+    public boolean isOptional() { return m_isOptional; }
+    
+    /**
+     * @return true if the dependency is multiple.
+     */
+    public boolean isMultiple() { return m_isMultiple; }
+    
+    /**
+     * Set the dependency to multiple.
+     */
+    protected void setMultiple() { m_isMultiple = true; }
+    
+    /**
+     * Set the tracked specification for this dependency.
+     * @param spec : the tracked specification (interface name)
+     */
+    protected void setSpecification(String spec) { m_specification = spec; }
+    
+    /**
+     * Add a callback to the dependency.
+     * @param cb : callback to add
+     */
+    protected void addDependencyCallback(DependencyCallback cb) {
+        if (m_callbacks.length > 0) {
+            DependencyCallback[] newCallbacks = new DependencyCallback[m_callbacks.length + 1];
+            System.arraycopy(m_callbacks, 0, newCallbacks, 0, m_callbacks.length);
+            newCallbacks[m_callbacks.length] = cb;
+            m_callbacks = newCallbacks;
+        }
+        else {
+            m_callbacks = new DependencyCallback[] {cb};
+        }
+    }
+    
+    public String getFilter() { return m_strFilter; }
 
     /**
      * @return the dependency handler of this dependency.
@@ -123,12 +192,12 @@ public class Dependency implements ServiceListener {
      */
     public HashMap getUsedServices() {
         HashMap hm = new HashMap();
-        if (m_metadata.isMultiple()) {
+        if (m_isMultiple) {
             for (int i = 0; i < m_ref.length; i++) {
                 if (i < m_services.length) { hm.put(((Object) m_services[i]).toString(), m_ref[i]); }
             }
         } else {
-            if (m_ref.length != 0 && m_services.length != 0) { hm.put(((Object) m_services[0]).toString(), m_ref[0]); }
+            if (m_ref.length != 0 && m_services.length != 0) { hm.put((m_services[0]).toString(), m_ref[0]); }
         }
         return hm;
     }
@@ -138,7 +207,7 @@ public class Dependency implements ServiceListener {
      * @return true is the dependency is satified
      */
     protected boolean isSatisfied() {
-        return m_metadata.isOptional() || m_ref.length != 0;
+        return m_isOptional || m_ref.length != 0;
     }
 
     /**
@@ -153,7 +222,7 @@ public class Dependency implements ServiceListener {
 
             // 1 : Test if there is any change in the reference list :
             if (!m_change) {
-                if (!m_metadata.isMultiple()) {
+                if (!m_isMultiple) {
                     if (m_services.length > 0) {
                         return m_services[0]; }
                 }
@@ -176,18 +245,19 @@ public class Dependency implements ServiceListener {
 
             // 3 : The service object list is populated, I return either the first service object, either the array.
             // Return null or an empty array if no service are found.
-            if (!m_metadata.isMultiple()) {
+            if (!m_isMultiple) {
                 if (m_services.length > 0) {
                     return m_services[0];
                 } else {
                     // Load the nullable class
-                    String[] segment = m_metadata.getServiceSpecification().split("[.]");
-                    String className = "org.apache.felix.ipojo." + segment[segment.length - 1] + "Nullable";
+                    //String[] segment = m_metadata.getServiceSpecification().split("[.]");
+                    //String className = "org.apache.felix.ipojo." + segment[segment.length - 1] + "Nullable";
+                	String className = m_specification + "Nullable";
             //        m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] Try to load the nullable class for " + getMetadata().getServiceSpecification() + " -> " + className);
                     Class nullableClazz = m_handler.getNullableClass(className);
 
                     if (nullableClazz == null) {
-                        m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] Cannot load the nullable class to return a dependency object for " + m_metadata.getField() + " -> " + m_metadata.getServiceSpecification());
+                        m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] Cannot load the nullable class to return a dependency object for " + m_field + " -> " + m_specification);
                         return null;
                     }
 
@@ -202,7 +272,7 @@ public class Dependency implements ServiceListener {
             }
         } catch (Exception e) {
             // There is a problem in the dependency resolving (like in stopping method)
-            if (!m_metadata.isMultiple()) {
+            if (!m_isMultiple) {
                 m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] Return null, an exception was throwed in the get method", e);
                 return null; }
             else {
@@ -258,7 +328,7 @@ public class Dependency implements ServiceListener {
         addReference(ref);
         if (isSatisfied()) {
             m_state = RESOLVED;
-            if (m_metadata.isMultiple() || m_ref.length == 1) { m_change = true; callBindMethod(ref); }
+            if (m_isMultiple || m_ref.length == 1) { m_change = true; callBindMethod(ref); }
         }
         m_handler.checkContext();
     }
@@ -269,27 +339,27 @@ public class Dependency implements ServiceListener {
      */
     private void departureManagement(ServiceReference ref) {
         // Call unbind method
-        if (!m_metadata.isMultiple() && ref == m_ref[0]) { callUnbindMethod(ref); }
-        if (m_metadata.isMultiple()) { callUnbindMethod(ref); }
+        if (!m_isMultiple && ref == m_ref[0]) { callUnbindMethod(ref); }
+        if (m_isMultiple) { callUnbindMethod(ref); }
 
         // Unget the service reference
         m_handler.getInstanceManager().getContext().ungetService(ref);
         int index = removeReference(ref);
 
         // Is the state valid or invalid
-        if (m_ref.length == 0 && !m_metadata.isOptional()) {
+        if (m_ref.length == 0 && !m_isOptional) {
             m_state = UNRESOLVED;
         }
-        if (m_ref.length == 0 && m_metadata.isOptional()) {
+        if (m_ref.length == 0 && m_isOptional) {
             m_state = RESOLVED;
         }
         // Is there any change ?
-        if (!m_metadata.isMultiple() && index == 0) {
+        if (!m_isMultiple && index == 0) {
             m_change = true;
             if (m_ref.length != 0) { callBindMethod(m_ref[0]); }
         }
-        if (!m_metadata.isMultiple() && index != 0) { m_change = false; }
-        if (m_metadata.isMultiple()) { m_change = true;  }
+        if (!m_isMultiple && index != 0) { m_change = false; }
+        if (m_isMultiple) { m_change = true;  }
 
         m_handler.checkContext();
         return;
@@ -301,19 +371,19 @@ public class Dependency implements ServiceListener {
      */
     private void callUnbindMethod(ServiceReference ref) {
         if (m_handler.getInstanceManager().getState() == InstanceManager.VALID) {
-            for (int i = 0; i < m_metadata.getCallbacks().length; i++) {
-                if (m_metadata.getCallbacks()[i].getMethodType() == DependencyCallback.UNBIND) {
+            for (int i = 0; i < m_callbacks.length; i++) {
+                if (m_callbacks[i].getMethodType() == DependencyCallback.UNBIND) {
                     // Try to call the bind method with a service reference inside
                     try {
-                        m_metadata.getCallbacks()[i].call(new Object[] {ref});
+                        m_callbacks[i].call(ref);
                     } catch (NoSuchMethodException e) {
                         // The method was not found : try without service reference
                         try {
-                            m_metadata.getCallbacks()[i].call();
+                            m_callbacks[i].call();
                         } catch (NoSuchMethodException e1) {
                             // The method was not found : try with the service object
                             try {
-                                m_metadata.getCallbacks()[i].call(new Object[] {m_handler.getInstanceManager().getContext().getService(ref)});
+                                m_callbacks[i].call(m_handler.getInstanceManager().getContext().getService(ref));
                             } catch (NoSuchMethodException e2) {
                                 m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Unbind method not found", e2);
                                 return;
@@ -350,24 +420,24 @@ public class Dependency implements ServiceListener {
      */
     protected void callBindMethod(Object instance) {
         // Check optional case : nullable object case : do not call bind on nullable object
-        if (m_metadata.isOptional() && m_ref.length == 0) { return; }
+        if (m_isOptional && m_ref.length == 0) { return; }
 
 
-        if (m_metadata.isMultiple()) {
+        if (m_isMultiple) {
             for (int i = 0; i < m_ref.length; i++) {
-                for (int j = 0; j < m_metadata.getCallbacks().length; j++) {
-                    if (m_metadata.getCallbacks()[j].getMethodType() == DependencyCallback.BIND) {
+                for (int j = 0; j < m_callbacks.length; j++) {
+                    if (m_callbacks[j].getMethodType() == DependencyCallback.BIND) {
                         // Try to call the bind method with a service reference inside
                         try {
-                            m_metadata.getCallbacks()[j].call(instance, new Object[] {m_ref[i]});
+                            m_callbacks[j].callOnInstance(instance, m_ref[i]);
                         } catch (NoSuchMethodException e) {
                             // The method was not found : try without service reference
                             try {
-                                m_metadata.getCallbacks()[j].call(instance);
+                                m_callbacks[j].callOnInstance(instance);
                             } catch (NoSuchMethodException e1) {
                                 // The method was not found : try with the service object
                                 try {
-                                    m_metadata.getCallbacks()[j].call(instance, new Object[] {m_handler.getInstanceManager().getContext().getService(m_ref[i])});
+                                    m_callbacks[j].callOnInstance(instance, m_handler.getInstanceManager().getContext().getService(m_ref[i]));
                                 } catch (NoSuchMethodException e2) {
                                     m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Bind method not found", e2);
                                     return;
@@ -396,19 +466,19 @@ public class Dependency implements ServiceListener {
                 }
             }
         } else {
-            for (int j = 0; j < m_metadata.getCallbacks().length; j++) {
-                if (m_metadata.getCallbacks()[j].getMethodType() == DependencyCallback.BIND) {
+            for (int j = 0; j < m_callbacks.length; j++) {
+                if (m_callbacks[j].getMethodType() == DependencyCallback.BIND) {
                     // Try to call the bind method with a service reference inside
                     try {
-                        m_metadata.getCallbacks()[j].call(instance, new Object[] {m_ref[0]});
+                        m_callbacks[j].callOnInstance(instance, m_ref[0]);
                     } catch (NoSuchMethodException e) {
                         // The method was not found : try without service reference
                         try {
-                            m_metadata.getCallbacks()[j].call(instance);
+                            m_callbacks[j].callOnInstance(instance);
                         } catch (NoSuchMethodException e1) {
                             // The method was not found : try with the service object
                             try {
-                                m_metadata.getCallbacks()[j].call(new Object[] {m_handler.getInstanceManager().getContext().getService(m_ref[0])});
+                                m_callbacks[j].callOnInstance(instance, m_handler.getInstanceManager().getContext().getService(m_ref[0]));
                             } catch (NoSuchMethodException e2) {
                                 m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Bind method not found", e2);
                                 return;
@@ -446,20 +516,20 @@ public class Dependency implements ServiceListener {
     private void callBindMethod(ServiceReference ref) {
         // call bind method :
         if (m_handler.getInstanceManager().getState() == InstanceManager.VALID) {
-            for (int i = 0; i < m_metadata.getCallbacks().length; i++) {
-                if (m_metadata.getCallbacks()[i].getMethodType() == DependencyCallback.BIND) {
+            for (int i = 0; i < m_callbacks.length; i++) {
+                if (m_callbacks[i].getMethodType() == DependencyCallback.BIND) {
                     // Try to call the bind method with a service reference inside
                     try {
-                        m_metadata.getCallbacks()[i].call(new Object[] {ref});
+                        m_callbacks[i].call(ref);
                     } catch (NoSuchMethodException e) {
                         // The method was not found : try without service reference
                         try {
                             m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Call the Bind method");
-                            m_metadata.getCallbacks()[i].call();
+                            m_callbacks[i].call();
                         } catch (NoSuchMethodException e1) {
                             // The method was not found : try with the service object
                             try {
-                                m_metadata.getCallbacks()[i].call(new Object[] {m_handler.getInstanceManager().getContext().getService(ref)});
+                                m_callbacks[i].call(m_handler.getInstanceManager().getContext().getService(ref));
                             } catch (NoSuchMethodException e2) {
                                 m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Bind method not found", e2);
                                 return;
@@ -495,29 +565,28 @@ public class Dependency implements ServiceListener {
      */
     public void start() {
         // Construct the filter with the objectclass + filter
-        String classnamefilter = "(objectClass=" + m_metadata.getServiceSpecification() + ")";
+        String classnamefilter = "(objectClass=" + m_specification + ")";
         String filter = "";
-        if (!m_metadata.getFilter().equals("")) {
-            filter = "(&" + classnamefilter + m_metadata.getFilter() + ")";
+        if (!m_strFilter.equals("")) {
+            filter = "(&" + classnamefilter + m_strFilter + ")";
         }
         else {
             filter = classnamefilter;
         }
 
-        m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] Start a dependency on : " + m_metadata.getServiceSpecification() + " with " + m_metadata.getFilter());
+        m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] Start a dependency on : " + m_specification + " with " + m_strFilter);
         m_state = UNRESOLVED;
 
         try {
-            m_clazz = m_handler.getInstanceManager().getContext().getBundle().loadClass(m_metadata.getServiceSpecification());
+            m_clazz = m_handler.getInstanceManager().getContext().getBundle().loadClass(m_specification);
         } catch (ClassNotFoundException e) {
-            System.err.println("Cannot load the interface class for the dependency " + m_metadata.getField() + " [" + m_metadata.getServiceSpecification() + "]");
+            System.err.println("Cannot load the interface class for the dependency " + m_field + " [" + m_specification + "]");
             e.printStackTrace();
         }
 
         try {
             // Look if the service is already present :
-            ServiceReference[] sr = m_handler.getInstanceManager().getContext().getServiceReferences(
-                    m_metadata.getServiceSpecification(), filter);
+            ServiceReference[] sr = m_handler.getInstanceManager().getContext().getServiceReferences(m_specification, filter);
             if (sr != null) {
                 for (int i = 0; i < sr.length; i++) { addReference(sr[i]); }
                 m_state = RESOLVED;
@@ -538,7 +607,7 @@ public class Dependency implements ServiceListener {
      * Stop the dependency.
      */
     public void stop() {
-        m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] Stop a dependency on : " + m_metadata.getServiceSpecification() + " with " + m_metadata.getFilter());
+        m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] Stop a dependency on : " + m_specification + " with " + m_strFilter);
         m_state = UNRESOLVED;
 
         // Unget all services references
@@ -549,7 +618,7 @@ public class Dependency implements ServiceListener {
         m_ref = new ServiceReference[0];
         m_handler.getInstanceManager().getContext().removeServiceListener(this);
         m_clazz = null;
-        m_services = null;
+        m_services = new Object[0];
     }
 
     /**
@@ -557,8 +626,7 @@ public class Dependency implements ServiceListener {
      * @return the state of the dependency (1 : valid, 2 : invalid)
      */
     public int getState() {
-        if (m_metadata.isOptional()) { return 1; }
-        else { return m_state; }
+        return ( m_isOptional ) ? 1 : m_state;
     }
 
     /**

@@ -48,7 +48,7 @@ public class LifecycleCallbackHandler extends Handler {
     private InstanceManager m_manager;
 
     /**
-     * Add the given Hook to the hook list.
+     * Add the given callback to the callback list.
      * @param hk : the element to add
      */
     private void addCallback(LifecycleCallback hk) {

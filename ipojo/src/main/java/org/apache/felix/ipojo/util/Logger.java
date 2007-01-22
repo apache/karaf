@@ -93,6 +93,7 @@ public class Logger implements ServiceListener{
                 break;
             default:
                 System.err.println("[" + m_name + "] UNKNOWN[" + level + "]: " + s);
+            	break;
         }
     }
 

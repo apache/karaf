@@ -27,6 +27,16 @@ import org.osgi.framework.ServiceReference;
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ProvidedServiceDescription {
+	
+	/**
+	 * State : the service is unregistered 
+	 */
+	public static final int UNREGISTERED = 0;
+	
+	/**
+	 * State : the service is registered
+	 */
+	public static final int REGISTERED = 1;
 
     /**
      * Provided Service Specification.
@@ -94,7 +104,7 @@ public class ProvidedServiceDescription {
      * @param props : the properties
      */
     public void setProperty(Properties props) {
-        m_properties = (Properties) props.clone();
+        m_properties = props;
     }
 
     /**

@@ -18,7 +18,6 @@
  */
 package org.apache.felix.ipojo.handlers.dependency;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Dictionary;
 
@@ -48,11 +47,6 @@ public class DependencyHandler extends Handler {
      * List of nullable class for optional dependencies.
      */
     private Class[] m_nullableClasses = new Class[0];
-
-    /**
-     * Classloader to use to load nullable classes.
-     */
-    private NullableClassloader m_classloader;
 
     /**
      * State of the handler.
@@ -128,16 +122,7 @@ public class DependencyHandler extends Handler {
             int initialState = m_state;
 
             // Check the component dependencies
-            if (!validateComponentDependencies()) {
-                // The dependencies are not valid
-                if (initialState == InstanceManager.VALID) {
-                    //There is a state change
-                    m_state = InstanceManager.INVALID;
-                    m_manager.checkInstanceState();
-                }
-                // Else do nothing, the component state stay UNRESOLVED
-            }
-            else {
+            if (validateComponentDependencies()) {
                 // The dependencies are valid
                 if (initialState == InstanceManager.INVALID) {
                     //There is a state change
@@ -145,6 +130,14 @@ public class DependencyHandler extends Handler {
                     m_manager.checkInstanceState();
                 }
                 // Else do nothing, the component state stay VALID
+            } else {
+                // The dependencies are not valid
+                if (initialState == InstanceManager.VALID) {
+                    //There is a state change
+                    m_state = InstanceManager.INVALID;
+                    m_manager.checkInstanceState();
+                }
+                // Else do nothing, the component state stay UNRESOLVED
             }
 
         }
@@ -157,7 +150,7 @@ public class DependencyHandler extends Handler {
      */
     private boolean checkDependency(Dependency dep, Element manipulation) {
         // Check the internal type of dependency
-        String field = dep.getMetadata().getField();
+        String field = dep.getField();
 
         String type = null;
         for (int i = 0; i < manipulation.getElements("Field").length; i++) {
@@ -168,26 +161,26 @@ public class DependencyHandler extends Handler {
         }
 
         if (type == null) {
-            m_manager.getFactory().getLogger().log(Logger.ERROR, "[DependencyHandler on " + m_manager.getClassName() + "] A declared dependency was not found in the class : " + dep.getMetadata().getField());
+            m_manager.getFactory().getLogger().log(Logger.ERROR, "[DependencyHandler on " + m_manager.getClassName() + "] A declared dependency was not found in the class : " + dep.getField());
             return false;
         }
 
         if (type != null) {
             if (type.endsWith("[]")) {
                 // Set the dependency to multiple
-                dep.getMetadata().setMultiple();
+                dep.setMultiple();
                 type = type.substring(0, type.length() - 2);
             }
 
-            if (dep.getMetadata().getServiceSpecification() == null) { dep.getMetadata().setServiceSpecification(type); }
+            if (dep.getSpecification() == null) { dep.setSpecification(type); }
 
-            if (!dep.getMetadata().getServiceSpecification().equals(type)) {
-                m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The field type [" + type + "] and the needed service interface [" + dep.getMetadata().getServiceSpecification() + "] are not the same");
-                dep.getMetadata().setServiceSpecification(type);
+            if (!dep.getSpecification().equals(type)) {
+                m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The field type [" + type + "] and the needed service interface [" + dep.getSpecification() + "] are not the same");
+                dep.setSpecification(type);
             }
         }
         else {
-            m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The declared dependency " + dep.getMetadata().getField() + "  does not exist in the code");
+            m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The declared dependency " + dep.getField() + "  does not exist in the code");
         }
         return true;
     }
@@ -212,14 +205,12 @@ public class DependencyHandler extends Handler {
             if (deps[i].containsAttribute("filter")) { filter = deps[i].getAttribute("filter"); }
             boolean optional = false;
             if (deps[i].containsAttribute("optional") && deps[i].getAttribute("optional").equals("true")) { optional = true; }
-            DependencyMetadata dm = new DependencyMetadata(field, serviceSpecification, filter, optional);
 
-
-            Dependency dep = new Dependency(this, dm);
+            Dependency dep = new Dependency(this, field, serviceSpecification, filter, optional);
             // Check the dependency :
             Element manipulation = componentMetadata.getElements("Manipulation")[0];
             if (checkDependency(dep, manipulation)) { addDependency(dep); }
-            else { m_manager.getFactory().getLogger().log(Logger.ERROR, "[DependencyHandler on " + m_manager.getClassName() + "] The dependency on " + dep.getMetadata().getField() + " is not valid"); }
+            else { m_manager.getFactory().getLogger().log(Logger.ERROR, "[DependencyHandler on " + m_manager.getClassName() + "] The dependency on " + dep.getField() + " is not valid"); }
 
             // Look for dependency callback :
             for (int j = 0; j < (deps[i].getElements("Callback", "")).length; j++) {
@@ -231,21 +222,16 @@ public class DependencyHandler extends Handler {
                 boolean isStatic = false;
                 if (deps[i].getElements("Callback", "")[j].containsAttribute("isStatic") && deps[i].getElements("Callback", "")[j].getAttribute("isStatic").equals("true")) { isStatic = true; }
                 DependencyCallback dc = new DependencyCallback(dep, method, methodType, isStatic);
-                dep.getMetadata().addDependencyCallback(dc);
+                dep.addDependencyCallback(dc);
             }
         }
 
         if (deps.length > 0) {
             String[] fields = new String[m_dependencies.length];
             for (int k = 0; k < m_dependencies.length; k++) {
-                fields[k] = m_dependencies[k].getMetadata().getField();
+                fields[k] = m_dependencies[k].getField();
             }
             m_manager.register(this, fields);
-
-            // Create the nullable classloader
-            // TODO why do not use the factory class loader ?
-            m_classloader = new NullableClassloader(m_manager.getContext().getBundle());
-
         }
     }
 
@@ -254,36 +240,25 @@ public class DependencyHandler extends Handler {
      * @param dep : the dependency
      */
     private void createNullableClass(Dependency dep) {
-        m_manager.getFactory().getLogger().log(Logger.INFO, "[DependencyHandler on " + m_manager.getClassName() + "] Try to load the nullable class for " + dep.getMetadata().getServiceSpecification());
-        // Try to load the nullable object :
-        String[] segment = dep.getMetadata().getServiceSpecification().split("[.]");
-        String className = "org/apache/felix/ipojo/" + segment[segment.length - 1] + "Nullable";
-
-        String resource = dep.getMetadata().getServiceSpecification().replace('.', '/') + ".class";
+        m_manager.getFactory().getLogger().log(Logger.INFO, "[DependencyHandler on " + m_manager.getClassName() + "] Try to load the nullable class for " + dep.getSpecification());
+        
+        //String[] segment = dep.getMetadata().getServiceSpecification().split("[.]");
+        //String className = "org/apache/felix/ipojo/" + segment[segment.length - 1] + "Nullable";
+		String className = dep.getSpecification()+"Nullable";
+        String resource = dep.getSpecification().replace('.', '/') + ".class";
         URL url =  m_manager.getContext().getBundle().getResource(resource);
 
         try {
-            byte[] b = NullableObjectWriter.dump(url,  dep.getMetadata().getServiceSpecification());
-
-//          // DEBUG :
-//          try {
-//          File file = new File("P:\\workspace\\iPOJO\\adapted\\" + className.replace('/', '.') + ".class");
-//          file.createNewFile();
-//          FileOutputStream fos = new FileOutputStream(file);
-//          fos.write(b);
-//          fos.close();
-//          } catch (Exception e3) {
-//          System.err.println("Problem to write the adapted class on the file system  : " + e3.getMessage());
-
-//          }
-
-            addNullableClass(m_classloader.defineClass(className.replace('/', '.'), b, null));
-            m_manager.getFactory().getLogger().log(Logger.INFO, "[DependencyHandler on " + m_manager.getClassName() + "] Nullable class created for " + dep.getMetadata().getServiceSpecification());
-
-        } catch (IOException e1) {
-            m_manager.getFactory().getLogger().log(Logger.ERROR, "[DependencyHandler on " + m_manager.getClassName() + "] Cannot open a stream of an interface to generate the nullable class for " + dep.getMetadata().getServiceSpecification(), e1);
+            byte[] b = NullableObjectWriter.dump(url,  dep.getSpecification());
+            Class c = null;
+            try {
+            	c = m_manager.getFactory().defineClass(className, b, null);
+            }
+            catch(Exception e) { System.err.println("Cannot define !!!");}
+            addNullableClass(c); 
+            m_manager.getFactory().getLogger().log(Logger.INFO, "[DependencyHandler on " + m_manager.getClassName() + "] Nullable class created for " + dep.getSpecification());
         } catch (Exception e2) {
-            m_manager.getFactory().getLogger().log(Logger.ERROR, "[DependencyHandler on " + m_manager.getClassName() + "] Cannot load the nullable class for  " + dep.getMetadata().getServiceSpecification(), e2);
+            m_manager.getFactory().getLogger().log(Logger.ERROR, "[DependencyHandler on " + m_manager.getClassName() + "] Cannot load the nullable class for  " + dep.getSpecification(), e2);
         }
     }
 
@@ -309,7 +284,7 @@ public class DependencyHandler extends Handler {
         //TODO : non effiecent
         for (int i = 0; i < m_dependencies.length; i++) {
             Dependency dep = m_dependencies[i];
-            if (dep.getMetadata().getField().equals(fieldName)) {
+            if (dep.getField().equals(fieldName)) {
                 // The field name is a dependency, return the get
                 return dep.get();
             }
@@ -334,7 +309,7 @@ public class DependencyHandler extends Handler {
         // Start the dependencies, for optional dependencies create Nullable class
         for (int i = 0; i < m_dependencies.length; i++) {
             Dependency dep = m_dependencies[i];
-            if (dep.getMetadata().isOptional() && !dep.getMetadata().isMultiple()) { createNullableClass(dep); }
+            if (dep.isOptional() && !dep.isMultiple()) { createNullableClass(dep); }
             dep.start();
         }
         // Check the state
@@ -352,6 +327,7 @@ public class DependencyHandler extends Handler {
      */
     public void stop() {
         for (int i = 0; i < m_dependencies.length; i++) { m_dependencies[i].stop(); }
+        m_nullableClasses = new Class[0];
     }
 
     /**
@@ -372,7 +348,7 @@ public class DependencyHandler extends Handler {
             Dependency dep = m_dependencies[i];
             valide = valide & dep.isSatisfied();
             if (!valide) {
-                m_manager.getFactory().getLogger().log(Logger.INFO, "[DependencyHandler on " + m_manager.getClassName() + "] Component Dependencies are not valid : " + dep.getMetadata().getServiceSpecification());
+                m_manager.getFactory().getLogger().log(Logger.INFO, "[DependencyHandler on " + m_manager.getClassName() + "] Component Dependencies are not valid : " + dep.getSpecification());
                 return false;
             }
         }

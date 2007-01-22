@@ -55,8 +55,9 @@ public class NullableObjectWriter implements Opcodes {
 
             ClassWriter cw = new ClassWriter(true);
 
-            String[] segment = contractName.split("[.]");
-            String className = "org/apache/felix/ipojo/" + segment[segment.length - 1] + "Nullable";
+            //String[] segment = contractName.split("[.]");
+            //String className = "org/apache/felix/ipojo/" + segment[segment.length - 1] + "Nullable";
+            String className=contractName.replace('.', '/')+"Nullable";
 
 
             // Create the class
@@ -89,10 +90,16 @@ public class NullableObjectWriter implements Opcodes {
                     switch (returnType.getSort()) {
                     case Type.BOOLEAN:
                     case Type.INT:
+                    case Type.BYTE:
+                    case Type.SHORT:
                         // Integer or Boolean : return 0 ( false)
                         mv.visitInsn(ICONST_0);
                         mv.visitInsn(IRETURN);
                         break;
+                    case Type.LONG:
+                    	mv.visitInsn(LCONST_0);
+                    	mv.visitInsn(LRETURN);
+                    	break;
                     case Type.DOUBLE:
                         // Double : return 0.0
                         mv.visitInsn(DCONST_0);
@@ -109,6 +116,7 @@ public class NullableObjectWriter implements Opcodes {
                         break;
                     default :
                         System.err.println("Type not yet managed : " + returnType);
+                    	break;
                     }
                 mv.visitMaxs(0, 0);
                 mv.visitEnd();

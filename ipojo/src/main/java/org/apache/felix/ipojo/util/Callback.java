@@ -115,6 +115,7 @@ public class Callback {
         for (int i = 0; i < arg.length; i++) {
             classes[i] = arg[i].getClass();
         }
+        
         Method method = m_manager.getClazz().getMethod(m_method, classes);
         method.setAccessible(true);
 

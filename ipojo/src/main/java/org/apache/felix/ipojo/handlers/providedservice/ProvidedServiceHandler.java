@@ -103,6 +103,7 @@ public class ProvidedServiceHandler extends Handler {
                     serviceSpecification[j] = manipulation.getElements("Interface")[j].getAttribute("name");
                 }
             }
+            if (serviceSpecification.length == 0) { m_manager.getFactory().getLogger().log(Logger.ERROR, "Cannot instantiate a provided service : no specifications found (no interfaces implemented by the pojo)"); return; }
 
             // Get the factory policy
             int factory = ProvidedService.SINGLETON_FACTORY;

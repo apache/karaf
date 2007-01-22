@@ -75,6 +75,10 @@ public class ComponentDescription {
      * @param pd : the property to add
      */
     public void addProperty(PropertyDescription pd) { 
+    	for(int i = 0; i < m_properties.length; i++) {
+    		if(m_properties[i].getName().equals(pd.getName())) { return; }
+    	}
+    	
     	PropertyDescription[] newProps = new PropertyDescription[m_properties.length + 1];
         System.arraycopy(m_properties, 0, newProps, 0, m_properties.length);
         newProps[m_properties.length] = pd;

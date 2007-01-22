@@ -102,6 +102,8 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * FactoryClassloader.
      */
     private class FactoryClassloader extends ClassLoader  {
+    	
+    	HashMap m_definedClasses = new HashMap();
 
         /**
          * load the class.
@@ -148,7 +150,10 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
          */
         public Class defineClass(String name, byte[] b,
                 ProtectionDomain domain) throws Exception {
-            return super.defineClass(name, b, 0, b.length, domain);
+        	if(m_definedClasses.containsKey(name)) { return (Class) m_definedClasses.get(name); } 
+            Class c = super.defineClass(name, b, 0, b.length, domain);
+            m_definedClasses.put(name, c);
+            return c;
         }
     }
 
@@ -211,8 +216,8 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         Collection col = m_componentInstances.values();
         Iterator it = col.iterator();
         while (it.hasNext()) {
-            InstanceManager cm = (InstanceManager) it.next();
-            cm.stop();
+            ComponentInstance ci = (ComponentInstance) it.next();
+            if(ci.isStarted()) { ci.stop(); }
         }
         m_componentInstances.clear();
         if (m_sr != null) { m_sr.unregister(); }
@@ -272,6 +277,11 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
             }
         }
         return m_context.getBundle().loadClass(className);
+    }
+    
+    public Class defineClass(String name, byte[] b, ProtectionDomain domain) throws Exception {
+    	if(m_classLoader == null) { m_classLoader = new FactoryClassloader(); }
+    	return m_classLoader.defineClass(name, b, domain);
     }
 
     /**

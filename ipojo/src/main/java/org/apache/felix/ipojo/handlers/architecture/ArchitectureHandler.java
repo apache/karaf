@@ -32,7 +32,6 @@ import org.apache.felix.ipojo.architecture.ProvidedServiceDescription;
 import org.apache.felix.ipojo.architecture.ProvidedServiceHandlerDescription;
 import org.apache.felix.ipojo.handlers.dependency.Dependency;
 import org.apache.felix.ipojo.handlers.dependency.DependencyHandler;
-import org.apache.felix.ipojo.handlers.dependency.DependencyMetadata;
 import org.apache.felix.ipojo.handlers.providedservice.Property;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedService;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
@@ -88,7 +87,7 @@ public class ArchitectureHandler extends Handler implements Architecture {
      */
     public void stop() {
         try {
-            if (m_sr != null) { m_sr.unregister(); }
+            if (m_sr != null) { m_sr.unregister(); m_sr = null; }
         } catch (Exception e) { return; }
     }
 
@@ -114,7 +113,7 @@ public class ArchitectureHandler extends Handler implements Architecture {
      */
     public InstanceDescription getInstanceDescription() {
         int componentState = m_manager.getState();
-        InstanceDescription instanceDescription = new InstanceDescription(m_className, m_name, componentState, m_manager.getContext().getBundle().getBundleId());
+        InstanceDescription instanceDescription = new InstanceDescription(m_name, m_className, componentState, m_manager.getContext().getBundle().getBundleId());
 
         String[] objects = new String[m_manager.getPojoObjects().length];
         for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
@@ -127,12 +126,11 @@ public class ArchitectureHandler extends Handler implements Architecture {
             if (handlers[i] instanceof DependencyHandler) {
                 DependencyHandler dh = (DependencyHandler) handlers[i];
                 DependencyHandlerDescription dhd = new DependencyHandlerDescription(dh.isValid());
-
                 for (int j = 0; j < dh.getDependencies().length; j++) {
                     Dependency dep = dh.getDependencies()[j];
-                    DependencyMetadata dm = dep.getMetadata();
                     // Create & add the dependency description
-                    DependencyDescription dd = new DependencyDescription(dm.getServiceSpecification(), dm.isMultiple(), dm.isOptional(), dm.getFilter(), dep.getState(), instanceDescription);
+                    DependencyDescription dd = new DependencyDescription(dep.getSpecification(), dep.isMultiple(), dep.isOptional(), dep.getFilter(), dep.getState(), instanceDescription);
+                    dd.setServiceReferences(dep.getServiceReferences());
                     dd.setUsedServices(dep.getUsedServices());
                     dhd.addDependency(dd);
                 }

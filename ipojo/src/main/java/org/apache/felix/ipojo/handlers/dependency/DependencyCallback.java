@@ -19,8 +19,11 @@
 package org.apache.felix.ipojo.handlers.dependency;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
-import org.apache.felix.ipojo.util.Callback;
+import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.util.Logger;
+import org.osgi.framework.ServiceReference;
 
 
 /**
@@ -45,10 +48,19 @@ public class DependencyCallback {
     private int m_methodType;
 
     /**
-     * Callback object.
+     * Callback method name.
      */
-    private Callback m_callback;
-
+    private String m_callback;
+    
+    /**
+     * Is the callback a static callback
+     */
+    private boolean m_isStatic;
+    
+    /**
+     * The instance manager
+     */
+    private InstanceManager m_manager;
 
     /**
      * Constructor.
@@ -59,7 +71,9 @@ public class DependencyCallback {
      */
     public DependencyCallback(Dependency dep, String method, int methodType, boolean isStatic) {
         m_methodType = methodType;
-        m_callback = new Callback(method, isStatic, dep.getDependencyHandler().getInstanceManager());
+        m_callback = method;
+        m_isStatic = isStatic;
+        m_manager = dep.getDependencyHandler().getInstanceManager();
     }
 
     /**
@@ -74,38 +88,116 @@ public class DependencyCallback {
      * @throws IllegalAccessException : The method can not be invoked
      */
     protected void call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        m_callback.call();
+    	// Get the method object
+    	Method method = m_manager.getClazz().getMethod(m_callback, new Class[] {});
+    	
+        if (m_isStatic) { method.invoke(null, new Object[] {}); }
+        else {
+            // Two cases :
+            // - if instances already exists : call on each instances
+            // - if no instance exists : create an instance
+            if (m_manager.getPojoObjects().length == 0) {
+                m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Create the first instance " + m_manager.getPojoObject());
+                method.invoke(m_manager.getPojoObject(), new Object[]{});
+            } else {
+                for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
+                    method.invoke(m_manager.getPojoObjects()[i], new Object[] {});
+                }
+            }
+        }
     }
 
     /**
-     * Call the callback method.
+     * Call the callback method with a service reference.
+     * @param ref : the service reference to send to the method
      * @throws NoSuchMethodException : Method is not found in the class
      * @throws InvocationTargetException : The method is not static
      * @throws IllegalAccessException : The method can not be invoked
      */
-    protected void call(Object[] arg) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        m_callback.call(arg);
+    protected void call(ServiceReference ref) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    	// Get the method object
+    	Method method = m_manager.getClazz().getMethod(m_callback, new Class[] {ServiceReference.class});
+    	
+        if (m_isStatic) { method.invoke(null, new Object[] {ref}); }
+        else {
+            // Two cases :
+            // - if instances already exists : call on each instances
+            // - if no instance exists : create an instance
+            if (m_manager.getPojoObjects().length == 0) {
+                m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Create the first instance " + m_manager.getPojoObject());
+                method.invoke(m_manager.getPojoObject(), new Object[]{ref});
+            } else {
+                for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
+                    method.invoke(m_manager.getPojoObjects()[i], new Object[] {ref});
+                }
+            }
+        }
     }
 
     /**
-     * Call the callback on the given instance.
+     * Call the callback method with an object.
+     * @param o : the object to send to the method
+     * @throws NoSuchMethodException : Method is not found in the class
+     * @throws InvocationTargetException : The method is not static
+     * @throws IllegalAccessException : The method can not be invoked
+     */
+    protected void call(Object o) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    	// Get the method object
+    	Method method = m_manager.getClazz().getMethod(m_callback, new Class[] {Object.class});
+    	
+        if (m_isStatic) { method.invoke(null, new Object[] {o}); }
+        else {
+            // Two cases :
+            // - if instances already exists : call on each instances
+            // - if no instance exists : create an instance
+            if (m_manager.getPojoObjects().length == 0) {
+                m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Create the first instance " + m_manager.getPojoObject());
+                method.invoke(m_manager.getPojoObject(), new Object[]{o});
+            } else {
+                for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
+                    method.invoke(m_manager.getPojoObjects()[i], new Object[] {o});
+                }
+            }
+        }
+    }
+
+    /**
+     * Call the callback on the given instance with no parameters.
      * @param instance : the instance on which call the callback
      * @throws NoSuchMethodException : the method is not found
      * @throws IllegalAccessException : the method could not be called
      * @throws InvocationTargetException : an error happens in the called method
      */
-    protected void call(Object instance) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException { m_callback.call(instance); }
+    protected void callOnInstance(Object instance) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException { 
+    	Method method = instance.getClass().getMethod(m_callback, new Class[] {});
+    	method.invoke(instance, new Object[] {});
+   	}
 
     /**
      * Call the callback on the given instance with the given argument.
      * @param instance : the instance on which call the callback
-     * @param arg : the argument of the callback
+     * @param ref : the service reference to send to the callback
      * @throws NoSuchMethodException : the method is not found
      * @throws IllegalAccessException : the method could not be called
      * @throws InvocationTargetException : an error happens in the called method
      * @throws InvocationTargetException
      */
-    protected void call(Object instance, Object[] arg) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        m_callback.call(instance, arg);
+    protected void callOnInstance(Object instance, ServiceReference ref) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    	Method method = instance.getClass().getMethod(m_callback, new Class[] {ServiceReference.class});
+    	method.invoke(instance, new Object[] {ref});
+    }
+    
+    /**
+     * Call the callback on the given instance with the given argument.
+     * @param instance : the instance on which call the callback
+     * @param o : the service object to send to the callback
+     * @throws NoSuchMethodException : the method is not found
+     * @throws IllegalAccessException : the method could not be called
+     * @throws InvocationTargetException : an error happens in the called method
+     * @throws InvocationTargetException
+     */
+    protected void callOnInstance(Object instance, Object o) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    	Method method = instance.getClass().getMethod(m_callback, new Class[] {Object.class});
+    	method.invoke(instance, new Object[] {o});
     }
 }

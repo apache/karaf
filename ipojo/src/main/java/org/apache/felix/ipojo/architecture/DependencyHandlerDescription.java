@@ -77,6 +77,7 @@ public class DependencyHandlerDescription extends HandlerDescription {
             while (it.hasNext()) {
                 info += "\n \t\t Uses : " + it.next();
             }
+            info += "\n";
         }
         return info;
     }

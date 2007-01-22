@@ -28,6 +28,12 @@ import org.osgi.framework.BundleContext;
 public interface ComponentInstance {
 
     /**
+     * Component Instance State : STOPPED.
+     * The component instance is not started.
+     */
+    int STOPPED = 0;
+	
+	/**
      * Component Instance State : INVALID.
      * The component is invalid when it start or when a component dependency is unvalid.
      */
@@ -74,6 +80,11 @@ public interface ComponentInstance {
      * @return the name of the component instance
      */
     String getInstanceName();
+    
+    /**
+     * @return true if getState return 1 or 2.
+     */
+    boolean isStarted();
 
 
 }

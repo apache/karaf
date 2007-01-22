@@ -73,7 +73,7 @@ public class InstanceManager implements ComponentInstance {
     /**
      * Component state (STOPPED at the beginning).
      */
-    private int m_state = INVALID;
+    private int m_state = STOPPED;
 
     /**
      * Manipulatd clazz.
@@ -196,6 +196,8 @@ public class InstanceManager implements ComponentInstance {
      * Start the instance manager.
      */
     public void start() {
+    	if(m_state != STOPPED) { return; } // Instance already started
+    	
         // Start all the handlers
         m_factory.getLogger().log(Logger.INFO, "[" + m_className + "] Start the instance manager with " + m_handlers.length + " handlers");
 
@@ -214,12 +216,16 @@ public class InstanceManager implements ComponentInstance {
      * Stop the instance manager.
      */
     public void stop() {
+    	if(m_state == STOPPED) { return; } // Instance already stopped
+    	
         setState(INVALID);
         // Stop all the handlers
         for (int i = m_handlers.length - 1; i > -1; i--) {
             m_handlers[i].stop();
         }
         m_pojoObjects = new Object[0];
+        
+        m_state = STOPPED;
     }
 
     /**
@@ -230,7 +236,7 @@ public class InstanceManager implements ComponentInstance {
         if (m_state != state) {
 
             // Log the state change
-            if (state == INVALID) { m_factory.getLogger().log(Logger.INFO, "[" + m_className + "]  State -> UNRESOLVED"); }
+            if (state == INVALID) { m_factory.getLogger().log(Logger.INFO, "[" + m_className + "]  State -> INVALID"); }
             if (state == VALID) { m_factory.getLogger().log(Logger.INFO, "[" + m_className + "] State -> VALID"); }
 
             // The state changed call the handler stateChange method
@@ -244,9 +250,12 @@ public class InstanceManager implements ComponentInstance {
     /**
      * @return the actual state of the component.
      */
-    public int getState() {
-        return m_state;
-    }
+    public int getState() { return m_state; }
+    
+    /**
+     * @see org.apache.felix.ipojo.ComponentInstance#isStarted()
+     */
+    public boolean isStarted() { return m_state != STOPPED; }
 
     // ===================== end Lifecycle management =====================
 
