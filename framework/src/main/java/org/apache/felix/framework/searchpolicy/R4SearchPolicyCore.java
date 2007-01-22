@@ -35,8 +35,7 @@ public class R4SearchPolicyCore implements ModuleListener
     private Logger m_logger = null;
     private PropertyResolver m_config = null;
     private IModuleFactory m_factory = null;
-    private Map m_availPkgMap = new HashMap();
-    private Map m_inUsePkgMap = new HashMap();
+    private Map m_inUseCapMap = new HashMap();
     private Map m_moduleDataMap = new HashMap();
 
     // Boot delegation packages.
@@ -49,6 +48,8 @@ public class R4SearchPolicyCore implements ModuleListener
 
     // Reusable empty array.
     public static final IModule[] m_emptyModules = new IModule[0];
+    public static final ICapability[] m_emptyCapabilities = new ICapability[0];
+    public static final ResolverCandidate[] m_emptyCandidates= new ResolverCandidate[0];
 
     // Re-usable security manager for accessing class context.
     private static SecurityManagerEx m_sm = new SecurityManagerEx();
@@ -115,17 +116,25 @@ public class R4SearchPolicyCore implements ModuleListener
 
     public Object[] definePackage(IModule module, String pkgName)
     {
-        R4Package pkg = Util.getExportPackage(module, pkgName);
-        if (pkg != null)
+        try
         {
-            return new Object[] {
-                pkgName, // Spec title.
-                pkg.getVersion().toString(), // Spec version.
-                "", // Spec vendor.
-                "", // Impl title.
-                "", // Impl version.
-                "" // Impl vendor.
-            };
+            ICapability cap = Util.getSatisfyingCapability(module,
+                new Requirement(ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")"));
+            if (cap != null)
+            {
+                return new Object[] {
+                    pkgName, // Spec title.
+                    cap.getProperties().get(ICapability.VERSION_PROPERTY).toString(), // Spec version.
+                    "", // Spec vendor.
+                    "", // Impl title.
+                    "", // Impl version.
+                    "" // Impl vendor.
+                };
+            }
+        }
+        catch (InvalidSyntaxException ex)
+        {
+            // This should never happen.
         }
         return null;
     }
@@ -194,7 +203,7 @@ public class R4SearchPolicyCore implements ModuleListener
             }
             // We need to throw a resource not found exception.
             throw new ResourceNotFoundException(name
-                + ": cannot resolve package " + ex.getPackage());
+                + ": cannot resolve requirement " + ex.getRequirement());
         }
 
         // Get the package of the target class/resource.
@@ -297,7 +306,7 @@ public class R4SearchPolicyCore implements ModuleListener
                 // potentially leak internal module information.
                 throw new ClassNotFoundException(
                     name + ": cannot resolve package "
-                    + ex.getPackage());
+                    + ex.getRequirement());
             }
             else
             {
@@ -313,7 +322,7 @@ public class R4SearchPolicyCore implements ModuleListener
                 // We need to throw a resource not found exception.
                 throw new ResourceNotFoundException(
                     name + ": cannot resolve package "
-                    + ex.getPackage());
+                    + ex.getRequirement());
             }
         }
 
@@ -476,141 +485,113 @@ public class R4SearchPolicyCore implements ModuleListener
         return null;
     }
 
-    private IWire attemptDynamicImport(IModule module, String pkgName)
+    private IWire attemptDynamicImport(IModule importer, String pkgName)
     {
         R4Wire wire = null;
-        IModule candidate = null;
+        ResolverCandidate candidate = null;
 
         // There is an overriding assumption here that a package is
         // never split across bundles. If a package can be split
         // across bundles, then this will fail.
 
-        try
+        // Only attempt to dynamically import a package if the module does
+        // not already have a wire for the package; this may be the case if
+        // the class being searched for actually does not exist.
+        if (Util.getWire(importer, pkgName) == null)
         {
-            // Get the matching dynamic import, if any.
-            R4Import impMatch = createDynamicImportTarget(module, pkgName);
-
-            // If the target package does not match any dynamically imported
-            // packages or if the module is already wired for the target package,
-            // then just return null. The module may be already wired to the target
-            // package if the class being searched for does not actually exist.
-            if ((impMatch == null) || (Util.getWire(module, impMatch.getName()) != null))
+            // Loop through the importer's dynamic requirements to determine if
+            // there is a matching one for the package from which we want to
+            // load a class.
+            IRequirement[] dynamics = importer.getDefinition().getDynamicRequirements();
+            for (int i = 0; (dynamics != null) && (i < dynamics.length); i++)
             {
-                return null;
-            }
-
-            // At this point, the target package has matched a dynamically
-            // imported package spec. Now we must try to find a candidate
-            // exporter for target package and add it to the module's set
-            // of wires.
-
-            // Lock module manager instance to ensure that nothing changes.
-            synchronized (m_factory)
-            {
-                // Try to add a new entry to the module's import attribute.
-                // Select the first candidate that successfully resolves.
-
-                // First check already resolved exports for a match.
-                IModule[] candidates = getInUseExporters(impMatch, false);
-                // If there is an "in use" candidate, just take the first one.
-                if (candidates.length > 0)
+                // Constrain the current dynamic requirement to include
+                // the precise package name for which we are searching; this
+                // is necessary because we cannot easily determine which
+                // package name a given dynamic requirement matches, since
+                // it is only a filter.
+                IRequirement req = null;
+                try
                 {
-                    candidate = candidates[0];
+                    req = new Requirement(
+                        ICapability.PACKAGE_NAMESPACE,
+                        "(&" + dynamics[i].getFilter().toString()
+                            + "(package=" + pkgName + "))");
+                }
+                catch (InvalidSyntaxException ex)
+                {
+                    // This should never happen.
                 }
 
-                // If there were no "in use" candidates, then try "available"
-                // candidates and take the first one that can resolve.
-                if (candidate == null)
+                // See if there is a candidate exporter that satisfies the
+                // constrained dynamic requirement.
+                try
                 {
-                    candidates = getAvailableExporters(impMatch, false);
-                    for (int candIdx = 0;
-                        (candidate == null) && (candIdx < candidates.length);
-                        candIdx++)
+                    // Lock module manager instance to ensure that nothing changes.
+                    synchronized (m_factory)
                     {
-                        try
+                        // First check "in use" candidates for a match.
+                        ResolverCandidate[] candidates = getInUseCandidates(req, false);
+                        // If there is an "in use" candidate, just take the first one.
+                        if (candidates.length > 0)
                         {
-                            resolve(candidates[candIdx]);
-                            candidate = candidates[candIdx];
+                            candidate = candidates[0];
                         }
-                        catch (ResolveException ex)
-                        {
-                        }
-                    }
-                }
 
-                // If we found a candidate, then add it to the module's
-                // wiring attribute.
-                if (candidate != null)
-                {
-                    IWire[] wires = module.getWires();
-                    R4Wire[] newWires = null;
-                    if (wires == null)
-                    {
-                        newWires = new R4Wire[1];
-                    }
-                    else
-                    {
-                        newWires = new R4Wire[wires.length + 1];
-                        System.arraycopy(wires, 0, newWires, 0, wires.length);
-                    }
-                    // Find the candidate's export package object and
-                    // use that for creating the wire; this is necessary
-                    // since it contains "uses" dependency information.
-                    wire = new R4Wire(
-                        module, candidate,
-                        Util.getExportPackage(candidate, impMatch.getName()));
-                    newWires[newWires.length - 1] = wire;
-                    ((ModuleImpl) module).setWires(newWires);
+                        // If there were no "in use" candidates, then try "available"
+                        // candidates.
+                        if (candidate == null)
+                        {
+                            candidates = getAvailableCandidates(req, false);
+
+                            // Take the first candidate that can resolve.
+                            for (int candIdx = 0;
+                                (candidate == null) && (candIdx < candidates.length);
+                                candIdx++)
+                            {
+                                try
+                                {
+                                    resolve(candidates[candIdx].m_module);
+                                    candidate = candidates[candIdx];
+                                }
+                                catch (ResolveException ex)
+                                {
+                                    // Ignore candidates that cannot resolve.
+                                }
+                            }
+                        }
+
+                        if (candidate != null)
+                        {
+                            IWire[] wires = importer.getWires();
+                            R4Wire[] newWires = null;
+                            if (wires == null)
+                            {
+                                newWires = new R4Wire[1];
+                            }
+                            else
+                            {
+                                newWires = new R4Wire[wires.length + 1];
+                                System.arraycopy(wires, 0, newWires, 0, wires.length);
+                            }
+
+                            // Create the wire and add it to the module.
+                            wire = new R4Wire(
+                                importer, candidate.m_module, candidate.m_capability);
+                            newWires[newWires.length - 1] = wire;
+                            ((ModuleImpl) importer).setWires(newWires);
 m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    m_logger.log(Logger.LOG_ERROR, "Unable to dynamically import package.", ex);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(Logger.LOG_ERROR, "Unable to dynamically import package.", ex);
         }
 
         return wire;
-    }
-
-    private R4Import createDynamicImportTarget(IModule module, String pkgName)
-    {
-        // Check the dynamic import specs for a match of
-        // the target package.
-        R4Import[] dynamics = module.getDefinition().getDynamicImports();
-        R4Import impMatch = null;
-        for (int i = 0; (impMatch == null) && (dynamics != null)
-            && (i < dynamics.length); i++)
-        {
-            // Star matches everything.
-            if (dynamics[i].getName().equals("*"))
-            {
-                // Create a package instance without wildcard.
-                impMatch = new R4Import(pkgName, dynamics[i]
-                    .getDirectives(), dynamics[i].getAttributes());
-            }
-            // Packages ending in ".*" must match starting strings.
-            else if (dynamics[i].getName().endsWith(".*"))
-            {
-                if (pkgName.regionMatches(0, dynamics[i].getName(), 0,
-                    dynamics[i].getName().length() - 2))
-                {
-                    // Create a package instance without wildcard.
-                    impMatch = new R4Import(pkgName, dynamics[i]
-                        .getDirectives(), dynamics[i].getAttributes());
-                }
-            }
-            // Or we can have a precise match.
-            else
-            {
-                if (pkgName.equals(dynamics[i].getName()))
-                {
-                    impMatch = dynamics[i];
-                }
-            }
-        }
-
-        return impMatch;
     }
 
     public String findLibrary(IModule module, String name)
@@ -630,54 +611,95 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 return lib;
             }
         }
+
         return null;
     }
 
-    public IModule[] getAvailableExporters(R4Import pkg, boolean includeRemovalPending)
+    public ResolverCandidate[] getInUseCandidates(IRequirement req, boolean includeRemovalPending)
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
         synchronized (m_factory)
         {
-            IModule[] exporters = getCompatibleExporters(
-                (IModule[]) m_availPkgMap.get(pkg.getName()), pkg, includeRemovalPending);
-
-            if ((exporters != null) && (System.getSecurityManager() != null))
+            ResolverCandidate[] candidates = m_emptyCandidates;
+            Iterator i = m_inUseCapMap.entrySet().iterator();
+            while (i.hasNext())
             {
-                PackagePermission perm = new PackagePermission(pkg.getName(),
-                    PackagePermission.EXPORT);
-
-                for (int i = 0; i < exporters.length; i++)
+                Map.Entry entry = (Map.Entry) i.next();
+                IModule module = (IModule) entry.getKey();
+                // The spec says that we cannot consider modules that
+                // are pending removal, so ignore them.
+                if (includeRemovalPending || !module.isRemovalPending())
                 {
-                    if (exporters[i] != null)
+                    ICapability[] inUseCaps = (ICapability[]) entry.getValue();
+                    for (int capIdx = 0; capIdx < inUseCaps.length; capIdx++)
                     {
-                        if (!((ProtectionDomain) exporters[i].getSecurityContext()).implies(perm))
+                        if (req.isSatisfied(inUseCaps[capIdx]))
                         {
-                            m_logger.log(Logger.LOG_DEBUG,
-                                "PackagePermission.EXPORT denied for " + pkg +
-                                "from " + exporters[i].getId());
-
-                            exporters[i] = null;
+// TODO: RB - Is this permission check correct.
+                            if (inUseCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+                                (System.getSecurityManager() != null) &&
+                                !((ProtectionDomain) module.getSecurityContext()).implies(
+                                    new PackagePermission(
+                                        (String) inUseCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY),
+                                        PackagePermission.EXPORT)))
+                            {
+                                m_logger.log(Logger.LOG_DEBUG,
+                                    "PackagePermission.EXPORT denied for "
+                                    + inUseCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY)
+                                    + "from " + module.getId());
+                            }
+                            else
+                            {
+                                ResolverCandidate[] tmp = new ResolverCandidate[candidates.length + 1];
+                                System.arraycopy(candidates, 0, tmp, 0, candidates.length);
+                                tmp[candidates.length] = new ResolverCandidate(module, inUseCaps[capIdx]);
+                                candidates = tmp;
+                            }
                         }
                     }
                 }
-
-                exporters = shrinkModuleArray(exporters);
             }
-
-            return exporters;
+            return candidates;
         }
     }
 
-    public IModule[] getInUseExporters(R4Import pkg, boolean includeRemovalPending)
+    public ResolverCandidate[] getAvailableCandidates(IRequirement req, boolean includeRemovalPending)
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
         synchronized (m_factory)
         {
-            return getCompatibleExporters(
-                (IModule[]) m_inUsePkgMap.get(pkg.getName()), pkg, includeRemovalPending);
+            return getCompatibleCandidates(
+                (IModule[]) m_factory.getModules(), req, includeRemovalPending);
         }
+    }
+
+    private ResolverCandidate[] getCompatibleCandidates(
+        IModule[] modules, IRequirement req, boolean includeRemovalPending)
+    {
+        // Create list of compatible exporters.
+        ResolverCandidate[] candidates = m_emptyCandidates;
+        for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
+        {
+            // The spec says that we cannot consider modules that
+            // are pending removal, so ignore them.
+            if (includeRemovalPending || !modules[modIdx].isRemovalPending())
+            {
+                // Get the module's export package for the target package.
+                ICapability cap = Util.getSatisfyingCapability(modules[modIdx], req);
+                // If compatible, then add the candidate to the list.
+                if (cap != null)
+                {
+                    ResolverCandidate[] tmp = new ResolverCandidate[candidates.length + 1];
+                    System.arraycopy(candidates, 0, tmp, 0, candidates.length);
+                    tmp[candidates.length] = new ResolverCandidate(modules[modIdx], cap);
+                    candidates = tmp;
+                }
+            }
+        }
+
+        return candidates;
     }
 
     public void resolve(IModule rootModule)
@@ -767,7 +789,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         {
             return;
         }
-        // Map to hold the module's import packages
+        // List to hold the module's import packages
         // and their respective resolving candidates.
         List nodeList = new ArrayList();
 
@@ -778,16 +800,17 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
         // Loop through each import and calculate its resolving
         // set of candidates.
-        R4Import[] imports = module.getDefinition().getImports();
-        for (int impIdx = 0; (imports != null) && (impIdx < imports.length); impIdx++)
+        IRequirement[] reqs = module.getDefinition().getRequirements();
+        for (int reqIdx = 0; (reqs != null) && (reqIdx < reqs.length); reqIdx++)
         {
             // Get the candidates from the "in use" and "available"
             // package maps. Candidates "in use" have higher priority
             // than "available" ones, so put the "in use" candidates
             // at the front of the list of candidates.
-            IModule[] inuse = getInUseExporters(imports[impIdx], false);
-            IModule[] available = getAvailableExporters(imports[impIdx], false);
-            IModule[] candidates = new IModule[inuse.length + available.length];
+            ResolverCandidate[] inuse = getInUseCandidates(reqs[reqIdx], false);
+            ResolverCandidate[] available = getAvailableCandidates(reqs[reqIdx], false);
+            ResolverCandidate[] candidates = new ResolverCandidate[inuse.length + available.length];
+// TODO: RB - This duplicates "in use" candidates from "available" candidates.
             System.arraycopy(inuse, 0, candidates, 0, inuse.length);
             System.arraycopy(available, 0, candidates, inuse.length, available.length);
 
@@ -802,9 +825,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     {
                         // Only populate the resolver map with modules that
                         // are not already resolved.
-                        if (!isResolved(candidates[candIdx]))
+                        if (!isResolved(candidates[candIdx].m_module))
                         {
-                            populateResolverMap(resolverMap, candidates[candIdx]);
+                            populateResolverMap(resolverMap, candidates[candIdx].m_module);
                         }
                     }
                     catch (ResolveException ex)
@@ -820,19 +843,13 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
                 // Remove any nulled candidates to create the final list
                 // of available candidates.
-                candidates = shrinkModuleArray(candidates);
+                candidates = shrinkCandidateArray(candidates);
             }
 
             // If no candidates exist at this point, then throw a
             // resolve exception unless the import is optional.
-            if ((candidates.length == 0) && !imports[impIdx].isOptional())
+            if ((candidates.length == 0) && !reqs[reqIdx].isOptional())
             {
-                // Since we are not able to resolve the module, we must
-                // remove the module from the resolve map so that subsequent
-                // resolves do not think that the module is resolvable due
-                // to the cycle check at the beginning of this method.
-                resolverMap.remove(module);
-                
                 // If we have received an exception while trying to populate
                 // the resolver map, rethrow that exception since it might
                 // be useful. NOTE: This is not necessarily the "only"
@@ -846,24 +863,25 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 else
                 {
                     throw new ResolveException(
-                        "Unable to resolve.", module, imports[impIdx]);
+                        "Unable to resolve.", module, reqs[reqIdx]);
                 }
             }
             else if (candidates.length > 0)
             {
                 nodeList.add(
-                    new ResolverNode(module, imports[impIdx], candidates));
+                    new ResolverNode(module, reqs[reqIdx], candidates));
             }
         }
     }
 
 // TODO: REMOVE THESE DEBUG METHODS.
+/*
     private void dumpAvailablePackages()
     {
         synchronized (this)
         {
             System.out.println("AVAILABLE PACKAGES:");
-            for (Iterator i = m_availPkgMap.entrySet().iterator(); i.hasNext(); )
+            for (Iterator i = m_availCapMap.entrySet().iterator(); i.hasNext(); )
             {
                 Map.Entry entry = (Map.Entry) i.next();
                 IModule[] modules = (IModule[]) entry.getValue();
@@ -878,54 +896,26 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             }
         }
     }
-
+*/
     private void dumpUsedPackages()
     {
         synchronized (this)
         {
-            System.out.println("USED PACKAGES:");
-            for (Iterator i = m_inUsePkgMap.entrySet().iterator(); i.hasNext(); )
+            System.out.println("PACKAGES IN USE:");
+            for (Iterator i = m_inUseCapMap.entrySet().iterator(); i.hasNext(); )
             {
                 Map.Entry entry = (Map.Entry) i.next();
-                IModule[] modules = (IModule[]) entry.getValue();
-                if ((modules != null) && (modules.length > 0))
+                ICapability[] caps = (ICapability[]) entry.getValue();
+                if ((caps != null) && (caps.length > 0))
                 {
                     System.out.println("  " + entry.getKey());
-                    for (int j = 0; j < modules.length; j++)
+                    for (int j = 0; j < caps.length; j++)
                     {
-                        System.out.println("    " + modules[j]);
+                        System.out.println("    " + caps[j]);
                     }
                 }
             }
         }
-    }
-
-    private IModule[] getCompatibleExporters(
-        IModule[] modules, R4Import target, boolean includeRemovalPending)
-    {
-        // Create list of compatible exporters.
-        IModule[] candidates = null;
-        for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
-        {
-            // The spec says that we cannot consider modules that
-            // are pending removal, so ignore them.
-            if (includeRemovalPending || !modules[modIdx].isRemovalPending())
-            {
-                // Get the modules export package for the target package.
-                R4Export export = Util.getExportPackage(
-                    modules[modIdx], target.getName());
-                // If compatible, then add the candidate to the list.
-                if ((export != null) && (target.isSatisfied(export)))
-                {
-                    candidates = addModuleToArray(candidates, modules[modIdx]);
-                }
-            }
-        }
-        if (candidates == null)
-        {
-            return m_emptyModules;
-        }
-        return candidates;
     }
 
     private void findConsistentClassSpace(Map resolverMap, IModule rootModule)
@@ -979,29 +969,50 @@ m_logger.log(
         // Add to cycle map for future reference.
         cycleMap.put(rootModule, rootModule);
 
+        // Get the resolver node list for the root module.
+        List nodeList = (List) resolverMap.get(rootModule);
+
         // Create an implicit "uses" constraint for every exported package
         // of the root module that is not also imported; uses constraints
         // for exported packages that are also imported will be taken
         // care of as part of normal import package processing.
-        R4Export[] exports = rootModule.getDefinition().getExports();
+        ICapability[] caps = rootModule.getDefinition().getCapabilities();
         Map usesMap = new HashMap();
-        for (int i = 0; (exports != null) && (i < exports.length); i++)
+        for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
         {
             // Ignore exports that are also imported, since they
             // will be taken care of when verifying import constraints.
-            if (Util.getImportPackage(rootModule, exports[i].getName()) == null)
+            if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
             {
-                usesMap.put(exports[i].getName(), rootModule);
+                // To find the import, check current candidates to see if
+                // they are providing an exported package, since we cannot
+                // find the imported package directly from the root module's
+                // requirements, since it is a filter.
+                boolean found = false;
+                for (int nodeIdx = 0; !found && (nodeIdx < nodeList.size()); nodeIdx++)
+                {
+                    ResolverNode node = (ResolverNode) nodeList.get(nodeIdx);
+                    ICapability candCap = node.m_candidates[node.m_idx].m_capability;
+                    if (candCap.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+                        candCap.getProperties().get(ICapability.PACKAGE_PROPERTY).equals(
+                            caps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY)))
+                    {
+                        found = true;
+                    }
+                }
+
+                if (!found)
+                {
+                    usesMap.put(caps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY), rootModule);
+                }
             }
         }
 
-        // Loop through the current candidates for the module's imports
-        // (available in the resolver node list of the resolver map) and
-        // calculate the uses constraints for each of the currently
-        // selected candidates for resolving the imports. Compare each
-        // candidate's constraints to the existing constraints to check
-        // for conflicts.
-        List nodeList = (List) resolverMap.get(rootModule);
+        // Use the resolver node list to loop through the current candidates
+        // for the root module's imports and calculate the uses constraints
+        // for each of the currently selected candidates for resolving its
+        // imports. Compare each candidate's constraints to the existing
+        // constraints to check for conflicts.
         for (int nodeIdx = 0; nodeIdx < nodeList.size(); nodeIdx++)
         {
             // Verify that the current candidate does not violate
@@ -1016,23 +1027,23 @@ m_logger.log(
             // Verify that the current candidate itself has a consistent
             // class space.
             if (!isClassSpaceConsistent(
-                resolverMap, node.m_candidates[node.m_idx], cycleMap))
+                resolverMap, node.m_candidates[node.m_idx].m_module, cycleMap))
             {
                 return false;
             }
 
             // Get the exported package from the current candidate that
             // will be used to resolve the root module's import.
-            R4Export candidatePkg = Util.getExportPackage(
-                node.m_candidates[node.m_idx], node.m_import.getName());
+            ICapability candidateCap = Util.getSatisfyingCapability(
+                node.m_candidates[node.m_idx].m_module, node.m_requirement);
 
             // Calculate the "uses" dependencies implied by the candidate's
             // exported package with respect to the currently selected
             // candidates in the resolver map.
             Map candUsesMap = calculateUsesDependencies(
                 resolverMap,
-                node.m_candidates[node.m_idx],
-                candidatePkg,
+                node.m_candidates[node.m_idx].m_module,
+                candidateCap,
                 new HashMap());
 
             // Iterate through the root module's current set of transitive
@@ -1064,26 +1075,26 @@ m_logger.log(
     }
 
     private Map calculateUsesDependencies(
-        Map resolverMap, IModule module, R4Export export, Map usesMap)
+        Map resolverMap, IModule module, ICapability cap, Map usesMap)
     {
 // TODO: CAN THIS BE OPTIMIZED?
 // TODO: IS THIS CYCLE CHECK CORRECT??
 // TODO: WHAT HAPPENS IF THERE ARE OVERLAPS WHEN CALCULATING USES??
 //       MAKE AN EXAMPLE WHERE TWO DEPENDENCIES PROVIDE SAME PACKAGE.
         // Make sure we are not in a cycle.
-        if (usesMap.get(export.getName()) != null)
+        if (usesMap.get(cap.getProperties().get(ICapability.PACKAGE_PROPERTY)) != null)
         {
             return usesMap;
         }
 
         // The target package at least uses itself,
         // so add it to the uses map.
-        usesMap.put(export.getName(), module);
+        usesMap.put(cap.getProperties().get(ICapability.PACKAGE_PROPERTY), module);
 
         // Get the "uses" constraints for the target export
         // package and calculate the transitive uses constraints
         // of any used packages.
-        String[] uses = export.getUses();
+        String[] uses = ((Capability) cap).getUses();
         List nodeList = (List) resolverMap.get(module);
 
         // We need to walk the transitive closure of "uses" relationships
@@ -1104,21 +1115,30 @@ m_logger.log(
             if (nodeList == null)
             {
                 // Get the actual exporter from the wire or if there
-                // is no wire, then get the export is from the module
+                // is no wire, then get the export from the module
                 // itself.
                 IWire wire = Util.getWire(module, uses[usesIdx]);
                 if (wire != null)
                 {
                     usesMap = calculateUsesDependencies(
-                        resolverMap, wire.getExporter(), wire.getExport(), usesMap);
+                        resolverMap, wire.getExporter(), wire.getCapability(), usesMap);
                 }
                 else
                 {
-                    export = Util.getExportPackage(module, uses[usesIdx]);
-                    if (export != null)
+                    try
+                    {
+                        cap = Util.getSatisfyingCapability(
+                            module, new Requirement(
+                                ICapability.PACKAGE_NAMESPACE, "(package=" + uses[usesIdx] + ")"));
+                    }
+                    catch (InvalidSyntaxException ex)
+                    {
+                        // This should never happen.
+                    }
+                    if (cap != null)
                     {
                         usesMap = calculateUsesDependencies(
-                            resolverMap, module, export, usesMap);
+                            resolverMap, module, cap, usesMap);
                     }
                 }
             }
@@ -1132,7 +1152,10 @@ m_logger.log(
                     nodeIdx++)
                 {
                     node = (ResolverNode) nodeList.get(nodeIdx);
-                    if (!node.m_import.getName().equals(uses[usesIdx]))
+                    ICapability usedCap = Util.getSatisfyingCapability(node.m_module, node.m_requirement);
+                    if ((usedCap == null) ||
+                        !usedCap.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) ||
+                        !usedCap.getProperties().get(ICapability.PACKAGE_PROPERTY).equals(uses[usesIdx]))
                     {
                         node = null;
                     }
@@ -1144,23 +1167,49 @@ m_logger.log(
                 // the potential exporting module.
                 if (node != null)
                 {
-                    usesMap = calculateUsesDependencies(
-                        resolverMap,
-                        node.m_candidates[node.m_idx],
-                        Util.getExportPackage(node.m_candidates[node.m_idx], node.m_import.getName()),
-                        usesMap);
+                    try
+                    {
+                        ICapability candCap = Util.getSatisfyingCapability(
+                            node.m_candidates[node.m_idx].m_module,
+                            new Requirement(
+                                ICapability.PACKAGE_NAMESPACE,
+                                "(package=" + uses[usesIdx] + ")"));
+                        usesMap = calculateUsesDependencies(
+                            resolverMap,
+                            node.m_candidates[node.m_idx].m_module,
+                            candCap,
+                            usesMap);
+                    }
+                    catch (InvalidSyntaxException ex)
+                    {
+                        // This should never happen.
+                    }
                 }
-                // If there was no resolver node for the "used" package,
-                // then this means that the module exports the package
-                // and we need to recursively add the constraints of this
-                // other exported package of this module.
-                else if (Util.getExportPackage(module, uses[usesIdx]) != null)
+                else
                 {
-                    usesMap = calculateUsesDependencies(
-                        resolverMap,
-                        module,
-                        Util.getExportPackage(module, uses[usesIdx]),
-                        usesMap);
+                    // If there was no resolver node for the "used" package,
+                    // then this means that the module exports the package
+                    // and we need to recursively add the constraints of the
+                    // other exported packages of this module.
+                    try
+                    {
+                        ICapability usedCap = Util.getSatisfyingCapability(
+                            module, new Requirement(
+                                ICapability.PACKAGE_NAMESPACE,
+                                "(package=" + uses[usesIdx] + ")"));
+                        if (usedCap != null)
+                        {
+                            usesMap = calculateUsesDependencies(
+                                resolverMap,
+                                module,
+                                usedCap,
+                                usesMap);
+                        }
+                    }
+                    catch (InvalidSyntaxException ex)
+                    {
+                        // This should never happen.
+                    }
                 }
             }
         }
@@ -1225,50 +1274,59 @@ m_logger.log(
                 wireIdx++)
             {
 m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
-                // First remove the wire module from "available" package map.
-                IModule[] modules = (IModule[]) m_availPkgMap.get(wires[wireIdx].getExport().getName());
-                modules = removeModuleFromArray(modules, wires[wireIdx].getExporter());
-                m_availPkgMap.put(wires[wireIdx].getExport().getName(), modules);
-
-                // Also remove any exported packages from the "available"
-                // package map that are from the module associated with
-                // the current wires where the exported packages were not
-                // actually exported; an export may not be exported if
-                // the module also imports the same package and was wired
-                // to a different module. If the exported package is not
-                // actually exported, then we just want to remove it
-                // completely, since it cannot be used.
-                if (wires[wireIdx].getExporter() != module)
-                {
-                    modules = (IModule[]) m_availPkgMap.get(wires[wireIdx].getExport().getName());
-                    modules = removeModuleFromArray(modules, module);
-                    m_availPkgMap.put(wires[wireIdx].getExport().getName(), modules);
-                }
-
                 // Add the module of the wire to the "in use" package map.
-                modules = (IModule[]) m_inUsePkgMap.get(wires[wireIdx].getExport().getName());
-                modules = addModuleToArray(modules, wires[wireIdx].getExporter());
-                m_inUsePkgMap.put(wires[wireIdx].getExport().getName(), modules);
+                ICapability[] inUseCaps = (ICapability[]) m_inUseCapMap.get(wires[wireIdx].getExporter());
+                inUseCaps = addCapabilityToArray(inUseCaps, wires[wireIdx].getCapability());
+                m_inUseCapMap.put(wires[wireIdx].getExporter(), inUseCaps);                
+            }
+
+            // Also add the module's capabilities to the "in use" map
+            // if the capability is not matched by a requirement. If the
+            // capability is matched by a requirement, then it is handled
+            // above when adding the wired modules to the "in use" map.
+// TODO: RB - Bug here because a requirement for a package need not overlap the
+//            capability for that package and this assumes it does.
+            ICapability[] caps = module.getDefinition().getCapabilities();
+            IRequirement[] reqs = module.getDefinition().getRequirements();
+            for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
+            {
+                boolean matched = false;
+                for (int reqIdx = 0;
+                    !matched && (reqs != null) && (reqIdx < reqs.length);
+                    reqIdx++)
+                {
+                    if (reqs[reqIdx].isSatisfied(caps[capIdx]))
+                    {
+                        matched = true;
+                    }
+                }
+                if (!matched)
+                {
+                    ICapability[] inUseCaps = (ICapability[]) m_inUseCapMap.get(module);
+                    inUseCaps = addCapabilityToArray(inUseCaps, caps[capIdx]);
+                    m_inUseCapMap.put(module, inUseCaps);                
+                }
             }
         }
+
         return resolvedModuleWireMap;
     }
 
-    private Map populateWireMap(Map resolverMap, IModule module, Map wireMap)
+    private Map populateWireMap(Map resolverMap, IModule importer, Map wireMap)
     {
         // If the module is already resolved or it is part of
         // a cycle, then just return the wire map.
-        if (isResolved(module) || (wireMap.get(module) != null))
+        if (isResolved(importer) || (wireMap.get(importer) != null))
         {
             return wireMap;
         }
 
-        List nodeList = (List) resolverMap.get(module);
+        List nodeList = (List) resolverMap.get(importer);
         IWire[] wires = new IWire[nodeList.size()];
 
         // Put the module in the wireMap with an empty wire array;
         // we do this early so we can use it to detect cycles.
-        wireMap.put(module, wires);
+        wireMap.put(importer, wires);
 
         // Loop through each resolver node and create a wire
         // for the selected candidate for the associated import.
@@ -1278,12 +1336,14 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             ResolverNode node = (ResolverNode) nodeList.get(nodeIdx);
 
             // Add the candidate to the list of wires.
-            R4Export export =
-                Util.getExportPackage(node.m_candidates[node.m_idx], node.m_import.getName());
-            wires[nodeIdx] = new R4Wire(module, node.m_candidates[node.m_idx], export);
+            wires[nodeIdx] = new R4Wire(
+                importer,
+                node.m_candidates[node.m_idx].m_module,
+                node.m_candidates[node.m_idx].m_capability);
 
             // Create the wires for the selected candidate module.
-            wireMap = populateWireMap(resolverMap, node.m_candidates[node.m_idx], wireMap);
+            wireMap = populateWireMap(
+                resolverMap, node.m_candidates[node.m_idx].m_module, wireMap);
         }
 
         return wireMap;
@@ -1441,17 +1501,18 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
     public void moduleAdded(ModuleEvent event)
     {
+/*
         synchronized (m_factory)
         {
             // When a module is added, create an aggregated list of available
             // exports to simplify later processing when resolving bundles.
             IModule module = event.getModule();
-            R4Export[] exports = module.getDefinition().getExports();
+            ICapability[] caps = module.getDefinition().getCapabilities();
 
             // Add exports to available package map.
-            for (int i = 0; (exports != null) && (i < exports.length); i++)
+            for (int i = 0; (caps != null) && (i < caps.length); i++)
             {
-                IModule[] modules = (IModule[]) m_availPkgMap.get(exports[i].getName());
+                IModule[] modules = (IModule[]) m_availCapMap.get(caps[i].getNamespace());
 
                 // We want to add the module into the list of available
                 // exporters in sorted order (descending version and
@@ -1503,9 +1564,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                     modules = newMods;
                 }
 
-                m_availPkgMap.put(exports[i].getName(), modules);
+                m_availCapMap.put(caps[i].getNamespace(), modules);
             }
         }
+*/
     }
 
     public void moduleRemoved(ModuleEvent event)
@@ -1518,26 +1580,31 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         // bundles to be installed or removed.
         synchronized (m_factory)
         {
+/*
             // Remove exports from package maps.
-            R4Export[] exports = event.getModule().getDefinition().getExports();
-            for (int i = 0; (exports != null) && (i < exports.length); i++)
+            ICapability[] caps = event.getModule().getDefinition().getCapabilities();
+            for (int i = 0; (caps != null) && (i < caps.length); i++)
             {
                 // Remove from "available" package map.
-                IModule[] modules = (IModule[]) m_availPkgMap.get(exports[i].getName());
+                IModule[] modules = (IModule[]) m_availCapMap.get(caps[i].getNamespace());
                 if (modules != null)
                 {
                     modules = removeModuleFromArray(modules, event.getModule());
-                    m_availPkgMap.put(exports[i].getName(), modules);
+                    m_availCapMap.put(caps[i].getNamespace(), modules);
                 }
+
                 // Remove from "in use" package map.
-                modules = (IModule[]) m_inUsePkgMap.get(exports[i].getName());
+                IModule[] modules = (IModule[]) m_inUseCapMap.get(caps[i].getNamespace());
                 if (modules != null)
                 {
                     modules = removeModuleFromArray(modules, event.getModule());
-                    m_inUsePkgMap.put(exports[i].getName(), modules);
+                    m_inUseCapMap.put(caps[i].getNamespace(), modules);
                 }
             }
-
+*/
+            // Remove the module from the "in use" map.
+// TODO: RB - Maybe this can be merged with ModuleData.
+            m_inUseCapMap.remove(event.getModule());
             // Finally, remove module data.
             m_moduleDataMap.remove(event.getModule());
         }
@@ -1572,7 +1639,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
         return modules;
     }
-
+/*
     private static IModule[] removeModuleFromArray(IModule[] modules, IModule m)
     {
         if (modules == null)
@@ -1612,35 +1679,129 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         }
         return modules;
     }
-
-    private static IModule[] shrinkModuleArray(IModule[] modules)
+*/
+    private static ResolverCandidate[] shrinkCandidateArray(ResolverCandidate[] candidates)
     {
-        if (modules == null)
+        if (candidates == null)
         {
-            return m_emptyModules;
+            return m_emptyCandidates;
         }
 
         // Move all non-null values to one end of the array.
         int lower = 0;
-        for (int i = 0; i < modules.length; i++)
+        for (int i = 0; i < candidates.length; i++)
         {
-            if (modules[i] != null)
+            if (candidates[i] != null)
             {
-                modules[lower++] = modules[i];
+                candidates[lower++] = candidates[i];
             }
         }
 
         if (lower == 0)
         {
-            return m_emptyModules;
+            return m_emptyCandidates;
         }
 
         // Copy non-null values into a new array and return.
-        IModule[] newModules = new IModule[lower];
-        System.arraycopy(modules, 0, newModules, 0, lower);
-        return newModules;
+        ResolverCandidate[] newCandidates= new ResolverCandidate[lower];
+        System.arraycopy(candidates, 0, newCandidates, 0, lower);
+        return newCandidates;
     }
 
+    private static ICapability[] addCapabilityToArray(ICapability[] caps, ICapability cap)
+    {
+        // Verify that the inuse is not already in the array.
+        for (int i = 0; (caps != null) && (i < caps.length); i++)
+        {
+            if (caps[i].equals(cap))
+            {
+                return caps;
+            }
+        }
+
+        if (caps != null)
+        {
+            ICapability[] newCaps = new ICapability[caps.length + 1];
+            System.arraycopy(caps, 0, newCaps, 0, caps.length);
+            newCaps[caps.length] = cap;
+            caps = newCaps;
+        }
+        else
+        {
+            caps = new ICapability[] { cap };
+        }
+
+        return caps;
+    }
+
+    private static ICapability[] removeCapabilityFromArray(ICapability[] caps, ICapability cap)
+    {
+        if (caps == null)
+        {
+            return m_emptyCapabilities;
+        }
+
+        int idx = -1;
+        for (int i = 0; i < caps.length; i++)
+        {
+            if (caps[i].equals(cap))
+            {
+                idx = i;
+                break;
+            }
+        }
+
+        if (idx >= 0)
+        {
+            // If this is the module, then point to empty list.
+            if ((caps.length - 1) == 0)
+            {
+                caps = m_emptyCapabilities;
+            }
+            // Otherwise, we need to do some array copying.
+            else
+            {
+                ICapability[] newCaps = new ICapability[caps.length - 1];
+                System.arraycopy(caps, 0, newCaps, 0, idx);
+                if (idx < newCaps.length)
+                {
+                    System.arraycopy(
+                        caps, idx + 1, newCaps, idx, newCaps.length - idx);
+                }
+                caps = newCaps;
+            }
+        }
+        return caps;
+    }
+/*
+    private static InUse[] shrinkInUseArray(InUse[] inuses)
+    {
+        if (inuses == null)
+        {
+            return m_emptyInUse;
+        }
+
+        // Move all non-null values to one end of the array.
+        int lower = 0;
+        for (int i = 0; i < inuses.length; i++)
+        {
+            if (inuses[i] != null)
+            {
+                inuses[lower++] = inuses[i];
+            }
+        }
+
+        if (lower == 0)
+        {
+            return m_emptyInUse;
+        }
+
+        // Copy non-null values into a new array and return.
+        InUse[] newInUse = new InUse[lower];
+        System.arraycopy(inuses, 0, newInUse, 0, lower);
+        return newInUse;
+    }
+*/
     //
     // Simple utility classes.
     //
@@ -1658,14 +1819,14 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
     private class ResolverNode
     {
         public IModule m_module = null;
-        public R4Import m_import = null;
-        public IModule[] m_candidates = null;
+        public IRequirement m_requirement = null;
+        public ResolverCandidate[] m_candidates = null;
         public int m_idx = 0;
         public boolean m_visited = false;
-        public ResolverNode(IModule module, R4Import imp, IModule[] candidates)
+        public ResolverNode(IModule module, IRequirement requirement, ResolverCandidate[] candidates)
         {
             m_module = module;
-            m_import = imp;
+            m_requirement = requirement;
             m_candidates = candidates;
             if (isResolved(m_module))
             {
@@ -1673,6 +1834,44 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             }
         }
     }
+
+    public class ResolverCandidate
+    {
+        public IModule m_module = null;
+        public ICapability m_capability = null;
+
+        public ResolverCandidate(IModule module, ICapability capability)
+        {
+            m_module = module;
+            m_capability = capability;
+        }
+    }
+
+    private class InUse
+    {
+        public IModule m_module = null;
+        public ICapability m_capability = null;
+        public InUse(IModule module, ICapability capability)
+        {
+            m_module = module;
+            m_capability = capability;
+        }
+
+        public boolean equals(Object obj)
+        {
+            if (obj instanceof InUse)
+            {
+                return m_module.equals(((InUse) obj).m_module) &&
+                    m_capability.equals(((InUse) obj).m_capability);
+            }
+
+            return false;
+        }
+    }
+
+    //
+    // Diagnostics.
+    //
 
     private String diagnoseClassLoadError(IModule module, String name)
     {
@@ -1689,7 +1888,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         IWire[] wires = module.getWires();
         for (int i = 0; (wires != null) && (i < wires.length); i++)
         {
-            if (wires[i].getExport().getName().equals(pkgName))
+            if (wires[i].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+                wires[i].getCapability().getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
             {
                 long expId = Util.getBundleIdFromModuleId(
                     wires[i].getExporter().getId());
@@ -1716,21 +1916,31 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
         // Next, check to see if the package was optionally imported and
         // whether or not there is an exporter available.
-        R4Import[] imports = module.getDefinition().getImports();
-        for (int i = 0; (imports != null) && (i < imports.length); i++)
+        IRequirement[] reqs = module.getDefinition().getRequirements();
+/*
+ * TODO: ML - Fix diagnostic message for optional imports.
+        for (int i = 0; (reqs != null) && (i < reqs.length); i++)
         {
-            if (imports[i].getName().equals(pkgName) && imports[i].isOptional())
+            if (reqs[i].getName().equals(pkgName) && reqs[i].isOptional())
             {
-                // Try to see if there is an exporter available. It may be
-                // the case that the package is exported, but the attributes
-                // do not match, so check that case too.
-                IModule[] exporters = getInUseExporters(imports[i], true);
+                // Try to see if there is an exporter available.
+                IModule[] exporters = getInUseExporters(reqs[i], true);
                 exporters = (exporters.length == 0)
-                    ? getAvailableExporters(imports[i], true) : exporters;
-                exporters = (exporters.length == 0)
-                    ? getInUseExporters(new R4Import(pkgName, null, null), true) : exporters;
-                exporters = (exporters.length == 0)
-                    ? getAvailableExporters(new R4Import(pkgName, null, null), true) : exporters;
+                    ? getAvailableExporters(reqs[i], true) : exporters;
+
+                // An exporter might be available, but it may have attributes
+                // that do not match the importer's required attributes, so
+                // check that case by simply looking for an exporter of the
+                // desired package without any attributes.
+                if (exporters.length == 0)
+                {
+                    IRequirement pkgReq = new Requirement(
+                        ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
+                    exporters = getInUseExporters(pkgReq, true);
+                    exporters = (exporters.length == 0)
+                        ? getAvailableExporters(pkgReq, true) : exporters;
+                }
+
                 long expId = (exporters.length == 0)
                     ? -1 : Util.getBundleIdFromModuleId(exporters[0].getId());
 
@@ -1745,8 +1955,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 {
                     sb.append(" However, bundle ");
                     sb.append(expId);
-                    if (imports[i].isSatisfied(
-                        Util.getExportPackage(exporters[0], imports[i].getName())))
+                    if (reqs[i].isSatisfied(
+                        Util.getExportPackage(exporters[0], reqs[i].getName())))
                     {
                         sb.append(" does export this package. Bundle ");
                         sb.append(expId);
@@ -1764,23 +1974,40 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 return sb.toString();
             }
         }
-
+*/
         // Next, check to see if the package is dynamically imported by the module.
-        R4Import imp = createDynamicImportTarget(module, pkgName);
+// TODO: RB - Fix dynamic import diagnostic.
+//        IRequirement imp = createDynamicImportTarget(module, pkgName);
+        IRequirement imp = null;
         if (imp != null)
         {
-            // Try to see if there is an exporter available. It may be
-            // the case that the package is exported, but the attributes
-            // do not match, so check that case too.
-            IModule[] exporters = getInUseExporters(imp, true);
+            // Try to see if there is an exporter available.
+            ResolverCandidate[] exporters = getInUseCandidates(imp, true);
             exporters = (exporters.length == 0)
-                ? getAvailableExporters(imp, true) : exporters;
-            exporters = (exporters.length == 0)
-                ? getInUseExporters(new R4Import(pkgName, null, null), true) : exporters;
-            exporters = (exporters.length == 0)
-                ? getAvailableExporters(new R4Import(pkgName, null, null), true) : exporters;
+                ? getAvailableCandidates(imp, true) : exporters;
+
+            // An exporter might be available, but it may have attributes
+            // that do not match the importer's required attributes, so
+            // check that case by simply looking for an exporter of the
+            // desired package without any attributes.
+            if (exporters.length == 0)
+            {
+                try
+                {
+                    IRequirement pkgReq = new Requirement(
+                        ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
+                    exporters = getInUseCandidates(pkgReq, true);
+                    exporters = (exporters.length == 0)
+                        ? getAvailableCandidates(pkgReq, true) : exporters;
+                }
+                catch (InvalidSyntaxException ex)
+                {
+                    // This should never happen.
+                }
+            }
+
             long expId = (exporters.length == 0)
-                ? -1 : Util.getBundleIdFromModuleId(exporters[0].getId());
+                ? -1 : Util.getBundleIdFromModuleId(exporters[0].m_module.getId());
 
             StringBuffer sb = new StringBuffer("*** Class '");
             sb.append(name);
@@ -1791,24 +2018,37 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             sb.append(".");
             if (exporters.length > 0)
             {
-                if (!imp.isSatisfied(
-                    Util.getExportPackage(exporters[0], imp.getName())))
+                try
                 {
-                    sb.append(" However, bundle ");
-                    sb.append(expId);
-                    sb.append(" does export this package with attributes that do not match.");
+                    if (!imp.isSatisfied(
+                        Util.getSatisfyingCapability(exporters[0].m_module,
+                            new Requirement(ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")"))))
+                    {
+                        sb.append(" However, bundle ");
+                        sb.append(expId);
+                        sb.append(" does export this package with attributes that do not match.");
+                    }
+                }
+                catch (InvalidSyntaxException ex)
+                {
+                    // This should never happen.
                 }
             }
             sb.append(" ***");
 
             return sb.toString();
         }
-
-        // Next, if the package is not imported by the module, check to
-        // see if there is an exporter for the package.
-        IModule[] exporters = getInUseExporters(new R4Import(pkgName, null, null), true);
-        exporters = (exporters.length == 0)
-            ? getAvailableExporters(new R4Import(pkgName, null, null), true) : exporters;
+        IRequirement pkgReq = null;
+        try
+        {
+            pkgReq = new Requirement(ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
+        }
+        catch (InvalidSyntaxException ex)
+        {
+            // This should never happen.
+        }
+        ResolverCandidate[] exporters = getInUseCandidates(pkgReq, true);
+        exporters = (exporters.length == 0) ? getAvailableCandidates(pkgReq, true) : exporters;
         if (exporters.length > 0)
         {
             boolean classpath = false;
@@ -1822,7 +2062,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 // Ignore
             }
 
-            long expId = Util.getBundleIdFromModuleId(exporters[0].getId());
+            long expId = Util.getBundleIdFromModuleId(exporters[0].m_module.getId());
 
             StringBuffer sb = new StringBuffer("*** Class '");
             sb.append(name);

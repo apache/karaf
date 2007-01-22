@@ -18,8 +18,8 @@
  */
 package org.apache.felix.framework.searchpolicy;
 
-import org.apache.felix.framework.util.manifestparser.R4Package;
 import org.apache.felix.moduleloader.IModule;
+import org.apache.felix.moduleloader.IRequirement;
 
 /**
  * <p>
@@ -33,17 +33,17 @@ import org.apache.felix.moduleloader.IModule;
 public class ResolveException extends Exception
 {
     private IModule m_module = null;
-    private R4Package m_pkg = null;
+    private IRequirement m_req = null;
 
     /**
      * Constructs an exception with the specified message, module,
      * import identifier, import version number, and propagation flag.
     **/
-    public ResolveException(String msg, IModule module, R4Package pkg)
+    public ResolveException(String msg, IModule module, IRequirement req)
     {
         super(msg);
         m_module = module;
-        m_pkg = pkg;
+        m_req = req;
     }
 
     /**
@@ -55,8 +55,8 @@ public class ResolveException extends Exception
         return m_module;
     }
 
-    public R4Package getPackage()
+    public IRequirement getRequirement()
     {
-        return m_pkg;
+        return m_req;
     }
 }

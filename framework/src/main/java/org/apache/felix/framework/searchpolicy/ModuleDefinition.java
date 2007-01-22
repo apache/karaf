@@ -18,42 +18,40 @@
  */
 package org.apache.felix.framework.searchpolicy;
 
-import org.apache.felix.framework.util.manifestparser.R4Export;
-import org.apache.felix.framework.util.manifestparser.R4Import;
 import org.apache.felix.framework.util.manifestparser.R4Library;
-import org.apache.felix.moduleloader.IModuleDefinition;
+import org.apache.felix.moduleloader.*;
 
 public class ModuleDefinition implements IModuleDefinition
 {
-    private R4Export[] m_exports = null;
-    private R4Import[] m_imports = null;
-    private R4Import[] m_dynamicImports = null;
+    public ICapability[] m_capabilities = null;
+    public IRequirement[] m_requirements = null;
+    public IRequirement[] m_dynamicRequirements = null;
     private R4Library[] m_libraries = null;
 
     public ModuleDefinition(
-        R4Export[] exports, R4Import[] imports,
-        R4Import[] dynamicImports, R4Library[] libraries)
+        ICapability[] capabilities, IRequirement[] requirements,
+        IRequirement[] dynamicRequirements, R4Library[] libraries)
     {
-        m_exports = exports;
-        m_imports = imports;
-        m_dynamicImports = dynamicImports;
+        m_capabilities = capabilities;
+        m_requirements = requirements;
+        m_dynamicRequirements = dynamicRequirements;
         m_libraries = libraries;
     }
 
-    public R4Export[] getExports()
+    public ICapability[] getCapabilities()
     {
-// TODO: ML - These should probably all return copies of the array.
-        return m_exports;
+// TODO: RB - These should probably all return copies of the array.
+        return m_capabilities;
     }
 
-    public R4Import[] getImports()
+    public IRequirement[] getRequirements()
     {
-        return m_imports;
+        return m_requirements;
     }
 
-    public R4Import[] getDynamicImports()
+    public IRequirement[] getDynamicRequirements()
     {
-        return m_dynamicImports;
+        return m_dynamicRequirements;
     }
 
     public R4Library[] getLibraries()

@@ -22,20 +22,20 @@ import java.net.URL;
 import java.util.Enumeration;
 
 import org.apache.felix.framework.util.Util;
-import org.apache.felix.framework.util.manifestparser.R4Export;
+import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.moduleloader.*;
 
 public class R4Wire implements IWire
 {
     private IModule m_importer = null;
     private IModule m_exporter = null;
-    private R4Export m_export= null;
+    private ICapability m_capability = null;
 
-    public R4Wire(IModule importer, IModule exporter, R4Export export)
+    public R4Wire(IModule importer, IModule exporter, ICapability capability)
     {
         m_importer = importer;
         m_exporter = exporter;
-        m_export = export;
+        m_capability = capability;
     }
 
     /* (non-Javadoc)
@@ -57,9 +57,9 @@ public class R4Wire implements IWire
     /* (non-Javadoc)
      * @see org.apache.felix.framework.searchpolicy.IWire#getExport()
      */
-    public R4Export getExport()
+    public ICapability getCapability()
     {
-        return m_export;
+        return m_capability;
     }
 
     /* (non-Javadoc)
@@ -74,7 +74,8 @@ public class R4Wire implements IWire
 
         // Only check when the package of the target class is
         // the same as the package for the wire.
-        if (m_export.getName().equals(pkgName))
+        if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+            m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
         {
             // Before delegating to the exporting module to satisfy
             // the class load, we must check the include/exclude filters
@@ -82,7 +83,9 @@ public class R4Wire implements IWire
             // actually visible. However, if the exporting module is the
             // same as the requesting module, then filtering is not
             // performed since a module has complete access to itself.
-            if ((m_exporter == m_importer) || m_export.isIncluded(name))
+            if ((m_exporter == m_importer) ||
+                (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+                    ((Capability) m_capability).isIncluded(name)))
             {
                 clazz = m_exporter.getContentLoader().getClass(name);
             }
@@ -111,7 +114,8 @@ public class R4Wire implements IWire
 
         // Only check when the package of the target resource is
         // the same as the package for the wire.
-        if (m_export.getName().equals(pkgName))
+        if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+            m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
         {
             url = m_exporter.getContentLoader().getResource(name);
 
@@ -136,7 +140,8 @@ public class R4Wire implements IWire
 
         // Only check when the package of the target resource is
         // the same as the package for the wire.
-        if (m_export.getName().equals(pkgName))
+        if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+            m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
         {
             urls = m_exporter.getContentLoader().getResources(name);
 
@@ -154,6 +159,12 @@ public class R4Wire implements IWire
 
     public String toString()
     {
-        return m_importer + " -> " + m_export.getName() + " -> " + m_exporter;
+        if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+        {
+            return m_importer + " -> "
+                + m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY)
+                + " -> " + m_exporter;
+        }
+        return m_importer + " -> " + m_capability + " -> " + m_exporter;
     }
 }
