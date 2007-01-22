@@ -19,6 +19,7 @@
 package org.apache.felix.framework.util.manifestparser;
 
 import java.util.*;
+
 import org.apache.felix.framework.util.Util;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
