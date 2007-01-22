@@ -18,14 +18,12 @@
  */
 package org.apache.felix.moduleloader;
 
-import org.apache.felix.framework.util.manifestparser.R4Import;
-import org.apache.felix.framework.util.manifestparser.R4Export;
 import org.apache.felix.framework.util.manifestparser.R4Library;
 
 public interface IModuleDefinition
 {
-    public R4Export[] getExports();
-    public R4Import[] getImports();
-    public R4Import[] getDynamicImports();
+    public ICapability[] getCapabilities();
+    public IRequirement[] getRequirements();
+    public IRequirement[] getDynamicRequirements();
     public R4Library[] getLibraries();
 }

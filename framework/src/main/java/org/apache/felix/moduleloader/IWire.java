@@ -21,13 +21,11 @@ package org.apache.felix.moduleloader;
 import java.net.URL;
 import java.util.Enumeration;
 
-import org.apache.felix.framework.util.manifestparser.R4Export;
-
 public interface IWire
 {
     public IModule getImporter();
     public IModule getExporter();
-    public R4Export getExport();
+    public ICapability getCapability();
     public Class getClass(String name) throws ClassNotFoundException;
     public URL getResource(String name) throws ResourceNotFoundException;
     public Enumeration getResources(String name) throws ResourceNotFoundException;
