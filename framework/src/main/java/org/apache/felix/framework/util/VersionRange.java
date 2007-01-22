@@ -27,6 +27,7 @@ public class VersionRange
     private Version m_high = null;
     private boolean m_isHighInclusive = false;
     private String m_toString = null;
+    public static final VersionRange infiniteRange = new VersionRange(Version.emptyVersion, true, null, true);
 
     public VersionRange(Version low, boolean isLowInclusive,
         Version high, boolean isHighInclusive)
