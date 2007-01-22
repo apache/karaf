@@ -290,9 +290,6 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             	case Type.BYTE :
             	case Type.SHORT :
            		case Type.INT :
-           		case Type.FLOAT :
-           		case Type.LONG :
-            	case Type.DOUBLE :
 
             		String internalName = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][0];
             		String boxingType = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][1];
@@ -341,7 +338,160 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             		mv.visitVarInsn(type.getOpcode(ILOAD), 5);
             		mv.visitInsn(type.getOpcode(IRETURN));
             		break;
+            	
+            	case Type.LONG :
+            		internalName = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][0];
+            		boxingType = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][1];
+            		unboxingMethod = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][2];
 
+            		mv.visitVarInsn(ALOAD, 0);
+            		mv.visitFieldInsn(GETFIELD, m_owner, name, internalName);
+            		mv.visitVarInsn(LSTORE, 1);
+
+            		mv.visitTypeInsn(NEW, boxingType);
+            		mv.visitInsn(DUP);
+            		mv.visitVarInsn(LLOAD, 1);
+            		mv.visitMethodInsn(INVOKESPECIAL, boxingType, "<init>", "(" + internalName + ")V");
+            		mv.visitVarInsn(ASTORE, 3);  // Double Space
+
+            		mv.visitVarInsn(ALOAD, 0);
+            		mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
+            		mv.visitLdcInsn(name);
+            		mv.visitVarInsn(ALOAD, 3);
+            		mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
+            		mv.visitVarInsn(ASTORE, 4);
+
+            		mv.visitVarInsn(ALOAD, 4);
+            		mv.visitTypeInsn(CHECKCAST, boxingType);
+            		mv.visitVarInsn(ASTORE, 5);
+
+            		mv.visitVarInsn(ALOAD, 5);
+            		mv.visitMethodInsn(INVOKEVIRTUAL, boxingType, unboxingMethod, "()" + internalName);
+            		mv.visitVarInsn(LSTORE, 6);
+
+            		l5 = new Label();
+            		mv.visitLabel(l5);
+
+            		mv.visitVarInsn(LLOAD, 1);
+            		mv.visitVarInsn(LLOAD, 6);
+            		mv.visitInsn(LCMP);
+            		l6 = new Label();
+            		mv.visitJumpInsn(IFEQ, l6);
+
+            		l7 = new Label();
+            		mv.visitLabel(l7);
+            			mv.visitVarInsn(ALOAD, 0);
+            			mv.visitVarInsn(LLOAD, 6);
+            			mv.visitMethodInsn(INVOKEVIRTUAL, m_owner, "_set" + name, "(" + internalName + ")V");
+            		mv.visitLabel(l6);
+
+            		mv.visitVarInsn(LLOAD, 6);
+            		mv.visitInsn(LRETURN);	 
+            		
+            		break;
+            	
+            	case Type.DOUBLE :
+            		internalName = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][0];
+            		boxingType = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][1];
+            		unboxingMethod = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][2];
+
+            		mv.visitVarInsn(ALOAD, 0);
+            		mv.visitFieldInsn(GETFIELD, m_owner, name, internalName);
+            		mv.visitVarInsn(DSTORE, 1);
+
+            		mv.visitTypeInsn(NEW, boxingType);
+            		mv.visitInsn(DUP);
+            		mv.visitVarInsn(DLOAD, 1);
+            		mv.visitMethodInsn(INVOKESPECIAL, boxingType, "<init>", "(" + internalName + ")V");
+            		mv.visitVarInsn(ASTORE, 3);  // Double Space
+
+            		mv.visitVarInsn(ALOAD, 0);
+            		mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
+            		mv.visitLdcInsn(name);
+            		mv.visitVarInsn(ALOAD, 3);
+            		mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
+            		mv.visitVarInsn(ASTORE, 4);
+
+            		mv.visitVarInsn(ALOAD, 4);
+            		mv.visitTypeInsn(CHECKCAST, boxingType);
+            		mv.visitVarInsn(ASTORE, 5);
+
+            		mv.visitVarInsn(ALOAD, 5);
+            		mv.visitMethodInsn(INVOKEVIRTUAL, boxingType, unboxingMethod, "()" + internalName);
+            		mv.visitVarInsn(DSTORE, 6);
+
+            		l5 = new Label();
+            		mv.visitLabel(l5);
+
+            		mv.visitVarInsn(DLOAD, 1);
+            		mv.visitVarInsn(DLOAD, 6);
+            		mv.visitInsn(DCMPL);
+            		l6 = new Label();
+            		mv.visitJumpInsn(IFEQ, l6);
+
+            		l7 = new Label();
+            		mv.visitLabel(l7);
+            			mv.visitVarInsn(ALOAD, 0);
+            			mv.visitVarInsn(DLOAD, 6);
+            			mv.visitMethodInsn(INVOKEVIRTUAL, m_owner, "_set" + name, "(" + internalName + ")V");
+            		mv.visitLabel(l6);
+
+            		mv.visitVarInsn(DLOAD, 6);
+            		mv.visitInsn(DRETURN);	 
+            		
+            		break;
+            		
+            	case Type.FLOAT :
+            		internalName = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][0];
+            		boxingType = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][1];
+            		unboxingMethod = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][2];
+
+            		mv.visitVarInsn(ALOAD, 0);
+            		mv.visitFieldInsn(GETFIELD, m_owner, name, internalName);
+            		mv.visitVarInsn(FSTORE, 1);
+
+            		mv.visitTypeInsn(NEW, boxingType);
+            		mv.visitInsn(DUP);
+            		mv.visitVarInsn(FLOAD, 1);
+            		mv.visitMethodInsn(INVOKESPECIAL, boxingType, "<init>", "(" + internalName + ")V");
+            		mv.visitVarInsn(ASTORE, 2);  // One Space
+
+            		mv.visitVarInsn(ALOAD, 0);
+            		mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
+            		mv.visitLdcInsn(name);
+            		mv.visitVarInsn(ALOAD, 2);
+            		mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
+            		mv.visitVarInsn(ASTORE, 3);
+
+            		mv.visitVarInsn(ALOAD, 3);
+            		mv.visitTypeInsn(CHECKCAST, boxingType);
+            		mv.visitVarInsn(ASTORE, 4);
+
+            		mv.visitVarInsn(ALOAD, 4);
+            		mv.visitMethodInsn(INVOKEVIRTUAL, boxingType, unboxingMethod, "()" + internalName);
+            		mv.visitVarInsn(FSTORE, 5);
+
+            		l5 = new Label();
+            		mv.visitLabel(l5);
+
+            		mv.visitVarInsn(FLOAD, 1);
+            		mv.visitVarInsn(FLOAD, 5);
+            		mv.visitInsn(FCMPL);
+            		l6 = new Label();
+            		mv.visitJumpInsn(IFEQ, l6);
+
+            		l7 = new Label();
+            		mv.visitLabel(l7);
+            			mv.visitVarInsn(ALOAD, 0);
+            			mv.visitVarInsn(FLOAD, 5);
+            			mv.visitMethodInsn(INVOKEVIRTUAL, m_owner, "_set" + name, "(" + internalName + ")V");
+            		mv.visitLabel(l6);
+
+            		mv.visitVarInsn(FLOAD, 5);
+            		mv.visitInsn(FRETURN);	 
+            		
+            		break;
+            		
             	case  Type.OBJECT :
 
             		mv.visitVarInsn(ALOAD, 0);
@@ -409,9 +559,6 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
         		case Type.SHORT :
        			case Type.INT :
        			case Type.FLOAT :
-       			case Type.LONG :
-       			case Type.DOUBLE :
-
         		String internalName = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][0];
         		String boxingType = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][1];
 
@@ -439,6 +586,37 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
                 	mv.visitLabel(l3);
                 	mv.visitInsn(RETURN);
                     break;
+                    
+       			case Type.LONG :
+       			case Type.DOUBLE :
+       				internalName = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][0];
+            		boxingType = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][1];
+
+            		mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(type.getOpcode(ILOAD), 1);
+                    mv.visitFieldInsn(PUTFIELD, m_owner, name, internalName);
+                    l1 = new Label();
+                    mv.visitLabel(l1);
+
+                    mv.visitTypeInsn(NEW, boxingType);
+                    mv.visitInsn(DUP);
+                    mv.visitVarInsn(type.getOpcode(ILOAD), 1);
+                    mv.visitMethodInsn(INVOKESPECIAL, boxingType, "<init>", "(" + internalName + ")V");
+                    mv.visitVarInsn(ASTORE, 3); // Double space
+
+                    l2 = new Label();
+                    mv.visitLabel(l2);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
+                    mv.visitLdcInsn(name);
+                    mv.visitVarInsn(ALOAD, 3);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "setterCallback", "(Ljava/lang/String;Ljava/lang/Object;)V");
+
+                    l3 = new Label();
+                    mv.visitLabel(l3);
+                    mv.visitInsn(RETURN);
+                    break;
+                    
                 case (Type.OBJECT) :
 
                 	mv.visitVarInsn(ALOAD, 0);
