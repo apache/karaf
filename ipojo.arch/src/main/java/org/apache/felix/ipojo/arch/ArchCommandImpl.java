@@ -85,7 +85,7 @@ public class ArchCommandImpl implements Command {
         synchronized(this) { 
         	for(int i=0; i < archiService.length; i++) {
         		InstanceDescription instance = archiService[i].getInstanceDescription();       
-        		out.println("Instance : " + instance.getClassName() + " - " + getInstanceState(instance.getState()) + " from bundle " + instance.getBundleId());
+        		out.println("Instance : " + instance.getName() + " (" + instance.getClassName() + ")" + " - " + getInstanceState(instance.getState()) + " from bundle " + instance.getBundleId());
         		for(int j = 0; j < instance.getHandlers().length; j++) {
         			HandlerDescription hd = instance.getHandlers()[j];
         			String hn = hd.getHandlerName();
