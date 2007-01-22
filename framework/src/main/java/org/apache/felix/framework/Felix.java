@@ -387,7 +387,7 @@ public class Felix
                 // This should never happen.
                 throw new BundleException(
                         "Unresolved package in System Bundle:"
-                        + ex.getPackage());
+                        + ex.getRequirement());
             }
 
             // Start the system bundle; this will set its state
@@ -456,6 +456,7 @@ public class Felix
             {
 // TODO: RB - Should this be system bundle, since bundle could be null?
 //                fireFrameworkEvent(FrameworkEvent.ERROR, systembundle, ex);
+ex.printStackTrace();
                 fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
                 try
                 {
@@ -1347,39 +1348,50 @@ public class Felix
         // to import the necessary packages.
         if (System.getSecurityManager() != null)
         {
-
             ProtectionDomain pd = (ProtectionDomain)
                 bundle.getInfo().getCurrentModule().getSecurityContext();
 
-            R4Import[] imports =
-                bundle.getInfo().getCurrentModule().getDefinition().getImports();
+            IRequirement[] imports =
+                bundle.getInfo().getCurrentModule().getDefinition().getRequirements();
 
-            for (int i = 0;i < imports.length; i++)
+/*
+ TODO: RB - We need to fix this import check by looking at the wire
+            associated with it, not the import since we don't know the
+            package name associated with the import since it is a filter.
+
+            for (int i = 0; i < imports.length; i++)
             {
-                PackagePermission perm = new PackagePermission(imports[i].getName(),
-                    PackagePermission.IMPORT);
-
-                if (!pd.implies(perm))
+                if (imports[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                 {
-                    throw new java.security.AccessControlException(
-                        "PackagePermission.IMPORT denied for import: " +
-                        imports[i].getName(), perm);
+                    PackagePermission perm = new PackagePermission(
+                        imports[i].???,
+                        PackagePermission.IMPORT);
+    
+                    if (!pd.implies(perm))
+                    {
+                        throw new java.security.AccessControlException(
+                            "PackagePermission.IMPORT denied for import: " +
+                            imports[i].getName(), perm);
+                    }
                 }
             }
+*/
             // Check export permission for all exports of the current module.
-            R4Export[] implicitImports =
-                bundle.getInfo().getCurrentModule().getDefinition().getExports();
-
-            for (int i = 0;i < implicitImports.length; i++)
+            ICapability[] exports =
+                bundle.getInfo().getCurrentModule().getDefinition().getCapabilities();
+            for (int i = 0; i < exports.length; i++)
             {
-                PackagePermission perm = new PackagePermission(
-                    implicitImports[i].getName(), PackagePermission.EXPORT);
-
-                if (!pd.implies(perm))
+                if (exports[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                 {
-                    throw new java.security.AccessControlException(
-                        "PackagePermission.EXPORT denied for implicit export: " +
-                        implicitImports[i].getName(), perm);
+                    PackagePermission perm = new PackagePermission(
+                        (String) exports[i].getProperties().get(ICapability.PACKAGE_PROPERTY), PackagePermission.EXPORT);
+    
+                    if (!pd.implies(perm))
+                    {
+                        throw new java.security.AccessControlException(
+                            "PackagePermission.EXPORT denied for export: " +
+                            exports[i].getProperties().get(ICapability.PACKAGE_PROPERTY), perm);
+                    }
                 }
             }
         }
@@ -1396,7 +1408,7 @@ public class Felix
                 throw new BundleException(
                     "Unresolved package in bundle "
                     + Util.getBundleIdFromModuleId(ex.getModule().getId())
-                    + ": " + ex.getPackage());
+                    + ": " + ex.getRequirement());
             }
             else
             {
@@ -2311,14 +2323,23 @@ public class Felix
      * package name. This is used by the PackageAdmin service
      * implementation.
      *
-     * @param name The name of the exported package to find.
+     * @param pkgName The name of the exported package to find.
      * @return The exported package or null if no matching package was found.
     **/
-    protected ExportedPackage[] getExportedPackages(String name)
+    protected ExportedPackage[] getExportedPackages(String pkgName)
     {
-        // First, get all exporters of the package.
         ExportedPackage[] pkgs = null;
-        IModule[] exporters = m_policyCore.getInUseExporters(new R4Import(name, null, null), true);
+
+        // First, get all exporters of the package.
+        R4SearchPolicyCore.ResolverCandidate[] exporters =
+            m_policyCore.getInUseCandidates(
+                new Requirement(
+                    ICapability.PACKAGE_NAMESPACE,
+                    null,
+                    null,
+                    new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) }),
+                true);
+
         if (exporters != null)
         {
             pkgs = new ExportedPackage[exporters.length];
@@ -2326,7 +2347,7 @@ public class Felix
             {
                 // Get the bundle associated with the current exporting module.
                 BundleImpl bundle = (BundleImpl) getBundle(
-                    Util.getBundleIdFromModuleId(exporters[pkgIdx].getId()));
+                    Util.getBundleIdFromModuleId(exporters[pkgIdx].m_module.getId()));
 
                 // We need to find the version of the exported package, but this
                 // is tricky since there may be multiple versions of the package
@@ -2341,12 +2362,19 @@ public class Felix
                 IModule[] modules = bundle.getInfo().getModules();
                 for (int modIdx = 0; modIdx < modules.length; modIdx++)
                 {
-                    R4Export export = Util.getExportPackage(modules[modIdx], name);
-                    if (export != null)
+                    Capability ec = (Capability)
+                        Util.getSatisfyingCapability(
+                            modules[modIdx],
+                            new Requirement(
+                                ICapability.PACKAGE_NAMESPACE,
+                                null,
+                                null,
+                                new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) }));
+
+                    if (ec != null)
                     {
                         pkgs[pkgIdx] =
-                            new ExportedPackageImpl(
-                                this, bundle, modules[modIdx], export);
+                            new ExportedPackageImpl(this, bundle, modules[modIdx], ec);
                     }
                 }
             }
@@ -2425,24 +2453,29 @@ public class Felix
         IModule[] modules = bundle.getInfo().getModules();
         for (int modIdx = 0; modIdx < modules.length; modIdx++)
         {
-            R4Export[] exports = modules[modIdx].getDefinition().getExports();
-            if ((exports != null) && (exports.length > 0))
+            ICapability[] caps = modules[modIdx].getDefinition().getCapabilities();
+            if ((caps != null) && (caps.length > 0))
             {
-                for (int expIdx = 0; expIdx < exports.length; expIdx++)
+                for (int capIdx = 0; capIdx < caps.length; capIdx++)
                 {
                     // See if the target bundle's module is one of the
                     // "in use" exporters of the package.
-                    IModule[] inUseModules =
-                        m_policyCore.getInUseExporters(
-                            new R4Import(exports[expIdx].getName(), null, null), true);
+                    R4SearchPolicyCore.ResolverCandidate[] inUseModules = m_policyCore.getInUseCandidates(
+                        new Requirement(
+                            ICapability.PACKAGE_NAMESPACE,
+                            null,
+                            null,
+                            new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, ((Capability) caps[capIdx]).getPackageName(), false) }),
+                        true);
+
                     // Search through the current providers to find the target
                     // module.
                     for (int i = 0; (inUseModules != null) && (i < inUseModules.length); i++)
                     {
-                        if (inUseModules[i] == modules[modIdx])
+                        if (inUseModules[i].m_module == modules[modIdx])
                         {
                             list.add(new ExportedPackageImpl(
-                                this, bundle, modules[modIdx], exports[expIdx]));
+                                this, bundle, modules[modIdx], (Capability) caps[capIdx]));
                         }
                     }
                 }
@@ -2505,6 +2538,7 @@ public class Felix
             // If there are targets, then resolve each one.
             if (bundles != null)
             {
+long time = System.currentTimeMillis();
                 for (int i = 0; i < bundles.length; i++)
                 {
                     try
@@ -2520,6 +2554,8 @@ public class Felix
                             ex);
                     }
                 }
+time = System.currentTimeMillis() - time;
+System.out.println("!!! ELAPSED RESOLVE TIME : " + time);
             }
 
             return result;
@@ -2692,9 +2728,9 @@ public class Felix
 
         // Create the module definition for the new module.
         IModuleDefinition md = new ModuleDefinition(
-            mp.getExports(),
-            mp.getImports(),
-            mp.getDynamicImports(),
+            mp.getCapabilities(),
+            mp.getRequirements(),
+            mp.getDynamicRequirements(),
             mp.getLibraries(m_cache.getArchive(targetId).getRevision(revision)));
 
         // Create the module using the module definition.

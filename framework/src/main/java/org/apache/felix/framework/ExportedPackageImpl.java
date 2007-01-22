@@ -18,7 +18,7 @@
  */
 package org.apache.felix.framework;
 
-import org.apache.felix.framework.util.manifestparser.R4Export;
+import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
@@ -29,12 +29,12 @@ class ExportedPackageImpl implements ExportedPackage
     private Felix m_felix = null;
     private BundleImpl m_exportingBundle = null;
     private IModule m_exportingModule = null;
-    private R4Export m_export = null;
+    private Capability m_export = null;
     private String m_toString = null;
     private String m_versionString = null;
 
     public ExportedPackageImpl(
-        Felix felix, BundleImpl exporter, IModule module, R4Export export)
+        Felix felix, BundleImpl exporter, IModule module, Capability export)
     {
         m_felix = felix;
         m_exportingBundle = exporter;
@@ -64,25 +64,25 @@ class ExportedPackageImpl implements ExportedPackage
 
     public String getName()
     {
-        return m_export.getName();
+        return m_export.getPackageName();
     }
 
     public String getSpecificationVersion()
     {
         if (m_versionString == null)
         {
-            m_versionString = (m_export.getVersion() == null)
+            m_versionString = (m_export.getPackageVersion() == null)
                 ? Version.emptyVersion.toString()
-                : m_export.getVersion().toString();
+                : m_export.getPackageVersion().toString();
         }
         return m_versionString;
     }
 
     public Version getVersion()
     {
-        return (m_export.getVersion() == null)
+        return (m_export.getPackageVersion() == null)
             ? Version.emptyVersion
-            : m_export.getVersion();
+            : m_export.getPackageVersion();
     }
 
     public boolean isRemovalPending()
@@ -94,7 +94,7 @@ class ExportedPackageImpl implements ExportedPackage
     {
         if (m_toString == null)
         {
-            m_toString = m_export.getName()
+            m_toString = m_export.getPackageName()
                 + "; version=" + getSpecificationVersion();
         }
         return m_toString;

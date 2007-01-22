@@ -24,8 +24,9 @@ import java.util.*;
 import org.apache.felix.framework.cache.SystemBundleArchive;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
+import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
-import org.apache.felix.framework.util.manifestparser.R4Export;
+import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IContentLoader;
 import org.osgi.framework.*;
 
@@ -34,7 +35,7 @@ class SystemBundle extends BundleImpl
     private List m_activatorList = null;
     private BundleActivator m_activator = null;
     private Thread m_shutdownThread = null;
-    private R4Export[] m_exports = null;
+    private ICapability[] m_exports = null;
     private IContentLoader m_contentLoader = null;
 
     protected SystemBundle(Felix felix, BundleInfo info, List activatorList)
@@ -64,29 +65,18 @@ class SystemBundle extends BundleImpl
 
         // Get system property that specifies which class path
         // packages should be exported by the system bundle.
-        R4Export[] classPathPkgs = null;
         try
         {
-            classPathPkgs = (R4Export[]) ManifestParser.parseImportExportHeader(
-                getFelix().getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES), true);
+            m_exports = (ICapability[]) ManifestParser.parseExportHeader(
+                getFelix().getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES));
         }
         catch (Exception ex)
         {
-            classPathPkgs = new R4Export[0];
+            m_exports = new ICapability[0];
             getFelix().getLogger().log(
                 Logger.LOG_ERROR,
                 "Error parsing system bundle export statement: "
                 + getFelix().getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES), ex);
-        }
-
-        // Now, create the list of standard framework exports for
-        // the system bundle.
-        m_exports = new R4Export[classPathPkgs.length];
-
-        // Copy the class path exported packages.
-        for (int i = 0; i < classPathPkgs.length; i++)
-        {
-            m_exports[i] = classPathPkgs[i];
         }
 
         m_contentLoader = new SystemBundleContentLoader(getFelix().getLogger());
@@ -99,9 +89,9 @@ class SystemBundle extends BundleImpl
                 exportSB.append(", ");
             }
 
-            exportSB.append(m_exports[i].getName());
+            exportSB.append(((Capability) m_exports[i]).getPackageName());
             exportSB.append("; version=\"");
-            exportSB.append(m_exports[i].getVersion().toString());
+            exportSB.append(((Capability) m_exports[i]).getPackageVersion().toString());
             exportSB.append("\"");
         }
 
@@ -123,7 +113,7 @@ class SystemBundle extends BundleImpl
         // that will allow for them to be independently configured.
     }
 
-    public R4Export[] getExports()
+    public ICapability[] getExports()
     {
         return m_exports;
     }
