@@ -289,15 +289,15 @@ public class R4LibraryClause
                     // Add the value to its corresponding property list.
                     if (property.equals(Constants.BUNDLE_NATIVECODE_OSNAME))
                     {
-                        osNameList.add(value);
+                        osNameList.add(normalizeOSName(value));
                     }
                     else if (property.equals(Constants.BUNDLE_NATIVECODE_OSVERSION))
                     {
-                        osVersionList.add(value);
+                        osVersionList.add(normalizeOSVersion(value));
                     }
                     else if (property.equals(Constants.BUNDLE_NATIVECODE_PROCESSOR))
                     {
-                        processorList.add(value);
+                        processorList.add(normalizeProcessor(value));
                     }
                     else if (property.equals(Constants.BUNDLE_NATIVECODE_LANGUAGE))
                     {
@@ -321,10 +321,10 @@ public class R4LibraryClause
             System.arraycopy(libFiles, 0, actualLibFiles, 0, libCount);
             return new R4LibraryClause(
                 actualLibFiles,
-                (String[]) osNameList.toArray(new String[0]),
-                (String[]) processorList.toArray(new String[0]),
-                (String[]) osVersionList.toArray(new String[0]),
-                (String[]) languageList.toArray(new String[0]),
+                (String[]) osNameList.toArray(new String[osNameList.size()]),
+                (String[]) processorList.toArray(new String[processorList.size()]),
+                (String[]) osVersionList.toArray(new String[osVersionList.size()]),
+                (String[]) languageList.toArray(new String[languageList.size()]),
                 selectionFilter);
         }
         catch (RuntimeException ex)
@@ -337,6 +337,8 @@ public class R4LibraryClause
 
     public static String normalizeOSName(String value)
     {
+        value = value.toLowerCase();
+
         if (value.startsWith("win"))
         {
             String os = "win";
@@ -390,7 +392,7 @@ public class R4LibraryClause
         {
             return "irix";
         }
-        else if (value.startsWith("macos"))
+        else if (value.startsWith("macos") || value.startsWith("mac os"))
         {
             return "macos";
         }
@@ -431,6 +433,8 @@ public class R4LibraryClause
 
     public static String normalizeProcessor(String value)
     {
+        value = value.toLowerCase();
+
         if (value.startsWith("x86") || value.startsWith("pentium")
             || value.startsWith("i386") || value.startsWith("i486")
             || value.startsWith("i586") || value.startsWith("i686"))
