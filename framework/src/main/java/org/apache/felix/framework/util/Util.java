@@ -20,10 +20,8 @@ package org.apache.felix.framework.util;
 
 import java.io.*;
 
-import org.apache.felix.framework.util.manifestparser.R4Export;
-import org.apache.felix.framework.util.manifestparser.R4Import;
-import org.apache.felix.moduleloader.IModule;
-import org.apache.felix.moduleloader.IWire;
+import org.apache.felix.framework.util.manifestparser.Capability;
+import org.apache.felix.moduleloader.*;
 
 public class Util
 {
@@ -189,27 +187,18 @@ public class Util
         return null;
     }
 
-    public static R4Export getExportPackage(IModule m, String name)
+    public static ICapability getSatisfyingCapability(IModule m, IRequirement req)
     {
-        R4Export[] pkgs = m.getDefinition().getExports();
-        for (int i = 0; (pkgs != null) && (i < pkgs.length); i++)
+        if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
         {
-            if (pkgs[i].getName().equals(name))
+            ICapability[] caps = m.getDefinition().getCapabilities();
+            for (int i = 0; (caps != null) && (i < caps.length); i++)
             {
-                return pkgs[i];
-            }
-        }
-        return null;
-    }
-
-    public static R4Import getImportPackage(IModule m, String name)
-    {
-        R4Import[] pkgs = m.getDefinition().getImports();
-        for (int i = 0; (pkgs != null) && (i < pkgs.length); i++)
-        {
-            if (pkgs[i].getName().equals(name))
-            {
-                return pkgs[i];
+                if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+                    req.isSatisfied(caps[i]))
+                {
+                    return caps[i];
+                }
             }
         }
         return null;
@@ -220,7 +209,8 @@ public class Util
         IWire[] wires = m.getWires();
         for (int i = 0; (wires != null) && (i < wires.length); i++)
         {
-            if (wires[i].getExport().getName().equals(name))
+            if (wires[i].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+                ((Capability) wires[i].getCapability()).getPackageName().equals(name))
             {
                 return wires[i];
             }
