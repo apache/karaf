@@ -21,8 +21,7 @@ package org.apache.felix.framework;
 import java.io.*;
 import java.net.URL;
 import java.net.URLStreamHandler;
-import java.security.CodeSource;
-import java.security.ProtectionDomain;
+import java.security.*;
 import java.util.*;
 
 import org.apache.felix.framework.cache.*;
@@ -2737,16 +2736,15 @@ System.out.println("!!! ELAPSED RESOLVE TIME : " + time);
         IModule module = m_factory.createModule(
             Long.toString(targetId) + "." + Integer.toString(revision), md);
 
-        if (System.getSecurityManager() != null)
-        {
-            CodeSource codesource = new CodeSource(m_secureAction.createURL(null, 
-                m_cache.getArchive(targetId).getLocation(), 
-                new FakeURLStreamHandler()), 
-                m_cache.getArchive(targetId).getCertificates());
+        CodeSource codesource = new CodeSource(m_secureAction.createURL(null, 
+            m_cache.getArchive(targetId).getLocation(), 
+            new FakeURLStreamHandler()), 
+            m_cache.getArchive(targetId).getCertificates());
 
-            m_factory.setSecurityContext(module, new ProtectionDomain(codesource,
-                m_secureAction.getPolicy().getPermissions(codesource)));
-        }
+        Permissions allPerms = new Permissions();
+        allPerms.add(new AllPermission());
+        m_factory.setSecurityContext(module, new ProtectionDomain(codesource,
+			allPerms));
 
         // Create the content loader from the module archive.
         IContentLoader contentLoader = new ContentLoaderImpl(
