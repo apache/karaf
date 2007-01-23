@@ -55,7 +55,6 @@ public class ContentClassLoader extends SecureClassLoader
         {
             throw new ClassNotFoundException(name);
         }
-        resolveClass(clazz);
         return clazz;
     }
 
