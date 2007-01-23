@@ -37,9 +37,9 @@
   	    <Bundle-Activator>
               ${pom.artifactId}.impl.Activator
             </Bundle-Activator>
-            <Dynamic-ImportPackage>
+            <DynamicImport-Package>
               org.osgi.service.log
-            </Dynamic-ImportPackage>
+            </DynamicImport-Package>
             <Import-Package>!org.osgi.service.log,*</Import-Package>
             <Export-Package>org.osgi.service.event</Export-Package>
             <Private-Package>org.apache.felix.eventadmin.impl.*</Private-Package>
