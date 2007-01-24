@@ -509,10 +509,10 @@ public class R4SearchPolicyCore implements ModuleListener
                 String dynPkgName = ((Requirement) dynamics[i]).getPackageName();
                 boolean wildcard = (dynPkgName.lastIndexOf(".*") >= 0);
                 dynPkgName = (wildcard)
-                    ? dynPkgName.substring(0, dynPkgName.length() - 1) : dynPkgName;
+                    ? dynPkgName.substring(0, dynPkgName.length() - 2) : dynPkgName;
                 if (dynPkgName.equals("*") ||
                     pkgName.equals(dynPkgName) ||
-                    (wildcard && pkgName.startsWith(dynPkgName)))
+                    (wildcard && pkgName.startsWith(dynPkgName + ".")))
                 {
                     // Constrain the current dynamic requirement to include
                     // the precise package name for which we are searching; this
