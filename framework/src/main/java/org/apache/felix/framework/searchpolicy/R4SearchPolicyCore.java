@@ -505,88 +505,99 @@ public class R4SearchPolicyCore implements ModuleListener
             IRequirement[] dynamics = importer.getDefinition().getDynamicRequirements();
             for (int i = 0; (dynamics != null) && (i < dynamics.length); i++)
             {
-                // Constrain the current dynamic requirement to include
-                // the precise package name for which we are searching; this
-                // is necessary because we cannot easily determine which
-                // package name a given dynamic requirement matches, since
-                // it is only a filter.
-                IRequirement req = null;
-                try
+                // Ignore any dynamic requirements whose packages don't match.
+                String dynPkgName = ((Requirement) dynamics[i]).getPackageName();
+                boolean wildcard = (dynPkgName.lastIndexOf(".*") >= 0);
+                dynPkgName = (wildcard)
+                    ? dynPkgName.substring(0, dynPkgName.length() - 2) : dynPkgName;
+                if (dynPkgName.equals("*") ||
+                    pkgName.equals(dynPkgName) ||
+                    (wildcard && pkgName.startsWith(dynPkgName)))
                 {
-                    req = new Requirement(
-                        ICapability.PACKAGE_NAMESPACE,
-                        "(&" + dynamics[i].getFilter().toString()
-                            + "(package=" + pkgName + "))");
-                }
-                catch (InvalidSyntaxException ex)
-                {
-                    // This should never happen.
-                }
-
-                // See if there is a candidate exporter that satisfies the
-                // constrained dynamic requirement.
-                try
-                {
-                    // Lock module manager instance to ensure that nothing changes.
-                    synchronized (m_factory)
+                    // Constrain the current dynamic requirement to include
+                    // the precise package name for which we are searching; this
+                    // is necessary because we cannot easily determine which
+                    // package name a given dynamic requirement matches, since
+                    // it is only a filter.
+    
+                    IRequirement req = null;
+                    try
                     {
-                        // First check "in use" candidates for a match.
-                        ResolverCandidate[] candidates = getInUseCandidates(req, false);
-                        // If there is an "in use" candidate, just take the first one.
-                        if (candidates.length > 0)
+                        req = new Requirement(
+                            ICapability.PACKAGE_NAMESPACE,
+                            "(&" + dynamics[i].getFilter().toString()
+                                + "(package=" + pkgName + "))");
+                    }
+                    catch (InvalidSyntaxException ex)
+                    {
+                        // This should never happen.
+                    }
+    
+                    // See if there is a candidate exporter that satisfies the
+                    // constrained dynamic requirement.
+                    try
+                    {
+                        // Lock module manager instance to ensure that nothing changes.
+                        synchronized (m_factory)
                         {
-                            candidate = candidates[0];
-                        }
-
-                        // If there were no "in use" candidates, then try "available"
-                        // candidates.
-                        if (candidate == null)
-                        {
-                            candidates = getAvailableCandidates(req, false);
-
-                            // Take the first candidate that can resolve.
-                            for (int candIdx = 0;
-                                (candidate == null) && (candIdx < candidates.length);
-                                candIdx++)
+                            // First check "in use" candidates for a match.
+                            ResolverCandidate[] candidates = getInUseCandidates(req, false);
+                            // If there is an "in use" candidate, just take the first one.
+                            if (candidates.length > 0)
                             {
-                                try
+                                candidate = candidates[0];
+                            }
+    
+                            // If there were no "in use" candidates, then try "available"
+                            // candidates.
+                            if (candidate == null)
+                            {
+                                candidates = getAvailableCandidates(req, false);
+    
+                                // Take the first candidate that can resolve.
+                                for (int candIdx = 0;
+                                    (candidate == null) && (candIdx < candidates.length);
+                                    candIdx++)
                                 {
-                                    resolve(candidates[candIdx].m_module);
-                                    candidate = candidates[candIdx];
+                                    try
+                                    {
+                                        resolve(candidates[candIdx].m_module);
+                                        candidate = candidates[candIdx];
+                                    }
+                                    catch (ResolveException ex)
+                                    {
+                                        // Ignore candidates that cannot resolve.
+                                    }
                                 }
-                                catch (ResolveException ex)
+                            }
+    
+                            if (candidate != null)
+                            {
+                                IWire[] wires = importer.getWires();
+                                R4Wire[] newWires = null;
+                                if (wires == null)
                                 {
-                                    // Ignore candidates that cannot resolve.
+                                    newWires = new R4Wire[1];
                                 }
-                            }
-                        }
-
-                        if (candidate != null)
-                        {
-                            IWire[] wires = importer.getWires();
-                            R4Wire[] newWires = null;
-                            if (wires == null)
-                            {
-                                newWires = new R4Wire[1];
-                            }
-                            else
-                            {
-                                newWires = new R4Wire[wires.length + 1];
-                                System.arraycopy(wires, 0, newWires, 0, wires.length);
-                            }
-
-                            // Create the wire and add it to the module.
-                            wire = new R4Wire(
-                                importer, candidate.m_module, candidate.m_capability);
-                            newWires[newWires.length - 1] = wire;
-                            ((ModuleImpl) importer).setWires(newWires);
+                                else
+                                {
+                                    newWires = new R4Wire[wires.length + 1];
+                                    System.arraycopy(wires, 0, newWires, 0, wires.length);
+                                }
+    
+                                // Create the wire and add it to the module.
+                                wire = new R4Wire(
+                                    importer, candidate.m_module, candidate.m_capability);
+                                newWires[newWires.length - 1] = wire;
+                                ((ModuleImpl) importer).setWires(newWires);
 m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
+                            }
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    m_logger.log(Logger.LOG_ERROR, "Unable to dynamically import package.", ex);
+                    catch (Exception ex)
+                    {
+                        m_logger.log(Logger.LOG_ERROR, "Unable to dynamically import package.", ex);
+                    }
                 }
             }
         }
