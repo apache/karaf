@@ -36,4 +36,14 @@ public class IPojoPluginConfiguration {
 		return logger;
 	}
 	
+	public static final String ipojo_version = "0.7.0";
+	
+	public static final String ipojo_package = "org.apache.felix.ipojo";
+	public static final String ipojo_arch_package = "org.apache.felix.ipojo.architecture";
+	public static final String config_admin_package = "org.osgi.service.cm";
+	
+	
+	
+	
+	
 }

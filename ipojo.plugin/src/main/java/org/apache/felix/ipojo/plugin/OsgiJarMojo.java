@@ -481,8 +481,10 @@ public class OsgiJarMojo extends AbstractMojo {
 			}
 		}
 		
-		// Add org.apache.felix.ipojo is not already in the set
-		referred.add("org.apache.felix.ipojo");
+		// Add org.apache.felix.ipojo, org.apache.felix.ipojo.architecture is not already in the set
+		referred.add(IPojoPluginConfiguration.ipojo_package);
+		referred.add(IPojoPluginConfiguration.ipojo_arch_package);
+		referred.add(IPojoPluginConfiguration.config_admin_package);
 		
 		if (referred.isEmpty())
 			return;
