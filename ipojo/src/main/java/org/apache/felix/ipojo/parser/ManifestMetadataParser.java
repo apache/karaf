@@ -58,13 +58,18 @@ public class ManifestMetadataParser {
         Dictionary[] dicts = new Dictionary[configs.length];
         for (int i = 0; i < configs.length; i++) {
             String comp = configs[i].getAttribute("component"); // get the component targeted by the configuration
+            if(comp == null) { throw new ParseException("An instance connaot be parsed : no component attribute"); }
             Dictionary d = new Properties();
             d.put("component", comp);
             if (configs[i].getAttribute("name") != null) { d.put("name", configs[i].getAttribute("name")); }
             for (int j = 0; j < configs[i].getElements("property", "").length; j++) {
                 String propsName = configs[i].getElements("property", "")[j].getAttribute("name", "");
                 String propsValue = configs[i].getElements("property", "")[j].getAttribute("value", "");
-                d.put(propsName, propsValue);
+                if(propsName == null || propsValue == null) { 
+                	System.err.println("A property cannot be parsed : " + propsName + " = " + propsValue);
+                	throw new ParseException("A property cannot be parsed : " + propsName + " = " + propsValue);
+                } 
+                else { d.put(propsName, propsValue); }
             }
             dicts[i] = d;
         }

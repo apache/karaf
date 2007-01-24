@@ -281,6 +281,10 @@ public class ProvidedService implements ServiceFactory {
 
         // Contruct the service properties list
         Properties serviceProperties = getServiceProperties();
+        
+        if(serviceProperties == null) {
+        	m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Cannot get the properties of the provided service");
+        }
 
         // Update the service registration
         if (m_state == REGISTERED) {

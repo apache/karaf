@@ -20,6 +20,7 @@ package org.apache.felix.ipojo;
 
 import java.util.Dictionary;
 
+import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
@@ -35,6 +36,7 @@ public class InstanceCreator implements ServiceListener {
 	
 	private BundleContext m_context;
 	
+	private Logger m_logger;
 	
 	/**
 	 * This structure aims to manage a configuration.
@@ -54,17 +56,15 @@ public class InstanceCreator implements ServiceListener {
 	 */
 	private ManagedConfiguration[] m_configurations;
 	
-	
-	
 	public InstanceCreator(BundleContext context, Dictionary[] configurations) {
 		m_context = context;
+		m_logger = new Logger(context, "InstanceCreator"+context.getBundle().getBundleId(), Logger.WARNING);
 		m_configurations = new ManagedConfiguration[configurations.length];
 		for(int i = 0; i < configurations.length; i++) {
 			ManagedConfiguration conf = new ManagedConfiguration(configurations[i]);
 			m_configurations[i] = conf;
 			
 			// Get the component type name :
-			System.out.println("component = " + conf.configuration.get("component"));
 			String componentType = (String) conf.configuration.get("component");
 			Factory fact = null;
 			
@@ -76,26 +76,24 @@ public class InstanceCreator implements ServiceListener {
 					createInstance(fact, conf);					
 				}
 				else {
-					System.err.println("No factory available for the type : " + componentType);
+					m_logger.log(Logger.WARNING, "No factory available for the type : " + componentType);
 				}
-			} catch (InvalidSyntaxException e) { e.printStackTrace(); }
-
+			} catch (InvalidSyntaxException e) { m_logger.log(Logger.ERROR, "Invalid syntax filter for the type : " + componentType, e); }
 		}
 		
 		// Register a service listenner on Factory Service
 		try {
 			m_context.addServiceListener(this, "(objectClass="+Factory.class.getName() + ")");
-		} catch (InvalidSyntaxException e) { e.printStackTrace(); }
+		} catch (InvalidSyntaxException e) { m_logger.log(Logger.ERROR, "Invalid syntax filter when registering a listener on Factory Service", e); }
 	}
 	
 	private void createInstance(Factory fact, ManagedConfiguration config) {
 		Dictionary conf = config.configuration;
-		if(fact.isAcceptable(conf)) {
-			config.instance = fact.createComponentInstance(conf);
-			config.factoryName = fact.getName();
-		}
-		else {
-			System.err.println("A factory is available for the configuration but the configuration is not acceptable");
+		try {
+				config.instance = fact.createComponentInstance(conf);
+				config.factoryName = fact.getName();
+		} catch (UnacceptableConfiguration e) {
+			m_logger.log(Logger.ERROR, "A factory is available for the configuration but the configuration is not acceptable", e);
 		}
 	}
 

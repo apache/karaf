@@ -111,7 +111,7 @@ public class Activator implements BundleActivator {
             ComponentFactory factory = m_factories[i];
             factory.stop();
         }
-        m_creator.stop();
+        if(m_creator != null) { m_creator.stop(); }
         m_factories = new ComponentFactory[0]; // Release all factories
     }
 
@@ -150,7 +150,12 @@ public class Activator implements BundleActivator {
     			String componentClass = m_factories[j].getComponentClassName();
     			String factoryName = m_factories[j].getFactoryName();
     			if(conf.get("component") != null && (conf.get("component").equals(componentClass) || conf.get("component").equals(factoryName))) {
-    				if(m_factories[j].isAcceptable(conf)) { m_factories[j].createComponentInstance(conf); created = true;}
+    				try {
+						m_factories[j].createComponentInstance(conf);
+	    				created = true;
+					} catch (UnacceptableConfiguration e) {
+						System.err.println("Cannot create the instance " + conf.get("name") +" : " + e.getMessage());
+					} 
     			}
     		}
     		if(!created && conf.get("component") != null) {

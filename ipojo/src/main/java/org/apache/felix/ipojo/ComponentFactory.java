@@ -296,10 +296,12 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     /**
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
-    public ComponentInstance createComponentInstance(Dictionary configuration) {
-    	if(!isAcceptable(configuration)) {
-    		m_logger.log(Logger.ERROR, "The configuration is not acceptable");
-    		return null; 
+    public ComponentInstance createComponentInstance(Dictionary configuration)  throws UnacceptableConfiguration {
+    	try {
+    		_isAcceptable(configuration);
+    	} catch(UnacceptableConfiguration e) {
+    		m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
+    		throw new UnacceptableConfiguration("The configuration " + configuration + " is not acceptable for " + m_factoryName + ": " + e.getMessage() );
     	}
     	
         IPojoContext context = new IPojoContext(m_context);
@@ -319,11 +321,12 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     /**
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
-    public ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) {
-    	if(!isAcceptable(configuration)) {
-    		//TODO : extend the message with infomation about the non acceptability
-    		m_logger.log(Logger.ERROR, "The configuration is not acceptable");
-    		return null; 
+    public ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration {
+    	try {
+    		_isAcceptable(configuration);
+    	} catch(UnacceptableConfiguration e) {
+    		m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
+    		throw new UnacceptableConfiguration("The configuration " + configuration + " is not acceptable for " + m_factoryName + ": " + e.getMessage() );
     	}
     	
     	IPojoContext context = new IPojoContext(m_context, serviceContext);
@@ -361,9 +364,24 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      */
     public void updated(String pid, Dictionary properties) throws ConfigurationException {
         InstanceManager cm = (InstanceManager) m_componentInstances.get(pid);
-        if (cm == null) { createComponentInstance(properties); } // Create the component
+        if (cm == null) { 
+        	try {
+        		createComponentInstance(properties);
+        	} catch (UnacceptableConfiguration e) {
+        		m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
+        		throw new ConfigurationException(properties.toString(), e.getMessage());
+        	} 
+        }
         else {
             cm.stop(); // Stop the component
+            
+            try {
+				_isAcceptable(properties); // Test if the configuration is acceptable
+			} catch (UnacceptableConfiguration e) {
+				m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
+        		throw new ConfigurationException(properties.toString(), e.getMessage());
+			}
+			
             cm.configure(m_componentMetadata, properties); // re-configure the component
             cm.start(); // restart it
         }
@@ -392,6 +410,18 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     		}
     	}
     	return true;
+    }
+    
+    private void _isAcceptable(Dictionary conf) throws UnacceptableConfiguration {
+    	if(conf == null || conf.get("name") == null) { throw new UnacceptableConfiguration("The configuration does not contains the \"name\" property"); }
+    	PropertyDescription[] props = m_componentDesc.getProperties();
+    	for(int i = 0; i < props.length; i++) {
+    		PropertyDescription pd = props[i];
+    		// Failed if the props has no default value and the configuration does not push a value 
+    		if(pd.getValue() == null && conf.get(pd.getName()) == null) {
+    			throw new UnacceptableConfiguration("The configuration does not contains the \"" + pd.getName() + "\" property");
+    		}
+    	}
     }
 
 }

@@ -34,7 +34,7 @@ public interface Factory {
      * @param configuration : the configuration properties for this component.
      * @return the created instance manager.
      */
-    ComponentInstance createComponentInstance(Dictionary configuration);
+    ComponentInstance createComponentInstance(Dictionary configuration) throws UnacceptableConfiguration;
     
     /**
      * Create an instance manager (i.e. component type instance).
@@ -43,7 +43,7 @@ public interface Factory {
      * @param serviceContext : the service context of the component.
      * @return the created instance manager.
      */
-    ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext);
+    ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration;
 
     /**
      * Get the component type information containing provided service, configuration properties ...
