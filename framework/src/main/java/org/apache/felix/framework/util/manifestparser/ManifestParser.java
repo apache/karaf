@@ -517,7 +517,7 @@ for (int reqIdx = 0; reqIdx < m_dynamicRequirements.length; reqIdx++)
                         {
                             pkgName = ((Capability) m_capabilities[capIdx]).getAttributes()[attrIdx];
                         }
-                        if (((Capability) m_capabilities[capIdx]).getAttributes()[attrIdx]
+                        else if (((Capability) m_capabilities[capIdx]).getAttributes()[attrIdx]
                             .getName().equals(ICapability.VERSION_PROPERTY))
                         {
                             pkgVersion = ((Capability) m_capabilities[capIdx]).getAttributes()[attrIdx];
