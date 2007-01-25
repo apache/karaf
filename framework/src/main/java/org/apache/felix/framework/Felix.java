@@ -99,6 +99,10 @@ public class Felix
     // Reusable bundle URL stream handler.
     private URLStreamHandler m_bundleStreamHandler = null;
 
+    // Execution environment.
+    private String m_executionEnvironment = "";
+    private Set m_executionEnvironmentCache = new HashSet();
+
     // The secure action used to do privileged calls
     private SecureAction m_secureAction = new SecureAction();
 
@@ -1395,6 +1399,8 @@ ex.printStackTrace();
             }
         }
 
+        verifyExecutionEnvironment(bundle);
+        
         IModule module = bundle.getInfo().getCurrentModule();
         try
         {
@@ -1859,9 +1865,9 @@ ex.printStackTrace();
             {
                 BundleArchive archive = m_cache.getArchive(id);
                 bundle = new BundleImpl(this, createBundleInfo(archive));
+                verifyExecutionEnvironment(bundle);
 
                 Object sm = System.getSecurityManager();
-
                 if (sm != null)
                 {
                     ((SecurityManager) sm).checkPermission(
@@ -1933,6 +1939,96 @@ ex.printStackTrace();
 
         // Return new bundle.
         return bundle;
+    }
+
+    /**
+     * Checks the passed in bundle and checks to see if there is a required execution environment.
+     * If there is, it gets the execution environment string and verifies that the framework provides it.
+     * @param bundle The bundle to verify
+     * @throws BundleException if the bundle's required execution environment does
+     *         not match the current execution environment.
+    **/
+    private void verifyExecutionEnvironment(BundleImpl bundle)
+        throws BundleException
+    {
+        String bundleEnvironment = (String)
+            bundle.getInfo().getCurrentHeader().get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
+        if (bundleEnvironment != null)
+        {
+            bundleEnvironment = bundleEnvironment.trim();
+            if (!bundleEnvironment.equals(""))
+            {
+                if (!isMatchingExecutionEnvironment(bundleEnvironment))
+                {
+                    throw new BundleException("Execution Environment not supported: " + bundleEnvironment);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check the required bundle execution environment against the framework provided
+     * exectution environment.
+     * @param bundleEnvironment The required execution environment string
+     *        (from Bundle-RequiredExecutionEnvironment manifest header
+     * @return True if the required bundle execution environment is provided by the framework
+     *         False if none of the provided framework execution environments match
+    **/
+    private boolean isMatchingExecutionEnvironment(String bundleEnvironment)
+    { 
+        String frameworkEnvironment = getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
+        if (frameworkEnvironment == null)
+        {
+            // If no framework execution environment is set, then all are valid
+            return true;
+        }
+
+        frameworkEnvironment = frameworkEnvironment.trim();
+        if ("".equals(frameworkEnvironment))
+        {
+            // If no framework execution environment is set, then all are valid
+            return true;
+        }
+
+        // The execution environment has changed, so update the cache and EE set
+        if (!m_executionEnvironment.equals(frameworkEnvironment))
+        {
+            updateFrameworkExecutionEnvironment(frameworkEnvironment);
+        }
+
+        StringTokenizer tokens = new StringTokenizer(bundleEnvironment, ",");
+        while (tokens.hasMoreTokens())
+        {
+            if (m_executionEnvironmentCache.contains(tokens.nextToken().trim()))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Updates the framework wide execution environment string and a cached Set of
+     * execution environment tokens from the comma delimited list specified by the
+     * system variable 'org.osgi.framework.executionenvironment'.
+     * @param frameworkEnvironment Comma delimited string of provided execution environments
+    **/
+    private void updateFrameworkExecutionEnvironment(String frameworkEnvironment)
+    {
+        StringTokenizer tokens = new StringTokenizer(frameworkEnvironment, ",");
+
+        Set newSet = new HashSet(tokens.countTokens());
+        while (tokens.hasMoreTokens())
+        {
+            newSet.add(tokens.nextToken().trim());
+        }
+
+        synchronized (m_executionEnvironmentCache)
+        {
+            m_executionEnvironment = frameworkEnvironment;
+            m_executionEnvironmentCache = newSet;
+        }
     }
 
     /**
