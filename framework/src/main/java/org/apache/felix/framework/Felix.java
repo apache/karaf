@@ -2623,22 +2623,25 @@ ex.printStackTrace();
                 {
                     // See if the target bundle's module is one of the
                     // "in use" exporters of the package.
-                    R4SearchPolicyCore.ResolverCandidate[] inUseModules = m_policyCore.getInUseCandidates(
-                        new Requirement(
-                            ICapability.PACKAGE_NAMESPACE,
-                            null,
-                            null,
-                            new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, ((Capability) caps[capIdx]).getPackageName(), false) }),
-                        true);
-
-                    // Search through the current providers to find the target
-                    // module.
-                    for (int i = 0; (inUseModules != null) && (i < inUseModules.length); i++)
+                    if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                     {
-                        if (inUseModules[i].m_module == modules[modIdx])
+                        R4SearchPolicyCore.ResolverCandidate[] inUseModules = m_policyCore.getInUseCandidates(
+                            new Requirement(
+                                ICapability.PACKAGE_NAMESPACE,
+                                null,
+                                null,
+                                new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, ((Capability) caps[capIdx]).getPackageName(), false) }),
+                            true);
+    
+                        // Search through the current providers to find the target
+                        // module.
+                        for (int i = 0; (inUseModules != null) && (i < inUseModules.length); i++)
                         {
-                            list.add(new ExportedPackageImpl(
-                                this, bundle, modules[modIdx], (Capability) caps[capIdx]));
+                            if (inUseModules[i].m_module == modules[modIdx])
+                            {
+                                list.add(new ExportedPackageImpl(
+                                    this, bundle, modules[modIdx], (Capability) caps[capIdx]));
+                            }
                         }
                     }
                 }
