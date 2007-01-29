@@ -356,59 +356,8 @@ class BundleContextImpl implements FelixBundleContext
     {
         checkValidity();
         
-        // TODO: Implement BundleContext.getAllServiceReferences()
-        Object sm = System.getSecurityManager();
-        
-        if (sm != null)
-        {
-            ServiceReference[] refs = null;
-            
-            if (refs == null)
-            {
-                return refs;
-            }
-            
-            List result = new ArrayList();
-            
-            for (int i = 0;i < refs.length;i++)
-            {
-                String[] objectClass = (String[]) refs[i].getProperty(
-                    Constants.OBJECTCLASS);
-                
-                if (objectClass == null)
-                {
-                    continue;
-                }
-                
-                for (int j = 0;j < objectClass.length;j++)
-                {
-                    try
-                    {
-                        ((SecurityManager) sm).checkPermission(new ServicePermission(
-                            objectClass[j], ServicePermission.GET));
-                        
-                        result.add(refs[i]);
-                        
-                        break;
-                    } 
-                    catch (Exception e)
-                    {
-                        
-                    }
-                }
-            }
-            
-            if (result.isEmpty())
-            {
-                return null;
-            }
-            
-            return (ServiceReference[]) result.toArray(new ServiceReference[result.size()]);
-        }
-        else
-        {
-            return null;
-        }
+        return m_felix.getAllowedServiceReferences(m_bundle, clazz, filter, false);
+
     }
 
     public ServiceReference[] getServiceReferences(String clazz, String filter)
@@ -416,58 +365,8 @@ class BundleContextImpl implements FelixBundleContext
     {
         checkValidity();
         
-        Object sm = System.getSecurityManager();
-        
-        if (sm != null)
-        {
-            ServiceReference[] refs = m_felix.getServiceReferences(m_bundle, clazz, filter);
-            
-            if (refs == null)
-            {
-                return refs;
-            }
-            
-            List result = new ArrayList();
-            
-            for (int i = 0;i < refs.length;i++)
-            {
-                String[] objectClass = (String[]) refs[i].getProperty(
-                    Constants.OBJECTCLASS);
-                
-                if (objectClass == null)
-                {
-                    continue;
-                }
-                
-                for (int j = 0;j < objectClass.length;j++)
-                {
-                    try
-                    {
-                        ((SecurityManager) sm).checkPermission(new ServicePermission(
-                            objectClass[j], ServicePermission.GET));
-                        
-                        result.add(refs[i]);
-                        
-                        break;
-                    } 
-                    catch (Exception e)
-                    {
-                        
-                    }
-                }
-            }
-            
-            if (result.isEmpty())
-            {
-                return null;
-            }
-            
-            return (ServiceReference[]) result.toArray(new ServiceReference[result.size()]);
-        }
-        else
-        {
-            return m_felix.getServiceReferences(m_bundle, clazz, filter);
-        }
+        return m_felix.getAllowedServiceReferences(m_bundle, clazz, filter, true);
+
     }
 
     public Object getService(ServiceReference ref)

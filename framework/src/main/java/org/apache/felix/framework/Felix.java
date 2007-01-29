@@ -504,7 +504,7 @@ ex.printStackTrace();
         {
             StartLevel sl = (StartLevel) getService(
                 getBundle(0),
-                getServiceReferences((BundleImpl) getBundle(0), StartLevel.class.getName(), null)[0]);
+                getServiceReferences((BundleImpl) getBundle(0), StartLevel.class.getName(), null, true)[0]);
             if (sl instanceof StartLevelImpl)
             {
                 ((StartLevelImpl) sl).setStartLevelAndWait(startLevel);
@@ -586,7 +586,7 @@ ex.printStackTrace();
         {
             StartLevelImpl sl = (StartLevelImpl) getService(
                 getBundle(0),
-                getServiceReferences((BundleImpl) getBundle(0), StartLevel.class.getName(), null)[0]);
+                getServiceReferences((BundleImpl) getBundle(0), StartLevel.class.getName(), null, true)[0]);
             sl.setStartLevelAndWait(0);
         }
         catch (InvalidSyntaxException ex)
@@ -2263,8 +2263,18 @@ ex.printStackTrace();
         return reg;
     }
 
+    /**
+     * Retrieves an array of {@link ServiceReference} objects based on calling bundle,
+     * service class name, and filter expression.  Optionally checks for isAssignable to
+     * make sure that the service can be cast to the
+     * @param bundle Calling Bundle
+     * @param className Service Classname or <code>null</code> for all
+     * @param expr Filter Criteria or <code>null</code>
+     * @return Array of ServiceReference objects that meet the criteria
+     * @throws InvalidSyntaxException
+     */
     protected ServiceReference[] getServiceReferences(
-        BundleImpl bundle, String className, String expr)
+        BundleImpl bundle, String className, String expr, boolean checkAssignable)
         throws InvalidSyntaxException
     {
         // Define filter if expression is not null.
@@ -2277,23 +2287,20 @@ ex.printStackTrace();
         // Ask the service registry for all matching service references.
         List refList = m_registry.getServiceReferences(className, filter);
 
-        // The returned reference list must be filtered for two cases:
-        // 1) The requesting bundle may not be wired to the same class
-        //    as the providing bundle (i.e, different versions), so filter
-        //    any services for which the requesting bundle might get a
-        //    class cast exception.
-        // 2) Security is enabled and the requesting bundle does not have
-        //    permission access the service.
-        for (int refIdx = 0; (refList != null) && (refIdx < refList.size()); refIdx++)
+        // Filter on assignable references
+        if (checkAssignable)
         {
-            // Get the current service reference.
-            ServiceReference ref = (ServiceReference) refList.get(refIdx);
-
-            // Now check for castability.
-            if (!Felix.isServiceAssignable(bundle, ref))
+            for (int refIdx = 0; (refList != null) && (refIdx < refList.size()); refIdx++)
             {
-                refList.remove(refIdx);
-                refIdx--;
+                // Get the current service reference.
+                ServiceReference ref = (ServiceReference) refList.get(refIdx);
+
+                // Now check for castability.
+                if (!Felix.isServiceAssignable(bundle, ref))
+                {
+                    refList.remove(refIdx);
+                    refIdx--;
+                }
             }
         }
 
@@ -2303,6 +2310,67 @@ ex.printStackTrace();
         }
 
         return null;
+    }
+
+    /**
+     * Retrieves Array of {@link ServiceReference} objects based on calling bundle, service class name,
+     * optional filter expression, and optionally filters further on the version.
+     * If running under a {@link SecurityManager}, checks that the calling bundle has permissions to
+     * see the service references and removes references that aren't.
+     * @param bundle Calling Bundle
+     * @param className Service Classname or <code>null</code> for all
+     * @param expr Filter Criteria or <code>null</code>
+     * @param checkAssignable <code>true</code> to check for isAssignable, <code>false</code> to return all versions
+     * @return Array of ServiceReference objects that meet the criteria
+     * @throws InvalidSyntaxException
+     */
+    protected ServiceReference[] getAllowedServiceReferences(
+        BundleImpl bundle, String className, String expr, boolean checkAssignable)
+        throws InvalidSyntaxException
+    {
+        ServiceReference[] refs = getServiceReferences(bundle, className, expr, checkAssignable);
+
+        Object sm = System.getSecurityManager();
+
+        if (sm == null)
+        {
+            return refs;
+        }
+
+        List result = new ArrayList();
+
+        for (int i = 0;i < refs.length;i++)
+        {
+            String[] objectClass = (String[]) refs[i].getProperty(Constants.OBJECTCLASS);
+
+            if (objectClass == null)
+            {
+                continue;
+            }
+
+            for (int j = 0; j < objectClass.length; j++)
+            {
+                try
+                {
+                    ((SecurityManager) sm).checkPermission(new ServicePermission(
+                        objectClass[j], ServicePermission.GET));
+                    result.add(refs[i]);
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    // Ignore, since we are just testing permission.
+                }
+            }
+        }
+
+        if (result.isEmpty())
+        {
+            return null;
+        }
+
+        return (ServiceReference[]) result.toArray(new ServiceReference[result.size()]);
+
     }
 
     /**
