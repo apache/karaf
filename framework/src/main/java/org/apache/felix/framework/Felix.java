@@ -2832,9 +2832,11 @@ System.out.println("!!! ELAPSED RESOLVE TIME : " + time);
         IModule module = m_factory.createModule(
             Long.toString(targetId) + "." + Integer.toString(revision), md);
 
-        CodeSource codesource = new CodeSource(m_secureAction.createURL(null, 
+        FakeURLStreamHandler handler = new FakeURLStreamHandler();
+        URL context = new URL(null, "location:", handler);
+        CodeSource codesource = new CodeSource(m_secureAction.createURL(context, 
             m_cache.getArchive(targetId).getLocation(), 
-            new FakeURLStreamHandler()), 
+            handler), 
             m_cache.getArchive(targetId).getCertificates());
 
         Permissions allPerms = new Permissions();
