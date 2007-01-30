@@ -2332,7 +2332,7 @@ ex.printStackTrace();
 
         Object sm = System.getSecurityManager();
 
-        if (sm == null)
+        if ((sm == null) || (refs == null))
         {
             return refs;
         }
