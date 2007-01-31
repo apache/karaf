@@ -2494,7 +2494,7 @@ ex.printStackTrace();
         ExportedPackage[] pkgs = null;
 
         // First, get all exporters of the package.
-        R4SearchPolicyCore.ResolverCandidate[] exporters =
+        R4SearchPolicyCore.PackageSource[] exporters =
             m_policyCore.getInUseCandidates(
                 new Requirement(
                     ICapability.PACKAGE_NAMESPACE,
@@ -2625,7 +2625,7 @@ ex.printStackTrace();
                     // "in use" exporters of the package.
                     if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                     {
-                        R4SearchPolicyCore.ResolverCandidate[] inUseModules = m_policyCore.getInUseCandidates(
+                        R4SearchPolicyCore.PackageSource[] inUseModules = m_policyCore.getInUseCandidates(
                             new Requirement(
                                 ICapability.PACKAGE_NAMESPACE,
                                 null,
