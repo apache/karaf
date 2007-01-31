@@ -108,7 +108,7 @@ public class ManifestParser
                 Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, m_bundleSymbolicName, false);
             attrs[1] = new R4Attribute(
                 Constants.BUNDLE_VERSION_ATTRIBUTE, m_bundleVersion, false);
-//            capList.add(new Capability(ICapability.MODULE_NAMESPACE, null, attrs));
+            capList.add(new Capability(ICapability.MODULE_NAMESPACE, null, attrs));
         }
 
         //
@@ -118,13 +118,7 @@ public class ManifestParser
         // Get exported packages from bundle manifest.
         ICapability[] exportCaps = parseExportHeader(
             (String) headerMap.get(Constants.EXPORT_PACKAGE));
-/*
-System.out.println("PARSED EXPORT CAPABILITIES:");
-for (int capIdx = 0; capIdx < exportCaps.length; capIdx++)
-{
-    System.out.println(exportCaps[capIdx]);
-}
-*/
+
         // Create non-duplicated export array.
         dupeMap.clear();
         for (int capIdx = 0; capIdx < exportCaps.length; capIdx++)
@@ -161,10 +155,9 @@ for (int capIdx = 0; capIdx < exportCaps.length; capIdx++)
 
         IRequirement[] bundleReq = parseRequireBundleHeader(
             (String) headerMap.get(Constants.REQUIRE_BUNDLE));
-//System.out.println("PARSED BUNDLE REQUIREMENTS:");
         for (int reqIdx = 0; reqIdx < bundleReq.length; reqIdx++)
         {
-//            reqList.add(bundleReq[reqIdx]);
+            reqList.add(bundleReq[reqIdx]);
         }
 
         //
@@ -174,13 +167,7 @@ for (int capIdx = 0; capIdx < exportCaps.length; capIdx++)
         // Get import packages from bundle manifest.
         IRequirement[] importReqs = parseImportHeader(
             (String) headerMap.get(Constants.IMPORT_PACKAGE));
-/*
-System.out.println("PARSED IMPORT REQUIREMENTS:");
-for (int reqIdx = 0; reqIdx < importReqs.length; reqIdx++)
-{
-    System.out.println(importReqs[reqIdx]);
-}
-*/
+
         // Create non-duplicated import array.
         dupeMap.clear();
         for (int reqIdx = 0; reqIdx < importReqs.length; reqIdx++)
@@ -218,13 +205,7 @@ for (int reqIdx = 0; reqIdx < importReqs.length; reqIdx++)
         // Get dynamic import packages from bundle manifest.
         m_dynamicRequirements = parseImportHeader(
             (String) headerMap.get(Constants.DYNAMICIMPORT_PACKAGE));
-/*
-System.out.println("PARSED DYNAMIC IMPORT REQUIREMENTS:");
-for (int reqIdx = 0; reqIdx < m_dynamicRequirements.length; reqIdx++)
-{
-    System.out.println(m_dynamicRequirements[reqIdx]);
-}
-*/
+
         // Dynamic imports can have duplicates, so just check for import
         // of java.*.
         for (int reqIdx = 0; reqIdx < m_dynamicRequirements.length; reqIdx++)
