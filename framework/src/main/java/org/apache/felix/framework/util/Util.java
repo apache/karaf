@@ -189,16 +189,13 @@ public class Util
 
     public static ICapability getSatisfyingCapability(IModule m, IRequirement req)
     {
-        if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+        ICapability[] caps = m.getDefinition().getCapabilities();
+        for (int i = 0; (caps != null) && (i < caps.length); i++)
         {
-            ICapability[] caps = m.getDefinition().getCapabilities();
-            for (int i = 0; (caps != null) && (i < caps.length); i++)
+            if (caps[i].getNamespace().equals(req.getNamespace()) &&
+                req.isSatisfied(caps[i]))
             {
-                if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
-                    req.isSatisfied(caps[i]))
-                {
-                    return caps[i];
-                }
+                return caps[i];
             }
         }
         return null;
