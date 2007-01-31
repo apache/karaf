@@ -2704,7 +2704,6 @@ ex.printStackTrace();
             // If there are targets, then resolve each one.
             if (bundles != null)
             {
-long time = System.currentTimeMillis();
                 for (int i = 0; i < bundles.length; i++)
                 {
                     try
@@ -2720,8 +2719,6 @@ long time = System.currentTimeMillis();
                             ex);
                     }
                 }
-time = System.currentTimeMillis() - time;
-System.out.println("!!! ELAPSED RESOLVE TIME : " + time);
             }
 
             return result;
