@@ -552,7 +552,7 @@ public class R4SearchPolicyCore implements ModuleListener
                             // candidates.
                             if (candidate == null)
                             {
-                                candidates = getAvailableCandidates(req, false);
+                                candidates = getUnusedCandidates(req, false);
 
                                 // Take the first candidate that can resolve.
                                 for (int candIdx = 0;
@@ -677,44 +677,52 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         }
     }
 
-    public PackageSource[] getAvailableCandidates(IRequirement req, boolean includeRemovalPending)
+    private boolean isCapabilityInUse(IModule module, ICapability cap)
+    {
+        ICapability[] caps = (ICapability[]) m_inUseCapMap.get(module);
+        for (int i = 0; (caps != null) && (i < caps.length); i++)
+        {
+            if (caps[i].equals(cap))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public PackageSource[] getUnusedCandidates(IRequirement req, boolean includeRemovalPending)
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
         synchronized (m_factory)
         {
-            PackageSource[] candidates = getCompatibleCandidates(
-                (IModule[]) m_factory.getModules(), req, includeRemovalPending);
+            // Get all modules.
+            IModule[] modules = m_factory.getModules();
+
+            // Create list of compatible providers.
+            PackageSource[] candidates = m_emptySources;
+            for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
+            {
+                // The spec says that we cannot consider modules that
+                // are pending removal, so ignore them.
+                if (includeRemovalPending || !modules[modIdx].isRemovalPending())
+                {
+                    // Get the module's export package for the target package.
+                    ICapability cap = Util.getSatisfyingCapability(modules[modIdx], req);
+                    // If compatible and it is not currently used, then add
+                    // the available candidate to the list.
+                    if ((cap != null) && !isCapabilityInUse(modules[modIdx], cap))
+                    {
+                        PackageSource[] tmp = new PackageSource[candidates.length + 1];
+                        System.arraycopy(candidates, 0, tmp, 0, candidates.length);
+                        tmp[candidates.length] = new PackageSource(modules[modIdx], cap);
+                        candidates = tmp;
+                    }
+                }
+            }
             Arrays.sort(candidates);
             return candidates;
         }
-    }
-
-    private PackageSource[] getCompatibleCandidates(
-        IModule[] modules, IRequirement req, boolean includeRemovalPending)
-    {
-        // Create list of compatible exporters.
-        PackageSource[] candidates = m_emptySources;
-        for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
-        {
-            // The spec says that we cannot consider modules that
-            // are pending removal, so ignore them.
-            if (includeRemovalPending || !modules[modIdx].isRemovalPending())
-            {
-                // Get the module's export package for the target package.
-                ICapability cap = Util.getSatisfyingCapability(modules[modIdx], req);
-                // If compatible, then add the candidate to the list.
-                if (cap != null)
-                {
-                    PackageSource[] tmp = new PackageSource[candidates.length + 1];
-                    System.arraycopy(candidates, 0, tmp, 0, candidates.length);
-                    tmp[candidates.length] = new PackageSource(modules[modIdx], cap);
-                    candidates = tmp;
-                }
-            }
-        }
-
-        return candidates;
     }
 
     public void resolve(IModule rootModule)
@@ -822,7 +830,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             // than "available" ones, so put the "in use" candidates
             // at the front of the list of candidates.
             PackageSource[] inuse = getInUseCandidates(reqs[reqIdx], false);
-            PackageSource[] available = getAvailableCandidates(reqs[reqIdx], false);
+            PackageSource[] available = getUnusedCandidates(reqs[reqIdx], false);
             PackageSource[] candidates = new PackageSource[inuse.length + available.length];
 // TODO: RB - This duplicates "in use" candidates from "available" candidates.
             System.arraycopy(inuse, 0, candidates, 0, inuse.length);
@@ -932,10 +940,6 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         Map cycleMap = new HashMap();
         while (!isClassSpaceConsistent(rootModule, moduleMap, cycleMap, resolverMap))
         {
-m_logger.log(
-    Logger.LOG_DEBUG,
-    "Constraint violation detected, will try to repair.");
-
             // The incrementCandidateConfiguration() method requires an
             // ordered access to the resolver map, so we will create
             // a reusable list once right here.
@@ -1010,6 +1014,11 @@ m_logger.log(
                 ResolvedPackage rpUses = (ResolvedPackage) entry.getValue();
                 if (!rp.isCompatible(rpUses) && !rpUses.isCompatible(rp))
                 {
+                    m_logger.log(
+                        Logger.LOG_DEBUG,
+                        "Constraint violation for " + rootModule
+                        + " detected; module can see "
+                        + rp + " and " + rpUses);
                     return false;
                 }
             }
@@ -2250,9 +2259,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         public StringBuffer toString(String padding, StringBuffer sb)
         {
             sb.append(padding);
-            sb.append("PKG ");
             sb.append(m_name);
-            sb.append(" FROM: ");
+            sb.append(" from [");
             for (int i = 0; i < m_sourceList.size(); i++)
             {
                 if (i != 0)
@@ -2262,6 +2270,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 PackageSource ps = (PackageSource) m_sourceList.get(i);
                 sb.append(ps.m_module);
             }
+            sb.append("]");
             return sb;
         }
     }
@@ -2403,7 +2412,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             // Try to see if there is an exporter available.
             PackageSource[] exporters = getInUseCandidates(imp, true);
             exporters = (exporters.length == 0)
-                ? getAvailableCandidates(imp, true) : exporters;
+                ? getUnusedCandidates(imp, true) : exporters;
 
             // An exporter might be available, but it may have attributes
             // that do not match the importer's required attributes, so
@@ -2417,7 +2426,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                         ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
                     exporters = getInUseCandidates(pkgReq, true);
                     exporters = (exporters.length == 0)
-                        ? getAvailableCandidates(pkgReq, true) : exporters;
+                        ? getUnusedCandidates(pkgReq, true) : exporters;
                 }
                 catch (InvalidSyntaxException ex)
                 {
@@ -2467,7 +2476,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             // This should never happen.
         }
         PackageSource[] exporters = getInUseCandidates(pkgReq, true);
-        exporters = (exporters.length == 0) ? getAvailableCandidates(pkgReq, true) : exporters;
+        exporters = (exporters.length == 0) ? getUnusedCandidates(pkgReq, true) : exporters;
         if (exporters.length > 0)
         {
             boolean classpath = false;
