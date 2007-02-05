@@ -435,15 +435,15 @@ public class R4LibraryClause
     {
         value = value.toLowerCase();
 
-        if (value.startsWith("x86") || value.startsWith("pentium")
+        if (value.startsWith("x86-64") || value.startsWith("amd64"))
+        {
+            return "x86-64";
+        }
+        else if (value.startsWith("x86") || value.startsWith("pentium")
             || value.startsWith("i386") || value.startsWith("i486")
             || value.startsWith("i586") || value.startsWith("i686"))
         {
             return "x86";
-        }
-        else if (value.startsWith("x86-64") || value.startsWith("amd64"))
-        {
-            return "x86-64";
         }
         else if (value.startsWith("68k"))
         {
