@@ -149,10 +149,6 @@ public class ConfigurationHandler extends Handler implements ManagedService {
                 else { if (fieldName != null &&  configuration.get(fieldName) != null && !(configuration.get(fieldName) instanceof String)) { m_configurableProperties[k].setValue(configuration.get(fieldName)); } }
             }
             m_manager.register(this, fields);
-
-
-
-
         }
         else { return; }
     }

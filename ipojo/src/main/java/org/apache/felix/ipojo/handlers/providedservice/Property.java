@@ -23,7 +23,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Logger;
+
+import sun.net.www.ParseUtil;
 
 /**
  * Represent a property i.e. a set : [name, type, value].
@@ -154,9 +157,7 @@ public class Property {
         // Array :
         if (m_type.endsWith("[]")) {
             String internalType = m_type.substring(0, m_type.length() - 2);
-            value = value.substring(1, value.length() - 1);
-            String[] values = value.split(",");
-            setArrayValue(internalType, values);
+            setArrayValue(internalType, ParseUtils.parseArrays(value));
             return;
         }
 
@@ -207,42 +208,42 @@ public class Property {
         if (internalType.equals("string") || internalType.equals("String")) { m_value = values; return; }
         if (internalType.equals("boolean")) {
             boolean[] bool = new boolean[values.length];
-            for (int i = 0; i < values.length; i++) { bool[i] = new Boolean(values[i].trim()).booleanValue(); }
+            for (int i = 0; i < values.length; i++) { bool[i] = new Boolean(values[i]).booleanValue(); }
             m_value = bool;
             return;
         }
         if (internalType.equals("byte")) {
             byte[] byt = new byte[values.length];
-            for (int i = 0; i < values.length; i++) { byt[i] = new Byte(values[i].trim()).byteValue(); }
+            for (int i = 0; i < values.length; i++) { byt[i] = new Byte(values[i]).byteValue(); }
             m_value = byt;
             return;
         }
         if (internalType.equals("short")) {
             short[] shor = new short[values.length];
-            for (int i = 0; i < values.length; i++) { shor[i] = new Short(values[i].trim()).shortValue(); }
+            for (int i = 0; i < values.length; i++) { shor[i] = new Short(values[i]).shortValue(); }
             m_value = shor;
             return;
         }
         if (internalType.equals("int")) {
             int[] in = new int[values.length];
-            for (int i = 0; i < values.length; i++) { in[i] = new Integer(values[i].trim()).intValue(); }
+            for (int i = 0; i < values.length; i++) { in[i] = new Integer(values[i]).intValue(); }
             m_value = in;
             return;
         }
         if (internalType.equals("long")) {
             long[] ll = new long[values.length];
-            for (int i = 0; i < values.length; i++) { ll[i] = new Long(values[i].trim()).longValue(); }
+            for (int i = 0; i < values.length; i++) { ll[i] = new Long(values[i]).longValue(); }
             m_value = ll;
             return;
         }
         if (internalType.equals("float")) {
             float[] fl = new float[values.length];
-            for (int i = 0; i < values.length; i++) { fl[i] = new Float(values[i].trim()).floatValue(); }
+            for (int i = 0; i < values.length; i++) { fl[i] = new Float(values[i]).floatValue(); }
             m_value = fl;
             return; }
         if (internalType.equals("double")) {
             double[] dl = new double[values.length];
-            for (int i = 0; i < values.length; i++) { dl[i] = new Double(values[i].trim()).doubleValue(); }
+            for (int i = 0; i < values.length; i++) { dl[i] = new Double(values[i]).doubleValue(); }
             m_value = dl;
             return; }
 
@@ -252,7 +253,7 @@ public class Property {
             Constructor cst = c.getConstructor(new Class[] {String.class});
             Object[] ob = (Object[]) Array.newInstance(c, values.length);
             for (int i = 0; i < values.length; i++) {
-                ob[i] = cst.newInstance(new Object[] {values[i].trim()});
+                ob[i] = cst.newInstance(new Object[] {values[i]});
             }
             m_value = ob;
             return;

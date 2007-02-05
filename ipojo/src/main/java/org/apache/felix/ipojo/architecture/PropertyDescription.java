@@ -38,8 +38,6 @@ public class PropertyDescription {
      * Default value of the property.
      */
     private String m_value = null;
-    
-    private boolean m_needed;
 
     /**
      * Constructor.
@@ -58,11 +56,6 @@ public class PropertyDescription {
      */
     public String getName() { return m_name; }
     
-    /**
-     * @return true is the property need to be configured.
-     */
-    public boolean isNeeded() { return m_needed; }
-
     /**
      * @return the property type.
      */

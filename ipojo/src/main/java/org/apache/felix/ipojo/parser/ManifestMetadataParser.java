@@ -57,23 +57,41 @@ public class ManifestMetadataParser {
         Element[] configs = m_elements[0].getElements("Instance");
         Dictionary[] dicts = new Dictionary[configs.length];
         for (int i = 0; i < configs.length; i++) {
-            String comp = configs[i].getAttribute("component"); // get the component targeted by the configuration
-            if(comp == null) { throw new ParseException("An instance connaot be parsed : no component attribute"); }
-            Dictionary d = new Properties();
-            d.put("component", comp);
-            if (configs[i].getAttribute("name") != null) { d.put("name", configs[i].getAttribute("name")); }
-            for (int j = 0; j < configs[i].getElements("property", "").length; j++) {
-                String propsName = configs[i].getElements("property", "")[j].getAttribute("name", "");
-                String propsValue = configs[i].getElements("property", "")[j].getAttribute("value", "");
-                if(propsName == null || propsValue == null) { 
-                	System.err.println("A property cannot be parsed : " + propsName + " = " + propsValue);
-                	throw new ParseException("A property cannot be parsed : " + propsName + " = " + propsValue);
-                } 
-                else { d.put(propsName, propsValue); }
-            }
-            dicts[i] = d;
+            dicts[i] = parseInstance(configs[i]);
         }
         return dicts;
+    }
+    
+    private Dictionary parseInstance(Element instance) throws ParseException {
+    	Dictionary dict = new Properties();
+    	if(!instance.containsAttribute("name")) { throw new ParseException("An instance does not have the 'name' attribute"); }
+    	if(!instance.containsAttribute("component")) { throw new ParseException("An instance does not have the 'component' attribute"); }
+    	dict.put("name", instance.getAttribute("name"));
+    	dict.put("component", instance.getAttribute("component"));
+    	
+    	for(int i=0; i < instance.getElements("property").length; i++) {
+    		parseProperty(instance.getElements("property")[i], dict);
+    	}
+    	
+    	return dict;
+    }
+    
+    private void parseProperty(Element prop, Dictionary dict) throws ParseException {
+    	// Check that the property has a name 
+    	if(!prop.containsAttribute("name")) { throw new ParseException("A property does not have the 'name' attribute"); }
+    	// Final case : the property element has a 'value' attribute
+    	if(prop.containsAttribute("value")) { dict.put(prop.getAttribute("name"), prop.getAttribute("value")); }
+    	else {
+    		// Recursive case
+    		// Check if there is 'property' element
+    		Element[] subProps = prop.getElements("property");
+    		if(subProps.length == 0) { throw new ParseException("A complex property must have at least one 'property' sub-element"); }
+    		Dictionary dict2 = new Properties();
+    		for(int i = 0; i < subProps.length; i++) {
+    			parseProperty(subProps[i], dict2);
+    			dict.put(prop.getAttribute("name"), dict2);
+    		}
+    	}
     }
 
     /**
@@ -81,10 +99,6 @@ public class ManifestMetadataParser {
      * @param elem : the element to add
      */
     private void addElement(Element elem) {
-        for (int i = 0; (m_elements != null) && (i < m_elements.length); i++) {
-            if (m_elements[i] == elem) { return; }
-        }
-
         if (m_elements != null) {
             Element[] newElementsList = new Element[m_elements.length + 1];
             System.arraycopy(m_elements, 0, newElementsList, 0, m_elements.length);

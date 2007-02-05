@@ -22,6 +22,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import org.apache.felix.ipojo.parser.ParseUtils;
+
 /**
  * Configurable Property.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
@@ -83,9 +85,7 @@ public class ConfigurableProperty {
         // Array :
         if (type.endsWith("[]")) {
             String internalType = type.substring(0, type.length() - 2);
-            strValue = strValue.substring(1, strValue.length() - 1);
-            String[] values = strValue.split(",");
-            setArrayValue(internalType, values);
+            setArrayValue(internalType, ParseUtils.parseArrays(strValue));
             return;
         }
 
@@ -135,48 +135,48 @@ public class ConfigurableProperty {
     private void setArrayValue(String internalType, String[] values) {
         if (internalType.equals("string") || internalType.equals("String")) { 
         	String[] str = new String[values.length];
-        	for (int i = 0; i < values.length; i++) { str[i] = new String(values[i].trim()); }
+        	for (int i = 0; i < values.length; i++) { str[i] = new String(values[i]); }
         	m_value = str;
         	return;
         }
         if (internalType.equals("boolean")) {
             boolean[] bool = new boolean[values.length];
-            for (int i = 0; i < values.length; i++) { bool[i] = new Boolean(values[i].trim()).booleanValue(); }
+            for (int i = 0; i < values.length; i++) { bool[i] = new Boolean(values[i]).booleanValue(); }
             m_value = bool;
             return;
         }
         if (internalType.equals("byte")) {
             byte[] byt = new byte[values.length];
-            for (int i = 0; i < values.length; i++) { byt[i] = new Byte(values[i].trim()).byteValue(); }
+            for (int i = 0; i < values.length; i++) { byt[i] = new Byte(values[i]).byteValue(); }
             m_value = byt;
             return;
         }
         if (internalType.equals("short")) {
             short[] shor = new short[values.length];
-            for (int i = 0; i < values.length; i++) { shor[i] = new Short(values[i].trim()).shortValue(); }
+            for (int i = 0; i < values.length; i++) { shor[i] = new Short(values[i]).shortValue(); }
             m_value = shor;
             return;
         }
         if (internalType.equals("int")) {
             int[] in = new int[values.length];
-            for (int i = 0; i < values.length; i++) { in[i] = new Integer(values[i].trim()).intValue(); }
+            for (int i = 0; i < values.length; i++) { in[i] = new Integer(values[i]).intValue(); }
             m_value = in;
             return;
         }
         if (internalType.equals("long")) {
             long[] ll = new long[values.length];
-            for (int i = 0; i < values.length; i++) { ll[i] = new Long(values[i].trim()).longValue(); }
+            for (int i = 0; i < values.length; i++) { ll[i] = new Long(values[i]).longValue(); }
             m_value = ll;
             return;
         }
         if (internalType.equals("float")) {
             float[] fl = new float[values.length];
-            for (int i = 0; i < values.length; i++) { fl[i] = new Float(values[i].trim()).floatValue(); }
+            for (int i = 0; i < values.length; i++) { fl[i] = new Float(values[i]).floatValue(); }
             m_value = fl;
             return; }
         if (internalType.equals("double")) {
             double[] dl = new double[values.length];
-            for (int i = 0; i < values.length; i++) { dl[i] = new Double(values[i].trim()).doubleValue(); }
+            for (int i = 0; i < values.length; i++) { dl[i] = new Double(values[i]).doubleValue(); }
             m_value = dl;
             return; }
 

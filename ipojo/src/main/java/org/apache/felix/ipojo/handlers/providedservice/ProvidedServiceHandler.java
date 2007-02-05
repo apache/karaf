@@ -25,6 +25,7 @@ import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.Constants;
 
@@ -94,9 +95,7 @@ public class ProvidedServiceHandler extends Handler {
             if (providedServices[i].containsAttribute("interface")) {
                 String serviceSpecificationStr = providedServices[i].getAttribute("interface");
                 //Get serviceSpecification if exist in the metadata
-                String[] spec = serviceSpecificationStr.split(",");
-                serviceSpecification = new String[spec.length];
-                for (int j = 0; j < spec.length; j++) { serviceSpecification[j] = spec[j].trim(); }
+                serviceSpecification = ParseUtils.parseArrays(serviceSpecificationStr);
             } else {
                 serviceSpecification = new String[manipulation.getElements("Interface").length];
                 for (int j = 0; j < manipulation.getElements("Interface").length; j++) {
