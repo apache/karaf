@@ -80,11 +80,6 @@ public class ProvidedService implements ServiceFactory {
     private ProvidedServiceHandler m_handler;
 
     /**
-     * State of the provided service.
-     */
-    private int m_state;
-
-    /**
      * Properties Array.
      */
     private Property[] m_properties = new Property[0];
@@ -205,8 +200,8 @@ public class ProvidedService implements ServiceFactory {
      * The service object must be able to serve this service.
      * To avoid cycle in Check Context, the registred service is set to registred before the real registration.
      */
-    protected void registerService() {
-        if (m_state != REGISTERED) {
+    protected synchronized void registerService() {
+        if (m_serviceRegistration == null) {
             String spec = "";
             for (int i = 0; i < m_serviceSpecification.length; i++) {
                 spec = spec + m_serviceSpecification[i] + ", ";
@@ -214,25 +209,21 @@ public class ProvidedService implements ServiceFactory {
             // Contruct the service properties list
             Properties serviceProperties = getServiceProperties();
 
-            m_state = REGISTERED;
-            synchronized (this) {
-                m_serviceRegistration =
+            m_serviceRegistration =
                     m_handler.getInstanceManager().getContext().registerService(
                     		m_serviceSpecification, this, serviceProperties);
-            }
         }
     }
 
     /**
      * Unregister the service.
      */
-    protected void unregisterService() {
-        if (m_state == REGISTERED) {
+    protected synchronized void unregisterService() {
+        if (m_serviceRegistration != null) {
             try {
                 m_serviceRegistration.unregister();
-                m_serviceRegistration = null;
             } catch (Exception e) { return; }
-            m_state = UNREGISTERED;
+            m_serviceRegistration = null;
         }
     }
 
@@ -240,7 +231,8 @@ public class ProvidedService implements ServiceFactory {
      * @return The state of the provided service.
      */
     public int getState() {
-        return m_state;
+    	if(m_serviceRegistration == null) { return UNREGISTERED; }
+    	else { return REGISTERED; }
     }
 
     /**
@@ -277,8 +269,7 @@ public class ProvidedService implements ServiceFactory {
      * Update the service properties.
      * The new list of properties is sended to the service registry.
      */
-    public void update() {
-
+    public synchronized void update() {
         // Contruct the service properties list
         Properties serviceProperties = getServiceProperties();
         
@@ -287,11 +278,9 @@ public class ProvidedService implements ServiceFactory {
         }
 
         // Update the service registration
-        if (m_state == REGISTERED) {
-            synchronized (this) {
+        if (m_serviceRegistration != null) {
                 m_serviceRegistration.setProperties(serviceProperties);
             }
-        }
     }
 
     /**
