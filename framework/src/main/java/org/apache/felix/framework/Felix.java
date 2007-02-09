@@ -1532,6 +1532,37 @@ ex.printStackTrace();
                     .setRemovalPending(true);
 
                 fireBundleEvent(BundleEvent.UPDATED, bundle);
+
+                // Determine if the bundle is in use by anyone.
+// TODO: FRAMEWORK - This is really inefficient since it will end up looping
+//       through all bundles and their imports, maybe we should keep track of
+//       wiring.
+                List usedPackages = new ArrayList();
+                getExportedPackages(bundle, usedPackages);
+                boolean used = false;
+                for (int i = 0; !used && (i < usedPackages.size()); i++)
+                {
+                    if (((ExportedPackageImpl) usedPackages.get(i)).getImportingBundles() != null)
+                    {
+                        used = true;
+                    }
+                }
+
+                // If the bundle is not used by anyone, then garbage
+                // collect it now.
+                if (!used)
+                {
+                    try
+                    {
+                        refreshPackages(new Bundle[] { bundle });
+                    }
+                    catch (Exception ex)
+                    {
+                        m_logger.log(
+                            Logger.LOG_ERROR,
+                            "Unable to immediately purge the bundle revisions.", ex);
+                    }
+                }
             }
 
             // Restart bundle, but do not change the persistent state.
@@ -1740,7 +1771,7 @@ ex.printStackTrace();
             ((ModuleImpl) target.getInfo().getCurrentModule()).setRemovalPending(true);
 
             // Put bundle in uninstalled bundle array.
-            rememberUninstalledBundle(bundle);
+            rememberUninstalledBundle(bundle);               
         }
         else
         {
@@ -1754,6 +1785,37 @@ ex.printStackTrace();
 
         // Fire bundle event.
         fireBundleEvent(BundleEvent.UNINSTALLED, bundle);
+
+        // Determine if the bundle is in use by anyone.
+// TODO: FRAMEWORK - This is really inefficient since it will end up looping
+//       through all bundles and their imports, maybe we should keep track of
+//       wiring.
+         List usedPackages = new ArrayList();
+         getExportedPackages(bundle, usedPackages);
+         boolean used = false;
+         for (int i = 0; !used && (i < usedPackages.size()); i++)
+         {
+             if (((ExportedPackageImpl) usedPackages.get(i)).getImportingBundles() != null)
+             {
+                 used = true;
+             }
+         }
+
+         // If the bundle is not used by anyone, then garbage
+         // collect it now.
+         if (!used)
+         {
+             try
+             {
+                 refreshPackages(new Bundle[] { bundle });
+             }
+             catch (Exception ex)
+             {
+                 m_logger.log(
+                     Logger.LOG_ERROR,
+                     "Unable to immediately garbage collect the bundle.", ex);
+             }
+         }
     }
 
     //
@@ -2500,8 +2562,7 @@ ex.printStackTrace();
                     ICapability.PACKAGE_NAMESPACE,
                     null,
                     null,
-                    new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) }),
-                true);
+                    new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) }));
 
         if (exporters != null)
         {
@@ -2630,8 +2691,7 @@ ex.printStackTrace();
                                 ICapability.PACKAGE_NAMESPACE,
                                 null,
                                 null,
-                                new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, ((Capability) caps[capIdx]).getPackageName(), false) }),
-                            true);
+                                new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, ((Capability) caps[capIdx]).getPackageName(), false) }));
     
                         // Search through the current providers to find the target
                         // module.

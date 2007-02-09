@@ -541,7 +541,7 @@ public class R4SearchPolicyCore implements ModuleListener
                         synchronized (m_factory)
                         {
                             // First check "in use" candidates for a match.
-                            PackageSource[] candidates = getInUseCandidates(req, false);
+                            PackageSource[] candidates = getInUseCandidates(req);
                             // If there is an "in use" candidate, just take the first one.
                             if (candidates.length > 0)
                             {
@@ -552,7 +552,7 @@ public class R4SearchPolicyCore implements ModuleListener
                             // candidates.
                             if (candidate == null)
                             {
-                                candidates = getUnusedCandidates(req, false);
+                                candidates = getUnusedCandidates(req);
 
                                 // Take the first candidate that can resolve.
                                 for (int candIdx = 0;
@@ -627,7 +627,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         return null;
     }
 
-    public PackageSource[] getInUseCandidates(IRequirement req, boolean includeRemovalPending)
+    public PackageSource[] getInUseCandidates(IRequirement req)
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
@@ -639,35 +639,30 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             {
                 Map.Entry entry = (Map.Entry) i.next();
                 IModule module = (IModule) entry.getKey();
-                // The spec says that we cannot consider modules that
-                // are pending removal, so ignore them.
-                if (includeRemovalPending || !module.isRemovalPending())
+                ICapability[] inUseCaps = (ICapability[]) entry.getValue();
+                for (int capIdx = 0; capIdx < inUseCaps.length; capIdx++)
                 {
-                    ICapability[] inUseCaps = (ICapability[]) entry.getValue();
-                    for (int capIdx = 0; capIdx < inUseCaps.length; capIdx++)
+                    if (req.isSatisfied(inUseCaps[capIdx]))
                     {
-                        if (req.isSatisfied(inUseCaps[capIdx]))
-                        {
 // TODO: RB - Is this permission check correct.
-                            if (inUseCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
-                                (System.getSecurityManager() != null) &&
-                                !((ProtectionDomain) module.getSecurityContext()).implies(
-                                    new PackagePermission(
-                                        (String) inUseCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY),
-                                        PackagePermission.EXPORT)))
-                            {
-                                m_logger.log(Logger.LOG_DEBUG,
-                                    "PackagePermission.EXPORT denied for "
-                                    + inUseCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY)
-                                    + "from " + module.getId());
-                            }
-                            else
-                            {
-                                PackageSource[] tmp = new PackageSource[candidates.length + 1];
-                                System.arraycopy(candidates, 0, tmp, 0, candidates.length);
-                                tmp[candidates.length] = new PackageSource(module, inUseCaps[capIdx]);
-                                candidates = tmp;
-                            }
+                        if (inUseCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+                            (System.getSecurityManager() != null) &&
+                            !((ProtectionDomain) module.getSecurityContext()).implies(
+                                new PackagePermission(
+                                    (String) inUseCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY),
+                                    PackagePermission.EXPORT)))
+                        {
+                            m_logger.log(Logger.LOG_DEBUG,
+                                "PackagePermission.EXPORT denied for "
+                                + inUseCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY)
+                                + "from " + module.getId());
+                        }
+                        else
+                        {
+                            PackageSource[] tmp = new PackageSource[candidates.length + 1];
+                            System.arraycopy(candidates, 0, tmp, 0, candidates.length);
+                            tmp[candidates.length] = new PackageSource(module, inUseCaps[capIdx]);
+                            candidates = tmp;
                         }
                     }
                 }
@@ -690,7 +685,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         return false;
     }
 
-    public PackageSource[] getUnusedCandidates(IRequirement req, boolean includeRemovalPending)
+    public PackageSource[] getUnusedCandidates(IRequirement req)
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
@@ -703,21 +698,16 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             PackageSource[] candidates = m_emptySources;
             for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
             {
-                // The spec says that we cannot consider modules that
-                // are pending removal, so ignore them.
-                if (includeRemovalPending || !modules[modIdx].isRemovalPending())
+                // Get the module's export package for the target package.
+                ICapability cap = Util.getSatisfyingCapability(modules[modIdx], req);
+                // If compatible and it is not currently used, then add
+                // the available candidate to the list.
+                if ((cap != null) && !isCapabilityInUse(modules[modIdx], cap))
                 {
-                    // Get the module's export package for the target package.
-                    ICapability cap = Util.getSatisfyingCapability(modules[modIdx], req);
-                    // If compatible and it is not currently used, then add
-                    // the available candidate to the list.
-                    if ((cap != null) && !isCapabilityInUse(modules[modIdx], cap))
-                    {
-                        PackageSource[] tmp = new PackageSource[candidates.length + 1];
-                        System.arraycopy(candidates, 0, tmp, 0, candidates.length);
-                        tmp[candidates.length] = new PackageSource(modules[modIdx], cap);
-                        candidates = tmp;
-                    }
+                    PackageSource[] tmp = new PackageSource[candidates.length + 1];
+                    System.arraycopy(candidates, 0, tmp, 0, candidates.length);
+                    tmp[candidates.length] = new PackageSource(modules[modIdx], cap);
+                    candidates = tmp;
                 }
             }
             Arrays.sort(candidates);
@@ -829,8 +819,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             // package maps. Candidates "in use" have higher priority
             // than "available" ones, so put the "in use" candidates
             // at the front of the list of candidates.
-            PackageSource[] inuse = getInUseCandidates(reqs[reqIdx], false);
-            PackageSource[] available = getUnusedCandidates(reqs[reqIdx], false);
+            PackageSource[] inuse = getInUseCandidates(reqs[reqIdx]);
+            PackageSource[] available = getUnusedCandidates(reqs[reqIdx]);
             PackageSource[] candidates = new PackageSource[inuse.length + available.length];
 // TODO: RB - This duplicates "in use" candidates from "available" candidates.
             System.arraycopy(inuse, 0, candidates, 0, inuse.length);
@@ -2410,9 +2400,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         if (imp != null)
         {
             // Try to see if there is an exporter available.
-            PackageSource[] exporters = getInUseCandidates(imp, true);
+            PackageSource[] exporters = getInUseCandidates(imp);
             exporters = (exporters.length == 0)
-                ? getUnusedCandidates(imp, true) : exporters;
+                ? getUnusedCandidates(imp) : exporters;
 
             // An exporter might be available, but it may have attributes
             // that do not match the importer's required attributes, so
@@ -2424,9 +2414,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 {
                     IRequirement pkgReq = new Requirement(
                         ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
-                    exporters = getInUseCandidates(pkgReq, true);
+                    exporters = getInUseCandidates(pkgReq);
                     exporters = (exporters.length == 0)
-                        ? getUnusedCandidates(pkgReq, true) : exporters;
+                        ? getUnusedCandidates(pkgReq) : exporters;
                 }
                 catch (InvalidSyntaxException ex)
                 {
@@ -2475,8 +2465,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         {
             // This should never happen.
         }
-        PackageSource[] exporters = getInUseCandidates(pkgReq, true);
-        exporters = (exporters.length == 0) ? getUnusedCandidates(pkgReq, true) : exporters;
+        PackageSource[] exporters = getInUseCandidates(pkgReq);
+        exporters = (exporters.length == 0) ? getUnusedCandidates(pkgReq) : exporters;
         if (exporters.length > 0)
         {
             boolean classpath = false;
