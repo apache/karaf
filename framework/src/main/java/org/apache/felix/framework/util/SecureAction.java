@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -115,8 +115,8 @@ public class SecureAction
             try
             {
                 Actions actions = (Actions) m_actions.get();
-                actions.set(Actions.CREATE_URL_ACTION, protocol, host, port,
-                    path, handler);
+                actions.set(Actions.CREATE_URL_ACTION, protocol, host,
+                    new Integer(port), path, handler);
                 return (URL) AccessController.doPrivileged(actions, m_acc);
             }
             catch (PrivilegedActionException ex)
@@ -133,7 +133,7 @@ public class SecureAction
             return new URL(protocol, host, port, path, handler);
         }
     }
-    
+
     public URL createURL(URL context, String spec, URLStreamHandler handler)
         throws MalformedURLException
     {
@@ -142,7 +142,7 @@ public class SecureAction
             try
             {
                 Actions actions = (Actions) m_actions.get();
-                actions.set(Actions.CREATE_URL_WITH_CONTEXT_ACTION, context, 
+                actions.set(Actions.CREATE_URL_WITH_CONTEXT_ACTION, context,
                     spec, handler);
                 return (URL) AccessController.doPrivileged(actions, m_acc);
             }
@@ -411,6 +411,85 @@ public class SecureAction
         }
     }
 
+    public File createTempFile(String prefix, String suffix, File dir)
+        throws IOException
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.CREATE_TMPFILE_ACTION, prefix, suffix, dir);
+                return (File) AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                if (ex.getException() instanceof IOException)
+                {
+                    throw (IOException) ex.getException();
+                }
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return File.createTempFile(prefix, suffix, dir);
+        }
+    }
+
+    public URLConnection openURLConnection(URL url) throws IOException
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.OPEN_URLCONNECTION_ACTION, url);
+                return (URLConnection) AccessController.doPrivileged(actions,
+                    m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                if (ex.getException() instanceof IOException)
+                {
+                    throw (IOException) ex.getException();
+                }
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return url.openConnection();
+        }
+    }
+
+    public JarFile getJarURLConnectionJAR(JarURLConnection connection)
+        throws IOException
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.OPEN_JARURLCONNECTIONJAR_ACTION, connection);
+                return (JarFile) AccessController.doPrivileged(actions,
+                    m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                if (ex.getException() instanceof IOException)
+                {
+                    throw (IOException) ex.getException();
+                }
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return connection.getJarFile();
+        }
+    }
+
     public JarFileX openJAR(File file) throws IOException
     {
         if (System.getSecurityManager() != null)
@@ -599,28 +678,22 @@ public class SecureAction
         public static final int SYSTEM_EXIT_ACTION = 19;
         public static final int OPEN_JAR_ACTION= 20;
         public static final int GET_POLICY_ACTION = 21;
-        
+        public static final int CREATE_TMPFILE_ACTION = 22;
+        public static final int OPEN_URLCONNECTION_ACTION = 23;
+        public static final int OPEN_JARURLCONNECTIONJAR_ACTION = 24;
+
+
         private int m_action = -1;
         private Object m_arg1 = null;
         private Object m_arg2 = null;
-
-        private String m_protocol = null;
-        private String m_host = null;
-        private int m_port = -1;
-        private String m_path = null;
-        private URLStreamHandler m_handler = null;
+        private Object m_arg3 = null;
+        private Object m_arg4 = null;
+        private Object m_arg5 = null;
 
         public void set(int action, Object arg1)
         {
             m_action = action;
             m_arg1 = arg1;
-
-            m_arg2 = null;
-            m_protocol = null;
-            m_host = null;
-            m_port = -1;
-            m_path = null;
-            m_handler = null;
         }
 
         public void set(int action, Object arg1, Object arg2)
@@ -628,46 +701,45 @@ public class SecureAction
             m_action = action;
             m_arg1 = arg1;
             m_arg2 = arg2;
-
-            m_protocol = null;
-            m_host = null;
-            m_port = -1;
-            m_path = null;
-            m_handler = null;
         }
 
-        public void set(int action, String protocol, String host,
-            int port, String path, URLStreamHandler handler)
+        public void set(int action, Object arg1, Object arg2, Object arg3)
         {
             m_action = action;
-            m_protocol = protocol;
-            m_host = host;
-            m_port = port;
-            m_path = path;
-            m_handler = handler;
-
-            m_arg1 = null;
-            m_arg2 = null;
+            m_arg1 = arg1;
+            m_arg2 = arg2;
+            m_arg3 = arg3;
         }
 
-        public void set(int action, URL context, String spec, URLStreamHandler handler)
+        public void set(int action, Object arg1, Object arg2, Object arg3,
+            Object arg4)
         {
             m_action = action;
-            m_arg1 = context;
-            m_arg2 = spec;
-            m_handler = handler;
+            m_arg1 = arg1;
+            m_arg2 = arg2;
+            m_arg3 = arg3;
+            m_arg4 = arg4;
         }
-        
+
+        public void set(int action, Object arg1, Object arg2, Object arg3,
+            Object arg4, Object arg5)
+        {
+            m_action = action;
+            m_arg1 = arg1;
+            m_arg2 = arg2;
+            m_arg3 = arg3;
+            m_arg4 = arg4;
+            m_arg5 = arg5;
+        }
+
         private void unset()
         {
             m_action = -1;
             m_arg1 = null;
             m_arg2 = null;
-            m_protocol = null;
-            m_host = null;
-            m_port = -1;
-            m_path = null;
-            m_handler = null;
+            m_arg3 = null;
+            m_arg4 = null;
+            m_arg5 = null;
         }
 
         public Object run() throws Exception
@@ -684,11 +756,14 @@ public class SecureAction
                 }
                 else if (m_action == CREATE_URL_ACTION)
                 {
-                    return new URL(m_protocol, m_host, m_port, m_path, m_handler);
+                    return new URL((String) m_arg1, (String) m_arg2,
+                        ((Integer) m_arg3).intValue(), (String) m_arg4,
+                        (URLStreamHandler) m_arg5);
                 }
                 else if (m_action == CREATE_URL_WITH_CONTEXT_ACTION)
                 {
-                    return new URL((URL) m_arg1, (String) m_arg2, m_handler);
+                    return new URL((URL) m_arg1, (String) m_arg2,
+                        (URLStreamHandler) m_arg3);
                 }
                 else if (m_action == GET_ABSOLUTE_PATH_ACTION)
                 {
@@ -765,6 +840,20 @@ public class SecureAction
                 {
                     return Policy.getPolicy();
                 }
+                else if (m_action == CREATE_TMPFILE_ACTION)
+                {
+                    return File.createTempFile((String) m_arg1, (String) m_arg2,
+                        (File) m_arg3);
+                }
+                else if (m_action == OPEN_URLCONNECTION_ACTION)
+                {
+                    return ((URL) m_arg1).openConnection();
+                }
+                else if (m_action == OPEN_JARURLCONNECTIONJAR_ACTION)
+                {
+                    return ((JarURLConnection) m_arg1).getJarFile();
+                }
+
                 return null;
             }
             finally
