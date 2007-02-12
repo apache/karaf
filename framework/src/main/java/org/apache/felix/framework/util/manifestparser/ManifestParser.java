@@ -174,7 +174,7 @@ public class ManifestParser
         {
             // Verify that the named package has not already been declared.
             String pkgName = ((Requirement) importReqs[reqIdx]).getPackageName();
-            
+
             if (dupeMap.get(pkgName) == null)
             {
                 // Verify that java.* packages are not imported.
@@ -510,7 +510,7 @@ public class ManifestParser
                                     + ((Capability) m_capabilities[capIdx]).getAttributes()[attrIdx].getName());
                         }
                     }
-    
+
                     // Recreate the export to remove any other attributes
                     // and add version if missing.
                     m_capabilities[capIdx] = new Capability(
@@ -574,7 +574,7 @@ public class ManifestParser
                     m_requirements[reqIdx] = new Requirement(
                         ICapability.PACKAGE_NAMESPACE,
                         (String) pkgName.getValue(),
-                        null, 
+                        null,
                         new R4Attribute[] { pkgName, pkgVersion });
                 }
             }
@@ -710,6 +710,24 @@ public class ManifestParser
                     newAttrs);
             }
         }
+        
+        if (parseExtensionBundleHeader((String) 
+            m_headerMap.get(Constants.FRAGMENT_HOST)) != null)
+        {
+            checkExtensionBundle();
+        }
+    }
+    
+    private void checkExtensionBundle() throws BundleException
+    {
+        if (m_headerMap.containsKey(Constants.IMPORT_PACKAGE) ||
+            m_headerMap.containsKey(Constants.REQUIRE_BUNDLE) ||
+            m_headerMap.containsKey(Constants.BUNDLE_NATIVECODE) ||
+            m_headerMap.containsKey(Constants.DYNAMICIMPORT_PACKAGE) ||
+            m_headerMap.containsKey(Constants.BUNDLE_ACTIVATOR))
+        {
+            throw new BundleException("Invalid Extension Bundle Manifest");
+        }
     }
 
     public static ICapability[] parseExportHeader(String header)
@@ -747,7 +765,7 @@ public class ManifestParser
                         "Both version and specificat-version are specified, but they are not equal.");
                 }
             }
-    
+
             // Ensure that only the "version" attribute is used and convert
             // it to the appropriate type.
             if ((v != null) || (sv != null))
@@ -830,7 +848,7 @@ public class ManifestParser
                         "Both version and specificat-version are specified, but they are not equal.");
                 }
             }
-    
+
             // Ensure that only the "version" attribute is used and convert
             // it to the VersionRange type.
             if ((v != null) || (sv != null))
@@ -942,6 +960,31 @@ public class ManifestParser
         }
 
         return (IRequirement[]) reqList.toArray(new IRequirement[reqList.size()]);
+    }
+
+    public static R4Directive parseExtensionBundleHeader(String header)
+    {
+        Object[][][] clauses = parseStandardHeader(header);
+
+        R4Directive result = null;
+
+        if (clauses.length == 1)
+        {
+            if (FelixConstants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(clauses[0][CLAUSE_PATHS_INDEX][0]) ||
+                Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(clauses[0][CLAUSE_PATHS_INDEX][0]))
+            {
+                if (clauses[0][CLAUSE_DIRECTIVES_INDEX].length == 1)
+                {
+                    if (Constants.EXTENSION_DIRECTIVE.equals(((R4Directive)
+                        clauses[0][CLAUSE_DIRECTIVES_INDEX][0]).getName()))
+                    {
+                        result = (R4Directive) clauses[0][CLAUSE_DIRECTIVES_INDEX][0];
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     public static final int CLAUSE_PATHS_INDEX = 0;
@@ -1107,7 +1150,7 @@ public class ManifestParser
         StringBuffer sb = new StringBuffer();
 
         int expecting = (CHAR | DELIMITER | STARTQUOTE);
-        
+
         for (int i = 0; i < value.length(); i++)
         {
             char c = value.charAt(i);
