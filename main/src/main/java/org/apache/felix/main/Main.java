@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,7 +21,6 @@ package org.apache.felix.main;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.*;
 import java.util.*;
 
 import org.apache.felix.framework.Felix;
@@ -60,21 +59,6 @@ public class Main
      * The default name used for the configuration properties file.
     **/
     public static final String CONFIG_PROPERTIES_FILE_VALUE = "config.properties";
-
-    public static final String KEYSTORE_FILE_PROP = "felix.keystore";
-
-    public static final String KEYSTORE_FILE_VALUE = System.getProperty("java.home") +
-        File.separatorChar + "lib" + File.separatorChar + "security" +
-        File.separatorChar + "cacerts" + File.pathSeparatorChar + System.getProperty("user.home") +
-        File.separatorChar + ".keystore";
-
-    public static final String KEYSTORE_TYPE_PROP = "felix.keystore.type";
-
-    public static final String KEYSTORE_TYPE_VALUE = "JKS" + File.pathSeparatorChar + "JKS";
-
-    public static final String KEYSTORE_PASS_PROP = "felix.keystore.pass";
-
-    public static final String KEYSTORE_PASS_VALUE = "changeit" + File.pathSeparatorChar + "changeit";
 
     private static Felix m_felix = null;
 
@@ -207,7 +191,7 @@ public class Main
             m_felix = new Felix();
             m_felix.start(
                 new MutablePropertyResolverImpl(new StringMap(configProps, false)),
-                null, (System.getSecurityManager() == null) ? null : new TrustManager(configProps));
+                null);
         }
         catch (Exception ex)
         {
@@ -557,120 +541,5 @@ public class Main
 
         // Return the value.
         return val;
-    }
-
-    private static class TrustManager extends AbstractCollection
-    {
-        private String[] m_keystores = null;
-        private String[] m_passwds = null;
-        private String[] m_types = null;
-        private ArrayList m_stores = null;
-
-        TrustManager(Properties config)
-        {
-            StringTokenizer tok = new StringTokenizer(System.getProperty(KEYSTORE_FILE_PROP,
-                config.getProperty(KEYSTORE_FILE_PROP, KEYSTORE_FILE_VALUE)), File.pathSeparator);
-
-            m_keystores = new String[tok.countTokens()];
-
-            for (int i = 0;tok.hasMoreTokens();i++)
-            {
-                m_keystores[i] = tok.nextToken();
-            }
-
-            tok = new StringTokenizer(System.getProperty(KEYSTORE_PASS_PROP,
-                config.getProperty(KEYSTORE_PASS_PROP, KEYSTORE_PASS_VALUE)), File.pathSeparator);
-
-            m_passwds = new String[tok.countTokens()];
-
-            for (int i = 0;tok.hasMoreTokens();i++)
-            {
-                m_passwds[i] = tok.nextToken();
-            }
-
-            tok = new StringTokenizer(System.getProperty(KEYSTORE_TYPE_PROP,
-                config.getProperty(KEYSTORE_TYPE_PROP, KEYSTORE_TYPE_VALUE)), File.pathSeparator);
-
-            m_types = new String[tok.countTokens()];
-
-            for (int i = 0;tok.hasMoreTokens();i++)
-            {
-                m_types[i] = tok.nextToken();
-            }
-        }
-
-        public synchronized Iterator iterator()
-        {
-            if (m_stores == null)
-            {
-                loadStores();
-            }
-
-            return m_stores.iterator();
-        }
-
-        public synchronized int size()
-        {
-            if (m_stores == null)
-            {
-                loadStores();
-            }
-
-            return m_stores.size();
-        }
-
-        private void loadStores()
-        {
-            m_stores = new ArrayList();
-
-            if ((m_keystores.length == m_passwds.length) && (m_passwds.length == m_types.length)
-                && (System.getSecurityManager() != null))
-            {
-                AccessController.doPrivileged(new PrivilegedAction()
-                {
-                    public Object run()
-                    {
-                        List certs = new ArrayList();
-
-                        for (int i = 0;i < m_keystores.length;i++)
-                        {
-
-                            try
-                            {
-                                KeyStore ks = KeyStore.getInstance(m_types[i]);
-                                ks.load(new FileInputStream(m_keystores[i]), m_passwds[i].toCharArray());
-                                for (Enumeration e = ks.aliases(); e.hasMoreElements();)
-                                {
-                                    String alias = (String) e.nextElement();
-                                    if (ks.isCertificateEntry(alias))
-                                    {
-                                        certs.add(ks.getCertificate(alias));
-                                    }
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                certs.clear();
-                                ex.printStackTrace(System.err);
-
-                                System.err.println("WARNING: Error accessing keystore: " + m_keystores[i]);
-                            }
-
-                            if (!certs.isEmpty())
-                            {
-                                m_stores.addAll(certs);
-                                certs.clear();
-                            }
-                        }
-
-                        return null;
-                    }
-                });
-            }
-            if (m_stores.isEmpty())
-            {
-                System.err.println("WARNING: No trusted CA certificates!");
-            }
-        }
     }
 }
