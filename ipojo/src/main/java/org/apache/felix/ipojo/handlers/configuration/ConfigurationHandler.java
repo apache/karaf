@@ -125,7 +125,7 @@ public class ConfigurationHandler extends Handler implements ManagedService {
             ConfigurableProperty cp = new ConfigurableProperty(name, fieldName, value, type, this);
             
             if (cp.getValue() != null) { cd.addProperty(new PropertyDescription(name, type, cp.getValue().toString())); }
-            else { cd.addProperty(new PropertyDescription(name, type, "")); }
+            else { cd.addProperty(new PropertyDescription(name, type, null)); }
 
             addProperty(cp);
         }

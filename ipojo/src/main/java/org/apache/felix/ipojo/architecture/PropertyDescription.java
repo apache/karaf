@@ -71,7 +71,7 @@ public class PropertyDescription {
      */
     public String toString() {
         if (m_value != null) { return getName() + " - " + getType() + " - " + getValue(); }
-        else { return getName() + " - " + getType() + " - CONFIGURABLE"; }
+        else { return getName() + " - " + getType() + " - REQUIRED"; }
     }
 
 }
