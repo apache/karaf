@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,13 +20,14 @@ package org.apache.felix.framework.util;
 
 public interface FelixConstants extends org.osgi.framework.Constants
 {
+    public static final String SYSTEM_BUNDLE_SYMBOLICNAME = "org.apache.felix.framework";
     // Framework constants and values.
     public static final String FRAMEWORK_VERSION_VALUE = "1.3";
     public static final String FRAMEWORK_VENDOR_VALUE = "Apache Software Foundation";
 
     // Framework constants and values.
     public static final String FELIX_VERSION_PROPERTY = "felix.version";
-    
+
     // Miscellaneous manifest constants.
     public static final String DIRECTIVE_SEPARATOR = ":=";
     public static final String ATTRIBUTE_SEPARATOR = "=";
@@ -60,4 +61,5 @@ public interface FelixConstants extends org.osgi.framework.Constants
 
     // Miscellaneous properties values.
     public static final String FAKE_URL_PROTOCOL_VALUE = "location:";
+    public static final String FELIX_EXTENSION_ACTIVATOR = "Felix-Activator";
 }
