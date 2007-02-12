@@ -19,26 +19,44 @@
 <project default="all">
     <target name="clean">
         <exec executable="mvn" failonerror="true">
-            <arg line="-f pom-new-plugin.xml clean" />
+            <arg line="-Dpackaging=bundle clean" />
         </exec>
         <exec executable="mvn" failonerror="true">
-            <arg line="-f pom-old-plugin.xml clean" />
+            <arg line="-Dpackaging=osgi-bundle clean" />
+        </exec>
+        <exec executable="mvn" failonerror="true">
+            <arg line="-Dpackaging=ipojo-bundle clean" />
+        </exec>
+        <exec executable="mvn" failonerror="true">
+            <arg line="-Dpackaging=osgi-bundle-mosgi clean" />
         </exec>
     </target>
     <target name="install">
         <exec executable="mvn" failonerror="true">
-            <arg line="-f pom-new-plugin.xml install" />
+            <arg line="-Dpackaging=bundle install" />
         </exec>
         <exec executable="mvn" failonerror="true">
-            <arg line="-f pom-old-plugin.xml install" />
+            <arg line="-Dpackaging=osgi-bundle install" />
+        </exec>
+        <exec executable="mvn" failonerror="true">
+            <arg line="-Dpackaging=ipojo-bundle install" />
+        </exec>
+        <exec executable="mvn" failonerror="true">
+            <arg line="-Dpackaging=osgi-bundle-mosgi install" />
         </exec>
     </target>
     <target name="all">
         <exec executable="mvn" failonerror="true">
-            <arg line="-f pom-new-plugin.xml clean install" />
+            <arg line="-Dpackaging=bundle clean install" />
         </exec>
         <exec executable="mvn" failonerror="true">
-            <arg line="-f pom-old-plugin.xml clean install" />
+            <arg line="-Dpackaging=osgi-bundle clean install" />
+        </exec>
+        <exec executable="mvn" failonerror="true">
+            <arg line="-Dpackaging=ipojo-bundle clean install" />
+        </exec>
+        <exec executable="mvn" failonerror="true">
+            <arg line="-Dpackaging=osgi-bundle-mosgi clean install" />
         </exec>
     </target>
 </project>
