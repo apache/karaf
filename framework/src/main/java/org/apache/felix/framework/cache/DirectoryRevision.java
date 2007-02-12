@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,6 +19,7 @@
 package org.apache.felix.framework.cache;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.jar.*;
@@ -183,180 +184,16 @@ class DirectoryRevision extends BundleRevision
         // by the parent bundle archive.
     }
 
-    protected X509Certificate[] getRevisionCertificates() throws Exception
+    public String getCachedBundleURL()
     {
-        File tmp = new File(getRevisionRootDir(), BUNDLE_JAR_FILE);
-
-        if (BundleCache.getSecureAction().fileExists(tmp))
-        {
-            BundleCache.getSecureAction().deleteFile(tmp);
-        }
-
         try
         {
-            BundleCache.copyStreamToFile(new RevisionToInputStream(m_refDir),
-                tmp);
-
-            JarFile bundle = BundleCache.getSecureAction().openJAR(tmp);
-
-            return getCertificatesForJar(bundle);
+            return m_refDir.toURL().toString();
         }
-        finally
+        catch (MalformedURLException ex)
         {
-            try
-            {
-                if (BundleCache.getSecureAction().fileExists(tmp))
-                {
-                    BundleCache.getSecureAction().deleteFile(tmp);
-                }
-            }
-            catch (Exception e)
-            {
-                // Not much we can do
-            }
-        }
-    }
-
-    private class RevisionToInputStream extends InputStream
-    {
-        class OutputStreamBuffer extends OutputStream
-        {
-            ByteArrayOutputStream outBuffer = null;
-
-            public void write(int b)
-            {
-                outBuffer.write(b);
-            }
-        }
-
-        private File m_revisionDir = null;
-        private File[] m_content = null;
-        private File m_manifest = null;
-        private ByteArrayInputStream m_buffer = null;
-        private int m_current = 0;
-        private OutputStreamBuffer m_outputBuffer = new OutputStreamBuffer();
-        private JarOutputStream m_output = null;
-
-        RevisionToInputStream(File revisionDir) throws IOException
-        {
-            m_revisionDir = revisionDir;
-
-            m_outputBuffer.outBuffer = new ByteArrayOutputStream();
-
-            m_manifest = new File(m_revisionDir, "META-INF/MANIFEST.MF");
-
-            m_output = new JarOutputStream(m_outputBuffer);
-
-            readNext(m_manifest, false);
-
-            m_content = listFilesRecursive(revisionDir);
-        }
-
-        private File[] listFilesRecursive(File dir)
-        {
-            File[] children = BundleCache.getSecureAction().listDirectory(dir);
-            File[] combined = children;
-            for (int i = 0; i < children.length; i++)
-            {
-                if (BundleCache.getSecureAction().isFileDirectory(children[i]))
-                {
-                    File[] grandchildren = listFilesRecursive(children[i]);
-                    if (grandchildren.length > 0)
-                    {
-                        File[] tmp = new File[combined.length + grandchildren.length];
-                        System.arraycopy(combined, 0, tmp, 0, combined.length);
-                        System.arraycopy(grandchildren, 0, tmp, combined.length, grandchildren.length);
-                        combined = tmp;
-                    }
-                }
-            }
-            return combined;
-        }
-
-        private boolean readNext(File file, boolean close) throws IOException
-        {
-            if (BundleCache.getSecureAction().isFileDirectory(file))
-            {
-                return false;
-            }
-
-            m_outputBuffer.outBuffer = new ByteArrayOutputStream();
-
-            InputStream in = null;
-            try
-            {
-                in = BundleCache.getSecureAction().getFileInputStream(file);
-
-                JarEntry entry = new JarEntry(
-                    file.getPath().substring(m_revisionDir.getPath().length() + 1));
-
-
-                m_output.putNextEntry(entry);
-
-                int c = -1;
-
-                while ((c = in.read()) != -1)
-                {
-                    m_output.write(c);
-                }
-            }
-            finally
-            {
-                if (in != null)
-                {
-                    in.close();
-                }
-            }
-
-            m_output.closeEntry();
-
-            m_output.flush();
-
-            if (close)
-            {
-                m_output.close();
-                m_output = null;
-            }
-
-            m_buffer = new ByteArrayInputStream(m_outputBuffer.outBuffer.toByteArray());
-
-            m_outputBuffer.outBuffer = null;
-
-            return true;
-        }
-
-        public int read() throws IOException
-        {
-            if ((m_output == null) && (m_buffer == null))
-            {
-                return -1;
-            }
-
-            if (m_buffer != null)
-            {
-                int result = m_buffer.read();
-
-                if (result == -1)
-                {
-                    m_buffer = null;
-                    return read();
-                }
-                else
-                {
-                    return result;
-                }
-            }
-
-            while ((m_current < m_content.length) &&
-                (m_content[m_current].equals(m_manifest) ||
-                !readNext(m_content[m_current], (m_current + 1) == m_content.length)))
-            {
-                m_current++;
-            }
-
-            m_current++;
-
-            return read();
+            // This should never happen.
+            return null;
         }
     }
 }

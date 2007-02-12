@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,8 +19,7 @@
 package org.apache.felix.framework.cache;
 
 import java.io.*;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.security.PrivilegedActionException;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -253,6 +252,19 @@ class JarRevision extends BundleRevision
         // by the parent bundle archive.
     }
 
+    public String getCachedBundleURL()
+    {
+        try
+        {
+            return m_bundleFile.toURL().toString();
+        }
+        catch (MalformedURLException ex)
+        {
+            // This should never happen.
+            return null;
+        }
+    }
+
     //
     // Private methods.
     //
@@ -448,10 +460,5 @@ class JarRevision extends BundleRevision
                 if (is != null) is.close();
             }
         }
-    }
-
-    protected X509Certificate[] getRevisionCertificates() throws Exception
-    {
-        return getCertificatesForJar(BundleCache.getSecureAction().openJAR(m_bundleFile, true));
     }
 }

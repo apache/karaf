@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,7 +19,6 @@
 package org.apache.felix.framework.cache;
 
 import java.io.*;
-import java.util.Collection;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.ObjectInputStreamX;
@@ -94,7 +93,6 @@ public class BundleArchive
     private int m_startLevel = -1;
     private long m_lastModified = -1;
     private BundleRevision[] m_revisions = null;
-    private Collection m_trustedCaCerts = null;
 
     private long m_refreshCount = -1;
 
@@ -125,10 +123,8 @@ public class BundleArchive
      * @param is input stream from which to read the bundle content.
      * @throws Exception if any error occurs.
     **/
-    public BundleArchive(
-        Logger logger, File archiveRootDir, long id, String location, InputStream is,
-        Collection trustedCaCerts)
-        throws Exception
+    public BundleArchive(Logger logger, File archiveRootDir, long id,
+        String location, InputStream is) throws Exception
     {
         m_logger = logger;
         m_archiveRootDir = archiveRootDir;
@@ -139,7 +135,6 @@ public class BundleArchive
                 "Bundle ID cannot be less than or equal to zero.");
         }
         m_originalLocation = location;
-        m_trustedCaCerts = trustedCaCerts;
 
         // Save state.
         initialize();
@@ -160,13 +155,11 @@ public class BundleArchive
      * @param id the bundle identifier associated with the archive.
      * @throws Exception if any error occurs.
     **/
-    public BundleArchive(Logger logger, File archiveRootDir,
-        Collection trustedCaCerts)
+    public BundleArchive(Logger logger, File archiveRootDir)
         throws Exception
     {
         m_logger = logger;
         m_archiveRootDir = archiveRootDir;
-        m_trustedCaCerts = trustedCaCerts;
 
         // Add a revision for each one that already exists in the file
         // system. The file system might contain more than one revision
@@ -479,7 +472,7 @@ public class BundleArchive
         {
             return m_lastModified;
         }
- 
+
         // Get bundle last modification time file.
         File lastModFile = new File(m_archiveRootDir, BUNDLE_LASTMODIFIED_FILE);
 
@@ -514,7 +507,7 @@ public class BundleArchive
      * @param lastModified The time of the last modification to set for
      *      this archive. According to the OSGi specification this time is
      *      set each time a bundle is installed, updated or uninstalled.
-     *      
+     *
      * @throws Exception if any error occurs.
     **/
     public synchronized void setLastModified(long lastModified) throws Exception
@@ -771,16 +764,6 @@ public class BundleArchive
         System.arraycopy(m_revisions, 0, tmp, 0, m_revisions.length - 1);
 
         return true;
-    }
-
-    public synchronized java.security.cert.Certificate[] getCertificates()
-    {
-        return m_revisions[m_revisions.length -1].getCertificates();
-    }
-
-    public synchronized String[] getDNChains()
-    {
-        return m_revisions[m_revisions.length -1].getDNChains();
     }
 
     private synchronized String getRevisionLocation(int revision) throws Exception
@@ -1101,8 +1084,6 @@ public class BundleArchive
             }
             throw ex;
         }
-
-        result.setTrustedCaCerts(m_trustedCaCerts);
 
         return result;
     }

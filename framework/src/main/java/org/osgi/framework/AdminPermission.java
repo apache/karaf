@@ -18,11 +18,12 @@
  */
 package org.osgi.framework;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.*;
 import java.util.*;
 
 import org.apache.felix.framework.FilterImpl;
-import org.apache.felix.framework.SignerMatcher;
 
 /**
  * <p>
@@ -32,17 +33,17 @@ import org.apache.felix.framework.SignerMatcher;
 **/
 public final class AdminPermission extends BasicPermission
 {
-	static final long serialVersionUID = 307051004521261705L;
+    static final long serialVersionUID = 307051004521261705L;
 
-	public static final String CLASS = "class";
-	public static final String EXECUTE = "execute";
-	public static final String EXTENSIONLIFECYCLE = "extensionLifecycle";
-	public static final String LIFECYCLE = "lifecycle";
-	public static final String LISTENER = "listener";
-	public static final String METADATA = "metadata";
-	public static final String RESOLVE = "resolve";
-	public static final String RESOURCE = "resource";
-	public static final String STARTLEVEL = "startlevel";
+    public static final String CLASS = "class";
+    public static final String EXECUTE = "execute";
+    public static final String EXTENSIONLIFECYCLE = "extensionLifecycle";
+    public static final String LIFECYCLE = "lifecycle";
+    public static final String LISTENER = "listener";
+    public static final String METADATA = "metadata";
+    public static final String RESOLVE = "resolve";
+    public static final String RESOURCE = "resource";
+    public static final String STARTLEVEL = "startlevel";
 
     private static final int CLASS_MASK = 1;
     private static final int EXECUTE_MASK = 2;
@@ -76,7 +77,7 @@ public final class AdminPermission extends BasicPermission
 	public AdminPermission()
     {
 		this("*", ALL_MASK);
-	}
+    }
 
     // This constructor is only used when checking a granted admin permission.
     public AdminPermission(Bundle bundle, String actions)
@@ -101,43 +102,43 @@ public final class AdminPermission extends BasicPermission
         m_actionMask = actionMask;
     }
 
-	public boolean equals(Object obj)
+    public boolean equals(Object obj)
     {
-		if (obj == this)
+	if (obj == this)
         {
-			return true;
-		}
-
-		if (!(obj instanceof AdminPermission))
-        {
-			return false;
-		}
-
-		AdminPermission p = (AdminPermission) obj;
-
-		return getName().equals(p.getName()) && (m_actionMask == p.m_actionMask);
+	    return true;
 	}
 
-	public int hashCode()
-    {
-		return getName().hashCode() ^ getActions().hashCode();
+	if (!(obj instanceof AdminPermission))
+        {
+	    return false;
 	}
 
-	public String getActions()
+	AdminPermission p = (AdminPermission) obj;
+
+	return getName().equals(p.getName()) && (m_actionMask == p.m_actionMask);
+    }
+
+    public int hashCode()
+    {
+	return getName().hashCode() ^ getActions().hashCode();
+    }
+
+    public String getActions()
     {
         if (m_actions == null)
         {
             m_actions = createActionString(m_actionMask);
         }
-		return m_actions;
-	}
+	return m_actions;
+    }
 
-	public boolean implies(Permission p)
+    public boolean implies(Permission p)
     {
-		if (!(p instanceof AdminPermission))
+	if (!(p instanceof AdminPermission))
         {
-			return false;
-		}
+	    return false;
+	}
 
         AdminPermission admin = (AdminPermission) p;
 
@@ -185,12 +186,12 @@ public final class AdminPermission extends BasicPermission
         }
 
         return m_filterImpl.match(admin.getBundleDictionary());
-	}
+    }
 
-	public PermissionCollection newPermissionCollection()
+    public PermissionCollection newPermissionCollection()
     {
-		return new AdminPermissionCollection();
-	}
+	return new AdminPermissionCollection();
+    }
 
     private Dictionary getBundleDictionary()
     {
@@ -213,6 +214,8 @@ public final class AdminPermission extends BasicPermission
                     public Object run()
                     {
                         m_bundleDict.put("location", m_bundle.getLocation());
+                        
+                        createSigner(m_bundle, m_bundleDict);
                         return null;
                     }
                 });
@@ -220,11 +223,32 @@ public final class AdminPermission extends BasicPermission
             else
             {
                 m_bundleDict.put("location", m_bundle.getLocation());
+                createSigner(m_bundle, m_bundleDict);
             }
-
-            m_bundleDict.put("signer", new SignerMatcher(m_bundle));
         }
         return m_bundleDict;
+    }
+
+    private static void createSigner(Bundle bundle, Dictionary dict)
+    {
+        try
+        {
+            Method method = bundle.getClass().getDeclaredMethod(
+                "getSignerMatcher", null);
+            method.setAccessible(true);
+            
+            Object signer = method.invoke(bundle, null);
+            
+            if (signer != null)
+            {
+                dict.put("signer", signer);
+            }
+        }
+        catch (Exception ex)
+        {
+// TODO: log this or something
+            ex.printStackTrace();
+        }
     }
 
     private static int parseActions(String actions)
@@ -365,8 +389,8 @@ public final class AdminPermission extends BasicPermission
 
 final class AdminPermissionCollection extends PermissionCollection
 {
-	private static final long serialVersionUID = 3747361397420496672L;
-	private HashMap m_map = new HashMap();
+    private static final long serialVersionUID = 3747361397420496672L;
+    private HashMap m_map = new HashMap();
 
     public void add(Permission permission)
     {
