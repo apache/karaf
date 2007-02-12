@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,9 +19,9 @@
 package org.apache.felix.framework;
 
 import java.io.*;
-import java.net.URL;
-import java.net.URLStreamHandler;
+import java.net.*;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.util.*;
 
 import org.apache.felix.framework.cache.*;
@@ -104,7 +104,7 @@ public class Felix
     private Set m_executionEnvironmentCache = new HashSet();
 
     // The secure action used to do privileged calls
-    private SecureAction m_secureAction = new SecureAction();
+    protected SecureAction m_secureAction = new SecureAction();
 
     private Collection m_trustedCaCerts = null;
 
@@ -213,19 +213,10 @@ public class Felix
     public synchronized void start(MutablePropertyResolver configMutable,
         List activatorList)
     {
-        start(configMutable, activatorList, (Collection) null);
-    }
-
-    public synchronized void start(
-        MutablePropertyResolver configMutable,
-        List activatorList, Collection trustedCaCerts)
-    {
         if (m_frameworkStatus != INITIAL_STATUS)
         {
             throw new IllegalStateException("Invalid framework status: " + m_frameworkStatus);
         }
-
-        m_trustedCaCerts = trustedCaCerts;
 
         // The framework is now in its startup sequence.
         m_frameworkStatus = STARTING_STATUS;
@@ -265,7 +256,7 @@ public class Felix
 
         try
         {
-            m_cache = new BundleCache(m_config, m_logger, m_trustedCaCerts);
+            m_cache = new BundleCache(m_config, m_logger);
         }
         catch (Exception ex)
         {
@@ -362,10 +353,8 @@ public class Felix
             BundleInfo info = new BundleInfo(
                 m_logger, new SystemBundleArchive(), null);
             systembundle = new SystemBundle(this, info, activatorList);
-            // Create a module for the system bundle.
-            IModuleDefinition md = new ModuleDefinition(
-                systembundle.getExports(), null, null, null);
-            systembundle.getInfo().addModule(m_factory.createModule("0", md));
+            systembundle.getInfo().addModule(m_factory.createModule("0",
+                systembundle));
             systembundle.getContentLoader().setSearchPolicy(
                 new R4SearchPolicy(
                     m_policyCore, systembundle.getInfo().getCurrentModule()));
@@ -559,7 +548,7 @@ ex.printStackTrace();
             fireFrameworkEvent(FrameworkEvent.ERROR, getBundle(0), ex);
             m_logger.log(Logger.LOG_ERROR, "Error stopping framework.", ex);
         }
-        
+
         // Finally shutdown the JVM if the framework is running stand-alone.
         String embedded = m_config.get(FelixConstants.EMBEDDED_EXECUTION_PROP);
         boolean isEmbedded = (embedded == null) ? false : embedded.equals("true");
@@ -568,7 +557,7 @@ ex.printStackTrace();
             m_secureAction.exit(0);
         }
     }
-    
+
     /**
      * This method actually performs the real shutdown operations of the
      * framework in terms of setting the start level to zero, really stopping
@@ -1248,6 +1237,13 @@ ex.printStackTrace();
     private void _startBundle(BundleImpl bundle, boolean record)
         throws BundleException
     {
+        // The spec doesn't say whether it is possible to start an extension
+        // We just do nothing
+        if (bundle.getInfo().isExtension())
+        {
+            return;
+        }
+
         // Set and save the bundle's persistent state to active
         // if we are supposed to record state change.
         if (record)
@@ -1369,7 +1365,7 @@ ex.printStackTrace();
                     PackagePermission perm = new PackagePermission(
                         imports[i].???,
                         PackagePermission.IMPORT);
-    
+
                     if (!pd.implies(perm))
                     {
                         throw new java.security.AccessControlException(
@@ -1388,7 +1384,7 @@ ex.printStackTrace();
                 {
                     PackagePermission perm = new PackagePermission(
                         (String) exports[i].getProperties().get(ICapability.PACKAGE_PROPERTY), PackagePermission.EXPORT);
-    
+
                     if (!pd.implies(perm))
                     {
                         throw new java.security.AccessControlException(
@@ -1400,7 +1396,7 @@ ex.printStackTrace();
         }
 
         verifyExecutionEnvironment(bundle);
-        
+
         IModule module = bundle.getInfo().getCurrentModule();
         try
         {
@@ -1448,7 +1444,7 @@ ex.printStackTrace();
         try
         {
             // Variable to indicate whether bundle is active or not.
-            Exception rethrow = null;
+            Throwable rethrow = null;
 
             // Cannot update an uninstalled bundle.
             BundleInfo info = bundle.getInfo();
@@ -1482,11 +1478,6 @@ ex.printStackTrace();
                 // get the revision of the new update.
                 try
                 {
-                    IModule module = createModule(
-                        info.getBundleId(),
-                        archive.getRevisionCount() - 1,
-                        info.getCurrentHeader());
-
                     Object sm = System.getSecurityManager();
 
                     if (sm != null)
@@ -1495,10 +1486,37 @@ ex.printStackTrace();
                             new AdminPermission(bundle, AdminPermission.LIFECYCLE));
                     }
 
+                    // We need to check whether this is an update to an 
+                    // extension bundle (info.isExtension) or an update from
+                    // a normal bundle to an extension bundle
+                    // (isExtensionBundle())
+                    IModule module = createModule(
+                        info.getBundleId(),
+                        archive.getRevisionCount() - 1,
+                        info.getCurrentHeader(),
+                        createBundleProtectionDomain(archive),
+                        bundle.getInfo().isExtension() || isExtensionBundle(
+                            bundle.getInfo().getCurrentHeader()));
+
                     // Add module to bundle info.
                     info.addModule(module);
+
+                    // If this is an update from a normal to an extension bundle
+                    // then attach the extension or else if this already is
+                    // an extension bundle then done allow it to be resolved 
+                    // again as per spec.
+                    if (!bundle.getInfo().isExtension() &&
+                        isExtensionBundle(bundle.getInfo().getCurrentHeader()))
+                    {
+                        attachExtensionBundle(bundle);
+                        bundle.getInfo().setState(BundleImpl.RESOLVED);
+                    }
+                    else if (bundle.getInfo().isExtension())
+                    {
+                        bundle.getInfo().setState(BundleImpl.INSTALLED);
+                    }
                 }
-                catch (Exception ex)
+                catch (Throwable ex)
                 {
                     try
                     {
@@ -1512,7 +1530,7 @@ ex.printStackTrace();
                     throw ex;
                 }
             }
-            catch (Exception ex)
+            catch (Throwable ex)
             {
                 m_logger.log(Logger.LOG_ERROR, "Unable to update the bundle.", ex);
                 rethrow = ex;
@@ -1523,7 +1541,12 @@ ex.printStackTrace();
             if (rethrow == null)
             {
                 info.setLastModified(System.currentTimeMillis());
-                info.setState(Bundle.INSTALLED);
+
+                if (!info.isExtension())
+                {
+                    info.setState(Bundle.INSTALLED);
+                }
+
                 fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
 
                 // Mark previous the bundle's old module for removal since
@@ -1740,6 +1763,14 @@ ex.printStackTrace();
             throw new IllegalStateException("The bundle is uninstalled.");
         }
 
+        // Extension Bundles are not removed until the framework is shutdown
+        if (bundle.getInfo().isExtension())
+        {
+            bundle.getInfo().setPersistentStateUninstalled();
+            bundle.getInfo().setState(Bundle.INSTALLED);
+            return;
+        }
+
         // The spec says that uninstall should always succeed, so
         // catch an exception here if stop() doesn't succeed and
         // rethrow it at the end.
@@ -1771,7 +1802,7 @@ ex.printStackTrace();
             ((ModuleImpl) target.getInfo().getCurrentModule()).setRemovalPending(true);
 
             // Put bundle in uninstalled bundle array.
-            rememberUninstalledBundle(bundle);               
+            rememberUninstalledBundle(bundle);
         }
         else
         {
@@ -1926,17 +1957,28 @@ ex.printStackTrace();
             try
             {
                 BundleArchive archive = m_cache.getArchive(id);
-                bundle = new BundleImpl(this, createBundleInfo(archive));
+                bundle = new BundleImpl(this, createBundleInfo(archive,
+                    isExtensionBundle(archive.getRevision(
+                    archive.getRevisionCount() - 1).getManifestHeader())));
+
                 verifyExecutionEnvironment(bundle);
 
-                Object sm = System.getSecurityManager();
-                if (sm != null)
+                if (!bundle.getInfo().isExtension())
                 {
-                    ((SecurityManager) sm).checkPermission(
-                        new AdminPermission(bundle, AdminPermission.LIFECYCLE));
+                    Object sm = System.getSecurityManager();
+                    if (sm != null)
+                    {
+                        ((SecurityManager) sm).checkPermission(
+                            new AdminPermission(bundle, AdminPermission.LIFECYCLE));
+                    }
                 }
+                else
+                {
+                    attachExtensionBundle(bundle);
+                }
+
             }
-            catch (Exception ex)
+            catch (Throwable ex)
             {
                 // If the bundle is new, then remove it from the cache.
                 // TODO: Perhaps it should be removed if it is not new too.
@@ -1954,11 +1996,18 @@ ex.printStackTrace();
                     }
                 }
 
+                if (bundle != null)
+                {
+                    ((ModuleImpl) bundle.getInfo().getCurrentModule()).setRemovalPending(true);
+                }
+
                 if ((System.getSecurityManager() != null) &&
                     (ex instanceof SecurityException))
                 {
                     throw (SecurityException) ex;
                 }
+
+                ex.printStackTrace();
 
                 throw new BundleException("Could not create bundle object.", ex);
             }
@@ -2003,6 +2052,68 @@ ex.printStackTrace();
         return bundle;
     }
 
+    private boolean isExtensionBundle(Map headers)
+    {
+        R4Directive dir = ManifestParser.parseExtensionBundleHeader((String)
+            headers.get(Constants.FRAGMENT_HOST));
+
+        return (dir != null) && (Constants.EXTENSION_FRAMEWORK.equals(
+            dir.getValue()) || Constants.EXTENSION_BOOTCLASSPATH.equals(
+            dir.getValue()));
+    }
+
+    private void attachExtensionBundle(BundleImpl bundle) throws Exception
+    {
+        Object sm = System.getSecurityManager();
+        if (sm != null)
+        {
+            ((SecurityManager) sm).checkPermission(
+                new AdminPermission(bundle, AdminPermission.EXTENSIONLIFECYCLE));
+        }
+
+        ProtectionDomain pd = (ProtectionDomain)
+        bundle.getInfo().getCurrentModule().getSecurityContext();
+
+        if (pd != null)
+        {
+            if (!pd.implies(new AllPermission()))
+            {
+                throw new SecurityException("Extension Bundles must have AllPermission");
+            }
+        }
+
+        R4Directive dir = ManifestParser.parseExtensionBundleHeader((String)
+            bundle.getInfo().getCurrentHeader().get(Constants.FRAGMENT_HOST));
+
+        if (!Constants.EXTENSION_FRAMEWORK.equals(dir.getValue()))
+        {
+            throw new BundleException("Unsupported Extension Bundle type: " +
+                dir.getValue(), new UnsupportedOperationException(
+                "Unsupported Extension Bundle type!"));
+        }
+
+        BundleImpl systemBundle = (BundleImpl) getBundle(0);
+        acquireBundleLock(systemBundle);
+
+        try
+        {
+            bundle.getInfo().setExtension(true);
+
+            ((SystemBundle) getBundle(0)).addExtensionBundle(bundle);
+        }
+        catch (Exception ex)
+        {
+            bundle.getInfo().setExtension(false);
+            throw ex;
+        }
+        finally
+        {
+            releaseBundleLock(systemBundle);
+        }
+
+        bundle.getInfo().setState(Bundle.RESOLVED);
+    }
+
     /**
      * Checks the passed in bundle and checks to see if there is a required execution environment.
      * If there is, it gets the execution environment string and verifies that the framework provides it.
@@ -2037,7 +2148,7 @@ ex.printStackTrace();
      *         False if none of the provided framework execution environments match
     **/
     private boolean isMatchingExecutionEnvironment(String bundleEnvironment)
-    { 
+    {
         String frameworkEnvironment = getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
         if (frameworkEnvironment == null)
         {
@@ -2491,9 +2602,11 @@ ex.printStackTrace();
         // The spec says to throw an error if the bundle
         // is stopped, which I assume means not active,
         // starting, or stopping.
+        // Additionally, we make an exception for extension bundles
         if ((bundle.getInfo().getState() != Bundle.ACTIVE) &&
             (bundle.getInfo().getState() != Bundle.STARTING) &&
-            (bundle.getInfo().getState() != Bundle.STOPPING))
+            (bundle.getInfo().getState() != Bundle.STOPPING) &&
+            !bundle.getInfo().isExtension())
         {
             throw new IllegalStateException("Only active bundles can create files.");
         }
@@ -2692,7 +2805,7 @@ ex.printStackTrace();
                                 null,
                                 null,
                                 new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, ((Capability) caps[capIdx]).getPackageName(), false) }));
-    
+
                         // Search through the current providers to find the target
                         // module.
                         for (int i = 0; (inUseModules != null) && (i < inUseModules.length); i++)
@@ -2795,6 +2908,39 @@ ex.printStackTrace();
         // Acquire locks for all impacted bundles.
         BundleImpl[] bundles = acquireBundleRefreshLocks(targets);
 
+        boolean restart = false;
+        
+        Bundle systemBundle = getBundle(0);
+
+        // We need to restart the framework if either an extension bundle is
+        // refreshed or the system bundle is refreshed and any extension bundle
+        // has been updated or uninstalled.
+        for (int i = 0; (bundles != null) && !restart && (i < bundles.length); i++)
+        {
+            if (bundles[i].getInfo().isExtension())
+            {
+                restart = true;
+            }
+            else if (systemBundle == bundles[i])
+            {
+                Bundle[] allBundles = getBundles();
+                for (int j = 0; !restart && j < allBundles.length; j++)
+                {
+                    if (((BundleImpl) allBundles[j]).getInfo().isExtension() &&
+                        (allBundles[j].getState() == BundleImpl.INSTALLED))
+                    {
+                        restart = true;
+                    }
+                }
+            }
+        }
+
+        if (restart)
+        {
+// TODO: Extension Bundle - We need a way to restart the framework
+            m_logger.log(Logger.LOG_WARNING, "Framework restart not implemented.");
+        }
+
         // Remove any targeted bundles from the uninstalled bundles
         // array, since they will be removed from the system after
         // the refresh.
@@ -2816,21 +2962,30 @@ ex.printStackTrace();
                 RefreshHelper[] helpers = new RefreshHelper[bundles.length];
                 for (int i = 0; i < bundles.length; i++)
                 {
-                    helpers[i] = new RefreshHelper(bundles[i]);
+                    if (!bundles[i].getInfo().isExtension())
+                    {
+                        helpers[i] = new RefreshHelper(bundles[i]);
+                    }
                 }
 
                 // Stop, purge or remove, and reinitialize all bundles first.
                 for (int i = 0; i < helpers.length; i++)
                 {
-                    helpers[i].stop();
-                    helpers[i].purgeOrRemove();
-                    helpers[i].reinitialize();
+                    if (helpers[i] != null)
+                    {
+                        helpers[i].stop();
+                        helpers[i].purgeOrRemove();
+                        helpers[i].reinitialize();
+                    }
                 }
 
                 // Then restart all bundles that were previously running.
                 for (int i = 0; i < helpers.length; i++)
                 {
-                    helpers[i].restart();
+                    if (helpers[i] != null)
+                    {
+                        helpers[i].restart();
+                    }
                 }
             }
         }
@@ -2874,7 +3029,7 @@ ex.printStackTrace();
     // Miscellaneous private methods.
     //
 
-    private BundleInfo createBundleInfo(BundleArchive archive)
+    private BundleInfo createBundleInfo(BundleArchive archive, boolean isExtension)
         throws Exception
     {
         // Get the bundle manifest.
@@ -2900,10 +3055,30 @@ ex.printStackTrace();
         // ever be one revision at this point, create the module for
         // the current revision to be safe.
         IModule module = createModule(
-            archive.getId(), archive.getRevisionCount() - 1, headerMap);
+            archive.getId(), archive.getRevisionCount() - 1, headerMap,
+            createBundleProtectionDomain(archive), isExtension);
 
         // Finally, create an return the bundle info.
-        return new BundleInfo(m_logger, archive, module);
+        BundleInfo info = new BundleInfo(m_logger, archive, module);
+        info.setExtension(isExtension);
+
+        return info;
+    }
+
+    private ProtectionDomain createBundleProtectionDomain(BundleArchive archive)
+        throws Exception
+    {
+//      TODO: Security - create a real ProtectionDomain for the Bundle
+        FakeURLStreamHandler handler = new FakeURLStreamHandler();
+        URL context = new URL(null, "location:", handler);
+        CodeSource codesource = new CodeSource(m_secureAction.createURL(context,
+            archive.getLocation(), handler), (Certificate[]) null);
+
+        Permissions allPerms = new Permissions();
+        allPerms.add(new AllPermission());
+        ProtectionDomain pd = new ProtectionDomain(codesource,
+            allPerms);
+        return pd;
     }
 
     /**
@@ -2915,7 +3090,8 @@ ex.printStackTrace();
      * @param headerMap The headers map associated with the bundle.
      * @return The initialized and/or newly created module.
     **/
-    private IModule createModule(long targetId, int revision, Map headerMap)
+    private IModule createModule(long targetId, int revision, Map headerMap,
+        Object securityContext, boolean isExtensionBundle)
         throws Exception
     {
         ManifestParser mp = new ManifestParser(m_logger, m_config, headerMap);
@@ -2950,8 +3126,10 @@ ex.printStackTrace();
         // pieces and bind them together.
 
         // Create the module definition for the new module.
+        // Note, in case this is an extension bundle it's exports are removed -
+        // they will be added to the system bundle directly later on.
         IModuleDefinition md = new ModuleDefinition(
-            mp.getCapabilities(),
+            (isExtensionBundle) ? null : mp.getCapabilities(),
             mp.getRequirements(),
             mp.getDynamicRequirements(),
             mp.getLibraries(m_cache.getArchive(targetId).getRevision(revision)));
@@ -2960,17 +3138,7 @@ ex.printStackTrace();
         IModule module = m_factory.createModule(
             Long.toString(targetId) + "." + Integer.toString(revision), md);
 
-        FakeURLStreamHandler handler = new FakeURLStreamHandler();
-        URL context = new URL(null, "location:", handler);
-        CodeSource codesource = new CodeSource(m_secureAction.createURL(context, 
-            m_cache.getArchive(targetId).getLocation(), 
-            handler), 
-            m_cache.getArchive(targetId).getCertificates());
-
-        Permissions allPerms = new Permissions();
-        allPerms.add(new AllPermission());
-        m_factory.setSecurityContext(module, new ProtectionDomain(codesource,
-			allPerms));
+        m_factory.setSecurityContext(module, securityContext);
 
         // Create the content loader from the module archive.
         IContentLoader contentLoader = new ContentLoaderImpl(
@@ -3495,7 +3663,8 @@ ex.printStackTrace();
                 try
                 {
                     BundleInfo info = m_bundle.getInfo();
-                    BundleInfo newInfo = createBundleInfo(info.getArchive());
+                    BundleInfo newInfo = createBundleInfo(info.getArchive(),
+                        info.isExtension());
                     newInfo.syncLock(info);
                     m_bundle.setInfo(newInfo);
                     fireBundleEvent(BundleEvent.UNRESOLVED, m_bundle);

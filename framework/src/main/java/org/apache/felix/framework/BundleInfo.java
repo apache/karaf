@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -41,6 +41,11 @@ class BundleInfo
     // Indicates whether the bundle is stale, meaning that it has
     // been refreshed and completely removed from the framework.
     private boolean m_stale = false;
+
+    // Indicates whether the bundle is an extension, meaning that it is
+    // installed as an extension bundle to the framework (i.e., can not be
+    // removed or updated until a framework restart.
+    private boolean m_extension = false;
 
     // Used for bundle locking.
     private int m_lockCount = 0;
@@ -112,7 +117,7 @@ class BundleInfo
     {
         return m_modules[m_modules.length - 1];
     }
-    
+
     /**
      * Add a module that corresponds to a new bundle JAR file revision for
      * the bundle associated with this <tt>BundleInfo</tt> object.
@@ -141,7 +146,7 @@ class BundleInfo
             return -1;
         }
     }
-    
+
     public String getLocation()
     {
         try
@@ -343,7 +348,7 @@ class BundleInfo
         }
         return result;
     }
-    
+
     public int getState()
     {
         return m_state;
@@ -473,6 +478,16 @@ class BundleInfo
     public void setStale()
     {
         m_stale = true;
+    }
+
+    public boolean isExtension()
+    {
+        return m_extension;
+    }
+
+    public void setExtension(boolean extension)
+    {
+        m_extension = extension;
     }
 
     //

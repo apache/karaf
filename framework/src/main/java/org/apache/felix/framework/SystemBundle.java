@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,25 +18,32 @@
  */
 package org.apache.felix.framework;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.cert.Certificate;
 import java.util.*;
 
-import org.apache.felix.framework.cache.SystemBundleArchive;
-import org.apache.felix.framework.util.FelixConstants;
-import org.apache.felix.framework.util.StringMap;
-import org.apache.felix.framework.util.manifestparser.Capability;
-import org.apache.felix.framework.util.manifestparser.ManifestParser;
-import org.apache.felix.moduleloader.ICapability;
-import org.apache.felix.moduleloader.IContentLoader;
+import org.apache.felix.framework.cache.*;
+import org.apache.felix.framework.util.*;
+import org.apache.felix.framework.util.manifestparser.*;
+import org.apache.felix.moduleloader.*;
 import org.osgi.framework.*;
 
-class SystemBundle extends BundleImpl
+class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAction
 {
+    private static final Set m_extensionLocations = new HashSet();
+
     private List m_activatorList = null;
-    private BundleActivator m_activator = null;
+    private SystemBundleActivator m_activator = null;
     private Thread m_shutdownThread = null;
     private ICapability[] m_exports = null;
     private IContentLoader m_contentLoader = null;
+    private Set m_exportNames = null;
 
     protected SystemBundle(Felix felix, BundleInfo info, List activatorList)
     {
@@ -54,7 +61,7 @@ class SystemBundle extends BundleImpl
         // Add the bundle activator for the start level service.
         activatorList.add(new StartLevelActivator(felix));
 
-        // Add the bundle activator for the URL Handlers service.
+        // Add the bundle activator for the url handler service.
         activatorList.add(new URLHandlersActivator(felix));
 
         m_activatorList = activatorList;
@@ -67,7 +74,7 @@ class SystemBundle extends BundleImpl
         // packages should be exported by the system bundle.
         try
         {
-            m_exports = (ICapability[]) ManifestParser.parseExportHeader(
+            m_exports = ManifestParser.parseExportHeader(
                 getFelix().getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES));
         }
         catch (Exception ex)
@@ -79,9 +86,29 @@ class SystemBundle extends BundleImpl
                 + getFelix().getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES), ex);
         }
 
-        m_contentLoader = new SystemBundleContentLoader(getFelix().getLogger());
+        m_contentLoader = new SystemBundleContentLoader();
 
+        // Initialize header map as a case insensitive map.
+        Map map = new StringMap(false);
+        map.put(FelixConstants.BUNDLE_VERSION,
+            getFelix().getConfig().get(FelixConstants.FELIX_VERSION_PROPERTY));
+        map.put(FelixConstants.BUNDLE_SYMBOLICNAME,
+            FelixConstants.SYSTEM_BUNDLE_SYMBOLICNAME);
+        map.put(FelixConstants.BUNDLE_NAME, "System Bundle");
+        map.put(FelixConstants.BUNDLE_DESCRIPTION,
+            "This bundle is system specific; it implements various system services.");
+        map.put(FelixConstants.EXPORT_SERVICE, "org.osgi.service.packageadmin.PackageAdmin,org.osgi.service.startlevel.StartLevel");
+
+        parseAndAddExports(map);
+
+        ((SystemBundleArchive) getInfo().getArchive()).setManifestHeader(map);
+    }
+
+    private void parseAndAddExports(Map headers)
+    {
         StringBuffer exportSB = new StringBuffer("");
+        Set exportNames = new HashSet();
+
         for (int i = 0; i < m_exports.length; i++)
         {
             if (i > 0)
@@ -93,24 +120,13 @@ class SystemBundle extends BundleImpl
             exportSB.append("; version=\"");
             exportSB.append(((Capability) m_exports[i]).getPackageVersion().toString());
             exportSB.append("\"");
+
+            exportNames.add(((Capability) m_exports[i]).getPackageName());
         }
 
-        // Initialize header map as a case insensitive map.
-        Map map = new StringMap(false);
-        map.put(FelixConstants.BUNDLE_VERSION,
-            getFelix().getConfig().get(FelixConstants.FELIX_VERSION_PROPERTY));
-        map.put(FelixConstants.BUNDLE_SYMBOLICNAME,
-            FelixConstants.SYSTEM_BUNDLE_SYMBOLICNAME);
-        map.put(FelixConstants.BUNDLE_NAME, "System Bundle");
-        map.put(FelixConstants.BUNDLE_DESCRIPTION,
-            "This bundle is system specific; it implements various system services.");
-        map.put(FelixConstants.EXPORT_PACKAGE, exportSB.toString());
-        map.put(FelixConstants.EXPORT_SERVICE, "org.osgi.service.packageadmin.PackageAdmin,org.osgi.service.startlevel.StartLevel");
-        ((SystemBundleArchive) getInfo().getArchive()).setManifestHeader(map);
+        m_exportNames = exportNames;
 
-        // TODO: FRAMEWORK - We need some systematic way for framework services
-        // to add packages and services to the system bundle's headers, something
-        // that will allow for them to be independently configured.
+        headers.put(FelixConstants.EXPORT_PACKAGE, exportSB.toString());
     }
 
     public ICapability[] getExports()
@@ -123,7 +139,7 @@ class SystemBundle extends BundleImpl
         return m_contentLoader;
     }
 
-    public synchronized void start() throws BundleException
+    public void start() throws BundleException
     {
         // The system bundle is only started once and it
         // is started by the framework.
@@ -156,7 +172,7 @@ class SystemBundle extends BundleImpl
      * multiple calls to this method, the shutdown thread is only started if
      * the framework is still in running state.
      */
-    public synchronized void stop()
+    public void stop()
     {
         Object sm = System.getSecurityManager();
 
@@ -191,17 +207,17 @@ class SystemBundle extends BundleImpl
         }
     }
 
-    public synchronized void uninstall() throws BundleException
+    public void uninstall() throws BundleException
     {
         throw new BundleException("Cannot uninstall the system bundle.");
     }
 
-    public synchronized void update() throws BundleException
+    public void update() throws BundleException
     {
         update(null);
     }
 
-    public synchronized void update(InputStream is) throws BundleException
+    public void update(InputStream is) throws BundleException
     {
         Object sm = System.getSecurityManager();
 
@@ -223,13 +239,13 @@ class SystemBundle extends BundleImpl
         }
         return m_activator;
     }
-    
+
     /**
      * Actually shuts down the system bundle. This method does what actually
      * the {@link #stop()} method would do for regular bundles. Since the system
      * bundle has to shutdown the framework, a separate method is used to stop
      * the system bundle during framework shutdown.
-     * 
+     *
      * @throws BundleException If an error occurrs stopping the system bundle
      *      and any activators "started" on framework start time.
      */
@@ -238,11 +254,266 @@ class SystemBundle extends BundleImpl
         // Callback from shutdown thread, so do our own stop.
         try
         {
-            getActivator().stop(getInfo().getContext());
+            getFelix().m_secureAction.stopActivator(getActivator(),
+                getInfo().getContext());
         }
         catch (Throwable throwable)
         {
             throw new BundleException( "Unable to stop system bundle.", throwable );
+        }
+    }
+
+    boolean exports(String packageName)
+    {
+        return m_exportNames.contains(packageName);
+    }
+
+    public ICapability[] getCapabilities()
+    {
+        return m_exports;
+    }
+
+    public IRequirement[] getDynamicRequirements()
+    {
+        return null;
+    }
+
+    public R4Library[] getLibraries()
+    {
+        return null;
+    }
+
+    public IRequirement[] getRequirements()
+    {
+        return null;
+    }
+
+    private final ThreadLocal m_tempBundle = new ThreadLocal();
+
+    void addExtensionBundle(BundleImpl bundle)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            m_tempBundle.set(bundle);
+
+            try
+            {
+                AccessController.doPrivileged(this);
+            }
+            finally
+            {
+                m_tempBundle.set(null);
+            }
+        }
+        else
+        {
+            _addExtensionBundle(bundle);
+        }
+    }
+
+    public Object run()
+    {
+        _addExtensionBundle((BundleImpl) m_tempBundle.get());
+        return null;
+    }
+
+    private void _addExtensionBundle(BundleImpl bundle)
+    {
+        BundleArchive archive = bundle.getInfo().getArchive();
+
+        SystemBundleArchive systemArchive =
+            (SystemBundleArchive) getInfo().getArchive();
+
+        Map headers;
+        ICapability[] exports;
+        try
+        {
+            headers = new StringMap(systemArchive.getManifestHeader(
+                systemArchive.getRevisionCount() - 1), false);
+
+            exports = ManifestParser.parseExportHeader((String)
+                bundle.getInfo().getCurrentHeader().get(Constants.EXPORT_PACKAGE));
+        }
+        catch (Exception ex)
+        {
+            getFelix().getLogger().log(
+                Logger.LOG_ERROR,
+                "Error parsing extension bundle export statement: "
+                + bundle.getInfo().getCurrentHeader().get(Constants.EXPORT_PACKAGE), ex);
+
+            return;
+        }
+
+        try
+        {
+            String url = archive.getRevision(
+                archive.getRevisionCount() -1).getCachedBundleURL();
+            if (url != null)
+            {
+                synchronized (getClass().getClassLoader())
+                {
+                    if (!m_extensionLocations.contains(bundle.getSymbolicName()))
+                    {
+                        Method addURL =
+                            URLClassLoader.class.getDeclaredMethod("addURL",
+                            new Class[] {URL.class});
+                        addURL.setAccessible(true);
+                        addURL.invoke(getClass().getClassLoader(),
+                            new Object[] {new URL(url)});
+                        m_extensionLocations.add(bundle.getSymbolicName());
+                    }
+                }
+            }
+            else
+            {
+                getFelix().getLogger().log(Logger.LOG_WARNING,
+                    "Unable to add extension bundle to FrameworkClassLoader - Maybe BundleCache does not support URLs?");
+                throw new UnsupportedOperationException(
+                    "Unable to add extension bundle to FrameworkClassLoader - Maybe BundleCache does not support URLs?");
+            }
+        }
+        catch (UnsupportedOperationException ex)
+        {
+            throw ex;
+        }
+        catch (Exception ex)
+        {
+            getFelix().getLogger().log(Logger.LOG_WARNING,
+                "Unable to add extension bundle to FrameworkClassLoader - Maybe not an URLClassLoader?", ex);
+            throw new UnsupportedOperationException(
+                "Unable to add extension bundle to FrameworkClassLoader - Maybe not an URLClassLoader?");
+        }
+
+                ICapability[] temp = new ICapability[m_exports.length + exports.length];
+
+        System.arraycopy(m_exports, 0, temp, 0, m_exports.length);
+        System.arraycopy(exports, 0, temp, m_exports.length, exports.length);
+
+        m_exports = temp;
+
+        parseAndAddExports(headers);
+
+        systemArchive.setManifestHeader(headers);
+
+        String activatorClass = (String)
+            bundle.getInfo().getCurrentHeader().get(
+            FelixConstants.FELIX_EXTENSION_ACTIVATOR);
+
+        if (activatorClass != null)
+        {
+            try
+            {
+                m_activator.addActivator(((BundleActivator)
+                    getClass().getClassLoader().loadClass(
+                    activatorClass.trim()).newInstance()),
+                    new BundleContextImpl(getFelix(), bundle));
+            }
+            catch (Throwable ex)
+            {
+                getFelix().getLogger().log(Logger.LOG_WARNING,
+                    "Unable to start Felix Extension Activator", ex);
+            }
+        }
+    }
+
+    private class SystemBundleContentLoader implements IContentLoader
+    {
+        private ISearchPolicy m_searchPolicy = null;
+        private IURLPolicy m_urlPolicy = null;
+
+        public void open()
+        {
+            // Nothing needed here.
+        }
+
+        public void close()
+        {
+            // Nothing needed here.
+        }
+
+        public IContent getContent()
+        {
+            return null;
+        }
+
+        public ISearchPolicy getSearchPolicy()
+        {
+            return m_searchPolicy;
+        }
+
+        public void setSearchPolicy(ISearchPolicy searchPolicy)
+        {
+            m_searchPolicy = searchPolicy;
+        }
+
+        public IURLPolicy getURLPolicy()
+        {
+            return m_urlPolicy;
+        }
+
+        public void setURLPolicy(IURLPolicy urlPolicy)
+        {
+            m_urlPolicy = urlPolicy;
+        }
+
+        public Class getClass(String name)
+        {
+            if (!m_exportNames.contains(Util.getClassPackage(name)))
+            {
+                return null;
+            }
+
+            try
+            {
+                return getClass().getClassLoader().loadClass(name);
+            }
+            catch (ClassNotFoundException ex)
+            {
+                getFelix().getLogger().log(
+                    Logger.LOG_WARNING,
+                    ex.getMessage(),
+                    ex);
+            }
+            return null;
+        }
+
+        public URL getResource(String name)
+        {
+            return getClass().getClassLoader().getResource(name);
+        }
+
+        public Enumeration getResources(String name)
+        {
+           try
+           {
+               return getClass().getClassLoader().getResources(name);
+           }
+           catch (IOException ex)
+           {
+               return null;
+           }
+        }
+
+        public URL getResourceFromContent(String name)
+        {
+            // There is no content for the system bundle, so return null.
+            return null;
+        }
+
+        public boolean hasInputStream(String urlPath) throws IOException
+        {
+            return (getClass().getClassLoader().getResource(urlPath) != null);
+        }
+
+        public InputStream getInputStream(String urlPath) throws IOException
+        {
+            return getClass().getClassLoader().getResourceAsStream(urlPath);
+        }
+
+        public String findLibrary(String name)
+        {
+            // No native libs associated with the system bundle.
+            return null;
         }
     }
 }

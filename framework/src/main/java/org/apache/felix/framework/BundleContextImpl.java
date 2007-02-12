@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -67,9 +67,9 @@ class BundleContextImpl implements FelixBundleContext
     public String getProperty(String name)
     {
         checkValidity();
-        
+
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
             if (!(Constants.FRAMEWORK_VERSION.equals(name) ||
@@ -83,14 +83,14 @@ class BundleContextImpl implements FelixBundleContext
                     new java.util.PropertyPermission(name, "read"));
             }
         }
-        
+
         return m_felix.getProperty(name);
     }
 
     public Bundle getBundle()
     {
         checkValidity();
-        
+
         return m_bundle;
     }
 
@@ -98,7 +98,7 @@ class BundleContextImpl implements FelixBundleContext
         throws InvalidSyntaxException
     {
         checkValidity();
-        
+
         return new FilterImpl(m_felix.getLogger(), expr);
     }
 
@@ -112,11 +112,11 @@ class BundleContextImpl implements FelixBundleContext
         throws BundleException
     {
         checkValidity();
-        
+
         Bundle result = null;
-        
+
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
             result = m_felix.installBundle(location, is);
@@ -129,57 +129,57 @@ class BundleContextImpl implements FelixBundleContext
         {
             result = m_felix.installBundle(location, is);
         }
-        
+
         return result;
     }
 
     public Bundle getBundle(long id)
     {
         checkValidity();
-        
+
         return m_felix.getBundle(id);
     }
 
     public Bundle[] getBundles()
     {
         checkValidity();
-        
+
         return m_felix.getBundles();
     }
 
     public void addBundleListener(BundleListener l)
     {
         checkValidity();
-        
+
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
             if (l instanceof SynchronousBundleListener)
             {
-                ((SecurityManager) sm).checkPermission(new AdminPermission(m_bundle, 
+                ((SecurityManager) sm).checkPermission(new AdminPermission(m_bundle,
                     AdminPermission.LISTENER));
             }
         }
-        
+
         m_felix.addBundleListener(m_bundle, l);
     }
 
     public void removeBundleListener(BundleListener l)
     {
         checkValidity();
-        
+
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
             if (l instanceof SynchronousBundleListener)
             {
-                ((SecurityManager) sm).checkPermission(new AdminPermission(m_bundle, 
+                ((SecurityManager) sm).checkPermission(new AdminPermission(m_bundle,
                     AdminPermission.LISTENER));
             }
         }
-        
+
         m_felix.removeBundleListener(m_bundle, l);
     }
 
@@ -199,28 +199,28 @@ class BundleContextImpl implements FelixBundleContext
         throws InvalidSyntaxException
     {
         checkValidity();
-        
+
         m_felix.addServiceListener(m_bundle, l, s);
     }
 
     public void removeServiceListener(ServiceListener l)
     {
         checkValidity();
-        
+
         m_felix.removeServiceListener(m_bundle, l);
     }
 
     public void addFrameworkListener(FrameworkListener l)
     {
         checkValidity();
-        
+
         m_felix.addFrameworkListener(m_bundle, l);
     }
 
     public void removeFrameworkListener(FrameworkListener l)
     {
         checkValidity();
-        
+
         m_felix.removeFrameworkListener(m_bundle, l);
     }
 
@@ -234,9 +234,9 @@ class BundleContextImpl implements FelixBundleContext
         String[] clazzes, Object svcObj, Dictionary dict)
     {
         checkValidity();
-        
+
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
             if (clazzes != null)
@@ -244,18 +244,18 @@ class BundleContextImpl implements FelixBundleContext
                 for (int i = 0;i < clazzes.length;i++)
                 {
                     ((SecurityManager) sm).checkPermission(
-                        new ServicePermission(clazzes[i], ServicePermission.REGISTER));        
+                        new ServicePermission(clazzes[i], ServicePermission.REGISTER));
                 }
             }
         }
-        
+
         return m_felix.registerService(m_bundle, clazzes, svcObj, dict);
     }
 
     public ServiceReference getServiceReference(String clazz)
     {
         checkValidity();
-        
+
         try
         {
             ServiceReference[] refs = getServiceReferences(clazz, null);
@@ -355,7 +355,7 @@ class BundleContextImpl implements FelixBundleContext
     public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException
     {
         checkValidity();
-        
+
         return m_felix.getAllowedServiceReferences(m_bundle, clazz, filter, false);
 
     }
@@ -364,7 +364,7 @@ class BundleContextImpl implements FelixBundleContext
         throws InvalidSyntaxException
     {
         checkValidity();
-        
+
         return m_felix.getAllowedServiceReferences(m_bundle, clazz, filter, true);
 
     }
@@ -372,53 +372,53 @@ class BundleContextImpl implements FelixBundleContext
     public Object getService(ServiceReference ref)
     {
         checkValidity();
-        
+
         if (ref == null)
         {
             throw new NullPointerException("Specified service reference cannot be null.");
         }
-        
+
         Object sm = System.getSecurityManager();
-        
+
         if (sm != null)
         {
             String[] objectClass = (String[]) ref.getProperty(Constants.OBJECTCLASS);
-            
+
             if (objectClass == null)
             {
                 return null;
             }
-            
+
             boolean hasPermission = false;
-            
+
             for (int i = 0;(i < objectClass.length) && !hasPermission;i++)
             {
-                try 
+                try
                 {
                     ((SecurityManager) sm).checkPermission(
                         new ServicePermission(objectClass[i], ServicePermission.GET));
-                    
+
                     hasPermission = true;
                 }
                 catch (Exception ex)
                 {
-                    
+
                 }
             }
-            
+
             if (!hasPermission)
             {
                 throw new SecurityException("No permission");
             }
         }
-        
+
         return m_felix.getService(m_bundle, ref);
     }
 
     public boolean ungetService(ServiceReference ref)
     {
         checkValidity();
-        
+
         if (ref == null)
         {
             throw new NullPointerException("Specified service reference cannot be null.");
@@ -431,7 +431,7 @@ class BundleContextImpl implements FelixBundleContext
     public File getDataFile(String s)
     {
         checkValidity();
-        
+
         return m_felix.getDataFile(m_bundle, s);
     }
 
@@ -446,8 +446,15 @@ class BundleContextImpl implements FelixBundleContext
                 case Bundle.STOPPING:
                     return;
             }
+
+            // As an exception we allow extension bundles to use their bundle
+            // context while not being active.
+            if (m_bundle.getInfo().isExtension())
+            {
+                return;
+            }
         }
-        
+
         throw new IllegalStateException("Invalid BundleContext.");
     }
 }
