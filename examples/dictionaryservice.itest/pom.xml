@@ -37,6 +37,7 @@
       <plugin>
         <groupId>org.apache.felix.plugins</groupId>
         <artifactId>maven-felix-plugin</artifactId>
+        <version>${pom.version}</version>
         <executions>
           <execution>
              <id>run</id>
