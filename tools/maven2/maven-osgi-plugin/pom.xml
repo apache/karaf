@@ -37,6 +37,7 @@
     </repository>
   </repositories>
 
+<!--
   <pluginRepositories>
     <pluginRepository>
       <id>snapshots</id>
@@ -49,6 +50,7 @@
       <url>http://people.apache.org/repo/m2-snapshot-repository</url>
     </pluginRepository>
   </pluginRepositories>
+-->
 
   <distributionManagement>
     <snapshotRepository>
