@@ -20,7 +20,6 @@
         <!--
         <module>antlr</module>
         <module>commons-collections</module>
-        <module>commons-lang</module>
         <module>jzlib</module>
         -->
         <module>cblib</module>
@@ -32,6 +31,7 @@
         <module>commons-fileupload</module>
         <module>commons-httpclient</module>
         <module>commons-io</module>
+        <module>commons-lang</module>
     </modules>
 
 </project>
