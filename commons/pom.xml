@@ -22,7 +22,7 @@
         <module>commons-collections</module>
         <module>jzlib</module>
         -->
-        <module>cblib</module>
+        <module>cglib</module>
         <module>commons-beanutils</module>
         <module>commons-codec</module>
         <module>commons-configuration</module>
