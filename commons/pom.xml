@@ -17,14 +17,11 @@
     </description>
 
     <modules>
-        <!--
         <module>antlr</module>
-        <module>commons-collections</module>
-        <module>jzlib</module>
-        -->
         <module>cglib</module>
         <module>commons-beanutils</module>
         <module>commons-codec</module>
+        <module>commons-collections</module>
         <module>commons-configuration</module>
         <module>commons-digester</module>
         <module>commons-el</module>
@@ -32,6 +29,7 @@
         <module>commons-httpclient</module>
         <module>commons-io</module>
         <module>commons-lang</module>
+        <module>jzlib</module>
     </modules>
 
 </project>

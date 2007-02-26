@@ -1,0 +1,52 @@
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.apache.felix.commons</groupId>
+        <artifactId>build</artifactId>
+        <version>0.9.0-incubator-SNAPSHOT</version>
+    </parent>
+
+    <groupId>org.apache.felix.commons</groupId>
+    <artifactId>commons-collections-osgi</artifactId>
+    <version>3.2</version>
+    <packaging>bundle</packaging>
+
+    <name>${pom.artifactId} bundle</name>
+    <description>
+        This bundle simply wraps commons-collections-${pom.version}.jar.
+    </description>
+
+    <organization> 
+        <name>Apache Felix Project</name> 
+        <url>http://incubator.apache.org/felix/</url> 
+    </organization>
+
+    <dependencies>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                    <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+	            <Export-Package>*</Export-Package>
+                    <Import-Package>!org.apache.commons.collections.*</Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
