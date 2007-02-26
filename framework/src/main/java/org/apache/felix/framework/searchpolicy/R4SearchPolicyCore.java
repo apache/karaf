@@ -974,9 +974,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         {
             Map.Entry entry = (Map.Entry) iter.next();
             ResolvedPackage rp = (ResolvedPackage) entry.getValue();
-            for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
+            for (Iterator srcIter = rp.m_sourceSet.iterator(); srcIter.hasNext(); )
             {
-                PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
+                PackageSource ps = (PackageSource) srcIter.next();
                 if (!isClassSpaceConsistent(ps.m_module, moduleMap, cycleMap, resolverMap))
                 {
                     return false;
@@ -1002,7 +1002,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 // is compatible with the package source of the module's
                 // package map.
                 ResolvedPackage rpUses = (ResolvedPackage) entry.getValue();
-                if (!rp.isCompatible(rpUses) && !rpUses.isCompatible(rp))
+                if (!rp.isSubset(rpUses) && !rpUses.isSubset(rp))
                 {
                     m_logger.log(
                         Logger.LOG_DEBUG,
@@ -1029,10 +1029,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         {
             Map.Entry entry = (Map.Entry) iter.next();
             ResolvedPackage rp = (ResolvedPackage) entry.getValue();
-            for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
+            for (Iterator srcIter = rp.m_sourceSet.iterator(); srcIter.hasNext(); )
             {
                 usesMap = calculateUsesConstraints(
-                    (PackageSource) rp.m_sourceList.get(srcIdx),
+                    (PackageSource) srcIter.next(),
                     moduleMap, usesMap, new HashMap(), resolverMap);
             }
         }
@@ -1057,10 +1057,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             ResolvedPackage rp = (ResolvedPackage) pkgMap.get(cap.getUses()[i]);
             if (rp != null)
             {
-                for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
+                for (Iterator srcIter = rp.m_sourceSet.iterator(); srcIter.hasNext(); )
                 {
                     usesMap = calculateUsesConstraints(
-                        (PackageSource) rp.m_sourceList.get(srcIdx),
+                        (PackageSource) srcIter.next(),
                         moduleMap, usesMap, cycleMap, resolverMap);
                 }
 
@@ -1068,17 +1068,11 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 ResolvedPackage rpExisting = (ResolvedPackage) usesMap.get(cap.getUses()[i]);
                 if (rpExisting != null)
                 {
-                    if ((rpExisting.m_sourceList.size() >= rp.m_sourceList.size()) &&
-                        rpExisting.isCompatible(rp))
+                    // Create union of package source if there is a subset
+                    // relationship.
+                    if (rpExisting.isSubset(rp) || rp.isSubset(rpExisting))
                     {
-//System.out.println("MERGING - IGNORE " + rp);
-                        // Nothing necessary since we have the more detailed source already.
-                    }
-                    else if (rp.isCompatible(rpExisting))
-                    {
-//System.out.println("MERGING - ADD " + rp);
-                        // Update to the more detailed package source.
-                        usesMap.put(cap.getUses()[i], rp);
+                        rpExisting.m_sourceSet.addAll(rp.m_sourceSet);
                     }
                     else
                     {
@@ -1130,7 +1124,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             if (rpReq != null)
             {
                 ResolvedPackage rpExport = (ResolvedPackage) entry.getValue();
-                rpReq.m_sourceList.addAll(rpExport.m_sourceList);
+                rpReq.m_sourceSet.addAll(rpExport.m_sourceSet);
             }
             else
             {
@@ -1143,7 +1137,6 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         for (Iterator i = importedPackages.entrySet().iterator(); i.hasNext(); )
         {
             Map.Entry entry = (Map.Entry) i.next();
-            ResolvedPackage rpImport = (ResolvedPackage) entry.getValue();
             requiredPackages.put(entry.getKey(), entry.getValue());
         }
 
@@ -1180,7 +1173,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     ps.m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY);
 
                 ResolvedPackage rp = new ResolvedPackage(pkgName);
-                rp.m_sourceList.add(ps);
+                rp.m_sourceSet.add(ps);
                 pkgMap.put(rp.m_name, rp);
             }
         }
@@ -1205,7 +1198,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     wires[i].getCapability().getProperties().get(ICapability.PACKAGE_PROPERTY);
                 ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
                 rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
-                rp.m_sourceList.add(new PackageSource(wires[i].getExporter(), wires[i].getCapability()));
+                rp.m_sourceSet.add(new PackageSource(wires[i].getExporter(), wires[i].getCapability()));
                 pkgMap.put(rp.m_name, rp);
             }
         }
@@ -1229,7 +1222,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     caps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY);
                 ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
                 rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
-                rp.m_sourceList.add(new PackageSource(module, caps[capIdx]));
+                rp.m_sourceSet.add(new PackageSource(module, caps[capIdx]));
                 pkgMap.put(rp.m_name, rp);
             }
         }
@@ -1269,11 +1262,11 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 for (Iterator reqIter = requireMap.entrySet().iterator(); reqIter.hasNext(); )
                 {
                     Map.Entry entry = (Map.Entry) reqIter.next();
-                    if (pkgMap.get(entry.getKey()) != null)
+                    ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
+                    if (rp != null)
                     {
-                        ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
                         ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                        rp.m_sourceList.addAll(rpReq.m_sourceList);
+                        rp.m_sourceSet.addAll(rpReq.m_sourceSet);
                     }
                     else
                     {
@@ -1307,11 +1300,11 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 for (Iterator reqIter = requireMap.entrySet().iterator(); reqIter.hasNext(); )
                 {
                     Map.Entry entry = (Map.Entry) reqIter.next();
-                    if (pkgMap.get(entry.getKey()) != null)
+                    ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
+                    if (rp != null)
                     {
-                        ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
                         ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                        rp.m_sourceList.addAll(rpReq.m_sourceList);
+                        rp.m_sourceSet.addAll(rpReq.m_sourceSet);
                     }
                     else
                     {
@@ -1362,24 +1355,12 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 for (Iterator reqIter = requiredMap.entrySet().iterator(); reqIter.hasNext(); )
                 {
                     Map.Entry entry = (Map.Entry) reqIter.next();
-                    if (pkgMap.get(entry.getKey()) != null)
+                    ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
+                    if (rp != null)
                     {
-                        ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
+                        // Create the union of all package sources.
                         ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                        if ((rp.m_sourceList.size() >= rpReq.m_sourceList.size()) &&
-                            rp.isCompatible(rpReq))
-                        {
-                            // Nothing necessary since we have the more detailed source already.
-                        }
-                        else if (rpReq.isCompatible(rp))
-                        {
-                            // Update to the more detailed package source.
-                            pkgMap.put(entry.getKey(), rpReq);
-                        }
-                        else
-                        {
-                            rp.m_sourceList.addAll(rpReq.m_sourceList);
-                        }
+                        rp.m_sourceSet.addAll(rpReq.m_sourceSet);
                     }
                     else
                     {
@@ -1400,7 +1381,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     candCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY);
                 ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
                 rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
-                rp.m_sourceList.add(new PackageSource(psTarget.m_module, candCaps[capIdx]));
+                rp.m_sourceSet.add(new PackageSource(psTarget.m_module, candCaps[capIdx]));
                 pkgMap.put(rp.m_name, rp);
             }
         }
@@ -1434,24 +1415,12 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 for (Iterator reqIter = requiredMap.entrySet().iterator(); reqIter.hasNext(); )
                 {
                     Map.Entry entry = (Map.Entry) reqIter.next();
-                    if (pkgMap.get(entry.getKey()) != null)
+                    ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
+                    if (rp != null)
                     {
-                        ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
+                        // Create the union of all package sources.
                         ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                        if ((rp.m_sourceList.size() >= rpReq.m_sourceList.size()) &&
-                            rp.isCompatible(rpReq))
-                        {
-                            // Nothing necessary since we have the more detailed source already.
-                        }
-                        else if (rpReq.isCompatible(rp))
-                        {
-                            // Update to the more detailed package source.
-                            pkgMap.put(entry.getKey(), rpReq);
-                        }
-                        else
-                        {
-                            rp.m_sourceList.addAll(rpReq.m_sourceList);
-                        }
+                        rp.m_sourceSet.addAll(rpReq.m_sourceSet);
                     }
                     else
                     {
@@ -1472,7 +1441,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
                 ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
                 rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
-                rp.m_sourceList.add(new PackageSource(module, caps[i]));
+                rp.m_sourceSet.add(new PackageSource(module, caps[i]));
                 pkgMap.put(rp.m_name, rp);
             }
         }
@@ -1497,7 +1466,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             {
                 ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
                 ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                rp.m_sourceList.addAll(rpReq.m_sourceList);
+                rp.m_sourceSet.addAll(rpReq.m_sourceSet);
             }
             else
             {
@@ -2198,8 +2167,35 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             }
             else
             {
-                return 0;
+                return -1;
             }
+        }
+
+        public int hashCode()
+        {
+            final int PRIME = 31;
+            int result = 1;
+            result = PRIME * result + ((m_capability == null) ? 0 : m_capability.hashCode());
+            result = PRIME * result + ((m_module == null) ? 0 : m_module.hashCode());
+            return result;
+        }
+
+        public boolean equals(Object o)
+        {
+            if (this == o)
+            {
+                return true;
+            }
+            if (o == null)
+            {
+                return false;
+            }
+            if (getClass() != o.getClass())
+            {
+                return false;
+            }
+            PackageSource ps = (PackageSource) o;
+            return (m_module.equals(ps.m_module) && (m_capability == ps.m_capability));
         }
     }
 
@@ -2213,32 +2209,26 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
     protected class ResolvedPackage
     {
         public String m_name = null;
-        public List m_sourceList = new ArrayList();
+        public Set m_sourceSet = new HashSet();
 
         public ResolvedPackage(String name)
         {
             m_name = name;
         }
 
-        public boolean isCompatible(ResolvedPackage rp)
+        public boolean isSubset(ResolvedPackage rp)
         {
-// TODO: RB - For now do equality comparision, but we will likely need "startsWith" comparison.
-            if (rp.m_sourceList.size() > m_sourceList.size())
+            if (rp.m_sourceSet.size() > m_sourceSet.size())
+            {
+                return false;
+            }
+            else if (!rp.m_name.equals(m_name))
             {
                 return false;
             }
 
-            for (int i = 0; i < rp.m_sourceList.size(); i++)
-            {
-                PackageSource ps1 = (PackageSource) m_sourceList.get(i);
-                PackageSource ps2 = (PackageSource) rp.m_sourceList.get(i);
-                if (ps1.m_module != ps2.m_module)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            // Determine if the target set of source modules is a subset.
+            return m_sourceSet.containsAll(rp.m_sourceSet);
         }
 
         public String toString()
@@ -2251,14 +2241,14 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             sb.append(padding);
             sb.append(m_name);
             sb.append(" from [");
-            for (int i = 0; i < m_sourceList.size(); i++)
+            for (Iterator i = m_sourceSet.iterator(); i.hasNext(); )
             {
-                if (i != 0)
+                PackageSource ps = (PackageSource) i.next();
+                sb.append(ps.m_module);
+                if (i.hasNext())
                 {
                     sb.append(", ");
                 }
-                PackageSource ps = (PackageSource) m_sourceList.get(i);
-                sb.append(ps.m_module);
             }
             sb.append("]");
             return sb;

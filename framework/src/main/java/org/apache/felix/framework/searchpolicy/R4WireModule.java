@@ -74,18 +74,21 @@ public class R4WireModule implements IWire
         // Get the package of the target class.
         String pkgName = Util.getClassPackage(name);
 
-        ResolvedPackage ps = (ResolvedPackage) m_pkgMap.get(pkgName);
-        for (int srcIdx = 0; (ps != null) && (srcIdx < ps.m_sourceList.size()); srcIdx++)
+        ResolvedPackage rp = (ResolvedPackage) m_pkgMap.get(pkgName);
+        if (rp != null)
         {
-            PackageSource rc = (PackageSource) ps.m_sourceList.get(srcIdx);
-            if ((rc.m_module == m_importer) ||
-                ((rc.m_capability instanceof Capability) &&
-                ((Capability) rc.m_capability).isIncluded(name)))
+            for (Iterator srcIter = rp.m_sourceSet.iterator(); srcIter.hasNext(); )
             {
-                Class clazz = rc.m_module.getContentLoader().getClass(name);
-                if (clazz != null)
+                PackageSource ps = (PackageSource) srcIter.next();
+                if ((ps.m_module == m_importer) ||
+                    ((ps.m_capability instanceof Capability) &&
+                    ((Capability) ps.m_capability).isIncluded(name)))
                 {
-                    return clazz;
+                    Class clazz = ps.m_module.getContentLoader().getClass(name);
+                    if (clazz != null)
+                    {
+                        return clazz;
+                    }
                 }
             }
         }
@@ -101,14 +104,17 @@ public class R4WireModule implements IWire
         // Get the package of the target class.
         String pkgName = Util.getResourcePackage(name);
 
-        ResolvedPackage ps = (ResolvedPackage) m_pkgMap.get(pkgName);
-        for (int srcIdx = 0; (ps != null) && (srcIdx < ps.m_sourceList.size()); srcIdx++)
+        ResolvedPackage rp = (ResolvedPackage) m_pkgMap.get(pkgName);
+        if (rp != null)
         {
-            PackageSource rc = (PackageSource) ps.m_sourceList.get(srcIdx);
-            URL url = rc.m_module.getContentLoader().getResource(name);
-            if (url != null)
+            for (Iterator srcIter = rp.m_sourceSet.iterator(); srcIter.hasNext(); )
             {
-                return url;
+                PackageSource ps = (PackageSource) srcIter.next();
+                URL url = ps.m_module.getContentLoader().getResource(name);
+                if (url != null)
+                {
+                    return url;
+                }
             }
         }
 
