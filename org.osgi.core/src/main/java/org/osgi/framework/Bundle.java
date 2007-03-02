@@ -546,6 +546,8 @@ public interface Bundle {
 	 */
 	public Dictionary getHeaders();
 
+	public BundleContext getBundleContext();
+
 	/**
 	 * Returns this bundle's identifier. The bundle is assigned a unique
 	 * identifier by the Framework when it is installed in the OSGi environment.

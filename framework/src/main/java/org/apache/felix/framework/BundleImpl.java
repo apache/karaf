@@ -52,7 +52,7 @@ class BundleImpl implements Bundle
         m_info = info;
     }
 
-    private BundleContext getContext()
+    public BundleContext getBundleContext()
     {
         return m_info.getContext();
     }
