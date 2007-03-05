@@ -66,7 +66,7 @@ public class Callback {
      */
     public void call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
     	m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Call an callback method : " + m_method);
-        Method method = m_manager.getClazz().getMethod(m_method, new Class[] {});
+        Method method = m_manager.getClazz().getDeclaredMethod(m_method, new Class[] {});
         method.setAccessible(true);
 
         if (m_isStatic) { method.invoke(null, new Object[]{}); }
@@ -95,7 +95,7 @@ public class Callback {
      */
     public void call(Object instance) throws NoSuchMethodException,
             IllegalAccessException, InvocationTargetException {
-        Method method = m_manager.getClazz().getMethod(m_method, new Class[] {});
+        Method method = m_manager.getClazz().getDeclaredMethod(m_method, new Class[] {});
         method.setAccessible(true);
         method.invoke(instance, new Object[] {});
     }
@@ -116,7 +116,7 @@ public class Callback {
             classes[i] = arg[i].getClass();
         }
         
-        Method method = m_manager.getClazz().getMethod(m_method, classes);
+        Method method = m_manager.getClazz().getDeclaredMethod(m_method, classes);
         method.setAccessible(true);
 
         if (m_isStatic) { method.invoke(null, arg); }
@@ -150,7 +150,7 @@ public class Callback {
             classes[i] = arg[i].getClass();
         }
 
-        Method method = m_manager.getClazz().getMethod(m_method, classes);
+        Method method = m_manager.getClazz().getDeclaredMethod(m_method, classes);
         method.setAccessible(true);
         method.invoke(instance, arg);
     }

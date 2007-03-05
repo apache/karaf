@@ -364,8 +364,9 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      */
     public void updated(String pid, Dictionary properties) throws ConfigurationException {
         InstanceManager cm = (InstanceManager) m_componentInstances.get(pid);
-        if (cm == null) { 
+        if (cm == null) {
         	try {
+        		properties.put("name", pid); // Add the name in the configuration
         		createComponentInstance(properties);
         	} catch (UnacceptableConfiguration e) {
         		m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
@@ -376,6 +377,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
             cm.stop(); // Stop the component
             
             try {
+            	properties.put("name", pid); // Add the name in the configuration
 				_isAcceptable(properties); // Test if the configuration is acceptable
 			} catch (UnacceptableConfiguration e) {
 				m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());

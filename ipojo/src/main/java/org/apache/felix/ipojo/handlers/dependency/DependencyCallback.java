@@ -89,7 +89,8 @@ public class DependencyCallback {
      */
     protected void call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
     	// Get the method object
-    	Method method = m_manager.getClazz().getMethod(m_callback, new Class[] {});
+    	Method method = m_manager.getClazz().getDeclaredMethod(m_callback, new Class[] {});
+    	method.setAccessible(true);
     	
         if (m_isStatic) { method.invoke(null, new Object[] {}); }
         else {
@@ -116,7 +117,8 @@ public class DependencyCallback {
      */
     protected void call(ServiceReference ref) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
     	// Get the method object
-    	Method method = m_manager.getClazz().getMethod(m_callback, new Class[] {ServiceReference.class});
+    	Method method = m_manager.getClazz().getDeclaredMethod(m_callback, new Class[] {ServiceReference.class});
+    	method.setAccessible(true);
     	
         if (m_isStatic) { method.invoke(null, new Object[] {ref}); }
         else {
@@ -143,7 +145,8 @@ public class DependencyCallback {
      */
     protected void call(Object o) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
     	// Get the method object
-    	Method method = m_manager.getClazz().getMethod(m_callback, new Class[] {Object.class});
+    	Method method = m_manager.getClazz().getDeclaredMethod(m_callback, new Class[] {Object.class});
+    	method.setAccessible(true);
     	
         if (m_isStatic) { method.invoke(null, new Object[] {o}); }
         else {
@@ -169,7 +172,8 @@ public class DependencyCallback {
      * @throws InvocationTargetException : an error happens in the called method
      */
     protected void callOnInstance(Object instance) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException { 
-    	Method method = instance.getClass().getMethod(m_callback, new Class[] {});
+    	Method method = instance.getClass().getDeclaredMethod(m_callback, new Class[] {});
+    	method.setAccessible(true);
     	method.invoke(instance, new Object[] {});
    	}
 
@@ -183,7 +187,8 @@ public class DependencyCallback {
      * @throws InvocationTargetException
      */
     protected void callOnInstance(Object instance, ServiceReference ref) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-    	Method method = instance.getClass().getMethod(m_callback, new Class[] {ServiceReference.class});
+    	Method method = instance.getClass().getDeclaredMethod(m_callback, new Class[] {ServiceReference.class});
+    	method.setAccessible(true);
     	method.invoke(instance, new Object[] {ref});
     }
     
@@ -197,7 +202,8 @@ public class DependencyCallback {
      * @throws InvocationTargetException
      */
     protected void callOnInstance(Object instance, Object o) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-    	Method method = instance.getClass().getMethod(m_callback, new Class[] {Object.class});
+    	Method method = instance.getClass().getDeclaredMethod(m_callback, new Class[] {Object.class});
+    	method.setAccessible(true);
     	method.invoke(instance, new Object[] {o});
     }
 }
