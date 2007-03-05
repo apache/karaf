@@ -587,7 +587,7 @@ public class R4SearchPolicyCore implements ModuleListener
 
                                 // Create the wire and add it to the module.
                                 wire = new R4Wire(
-                                    importer, candidate.m_module, candidate.m_capability);
+                                    importer, dynamics[i], candidate.m_module, candidate.m_capability);
                                 newWires[newWires.length - 1] = wire;
                                 ((ModuleImpl) importer).setWires(newWires);
 m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
@@ -1304,7 +1304,6 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
         // Loop through all current candidates for module dependencies and
         // merge re-exported packages.
-// TODO: RB - Right now assume that everything is re-exported, but this won't be true in the future.
         List candSetList = (List) candidatesMap.get(module);
         for (int candSetIdx = 0; (candSetList != null) && (candSetIdx < candSetList.size()); candSetIdx++)
         {
@@ -1314,11 +1313,14 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             // If the capabaility is a module dependency, then flatten it to packages.
             if (ps.m_capability.getNamespace().equals(ICapability.MODULE_NAMESPACE))
             {
+                // Calculate transitively required packages.
                 Map cycleMap = new HashMap();
                 cycleMap.put(module, module);
-                Map requireMap = calculateExportedAndReexportedPackages(ps, candidatesMap, new HashMap(), cycleMap);
+                Map requireMap = calculateExportedAndReexportedPackages(
+                    ps, candidatesMap, new HashMap(), cycleMap);
 
-                // Merge sources.
+                // Loop through all export package capabilities and merge them
+                // into the package map adding the original target as a source.
                 for (Iterator reqIter = requireMap.entrySet().iterator(); reqIter.hasNext(); )
                 {
                     Map.Entry entry = (Map.Entry) reqIter.next();
@@ -1344,7 +1346,6 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 //System.out.println("calculateRequiredPackagesResolved("+module+")");
         Map pkgMap = new HashMap();
 
-// TODO: RB - Right now assume that everything is re-exported, but this won't be true in the future.
         IWire[] wires = module.getWires();
         for (int i = 0; (wires != null) && (i < wires.length); i++)
         {
@@ -1354,7 +1355,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 // We can call calculateExportedAndReexportedPackagesResolved()
                 // directly, since we know all dependencies have to be resolved
                 // because this module itself is resolved.
-                Map requireMap = calculateExportedAndReexportedPackagesResolved(wires[i].getExporter(), new HashMap(), new HashMap());
+                Map cycleMap = new HashMap();
+                cycleMap.put(module, module);
+                Map requireMap = calculateExportedAndReexportedPackagesResolved(
+                    wires[i].getExporter(), new HashMap(), cycleMap);
 
                 // Merge sources.
                 for (Iterator reqIter = requireMap.entrySet().iterator(); reqIter.hasNext(); )
@@ -1394,42 +1398,6 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
         cycleMap.put(psTarget.m_module, psTarget.m_module);
 
-        // Loop through all current candidates for module dependencies and
-        // merge re-exported packages.
-// TODO: RB - Right now assume that everything is re-exported, but this won't be true in the future.
-        List candSetList = (List) candidatesMap.get(psTarget.m_module);
-        for (int candSetIdx = 0; candSetIdx < candSetList.size(); candSetIdx++)
-        {
-            CandidateSet cs = (CandidateSet) candSetList.get(candSetIdx);
-            PackageSource ps = cs.m_candidates[cs.m_idx];
-
-            // If the candidate is resolving a module dependency, then
-            // flatten it to packages.
-            if (ps.m_capability.getNamespace().equals(ICapability.MODULE_NAMESPACE))
-            {
-                // Recursively calculate the required packages for the
-                // current candidate.
-                Map requiredMap = calculateExportedAndReexportedPackages(ps, candidatesMap, new HashMap(), cycleMap);
-
-                // Merge the candidate's required packages with the existing packages.
-                for (Iterator reqIter = requiredMap.entrySet().iterator(); reqIter.hasNext(); )
-                {
-                    Map.Entry entry = (Map.Entry) reqIter.next();
-                    ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
-                    if (rp != null)
-                    {
-                        // Create the union of all package sources.
-                        ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                        rp.m_sourceSet.addAll(rpReq.m_sourceSet);
-                    }
-                    else
-                    {
-                        pkgMap.put(entry.getKey(), entry.getValue());
-                    }
-                }
-            }
-        }
-
         // Loop through all export package capabilities and merge them
         // into the package map adding the original target as a source.
         ICapability[] candCaps = psTarget.m_module.getDefinition().getCapabilities();
@@ -1446,6 +1414,93 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             }
         }
 
+        // Loop through all current candidates for module dependencies and
+        // merge re-exported packages.
+        Map allRequiredMap = new HashMap();
+        List candSetList = (List) candidatesMap.get(psTarget.m_module);
+        for (int candSetIdx = 0; candSetIdx < candSetList.size(); candSetIdx++)
+        {
+            CandidateSet cs = (CandidateSet) candSetList.get(candSetIdx);
+            PackageSource ps = cs.m_candidates[cs.m_idx];
+
+            // If the candidate is resolving a module dependency, then
+            // flatten the required packages if they are re-exported.
+            if (ps.m_capability.getNamespace().equals(ICapability.MODULE_NAMESPACE))
+            {
+                // Determine if required packages are re-exported.
+                boolean reexport = false;
+                R4Directive[] dirs =  ((Requirement) cs.m_requirement).getDirectives();
+                for (int dirIdx = 0;
+                    !reexport && (dirs != null) && (dirIdx < dirs.length); dirIdx++)
+                {
+                    if (dirs[dirIdx].getName().equals(Constants.VISIBILITY_DIRECTIVE)
+                        && dirs[dirIdx].getValue().equals(Constants.VISIBILITY_REEXPORT))
+                    {
+                        reexport = true;
+                    }
+                }
+
+                // Recursively calculate the required packages for the
+                // current candidate.
+                Map requiredMap = calculateExportedAndReexportedPackages(ps, candidatesMap, new HashMap(), cycleMap);
+
+                // Merge the candidate's required packages with the existing packages.
+                for (Iterator reqIter = requiredMap.entrySet().iterator(); reqIter.hasNext(); )
+                {
+                    Map.Entry entry = (Map.Entry) reqIter.next();
+                    String pkgName = (String) entry.getKey();
+
+                    // Merge the current set of required packages into
+                    // the overall complete set of required packages.
+                    // We must keep track of all possible re-exported
+                    // packages, because despite the fact that some packages
+                    // will be required "privately" and some will be required
+                    // "reexport", any re-exported package sources will
+                    // ultimately need to be combined with privately required
+                    // package sources, if the required packages overlap.
+                    // This is one of the bad things about require-bundle
+                    // behavior, it does not necessarily obey the visibility
+                    // rules declared in the dependency.
+                    ResolvedPackage rp = (ResolvedPackage) allRequiredMap.get(pkgName);
+                    if (rp != null)
+                    {
+                        // Create the union of all package sources.
+                        ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
+                        rp.m_sourceSet.addAll(rpReq.m_sourceSet);                       
+                    }
+                    else
+                    {
+                        allRequiredMap.put(entry.getKey(), entry.getValue());
+                    }
+
+                    // Now merge any re-exported packages into the module's
+                    // overall package map, since these re-exported packages
+                    // will become part of the module's export signature.
+                    rp = (ResolvedPackage) pkgMap.get(entry.getKey());
+                    if ((rp == null) && reexport)
+                    {
+                        pkgMap.put(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+        }
+
+        // Using the package map that represents the module's complete
+        // export signature (i.e., it includes exported and re-exported
+        // packages), merge in the package sources for any required
+        // packages that overlap the set of exported/re-exported packages.
+        for (Iterator reqIter = allRequiredMap.entrySet().iterator(); reqIter.hasNext(); )
+        {
+            Map.Entry entry = (Map.Entry) reqIter.next();
+            ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
+            if (rp != null)
+            {
+                // Create the union of all package sources.
+                ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
+                rp.m_sourceSet.addAll(rpReq.m_sourceSet);                       
+            }
+        }
+
         return pkgMap;
     }
 
@@ -1458,37 +1513,6 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         }
 
         cycleMap.put(module, module);
-
-// TODO: RB - Right now assume that everything is re-exported, but this won't be true in the future.
-        IWire[] wires = module.getWires();
-        for (int i = 0; (wires != null) && (i < wires.length); i++)
-        {
-            // If the wire is a module dependency, then flatten it to packages.
-            if (wires[i].getCapability().getNamespace().equals(ICapability.MODULE_NAMESPACE))
-            {
-                // Recursively calculate the required packages for the
-                // wire's exporting module.
-                Map requiredMap = calculateExportedAndReexportedPackagesResolved(wires[i].getExporter(), new HashMap(), cycleMap);
-
-                // Merge the exporting module's required packages with the
-                // existing packages.
-                for (Iterator reqIter = requiredMap.entrySet().iterator(); reqIter.hasNext(); )
-                {
-                    Map.Entry entry = (Map.Entry) reqIter.next();
-                    ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
-                    if (rp != null)
-                    {
-                        // Create the union of all package sources.
-                        ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                        rp.m_sourceSet.addAll(rpReq.m_sourceSet);
-                    }
-                    else
-                    {
-                        pkgMap.put(entry.getKey(), entry.getValue());
-                    }
-                }
-            }
-        }
 
         // Loop through all export package capabilities and merge them
         // into the package map adding the original target as a source.
@@ -1506,35 +1530,97 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             }
         }
 
+        Map allRequiredMap = new HashMap();
+        IWire[] wires = module.getWires();
+        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        {
+            // If the wire is a module dependency, then flatten it to packages.
+            if (wires[i].getCapability().getNamespace().equals(ICapability.MODULE_NAMESPACE))
+            {
+                // Determine if required packages are re-exported.
+                boolean reexport = false;
+                R4Directive[] dirs =  ((Requirement) wires[i].getRequirement()).getDirectives();
+                for (int dirIdx = 0;
+                    !reexport && (dirs != null) && (dirIdx < dirs.length); dirIdx++)
+                {
+                    if (dirs[dirIdx].getName().equals(Constants.VISIBILITY_DIRECTIVE)
+                        && dirs[dirIdx].getValue().equals(Constants.VISIBILITY_REEXPORT))
+                    {
+                        reexport = true;
+                    }
+                }
+
+                // Recursively calculate the required packages for the
+                // wire's exporting module.
+                Map requiredMap = calculateExportedAndReexportedPackagesResolved(wires[i].getExporter(), new HashMap(), cycleMap);
+
+                // Merge the exporting module's required packages with the
+                // existing packages.
+                for (Iterator reqIter = requiredMap.entrySet().iterator(); reqIter.hasNext(); )
+                {
+                    Map.Entry entry = (Map.Entry) reqIter.next();
+                    String pkgName = (String) entry.getKey();
+
+                    // Merge the current set of required packages into
+                    // the overall complete set of required packages.
+                    // We must keep track of all possible re-exported
+                    // packages, because despite the fact that some packages
+                    // will be required "privately" and some will be required
+                    // "reexport", any re-exported package sources will
+                    // ultimately need to be combined with privately required
+                    // package sources, if the required packages overlap.
+                    // This is one of the bad things about require-bundle
+                    // behavior, it does not necessarily obey the visibility
+                    // rules declared in the dependency.
+                    ResolvedPackage rp = (ResolvedPackage) allRequiredMap.get(pkgName);
+                    if (rp != null)
+                    {
+                        // Create the union of all package sources.
+                        ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
+                        rp.m_sourceSet.addAll(rpReq.m_sourceSet);                       
+                    }
+                    else
+                    {
+                        allRequiredMap.put(entry.getKey(), entry.getValue());
+                    }
+
+                    // Now merge any re-exported packages into the module's
+                    // overall package map, since these re-exported packages
+                    // will become part of the module's export signature.
+                    rp = (ResolvedPackage) pkgMap.get(entry.getKey());
+                    if ((rp == null) && reexport)
+                    {
+                        pkgMap.put(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+        }
+
+        // Using the package map that represents the module's complete
+        // export signature (i.e., it includes exported and re-exported
+        // packages), merge in the package sources for any required
+        // packages that overlap the set of exported/re-exported packages.
+        for (Iterator reqIter = allRequiredMap.entrySet().iterator(); reqIter.hasNext(); )
+        {
+            Map.Entry entry = (Map.Entry) reqIter.next();
+            ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
+            if (rp != null)
+            {
+                // Create the union of all package sources.
+                ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
+                rp.m_sourceSet.addAll(rpReq.m_sourceSet);                       
+            }
+        }
+
         return pkgMap;
     }
 
     private Map calculateCandidateRequiredPackages(IModule module, PackageSource psTarget, Map candidatesMap)
     {
 //System.out.println("calculateCandidateRequiredPackages("+module+")");
-        Map pkgMap = new HashMap();
-
         Map cycleMap = new HashMap();
         cycleMap.put(module, module);
-        Map requiredMap = calculateExportedAndReexportedPackages(psTarget, candidatesMap, new HashMap(), cycleMap);
-
-        // Merge sources.
-        for (Iterator reqIter = requiredMap.entrySet().iterator(); reqIter.hasNext(); )
-        {
-            Map.Entry entry = (Map.Entry) reqIter.next();
-            if (pkgMap.get(entry.getKey()) != null)
-            {
-                ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
-                ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                rp.m_sourceSet.addAll(rpReq.m_sourceSet);
-            }
-            else
-            {
-                pkgMap.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return pkgMap;
+        return calculateExportedAndReexportedPackages(psTarget, candidatesMap, new HashMap(), cycleMap);
     }
 
     private void incrementCandidateConfiguration(List resolverList)
@@ -1663,6 +1749,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             {
                 moduleWires.add(new R4WireModule(
                     importer,
+                    cs.m_requirement,
                     cs.m_candidates[cs.m_idx].m_module,
                     cs.m_candidates[cs.m_idx].m_capability,
                     calculateCandidateRequiredPackages(importer, cs.m_candidates[cs.m_idx], candidatesMap)));
@@ -1671,6 +1758,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             {
                 packageWires.add(new R4Wire(
                     importer,
+                    cs.m_requirement,
                     cs.m_candidates[cs.m_idx].m_module,
                     cs.m_candidates[cs.m_idx].m_capability));
             }

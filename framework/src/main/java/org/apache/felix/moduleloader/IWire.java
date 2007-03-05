@@ -24,6 +24,7 @@ import java.util.Enumeration;
 public interface IWire
 {
     public IModule getImporter();
+    public IRequirement getRequirement();
     public IModule getExporter();
     public ICapability getCapability();
     public Class getClass(String name) throws ClassNotFoundException;

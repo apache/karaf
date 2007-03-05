@@ -102,11 +102,13 @@ public class Requirement implements IRequirement
 
     public R4Directive[] getDirectives()
     {
+        // TODO: RB - We should return copies of the arrays probably.
         return m_directives;
     }
 
     public R4Attribute[] getAttributes()
     {
+        // TODO: RB - We should return copies of the arrays probably.
         return m_attributes;
     }
 

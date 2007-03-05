@@ -28,18 +28,21 @@ import org.apache.felix.moduleloader.*;
 public class R4Wire implements IWire
 {
     private IModule m_importer = null;
+    private IRequirement m_requirement = null;
     private IModule m_exporter = null;
     private ICapability m_capability = null;
 
-    public R4Wire(IModule importer, IModule exporter, ICapability capability)
+    public R4Wire(IModule importer, IRequirement requirement,
+        IModule exporter, ICapability capability)
     {
         m_importer = importer;
+        m_requirement = requirement;
         m_exporter = exporter;
         m_capability = capability;
     }
 
     /* (non-Javadoc)
-     * @see org.apache.felix.framework.searchpolicy.IWire#getImportingModule()
+     * @see org.apache.felix.framework.searchpolicy.IWire#getImporter()
      */
     public IModule getImporter()
     {
@@ -47,7 +50,15 @@ public class R4Wire implements IWire
     }
 
     /* (non-Javadoc)
-     * @see org.apache.felix.framework.searchpolicy.IWire#getExportingModule()
+     * @see org.apache.felix.framework.searchpolicy.IWire#getRequirement()
+     */
+    public IRequirement getRequirement()
+    {
+        return m_requirement;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.felix.framework.searchpolicy.IWire#getExporter()
      */
     public IModule getExporter()
     {
@@ -55,7 +66,7 @@ public class R4Wire implements IWire
     }
 
     /* (non-Javadoc)
-     * @see org.apache.felix.framework.searchpolicy.IWire#getExport()
+     * @see org.apache.felix.framework.searchpolicy.IWire#getCapability()
      */
     public ICapability getCapability()
     {
@@ -131,6 +142,9 @@ public class R4Wire implements IWire
         return url;
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.felix.framework.searchpolicy.IWire#getResources(java.lang.String)
+     */
     public Enumeration getResources(String name) throws ResourceNotFoundException
     {
         Enumeration urls = null;

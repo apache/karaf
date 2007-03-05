@@ -30,20 +30,23 @@ import org.apache.felix.moduleloader.*;
 public class R4WireModule implements IWire
 {
     private IModule m_importer = null;
+    private IRequirement m_requirement = null;
     private IModule m_exporter = null;
     private ICapability m_capability = null;
     private Map m_pkgMap = null;
     
-    public R4WireModule(IModule importer, IModule exporter, ICapability capability, Map pkgMap)
+    public R4WireModule(IModule importer, IRequirement requirement,
+        IModule exporter, ICapability capability, Map pkgMap)
     {
         m_importer = importer;
+        m_requirement = requirement;
         m_exporter = exporter;
         m_capability = capability;
         m_pkgMap = pkgMap;
     }
     
     /* (non-Javadoc)
-     * @see org.apache.felix.framework.searchpolicy.IWire#getImportingModule()
+     * @see org.apache.felix.framework.searchpolicy.IWire#getImporter()
      */
     public IModule getImporter()
     {
@@ -51,7 +54,15 @@ public class R4WireModule implements IWire
     }
     
     /* (non-Javadoc)
-     * @see org.apache.felix.framework.searchpolicy.IWire#getExportingModule()
+     * @see org.apache.felix.framework.searchpolicy.IWire#getRequirement()
+     */
+    public IRequirement getRequirement()
+    {
+        return m_requirement;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.felix.framework.searchpolicy.IWire#getExporter()
      */
     public IModule getExporter()
     {
@@ -59,7 +70,7 @@ public class R4WireModule implements IWire
     }
     
     /* (non-Javadoc)
-     * @see org.apache.felix.framework.searchpolicy.IWire#getExport()
+     * @see org.apache.felix.framework.searchpolicy.IWire#getCapability()
      */
     public ICapability getCapability()
     {
@@ -121,6 +132,9 @@ public class R4WireModule implements IWire
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.felix.framework.searchpolicy.IWire#getResources(java.lang.String)
+     */
     public Enumeration getResources(String name) throws ResourceNotFoundException
     {
 // TODO: RB - Implement R4WireModule.getResources()
