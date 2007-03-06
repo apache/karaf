@@ -84,7 +84,6 @@ public class Manipulator {
 
         InputStream is1 = url.openStream();
         
-        
         // First check if the class is already manipulated : 
         ClassReader ckReader = new ClassReader(is1);
         ClassChecker ck = new ClassChecker();
@@ -109,18 +108,14 @@ public class Manipulator {
         	cr0.accept(preprocess, false);
         	is2.close();
 
-        	File file = null;
         	try {
-        		file = new File(url.getFile());
-
-        		//file.createNewFile();
-                FileOutputStream fos = new FileOutputStream(file);
+                FileOutputStream fos = new FileOutputStream(clazz);
                 
                 fos.write(cw0.toByteArray());
                 
                 fos.close();
-                IPojoPluginConfiguration.getLogger().log(Level.INFO, "Put the file " + file.getAbsolutePath() + " in the jar file");
-            } catch (Exception e) { System.err.println("Problem to write the adapted class on the file system " + " [ "+ file.getAbsolutePath() +" ] " + e.getMessage()); }
+                IPojoPluginConfiguration.getLogger().log(Level.INFO, "Put the file " + clazz.getAbsolutePath() + " in the jar file");
+            } catch (Exception e) { System.err.println("Problem to write the adapted class on the file system " + " [ "+ clazz.getAbsolutePath() +" ] " + e.getMessage()); }
         }
         // The file is in the bundle
         return true;
