@@ -19,10 +19,12 @@
 package org.apache.felix.ipojo.handlers.providedservice;
 
 import java.util.Dictionary;
+import java.util.Properties;
 
 import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.architecture.ComponentDescription;
+import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ParseUtils;
@@ -320,5 +322,27 @@ public class ProvidedServiceHandler extends Handler {
             m_providedServices[i].deleteProperties(dict);
         }
     }
+	
+	/**
+	 * @see org.apache.felix.ipojo.Handler#getDescription()
+	 */
+	public HandlerDescription getDescription() {
+		ProvidedServiceHandlerDescription pshd = new ProvidedServiceHandlerDescription(this.isValid());
+
+		for (int j = 0; j < getProvidedService().length; j++) {
+			ProvidedService ps = getProvidedService()[j];
+			ProvidedServiceDescription psd = new ProvidedServiceDescription(ps.getServiceSpecification(), ps.getState(), ps.getServiceReference());
+
+			Properties props = new Properties();
+			for (int k = 0; k < ps.getProperties().length; k++) {
+				Property prop = ps.getProperties()[k];
+				if (prop.getValue() != null) { props.put(prop.getName(), prop.getValue().toString()); }
+			}
+			psd.setProperty(props);
+			pshd.addProvidedService(psd);
+		}
+		
+		return pshd;
+	}
 
 }

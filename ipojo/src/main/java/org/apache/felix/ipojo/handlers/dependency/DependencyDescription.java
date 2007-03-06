@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo.architecture;
+package org.apache.felix.ipojo.handlers.dependency;
 
 import java.util.HashMap;
 
@@ -95,9 +95,8 @@ public class DependencyDescription {
      * @param optional : is the depdendency optional ?
      * @param filter : the filter
      * @param state : the state
-     * @param parent : the description of the parent (either a ProvidedServiceDescription, either a ComponentDescription)
      */
-    public DependencyDescription(String itf, boolean multiple, boolean optional, String filter, int state, Object parent) {
+    public DependencyDescription(String itf, boolean multiple, boolean optional, String filter, int state) {
         super();
         m_interface = itf;
         m_multiple = multiple;

@@ -16,12 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo.architecture;
+package org.apache.felix.ipojo.handlers.providedservice;
 
 import java.util.Iterator;
 
-import org.apache.felix.ipojo.handlers.providedservice.ProvidedService;
-import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
+import org.apache.felix.ipojo.architecture.HandlerDescription;
 
 /**
  * Provided Service Handler Description.

@@ -21,6 +21,7 @@ package org.apache.felix.ipojo.handlers.lifecycle.callback;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Dictionary;
 
+import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.metadata.Element;
@@ -46,6 +47,11 @@ public class LifecycleCallbackHandler extends Handler {
      * The instance manager.
      */
     private InstanceManager m_manager;
+
+	/**
+	 * Does a POJO object be created at starting
+	 */
+	private boolean m_immediate = false;
 
     /**
      * Add the given callback to the callback list.
@@ -74,6 +80,8 @@ public class LifecycleCallbackHandler extends Handler {
     public void configure(InstanceManager cm, Element metadata, Dictionary configuration) {
         m_manager = cm;
         m_callbacks = new LifecycleCallback[0];
+        
+        if (metadata.containsAttribute("immediate") && metadata.getAttribute("immediate").equalsIgnoreCase("true")) { m_immediate = true; }
 
         Element[] hooksMetadata = metadata.getElements("callback");
         for (int i = 0; i < hooksMetadata.length; i++) {
@@ -87,7 +95,7 @@ public class LifecycleCallbackHandler extends Handler {
             LifecycleCallback hk = new LifecycleCallback(this, initialState, finalState, method, isStatic);
             addCallback(hk);
         }
-        if (m_callbacks.length > 0) { m_manager.register(this); }
+        if (m_callbacks.length > 0 || m_immediate) { m_manager.register(this); }
     }
 
     /**
@@ -112,6 +120,11 @@ public class LifecycleCallbackHandler extends Handler {
      * @see org.apache.felix.ipojo.Handler#stateChanged(int)
      */
     public void stateChanged(int state) {
+    	// Manage immediate component
+    	if(m_state == ComponentInstance.INVALID && state == ComponentInstance.VALID && m_manager.getPojoObjects().length == 0) {
+    		m_manager.createPojoObject();
+    	}
+    	
         for (int i = 0; i < m_callbacks.length; i++) {
             if (m_callbacks[i].getInitialState() == m_state && m_callbacks[i].getFinalState() == state) {
                 try {

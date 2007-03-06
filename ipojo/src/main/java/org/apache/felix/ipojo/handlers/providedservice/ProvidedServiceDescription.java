@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo.architecture;
+package org.apache.felix.ipojo.handlers.providedservice;
 
 import java.util.Properties;
 
+import org.apache.felix.ipojo.handlers.dependency.DependencyDescription;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -58,10 +59,10 @@ public class ProvidedServiceDescription {
      */
     private ServiceReference m_serviceReference;
 
-    /**
-     * Handler on the component description who contains this description.
-     */
-    private InstanceDescription m_parent;
+//    /**
+//     * Handler on the component description who contains this description.
+//     */
+//    private InstanceDescription m_parent;
 
     /**
      * Properties of the provided service.
@@ -76,11 +77,11 @@ public class ProvidedServiceDescription {
      * @param sr : Service Registration (to obtain the reference), or null if state is UNREGISTRED
      * @param parent : the component description declaring this proided service
      */
-    public ProvidedServiceDescription(String[] serviceSpecification, int state, ServiceReference sr, InstanceDescription parent) {
+    public ProvidedServiceDescription(String[] serviceSpecification, int state, ServiceReference sr/*, InstanceDescription parent*/) {
         m_serviceSpecification = serviceSpecification;
         m_state = state;
         m_serviceReference = sr;
-        m_parent = parent;
+       // m_parent = parent;
     }
 
     /**
@@ -133,13 +134,6 @@ public class ProvidedServiceDescription {
      */
     public ServiceReference getServiceReference() {
         return m_serviceReference;
-    }
-
-    /**
-     * @return the parent description.
-     */
-    public InstanceDescription getInstanceDescription() {
-        return m_parent;
     }
 
 }

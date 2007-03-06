@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo.architecture;
+package org.apache.felix.ipojo.handlers.dependency;
 
 import java.util.Iterator;
-import org.apache.felix.ipojo.handlers.dependency.DependencyHandler;
+
+import org.apache.felix.ipojo.architecture.HandlerDescription;
 
 /**
  * Dependency Handler Description.

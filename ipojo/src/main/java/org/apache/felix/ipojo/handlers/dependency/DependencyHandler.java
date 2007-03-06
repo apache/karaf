@@ -23,6 +23,7 @@ import java.util.Dictionary;
 
 import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.handlers.dependency.nullable.NullableObjectWriter;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.Logger;
@@ -354,6 +355,19 @@ public class DependencyHandler extends Handler {
         }
         m_manager.getFactory().getLogger().log(Logger.INFO, "[DependencyHandler on " + m_manager.getClassName() + "] Component Dependencies are valid");
         return valide;
+    }
+    
+    public HandlerDescription getDescription() {
+        DependencyHandlerDescription dhd = new DependencyHandlerDescription(isValid());
+        for (int j = 0; j < getDependencies().length; j++) {
+            Dependency dep = getDependencies()[j];
+            // Create & add the dependency description
+            DependencyDescription dd = new DependencyDescription(dep.getSpecification(), dep.isMultiple(), dep.isOptional(), dep.getFilter(), dep.getState());
+            dd.setServiceReferences(dep.getServiceReferences());
+            dd.setUsedServices(dep.getUsedServices());
+            dhd.addDependency(dd);
+        }
+        return dhd;
     }
 
 }

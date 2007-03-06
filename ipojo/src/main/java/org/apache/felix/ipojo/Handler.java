@@ -20,6 +20,7 @@ package org.apache.felix.ipojo;
 
 import java.util.Dictionary;
 
+import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Element;
 
 /**
@@ -78,4 +79,9 @@ public abstract class Handler {
      * @param instance : the created instance
      */
     public void createInstance(Object instance) { }
+    
+    /**
+     * @return the description of the handler..
+     */
+    public HandlerDescription getDescription() { return new HandlerDescription(this.getClass().getName(), isValid()); }
 }

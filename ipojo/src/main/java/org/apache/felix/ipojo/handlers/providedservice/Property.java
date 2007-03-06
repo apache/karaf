@@ -26,8 +26,6 @@ import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Logger;
 
-import sun.net.www.ParseUtil;
-
 /**
  * Represent a property i.e. a set : [name, type, value].
  * A property can be attached to a field.

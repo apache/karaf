@@ -82,7 +82,7 @@ public interface ComponentInstance {
     String getInstanceName();
     
     /**
-     * @return true if getState return 1 or 2.
+     * @return true if getState returns INVALID or VALID.
      */
     boolean isStarted();
 
