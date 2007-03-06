@@ -88,9 +88,9 @@ public class R4WireModule implements IWire
         ResolvedPackage rp = (ResolvedPackage) m_pkgMap.get(pkgName);
         if (rp != null)
         {
-            for (Iterator srcIter = rp.m_sourceSet.iterator(); srcIter.hasNext(); )
+            for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
             {
-                PackageSource ps = (PackageSource) srcIter.next();
+                PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
                 if ((ps.m_module == m_importer) ||
                     ((ps.m_capability instanceof Capability) &&
                     ((Capability) ps.m_capability).isIncluded(name)))
@@ -118,9 +118,9 @@ public class R4WireModule implements IWire
         ResolvedPackage rp = (ResolvedPackage) m_pkgMap.get(pkgName);
         if (rp != null)
         {
-            for (Iterator srcIter = rp.m_sourceSet.iterator(); srcIter.hasNext(); )
+            for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
             {
-                PackageSource ps = (PackageSource) srcIter.next();
+                PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
                 URL url = ps.m_module.getContentLoader().getResource(name);
                 if (url != null)
                 {

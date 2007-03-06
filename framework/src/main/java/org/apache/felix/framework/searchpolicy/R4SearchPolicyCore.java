@@ -922,11 +922,11 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
     {
         List candidatesList = null;
 
-        // The module map maps a module to a map of resolved
-        // packages that are accessible by the given module.
-        // The set of resolved packages is calculated from the
-        // current candidates of the candidates map and the
-        // module's metadata.
+        // The reusable module map maps a module to a map of
+        // resolved packages that are accessible by the given
+        // module. The set of resolved packages is calculated
+        // from the current candidates of the candidates map
+        // and the module's metadata.
         Map moduleMap = new HashMap();
 
         // Reusable map used to test for cycles.
@@ -962,25 +962,25 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
     }
 
     private boolean isClassSpaceConsistent(
-        IModule rootModule, Map moduleMap, Map cycleMap, Map candidatesMap)
+        IModule targetModule, Map moduleMap, Map cycleMap, Map candidatesMap)
     {
-//System.out.println("isClassSpaceConsistent("+rootModule+")");
+//System.out.println("isClassSpaceConsistent("+targetModule+")");
         // If we are in a cycle, then assume true for now.
-        if (cycleMap.get(rootModule) != null)
+        if (cycleMap.get(targetModule) != null)
         {
             return true;
         }
 
-        // Record the root module in the cycle map.
-        cycleMap.put(rootModule, rootModule);
+        // Record the target module in the cycle map.
+        cycleMap.put(targetModule, targetModule);
 
-        // Get the package map for the root module, which is a
+        // Get the package map for the target module, which is a
         // map of all packages accessible to the module and their
         // associated package sources.
-        Map pkgMap = getModulePackages(moduleMap, rootModule, candidatesMap);
+        Map pkgMap = getModulePackages(moduleMap, targetModule, candidatesMap);
 
-        // Loop through all of the module's accessible packages and verify
-        // that all package sources are consistent.
+        // Loop through all of the target module's accessible packages and
+        // verify that all package sources are consistent.
         for (Iterator iter = pkgMap.entrySet().iterator(); iter.hasNext(); )
         {
             Map.Entry entry = (Map.Entry) iter.next();
@@ -988,9 +988,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             // package sources for the given package.
             ResolvedPackage rp = (ResolvedPackage) entry.getValue();
             // Loop through each package source and test if it is consistent.
-            for (Iterator srcIter = rp.m_sourceSet.iterator(); srcIter.hasNext(); )
+            for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
             {
-                PackageSource ps = (PackageSource) srcIter.next();
+                PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
                 if (!isClassSpaceConsistent(ps.m_module, moduleMap, cycleMap, candidatesMap))
                 {
                     return false;
@@ -999,20 +999,20 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         }
 
         // Now we need to calculate the "uses" constraints of every package
-        // accessible to the module based on the current candidates.
-        Map usesMap = calculateUsesConstraints(rootModule, moduleMap, candidatesMap);
+        // accessible to the target module based on the current candidates.
+        Map usesMap = calculateUsesConstraints(targetModule, moduleMap, candidatesMap);
 
         // Verify that none of the implied "uses" constraints in the uses map
-        // conflict with anything in the root module's package map.
+        // conflict with anything in the target module's package map.
         for (Iterator iter = usesMap.entrySet().iterator(); iter.hasNext(); )
         {
             Map.Entry entry = (Map.Entry) iter.next();
 
             // For the given "used" package, get that package from the
-            // root module's package map, if present.
+            // target module's package map, if present.
             ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
 
-            // If the "used" package is also visible to the root module,
+            // If the "used" package is also visible to the target module,
             // make sure there is no conflicts in the implied "uses"
             // constraints.
             if (rp != null)
@@ -1031,21 +1031,24 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     // package.
                     ResolvedPackage rpUses = (ResolvedPackage) constraintList.get(constIdx);
                     // Determine if the implied "uses" constraint is compatible with
-                    // the root module's package sources for the given "used" package.
-                    // They are compatible if one is the subset of the other.
-                    if (rp.isSubset(rpUses) || rpUses.isSubset(rp))
+                    // the target module's package sources for the given "used"
+                    // package. They are compatible if one is the subset of the other.
+                    // Retain the union of the two sets if they are compatible.
+                    if (rpUses.isSubset(rp))
                     {
-                        // In case they are compatible, then create the union of
-                        // the root module's package sources and those of the
-                        // "uses" constraint for continued testing of the
-                        // remaining "uses" constraints.
-                        rp.m_sourceSet.addAll(rpUses.m_sourceSet);
+                        // Do nothing because we already have the superset.
+                    }
+                    else if (rp.isSubset(rpUses))
+                    {
+                        // Keep the superset, i.e., the union.
+                        rp.m_sourceList.clear();
+                        rp.m_sourceList.addAll(rpUses.m_sourceList);
                     }
                     else
                     {
                         m_logger.log(
                             Logger.LOG_DEBUG,
-                            "Constraint violation for " + rootModule
+                            "Constraint violation for " + targetModule
                             + " detected; module can see "
                             + rp + " and " + rpUses);
                         return false;
@@ -1057,9 +1060,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         return true;
     }
 
-    private Map calculateUsesConstraints(IModule rootModule, Map moduleMap, Map candidatesMap)
+    private Map calculateUsesConstraints(
+        IModule targetModule, Map moduleMap, Map candidatesMap)
     {
-//System.out.println("calculateUsesConstraints("+rootModule+")");
+//System.out.println("calculateUsesConstraints("+targetModule+")");
         // Map to store calculated uses constraints. This maps a
         // package name to a list of resolved packages, where each
         // resolved package represents a constraint on anyone
@@ -1070,51 +1074,53 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         // Re-usable map to detect cycles.
         Map cycleMap = new HashMap();
 
-        // Get all packages accessible by the root module.
-        Map pkgMap = getModulePackages(moduleMap, rootModule, candidatesMap);
+        // Get all packages accessible by the target module.
+        Map pkgMap = getModulePackages(moduleMap, targetModule, candidatesMap);
 
-        // Each package accessible from the root module is potentially
+        // Each package accessible from the target module is potentially
         // comprised of one or more modules, called package sources. The
         // "uses" constraints implied by all package sources must be
         // calculated and combined to determine the complete set of implied
-        // "uses" constraints for each package accessible by the root module.
+        // "uses" constraints for each package accessible by the target module.
         for (Iterator iter = pkgMap.entrySet().iterator(); iter.hasNext(); )
         {
             Map.Entry entry = (Map.Entry) iter.next();
             ResolvedPackage rp = (ResolvedPackage) entry.getValue();
-            for (Iterator srcIter = rp.m_sourceSet.iterator(); srcIter.hasNext(); )
+            for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
             {
                 usesMap = calculateUsesConstraints(
-                    (PackageSource) srcIter.next(),
+                    (PackageSource) rp.m_sourceList.get(srcIdx),
                     moduleMap, usesMap, cycleMap, candidatesMap);
             }
         }
         return usesMap;
     }
 
-    private Map calculateUsesConstraints(PackageSource ps, Map moduleMap, Map usesMap, Map cycleMap, Map candidatesMap)
+    private Map calculateUsesConstraints(
+        PackageSource psTarget, Map moduleMap, Map usesMap,
+        Map cycleMap, Map candidatesMap)
     {
-//System.out.println("calculateUsesConstraints2("+ps.m_module+")");
+//System.out.println("calculateUsesConstraints2("+psTarget.m_module+")");
         // If we are in a cycle, then return for now.
-        if (cycleMap.get(ps) != null)
+        if (cycleMap.get(psTarget) != null)
         {
             return usesMap;
         }
 
-        // Record the package source in the cycle map.
-        cycleMap.put(ps, ps);
+        // Record the target package source in the cycle map.
+        cycleMap.put(psTarget, psTarget);
 
         // Get all packages accessible from the module of the
-        // current package source.
-        Map pkgMap = getModulePackages(moduleMap, ps.m_module, candidatesMap);
+        // target package source.
+        Map pkgMap = getModulePackages(moduleMap, psTarget.m_module, candidatesMap);
 
-        // Get capability (i.e., package) of the package source.
-        Capability cap = (Capability) ps.m_capability;
+        // Get capability (i.e., package) of the target package source.
+        Capability cap = (Capability) psTarget.m_capability;
 
         // Loop through all "used" packages of the capability.
         for (int i = 0; i < cap.getUses().length; i++)
         {
-            // The package source module should have a resolved package
+            // The target package source module should have a resolved package
             // for the "used" package in its set of accessible packages,
             // since it claims to use it, so get the associated resolved
             // package.
@@ -1127,10 +1133,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 // First, iterate through all package sources for the resolved
                 // package associated with the current "used" package and calculate
                 // and combine the "uses" constraints for each package source.
-                for (Iterator srcIter = rp.m_sourceSet.iterator(); srcIter.hasNext(); )
+                for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
                 {
                     usesMap = calculateUsesConstraints(
-                        (PackageSource) srcIter.next(),
+                        (PackageSource) rp.m_sourceList.get(srcIdx),
                         moduleMap, usesMap, cycleMap, candidatesMap);
                 }
 
@@ -1167,6 +1173,20 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         return map;
     }
 
+    /**
+     * <p>
+     * Calculates the module's set of accessible packages and their
+     * assocaited package sources. This method uses the current candidates
+     * for resolving the module's requirements from the candidate map
+     * to calculate the module's accessible packages.
+     * </p>
+     * @param module the module whose package map is to be calculated.
+     * @param candidatesMap the map of potential candidates for resolving
+     *        the module's requirements.
+     * @return a map of the packages accessible to the specified module where
+     *         the key of the map is the package name and the value of the map
+     *         is a ResolvedPackage.
+    **/
     private Map calculateModulePackages(IModule module, Map candidatesMap)
     {
 //System.out.println("calculateModulePackages("+module+")");
@@ -1183,8 +1203,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             ResolvedPackage rpReq = (ResolvedPackage) requiredPackages.get(entry.getKey());
             if (rpReq != null)
             {
+                // Merge exported and required packages, avoiding duplicate
+                // package sources and maintaining ordering.
                 ResolvedPackage rpExport = (ResolvedPackage) entry.getValue();
-                rpReq.m_sourceSet.addAll(rpExport.m_sourceSet);
+                rpReq.merge(rpExport);
             }
             else
             {
@@ -1203,25 +1225,25 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         return requiredPackages;
     }
 
-    private Map calculateImportedPackages(IModule module, Map candidatesMap)
+    private Map calculateImportedPackages(IModule targetModule, Map candidatesMap)
     {
-        return (candidatesMap.get(module) == null)
-            ? calculateImportedPackagesResolved(module)
-            : calculateImportedPackagesUnresolved(module, candidatesMap);
+        return (candidatesMap.get(targetModule) == null)
+            ? calculateImportedPackagesResolved(targetModule)
+            : calculateImportedPackagesUnresolved(targetModule, candidatesMap);
     }
 
-    private Map calculateImportedPackagesUnresolved(IModule module, Map candidatesMap)
+    private Map calculateImportedPackagesUnresolved(IModule targetModule, Map candidatesMap)
     {
-//System.out.println("calculateImportedPackagesUnresolved("+module+")");
+//System.out.println("calculateImportedPackagesUnresolved("+targetModule+")");
         Map pkgMap = new HashMap();
 
         // Get the candidate set list to get all candidates for
-        // all of the module's requirements.
-        List candSetList = (List) candidatesMap.get(module);
+        // all of the target module's requirements.
+        List candSetList = (List) candidatesMap.get(targetModule);
 
         // Loop through all candidate sets that represent import dependencies
-        // for the module and add the current candidate's package source to the
-        // imported package map.
+        // for the target module and add the current candidate's package source
+        // to the imported package map.
         for (int candSetIdx = 0; (candSetList != null) && (candSetIdx < candSetList.size()); candSetIdx++)
         {
             CandidateSet cs = (CandidateSet) candSetList.get(candSetIdx);
@@ -1233,7 +1255,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     ps.m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY);
 
                 ResolvedPackage rp = new ResolvedPackage(pkgName);
-                rp.m_sourceSet.add(ps);
+                rp.m_sourceList.add(ps);
                 pkgMap.put(rp.m_name, rp);
             }
         }
@@ -1241,15 +1263,15 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         return pkgMap;
     }
 
-    private Map calculateImportedPackagesResolved(IModule module)
+    private Map calculateImportedPackagesResolved(IModule targetModule)
     {
-//System.out.println("calculateImportedPackagesResolved("+module+")");
+//System.out.println("calculateImportedPackagesResolved("+targetModule+")");
         Map pkgMap = new HashMap();
 
-        // Loop through all wires for the module that represent package
+        // Loop through the target module's wires for package
         // dependencies and add the resolved package source to the
         // imported package map.
-        IWire[] wires = module.getWires();
+        IWire[] wires = targetModule.getWires();
         for (int i = 0; (wires != null) && (i < wires.length); i++)
         {
             if (wires[i].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
@@ -1258,7 +1280,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     wires[i].getCapability().getProperties().get(ICapability.PACKAGE_PROPERTY);
                 ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
                 rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
-                rp.m_sourceSet.add(new PackageSource(wires[i].getExporter(), wires[i].getCapability()));
+                rp.m_sourceList.add(new PackageSource(wires[i].getExporter(), wires[i].getCapability()));
                 pkgMap.put(rp.m_name, rp);
             }
         }
@@ -1266,14 +1288,14 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         return pkgMap;
     }
 
-    private Map calculateExportedPackages(IModule module)
+    private Map calculateExportedPackages(IModule targetModule)
     {
-//System.out.println("calculateExportedPackages("+module+")");
+//System.out.println("calculateExportedPackages("+targetModule+")");
         Map pkgMap = new HashMap();
 
-        // Loop through all capabilities that represent exported packages
-        // and add them to the exported package map.
-        ICapability[] caps = module.getDefinition().getCapabilities();
+        // Loop through the target module's capabilities that represent
+        // exported packages and add them to the exported package map.
+        ICapability[] caps = targetModule.getDefinition().getCapabilities();
         for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
         {
             if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
@@ -1282,7 +1304,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     caps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY);
                 ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
                 rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
-                rp.m_sourceSet.add(new PackageSource(module, caps[capIdx]));
+                rp.m_sourceList.add(new PackageSource(targetModule, caps[capIdx]));
                 pkgMap.put(rp.m_name, rp);
             }
         }
@@ -1290,21 +1312,21 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         return pkgMap;
     }
 
-    private Map calculateRequiredPackages(IModule module, Map candidatesMap)
+    private Map calculateRequiredPackages(IModule targetModule, Map candidatesMap)
     {
-        return (candidatesMap.get(module) == null)
-            ? calculateRequiredPackagesResolved(module)
-            : calculateRequiredPackagesUnresolved(module, candidatesMap);      
+        return (candidatesMap.get(targetModule) == null)
+            ? calculateRequiredPackagesResolved(targetModule)
+            : calculateRequiredPackagesUnresolved(targetModule, candidatesMap);      
     }
 
-    private Map calculateRequiredPackagesUnresolved(IModule module, Map candidatesMap)
+    private Map calculateRequiredPackagesUnresolved(IModule targetModule, Map candidatesMap)
     {
-//System.out.println("calculateRequiredPackagesUnresolved("+module+")");
+//System.out.println("calculateRequiredPackagesUnresolved("+targetModule+")");
         Map pkgMap = new HashMap();
 
-        // Loop through all current candidates for module dependencies and
-        // merge re-exported packages.
-        List candSetList = (List) candidatesMap.get(module);
+        // Loop through target module's candidate list for candidates
+        // for its module dependencies and merge re-exported packages.
+        List candSetList = (List) candidatesMap.get(targetModule);
         for (int candSetIdx = 0; (candSetList != null) && (candSetIdx < candSetList.size()); candSetIdx++)
         {
             CandidateSet cs = (CandidateSet) candSetList.get(candSetIdx);
@@ -1315,20 +1337,24 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             {
                 // Calculate transitively required packages.
                 Map cycleMap = new HashMap();
-                cycleMap.put(module, module);
-                Map requireMap = calculateExportedAndReexportedPackages(
-                    ps, candidatesMap, new HashMap(), cycleMap);
+                cycleMap.put(targetModule, targetModule);
+                Map requireMap =
+                    calculateExportedAndReexportedPackages(
+                        ps, candidatesMap, cycleMap);
 
-                // Loop through all export package capabilities and merge them
-                // into the package map adding the original target as a source.
+                // Take the flattened required package map for the current
+                // module dependency and merge it into the existing map
+                // of required packages.
                 for (Iterator reqIter = requireMap.entrySet().iterator(); reqIter.hasNext(); )
                 {
                     Map.Entry entry = (Map.Entry) reqIter.next();
                     ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
                     if (rp != null)
                     {
+                        // Merge required packages, avoiding duplicate
+                        // package sources and maintaining ordering.
                         ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                        rp.m_sourceSet.addAll(rpReq.m_sourceSet);
+                        rp.merge(rpReq);
                     }
                     else
                     {
@@ -1341,34 +1367,42 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         return pkgMap;
     }
 
-    private Map calculateRequiredPackagesResolved(IModule module)
+    private Map calculateRequiredPackagesResolved(IModule targetModule)
     {
-//System.out.println("calculateRequiredPackagesResolved("+module+")");
+//System.out.println("calculateRequiredPackagesResolved("+targetModule+")");
         Map pkgMap = new HashMap();
 
-        IWire[] wires = module.getWires();
+        // Loop through target module's wires for module dependencies
+        // and merge re-exported packages.
+        IWire[] wires = targetModule.getWires();
         for (int i = 0; (wires != null) && (i < wires.length); i++)
         {
-            // If the candidate is a module dependency, then flatten it to packages.
+            // If the wire is a module dependency, then flatten it to packages.
             if (wires[i].getCapability().getNamespace().equals(ICapability.MODULE_NAMESPACE))
             {
+                // Calculate transitively required packages.
                 // We can call calculateExportedAndReexportedPackagesResolved()
                 // directly, since we know all dependencies have to be resolved
                 // because this module itself is resolved.
                 Map cycleMap = new HashMap();
-                cycleMap.put(module, module);
-                Map requireMap = calculateExportedAndReexportedPackagesResolved(
-                    wires[i].getExporter(), new HashMap(), cycleMap);
+                cycleMap.put(targetModule, targetModule);
+                Map requireMap =
+                    calculateExportedAndReexportedPackagesResolved(
+                        wires[i].getExporter(), cycleMap);
 
-                // Merge sources.
+                // Take the flattened required package map for the current
+                // module dependency and merge it into the existing map
+                // of required packages.
                 for (Iterator reqIter = requireMap.entrySet().iterator(); reqIter.hasNext(); )
                 {
                     Map.Entry entry = (Map.Entry) reqIter.next();
                     ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
                     if (rp != null)
                     {
+                        // Merge required packages, avoiding duplicate
+                        // package sources and maintaining ordering.
                         ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                        rp.m_sourceSet.addAll(rpReq.m_sourceSet);
+                        rp.merge(rpReq);
                     }
                     else
                     {
@@ -1381,16 +1415,20 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         return pkgMap;
     }
 
-    private Map calculateExportedAndReexportedPackages(PackageSource psTarget, Map candidatesMap, Map pkgMap, Map cycleMap)
+    private Map calculateExportedAndReexportedPackages(
+        PackageSource psTarget, Map candidatesMap, Map cycleMap)
     {
         return (candidatesMap.get(psTarget.m_module) == null)
-            ? calculateExportedAndReexportedPackagesResolved(psTarget.m_module, pkgMap, cycleMap)
-            : calculateExportedAndReexportedPackagesUnresolved(psTarget, candidatesMap, pkgMap, cycleMap);      
+            ? calculateExportedAndReexportedPackagesResolved(psTarget.m_module, cycleMap)
+            : calculateExportedAndReexportedPackagesUnresolved(psTarget, candidatesMap, cycleMap);      
     }
 
-    private Map calculateExportedAndReexportedPackagesUnresolved(PackageSource psTarget, Map candidatesMap, Map pkgMap, Map cycleMap)
+    private Map calculateExportedAndReexportedPackagesUnresolved(
+        PackageSource psTarget, Map candidatesMap, Map cycleMap)
     {
 //System.out.println("calculateExportedAndReexportedPackagesUnresolved("+psTarget.m_module+")");
+        Map pkgMap = new HashMap();
+
         if (cycleMap.get(psTarget.m_module) != null)
         {
             return pkgMap;
@@ -1398,25 +1436,12 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
         cycleMap.put(psTarget.m_module, psTarget.m_module);
 
-        // Loop through all export package capabilities and merge them
-        // into the package map adding the original target as a source.
-        ICapability[] candCaps = psTarget.m_module.getDefinition().getCapabilities();
-        for (int capIdx = 0; (candCaps != null) && (capIdx < candCaps.length); capIdx++)
-        {
-            if (candCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-            {
-                String pkgName = (String)
-                    candCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY);
-                ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
-                rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
-                rp.m_sourceSet.add(new PackageSource(psTarget.m_module, candCaps[capIdx]));
-                pkgMap.put(rp.m_name, rp);
-            }
-        }
-
-        // Loop through all current candidates for module dependencies and
-        // merge re-exported packages.
+        // Loop through all current candidates for target module's dependencies
+        // and calculate the module's complete set of required packages (and
+        // their associated package sources) and the complete set of required
+        // packages to be re-exported.
         Map allRequiredMap = new HashMap();
+        Map reexportedPkgMap = new HashMap();
         List candSetList = (List) candidatesMap.get(psTarget.m_module);
         for (int candSetIdx = 0; candSetIdx < candSetList.size(); candSetIdx++)
         {
@@ -1442,9 +1467,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
                 // Recursively calculate the required packages for the
                 // current candidate.
-                Map requiredMap = calculateExportedAndReexportedPackages(ps, candidatesMap, new HashMap(), cycleMap);
+                Map requiredMap = calculateExportedAndReexportedPackages(ps, candidatesMap, cycleMap);
 
-                // Merge the candidate's required packages with the existing packages.
+                // Merge the candidate's exported and re-exported packages
+                // into the complete set of required packages.
                 for (Iterator reqIter = requiredMap.entrySet().iterator(); reqIter.hasNext(); )
                 {
                     Map.Entry entry = (Map.Entry) reqIter.next();
@@ -1452,86 +1478,91 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
                     // Merge the current set of required packages into
                     // the overall complete set of required packages.
-                    // We must keep track of all possible re-exported
-                    // packages, because despite the fact that some packages
-                    // will be required "privately" and some will be required
-                    // "reexport", any re-exported package sources will
-                    // ultimately need to be combined with privately required
-                    // package sources, if the required packages overlap.
-                    // This is one of the bad things about require-bundle
-                    // behavior, it does not necessarily obey the visibility
-                    // rules declared in the dependency.
+                    // We calculate all the required packages, because
+                    // despite the fact that some packages will be required
+                    // "privately" and some will be required "reexport", any
+                    // re-exported package sources will ultimately need to
+                    // be combined with privately required package sources,
+                    // if the required packages overlap. This is one of the
+                    // bad things about require-bundle behavior, it does not
+                    // necessarily obey the visibility rules declared in the
+                    // dependency.
                     ResolvedPackage rp = (ResolvedPackage) allRequiredMap.get(pkgName);
                     if (rp != null)
                     {
                         // Create the union of all package sources.
                         ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                        rp.m_sourceSet.addAll(rpReq.m_sourceSet);                       
+                        rp.merge(rpReq);
                     }
                     else
                     {
-                        allRequiredMap.put(entry.getKey(), entry.getValue());
+                        // Add package to required map.
+                        allRequiredMap.put(pkgName, entry.getValue());
                     }
 
-                    // Now merge any re-exported packages into the module's
-                    // overall package map, since these re-exported packages
-                    // will become part of the module's export signature.
-                    rp = (ResolvedPackage) pkgMap.get(entry.getKey());
-                    if ((rp == null) && reexport)
+                    // Keep track of all required packages to be re-exported.
+                    // All re-exported packages will need to be merged into the
+                    // target module's package map and become part of its overall
+                    // export signature.
+                    if (reexport)
                     {
-                        pkgMap.put(entry.getKey(), entry.getValue());
+                        reexportedPkgMap.put(pkgName, pkgName);
                     }
                 }
             }
         }
 
-        // Using the package map that represents the module's complete
-        // export signature (i.e., it includes exported and re-exported
-        // packages), merge in the package sources for any required
-        // packages that overlap the set of exported/re-exported packages.
-        for (Iterator reqIter = allRequiredMap.entrySet().iterator(); reqIter.hasNext(); )
+        // For the target module we have now calculated its entire set
+        // of required packages and their associated package sources in
+        // allRequiredMap and have calculated all packages to be re-exported
+        // in reexportedPkgMap. Add all re-exported required packages to the
+        // target module's package map since they will be part of its export
+        // signature.
+        for (Iterator iter = reexportedPkgMap.entrySet().iterator(); iter.hasNext(); )
         {
-            Map.Entry entry = (Map.Entry) reqIter.next();
-            ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
-            if (rp != null)
+            String pkgName = (String) ((Map.Entry) iter.next()).getKey();
+            pkgMap.put(pkgName, allRequiredMap.get(pkgName));
+        }
+
+        // Now loop through the target module's export package capabilities and
+        // add the target module as a package source for any exported packages.
+        ICapability[] candCaps = psTarget.m_module.getDefinition().getCapabilities();
+        for (int capIdx = 0; (candCaps != null) && (capIdx < candCaps.length); capIdx++)
+        {
+            if (candCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
             {
-                // Create the union of all package sources.
-                ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                rp.m_sourceSet.addAll(rpReq.m_sourceSet);                       
+                String pkgName = (String)
+                    candCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY);
+                ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
+                rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
+                rp.m_sourceList.add(new PackageSource(psTarget.m_module, candCaps[capIdx]));
+                pkgMap.put(rp.m_name, rp);
             }
         }
 
         return pkgMap;
     }
 
-    private Map calculateExportedAndReexportedPackagesResolved(IModule module, Map pkgMap, Map cycleMap)
+    private Map calculateExportedAndReexportedPackagesResolved(
+        IModule targetModule, Map cycleMap)
     {
-//System.out.println("calculateExportedAndRequiredPackagesResolved("+module+")");
-        if (cycleMap.get(module) != null)
+//System.out.println("calculateExportedAndRequiredPackagesResolved("+targetModule+")");
+        Map pkgMap = new HashMap();
+
+        if (cycleMap.get(targetModule) != null)
         {
             return pkgMap;
         }
 
-        cycleMap.put(module, module);
+        cycleMap.put(targetModule, targetModule);
 
-        // Loop through all export package capabilities and merge them
-        // into the package map adding the original target as a source.
-        ICapability[] caps = module.getDefinition().getCapabilities();
-        for (int i = 0; (caps != null) && (i < caps.length); i++)
-        {
-            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-            {
-                String pkgName = (String)
-                    caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
-                ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
-                rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
-                rp.m_sourceSet.add(new PackageSource(module, caps[i]));
-                pkgMap.put(rp.m_name, rp);
-            }
-        }
-
+        // Loop through all wires for the target module's module dependencies
+        // and calculate the module's complete set of required packages (and
+        // their associated package sources) and the complete set of required
+        // packages to be re-exported.
         Map allRequiredMap = new HashMap();
-        IWire[] wires = module.getWires();
+        Map reexportedPkgMap = new HashMap();
+        IWire[] wires = targetModule.getWires();
         for (int i = 0; (wires != null) && (i < wires.length); i++)
         {
             // If the wire is a module dependency, then flatten it to packages.
@@ -1552,10 +1583,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
                 // Recursively calculate the required packages for the
                 // wire's exporting module.
-                Map requiredMap = calculateExportedAndReexportedPackagesResolved(wires[i].getExporter(), new HashMap(), cycleMap);
+                Map requiredMap = calculateExportedAndReexportedPackagesResolved(wires[i].getExporter(), cycleMap);
 
-                // Merge the exporting module's required packages with the
-                // existing packages.
+                // Merge the wires exported and re-exported packages
+                // into the complete set of required packages.
                 for (Iterator reqIter = requiredMap.entrySet().iterator(); reqIter.hasNext(); )
                 {
                     Map.Entry entry = (Map.Entry) reqIter.next();
@@ -1563,52 +1594,65 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
                     // Merge the current set of required packages into
                     // the overall complete set of required packages.
-                    // We must keep track of all possible re-exported
-                    // packages, because despite the fact that some packages
-                    // will be required "privately" and some will be required
-                    // "reexport", any re-exported package sources will
-                    // ultimately need to be combined with privately required
-                    // package sources, if the required packages overlap.
-                    // This is one of the bad things about require-bundle
-                    // behavior, it does not necessarily obey the visibility
-                    // rules declared in the dependency.
+                    // We calculate all the required packages, because
+                    // despite the fact that some packages will be required
+                    // "privately" and some will be required "reexport", any
+                    // re-exported package sources will ultimately need to
+                    // be combined with privately required package sources,
+                    // if the required packages overlap. This is one of the
+                    // bad things about require-bundle behavior, it does not
+                    // necessarily obey the visibility rules declared in the
+                    // dependency.
                     ResolvedPackage rp = (ResolvedPackage) allRequiredMap.get(pkgName);
                     if (rp != null)
                     {
                         // Create the union of all package sources.
                         ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                        rp.m_sourceSet.addAll(rpReq.m_sourceSet);                       
+                        rp.merge(rpReq);
                     }
                     else
                     {
-                        allRequiredMap.put(entry.getKey(), entry.getValue());
+                        // Add package to required map.
+                        allRequiredMap.put(pkgName, entry.getValue());
                     }
 
-                    // Now merge any re-exported packages into the module's
-                    // overall package map, since these re-exported packages
-                    // will become part of the module's export signature.
-                    rp = (ResolvedPackage) pkgMap.get(entry.getKey());
-                    if ((rp == null) && reexport)
+                    // Keep track of all required packages to be re-exported.
+                    // All re-exported packages will need to be merged into the
+                    // target module's package map and become part of its overall
+                    // export signature.
+                    if (reexport)
                     {
-                        pkgMap.put(entry.getKey(), entry.getValue());
+                        reexportedPkgMap.put(pkgName, pkgName);
                     }
                 }
             }
         }
 
-        // Using the package map that represents the module's complete
-        // export signature (i.e., it includes exported and re-exported
-        // packages), merge in the package sources for any required
-        // packages that overlap the set of exported/re-exported packages.
-        for (Iterator reqIter = allRequiredMap.entrySet().iterator(); reqIter.hasNext(); )
+        // For the target module we have now calculated its entire set
+        // of required packages and their associated package sources in
+        // allRequiredMap and have calculated all packages to be re-exported
+        // in reexportedPkgMap. Add all re-exported required packages to the
+        // target module's package map since they will be part of its export
+        // signature.
+        for (Iterator iter = reexportedPkgMap.entrySet().iterator(); iter.hasNext(); )
         {
-            Map.Entry entry = (Map.Entry) reqIter.next();
-            ResolvedPackage rp = (ResolvedPackage) pkgMap.get(entry.getKey());
-            if (rp != null)
+            String pkgName = (String) ((Map.Entry) iter.next()).getKey();
+            pkgMap.put(pkgName, allRequiredMap.get(pkgName));
+        }
+
+        // Now loop through the target module's export package capabilities and
+        // add the target module as a package source for any exported packages.
+        ICapability[] caps = targetModule.getDefinition().getCapabilities();
+        for (int i = 0; (caps != null) && (i < caps.length); i++)
+        {
+            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
             {
-                // Create the union of all package sources.
-                ResolvedPackage rpReq = (ResolvedPackage) entry.getValue();
-                rp.m_sourceSet.addAll(rpReq.m_sourceSet);                       
+                String pkgName = (String)
+                    caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
+                ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
+                rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
+                rp.m_sourceList.add(new PackageSource(targetModule, caps[i]));
+                pkgMap.put(rp.m_name, rp);
             }
         }
 
@@ -1620,7 +1664,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 //System.out.println("calculateCandidateRequiredPackages("+module+")");
         Map cycleMap = new HashMap();
         cycleMap.put(module, module);
-        return calculateExportedAndReexportedPackages(psTarget, candidatesMap, new HashMap(), cycleMap);
+        return calculateExportedAndReexportedPackages(psTarget, candidatesMap, cycleMap);
     }
 
     private void incrementCandidateConfiguration(List resolverList)
@@ -2357,7 +2401,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
     protected class ResolvedPackage
     {
         public String m_name = null;
-        public Set m_sourceSet = new HashSet();
+        public List m_sourceList = new ArrayList();
 
         public ResolvedPackage(String name)
         {
@@ -2366,24 +2410,37 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
         public boolean isSubset(ResolvedPackage rp)
         {
-            if (rp.m_sourceSet.size() > m_sourceSet.size())
+            if (m_sourceList.size() > rp.m_sourceList.size())
             {
                 return false;
             }
-            else if (!rp.m_name.equals(m_name))
+            else if (!m_name.equals(rp.m_name))
             {
                 return false;
             }
 
             // Determine if the target set of source modules is a subset.
-            return m_sourceSet.containsAll(rp.m_sourceSet);
+            return rp.m_sourceList.containsAll(m_sourceList);
         }
 
         public Object clone()
         {
             ResolvedPackage rp = new ResolvedPackage(m_name);
-            rp.m_sourceSet.addAll(m_sourceSet);
+            rp.m_sourceList.addAll(m_sourceList);
             return rp;
+        }
+
+        public void merge(ResolvedPackage rp)
+        {
+            // Merge required packages, avoiding duplicate
+            // package sources and maintaining ordering.
+            for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
+            {
+                if (!m_sourceList.contains(rp.m_sourceList.get(srcIdx)))
+                {
+                    m_sourceList.add(rp.m_sourceList.get(srcIdx));
+                }
+            }
         }
 
         public String toString()
@@ -2396,11 +2453,11 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             sb.append(padding);
             sb.append(m_name);
             sb.append(" from [");
-            for (Iterator i = m_sourceSet.iterator(); i.hasNext(); )
+            for (int i = 0; i < m_sourceList.size(); i++)
             {
-                PackageSource ps = (PackageSource) i.next();
+                PackageSource ps = (PackageSource) m_sourceList.get(i);
                 sb.append(ps.m_module);
-                if (i.hasNext())
+                if ((i + 1) < m_sourceList.size())
                 {
                     sb.append(", ");
                 }
@@ -2410,6 +2467,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         }
     }
 
+    // TODO: RB - This may come back once we optimize filter evaluation.
     private class InUse
     {
         public IModule m_module = null;
