@@ -268,7 +268,6 @@ public class BundleListPlugin extends JPanel implements Plugin
                 }
             }
         });
-
     }
 
     private class SimpleTableModel extends AbstractTableModel
