@@ -41,6 +41,7 @@ public class BundleListPlugin extends JPanel implements Plugin
     private JButton m_updateButton = null;
     private JButton m_refreshButton = null;
     private JButton m_uninstallButton = null;
+    private JButton m_shutdownButton = null;
 
     // Plugin interface methods.
 
@@ -62,9 +63,8 @@ public class BundleListPlugin extends JPanel implements Plugin
 
         // Create user interface components.
         setLayout(new BorderLayout());
-        JScrollPane scroll = null;
         add(createURLPanel(), BorderLayout.NORTH);
-        add(scroll = new JScrollPane(m_bundleTable = new JTable()), BorderLayout.CENTER);
+        add(new JScrollPane(m_bundleTable = new JTable()), BorderLayout.CENTER);
         add(createButtonPanel(), BorderLayout.SOUTH);
 
         // Set table model to display bundles.
@@ -95,11 +95,13 @@ public class BundleListPlugin extends JPanel implements Plugin
         panel.add(m_updateButton = new JButton("Update"));
         panel.add(m_refreshButton = new JButton("Refresh"));
         panel.add(m_uninstallButton = new JButton("Uninstall"));
+        panel.add(m_shutdownButton = new JButton("Shutdown"));
         m_startButton.setMnemonic('S');
         m_stopButton.setMnemonic('p');
         m_updateButton.setMnemonic('a');
         m_refreshButton.setMnemonic('R');
         m_uninstallButton.setMnemonic('U');
+        m_shutdownButton.setMnemonic('d');
         return panel;
     }
 
@@ -250,6 +252,23 @@ public class BundleListPlugin extends JPanel implements Plugin
                 }
             }
         });
+
+        m_shutdownButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event)
+            {
+                Bundle systembundle = m_context.getBundle(0);
+                try
+                {
+                    systembundle.stop();
+                }
+                catch (Exception ex)
+                {
+                    System.out.println(ex.toString());
+                    ex.printStackTrace(System.out);
+                }
+            }
+        });
+
     }
 
     private class SimpleTableModel extends AbstractTableModel
