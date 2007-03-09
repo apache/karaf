@@ -123,7 +123,10 @@ public class Dependency implements ServiceListener {
     /**
      * Dependency contructor. After the creation the dependency is not started.
      * @param dh : the dependency handler managing this dependency
-     * @param dm : the depednency metadata
+     * @param field : field of the dependency
+     * @param spec : required specification
+     * @param filter : LDAP filter of the dependency
+     * @param isOptional : is the dependency an optional dependency ?
      */
     public Dependency(DependencyHandler dh, String field, String spec, String filter, boolean isOptional) {
         m_handler = dh;
@@ -174,12 +177,14 @@ public class Dependency implements ServiceListener {
             System.arraycopy(m_callbacks, 0, newCallbacks, 0, m_callbacks.length);
             newCallbacks[m_callbacks.length] = cb;
             m_callbacks = newCallbacks;
-        }
-        else {
+        } else {
             m_callbacks = new DependencyCallback[] {cb};
         }
     }
     
+    /**
+     * @return the filter attached to the dependency.
+     */
     public String getFilter() { return m_strFilter; }
 
     /**
@@ -224,9 +229,9 @@ public class Dependency implements ServiceListener {
             if (!m_change) {
                 if (!m_isMultiple) {
                     if (m_services.length > 0) {
-                        return m_services[0]; }
-                }
-                else {
+                        return m_services[0]; 
+                    }
+                } else {
                     return m_services;
                 }
             }
@@ -266,18 +271,18 @@ public class Dependency implements ServiceListener {
              //       m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] Nullable object created for " + getMetadata().getServiceSpecification() + " -> " + instance);
                     return instance;
                 }
-            }
-            else { // Multiple dependency
+            } else { // Multiple dependency
                 return m_services;
             }
         } catch (Exception e) {
             // There is a problem in the dependency resolving (like in stopping method)
             if (!m_isMultiple) {
                 m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] Return null, an exception was throwed in the get method", e);
-                return null; }
-            else {
+                return null; 
+            } else {
                 m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] Return an empty array, an exception was throwed in the get method", e);
-                return Array.newInstance(m_clazz, 0); }
+                return Array.newInstance(m_clazz, 0); 
+            }
         }
     }
 
@@ -298,19 +303,23 @@ public class Dependency implements ServiceListener {
 
             // If a service arrives
             if (event.getType() == ServiceEvent.REGISTERED) {
-                if (m_filter.match(event.getServiceReference())) { arrivalManagement(event.getServiceReference()); return; }
-                else { return; }
+                if (m_filter.match(event.getServiceReference())) { 
+                	arrivalManagement(event.getServiceReference());
+                }
+                return;
             }
-
             // If a service is modified
             if (event.getType() == ServiceEvent.MODIFIED) {
                 if (m_filter.match(event.getServiceReference())) {
                     m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] A service with a filter matching is arrived -> " + event.getServiceReference().getBundle());
-                    if (!containsSR(event.getServiceReference())) { arrivalManagement(event.getServiceReference()); }
-                }
-                else {
+                    if (!containsSR(event.getServiceReference())) { 
+                    	arrivalManagement(event.getServiceReference()); 
+                    }
+                } else {
                     m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] A service with a filter matching has gone -> " + event.getServiceReference().getBundle());
-                    if (containsSR(event.getServiceReference())) { departureManagement(event.getServiceReference()); }
+                    if (containsSR(event.getServiceReference())) { 
+                    	departureManagement(event.getServiceReference()); 
+                    }
                 }
                 return;
             }
@@ -569,8 +578,7 @@ public class Dependency implements ServiceListener {
         String filter = "";
         if (!m_strFilter.equals("")) {
             filter = "(&" + classnamefilter + m_strFilter + ")";
-        }
-        else {
+        } else {
             filter = classnamefilter;
         }
 
@@ -596,8 +604,7 @@ public class Dependency implements ServiceListener {
             m_filter = m_handler.getInstanceManager().getContext().createFilter(filter); // Store the filter
             m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] Create a filter from : " + filter);
             m_change = true;
-        }
-        catch (InvalidSyntaxException e1) {
+        } catch (InvalidSyntaxException e1) {
             m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] A filter is malformed : " + filter);
             e1.printStackTrace();
         }
@@ -626,7 +633,7 @@ public class Dependency implements ServiceListener {
      * @return the state of the dependency (1 : valid, 2 : invalid)
      */
     public int getState() {
-        return ( m_isOptional ) ? 1 : m_state;
+        return (m_isOptional) ? 1 : m_state;
     }
 
     /**
@@ -653,8 +660,7 @@ public class Dependency implements ServiceListener {
             System.arraycopy(m_ref, 0, newSR, 0, m_ref.length);
             newSR[m_ref.length] = r;
             m_ref = newSR;
-        }
-        else {
+        } else {
             m_ref = new ServiceReference[] {r};
         }
     }
@@ -695,9 +701,7 @@ public class Dependency implements ServiceListener {
             // If this is the module, then point to empty list.
             if ((m_ref.length - 1) == 0) {
                 m_ref = new ServiceReference[0];
-            }
-            // Otherwise, we need to do some array copying.
-            else {
+            } else { // Otherwise, we need to do some array copying.
                 ServiceReference[] newSR = new ServiceReference[m_ref.length - 1];
                 System.arraycopy(m_ref, 0, newSR, 0, idx);
                 if (idx < newSR.length)             {

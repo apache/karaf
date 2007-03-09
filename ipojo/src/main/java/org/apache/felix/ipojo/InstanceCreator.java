@@ -34,8 +34,14 @@ import org.osgi.framework.ServiceReference;
  */
 public class InstanceCreator implements ServiceListener {
 	
+	/**
+	 * Bundle Context.
+	 */
 	private BundleContext m_context;
 	
+	/**
+	 * Logger to log messages if error occurs.
+	 */
 	private Logger m_logger;
 	
 	/**
@@ -43,11 +49,53 @@ public class InstanceCreator implements ServiceListener {
 	 * It stores all necessary information to create an instance and to track the factory.
 	 */
 	private class ManagedConfiguration {
-		Dictionary configuration;
-		String factoryName;
-		ComponentInstance instance;
+		/**
+		 * Configuration of the instance to create.
+		 */
+		private Dictionary m_configuration;
 		
-		public ManagedConfiguration(Dictionary conf) { configuration = conf; }
+		/**
+		 * Factory name. 
+		 */
+		private String m_factoryName;
+		
+		/**
+		 * Created instance. 
+		 */
+		private ComponentInstance m_instance;
+		
+		/**
+		 * Constructor.
+		 * @param conf : the configuration to create.
+		 */
+		ManagedConfiguration(Dictionary conf) { m_configuration = conf; }
+		
+		/**
+		 * @return the configuration.
+		 */
+		Dictionary getConfiguration() { return m_configuration; }
+		
+		/**
+		 * @return the factory
+		 */
+		String getFactory() { return m_factoryName; }
+		
+		/**
+		 * @return the instance (or null if no instance are created).
+		 */
+		ComponentInstance getInstance() { return m_instance; }
+		
+		/**
+		 * Set the factory name.
+		 * @param name : the factory name.
+		 */
+		void setFactory(String name) { m_factoryName = name; }
+		
+		/**
+		 * Set the instance object.
+		 * @param instance : the instance
+		 */
+		void setInstance(ComponentInstance instance) { m_instance = instance; }
 	}
 	
 	
@@ -56,26 +104,30 @@ public class InstanceCreator implements ServiceListener {
 	 */
 	private ManagedConfiguration[] m_configurations;
 	
+	/**
+	 * Constructor.
+	 * @param context : the bundle context.
+	 * @param configurations : configuration set to create and maintain.
+	 */
 	public InstanceCreator(BundleContext context, Dictionary[] configurations) {
 		m_context = context;
-		m_logger = new Logger(context, "InstanceCreator"+context.getBundle().getBundleId(), Logger.WARNING);
+		m_logger = new Logger(context, "InstanceCreator" + context.getBundle().getBundleId(), Logger.WARNING);
 		m_configurations = new ManagedConfiguration[configurations.length];
-		for(int i = 0; i < configurations.length; i++) {
+		for (int i = 0; i < configurations.length; i++) {
 			ManagedConfiguration conf = new ManagedConfiguration(configurations[i]);
 			m_configurations[i] = conf;
 			
 			// Get the component type name :
-			String componentType = (String) conf.configuration.get("component");
+			String componentType = (String) conf.getConfiguration().get("component");
 			Factory fact = null;
 			
 			try {
 				String fil = "(|(" + org.osgi.framework.Constants.SERVICE_PID + "=" + componentType + ")(component.class=" + componentType + "))";
 				ServiceReference[] refs = context.getServiceReferences(org.apache.felix.ipojo.Factory.class.getName(), fil);
-				if(refs != null) { 
+				if (refs != null) { 
 					fact = (Factory) m_context.getService(refs[0]);
 					createInstance(fact, conf);					
-				}
-				else {
+				} else {
 					m_logger.log(Logger.WARNING, "No factory available for the type : " + componentType);
 				}
 			} catch (InvalidSyntaxException e) { m_logger.log(Logger.ERROR, "Invalid syntax filter for the type : " + componentType, e); }
@@ -83,28 +135,36 @@ public class InstanceCreator implements ServiceListener {
 		
 		// Register a service listenner on Factory Service
 		try {
-			m_context.addServiceListener(this, "(objectClass="+Factory.class.getName() + ")");
+			m_context.addServiceListener(this, "(objectClass=" + Factory.class.getName() + ")");
 		} catch (InvalidSyntaxException e) { m_logger.log(Logger.ERROR, "Invalid syntax filter when registering a listener on Factory Service", e); }
 	}
 	
+	/**
+	 * Create an instance using the given factory and the given configuration.
+	 * @param fact : the facotry name to used.
+	 * @param config : the configuration.
+	 */
 	private void createInstance(Factory fact, ManagedConfiguration config) {
-		Dictionary conf = config.configuration;
+		Dictionary conf = config.getConfiguration();
 		try {
-				config.instance = fact.createComponentInstance(conf);
-				config.factoryName = fact.getName();
+			config.setInstance(fact.createComponentInstance(conf));
+			config.setFactory(fact.getName());
 		} catch (UnacceptableConfiguration e) {
 			m_logger.log(Logger.ERROR, "A factory is available for the configuration but the configuration is not acceptable", e);
 		}
 	}
 
+	/**
+	 * @see org.osgi.framework.ServiceListener#serviceChanged(org.osgi.framework.ServiceEvent)
+	 */
 	public void serviceChanged(ServiceEvent ev) {
 		ServiceReference ref = ev.getServiceReference();
 		String factoryName = (String) ref.getProperty(org.osgi.framework.Constants.SERVICE_PID);
 		String componentClass = (String) ref.getProperty("component.class");
 		
-		if(ev.getType() == ServiceEvent.REGISTERED) { //A new factory appears
-			for(int i = 0; i < m_configurations.length; i++) {
-				if(m_configurations[i].instance == null && (m_configurations[i].configuration.get("component").equals(factoryName) ||  m_configurations[i].configuration.get("component").equals(componentClass))) {
+		if (ev.getType() == ServiceEvent.REGISTERED) { //A new factory appears
+			for (int i = 0; i < m_configurations.length; i++) {
+				if (m_configurations[i].getInstance() == null && (m_configurations[i].getConfiguration().get("component").equals(factoryName) ||  m_configurations[i].getConfiguration().get("component").equals(componentClass))) {
 					Factory fact = (Factory) m_context.getService(ref);
 					createInstance(fact, m_configurations[i]);
 				}
@@ -112,27 +172,26 @@ public class InstanceCreator implements ServiceListener {
 			return;
 		}
 		
-		if(ev.getType() == ServiceEvent.UNREGISTERING) {
-			for(int i = 0; i < m_configurations.length; i++) {
-				if(m_configurations[i].instance != null && m_configurations[i].factoryName.equals(factoryName)) {
-					m_configurations[i].instance = null;
-					m_configurations[i].factoryName = null;
+		if (ev.getType() == ServiceEvent.UNREGISTERING) {
+			for (int i = 0; i < m_configurations.length; i++) {
+				if (m_configurations[i].getInstance() != null && m_configurations[i].getFactory().equals(factoryName)) {
+					m_configurations[i].setInstance(null);
+					m_configurations[i].setFactory(null);
 					m_context.ungetService(ref);
 				}
 			}
 			return;
 		}
-		
-		//TODO manage modification ? normally a factory should not change its property.
 	}
 	
 	/**
-	 * Stop all created instances
+	 * Stop all created instances.
 	 */
 	public void stop() {
-		for(int i = 0; i < m_configurations.length; i++) {
-			if(m_configurations[i].instance != null) { m_configurations[i].instance.stop(); }
-			m_configurations[i].instance = null;
+		for (int i = 0; i < m_configurations.length; i++) {
+			if (m_configurations[i].getInstance() != null) { m_configurations[i].getInstance().stop(); }
+			m_configurations[i].setInstance(null);
+			m_configurations[i].setFactory(null);
 		}
 		m_configurations = null;
 	}

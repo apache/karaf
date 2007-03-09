@@ -71,8 +71,7 @@ public class DependencyHandler extends Handler {
             System.arraycopy(m_dependencies, 0, newDep, 0, m_dependencies.length);
             newDep[m_dependencies.length] = dep;
             m_dependencies = newDep;
-        }
-        else {
+        } else {
             m_dependencies = new Dependency[] {dep};
         }
     }
@@ -92,8 +91,7 @@ public class DependencyHandler extends Handler {
             System.arraycopy(m_nullableClasses, 0, newClass, 0, m_nullableClasses.length);
             newClass[m_nullableClasses.length] = clazz;
             m_nullableClasses = newClass;
-        }
-        else {
+        } else {
             m_nullableClasses = new Class[] {clazz};
         }
     }
@@ -179,8 +177,7 @@ public class DependencyHandler extends Handler {
                 m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The field type [" + type + "] and the needed service interface [" + dep.getSpecification() + "] are not the same");
                 dep.setSpecification(type);
             }
-        }
-        else {
+        } else {
             m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The declared dependency " + dep.getField() + "  does not exist in the code");
         }
         return true;
@@ -210,16 +207,22 @@ public class DependencyHandler extends Handler {
             Dependency dep = new Dependency(this, field, serviceSpecification, filter, optional);
             // Check the dependency :
             Element manipulation = componentMetadata.getElements("Manipulation")[0];
-            if (checkDependency(dep, manipulation)) { addDependency(dep); }
-            else { m_manager.getFactory().getLogger().log(Logger.ERROR, "[DependencyHandler on " + m_manager.getClassName() + "] The dependency on " + dep.getField() + " is not valid"); }
+            if (checkDependency(dep, manipulation)) { 
+            	addDependency(dep); 
+            } else { 
+            	m_manager.getFactory().getLogger().log(Logger.ERROR, "[DependencyHandler on " + m_manager.getClassName() + "] The dependency on " + dep.getField() + " is not valid");
+            }
 
             // Look for dependency callback :
             for (int j = 0; j < (deps[i].getElements("Callback", "")).length; j++) {
                 String method = deps[i].getElements("Callback", "")[j].getAttribute("method");
                 String type = deps[i].getElements("Callback", "")[j].getAttribute("type");
                 int methodType = 0;
-                if (type.equals("bind")) { methodType = DependencyCallback.BIND; }
-                else { methodType = DependencyCallback.UNBIND; }
+                if (type.equals("bind")) { 
+                	methodType = DependencyCallback.BIND; 
+                } else { 
+                	methodType = DependencyCallback.UNBIND;
+                }
                 boolean isStatic = false;
                 if (deps[i].getElements("Callback", "")[j].containsAttribute("isStatic") && deps[i].getElements("Callback", "")[j].getAttribute("isStatic").equals("true")) { isStatic = true; }
                 DependencyCallback dc = new DependencyCallback(dep, method, methodType, isStatic);
@@ -245,7 +248,7 @@ public class DependencyHandler extends Handler {
         
         //String[] segment = dep.getMetadata().getServiceSpecification().split("[.]");
         //String className = "org/apache/felix/ipojo/" + segment[segment.length - 1] + "Nullable";
-		String className = dep.getSpecification()+"Nullable";
+		String className = dep.getSpecification() + "Nullable";
         String resource = dep.getSpecification().replace('.', '/') + ".class";
         URL url =  m_manager.getContext().getBundle().getResource(resource);
 
@@ -254,8 +257,9 @@ public class DependencyHandler extends Handler {
             Class c = null;
             try {
             	c = m_manager.getFactory().defineClass(className, b, null);
+            } catch (Exception e) { 
+            	System.err.println("Cannot define !!!");
             }
-            catch(Exception e) { System.err.println("Cannot define !!!");}
             addNullableClass(c); 
             m_manager.getFactory().getLogger().log(Logger.INFO, "[DependencyHandler on " + m_manager.getClassName() + "] Nullable class created for " + dep.getSpecification());
         } catch (Exception e2) {
@@ -357,6 +361,9 @@ public class DependencyHandler extends Handler {
         return valide;
     }
     
+    /**
+     * @see org.apache.felix.ipojo.Handler#getDescription()
+     */
     public HandlerDescription getDescription() {
         DependencyHandlerDescription dhd = new DependencyHandlerDescription(isValid());
         for (int j = 0; j < getDependencies().length; j++) {

@@ -90,6 +90,7 @@ public class InstanceManager implements ComponentInstance {
     /**
      * Construct a new Component Manager.
      * @param factory : the factory managing the instance manager
+     * @param bc : the bundle context to give to the instance
      */
     public InstanceManager(ComponentFactory factory, BundleContext bc) {
         m_factory = factory;
@@ -100,7 +101,8 @@ public class InstanceManager implements ComponentInstance {
     /**
      * Configure the instance manager.
      * Stop the existings handler, clear the handler list, change the metadata, recreate the handlers
-     * @param cm
+     * @param cm : the component type metadata
+     * @param configuration : the configuration of the instance
      */
     public void configure(Element cm, Dictionary configuration) {
         // Stop all previous registred handler
@@ -150,10 +152,8 @@ public class InstanceManager implements ComponentInstance {
                 } catch (IllegalAccessException e) {
                     m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] Cannot instantiate the handler " + cm.getNamespaces()[i] + " : " + e.getMessage());
                 }
-
             }
         }
-
     }
 
     /**
@@ -161,6 +161,9 @@ public class InstanceManager implements ComponentInstance {
      */
     public ComponentDescription getComponentDescription() { return m_componentDesc; }
     
+    /**
+     * @return the instance description.
+     */
     public InstanceDescription getInstanceDescription() {
     	int componentState = getState();
         InstanceDescription instanceDescription = new InstanceDescription(m_name, m_className, componentState, getContext().getBundle().getBundleId());
@@ -200,6 +203,9 @@ public class InstanceManager implements ComponentInstance {
      */
     public String getComponentName() { return m_name; }
     
+    /**
+     * @return the implementation class name of the instance.
+     */
     public String getClassName() { return m_className; }
 
     // ===================== Lifecycle management =====================
@@ -208,7 +214,7 @@ public class InstanceManager implements ComponentInstance {
      * Start the instance manager.
      */
     public void start() {
-    	if(m_state != STOPPED) { return; } // Instance already started
+    	if (m_state != STOPPED) { return; } // Instance already started
     	
         // Start all the handlers
         m_factory.getLogger().log(Logger.INFO, "[" + m_name + "] Start the instance manager with " + m_handlers.length + " handlers");
@@ -228,7 +234,7 @@ public class InstanceManager implements ComponentInstance {
      * Stop the instance manager.
      */
     public void stop() {
-    	if(m_state == STOPPED) { return; } // Instance already stopped
+    	if (m_state == STOPPED) { return; } // Instance already stopped
     	
         setState(INVALID);
         // Stop all the handlers
@@ -311,8 +317,7 @@ public class InstanceManager implements ComponentInstance {
             System.arraycopy(m_pojoObjects, 0, newInstances, 0, m_pojoObjects.length);
             newInstances[m_pojoObjects.length] = o;
             m_pojoObjects = newInstances;
-        }
-        else {
+        } else {
             m_pojoObjects = new Object[] {o};
         }
     }
@@ -328,12 +333,14 @@ public class InstanceManager implements ComponentInstance {
         }
 
         if (idx >= 0) {
-            if ((m_pojoObjects.length - 1) == 0) { m_pojoObjects = new Element[0]; }
-            else {
+            if ((m_pojoObjects.length - 1) == 0) { 
+            	m_pojoObjects = new Element[0]; 
+            } else {
                 Object[] newInstances = new Object[m_pojoObjects.length - 1];
                 System.arraycopy(m_pojoObjects, 0, newInstances, 0, idx);
                 if (idx < newInstances.length) {
-                    System.arraycopy(m_pojoObjects, idx + 1, newInstances, idx, newInstances.length - idx); }
+                    System.arraycopy(m_pojoObjects, idx + 1, newInstances, idx, newInstances.length - idx); 
+                }
                 m_pojoObjects = newInstances;
             }
         }
@@ -366,8 +373,7 @@ public class InstanceManager implements ComponentInstance {
                 Constructor constructor = m_clazz.getConstructor(new Class[] {InstanceManager.class, BundleContext.class});
                 constructor.setAccessible(true);
                 instance = constructor.newInstance(new Object[] {this, m_context});
-            }
-            catch (NoSuchMethodException e) { }
+            } catch (NoSuchMethodException e) { instance = null; }
 
             // Create an instance if no instance are already created with <init>()BundleContext
             if (instance == null) {
@@ -452,10 +458,13 @@ public class InstanceManager implements ComponentInstance {
         for (int i = 0; i < fields.length; i++) {
             if (m_fieldRegistration.get(fields[i]) == null) {
                 m_fieldRegistration.put(fields[i], new Handler[] {h});
-            }
-            else {
+            } else {
                 Handler[] list = (Handler[]) m_fieldRegistration.get(fields[i]);
-                for (int j = 0; j < list.length; j++) { if (list[j] == h) { return; } }
+                for (int j = 0; j < list.length; j++) { 
+                	if (list[j] == h) { 
+                		return;
+                	} 
+                }
                 Handler[] newList = new Handler[list.length + 1];
                 System.arraycopy(list, 0, newList, 0, list.length);
                 newList[list.length] = h;
@@ -472,8 +481,9 @@ public class InstanceManager implements ComponentInstance {
      */
     public void unregister(Handler h, String[] fields) {
         for (int i = 0; i < fields.length; i++) {
-            if (m_fieldRegistration.get(fields[i]) == null) { break; }
-            else {
+            if (m_fieldRegistration.get(fields[i]) == null) { 
+            	break;
+            } else {
                 Handler[] list = (Handler[]) m_fieldRegistration.get(fields[i]);
                 int idx = -1;
                 for (int j = 0; j < list.length; j++) {
@@ -486,8 +496,7 @@ public class InstanceManager implements ComponentInstance {
                 if (idx >= 0) {
                     if ((list.length - 1) == 0) {
                         list = new Handler[0];
-                    }
-                    else {
+                    } else {
                         Handler[] newList = new Handler[list.length - 1];
                         System.arraycopy(list, 0, newList, 0, idx);
                         if (idx < newList.length)             {
@@ -518,8 +527,7 @@ public class InstanceManager implements ComponentInstance {
         if (idx >= 0) {
             if ((m_handlers.length - 1) == 0) {
                 m_handlers = new Handler[0];
-            }
-            else {
+            } else {
                 Handler[] newList = new Handler[m_handlers.length - 1];
                 System.arraycopy(m_handlers, 0, newList, 0, idx);
                 if (idx < newList.length)             {
@@ -595,7 +603,19 @@ public class InstanceManager implements ComponentInstance {
         if (isValid && m_state == INVALID) { setState(VALID); }
     }
 
+	/**
+	 * @see org.apache.felix.ipojo.ComponentInstance#getInstanceName()
+	 */
 	public String getInstanceName() { return m_name; }
+
+	/**
+	 * @see org.apache.felix.ipojo.ComponentInstance#reconfigure(java.util.Dictionary)
+	 */
+	public void reconfigure(Dictionary configuration) {
+		for (int i = 0; i < m_handlers.length; i++) {
+	        m_handlers[i].reconfigure(configuration);
+	    }
+	}
 
 
     // ======================= end Handlers Management =====================

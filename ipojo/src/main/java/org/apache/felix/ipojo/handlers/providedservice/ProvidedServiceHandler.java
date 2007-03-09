@@ -62,8 +62,9 @@ public class ProvidedServiceHandler extends Handler {
             System.arraycopy(m_providedServices, 0, newPS, 0, m_providedServices.length);
             newPS[m_providedServices.length] = ps;
             m_providedServices = newPS;
+        } else { 
+        	m_providedServices = new ProvidedService[] {ps}; 
         }
-        else { m_providedServices = new ProvidedService[] {ps}; }
     }
 
     /**
@@ -125,8 +126,13 @@ public class ProvidedServiceHandler extends Handler {
                 String field = null;
                 if (props[j].containsAttribute("field")) { field = props[j].getAttribute("field"); }
 
-                if (name != null && configuration.get(name) != null && configuration.get(name) instanceof String) { value = (String) configuration.get(name); }
-                else { if (field != null &&  configuration.get(field) != null && configuration.get(field) instanceof String) { value = (String) configuration.get(field); } }
+                if (name != null && configuration.get(name) != null && configuration.get(name) instanceof String) { 
+                	value = (String) configuration.get(name); 
+                } else { 
+                	if (field != null &&  configuration.get(field) != null && configuration.get(field) instanceof String) { 
+                		value = (String) configuration.get(field); 
+                	}
+                }
 
                 Property prop = new Property(ps, name, field, type, value, manipulation);
                 properties[j] = prop;
@@ -140,12 +146,11 @@ public class ProvidedServiceHandler extends Handler {
                 // Change ComponentInfo
                 for (int k = 0; k < ps.getServiceSpecification().length; k++) { cd.addProvidedServiceSpecification(ps.getServiceSpecification()[k]); }
                 for (int k = 0; k < ps.getProperties().length; k++) { 
-                	if(!ps.getProperties()[k].getName().equals(Constants.SERVICE_PID) && !ps.getProperties()[k].getName().equals("factory.pid")) {
+                	if (!ps.getProperties()[k].getName().equals(Constants.SERVICE_PID) && !ps.getProperties()[k].getName().equals("factory.pid")) {
                 		cd.addProperty(new PropertyDescription(ps.getProperties()[k].getName(), ps.getProperties()[k].getType(), ps.getProperties()[k].getInitialValue())); 
                 	}
                 }
-            }
-            else {
+            } else {
                 String itfs = "";
                 for (int j = 0; j < serviceSpecification.length; j++) {
                     itfs = itfs + " " + serviceSpecification[j];
@@ -164,9 +169,13 @@ public class ProvidedServiceHandler extends Handler {
                     Property prop = ps.getProperties()[j];
 
                     // Check if the instance configuration has a value for this property
-                    if (prop.getName() != null && configuration.get(prop.getName()) != null && !(configuration.get(prop.getName()) instanceof String)) { prop.set(configuration.get(prop.getName())); }
-                    else { if (prop.getField() != null && configuration.get(prop.getField()) != null && !(configuration.get(prop.getField()) instanceof String)) { prop.set(configuration.get(prop.getField())); } }
-
+                    if (prop.getName() != null && configuration.get(prop.getName()) != null && !(configuration.get(prop.getName()) instanceof String)) { 
+                    	prop.set(configuration.get(prop.getName())); 
+                    } else { 
+                    	if (prop.getField() != null && configuration.get(prop.getField()) != null && !(configuration.get(prop.getField()) instanceof String)) { 
+                    		prop.set(configuration.get(prop.getField())); 
+                    	}
+                    }
                     if (prop.getField() != null) {
                         String[] newFields = new String[fields.length + 1];
                         System.arraycopy(fields, 0, newFields, 0, fields.length);
@@ -176,7 +185,8 @@ public class ProvidedServiceHandler extends Handler {
                 }
             }
 
-            m_manager.register(this, fields); }
+            m_manager.register(this, fields); 
+        }
     }
 
     /**
@@ -193,7 +203,7 @@ public class ProvidedServiceHandler extends Handler {
                     b = true;
                 }
             }
-        	if(!b) { 
+        	if (!b) { 
         		m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The service specification " + ps.getServiceSpecification()[i] + " is not implemented by the component class");
         		return false; 
         	}
@@ -226,26 +236,16 @@ public class ProvidedServiceHandler extends Handler {
     }
 
     /**
-     * Stop the provided service handler : unregister all provided services.
+     * Stop the provided service handler.
      * @see org.apache.felix.ipojo.Handler#stop()
      */
-    public void stop() {
-        for (int i = 0; i < m_providedServices.length; i++) {
-            m_providedServices[i].unregisterService();
-        }
-    }
+    public void stop() { }
 
     /**
-     * Start the provided service handler : register the service if the component is resolved.
-     * Else do nothing and whait for a component state change event
+     * Start the provided service handler.
      * @see org.apache.felix.ipojo.Handler#start()
      */
-    public void start() {
-    	m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Start the provided service handler");
-        for (int i = 0; (m_manager.getState() == InstanceManager.VALID) && i < m_providedServices.length; i++) {
-            m_providedServices[i].registerService();
-        }
-    }
+    public void start() { }
 
     /**
      * @see org.apache.felix.ipojo.Handler#setterCallback(java.lang.String, java.lang.Object)
@@ -254,13 +254,16 @@ public class ProvidedServiceHandler extends Handler {
         // Verify that the field name coreespond to a dependency
         for (int i = 0; i < m_providedServices.length; i++) {
             ProvidedService ps = m_providedServices[i];
+            boolean update = false;
             for (int j = 0; j < ps.getProperties().length; j++) {
                 Property prop = ps.getProperties()[j];
                 if (fieldName.equals(prop.getField())) {
                     // it is the associated property
                     prop.set(value);
+                    update = true;
                 }
             }
+            if (update) { ps.update(); }
         }
         //Else do nothing
     }
@@ -291,13 +294,17 @@ public class ProvidedServiceHandler extends Handler {
     public void stateChanged(int state) {
         // If the new state is UNRESOLVED => unregister all the services
         if (state == InstanceManager.INVALID) {
-            stop();
+        	for (int i = 0; i < m_providedServices.length; i++) {
+                m_providedServices[i].unregisterService();
+            }
             return;
         }
 
         // If the new state is VALID => regiter all the services
         if (state == InstanceManager.VALID) {
-            start();
+        	for (int i = 0; i < m_providedServices.length; i++) {
+                m_providedServices[i].registerService();
+            }
             return;
         }
 
@@ -310,6 +317,7 @@ public class ProvidedServiceHandler extends Handler {
     public void addProperties(Dictionary dict) {
         for (int i = 0; i < m_providedServices.length; i++) {
             m_providedServices[i].addProperties(dict);
+            m_providedServices[i].update();
         }
     }
 
@@ -320,6 +328,7 @@ public class ProvidedServiceHandler extends Handler {
     public void removeProperties(Dictionary dict) {
         for (int i = 0; i < m_providedServices.length; i++) {
             m_providedServices[i].deleteProperties(dict);
+            m_providedServices[i].update();
         }
     }
 	
@@ -341,8 +350,27 @@ public class ProvidedServiceHandler extends Handler {
 			psd.setProperty(props);
 			pshd.addProvidedService(psd);
 		}
-		
 		return pshd;
+	}
+	
+	/**
+	 * @see org.apache.felix.ipojo.Handler#reconfigure(java.util.Dictionary)
+	 */
+	public void reconfigure(Dictionary dict) {
+		for (int j = 0; j < getProvidedService().length; j++) {
+			ProvidedService ps = getProvidedService()[j];
+			Property[] props = ps.getProperties();
+			boolean update = false;
+			for (int k = 0; k < props.length; k++) {
+				if (dict.get(props[k].getName()) != null) {
+					update = true;
+					if (dict.get(props[k].getName()) instanceof String) {
+						props[k].set((String) dict.get(props[k].getName()));
+					} else { props[k].set(dict.get(props[k].getName())); }
+				}
+			}
+			if (update) { ps.update(); }
+		}
 	}
 
 }

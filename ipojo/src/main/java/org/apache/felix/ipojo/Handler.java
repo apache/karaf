@@ -34,6 +34,7 @@ public abstract class Handler {
      * Configure the handler.
      * @param im : the instance manager
      * @param metadata : the metadata of the component
+     * @param configuration : the instance configuration
      */
     public abstract void configure(InstanceManager im, Element metadata, Dictionary configuration);
 
@@ -84,4 +85,10 @@ public abstract class Handler {
      * @return the description of the handler..
      */
     public HandlerDescription getDescription() { return new HandlerDescription(this.getClass().getName(), isValid()); }
+
+	/**
+	 * The instance is reconfiguring.
+	 * @param configuration : New instance configuration.
+	 */
+	public void reconfigure(Dictionary configuration) { }
 }

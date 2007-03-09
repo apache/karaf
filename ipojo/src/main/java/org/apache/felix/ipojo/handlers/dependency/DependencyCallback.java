@@ -53,12 +53,12 @@ public class DependencyCallback {
     private String m_callback;
     
     /**
-     * Is the callback a static callback
+     * Is the callback a static callback.
      */
     private boolean m_isStatic;
     
     /**
-     * The instance manager
+     * The instance manager.
      */
     private InstanceManager m_manager;
 
@@ -92,8 +92,9 @@ public class DependencyCallback {
     	Method method = m_manager.getClazz().getDeclaredMethod(m_callback, new Class[] {});
     	method.setAccessible(true);
     	
-        if (m_isStatic) { method.invoke(null, new Object[] {}); }
-        else {
+        if (m_isStatic) { 
+        	method.invoke(null, new Object[] {}); 
+        } else {
             // Two cases :
             // - if instances already exists : call on each instances
             // - if no instance exists : create an instance
@@ -120,8 +121,9 @@ public class DependencyCallback {
     	Method method = m_manager.getClazz().getDeclaredMethod(m_callback, new Class[] {ServiceReference.class});
     	method.setAccessible(true);
     	
-        if (m_isStatic) { method.invoke(null, new Object[] {ref}); }
-        else {
+        if (m_isStatic) { 
+        	method.invoke(null, new Object[] {ref}); 
+        } else {
             // Two cases :
             // - if instances already exists : call on each instances
             // - if no instance exists : create an instance
@@ -148,8 +150,9 @@ public class DependencyCallback {
     	Method method = m_manager.getClazz().getDeclaredMethod(m_callback, new Class[] {Object.class});
     	method.setAccessible(true);
     	
-        if (m_isStatic) { method.invoke(null, new Object[] {o}); }
-        else {
+        if (m_isStatic) { 
+        	method.invoke(null, new Object[] {o}); 
+        } else {
             // Two cases :
             // - if instances already exists : call on each instances
             // - if no instance exists : create an instance

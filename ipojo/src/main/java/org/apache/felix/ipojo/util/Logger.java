@@ -25,70 +25,131 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 
-public class Logger implements ServiceListener{
+/**
+ * iPOJO Logger.
+ * This logger send log message to a log service if presents. 
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ */
+public class Logger implements ServiceListener {
 	
+	// TODO how to stop the logging (remove listener ...)
+	
+	/**
+	 * Log Level ERROR.
+	 */
 	public static final int ERROR = 1;
+    
+	/**
+     * Log Level WARNING. 
+     */
     public static final int WARNING = 2;
+    
+    /**
+     * Log Level INFO.
+     */
     public static final int INFO = 3;
+    
+    /**
+     * Log Level DEBUG. 
+     */
     public static final int DEBUG = 4;
     
+    /**
+     * Bundle Context.
+     */
     private BundleContext m_context;
+    
+    /**
+     * Service Reference of the log service is available. 
+     */
     private ServiceReference m_ref;
+    
+    /**
+     * Log service object. 
+     */
     private LogService m_log;
     
+    /**
+     * Name of the logger. 
+     */
     private String m_name;
+    
+    /**
+     * trace level of this logger. 
+     */
     private int m_level;
     
+    /**
+     * Constructor.
+     * @param bc : bundle context
+     * @param name : name of the logger
+     * @param level : trace level
+     */
     public Logger(BundleContext bc, String name, int level) { 
     	m_name = name;
     	m_level = level;
     	m_context = bc;
     	
     	m_ref = m_context.getServiceReference(LogService.class.getName());
-    	if(m_ref != null) { m_log = (LogService) m_context.getService(m_ref); }
+    	if (m_ref != null) { m_log = (LogService) m_context.getService(m_ref); }
     	
     	try {
-			m_context.addServiceListener(this, "(objectClass="+LogService.class.getName() + ")");
+			m_context.addServiceListener(this, "(objectClass=" + LogService.class.getName() + ")");
 		} catch (InvalidSyntaxException e) { e.printStackTrace(); }
     }
     
+    /**
+     * Log a message.
+     * @param level : level of the message
+     * @param msg : the message to log
+     */
     public void log(int level, String msg) {
-    	if(m_level >= level) {
-    		synchronized(this) { _log(level, msg, null); }
+    	if (m_level >= level) {
+    		synchronized (this) { _log(level, msg, null); }
     	}
     }
     
+    /**
+     * Log a message with an exception.
+     * @param level : level of the message
+     * @param msg : message to log
+     * @param ex : exception attached to the message
+     */
     public void log(int level, String msg, Throwable ex) {
-    	if(m_level >= level) { 
-    		synchronized(this) {_log(level, msg, ex); }
+    	if (m_level >= level) { 
+    		synchronized (this) { _log(level, msg, ex); }
     	}
     }
     
-    private void _log(int level, String msg, Throwable ex)
-    {
+    /**
+     * Internal log method.
+     * @param level : level of the message.
+     * @param msg : message to log
+     * @param ex : exception attached to the message
+     */
+    private void _log(int level, String msg, Throwable ex) {
         String s = msg;
         s = (ex == null) ? s : s + " (" + ex.getMessage() + ")";
         String message;
-        switch (level)
-        {
+        switch (level) {
             case DEBUG:
             	message = "[" + m_name + "] DEBUG: " + s;
-            	if(m_log != null) { m_log.log(LogService.LOG_DEBUG, message); }
+            	if (m_log != null) { m_log.log(LogService.LOG_DEBUG, message); }
                 System.err.println(message);
                 break;
             case ERROR:
             	message = "[" + m_name + "] ERROR: " + s;
-            	if(m_log != null) { m_log.log(LogService.LOG_ERROR, message); }
+            	if (m_log != null) { m_log.log(LogService.LOG_ERROR, message); }
                 System.err.println(message);
                 break;
             case INFO:
                 message = "[" + m_name + "] INFO: " + s;
-                if(m_log != null) { m_log.log(LogService.LOG_INFO, message); }
+                if (m_log != null) { m_log.log(LogService.LOG_INFO, message); }
             	System.err.println(message);
                 break;
             case WARNING:
             	message = "[" + m_name + "] WARNING: " + s;
-            	if(m_log != null) { m_log.log(LogService.LOG_WARNING, message); }
+            	if (m_log != null) { m_log.log(LogService.LOG_WARNING, message); }
                 System.err.println(message);
                 break;
             default:
@@ -97,16 +158,19 @@ public class Logger implements ServiceListener{
         }
     }
 
+	/**
+	 * @see org.osgi.framework.ServiceListener#serviceChanged(org.osgi.framework.ServiceEvent)
+	 */
 	public void serviceChanged(ServiceEvent ev) {
-		if(ev.getType() == ServiceEvent.REGISTERED && m_ref == null) {
+		if (ev.getType() == ServiceEvent.REGISTERED && m_ref == null) {
 			m_ref = ev.getServiceReference();
 			m_log = (LogService) m_context.getService(m_ref);
 		}
-		if(ev.getType() == ServiceEvent.UNREGISTERING && m_ref == ev.getServiceReference()) {
+		if (ev.getType() == ServiceEvent.UNREGISTERING && m_ref == ev.getServiceReference()) {
 			m_context.ungetService(m_ref);
 			m_log = null;
 			m_ref = m_context.getServiceReference(LogService.class.getName());
-	    	if(m_ref != null) { m_log = (LogService) m_context.getService(m_ref); }
+	    	if (m_ref != null) { m_log = (LogService) m_context.getService(m_ref); }
 		}
 		
 	}

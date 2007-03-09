@@ -57,8 +57,10 @@ public class InstanceDescription {
 
     /**
      * Constructor.
-     * @param name : the name of the component (the class name).
-     * @param state : the state of the component.
+     * @param name : the name of the component instance.
+     * @param state : the state of the instance.
+     * @param className : implementation class name.
+     * @param bundleId : bundle id owning this instance.
      */
     public InstanceDescription(String name, String className, int state, long bundleId) {
         m_name = name;
@@ -106,10 +108,10 @@ public class InstanceDescription {
             }
         }
             // The component Description is not in the array, add it
-            HandlerDescription[] newHd = new HandlerDescription[m_handlers.length + 1];
-            System.arraycopy(m_handlers, 0, newHd, 0, m_handlers.length);
-            newHd[m_handlers.length] = hd;
-            m_handlers = newHd;
+        HandlerDescription[] newHd = new HandlerDescription[m_handlers.length + 1];
+        System.arraycopy(m_handlers, 0, newHd, 0, m_handlers.length);
+        newHd[m_handlers.length] = hd;
+        m_handlers = newHd;
     }
 
     /**

@@ -34,18 +34,18 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * The iPOJO Context is a BundleContext implementation allowing the separation between Bundle context and Service (Bundle) Context
+ * The iPOJO Context is a BundleContext implementation allowing the separation between Bundle context and Service (Bundle) Context.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class IPojoContext implements BundleContext {
 	
 	/**
-	 * BundleContext used to access bundle method
+	 * BundleContext used to access bundle method.
 	 */
 	private BundleContext m_bundleContext;
 	
 	/**
-	 * Service Context used to access service interaction 
+	 * Service Context used to access service interaction. 
 	 */
 	private ServiceContext m_serviceContext;
 	
@@ -83,8 +83,9 @@ public class IPojoContext implements BundleContext {
 	/**
 	 * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener, java.lang.String)
 	 */
-	public void addServiceListener(ServiceListener listener, String filter)
-			throws InvalidSyntaxException { m_serviceContext.addServiceListener(listener, filter); }
+	public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
+		m_serviceContext.addServiceListener(listener, filter); 
+	}
 
 	/**
 	 * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener)
@@ -94,13 +95,16 @@ public class IPojoContext implements BundleContext {
 	/**
 	 * @see org.osgi.framework.BundleContext#createFilter(java.lang.String)
 	 */
-	public Filter createFilter(String filter) throws InvalidSyntaxException { return m_bundleContext.createFilter(filter); }
+	public Filter createFilter(String filter) throws InvalidSyntaxException {
+		return m_bundleContext.createFilter(filter); 
+	}
 
 	/**
 	 * @see org.osgi.framework.BundleContext#getAllServiceReferences(java.lang.String, java.lang.String)
 	 */
-	public ServiceReference[] getAllServiceReferences(String clazz,
-			String filter) throws InvalidSyntaxException { return m_serviceContext.getAllServiceReferences(clazz, filter); }
+	public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
+		return m_serviceContext.getAllServiceReferences(clazz, filter); 
+	}
 
 	/**
 	 * @see org.osgi.framework.BundleContext#getBundle()
@@ -140,8 +144,9 @@ public class IPojoContext implements BundleContext {
 	/**
 	 * @see org.osgi.framework.BundleContext#getServiceReferences(java.lang.String, java.lang.String)
 	 */
-	public ServiceReference[] getServiceReferences(String clazz, String filter)
-			throws InvalidSyntaxException { return m_serviceContext.getServiceReferences(clazz, filter); }
+	public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException { 
+		return m_serviceContext.getServiceReferences(clazz, filter); 
+	}
 
 	/**
 	 * @see org.osgi.framework.BundleContext#installBundle(java.lang.String)
@@ -151,8 +156,9 @@ public class IPojoContext implements BundleContext {
 	/**
 	 * @see org.osgi.framework.BundleContext#installBundle(java.lang.String, java.io.InputStream)
 	 */
-	public Bundle installBundle(String location, InputStream input)
-			throws BundleException { return m_bundleContext.installBundle(location, input); }
+	public Bundle installBundle(String location, InputStream input) throws BundleException { 
+		return m_bundleContext.installBundle(location, input); 
+	}
 
 	/**
 	 * @see org.osgi.framework.BundleContext#registerService(java.lang.String[], java.lang.Object, java.util.Dictionary)
@@ -187,10 +193,10 @@ public class IPojoContext implements BundleContext {
 	public boolean ungetService(ServiceReference reference) { return m_serviceContext.ungetService(reference); }
 	
 	/**
-	 * Set the instance manager to the service context.
-	 * @param cm : the component manager
+	 * Set the instance to the service context.
+	 * @param ci : the component instance
 	 */
-	public void setComponentInstance(ComponentInstance ci) {m_serviceContext.setComponentInstance(ci); }
+	public void setComponentInstance(ComponentInstance ci) { m_serviceContext.setComponentInstance(ci); }
 	
 	/**
 	 * Get the instance manager from the service context.

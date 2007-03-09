@@ -88,7 +88,8 @@ public class ProvidedService implements ServiceFactory {
     /**
      * Construct a provided service object.
      * @param handler : the provided service handler.
-     * @param psm : the provided service metadata.
+     * @param specification : specifications provided by this provided service
+     * @param factoryPolicy : service providing policy
      */
     public ProvidedService(ProvidedServiceHandler handler, String[] specification, int factoryPolicy) {
         m_handler = handler;
@@ -107,7 +108,7 @@ public class ProvidedService implements ServiceFactory {
      * @param props : the properties to attached to the service registration
      */
     protected void setProperties(Property[] props) { 
-    	for(int i = 0; i < props.length; i++) {
+    	for (int i = 0; i < props.length; i++) {
     		addProperty(props[i]);
     	}
     }
@@ -126,8 +127,9 @@ public class ProvidedService implements ServiceFactory {
             System.arraycopy(m_properties, 0, newProp, 0, m_properties.length);
             newProp[m_properties.length] = p;
             m_properties = newProp;
+        } else { 
+        	m_properties = new Property[] {p}; 
         }
-        else { m_properties = new Property[] {p}; }
     }
 
     /**
@@ -141,12 +143,14 @@ public class ProvidedService implements ServiceFactory {
         }
 
         if (idx >= 0) {
-            if ((m_properties.length - 1) == 0) { m_properties = new Property[0]; }
-            else {
+            if ((m_properties.length - 1) == 0) { 
+            	m_properties = new Property[0]; 
+            } else {
                 Property[] newPropertiesList = new Property[m_properties.length - 1];
                 System.arraycopy(m_properties, 0, newPropertiesList, 0, idx);
                 if (idx < newPropertiesList.length) {
-                    System.arraycopy(m_properties, idx + 1, newPropertiesList, idx, newPropertiesList.length - idx); }
+                    System.arraycopy(m_properties, idx + 1, newPropertiesList, idx, newPropertiesList.length - idx); 
+                }
                 m_properties = newPropertiesList;
             }
         }
@@ -156,8 +160,9 @@ public class ProvidedService implements ServiceFactory {
      * @return the service reference of the provided service (null if the service is not published).
      */
     public ServiceReference getServiceReference() {
-        if (m_serviceRegistration != null) { return m_serviceRegistration.getReference(); }
-        else { return null; }
+        if (m_serviceRegistration != null) { 
+        	return m_serviceRegistration.getReference(); 
+        } else { return null; }
     }
 
     /**
@@ -179,7 +184,7 @@ public class ProvidedService implements ServiceFactory {
 
             default :
                 m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] Unknown factory policy for " + m_serviceSpecification + " : " + m_factoryPolicy);
-            return null;
+                return null;
         }
 
     }
@@ -231,8 +236,11 @@ public class ProvidedService implements ServiceFactory {
      * @return The state of the provided service.
      */
     public int getState() {
-    	if(m_serviceRegistration == null) { return UNREGISTERED; }
-    	else { return REGISTERED; }
+    	if (m_serviceRegistration == null) { 
+    		return UNREGISTERED; 
+    	} else { 
+    		return REGISTERED; 
+    	}
     }
 
     /**
@@ -273,14 +281,14 @@ public class ProvidedService implements ServiceFactory {
         // Contruct the service properties list
         Properties serviceProperties = getServiceProperties();
         
-        if(serviceProperties == null) {
+        if (serviceProperties == null) {
         	m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Cannot get the properties of the provided service");
         }
 
         // Update the service registration
         if (m_serviceRegistration != null) {
-                m_serviceRegistration.setProperties(serviceProperties);
-            }
+            m_serviceRegistration.setProperties(serviceProperties);
+        }
     }
 
     /**
@@ -295,7 +303,6 @@ public class ProvidedService implements ServiceFactory {
             Property prop = new Property(this, key, value);
             addProperty(prop);
         }
-        update();
     }
 
     /**
@@ -308,7 +315,6 @@ public class ProvidedService implements ServiceFactory {
             String key = (String) keys.nextElement();
             removeProperty(key);
         }
-        update();
     }
 
 	/**

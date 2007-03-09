@@ -70,8 +70,11 @@ public class PropertyDescription {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        if (m_value != null) { return getName() + " - " + getType() + " - " + getValue(); }
-        else { return getName() + " - " + getType() + " - REQUIRED"; }
+        if (m_value != null) { 
+        	return getName() + " - " + getType() + " - " + getValue(); 
+        } else { 
+        	return getName() + " - " + getType() + " - REQUIRED"; 
+        }
     }
 
 }

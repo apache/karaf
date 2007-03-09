@@ -30,12 +30,12 @@ import org.osgi.framework.ServiceReference;
 public class ProvidedServiceDescription {
 	
 	/**
-	 * State : the service is unregistered 
+	 * State : the service is unregistered.
 	 */
 	public static final int UNREGISTERED = 0;
 	
 	/**
-	 * State : the service is registered
+	 * State : the service is registered.
 	 */
 	public static final int REGISTERED = 1;
 
@@ -75,9 +75,8 @@ public class ProvidedServiceDescription {
      * @param serviceSpecification : the provided contract
      * @param state : state (UNREGITRED | REGISTRED)
      * @param sr : Service Registration (to obtain the reference), or null if state is UNREGISTRED
-     * @param parent : the component description declaring this proided service
      */
-    public ProvidedServiceDescription(String[] serviceSpecification, int state, ServiceReference sr/*, InstanceDescription parent*/) {
+    public ProvidedServiceDescription(String[] serviceSpecification, int state, ServiceReference sr) {
         m_serviceSpecification = serviceSpecification;
         m_state = state;
         m_serviceReference = sr;

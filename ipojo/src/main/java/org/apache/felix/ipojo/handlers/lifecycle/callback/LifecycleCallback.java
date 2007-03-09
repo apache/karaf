@@ -52,7 +52,10 @@ public class LifecycleCallback {
     /**
      * LifecycleCallback constructor.
      * @param hh : the callback handler calling the callback
-     * @param hm : the callback metadata
+     * @param initialState : initial state of the callback
+     * @param finalState : finali state of the callback
+     * @param method : method to invoke
+     * @param isStatic : is the method static ?
      */
     public LifecycleCallback(LifecycleCallbackHandler hh, String initialState, String finalState, String method, boolean isStatic) {
     	if (initialState.equals("VALID")) { m_initialState = InstanceManager.VALID; }

@@ -70,7 +70,11 @@ public class Property {
     /**
      * Property constructor.
      * @param ps : the provided service
-     * @param pm : metadata of the property
+     * @param name : name of the property
+     * @param field : name of the field (if a field is attached to the property)
+     * @param type : type of the property
+     * @param value : initial value of the property
+     * @param manipulation : manipulation metadata
      */
     public Property(ProvidedService ps, String name, String field, String type, String value, Element manipulation) {
         m_providedService = ps;
@@ -85,15 +89,15 @@ public class Property {
         }
         
         // Check type if not already set
-        if(m_type == null) {
-        	if(field == null) { ps.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The property "+ m_name + " has neither type neither field."); return; }
-                for (int j = 0; j < manipulation.getElements("Field").length; j++) {
-                    if (field.equals(manipulation.getElements("Field")[j].getAttribute("name"))) {
-                        m_type = manipulation.getElements("Field")[j].getAttribute("type");
-                        break;
-                    }
+        if (m_type == null) {
+        	if (field == null) { ps.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The property " + m_name + " has neither type neither field."); return; }
+            for (int j = 0; j < manipulation.getElements("Field").length; j++) {
+                if (field.equals(manipulation.getElements("Field")[j].getAttribute("name"))) {
+                    m_type = manipulation.getElements("Field")[j].getAttribute("type");
+                    break;
                 }
-                if (m_type == null) { m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + ps.getInstanceManager().getClassName() + "] A declared property was not found in the class : " + m_field); }
+            }
+            if (m_type == null) { m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + ps.getInstanceManager().getClassName() + "] A declared property was not found in the class : " + m_field); }
         }
         
         if (m_initialValue != null) { setValue(m_initialValue); }
@@ -125,7 +129,6 @@ public class Property {
      */
     protected void set(String s) {
         setValue(s);
-        m_providedService.update();
     }
 
     /**
@@ -135,7 +138,6 @@ public class Property {
      */
     protected void set(Object o) {
         m_value = o;
-        m_providedService.update();
     }
 
     /**
@@ -238,12 +240,14 @@ public class Property {
             float[] fl = new float[values.length];
             for (int i = 0; i < values.length; i++) { fl[i] = new Float(values[i]).floatValue(); }
             m_value = fl;
-            return; }
+            return; 
+        }
         if (internalType.equals("double")) {
             double[] dl = new double[values.length];
             for (int i = 0; i < values.length; i++) { dl[i] = new Double(values[i]).doubleValue(); }
             m_value = dl;
-            return; }
+            return; 
+        }
 
         // Else it is a neither a primitive type neither a String -> create the object by calling a constructor with a string in argument.
         try {

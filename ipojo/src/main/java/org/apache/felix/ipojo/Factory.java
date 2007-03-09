@@ -62,5 +62,14 @@ public interface Factory {
      * @return the name of the factory.
      */
     String getName();
+    
+    
+    /**
+     * Reconfigure an instance already created.
+     * This configuration need to have the name property to identify the instance.
+     * @param conf : the configuration to reconfigure the instance.
+     * @throws UnacceptableConfiguration : if the given configuration is not consistent for the tragetted instance.
+     */
+    void reconfigure(Dictionary conf) throws UnacceptableConfiguration;
 
 }

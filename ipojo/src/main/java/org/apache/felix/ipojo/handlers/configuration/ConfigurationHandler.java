@@ -29,17 +29,13 @@ import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.Logger;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
 
 /**
  * Handler managing the Configuration Admin.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public class ConfigurationHandler extends Handler implements ManagedService {
+public class ConfigurationHandler extends Handler {
 
     /**
      * Reference on the instance manager.
@@ -61,14 +57,15 @@ public class ConfigurationHandler extends Handler implements ManagedService {
      * Properties propagated at the last "updated".
      */
     private Dictionary m_propagated = new Properties();
-
+    
+    
     /**
-     * PID of the component.
+     * Properties to propage.
      */
-    private String m_pid;
+    private Dictionary m_toPropagate = new Properties();
 
     /**
-     * should the component provided ManagedService ?
+     * should the component propagate configuration ?
      */
     private boolean m_isConfigurable;
 
@@ -97,20 +94,28 @@ public class ConfigurationHandler extends Handler implements ManagedService {
 
         // Check if the component is dynamically configurable
         m_isConfigurable = false;
-        if (confs[0].containsAttribute("configurable") && confs[0].getAttribute("configurable").equalsIgnoreCase("true")) { m_isConfigurable = true; }
+        if (confs[0].containsAttribute("configurable") && confs[0].getAttribute("configurable").equalsIgnoreCase("true")) { m_isConfigurable = true; m_toPropagate = configuration; }
 
         Element[] configurables = confs[0].getElements("Property");
 
         for (int i = 0; i < configurables.length; i++) {
             String fieldName = configurables[i].getAttribute("field");
             String name = null;
-            if (configurables[i].containsAttribute("name")) { name = configurables[i].getAttribute("name"); }
-            else { name = fieldName; }
+            if (configurables[i].containsAttribute("name")) { 
+            	name = configurables[i].getAttribute("name"); 
+            } else { 
+            	name = fieldName; 
+            }
             String value = null;
             if (configurables[i].containsAttribute("value")) { value = configurables[i].getAttribute("value"); }
 
-            if (name != null && configuration.get(name) != null && configuration.get(name) instanceof String) { value = (String) configuration.get(name); }
-            else { if (fieldName != null &&  configuration.get(fieldName) != null && configuration.get(fieldName) instanceof String) { value = (String) configuration.get(fieldName); } }
+            if (name != null && configuration.get(name) != null && configuration.get(name) instanceof String) { 
+            	value = (String) configuration.get(name); 
+            } else { 
+            	if (fieldName != null &&  configuration.get(fieldName) != null && configuration.get(fieldName) instanceof String) { 
+            		value = (String) configuration.get(fieldName); 
+            	} 
+            }
 
             // Detect the type of the property 
             Element manipulation = metadata.getElements("Manipulation")[0];
@@ -124,18 +129,14 @@ public class ConfigurationHandler extends Handler implements ManagedService {
             
             ConfigurableProperty cp = new ConfigurableProperty(name, fieldName, value, type, this);
             
-            if (cp.getValue() != null) { cd.addProperty(new PropertyDescription(name, type, cp.getValue().toString())); }
-            else { cd.addProperty(new PropertyDescription(name, type, null)); }
+            if (cp.getValue() != null) { 
+            	cd.addProperty(new PropertyDescription(name, type, cp.getValue().toString())); 
+            } else { 
+            	cd.addProperty(new PropertyDescription(name, type, null)); 
+            }
 
             addProperty(cp);
         }
-
-        // Get the PID in the configuration name :
-        if (configuration.get("name") != null) { m_pid = (String) configuration.get("name"); }
-        else { m_pid = metadata.getAttribute("className"); }
-
-        // Get the provided service handler :
-        m_providedServiceHandler = (ProvidedServiceHandler) m_manager.getHandler(ProvidedServiceHandler.class.getName());
 
         if (configurables.length > 0) {
             String[] fields = new String[m_configurableProperties.length];
@@ -145,42 +146,36 @@ public class ConfigurationHandler extends Handler implements ManagedService {
                 // Check if the instance configuration contains value for the current property :
                 String name = m_configurableProperties[k].getName();
                 String fieldName = m_configurableProperties[k].getField();
-                if (name != null && configuration.get(name) != null && !(configuration.get(name) instanceof String)) { m_configurableProperties[k].setValue(configuration.get(name)); }
-                else { if (fieldName != null &&  configuration.get(fieldName) != null && !(configuration.get(fieldName) instanceof String)) { m_configurableProperties[k].setValue(configuration.get(fieldName)); } }
+                if (name != null && configuration.get(name) != null && !(configuration.get(name) instanceof String)) { 
+                	m_configurableProperties[k].setValue(configuration.get(name)); 
+                } else { 
+                	if (fieldName != null &&  configuration.get(fieldName) != null && !(configuration.get(fieldName) instanceof String)) { 
+                		m_configurableProperties[k].setValue(configuration.get(fieldName)); 
+                	} 
+                }
             }
             m_manager.register(this, fields);
         }
-        else { return; }
     }
 
     /**
      * @see org.apache.felix.ipojo.Handler#stop()
      */
-    public void stop() {
-        // Unregister the service
-        if (m_isConfigurable && m_sr != null) {
-            m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Unregister Managed Service");
-            m_sr.unregister();
-            m_sr = null;
-        }
-
-    }
+    public void stop() {    }
 
     /**
      * @see org.apache.felix.ipojo.Handler#start()
      */
     public void start() {
-        // Unregister the service if already registred (it should not happen )
-        if (m_isConfigurable && m_sr != null) { m_sr.unregister(); }
+        // Get the provided service handler :
+        m_providedServiceHandler = (ProvidedServiceHandler) m_manager.getHandler(ProvidedServiceHandler.class.getName());
 
-        // Register the ManagedService
+        // Propagation
         if (m_isConfigurable) {
-            BundleContext bc = m_manager.getContext();
-            Dictionary properties = new Properties();
-            properties.put(Constants.SERVICE_PID, m_pid);
-
-            m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Register Managed Service");
-            m_sr = bc.registerService(ManagedService.class.getName(), this, properties);
+        	for (int i = 0; i < m_configurableProperties.length; i++) {
+        		m_toPropagate.put(m_configurableProperties[i].getName(), m_configurableProperties[i].getValue());
+        	}
+        	reconfigure(m_toPropagate);
         }
     }
 
@@ -229,47 +224,6 @@ public class ConfigurationHandler extends Handler implements ManagedService {
     }
 
     /**
-     * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
-     */
-    public void updated(Dictionary np) throws ConfigurationException {
-        Properties toPropagate = new Properties();
-        if (np != null) {
-            Enumeration keysEnumeration = np.keys();
-            while (keysEnumeration.hasMoreElements()) {
-                String name = (String) keysEnumeration.nextElement();
-                Object value = np.get(name);
-                boolean find = false;
-                // Check if the field is a configurable property
-                for (int i = 0; !find && i < m_configurableProperties.length; i++) {
-                    if (m_configurableProperties[i].getName().equals(name)) {
-                        // Check if the value has change
-                        if (m_configurableProperties[i].getValue() == null || !m_configurableProperties[i].getValue().equals(value)) {
-                            m_manager.setterCallback(m_configurableProperties[i].getField(), value); // says that the value has change
-                        }
-                        find = true;
-                        // Else do nothing
-                    }
-                }
-                if (!find) {
-                    //The property is not a configurable property
-                    m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] The property " + name + " will be propagated to service registrations");
-                    toPropagate.put(name, value);
-                }
-            }
-        }
-        else { m_manager.getFactory().getLogger().log(Logger.WARNING, "[" + m_manager.getClassName() + "] The pushed configuration is null for " + m_pid); }
-
-        // Propagation of the properties to service registrations :
-        if (m_providedServiceHandler != null && !toPropagate.isEmpty()) {
-            m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Properties will be propagated");
-            m_providedServiceHandler.removeProperties(m_propagated);
-            m_providedServiceHandler.addProperties(toPropagate);
-            m_propagated = toPropagate;
-        }
-
-    }
-
-    /**
      * Add the given property metadata to the property metadata list.
      * @param p : property metdata to add
      */
@@ -283,8 +237,7 @@ public class ConfigurationHandler extends Handler implements ManagedService {
             System.arraycopy(m_configurableProperties, 0, newProp, 0, m_configurableProperties.length);
             newProp[m_configurableProperties.length] = p;
             m_configurableProperties = newProp;
-        }
-        else {
+        } else {
             m_configurableProperties = new ConfigurableProperty[] {p};
         }
     }
@@ -299,6 +252,45 @@ public class ConfigurationHandler extends Handler implements ManagedService {
             if (m_configurableProperties[i].getName().equals(name)) { return true; }
         }
         return false;
+    }
+    
+    /**
+     * @see org.apache.felix.ipojo.Handler#reconfigure(java.util.Dictionary)
+     */
+    public void reconfigure(Dictionary np) {
+    	Properties toPropagate = new Properties();
+        Enumeration keysEnumeration = np.keys();
+        while (keysEnumeration.hasMoreElements()) {
+            String name = (String) keysEnumeration.nextElement();
+            Object value = np.get(name);
+            boolean find = false;
+            // Check if the field is a configurable property
+            for (int i = 0; !find && i < m_configurableProperties.length; i++) {
+                if (m_configurableProperties[i].getName().equals(name)) {
+                    // Check if the value has change
+                    if (m_configurableProperties[i].getValue() == null || !m_configurableProperties[i].getValue().equals(value)) {
+                        m_manager.setterCallback(m_configurableProperties[i].getField(), value); // says that the value has changed
+                    }
+                    find = true;
+                    // Else do nothing
+                }
+            }
+            if (!find) {
+                //The property is not a configurable property
+                toPropagate.put(name, value);
+            }
+        }
+
+        // Propagation of the properties to service registrations :
+        if (m_providedServiceHandler != null && !toPropagate.isEmpty()) {
+            m_providedServiceHandler.removeProperties(m_propagated);
+            
+            // Remove to name props
+            toPropagate.remove("name");
+            
+            m_providedServiceHandler.addProperties(toPropagate);
+            m_propagated = toPropagate;
+        }
     }
 
 }

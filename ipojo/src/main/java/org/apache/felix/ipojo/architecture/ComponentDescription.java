@@ -75,8 +75,8 @@ public class ComponentDescription {
      * @param pd : the property to add
      */
     public void addProperty(PropertyDescription pd) { 
-    	for(int i = 0; i < m_properties.length; i++) {
-    		if(m_properties[i].getName().equals(pd.getName())) { return; }
+    	for (int i = 0; i < m_properties.length; i++) {
+    		if (m_properties[i].getName().equals(pd.getName())) { return; }
     	}
     	
     	PropertyDescription[] newProps = new PropertyDescription[m_properties.length + 1];
@@ -95,10 +95,10 @@ public class ComponentDescription {
      * @param serviceSpecification : the provided service to add (interface name)
      */
     public void addProvidedServiceSpecification(String serviceSpecification) { 
-            String[] newSs = new String[m_providedServiceSpecification.length + 1];
-            System.arraycopy(m_providedServiceSpecification, 0, newSs, 0, m_providedServiceSpecification.length);
-            newSs[m_providedServiceSpecification.length] = serviceSpecification;
-            m_providedServiceSpecification = newSs;
+        String[] newSs = new String[m_providedServiceSpecification.length + 1];
+        System.arraycopy(m_providedServiceSpecification, 0, newSs, 0, m_providedServiceSpecification.length);
+        newSs[m_providedServiceSpecification.length] = serviceSpecification;
+        m_providedServiceSpecification = newSs;
     }
     
     

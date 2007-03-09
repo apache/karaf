@@ -69,8 +69,9 @@ public class Callback {
         Method method = m_manager.getClazz().getDeclaredMethod(m_method, new Class[] {});
         method.setAccessible(true);
 
-        if (m_isStatic) { method.invoke(null, new Object[]{}); }
-        else {
+        if (m_isStatic) { 
+        	method.invoke(null, new Object[]{}); 
+        } else {
             // Two cases :
             // - if instances already exists : call on each instances
             // - if no instance exists : create an instance
@@ -119,8 +120,9 @@ public class Callback {
         Method method = m_manager.getClazz().getDeclaredMethod(m_method, classes);
         method.setAccessible(true);
 
-        if (m_isStatic) { method.invoke(null, arg); }
-        else {
+        if (m_isStatic) { 
+        	method.invoke(null, arg); 
+        } else {
             // Two cases :
             // - if instances already exists : call on each instances
             // - if no instance exists : create an instance

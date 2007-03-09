@@ -59,10 +59,12 @@ public class ConfigurableProperty {
      */
     public ConfigurableProperty(String name, String field, String value, String type, ConfigurationHandler ch) {
         m_handler = ch;
-        if (name != null) { m_name = name; }
-        else { m_name = field; }
+        if (name != null) { 
+        	m_name = name; 
+        } else { 
+        	m_name = field; 
+        }
         m_field = field;
-
         if (value != null) { setValue(m_field, value, type); }
 
     }
@@ -173,12 +175,14 @@ public class ConfigurableProperty {
             float[] fl = new float[values.length];
             for (int i = 0; i < values.length; i++) { fl[i] = new Float(values[i]).floatValue(); }
             m_value = fl;
-            return; }
+            return; 
+        }
         if (internalType.equals("double")) {
             double[] dl = new double[values.length];
             for (int i = 0; i < values.length; i++) { dl[i] = new Double(values[i]).doubleValue(); }
             m_value = dl;
-            return; }
+            return;
+        }
 
         // Else it is a neither a primitive type neither a String -> create the object by calling a constructor with a string in argument.
         try {

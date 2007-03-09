@@ -75,9 +75,7 @@ public class Activator implements BundleActivator {
             System.arraycopy(m_factories, 0, newFactory, 0, m_factories.length);
             newFactory[m_factories.length] = factory;
             m_factories = newFactory;
-        }
-        // Else create an array of size one with the new Factory
-        else { m_factories = new ComponentFactory[] {factory}; }
+        } else { m_factories = new ComponentFactory[] {factory}; }         // Else create an array of size one with the new Factory
     }
 
     /**
@@ -111,7 +109,7 @@ public class Activator implements BundleActivator {
             ComponentFactory factory = m_factories[i];
             factory.stop();
         }
-        if(m_creator != null) { m_creator.stop(); }
+        if (m_creator != null) { m_creator.stop(); }
         m_factories = new ComponentFactory[0]; // Release all factories
     }
 
@@ -140,32 +138,32 @@ public class Activator implements BundleActivator {
      */
     private void start() {
     	// Start the factories
-    	for(int j = 0; j < m_factories.length; j++) { m_factories[j].start(); }
+    	for (int j = 0; j < m_factories.length; j++) { m_factories[j].start(); }
     	
     	Dictionary[] outsiders = new Dictionary[0];
-    	for(int i = 0; i < m_configurations.length; i++) {
+    	for (int i = 0; i < m_configurations.length; i++) {
     		Dictionary conf = m_configurations[i];
     		boolean created = false;
-    		for(int j = 0; j < m_factories.length; j++) {
+    		for (int j = 0; j < m_factories.length; j++) {
     			String componentClass = m_factories[j].getComponentClassName();
     			String factoryName = m_factories[j].getFactoryName();
-    			if(conf.get("component") != null && (conf.get("component").equals(componentClass) || conf.get("component").equals(factoryName))) {
+    			if (conf.get("component") != null && (conf.get("component").equals(componentClass) || conf.get("component").equals(factoryName))) {
     				try {
 						m_factories[j].createComponentInstance(conf);
 	    				created = true;
 					} catch (UnacceptableConfiguration e) {
-						System.err.println("Cannot create the instance " + conf.get("name") +" : " + e.getMessage());
+						System.err.println("Cannot create the instance " + conf.get("name") + " : " + e.getMessage());
 					} 
     			}
     		}
-    		if(!created && conf.get("component") != null) {
+    		if (!created && conf.get("component") != null) {
     	        if (outsiders.length != 0) {
     	            Dictionary[] newList = new Dictionary[outsiders.length + 1];
     	            System.arraycopy(outsiders, 0, newList, 0, outsiders.length);
     	            newList[outsiders.length] = conf;
     	            outsiders = newList;
-    	        }
-    	        else { outsiders = new Dictionary[] {conf}; }
+    	        } else { outsiders = new Dictionary[] {conf}; }
+    	        
     		}
     	}
     	

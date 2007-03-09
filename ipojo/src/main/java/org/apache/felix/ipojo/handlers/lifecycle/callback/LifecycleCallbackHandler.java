@@ -49,7 +49,7 @@ public class LifecycleCallbackHandler extends Handler {
     private InstanceManager m_manager;
 
 	/**
-	 * Does a POJO object be created at starting
+	 * Does a POJO object be created at starting.
 	 */
 	private boolean m_immediate = false;
 
@@ -67,8 +67,7 @@ public class LifecycleCallbackHandler extends Handler {
             System.arraycopy(m_callbacks, 0, newHk, 0, m_callbacks.length);
             newHk[m_callbacks.length] = hk;
             m_callbacks = newHk;
-        }
-        else {
+        } else {
             m_callbacks = new LifecycleCallback[] {hk};
         }
 
@@ -121,7 +120,7 @@ public class LifecycleCallbackHandler extends Handler {
      */
     public void stateChanged(int state) {
     	// Manage immediate component
-    	if(m_state == ComponentInstance.INVALID && state == ComponentInstance.VALID && m_manager.getPojoObjects().length == 0) {
+    	if (m_state == ComponentInstance.INVALID && state == ComponentInstance.VALID && m_manager.getPojoObjects().length == 0) {
     		m_manager.createPojoObject();
     	}
     	

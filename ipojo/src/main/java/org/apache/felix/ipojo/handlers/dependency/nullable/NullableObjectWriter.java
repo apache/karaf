@@ -57,7 +57,7 @@ public class NullableObjectWriter implements Opcodes {
 
             //String[] segment = contractName.split("[.]");
             //String className = "org/apache/felix/ipojo/" + segment[segment.length - 1] + "Nullable";
-            String className=contractName.replace('.', '/')+"Nullable";
+            String className = contractName.replace('.', '/') + "Nullable";
 
 
             // Create the class
@@ -65,12 +65,12 @@ public class NullableObjectWriter implements Opcodes {
                     "java/lang/Object", new String[]{contractName.replace('.', '/'), "org/apache/felix/ipojo/Nullable"});
 
             // Inject a constructor <INIT>()V
-                MethodVisitor cst = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
-                cst.visitVarInsn(ALOAD, 0);
-                cst.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V");
-                cst.visitInsn(RETURN);
-                cst.visitMaxs(0, 0);
-                cst.visitEnd();
+            MethodVisitor cst = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
+            cst.visitVarInsn(ALOAD, 0);
+            cst.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V");
+            cst.visitInsn(RETURN);
+            cst.visitMaxs(0, 0);
+            cst.visitEnd();
 
             // Methods Generation :
             MethodSignature[] methods = msv.getMethods();
@@ -87,7 +87,7 @@ public class NullableObjectWriter implements Opcodes {
                 Type returnType = Type.getReturnType(desc);
                     // TODO : manage the other type primitive for Nullable
                     // Primitive type :
-                    switch (returnType.getSort()) {
+                switch (returnType.getSort()) {
                     case Type.BOOLEAN:
                     case Type.INT:
                     case Type.BYTE:
@@ -117,7 +117,7 @@ public class NullableObjectWriter implements Opcodes {
                     default :
                         System.err.println("Type not yet managed : " + returnType);
                     	break;
-                    }
+                }
                 mv.visitMaxs(0, 0);
                 mv.visitEnd();
             }

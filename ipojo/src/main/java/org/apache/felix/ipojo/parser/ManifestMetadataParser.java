@@ -62,32 +62,44 @@ public class ManifestMetadataParser {
         return dicts;
     }
     
+    /**
+     * Parse an Element to get a dictionary.
+     * @param instance : the Element describing an instance.
+     * @return : the resulting dictionary
+     * @throws ParseException
+     */
     private Dictionary parseInstance(Element instance) throws ParseException {
     	Dictionary dict = new Properties();
-    	if(!instance.containsAttribute("name")) { throw new ParseException("An instance does not have the 'name' attribute"); }
-    	if(!instance.containsAttribute("component")) { throw new ParseException("An instance does not have the 'component' attribute"); }
+    	if (!instance.containsAttribute("name")) { throw new ParseException("An instance does not have the 'name' attribute"); }
+    	if (!instance.containsAttribute("component")) { throw new ParseException("An instance does not have the 'component' attribute"); }
     	dict.put("name", instance.getAttribute("name"));
     	dict.put("component", instance.getAttribute("component"));
     	
-    	for(int i=0; i < instance.getElements("property").length; i++) {
+    	for (int i = 0; i < instance.getElements("property").length; i++) {
     		parseProperty(instance.getElements("property")[i], dict);
     	}
     	
     	return dict;
     }
     
+    /**
+     * @param prop
+     * @param dict
+     * @throws ParseException
+     */
     private void parseProperty(Element prop, Dictionary dict) throws ParseException {
     	// Check that the property has a name 
-    	if(!prop.containsAttribute("name")) { throw new ParseException("A property does not have the 'name' attribute"); }
+    	if (!prop.containsAttribute("name")) { throw new ParseException("A property does not have the 'name' attribute"); }
     	// Final case : the property element has a 'value' attribute
-    	if(prop.containsAttribute("value")) { dict.put(prop.getAttribute("name"), prop.getAttribute("value")); }
-    	else {
+    	if (prop.containsAttribute("value")) { 
+    		dict.put(prop.getAttribute("name"), prop.getAttribute("value")); 
+    	} else {
     		// Recursive case
     		// Check if there is 'property' element
     		Element[] subProps = prop.getElements("property");
-    		if(subProps.length == 0) { throw new ParseException("A complex property must have at least one 'property' sub-element"); }
+    		if (subProps.length == 0) { throw new ParseException("A complex property must have at least one 'property' sub-element"); }
     		Dictionary dict2 = new Properties();
-    		for(int i = 0; i < subProps.length; i++) {
+    		for (int i = 0; i < subProps.length; i++) {
     			parseProperty(subProps[i], dict2);
     			dict.put(prop.getAttribute("name"), dict2);
     		}
@@ -104,8 +116,7 @@ public class ManifestMetadataParser {
             System.arraycopy(m_elements, 0, newElementsList, 0, m_elements.length);
             newElementsList[m_elements.length] = elem;
             m_elements = newElementsList;
-        }
-        else { m_elements = new Element[] {elem}; }
+        } else { m_elements = new Element[] {elem}; }
     }
 
     /**
@@ -120,8 +131,7 @@ public class ManifestMetadataParser {
             if ((m_elements.length - 1) == 0) {
                 // It is the last element of the list;
                 m_elements = new Element[0];
-            }
-            else {
+            } else {
                 // Remove the last element of the list :
                 Element[] newElementsList = new Element[m_elements.length - 1];
                 System.arraycopy(m_elements, 0, newElementsList, 0, idx);
@@ -169,8 +179,8 @@ public class ManifestMetadataParser {
             char c = string[i];
 
             switch(c) {
-
-                case '$' :
+            	// Beginning of an attribute.
+                case '$' : 
                     String attName = "";
                     String attValue = "";
                     String attNs = "";
@@ -199,41 +209,45 @@ public class ManifestMetadataParser {
                     m_elements[m_elements.length - 1].addAttribute(att);
                     break;
 
-                case '}' :
+                // End of an element    
+                case '}' : 
                     Element lastElement = removeLastElement();
                     if (m_elements.length != 0) {
                         Element newQueue = m_elements[m_elements.length - 1];
                         newQueue.addElement(lastElement);
-                    }
-                    else {
+                    } else {
                         addElement(lastElement);
                     }
                     break;
-                case ' ' : break; // do nothing;
+
+                // Space
+                case ' ' : 
+                	break; // do nothing;
+                
+                // Default case
                 default :
                     String name = "";
-                String ns = "";
-                c = string[i];
-                while (c != ' ') {
-                    if (c == ':') {
-                        ns = name;
-                        name = "";
-                        i++;
-                        c = string[i];
-                    }
-                    else {
-                        name = name + c;
-                        i++;
-                        c = string[i];
-                    }
-                }
-                // Skip spaces
-                while (string[i] == ' ') { i = i + 1; }
-                i = i + 1; // skip {
-                Element elem = new Element(name, ns);
-                addElement(elem);
-                break;
-            }
+                	String ns = "";
+                	c = string[i];
+                	while (c != ' ') {
+                		if (c == ':') {
+                			ns = name;
+                			name = "";
+                			i++;
+                			c = string[i];
+                		} else {
+                			name = name + c;
+                			i++;
+                			c = string[i];
+                		}
+                	}
+                	// Skip spaces
+                	while (string[i] == ' ') { i = i + 1; }
+                	i = i + 1; // skip {
+                	Element elem = new Element(name, ns);
+                	addElement(elem);
+                	break;
+           	}
         }
     }
 

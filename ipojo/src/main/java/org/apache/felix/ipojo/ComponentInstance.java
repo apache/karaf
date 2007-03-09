@@ -18,6 +18,8 @@
  */
 package org.apache.felix.ipojo;
 
+import java.util.Dictionary;
+
 import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.osgi.framework.BundleContext;
 
@@ -85,6 +87,14 @@ public interface ComponentInstance {
      * @return true if getState returns INVALID or VALID.
      */
     boolean isStarted();
+    
+    /**
+     * Re-configurare an instance.
+     * Do nothing if the instance does not support dynamic reconfiguration.
+     * The reconfiguration does not stop the instance.
+     * @param configuration : the new configuration.
+     */
+    void reconfigure(Dictionary configuration);
 
 
 }

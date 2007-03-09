@@ -94,7 +94,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     private ComponentDescription m_componentDesc;
     
     /**
-     * Logger for the factory (and all component instance)
+     * Logger for the factory (and all component instance).
      */
     private Logger m_logger;
 
@@ -103,7 +103,10 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      */
     private class FactoryClassloader extends ClassLoader  {
     	
-    	HashMap m_definedClasses = new HashMap();
+    	/**
+    	 * Map of defined classes [Name, Class Object].
+    	 */
+    	private HashMap m_definedClasses = new HashMap();
 
         /**
          * load the class.
@@ -150,7 +153,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
          */
         public Class defineClass(String name, byte[] b,
                 ProtectionDomain domain) throws Exception {
-        	if(m_definedClasses.containsKey(name)) { return (Class) m_definedClasses.get(name); } 
+        	if (m_definedClasses.containsKey(name)) { return (Class) m_definedClasses.get(name); } 
             Class c = super.defineClass(name, b, 0, b.length, domain);
             m_definedClasses.put(name, c);
             return c;
@@ -184,8 +187,9 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         m_componentMetadata = cm;
         
         // Get factory PID :
-        if (m_componentMetadata.containsAttribute("factory") && !m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) { m_factoryName = m_componentMetadata.getAttribute("factory"); }
-        else { m_factoryName = m_componentMetadata.getAttribute("className"); }
+        if (m_componentMetadata.containsAttribute("factory") && !m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) { 
+        	m_factoryName = m_componentMetadata.getAttribute("factory");
+        } else { m_factoryName = m_componentMetadata.getAttribute("className"); }
         
         m_logger = new Logger(m_context, m_factoryName, Logger.WARNING);
     }
@@ -203,8 +207,9 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         m_componentMetadata = cm;
         
         // Get factory PID :
-        if (m_componentMetadata.containsAttribute("factory") && !m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) { m_factoryName = m_componentMetadata.getAttribute("factory"); }
-        else { m_factoryName = m_componentMetadata.getAttribute("className"); }
+        if (m_componentMetadata.containsAttribute("factory") && !m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) { 
+        	m_factoryName = m_componentMetadata.getAttribute("factory"); 
+        } else { m_factoryName = m_componentMetadata.getAttribute("className"); }
         
         m_logger = new Logger(m_context, m_factoryName, Logger.WARNING);
     }
@@ -217,7 +222,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         Iterator it = col.iterator();
         while (it.hasNext()) {
             ComponentInstance ci = (ComponentInstance) it.next();
-            if(ci.isStarted()) { ci.stop(); }
+            if (ci.isStarted()) { ci.stop(); }
         }
         m_componentInstances.clear();
         if (m_sr != null) { m_sr.unregister(); }
@@ -279,8 +284,16 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         return m_context.getBundle().loadClass(className);
     }
     
+    /**
+     * Define a class.
+     * @param name : qualified name of the class
+     * @param b : byte array of the class
+     * @param domain : protection domain of the class
+     * @return the defined class object
+     * @throws Exception : an exception occur during the definition
+     */
     public Class defineClass(String name, byte[] b, ProtectionDomain domain) throws Exception {
-    	if(m_classLoader == null) { m_classLoader = new FactoryClassloader(); }
+    	if (m_classLoader == null) { m_classLoader = new FactoryClassloader(); }
     	return m_classLoader.defineClass(name, b, domain);
     }
 
@@ -299,9 +312,9 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     public ComponentInstance createComponentInstance(Dictionary configuration)  throws UnacceptableConfiguration {
     	try {
     		_isAcceptable(configuration);
-    	} catch(UnacceptableConfiguration e) {
+    	} catch (UnacceptableConfiguration e) {
     		m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
-    		throw new UnacceptableConfiguration("The configuration " + configuration + " is not acceptable for " + m_factoryName + ": " + e.getMessage() );
+    		throw new UnacceptableConfiguration("The configuration " + configuration + " is not acceptable for " + m_factoryName + ": " + e.getMessage());
     	}
     	
         IPojoContext context = new IPojoContext(m_context);
@@ -310,8 +323,9 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         instance.configure(m_componentMetadata, configuration);
 
         String pid = null;
-        if (configuration.get("name") != null) { pid = (String) configuration.get("name"); }
-        else { pid = m_componentMetadata.getAttribute("className"); }
+        if (configuration.get("name") != null) { 
+        	pid = (String) configuration.get("name"); 
+        } else { pid = m_componentMetadata.getAttribute("className"); }
 
         m_componentInstances.put(pid, instance);
         instance.start();
@@ -324,9 +338,9 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     public ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration {
     	try {
     		_isAcceptable(configuration);
-    	} catch(UnacceptableConfiguration e) {
+    	} catch (UnacceptableConfiguration e) {
     		m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
-    		throw new UnacceptableConfiguration("The configuration " + configuration + " is not acceptable for " + m_factoryName + ": " + e.getMessage() );
+    		throw new UnacceptableConfiguration("The configuration " + configuration + " is not acceptable for " + m_factoryName + ": " + e.getMessage());
     	}
     	
     	IPojoContext context = new IPojoContext(m_context, serviceContext);
@@ -335,8 +349,11 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         instance.configure(m_componentMetadata, configuration);
 
         String pid = null;
-        if (configuration.get("name") != null) { pid = (String) configuration.get("name"); }
-        else { pid = m_componentMetadata.getAttribute("className"); }
+        if (configuration.get("name") != null) { 
+        	pid = (String) configuration.get("name"); 
+        } else { 
+        	pid = m_componentMetadata.getAttribute("className");
+        }
 
         m_componentInstances.put(pid, instance);
         instance.start();
@@ -350,8 +367,9 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      */
     public void deleted(String pid) {
         InstanceManager cm = (InstanceManager) m_componentInstances.remove(pid);
-        if (cm == null) { return;  } // do nothing, the component does not exist !
-        else { cm.stop(); }
+        if (cm == null) { 
+        	return; // do nothing, the component does not exist !  
+        } else { cm.stop(); }
     }
 
     /**
@@ -372,10 +390,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         		m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
         		throw new ConfigurationException(properties.toString(), e.getMessage());
         	} 
-        }
-        else {
-            cm.stop(); // Stop the component
-            
+        } else {            
             try {
             	properties.put("name", pid); // Add the name in the configuration
 				_isAcceptable(properties); // Test if the configuration is acceptable
@@ -383,9 +398,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
 				m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
         		throw new ConfigurationException(properties.toString(), e.getMessage());
 			}
-			
-            cm.configure(m_componentMetadata, properties); // re-configure the component
-            cm.start(); // restart it
+            cm.reconfigure(properties); // re-configure the component
         }
     }
     
@@ -402,28 +415,47 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      */
     public boolean isAcceptable(Dictionary conf) {
     	// First check that the configuration contains a name : 
-    	if(conf.get("name") == null) { return false; }
+    	if (conf.get("name") == null) { return false; }
     	PropertyDescription[] props = m_componentDesc.getProperties();
-    	for(int i = 0; i < props.length; i++) {
+    	for (int i = 0; i < props.length; i++) {
     		PropertyDescription pd = props[i];
     		// Failed if the props has no default value and the configuration does not push a value 
-    		if(pd.getValue() == null && conf.get(pd.getName()) == null) {
+    		if (pd.getValue() == null && conf.get(pd.getName()) == null) {
     			return false;
     		}
     	}
     	return true;
     }
     
+    /**
+     * Test is a configuration is acceptable for the factory.
+     * @param conf : the configuration to test.
+     * @throws UnacceptableConfiguration : the configuration is not acceptable.
+     */
     private void _isAcceptable(Dictionary conf) throws UnacceptableConfiguration {
-    	if(conf == null || conf.get("name") == null) { throw new UnacceptableConfiguration("The configuration does not contains the \"name\" property"); }
+    	if (conf == null || conf.get("name") == null) { throw new UnacceptableConfiguration("The configuration does not contains the \"name\" property"); }
     	PropertyDescription[] props = m_componentDesc.getProperties();
-    	for(int i = 0; i < props.length; i++) {
+    	for (int i = 0; i < props.length; i++) {
     		PropertyDescription pd = props[i];
     		// Failed if the props has no default value and the configuration does not push a value 
-    		if(pd.getValue() == null && conf.get(pd.getName()) == null) {
+    		if (pd.getValue() == null && conf.get(pd.getName()) == null) {
     			throw new UnacceptableConfiguration("The configuration does not contains the \"" + pd.getName() + "\" property");
     		}
     	}
     }
 
+	/**
+	 * @see org.apache.felix.ipojo.Factory#reconfigure(java.util.Dictionary)
+	 */
+	public void reconfigure(Dictionary properties) throws UnacceptableConfiguration {
+		if (properties == null || properties.get("name") == null) { throw new UnacceptableConfiguration("The configuration does not contains the \"name\" property"); }
+		String name = (String) properties.get("name");
+		InstanceManager cm = (InstanceManager) m_componentInstances.get(name);
+        if (cm == null) { 
+        	return;  // The instance does not exist.
+        } else {
+            _isAcceptable(properties); // Test if the configuration is acceptable
+		}			
+        cm.reconfigure(properties); // re-configure the component
+	}
 }
