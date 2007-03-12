@@ -243,8 +243,11 @@ public class Requirement implements IRequirement
 
     private Filter convertToFilter()
     {
-        StringBuffer sb = new StringBuffer("(&");
-
+        StringBuffer sb = new StringBuffer();
+        if ((m_attributes != null) && (m_attributes.length > 1))
+        {
+            sb.append("(&");
+        }
         for (int i = 0; (m_attributes != null) && (i < m_attributes.length); i++)
         {
             // If this is a package import, then convert wild-carded
@@ -265,13 +268,17 @@ public class Requirement implements IRequirement
                 VersionRange vr = (VersionRange) m_attributes[i].getValue();
                 if (vr.isLowInclusive())
                 {
-                    sb.append("(version>=");
+                    sb.append("(");
+                    sb.append(m_attributes[i].getName());
+                    sb.append(">=");
                     sb.append(vr.getLow().toString());
                     sb.append(")");
                 }
                 else
                 {
-                    sb.append("(!(version<=");
+                    sb.append("(!(");
+                    sb.append(m_attributes[i].getName());
+                    sb.append("<=");
                     sb.append(vr.getLow().toString());
                     sb.append("))");
                 }
@@ -280,13 +287,17 @@ public class Requirement implements IRequirement
                 {
                     if (vr.isHighInclusive())
                     {
-                        sb.append("(version<=");
+                        sb.append("(");
+                        sb.append(m_attributes[i].getName());
+                        sb.append("<=");
                         sb.append(vr.getHigh().toString());
                         sb.append(")");
                     }
                     else
                     {
-                        sb.append("(!(version>=");
+                        sb.append("(!(");
+                        sb.append(m_attributes[i].getName());
+                        sb.append(">=");
                         sb.append(vr.getHigh().toString());
                         sb.append("))");
                     }
@@ -302,7 +313,10 @@ public class Requirement implements IRequirement
             }
         }
 
-        sb.append(")");
+        if ((m_attributes != null) && (m_attributes.length > 1))
+        {
+            sb.append(")");
+        }
 
         try
         {
