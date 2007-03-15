@@ -94,7 +94,7 @@ public class BundlePlugin extends AbstractMojo {
      properties.put(Analyzer.EXPORT_PACKAGE, bsn + ".*");
    }
    String version = project.getVersion();
-   Pattern P_VERSION = Pattern.compile("([0-9]+(\\.[0-9])*)-(.*)");
+   Pattern P_VERSION = Pattern.compile("([0-9]+(\\.[0-9]+)*)-(.*)");
    Matcher m = P_VERSION.matcher(version);
    if (m.matches()) {
      version = m.group(1) + "." + m.group(3);
