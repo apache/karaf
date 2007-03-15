@@ -145,14 +145,12 @@
 
         <module>servicebinder</module>
         <module>wireadmin</module>
-<!-- upnp modules disabled to avoid build failure during the server updates
         <module>upnp.extra</module>
         <module>upnp.basedriver</module>
         <module>upnp.tester</module>
         <module>upnp.sample.tv</module>
         <module>upnp.sample.clock</module>
         <module>upnp.sample.binaryLight</module>
--->
         <!--    <module>http.jetty</module> -->
         <module>scr</module>
 
