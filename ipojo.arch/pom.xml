@@ -32,6 +32,7 @@
         <configuration>
           <osgiManifest>
             <bundleName>iPOJO Arch Command</bundleName>
+            <bundleVersion>0.7.0.incubator-SNAPSHOT</bundleVersion>
             <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
             <bundleDescription>Architecture Shell Command (arch)</bundleDescription>
             <iPOJOMetadata>metadata.xml</iPOJOMetadata>
