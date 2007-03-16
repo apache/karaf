@@ -16,34 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo.parser;
+package org.apache.felix.ipojo;
 
 /**
- * Parse Utils Methods.
+ * Interface implemented by each object created through an manipulated class.
+ * This interface allow to get the component instance from the object.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-public class ParseUtils {
+public interface Pojo {
 	
 	/**
-	 * Parse the string form of an array as {a, b, c}.
-	 * @param str : the string form
-	 * @return the resulting string array
+	 * @return the component instance who create this object.
 	 */
-	public static String[] parseArrays(String str) {
-		// Remove { and }
-		if (str.startsWith("{") && str.endsWith("}")) {
-			String m = str.substring(1, str.length() - 1);
-			// Check empty array
-			m = m.trim();
-			if (m.length() == 0) { return new String[0]; }
-			String[] values = m.split(",");
-			for (int i = 0; i < values.length; i++) {
-				values[i] = values[i].trim();
-			}
-			return values;
-		} else {
-			return new String[] {str};
-		}
-	}
+	ComponentInstance getComponentInstance();
 
 }

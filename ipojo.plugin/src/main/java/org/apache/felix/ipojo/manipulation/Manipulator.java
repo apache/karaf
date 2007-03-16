@@ -22,7 +22,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.apache.felix.ipojo.plugin.IPojoPluginConfiguration;
@@ -44,6 +46,11 @@ public class Manipulator {
 	 * Store the interface implemented by the class.
 	 */
 	private String[] m_interfaces = new String[0];
+	
+	/**
+	 * Store the methods list.
+	 */
+	private List m_methods = new ArrayList();
 
 	/**
 	 * Return the hashmap [name of the field, type of the field].
@@ -62,6 +69,11 @@ public class Manipulator {
 	 * @return the hashmap [name of the field, type of the field].
 	 */
 	public String[] getInterfaces() { return (String[])m_interfaces.clone(); }
+	
+	/**
+	 * @return the method list.
+	 */
+	public List getMethods() { return m_methods; }
 
 	/**
      * Manipulate the class.
@@ -91,9 +103,31 @@ public class Manipulator {
         is1.close();
         
         m_fields = ck.getFields();
-        m_interfaces = new String[ck.getInterfaces().length];
+        
+        // Get interface and remove POJO interface is presents
+        String[] its = ck.getInterfaces();
+        ArrayList l = new ArrayList();
+        for(int i = 0; i < its.length; i++) {
+        	l.add(its[i]);
+        }
+        l.remove("org/apache/felix/ipojo/Pojo");
+        
+        m_interfaces = new String[l.size()];
         for (int i = 0; i < m_interfaces.length; i++) {
-        	m_interfaces[i] = ck.getInterfaces()[i].replace('/', '.');
+        	m_interfaces[i] = ((String) l.get(i)).replace('/', '.');
+        }
+        
+        
+        // Get the method list
+        // Remove iPOJO methods
+        for(int i = 0; i < ck.getMethods().size(); i++) {
+        	MethodDescriptor method = (MethodDescriptor) ck.getMethods().get(i);
+        	if(!(method.getName().startsWith("_get") ||  //Avoid getter method 
+        			method.getName().startsWith("_set") || // Avoid setter method
+        			method.getName().equals("_setComponentManager") || // Avoid the set method
+        			method.getName().equals("getComponentInstance"))){ // Avoid the getComponentInstance method
+        		m_methods.add(method);
+        	}
         }
         
         if(!ck.isalreadyManipulated()) {

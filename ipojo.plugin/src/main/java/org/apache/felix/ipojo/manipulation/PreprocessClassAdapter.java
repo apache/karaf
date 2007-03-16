@@ -41,6 +41,9 @@ import org.objectweb.asm.Type;
  *
  */
 public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
+	
+	
+		private final String POJO_INTERFACE =  "org/apache/felix/ipojo/Pojo";
 
         /**
          * The owner.
@@ -84,8 +87,33 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
             
             // Create the _cmSetter(ComponentManager cm) method
             createComponentManagerSetter();
+            
+            // Add the getComponentInstance
+            createGetComponentInstanceMethod();
+            
+            // Add the POJO interface to the interface list
+            // Check that the POJO interface isnot already in the list
+            boolean found = false;
+            for(int i = 0; i < interfaces.length; i++) {
+            	if(interfaces[i].equals(POJO_INTERFACE)) { found = true; }
+            }
+            String[] itfs;
+            if(!found) {
+            	itfs = new String[interfaces.length + 1];
+            	for(int i = 0; i < interfaces.length; i++) {
+                	itfs[i] = interfaces[i];
+                }
+            	itfs[interfaces.length] = POJO_INTERFACE;
+            } else {
+            	itfs = interfaces;
+            }
+            
+            String str = "";
+            for(int i = 0; i < itfs.length; i++) {
+            	str += itfs[i] + " ";
+            }
 
-            super.visit(version, access, name, signature, superName, interfaces);
+            super.visit(version, access, name, signature, superName, itfs);
         }
         
 
@@ -139,6 +167,20 @@ public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {
            
             mv.visitMaxs(0, 0);
             mv.visitEnd();
+        }
+        
+        /**
+         * Create the getComponentInstance method.
+         */
+        private void createGetComponentInstanceMethod() {
+        	MethodVisitor mv = cv.visitMethod(ACC_PUBLIC, "getComponentInstance", "()Lorg/apache/felix/ipojo/ComponentInstance;", null, null);
+        	
+        	mv.visitVarInsn(ALOAD, 0);
+        	mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
+        	mv.visitInsn(ARETURN);
+        	
+        	mv.visitMaxs(0, 0);
+        	mv.visitEnd();
         }
 
         /** visit Field method.

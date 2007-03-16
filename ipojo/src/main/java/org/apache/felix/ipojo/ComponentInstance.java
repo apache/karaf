@@ -21,6 +21,7 @@ package org.apache.felix.ipojo;
 import java.util.Dictionary;
 
 import org.apache.felix.ipojo.architecture.ComponentDescription;
+import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -67,6 +68,11 @@ public interface ComponentInstance {
      * Each handler can participate to the component description.
      */
     ComponentDescription getComponentDescription();
+    
+    /**
+     * @return the instance description of the current instance
+     */
+    InstanceDescription getInstanceDescription();
 
     /**
      * @return the factory of the component instance.
@@ -95,6 +101,5 @@ public interface ComponentInstance {
      * @param configuration : the new configuration.
      */
     void reconfigure(Dictionary configuration);
-
-
+    
 }

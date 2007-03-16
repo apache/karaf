@@ -18,7 +18,9 @@
 
 package org.osgi.service.cm;
 
-import java.security.*;
+import java.security.BasicPermission;
+import java.security.Permission;
+import java.security.PermissionCollection;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 

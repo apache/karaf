@@ -118,8 +118,7 @@ public class InstanceManager implements ComponentInstance {
         }
 
         // ComponentInfo initialization
-        m_componentDesc = new ComponentDescription();
-        m_componentDesc.setClassName(m_className);
+        m_componentDesc = new ComponentDescription(m_factory.getName(), m_className);
         
         // Add the name
         m_name = (String) configuration.get("name");

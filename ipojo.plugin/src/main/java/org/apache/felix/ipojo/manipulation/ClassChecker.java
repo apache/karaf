@@ -18,7 +18,9 @@
  */
 package org.apache.felix.ipojo.manipulation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
@@ -44,6 +46,11 @@ public class ClassChecker implements ClassVisitor, Opcodes {
 	 * Field hashmap [field name, type] discovered in the component class.
 	 */
 	private HashMap m_fields = new HashMap();
+	
+	/**
+	 * Method List of method descriptor discovered in the component class. 
+	 */
+	private List m_methods = new ArrayList()/*<MethodDesciptor>*/;
 
 	/** Check if the _cm field already exists.
 	 * @see org.objectweb.asm.ClassVisitor#visitField(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
@@ -77,7 +84,7 @@ public class ClassChecker implements ClassVisitor, Opcodes {
      */
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces)  {
     	//Store the interfaces :
-        m_itfs = interfaces;
+    	m_itfs = interfaces;
     }
 
     /**
@@ -108,7 +115,10 @@ public class ClassChecker implements ClassVisitor, Opcodes {
     /**
      * @see org.objectweb.asm.ClassVisitor#visitMethod(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
      */
-    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) { return null; }
+    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) { 
+    	if(!name.equals("<init>")) { m_methods.add(new MethodDescriptor(name, desc)); }
+    	return null; 
+    }
 
     /**
      * @see org.objectweb.asm.ClassVisitor#visitEnd()
@@ -123,10 +133,18 @@ public class ClassChecker implements ClassVisitor, Opcodes {
     }
 
 	/**
-	 * @return the field hashmap [field_name, type]
+	 * @return the field hashmap [field_name, type].
 	 */
 	public HashMap getFields() {
 		return m_fields;
+	}
+	
+	
+	/**
+	 * @return the method list of [method, signature].
+	 */
+	public List getMethods() {
+		return m_methods;
 	}
 
 }

@@ -35,6 +35,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.felix.ipojo.manipulation.Manipulator;
+import org.apache.felix.ipojo.manipulation.MethodDescriptor;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 
@@ -940,7 +941,6 @@ public class OsgiJarMojo extends AbstractMojo {
 		if(namespaces == null) { namespaces = new String[original_meta.length][]; } //NO
         for(int i = 0; i < original_meta.length; i++) {
         	if(original_meta[i].getName().equalsIgnoreCase("component")) { 
-        		getLog().info("Component Class Name : " + original_meta[i].getAttribute("className"));
         		namespaces[i] = original_meta[i].getNamespaces(); 
         		try {
         			manipulator.preProcess(original_meta[i].getAttribute("className"), outputDirectory);
@@ -949,7 +949,6 @@ public class OsgiJarMojo extends AbstractMojo {
         			throw new MojoExecutionException("[iPOJO] Manipulation error in the class : " + original_meta[i].getAttribute("className"));
         		}
         	
-        		getLog().info("Add manipulation metadata for : " + original_meta[i].getAttribute("className"));
         		// Insert information to metadata
         		Element elem = new Element("Manipulation", "");
         		for(int j = 0; j < manipulator.getInterfaces().length; j++) {
@@ -970,6 +969,11 @@ public class OsgiJarMojo extends AbstractMojo {
         			field.addAttribute(attType);
         			elem.addElement(field);
         		}
+        		
+        		for(int j= 0; j < manipulator.getMethods().size(); j++) {
+        			MethodDescriptor method = (MethodDescriptor) manipulator.getMethods().get(j);
+        			elem.addElement(method.getElement());
+        		}
 
         		original_meta[i].addElement(elem);
         	} else { namespaces[i] = new String[0]; }
@@ -980,13 +984,11 @@ public class OsgiJarMojo extends AbstractMojo {
         	meta = meta + metadata[i];
         }
         
-        getLog().info("Metadata of the bundles : " + meta);
 	    archiveConfig.addManifestEntry("iPOJO-Components", meta);
 	        
-	    getLog().info("Set the bundle activator");
 	    setBundleActivator();
 			
-	    getLog().info("iPOJO Manipulation ... SUCCESS");
+	    getLog().info("iPOJO Packaging ... SUCCESS");
 	}
 
 	private String buildManifestMetadata(Element element, String actual) {

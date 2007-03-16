@@ -40,11 +40,26 @@ public class ComponentDescription {
     private PropertyDescription[] m_properties = new PropertyDescription[0];
 
     /**
+     * Get the name of this component type.
+     */
+    private String m_name;
+    
+    /**
+     * Constructor.
+     * @param name : name of the component type (factory name). 
+     * @param className : implementation class.
+     */
+    public ComponentDescription(String name, String className) {
+    	m_name = name;
+    	m_className = className;
+    }
+    
+    /**
      * @see java.lang.Object#toString()
      */
     public String toString() {
         String res = "";
-        res += "Component : " + m_className + "\n";
+        res += "Component Type : " + m_name + " (" + m_className + ") \n";
         for (int i = 0; i < m_providedServiceSpecification.length; i++) {
             res += "\tProvides : " + m_providedServiceSpecification[i] + "\n";
         }
@@ -58,12 +73,6 @@ public class ComponentDescription {
      * @return the component type implementation class name.
      */
     public String getClassName() { return m_className; }
-
-    /**
-     * Set the component type implementation class name.
-     * @param name : the name of the implementation class
-     */
-    public void setClassName(String name) { m_className = name; }
 
     /**
      * @return the list of configuration properties accepted by the component type.
@@ -100,6 +109,11 @@ public class ComponentDescription {
         newSs[m_providedServiceSpecification.length] = serviceSpecification;
         m_providedServiceSpecification = newSs;
     }
+    
+    /**
+     * @return the name of this component type
+     */
+    public String getName() { return m_name; }
     
     
 
