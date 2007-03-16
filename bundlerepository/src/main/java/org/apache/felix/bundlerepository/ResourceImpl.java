@@ -35,10 +35,10 @@ public class ResourceImpl implements Resource
     private List m_capList = new ArrayList();
     private List m_reqList = new ArrayList();
 
-    private String m_resourceURI = "";
-    private String m_docURI = "";
-    private String m_licenseURI = "";
-    private String m_sourceURI = "";
+    private String m_resourceURI = null;
+    private String m_docURI = null;
+    private String m_licenseURI = null;
+    private String m_sourceURI = null;
     private boolean m_converted = false;
 
     public ResourceImpl()
