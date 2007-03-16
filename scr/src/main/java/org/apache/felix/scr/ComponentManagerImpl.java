@@ -72,7 +72,7 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
     private ComponentContext m_componentContext = null;
     
     // In case of a delayed component, this holds a reference to the factory
-    private DelayedComponentServiceFactory m_delayedComponentServiceFactory;
+    private ServiceFactory m_delayedComponentServiceFactory;
     
     /**
      * The constructor receives both the activator and the metadata
@@ -203,8 +203,17 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
 	            //invalidate();
 	            return;
 	        }
-        } else {
-        	m_delayedComponentServiceFactory = new DelayedComponentServiceFactory();
+        }
+        else if ( m_componentMetadata.getServiceMetadata() != null
+            && m_componentMetadata.getServiceMetadata().isServiceFactory() )
+        {
+            // delayed component is a ServiceFactory service
+            m_delayedComponentServiceFactory = new DelayedServiceFactoryServiceFactory();
+        }
+        else
+        {
+            // delayed component is a standard service
+            m_delayedComponentServiceFactory = new DelayedComponentServiceFactory();
         }
         
         // 3. Bind the target services
@@ -495,7 +504,7 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
 
                 for (int index = 0; index < max; index++)
                 {
-                    retval = invokeBindMethod(refs[index]);
+                    retval = invokeBindMethod(m_implementationObject, refs[index]);
                     if(retval == false && (max == 1))
                     {
                         // There was an exception when calling the bind method
@@ -524,7 +533,7 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
 
             for (int i = 0; i < allrefs.length; i++)
             {
-                invokeUnbindMethod((ServiceReference)allrefs[i]);
+                invokeUnbindMethod(m_implementationObject, (ServiceReference)allrefs[i]);
             }
         }
 
@@ -662,18 +671,19 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
          * Call the bind method. In case there is an exception while calling the bind method, the service
          * is not considered to be bound to the instance object
          *
+         * @param implementationObject The object to which the service is bound
          * @param ref A ServiceReference with the service that will be bound to the instance object
          * @param storeRef A boolean that indicates if the reference must be stored (this is used for the delayed components)
          * @return true if the call was successful, false otherwise
         **/
-        private boolean invokeBindMethod(ServiceReference ref) {
+        private boolean invokeBindMethod(Object implementationObject, ServiceReference ref) {
         	// The bind method is only invoked if the implementation object is not null. This is valid
         	// for both immediate and delayed components
-        	if(m_implementationObject != null) {
+        	if(implementationObject != null) {
         		
 		        try {
 		        	// Get the bind method
-		            Method bindMethod = getBindingMethod(m_dependencyMetadata.getBind(),  getInstance().getClass(), m_dependencyMetadata.getInterface());
+		            Method bindMethod = getBindingMethod(m_dependencyMetadata.getBind(), implementationObject.getClass(), m_dependencyMetadata.getInterface());
 		            
 		            if(bindMethod == null){
 		            	// 112.3.1 If the method is not found , SCR must log an error
@@ -694,7 +704,7 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
 		            }
 		            	
 		            // Invoke the method
-		            bindMethod.invoke(getInstance(),new Object[] {parameter});
+		            bindMethod.invoke(implementationObject, new Object[] {parameter});
 		            
 		            // Store the reference
 		        	m_boundServicesRefs.add(ref);                
@@ -713,7 +723,7 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
 		        	Activator.exception("DependencyManager : exception while invoking "+m_dependencyMetadata.getBind()+"()", m_componentMetadata, ex);
 		            return false;
 		        }
-        	} else if( m_implementationObject == null && m_componentMetadata.isImmediate() == false) {
+        	} else if( implementationObject == null && m_componentMetadata.isImmediate() == false) {
         		// In the case the implementation object is null and the component is delayed
         		// then we still have to store the object that is passed to the bind methods
         		// so that it can be used once the implementation object is created.
@@ -728,20 +738,21 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
         /**
          * Call the unbind method
          *
+         * @param implementationObject The object from which the service is unbound
          * @param ref A service reference corresponding to the service that will be unbound
          * @return true if the call was successful, false otherwise
         **/
-        private boolean invokeUnbindMethod(ServiceReference ref) {
+        private boolean invokeUnbindMethod(Object implementationObject, ServiceReference ref) {
         	// TODO: assert m_boundServices.contains(ref) == true : "DependencyManager : callUnbindMethod UNBINDING UNKNOWN SERVICE !!!!";	
         	
         	// The unbind method is only invoked if the implementation object is not null. This is valid
         	// for both immediate and delayed components
-        	if ( m_implementationObject != null ) {
+        	if ( implementationObject != null ) {
 	            try
 	            {
 	            	// TODO: me quede aqui por que el unbind method no funciona
 	                Activator.trace("getting unbind: "+m_dependencyMetadata.getUnbind(), m_componentMetadata);
-	            	Method unbindMethod = getBindingMethod(m_dependencyMetadata.getUnbind(), getInstance().getClass(), m_dependencyMetadata.getInterface());
+	            	Method unbindMethod = getBindingMethod(m_dependencyMetadata.getUnbind(), implementationObject.getClass(), m_dependencyMetadata.getInterface());
 	            	
 		        	// Recover the object that is bound from the map.
 		            //Object parameter = m_boundServices.get(ref);
@@ -761,7 +772,7 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
 	                	return false;
 	                }
 	
-	            	unbindMethod.invoke(getInstance(),new Object [] {parameter});
+	            	unbindMethod.invoke(implementationObject, new Object [] {parameter});
 	            	                
 	                m_boundServicesRefs.remove(ref);
 	                
@@ -780,7 +791,7 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
 	            	return false;
 	            }
 	            
-        	} else if( m_implementationObject == null && m_componentMetadata.isImmediate() == false) {
+        	} else if( implementationObject == null && m_componentMetadata.isImmediate() == false) {
         		// In the case the implementation object is null and the component is delayed
         		// then we still have to store the object that is passed to the bind methods
         		// so that it can be used once the implementation object is created.
@@ -846,7 +857,7 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
                             // Release references to the service, call unbinder method
                             // and eventually request service unregistration
 
-                            invokeUnbindMethod(evt.getServiceReference());
+                            invokeUnbindMethod(m_implementationObject, evt.getServiceReference());
 
                             // The only thing we need to do here is check if we can reinitialize
                             // once the bound services becomes zero. This tries to repair dynamic
@@ -897,7 +908,7 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
                             // Otherwise only bind if bind services is zero, which captures the 0..1 case
                             if (m_dependencyMetadata.isMultiple() || m_boundServicesRefs.size() == 0)
                             {
-                                invokeBindMethod(evt.getServiceReference());
+                                invokeBindMethod(m_implementationObject, evt.getServiceReference());
                             }
                         }
                     }
@@ -1057,59 +1068,77 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
     }
     
     /**
-     * This class is a ServiceFactory that is used when a delayed component is created
+     * This class is a ServiceFactory that is used when a delayed component is created.
+     * This class returns the same service object instance for all bundles.
      *
      */
     class DelayedComponentServiceFactory implements ServiceFactory {
     	
-    	public Object getService(Bundle arg0, ServiceRegistration arg1) {
+    	public Object getService(Bundle bundle, ServiceRegistration registration) {
     		
     	    Activator.trace("DelayedComponentServiceFactory.getService()", m_componentMetadata);
     		// When the getServiceMethod is called, the implementation object must be created
-    		
+    		// unless another bundle has already retrievd it
+            
+            if (m_implementationObject == null) {
+                m_componentContext = new ComponentContextImpl(null);
+                m_implementationObject = createImplementationObject( m_componentContext );
+            }
+            
+            return m_implementationObject;
+    	}
+
+    	public void ungetService(Bundle bundle, ServiceRegistration registration, Object object) {
+            // nothing to do here, delayed components are deactivated when
+            // the component is deactivated and not when any bundle releases
+            // the service
+    	}
+        
+        protected Object createImplementationObject(ComponentContext componentContext) {
+            Object implementationObject;
+            
             // 1. Load the component implementation class
             // 2. Create the component instance and component context
             // If the component is not immediate, this is not done at this moment
-        	try
-	        {
-	        	// 112.4.4 The class is retrieved with the loadClass method of the component's bundle
-	            Class c = m_activator.getBundleContext().getBundle().loadClass(m_componentMetadata.getImplementationClassName());
-	            
-	            // 112.4.4 The class must be public and have a public constructor without arguments so component instances
-	            // may be created by the SCR with the newInstance method on Class
-	            m_componentContext = new ComponentContextImpl(arg0);
-	            m_implementationObject = c.newInstance();
-	        }
-	        catch (Exception ex)
-	        {
-	            // TODO: manage this exception when implementation object cannot be created
-	            Activator.exception("Error during instantiation of the implementation object",m_componentMetadata,ex);
-	            deactivate();
-	            //invalidate();
-	            return null;
-	        }
-	        
-	        
-	        // 3. Bind the target services
-	        Iterator it = m_dependencyManagers.iterator();
+            try
+            {
+                // 112.4.4 The class is retrieved with the loadClass method of the component's bundle
+                Class c = m_activator.getBundleContext().getBundle().loadClass(m_componentMetadata.getImplementationClassName());
+                
+                // 112.4.4 The class must be public and have a public constructor without arguments so component instances
+                // may be created by the SCR with the newInstance method on Class
+                implementationObject = c.newInstance();
+            }
+            catch (Exception ex)
+            {
+                // TODO: manage this exception when implementation object cannot be created
+                Activator.exception("Error during instantiation of the implementation object",m_componentMetadata,ex);
+                deactivate();
+                //invalidate();
+                return null;
+            }
+            
+            
+            // 3. Bind the target services
+            Iterator it = m_dependencyManagers.iterator();
 
-	        while ( it.hasNext() )
-	        {
-	            DependencyManager dm = (DependencyManager)it.next();
-	            Iterator bound = dm.m_boundServicesRefs.iterator();
-	            while ( bound.hasNext() ) {
-	            	ServiceReference nextRef = (ServiceReference) bound.next();	            	
-	            	dm.invokeBindMethod(nextRef);
-	            }
-	        }
-	        
-	        // 4. Call the activate method, if present
+            while ( it.hasNext() )
+            {
+                DependencyManager dm = (DependencyManager)it.next();
+                Iterator bound = dm.m_boundServicesRefs.iterator();
+                while ( bound.hasNext() ) {
+                    ServiceReference nextRef = (ServiceReference) bound.next();                 
+                    dm.invokeBindMethod(implementationObject, nextRef);
+                }
+            }
+            
+            // 4. Call the activate method, if present
             // Search for the activate method
-        	try {
-        		Method activateMethod = getMethod(m_implementationObject.getClass(), "activate", new Class[]{ComponentContext.class});
-        		activateMethod.invoke(m_implementationObject, new Object[]{m_componentContext});
-        	}
-        	catch(NoSuchMethodException ex) {
+            try {
+                Method activateMethod = getMethod(implementationObject.getClass(), "activate", new Class[]{ComponentContext.class});
+                activateMethod.invoke(implementationObject, new Object[]{componentContext});
+            }
+            catch(NoSuchMethodException ex) {
                 // We can safely ignore this one
                 Activator.trace("activate() method is not implemented", m_componentMetadata);
             }
@@ -1120,15 +1149,100 @@ class ComponentManagerImpl implements ComponentManager, ComponentInstance
             catch(InvocationTargetException ex) {
                 // TODO: 112.5.8 If the activate method throws an exception, SCR must log an error message
                 // containing the exception with the Log Service
-                Activator.exception("The activate method has thrown and exception", m_componentMetadata, ex);
+                Activator.exception("The activate method has thrown an exception", m_componentMetadata, ex);
             }
-    		
-    		return m_implementationObject;
-    	}
+            
+            return implementationObject;
+        }
+    }
 
-    	public void ungetService(Bundle arg0, ServiceRegistration arg1, Object arg2) {
-    		// TODO Auto-generated method stub
-    	}
+    /**
+     * This class is a ServiceFactory that is used when a delayed component is created
+     * for a service factory service
+     *
+     */
+    class DelayedServiceFactoryServiceFactory extends DelayedComponentServiceFactory
+    {
+        
+        // we do not have to maintain references to the actual service
+        // instances as those are handled by the ServiceManager and given
+        // to the ungetService method when the bundle releases the service
+        
+        // maintain the map of componentContext objects created for the
+        // service instances
+        private IdentityHashMap componentContexts = new IdentityHashMap();
+        
+        public Object getService( Bundle bundle, ServiceRegistration registration )
+        {
+
+            Activator.trace( "DelayedServiceFactoryServiceFactory.getService()", m_componentMetadata );
+            // When the getServiceMethod is called, the implementation object must be created
+
+            // private ComponentContext and implementation instances
+            ComponentContext componentContext = new ComponentContextImpl( bundle );
+            Object implementationObject = createImplementationObject( componentContext );
+
+            // register the components component context
+            componentContexts.put( implementationObject, componentContext );
+
+            return implementationObject;
+        }
+
+        public void ungetService( Bundle bundle, ServiceRegistration registration, Object implementationObject )
+        {
+            Activator.trace( "DelayedServiceFactoryServiceFactory.ungetService()", m_componentMetadata );
+            // When the ungetServiceMethod is called, the implementation object must be deactivated
+
+            // private ComponentContext and implementation instances
+            ComponentContext componentContext = ( ComponentContext ) componentContexts.remove( implementationObject );
+            deactivateImplementationObject( implementationObject, componentContext );
+        }
+        
+        protected void deactivateImplementationObject( Object implementationObject, ComponentContext componentContext )
+        {
+            // 1. Call the deactivate method, if present
+            // Search for the activate method
+            try
+            {
+                Method deactivateMethod = getMethod( implementationObject.getClass(), "deactivate", new Class[]
+                    { ComponentContext.class } );
+                deactivateMethod.invoke( implementationObject, new Object[]
+                    { componentContext } );
+            }
+            catch ( NoSuchMethodException ex )
+            {
+                // We can safely ignore this one
+                Activator.trace( "deactivate() method is not implemented", m_componentMetadata );
+            }
+            catch ( IllegalAccessException ex )
+            {
+                // Ignored, but should it be logged?
+                Activator.trace( "deactivate() method cannot be called", m_componentMetadata );
+            }
+            catch ( InvocationTargetException ex )
+            {
+                // TODO: 112.5.12 If the deactivate method throws an exception, SCR must log an error message
+                // containing the exception with the Log Service and continue
+                Activator.exception( "The deactivate method has thrown an exception", m_componentMetadata, ex );
+            }
+
+            // 2. Unbind any bound services
+            Iterator it = m_dependencyManagers.iterator();
+
+            while ( it.hasNext() )
+            {
+                DependencyManager dm = ( DependencyManager ) it.next();
+                Iterator bound = dm.m_boundServicesRefs.iterator();
+                while ( bound.hasNext() )
+                {
+                    ServiceReference nextRef = ( ServiceReference ) bound.next();
+                    dm.invokeUnbindMethod( implementationObject, nextRef );
+                }
+            }
+
+            // 3. Release all references
+            // nothing to do, we keep no references on per-Bundle services
+        }
     }
 
     /**
