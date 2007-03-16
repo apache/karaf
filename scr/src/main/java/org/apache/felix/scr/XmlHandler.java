@@ -40,6 +40,9 @@ public class XmlHandler implements KXml2SAXHandler {
     // A list of component descriptors contained in the file
     private List m_components = new ArrayList();
 
+    // PropertyMetaData whose value attribute is missing, hence has element data
+    private PropertyMetadata m_pendingProperty;
+    
     /**
      * Method called when a tag opens
      *
@@ -89,26 +92,24 @@ public class XmlHandler implements KXml2SAXHandler {
 	        }
 	        // 112.4.5 Properties and Property Elements
 	        else if (qName.equals("property")) {
-	        	// 112.4.5: If the value attribute is specified, the body of the element is ignored.
+                PropertyMetadata prop = new PropertyMetadata();
+                
+                // name attribute is mandatory
+                prop.setName(attrib.getProperty("name"));
+                
+                // type attribute is optional
+                if(attrib.getProperty("type") != null) {
+                    prop.setType(attrib.getProperty("type"));
+                }
+
+                // 112.4.5: If the value attribute is specified, the body of the element is ignored.
 	        	if( attrib.getProperty("value") != null) {
-	        		PropertyMetadata prop = new PropertyMetadata();
-	        		
-	        		// name attribute is mandatory
-	        		prop.setName(attrib.getProperty("name"));
-	        		
-	        		// type attribute is optional
-	        		if(attrib.getProperty("type") != null) {
-	        			prop.setType(attrib.getProperty("type"));
-	        		}
-	        		
-	        		// value attribute is optional
-	        		if(attrib.getProperty("value") != null) {
-	        			prop.setValue(attrib.getProperty("value"));
-	        		}
+        			prop.setValue(attrib.getProperty("value"));
 	            	m_currentComponent.addProperty(prop);
 	        	}
 	        	else {
-	        		// TODO: treat the case where property value is not specified (p. 291)
+	        		// hold the metadata pending
+                    m_pendingProperty = prop;
 	        	}
 	        	// TODO: treat the case where a properties file name is provided (p. 292)
 	        }
@@ -175,6 +176,11 @@ public class XmlHandler implements KXml2SAXHandler {
         	// When the closing tag for a component is found, the component is validated to check if 
         	// the implementation class has been set
         	m_currentComponent.validate();
+        } else if (qName.equals("property") && m_pendingProperty != null) {
+            // 112.4.5 body expected to contain property value
+            // if so, the m_pendingProperty field would be null
+            // currently, we just ignore this situation
+            m_pendingProperty = null;
         }
     }
 
@@ -188,10 +194,16 @@ public class XmlHandler implements KXml2SAXHandler {
         return m_components;
     }
 
-	public void characters(char[] ch, int offset, int length) throws Exception {
-		// Not used
-		
-	}
+	public void characters( char[] ch, int offset, int length ) throws Exception
+    {
+        // 112.4.5 If the value attribute is not specified, the body must contain one or more values
+        if ( m_pendingProperty != null )
+        {
+            m_pendingProperty.setValues( new String( ch, offset, length ) );
+            m_currentComponent.addProperty( m_pendingProperty );
+            m_pendingProperty = null;
+        }
+    }
 
 	public void processingInstruction(String target, String data) throws Exception {
 		// Not used
