@@ -146,6 +146,9 @@ public class Main
         // Read configuration properties.
         Properties configProps = Main.loadConfigProperties();
 
+        // Copy framework properties from the system properties.
+        Main.copySystemProperties(configProps);
+
         // See if the profile name property was specified.
         String profileName = configProps.getProperty(BundleCache.CACHE_PROFILE_PROP);
 
@@ -417,6 +420,21 @@ public class Main
         }
 
         return props;
+    }
+
+    public static void copySystemProperties(Properties configProps)
+    {
+        for (Enumeration e = System.getProperties().propertyNames();
+             e.hasMoreElements(); )
+        {
+            String key = (String)e.nextElement();
+            if (key.startsWith("felix.") ||
+                key.equals("org.osgi.framework.system.packages") ||
+                key.equals("org.osgi.framework.bootdelegation"))
+            {
+                configProps.setProperty(key, System.getProperty(key));
+            }
+        }
     }
 
     private static final String DELIM_START = "${";
