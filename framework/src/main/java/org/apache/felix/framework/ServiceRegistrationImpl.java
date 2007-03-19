@@ -41,7 +41,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
     // Service factory interface.
     private ServiceFactory m_factory = null;
     // Associated property dictionary.
-    private Map m_propMap = null;
+    private Map m_propMap =  new StringMap(false);
     // Re-usable service reference.
     private ServiceReferenceImpl m_ref = null;
 
@@ -153,7 +153,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
     protected String[] getPropertyKeys()
     {
-        synchronized (m_list)
+        synchronized (m_propMap)
         {
             m_list.clear();
             Iterator i = m_propMap.entrySet().iterator();
@@ -230,29 +230,24 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
     private void initializeProperties(Dictionary dict)
     {
-        // Create a case insensitive map.
-        if (m_propMap == null)
-        {
-            m_propMap = new StringMap(false);
-        }
-        else
+        synchronized (m_propMap)
         {
             m_propMap.clear();
-        }
-
-        if (dict != null)
-        {
-            Enumeration keys = dict.keys();
-            while (keys.hasMoreElements())
+    
+            if (dict != null)
             {
-                Object key = keys.nextElement();
-                m_propMap.put(key, dict.get(key));
+                Enumeration keys = dict.keys();
+                while (keys.hasMoreElements())
+                {
+                    Object key = keys.nextElement();
+                    m_propMap.put(key, dict.get(key));
+                }
             }
+    
+            // Add the framework assigned properties.
+            m_propMap.put(Constants.OBJECTCLASS, m_classes);
+            m_propMap.put(Constants.SERVICE_ID, m_serviceId);
         }
-
-        // Add the framework assigned properties.
-        m_propMap.put(Constants.OBJECTCLASS, m_classes);
-        m_propMap.put(Constants.SERVICE_ID, m_serviceId);
     }
 
     private Object getFactoryUnchecked(Bundle bundle)
