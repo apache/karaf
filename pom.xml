@@ -18,6 +18,13 @@
 -->
 <project>
   <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache</groupId>
+    <artifactId>apache</artifactId>
+    <version>4</version>
+  </parent>
+
   <groupId>org.apache.felix</groupId>
   <artifactId>felix</artifactId>
   <packaging>pom</packaging>
@@ -47,14 +54,6 @@
       <archive>http://www.mail-archive.com/felix-commits%40incubator.apache.org/</archive>
     </mailingList>
   </mailingLists>
-
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
 
   <scm>
     <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/felix</connection>
@@ -232,39 +231,15 @@
     </dependencies>
   </dependencyManagement>
 
-  <repositories>
-    <!-- For snapshots (no release jars or non-apache jars)           -->
-    <repository>
-      <id>apache.snapshots</id>
-      <name>Apache Snapshot Repository</name>
-      <url>http://people.apache.org/repo/m2-snapshot-repository</url>
-    </repository>
-  
-    <repository>
-      <id>safehaus</id>
-      <name>Alternate Repository for Missing Ibiblio Artifacts</name>
-      <url>http://m2.safehaus.org</url>
-    </repository>
-  </repositories>
-
   <distributionManagement>
     <site>
       <id>felix website</id>
       <url>file:///${user.dir}/target/site-deployed/</url>
     </site>
-    <snapshotRepository>
-      <id>apache.snapshots</id>
-      <name>Apache Snapshot Repository</name>
-      <url>
-        scp://people.apache.org/www/people.apache.org/repo/m2-snapshot-repository
-      </url>
-    </snapshotRepository>
     <repository>
-      <name>ASF Mirrored M2 Distributions</name>
-      <id>apache.distributions</id>
-      <url>
-        scp://people.apache.org/www/people.apache.org/repo/m2-incubating-repository
-      </url>
+      <id>apache.incubator.releases</id>
+      <name>Apache Incubator Release Distribution Repository</name>
+      <url>scp://people.apache.org/www/people.apache.org/repo/m2-incubating-repository</url>
     </repository>
   </distributionManagement>
 
