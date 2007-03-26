@@ -61,7 +61,8 @@ public class Requirement implements IRequirement
             {
                 m_pkgName = (String) m_attributes[i].getValue();
             }
-            else if (m_attributes[i].getName().equals(ICapability.VERSION_PROPERTY))
+            else if (m_namespace.equals(ICapability.PACKAGE_NAMESPACE) &&
+                     m_attributes[i].getName().equals(ICapability.VERSION_PROPERTY))
             {
                 m_pkgVersionRange = (VersionRange) m_attributes[i].getValue();
             }
