@@ -252,12 +252,21 @@ public class Activator implements BundleActivator, SynchronousBundleListener
      */
     private BundleContext getBundleContext(Bundle bundle)
     {
-//        try {
-//            return bundle.getBundleContext();
-//        } catch (Throwable t) {
-//            // don't care, might be that the implementation is not yet updated
-//            // to OSGi Rev 4.1
-//        }
+        try
+        {
+            return bundle.getBundleContext();
+        }
+        catch ( SecurityException se )
+        {
+            // assume we do not have the correct AdminPermission[*,CONTEXT]
+            // to call this, so we have to forward this exception
+            throw se;
+        }
+        catch ( Throwable t )
+        {
+            // ignore any other Throwable, most prominently NoSuchMethodError
+            // which is called in a pre-OSGI 4.1 environment
+        }
         
         BundleContext context = null;
         for (Class clazz = bundle.getClass(); context == null && clazz != null; clazz = clazz.getSuperclass())
