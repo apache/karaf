@@ -85,6 +85,21 @@
   <profiles>
 
     <profile>
+      <id>packaging-plugins</id>
+      <activation>
+        <property>
+          <name>packaging</name>
+          <value>plugins</value>
+        </property>
+      </activation>
+      <modules>
+        <module>tools/maven2/maven-bundle-plugin</module>
+        <module>tools/maven2/maven-osgi-plugin</module>
+        <module>ipojo.plugin</module>
+      </modules>
+    </profile>
+
+    <profile>
       <id>packaging-ipojo-bundle</id>
       <activation>
         <property>
@@ -107,7 +122,6 @@
       </activation>
       <modules>
         <module>org.osgi.foundation</module>
-        <module>tools/maven2/maven-bundle-plugin</module>
         <module>javax.servlet</module>
         <module>org.osgi.core</module>
         <module>org.osgi.compendium</module>
@@ -134,7 +148,6 @@
         </property>
       </activation>
       <modules>
-        <module>tools/maven2/maven-osgi-plugin</module>
         <module>shell.gui</module>
         <module>shell.gui.plugin</module>
         <module>org.apache.felix.daemon</module>
@@ -157,7 +170,6 @@
 
         <module>ipojo</module>
         <module>ipojo.metadata</module>
-        <module>ipojo.plugin</module>
       </modules>
     </profile>
 

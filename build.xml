@@ -29,6 +29,9 @@
     </target>
     <target name="clean" depends="init">
         <exec executable="${mvn}" failonerror="true">
+            <arg line="-Dpackaging=plugins clean" />
+        </exec>
+        <exec executable="${mvn}" failonerror="true">
             <arg line="-Dpackaging=bundle clean" />
         </exec>
         <exec executable="${mvn}" failonerror="true">
@@ -43,6 +46,9 @@
     </target>
     <target name="install" depends="init">
         <exec executable="${mvn}" failonerror="true">
+            <arg line="-Dpackaging=plugins install" />
+        </exec>
+        <exec executable="${mvn}" failonerror="true">
             <arg line="-Dpackaging=bundle install" />
         </exec>
         <exec executable="${mvn}" failonerror="true">
@@ -56,6 +62,9 @@
         </exec>
     </target>
     <target name="all" depends="init">
+        <exec executable="${mvn}" failonerror="true">
+            <arg line="-Dpackaging=plugins clean install" />
+        </exec>
         <exec executable="${mvn}" failonerror="true">
             <arg line="-Dpackaging=bundle clean install" />
         </exec>
