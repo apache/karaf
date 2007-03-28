@@ -128,8 +128,16 @@ public class BundlePlugin extends AbstractMojo {
    properties.put("project.build.directory", buildDirectory );
    properties.put("project.build.outputdirectory", outputDirectory );
    
-   properties.putAll(instructions);
- 
+   Iterator i = instructions.entrySet().iterator();
+   while (i.hasNext()) {
+     Map.Entry e = (Map.Entry)i.next();
+     String key = (String)e.getKey();
+     if (key.startsWith("_")) {
+       key = "-"+key.substring(1);
+     }
+     properties.put(key, e.getValue());
+   }
+
    Builder builder = new Builder();
    builder.setBase(baseDir);
    Jar[] cp = getClasspath();
