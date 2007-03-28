@@ -151,7 +151,7 @@
         <module>shell.gui</module>
         <module>shell.gui.plugin</module>
         <module>org.apache.felix.daemon</module>
-        <module>org.apache.felix.dependencymanager</module>
+        <module>dependencymanager</module>
 
         <module>examples</module>
 
