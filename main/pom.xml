@@ -83,6 +83,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <_donotcopy>(CVS|.svn|config.properties)</_donotcopy>
             <Main-Class>org.apache.felix.main.Main</Main-Class>
             <Bundle-Name>Apache Felix</Bundle-Name>
             <Bundle-Description>OSGi R4 framework.</Bundle-Description>
