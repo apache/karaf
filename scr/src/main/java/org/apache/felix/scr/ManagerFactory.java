@@ -18,15 +18,34 @@
  */
 package org.apache.felix.scr;
 
+
 /**
  * This factory allows other types of ComponentManagers to be provided.
  * 
  * 
  */
-public class ManagerFactory {
-	
-	static ComponentManager createManager(BundleComponentActivator activator, ComponentMetadata metadata) {
-	    Activator.trace("ManagerFactory.createManager", metadata);
-	    return new ComponentManagerImpl(activator,metadata);
-	}
+public class ManagerFactory
+{
+
+    static ComponentManager createManager( BundleComponentActivator activator, ComponentMetadata metadata,
+        long componentId )
+    {
+        Activator.trace( "ManagerFactory.createManager", metadata );
+        if ( metadata.isImmediate() )
+        {
+            return new ImmediateComponentManager( activator, metadata, componentId );
+        }
+        else if ( metadata.getServiceMetadata() != null )
+        {
+            if ( metadata.getServiceMetadata().isServiceFactory() )
+            {
+                return new ServiceFactoryComponentManager( activator, metadata, componentId );
+            }
+
+            return new DelayedComponentManager( activator, metadata, componentId );
+        }
+
+        // if we get here, which is not expected after all, we fail
+        throw new IllegalArgumentException( "Cannot create a component manager for " + metadata.getName() );
+    }
 }

@@ -24,15 +24,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.naming.ConfigurationException;
+
 import org.apache.felix.scr.parser.KXml2SAXParser;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentException;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * The BundleComponentActivator is helper class to load and unload Components of
@@ -41,26 +47,40 @@ import org.osgi.service.component.ComponentException;
  */
 class BundleComponentActivator
 {	
-	// The bundle context
+    // global component registration
+    private ComponentRegistry m_componentRegistry;
+    
+	// The bundle context owning the registered component
     private BundleContext m_context = null;
     
     // This is a list of component instance managers that belong to a particular bundle
     private List m_managers = new ArrayList();
 
-    // Global Registry of component names
-    private static Set m_componentNames = new HashSet();
+    // The Configuration Admin tracker providing configuration for components
+    private ServiceTracker m_configurationAdmin;
 
     /**
      * Called upon starting of the bundle. This method invokes initialize() which
      * parses the metadata and creates the instance managers
      *
-     * @param   context  The bundle context passed by the framework
-     * @exception   Exception any exception thrown from initialize
+     * @param componentRegistry The <code>ComponentRegistry</code> used to
+     *      register components with to ensure uniqueness of component names
+     *      and to ensure configuration updates.
+     * @param   context  The bundle context owning the components
+     * 
+     * @throws ComponentException if any error occurrs initializing this class
      */
-    BundleComponentActivator(BundleContext context) throws ComponentException
+    BundleComponentActivator(ComponentRegistry componentRegistry, BundleContext context) throws ComponentException
     {
+        // The global "Component" registry
+        this.m_componentRegistry = componentRegistry;
+        
     	// Stores the context
         m_context = context;
+        
+        // have the Configuration Admin Service handy (if available)
+        m_configurationAdmin = new ServiceTracker(context, ConfigurationAdmin.class.getName(), null);
+        m_configurationAdmin.open();
         
         // Get the Metadata-Location value from the manifest
         String descriptorLocations =
@@ -95,12 +115,13 @@ class BundleComponentActivator
             {
                 // 112.4.1 If an XML document specified by the header cannot be located in the bundle and its attached
                 // fragments, SCR must log an error message with the Log Service, if present, and continue.
-                Activator.error("Component descriptor entry '" + descriptorLocation + "' not found");
+                Activator.error( "Component descriptor entry '" + descriptorLocation + "' not found", null );
                 continue;
             }
 
+            InputStream stream = null;
 			try {
-				InputStream stream = descriptorURL.openStream();
+				stream = descriptorURL.openStream();
 
 				BufferedReader in = new BufferedReader(new InputStreamReader(stream)); 
 	            XmlHandler handler = new XmlHandler(); 
@@ -121,16 +142,23 @@ class BundleComponentActivator
     		            validate(metadata);
     		        	
     	                // Request creation of the component manager
-    	                ComponentManager manager = ManagerFactory.createManager(this,metadata);
+    	                ComponentManager manager;
+                        
+                        if (metadata.isFactory()) {
+                            // 112.2.4 SCR must register a Component Factory service on behalf ot the component
+                            // as soon as the component factory is satisfied
+                            manager = new ComponentFactoryImpl(this, metadata, m_componentRegistry);
+                        } else {
+                            manager = ManagerFactory.createManager( this, metadata, m_componentRegistry
+                            .createComponentId() );
+                        }
                 		
-                		if(metadata.isFactory())
+                        // register the component after validation
+                        m_componentRegistry.registerComponent( metadata.getName(), manager );
+                        
+                        // enable the component
+                		if(metadata.isEnabled())
                         {
-                			// 112.2.4 SCR must register a Component Factory service on behalf ot the component
-                			// as soon as the component factory is satisfied
-                		}
-                		else if(metadata.isEnabled())
-                        {
-		                	// enable the component
 		                	manager.enable();
 		                }
 
@@ -144,9 +172,6 @@ class BundleComponentActivator
                         Activator.exception("Cannot register Component", metadata, e);
 					} 
 		        }
-		        
-		        stream.close();
-
 			}
 			catch ( IOException ex )
             {
@@ -161,6 +186,19 @@ class BundleComponentActivator
                 Activator.exception("General problem with descriptor entry '"
                     + descriptorLocation + "'", null, ex);
 			}
+            finally
+            {
+                if ( stream != null )
+                {
+                    try
+                    {
+                        stream.close();
+                    }
+                    catch ( IOException ignore )
+                    {
+                    }
+                }
+            }
 		}
     }
 
@@ -193,11 +231,16 @@ class BundleComponentActivator
             }
             finally
             {
-            	m_componentNames.remove(manager.getComponentMetadata().getName());
+                m_componentRegistry.unregisterComponent( manager.getComponentMetadata().getName() );
             }
             
         }
 
+        // close the Configuration Admin tracker
+        if (m_configurationAdmin != null) {
+            m_configurationAdmin.close();
+        }
+        
         Activator.trace("BundleComponentActivator : Bundle ["
             + m_context.getBundle().getBundleId() + "] STOPPED", null);
 
@@ -224,6 +267,16 @@ class BundleComponentActivator
         return m_context;
     }
 
+    /**
+     * Returns the <code>ConfigurationAdmin</code> service used to retrieve
+     * configuration data for components managed by this activator or
+     * <code>null</code> if no Configuration Admin Service is available in the
+     * framework.
+     */
+    protected ConfigurationAdmin getConfigurationAdmin() {
+        return (ConfigurationAdmin) m_configurationAdmin.getService();
+    }
+    
     /**
      * Implements the <code>ComponentContext.enableComponent(String)</code>
      * method by first finding the component(s) for the <code>name</code> and
@@ -255,8 +308,7 @@ class BundleComponentActivator
                     }
                     catch (Throwable t) 
                     {
-                        Activator.exception("Cannot enable component",
-                            cm[i].getComponentMetadata(), t);
+                        Activator.exception( "Cannot enable component", cm[i].getComponentMetadata(), t );
                     }
                 }
             }
@@ -291,7 +343,7 @@ class BundleComponentActivator
                 {
                     try
                     {
-                        cm[i].dispose();
+                        cm[i].disable();
                     }
                     catch (Throwable t)
                     {
@@ -326,7 +378,7 @@ class BundleComponentActivator
             return (ComponentManager[]) m_managers.toArray(new ComponentManager[m_managers.size()]);
         }
         
-        if (m_componentNames.contains(name))
+        if ( m_componentRegistry.getComponent( name ) != null )
         {
             // otherwise just find it
             Iterator it = m_managers.iterator();
@@ -358,16 +410,19 @@ class BundleComponentActivator
     void validate(ComponentMetadata component) throws ComponentException
     {
 
-    	if(m_componentNames.contains(component.getName()))
-    	{
-    		throw new ComponentException("The component name '"+component.getName()+"' has already been registered.");
-    	}
+        m_componentRegistry.checkComponentName( component.getName() );
     	
-        component.validate();
+        try
+        {
+            component.validate();
+        }
+        catch ( ComponentException ce )
+        {
+            // remove the reservation before leaving
+            m_componentRegistry.unregisterComponent( component.getName() );
+            throw ce;
+        }
 
-        // register the component after validation
-        m_componentNames.add(component.getName());
-    	
-        Activator.trace("Validated and registered component",component);
+        Activator.trace( "Validated and registered component", component );
     }
 }

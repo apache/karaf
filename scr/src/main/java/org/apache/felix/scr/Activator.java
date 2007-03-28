@@ -18,18 +18,28 @@
  */
 package org.apache.felix.scr;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.Logger;
 
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.Constants;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.service.log.LogService;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * This activator is used to cover requirement described in section 112.8.1 @@ -27,14
  * 37,202 @@ in active bundles.
  * 
  */
-public class Activator implements BundleActivator, SynchronousBundleListener, ServiceListener
+public class Activator implements BundleActivator, SynchronousBundleListener
 {
     // name of the LogService class
     private static final String LOGSERVICE_CLASS = LogService.class.getName();
@@ -41,37 +51,20 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
     private static boolean m_error = true;
 
     // A string containing the version number
-    private static String m_version = "1.0.0 (12012006)";
+    private static String m_version = "1.0.0 (20070320)";
 
     // this bundle's context
     private BundleContext m_context;
     
     // the log service to log messages to
-    private static /* TODO: not very good, is it ? */ LogService m_logService;
+    private static ServiceTracker m_logService;
     
     // map of BundleComponentActivator instances per Bundle indexed by Bundle symbolic
     // name
     private Map m_componentBundles;
 
-    // Static initializations based on system properties
-    static {
-        // Get system properties to see if traces or errors need to be displayed
-        String result = System.getProperty("ds.showtrace");
-        if(result != null && result.equals("true"))
-        {
-            m_trace = true;
-        }
-        result = System.getProperty("ds.showerrors");
-        if(result != null && result.equals("false"))
-        {
-            m_error = false;
-        }
-        result = System.getProperty("ds.showversion");
-        if(result != null && result.equals("true"))
-        {
-            System.out.println("[ Version = "+m_version+" ]\n");
-        }        
-    }
+    // registry of managed component
+    private ComponentRegistry m_componentRegistry;
 
     /**
      * Registers this instance as a (synchronous) bundle listener and loads the
@@ -84,15 +77,21 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
     {
         m_context = context;
         m_componentBundles = new HashMap();
+        m_componentRegistry = new ComponentRegistry( m_context );
 
         // require the log service
-        ServiceReference logRef = context.getServiceReference(LOGSERVICE_CLASS);
-        if (logRef != null) {
-            m_logService = (LogService) context.getService(logRef);
-        }
-        context.addServiceListener(this,
-            "(" + Constants.OBJECTCLASS + "=" + LOGSERVICE_CLASS + ")");
+        m_logService = new ServiceTracker(context, LOGSERVICE_CLASS, null);
+        m_logService.open();
         
+        // configure logging from context properties
+        m_trace = "true".equalsIgnoreCase( context.getProperty( "ds.showtrace" ) );
+        m_error = !"false".equalsIgnoreCase( context.getProperty( "ds.showerrors" ) );
+        if ( "true".equalsIgnoreCase( context.getProperty( "ds.showversion" ) ) )
+        {
+            trace( context.getBundle().getSymbolicName() + "[ Version = "
+                + context.getBundle().getHeaders().get( Constants.BUNDLE_VERSION ) + " ]", null );
+        }
+
         // register for bundle updates
         context.addBundleListener(this);
 
@@ -115,6 +114,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 
         // 112.8.2 dispose off all active components
         disposeAllComponents();
+
+        // dispose off the component registry
+        m_componentRegistry.dispose();
     }
 
     // ---------- BundleListener Interface -------------------------------------
@@ -139,23 +141,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
         }
     }
 
-    //---------- ServiceListener ----------------------------------------------
-
-    // TODO:
-    public void serviceChanged(ServiceEvent event)
-    {
-        if (event.getType() == ServiceEvent.REGISTERED)
-        {
-            m_logService = (LogService) m_context.getService(event.getServiceReference());
-        }
-        else if (event.getType() == ServiceEvent.UNREGISTERING)
-        {
-            m_logService = null;
-            m_context.ungetService(event.getServiceReference());
-        }
-    }
-    
-    // ---------- Component Management -----------------------------------------
+    //---------- Component Management -----------------------------------------
 
     // Loads the components of all bundles currently active.
     private void loadAllComponents(BundleContext context)
@@ -192,14 +178,13 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
         BundleContext context = getBundleContext(bundle);
         if (context == null)
         {
-            error("Cannot get BundleContext of bundle "
-                + bundle.getSymbolicName());
+            error( "Cannot get BundleContext of bundle " + bundle.getSymbolicName(), null );
             return;
         }
 
         try
         {
-            BundleComponentActivator ga = new BundleComponentActivator(context);
+            BundleComponentActivator ga = new BundleComponentActivator( m_componentRegistry, context );
             m_componentBundles.put(bundle.getSymbolicName(), ga);
         }
         catch (Exception e)
@@ -267,15 +252,21 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
      */
     private BundleContext getBundleContext(Bundle bundle)
     {
-        for (Class clazz = bundle.getClass(); clazz != null; clazz = clazz.getSuperclass())
+//        try {
+//            return bundle.getBundleContext();
+//        } catch (Throwable t) {
+//            // don't care, might be that the implementation is not yet updated
+//            // to OSGi Rev 4.1
+//        }
+        
+        BundleContext context = null;
+        for (Class clazz = bundle.getClass(); context == null && clazz != null; clazz = clazz.getSuperclass())
         {
             try
             {
-                Method m = clazz.getDeclaredMethod("getContext", null);
-                if (m.getReturnType().equals(BundleContext.class))
-                {
-                    m.setAccessible(true);
-                    return (BundleContext) m.invoke(bundle, null);
+                context = getBundleContext( clazz, bundle, "getBundleContext" );
+                if (context == null) {
+                    context = getBundleContext( clazz, bundle, "getContext" );
                 }
             }
             catch (NoSuchMethodException nsme)
@@ -289,10 +280,23 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
             }
         }
 
-        // fall back to nothing
-        return null;
+        // return what we found
+        return context;
     }
     
+    private BundleContext getBundleContext( Class clazz, Bundle bundle, String methodName )
+        throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
+    {
+        Method m = clazz.getDeclaredMethod( methodName, null );
+        if ( m.getReturnType().equals( BundleContext.class ) )
+        {
+            m.setAccessible( true );
+            return ( BundleContext ) m.invoke( bundle, null );
+        }
+        
+        // method exists but has wrong return type
+        return null;
+    }
     
     /**
      * Method to display traces
@@ -310,7 +314,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
             }
             msg.append(message);
 
-            LogService log = m_logService;
+            LogService log = (LogService) m_logService.getService();
             if (log == null)
             {
                 System.out.println(msg);
@@ -326,14 +330,19 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
      * Method to display errors
      *
      * @param message a string to be displayed
+     * @param metadata optional metadata providing more information to log
      **/
-    static void error(String message)
+    static void error(String message, ComponentMetadata metadata)
     {
         if(m_error)
         {
-            StringBuffer msg = new StringBuffer("### ").append(message);
+            StringBuffer msg = new StringBuffer("### ");
+            if(metadata != null) {
+                msg.append("[").append(metadata.getName()).append("] ");
+            }
+            msg.append(message);
 
-            LogService log = m_logService;
+            LogService log = (LogService) m_logService.getService();
             if (log == null)
             {
                 System.err.println(msg);
@@ -361,7 +370,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
              msg.append("Exception with component : ");
              msg.append(message).append(" ---");
              
-             LogService log = m_logService;
+             LogService log = (LogService) m_logService.getService();
              if (log == null)
              {
                  System.err.println(msg);
