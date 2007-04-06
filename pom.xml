@@ -136,6 +136,8 @@
         <module>eventadmin.bridge.configuration</module>
         <module>eventadmin.bridge.useradmin</module>
         <module>eventadmin.bridge.wireadmin</module>
+		
+		<module>scr</module>
       </modules>
     </profile>
     
@@ -164,7 +166,7 @@
         <module>upnp.sample.clock</module>
         <module>upnp.sample.binaryLight</module>
         <!--    <module>http.jetty</module> -->
-        <module>scr</module>
+        
 
         <!--    <module>tools/mangen</module> -->
 
