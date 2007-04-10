@@ -40,6 +40,15 @@ import aQute.lib.osgi.*;
  */
 public class BundlePlugin extends AbstractMojo {
  
+ /** Bundle-Version must match this pattern */
+ private static final Pattern OSGI_VERSION_PATTERN = Pattern.compile("[0-9]+(\\.[0-9]+(\\.[0-9]+(\\.[0-9A-Za-z_-]+)?)?)?");
+
+ /** pattern used to change - to . */
+ //private static final Pattern P_VERSION = Pattern.compile("([0-9]+(\\.[0-9])*)-(.*)");
+
+ /** pattern that matches strings that contain only numbers */
+ private static final Pattern ONLY_NUMBERS = Pattern.compile("[0-9]+");
+
  /**
   * @parameter expression="${project.build.outputDirectory}"
   * @required
@@ -79,74 +88,50 @@ public class BundlePlugin extends AbstractMojo {
   */
  private Map    instructions = new HashMap();
  
+ protected MavenProject getProject() {
+  return project;
+ }
+
  public void execute() throws MojoExecutionException {
+  Properties properties = new Properties();
+
+  if (new File(baseDir, "src/main/resources").exists()) {
+    header(properties, Analyzer.INCLUDE_RESOURCE, "src/main/resources/");
+  }
+  
+  execute(project, instructions, properties);
+ }
+
+ protected void execute(MavenProject project, Map instructions, Properties properties) throws MojoExecutionException {
   try {
-   File jarFile = new File(buildDirectory, project.getBuild()
-     .getFinalName()
-     + ".jar");
- 
-   // Setup defaults
+    execute(project, instructions, properties, getClasspath(project));
+  }
+  catch ( IOException e ) {
+    throw new MojoExecutionException("Error calculating classpath for project " + project, e);
+  }
+ }
+
+ protected void execute(MavenProject project, Map instructions, Properties properties, Jar[] classpath) throws MojoExecutionException {
+  try {
+   File jarFile = new File(getBuildDirectory(), getBundleName(project));
+
+   properties.putAll(getDefaultProperties(project));
+   
    String bsn = project.getGroupId() + "." + project.getArtifactId();
-   Properties properties = new Properties();
-   properties.put(Analyzer.BUNDLE_SYMBOLICNAME, bsn);
-   properties.put(Analyzer.IMPORT_PACKAGE, "*");
    if (!instructions.containsKey(Analyzer.PRIVATE_PACKAGE)) {
      properties.put(Analyzer.EXPORT_PACKAGE, bsn + ".*");
    }
-   String version = project.getVersion();
-   Pattern P_VERSION = Pattern.compile("([0-9]+(\\.[0-9]+)*)-(.*)");
-   Matcher m = P_VERSION.matcher(version);
-   if (m.matches()) {
-     version = m.group(1) + "." + m.group(3);
-   }
-   properties.put(Analyzer.BUNDLE_VERSION, version);
-   header(properties, Analyzer.BUNDLE_DESCRIPTION, project
-     .getDescription());
-   header(properties, Analyzer.BUNDLE_LICENSE, printLicenses(project
-     .getLicenses()));
-   header(properties, Analyzer.BUNDLE_NAME, project.getName());
-   
-   if (project.getOrganization() != null) {
-     header(properties, Analyzer.BUNDLE_VENDOR, project
-       .getOrganization().getName());
-     if (project.getOrganization().getUrl() != null) {
-       header(properties, Analyzer.BUNDLE_DOCURL, project
-         .getOrganization().getUrl());
-     }
-   }
 
-   if (new File(baseDir, "src/main/resources").exists()) {
-     header(properties, Analyzer.INCLUDE_RESOURCE, "src/main/resources/");
-   }
+   properties.putAll(instructions);
  
-   properties.putAll(project.getProperties());
-   properties.putAll(project.getModel().getProperties());
-   properties.putAll( getProperies("project.build.", project.getBuild()));
-   properties.putAll( getProperies("pom.", project.getModel()));
-   properties.putAll( getProperies("project.", project));
-   properties.put("project.baseDir", baseDir );
-   properties.put("project.build.directory", buildDirectory );
-   properties.put("project.build.outputdirectory", outputDirectory );
-   
-   Iterator i = instructions.entrySet().iterator();
-   while (i.hasNext()) {
-     Map.Entry e = (Map.Entry)i.next();
-     String key = (String)e.getKey();
-     if (key.startsWith("_")) {
-       key = "-"+key.substring(1);
-     }
-     properties.put(key, e.getValue());
-   }
-
    Builder builder = new Builder();
    builder.setBase(baseDir);
-   Jar[] cp = getClasspath();
    builder.setProperties(properties);
-   builder.setClasspath(cp);
+   builder.setClasspath(classpath);
  
    builder.build();
    Jar jar = builder.getJar();
-   doMavenMetadata(jar);
+   doMavenMetadata(project, jar);
    builder.setJar(jar);
  
    List errors = builder.getErrors();
@@ -156,7 +141,7 @@ public class BundlePlugin extends AbstractMojo {
     jarFile.delete();
     for (Iterator e = errors.iterator(); e.hasNext();) {
      String msg = (String) e.next();
-     getLog().error(msg);
+     getLog().error("Error building bundle " + project.getArtifact() + " : " + msg);
     }
     throw new MojoFailureException("Found errors, see log");
    }
@@ -167,7 +152,7 @@ public class BundlePlugin extends AbstractMojo {
    }
    for (Iterator w = warnings.iterator(); w.hasNext();) {
     String msg = (String) w.next();
-    getLog().warn(msg);
+    getLog().warn("Warning building bundle " + project.getArtifact() + " : " + msg);
    }
  
   }
@@ -177,14 +162,14 @@ public class BundlePlugin extends AbstractMojo {
   }
  }
  
- private Map getProperies(String prefix, Object model) {
+ private Map getProperies(Model projectModel, String prefix, Object model) {
   Map properties = new HashMap();
   Method methods[] = Model.class.getDeclaredMethods();
   for (int i = 0; i < methods.length; i++) {
    String name = methods[i].getName();
    if ( name.startsWith("get") ) {
     try {
-     Object v = methods[i].invoke(project.getModel(), null );
+     Object v = methods[i].invoke(projectModel, null );
      if ( v != null ) {
       name = prefix + Character.toLowerCase(name.charAt(3)) + name.substring(4);
       if ( v.getClass().isArray() )
@@ -221,7 +206,7 @@ public class BundlePlugin extends AbstractMojo {
   * @param jar
   * @throws IOException
   */
- private void doMavenMetadata(Jar jar) throws IOException {
+ private void doMavenMetadata(MavenProject project, Jar jar) throws IOException {
   String path = "META-INF/maven/" + project.getGroupId() + "/"
     + project.getArtifactId();
   File pomFile = new File(baseDir, "pom.xml");
@@ -242,20 +227,24 @@ public class BundlePlugin extends AbstractMojo {
   * @throws ZipException
   * @throws IOException
   */
- private Jar[] getClasspath() throws ZipException, IOException {
+ protected Jar[] getClasspath(MavenProject project) throws ZipException, IOException {
   List list = new ArrayList();
   
   if (outputDirectory != null && outputDirectory.exists()) {
     list.add(new Jar(".", outputDirectory));
   }
  
-  Set artifacts = project.getArtifacts();
+  Set artifacts = project.getDependencyArtifacts();
   for (Iterator it = artifacts.iterator(); it.hasNext();) {
    Artifact artifact = (Artifact) it.next();
    if (Artifact.SCOPE_COMPILE.equals(artifact.getScope()) 
      || Artifact.SCOPE_SYSTEM.equals(artifact.getScope()) 
      || Artifact.SCOPE_PROVIDED.equals(artifact.getScope())) {
-    Jar jar = new Jar(artifact.getArtifactId(), artifact.getFile());
+    File file = getFile(artifact);
+    if (file == null) {
+        throw new RuntimeException("File is not available for artifact " + artifact + " in project " + project.getArtifact());
+    }
+    Jar jar = new Jar(artifact.getArtifactId(), file);
     list.add(jar);
    }
   }
@@ -264,6 +253,15 @@ public class BundlePlugin extends AbstractMojo {
   return cp;
  }
  
+ /**
+  * Get the file for an Artifact
+  * 
+  * @param artifact
+  */
+ protected File getFile(Artifact artifact) {
+  return artifact.getFile();
+ }
+
  private void header(Properties properties, String key, Object value) {
   if (value == null)
    return;
@@ -272,5 +270,171 @@ public class BundlePlugin extends AbstractMojo {
    return;
  
   properties.put(key, value.toString());
+ }
+
+ /**
+  * Convert a Maven version into an OSGi compliant version
+  * 
+  * @param version Maven version
+  * @return the OSGi version
+  */
+ protected String convertVersionToOsgi(String version)
+ {
+     String osgiVersion;
+
+//     Matcher m = P_VERSION.matcher(version);
+//     if (m.matches()) {
+//         osgiVersion = m.group(1) + "." + m.group(3);
+//     }
+
+     /* TODO need a regexp guru here */
+
+     Matcher m;
+     
+     /* if it's already OSGi compliant don't touch it */
+     m = OSGI_VERSION_PATTERN.matcher(version);
+     if (m.matches()) {
+         return version;
+     }
+
+     osgiVersion = version;
+
+     /* check for dated snapshot versions with only major or major and minor */
+     Pattern DATED_SNAPSHOT = Pattern.compile("([0-9])(\\.([0-9]))?(\\.([0-9]))?\\-([0-9]{8}\\.[0-9]{6}\\-[0-9]*)");
+     m = DATED_SNAPSHOT.matcher(osgiVersion);
+     if (m.matches()) {
+         String major = m.group(1);
+         String minor = (m.group(3) != null) ? m.group(3) : "0";
+         String service = (m.group(5) != null) ? m.group(5) : "0";
+         String qualifier = m.group(6).replaceAll( "-", "_" ).replaceAll( "\\.", "_" );
+         osgiVersion = major + "." + minor + "." + service + "." + qualifier;
+     }
+
+     /* else transform first - to . and others to _ */
+     osgiVersion = osgiVersion.replaceFirst( "-", "\\." );
+     osgiVersion = osgiVersion.replaceAll( "-", "_" );
+     m = OSGI_VERSION_PATTERN.matcher(osgiVersion);
+     if (m.matches()) {
+         return osgiVersion;
+     }
+
+     /* remove dots in the middle of the qualifier */
+     Pattern DOTS_IN_QUALIFIER = Pattern.compile("([0-9])(\\.[0-9])?\\.([0-9A-Za-z_-]+)\\.([0-9A-Za-z_-]+)");
+     m = DOTS_IN_QUALIFIER.matcher(osgiVersion);
+     if (m.matches()) {
+         String s1 = m.group(1);
+         String s2 = m.group(2);
+         String s3 = m.group(3);
+         String s4 = m.group(4);
+
+         Matcher qualifierMatcher = ONLY_NUMBERS.matcher( s3 );
+         /* if last portion before dot is only numbers then it's not in the middle of the qualifier */
+         if (!qualifierMatcher.matches()) {
+             osgiVersion = s1 + s2 + "." + s3 + "_" + s4;
+         }
+     }
+
+     /* convert 1.string into 1.0.0.string and 1.2.string into 1.2.0.string */
+     Pattern NEED_TO_FILL_ZEROS = Pattern.compile("([0-9])(\\.([0-9]))?\\.([0-9A-Za-z_-]+)");
+     m = NEED_TO_FILL_ZEROS.matcher(osgiVersion);
+     if (m.matches()) {
+         String major = m.group(1);
+         String minor = ( m.group( 3 ) != null ) ? m.group( 3 ) : "0";
+         String service = "0";
+         String qualifier = m.group(4);
+
+         Matcher qualifierMatcher = ONLY_NUMBERS.matcher( qualifier );
+         /* if last portion is only numbers then it's not a qualifier */
+         if (!qualifierMatcher.matches()) {
+             osgiVersion = major + "." + minor + "." + service + "." + qualifier;
+         }
+     }
+
+     m = OSGI_VERSION_PATTERN.matcher(osgiVersion);
+     /* if still its not OSGi version then add everything as qualifier */
+     if (!m.matches()) {
+         String major = "0";
+         String minor = "0";
+         String service = "0";
+         String qualifier = osgiVersion.replaceAll( "\\.", "_" );
+         osgiVersion = major + "." + minor + "." + service + "." + qualifier;
+     }
+
+     return osgiVersion;
+ }
+
+ protected String getBundleName(MavenProject project) {
+  return project.getBuild().getFinalName() + ".jar";
+ }
+
+ public String getBuildDirectory() {
+  return buildDirectory;
+ }
+
+ void setBuildDirectory(String buildirectory) {
+  this.buildDirectory = buildirectory;    
+ }
+
+ /**
+  * Get a list of packages inside a Jar
+  * 
+  * @param jar
+  * @return list of package names
+  */
+ public List getPackages(Jar jar) {
+  List packages = new ArrayList();
+  for (Iterator p = jar.getDirectories().entrySet().iterator(); p.hasNext();) {
+    Map.Entry directory = (Map.Entry) p.next();
+    String path = (String) directory.getKey();
+
+    String pack = path.replace('/', '.');
+    packages.add(pack);
+  }
+  return packages;
+ }
+
+ protected Properties getDefaultProperties(MavenProject project) {
+     Properties properties = new Properties();
+     // Setup defaults
+     String bsn = project.getGroupId() + "." + project.getArtifactId();
+     properties.put(Analyzer.BUNDLE_SYMBOLICNAME, bsn);
+     properties.put(Analyzer.IMPORT_PACKAGE, "*");
+
+     String version = convertVersionToOsgi(project.getVersion());
+     
+     properties.put(Analyzer.BUNDLE_VERSION, version);
+     header(properties, Analyzer.BUNDLE_DESCRIPTION, project
+       .getDescription());
+     header(properties, Analyzer.BUNDLE_LICENSE, printLicenses(project
+       .getLicenses()));
+     header(properties, Analyzer.BUNDLE_NAME, project.getName());
+     
+     if (project.getOrganization() != null) {
+       header(properties, Analyzer.BUNDLE_VENDOR, project
+         .getOrganization().getName());
+       if (project.getOrganization().getUrl() != null) {
+         header(properties, Analyzer.BUNDLE_DOCURL, project
+           .getOrganization().getUrl());
+       }
+     }
+
+     properties.putAll(project.getProperties());
+     properties.putAll(project.getModel().getProperties());
+     properties.putAll( getProperies(project.getModel(), "project.build.", project.getBuild()));
+     properties.putAll( getProperies(project.getModel(), "pom.", project.getModel()));
+     properties.putAll( getProperies(project.getModel(), "project.", project));
+     properties.put("project.baseDir", baseDir );
+     properties.put("project.build.directory", getBuildDirectory() );
+     properties.put("project.build.outputdirectory", outputDirectory );
+     
+     return properties;
+ }
+ 
+ void setBasedir(File basedir){
+     this.baseDir = basedir;
+ }
+
+ void setOutputDirectory(File outputDirectory){
+     this.outputDirectory = outputDirectory;
  }
 }
