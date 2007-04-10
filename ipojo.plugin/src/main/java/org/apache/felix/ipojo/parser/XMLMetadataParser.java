@@ -18,6 +18,8 @@
  */
 package org.apache.felix.ipojo.parser;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.apache.felix.ipojo.metadata.Attribute;
@@ -41,15 +43,38 @@ public class XMLMetadataParser implements ContentHandler {
      * @throws ParseException when an error occurs in the xml parsing
      */
     public Element[] getComponentsMetadata() throws ParseException {
-    	return m_elements[0].getElements("Component");
+    	Element[] comp = m_elements[0].getElements("Component");
+    	Element[] compo = m_elements[0].getElements("Composite");
+    	Element[] metadata = new Element[comp.length + compo.length];
+    	int l = 0;
+    	for(int i = 0; i < comp.length; i++) { metadata[l] = comp[i]; l++;}
+    	for(int i = 0; i < compo.length; i++) { metadata[l] = compo[i]; l++;}
+    	return metadata;
+    }
+    
+    public List getReferredPackages() {
+    	List referred = new ArrayList();
+    	Element[] compo = m_elements[0].getElements("Composite");
+    	for(int i= 0; i < compo.length; i++) {
+    		for(int j = 0; j < compo[i].getElements().length; j++) {
+    			if(compo[i].getElements()[j].containsAttribute("specification")) {
+    				String p = compo[i].getElements()[j].getAttribute("specification");
+    				int last = p.lastIndexOf('.');
+    				if(last != -1) { referred.add(p.substring(0, last)); }
+    			}
+    		}
+    	}
+    	return referred;
     }
     
     public Element[] getMetadata() throws ParseException {
     	Element[] comp = m_elements[0].getElements("Component");
+    	Element[] compo = m_elements[0].getElements("Composite");
     	Element[] conf = m_elements[0].getElements("Instance");
-    	Element[] metadata = new Element[comp.length + conf.length];
+    	Element[] metadata = new Element[comp.length + conf.length + compo.length];
     	int l = 0;
     	for(int i = 0; i < comp.length; i++) { metadata[l] = comp[i]; l++;}
+    	for(int i = 0; i < compo.length; i++) { metadata[l] = compo[i]; l++;}
     	for(int i = 0; i < conf.length; i++) { metadata[l] = conf[i]; l++;}
     	return metadata;
     }

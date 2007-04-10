@@ -42,11 +42,23 @@ public class ManifestMetadataParser {
     private Element[] m_elements = new Element[0];
 
     /**
-     * @return the component metadata.
+     * @return the component metadata (composite & component).
      * @throws ParseException when a parsing error occurs
      */
     public Element[] getComponentsMetadata() throws ParseException {
-        return m_elements[0].getElements("Component");
+        Element[] components = m_elements[0].getElements("Component");
+        Element[] composites = m_elements[0].getElements("Composite");
+        Element[] all = new Element[components.length + composites.length];
+        int l = 0;
+        for (int i = 0; i < components.length; i++) {
+        	all[l] = components[i];
+        	l++;
+        }
+        for (int i = 0; i < composites.length; i++) {
+        	all[l] = composites[i];
+        	l++;
+        }
+        return all;
     }
 
     /**
@@ -152,7 +164,6 @@ public class ManifestMetadataParser {
         //Add the ipojo element inside the element list
         addElement(new Element("iPOJO", ""));
         parseElements(componentClassesStr.trim());
-
     }
 
     /**

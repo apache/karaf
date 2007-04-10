@@ -207,7 +207,7 @@ public class Element {
 		name = name.toLowerCase();
 		Element[] list = new Element[0];
 		for (int i = 0; i < m_elements.length; i++) {
-			if (m_elements[i].getName().equals(name) && m_elements[i].getNameSpace().equals("")) {
+			if (m_elements[i].getName().equalsIgnoreCase(name) && m_elements[i].getNameSpace().equals("")) {
 				list = Element.addElement(list, m_elements[i]);
 			}
 		}

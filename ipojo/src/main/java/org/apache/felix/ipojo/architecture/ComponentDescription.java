@@ -55,11 +55,23 @@ public class ComponentDescription {
     }
     
     /**
+     * Constructor for composite.
+     * @param name : name of the component type (factory name). 
+     */
+    public ComponentDescription(String name) {
+    	m_name = name;
+    }
+    
+    /**
      * @see java.lang.Object#toString()
      */
     public String toString() {
         String res = "";
-        res += "Component Type : " + m_name + " (" + m_className + ") \n";
+        if (m_className == null) {
+        	res += "Component Type : " + m_name + " (Composition) \n";
+        } else {
+        	res += "Component Type : " + m_name + " (" + m_className + ") \n";
+        }
         for (int i = 0; i < m_providedServiceSpecification.length; i++) {
             res += "\tProvides : " + m_providedServiceSpecification[i] + "\n";
         }

@@ -51,6 +51,11 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * The key of this hashmap is the name (i.e. pid) of the created instance
      */
     private HashMap m_componentInstances = new HashMap();
+    
+    /**
+     * Ture if the component is a composition. 
+     */
+    private boolean m_isComposite = false;
 
     /**
      * The bundle context reference.
@@ -66,6 +71,11 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * Component Implementation Class Name.
      */
     private String m_componentClassName = null;
+    
+    /**
+     * Composition Name. 
+     */
+    private String m_compositeName = null;
 
     /**
      * Classloader to delegate loading.
@@ -97,6 +107,11 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * Logger for the factory (and all component instance).
      */
     private Logger m_logger;
+    
+    /**
+     * True when the factory is active (non stopping and non starting).
+     */
+    private boolean m_active = false;
 
     /**
      * FactoryClassloader.
@@ -183,19 +198,44 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      */
     public ComponentFactory(BundleContext bc, Element cm) {
         m_context = bc;
-        m_componentClassName = cm.getAttribute("className");
         m_componentMetadata = cm;
-        
-        // Get factory PID :
-        if (m_componentMetadata.containsAttribute("factory") && !m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) { 
-        	m_factoryName = m_componentMetadata.getAttribute("factory");
-        } else { m_factoryName = m_componentMetadata.getAttribute("className"); }
-        
-        m_logger = new Logger(m_context, m_factoryName, Logger.WARNING);
+        if (cm.getName().equalsIgnoreCase("composite")) {
+        	m_componentClassName = null;
+        	m_isComposite = true;
+        	// Get the name
+        	if (cm.containsAttribute("name")) { 
+        		m_compositeName = cm.getAttribute("name");
+        	} else { 
+        		System.err.println("A composite needs a name"); return;
+        	}
+        	// Compute factory name
+        	if (m_componentMetadata.containsAttribute("factory") && !m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) { 
+            	m_factoryName = m_componentMetadata.getAttribute("factory");
+            } else { m_factoryName = m_compositeName; }
+        } else  {
+        	if (cm.containsAttribute("className")) { 
+        		m_componentClassName = cm.getAttribute("className");
+        	} else { 
+        		System.err.println("A component needs a class name"); return;
+        	}
+        	if (m_componentMetadata.containsAttribute("factory") && !m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) { 
+            	m_factoryName = m_componentMetadata.getAttribute("factory");
+            } else { m_factoryName = m_componentMetadata.getAttribute("className"); }
+        }
+        if (m_factoryName != null) {
+        	m_logger = new Logger(m_context, m_factoryName, Logger.WARNING);
+        } else {
+        	if (m_isComposite) {
+        		m_logger = new Logger(m_context, m_compositeName, Logger.WARNING);
+        	} else {
+        		m_logger = new Logger(m_context, m_componentClassName, Logger.WARNING);
+        	}
+        }
     }
 
     /**
      * Create a instance manager factory. The class is given in parameter.
+     * The component type is not a composite.
      * @param bc : bundle context
      * @param clazz : the component class
      * @param cm : metadata of the component
@@ -217,12 +257,15 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     /**
      * Stop all the instance managers.
      */
-    public void stop() {
+    public synchronized void stop() {
+    	m_active = false;
         Collection col = m_componentInstances.values();
         Iterator it = col.iterator();
         while (it.hasNext()) {
             ComponentInstance ci = (ComponentInstance) it.next();
-            if (ci.isStarted()) { ci.stop(); }
+            if (ci.isStarted()) {
+            	ci.stop();
+            }
         }
         m_componentInstances.clear();
         if (m_sr != null) { m_sr.unregister(); }
@@ -232,20 +275,33 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     /**
      * Start all the instance managers.
      */
-    public void start() {        
+    public synchronized void start() {        
         Properties props = new Properties();
 
         // create a ghost component
-        InstanceManager ghost = new InstanceManager(this, m_context);
-        Properties p = new Properties();
-        p.put("name", "ghost");
-        ghost.configure(m_componentMetadata, p);
-        m_componentDesc = ghost.getComponentDescription();
+        if (!m_isComposite) {
+        	InstanceManager ghost = new InstanceManager(this, m_context);
+        	Properties p = new Properties();
+        	p.put("name", "ghost");
+        	ghost.configure(m_componentMetadata, p);
+        	m_componentDesc = ghost.getComponentDescription();
+        } else {
+        	CompositeManager ghost = new CompositeManager(this, m_context);
+        	Properties p = new Properties();
+        	p.put("name", "ghost");
+        	ghost.configure(m_componentMetadata, p);
+        	m_componentDesc = ghost.getComponentDescription();
+        }
         
         // Check if the factory should be exposed
         if (m_componentMetadata.containsAttribute("factory") && m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) { return; }
         
-        props.put("component.class", m_componentClassName);
+        if (!m_isComposite) { 
+        	props.put("component.class", m_componentClassName);
+        } else { 
+        	props.put("component.class", "no implementation class"); 
+        }
+        props.put("factory.name", m_factoryName);
         props.put("component.providedServiceSpecifications", m_componentDesc.getprovidedServiceSpecification());
         props.put("component.properties", m_componentDesc.getProperties());
         props.put("component.description", m_componentDesc);
@@ -255,7 +311,18 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         props.put(Constants.SERVICE_PID, m_factoryName);
 
         // Exposition of the factory service
+        m_active = true;
         m_sr = m_context.registerService(new String[] {Factory.class.getName(), ManagedServiceFactory.class.getName()}, this, props);
+    }
+    
+    /**
+     * Callback called by instance when stopped.
+     * @param ci : the instance stopping
+     */
+    protected synchronized void stopped(ComponentInstance ci) {
+    	if (m_active) {
+    		m_componentInstances.remove(ci.getInstanceName());
+    	}
     }
 
     /**
@@ -318,15 +385,30 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     	}
     	
         IPojoContext context = new IPojoContext(m_context);
-        InstanceManager instance = new InstanceManager(this, context);
-        context.setComponentInstance(instance);
-        instance.configure(m_componentMetadata, configuration);
+        ComponentInstance instance = null;
+        if (!m_isComposite) {
+        	InstanceManager inst = new InstanceManager(this, context);
+        	//context.setComponentInstance(inst);
+        	inst.configure(m_componentMetadata, configuration);
+        	instance = inst;
+        } else {
+        	CompositeManager inst = new CompositeManager(this, context);
+        	//context.setComponentInstance(inst);
+        	inst.configure(m_componentMetadata, configuration);
+        	instance = inst;
+        }
 
         String pid = null;
         if (configuration.get("name") != null) { 
         	pid = (String) configuration.get("name"); 
-        } else { pid = m_componentMetadata.getAttribute("className"); }
-
+        } else {
+        	throw new UnacceptableConfiguration("The name attribute is missing");
+        }
+        
+        if (m_componentInstances.containsKey(pid)) {
+        	throw new UnacceptableConfiguration("Name already used : " + pid);
+        }
+        
         m_componentInstances.put(pid, instance);
         instance.start();
         return instance;
@@ -342,17 +424,30 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     		m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
     		throw new UnacceptableConfiguration("The configuration " + configuration + " is not acceptable for " + m_factoryName + ": " + e.getMessage());
     	}
-    	
-    	IPojoContext context = new IPojoContext(m_context, serviceContext);
-        InstanceManager instance = new InstanceManager(this, context);
-        context.setComponentInstance(instance);
-        instance.configure(m_componentMetadata, configuration);
 
-        String pid = null;
+    	IPojoContext context = new IPojoContext(m_context, serviceContext);
+    	ComponentInstance instance = null;
+    	if (!m_isComposite) {
+        	InstanceManager inst = new InstanceManager(this, context);
+        	//context.setComponentInstance(inst);
+        	inst.configure(m_componentMetadata, configuration);
+        	instance = inst;
+        } else {
+        	CompositeManager inst = new CompositeManager(this, context);
+        	//context.setComponentInstance(inst);
+        	inst.configure(m_componentMetadata, configuration);
+        	instance = inst;
+        }
+
+    	String pid = null;
         if (configuration.get("name") != null) { 
         	pid = (String) configuration.get("name"); 
-        } else { 
-        	pid = m_componentMetadata.getAttribute("className");
+        } else {
+        	throw new UnacceptableConfiguration("The name attribute is missing");
+        }
+        
+        if (m_componentInstances.containsKey(pid)) {
+        	throw new UnacceptableConfiguration("Name already used : " + pid);
         }
 
         m_componentInstances.put(pid, instance);
@@ -450,7 +545,12 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
 	public void reconfigure(Dictionary properties) throws UnacceptableConfiguration {
 		if (properties == null || properties.get("name") == null) { throw new UnacceptableConfiguration("The configuration does not contains the \"name\" property"); }
 		String name = (String) properties.get("name");
-		InstanceManager cm = (InstanceManager) m_componentInstances.get(name);
+		ComponentInstance cm = null;
+		if (m_isComposite) {
+			cm = (CompositeManager) m_componentInstances.get(name);
+		} else  {
+			cm = (InstanceManager) m_componentInstances.get(name);
+		}
         if (cm == null) { 
         	return;  // The instance does not exist.
         } else {

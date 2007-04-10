@@ -1,0 +1,87 @@
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.felix.ipojo.composite;
+
+
+import org.apache.felix.ipojo.ComponentInstance;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
+
+/**
+ * Internal service reference implemenation.
+ * This class is used for in the composition.
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ */
+public class ServiceReferenceImpl implements ServiceReference {
+	
+	 /**
+	 * Service Registration attached to the service reference.
+	 */
+	private ServiceRegistrationImpl m_registration = null;
+	 
+	 /**
+	 * Constructor.
+	 * @param cm : component instance publishing the service.
+	 * @param sr : registration attached to this service reference.
+	 */
+	public ServiceReferenceImpl(ComponentInstance cm, ServiceRegistrationImpl sr) { m_registration = sr; }
+
+	/**
+	 * Not supported in composite.
+	 * @see org.osgi.framework.ServiceReference#getBundle()
+	 */
+	public Bundle getBundle() { 
+		throw new UnsupportedOperationException("getUsingBundles is not supported in scope");
+	}
+	
+	/**
+	 * @return the service registration for this service reference.
+	 */
+	public ServiceRegistrationImpl getServiceRegistration() { return m_registration; }
+
+	/**
+	 * @see org.osgi.framework.ServiceReference#getProperty(java.lang.String)
+	 */
+	public Object getProperty(String s) {
+		return m_registration.getProperty(s);
+	}
+
+	/**
+	 * @see org.osgi.framework.ServiceReference#getPropertyKeys()
+	 */
+	public String[] getPropertyKeys() {
+		return m_registration.getPropertyKeys();
+	}
+
+	/**
+	 * Not supported in composite.
+	 * @see org.osgi.framework.ServiceReference#getUsingBundles()
+	 */
+	public Bundle[] getUsingBundles() {
+		throw new UnsupportedOperationException("getUsingBundles is not supported in scope");
+	}
+
+	/**
+	 * @see org.osgi.framework.ServiceReference#isAssignableTo(org.osgi.framework.Bundle, java.lang.String)
+	 */
+	public boolean isAssignableTo(Bundle arg0, String arg1) {
+		return true;
+	}
+
+}

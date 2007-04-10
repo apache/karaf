@@ -196,12 +196,12 @@ public class IPojoContext implements BundleContext {
 	 * Set the instance to the service context.
 	 * @param ci : the component instance
 	 */
-	public void setComponentInstance(ComponentInstance ci) { m_serviceContext.setComponentInstance(ci); }
+	//public void setComponentInstance(ComponentInstance ci) { m_serviceContext.setComponentInstance(ci); }
 	
 	/**
 	 * Get the instance manager from the service context.
 	 * @return the component manager of the service context
 	 */
-	public ComponentInstance getComponentInstance() { return m_serviceContext.getComponentInstance(); }
+	//public ComponentInstance getComponentInstance() { return m_serviceContext.getComponentInstance(); }
 
 }

@@ -165,7 +165,7 @@ public class InstanceManager implements ComponentInstance {
      */
     public InstanceDescription getInstanceDescription() {
     	int componentState = getState();
-        InstanceDescription instanceDescription = new InstanceDescription(m_name, m_className, componentState, getContext().getBundle().getBundleId());
+        InstanceDescription instanceDescription = new InstanceDescription(m_name, componentState, getContext().getBundle().getBundleId(), m_componentDesc);
 
         String[] objects = new String[getPojoObjects().length];
         for (int i = 0; i < getPojoObjects().length; i++) {
@@ -243,6 +243,8 @@ public class InstanceManager implements ComponentInstance {
         m_pojoObjects = new Object[0];
         
         m_state = STOPPED;
+        
+        m_factory.stopped(this);
     }
 
     /**

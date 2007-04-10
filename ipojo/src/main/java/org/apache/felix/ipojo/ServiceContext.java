@@ -108,6 +108,6 @@ public interface ServiceContext {
 	 * Set the component instance using the service context.
 	 * @param ci
 	 */
-	void setComponentInstance(ComponentInstance ci);
+	//void setComponentInstance(ComponentInstance ci);
 
 }

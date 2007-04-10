@@ -72,8 +72,9 @@ public class Manipulator {
 	
 	/**
 	 * @return the method list.
+	 * Modified for performance issue.
 	 */
-	public List getMethods() { return m_methods; }
+	public List getMethods() { /*return m_methods;*/ return new ArrayList(); }
 
 	/**
      * Manipulate the class.

@@ -18,6 +18,8 @@
  */
 package org.apache.felix.ipojo;
 
+import org.apache.felix.ipojo.composite.service.importer.ImportExportHandler;
+import org.apache.felix.ipojo.composite.service.instantiator.ServiceInstantiatorHandler;
 import org.apache.felix.ipojo.handlers.architecture.ArchitectureHandler;
 import org.apache.felix.ipojo.handlers.configuration.ConfigurationHandler;
 import org.apache.felix.ipojo.handlers.dependency.DependencyHandler;
@@ -48,5 +50,14 @@ public class IPojoConfiguration {
         LifecycleCallbackHandler.class,
         ArchitectureHandler.class
     };
+
+	/**
+	 * Available composite handlers in the iPOJO bundle.
+	 */
+	public static final Class[] INTERNAL_COMPOSITE_HANDLERS = new Class[] {
+		ServiceInstantiatorHandler.class,
+		ImportExportHandler.class,
+		org.apache.felix.ipojo.composite.architecture.ArchitectureHandler.class
+	};
 
 }

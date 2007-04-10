@@ -25,12 +25,6 @@ package org.apache.felix.ipojo.architecture;
 public class InstanceDescription {
 
     /**
-     * The Component class name.
-     * This String is the identifier of the component.
-     */
-    private String m_className;
-
-    /**
      * The name of the component (instance).
      */
     private String m_name;
@@ -51,24 +45,35 @@ public class InstanceDescription {
     private int m_state;
 
     /**
-     * BundleId of the component.
+     * BundleId who create the instance.
      */
     private long m_bundleId;
+    
+    /**
+     * Component Type of the instance.
+     */
+    private ComponentDescription m_type;
+    
+    /**
+     * COntained instance list.
+     */
+    private InstanceDescription[] m_containedInstances = new InstanceDescription[0];
 
     /**
      * Constructor.
      * @param name : the name of the component instance.
      * @param state : the state of the instance.
-     * @param className : implementation class name.
      * @param bundleId : bundle id owning this instance.
+     * @param cd : the component type description of this instance.
      */
-    public InstanceDescription(String name, String className, int state, long bundleId) {
+    public InstanceDescription(String name, int state, long bundleId, ComponentDescription cd) {
         m_name = name;
-        m_className = className;
         m_state = state;
         m_createdObjects = new String[0];
         m_handlers = new HandlerDescription[0];
+        m_containedInstances = new InstanceDescription[0];
         m_bundleId = bundleId;
+        m_type = cd;
     }
 
     /**
@@ -87,9 +92,9 @@ public class InstanceDescription {
     public void setCreatedObjects(String[] objects) { m_createdObjects = objects; }
 
     /**
-     * @return : the class name of the component
+     * @return : the component type description of this instance.
      */
-    public String getClassName() { return m_className; }
+    public ComponentDescription getComponentDescription() { return m_type; }
 
     /**
      * @return the live handler list
@@ -113,6 +118,24 @@ public class InstanceDescription {
         newHd[m_handlers.length] = hd;
         m_handlers = newHd;
     }
+    
+    /**
+     * Add an instance description to the contained instance list.
+     * @param inst : the handler description to add
+     */
+    public void addInstance(InstanceDescription inst) {
+        // Verify that the dependency description is not already in the array.
+        for (int i = 0; (i < m_containedInstances.length); i++) {
+            if (m_containedInstances[i] == inst) {
+                return; //NOTHING TO DO, the description is already in the array
+            }
+        }
+        // The component Description is not in the array, add it
+        InstanceDescription[] newCi = new InstanceDescription[m_containedInstances.length + 1];
+        System.arraycopy(m_containedInstances, 0, newCi, 0, m_containedInstances.length);
+        newCi[m_containedInstances.length] = inst;
+        m_containedInstances = newCi;
+    }
 
     /**
      * Set the state of the component.
@@ -129,6 +152,11 @@ public class InstanceDescription {
      * @return the bundle id owning the component implementation class.
      */
     public long getBundleId() { return m_bundleId; }
+    
+    /**
+     * @return the list of contained instances.
+     */
+    public InstanceDescription[] getContainedInstances() { return m_containedInstances; }
 
 
 }

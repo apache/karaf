@@ -296,7 +296,6 @@ public class Dependency implements ServiceListener {
 
             // If a service goes way.
             if (event.getType() == ServiceEvent.UNREGISTERING) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] A service is gone -> " + event.getServiceReference().getBundle());
                 if (containsSR(event.getServiceReference())) { departureManagement(event.getServiceReference()); }
                 return;
             }
@@ -311,12 +310,10 @@ public class Dependency implements ServiceListener {
             // If a service is modified
             if (event.getType() == ServiceEvent.MODIFIED) {
                 if (m_filter.match(event.getServiceReference())) {
-                    m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] A service with a filter matching is arrived -> " + event.getServiceReference().getBundle());
                     if (!containsSR(event.getServiceReference())) { 
                     	arrivalManagement(event.getServiceReference()); 
                     }
                 } else {
-                    m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] A service with a filter matching has gone -> " + event.getServiceReference().getBundle());
                     if (containsSR(event.getServiceReference())) { 
                     	departureManagement(event.getServiceReference()); 
                     }

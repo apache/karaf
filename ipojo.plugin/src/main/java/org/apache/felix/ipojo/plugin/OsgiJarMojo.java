@@ -151,7 +151,8 @@ public class OsgiJarMojo extends AbstractMojo {
 	 */
 	private OsgiManifest				osgiManifest;
 	
-	private String[][] namespaces; 
+	private String[][] namespaces;
+	private List referedPackages; 
 
 	/**
 	 * Execute this Mojo
@@ -480,6 +481,12 @@ public class OsgiJarMojo extends AbstractMojo {
 					referred.add(ns);
 				}
 			}
+		}
+		
+		// Add refered imports form the metadata
+		for(int i = 0; i < referedPackages.size(); i++) {
+			String pack = (String) referedPackages.get(i);
+			referred.add(pack);
 		}
 		
 		// Add org.apache.felix.ipojo, org.apache.felix.ipojo.architecture is not already in the set
@@ -872,6 +879,7 @@ public class OsgiJarMojo extends AbstractMojo {
 			parser.parse(is);
 		    
 		    meta = handler.getMetadata();
+		    referedPackages = handler.getReferredPackages();
 		    
 		} catch (MalformedURLException e) {
 			getLog().error("Malformed URL for " + outputDirectory+path+ "("+e.getMessage()+")");

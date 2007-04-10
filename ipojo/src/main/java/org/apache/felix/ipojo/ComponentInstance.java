@@ -80,7 +80,7 @@ public interface ComponentInstance {
     ComponentFactory getFactory();
     
     /**
-     * @return the context of the instance manager
+     * @return the context of the component instance
      */
     BundleContext getContext();
     
