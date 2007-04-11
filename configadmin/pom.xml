@@ -7,7 +7,7 @@
         <version>0.9.0-incubator-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.apache.felix.cm</artifactId>
+    <artifactId>org.apache.felix.configadmin</artifactId>
     <packaging>bundle</packaging>
 
     <name>Apache Felix Configuration Admin Service</name>
