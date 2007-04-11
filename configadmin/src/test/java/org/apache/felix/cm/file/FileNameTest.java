@@ -32,8 +32,8 @@ public class FileNameTest extends TestCase
     {
         assertEquals( "plain", encodePath( "plain" ) );
         assertEquals( "plain" + File.separatorChar + "path", encodePath( "plain.path" ) );
-        assertEquals( "encod%00e8", encodePath( "encodè" ) );
-        assertEquals( "encod%00e8" + File.separatorChar + "path", encodePath( "encodè/path" ) );
+        assertEquals( "encod%00e8", encodePath( "encod\u00E8" ) );
+        assertEquals( "encod%00e8" + File.separatorChar + "path", encodePath( "encod\u00E8/path" ) );
         assertEquals( "encode" + File.separatorChar + "%1234" + File.separatorChar + "path", encodePath( "encode/\u1234/path" ) );
         assertEquals( "encode" + File.separatorChar + " %0025 " + File.separatorChar + "path", encodePath( "encode/ % /path" ) );
     }
