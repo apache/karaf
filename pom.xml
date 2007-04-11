@@ -136,8 +136,10 @@
         <module>eventadmin.bridge.configuration</module>
         <module>eventadmin.bridge.useradmin</module>
         <module>eventadmin.bridge.wireadmin</module>
-		
-		<module>scr</module>
+
+        <module>scr</module>
+        <module>configadmin</module>
+        <module>metatype</module>
       </modules>
     </profile>
     
