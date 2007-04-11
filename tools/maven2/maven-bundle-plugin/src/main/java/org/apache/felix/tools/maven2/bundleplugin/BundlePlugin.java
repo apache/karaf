@@ -111,6 +111,24 @@ public class BundlePlugin extends AbstractMojo {
   }
  }
 
+ /* transform directives from their XML form to the expected BND syntax (eg. _include becomes -include) */
+ protected Map transformDirectives(Map instructions) {
+  Set removedKeys = new HashSet();
+//System.out.println("BEFORE "+instructions);
+  for (Iterator i = instructions.entrySet().iterator(); i.hasNext();) {
+    final Map.Entry e = (Map.Entry)i.next();
+    final String key = (String)e.getKey();
+    if (key.startsWith("_")) {
+      final String transformedKey = "-"+key.substring(1);
+      instructions.put(transformedKey, e.getValue());
+      removedKeys.add(key);
+    }
+  }
+  instructions.keySet().removeAll(removedKeys);
+//System.out.println("AFTER "+instructions);
+  return instructions;
+ }
+
  protected void execute(MavenProject project, Map instructions, Properties properties, Jar[] classpath) throws MojoExecutionException {
   try {
    File jarFile = new File(getBuildDirectory(), getBundleName(project));
@@ -122,7 +140,7 @@ public class BundlePlugin extends AbstractMojo {
      properties.put(Analyzer.EXPORT_PACKAGE, bsn + ".*");
    }
 
-   properties.putAll(instructions);
+   properties.putAll(transformDirectives(instructions));
  
    Builder builder = new Builder();
    builder.setBase(baseDir);

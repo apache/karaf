@@ -105,7 +105,7 @@ public class ManifestPlugin
             props.put( Analyzer.IMPORT_PACKAGE, "*" );
         }
 
-        props.putAll( instructions );
+        props.putAll( transformDirectives( instructions ) );
 
         analyzer.setProperties( props );
 
