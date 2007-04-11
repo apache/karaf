@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>felix</artifactId>
+        <version>0.9.0-incubator-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>org.apache.felix.cm</artifactId>
+    <packaging>bundle</packaging>
+
+    <name>Apache Felix Configuration Admin Service</name>
+    <description>
+        Implementation of the OSGi Configuration Admin Service Specification 1.2
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>0.9.0-incubator-SNAPSHOT</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Category>osgi</Bundle-Category>
+                        <Export-Package>
+                            org.apache.felix.cm,
+                            org.apache.felix.cm.file,
+                            org.osgi.service.cm;version=1.2
+                        </Export-Package>
+                        <Private-Package>
+                            org.apache.felix.cm.*
+                        </Private-Package>
+                        <Bundle-Activator>
+                            org.apache.felix.cm.impl.ConfigurationManager
+                        </Bundle-Activator>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
