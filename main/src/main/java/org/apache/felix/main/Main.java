@@ -90,13 +90,13 @@ public class Main
      *       instance and to pass configuration information into
      *       bundles installed into the framework instance. The configuration
      *       property file is called <tt>config.properties</tt> by default
-     *       and is located in the same directory as the <tt>felix.jar</tt>
-     *       file, which is typically in the <tt>lib/</tt> directory of the
-     *       Felix installation directory. It is possible to use a different
-     *       location for the property file by specifying the desired URL
-     *       using the <tt>felix.config.properties</tt> system property;
-     *       this should be set using the <tt>-D</tt> syntax when executing
-     *       the JVM. Refer to the
+     *       and is located in the <tt>conf/</tt> directory of the Felix
+     *       installation directory, which is the parent directory of the
+     *       directory containing the <tt>felix.jar</tt> file. It is possible
+     *       to use a different location for the property file by specifying
+     *       the desired URL using the <tt>felix.config.properties</tt>
+     *       system property; this should be set using the <tt>-D</tt> syntax
+     *       when executing the JVM. Refer to the
      *       <a href="Felix.html#start(org.apache.felix.framework.util.MutablePropertyResolver, org.apache.felix.framework.util.MutablePropertyResolver, java.util.List)">
      *       <tt>Felix.start()</tt></a> method documentation for more
      *       information on the framework configuration options.
@@ -330,8 +330,9 @@ public class Main
     public static Properties loadConfigProperties()
     {
         // The config properties file is either specified by a system
-        // property or it is in the same directory as the Felix JAR file.
-        // Try to load it from one of these places.
+        // property or it is in the conf/ directory of the Felix
+        // installation directory.  Try to load it from one of these
+        // places.
 
         // See if the property URL was specified as a property.
         URL propURL = null;
@@ -356,14 +357,15 @@ public class Main
             String classpath = System.getProperty("java.class.path");
             int index = classpath.toLowerCase().indexOf("felix.jar");
             int start = classpath.lastIndexOf(File.pathSeparator, index) + 1;
-            if (index > start)
+            if (index >= start)
             {
+                // Get the path of the felix.jar file.
                 String jarLocation = classpath.substring(start, index);
-                if (jarLocation.length() == 0)
-                {
-                    jarLocation = ".";
-                }
-                confDir = new File(new File(jarLocation).getParent(), "conf");
+                // Calculate the conf directory based on the parent
+                // directory of the felix.jar directory.
+                confDir = new File(
+                    new File(new File(jarLocation).getAbsolutePath()).getParent(),
+                    "conf");
             }
             else
             {
