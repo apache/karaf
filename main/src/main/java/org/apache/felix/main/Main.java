@@ -247,14 +247,15 @@ public class Main
             String classpath = System.getProperty("java.class.path");
             int index = classpath.toLowerCase().indexOf("felix.jar");
             int start = classpath.lastIndexOf(File.pathSeparator, index) + 1;
-            if (index > start)
+            if (index >= start)
             {
+                // Get the path of the felix.jar file.
                 String jarLocation = classpath.substring(start, index);
-                if (jarLocation.length() == 0)
-                {
-                    jarLocation = ".";
-                }
-                confDir = new File(new File(jarLocation).getParent(), "conf");
+                // Calculate the conf directory based on the parent
+                // directory of the felix.jar directory.
+                confDir = new File(
+                    new File(new File(jarLocation).getAbsolutePath()).getParent(),
+                    "conf");
             }
             else
             {
