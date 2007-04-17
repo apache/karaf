@@ -18,8 +18,13 @@
  */
 package org.apache.felix.ipojo.architecture;
 
+import org.apache.felix.ipojo.ComponentInstance;
+import org.apache.felix.ipojo.metadata.Attribute;
+import org.apache.felix.ipojo.metadata.Element;
+
 /**
  * Instance Description.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class InstanceDescription {
@@ -48,12 +53,12 @@ public class InstanceDescription {
      * BundleId who create the instance.
      */
     private long m_bundleId;
-    
+
     /**
      * Component Type of the instance.
      */
     private ComponentDescription m_type;
-    
+
     /**
      * COntained instance list.
      */
@@ -61,6 +66,7 @@ public class InstanceDescription {
 
     /**
      * Constructor.
+     * 
      * @param name : the name of the component instance.
      * @param state : the state of the instance.
      * @param bundleId : bundle id owning this instance.
@@ -77,29 +83,44 @@ public class InstanceDescription {
     }
 
     /**
-     * @return the name of the component.
+     * Get the instance name.
+     * @return the name of the instance.
      */
-    public String getName() { return m_name; }
+    public String getName() {
+        return m_name;
+    }
 
     /**
+     * Get the list of object created by the described instance.
      * @return the created instances
      */
-    public String[] getCreatedObjects() { return m_createdObjects; }
+    public String[] getCreatedObjects() {
+        return m_createdObjects;
+    }
 
     /**
-     * Set the instances array.
+     * Set the array of objects created by the described instance.
+     * @param objects : the list of create objects.
      */
-    public void setCreatedObjects(String[] objects) { m_createdObjects = objects; }
+    public void setCreatedObjects(String[] objects) {
+        m_createdObjects = objects;
+    }
 
     /**
+     * Get the component type description of the described instance.
      * @return : the component type description of this instance.
      */
-    public ComponentDescription getComponentDescription() { return m_type; }
+    public ComponentDescription getComponentDescription() {
+        return m_type;
+    }
 
     /**
+     * Get the plugged handler list.
      * @return the live handler list
      */
-    public HandlerDescription[] getHandlers() { return m_handlers; }
+    public HandlerDescription[] getHandlers() {
+        return m_handlers;
+    }
 
     /**
      * Add an handler description to the list.
@@ -107,27 +128,30 @@ public class InstanceDescription {
      */
     public void addHandler(HandlerDescription hd) {
         // Verify that the dependency description is not already in the array.
-        for (int i = 0; (i < m_handlers.length); i++) {
+        for (int i = 0; i < m_handlers.length; i++) {
             if (m_handlers[i] == hd) {
-                return; //NOTHING TO DO, the description is already in the array
+                return; // NOTHING TO DO, the description is already in the
+                        // array
             }
         }
-            // The component Description is not in the array, add it
+        // The component Description is not in the array, add it
         HandlerDescription[] newHd = new HandlerDescription[m_handlers.length + 1];
         System.arraycopy(m_handlers, 0, newHd, 0, m_handlers.length);
         newHd[m_handlers.length] = hd;
         m_handlers = newHd;
     }
-    
+
     /**
      * Add an instance description to the contained instance list.
+     * 
      * @param inst : the handler description to add
      */
     public void addInstance(InstanceDescription inst) {
         // Verify that the dependency description is not already in the array.
-        for (int i = 0; (i < m_containedInstances.length); i++) {
+        for (int i = 0; i < m_containedInstances.length; i++) {
             if (m_containedInstances[i] == inst) {
-                return; //NOTHING TO DO, the description is already in the array
+                return; // NOTHING TO DO, the description is already in the
+                        // array
             }
         }
         // The component Description is not in the array, add it
@@ -139,24 +163,79 @@ public class InstanceDescription {
 
     /**
      * Set the state of the component.
+     * 
      * @param i : the state
      */
-    public void setState(int i) { m_state = i; }
+    public void setState(int i) {
+        m_state = i;
+    }
 
     /**
-     * @return the state of the component.
+     * Get the state of the described instance.
+     * @return the state of the instance.
      */
-    public int getState() { return m_state; }
+    public int getState() {
+        return m_state;
+    }
 
     /**
+     * Get the bundle id of the bundle containing the described instance.
      * @return the bundle id owning the component implementation class.
      */
-    public long getBundleId() { return m_bundleId; }
-    
+    public long getBundleId() {
+        return m_bundleId;
+    }
+
     /**
+     * Get the list of contained instance in the describe instance.
+     * This list contains only instances who exposed their architecture.
      * @return the list of contained instances.
      */
-    public InstanceDescription[] getContainedInstances() { return m_containedInstances; }
+    public InstanceDescription[] getContainedInstances() {
+        return m_containedInstances;
+    }
 
+    /**
+     * Get the instance description.
+     * @return the instance description
+     */
+    public Element getDescription() {
+        Element instance = new Element("Instance", "");
+        instance.addAttribute(new Attribute("name", getName())); // Name
+        // State
+        if (m_state == ComponentInstance.STOPPED) {
+            instance.addAttribute(new Attribute("state", "stopped"));
+        }
+        if (m_state == ComponentInstance.VALID) {
+            instance.addAttribute(new Attribute("state", "valid"));
+        }
+        if (m_state == ComponentInstance.INVALID) {
+            instance.addAttribute(new Attribute("state", "invalid"));
+        }
+        // Bundle
+        instance.addAttribute(new Attribute("bundle", "" + m_bundleId));
+
+        // Component Type
+        instance.addAttribute(new Attribute("component.type", m_type.getName()));
+
+        // Handlers
+        for (int i = 0; i < m_handlers.length; i++) {
+            instance.addElement(m_handlers[i].getHandlerInfo());
+        }
+        // Created Object (empty is composite)
+        for (int i = 0; i < m_createdObjects.length; i++) {
+            Element obj = new Element("Object", "");
+            obj.addAttribute(new Attribute("name", ((Object) m_createdObjects[i]).toString()));
+            instance.addElement(obj);
+        }
+        // Contained instance (exposing architecture) (empty if primitive)
+        for (int i = 0; i < m_containedInstances.length; i++) {
+            Element inst = new Element("ContainedInstances", "");
+            inst.addElement(m_containedInstances[i].getDescription());
+            instance.addElement(inst);
+        }
+        return instance;
+
+    }
 
 }

@@ -43,7 +43,7 @@ public class MethodSignature {
     /**
      * Exception thored by the method.
      */
-    private String[] m_exception;
+    private String[] m_exception = new String[0];
 
     /**
      * MethodSignature constructor.
@@ -57,10 +57,11 @@ public class MethodSignature {
         m_name = name;
         m_desc = desc;
         m_signature = sign;
-        m_exception = exc;
+        if (exc != null) { m_exception = exc; }
     }
 
     /**
+     * Get the method description.
      * @return the description of the method.
      */
     public String getDesc() {
@@ -68,6 +69,7 @@ public class MethodSignature {
     }
 
     /**
+     * Get the list of declared exception.
      * @return the String array of exception throwed by the method.
      */
     public String[] getException() {
@@ -75,6 +77,7 @@ public class MethodSignature {
     }
 
     /**
+     * Get the method name.
      * @return the name of the method.
      */
     public String getName() {
@@ -82,6 +85,7 @@ public class MethodSignature {
     }
 
     /**
+     * Get the method signature.
      * @return the signature of the method.
      */
     public String getSignature() {

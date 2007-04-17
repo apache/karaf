@@ -63,29 +63,14 @@ public class DependencyDescription {
      */
     private ServiceReference[] m_serviceReferences;
 
-    /**
-     * @return true if the dependency is a multiple dependency.
-     */
     public boolean isMultiple() { return m_multiple; }
 
-    /**
-     * @return true if the dependency is an optional dependency.
-     */
     public boolean isOptional() { return m_optional; }
 
-    /**
-     * @return the filter.
-     */
     public String getFilter() { return m_filter; }
 
-    /**
-     * @return the needed interface.
-     */
     public String getInterface() { return m_interface; }
 
-    /**
-     * @return the state of the dependency.
-     */
     public int getState() { return m_state; }
 
     /**
@@ -107,11 +92,13 @@ public class DependencyDescription {
     }
 
     /**
+     * Get the service refrence array.
      * @return the array of service reference (only if the cardinality could be n).
      */
     public ServiceReference[] getServiceReferences() { return m_serviceReferences; }
 
     /**
+     * Get the service reference if only 1 used.
      * @return the ServiceReference (only if the cardinality could be 1).
      */
     public ServiceReference getServiceReference() { return m_serviceReferences[0]; }
@@ -123,6 +110,7 @@ public class DependencyDescription {
     public void setServiceReferences(ServiceReference[] sr) { m_serviceReferences = sr; }
 
     /**
+     * Get the used service map.
      * @return the hashmap [object reference, service reference] containing the used services
      */
     public HashMap getUsedServices() { return m_usedServices; }

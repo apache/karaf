@@ -28,9 +28,8 @@ import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
 import org.apache.felix.ipojo.util.Logger;
 
 /**
- * Activator Basic Configuration.
- * - Log Level
- * - Available handlers
+ * Activator Basic Configuration. - Log Level - Available handlers
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class IPojoConfiguration {
@@ -43,21 +42,22 @@ public class IPojoConfiguration {
     /**
      * Available handlers in the iPOJO bundle.
      */
-    public static final Class[] INTERNAL_HANDLERS = new Class[] {
-        DependencyHandler.class,
-        ProvidedServiceHandler.class,
+    public static final Class[] INTERNAL_HANDLERS = new Class[] { 
+        DependencyHandler.class, 
+        ProvidedServiceHandler.class, 
         ConfigurationHandler.class,
-        LifecycleCallbackHandler.class,
-        ArchitectureHandler.class
+        LifecycleCallbackHandler.class, 
+        ArchitectureHandler.class 
     };
 
-	/**
-	 * Available composite handlers in the iPOJO bundle.
-	 */
-	public static final Class[] INTERNAL_COMPOSITE_HANDLERS = new Class[] {
-		ServiceInstantiatorHandler.class,
-		ImportExportHandler.class,
-		org.apache.felix.ipojo.composite.architecture.ArchitectureHandler.class
-	};
+    /**
+     * Available composite handlers in the iPOJO bundle.
+     */
+    public static final Class[] INTERNAL_COMPOSITE_HANDLERS = new Class[] { 
+        ServiceInstantiatorHandler.class, 
+        ImportExportHandler.class,
+        org.apache.felix.ipojo.composite.service.provides.ProvidedServiceHandler.class,
+        org.apache.felix.ipojo.composite.architecture.ArchitectureHandler.class
+    };
 
 }

@@ -21,8 +21,8 @@ package org.apache.felix.ipojo.arch;
 
 import java.io.PrintStream;
 
+import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.architecture.Architecture;
-import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.ungoverned.osgi.service.shell.Command;
 
@@ -49,7 +49,7 @@ public class ArchCommandImpl implements Command {
      * @see org.ungoverned.osgi.service.shell.Command#getUsage()
      */
     public String getUsage() {
-        return "arch -> Dispaly architecture information";
+        return "arch [instance name]";
     }
 
     /**
@@ -58,49 +58,32 @@ public class ArchCommandImpl implements Command {
     public String getShortDescription() {
         return "Architecture command : display the architecture";
     }
-    
-    
-    /**
-     * Return the String corresponding to a component state.
-     * @param state : the state in int
-     * @return : the string of the state (Stopped, Unresolved, Resolved) or "Unknown" if state is not revelant
-     */
-    private String getInstanceState(int state) {
-        switch(state) {
-        case(0) :
-            return "STOPPED";
-        case(1) :
-            return "INVALID";
-        case(2) :
-            return  "VALID";
-        default :
-            return "UNKNOWN";
-        }
-    }
 
     /**
      * @see org.ungoverned.osgi.service.shell.Command#execute(java.lang.String, java.io.PrintStream, java.io.PrintStream)
      */
     public void execute(String line, PrintStream out, PrintStream err) {
         synchronized(this) { 
-        	for(int i=0; i < archiService.length; i++) {
-        		InstanceDescription instance = archiService[i].getInstanceDescription();       
-        		out.println("Instance : " + instance.getName() + " (" + instance.getComponentDescription().getClassName() + ")" + " - " + getInstanceState(instance.getState()) + " from bundle " + instance.getBundleId());
-        		for(int j = 0; j < instance.getHandlers().length; j++) {
-        			HandlerDescription hd = instance.getHandlers()[j];
-        			String hn = hd.getHandlerName();
-        			String hv = "valid";
-        			if(!hd.isValid()) { hv = "invalid"; }
-        			String hi = hd.getHandlerInfo();
-        			out.println("Handler : " + hn + " : " + hv);
-        			if(!hi.equals("")) { out.println(hi); }
+        	if(line.substring("arch".length()).trim().length() == 0) {
+        		for(int i=0; i < archiService.length; i++) {
+        			InstanceDescription instance = archiService[i].getInstanceDescription();
+        			if(instance.getState() == ComponentInstance.VALID) {
+        				out.println("Instance " + instance.getName() + " -> valid");
+        			}
+        			if(instance.getState() == ComponentInstance.INVALID) {
+        				out.println("Instance " + instance.getName() + " -> invalid");
+        			}
+        			if(instance.getState() == ComponentInstance.STOPPED) {
+        				out.println("Instance " + instance.getName() + " -> stopped");
+        			}
         		}
-        		
-        		out.println("Created POJO Objects : ");
-        		for(int j=0;  j < instance.getCreatedObjects().length; j++) {
-        			out.println("\t" + instance.getCreatedObjects()[j]);
+        	} else {
+        		String line2 = line.substring("arch".length()).trim();
+        		for(int i=0; i < archiService.length; i++) {
+        			InstanceDescription instance = archiService[i].getInstanceDescription();
+        			if(instance.getName().equalsIgnoreCase(line2)) { out.println(instance.getDescription()); return;}
         		}
-        		out.print("\n");
+        		err.println("Instance " + line2 + " not found");
         	}
         }
         

@@ -60,7 +60,8 @@ public class MethodSignatureVisitor implements ClassVisitor, Opcodes {
     }
 
     /**
-     * @return the mthod signature array.
+     * Get the method signatures list.
+     * @return the method signature array.
      */
     public MethodSignature[] getMethods() {
         return m_methods;
@@ -86,6 +87,7 @@ public class MethodSignatureVisitor implements ClassVisitor, Opcodes {
     }
 
     /**
+     * Visit a method.
      * @see org.objectweb.asm.ClassVisitor#visit(int, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
      * @param arg0 : version
      * @param arg1 : access
@@ -97,6 +99,7 @@ public class MethodSignatureVisitor implements ClassVisitor, Opcodes {
     public void visit(int arg0, int arg1, String arg2, String arg3, String arg4, String[] arg5) { }
 
     /**
+     * Visit sources.
      * @see org.objectweb.asm.ClassVisitor#visitSource(java.lang.String, java.lang.String)
      * @param arg0 : source
      * @param arg1 : debug
@@ -104,6 +107,7 @@ public class MethodSignatureVisitor implements ClassVisitor, Opcodes {
     public void visitSource(String arg0, String arg1) { }
 
     /**
+     * Visit an outer class.
      * @see org.objectweb.asm.ClassVisitor#visitOuterClass(java.lang.String, java.lang.String, java.lang.String)
      * @param arg0 : owner
      * @param arg1 : name
@@ -112,6 +116,7 @@ public class MethodSignatureVisitor implements ClassVisitor, Opcodes {
     public void visitOuterClass(String arg0, String arg1, String arg2) { }
 
     /**
+     * Visit an annotation.
      * @see org.objectweb.asm.ClassVisitor#visitAnnotation(java.lang.String, boolean)
      * @param arg0 : desc
      * @param arg1 : visible
@@ -120,12 +125,14 @@ public class MethodSignatureVisitor implements ClassVisitor, Opcodes {
     public AnnotationVisitor visitAnnotation(String arg0, boolean arg1) { return null; }
 
     /**
+     * Visit an attribute.
      * @see org.objectweb.asm.ClassVisitor#visitAttribute(org.objectweb.asm.Attribute)
      * @param arg0 : Attribute
      */
     public void visitAttribute(Attribute arg0) { }
 
     /**
+     * Visit an inner class.
      * @see org.objectweb.asm.ClassVisitor#visitInnerClass(java.lang.String, java.lang.String, java.lang.String, int)
      * @param arg0 : name
      * @param arg1 : outerclass
@@ -135,6 +142,7 @@ public class MethodSignatureVisitor implements ClassVisitor, Opcodes {
     public void visitInnerClass(String arg0, String arg1, String arg2, int arg3) { }
 
     /**
+     * Visit a field.
      * @see org.objectweb.asm.ClassVisitor#visitField(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
      * @param arg0 : access
      * @param arg1 : name
@@ -146,6 +154,7 @@ public class MethodSignatureVisitor implements ClassVisitor, Opcodes {
     public FieldVisitor visitField(int arg0, String arg1, String arg2, String arg3, Object arg4) { return null; }
 
     /**
+     * End of the visit.
      * @see org.objectweb.asm.ClassVisitor#visitEnd()
      */
     public void visitEnd() { }

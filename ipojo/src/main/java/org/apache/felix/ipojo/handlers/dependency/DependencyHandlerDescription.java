@@ -21,13 +21,15 @@ package org.apache.felix.ipojo.handlers.dependency;
 import java.util.Iterator;
 
 import org.apache.felix.ipojo.architecture.HandlerDescription;
+import org.apache.felix.ipojo.metadata.Attribute;
+import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * Dependency Handler Description.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class DependencyHandlerDescription extends HandlerDescription {
-
 
     /**
      * Dependencies managed by the dependency handler.
@@ -36,6 +38,7 @@ public class DependencyHandlerDescription extends HandlerDescription {
 
     /**
      * Constructor.
+     * 
      * @param isValid : the validity of the dependency handler.
      */
     public DependencyHandlerDescription(boolean isValid) {
@@ -43,19 +46,24 @@ public class DependencyHandlerDescription extends HandlerDescription {
     }
 
     /**
+     * Get dependencies description.
      * @return the dependencies list.
      */
-    public DependencyDescription[] getDependencies() { return m_dependencies; }
+    public DependencyDescription[] getDependencies() {
+        return m_dependencies;
+    }
 
     /**
      * Add a dependency.
+     * 
      * @param dep : the dependency to add
      */
     public void addDependency(DependencyDescription dep) {
         // Verify that the dependency description is not already in the array.
-        for (int i = 0; (i < m_dependencies.length); i++) {
+        for (int i = 0; i < m_dependencies.length; i++) {
             if (m_dependencies[i] == dep) {
-                return; //NOTHING TO DO, the description is already in the array
+                return; // NOTHING TO DO, the description is already in the
+                        // array
             }
         }
         // The component Description is not in the array, add it
@@ -66,21 +74,31 @@ public class DependencyHandlerDescription extends HandlerDescription {
     }
 
     /**
+     * Build Dependency Handler description.
+     * @return the handler description.
      * @see org.apache.felix.ipojo.architecture.HandlerDescription#getHandlerInfo()
      */
-    public String getHandlerInfo() {
-        String info = "";
+    public Element getHandlerInfo() {
+        Element deps = super.getHandlerInfo();
         for (int i = 0; i < m_dependencies.length; i++) {
             String state = "resolved";
-            if (m_dependencies[i].getState() == 2) { state = "unresolved"; }
-            info += "\t Dependency on " + m_dependencies[i].getInterface() + "[" + m_dependencies[i].getFilter() + "] is " + state;
+            if (m_dependencies[i].getState() == 2) {
+                state = "unresolved";
+            }
+            Element dep = new Element("Dependency", "");
+            dep.addAttribute(new Attribute("Specification", m_dependencies[i].getInterface()));
+            dep.addAttribute(new Attribute("Filter", m_dependencies[i].getFilter()));
+            dep.addAttribute(new Attribute("State", state));
+            Element usages = new Element("Usages", "");
             Iterator it = m_dependencies[i].getUsedServices().keySet().iterator();
             while (it.hasNext()) {
-                info += "\n \t\t Uses : " + it.next();
+                Element use = new Element("Use", "");
+                use.addAttribute(new Attribute("object", it.next().toString()));
+                usages.addElement(use);
             }
-            info += "\n";
+            deps.addElement(dep);
         }
-        return info;
+        return deps;
     }
 
 }

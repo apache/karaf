@@ -23,37 +23,39 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Simple utility class that creates a map for string-based keys by
- * extending <tt>TreeMap</tt>. This map can be set to use case-sensitive
- * or case-insensitive comparison when searching for the key.
- * Any keys put into this map will be converted to
- * a <tt>String</tt> using the <tt>toString()</tt> method,
- * since it is only intended to compare strings.
-**/
+ * Simple utility class that creates a map for string-based keys by extending
+ * <tt>TreeMap</tt>. This map can be set to use case-sensitive or
+ * case-insensitive comparison when searching for the key. Any keys put into
+ * this map will be converted to a <tt>String</tt> using the
+ * <tt>toString()</tt> method, since it is only intended to compare strings.
+ * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ */
 public class StringMap extends TreeMap {
-    
-	/**
-	 * serialVersionUID.
-	 */
-	private static final long serialVersionUID = 6948801857034259744L;
 
-	/**
+    /**
+     * serialVersionUID.
+     */
+    private static final long serialVersionUID = 6948801857034259744L;
+
+    /**
      * Constructor.
      */
     public StringMap() {
         this(true);
     }
-    
+
     /**
      * Constructor.
+     * 
      * @param caseSensitive : fix if the map if case sensitive or not.
      */
     public StringMap(boolean caseSensitive) {
         super(new StringComparator(caseSensitive));
     }
-    
+
     /**
      * Constructor.
+     * 
      * @param map : initial properties.
      * @param caseSensitive : fix if the map if case sensitive or not.
      */
@@ -61,15 +63,20 @@ public class StringMap extends TreeMap {
         this(caseSensitive);
         putAll(map);
     }
-    
+
     /**
+     * Put a record in the map.
+     * @param key : key
+     * @param value : value
+     * @return an object.
      * @see java.util.TreeMap#put(K, V)
      */
     public Object put(Object key, Object value) {
         return super.put(key.toString(), value);
     }
-    
+
     /**
+     * Check if the map is case-sensitive.
      * @return true if the map is case sensitive.
      */
     public boolean isCaseSensitive() {
@@ -78,6 +85,7 @@ public class StringMap extends TreeMap {
 
     /**
      * Set the case sensitivity.
+     * 
      * @param b : the new case sensitivity.
      */
     public void setCaseSensitive(boolean b) {
@@ -85,10 +93,14 @@ public class StringMap extends TreeMap {
     }
 
     private static class StringComparator implements Comparator {
+        /**
+         * Is the map case sensitive?
+         */
         private boolean m_isCaseSensitive = true;
 
         /**
          * Constructor.
+         * 
          * @param b : true to enable the case sensitivity.
          */
         public StringComparator(boolean b) {
@@ -96,6 +108,10 @@ public class StringMap extends TreeMap {
         }
 
         /**
+         * Compare to object.
+         * @param o1 : first object to compare
+         * @param o2 : second object to compare
+         * @return the comparison result
          * @see java.util.Comparator#compare(T, T)
          */
         public int compare(Object o1, Object o2) {
@@ -107,6 +123,7 @@ public class StringMap extends TreeMap {
         }
 
         /**
+         * Check if the comparator is case sensitive.
          * @return true if the map is case sensitive.
          */
         public boolean isCaseSensitive() {
@@ -115,17 +132,20 @@ public class StringMap extends TreeMap {
 
         /**
          * Set the case sensitivity.
+         * 
          * @param b : true to enable the case sensitivity
          */
         public void setCaseSensitive(boolean b) {
             m_isCaseSensitive = b;
         }
-        
+
         /**
+         * Does not support cloning.
+         * @return The current map
          * @see java.lang.Object#clone()
          */
         public Object clone() {
-        	return this;
+            return this;
         }
     }
 }

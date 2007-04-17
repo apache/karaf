@@ -25,8 +25,8 @@ import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 
 /**
- * Manifest Metadata parser.
- * Read a manifest file and construct metadata
+ * Manifest Metadata parser. Read a manifest file and construct metadata
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ManifestMetadataParser {
@@ -42,6 +42,7 @@ public class ManifestMetadataParser {
     private Element[] m_elements = new Element[0];
 
     /**
+     * Get the array of component type metadata.
      * @return the component metadata (composite & component).
      * @throws ParseException when a parsing error occurs
      */
@@ -51,17 +52,18 @@ public class ManifestMetadataParser {
         Element[] all = new Element[components.length + composites.length];
         int l = 0;
         for (int i = 0; i < components.length; i++) {
-        	all[l] = components[i];
-        	l++;
+            all[l] = components[i];
+            l++;
         }
         for (int i = 0; i < composites.length; i++) {
-        	all[l] = composites[i];
-        	l++;
+            all[l] = composites[i];
+            l++;
         }
         return all;
     }
 
     /**
+     * Get the array of instance configuration described in the metadata.
      * @return the instances list.
      * @throws ParseException : if the metadata cannot be parsed successfully
      */
@@ -73,53 +75,64 @@ public class ManifestMetadataParser {
         }
         return dicts;
     }
-    
+
     /**
      * Parse an Element to get a dictionary.
+     * 
      * @param instance : the Element describing an instance.
      * @return : the resulting dictionary
-     * @throws ParseException
+     * @throws ParseException : occurs when a configuration cannot be parse correctly.
      */
     private Dictionary parseInstance(Element instance) throws ParseException {
-    	Dictionary dict = new Properties();
-    	if (!instance.containsAttribute("name")) { throw new ParseException("An instance does not have the 'name' attribute"); }
-    	if (!instance.containsAttribute("component")) { throw new ParseException("An instance does not have the 'component' attribute"); }
-    	dict.put("name", instance.getAttribute("name"));
-    	dict.put("component", instance.getAttribute("component"));
-    	
-    	for (int i = 0; i < instance.getElements("property").length; i++) {
-    		parseProperty(instance.getElements("property")[i], dict);
-    	}
-    	
-    	return dict;
+        Dictionary dict = new Properties();
+        if (!instance.containsAttribute("name")) {
+            throw new ParseException("An instance does not have the 'name' attribute");
+        }
+        if (!instance.containsAttribute("component")) {
+            throw new ParseException("An instance does not have the 'component' attribute");
+        }
+        dict.put("name", instance.getAttribute("name"));
+        dict.put("component", instance.getAttribute("component"));
+
+        for (int i = 0; i < instance.getElements("property").length; i++) {
+            parseProperty(instance.getElements("property")[i], dict);
+        }
+
+        return dict;
     }
-    
+
     /**
-     * @param prop
-     * @param dict
-     * @throws ParseException
+     * Parse a property.
+     * @param prop : the current element to parse
+     * @param dict : the dictionary to populate
+     * @throws ParseException : occurs if the proeprty cannot be parsed correctly
      */
     private void parseProperty(Element prop, Dictionary dict) throws ParseException {
-    	// Check that the property has a name 
-    	if (!prop.containsAttribute("name")) { throw new ParseException("A property does not have the 'name' attribute"); }
-    	// Final case : the property element has a 'value' attribute
-    	if (prop.containsAttribute("value")) { 
-    		dict.put(prop.getAttribute("name"), prop.getAttribute("value")); 
-    	} else {
-    		// Recursive case
-    		// Check if there is 'property' element
-    		Element[] subProps = prop.getElements("property");
-    		if (subProps.length == 0) { throw new ParseException("A complex property must have at least one 'property' sub-element"); }
-    		Dictionary dict2 = new Properties();
-    		for (int i = 0; i < subProps.length; i++) {
-    			parseProperty(subProps[i], dict2);
-    			dict.put(prop.getAttribute("name"), dict2);
-    		}
-    	}
+        // Check that the property has a name
+        if (!prop.containsAttribute("name")) {
+            throw new ParseException("A property does not have the 'name' attribute");
+        }
+        // Final case : the property element has a 'value' attribute
+        if (prop.containsAttribute("value")) {
+            dict.put(prop.getAttribute("name"), prop.getAttribute("value"));
+        } else {
+            // Recursive case
+            // Check if there is 'property' element
+            Element[] subProps = prop.getElements("property");
+            if (subProps.length == 0) {
+                throw new ParseException("A complex property must have at least one 'property' sub-element");
+            }
+            Dictionary dict2 = new Properties();
+            for (int i = 0; i < subProps.length; i++) {
+                parseProperty(subProps[i], dict2);
+                dict.put(prop.getAttribute("name"), dict2);
+            }
+        }
     }
 
     /**
      * Add an element to the list.
+     * 
      * @param elem : the element to add
      */
     private void addElement(Element elem) {
@@ -128,11 +141,14 @@ public class ManifestMetadataParser {
             System.arraycopy(m_elements, 0, newElementsList, 0, m_elements.length);
             newElementsList[m_elements.length] = elem;
             m_elements = newElementsList;
-        } else { m_elements = new Element[] {elem}; }
+        } else {
+            m_elements = new Element[] { elem };
+        }
     }
 
     /**
      * Remove an element to the list.
+     * 
      * @return an element to remove
      */
     private Element removeLastElement() {
@@ -155,32 +171,37 @@ public class ManifestMetadataParser {
 
     /**
      * Parse the given dictionnary and create the instance managers.
+     * 
      * @param dict : the given headers of the manifest file
      * @throws ParseException : if any error occurs
      */
     public void parse(Dictionary dict) throws ParseException {
         m_headers = dict;
         String componentClassesStr = (String) m_headers.get("iPOJO-Components");
-        //Add the ipojo element inside the element list
+        // Add the ipojo element inside the element list
         addElement(new Element("iPOJO", ""));
         parseElements(componentClassesStr.trim());
     }
 
     /**
      * Parse the metadata from the string given in argument.
+     * 
      * @param metadata : the metadata to parse
      * @return Element : the root element resulting of the parsing
      * @throws ParseException : if any error occurs
      */
-    public static Element parse(String metadata) throws ParseException  {
+    public static Element parse(String metadata) throws ParseException {
         ManifestMetadataParser parser = new ManifestMetadataParser();
         parser.parseElements(metadata);
-        if (parser.m_elements.length != 1) { throw new ParseException("Error in parsing, root element not found : " + metadata); }
+        if (parser.m_elements.length != 1) {
+            throw new ParseException("Error in parsing, root element not found : " + metadata);
+        }
         return parser.m_elements[0];
     }
 
     /**
      * Paser the given string.
+     * 
      * @param s : the string to parse
      */
     private void parseElements(String s) {
@@ -189,9 +210,9 @@ public class ManifestMetadataParser {
         for (int i = 0; i < string.length; i++) {
             char c = string[i];
 
-            switch(c) {
-            	// Beginning of an attribute.
-                case '$' : 
+            switch (c) {
+                // Beginning of an attribute.
+                case '$':
                     String attName = "";
                     String attValue = "";
                     String attNs = "";
@@ -201,7 +222,9 @@ public class ManifestMetadataParser {
                         if (c == ':') {
                             attNs = attName;
                             attName = "";
-                        } else { attName = attName + c; }
+                        } else {
+                            attName = attName + c;
+                        }
                         i = i + 1;
                         c = string[i];
                     }
@@ -216,12 +239,12 @@ public class ManifestMetadataParser {
                     i++; // skip "
                     c = string[i];
 
-                    Attribute att = new Attribute(attName, attNs , attValue);
+                    Attribute att = new Attribute(attName, attNs, attValue);
                     m_elements[m_elements.length - 1].addAttribute(att);
                     break;
 
-                // End of an element    
-                case '}' : 
+                // End of an element
+                case '}':
                     Element lastElement = removeLastElement();
                     if (m_elements.length != 0) {
                         Element newQueue = m_elements[m_elements.length - 1];
@@ -232,33 +255,35 @@ public class ManifestMetadataParser {
                     break;
 
                 // Space
-                case ' ' : 
-                	break; // do nothing;
-                
+                case ' ':
+                    break; // do nothing;
+
                 // Default case
-                default :
+                default:
                     String name = "";
-                	String ns = "";
-                	c = string[i];
-                	while (c != ' ') {
-                		if (c == ':') {
-                			ns = name;
-                			name = "";
-                			i++;
-                			c = string[i];
-                		} else {
-                			name = name + c;
-                			i++;
-                			c = string[i];
-                		}
-                	}
-                	// Skip spaces
-                	while (string[i] == ' ') { i = i + 1; }
-                	i = i + 1; // skip {
-                	Element elem = new Element(name, ns);
-                	addElement(elem);
-                	break;
-           	}
+                    String ns = "";
+                    c = string[i];
+                    while (c != ' ') {
+                        if (c == ':') {
+                            ns = name;
+                            name = "";
+                            i++;
+                            c = string[i];
+                        } else {
+                            name = name + c;
+                            i++;
+                            c = string[i];
+                        }
+                    }
+                    // Skip spaces
+                    while (string[i] == ' ') {
+                        i = i + 1;
+                    }
+                    i = i + 1; // skip {
+                    Element elem = new Element(name, ns);
+                    addElement(elem);
+                    break;
+            }
         }
     }
 

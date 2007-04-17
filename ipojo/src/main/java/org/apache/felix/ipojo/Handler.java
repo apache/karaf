@@ -24,14 +24,16 @@ import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Element;
 
 /**
- * Handler Abstract Class.
- * An handler need implements tese method to be notifed of lifecycle change, getfield operation and putfield operation
+ * Handler Abstract Class. An handler need implements tese method to be notifed
+ * of lifecycle change, getfield operation and putfield operation
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public abstract class Handler {
 
     /**
      * Configure the handler.
+     * 
      * @param im : the instance manager
      * @param metadata : the metadata of the component
      * @param configuration : the instance configuration
@@ -50,45 +52,64 @@ public abstract class Handler {
 
     /**
      * This method is called when a PUTFIELD operation is detected.
+     * 
      * @param fieldName : the field name
      * @param value : the value passed to the field
      */
-    public void setterCallback(String fieldName, Object value) { }
+    public void setterCallback(String fieldName, Object value) {
+    }
 
     /**
      * This method is called when a GETFIELD operation is detected.
+     * 
      * @param fieldName : the field name
      * @param value : the value passed to the field (by the previous handler)
      * @return : the managed value of the field
      */
-    public Object getterCallback(String fieldName, Object value) { return value; }
+    public Object getterCallback(String fieldName, Object value) {
+        return value;
+    }
 
     /**
      * Is the actual state valid for this handler ?
+     * 
      * @return true is the state seems valid for the handler
      */
-    public boolean isValid() { return true; }
+    public boolean isValid() {
+        return true;
+    }
 
     /**
      * This method is called when the component state changed.
+     * 
      * @param state : the new state
      */
-    public void stateChanged(int state) { }
+    public void stateChanged(int state) {
+    }
 
     /**
-     * This method is called when an instance of the component is created, but before someone can use it.
+     * This method is called when an instance of the component is created, but
+     * before someone can use it.
+     * 
      * @param instance : the created instance
      */
-    public void createInstance(Object instance) { }
-    
+    public void createInstance(Object instance) {
+    }
+
     /**
+     * Return the current handler description.
+     * Thesimplest description contains only the name and the validity of the handler.
      * @return the description of the handler..
      */
-    public HandlerDescription getDescription() { return new HandlerDescription(this.getClass().getName(), isValid()); }
+    public HandlerDescription getDescription() {
+        return new HandlerDescription(this.getClass().getName(), isValid());
+    }
 
-	/**
-	 * The instance is reconfiguring.
-	 * @param configuration : New instance configuration.
-	 */
-	public void reconfigure(Dictionary configuration) { }
+    /**
+     * The instance is reconfiguring.
+     * 
+     * @param configuration : New instance configuration.
+     */
+    public void reconfigure(Dictionary configuration) {
+    }
 }

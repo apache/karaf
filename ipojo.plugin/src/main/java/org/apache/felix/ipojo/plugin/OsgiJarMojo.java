@@ -152,7 +152,7 @@ public class OsgiJarMojo extends AbstractMojo {
 	private OsgiManifest				osgiManifest;
 	
 	private String[][] namespaces;
-	private List referedPackages; 
+	private List referredPackages; 
 
 	/**
 	 * Execute this Mojo
@@ -484,8 +484,8 @@ public class OsgiJarMojo extends AbstractMojo {
 		}
 		
 		// Add refered imports form the metadata
-		for(int i = 0; i < referedPackages.size(); i++) {
-			String pack = (String) referedPackages.get(i);
+		for(int i = 0; i < referredPackages.size(); i++) {
+			String pack = (String) referredPackages.get(i);
 			referred.add(pack);
 		}
 		
@@ -879,7 +879,7 @@ public class OsgiJarMojo extends AbstractMojo {
 			parser.parse(is);
 		    
 		    meta = handler.getMetadata();
-		    referedPackages = handler.getReferredPackages();
+		    referredPackages = handler.getReferredPackages();
 		    
 		} catch (MalformedURLException e) {
 			getLog().error("Malformed URL for " + outputDirectory+path+ "("+e.getMessage()+")");

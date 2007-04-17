@@ -23,9 +23,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.felix.ipojo.parser.ParseUtils;
+import org.apache.felix.ipojo.util.Logger;
 
 /**
  * Configurable Property.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ConfigurableProperty {
@@ -52,38 +54,61 @@ public class ConfigurableProperty {
 
     /**
      * Configurable Property Constructor.
+     * 
      * @param name : name of the property (optional)
      * @param field : name of the field (mandatory)
      * @param value : initial value of the property (optional)
+     * @param type : the type of the property
      * @param ch : configuration handler managing this configurable property
      */
     public ConfigurableProperty(String name, String field, String value, String type, ConfigurationHandler ch) {
         m_handler = ch;
-        if (name != null) { 
-        	m_name = name; 
-        } else { 
-        	m_name = field; 
+        if (name != null) {
+            m_name = name;
+        } else {
+            m_name = field;
         }
         m_field = field;
-        if (value != null) { setValue(m_field, value, type); }
+        if (value != null) {
+            setValue(m_field, value, type);
+        }
 
     }
 
     /**
      * Set the value of the property.
+     * 
+     * @param field : name of the field attached to the property
      * @param strValue : value of the property (String)
+     * @param type : type of the property
      */
     private void setValue(String field, String strValue, String type) {
         Object value = null;
 
-        if (type.equals("string") || type.equals("String")) { value = new String(strValue); }
-        if (type.equals("boolean")) { value = new Boolean(strValue); }
-        if (type.equals("byte")) { value = new Byte(strValue); }
-        if (type.equals("short")) { value = new Short(strValue); }
-        if (type.equals("int")) { value = new Integer(strValue); }
-        if (type.equals("long")) { value = new Long(strValue); }
-        if (type.equals("float")) { value = new Float(strValue); }
-        if (type.equals("double")) { value = new Double(strValue); }
+        if (type.equals("string") || type.equals("String")) {
+            value = new String(strValue);
+        }
+        if (type.equals("boolean")) {
+            value = new Boolean(strValue);
+        }
+        if (type.equals("byte")) {
+            value = new Byte(strValue);
+        }
+        if (type.equals("short")) {
+            value = new Short(strValue);
+        }
+        if (type.equals("int")) {
+            value = new Integer(strValue);
+        }
+        if (type.equals("long")) {
+            value = new Long(strValue);
+        }
+        if (type.equals("float")) {
+            value = new Float(strValue);
+        }
+        if (type.equals("double")) {
+            value = new Double(strValue);
+        }
         // Array :
         if (type.endsWith("[]")) {
             String internalType = type.substring(0, type.length() - 2);
@@ -92,35 +117,34 @@ public class ConfigurableProperty {
         }
 
         if (value == null) {
-            // Else it is a neither a primitive type neither a String -> create the object by calling a constructor with a string in argument.
+            // Else it is a neither a primitive type neither a String -> create
+            // the object by calling a constructor with a string in argument.
             try {
                 Class c = m_handler.getInstanceManager().getContext().getBundle().loadClass(type);
-                Constructor cst = c.getConstructor(new Class[] {String.class});
-                value = cst.newInstance(new Object[] {strValue});
+                Constructor cst = c.getConstructor(new Class[] { String.class });
+                value = cst.newInstance(new Object[] { strValue });
             } catch (ClassNotFoundException e) {
-                System.err.println("Class not found exception in setValue on " + type);
-                e.printStackTrace();
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
+                        "Class not found exception in setValue on " + type + " : " + e.getMessage());
                 return;
             } catch (SecurityException e) {
-                e.printStackTrace();
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Security excption in setValue on " + type + " : " + e.getMessage());
                 return;
             } catch (NoSuchMethodException e) {
-                System.err.println("Constructor not found exeption in setValue on " + type);
-                e.printStackTrace();
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
+                        "Constructor not found exeption in setValue on " + type + " : " + e.getMessage());
                 return;
             } catch (IllegalArgumentException e) {
-                System.err.println("Argument problem to call the constructor of the type " + type);
-                e.printStackTrace();
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Argument problem to call the constructor of the type " + type);
                 return;
             } catch (InstantiationException e) {
-                System.err.println("Instantiation problem  " + type);
-                e.printStackTrace();
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Instantiation problem  " + type);
                 return;
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Illegal Access " + type);
+                return;
             } catch (InvocationTargetException e) {
-                System.err.println("Invocation problem " + type);
-                e.printStackTrace();
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Invocation problem " + type);
                 return;
             }
         }
@@ -131,109 +155,123 @@ public class ConfigurableProperty {
 
     /**
      * Set array value to the current property.
+     * 
      * @param internalType : type of the property
      * @param values : new property value
      */
     private void setArrayValue(String internalType, String[] values) {
-        if (internalType.equals("string") || internalType.equals("String")) { 
-        	String[] str = new String[values.length];
-        	for (int i = 0; i < values.length; i++) { str[i] = new String(values[i]); }
-        	m_value = str;
-        	return;
+        if (internalType.equals("string") || internalType.equals("String")) {
+            String[] str = new String[values.length];
+            for (int i = 0; i < values.length; i++) {
+                str[i] = new String(values[i]);
+            }
+            m_value = str;
+            return;
         }
         if (internalType.equals("boolean")) {
             boolean[] bool = new boolean[values.length];
-            for (int i = 0; i < values.length; i++) { bool[i] = new Boolean(values[i]).booleanValue(); }
+            for (int i = 0; i < values.length; i++) {
+                bool[i] = new Boolean(values[i]).booleanValue();
+            }
             m_value = bool;
             return;
         }
         if (internalType.equals("byte")) {
             byte[] byt = new byte[values.length];
-            for (int i = 0; i < values.length; i++) { byt[i] = new Byte(values[i]).byteValue(); }
+            for (int i = 0; i < values.length; i++) {
+                byt[i] = new Byte(values[i]).byteValue();
+            }
             m_value = byt;
             return;
         }
         if (internalType.equals("short")) {
             short[] shor = new short[values.length];
-            for (int i = 0; i < values.length; i++) { shor[i] = new Short(values[i]).shortValue(); }
+            for (int i = 0; i < values.length; i++) {
+                shor[i] = new Short(values[i]).shortValue();
+            }
             m_value = shor;
             return;
         }
         if (internalType.equals("int")) {
             int[] in = new int[values.length];
-            for (int i = 0; i < values.length; i++) { in[i] = new Integer(values[i]).intValue(); }
+            for (int i = 0; i < values.length; i++) {
+                in[i] = new Integer(values[i]).intValue();
+            }
             m_value = in;
             return;
         }
         if (internalType.equals("long")) {
             long[] ll = new long[values.length];
-            for (int i = 0; i < values.length; i++) { ll[i] = new Long(values[i]).longValue(); }
+            for (int i = 0; i < values.length; i++) {
+                ll[i] = new Long(values[i]).longValue();
+            }
             m_value = ll;
             return;
         }
         if (internalType.equals("float")) {
             float[] fl = new float[values.length];
-            for (int i = 0; i < values.length; i++) { fl[i] = new Float(values[i]).floatValue(); }
+            for (int i = 0; i < values.length; i++) {
+                fl[i] = new Float(values[i]).floatValue();
+            }
             m_value = fl;
-            return; 
+            return;
         }
         if (internalType.equals("double")) {
             double[] dl = new double[values.length];
-            for (int i = 0; i < values.length; i++) { dl[i] = new Double(values[i]).doubleValue(); }
+            for (int i = 0; i < values.length; i++) {
+                dl[i] = new Double(values[i]).doubleValue();
+            }
             m_value = dl;
             return;
         }
 
-        // Else it is a neither a primitive type neither a String -> create the object by calling a constructor with a string in argument.
+        // Else it is a neither a primitive type neither a String -> create the
+        // object by calling a constructor with a string in argument.
         try {
             Class c = m_handler.getInstanceManager().getContext().getBundle().loadClass(internalType);
-            Constructor cst = c.getConstructor(new Class[] {String.class});
+            Constructor cst = c.getConstructor(new Class[] { String.class });
             Object[] ob = (Object[]) Array.newInstance(c, values.length);
             for (int i = 0; i < values.length; i++) {
-                ob[i] = cst.newInstance(new Object[] {values[i].trim()});
+                ob[i] = cst.newInstance(new Object[] { values[i].trim() });
             }
             m_value = ob;
             return;
         } catch (ClassNotFoundException e) {
-            System.err.println("Class not found exception in setValue on " + internalType);
-            e.printStackTrace();
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Class not found exception in setValue on " + internalType);
         } catch (SecurityException e) {
-            e.printStackTrace();
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Secutiry Exception in setValue on " + internalType);
         } catch (NoSuchMethodException e) {
-            System.err.println("Constructor not found exeption in setValue on " + internalType);
-            e.printStackTrace();
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Constructor not found exception in setValue on " + internalType);
         } catch (IllegalArgumentException e) {
-            System.err.println("Argument problem to call the constructor of the type " + internalType);
-            e.printStackTrace();
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Argument problem to call the constructor of the type " + internalType);
         } catch (InstantiationException e) {
-            System.err.println("Instantiation problem  " + internalType);
-            e.printStackTrace();
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Instantiation problem  " + internalType);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Illegal Access Exception in  " + internalType);
         } catch (InvocationTargetException e) {
-            System.err.println("Invocation problem " + internalType);
-            e.printStackTrace();
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Invocation problem " + internalType);
         }
     }
 
-    /**
-     * @return the name of the property.
-     */
-    public String getName() { return m_name; }
+    public String getName() {
+        return m_name;
+    }
 
-    /**
-     * @return the field of the property.
-     */
-    public String getField() { return m_field; }
+    public String getField() {
+        return m_field;
+    }
 
-    /**
-     * @return the value of the property.
-     */
-    public Object getValue() { return m_value; }
+
+    public Object getValue() {
+        return m_value;
+    }
 
     /**
      * Fix the value of the property.
+     * 
      * @param value : the new value.
      */
-    public void setValue(Object value) { m_value = value; }
+    public void setValue(Object value) {
+        m_value = value;
+    }
 }

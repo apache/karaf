@@ -29,6 +29,7 @@ import org.apache.felix.ipojo.util.Logger;
 
 /**
  * Lifecycle callback handler.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class LifecycleCallbackHandler extends Handler {
@@ -48,18 +49,21 @@ public class LifecycleCallbackHandler extends Handler {
      */
     private InstanceManager m_manager;
 
-	/**
-	 * Does a POJO object be created at starting.
-	 */
-	private boolean m_immediate = false;
+    /**
+     * Does a POJO object be created at starting.
+     */
+    private boolean m_immediate = false;
 
     /**
      * Add the given callback to the callback list.
+     * 
      * @param hk : the element to add
      */
     private void addCallback(LifecycleCallback hk) {
         for (int i = 0; (m_callbacks != null) && (i < m_callbacks.length); i++) {
-            if (m_callbacks[i] == hk) { return; }
+            if (m_callbacks[i] == hk) {
+                return;
+            }
         }
 
         if (m_callbacks.length > 0) {
@@ -68,19 +72,25 @@ public class LifecycleCallbackHandler extends Handler {
             newHk[m_callbacks.length] = hk;
             m_callbacks = newHk;
         } else {
-            m_callbacks = new LifecycleCallback[] {hk};
+            m_callbacks = new LifecycleCallback[] { hk };
         }
 
     }
 
     /**
-     * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager, org.apache.felix.ipojo.metadata.Element)
+     * Configure the handler.
+     * @param cm : the instance manager
+     * @param metadata : the component type metadata
+     * @param configuration : the instance configuration
+     * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager, org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
     public void configure(InstanceManager cm, Element metadata, Dictionary configuration) {
         m_manager = cm;
         m_callbacks = new LifecycleCallback[0];
-        
-        if (metadata.containsAttribute("immediate") && metadata.getAttribute("immediate").equalsIgnoreCase("true")) { m_immediate = true; }
+
+        if (metadata.containsAttribute("immediate") && metadata.getAttribute("immediate").equalsIgnoreCase("true")) {
+            m_immediate = true;
+        }
 
         Element[] hooksMetadata = metadata.getElements("callback");
         for (int i = 0; i < hooksMetadata.length; i++) {
@@ -89,20 +99,27 @@ public class LifecycleCallbackHandler extends Handler {
             String finalState = hooksMetadata[i].getAttribute("final");
             String method = hooksMetadata[i].getAttribute("method");
             boolean isStatic = false;
-            if (hooksMetadata[i].containsAttribute("isStatic") && hooksMetadata[i].getAttribute("isStatic").equals("true")) { isStatic = true; }
+            if (hooksMetadata[i].containsAttribute("isStatic") && hooksMetadata[i].getAttribute("isStatic").equals("true")) {
+                isStatic = true;
+            }
 
             LifecycleCallback hk = new LifecycleCallback(this, initialState, finalState, method, isStatic);
             addCallback(hk);
         }
-        if (m_callbacks.length > 0 || m_immediate) { m_manager.register(this); }
+        if (m_callbacks.length > 0 || m_immediate) {
+            m_manager.register(this);
+        }
     }
 
     /**
+     * Start the handler. 
      * @see org.apache.felix.ipojo.Handler#start()
      */
-    public void start() { } //Do nothing during the start
+    public void start() {
+    } // Do nothing during the start
 
     /**
+     * Stop the handler.
      * @see org.apache.felix.ipojo.Handler#stop()
      */
     public void stop() {
@@ -110,30 +127,40 @@ public class LifecycleCallbackHandler extends Handler {
     }
 
     /**
+     * Get the instance manager.
      * @return the instance manager
      */
-    protected InstanceManager getInstanceManager() { return m_manager; }
+    protected InstanceManager getInstanceManager() {
+        return m_manager;
+    }
 
     /**
-     * When the state change call the associated hooks.
+     * When the state change call the associated callback.
+     * 
+     * @param state : the new isntance state.
      * @see org.apache.felix.ipojo.Handler#stateChanged(int)
      */
     public void stateChanged(int state) {
-    	// Manage immediate component
-    	if (m_state == ComponentInstance.INVALID && state == ComponentInstance.VALID && m_manager.getPojoObjects().length == 0) {
-    		m_manager.createPojoObject();
-    	}
-    	
+        // Manage immediate component
+        if (m_state == ComponentInstance.INVALID && state == ComponentInstance.VALID && m_manager.getPojoObjects().length == 0) {
+            m_manager.createPojoObject();
+        }
+
         for (int i = 0; i < m_callbacks.length; i++) {
             if (m_callbacks[i].getInitialState() == m_state && m_callbacks[i].getFinalState() == state) {
                 try {
                     m_callbacks[i].call();
                 } catch (NoSuchMethodException e) {
-                    m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The callback method " + m_callbacks[i].getMethod() + " is not found", e);
+                    m_manager.getFactory().getLogger().log(Logger.ERROR,
+                            "[" + m_manager.getClassName() + "] The callback method " + m_callbacks[i].getMethod() + " is not found", e);
                 } catch (IllegalAccessException e) {
-                	m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The callback method " + m_callbacks[i].getMethod() + " is not accessible", e);
+                    m_manager.getFactory().getLogger().log(Logger.ERROR,
+                            "[" + m_manager.getClassName() + "] The callback method " + m_callbacks[i].getMethod() + " is not accessible", e);
                 } catch (InvocationTargetException e) {
-                	m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The callback method " + m_callbacks[i].getMethod() + " has throws an exception : " + e.getMessage() + " -> " + e.getCause());
+                    m_manager.getFactory().getLogger().log(
+                            Logger.ERROR,
+                            "[" + m_manager.getClassName() + "] The callback method " + m_callbacks[i].getMethod() + " has throws an exception : "
+                                    + e.getMessage() + " -> " + e.getCause());
                 }
             }
         }

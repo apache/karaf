@@ -32,17 +32,19 @@ import org.osgi.framework.ServiceRegistration;
 
 /**
  * Composite Architecture Handler.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ArchitectureHandler extends CompositeHandler implements Architecture {
 
-	/**
+    /**
      * Composite Manager.
      */
     private CompositeManager m_manager;
 
     /**
-     * Service Registration of the Architecture service provided by this handler.
+     * Service Registration of the Architecture service provided by this
+     * handler.
      */
     private ServiceRegistration m_sr;
 
@@ -52,12 +54,20 @@ public class ArchitectureHandler extends CompositeHandler implements Architectur
     private String m_name;
 
     /**
-     * @see org.apache.felix.ipojo.CompositeHandler#configure(org.apache.felix.ipojo.CompositeManager, org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
+     * Configure the handler.
+     * 
+     * @param im : the instance manager
+     * @param metadata : the metadata of the component
+     * @param configuration : the instance configuration
+     * @see org.apache.felix.ipojo.CompositeHandler#configure(org.apache.felix.ipojo.CompositeManager,
+     * org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
     public void configure(CompositeManager im, Element metadata, Dictionary configuration) {
         if (metadata.containsAttribute("architecture")) {
             String isArchitectureEnabled = (metadata.getAttribute("architecture")).toLowerCase();
-            if (isArchitectureEnabled.equalsIgnoreCase("true")) { im.register(this); }
+            if (isArchitectureEnabled.equalsIgnoreCase("true")) {
+                im.register(this);
+            }
         }
 
         m_name = (String) configuration.get("name");
@@ -66,20 +76,27 @@ public class ArchitectureHandler extends CompositeHandler implements Architectur
     }
 
     /**
+     * Stop the handler.
+     * Unregister the service.
      * @see org.apache.felix.ipojo.Handler#stop()
      */
     public void stop() {
-        try {
-            if (m_sr != null) { m_sr.unregister(); m_sr = null; }
-        } catch (Exception e) { return; }
+        if (m_sr != null) {
+            m_sr.unregister();
+            m_sr = null;
+        }
     }
 
     /**
+     * Start the handler.
+     * Register the service.
      * @see org.apache.felix.ipojo.Handler#start()
      */
     public void start() {
         // Unregister the service if already registred
-        if (m_sr != null) { m_sr.unregister(); }
+        if (m_sr != null) {
+            m_sr.unregister();
+        }
 
         // Register the ManagedService
         BundleContext bc = m_manager.getContext();
@@ -91,6 +108,8 @@ public class ArchitectureHandler extends CompositeHandler implements Architectur
     }
 
     /**
+     * Get the instance description.
+     * @return the instance description
      * @see org.apache.felix.ipojo.architecture.Architecture#getComponentDescription()
      */
     public InstanceDescription getInstanceDescription() {

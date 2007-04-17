@@ -58,9 +58,10 @@ public class Activator implements BundleActivator {
     private Dictionary[] m_configurations;
 
     /**
-     * @return the bundle context
+     * Return the bundle context.
+     * @return the bundle context.
      */
-    public BundleContext getBundleContext() { return m_bundleContext; }
+    BundleContext getBundleContext() { return m_bundleContext; }
 
     /**
      * Add a component factory to the factory list.
@@ -89,9 +90,11 @@ public class Activator implements BundleActivator {
 
         try {
             parse();
-        } catch (Exception e) {
-            System.err.println("Parse error for the bundle " + m_bundleContext.getBundle().getBundleId() + " : " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("IO error for the bundle " + m_bundleContext.getBundle().getBundleId() + " : " + e.getMessage());
             return;
+        } catch (ParseException e) {
+            System.err.println("Parse error for the bundle " + m_bundleContext.getBundle().getBundleId() + " : " + e.getMessage());
         }
 
         start(); // Call the internal start method
@@ -137,38 +140,42 @@ public class Activator implements BundleActivator {
      * Start the management factories and create instances.
      */
     private void start() {
-    	// Start the factories
-    	for (int j = 0; j < m_factories.length; j++) { m_factories[j].start(); }
-    	
-    	Dictionary[] outsiders = new Dictionary[0];
-    	for (int i = 0; i < m_configurations.length; i++) {
-    		Dictionary conf = m_configurations[i];
-    		boolean created = false;
-    		for (int j = 0; j < m_factories.length; j++) {
-    			String componentClass = m_factories[j].getComponentClassName();
-    			String factoryName = m_factories[j].getFactoryName();
-    			if (conf.get("component") != null && (conf.get("component").equals(componentClass) || conf.get("component").equals(factoryName))) {
-    				try {
-						m_factories[j].createComponentInstance(conf);
-	    				created = true;
-					} catch (UnacceptableConfiguration e) {
-						System.err.println("Cannot create the instance " + conf.get("name") + " : " + e.getMessage());
-					} 
-    			}
-    		}
-    		if (!created && conf.get("component") != null) {
-    	        if (outsiders.length != 0) {
-    	            Dictionary[] newList = new Dictionary[outsiders.length + 1];
-    	            System.arraycopy(outsiders, 0, newList, 0, outsiders.length);
-    	            newList[outsiders.length] = conf;
-    	            outsiders = newList;
-    	        } else { outsiders = new Dictionary[] {conf}; }
-    	        
-    		}
-    	}
-    	
-    	// Create the instance creator
-    	m_creator = new InstanceCreator(m_bundleContext, outsiders);
+        // Start the factories
+        for (int j = 0; j < m_factories.length; j++) {
+            m_factories[j].start();
+        }
+
+        Dictionary[] outsiders = new Dictionary[0];
+        for (int i = 0; i < m_configurations.length; i++) {
+            Dictionary conf = m_configurations[i];
+            boolean created = false;
+            for (int j = 0; j < m_factories.length; j++) {
+                String componentClass = m_factories[j].getComponentClassName();
+                String factoryName = m_factories[j].getName();
+                if (conf.get("component") != null && (conf.get("component").equals(componentClass) || conf.get("component").equals(factoryName))) {
+                    try {
+                        m_factories[j].createComponentInstance(conf);
+                        created = true;
+                    } catch (UnacceptableConfiguration e) {
+                        System.err.println("Cannot create the instance " + conf.get("name") + " : " + e.getMessage());
+                    }
+                }
+            }
+            if (!created && conf.get("component") != null) {
+                if (outsiders.length != 0) {
+                    Dictionary[] newList = new Dictionary[outsiders.length + 1];
+                    System.arraycopy(outsiders, 0, newList, 0, outsiders.length);
+                    newList[outsiders.length] = conf;
+                    outsiders = newList;
+                } else {
+                    outsiders = new Dictionary[] { conf };
+                }
+
+            }
+        }
+
+        // Create the instance creator
+        m_creator = new InstanceCreator(m_bundleContext, outsiders);
     }
 
 }

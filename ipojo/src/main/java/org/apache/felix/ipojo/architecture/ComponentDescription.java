@@ -20,6 +20,7 @@ package org.apache.felix.ipojo.architecture;
 
 /**
  * Component Type information.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ComponentDescription {
@@ -43,34 +44,38 @@ public class ComponentDescription {
      * Get the name of this component type.
      */
     private String m_name;
-    
+
     /**
      * Constructor.
-     * @param name : name of the component type (factory name). 
+     * 
+     * @param name : name of the component type (factory name).
      * @param className : implementation class.
      */
     public ComponentDescription(String name, String className) {
-    	m_name = name;
-    	m_className = className;
+        m_name = name;
+        m_className = className;
     }
-    
+
     /**
      * Constructor for composite.
-     * @param name : name of the component type (factory name). 
+     * 
+     * @param name : name of the component type (factory name).
      */
     public ComponentDescription(String name) {
-    	m_name = name;
+        m_name = name;
     }
-    
+
     /**
+     * Get a displayable form of the current component type description.
+     * @return displayable form of the component type description
      * @see java.lang.Object#toString()
      */
     public String toString() {
         String res = "";
         if (m_className == null) {
-        	res += "Component Type : " + m_name + " (Composition) \n";
+            res += "Component Type : " + m_name + " (Composition) \n";
         } else {
-        	res += "Component Type : " + m_name + " (" + m_className + ") \n";
+            res += "Component Type : " + m_name + " (" + m_className + ") \n";
         }
         for (int i = 0; i < m_providedServiceSpecification.length; i++) {
             res += "\tProvides : " + m_providedServiceSpecification[i] + "\n";
@@ -82,54 +87,66 @@ public class ComponentDescription {
     }
 
     /**
+     * Get the implementation class of this component type.
      * @return the component type implementation class name.
      */
-    public String getClassName() { return m_className; }
+    public String getClassName() {
+        return m_className;
+    }
 
     /**
-     * @return the list of configuration properties accepted by the component type.
+     * Get component-type properties.
+     * @return the list of configuration properties accepted by the component type
+     * type.
      */
-    public PropertyDescription[] getProperties() { return m_properties; }
+    public PropertyDescription[] getProperties() {
+        return m_properties;
+    }
 
     /**
      * Add a configuration properties to the component type.
+     * 
      * @param pd : the property to add
      */
-    public void addProperty(PropertyDescription pd) { 
-    	for (int i = 0; i < m_properties.length; i++) {
-    		if (m_properties[i].getName().equals(pd.getName())) { return; }
-    	}
-    	
-    	PropertyDescription[] newProps = new PropertyDescription[m_properties.length + 1];
+    public void addProperty(PropertyDescription pd) {
+        for (int i = 0; i < m_properties.length; i++) {
+            if (m_properties[i].getName().equals(pd.getName())) {
+                return;
+            }
+        }
+
+        PropertyDescription[] newProps = new PropertyDescription[m_properties.length + 1];
         System.arraycopy(m_properties, 0, newProps, 0, m_properties.length);
         newProps[m_properties.length] = pd;
         m_properties = newProps;
     }
 
     /**
+     * Get the list of provided service offered by instances of this type.
      * @return the list of the provided service.
      */
-    public String[] getprovidedServiceSpecification() { return m_providedServiceSpecification; }
+    public String[] getprovidedServiceSpecification() {
+        return m_providedServiceSpecification;
+    }
 
     /**
-     * add a provided service to the component type.
-     * @param serviceSpecification : the provided service to add (interface name)
+     * Add a provided service to the component type.
+     * @param serviceSpecification : the provided service to add (interface
+     * name)
      */
-    public void addProvidedServiceSpecification(String serviceSpecification) { 
+    public void addProvidedServiceSpecification(String serviceSpecification) {
         String[] newSs = new String[m_providedServiceSpecification.length + 1];
         System.arraycopy(m_providedServiceSpecification, 0, newSs, 0, m_providedServiceSpecification.length);
         newSs[m_providedServiceSpecification.length] = serviceSpecification;
         m_providedServiceSpecification = newSs;
     }
-    
+
     /**
+     * Return the component-type name.
      * @return the name of this component type
      */
-    public String getName() { return m_name; }
-    
-    
-
-
-
+    public String getName() {
+        return m_name;
+    }
 
 }

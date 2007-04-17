@@ -18,70 +18,89 @@
  */
 package org.apache.felix.ipojo.composite;
 
-
 import org.apache.felix.ipojo.ComponentInstance;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
 /**
- * Internal service reference implemenation.
- * This class is used for in the composition.
+ * Internal service reference implemenation. This class is used for in the
+ * composition.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ServiceReferenceImpl implements ServiceReference {
-	
-	 /**
-	 * Service Registration attached to the service reference.
-	 */
-	private ServiceRegistrationImpl m_registration = null;
-	 
-	 /**
-	 * Constructor.
-	 * @param cm : component instance publishing the service.
-	 * @param sr : registration attached to this service reference.
-	 */
-	public ServiceReferenceImpl(ComponentInstance cm, ServiceRegistrationImpl sr) { m_registration = sr; }
 
-	/**
-	 * Not supported in composite.
-	 * @see org.osgi.framework.ServiceReference#getBundle()
-	 */
-	public Bundle getBundle() { 
-		throw new UnsupportedOperationException("getUsingBundles is not supported in scope");
-	}
-	
-	/**
-	 * @return the service registration for this service reference.
-	 */
-	public ServiceRegistrationImpl getServiceRegistration() { return m_registration; }
+    /**
+     * Service Registration attached to the service reference.
+     */
+    private ServiceRegistrationImpl m_registration = null;
 
-	/**
-	 * @see org.osgi.framework.ServiceReference#getProperty(java.lang.String)
-	 */
-	public Object getProperty(String s) {
-		return m_registration.getProperty(s);
-	}
+    /**
+     * Constructor.
+     * 
+     * @param cm : component instance publishing the service.
+     * @param sr : registration attached to this service reference.
+     */
+    public ServiceReferenceImpl(ComponentInstance cm, ServiceRegistrationImpl sr) {
+        m_registration = sr;
+    }
 
-	/**
-	 * @see org.osgi.framework.ServiceReference#getPropertyKeys()
-	 */
-	public String[] getPropertyKeys() {
-		return m_registration.getPropertyKeys();
-	}
+    /**
+     * Not supported in composite.
+     * @return null
+     * @see org.osgi.framework.ServiceReference#getBundle()
+     */
+    public Bundle getBundle() {
+        throw new UnsupportedOperationException("getUsingBundles is not supported in scope");
+    }
 
-	/**
-	 * Not supported in composite.
-	 * @see org.osgi.framework.ServiceReference#getUsingBundles()
-	 */
-	public Bundle[] getUsingBundles() {
-		throw new UnsupportedOperationException("getUsingBundles is not supported in scope");
-	}
+    /**
+     * Get the service registration for this reference.
+     * @return the service registration for this service reference.
+     */
+    public ServiceRegistrationImpl getServiceRegistration() {
+        return m_registration;
+    }
 
-	/**
-	 * @see org.osgi.framework.ServiceReference#isAssignableTo(org.osgi.framework.Bundle, java.lang.String)
-	 */
-	public boolean isAssignableTo(Bundle arg0, String arg1) {
-		return true;
-	}
+
+    /**
+     * Get a property value.
+     * @param s : the key of the required property.
+     * @return the property value or null if no property for the given key.
+     * @see org.osgi.framework.ServiceReference#getProperty(java.lang.String)
+     */
+    public Object getProperty(String s) {
+        return m_registration.getProperty(s);
+    }
+
+    /**
+     * Get the String arrays of service property keys.
+     * @return : the list of property keys.
+     * @see org.osgi.framework.ServiceReference#getPropertyKeys()
+     */
+    public String[] getPropertyKeys() {
+        return m_registration.getPropertyKeys();
+    }
+
+
+    /**
+     * Unsupported Operation inside composite.
+     * @return bundles using this reference.
+     * @see org.osgi.framework.ServiceReference#getUsingBundles()
+     */
+    public Bundle[] getUsingBundles() {
+        throw new UnsupportedOperationException("getUsingBundles is not supported in scope");
+    }
+
+    /**
+     * Check if the current service reference is assignable to the given bundle.
+     * @param arg0 : the bundle to check
+     * @param arg1 : the class name to check.
+     * @return true in the case of composite
+     * @see org.osgi.framework.ServiceReference#isAssignableTo(org.osgi.framework.Bundle, java.lang.String)
+     */
+    public boolean isAssignableTo(Bundle arg0, String arg1) {
+        return true;
+    }
 
 }

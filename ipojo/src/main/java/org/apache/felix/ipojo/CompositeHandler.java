@@ -24,14 +24,16 @@ import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Element;
 
 /**
- * Composite Handler Abstract Class.
- * An composite handler need implements these method to be notifed of lifecycle change...
+ * Composite Handler Abstract Class. An composite handler need implements these
+ * method to be notifed of lifecycle change...
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public abstract class CompositeHandler {
-	
-	/**
+
+    /**
      * Configure the handler.
+     * 
      * @param im : the instance manager
      * @param metadata : the metadata of the component
      * @param configuration : the instance configuration
@@ -50,25 +52,35 @@ public abstract class CompositeHandler {
 
     /**
      * Is the actual state valid for this handler ?
+     * 
      * @return true is the state seems valid for the handler
      */
-    public boolean isValid() { return true; }
+    public boolean isValid() {
+        return true;
+    }
 
     /**
      * This method is called when the component state changed.
+     * 
      * @param state : the new state
      */
-    public void stateChanged(int state) { }
+    public void stateChanged(int state) {
+    }
 
     /**
-     * @return the description of the handler..
+     * Return the description of the handler.
+     * @return the description of the handler.
      */
-    public HandlerDescription getDescription() { return new HandlerDescription(this.getClass().getName(), isValid()); }
+    public HandlerDescription getDescription() {
+        return new HandlerDescription(this.getClass().getName(), isValid());
+    }
 
-	/**
-	 * The instance is reconfiguring.
-	 * @param configuration : New instance configuration.
-	 */
-	public void reconfigure(Dictionary configuration) { }
+    /**
+     * The instance is reconfiguring.
+     * 
+     * @param configuration : New instance configuration.
+     */
+    public void reconfigure(Dictionary configuration) {
+    }
 
 }

@@ -309,5 +309,81 @@ public class Element {
 
 		return ns;
 	}
+	
+	public String toXMLString() {
+		return toXMLString(0);
+	}
+	
+	private String toXMLString(int indent) {
+		String xml = "";
+		
+		String tabs = "";
+		for(int j = 0; j < indent; j++) {
+			tabs += "\t";
+		}
+		
+		if(m_nameSpace.equals("")) {
+			xml = tabs + "<" + m_name;
+		} else {
+			xml = tabs + "<" + m_nameSpace+":"+m_name;
+		}
+		
+		for(int i = 0; i < m_attributes.length; i++) {
+			Attribute current = m_attributes[i];
+			if(current.getNameSpace().equals("")) {
+				xml += " " + current.getName() + "=\"" + current.getValue() + "\"";
+			} else {
+				xml += " " + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue()+ "\"";
+			}
+		}
+		
+		if(m_elements.length == 0) { xml += "/>"; return xml; }
+		else {
+			xml+=">";
+			for(int i = 0; i < m_elements.length; i++) {
+				xml += "\n";
+				xml += m_elements[i].toXMLString(indent+1);
+			}
+			xml+="\n" + tabs + "</"+m_name+">";
+			return xml;
+		}
+	}
+	
+	public String toString() {
+		return toString(0);
+	}
+	
+	private String toString(int indent) {
+		String xml = "";
+		
+		String tabs = "";
+		for(int j = 0; j < indent; j++) {
+			tabs += "\t";
+		}
+		
+		if(m_nameSpace.equals("")) {
+			xml = tabs + m_name;
+		} else {
+			xml = tabs + m_nameSpace+":"+m_name;
+		}
+		
+		for(int i = 0; i < m_attributes.length; i++) {
+			Attribute current = m_attributes[i];
+			if(current.getNameSpace().equals("")) {
+				xml += " " + current.getName() + "=\"" + current.getValue() + "\"";
+			} else {
+				xml += " " + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue()+ "\"";
+			}
+		}
+		
+		if(m_elements.length == 0) { return xml; }
+		else {
+			for(int i = 0; i < m_elements.length; i++) {
+				xml += "\n";
+				xml += m_elements[i].toString(indent+1);
+			}
+			return xml;
+		}
+	}
 
 }

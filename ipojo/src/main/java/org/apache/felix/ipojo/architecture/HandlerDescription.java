@@ -18,13 +18,15 @@
  */
 package org.apache.felix.ipojo.architecture;
 
+import org.apache.felix.ipojo.metadata.Attribute;
+import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * Handler Description.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class HandlerDescription {
-
 
     /**
      * Handler Class Name (i.e namespace).
@@ -36,9 +38,9 @@ public class HandlerDescription {
      */
     private boolean m_isValid;
 
-
     /**
      * Constructor.
+     * 
      * @param name : handler name
      * @param isValid : is the handler valid
      */
@@ -48,18 +50,34 @@ public class HandlerDescription {
     }
 
     /**
+     * Check if the handler is valid.
      * @return true if the handler is valid.
      */
-    public boolean isValid() { return m_isValid; }
+    public boolean isValid() {
+        return m_isValid;
+    }
 
     /**
+     * Get the handler name.
      * @return the handler name (i.e. namespace).
      */
-    public String getHandlerName() { return m_handlerName; }
+    public String getHandlerName() {
+        return m_handlerName;
+    }
 
     /**
+     * Get handler information.
      * @return the handler information.
      */
-    public String getHandlerInfo() { return ""; };
+    public Element getHandlerInfo() {
+        Element elem = new Element("Handler", "");
+        elem.addAttribute(new Attribute("name", m_handlerName));
+        if (m_isValid) {
+            elem.addAttribute(new Attribute("state", "valid"));
+        } else {
+            elem.addAttribute(new Attribute("state", "invalid"));
+        }
+        return elem;
+    }
 
 }

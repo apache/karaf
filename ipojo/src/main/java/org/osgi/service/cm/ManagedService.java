@@ -1,19 +1,21 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ManagedService.java,v 1.11 2006/03/14 01:21:09 hargrave Exp $
- *
+ * $Header:
+ * /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ManagedService.java,v
+ * 1.11 2006/03/14 01:21:09 hargrave Exp $
+ * 
  * Copyright (c) OSGi Alliance (2001, 2005). All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.osgi.service.cm;
 
@@ -110,31 +112,30 @@ import java.util.Dictionary;
  * @version $Revision: 1.11 $
  */
 public interface ManagedService {
-	/**
-	 * Update the configuration for a Managed Service.
-	 * 
-	 * <p>
-	 * When the implementation of <code>updated(Dictionary)</code> detects any
-	 * kind of error in the configuration properties, it should create a new
-	 * <code>ConfigurationException</code> which describes the problem. This
-	 * can allow a management system to provide useful information to a human
-	 * administrator.
-	 * 
-	 * <p>
-	 * If this method throws any other <code>Exception</code>, the
-	 * Configuration Admin service must catch it and should log it.
-	 * <p>
-	 * The Configuration Admin service must call this method asynchronously
-	 * which initiated the callback. This implies that implementors of Managed
-	 * Service can be assured that the callback will not take place during
-	 * registration when they execute the registration in a synchronized method.
-	 * 
-	 * @param properties A copy of the Configuration properties, or
-	 *        <code>null</code>. This argument must not contain the
-	 *        "service.bundleLocation" property. The value of this property may
-	 *        be obtained from the <code>Configuration.getBundleLocation</code>
-	 *        method.
-	 * @throws ConfigurationException when the update fails
-	 */
-	public void updated(Dictionary properties) throws ConfigurationException;
+    /**
+     * Update the configuration for a Managed Service.
+     * 
+     * <p>
+     * When the implementation of <code>updated(Dictionary)</code> detects any
+     * kind of error in the configuration properties, it should create a new
+     * <code>ConfigurationException</code> which describes the problem. This
+     * can allow a management system to provide useful information to a human
+     * administrator.
+     * 
+     * <p>
+     * If this method throws any other <code>Exception</code>, the
+     * Configuration Admin service must catch it and should log it.
+     * <p>
+     * The Configuration Admin service must call this method asynchronously
+     * which initiated the callback. This implies that implementors of Managed
+     * Service can be assured that the callback will not take place during
+     * registration when they execute the registration in a synchronized method.
+     * 
+     * @param properties A copy of the Configuration properties, or
+     * <code>null</code>. This argument must not contain the
+     * "service.bundleLocation" property. The value of this property may be
+     * obtained from the <code>Configuration.getBundleLocation</code> method.
+     * @throws ConfigurationException when the update fails
+     */
+    public void updated(Dictionary properties) throws ConfigurationException;
 }

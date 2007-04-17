@@ -20,6 +20,7 @@ package org.apache.felix.ipojo.architecture;
 
 /**
  * Property Information.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class PropertyDescription {
@@ -41,6 +42,7 @@ public class PropertyDescription {
 
     /**
      * Constructor.
+     * 
      * @param name : name of the property
      * @param type : type of the property
      * @param value : default value of the property
@@ -52,28 +54,39 @@ public class PropertyDescription {
     }
 
     /**
+     * Get the current property name.
      * @return the property name.
      */
-    public String getName() { return m_name; }
-    
+    public String getName() {
+        return m_name;
+    }
+
     /**
+     * Get the current property type.
      * @return the property type.
      */
-    public String getType() { return m_type; }
+    public String getType() {
+        return m_type;
+    }
 
     /**
+     * Get the current property value.
      * @return the default value for the property.
      */
-    public String getValue() { return m_value; }
+    public String getValue() {
+        return m_value;
+    }
 
     /**
+     * Get a displayed form of the current property.
+     * @return : a String representing this property.
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        if (m_value != null) { 
-        	return getName() + " - " + getType() + " - " + getValue(); 
-        } else { 
-        	return getName() + " - " + getType() + " - REQUIRED"; 
+        if (m_value != null) {
+            return getName() + " - " + getType() + " - " + getValue();
+        } else {
+            return getName() + " - " + getType() + " - REQUIRED";
         }
     }
 

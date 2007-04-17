@@ -34,174 +34,272 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * The iPOJO Context is a BundleContext implementation allowing the separation between Bundle context and Service (Bundle) Context.
+ * The iPOJO Context is a BundleContext implementation allowing the separation
+ * between Bundle context and Service (Bundle) Context.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class IPojoContext implements BundleContext {
-	
-	/**
-	 * BundleContext used to access bundle method.
-	 */
-	private BundleContext m_bundleContext;
-	
-	/**
-	 * Service Context used to access service interaction. 
-	 */
-	private ServiceContext m_serviceContext;
-	
-	/**
-	 * Constructor.
-	 * Used when the service context = the bundle context
-	 * @param bc : bundle context
-	 */
-	public IPojoContext(BundleContext bc) {
-		m_bundleContext = bc;
-		m_serviceContext = new DefaultServiceContext(bc);
-	}
-	
-	/**
-	 * Constructor.
-	 * Used when the service context and the bundle context are different
-	 * @param bc : bundle context
-	 * @param sc : service context
-	 */
-	public IPojoContext(BundleContext bc, ServiceContext sc) {
-		m_bundleContext = bc;
-		m_serviceContext = sc;
-	}
 
-	/**
-	 * @see org.osgi.framework.BundleContext#addBundleListener(org.osgi.framework.BundleListener)
-	 */
-	public void addBundleListener(BundleListener listener) { m_bundleContext.addBundleListener(listener); }
+    /**
+     * BundleContext used to access bundle method.
+     */
+    private BundleContext m_bundleContext;
 
-	/**
-	 * @see org.osgi.framework.BundleContext#addFrameworkListener(org.osgi.framework.FrameworkListener)
-	 */
-	public void addFrameworkListener(FrameworkListener listener) { m_bundleContext.addFrameworkListener(listener); }
+    /**
+     * Service Context used to access service interaction.
+     */
+    private ServiceContext m_serviceContext;
 
-	/**
-	 * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener, java.lang.String)
-	 */
-	public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
-		m_serviceContext.addServiceListener(listener, filter); 
-	}
+    /**
+     * Constructor. Used when the service context = the bundle context
+     * 
+     * @param bc : bundle context
+     */
+    public IPojoContext(BundleContext bc) {
+        m_bundleContext = bc;
+        m_serviceContext = new DefaultServiceContext(bc);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener)
-	 */
-	public void addServiceListener(ServiceListener listener) { m_serviceContext.addServiceListener(listener); }
+    /**
+     * Constructor. Used when the service context and the bundle context are
+     * different
+     * 
+     * @param bc : bundle context
+     * @param sc : service context
+     */
+    public IPojoContext(BundleContext bc, ServiceContext sc) {
+        m_bundleContext = bc;
+        m_serviceContext = sc;
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#createFilter(java.lang.String)
-	 */
-	public Filter createFilter(String filter) throws InvalidSyntaxException {
-		return m_bundleContext.createFilter(filter); 
-	}
+   
+    /**
+     * Add a bundle listener.
+     * @param listener : the listener to add
+     * @see org.osgi.framework.BundleContext#addBundleListener(org.osgi.framework.BundleListener)
+     */
+    public void addBundleListener(BundleListener listener) {
+        m_bundleContext.addBundleListener(listener);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#getAllServiceReferences(java.lang.String, java.lang.String)
-	 */
-	public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
-		return m_serviceContext.getAllServiceReferences(clazz, filter); 
-	}
+    /**
+     * Add a framework listener.
+     * @param listener : the listener object to add
+     * @see org.osgi.framework.BundleContext#addFrameworkListener(org.osgi.framework.FrameworkListener)
+     */
+    public void addFrameworkListener(FrameworkListener listener) {
+        m_bundleContext.addFrameworkListener(listener);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#getBundle()
-	 */
-	public Bundle getBundle() { return m_bundleContext.getBundle(); }
+    /**
+     * Add a service listener.
+     * @param listener : the service lsitener to add.
+     * @param filter : the LDAP filter
+     * @throws InvalidSyntaxException : occurs when the LDAP filter is malformed
+     * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener, java.lang.String)
+     */
+    public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
+        m_serviceContext.addServiceListener(listener, filter);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#getBundle(long)
-	 */
-	public Bundle getBundle(long id) { return m_bundleContext.getBundle(id); }
+    /**
+     * Add a service listener.
+     * @param listener : the service listener to add.
+     * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener)
+     */
+    public void addServiceListener(ServiceListener listener) {
+        m_serviceContext.addServiceListener(listener);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#getBundles()
-	 */
-	public Bundle[] getBundles() { return m_bundleContext.getBundles();	}
 
-	/**
-	 * @see org.osgi.framework.BundleContext#getDataFile(java.lang.String)
-	 */
-	public File getDataFile(String filename) { return m_bundleContext.getDataFile(filename); }
+    /**
+     * Create a Filter object.
+     * @param filter : the string form of the LDAP filter to create
+     * @return the Filter object.
+     * @throws InvalidSyntaxException : occurs when the given filter is malformed
+     * @see org.osgi.framework.BundleContext#createFilter(java.lang.String)
+     */
+    public Filter createFilter(String filter) throws InvalidSyntaxException {
+        return m_bundleContext.createFilter(filter);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#getProperty(java.lang.String)
-	 */
-	public String getProperty(String key) { return m_bundleContext.getProperty(key); }
+    /**
+     * Get the service references matching with the given query.
+     * @param clazz : Required interface
+     * @param filter : LDAP filter
+     * @return the array of available service reference
+     * @throws InvalidSyntaxException : occurs if the LDAP filter is malformed
+     * @see org.osgi.framework.BundleContext#getAllServiceReferences(java.lang.String, java.lang.String)
+     */
+    public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
+        return m_serviceContext.getAllServiceReferences(clazz, filter);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#getService(org.osgi.framework.ServiceReference)
-	 */
-	public Object getService(ServiceReference reference) { return m_serviceContext.getService(reference); }
+    /**
+     * Get the current bundle.
+     * @return the current bundle
+     * @see org.osgi.framework.BundleContext#getBundle()
+     */
+    public Bundle getBundle() {
+        return m_bundleContext.getBundle();
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#getServiceReference(java.lang.String)
-	 */
-	public ServiceReference getServiceReference(String clazz) { return m_serviceContext.getServiceReference(clazz); }
+    /**
+     * Get the bundle object with the given id.
+     * @param id : bundle id
+     * @return the bundle object
+     * @see org.osgi.framework.BundleContext#getBundle(long)
+     */
+    public Bundle getBundle(long id) {
+        return m_bundleContext.getBundle(id);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#getServiceReferences(java.lang.String, java.lang.String)
-	 */
-	public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException { 
-		return m_serviceContext.getServiceReferences(clazz, filter); 
-	}
+    /**
+     * Get installed bundles.
+     * @return the list of installed bundles
+     * @see org.osgi.framework.BundleContext#getBundles()
+     */
+    public Bundle[] getBundles() {
+        return m_bundleContext.getBundles();
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#installBundle(java.lang.String)
-	 */
-	public Bundle installBundle(String location) throws BundleException { return m_bundleContext.installBundle(location); }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#installBundle(java.lang.String, java.io.InputStream)
-	 */
-	public Bundle installBundle(String location, InputStream input) throws BundleException { 
-		return m_bundleContext.installBundle(location, input); 
-	}
+    /**
+     * Get a data file.
+     * @param filename : File name.
+     * @return the File object
+     * @see org.osgi.framework.BundleContext#getDataFile(java.lang.String)
+     */
+    public File getDataFile(String filename) {
+        return m_bundleContext.getDataFile(filename);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#registerService(java.lang.String[], java.lang.Object, java.util.Dictionary)
-	 */
-	public ServiceRegistration registerService(String[] clazzes,
-			Object service, Dictionary properties) { return m_serviceContext.registerService(clazzes, service, properties); }
+    /**
+     * Get a property value.
+     * @param key : key of the asked property
+     * @return the property value (object) or null if no property are associated with the given key
+     * @see org.osgi.framework.BundleContext#getProperty(java.lang.String)
+     */
+    public String getProperty(String key) {
+        return m_bundleContext.getProperty(key);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#registerService(java.lang.String, java.lang.Object, java.util.Dictionary)
-	 */
-	public ServiceRegistration registerService(String clazz, Object service,
-			Dictionary properties) { return m_serviceContext.registerService(clazz, service, properties); }
+    /**
+     * Get a service object.
+     * @param reference : the required service reference 
+     * @return the service object or null if the service reference is no more valid or if the service object is not accessible
+     * @see org.osgi.framework.BundleContext#getService(org.osgi.framework.ServiceReference)
+     */
+    public Object getService(ServiceReference reference) {
+        return m_serviceContext.getService(reference);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#removeBundleListener(org.osgi.framework.BundleListener)
-	 */
-	public void removeBundleListener(BundleListener listener) { m_bundleContext.removeBundleListener(listener); }
+    /**
+     * Get a service reference for the given interface.
+     * @param clazz : the required interface name
+     * @return a service reference on a available provider or null if no provider available
+     * @see org.osgi.framework.BundleContext#getServiceReference(java.lang.String)
+     */
+    public ServiceReference getServiceReference(String clazz) {
+        return m_serviceContext.getServiceReference(clazz);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#removeFrameworkListener(org.osgi.framework.FrameworkListener)
-	 */
-	public void removeFrameworkListener(FrameworkListener listener) { m_bundleContext.removeFrameworkListener(listener); }
+    /**
+     * Get service reference list for the given query.
+     * @param clazz : the name of the requried service interface
+     * @param filter : LDAP filter to apply on service provider
+     * @return : the array of consistent service reference or null if no available provider
+     * @throws InvalidSyntaxException : occrus if the LDAP filter is malformed
+     * @see org.osgi.framework.BundleContext#getServiceReferences(java.lang.String, java.lang.String)
+     */
+    public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
+        return m_serviceContext.getServiceReferences(clazz, filter);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#removeServiceListener(org.osgi.framework.ServiceListener)
-	 */
-	public void removeServiceListener(ServiceListener listener) { m_serviceContext.removeServiceListener(listener); }
+    /**
+     * Install a bundle.
+     * @param location : URL of the bundle to install
+     * @return the installed bundle
+     * @throws BundleException : if the bundle cannot be installed correctly
+     * @see org.osgi.framework.BundleContext#installBundle(java.lang.String)
+     */
+    public Bundle installBundle(String location) throws BundleException {
+        return m_bundleContext.installBundle(location);
+    }
 
-	/**
-	 * @see org.osgi.framework.BundleContext#ungetService(org.osgi.framework.ServiceReference)
-	 */
-	public boolean ungetService(ServiceReference reference) { return m_serviceContext.ungetService(reference); }
-	
-	/**
-	 * Set the instance to the service context.
-	 * @param ci : the component instance
-	 */
-	//public void setComponentInstance(ComponentInstance ci) { m_serviceContext.setComponentInstance(ci); }
-	
-	/**
-	 * Get the instance manager from the service context.
-	 * @return the component manager of the service context
-	 */
-	//public ComponentInstance getComponentInstance() { return m_serviceContext.getComponentInstance(); }
+    /**
+     * Install a bundle.
+     * @param location : URL of the bundle to install
+     * @param input : 
+     * @return the installed bundle
+     * @throws BundleException : if the bundle cannot be installed correctly
+     * @see org.osgi.framework.BundleContext#installBundle(java.lang.String, java.io.InputStream)
+     */
+    public Bundle installBundle(String location, InputStream input) throws BundleException {
+        return m_bundleContext.installBundle(location, input);
+    }
+
+    /**
+     * Register a service.
+     * @param clazzes : interfaces provided by the service.
+     * @param service : the service object.
+     * @param properties : service properties.
+     * @return the service registration for this service publication.
+     * @see org.apache.felix.ipojo.ServiceContext#registerService(java.lang.String[], java.lang.Object, java.util.Dictionary)
+     */
+    public ServiceRegistration registerService(String[] clazzes, Object service, Dictionary properties) {
+        return m_serviceContext.registerService(clazzes, service, properties);
+    }
+
+    /**
+     * Register a service.
+     * @param clazz : interface provided by the service.
+     * @param service : the service object.
+     * @param properties : service properties.
+     * @return the service registration for this service publication.
+     * @see org.osgi.framework.BundleContext#registerService(java.lang.String, java.lang.Object, java.util.Dictionary)
+     */
+    public ServiceRegistration registerService(String clazz, Object service, Dictionary properties) {
+        return m_serviceContext.registerService(clazz, service, properties);
+    }
+
+    /**
+     * Remove a bundle listener.
+     * @param listener : the listener to remove
+     * @see org.osgi.framework.BundleContext#removeBundleListener(org.osgi.framework.BundleListener)
+     */
+    public void removeBundleListener(BundleListener listener) {
+        m_bundleContext.removeBundleListener(listener);
+    }
+
+    /**
+     * Remove a framework listener.
+     * @param listener : the listener to remove
+     * @see org.osgi.framework.BundleContext#removeFrameworkListener(org.osgi.framework.FrameworkListener)
+     */
+    public void removeFrameworkListener(FrameworkListener listener) {
+        m_bundleContext.removeFrameworkListener(listener);
+    }
+
+    /**
+     * Remove a service listener.
+     * @param listener : the service listner to remove
+     * @see org.apache.felix.ipojo.ServiceContext#removeServiceListener(org.osgi.framework.ServiceListener)
+     * @see org.osgi.framework.BundleContext#removeServiceListener(org.osgi.framework.ServiceListener)
+     */
+    public void removeServiceListener(ServiceListener listener) {
+        m_serviceContext.removeServiceListener(listener);
+    }
+
+    /**
+     * Unget the service reference.
+     * @param reference : the reference to unget
+     * @return true if you are the last user of the reference
+     * @see org.osgi.framework.BundleContext#ungetService(org.osgi.framework.ServiceReference)
+     */
+    public boolean ungetService(ServiceReference reference) {
+        return m_serviceContext.ungetService(reference);
+    }
 
 }

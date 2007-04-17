@@ -25,11 +25,12 @@ import org.apache.felix.ipojo.util.Callback;
 
 /**
  * This class is the implementation of callback on lifecycle transition.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class LifecycleCallback {
-	
-	 /**
+
+    /**
      * Initial state of the transition.
      */
     private int m_initialState;
@@ -43,7 +44,7 @@ public class LifecycleCallback {
      * Callback object.
      */
     private Callback m_callback;
-    
+
     /**
      * Method called by the callback.
      */
@@ -51,6 +52,7 @@ public class LifecycleCallback {
 
     /**
      * LifecycleCallback constructor.
+     * 
      * @param hh : the callback handler calling the callback
      * @param initialState : initial state of the callback
      * @param finalState : finali state of the callback
@@ -58,17 +60,27 @@ public class LifecycleCallback {
      * @param isStatic : is the method static ?
      */
     public LifecycleCallback(LifecycleCallbackHandler hh, String initialState, String finalState, String method, boolean isStatic) {
-    	if (initialState.equals("VALID")) { m_initialState = InstanceManager.VALID; }
-        if (initialState.equals("INVALID")) { m_initialState = InstanceManager.INVALID; }
-        if (finalState.equals("VALID")) { m_finalState = InstanceManager.VALID; }
-        if (finalState.equals("INVALID")) { m_finalState = InstanceManager.INVALID; }
-        
+        if (initialState.equals("VALID")) {
+            m_initialState = InstanceManager.VALID;
+        }
+        if (initialState.equals("INVALID")) {
+            m_initialState = InstanceManager.INVALID;
+        }
+        if (finalState.equals("VALID")) {
+            m_finalState = InstanceManager.VALID;
+        }
+        if (finalState.equals("INVALID")) {
+            m_finalState = InstanceManager.INVALID;
+        }
+
         m_method = method;
         m_callback = new Callback(method, isStatic, hh.getInstanceManager());
     }
 
     /**
-     * Call the hook method when the transition from inital to final state is detected.
+     * Call the hook method when the transition from inital to final state is
+     * detected.
+     * 
      * @throws NoSuchMethodException : Method is not found in the class
      * @throws InvocationTargetException : The method is not static
      * @throws IllegalAccessException : The method can not be invoked
@@ -76,24 +88,17 @@ public class LifecycleCallback {
     protected void call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         m_callback.call();
     }
-    
-    /**
-     * @return Returns the m_finalState.
-     */
+
     public int getFinalState() {
         return m_finalState;
     }
 
-    /**
-     * @return Returns the m_initialState.
-     */
     public int getInitialState() {
         return m_initialState;
     }
-    
-    /**
-     * @return the method called by this callback.
-     */
-    public String getMethod() { return m_method; }
+
+    public String getMethod() {
+        return m_method;
+    }
 
 }

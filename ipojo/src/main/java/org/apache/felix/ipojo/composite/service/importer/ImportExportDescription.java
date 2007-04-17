@@ -21,57 +21,77 @@ package org.apache.felix.ipojo.composite.service.importer;
 import java.util.List;
 
 import org.apache.felix.ipojo.architecture.HandlerDescription;
+import org.apache.felix.ipojo.metadata.Attribute;
+import org.apache.felix.ipojo.metadata.Element;
 
 /**
+ * Description of the Import Export Handler.
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ImportExportDescription extends HandlerDescription {
-	
-	private List m_imports;
-	private List m_exports;
 
-	/**
-	 * Constructor.
-	 * @param name
-	 * @param isValid
-	 * @param importers
-	 * @param exporters
-	 */
-	public ImportExportDescription(String name, boolean isValid, List importers, List exporters) {
-		super(name, isValid);
-		m_imports = importers;
-		m_exports = exporters;
-	}
-	
-	/**
-	 * @see org.apache.felix.ipojo.architecture.HandlerDescription#getHandlerInfo()
-	 */
-	public String getHandlerInfo() {
-		String s = "";
-		for (int i = 0; i < m_imports.size(); i++) {
-			ServiceImporter imp = (ServiceImporter) m_imports.get(i);
-			if (imp.isSatisfied()) {
-				s += "\t Specification " + imp.getSpecification() + " provided by \n \t";
-				for (int j = 0; j < imp.getProviders().size(); j++) {
-					String prov = (String) imp.getProviders().get(j);
-					s += prov + " ";
-				}	
-			} else {
-				s += "\t Specification " + imp.getSpecification() + " is not statisfied \n";
-			}
-		}
-		for (int i = 0; i < m_exports.size(); i++) {
-			ServiceExporter exp = (ServiceExporter) m_exports.get(i);
-			if (exp.isSatisfied()) {
-				s += "\t Specification " + exp.getSpecification() + " is exported or optional";
-			} else {
-				s += "\t Specification " + exp.getSpecification() + " is not exported";
-			}
-		}
-		return s;
-		
-	}
-	
-	
+    /**
+     * List of imports.
+     */
+    private List m_imports;
+
+    /**
+     * List of exports.
+     */
+    private List m_exports;
+
+    /**
+     * Constructor.
+     * 
+     * @param name : name of the handler
+     * @param isValid : handler validity
+     * @param importers : list of managed imports
+     * @param exporters : list of managed exports
+     */
+    public ImportExportDescription(String name, boolean isValid, List importers, List exporters) {
+        super(name, isValid);
+        m_imports = importers;
+        m_exports = exporters;
+    }
+
+    /**
+     * Build the ImportExport handler description.
+     * @return the handler description
+     * @see org.apache.felix.ipojo.architecture.HandlerDescription#getHandlerInfo()
+     */
+    public Element getHandlerInfo() {
+        Element handler = super.getHandlerInfo();
+        for (int i = 0; i < m_imports.size(); i++) {
+            ServiceImporter imp = (ServiceImporter) m_imports.get(i);
+            Element impo = new Element("Import", "");
+            impo.addAttribute(new Attribute("Specification", imp.getSpecification()));
+            if (imp.getFilter() != null) { impo.addAttribute(new Attribute("Filter", imp.getFilter())); }
+            if (imp.isSatisfied()) {
+                impo.addAttribute(new Attribute("State", "resolved"));
+                for (int j = 0; j < imp.getProviders().size(); j++) {
+                    Element pr = new Element("Provider", "");
+                    pr.addAttribute(new Attribute("name", (String) imp.getProviders().get(j)));
+                    impo.addElement(pr);
+                }
+            } else {
+                impo.addAttribute(new Attribute("State", "unresolved"));
+            }
+            handler.addElement(impo);
+        }
+        for (int i = 0; i < m_exports.size(); i++) {
+            ServiceExporter exp = (ServiceExporter) m_exports.get(i);
+            Element expo = new Element("Export", "");
+            expo.addAttribute(new Attribute("Specification", exp.getSpecification()));
+            expo.addAttribute(new Attribute("Filter", exp.getFilter()));
+            if (exp.isSatisfied()) {
+                expo.addAttribute(new Attribute("State", "resolved"));
+            } else {
+                expo.addAttribute(new Attribute("State", "unresolved"));
+            }
+            handler.addElement(expo);
+        }
+        return handler;
+
+    }
 
 }

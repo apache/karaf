@@ -21,9 +21,12 @@ package org.apache.felix.ipojo.handlers.providedservice;
 import java.util.Iterator;
 
 import org.apache.felix.ipojo.architecture.HandlerDescription;
+import org.apache.felix.ipojo.metadata.Attribute;
+import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * Provided Service Handler Description.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ProvidedServiceHandlerDescription extends HandlerDescription {
@@ -33,9 +36,9 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
      */
     private ProvidedServiceDescription[] m_providedServices = new ProvidedServiceDescription[0];
 
-
     /**
      * Constructor.
+     * 
      * @param isValid : the validity of the provided service handler.
      */
     public ProvidedServiceHandlerDescription(boolean isValid) {
@@ -43,19 +46,25 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
     }
 
     /**
+     * Get the provided service descriptions.
      * @return the provided service description list.
      */
-    public ProvidedServiceDescription[] getProvidedServices() { return m_providedServices; }
+    public ProvidedServiceDescription[] getProvidedServices() {
+        return m_providedServices;
+    }
 
     /**
      * Add a provided service.
+     * 
      * @param pds : the provided service to add
      */
     public void addProvidedService(ProvidedServiceDescription pds) {
-        //Verify that the provided service description is not already in the array.
-        for (int i = 0; (i < m_providedServices.length); i++) {
+        // Verify that the provided service description is not already in the
+        // array.
+        for (int i = 0; i < m_providedServices.length; i++) {
             if (m_providedServices[i] == pds) {
-                return; //NOTHING DO DO, the description is already in the array
+                return; // NOTHING DO DO, the description is already in the
+                        // array
             }
         }
         // The component Description is not in the array, add it
@@ -66,27 +75,40 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
     }
 
     /**
+     * Build the provided service handler description.
+     * @return the handler description.
      * @see org.apache.felix.ipojo.architecture.HandlerDescription#getHandlerInfo()
      */
-    public String getHandlerInfo() {
-        String info = "";
+    public Element getHandlerInfo() {
+        Element services = super.getHandlerInfo();
         for (int i = 0; i < m_providedServices.length; i++) {
+            Element service = new Element("service", "");
             String state = "unregistered";
-            if (m_providedServices[i].getState() == ProvidedService.REGISTERED) { state = "registered"; }
-            String spec = "";
-            for (int j = 0; j < m_providedServices[i].getServiceSpecification().length; j++) {
-                spec += m_providedServices[i].getServiceSpecification()[j] + " ";
+            if (m_providedServices[i].getState() == ProvidedService.REGISTERED) {
+                state = "registered";
             }
-            info += "\t Provided Service [" + spec + "] is " + state;
+            String spec = "[";
+            for (int j = 0; j < m_providedServices[i].getServiceSpecification().length; j++) {
+                if (j == 0) {
+                    spec += m_providedServices[i].getServiceSpecification()[j];
+                } else {
+                    spec += ", " + m_providedServices[i].getServiceSpecification()[j];
+                }
+            }
+            spec += "]";
+            service.addAttribute(new Attribute("specifications", spec));
+            service.addAttribute(new Attribute("state", state));
             Iterator it = m_providedServices[i].getProperties().keySet().iterator();
             while (it.hasNext()) {
+                Element prop = new Element("property", "");
                 String k = (String) it.next();
-                info += "\n\t\t Service Property : " + k + " = " + m_providedServices[i].getProperties().getProperty(k);
+                prop.addAttribute(new Attribute("name", k));
+                prop.addAttribute(new Attribute("value", m_providedServices[i].getProperties().getProperty(k).toString()));
+                service.addElement(prop);
             }
+            services.addElement(service);
         }
-        return info;
+        return services;
     }
-
-
 
 }

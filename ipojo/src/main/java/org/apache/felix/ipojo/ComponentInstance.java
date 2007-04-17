@@ -26,25 +26,26 @@ import org.osgi.framework.BundleContext;
 
 /**
  * The component instance class manages one instance of a component type.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public interface ComponentInstance {
 
     /**
-     * Component Instance State : STOPPED.
-     * The component instance is not started.
+     * Component Instance State : STOPPED. The component instance is not
+     * started.
      */
     int STOPPED = 0;
-	
-	/**
-     * Component Instance State : INVALID.
-     * The component is invalid when it start or when a component dependency is unvalid.
+
+    /**
+     * Component Instance State : INVALID. The component is invalid when it
+     * start or when a component dependency is unvalid.
      */
     int INVALID = 1;
 
     /**
-     * Component Instance State : VALID.
-     * The component is resolved when it is running and all its component dependencies are valid.
+     * Component Instance State : VALID. The component is resolved when it is
+     * running and all its component dependencies are valid.
      */
     int VALID = 2;
 
@@ -55,51 +56,65 @@ public interface ComponentInstance {
 
     /**
      * Stop the component instance.
+     * A stopped instance can be re-started.
      */
     void stop();
+    
+    /**
+     * Dispose the component instance.
+     * A disposed instance cannot be re-started.
+     */
+    void dispose();
 
     /**
+     * Return the actual state of the instance. 
      * @return the actual state of the component instance.
      */
     int getState();
 
     /**
-     * @return the component type information.
-     * Each handler can participate to the component description.
+     * Return component-type description of this instance.
+     * @return the component type information. Each handler can participate to
+     * the component description.
      */
     ComponentDescription getComponentDescription();
-    
+
     /**
+     * Return the instance description.
      * @return the instance description of the current instance
      */
     InstanceDescription getInstanceDescription();
 
     /**
+     * Return the factory which create this instance.
      * @return the factory of the component instance.
      */
     ComponentFactory getFactory();
-    
+
     /**
+     * Return the bundle context of this instance.
      * @return the context of the component instance
      */
     BundleContext getContext();
-    
+
     /**
+     * Return the name of the instance.
      * @return the name of the component instance
      */
     String getInstanceName();
-    
+
     /**
+     * Check if the instance is started.
      * @return true if getState returns INVALID or VALID.
      */
     boolean isStarted();
-    
+
     /**
-     * Re-configurare an instance.
-     * Do nothing if the instance does not support dynamic reconfiguration.
-     * The reconfiguration does not stop the instance.
+     * Re-configurare an instance. Do nothing if the instance does not support
+     * dynamic reconfiguration. The reconfiguration does not stop the instance.
+     * 
      * @param configuration : the new configuration.
      */
     void reconfigure(Dictionary configuration);
-    
+
 }

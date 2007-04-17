@@ -23,52 +23,63 @@ import java.util.Dictionary;
 import org.apache.felix.ipojo.architecture.ComponentDescription;
 
 /**
- * Component Type Factory Service.
- * This service is exposed by a instance manager factory, and allows the dynamic creation of component instance.
+ * Component Type Factory Service. This service is exposed by a instance manager
+ * factory, and allows the dynamic creation of component instance.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public interface Factory {
 
     /**
      * Create an instance manager (i.e. component type instance).
+     * 
      * @param configuration : the configuration properties for this component.
      * @return the created instance manager.
+     * @throws UnacceptableConfiguration : when a given configuration is not valid.
      */
     ComponentInstance createComponentInstance(Dictionary configuration) throws UnacceptableConfiguration;
-    
+
     /**
-     * Create an instance manager (i.e. component type instance).
-     * This has these service interaction in the scope given in argument.
+     * Create an instance manager (i.e. component type instance). This has these
+     * service interaction in the scope given in argument.
+     * 
      * @param configuration : the configuration properties for this component.
      * @param serviceContext : the service context of the component.
      * @return the created instance manager.
+     * @throws UnacceptableConfiguration : when the given configuration isnot valid.
      */
     ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration;
 
     /**
-     * Get the component type information containing provided service, configuration properties ...
-     * @return the compionent type information.
+     * Get the component type information containing provided service,
+     * configuration properties ...
+     * 
+     * @return the component type information.
      */
     ComponentDescription getComponentDescription();
-    
+
     /**
-     * Check if the given configuration is acceptable as a configuration of a component instance.
+     * Check if the given configuration is acceptable as a configuration of a
+     * component instance.
+     * 
      * @param conf : the configuration to test
      * @return true if the configuration is acceptable
      */
     boolean isAcceptable(Dictionary conf);
-    
+
     /**
+     * Return the factory name.
      * @return the name of the factory.
      */
     String getName();
-    
-    
+
     /**
-     * Reconfigure an instance already created.
-     * This configuration need to have the name property to identify the instance.
+     * Reconfigure an instance already created. This configuration need to have
+     * the name property to identify the instance.
+     * 
      * @param conf : the configuration to reconfigure the instance.
-     * @throws UnacceptableConfiguration : if the given configuration is not consistent for the tragetted instance.
+     * @throws UnacceptableConfiguration : if the given configuration is not
+     * consistent for the tragetted instance.
      */
     void reconfigure(Dictionary conf) throws UnacceptableConfiguration;
 

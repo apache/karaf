@@ -32,39 +32,40 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * Internal service registration implemenation.
- * This class is used for in the composition.
+ * Internal service registration implemenation. This class is used for in the
+ * composition.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ServiceRegistrationImpl implements ServiceRegistration {
 
     /**
-     * Service Registry. 
+     * Service Registry.
      */
     private ServiceRegistry m_registry = null;
-   
+
     /**
      * Interfaces associated with the service object.
      */
     private String[] m_classes = null;
-    
+
     /**
-     *  Service Id associated with the service object.
+     * Service Id associated with the service object.
      */
     private Long m_serviceId = null;
-    
+
     /**
      * Service object.
      */
     private Object m_svcObj = null;
-    
+
     /**
      * Service factory interface.
      */
     private ServiceFactory m_factory = null;
-    
+
     /**
-     * Associated property dictionary. 
+     * Associated property dictionary.
      */
     private Map m_propMap = null;
 
@@ -75,10 +76,11 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 
     /**
      * Constructor.
+     * 
      * @param registry : the service registry
      * @param cm : component instance
      * @param classes : published interfaces array
-     * @param serviceId : the unique service id 
+     * @param serviceId : the unique service id
      * @param svcObj : the service object or the service factory object
      * @param dict : service properties
      */
@@ -87,33 +89,44 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
         m_classes = classes;
         m_serviceId = serviceId;
         m_svcObj = svcObj;
-        m_factory = (m_svcObj instanceof ServiceFactory)
-            ? (ServiceFactory) m_svcObj : null;
-
+        if (m_svcObj instanceof ServiceFactory) { m_factory = (ServiceFactory) m_svcObj; }
         initializeProperties(dict);
 
-        // This reference is the "standard" reference for this service and will always be returned by getReference().
-        // Since all reference to this service are supposed to be equal, we use the hashcode of this reference for
+        // This reference is the "standard" reference for this service and will
+        // always be returned by getReference().
+        // Since all reference to this service are supposed to be equal, we use
+        // the hashcode of this reference for
         // a references to this service in ServiceReference.
         m_ref = new ServiceReferenceImpl(cm, this);
     }
 
     /**
+     * Check if the service registration still valid.
      * @return true if the service registration is valid.
      */
-    protected boolean isValid() { return (m_svcObj != null); }
+    protected boolean isValid() {
+        return m_svcObj != null;
+    }
 
     /**
+     * Get the service reference attached with this service registration.
+     * @return the service reference
      * @see org.osgi.framework.ServiceRegistration#getReference()
      */
-    public ServiceReference getReference() { return m_ref; }
+    public ServiceReference getReference() {
+        return m_ref;
+    }
 
     /**
+     * Add properties to a service registration.
+     * @param dict : the properties to add
      * @see org.osgi.framework.ServiceRegistration#setProperties(java.util.Dictionary)
      */
     public void setProperties(Dictionary dict) {
         // Make sure registration is valid.
-        if (!isValid()) { throw new IllegalStateException("The service registration is no longer valid."); }
+        if (!isValid()) {
+            throw new IllegalStateException("The service registration is no longer valid.");
+        }
         // Set the properties.
         initializeProperties(dict);
         // Tell registry about it.
@@ -121,6 +134,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
     }
 
     /**
+     * Unregister the service.
      * @see org.osgi.framework.ServiceRegistration#unregister()
      */
     public void unregister() {
@@ -128,15 +142,17 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
             m_registry.unregisterService(this);
             m_svcObj = null;
             m_factory = null;
-        } else { 
-        	throw new IllegalStateException("Service already unregistered."); 
+        } else {
+            throw new IllegalStateException("Service already unregistered.");
         }
     }
 
     /**
-     * Look for a property in the service properties. 
+     * Look for a property in the service properties.
+     * 
      * @param key : property key
-     * @return the object associated with the key or null if the key is not present.
+     * @return the object associated with the key or null if the key is not
+     * present.
      */
     protected Object getProperty(String key) {
         return m_propMap.get(key);
@@ -148,6 +164,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
     private transient ArrayList m_list = new ArrayList();
 
     /**
+     * Get the property keys.
      * @return the property keys list.
      */
     protected String[] getPropertyKeys() {
@@ -163,26 +180,30 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
     }
 
     /**
+     * Get the service object.
      * @return the service object. Call the service factory if needed.
      */
     protected Object getService() {
         // If the service object is a service factory, then
         // let it create the service object.
         if (m_factory != null) {
-            return getFactoryUnchecked(); 
-        } else { return m_svcObj; }
+            return getFactoryUnchecked();
+        } else {
+            return m_svcObj;
+        }
     }
 
     /**
      * Initialize properties.
+     * 
      * @param dict : serivce properties to publish.
      */
     private void initializeProperties(Dictionary dict) {
         // Create a case insensitive map.
-        if (m_propMap == null) { 
-        	m_propMap = new StringMap(false);
-        } else { 
-        	m_propMap.clear();
+        if (m_propMap == null) {
+            m_propMap = new StringMap(false);
+        } else {
+            m_propMap.clear();
         }
 
         if (dict != null) {
@@ -198,6 +219,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
     }
 
     /**
+     * Get a service object via a service factory.
      * @return the service object via the service factory invocation.
      */
     private Object getFactoryUnchecked() {
@@ -205,28 +227,30 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
     }
 
     /**
-     * Unget a service.
-     * (Internal Method)
+     * Unget a service. (Internal Method)
+     * 
      * @param cm : component instance using the service.
      * @param svcObj : the unget service object.
      */
     private void ungetFactoryUnchecked(ComponentInstance cm, Object svcObj) {
-    	if (cm instanceof InstanceManager) {
-    		m_factory.ungetService(((InstanceManager) cm).getContext().getBundle(), this, svcObj);
-    	}
-        
+        if (cm instanceof InstanceManager) {
+            m_factory.ungetService(((InstanceManager) cm).getContext().getBundle(), this, svcObj);
+        }
+
     }
 
-	/**
-	 * Unget a service.
+    /**
+     * Unget a service.
+     * 
      * @param cm : component instance using the service.
      * @param srvObj : the unget service object.
-	 */
-	public void ungetService(ComponentInstance cm, Object srvObj) {
-		//	If the service object is a service factory, then let is release the service object.
+     */
+    public void ungetService(ComponentInstance cm, Object srvObj) {
+        // If the service object is a service factory, then let is release the
+        // service object.
         if (m_factory != null) {
             ungetFactoryUnchecked(cm, srvObj);
         }
-	}
+    }
 
 }

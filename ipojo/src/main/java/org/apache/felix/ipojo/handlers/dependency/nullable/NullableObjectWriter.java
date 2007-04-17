@@ -18,7 +18,6 @@
  */
 package org.apache.felix.ipojo.handlers.dependency.nullable;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -29,19 +28,22 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-/** Create the proxy class.
+/**
+ * Create the proxy class.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class NullableObjectWriter implements Opcodes {
 
-    /** Return the proxy classname for the contract contractname
-     * on the service object soc.
+    /**
+     * Return the proxy classname for the contract contractname on the service
+     * object soc.
+     * 
      * @param url URL of the needed contract
      * @param contractName String
      * @return byte[]
      */
-    public static byte[] dump(URL url,
-            String contractName) {
+    public static byte[] dump(URL url, String contractName) {
 
         ClassReader cr = null;
         InputStream is = null;
@@ -55,14 +57,14 @@ public class NullableObjectWriter implements Opcodes {
 
             ClassWriter cw = new ClassWriter(true);
 
-            //String[] segment = contractName.split("[.]");
-            //String className = "org/apache/felix/ipojo/" + segment[segment.length - 1] + "Nullable";
+            // String[] segment = contractName.split("[.]");
+            // String className = "org/apache/felix/ipojo/" +
+            // segment[segment.length - 1] + "Nullable";
             String className = contractName.replace('.', '/') + "Nullable";
 
-
             // Create the class
-            cw.visit(V1_2, ACC_PUBLIC + ACC_SUPER, className, null,
-                    "java/lang/Object", new String[]{contractName.replace('.', '/'), "org/apache/felix/ipojo/Nullable"});
+            cw.visit(V1_2, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", new String[] { contractName.replace('.', '/'),
+                "org/apache/felix/ipojo/Nullable" });
 
             // Inject a constructor <INIT>()V
             MethodVisitor cst = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
@@ -85,38 +87,43 @@ public class NullableObjectWriter implements Opcodes {
                 MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, name, desc, sign, exc);
 
                 Type returnType = Type.getReturnType(desc);
-                    // TODO : manage the other type primitive for Nullable
-                    // Primitive type :
+                // Primitive type :
                 switch (returnType.getSort()) {
                     case Type.BOOLEAN:
                     case Type.INT:
                     case Type.BYTE:
+                    case Type.CHAR:
                     case Type.SHORT:
                         // Integer or Boolean : return 0 ( false)
                         mv.visitInsn(ICONST_0);
                         mv.visitInsn(IRETURN);
                         break;
                     case Type.LONG:
-                    	mv.visitInsn(LCONST_0);
-                    	mv.visitInsn(LRETURN);
-                    	break;
+                        mv.visitInsn(LCONST_0);
+                        mv.visitInsn(LRETURN);
+                        break;
                     case Type.DOUBLE:
                         // Double : return 0.0
                         mv.visitInsn(DCONST_0);
                         mv.visitInsn(DRETURN);
                         break;
-                    case Type.ARRAY :
-                    case Type.OBJECT :
+                    case Type.FLOAT:
+                        // Double : return 0.0
+                        mv.visitInsn(FCONST_0);
+                        mv.visitInsn(FRETURN);
+                        break;
+                    case Type.ARRAY:
+                    case Type.OBJECT:
                         // Return always null for array and object
                         mv.visitInsn(ACONST_NULL);
                         mv.visitInsn(ARETURN);
                         break;
-                    case Type.VOID :
+                    case Type.VOID:
                         mv.visitInsn(RETURN);
                         break;
-                    default :
+                    default:
                         System.err.println("Type not yet managed : " + returnType);
-                    	break;
+                        break;
                 }
                 mv.visitMaxs(0, 0);
                 mv.visitEnd();
@@ -124,7 +131,7 @@ public class NullableObjectWriter implements Opcodes {
 
             // End process
             cw.visitEnd();
-            b =  cw.toByteArray();
+            b = cw.toByteArray();
 
         } catch (IOException e) {
             e.printStackTrace();

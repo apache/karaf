@@ -140,6 +140,9 @@
         <module>scr</module>
         <module>configadmin</module>
         <module>metatype</module>
+        
+        <module>ipojo</module>
+        <module>ipojo.metadata</module>
       </modules>
     </profile>
     
@@ -172,8 +175,7 @@
 
         <!--    <module>tools/mangen</module> -->
 
-        <module>ipojo</module>
-        <module>ipojo.metadata</module>
+
       </modules>
     </profile>
 

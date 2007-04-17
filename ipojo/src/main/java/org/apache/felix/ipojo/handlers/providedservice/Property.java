@@ -27,18 +27,17 @@ import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Logger;
 
 /**
- * Represent a property i.e. a set : [name, type, value].
- * A property can be attached to a field.
- * The value of the property is thefield value.
- * When the value change, the published value change too.
+ * Represent a property i.e. a set : [name, type, value]. A property can be
+ * attached to a field. The value of the property is thefield value. When the
+ * value change, the published value change too.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class Property {
 
     /**
-     * A property is link with a service.
-     * This field represent this provided service.
-     * m_providedService : ProvidedService
+     * A property is link with a service. This field represent this provided
+     * service. m_providedService : ProvidedService
      */
     private ProvidedService m_providedService;
 
@@ -46,7 +45,7 @@ public class Property {
      * Value of the property (before we know the type).
      */
     private Object m_value;
-    
+
     /**
      * Field of the property.
      */
@@ -69,6 +68,7 @@ public class Property {
 
     /**
      * Property constructor.
+     * 
      * @param ps : the provided service
      * @param name : name of the property
      * @param field : name of the field (if a field is attached to the property)
@@ -85,27 +85,38 @@ public class Property {
 
         // Dynamic property case :
         if (m_field != null) {
-            if (m_name == null) { m_name = m_field; }
+            if (m_name == null) {
+                m_name = m_field;
+            }
         }
-        
+
         // Check type if not already set
         if (m_type == null) {
-        	if (field == null) { ps.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The property " + m_name + " has neither type neither field."); return; }
+            if (field == null) {
+                ps.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The property " + m_name + " has neither type neither field.");
+                return;
+            }
             for (int j = 0; j < manipulation.getElements("Field").length; j++) {
                 if (field.equals(manipulation.getElements("Field")[j].getAttribute("name"))) {
                     m_type = manipulation.getElements("Field")[j].getAttribute("type");
                     break;
                 }
             }
-            if (m_type == null) { m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + ps.getInstanceManager().getClassName() + "] A declared property was not found in the class : " + m_field); }
+            if (m_type == null) {
+                m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
+                        "[" + ps.getInstanceManager().getClassName() + "] A declared property was not found in the class : " + m_field);
+            }
         }
-        
-        if (m_initialValue != null) { setValue(m_initialValue); }
+
+        if (m_initialValue != null) {
+            setValue(m_initialValue);
+        }
     }
 
     /**
-     * Property constructor.
-     * This constructor is used only for non-field property (property not attached to a field).
+     * Property constructor. This constructor is used only for non-field
+     * property (property not attached to a field).
+     * 
      * @param ps : the provided service
      * @param name : the name of the property
      * @param value : the value of the property
@@ -118,13 +129,17 @@ public class Property {
     }
 
     /**
+     * Get the property value.
      * @return the Object value of the property
      */
-    protected Object get() { return m_value; }
+    protected Object get() {
+        return m_value;
+    }
 
     /**
-     * This method is automaticaly called when the value of the property is changed.
-     * Set the value of a property.
+     * This method is automaticaly called when the value of the property is
+     * changed. Set the value of a property.
+     * 
      * @param s : the new value of the property (in String)
      */
     protected void set(String s) {
@@ -132,8 +147,9 @@ public class Property {
     }
 
     /**
-     * This method is called when the value of the property is changed.
-     * Set the value of a property.
+     * This method is called when the value of the property is changed. Set the
+     * value of a property.
+     * 
      * @param o : the new value of the property (object)
      */
     protected void set(Object o) {
@@ -142,6 +158,7 @@ public class Property {
 
     /**
      * Set the provided service of this property.
+     * 
      * @param ps : the provided service to attached.
      */
     void setProvidedService(ProvidedService ps) {
@@ -150,6 +167,7 @@ public class Property {
 
     /**
      * Set the value of the property.
+     * 
      * @param value : value of the property (String)
      */
     private void setValue(String value) {
@@ -162,154 +180,210 @@ public class Property {
         }
 
         // Simple :
-        if (m_type.equals("string") || m_type.equals("String")) { m_value = new String(value); return; }
-        if (m_type.equals("boolean")) { m_value = new Boolean(value); return; }
-        if (m_type.equals("byte")) { m_value = new Byte(value); return; }
-        if (m_type.equals("short")) { m_value = new Short(value); return; }
-        if (m_type.equals("int")) { m_value = new Integer(value); return; }
-        if (m_type.equals("long")) { m_value = new Long(value); return; }
-        if (m_type.equals("float")) { m_value = new Float(value); return; }
-        if (m_type.equals("double")) { m_value = new Double(value); return; }
+        if (m_type.equals("string") || m_type.equals("String")) {
+            m_value = new String(value);
+            return;
+        }
+        if (m_type.equals("boolean")) {
+            m_value = new Boolean(value);
+            return;
+        }
+        if (m_type.equals("byte")) {
+            m_value = new Byte(value);
+            return;
+        }
+        if (m_type.equals("short")) {
+            m_value = new Short(value);
+            return;
+        }
+        if (m_type.equals("int")) {
+            m_value = new Integer(value);
+            return;
+        }
+        if (m_type.equals("long")) {
+            m_value = new Long(value);
+            return;
+        }
+        if (m_type.equals("float")) {
+            m_value = new Float(value);
+            return;
+        }
+        if (m_type.equals("double")) {
+            m_value = new Double(value);
+            return;
+        }
 
-        // Else it is a neither a primitive type neither a String -> create the object by calling a constructor with a string in argument.
+        // Else it is a neither a primitive type neither a String -> create the
+        // object by calling a constructor with a string in argument.
         try {
             Class c = m_providedService.getInstanceManager().getContext().getBundle().loadClass(m_type);
-            //Class string = m_providedService.getComponentManager().getContext().getBundle().loadClass("java.lang.String");
-            Constructor cst = c.getConstructor(new Class[] {String.class});
-            m_value = cst.newInstance(new Object[] {value});
+            // Class string =
+            // m_providedService.getComponentManager().getContext().getBundle().loadClass("java.lang.String");
+            Constructor cst = c.getConstructor(new Class[] { String.class });
+            m_value = cst.newInstance(new Object[] { value });
         } catch (ClassNotFoundException e) {
-            System.err.println("Class not found exception in setValue on " + m_type);
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Class not found exception in setValue on " + m_type);
         } catch (SecurityException e) {
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Security Exception in setValue on " + m_type);
         } catch (NoSuchMethodException e) {
-            System.err.println("Constructor not found exeption in setValue on " + m_type);
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Constructor not found exeption in setValue on " + m_type);
         } catch (IllegalArgumentException e) {
-            System.err.println("Argument problem to call the constructor of the type " + m_type);
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Argument problem to call the constructor of the type " + m_type);
         } catch (InstantiationException e) {
-            System.err.println("Instantiation problem  " + m_type);
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Instantiation problem  " + m_type);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Illegal Access Exception in setValue on " + m_type);
         } catch (InvocationTargetException e) {
-            System.err.println("Invocation problem " + m_type);
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Invocation problem " + m_type);
         }
     }
 
     /**
      * Set a array value to the current property.
+     * 
      * @param internalType : internal array type
      * @param values : the new value
      */
     private void setArrayValue(String internalType, String[] values) {
-        if (internalType.equals("string") || internalType.equals("String")) { m_value = values; return; }
+        if (internalType.equals("string") || internalType.equals("String")) {
+            m_value = values;
+            return;
+        }
         if (internalType.equals("boolean")) {
             boolean[] bool = new boolean[values.length];
-            for (int i = 0; i < values.length; i++) { bool[i] = new Boolean(values[i]).booleanValue(); }
+            for (int i = 0; i < values.length; i++) {
+                bool[i] = new Boolean(values[i]).booleanValue();
+            }
             m_value = bool;
             return;
         }
         if (internalType.equals("byte")) {
             byte[] byt = new byte[values.length];
-            for (int i = 0; i < values.length; i++) { byt[i] = new Byte(values[i]).byteValue(); }
+            for (int i = 0; i < values.length; i++) {
+                byt[i] = new Byte(values[i]).byteValue();
+            }
             m_value = byt;
             return;
         }
         if (internalType.equals("short")) {
             short[] shor = new short[values.length];
-            for (int i = 0; i < values.length; i++) { shor[i] = new Short(values[i]).shortValue(); }
+            for (int i = 0; i < values.length; i++) {
+                shor[i] = new Short(values[i]).shortValue();
+            }
             m_value = shor;
             return;
         }
         if (internalType.equals("int")) {
             int[] in = new int[values.length];
-            for (int i = 0; i < values.length; i++) { in[i] = new Integer(values[i]).intValue(); }
+            for (int i = 0; i < values.length; i++) {
+                in[i] = new Integer(values[i]).intValue();
+            }
             m_value = in;
             return;
         }
         if (internalType.equals("long")) {
             long[] ll = new long[values.length];
-            for (int i = 0; i < values.length; i++) { ll[i] = new Long(values[i]).longValue(); }
+            for (int i = 0; i < values.length; i++) {
+                ll[i] = new Long(values[i]).longValue();
+            }
             m_value = ll;
             return;
         }
         if (internalType.equals("float")) {
             float[] fl = new float[values.length];
-            for (int i = 0; i < values.length; i++) { fl[i] = new Float(values[i]).floatValue(); }
+            for (int i = 0; i < values.length; i++) {
+                fl[i] = new Float(values[i]).floatValue();
+            }
             m_value = fl;
-            return; 
+            return;
         }
         if (internalType.equals("double")) {
             double[] dl = new double[values.length];
-            for (int i = 0; i < values.length; i++) { dl[i] = new Double(values[i]).doubleValue(); }
+            for (int i = 0; i < values.length; i++) {
+                dl[i] = new Double(values[i]).doubleValue();
+            }
             m_value = dl;
-            return; 
+            return;
         }
 
-        // Else it is a neither a primitive type neither a String -> create the object by calling a constructor with a string in argument.
+        // Else it is a neither a primitive type neither a String -> create the
+        // object by calling a constructor with a string in argument.
         try {
             Class c = m_providedService.getInstanceManager().getContext().getBundle().loadClass(internalType);
-            Constructor cst = c.getConstructor(new Class[] {String.class});
+            Constructor cst = c.getConstructor(new Class[] { String.class });
             Object[] ob = (Object[]) Array.newInstance(c, values.length);
             for (int i = 0; i < values.length; i++) {
-                ob[i] = cst.newInstance(new Object[] {values[i]});
+                ob[i] = cst.newInstance(new Object[] { values[i] });
             }
             m_value = ob;
             return;
         } catch (ClassNotFoundException e) {
-            System.err.println("Class not found exception in setValue on " + internalType);
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Class not found exception in setArrayValue on " + internalType);
         } catch (SecurityException e) {
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Security Exception in setArrayValue on " + internalType);
         } catch (NoSuchMethodException e) {
-            System.err.println("Constructor not found exeption in setValue on " + internalType);
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
+                    "Constructor not found exception in setArrayValue on " + internalType);
         } catch (IllegalArgumentException e) {
-            System.err.println("Argument problem to call the constructor of the type " + internalType);
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
+                    "Argument problem to call the constructor of the type " + internalType);
         } catch (InstantiationException e) {
-            System.err.println("Instantiation problem  " + internalType);
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Instantiation problem  " + internalType);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Illegal Access Exception in setArrayValue on " + internalType);
         } catch (InvocationTargetException e) {
-            System.err.println("Invocation problem " + internalType);
-            e.printStackTrace();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Invocation problem " + internalType);
         }
     }
 
     /**
+     * Get the stored value.
      * @return the value of the property.
      */
-    public Object getValue() { return m_value; }
-    
+    public Object getValue() {
+        return m_value;
+    }
+
     /**
+     * Get the property name.
      * @return the name of the property
      */
-    public String getName() { return m_name; }
-    
+    public String getName() {
+        return m_name;
+    }
+
     /**
-     * @return the field name of the property (null if the property has no field).
+     * Get the property field.
+     * @return the field name of the property (null if the property has no
+     * field).
      */
-    protected String getField() { return m_field; }
+    protected String getField() {
+        return m_field;
+    }
 
-	/**
-	 * Set the type of the property.
-	 * @param type : the type to attached to the property
-	 */
-	public void setType(String type) { m_type = type; }
-	
-	/**
-	 * @return the type of the property.
-	 */
-	public String getType() { return m_type; }
+    /**
+     * Set the type of the property.
+     * 
+     * @param type : the type to attached to the property
+     */
+    public void setType(String type) {
+        m_type = type;
+    }
 
-	/**
-	 * @return the initial value of the property.
-	 */
-	public String getInitialValue() { return m_initialValue; }
-	
+    /**
+     * Get the property type.
+     * @return the type of the property.
+     */
+    public String getType() {
+        return m_type;
+    }
+
+    /**
+     * Get the property initial value.
+     * @return the initial value of the property.
+     */
+    public String getInitialValue() {
+        return m_initialValue;
+    }
+
 }

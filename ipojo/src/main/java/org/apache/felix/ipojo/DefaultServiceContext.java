@@ -27,116 +27,134 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * Default iPOJO Service Context.
- * this service context delegate all calls on the bundle context.
+ * Default iPOJO Service Context. this service context delegate all calls on the
+ * bundle context.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
-/**
- * @author Clement
- *
- */
 public class DefaultServiceContext implements ServiceContext {
-	
-	/**
-	 * The bundle context on which delegate.
-	 */
-	private BundleContext m_context;
-	
-	/**
-	 * Instance attached to this service context.
-	 */
-	private ComponentInstance m_instance;
-	
-	/**
-	 * Constructor. 
-	 * @param bc : the bundle context on which delegate.
-	 */
-	public DefaultServiceContext(BundleContext bc) { m_context = bc; }
 
-	/**
-	 * @see org.apache.felix.ipojo.ServiceContext#addServiceListener(org.osgi.framework.ServiceListener, java.lang.String)
-	 */
-	public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
-		m_context.addServiceListener(listener, filter);
-	}
-	
-	/**
-	 * @see org.apache.felix.ipojo.ServiceContext#addServiceListener(org.osgi.framework.ServiceListener)
-	 */
-	public void addServiceListener(ServiceListener listener) {
-		m_context.addServiceListener(listener);
-	}
+    /**
+     * The bundle context on which delegate.
+     */
+    private BundleContext m_context;
 
-	/**
-	 * @see org.apache.felix.ipojo.ServiceContext#getAllServiceReferences(java.lang.String, java.lang.String)
-	 */
-	public ServiceReference[] getAllServiceReferences(String clazz,
-			String filter) throws InvalidSyntaxException {
-		return m_context.getAllServiceReferences(clazz, filter);
-	}
+    /**
+     * Constructor.
+     * 
+     * @param bc : the bundle context on which delegate.
+     */
+    public DefaultServiceContext(BundleContext bc) {
+        m_context = bc;
+    }
 
-	/**
-	 * @see org.apache.felix.ipojo.ServiceContext#getService(org.osgi.framework.ServiceReference)
-	 */
-	public Object getService(ServiceReference reference) {
-		return m_context.getService(reference);
-	}
+    /**
+     * Add a service listener.
+     * @param listener : the service lsitener to add.
+     * @param filter : the LDAP filter
+     * @throws InvalidSyntaxException : occurs when the LDAP filter is malformed
+     * @see org.apache.felix.ipojo.ServiceContext#addServiceListener(org.osgi.framework.ServiceListener, java.lang.String)
+     */
+    public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
+        m_context.addServiceListener(listener, filter);
+    }
 
-	/**
-	 * @see org.apache.felix.ipojo.ServiceContext#getServiceReference(java.lang.String)
-	 */
-	public ServiceReference getServiceReference(String clazz) {
-		return m_context.getServiceReference(clazz);
-	}
+    /**
+     * Add a service listener.
+     * @param listener : the service listener to add.
+     * @see org.apache.felix.ipojo.ServiceContext#addServiceListener(org.osgi.framework.ServiceListener)
+     */
+    public void addServiceListener(ServiceListener listener) {
+        m_context.addServiceListener(listener);
+    }
 
-	/**
-	 * @see org.apache.felix.ipojo.ServiceContext#getServiceReferences(java.lang.String, java.lang.String)
-	 */
-	public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
-		return m_context.getServiceReferences(clazz, filter);
-	}
+    /**
+     * Get the service references matching with the given query.
+     * @param clazz : Required interface
+     * @param filter : LDAP filter
+     * @return the array of available service reference
+     * @throws InvalidSyntaxException : occurs if the LDAP filter is malformed
+     * @see org.apache.felix.ipojo.ServiceContext#getAllServiceReferences(java.lang.String, java.lang.String)
+     */
+    public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
+        return m_context.getAllServiceReferences(clazz, filter);
+    }
 
-	/**
-	 * @see org.apache.felix.ipojo.ServiceContext#registerService(java.lang.String[], java.lang.Object, java.util.Dictionary)
-	 */
-	public ServiceRegistration registerService(String[] clazzes,
-			Object service, Dictionary properties) {
-		return m_context.registerService(clazzes, service, properties);
-	}
+    /**
+     * Get a service object.
+     * @param reference : the required service reference 
+     * @return the service object or null if the service reference is no more valid or if the service object is not accessible
+     * @see org.apache.felix.ipojo.ServiceContext#getService(org.osgi.framework.ServiceReference)
+     */
+    public Object getService(ServiceReference reference) {
+        return m_context.getService(reference);
+    }
 
-	/**
-	 * @see org.apache.felix.ipojo.ServiceContext#registerService(java.lang.String, java.lang.Object, java.util.Dictionary)
-	 */
-	public ServiceRegistration registerService(String clazz, Object service,
-			Dictionary properties) {
-		return m_context.registerService(clazz, service, properties);
-	}
+    /**
+     * Get a service reference for the given interface.
+     * @param clazz : the required interface name
+     * @return a service reference on a available provider or null if no provider available
+     * @see org.apache.felix.ipojo.ServiceContext#getServiceReference(java.lang.String)
+     */
+    public ServiceReference getServiceReference(String clazz) {
+        return m_context.getServiceReference(clazz);
+    }
 
-	/**
-	 * @see org.apache.felix.ipojo.ServiceContext#removeServiceListener(org.osgi.framework.ServiceListener)
-	 */
-	public void removeServiceListener(ServiceListener listener) {
-		m_context.removeServiceListener(listener);
+    /**
+     * Get service reference list for the given query.
+     * @param clazz : the name of the requried service interface
+     * @param filter : LDAP filter to apply on service provider
+     * @return : the array of consistent service reference or null if no available provider
+     * @throws InvalidSyntaxException : occrus if the LDAP filter is malformed
+     * @see org.apache.felix.ipojo.ServiceContext#getServiceReferences(java.lang.String, java.lang.String)
+     */
+    public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
+        return m_context.getServiceReferences(clazz, filter);
+    }
 
-	}
+    /**
+     * Register a service.
+     * @param clazzes : interfaces provided by the service.
+     * @param service : the service object.
+     * @param properties : service properties.
+     * @return the service registration for this service publication.
+     * @see org.apache.felix.ipojo.ServiceContext#registerService(java.lang.String[], java.lang.Object, java.util.Dictionary)
+     */
+    public ServiceRegistration registerService(String[] clazzes, Object service, Dictionary properties) {
+        return m_context.registerService(clazzes, service, properties);
+    }
 
-	/**
-	 * @see org.apache.felix.ipojo.ServiceContext#ungetService(org.osgi.framework.ServiceReference)
-	 */
-	public boolean ungetService(ServiceReference reference) {
-		return m_context.ungetService(reference);
-	}
+    /**
+     * Register a service.
+     * @param clazz : interface provided by the service.
+     * @param service : the service object.
+     * @param properties : service properties.
+     * @return the service registration for this service publication.
+     * @see org.apache.felix.ipojo.ServiceContext#registerService(java.lang.String, java.lang.Object, java.util.Dictionary)
+     */
+    public ServiceRegistration registerService(String clazz, Object service, Dictionary properties) {
+        return m_context.registerService(clazz, service, properties);
+    }
 
-	/**
-	 * @see org.apache.felix.ipojo.ServiceContext#getComponentInstance()
-	 */
-	public ComponentInstance getComponentInstance() {
-		return m_instance;
-	}
-	
-	/**
-	 * @see org.apache.felix.ipojo.ServiceContext#setComponentInstance(org.apache.felix.ipojo.ComponentInstance)
-	 */
-	public void setComponentInstance(ComponentInstance ci) { m_instance =  ci; }
+
+    /**
+     * Remove a service listener.
+     * @param listener : the service listner to remove
+     * @see org.apache.felix.ipojo.ServiceContext#removeServiceListener(org.osgi.framework.ServiceListener)
+     */
+    public void removeServiceListener(ServiceListener listener) {
+        m_context.removeServiceListener(listener);
+
+    }
+
+    /**
+     * Unget the service reference.
+     * @param reference : the reference to unget
+     * @return true if you are the last user of the reference
+     * @see org.apache.felix.ipojo.ServiceContext#ungetService(org.osgi.framework.ServiceReference)
+     */
+    public boolean ungetService(ServiceReference reference) {
+        return m_context.ungetService(reference);
+    }
 
 }

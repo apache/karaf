@@ -20,34 +20,29 @@ package org.apache.felix.ipojo.handlers.providedservice;
 
 import java.util.Properties;
 
-import org.apache.felix.ipojo.handlers.dependency.DependencyDescription;
 import org.osgi.framework.ServiceReference;
 
 /**
  * Provided Service Description.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public class ProvidedServiceDescription {
-	
-	/**
-	 * State : the service is unregistered.
-	 */
-	public static final int UNREGISTERED = 0;
-	
-	/**
-	 * State : the service is registered.
-	 */
-	public static final int REGISTERED = 1;
+
+    /**
+     * State : the service is unregistered.
+     */
+    public static final int UNREGISTERED = 0;
+
+    /**
+     * State : the service is registered.
+     */
+    public static final int REGISTERED = 1;
 
     /**
      * Provided Service Specification.
      */
     private String[] m_serviceSpecification;
-
-    /**
-     * Dependency of the service.
-     */
-    private DependencyDescription[] m_dependencies = new DependencyDescription[0];
 
     /**
      * State.
@@ -59,31 +54,33 @@ public class ProvidedServiceDescription {
      */
     private ServiceReference m_serviceReference;
 
-//    /**
-//     * Handler on the component description who contains this description.
-//     */
-//    private InstanceDescription m_parent;
+    // /**
+    // * Handler on the component description who contains this description.
+    // */
+    // private InstanceDescription m_parent;
 
     /**
      * Properties of the provided service.
      */
     private Properties m_properties = new Properties();
 
-
     /**
      * Constructor.
+     * 
      * @param serviceSpecification : the provided contract
      * @param state : state (UNREGITRED | REGISTRED)
-     * @param sr : Service Registration (to obtain the reference), or null if state is UNREGISTRED
+     * @param sr : Service Registration (to obtain the reference), or null if
+     * state is UNREGISTRED
      */
     public ProvidedServiceDescription(String[] serviceSpecification, int state, ServiceReference sr) {
         m_serviceSpecification = serviceSpecification;
         m_state = state;
         m_serviceReference = sr;
-       // m_parent = parent;
+        // m_parent = parent;
     }
 
     /**
+     * Get the list of provided service specifications.
      * @return the provided contract name.
      */
     public String[] getServiceSpecification() {
@@ -92,6 +89,7 @@ public class ProvidedServiceDescription {
 
     /**
      * Add a property to the current provided service description.
+     * 
      * @param key : the key of the property
      * @param value : the value of the property
      */
@@ -101,6 +99,7 @@ public class ProvidedServiceDescription {
 
     /**
      * Set the set of properties. This function create a clone of the argument.
+     * 
      * @param props : the properties
      */
     public void setProperty(Properties props) {
@@ -108,13 +107,7 @@ public class ProvidedServiceDescription {
     }
 
     /**
-     * @return the dependeny description list.
-     */
-    public DependencyDescription[] getDependencies() {
-        return m_dependencies;
-    }
-
-    /**
+     * Get the list of properties.
      * @return the properties.
      */
     public Properties getProperties() {
@@ -122,13 +115,15 @@ public class ProvidedServiceDescription {
     }
 
     /**
-     * @return the state of the provided service (UNREGISTRED | REGISTRED).
+     * Get provided service state.
+     * @return the state of the provided service (UNREGISTERED | REGISTRED).
      */
     public int getState() {
         return m_state;
     }
 
     /**
+     * Get the service reference.
      * @return the service reference (null if the service is unregistred).
      */
     public ServiceReference getServiceReference() {

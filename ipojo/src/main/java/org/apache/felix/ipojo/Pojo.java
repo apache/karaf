@@ -21,13 +21,15 @@ package org.apache.felix.ipojo;
 /**
  * Interface implemented by each object created through an manipulated class.
  * This interface allow to get the component instance from the object.
+ * 
  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
  */
 public interface Pojo {
-	
-	/**
-	 * @return the component instance who create this object.
-	 */
-	ComponentInstance getComponentInstance();
+
+    /**
+     * Get the instance container which create the current object.
+     * @return the component instance who create this object.
+     */
+    ComponentInstance getComponentInstance();
 
 }
