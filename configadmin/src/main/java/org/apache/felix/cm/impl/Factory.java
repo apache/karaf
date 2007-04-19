@@ -86,7 +86,7 @@ class Factory
         this( persistenceManager, factoryPid );
 
         // set bundle location
-        setBundleLocation( ( String ) props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION ) );
+        bundleLocation = ( String ) props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
 
         // set pids
         String[] pidList = ( String[] ) props.get( FACTORY_PID_LIST );
@@ -94,7 +94,7 @@ class Factory
         {
             for ( int i = 0; i < pidList.length; i++ )
             {
-                addPID( pidList[i] );
+                pids.add( pidList[i] );
             }
         }
     }
