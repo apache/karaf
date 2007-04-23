@@ -109,6 +109,10 @@ public class ComponentDescription {
      * @param pd : the property to add
      */
     public void addProperty(PropertyDescription pd) {
+        if (pd.getName().equals("name")) {
+            pd = new PropertyDescription(pd.getName(), pd.getType(), null); // Erase the instance name
+        }
+        
         for (int i = 0; i < m_properties.length; i++) {
             if (m_properties[i].getName().equals(pd.getName())) {
                 return;

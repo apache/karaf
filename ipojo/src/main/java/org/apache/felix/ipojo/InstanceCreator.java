@@ -218,7 +218,7 @@ public class InstanceCreator implements ServiceListener {
         m_context.removeServiceListener(this);
         for (int i = 0; i < m_configurations.length; i++) {
             if (m_configurations[i].getInstance() != null) {
-                m_configurations[i].getInstance().stop();
+                m_configurations[i].getInstance().dispose();
             }
             m_configurations[i].setInstance(null);
             m_configurations[i].setFactory(null);
