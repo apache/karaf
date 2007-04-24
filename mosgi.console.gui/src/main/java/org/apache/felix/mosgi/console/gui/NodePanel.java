@@ -93,6 +93,7 @@ public class NodePanel extends JTabbedPane implements PropertyChangeListener, Ch
     }else if (event.getPropertyName().equals(Plugin.NEW_NODE_SELECTED)) {
       /* Update the tabs (Plugin) in the JTabbedPane (NodePanel) */
       MBeanServerConnection mbsc = (MBeanServerConnection)event.getNewValue();
+      String connString = (String) event.getOldValue();
       try {
 	this.clean();
         Set ons = mbsc.queryNames( null, null );
@@ -154,7 +155,7 @@ public class NodePanel extends JTabbedPane implements PropertyChangeListener, Ch
             }
           }
         }
-        a.firePropertyChangedEvent(Plugin.NEW_NODE_READY, null, mbsc);
+        a.firePropertyChangedEvent(Plugin.NEW_NODE_READY, connString, mbsc);
         a.firePropertyChangedEvent(Plugin.PLUGIN_ACTIVATED, null, this.getComponentAt(0).getName());
 
       } catch (MBeanException e) {
