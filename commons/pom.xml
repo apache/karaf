@@ -47,6 +47,7 @@
         <module>commons-configuration</module>
         <module>commons-digester</module>
         <module>commons-el</module>
+        <module>commons-email</module>
         <module>commons-fileupload</module>
         <module>commons-httpclient</module>
         <module>commons-io</module>
