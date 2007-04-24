@@ -70,7 +70,7 @@ public class Dependency implements ServiceListener {
     /**
      * Is the dependency a multiple dependency ?
      */
-    private boolean m_isMultiple = false;
+    private boolean m_isAggregate = false;
 
     /**
      * Is the Dependency an optional dependency ?
@@ -125,13 +125,15 @@ public class Dependency implements ServiceListener {
      * @param spec : required specification
      * @param filter : LDAP filter of the dependency
      * @param isOptional : is the dependency an optional dependency ?
+     * @param isAggregate : is the dependency an aggregate dependency
      */
-    public Dependency(DependencyHandler dh, String field, String spec, String filter, boolean isOptional) {
+    public Dependency(DependencyHandler dh, String field, String spec, String filter, boolean isOptional, boolean isAggregate) {
         m_handler = dh;
         m_field = field;
         m_specification = spec;
         m_isOptional = isOptional;
         m_strFilter = filter;
+        m_isAggregate = isAggregate;
     }
 
     public String getField() {
@@ -149,15 +151,15 @@ public class Dependency implements ServiceListener {
     }
 
 
-    public boolean isMultiple() {
-        return m_isMultiple;
+    public boolean isAggregate() {
+        return m_isAggregate;
     }
 
     /**
-     * Set the dependency to multiple.
+     * Set the dependency to aggregate.
      */
-    protected void setMultiple() {
-        m_isMultiple = true;
+    protected void setAggregate() {
+        m_isAggregate = true;
     }
 
     /**
@@ -201,7 +203,7 @@ public class Dependency implements ServiceListener {
      */
     public HashMap getUsedServices() {
         HashMap hm = new HashMap();
-        if (m_isMultiple) {
+        if (m_isAggregate) {
             for (int i = 0; i < m_ref.length; i++) {
                 if (i < m_services.length) {
                     hm.put(((Object) m_services[i]).toString(), m_ref[i]);
@@ -241,7 +243,7 @@ public class Dependency implements ServiceListener {
 
             // 1 : Test if there is any change in the reference list :
             if (!m_change) {
-                if (!m_isMultiple) {
+                if (!m_isAggregate) {
                     if (m_services.length > 0) {
                         return m_services[0];
                     }
@@ -268,7 +270,7 @@ public class Dependency implements ServiceListener {
             // 3 : The service object list is populated, I return either the
             // first service object, either the array.
             // Return null or an empty array if no service are found.
-            if (!m_isMultiple) {
+            if (!m_isAggregate) {
                 if (m_services.length > 0) {
                     return m_services[0];
                 } else {
@@ -309,7 +311,7 @@ public class Dependency implements ServiceListener {
         } catch (Exception e) {
             // There is a problem in the dependency resolving (like in stopping
             // method)
-            if (!m_isMultiple) {
+            if (!m_isAggregate) {
                 m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
                         "[" + m_handler.getInstanceManager().getClassName() + "] Return null, an exception was throwed in the get method", e);
                 return null;
@@ -371,7 +373,7 @@ public class Dependency implements ServiceListener {
         addReference(ref);
         if (isSatisfied()) {
             m_state = RESOLVED;
-            if (m_isMultiple || m_ref.length == 1) {
+            if (m_isAggregate || m_ref.length == 1) {
                 m_change = true;
                 callBindMethod(ref);
             }
@@ -386,10 +388,10 @@ public class Dependency implements ServiceListener {
      */
     private void departureManagement(ServiceReference ref) {
         // Call unbind method
-        if (!m_isMultiple && ref == m_ref[0]) {
+        if (!m_isAggregate && ref == m_ref[0]) {
             callUnbindMethod(ref);
         }
-        if (m_isMultiple) {
+        if (m_isAggregate) {
             callUnbindMethod(ref);
         }
 
@@ -405,16 +407,16 @@ public class Dependency implements ServiceListener {
             m_state = RESOLVED;
         }
         // Is there any change ?
-        if (!m_isMultiple && index == 0) {
+        if (!m_isAggregate && index == 0) {
             m_change = true;
             if (m_ref.length != 0) {
                 callBindMethod(m_ref[0]);
             }
         }
-        if (!m_isMultiple && index != 0) {
+        if (!m_isAggregate && index != 0) {
             m_change = false;
         }
-        if (m_isMultiple) {
+        if (m_isAggregate) {
             m_change = true;
         }
 
@@ -431,57 +433,24 @@ public class Dependency implements ServiceListener {
         if (m_handler.getInstanceManager().getState() == InstanceManager.VALID) {
             for (int i = 0; i < m_callbacks.length; i++) {
                 if (m_callbacks[i].getMethodType() == DependencyCallback.UNBIND) {
-                    // Try to call the bind method with a service reference
-                    // inside
                     try {
-                        m_callbacks[i].call(ref);
+                        m_callbacks[i].call(ref, m_handler.getInstanceManager().getContext().getService(ref));
                     } catch (NoSuchMethodException e) {
-                        // The method was not found : try without service
-                        // reference
-                        try {
-                            m_callbacks[i].call();
-                        } catch (NoSuchMethodException e1) {
-                            // The method was not found : try with the service
-                            // object
-                            try {
-                                m_callbacks[i].call(m_handler.getInstanceManager().getContext().getService(ref));
-                            } catch (NoSuchMethodException e2) {
-                                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                                        "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Unbind method not found", e2);
-                                return;
-                            } catch (IllegalAccessException e2) {
-                                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                                        "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Illegal access on unbind method",
-                                        e2);
-                                return;
-                            } catch (InvocationTargetException e2) {
-                                m_handler.getInstanceManager().getFactory().getLogger().log(
-                                        Logger.ERROR,
-                                        "[" + m_handler.getInstanceManager().getClassName()
-                                                + "] Dependency Callback Error : Invocation Target Exception in the unbind method", e2);
-                                return;
-                            }
-                        } catch (IllegalAccessException e1) {
-                            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                                    "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Illegal access on unbind method", e1);
-                            return;
-                        } catch (InvocationTargetException e1) {
-                            m_handler.getInstanceManager().getFactory().getLogger().log(
-                                    Logger.ERROR,
-                                    "[" + m_handler.getInstanceManager().getClassName()
-                                            + "] Dependency Callback Error : Invocation Target Exception in the unbind method", e1);
-                            return;
-                        }
-
+                        m_handler.getInstanceManager().getFactory().getLogger().log(
+                                Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " does not exist in the class "
+                                        + m_handler.getInstanceManager().getClassName());
+                        return;
                     } catch (IllegalAccessException e) {
-                        m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                                "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Illegal access on bind method", e);
+                        m_handler.getInstanceManager().getFactory().getLogger().log(
+                                Logger.ERROR,
+                                "The method " + m_callbacks[i].getMethodName() + " is not accessible in the class "
+                                        + m_handler.getInstanceManager().getClassName());
                         return;
                     } catch (InvocationTargetException e) {
                         m_handler.getInstanceManager().getFactory().getLogger().log(
                                 Logger.ERROR,
-                                "[" + m_handler.getInstanceManager().getClassName()
-                                        + "] Dependency Callback Error : Invocation Target Exception in the bind method", e);
+                                "The method " + m_callbacks[i].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName()
+                                        + "thorws an exception : " + e.getMessage());
                         return;
                     }
                 }
@@ -501,65 +470,29 @@ public class Dependency implements ServiceListener {
             return;
         }
 
-        if (m_isMultiple) {
+        if (m_isAggregate) {
             for (int i = 0; i < m_ref.length; i++) {
                 for (int j = 0; j < m_callbacks.length; j++) {
                     if (m_callbacks[j].getMethodType() == DependencyCallback.BIND) {
-                        // Try to call the bind method with a service reference
-                        // inside
                         try {
-                            m_callbacks[j].callOnInstance(instance, m_ref[i]);
+                            m_callbacks[j].callOnInstance(instance, m_ref[i], m_handler.getInstanceManager()
+                                    .getContext().getService(m_ref[i]));
                         } catch (NoSuchMethodException e) {
-                            // The method was not found : try without service
-                            // reference
-                            try {
-                                m_callbacks[j].callOnInstance(instance);
-                            } catch (NoSuchMethodException e1) {
-                                // The method was not found : try with the
-                                // service object
-                                try {
-                                    m_callbacks[j].callOnInstance(instance, m_handler.getInstanceManager().getContext().getService(m_ref[i]));
-                                } catch (NoSuchMethodException e2) {
-                                    m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                                            "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Bind method not found", e2);
-                                    return;
-                                } catch (IllegalAccessException e2) {
-                                    m_handler.getInstanceManager().getFactory().getLogger()
-                                            .log(
-                                                    Logger.ERROR,
-                                                    "[" + m_handler.getInstanceManager().getClassName()
-                                                            + "] Dependency Callback Error : Illegal access on bind method", e2);
-                                    return;
-                                } catch (InvocationTargetException e2) {
-                                    m_handler.getInstanceManager().getFactory().getLogger().log(
-                                            Logger.ERROR,
-                                            "[" + m_handler.getInstanceManager().getClassName()
-                                                    + "] Dependency Callback Error : Invocation Target Exception in the bind method", e2);
-                                    return;
-                                }
-                            } catch (IllegalAccessException e1) {
-                                m_handler.getInstanceManager().getFactory().getLogger()
-                                        .log(
-                                                Logger.ERROR,
-                                                "[" + m_handler.getInstanceManager().getClassName()
-                                                        + "] Dependency Callback Error : Illegal access on bind method", e1);
-                                return;
-                            } catch (InvocationTargetException e1) {
-                                m_handler.getInstanceManager().getFactory().getLogger().log(
-                                        Logger.ERROR,
-                                        "[" + m_handler.getInstanceManager().getClassName()
-                                                + "] Dependency Callback Error : Invocation Target Exception in the bind method", e1);
-                                return;
-                            }
+                            m_handler.getInstanceManager().getFactory().getLogger().log(
+                                    Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " does not exist in the class "
+                                            + m_handler.getInstanceManager().getClassName());
+                            return;
                         } catch (IllegalAccessException e) {
-                            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                                    "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Illegal access on bind method", e);
+                            m_handler.getInstanceManager().getFactory().getLogger().log(
+                                    Logger.ERROR,
+                                    "The method " + m_callbacks[j].getMethodName() + " is not accessible in the class "
+                                            + m_handler.getInstanceManager().getClassName());
                             return;
                         } catch (InvocationTargetException e) {
                             m_handler.getInstanceManager().getFactory().getLogger().log(
                                     Logger.ERROR,
-                                    "[" + m_handler.getInstanceManager().getClassName()
-                                            + "] Dependency Callback Error : Invocation Target Exception in the bind method" + e);
+                                    "The method " + m_callbacks[j].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName()
+                                            + "thorws an exception : " + e.getMessage());
                             return;
                         }
                     }
@@ -568,59 +501,24 @@ public class Dependency implements ServiceListener {
         } else {
             for (int j = 0; j < m_callbacks.length; j++) {
                 if (m_callbacks[j].getMethodType() == DependencyCallback.BIND) {
-                    // Try to call the bind method with a service reference
-                    // inside
                     try {
-                        m_callbacks[j].callOnInstance(instance, m_ref[0]);
+                        m_callbacks[j].callOnInstance(instance, m_ref[0], m_handler.getInstanceManager().getContext().getService(m_ref[0]));
                     } catch (NoSuchMethodException e) {
-                        // The method was not found : try without service
-                        // reference
-                        try {
-                            m_callbacks[j].callOnInstance(instance);
-                        } catch (NoSuchMethodException e1) {
-                            // The method was not found : try with the service
-                            // object
-                            try {
-                                m_callbacks[j].callOnInstance(instance, m_handler.getInstanceManager().getContext().getService(m_ref[0]));
-                            } catch (NoSuchMethodException e2) {
-                                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                                        "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Bind method not found", e2);
-                                return;
-                            } catch (IllegalAccessException e2) {
-                                m_handler.getInstanceManager().getFactory().getLogger()
-                                        .log(
-                                                Logger.ERROR,
-                                                "[" + m_handler.getInstanceManager().getClassName()
-                                                        + "] Dependency Callback Error : Illegal access on bind method", e2);
-                                return;
-                            } catch (InvocationTargetException e2) {
-                                m_handler.getInstanceManager().getFactory().getLogger().log(
-                                        Logger.ERROR,
-                                        "[" + m_handler.getInstanceManager().getClassName()
-                                                + "] Dependency Callback Error : Invocation Target Exception in the bind method", e2);
-                                return;
-                            }
-                        } catch (IllegalAccessException e1) {
-                            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                                    "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Illegal access on bind method", e1);
-                            return;
-                        } catch (InvocationTargetException e1) {
-                            m_handler.getInstanceManager().getFactory().getLogger().log(
-                                    Logger.ERROR,
-                                    "[" + m_handler.getInstanceManager().getClassName()
-                                            + "] Dependency Callback Error : Invocation Target Exception in the bind method", e1);
-                            return;
-                        }
-
+                        m_handler.getInstanceManager().getFactory().getLogger().log(
+                                Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " does not exist in the class "
+                                        + m_handler.getInstanceManager().getClassName());
+                        return;
                     } catch (IllegalAccessException e) {
-                        m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                                "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Illegal access on bind method", e);
+                        m_handler.getInstanceManager().getFactory().getLogger().log(
+                                Logger.ERROR,
+                                "The method " + m_callbacks[j].getMethodName() + " is not accessible in the class "
+                                        + m_handler.getInstanceManager().getClassName());
                         return;
                     } catch (InvocationTargetException e) {
                         m_handler.getInstanceManager().getFactory().getLogger().log(
                                 Logger.ERROR,
-                                "[" + m_handler.getInstanceManager().getClassName()
-                                        + "] Dependency Callback Error : Invocation Target Exception in the bind method", e);
+                                "The method " + m_callbacks[j].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName()
+                                        + "thorws an exception : " + e.getMessage());
                         return;
                     }
                 }
@@ -638,61 +536,24 @@ public class Dependency implements ServiceListener {
         if (m_handler.getInstanceManager().getState() == InstanceManager.VALID) {
             for (int i = 0; i < m_callbacks.length; i++) {
                 if (m_callbacks[i].getMethodType() == DependencyCallback.BIND) {
-                    // Try to call the bind method with a service reference
-                    // inside
                     try {
-                        m_callbacks[i].call(ref);
+                        m_callbacks[i].call(ref, m_handler.getInstanceManager().getContext().getService(ref));
                     } catch (NoSuchMethodException e) {
-                        // The method was not found : try without service
-                        // reference
-                        try {
-                            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO,
-                                    "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Call the Bind method");
-                            m_callbacks[i].call();
-                        } catch (NoSuchMethodException e1) {
-                            // The method was not found : try with the service
-                            // object
-                            try {
-                                m_callbacks[i].call(m_handler.getInstanceManager().getContext().getService(ref));
-                            } catch (NoSuchMethodException e2) {
-                                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                                        "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Bind method not found", e2);
-                                return;
-                            } catch (IllegalAccessException e2) {
-                                m_handler.getInstanceManager().getFactory().getLogger()
-                                        .log(
-                                                Logger.ERROR,
-                                                "[" + m_handler.getInstanceManager().getClassName()
-                                                        + "] Dependency Callback Error : Illegal access on bind method", e2);
-                                return;
-                            } catch (InvocationTargetException e2) {
-                                m_handler.getInstanceManager().getFactory().getLogger().log(
-                                        Logger.ERROR,
-                                        "[" + m_handler.getInstanceManager().getClassName()
-                                                + "] Dependency Callback Error : Invocation Target Exception in the bind method", e2);
-                                return;
-                            }
-                        } catch (IllegalAccessException e1) {
-                            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                                    "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Illegal access on bind method", e1);
-                            return;
-                        } catch (InvocationTargetException e1) {
-                            m_handler.getInstanceManager().getFactory().getLogger().log(
-                                    Logger.ERROR,
-                                    "[" + m_handler.getInstanceManager().getClassName()
-                                            + "] Dependency Callback Error : Invocation Target Exception in the bind method", e1);
-                            return;
-                        }
-
+                        m_handler.getInstanceManager().getFactory().getLogger().log(
+                                Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " does not exist in the class "
+                                        + m_handler.getInstanceManager().getClassName());
+                        return;
                     } catch (IllegalAccessException e) {
-                        m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                                "[" + m_handler.getInstanceManager().getClassName() + "] Dependency Callback Error : Illegal access on bind method", e);
+                        m_handler.getInstanceManager().getFactory().getLogger().log(
+                                Logger.ERROR,
+                                "The method " + m_callbacks[i].getMethodName() + " is not accessible in the class "
+                                        + m_handler.getInstanceManager().getClassName());
                         return;
                     } catch (InvocationTargetException e) {
                         m_handler.getInstanceManager().getFactory().getLogger().log(
                                 Logger.ERROR,
-                                "[" + m_handler.getInstanceManager().getClassName()
-                                        + "] Dependency Callback Error : Invocation Target Exception in the bind method", e);
+                                "The method " + m_callbacks[i].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName()
+                                        + "thorws an exception : " + e.getMessage());
                         return;
                     }
                 }
@@ -860,6 +721,10 @@ public class Dependency implements ServiceListener {
             }
         }
         return idx;
+    }
+    
+    protected DependencyCallback[] getCallbacks() {
+        return m_callbacks;
     }
 
 }

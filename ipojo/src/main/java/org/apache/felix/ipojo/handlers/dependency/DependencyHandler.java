@@ -26,7 +26,9 @@ import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.handlers.dependency.nullable.NullableObjectWriter;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Logger;
+import org.osgi.framework.ServiceReference;
 
 /**
  * The dependency handler manages a list of dependencies.
@@ -162,44 +164,74 @@ public class DependencyHandler extends Handler {
     private boolean checkDependency(Dependency dep, Element manipulation) {
         // Check the internal type of dependency
         String field = dep.getField();
-
-        String type = null;
-        for (int i = 0; i < manipulation.getElements("Field").length; i++) {
-            if (field.equals(manipulation.getElements("Field")[i].getAttribute("name"))) {
-                type = manipulation.getElements("Field")[i].getAttribute("type");
-                break;
+        DependencyCallback[] callbacks = dep.getCallbacks();
+        
+        for (int i = 0; i < callbacks.length; i++) {
+            for (int j = 0; j < manipulation.getElements("Method").length; j++) {
+                if (manipulation.getElements("Method")[j].getAttribute("name").equals(callbacks[i].getMethodName())) {
+                    if (manipulation.getElements("Method")[j].containsAttribute("Arguments")) {
+                        String[] args = ParseUtils.parseArrays(manipulation.getElements("Method")[j].getAttribute("Arguments"));
+                        if (args.length != 1) {
+                            getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "A dependency callback " + callbacks[i].getMethodName() + " must have 0 or 1 argument");
+                            return false;
+                        } else {
+                            callbacks[i].setArgument(args[0]);
+                            if (!args[0].equals(ServiceReference.class.getName())) {
+                                if (dep.getSpecification() == null) {
+                                    dep.setSpecification(args[0]);
+                                }
+                                if (!dep.getSpecification().equals(args[0])) {
+                                    m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The field type [" + args[0] + "] and the needed service interface ["
+                                                + dep.getSpecification() + "] are not the same");
+                                    dep.setSpecification(args[0]);
+                                }
+                            }
+                        }
+                    } else {
+                        callbacks[i].setArgument("EMPTY");
+                    }
+                }
             }
         }
-
-        if (type == null) {
-            m_manager.getFactory().getLogger().log(Logger.ERROR,
-                    "[DependencyHandler on " + m_manager.getClassName() + "] A declared dependency was not found in the class : " + dep.getField());
-            return false;
-        }
-
-        if (type != null) {
-            if (type.endsWith("[]")) {
-                // Set the dependency to multiple
-                dep.setMultiple();
-                type = type.substring(0, type.length() - 2);
+        
+        if (field != null) {
+            String type = null;
+            for (int i = 0; i < manipulation.getElements("Field").length; i++) {
+                if (field.equals(manipulation.getElements("Field")[i].getAttribute("name"))) {
+                    type = manipulation.getElements("Field")[i].getAttribute("type");
+                    break;
+                }
             }
 
-            if (dep.getSpecification() == null) {
-                dep.setSpecification(type);
+            if (type == null) {
+                m_manager.getFactory().getLogger().log(Logger.ERROR,
+                        "[DependencyHandler on " + m_manager.getClassName() + "] A declared dependency was not found in the class : " + dep.getField());
+                return false;
             }
 
-            if (!dep.getSpecification().equals(type)) {
-                m_manager.getFactory().getLogger().log(
-                        Logger.WARNING,
-                        "[DependencyHandler on " + m_manager.getClassName() + "] The field type [" + type + "] and the needed service interface ["
+            if (type != null) {
+                if (type.endsWith("[]")) {
+                    // Set the dependency to multiple
+                    dep.setAggregate();
+                    type = type.substring(0, type.length() - 2);
+                }
+
+                if (dep.getSpecification() == null) {
+                    dep.setSpecification(type);
+                }
+
+                if (!dep.getSpecification().equals(type)) {
+                    m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The field type [" + type + "] and the needed service interface ["
                                 + dep.getSpecification() + "] are not the same");
-                dep.setSpecification(type);
+                    dep.setSpecification(type);
+                }
+            } else {
+                m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The declared dependency " + dep.getField() + "  does not exist in the code");
             }
-        } else {
-            m_manager.getFactory().getLogger().log(Logger.WARNING,
-                    "[DependencyHandler on " + m_manager.getClassName() + "] The declared dependency " + dep.getField() + "  does not exist in the code");
         }
-        return true;
+        
+        //Check that all required info are set
+        return dep.getSpecification() != null;
     }
 
     /**
@@ -218,7 +250,10 @@ public class DependencyHandler extends Handler {
         Element[] deps = componentMetadata.getElements("Dependency");
         for (int i = 0; i < deps.length; i++) {
             // Create the dependency metadata
-            String field = deps[i].getAttribute("field");
+            String field = null;
+            if (deps[i].containsAttribute("field")) {
+                field = deps[i].getAttribute("field");
+            }
             String serviceSpecification = null;
             if (deps[i].containsAttribute("interface")) {
                 serviceSpecification = deps[i].getAttribute("interface");
@@ -231,17 +266,13 @@ public class DependencyHandler extends Handler {
             if (deps[i].containsAttribute("optional") && deps[i].getAttribute("optional").equals("true")) {
                 optional = true;
             }
-
-            Dependency dep = new Dependency(this, field, serviceSpecification, filter, optional);
-            // Check the dependency :
-            Element manipulation = componentMetadata.getElements("Manipulation")[0];
-            if (checkDependency(dep, manipulation)) {
-                addDependency(dep);
-            } else {
-                m_manager.getFactory().getLogger().log(Logger.ERROR,
-                        "[DependencyHandler on " + m_manager.getClassName() + "] The dependency on " + dep.getField() + " is not valid");
+            boolean aggregate = false;
+            if (deps[i].containsAttribute("aggregate") && deps[i].getAttribute("aggregate").equals("true")) {
+                aggregate = true;
             }
 
+            Dependency dep = new Dependency(this, field, serviceSpecification, filter, optional, aggregate);
+            
             // Look for dependency callback :
             for (int j = 0; j < (deps[i].getElements("Callback", "")).length; j++) {
                 String method = deps[i].getElements("Callback", "")[j].getAttribute("method");
@@ -252,14 +283,20 @@ public class DependencyHandler extends Handler {
                 } else {
                     methodType = DependencyCallback.UNBIND;
                 }
-                boolean isStatic = false;
-                if (deps[i].getElements("Callback", "")[j].containsAttribute("isStatic")
-                        && deps[i].getElements("Callback", "")[j].getAttribute("isStatic").equals("true")) {
-                    isStatic = true;
-                }
-                DependencyCallback dc = new DependencyCallback(dep, method, methodType, isStatic);
+
+                DependencyCallback dc = new DependencyCallback(dep, method, methodType);
                 dep.addDependencyCallback(dc);
             }
+            
+            // Check the dependency :
+            Element manipulation = componentMetadata.getElements("Manipulation")[0];
+            if (checkDependency(dep, manipulation)) {
+                addDependency(dep);
+            } else {
+                m_manager.getFactory().getLogger().log(Logger.ERROR,
+                        "[DependencyHandler on " + m_manager.getClassName() + "] The dependency on " + dep.getField() + " is not valid");
+            }
+
         }
 
         if (deps.length > 0) {
@@ -362,7 +399,7 @@ public class DependencyHandler extends Handler {
         // class
         for (int i = 0; i < m_dependencies.length; i++) {
             Dependency dep = m_dependencies[i];
-            if (dep.isOptional() && !dep.isMultiple()) {
+            if (dep.isOptional() && !dep.isAggregate()) {
                 createNullableClass(dep);
             }
             dep.start();
@@ -433,7 +470,7 @@ public class DependencyHandler extends Handler {
         for (int j = 0; j < getDependencies().length; j++) {
             Dependency dep = getDependencies()[j];
             // Create & add the dependency description
-            DependencyDescription dd = new DependencyDescription(dep.getSpecification(), dep.isMultiple(), dep.isOptional(), dep.getFilter(), dep.getState());
+            DependencyDescription dd = new DependencyDescription(dep.getSpecification(), dep.isAggregate(), dep.isOptional(), dep.getFilter(), dep.getState());
             dd.setServiceReferences(dep.getServiceReferences());
             dd.setUsedServices(dep.getUsedServices());
             dhd.addDependency(dd);

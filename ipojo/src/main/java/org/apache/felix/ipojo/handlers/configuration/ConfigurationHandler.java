@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.handlers.configuration;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -28,6 +29,7 @@ import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.ServiceRegistration;
 
@@ -113,12 +115,26 @@ public class ConfigurationHandler extends Handler {
         Element[] configurables = confs[0].getElements("Property");
 
         for (int i = 0; i < configurables.length; i++) {
-            String fieldName = configurables[i].getAttribute("field");
+            String fieldName = null;
+            String methodName = null;
+            
+            if (configurables[i].containsAttribute("field")) { fieldName = configurables[i].getAttribute("field"); }
+            if (configurables[i].containsAttribute("method")) { methodName = configurables[i].getAttribute("method"); }
+            
+            if (fieldName == null && methodName == null) {
+                m_manager.getFactory().getLogger().log(Logger.ERROR, "A configurable property need to have at least a field or a method");
+                return;
+            }
+            
             String name = null;
             if (configurables[i].containsAttribute("name")) {
                 name = configurables[i].getAttribute("name");
             } else {
-                name = fieldName;
+                if (fieldName != null) {
+                    name = fieldName;
+                } else {
+                    name = methodName;
+                }
             }
             String value = null;
             if (configurables[i].containsAttribute("value")) {
@@ -136,18 +152,38 @@ public class ConfigurationHandler extends Handler {
             // Detect the type of the property
             Element manipulation = metadata.getElements("Manipulation")[0];
             String type = null;
-            for (int kk = 0; kk < manipulation.getElements("Field").length; kk++) {
-                if (fieldName.equals(manipulation.getElements("Field")[kk].getAttribute("name"))) {
-                    type = manipulation.getElements("Field")[kk].getAttribute("type");
+            if (fieldName != null) {
+                for (int kk = 0; kk < manipulation.getElements("Field").length; kk++) {
+                    if (fieldName.equals(manipulation.getElements("Field")[kk].getAttribute("name"))) {
+                        type = manipulation.getElements("Field")[kk].getAttribute("type");
+                    }
+                }
+                if (type == null) {
+                    m_manager.getFactory().getLogger().log(Logger.ERROR,
+                            "[" + m_manager.getClassName() + "] The field " + fieldName + " does not exist in the implementation");
+                    return;
+                }
+            } else {
+                for (int kk = 0; kk < manipulation.getElements("Method").length; kk++) {
+                    if (methodName.equals(manipulation.getElements("Method")[kk].getAttribute("name"))) {
+                        if (manipulation.getElements("Method")[kk].containsAttribute("arguments")) {
+                            String[] arg = ParseUtils.parseArrays(manipulation.getElements("Method")[kk].getAttribute("arguments"));
+                            if (arg.length != 1) {
+                                m_manager.getFactory().getLogger().log(Logger.ERROR, "A configurable property need to have a method with only one argument");
+                                return;
+                            }
+                            type = arg[0];
+                        }
+                    }
+                }
+                if (type == null) {
+                    m_manager.getFactory().getLogger().log(Logger.ERROR,
+                            "The method " + methodName + " does not exist in the implementation, or does not have one argument");
+                    return;
                 }
             }
-            if (type == null) {
-                m_manager.getFactory().getLogger().log(Logger.ERROR,
-                        "[" + m_manager.getClassName() + "] The field " + fieldName + " does not exist in the implementation");
-                return;
-            }
 
-            ConfigurableProperty cp = new ConfigurableProperty(name, fieldName, value, type, this);
+            ConfigurableProperty cp = new ConfigurableProperty(name, fieldName, methodName, value, type, this);
 
             if (cp.getValue() != null) {
                 cd.addProperty(new PropertyDescription(name, type, cp.getValue().toString()));
@@ -159,9 +195,11 @@ public class ConfigurationHandler extends Handler {
         }
 
         if (configurables.length > 0) {
-            String[] fields = new String[m_configurableProperties.length];
+            ArrayList ff = new ArrayList();
             for (int k = 0; k < m_configurableProperties.length; k++) {
-                fields[k] = m_configurableProperties[k].getField();
+                if (m_configurableProperties[k].getField() != null) {
+                    ff.add(m_configurableProperties[k].getField());
+                }                
 
                 // Check if the instance configuration contains value for the
                 // current property :
@@ -175,7 +213,7 @@ public class ConfigurationHandler extends Handler {
                     }
                 }
             }
-            m_manager.register(this, fields);
+            m_manager.register(this, (String[]) ff.toArray(new String[0]));
         }
     }
 
@@ -321,12 +359,13 @@ public class ConfigurationHandler extends Handler {
                 if (m_configurableProperties[i].getName().equals(name)) {
                     // Check if the value has change
                     if (m_configurableProperties[i].getValue() == null || !m_configurableProperties[i].getValue().equals(value)) {
-                        m_manager.setterCallback(m_configurableProperties[i].getField(), value); // says
-                                                                                                    // that
-                                                                                                    // the
-                                                                                                    // value
-                                                                                                    // has
-                                                                                                    // changed
+                        if (m_configurableProperties[i].getField() != null) {
+                            m_manager.setterCallback(m_configurableProperties[i].getField(), value); // says that the value has changed
+                        }
+                        if (m_configurableProperties[i].getMethod() != null) {
+                            m_configurableProperties[i].setValue(value);
+                            m_configurableProperties[i].invoke();
+                        }
                     }
                     find = true;
                     // Else do nothing
@@ -349,5 +388,20 @@ public class ConfigurationHandler extends Handler {
             m_propagated = toPropagate;
         }
     }
+    
+    /**
+     * Handler createInstance method.
+     * This method is overided to allow delayed callback invocation.
+     * @param instance : the created object
+     * @see org.apache.felix.ipojo.Handler#createInstance(java.lang.Object)
+     */
+    public void createInstance(Object instance) {
+        for (int i = 0; i < m_configurableProperties.length; i++) {
+            if (m_configurableProperties[i].getMethod() != null) {
+                m_configurableProperties[i].invoke(instance);
+            }
+        }
+    }
+
 
 }

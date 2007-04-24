@@ -81,10 +81,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     /**
      * Classloader to delegate loading.
      */
-    private FactoryClassloader m_classLoader = null; // TODO is this
-
-    // classloader really
-    // useful ?
+    private FactoryClassloader m_classLoader = null;
 
     /**
      * Component Type provided by this factory. //TODO Should be keep this

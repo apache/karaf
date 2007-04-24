@@ -19,10 +19,9 @@
 package org.apache.felix.ipojo.handlers.dependency;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import org.apache.felix.ipojo.InstanceManager;
-import org.apache.felix.ipojo.util.Logger;
+import org.apache.felix.ipojo.util.Callback;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -42,21 +41,27 @@ public class DependencyCallback {
      * Unbind method (called when a service disappears).
      */
     public static final int UNBIND = 1;
+    
 
     /**
      * Is the method a bind method or an unbind method ?
      */
     private int m_methodType;
+    
+    /**
+     * Argument of the callback.
+     */
+    private String m_argument;
 
     /**
      * Callback method name.
      */
-    private String m_callback;
+    private String m_method;
 
     /**
      * Is the callback a static callback.
      */
-    private boolean m_isStatic;
+    private Callback m_callback;
 
     /**
      * The instance manager.
@@ -70,18 +75,38 @@ public class DependencyCallback {
      * @param method : the method to call
      * @param methodType : is the method to call a bind method or an unbind
      * method
-     * @param isStatic : is the method to call static ?
      */
-    public DependencyCallback(Dependency dep, String method, int methodType, boolean isStatic) {
+    public DependencyCallback(Dependency dep, String method, int methodType) {
         m_methodType = methodType;
-        m_callback = method;
-        m_isStatic = isStatic;
+        m_method = method;
         m_manager = dep.getDependencyHandler().getInstanceManager();
     }
 
 
     public int getMethodType() {
         return m_methodType;
+    }
+    
+    public String getMethodName() {
+        return m_method;
+    }
+    
+    /**
+     * Set the argument type (Empty or the class name).
+     * @param arg : the type name or EMPTY
+     */
+    public void setArgument(String arg) {
+        m_argument = arg;
+        if (arg.equals("EMPTY")) {
+            m_callback = new Callback(m_method, new String[0], false, m_manager);
+        } else {
+            m_callback = new Callback(m_method, new String[] {arg}, false, m_manager);
+        }
+        
+    }
+    
+    public String getArgument() {
+        return m_argument;
     }
 
     /**
@@ -92,102 +117,28 @@ public class DependencyCallback {
      * @throws IllegalAccessException : The method can not be invoked
      */
     protected void call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        // Get the method object
-        Method method = m_manager.getClazz().getDeclaredMethod(m_callback, new Class[] {});
-        method.setAccessible(true);
-
-        if (m_isStatic) {
-            method.invoke(null, new Object[] {});
-        } else {
-            // Two cases :
-            // - if instances already exists : call on each instances
-            // - if no instance exists : create an instance
-            if (m_manager.getPojoObjects().length == 0) {
-                m_manager.getFactory().getLogger()
-                        .log(Logger.INFO, "[" + m_manager.getClassName() + "] Create the first instance " + m_manager.getPojoObject());
-                method.invoke(m_manager.getPojoObject(), new Object[] {});
-            } else {
-                for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
-                    method.invoke(m_manager.getPojoObjects()[i], new Object[] {});
-                }
-            }
-        }
+        m_callback.call();
     }
 
     /**
      * Call the callback method with a service reference.
      * 
      * @param ref : the service reference to send to the method
+     * @param obj : the service object
      * @throws NoSuchMethodException : Method is not found in the class
      * @throws InvocationTargetException : The method is not static
      * @throws IllegalAccessException : The method can not be invoked
      */
-    protected void call(ServiceReference ref) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        // Get the method object
-        Method method = m_manager.getClazz().getDeclaredMethod(m_callback, new Class[] { ServiceReference.class });
-        method.setAccessible(true);
-
-        if (m_isStatic) {
-            method.invoke(null, new Object[] { ref });
+    protected void call(ServiceReference ref, Object obj) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        if (m_argument.equals("EMPTY")) {
+            m_callback.call(new Object[] {});
         } else {
-            // Two cases :
-            // - if instances already exists : call on each instances
-            // - if no instance exists : create an instance
-            if (m_manager.getPojoObjects().length == 0) {
-                m_manager.getFactory().getLogger()
-                        .log(Logger.INFO, "[" + m_manager.getClassName() + "] Create the first instance " + m_manager.getPojoObject());
-                method.invoke(m_manager.getPojoObject(), new Object[] { ref });
+            if (m_argument.equals(ServiceReference.class.getName())) {
+                m_callback.call(new Object[] {ref});
             } else {
-                for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
-                    method.invoke(m_manager.getPojoObjects()[i], new Object[] { ref });
-                }
+                m_callback.call(new Object[] {obj});
             }
         }
-    }
-
-    /**
-     * Call the callback method with an object.
-     * 
-     * @param o : the object to send to the method
-     * @throws NoSuchMethodException : Method is not found in the class
-     * @throws InvocationTargetException : The method is not static
-     * @throws IllegalAccessException : The method can not be invoked
-     */
-    protected void call(Object o) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        // Get the method object
-        Method method = m_manager.getClazz().getDeclaredMethod(m_callback, new Class[] { Object.class });
-        method.setAccessible(true);
-
-        if (m_isStatic) {
-            method.invoke(null, new Object[] { o });
-        } else {
-            // Two cases :
-            // - if instances already exists : call on each instances
-            // - if no instance exists : create an instance
-            if (m_manager.getPojoObjects().length == 0) {
-                m_manager.getFactory().getLogger()
-                        .log(Logger.INFO, "[" + m_manager.getClassName() + "] Create the first instance " + m_manager.getPojoObject());
-                method.invoke(m_manager.getPojoObject(), new Object[] { o });
-            } else {
-                for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
-                    method.invoke(m_manager.getPojoObjects()[i], new Object[] { o });
-                }
-            }
-        }
-    }
-
-    /**
-     * Call the callback on the given instance with no parameters.
-     * 
-     * @param instance : the instance on which call the callback
-     * @throws NoSuchMethodException : the method is not found
-     * @throws IllegalAccessException : the method could not be called
-     * @throws InvocationTargetException : an error happens in the called method
-     */
-    protected void callOnInstance(Object instance) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Method method = instance.getClass().getDeclaredMethod(m_callback, new Class[] {});
-        method.setAccessible(true);
-        method.invoke(instance, new Object[] {});
     }
 
     /**
@@ -195,15 +146,22 @@ public class DependencyCallback {
      * 
      * @param instance : the instance on which call the callback
      * @param ref : the service reference to send to the callback
+     * @param obj : the service object
      * @throws NoSuchMethodException : the method is not found
      * @throws IllegalAccessException : the method could not be called
      * @throws InvocationTargetException : an error happens in the called method
      * @throws InvocationTargetException
      */
-    protected void callOnInstance(Object instance, ServiceReference ref) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Method method = instance.getClass().getDeclaredMethod(m_callback, new Class[] { ServiceReference.class });
-        method.setAccessible(true);
-        method.invoke(instance, new Object[] { ref });
+    protected void callOnInstance(Object instance, ServiceReference ref, Object obj) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        if (m_argument.equals("EMPTY")) {
+            m_callback.call(instance, new Object[] {});
+            return;
+        }
+        if (m_argument.equals(ServiceReference.class.getName())) {
+            m_callback.call(instance, new Object[] {ref});
+        } else {
+            m_callback.call(instance, new Object[] {obj});
+        }
     }
 
     /**
@@ -217,8 +175,6 @@ public class DependencyCallback {
      * @throws InvocationTargetException
      */
     protected void callOnInstance(Object instance, Object o) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Method method = instance.getClass().getDeclaredMethod(m_callback, new Class[] { Object.class });
-        method.setAccessible(true);
-        method.invoke(instance, new Object[] { o });
+        m_callback.call(instance, new Object[] {o});
     }
 }

@@ -74,11 +74,11 @@ public class LifecycleCallback {
         }
 
         m_method = method;
-        m_callback = new Callback(method, isStatic, hh.getInstanceManager());
+        m_callback = new Callback(method, new String[0], isStatic, hh.getInstanceManager());
     }
 
     /**
-     * Call the hook method when the transition from inital to final state is
+     * Call the callback method when the transition from inital to final state is
      * detected.
      * 
      * @throws NoSuchMethodException : Method is not found in the class

@@ -25,16 +25,24 @@ public class MethodDescriptor {
 	public Element getElement() {
 		Element method = new Element("method", "");
 		method.addAttribute(new Attribute("name", m_name));
-		method.addAttribute(new Attribute("return", m_returnType));
-		String args = "{";
-		if(m_arguments.length > 0) {
+        
+        // Add return
+        if(!m_returnType.equals("void")) {
+            method.addAttribute(new Attribute("return", m_returnType));
+        }
+        
+        // Add arguments
+        if(m_arguments.length > 0) {
+            String args = "{";
 			args += m_arguments[0];
 			for(int i = 1; i < m_arguments.length; i++) {
 				args += "," + m_arguments[i];
 			}
+            args += "}";
+            method.addAttribute(new Attribute("arguments", args));
 		}
-		args += "}";
-		method.addAttribute(new Attribute("arguments", args));
+		
+		
 		return method;
 	}
 	

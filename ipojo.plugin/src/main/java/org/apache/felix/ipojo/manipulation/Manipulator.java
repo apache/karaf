@@ -72,9 +72,10 @@ public class Manipulator {
 	
 	/**
 	 * @return the method list.
-	 * Modified for performance issue.
 	 */
-	public List getMethods() { /*return m_methods;*/ return new ArrayList(); }
+	public List getMethods() {
+	    return m_methods; 
+    }
 
 	/**
      * Manipulate the class.
@@ -83,6 +84,11 @@ public class Manipulator {
      * @throws Exception : throwed if the manipulation failed.
      */
     public boolean preProcess(String name, File outputDirectory) throws Exception {
+        
+        // Init field, itfs and methods
+        m_fields = new HashMap();
+        m_interfaces = new String[0];
+        m_methods = new ArrayList();
 
         // gets an input stream to read the bytecode of the class
         String path = outputDirectory+"/"+name.replace('.', '/') + ".class";

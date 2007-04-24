@@ -44,18 +44,129 @@ public class Callback {
      * Reference on the instance manager.
      */
     private InstanceManager m_manager;
+    
+    /**
+     * Method object.
+     */
+    private Method m_methodObj;
+    
+    /**
+     * Argument classes.
+     */
+    private String[] m_args;
 
     /**
-     * LifecycleCallback constructor.
+     * Callback constructor.
      * 
      * @param method : the name of the method to call
+     * @param args : argument type name
      * @param isStatic : is the method a static method
      * @param im : the instance manager of the component containing the method
      */
-    public Callback(String method, boolean isStatic, InstanceManager im) {
+    public Callback(String method, String[] args, boolean isStatic, InstanceManager im) {
         m_method = method;
         m_isStatic = isStatic;
         m_manager = im;
+        m_args = new String[args.length];
+        for (int i = 0; i < args.length; i++) {
+            // Primitive Array 
+            if (args[i].endsWith("[]") && args[i].indexOf(".") == -1) {
+                m_args[i] = "[" + getInternalPrimitiveType(args[i]);
+            }
+            // Non-Primitive Array 
+            if (args[i].endsWith("[]") && args[i].indexOf(".") != -1) {
+                m_args[i] = "[L" + args[i] + ";";
+            }
+            // Simple type 
+            if (!args[i].endsWith("[]")) {
+                m_args[i] = args[i];
+            }
+            
+        }
+    }
+    
+    /**
+     * Callback constructor.
+     * 
+     * @param method : the name of the method to call
+     * @param args : argument classes
+     * @param isStatic : is the method a static method
+     * @param im : the instance manager of the component containing the method
+     */
+    public Callback(String method, Class[] args, boolean isStatic, InstanceManager im) {
+        m_method = method;
+        m_isStatic = isStatic;
+        m_manager = im;
+        m_args = new String[args.length];
+        for (int i = 0; i < args.length; i++) {
+            m_args[i] = args[i].getName();
+        }
+    }
+
+    /**
+     * Get the internal notation for primitive type.
+     * @param string : Stringform of the type
+     * @return the internal notation or null if not found
+     */
+    private String getInternalPrimitiveType(String string) {
+        if (string.equalsIgnoreCase("boolean")) {
+            return "Z";
+        }
+        if (string.equalsIgnoreCase("char")) {
+            return "C";
+        }
+        if (string.equalsIgnoreCase("byte")) {
+            return "B";
+        }
+        if (string.equalsIgnoreCase("short")) {
+            return "S";
+        }
+        if (string.equalsIgnoreCase("int")) {
+            return "I";
+        }
+        if (string.equalsIgnoreCase("float")) {
+            return "F";
+        }
+        if (string.equalsIgnoreCase("long")) {
+            return "J";
+        }
+        if (string.equalsIgnoreCase("double")) {
+            return "D";
+        }
+        return null;
+    }
+    
+    /**
+     * Search the method object in the POJO by analyzing present method.
+     * The name of the maethod and the argument type are checked.
+     */
+    private void searchMethod() {
+        Method[] methods = m_manager.getClazz().getDeclaredMethods();
+        for (int i = 0; m_methodObj == null && i < methods.length; i++) {
+            // First check the method name
+            if (methods[i].getName().equals(m_method)) {
+                // Check arguments
+                Class[] clazzes = methods[i].getParameterTypes();
+                if (clazzes.length == m_args.length) { // Test size to avoid useless loop
+                    boolean ok = true;
+                    for (int j = 0; ok && j < m_args.length; j++) {
+                        if (!m_args[j].equals(clazzes[j].getName())) {
+                            ok = false;
+                        }
+                    }
+                    if (ok) {
+                        m_methodObj = methods[i]; // It is the looked method.
+                    } 
+                }
+
+            }
+        }
+        if (m_methodObj == null) {
+            m_manager.getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " is not found in the code");
+            return;
+        } else {
+            m_methodObj.setAccessible(true);
+        }
     }
 
     /**
@@ -66,25 +177,21 @@ public class Callback {
      * @throws IllegalAccessException : The method can not be invoked
      */
     public void call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Call an callback method : " + m_method);
-        Method method = m_manager.getClazz().getDeclaredMethod(m_method, new Class[] {});
-        method.setAccessible(true);
+        if (m_methodObj == null) {
+            searchMethod();
+        }
 
         if (m_isStatic) {
-            method.invoke(null, new Object[] {});
+            m_methodObj.invoke(null, new Object[] {});
         } else {
             // Two cases :
             // - if instances already exists : call on each instances
             // - if no instance exists : create an instance
             if (m_manager.getPojoObjects().length == 0) {
-                m_manager.getFactory().getLogger()
-                        .log(Logger.INFO, "[" + m_manager.getClassName() + "] Create the first instance " + m_manager.getPojoObject());
-                method.invoke(m_manager.getPojoObject(), new Object[] {});
+                m_methodObj.invoke(m_manager.getPojoObject(), new Object[] {});
             } else {
                 for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
-                    m_manager.getFactory().getLogger().log(Logger.INFO,
-                            "[" + m_manager.getClassName() + "] Call the callback on the instance " + m_manager.getPojoObjects()[i]);
-                    method.invoke(m_manager.getPojoObjects()[i], new Object[] {});
+                    m_methodObj.invoke(m_manager.getPojoObjects()[i], new Object[] {});
                 }
             }
         }
@@ -99,9 +206,10 @@ public class Callback {
      * @throws InvocationTargetException : an error happens in the method
      */
     public void call(Object instance) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Method method = m_manager.getClazz().getDeclaredMethod(m_method, new Class[] {});
-        method.setAccessible(true);
-        method.invoke(instance, new Object[] {});
+        if (m_methodObj == null) {
+            searchMethod();
+        }
+        m_methodObj.invoke(instance, new Object[] {});
     }
 
     /**
@@ -114,30 +222,21 @@ public class Callback {
      * method
      */
     public void call(Object[] arg) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        m_manager.getFactory().getLogger().log(Logger.INFO, "[" + m_manager.getClassName() + "] Call an callback method : " + m_method);
-
-        // Build an array of call for arg :
-        Class[] classes = new Class[arg.length];
-        for (int i = 0; i < arg.length; i++) {
-            classes[i] = arg[i].getClass();
+        if (m_methodObj == null) {
+            searchMethod();
         }
-
-        Method method = m_manager.getClazz().getDeclaredMethod(m_method, classes);
-        method.setAccessible(true);
-
+        
         if (m_isStatic) {
-            method.invoke(null, arg);
+            m_methodObj.invoke(null, arg);
         } else {
             // Two cases :
             // - if instances already exists : call on each instances
             // - if no instance exists : create an instance
             if (m_manager.getPojoObjects().length == 0) {
-                m_manager.getFactory().getLogger()
-                        .log(Logger.INFO, "[" + m_manager.getClassName() + "] Create the first instance " + m_manager.getPojoObject());
-                method.invoke(m_manager.getPojoObject(), new Object[] {});
+                m_methodObj.invoke(m_manager.getPojoObject(), arg);
             } else {
                 for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
-                    method.invoke(m_manager.getPojoObjects()[i], arg);
+                    m_methodObj.invoke(m_manager.getPojoObjects()[i], arg);
                 }
             }
         }
@@ -155,14 +254,10 @@ public class Callback {
      * method
      */
     public void call(Object instance, Object[] arg) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        // Build an array of call for arg :
-        Class[] classes = new Class[arg.length];
-        for (int i = 0; i < arg.length; i++) {
-            classes[i] = arg[i].getClass();
+        if (m_methodObj == null) {
+            searchMethod();
         }
-
-        Method method = m_manager.getClazz().getDeclaredMethod(m_method, classes);
-        method.setAccessible(true);
-        method.invoke(instance, arg);
+        
+        m_methodObj.invoke(instance, arg);
     }
 }
