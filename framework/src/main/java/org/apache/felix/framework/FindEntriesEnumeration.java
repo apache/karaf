@@ -105,7 +105,7 @@ class FindEntriesEnumeration implements Enumeration
                         ? entryName.length() - 1
                         : entryName.length();
                     int startIdx = (entryName.charAt(entryName.length() - 1) == '/')
-                        ? entryName.lastIndexOf('/', endIdx - 2) + 1
+                        ? entryName.lastIndexOf('/', endIdx - 1) + 1
                         : entryName.lastIndexOf('/', endIdx) + 1;
                     String lastElement = entryName.substring(startIdx, endIdx);
                     
