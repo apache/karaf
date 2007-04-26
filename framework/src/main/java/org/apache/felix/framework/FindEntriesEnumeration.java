@@ -91,28 +91,24 @@ class FindEntriesEnumeration implements Enumeration
             // Check to see if it is a descendent of the specified path.
             if (!entryName.equals(m_path) && entryName.startsWith(m_path))
             {
-                // NOTE: We assume here that directories are not returned,
-                // unlike getEntryPaths() above, where directories are returned;
-                // this may or may not be the correct spec interpretation.
-
-                // If this is recursive, then simply verify that the
-                // entry is not a directory my making sure it does not
-                // end with '/'. If this is not recursive, then verify
-                // that the entry is a child of the path and not a
-                // grandchild by examining its remaining path length.
-                // This code uses the knowledge that content entries
-                // corresponding to directories end in '/'.
+                // If this is recursive search, then try to match any
+                // entry path that starts with the specified path;
+                // otherwise, only try to match children of the specified
+                // path and not any grandchild. This code uses the knowledge
+                // that content entries corresponding to directories end in '/'.
                 int idx = entryName.indexOf('/', m_path.length());
-                if ((m_recurse && (entryName.charAt(entryName.length() - 1) != '/'))
-                    || (idx < 0))
+                if (m_recurse || (idx < 0) || (idx == (entryName.length() - 1)))
                 {
-                    // Get the last element of the path.
-                    idx = entryName.lastIndexOf('/');
-                    String lastElement = entryName;
-                    if (idx >= 0)
-                    {
-                        lastElement = entryName.substring(idx + 1);
-                    }
+                    // Get the last element of the entry path, not including
+                    // the '/' if it is a directory.
+                    int endIdx = (entryName.charAt(entryName.length() - 1) == '/')
+                        ? entryName.length() - 1
+                        : entryName.length();
+                    int startIdx = (entryName.charAt(entryName.length() - 1) == '/')
+                        ? entryName.lastIndexOf('/', endIdx - 2) + 1
+                        : entryName.lastIndexOf('/', endIdx) + 1;
+                    String lastElement = entryName.substring(startIdx, endIdx);
+                    
                     // See if the file pattern matches the last element of the path.
                     if (checkSubstring(m_filePattern, lastElement))
                     {
