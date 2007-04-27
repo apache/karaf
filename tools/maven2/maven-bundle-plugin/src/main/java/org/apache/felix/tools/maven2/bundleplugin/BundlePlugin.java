@@ -49,6 +49,8 @@ public class BundlePlugin extends AbstractMojo {
  /** pattern that matches strings that contain only numbers */
  private static final Pattern ONLY_NUMBERS = Pattern.compile("[0-9]+");
 
+ private static final Collection SUPPORTED_PROJECT_TYPES = Arrays.asList(new String[]{"jar","osgi-bundle"});
+
  /**
   * @parameter expression="${project.build.outputDirectory}"
   * @required
@@ -97,6 +99,12 @@ public class BundlePlugin extends AbstractMojo {
 
   if (new File(baseDir, "src/main/resources").exists()) {
     header(properties, Analyzer.INCLUDE_RESOURCE, "src/main/resources/");
+  }
+  
+  /* ignore project types not supported, useful when the plugin is configured in the parent pom */
+  if (!SUPPORTED_PROJECT_TYPES.contains(getProject().getArtifact().getType())) {
+    getLog().debug("Ignoring project " + getProject().getArtifact() + " : type not supported by bundle plugin");
+    return;
   }
   
   execute(project, instructions, properties);
