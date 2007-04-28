@@ -49,7 +49,7 @@ public class BundlePlugin extends AbstractMojo {
  /** pattern that matches strings that contain only numbers */
  private static final Pattern ONLY_NUMBERS = Pattern.compile("[0-9]+");
 
- private static final Collection SUPPORTED_PROJECT_TYPES = Arrays.asList(new String[]{"jar","osgi-bundle"});
+ private static final Collection SUPPORTED_PROJECT_TYPES = Arrays.asList(new String[]{"jar","bundle"});
 
  /**
   * @parameter expression="${project.build.outputDirectory}"
