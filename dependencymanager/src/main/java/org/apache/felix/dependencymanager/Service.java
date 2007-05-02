@@ -72,22 +72,25 @@ public interface Service {
      * There are four special methods that are called when found through
      * reflection to give you some life-cycle management options:
      * <ol>
-     * <li><code>init()</code> when the implementation should be initialized,
-     * before it is actually registered as a service (if at all)</li>
-     * <li><code>start()</code> when the implementation has been registered
-     * as a service (if at all)</li>
-     * <li><code>stop()</code> when the implementation will be stopped, just
-     * before the service will go away (if it had been registered)</li>
-     * <li><code>destroy()</code>after the service has gone away (if it had
-     * been registered)</li>
+     * <li><code>init()</code> is invoked right after the instance has been
+     * created, and before any dependencies are resolved, and can be used to
+     * initialize the internal state of the instance</li>
+     * <li><code>start()</code> is invoked after the required dependencies
+     * are resolved and injected, and before the service is registered</li>
+     * <li><code>stop()</code> is invoked right after the service is
+     * unregistered</li>
+     * <li><code>destroy()</code> is invoked after all dependencies are
+     * removed</li>
      * </ol>
      * In short, this allows you to initialize your instance before it is
      * registered, perform some post-initialization and pre-destruction code
      * as well as final cleanup. If a method is not defined, it simply is not
-     * called, so you can decide which one(s) you need.
+     * called, so you can decide which one(s) you need. If you need even more
+     * fine-grained control, you can register as a service state listener too.
      * 
      * @param implementation the implementation
      * @return this service
+     * @see ServiceStateListener
      */
     public Service setImplementation(Object implementation);
     

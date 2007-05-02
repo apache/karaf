@@ -26,25 +26,30 @@ package org.apache.felix.dependencymanager;
  */
 public interface ServiceStateListener {
     /**
-     * Called when the service is starting.
+     * Called when the service is starting. At this point, the required
+     * dependencies have been injected, but the service has not been registered
+     * yet.
      * 
      * @param service the service
      */
     public void starting(Service service);
     /**
-     * Called when the service is started.
+     * Called when the service is started. At this point, the service has been
+     * registered.
      * 
      * @param service the service
      */
     public void started(Service service);
     /**
-     * Called when the service is stopping.
+     * Called when the service is stopping. At this point, the service is still
+     * registered.
      * 
      * @param service the service
      */
     public void stopping(Service service);
     /**
-     * Called when the service is stopped.
+     * Called when the service is stopped. At this point, the service has been
+     * unregistered.
      * 
      * @param service the service
      */
