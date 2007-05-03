@@ -114,6 +114,11 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * True when the factory is active (non stopping and non starting).
      */
     private boolean m_active = false;
+    
+    /**
+     * Index used to generate instance name if not set.
+     */
+    private long m_index = 0;
 
     /**
      * FactoryClassloader.
@@ -293,11 +298,15 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
                 ci.dispose();
             }
         }
+
+        m_logger.stop();
+
         m_componentInstances.clear();
         if (m_sr != null) {
             m_sr.unregister();
         }
         m_sr = null;
+
     }
 
     /**
@@ -362,6 +371,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Get the component type description attached to this factory.
+     * 
      * @return : the component type description
      * @see org.apache.felix.ipojo.Factory#getComponentDescription()
      */
@@ -377,8 +387,9 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * @throws ClassNotFoundException : happen when the class is not found
      */
     public Class loadClass(String className) throws ClassNotFoundException {
-        if (m_clazz != null && className.equals(m_componentClassName)) { 
-            // Used the factory classloader to load the component implementation class
+        if (m_clazz != null && className.equals(m_componentClassName)) {
+            // Used the factory classloader to load the component implementation
+            // class
             if (m_classLoader == null) {
                 m_classLoader = new FactoryClassloader();
             }
@@ -418,26 +429,33 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Create an instance.
-     * The given configuration needs to contain the 'name' property.
+     * Create an instance. The given configuration needs to contain the 'name'
+     * property.
+     * 
      * @param configuration : configuration of the created instance.
      * @return the created component instance.
-     * @throws UnacceptableConfiguration : occurs if the given configuration is not consistent with the component type of this factory.
+     * @throws UnacceptableConfiguration : occurs if the given configuration is
+     * not consistent with the component type of this factory.
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
     public ComponentInstance createComponentInstance(Dictionary configuration) throws UnacceptableConfiguration {
+        if (configuration == null) {
+            configuration = new Properties();
+        }
+        
         try {
             checkAcceptability(configuration);
         } catch (UnacceptableConfiguration e) {
             m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
-            throw new UnacceptableConfiguration("The configuration " + configuration + " is not acceptable for " + m_factoryName + ": " + e.getMessage());
+            throw new UnacceptableConfiguration("The configuration " + configuration + " is not acceptable for " + m_factoryName + ": " + e);
         }
-
+        
         String pid = null;
         if (configuration.get("name") != null) {
             pid = (String) configuration.get("name");
         } else {
-            throw new UnacceptableConfiguration("The name attribute is missing");
+            pid = generateName();
+            configuration.put("name", pid);
         }
 
         if (m_componentInstances.containsKey(pid)) {
@@ -448,12 +466,10 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         ComponentInstance instance = null;
         if (!m_isComposite) {
             InstanceManager inst = new InstanceManager(this, context);
-            // context.setComponentInstance(inst);
             inst.configure(m_componentMetadata, configuration);
             instance = inst;
         } else {
             CompositeManager inst = new CompositeManager(this, context);
-            // context.setComponentInstance(inst);
             inst.configure(m_componentMetadata, configuration);
             instance = inst;
         }
@@ -464,15 +480,21 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Create an instance.
-     * The given configuration needs to contain the 'name' property.
+     * Create an instance. The given configuration needs to contain the 'name'
+     * property.
+     * 
      * @param configuration : configuration of the created instance.
      * @param serviceContext : the service context to push for this instance.
      * @return the created component instance.
-     * @throws UnacceptableConfiguration : occurs if the given configuration is not consistent with the component type of this factory.
+     * @throws UnacceptableConfiguration : occurs if the given configuration is
+     * not consistent with the component type of this factory.
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
     public ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration {
+        if (configuration == null) {
+            configuration = new Properties();
+        }
+        
         try {
             checkAcceptability(configuration);
         } catch (UnacceptableConfiguration e) {
@@ -480,13 +502,15 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
             throw new UnacceptableConfiguration("The configuration " + configuration + " is not acceptable for " + m_factoryName + ": " + e.getMessage());
         }
 
+        
         String pid = null;
         if (configuration.get("name") != null) {
             pid = (String) configuration.get("name");
         } else {
-            throw new UnacceptableConfiguration("The name attribute is missing");
+            pid = generateName();
+            configuration.put("name", pid);
         }
-
+        
         if (m_componentInstances.containsKey(pid)) {
             throw new UnacceptableConfiguration("Name already used : " + pid);
         }
@@ -495,12 +519,10 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         ComponentInstance instance = null;
         if (!m_isComposite) {
             InstanceManager inst = new InstanceManager(this, context);
-            // context.setComponentInstance(inst);
             inst.configure(m_componentMetadata, configuration);
             instance = inst;
         } else {
             CompositeManager inst = new CompositeManager(this, context);
-            // context.setComponentInstance(inst);
             inst.configure(m_componentMetadata, configuration);
             instance = inst;
         }
@@ -512,6 +534,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Delete an instance.
+     * 
      * @param pid : name of the instance to delete
      * @see org.osgi.service.cm.ManagedServiceFactory#deleted(java.lang.String)
      */
@@ -526,6 +549,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Get the name of this factory.
+     * 
      * @return the name of this factory
      * @see org.apache.felix.ipojo.Factory#getName()
      */
@@ -535,17 +559,19 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Create of update an instance.
+     * 
      * @param pid : name of the instance
      * @param properties : configuration of the instance
-     * @throws ConfigurationException : if the configuration is not consistent for this component type
-     * @see org.osgi.service.cm.ManagedServiceFactory#updated(java.lang.String, java.util.Dictionary)
+     * @throws ConfigurationException : if the configuration is not consistent
+     * for this component type
+     * @see org.osgi.service.cm.ManagedServiceFactory#updated(java.lang.String,
+     * java.util.Dictionary)
      */
     public void updated(String pid, Dictionary properties) throws ConfigurationException {
         InstanceManager cm = (InstanceManager) m_componentInstances.get(pid);
         if (cm == null) {
             try {
-                properties.put("name", pid); // Add the name in the
-                // configuration
+                properties.put("name", pid); // Add the name in the configuration
                 createComponentInstance(properties);
             } catch (UnacceptableConfiguration e) {
                 m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
@@ -553,8 +579,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
             }
         } else {
             try {
-                properties.put("name", pid); // Add the name in the
-                // configuration
+                properties.put("name", pid); // Add the name in the configuration
                 checkAcceptability(properties); // Test if the configuration is
                 // acceptable
             } catch (UnacceptableConfiguration e) {
@@ -567,17 +592,13 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Check if the given configuration is acceptable as a component instance
-     * configuration. This checks that a name is given in the configuration and
-     * if all the configurable properties have a value.
+     * configuration. This method checks that if all the configurable properties
+     * have a value.
      * 
      * @param conf : the configuration to check
      * @return true when the configuration seems to be acceptable
      */
     public boolean isAcceptable(Dictionary conf) {
-        // First check that the configuration contains a name :
-        if (conf.get("name") == null) {
-            return false;
-        }
         PropertyDescription[] props = m_componentDesc.getProperties();
         for (int i = 0; i < props.length; i++) {
             PropertyDescription pd = props[i];
@@ -597,9 +618,6 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * @throws UnacceptableConfiguration : the configuration is not acceptable.
      */
     private void checkAcceptability(Dictionary conf) throws UnacceptableConfiguration {
-        if (conf == null || conf.get("name") == null) {
-            throw new UnacceptableConfiguration("The configuration does not contains the \"name\" property");
-        }
         PropertyDescription[] props = m_componentDesc.getProperties();
         for (int i = 0; i < props.length; i++) {
             PropertyDescription pd = props[i];
@@ -613,8 +631,10 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Reconfigure an existing instance.
+     * 
      * @param properties : the new configuration to push.
-     * @throws UnacceptableConfiguration : occurs if the new configuration is not consistent with the component type.
+     * @throws UnacceptableConfiguration : occurs if the new configuration is
+     * not consistent with the component type.
      * @see org.apache.felix.ipojo.Factory#reconfigure(java.util.Dictionary)
      */
     public void reconfigure(Dictionary properties) throws UnacceptableConfiguration {
@@ -631,9 +651,21 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         if (cm == null) {
             return; // The instance does not exist.
         } else {
-            checkAcceptability(properties); // Test if the configuration is
-            // acceptable
+            checkAcceptability(properties); // Test if the configuration is acceptable
         }
         cm.reconfigure(properties); // re-configure the component
+    }
+    
+    /**
+     * Generate an instance name.
+     * @return an non already used name
+     */
+    private synchronized String generateName() {
+        String name = getName() + "-" + m_index;
+        while (m_componentInstances.containsKey(name)) {
+            m_index = m_index + 1;
+            name = getName() + "-" + m_index;
+        }
+        return name;
     }
 }

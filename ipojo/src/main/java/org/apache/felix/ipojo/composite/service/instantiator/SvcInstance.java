@@ -90,11 +90,6 @@ public class SvcInstance implements ServiceListener {
     private String m_filterStr;
 
     /**
-     * Name of the last create instance.
-     */
-    private static Long m_index = new Long(0);
-
-    /**
      * Constructor.
      * 
      * @param h : the handler.
@@ -191,13 +186,6 @@ public class SvcInstance implements ServiceListener {
                 p.put(k, m_configuration.get(k));
             }
             
-            if (p.get("name") == null) {
-                synchronized (m_index) {
-                    p.put("name", this.toString() + "-" + m_index.longValue());
-                    m_index = new Long(m_index.longValue() + 1);
-                }
-            }
-            
             ComponentInstance instance = factory.createComponentInstance(p);
             m_usedRef.put(ref, instance);
             m_context.ungetService(ref);
@@ -223,13 +211,6 @@ public class SvcInstance implements ServiceListener {
             while (kk.hasMoreElements()) {
                 String k = (String) kk.nextElement();
                 p.put(k, m_configuration.get(k));
-            }
-            
-            if (p.get("name") == null) {
-                synchronized (m_index) {
-                    p.put("name", this.toString() + "-" + m_index.longValue());
-                    m_index = new Long(m_index.longValue() + 1);
-                }
             }
             
             ComponentInstance instance = factory.createComponentInstance(p);
@@ -313,13 +294,6 @@ public class SvcInstance implements ServiceListener {
                 while (keys.hasMoreElements()) {
                     String k = (String) keys.nextElement();
                     p.put(k, m_configuration.get(k));
-                }
-                
-                if (p.get("name") == null) {
-                    synchronized (m_index) {
-                        p.put("name", this.toString() + "-" + m_index.longValue());
-                        m_index = new Long(m_index.longValue() + 1);
-                    }
                 }
 
                 // Check the acceptability.

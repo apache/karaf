@@ -85,13 +85,13 @@ public class ManifestMetadataParser {
      */
     private Dictionary parseInstance(Element instance) throws ParseException {
         Dictionary dict = new Properties();
-        if (!instance.containsAttribute("name")) {
-            throw new ParseException("An instance does not have the 'name' attribute");
+        if (instance.containsAttribute("name")) {
+            dict.put("name", instance.getAttribute("name"));
         }
         if (!instance.containsAttribute("component")) {
             throw new ParseException("An instance does not have the 'component' attribute");
         }
-        dict.put("name", instance.getAttribute("name"));
+        
         dict.put("component", instance.getAttribute("component"));
 
         for (int i = 0; i < instance.getElements("property").length; i++) {

@@ -198,6 +198,18 @@ public class Logger implements ServiceListener {
                 m_log = (LogService) m_context.getService(m_ref);
             }
         }
-
+    }
+    
+    /**
+     * Stop the logger.
+     * This method unget the used log service, and remove stop the service listenning.
+     */
+    public void stop() {
+        m_context.removeServiceListener(this);
+        if (m_ref != null) {
+            m_log = null;
+            m_context.ungetService(m_ref);
+            m_ref = null;
+        }
     }
 }

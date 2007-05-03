@@ -170,12 +170,13 @@ public class Activator implements BundleActivator {
                 } else {
                     outsiders = new Dictionary[] { conf };
                 }
-
             }
         }
 
-        // Create the instance creator
-        m_creator = new InstanceCreator(m_bundleContext, outsiders);
+        // Create the instance creator if needed.
+        if (outsiders.length > 0) {
+            m_creator = new InstanceCreator(m_bundleContext, outsiders);
+        }
     }
 
 }

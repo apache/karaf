@@ -90,14 +90,11 @@ public class ImportExportHandler extends CompositeHandler {
             boolean aggregate = false;
             String specification = null;
 
-            if (!imp[i].containsAttribute("specification")) { // Malformed
-                                                                // import
+            if (!imp[i].containsAttribute("specification")) { // Malformed import
                 im.getFactory().getLogger().log(Logger.ERROR, "Malformed import : the specification attribute is mandatory");
             } else {
                 specification = imp[i].getAttribute("specification");
-                String filter = "(&(objectClass=" + specification + ")(!(service.pid=" + m_manager.getInstanceName() + ")))"; // Cannot
-                                                                                                                                // import
-                                                                                                                                // yourself
+                String filter = "(&(objectClass=" + specification + ")(!(service.pid=" + m_manager.getInstanceName() + ")))"; // Cannot import yourself
                 if (imp[i].containsAttribute("optional") && imp[i].getAttribute("optional").equalsIgnoreCase("true")) {
                     optional = true;
                 }
@@ -105,12 +102,8 @@ public class ImportExportHandler extends CompositeHandler {
                     aggregate = true;
                 }
                 if (imp[i].containsAttribute("filter")) {
-                    String classnamefilter = "(objectClass=" + specification + ")";
-                    filter = "";
                     if (!imp[i].getAttribute("filter").equals("")) {
-                        filter = "(&" + classnamefilter + imp[i].getAttribute("filter") + ")";
-                    } else {
-                        filter = classnamefilter;
+                        filter = "(&" + filter + imp[i].getAttribute("filter") + ")";
                     }
                 }
                 ServiceImporter si = new ServiceImporter(specification, filter, aggregate, optional, m_context, m_scope, this);

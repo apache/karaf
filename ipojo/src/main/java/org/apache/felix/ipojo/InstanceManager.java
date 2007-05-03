@@ -256,6 +256,7 @@ public class InstanceManager implements ComponentInstance {
         for (int i = m_handlers.length - 1; i > -1; i--) {
             m_handlers[i].stop();
         }
+        
         m_pojoObjects = new Object[0];
 
         m_state = STOPPED;
@@ -699,7 +700,6 @@ public class InstanceManager implements ComponentInstance {
         if (!isValid && m_state == VALID) {
             // Need to update the state to UNRESOLVED
             setState(INVALID);
-            m_pojoObjects = new Object[0];
             return;
         }
         if (isValid && m_state == INVALID) {

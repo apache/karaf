@@ -207,9 +207,10 @@ public class CompositionMetadata {
 
     /**
      * Build service implementation metadata.
+     * @param in : name of the future instance (used to avoid cycle)
      * @return Component Type metadata. 
      */
-    protected Element buildMetadata() {
+    protected Element buildMetadata(String in) {
         Element elem = new Element("component", "");
         Attribute className = new Attribute("className", m_name);
         Attribute factory = new Attribute("factory", "no");
@@ -231,6 +232,7 @@ public class CompositionMetadata {
                 if (field.getSpecification().isOptional()) {
                     dep.addAttribute(new Attribute("optional", "true"));
                 }
+                dep.addAttribute(new Attribute("filter", "(!(service.pid=" + in + "))"));
                 elem.addElement(dep);
             }
         }

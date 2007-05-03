@@ -104,15 +104,15 @@ public class ProvidedService {
      * Build service implementation type, factory and instance.
      */
     public void start() {
+        String name = m_composition.getSpecificationMetadata().getName() + "Provider";
         m_clazz = m_composition.buildPOJO();
-        m_metadata = m_composition.buildMetadata();
+        m_metadata = m_composition.buildMetadata(name);
 
         // Create the factory
         m_factory = new ComponentFactory(m_context, m_clazz, m_metadata);
         m_factory.start();
 
         Properties p = new Properties();
-        String name = m_composition.getSpecificationMetadata().getName() + "Provider";
         p.put("name", name);
         try {
             m_instance = m_factory.createComponentInstance(p, m_scope);
