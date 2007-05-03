@@ -42,7 +42,7 @@ public class PsCommandImpl implements Command
 
     public String getUsage()
     {
-        return "ps [-l | -u]";
+        return "ps [-l | -s | -u]";
     }
 
     public String getShortDescription()
@@ -74,6 +74,7 @@ public class PsCommandImpl implements Command
 
         // Check for optional argument.
         boolean showLoc = false;
+        boolean showSymbolic = false;
         boolean showUpdate = false;
         if (st.countTokens() >= 1)
         {
@@ -83,6 +84,10 @@ public class PsCommandImpl implements Command
                 if (token.equals("-l"))
                 {
                     showLoc = true;
+                }
+                else if (token.equals("-s"))
+                {
+                    showSymbolic = true;
                 }
                 else if (token.equals("-u"))
                 {
@@ -105,6 +110,10 @@ public class PsCommandImpl implements Command
             {
                msg = " Location";
             }
+            else if (showSymbolic)
+            {
+               msg = " Symbolic name";
+            }
             else if (showUpdate)
             {
                msg = " Update location";
@@ -116,18 +125,29 @@ public class PsCommandImpl implements Command
                 // Get the bundle name or location.
                 String name = (String)
                     bundles[i].getHeaders().get(Constants.BUNDLE_NAME);
+                // If there is no name, then default to symbolic name.
+                name = (name == null) ? bundles[i].getSymbolicName() : name;
+                // If there is no symbolic name, resort to location.
+                name = (name == null) ? bundles[i].getLocation() : name;
+
+                // Overwrite the default value is the user specifically
+                // requested to display one or the other.
                 if (showLoc)
                 {
                     name = bundles[i].getLocation();
                 }
+                else if (showSymbolic)
+                {
+                    name = bundles[i].getSymbolicName();
+                    name = (name == null)
+                        ? "<no symbolic name>" : name;
+                }
                 else if (showUpdate)
                 {
-                    Dictionary dict = bundles[i].getHeaders();
-                    name = (String) dict.get(Constants.BUNDLE_UPDATELOCATION);
-                    if (name == null)
-                    {
-                        name = bundles[i].getLocation();
-                    }
+                    name = (String)
+                        bundles[i].getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
+                    name = (name == null)
+                        ? bundles[i].getLocation() : name;
                 }
                 // Show bundle version if not showing location.
                 String version = (String)
