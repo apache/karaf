@@ -9,18 +9,40 @@
   <name>Apache Felix Examples: Build</name>
   <artifactId>build</artifactId>
 
-  <modules>
-    <module>eventlistener</module>
-    <module>dictionaryservice</module>
-    <module>dictionaryservice.itest</module>
-    <module>frenchdictionary</module>
-    <module>dictionaryclient</module>
-    <module>dictionaryclient2</module>
-    <module>spellcheckservice</module>
-    <module>spellcheckclient</module>
-    <module>spellcheckbinder</module>
-    <module>spellcheckscr</module>
-  </modules>
+  <profiles>
+    <profile>
+      <id>packaging-osgi-bundle</id>
+      <activation>
+        <property>
+          <name>packaging</name>
+          <value>osgi-bundle</value>
+        </property>
+      </activation>
+      <modules>
+          <module>eventlistener</module>
+          <module>dictionaryservice</module>
+          <module>dictionaryservice.itest</module>
+          <module>frenchdictionary</module>
+          <module>dictionaryclient</module>
+          <module>dictionaryclient2</module>
+          <module>spellcheckservice</module>
+          <module>spellcheckclient</module>
+          <module>spellcheckbinder</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>packaging-bundle</id>
+      <activation>
+        <property>
+          <name>packaging</name>
+          <value>bundle</value>
+        </property>
+      </activation>
+      <modules>
+          <module>spellcheckscr</module>
+      </modules>
+    </profile>
+  </profiles>
 
   <dependencies>
     <dependency>
