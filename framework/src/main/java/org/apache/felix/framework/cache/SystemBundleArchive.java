@@ -69,11 +69,6 @@ public class SystemBundleArchive extends BundleArchive
             {
             }
 
-            public String getCachedBundleURL()
-            {
-                return null;
-            }
-
             protected X509Certificate[] getRevisionCertificates()
             {
                 return null;

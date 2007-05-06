@@ -252,19 +252,6 @@ class JarRevision extends BundleRevision
         // by the parent bundle archive.
     }
 
-    public String getCachedBundleURL()
-    {
-        try
-        {
-            return m_bundleFile.toURL().toString();
-        }
-        catch (MalformedURLException ex)
-        {
-            // This should never happen.
-            return null;
-        }
-    }
-
     //
     // Private methods.
     //

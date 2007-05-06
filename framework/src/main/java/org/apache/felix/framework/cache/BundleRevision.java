@@ -169,11 +169,4 @@ public abstract class BundleRevision
      * @throws Exception if any error occurs.
     **/
     public abstract void dispose() throws Exception;
-
-    /**
-     * Returns the url of the cached bundle if possible.
-     *
-     * @return the url of the cached bundle as a string or null if not possible.
-     */
-    public abstract String getCachedBundleURL();
 }

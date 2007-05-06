@@ -183,17 +183,4 @@ class DirectoryRevision extends BundleRevision
         // of the revision directory, which will be automatically deleted
         // by the parent bundle archive.
     }
-
-    public String getCachedBundleURL()
-    {
-        try
-        {
-            return m_refDir.toURL().toString();
-        }
-        catch (MalformedURLException ex)
-        {
-            // This should never happen.
-            return null;
-        }
-    }
 }

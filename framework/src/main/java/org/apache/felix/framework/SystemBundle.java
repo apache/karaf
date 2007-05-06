@@ -25,7 +25,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.security.cert.Certificate;
 import java.util.*;
 
 import org.apache.felix.framework.cache.*;
@@ -36,8 +35,6 @@ import org.osgi.framework.*;
 
 class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAction
 {
-    private static final Set m_extensionLocations = new HashSet();
-
     private List m_activatorList = null;
     private SystemBundleActivator m_activator = null;
     private Thread m_shutdownThread = null;
@@ -235,7 +232,7 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
     {
         if (m_activator == null)
         {
-            m_activator = new SystemBundleActivator(getFelix(), m_activatorList);
+            m_activator = new SystemBundleActivator(m_activatorList);
         }
         return m_activator;
     }
@@ -310,6 +307,29 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
             _addExtensionBundle(bundle);
         }
     }
+    
+    void startExtensionBundle(BundleImpl bundle) 
+    {
+        String activatorClass = (String)
+        bundle.getInfo().getCurrentHeader().get(
+            FelixConstants.FELIX_EXTENSION_ACTIVATOR);
+        
+        if (activatorClass != null)
+        {
+            try
+            {
+                m_activator.addActivator(((BundleActivator)
+                    getClass().getClassLoader().loadClass(
+                    activatorClass.trim()).newInstance()),
+                    new BundleContextImpl(getFelix(), bundle));
+            }
+            catch (Throwable ex)
+            {
+                getFelix().getLogger().log(Logger.LOG_WARNING,
+                    "Unable to start Felix Extension Activator", ex);
+            }
+        }
+    }
 
     public Object run()
     {
@@ -319,8 +339,6 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
 
     private void _addExtensionBundle(BundleImpl bundle)
     {
-        BundleArchive archive = bundle.getInfo().getArchive();
-
         SystemBundleArchive systemArchive =
             (SystemBundleArchive) getInfo().getArchive();
 
@@ -346,35 +364,12 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
 
         try
         {
-            String url = archive.getRevision(
-                archive.getRevisionCount() -1).getCachedBundleURL();
-            if (url != null)
-            {
-                synchronized (getClass().getClassLoader())
-                {
-                    if (!m_extensionLocations.contains(bundle.getSymbolicName()))
-                    {
-                        Method addURL =
-                            URLClassLoader.class.getDeclaredMethod("addURL",
-                            new Class[] {URL.class});
-                        addURL.setAccessible(true);
-                        addURL.invoke(getClass().getClassLoader(),
-                            new Object[] {new URL(url)});
-                        m_extensionLocations.add(bundle.getSymbolicName());
-                    }
-                }
-            }
-            else
-            {
-                getFelix().getLogger().log(Logger.LOG_WARNING,
-                    "Unable to add extension bundle to FrameworkClassLoader - Maybe BundleCache does not support URLs?");
-                throw new UnsupportedOperationException(
-                    "Unable to add extension bundle to FrameworkClassLoader - Maybe BundleCache does not support URLs?");
-            }
-        }
-        catch (UnsupportedOperationException ex)
-        {
-            throw ex;
+            Method addURL =
+                URLClassLoader.class.getDeclaredMethod("addURL",
+                new Class[] {URL.class});
+            addURL.setAccessible(true);
+            addURL.invoke(getClass().getClassLoader(),
+                new Object[] {bundle.getEntry("/")});
         }
         catch (Exception ex)
         {
@@ -384,7 +379,7 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
                 "Unable to add extension bundle to FrameworkClassLoader - Maybe not an URLClassLoader?");
         }
 
-                ICapability[] temp = new ICapability[m_exports.length + exports.length];
+        ICapability[] temp = new ICapability[m_exports.length + exports.length];
 
         System.arraycopy(m_exports, 0, temp, 0, m_exports.length);
         System.arraycopy(exports, 0, temp, m_exports.length, exports.length);
@@ -394,26 +389,6 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
         parseAndAddExports(headers);
 
         systemArchive.setManifestHeader(headers);
-
-        String activatorClass = (String)
-            bundle.getInfo().getCurrentHeader().get(
-            FelixConstants.FELIX_EXTENSION_ACTIVATOR);
-
-        if (activatorClass != null)
-        {
-            try
-            {
-                m_activator.addActivator(((BundleActivator)
-                    getClass().getClassLoader().loadClass(
-                    activatorClass.trim()).newInstance()),
-                    new BundleContextImpl(getFelix(), bundle));
-            }
-            catch (Throwable ex)
-            {
-                getFelix().getLogger().log(Logger.LOG_WARNING,
-                    "Unable to start Felix Extension Activator", ex);
-            }
-        }
     }
 
     private class SystemBundleContentLoader implements IContentLoader

@@ -25,20 +25,18 @@ import org.osgi.framework.BundleContext;
 
 class SystemBundleActivator implements BundleActivator
 {
-    private Felix m_felix = null;
     private List m_activatorList = null;
     private BundleContext m_context = null;
     private Map m_activatorContextMap = null;
 
-    SystemBundleActivator(Felix felix, List activatorList)
+    SystemBundleActivator(List activatorList)
     {
-        this.m_felix = felix;
-        this.m_activatorList = activatorList;
+        m_activatorList = activatorList;
     }
 
     public void start(BundleContext context) throws Exception
     {
-        this.m_context = context;
+        m_context = context;
 
         // Start all activators.
         if (m_activatorList != null)

@@ -106,8 +106,6 @@ public class Felix
     // The secure action used to do privileged calls
     protected SecureAction m_secureAction = new SecureAction();
 
-    private Collection m_trustedCaCerts = null;
-
     /**
      * <p>
      * This method starts the framework instance; instances of the framework
@@ -2024,6 +2022,21 @@ ex.printStackTrace();
             synchronized (m_installedBundleLock_Priority2)
             {
                 m_installedBundleMap.put(location, bundle);
+            }
+            
+            if (bundle.getInfo().isExtension()) 
+            {
+                BundleImpl systemBundle = (BundleImpl) getBundle(0);
+                acquireBundleLock(systemBundle);
+
+                try
+                {
+                    ((SystemBundle) getBundle(0)).startExtensionBundle(bundle);
+                }
+                finally
+                {
+                    releaseBundleLock(systemBundle);
+                }
             }
         }
         finally
