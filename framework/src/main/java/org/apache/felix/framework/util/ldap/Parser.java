@@ -63,15 +63,15 @@ public class Parser
     // Criteria in % to accept something as approximate.
     public static final int APPROX_CRITERIA = 10;
 
-    // Flag indicating presense of BigInteger/Decimal.
-    private static boolean m_hasBigNumbers = false;
+    // Flag indicating presense of BigDecimal.
+    private static boolean m_hasBigDecimal = false;
 
     static 
     {
         try
         {
             Class.forName("java.math.BigDecimal");
-            m_hasBigNumbers = true;
+            m_hasBigDecimal = true;
         }
         catch (Exception ex)
         {
@@ -1556,7 +1556,7 @@ loop:   for (;;)
             int size = ((String)obj1).length();
             return (distance <= ((size*APPROX_CRITERIA)/100));
         }
-        else if (m_hasBigNumbers && (obj1 instanceof BigInteger))
+        else if (obj1 instanceof BigInteger)
         {
             BigInteger value1 = (BigInteger)obj1;
             BigInteger value2 = (BigInteger)obj2;
@@ -1567,7 +1567,7 @@ loop:   for (;;)
             BigInteger high = value1.add(delta);
             return (value2.compareTo(low) >= 0) && (value2.compareTo(high) <= 0);
         }
-        else if (m_hasBigNumbers && (obj1 instanceof BigDecimal))
+        else if (m_hasBigDecimal && (obj1 instanceof BigDecimal))
         {
             BigDecimal value1 = (BigDecimal)obj1;
             BigDecimal value2 = (BigDecimal)obj2;
