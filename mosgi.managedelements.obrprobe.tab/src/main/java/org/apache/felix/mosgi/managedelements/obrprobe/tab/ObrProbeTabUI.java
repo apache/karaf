@@ -121,8 +121,10 @@ public class ObrProbeTabUI extends JPanel implements Plugin, BundleActivator {
   public Component getGUI(){return this;}
 
   public void propertyChange(PropertyChangeEvent e){
-   if (e.getPropertyName().equals(Plugin.NEW_NODE_CONNECTION)){
+System.out.println("TEST"+e.getPropertyName());	
+   if (e.getPropertyName().equals(Plugin.NEW_NODE_READY)){
      this.mbsc=(MBeanServerConnection)e.getNewValue();
+System.out.println("TESTE"+this.mbsc);	
    }else if(e.getPropertyName().equals(Plugin.EMPTY_NODE)){
      this.mbsc=null;
    }
