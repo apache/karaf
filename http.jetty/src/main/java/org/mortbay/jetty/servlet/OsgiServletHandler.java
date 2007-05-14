@@ -92,7 +92,17 @@ public class OsgiServletHandler
         else
         {
             //TODO: any other error/auth handling we should do in here?
-            response.flushBuffer();
+            
+            // response.flushBuffer() if available
+            try
+            {
+                response.getClass().getDeclaredMethod("flushBuffer", null).invoke(response, null);
+            } 
+            catch (Exception ex)
+            {
+                // else ignore
+                ex.printStackTrace();
+            }
         }
     }
 }
