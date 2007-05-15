@@ -18,12 +18,12 @@
  */
 package org.apache.felix.scr;
 
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -41,17 +41,14 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class Activator implements BundleActivator, SynchronousBundleListener
 {
-    // name of the LogService class
-    private static final String LOGSERVICE_CLASS = LogService.class.getName();
+    //  name of the LogService class (this is a string to not create a reference to the class)
+    private static final String LOGSERVICE_CLASS = "org.osgi.service.log.LogService";    
     
     // Flag that sets tracing messages
     private static boolean m_trace = true;
     
     // Flag that sets error messages
     private static boolean m_error = true;
-
-    // A string containing the version number
-    private static String m_version = "1.0.0 (20070320)";
 
     // this bundle's context
     private BundleContext m_context;
@@ -66,6 +63,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener
     // registry of managed component
     private ComponentRegistry m_componentRegistry;
 
+    //  thread acting upon configurations
+    private ComponentActorThread m_componentActor;
+    
     /**
      * Registers this instance as a (synchronous) bundle listener and loads the
      * components of already registered bundles.
@@ -92,6 +92,10 @@ public class Activator implements BundleActivator, SynchronousBundleListener
                 + context.getBundle().getHeaders().get( Constants.BUNDLE_VERSION ) + " ]", null );
         }
 
+        // create and start the component actor 
+        m_componentActor = new ComponentActorThread();
+        m_componentActor.start();
+
         // register for bundle updates
         context.addBundleListener(this);
 
@@ -107,16 +111,33 @@ public class Activator implements BundleActivator, SynchronousBundleListener
      * @param context The <code>BundleContext</code> of the SCR implementation
      *      bundle.
      */
-    public void stop(BundleContext context) throws Exception
+    public void stop( BundleContext context ) throws Exception
     {
         // unregister as bundle listener
-        context.removeBundleListener(this);
+        context.removeBundleListener( this );
 
         // 112.8.2 dispose off all active components
         disposeAllComponents();
 
         // dispose off the component registry
         m_componentRegistry.dispose();
+
+        // terminate the actor thread and wait for it for a limited time
+        if ( m_componentActor != null )
+        {
+            // terminate asynchrounous updates
+            m_componentActor.terminate();
+
+            // wait for all updates to terminate
+            try
+            {
+                m_componentActor.join( 5000 );
+            }
+            catch ( InterruptedException ie )
+            {
+                // don't really care
+            }
+        }
     }
 
     // ---------- BundleListener Interface -------------------------------------
@@ -184,7 +205,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
 
         try
         {
-            BundleComponentActivator ga = new BundleComponentActivator( m_componentRegistry, context );
+            BundleComponentActivator ga = new BundleComponentActivator( m_componentRegistry, m_componentActor, context );
             m_componentBundles.put(bundle.getSymbolicName(), ga);
         }
         catch (Exception e)
@@ -312,28 +333,22 @@ public class Activator implements BundleActivator, SynchronousBundleListener
      *
      * @param message a string to be displayed
      * @param metadata ComponentMetadata associated to the message (can be null)
-    **/
-    static void trace(String message, ComponentMetadata metadata)
+     **/
+    static void trace( String message, ComponentMetadata metadata )
     {
-        if(m_trace)
+        if ( m_trace )
         {
-            StringBuffer msg = new StringBuffer("--- ");
-            if(metadata != null) {
-                msg.append("[").append(metadata.getName()).append("] ");
+            StringBuffer msg = new StringBuffer( "--- " );
+            if ( metadata != null )
+            {
+                msg.append( "[" ).append( metadata.getName() ).append( "] " );
             }
-            msg.append(message);
+            msg.append( message );
 
-            LogService log = (LogService) m_logService.getService();
-            if (log == null)
-            {
-                System.out.println(msg);
-            }
-            else
-            {
-                log.log(LogService.LOG_DEBUG, msg.toString());
-            }
+            log( LogService.LOG_DEBUG, msg.toString(), null );
         }
     }
+
 
     /**
      * Method to display errors
@@ -341,57 +356,70 @@ public class Activator implements BundleActivator, SynchronousBundleListener
      * @param message a string to be displayed
      * @param metadata optional metadata providing more information to log
      **/
-    static void error(String message, ComponentMetadata metadata)
+    static void error( String message, ComponentMetadata metadata )
     {
-        if(m_error)
+        if ( m_error )
         {
-            StringBuffer msg = new StringBuffer("### ");
-            if(metadata != null) {
-                msg.append("[").append(metadata.getName()).append("] ");
+            StringBuffer msg = new StringBuffer( "### " );
+            if ( metadata != null )
+            {
+                msg.append( "[" ).append( metadata.getName() ).append( "] " );
             }
-            msg.append(message);
+            msg.append( message );
 
-            LogService log = (LogService) m_logService.getService();
-            if (log == null)
-            {
-                System.err.println(msg);
-            }
-            else
-            {
-                log.log(LogService.LOG_ERROR, msg.toString());
-            }
+            log( LogService.LOG_ERROR, msg.toString(), null );
         }
     }
+
 
     /**
      * Method to display exceptions
      *
      * @param ex an exception
-     **/   
-    static void exception(String message, ComponentMetadata metadata, Throwable ex)
+     **/
+    static void exception( String message, ComponentMetadata metadata, Throwable ex )
     {
-         if(m_error)
-         {
-             StringBuffer msg = new StringBuffer("--- ");
-             if(metadata != null) {
-                 msg.append("[").append(metadata.getName()).append("] ");
-             }
-             msg.append("Exception with component : ");
-             msg.append(message).append(" ---");
-             
-             LogService log = (LogService) m_logService.getService();
-             if (log == null)
-             {
-                 System.err.println(msg);
-                 if (ex != null)
-                 {
-                     ex.printStackTrace(System.err);
-                 }
-             }
-             else
-             {
-                 log.log(LogService.LOG_ERROR, msg.toString(), ex);
-             }
-         }      
+        if ( m_error )
+        {
+            StringBuffer msg = new StringBuffer( "--- " );
+            if ( metadata != null )
+            {
+                msg.append( "[" ).append( metadata.getName() ).append( "] " );
+            }
+            msg.append( "Exception with component : " );
+            msg.append( message ).append( " ---" );
+
+            log( LogService.LOG_ERROR, msg.toString(), ex );
+        }
+    }
+
+
+    /**
+     * Method to actually emit the log message. If the LogService is available,
+     * the message will be logged through the LogService. Otherwise the message
+     * is logged to stdout (or stderr in case of LOG_ERROR level messages),
+     * 
+     * @param level The log level to log the message at
+     * @param message The message to log
+     * @param ex An optional <code>Throwable</code> whose stack trace is written,
+     *      or <code>null</code> to not log a stack trace.
+     */
+    static void log( int level, String message, Throwable ex )
+    {
+
+        Object logger = m_logService.getService();
+        if ( logger == null )
+        {
+            PrintStream out = ( level == LogService.LOG_ERROR ) ? System.err : System.out;
+            out.println( message );
+            if ( ex != null )
+            {
+                ex.printStackTrace( out );
+            }
+        }
+        else
+        {
+            ( ( LogService ) logger ).log( level, message, ex );
+        }
     }
 }

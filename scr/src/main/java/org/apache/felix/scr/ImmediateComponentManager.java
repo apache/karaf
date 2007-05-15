@@ -87,21 +87,23 @@ class ImmediateComponentManager extends AbstractComponentManager
     // 2. Create the component instance and component context
     // 3. Bind the target services
     // 4. Call the activate method, if present
+    // if this method is overwritten, the deleteComponent method should
+    // also be overwritten
     protected void createComponent()
     {
         ComponentContext tmpContext = new ComponentContextImpl( this );
-        Object tmpObject = createImplementationObject( tmpContext );
+        Object tmpComponent = createImplementationObject( tmpContext );
         
         // if something failed craeating the object, we fell back to
         // unsatisfied !!
-        if (tmpObject != null) {
+        if (tmpComponent != null) {
             m_componentContext = tmpContext;
-            m_implementationObject = tmpObject;
+            m_implementationObject = tmpComponent;
         }
     }
     
     protected void deleteComponent() {
-        deactivateImplementationObject( m_implementationObject, m_componentContext );
+        disposeImplementationObject( m_implementationObject, m_componentContext );
         m_implementationObject = null;
         m_componentContext = null;
         m_properties = null;
@@ -189,7 +191,7 @@ class ImmediateComponentManager extends AbstractComponentManager
         return implementationObject;
     }
 
-    protected void deactivateImplementationObject( Object implementationObject, ComponentContext componentContext )
+    protected void disposeImplementationObject( Object implementationObject, ComponentContext componentContext )
     {
         // 1. Call the deactivate method, if present
         // Search for the activate method

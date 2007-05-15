@@ -79,11 +79,6 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         // not component to create, newInstance must be used instead
     }
 
-    public void reconfigure()
-    {
-        super.reconfigure();
-    }
-
     protected void deleteComponent()
     {
         // nothing to delete

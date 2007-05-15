@@ -30,20 +30,13 @@ import org.osgi.service.component.ComponentInstance;
 
 /**
  * The <code>ServiceFactoryComponentManager</code> TODO
- *
- * @author fmeschbe
- * @version $Rev$, $Date$
  */
 public class ServiceFactoryComponentManager extends ImmediateComponentManager implements ServiceFactory
 {
 
-    // we do not have to maintain references to the actual service
-    // instances as those are handled by the ServiceManager and given
-    // to the ungetService method when the bundle releases the service
-
-    // maintain the map of componentContext objects created for the
+    // maintain the map of ComponentContext objects created for the
     // service instances
-    private IdentityHashMap componentContexts = new IdentityHashMap();
+    private IdentityHashMap serviceContexts = new IdentityHashMap();
 
 
     /**
@@ -101,13 +94,13 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
         // When the getServiceMethod is called, the implementation object must be created
 
         // private ComponentContext and implementation instances
-        BundleComponentContext componentContext = new BundleComponentContext( this, bundle );
-        Object implementationObject = createImplementationObject( componentContext );
+        BundleComponentContext serviceContext = new BundleComponentContext( this, bundle );
+        Object service = createImplementationObject( serviceContext );
 
         // register the components component context if successfull
-        if (implementationObject != null) {
-            componentContext.setImplementationObject( implementationObject );
-            componentContexts.put( implementationObject, componentContext );
+        if (service != null) {
+            serviceContext.setImplementationObject( service );
+            serviceContexts.put( service, serviceContext );
 
             // if this is the first use of this component, switch to ACTIVE state
             if (getState() == STATE_REGISTERED)
@@ -116,7 +109,7 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
             }
         }
         
-        return implementationObject;
+        return service;
     }
 
 
@@ -129,11 +122,11 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
         // When the ungetServiceMethod is called, the implementation object must be deactivated
 
         // private ComponentContext and implementation instances
-        ComponentContext componentContext = ( ComponentContext ) componentContexts.remove( service );
-        deactivateImplementationObject( service, componentContext );
+        ComponentContext serviceContext = ( ComponentContext ) serviceContexts.remove( service );
+        disposeImplementationObject( service, serviceContext );
         
         // if this was the last use of the component, go back to REGISTERED state
-        if ( componentContexts.isEmpty() && getState() == STATE_ACTIVE )
+        if ( serviceContexts.isEmpty() && getState() == STATE_ACTIVE )
         {
             setState( STATE_REGISTERED );
         }

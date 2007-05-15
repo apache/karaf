@@ -47,6 +47,14 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
         // nothing to do here for a delayed component, will be done in the
         // getService method for the first bundle acquiring the component
     }
+
+    protected void deleteComponent()
+    {
+        // only have to delete, if there is actually an instance
+        if (getInstance() != null) {
+            super.deleteComponent();
+        }
+    }
     
     protected Object getService()
     {

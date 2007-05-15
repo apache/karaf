@@ -24,20 +24,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
-
-import javax.naming.ConfigurationException;
 
 import org.apache.felix.scr.parser.KXml2SAXParser;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -59,6 +54,9 @@ class BundleComponentActivator
     // The Configuration Admin tracker providing configuration for components
     private ServiceTracker m_configurationAdmin;
 
+    // thread acting upon configurations
+    private ComponentActorThread m_componentActor;
+    
     /**
      * Called upon starting of the bundle. This method invokes initialize() which
      * parses the metadata and creates the instance managers
@@ -70,27 +68,26 @@ class BundleComponentActivator
      * 
      * @throws ComponentException if any error occurrs initializing this class
      */
-    BundleComponentActivator(ComponentRegistry componentRegistry, BundleContext context) throws ComponentException
+    BundleComponentActivator( ComponentRegistry componentRegistry, ComponentActorThread componentActor,
+        BundleContext context ) throws ComponentException
     {
-        // The global "Component" registry
-        this.m_componentRegistry = componentRegistry;
-        
-    	// Stores the context
+        // keep the parameters for later
+        m_componentRegistry = componentRegistry;
+        m_componentActor = componentActor;
         m_context = context;
-        
+
         // have the Configuration Admin Service handy (if available)
-        m_configurationAdmin = new ServiceTracker(context, ConfigurationAdmin.class.getName(), null);
+        m_configurationAdmin = new ServiceTracker( context, ConfigurationAdmin.class.getName(), null );
         m_configurationAdmin.open();
-        
+
         // Get the Metadata-Location value from the manifest
-        String descriptorLocations =
-            (String) m_context.getBundle().getHeaders().get("Service-Component");
-        if (descriptorLocations == null)
+        String descriptorLocations = ( String ) m_context.getBundle().getHeaders().get( "Service-Component" );
+        if ( descriptorLocations == null )
         {
-            throw new ComponentException("Service-Component entry not found in the manifest");
+            throw new ComponentException( "Service-Component entry not found in the manifest" );
         }
 
-        initialize(descriptorLocations);
+        initialize( descriptorLocations );
     }
 
     /**
@@ -138,39 +135,46 @@ class BundleComponentActivator
                     ComponentMetadata metadata = (ComponentMetadata) i.next();
                 	try
                     {
+                        // check and reserve the component name
+                        m_componentRegistry.checkComponentName( metadata.getName() );
+                        
                         // validate the component metadata
-    		            validate(metadata);
+                        metadata.validate();
     		        	
     	                // Request creation of the component manager
     	                ComponentManager manager;
-                        
-                        if (metadata.isFactory()) {
-                            // 112.2.4 SCR must register a Component Factory service on behalf ot the component
+                        if ( metadata.isFactory() )
+                        {
+                            // 112.2.4 SCR must register a Component Factory
+                            // service on behalf ot the component
                             // as soon as the component factory is satisfied
-                            manager = new ComponentFactoryImpl(this, metadata, m_componentRegistry);
-                        } else {
+                            manager = new ComponentFactoryImpl( this, metadata, m_componentRegistry );
+                        }
+                        else
+                        {
                             manager = ManagerFactory.createManager( this, metadata, m_componentRegistry
-                            .createComponentId() );
+                                .createComponentId() );
                         }
                 		
                         // register the component after validation
                         m_componentRegistry.registerComponent( metadata.getName(), manager );
+                        m_managers.add( manager );
                         
                         // enable the component
-                		if(metadata.isEnabled())
+                        if ( metadata.isEnabled() )
                         {
-		                	manager.enable();
-		                }
-
-                		// register the manager
-                		m_managers.add(manager);
+                            manager.enable();
+                        }
                     }
-                    catch (Exception e)
+                    catch (Throwable t)
                     {
 						// There is a problem with this particular component, we'll log the error
 	                	// and proceed to the next one
-                        Activator.exception("Cannot register Component", metadata, e);
-					} 
+                        Activator.exception("Cannot register Component", metadata, t);
+                        
+                        // make sure the name is not reserved any more
+                        m_componentRegistry.unregisterComponent( metadata.getName() );
+					}
 		        }
 			}
 			catch ( IOException ex )
@@ -295,25 +299,18 @@ class BundleComponentActivator
         {
             return;
         }
-        
-        Thread enabler = new Thread("Component Enabling") 
+
+        for ( int i = 0; i < cm.length; i++ )
         {
-            public void run()
+            try
             {
-                for (int i=0; i < cm.length; i++)
-                {
-                    try
-                    {
-                        cm[i].enable();
-                    }
-                    catch (Throwable t) 
-                    {
-                        Activator.exception( "Cannot enable component", cm[i].getComponentMetadata(), t );
-                    }
-                }
+                cm[i].enable();
             }
-        };
-        enabler.start();
+            catch ( Throwable t )
+            {
+                Activator.exception( "Cannot enable component", cm[i].getComponentMetadata(), t );
+            }
+        }
     }
     
     /**
@@ -335,25 +332,17 @@ class BundleComponentActivator
             return;
         }
         
-        Thread disabler = new Thread("Component Disabling")
+        for ( int i = 0; i < cm.length; i++ )
         {
-            public void run()
+            try
             {
-                for (int i=0; i < cm.length; i++)
-                {
-                    try
-                    {
-                        cm[i].disable();
-                    }
-                    catch (Throwable t)
-                    {
-                        Activator.exception("Cannot disable component",
-                            cm[i].getComponentMetadata(), t);
-                    }
-                }
+                cm[i].disable();
             }
-        };
-        disabler.start();
+            catch ( Throwable t )
+            {
+                Activator.exception( "Cannot disable component", cm[i].getComponentMetadata(), t );
+            }
+        }
     }
     
     /**
@@ -395,34 +384,36 @@ class BundleComponentActivator
         return null;
     }
 
+    //---------- Asynchronous Component Handling ------------------------------
+
     /**
-     * This method is used to validate that the component. This method verifies multiple things:
+     * Schedules the given <code>task</code> for asynchrounous execution or
+     * synchronously runs the task if the thread is not running.
      * 
-     * 1.- That the name attribute is set and is globally unique
-     * 2.- That an implementation class name has been set 
-     * 3.- That a delayed component provides a service and is not specified to be a factory
-     * - That the serviceFactory attribute for the provided service is not true if the component is a factory or immediate
-     * 
-     * If the component is valid, its name is registered
-     * 
-     * @throws A ComponentException if something is not right
+     * @param task The component task to execute
      */
-    void validate(ComponentMetadata component) throws ComponentException
+    void schedule( Runnable task )
     {
-
-        m_componentRegistry.checkComponentName( component.getName() );
-    	
-        try
+        ComponentActorThread cat = m_componentActor;
+        if ( cat != null )
         {
-            component.validate();
+            cat.schedule( task );
         }
-        catch ( ComponentException ce )
+        else
         {
-            // remove the reservation before leaving
-            m_componentRegistry.unregisterComponent( component.getName() );
-            throw ce;
+            Activator.log( LogService.LOG_INFO, "Component Actor Thread not running, calling synchronously", null );
+            try
+            {
+                synchronized ( this )
+                {
+                    task.run();
+                }
+            }
+            catch ( Throwable t )
+            {
+                Activator.log( LogService.LOG_INFO, "Unexpected problem executing task", t );
+            }
         }
-
-        Activator.trace( "Validated and registered component", component );
     }
+
 }

@@ -29,10 +29,8 @@ public interface ComponentManager {
 	
 	/**
 	 * Enable the component
-	 * 
-	 * @return true if it was succesfully enabled, false otherwise
 	 */
-	public boolean enable();
+	public void enable();
 	
     /**
      * Reconfigure the component with configuration data newly retrieved from

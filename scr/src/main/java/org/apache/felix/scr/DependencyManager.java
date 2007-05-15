@@ -613,7 +613,7 @@ class DependencyManager implements ServiceListener
             m_tracked.put( reference, service );
         }
 
-        // forward the event if in event hanlding state
+        // forward the event if in event handling state
         if ( handleServiceEvent() )
         {
 
