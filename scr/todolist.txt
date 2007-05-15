@@ -1,15 +1,15 @@
 Component Description
 
 112.4.1 Service Component Header 
-[    ] Process multi-entry (comma separated) header
+[ OK ] Process multi-entry (comma separated) header
 [    ] Support fragments
-[    ] Log error with log service in case header cannot be located
+[ OK ] Log error with log service in case header cannot be located
 
 112.4.2 XML Document
 [    ] Use document namespace
 
 112.4.3 Component Element
-[    ] Verify that the name of a component is globally unique
+[ ok ] Verify that the name of a component is globally unique
 [ OK ] Enabled set to true when not present
 [ OK ] Support null factory attribute
 [ OK ] Immediate set to false by default
@@ -19,7 +19,7 @@ Component Description
 
 112.4.5 Properties and Property Elements
 [ OK ] Support property
-[    ] Support Configuration Admin's service
+[ OK ] Support Configuration Admin's service
 [    ] Element body with multiple lines
 [    ] Support properties (file)
 
@@ -42,23 +42,23 @@ Component Lifecycle
 [ OK ] 112.5.2 Satisfied
 [ OK ] 112.5.3 Immediate
 [ OK ] 112.5.4 Delayed
-[    ] 112.5.5 Factory
+[ OK ] 112.5.5 Factory
 [ OK ] 112.5.6 Activation
 [ OK ] 112.5.7 Binding Services
 [ OK ] 112.5.8 Activate Method
-[    ] 112.5.9 Component Context
-[    ] 112.5.10 Bound Service Replacement
-[    ] 112.5.11 Deactivation
+[ OK ] 112.5.9 Component Context
+[ OK ] 112.5.10 Bound Service Replacement
+[ OK ] 112.5.11 Deactivation
 [ OK ] 112.5.12 Deactivate Method
 [ OK ] 112.5.13 Unbinding
 
-[    ] 112.6 Component Properties
+[ OK ] 112.6 Component Properties
 [    ] 112.7 Deployment
 
 Service Component Runtime
 
-[    ] 112.8.1 Relationship to OSGi Framework
-[    ] 112.8.2 Starting and Stopping SCR
+[ OK ] 112.8.1 Relationship to OSGi Framework
+[ OK ] 112.8.2 Starting and Stopping SCR
 
 Security
 
