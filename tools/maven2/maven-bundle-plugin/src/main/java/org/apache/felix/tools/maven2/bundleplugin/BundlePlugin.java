@@ -97,10 +97,6 @@ public class BundlePlugin extends AbstractMojo {
  public void execute() throws MojoExecutionException {
   Properties properties = new Properties();
 
-  if (new File(baseDir, "src/main/resources").exists()) {
-    header(properties, Analyzer.INCLUDE_RESOURCE, "src/main/resources/");
-  }
-  
   /* ignore project types not supported, useful when the plugin is configured in the parent pom */
   if (!SUPPORTED_PROJECT_TYPES.contains(getProject().getArtifact().getType())) {
     getLog().debug("Ignoring project " + getProject().getArtifact() + " : type not supported by bundle plugin");
@@ -122,7 +118,6 @@ public class BundlePlugin extends AbstractMojo {
  /* transform directives from their XML form to the expected BND syntax (eg. _include becomes -include) */
  protected Map transformDirectives(Map instructions) {
   Set removedKeys = new HashSet();
-//System.out.println("BEFORE "+instructions);
   for (Iterator i = instructions.entrySet().iterator(); i.hasNext();) {
     final Map.Entry e = (Map.Entry)i.next();
     final String key = (String)e.getKey();
@@ -136,7 +131,6 @@ public class BundlePlugin extends AbstractMojo {
     }
   }
   instructions.keySet().removeAll(removedKeys);
-//System.out.println("AFTER "+instructions);
   return instructions;
  }
 
@@ -153,6 +147,17 @@ public class BundlePlugin extends AbstractMojo {
 
    properties.putAll(transformDirectives(instructions));
  
+   // pass maven resource paths onto BND analyzer
+   String mavenResourcePaths = getMavenResourcePaths();
+   if (mavenResourcePaths.length() > 0) {
+     final String includeResource = (String)properties.get(Analyzer.INCLUDE_RESOURCE);
+     if (includeResource != null) {
+       properties.put(Analyzer.INCLUDE_RESOURCE, includeResource + ',' + mavenResourcePaths);
+     } else {
+       properties.put(Analyzer.INCLUDE_RESOURCE, mavenResourcePaths);
+     }
+   }
+  
    Builder builder = new Builder();
    builder.setBase(baseDir);
    builder.setProperties(properties);
@@ -465,5 +470,46 @@ public class BundlePlugin extends AbstractMojo {
 
  void setOutputDirectory(File outputDirectory){
      this.outputDirectory = outputDirectory;
+ }
+
+ String getMavenResourcePaths()
+ {
+     final String basePath = baseDir.getAbsolutePath();
+
+     StringBuffer resourcePaths = new StringBuffer();
+     for (Iterator i = project.getResources().iterator(); i.hasNext();) {
+         org.apache.maven.model.Resource resource = (org.apache.maven.model.Resource)i.next();
+
+         final String sourcePath = resource.getDirectory();
+         final String targetPath = resource.getTargetPath();
+
+         // ignore empty or non-local resources
+         if (new File(sourcePath).exists() && ((targetPath == null) || (targetPath.indexOf("..") < 0))) {
+             String path = sourcePath;
+
+             // make relative to basedir
+             if (path.startsWith(basePath)) {
+                 path = path.substring(basePath.length() + 1);
+             }
+
+             if (targetPath != null) {
+                 path = targetPath + '=' + path;
+             }
+
+             if (resourcePaths.length() > 0) {
+                 resourcePaths.append(',');
+             }
+
+             if (resource.isFiltering()) {
+               resourcePaths.append('{');
+               resourcePaths.append(path);
+               resourcePaths.append('}');
+             } else {
+               resourcePaths.append(path);
+             }
+         }
+     }
+
+     return resourcePaths.toString();
  }
 }
