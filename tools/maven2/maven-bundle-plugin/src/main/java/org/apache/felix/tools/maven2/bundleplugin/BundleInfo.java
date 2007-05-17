@@ -49,7 +49,7 @@ public class BundleInfo
         artifacts.add( artifact );
     }
 
-    private Map getExportedPackages()
+    Map getExportedPackages()
     {
         return exportedPackages;
     }

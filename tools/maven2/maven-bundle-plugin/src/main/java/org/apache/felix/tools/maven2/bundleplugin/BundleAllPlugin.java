@@ -20,6 +20,7 @@ package org.apache.felix.tools.maven2.bundleplugin;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -261,13 +262,30 @@ public class BundleAllPlugin
 
             Analyzer analyzer = getAnalyzer( project, getClasspath( project ) );
 
-            BundleInfo bundleInfo = addExportedPackages( project, analyzer.getExports().keySet() );
-
             Jar osgiJar = new Jar( project.getArtifactId(), project.getArtifact().getFile() );
-            Manifest manifest = analyzer.getJar().getManifest();
-            osgiJar.setManifest( manifest );
+
+            Collection exportedPackages;
+            if ( isOsgi( osgiJar ) )
+            {
+                /* if it is already an OSGi jar copy it as is */
+                getLog().info(
+                               "Using existing OSGi bundle for " + project.getGroupId() + ":" + project.getArtifactId()
+                                   + ":" + project.getVersion() );
+                String exportHeader = osgiJar.getManifest().getMainAttributes().getValue( Analyzer.EXPORT_PACKAGE );
+                exportedPackages = analyzer.parseHeader( exportHeader ).keySet();
+            }
+            else
+            {
+                /* else generate the mainfest from the packages */
+                exportedPackages = analyzer.getExports().keySet();
+                Manifest manifest = analyzer.getJar().getManifest();
+                osgiJar.setManifest( manifest );
+            }
+
             outputFile.getParentFile().mkdirs();
             osgiJar.write( outputFile );
+
+            BundleInfo bundleInfo = addExportedPackages( project, exportedPackages );
 
             return bundleInfo;
         }
@@ -277,6 +295,12 @@ public class BundleAllPlugin
             throw new MojoExecutionException( "Error generating OSGi bundle for project "
                 + getArtifactKey( project.getArtifact() ), e );
         }
+    }
+
+    private boolean isOsgi( Jar jar )
+        throws IOException
+    {
+        return jar.getManifest().getMainAttributes().getValue( Analyzer.BUNDLE_NAME ) != null;
     }
 
     private BundleInfo addExportedPackages( MavenProject project, Collection packages )
