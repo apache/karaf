@@ -42,7 +42,7 @@
   <dependency>
    <groupId>biz.aQute</groupId>
    <artifactId>bndlib</artifactId>
-   <version>0.0.138</version>
+   <version>0.0.140</version>
   </dependency>
   <dependency>
    <groupId>junit</groupId>
