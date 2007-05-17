@@ -126,6 +126,9 @@ public class BundlePlugin extends AbstractMojo {
   for (Iterator i = instructions.entrySet().iterator(); i.hasNext();) {
     final Map.Entry e = (Map.Entry)i.next();
     final String key = (String)e.getKey();
+    if (e.getValue() == null) {
+      e.setValue("");
+    }
     if (key.startsWith("_")) {
       final String transformedKey = "-"+key.substring(1);
       instructions.put(transformedKey, e.getValue());
