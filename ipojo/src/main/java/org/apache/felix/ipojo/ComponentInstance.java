@@ -32,6 +32,11 @@ import org.osgi.framework.BundleContext;
 public interface ComponentInstance {
 
     /**
+     * Component Instance State : DISPOSED. The instance was destroyed.
+     */
+    int DISPOSED = -1;
+    
+    /**
      * Component Instance State : STOPPED. The component instance is not
      * started.
      */
@@ -116,5 +121,17 @@ public interface ComponentInstance {
      * @param configuration : the new configuration.
      */
     void reconfigure(Dictionary configuration);
+    
+    /**
+     * Add an instance state listener on the current instance.
+     * @param listener : the listener to add.
+     */
+    void addInstanceStateListener(InstanceStateListener listener);
+    
+    /**
+     * Remove an instance state listener on the current instance.
+     * @param listener : the listener to remove.
+     */
+    void removeInstanceStateListener(InstanceStateListener listener);
 
 }

@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo;
 
+import org.apache.felix.ipojo.composite.instance.InstanceHandler;
 import org.apache.felix.ipojo.composite.service.importer.ImportExportHandler;
 import org.apache.felix.ipojo.composite.service.instantiator.ServiceInstantiatorHandler;
 import org.apache.felix.ipojo.handlers.architecture.ArchitectureHandler;
@@ -56,6 +57,7 @@ public class IPojoConfiguration {
     public static final Class[] INTERNAL_COMPOSITE_HANDLERS = new Class[] { 
         ServiceInstantiatorHandler.class, 
         ImportExportHandler.class,
+        InstanceHandler.class,
         org.apache.felix.ipojo.composite.service.provides.ProvidedServiceHandler.class,
         org.apache.felix.ipojo.composite.architecture.ArchitectureHandler.class
     };

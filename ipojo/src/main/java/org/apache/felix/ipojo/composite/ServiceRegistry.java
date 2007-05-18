@@ -242,8 +242,7 @@ public class ServiceRegistry {
                 ServiceReference[] refs = getServiceReferences(clazz, null);
                 if (refs != null) {
                     return refs[0];
-                } // If the refs != null we are sure that it exist one
-                // references or more.
+                } // If the refs != null we are sure that it exists one reference or more.
             } catch (InvalidSyntaxException ex) {
                 System.err.println("Scope Service Registry : Problem when look for service reference" + ex.getMessage());
             }

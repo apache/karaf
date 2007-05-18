@@ -185,11 +185,10 @@ public class SvcInstance implements ServiceListener {
                 String k = (String) kk.nextElement();
                 p.put(k, m_configuration.get(k));
             }
-            
             ComponentInstance instance = factory.createComponentInstance(p);
             m_usedRef.put(ref, instance);
             m_context.ungetService(ref);
-        } catch (UnacceptableConfiguration e) {
+        } catch (Throwable e) {
             m_handler.getManager().getFactory().getLogger().log(Logger.ERROR,
                     "A matching factory (" + ref.getProperty("service.pid") + ") seems to refuse the given configuration : " + e.getMessage());
         }

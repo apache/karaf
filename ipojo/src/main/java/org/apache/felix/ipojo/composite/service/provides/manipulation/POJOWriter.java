@@ -196,7 +196,11 @@ public class POJOWriter implements Opcodes {
             }
 
             // Invoke
-            mv.visitMethodInsn(INVOKEINTERFACE, delegator.getSpecification().getName().replace('.', '/'), name, desc);
+            if (delegator.getSpecification().isInterface()) {
+                mv.visitMethodInsn(INVOKEINTERFACE, delegator.getSpecification().getName().replace('.', '/'), name, desc);
+            } else {
+                mv.visitMethodInsn(INVOKEVIRTUAL, delegator.getSpecification().getName().replace('.', '/'), name, desc);
+            }
 
             // Return
             writeReturn(Type.getReturnType(desc), mv);

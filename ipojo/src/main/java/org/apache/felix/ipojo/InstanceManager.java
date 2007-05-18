@@ -81,6 +81,11 @@ public class InstanceManager implements ComponentInstance {
      * Instances of the components.
      */
     private Object[] m_pojoObjects = new Object[0];
+    
+    /**
+     * Instance State Listener List.
+     */
+    private InstanceStateListener[] m_instanceListeners = new InstanceStateListener[0];
 
     /**
      * Component type information.
@@ -127,7 +132,7 @@ public class InstanceManager implements ComponentInstance {
 
         // Add the name
         m_name = (String) configuration.get("name");
-
+        
         // Create the standard handlers and add these handlers to the list
         for (int i = 0; i < IPojoConfiguration.INTERNAL_HANDLERS.length; i++) {
             // Create a new instance
@@ -260,6 +265,9 @@ public class InstanceManager implements ComponentInstance {
         m_pojoObjects = new Object[0];
 
         m_state = STOPPED;
+        for (int i = 0; i < m_instanceListeners.length; i++) {
+            m_instanceListeners[i].stateChanged(this, STOPPED);
+        }
     }
     
     /** 
@@ -267,22 +275,44 @@ public class InstanceManager implements ComponentInstance {
      * @see org.apache.felix.ipojo.ComponentInstance#dispose()
      */
     public void dispose() {
-        if (m_state != STOPPED) {
+        if (m_state > STOPPED) { // Valid or invalid
             stop();
         }
         
-        m_factory.stopped(this);
+        for (int i = 0; i < m_instanceListeners.length; i++) {
+            m_instanceListeners[i].stateChanged(this, DISPOSED);
+        }
+        
+        m_factory.disposed(this);
 
         // Cleaning
-        m_factory = null;
-        m_name = null;
-        m_className = null;
-        m_context = null;
-        m_handlers = null;
-        m_fieldRegistration = null;
+        m_handlers = new Handler[0];
+        m_fieldRegistration = new HashMap();
         m_clazz = null;
-        m_pojoObjects = null;
-        m_componentDesc = null;
+        m_pojoObjects = new Object[0];
+        m_instanceListeners = new InstanceStateListener[0];
+    }
+    
+    /**
+     * Kill the current instance.
+     * Only the factory of this instance can call this method.
+     */
+    protected void kill() {
+        if (m_state > STOPPED) {
+            stop();
+        }
+        
+        for (int i = 0; i < m_instanceListeners.length; i++) {
+            m_instanceListeners[i].stateChanged(this, DISPOSED);
+        }
+
+        // Cleaning
+        m_state = DISPOSED;
+        m_handlers = new Handler[0];
+        m_fieldRegistration = new HashMap();
+        m_clazz = null;
+        m_pojoObjects = new Object[0];
+        m_instanceListeners = new InstanceStateListener[0];
     }
 
     /**
@@ -306,6 +336,10 @@ public class InstanceManager implements ComponentInstance {
             for (int i = m_handlers.length - 1; i > -1; i--) {
                 m_handlers[i].stateChanged(state);
             }
+            
+            for (int i = 0; i < m_instanceListeners.length; i++) {
+                m_instanceListeners[i].stateChanged(this, state);
+            }
         }
     }
 
@@ -324,7 +358,57 @@ public class InstanceManager implements ComponentInstance {
      * @see org.apache.felix.ipojo.ComponentInstance#isStarted()
      */
     public boolean isStarted() {
-        return m_state != STOPPED;
+        return m_state > STOPPED;
+    }
+    
+    /**
+     * Add an instance to the created instance list.
+     * @param listener : the instance state listener to add.
+     * @see org.apache.felix.ipojo.ComponentInstance#addInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
+     */
+    public void addInstanceStateListener(InstanceStateListener listener) {
+        for (int i = 0; (m_instanceListeners != null) && (i < m_instanceListeners.length); i++) {
+            if (m_instanceListeners[i] == listener) {
+                return;
+            }
+        }
+
+        if (m_instanceListeners.length > 0) {
+            InstanceStateListener[] newInstances = new InstanceStateListener[m_instanceListeners.length + 1];
+            System.arraycopy(m_instanceListeners, 0, newInstances, 0, m_instanceListeners.length);
+            newInstances[m_instanceListeners.length] = listener;
+            m_instanceListeners = newInstances;
+        } else {
+            m_instanceListeners = new InstanceStateListener[] { listener };
+        }
+    }
+    
+    /**
+     * Remove an instance state listener.
+     * @param listener : the listener to remove
+     * @see org.apache.felix.ipojo.ComponentInstance#removeInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
+     */
+    public void removeInstanceStateListener(InstanceStateListener listener) {
+        int idx = -1;
+        for (int i = 0; i < m_instanceListeners.length; i++) {
+            if (m_instanceListeners[i] == listener) {
+                idx = i;
+                break;
+            }
+        }
+        
+        if (idx >= 0) {
+            if ((m_instanceListeners.length - 1) == 0) {
+                m_instanceListeners = new InstanceStateListener[0];
+            } else {
+                InstanceStateListener[] newInstances = new InstanceStateListener[m_instanceListeners.length - 1];
+                System.arraycopy(m_instanceListeners, 0, newInstances, 0, idx);
+                if (idx < newInstances.length) {
+                    System.arraycopy(m_instanceListeners, idx + 1, newInstances, idx, newInstances.length - idx);
+                }
+                m_instanceListeners = newInstances;
+            }
+        }
     }
 
     // ===================== end Lifecycle management =====================
@@ -398,7 +482,7 @@ public class InstanceManager implements ComponentInstance {
 
         if (idx >= 0) {
             if ((m_pojoObjects.length - 1) == 0) {
-                m_pojoObjects = new Element[0];
+                m_pojoObjects = new Object[0];
             } else {
                 Object[] newInstances = new Object[m_pojoObjects.length - 1];
                 System.arraycopy(m_pojoObjects, 0, newInstances, 0, idx);
@@ -478,8 +562,6 @@ public class InstanceManager implements ComponentInstance {
             m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the constructor (method not found) : " + e.getMessage());
             e.printStackTrace();
         }
-
-        m_factory.getLogger().log(Logger.INFO, "[" + m_name + "] createInstance -> Return the instance " + instance);
 
         // Register the new instance
         addInstance(instance);
@@ -689,13 +771,14 @@ public class InstanceManager implements ComponentInstance {
      * Check the state of all handlers.
      */
     public void checkInstanceState() {
-        m_factory.getLogger().log(Logger.INFO, "[" + m_name + "] Check the instance state");
+        if (!isStarted()) { return; }
+        
         boolean isValid = true;
         for (int i = 0; i < m_handlers.length; i++) {
             boolean b = m_handlers[i].isValid();
             isValid = isValid && b;
         }
-
+     
         // Update the component state if necessary
         if (!isValid && m_state == VALID) {
             // Need to update the state to UNRESOLVED

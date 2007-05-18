@@ -212,6 +212,9 @@ public class InstanceDescription {
         if (m_state == ComponentInstance.INVALID) {
             instance.addAttribute(new Attribute("state", "invalid"));
         }
+        if (m_state == ComponentInstance.DISPOSED) {
+            instance.addAttribute(new Attribute("state", "disposed"));
+        }
         // Bundle
         instance.addAttribute(new Attribute("bundle", "" + m_bundleId));
 

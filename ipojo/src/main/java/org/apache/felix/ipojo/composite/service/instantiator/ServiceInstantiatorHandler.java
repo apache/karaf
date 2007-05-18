@@ -148,8 +148,8 @@ public class ServiceInstantiatorHandler extends CompositeHandler {
         if (!m_isValid) {
             if (isValid()) {
                 m_manager.checkInstanceState();
+                m_isValid = true;
             }
-            m_isValid = true;
         }
     }
 
@@ -160,8 +160,8 @@ public class ServiceInstantiatorHandler extends CompositeHandler {
         if (m_isValid) {
             if (!isValid()) {
                 m_manager.checkInstanceState();
+                m_isValid = false;
             }
-            m_isValid = false;
         }
     }
 

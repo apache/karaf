@@ -613,8 +613,10 @@ public class Dependency implements ServiceListener {
      * Stop the dependency.
      */
     public void stop() {
+        m_handler.getInstanceManager().getContext().removeServiceListener(this);
+        
         m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO,
-                "[" + m_handler.getInstanceManager().getClassName() + "] Stop a dependency on : " + m_specification + " with " + m_strFilter);
+                "[" + m_handler.getInstanceManager().getInstanceName() + "] Stop a dependency on : " + m_specification + " with " + m_strFilter + " (" + m_handler.getInstanceManager() + ")");
         m_state = UNRESOLVED;
 
         // Unget all services references
@@ -623,7 +625,6 @@ public class Dependency implements ServiceListener {
         }
 
         m_ref = new ServiceReference[0];
-        m_handler.getInstanceManager().getContext().removeServiceListener(this);
         m_clazz = null;
         m_services = new Object[0];
     }

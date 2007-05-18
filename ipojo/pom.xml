@@ -17,6 +17,12 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <version>0.9.0-incubator-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>asm</groupId>
       <artifactId>asm</artifactId>
       <version>2.2.1</version>
@@ -39,13 +45,14 @@
             <Bundle-Vendor>Clement ESCOFFIER</Bundle-Vendor>
             <Bundle-Description> iPOJO </Bundle-Description>
             <Import-Package>
-              org.osgi.framework; version="1.3", 
-              org.osgi.service.cm; version="1.2",
-              org.osgi.service.log; version="1.3"
+              org.osgi.framework, 
+              org.osgi.service.cm,
+              org.osgi.service.log
             </Import-Package>
             <Private-Package>
     			org.apache.felix.ipojo.composite.architecture,
     			org.apache.felix.ipojo.composite.service*,
+    			org.apache.felix.ipojo.composite.instance,
     			org.apache.felix.ipojo.handlers.architecture,
     			org.apache.felix.ipojo.handlers.configuration,
     			org.apache.felix.ipojo.handlers.dependency.nullable,
@@ -61,8 +68,8 @@
               org.apache.felix.ipojo.handlers.dependency; version="0.7.1",
               org.apache.felix.ipojo.handlers.providedservice; version="0.7.1", 
               org.apache.felix.ipojo.composite; version="0.7.1",
-              org.osgi.service.cm; version="1.2",
-              org.osgi.service.log; version="1.3"
+              org.osgi.service.cm,
+              org.osgi.service.log
             </Export-Package>
           </instructions>
         </configuration>

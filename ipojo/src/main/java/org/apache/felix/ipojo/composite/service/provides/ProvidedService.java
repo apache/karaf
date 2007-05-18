@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.composite.service.provides;
 
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentFactory;
@@ -25,7 +26,9 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.CompositeManager;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.UnacceptableConfiguration;
+import org.apache.felix.ipojo.composite.instance.InstanceHandler;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
@@ -79,6 +82,11 @@ public class ProvidedService {
      * Exporter.
      */
     private ServiceExporter m_exports;
+    
+    /**
+     * Created instance name.
+     */
+    private String m_instanceName;
 
     /**
      * Constructor.
@@ -92,36 +100,28 @@ public class ProvidedService {
         m_scope = m_manager.getServiceContext();
         m_context = m_manager.getContext();
         m_composition = new CompositionMetadata(m_manager.getContext(), element, handler, name);
-        try {
-            m_composition.buildMapping();
-        } catch (CompositionException e) {
-            return;
-        }
     }
 
     /**
      * Start method.
      * Build service implementation type, factory and instance.
+     * @throws CompositionException if a consistent mapping cannot be discovered.
      */
-    public void start() {
-        String name = m_composition.getSpecificationMetadata().getName() + "Provider";
+    public void start() throws CompositionException {
+        m_composition.buildMapping();
+        
+        m_instanceName = m_composition.getSpecificationMetadata().getName() + "Provider";
         m_clazz = m_composition.buildPOJO();
-        m_metadata = m_composition.buildMetadata(name);
+        m_metadata = m_composition.buildMetadata(m_instanceName);
 
         // Create the factory
         m_factory = new ComponentFactory(m_context, m_clazz, m_metadata);
         m_factory.start();
 
-        Properties p = new Properties();
-        p.put("name", name);
-        try {
-            m_instance = m_factory.createComponentInstance(p, m_scope);
-        } catch (UnacceptableConfiguration e) {
-            return;
-        }
         // Create the exports
-        m_exports = new ServiceExporter(m_composition.getSpecificationMetadata().getName(), "(" + Constants.SERVICE_PID + "=" + name + ")", false, false,
+        m_exports = new ServiceExporter(m_composition.getSpecificationMetadata().getName(), "(" + Constants.SERVICE_PID + "=" + m_instanceName + ")", false, false,
                 m_scope, m_context, this);
+        m_exports.start();
     }
 
     /**
@@ -165,9 +165,9 @@ public class ProvidedService {
      * Unregister published service.
      */
     protected void unregister() {
-        if (m_exports != null) {
-            m_instance.stop();
-            m_exports.stop();
+        if (m_instance != null) {
+            m_instance.dispose();
+            m_instance = null;
         }
     }
 
@@ -176,9 +176,40 @@ public class ProvidedService {
      */
     protected void register() {
         if (m_exports != null) {
-            m_instance.start();
-            m_exports.start();
+            if (m_instance != null) { m_instance.dispose(); }
+            Properties p = new Properties();
+            p.put("name", m_instanceName);
+            List fields = m_composition.getFieldList();
+            for (int i = 0; i < fields.size(); i++) {
+                FieldMetadata fm = (FieldMetadata) fields.get(i);
+                if (fm.isUseful() && !fm.getSpecification().isInterface()) {
+                    String type = fm.getSpecification().getComponentType();
+                    Object o = getObjectByType(type);
+                    p.put(fm.getName(), o); 
+                }
+            }
+            try {
+                m_instance = m_factory.createComponentInstance(p, m_scope);
+            } catch (UnacceptableConfiguration e) {
+                e.printStackTrace();
+                return;
+            }
         }
+    }
+
+    /**
+     * Get an object from the given type.
+     * @param type : type
+     * @return an object from an instance of this type or null
+     */
+    private Object getObjectByType(String type) {
+        InstanceHandler h = (InstanceHandler) m_manager.getCompositeHandler("org.apache.felix.ipojo.composite.instance.InstanceHandler");
+        Object o = h.getObjectFromInstance(type);
+        if (o == null) {
+            m_manager.getFactory().getLogger().log(Logger.ERROR, "An instance object cannot be found for the type : " + type);
+        }
+        return o;
+        
     }
 
     public String getSpecification() {

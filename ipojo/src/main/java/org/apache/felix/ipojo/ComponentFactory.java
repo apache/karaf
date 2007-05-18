@@ -109,11 +109,6 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * Logger for the factory (and all component instance).
      */
     private Logger m_logger;
-
-    /**
-     * True when the factory is active (non stopping and non starting).
-     */
-    private boolean m_active = false;
     
     /**
      * Index used to generate instance name if not set.
@@ -289,34 +284,36 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * Stop all the instance managers.
      */
     public synchronized void stop() {
-        m_active = false;
         Collection col = m_componentInstances.values();
         Iterator it = col.iterator();
         while (it.hasNext()) {
             ComponentInstance ci = (ComponentInstance) it.next();
             if (ci.isStarted()) {
-                ci.dispose();
+                if (ci instanceof CompositeManager) { 
+                    ((CompositeManager) ci).kill();
+                } else { 
+                    ((InstanceManager) ci).kill(); 
+                } 
             }
         }
 
         m_logger.stop();
-
+        
         m_componentInstances.clear();
         if (m_sr != null) {
             m_sr.unregister();
         }
         m_sr = null;
-
+        m_componentDesc = null;
     }
 
     /**
      * Start all the instance managers.
      */
     public synchronized void start() {
-        if (m_active) {
+        if (m_componentDesc != null) { // Already started.
             return;
-        } // Already started
-
+        }
         Properties props = new Properties();
 
         // create a ghost component
@@ -354,19 +351,16 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         props.put(Constants.SERVICE_PID, m_factoryName);
 
         // Exposition of the factory service
-        m_active = true;
         m_sr = m_context.registerService(new String[] { Factory.class.getName(), ManagedServiceFactory.class.getName() }, this, props);
     }
 
     /**
-     * Callback called by instance when stopped.
+     * Callback called by instance when disposed.
      * 
-     * @param ci : the instance stopping
+     * @param ci : the destroyed instance
      */
-    protected synchronized void stopped(ComponentInstance ci) {
-        if (m_active) {
-            m_componentInstances.remove(ci.getInstanceName());
-        }
+    protected synchronized void disposed(ComponentInstance ci) {
+        m_componentInstances.remove(ci.getInstanceName());
     }
 
     /**

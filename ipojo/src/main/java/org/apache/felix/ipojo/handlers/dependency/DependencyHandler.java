@@ -123,11 +123,7 @@ public class DependencyHandler extends Handler {
      * Check the validity of the dependencies.
      */
     protected void checkContext() {
-
         synchronized (this) {
-
-            m_manager.getFactory().getLogger().log(Logger.INFO, "[DependencyHandler on " + m_manager.getClassName() + "] Check Context ...");
-
             // Store the initial state
             int initialState = m_state;
 
@@ -451,12 +447,9 @@ public class DependencyHandler extends Handler {
             Dependency dep = m_dependencies[i];
             valide = valide & dep.isSatisfied();
             if (!valide) {
-                m_manager.getFactory().getLogger().log(Logger.INFO,
-                        "[DependencyHandler on " + m_manager.getClassName() + "] Component Dependencies are not valid : " + dep.getSpecification());
                 return false;
             }
         }
-        m_manager.getFactory().getLogger().log(Logger.INFO, "[DependencyHandler on " + m_manager.getClassName() + "] Component Dependencies are valid");
         return valide;
     }
 

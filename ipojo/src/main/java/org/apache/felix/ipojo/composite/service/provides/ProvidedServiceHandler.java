@@ -27,6 +27,7 @@ import org.apache.felix.ipojo.CompositeHandler;
 import org.apache.felix.ipojo.CompositeManager;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -56,6 +57,16 @@ public class ProvidedServiceHandler extends CompositeHandler {
     private ArrayList m_managedServices = new ArrayList();
 
     /**
+     * Handler validity. False if
+     */
+    private boolean m_valid = false;
+
+    /**
+     * List of component type.
+     */
+    private ArrayList m_types;
+
+    /**
      * Configure the handler.
      * 
      * @param im : the instance manager
@@ -76,6 +87,7 @@ public class ProvidedServiceHandler extends CompositeHandler {
 
         // Compute imports and instances
         computeAvailableServices(metadata);
+        computeAvailableTypes(metadata);
 
         for (int i = 0; i < provides.length; i++) {
             ProvidedService ps = new ProvidedService(this, provides[i], "" + i);
@@ -94,9 +106,24 @@ public class ProvidedServiceHandler extends CompositeHandler {
     public void start() {
         for (int i = 0; i < m_managedServices.size(); i++) {
             ProvidedService ps = (ProvidedService) m_managedServices.get(i);
-            ps.start();
+            try {
+                ps.start();
+            } catch (CompositionException e) {
+                m_manager.getFactory().getLogger().log(Logger.ERROR, "Cannot start the provided service handler", e);
+                m_valid = false;
+                return;
+            }
         }
-
+        m_valid  = true;
+    }
+    
+    /**
+     * Check the handler validity.
+     * @return true if the handler is valid.
+     * @see org.apache.felix.ipojo.CompositeHandler#isValid()
+     */
+    public boolean isValid() {
+        return m_valid;
     }
 
     /**
@@ -187,6 +214,24 @@ public class ProvidedServiceHandler extends CompositeHandler {
 
     public HandlerDescription getDescription() {
         return new ProvidedServiceHandlerDescription(true, m_managedServices);
+    }
+    
+    /**
+     * Build available instance type.
+     * 
+     * @param metadata : composite metadata
+     */
+    private void computeAvailableTypes(Element metadata) {
+        m_types = new ArrayList();
+        Element[] instances = metadata.getElements("instance", "");
+        for (int i = 0; i < instances.length; i++) {
+            String itf = instances[i].getAttribute("component");
+            m_types.add(itf);
+        }
+    }
+
+    public List getInstanceType() {
+        return m_types;
     }
 
 }

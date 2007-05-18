@@ -20,6 +20,7 @@ package org.apache.felix.ipojo.composite.service.provides;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -55,6 +56,16 @@ public class SpecificationMetadata {
      * Is the specification optional?
      */
     private boolean m_isOptional = false;
+    
+    /**
+     * Is the specification an interface?
+     */
+    private boolean m_isInterface = true;
+    
+    /**
+     * Componenet Type.
+     */
+    private String m_componentType = null;
 
     /**
      * Reference on the handler.
@@ -141,6 +152,36 @@ public class SpecificationMetadata {
         m_isAggregate = isAggregate;
         m_isOptional = isOptional;
     }
+    
+    /**
+     * Constructor.
+     * @param c : class
+     * @param type : componenet type
+     * @param psd : the parent handler
+     */
+    public SpecificationMetadata(Class c, String type, ProvidedServiceHandler psd) {
+        m_handler = psd;
+        m_isAggregate = false;
+        m_isOptional = false;
+        m_componentType = type;
+        m_name = c.getName();
+        Method[] methods = c.getMethods();
+        for (int i = 0; i < methods.length; i++) {
+            String desc = Type.getMethodDescriptor(methods[i]);
+            MethodMetadata method = new MethodMetadata(methods[i].getName(), desc);
+            Type[] args = Type.getArgumentTypes(desc);
+            Class[] exceptionClasses = methods[i].getExceptionTypes();
+            for (int j = 0; j < args.length; j++) {
+                method.addArgument(args[j].getClassName());
+            }
+            for (int j = 0; j < exceptionClasses.length; j++) {
+                method.addException(exceptionClasses[j].getName());
+            }
+
+            addMethod(method);
+        }
+        m_isInterface = false;
+    }
 
     public boolean isAggregate() {
         return m_isAggregate;
@@ -149,9 +190,17 @@ public class SpecificationMetadata {
     public boolean isOptional() {
         return m_isOptional;
     }
+    
+    public boolean isInterface() {
+        return m_isInterface;
+    }
 
     public void setIsOptional(boolean optional) {
         m_isOptional = optional;
+    }
+    
+    public String getComponentType() {
+        return m_componentType;
     }
 
 }

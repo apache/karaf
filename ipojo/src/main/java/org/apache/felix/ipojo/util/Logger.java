@@ -32,8 +32,6 @@ import org.osgi.service.log.LogService;
  */
 public class Logger implements ServiceListener {
 
-    // TODO how to stop the logging (remove listener ...)
-
     /**
      * Log Level ERROR.
      */

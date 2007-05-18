@@ -27,12 +27,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.composite.service.provides.manipulation.Manipulator;
 import org.apache.felix.ipojo.composite.service.provides.manipulation.POJOWriter;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Check and build a compostion, i.e. a pojo containing the composition.
@@ -121,9 +125,34 @@ public class CompositionMetadata {
 
     /**
      * Build Available Mappings.
+     * @throws CompositionException : a factory is not available, the composition cannot be checked.
      */
-    private void buildAvailableMappingList() {
+    private void buildAvailableMappingList() throws CompositionException {
         int index = 0;
+        
+        for (int i = 0; i < m_handler.getInstanceType().size(); i++) {
+            String type = (String) m_handler.getInstanceType().get(i);
+            try {
+                ServiceReference[] refs = m_context.getServiceReferences(Factory.class.getName(), "(" + Constants.SERVICE_PID + "=" + type + ")");
+                if (refs == null) {
+                    m_handler.getManager().getFactory().getLogger().log(Logger.ERROR, "The factory " + type + " is not available, cannot check the composition");
+                    throw new CompositionException("The factory " + type + " needs to be available to check the composition");
+                } else {
+                    String className = (String) refs[0].getProperty("component.class");
+                    Class impl = m_context.getBundle().loadClass(className);
+                    SpecificationMetadata spec = new SpecificationMetadata(impl, type, m_handler);
+                    FieldMetadata field = new FieldMetadata(spec);
+                    field.setName("_field" + index);
+                    Mapping map = new Mapping(spec, field);
+                    m_mappings.add(map);
+                    index++;
+                }
+            } catch (InvalidSyntaxException e) {
+                m_handler.getManager().getFactory().getLogger().log(Logger.ERROR, "A LDAP filter is not valid : " + e.getMessage());
+            } catch (ClassNotFoundException e) {
+                m_handler.getManager().getFactory().getLogger().log(Logger.ERROR, "The implementation class of a component cannot be loaded : " + e.getMessage());
+            }
+        }
 
         for (int i = 0; i < m_handler.getSpecifications().size(); i++) {
             SpecificationMetadata spec = (SpecificationMetadata) m_handler.getSpecifications().get(i);
@@ -140,6 +169,7 @@ public class CompositionMetadata {
             index++;
         }
     }
+    
 
     /**
      * Build the delegation mapping.
@@ -149,38 +179,56 @@ public class CompositionMetadata {
         buildAvailableMappingList();
 
         // Dependency closure is OK, now look for method delegation
-        Map/* <MethodMetadata, Mapping> */availableMethods = new HashMap();
+        Map/* <MethodMetadata, Mapping> */availableSvcMethods = new HashMap();
+        Map/* <MethodMetadata, Mapping> */availableInstMethods = new HashMap();
 
         for (int i = 0; i < m_mappings.size(); i++) {
             Mapping map = (Mapping) m_mappings.get(i);
             SpecificationMetadata spec = map.getSpecification();
             for (int j = 0; j < spec.getMethods().size(); j++) {
                 MethodMetadata method = (MethodMetadata) spec.getMethods().get(j);
-                availableMethods.put(method, map);
+                if (spec.isInterface()) { 
+                    availableSvcMethods.put(method, map);
+                } else {
+                    availableInstMethods.put(method, map);
+                }
             }
         }
 
-        // For each needed method search if available and store the mapping
+        // For each needed method, search if available and store the mapping
         for (int j = 0; j < m_specification.getMethods().size(); j++) {
             MethodMetadata method = (MethodMetadata) m_specification.getMethods().get(j);
-            Set keys = availableMethods.keySet();
+            Set keys = availableInstMethods.keySet(); // Look first in methods contained in the glue code.
             Iterator it = keys.iterator();
             boolean found = false;
             while (it.hasNext() & !found) {
                 MethodMetadata met = (MethodMetadata) it.next();
                 if (met.equals(method)) {
                     found = true;
-                    FieldMetadata field = ((Mapping) availableMethods.get(met)).getField();
+                    FieldMetadata field = ((Mapping) availableInstMethods.get(met)).getField();
                     field.setUseful(true);
                     method.setDelegation(field);
-                    // Test optionality
-                    if (field.isOptional() && !method.getExceptions().contains("java/lang/UnsupportedOperationException")) {
-                        m_handler.getManager().getFactory().getLogger().log(Logger.WARNING, "The method " + method.getMethodName() + " could not be provided correctly : the specification " + field.getSpecification().getName() + " is optional");
+                }
+            }
+            if (!found) { // If not found looks inside method contained in services.
+                keys = availableSvcMethods.keySet(); // Look first in methods contained in the glue code
+                it = keys.iterator();
+                while (it.hasNext() & !found) {
+                    MethodMetadata met = (MethodMetadata) it.next();
+                    if (met.equals(method)) {
+                        found = true;
+                        FieldMetadata field = ((Mapping) availableSvcMethods.get(met)).getField();
+                        field.setUseful(true);
+                        method.setDelegation(field);
+                        // Test optionality
+                        if (field.isOptional() && !method.getExceptions().contains("java/lang/UnsupportedOperationException")) {
+                            m_handler.getManager().getFactory().getLogger().log(Logger.WARNING, "The method " + method.getMethodName() + " could not be provided correctly : the specification " + field.getSpecification().getName() + " is optional");
+                        }
                     }
                 }
             }
             if (!found) {
-                throw new CompositionException("Composition non consistent : " + method.getMethodName() + " could not be delegated");
+                throw new CompositionException("Unconsistent composition - the method " + method.getMethodName() + " could not be delegated");
             }
         }
     }
@@ -226,7 +274,7 @@ public class CompositionMetadata {
         List fields = getFieldList();
         for (int i = 0; i < fields.size(); i++) {
             FieldMetadata field = (FieldMetadata) fields.get(i);
-            if (field.isUseful()) {
+            if (field.isUseful() && field.getSpecification().isInterface()) {
                 Element dep = new Element("Dependency", "");
                 dep.addAttribute(new Attribute("field", field.getName()));
                 if (field.getSpecification().isOptional()) {
@@ -235,6 +283,19 @@ public class CompositionMetadata {
                 dep.addAttribute(new Attribute("filter", "(!(service.pid=" + in + "))"));
                 elem.addElement(dep);
             }
+        }
+        
+        Element properties = new Element("properties", "");
+        for (int i = 0; i < fields.size(); i++) {
+            FieldMetadata field = (FieldMetadata) fields.get(i);
+            if (field.isUseful() &&  ! field.getSpecification().isInterface()) {
+                Element prop = new Element("Property", "");
+                prop.addAttribute(new Attribute("field", field.getName()));
+                properties.addElement(prop);
+            }
+        }
+        if (properties.getElements().length != 0) {
+            elem.addElement(properties);
         }
 
         // Insert information to metadata
@@ -268,7 +329,7 @@ public class CompositionMetadata {
      * Get the field list to use for the delegation.
      * @return the field list.
      */
-    private List getFieldList() {
+    public List getFieldList() {
         List list = new ArrayList();
         for (int i = 0; i < m_mappings.size(); i++) {
             Mapping map = (Mapping) m_mappings.get(i);
