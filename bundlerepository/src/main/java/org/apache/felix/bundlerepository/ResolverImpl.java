@@ -155,7 +155,7 @@ public class ResolverImpl implements Resolver
     {
         boolean result = true;
 
-        // Check for a cycle.
+        // Check for cycles.
         if (m_resolveSet.contains(resource))
         {
             return result;
@@ -165,7 +165,8 @@ public class ResolverImpl implements Resolver
         m_resolveSet.add(resource);
 
         // Resolve the requirements for the resource according to the
-        // search order of: added, local, resolving, and remote resources.
+        // search order of: added, resolving, local and finally remote
+        // resources.
         Requirement[] reqs = resource.getRequirements();
         if (reqs != null)
         {
@@ -175,13 +176,31 @@ public class ResolverImpl implements Resolver
                 candidate = searchAddedResources(reqs[reqIdx]);
                 if (candidate == null)
                 {
-                    candidate = searchLocalResources(reqs[reqIdx]);
+                    candidate = searchResolvingResources(reqs[reqIdx]);
                     if (candidate == null)
-                    {
-                        candidate = searchResolvingResources(reqs[reqIdx]);
-                        if (candidate == null)
+                    {   
+                        // TODO: OBR - We need a nicer way to make sure that
+                        // the local resources are preferred over the remote
+                        // resources. Currently, we are just putting them at
+                        // the beginning of the candidate list.
+                        List possibleCandidates = searchLocalResources(reqs[reqIdx]); 
+                        possibleCandidates.addAll(searchRemoteResources(reqs[reqIdx]));
+
+                        // Determine the best candidate available that
+                        // can resolve.
+                        while ((candidate == null) && !possibleCandidates.isEmpty())
                         {
-                            candidate = searchRemoteResources(reqs[reqIdx]);
+                            Resource bestResource = (Resource) getBestResource(possibleCandidates);
+
+                            // Try to resolve the best resource.
+                            if (resolve(bestResource))
+                            {
+                                candidate = bestResource;
+                            }
+                            else
+                            {
+                                possibleCandidates.remove(bestResource);
+                            }
                         }
                     }
                 }
@@ -231,6 +250,15 @@ public class ResolverImpl implements Resolver
             }
         }
 
+        // If the resource did not resolve, then remove it from
+        // the resolve set, since to keep it consistent for iterative
+        // resolving, such as what happens when determining the best
+        // available candidate.
+        if (!result)
+        {
+            m_resolveSet.remove(resource);
+        }
+
         return result;
     }
 
@@ -247,24 +275,6 @@ public class ResolverImpl implements Resolver
                     // The requirement is already satisfied an existing
                     // resource, return the resource.
                     return resource;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private Resource searchLocalResources(Requirement req)
-    {
-        Resource[] resources = m_local.getResources();
-        for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
-        {
-            Capability[] caps = resources[resIdx].getCapabilities();
-            for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
-            {
-                if (req.isSatisfied(caps[capIdx]))
-                {
-                    return resources[resIdx];
                 }
             }
         }
@@ -291,15 +301,39 @@ public class ResolverImpl implements Resolver
         return null;
     }
 
-    private Resource searchRemoteResources(Requirement req)
+    /**
+     * Returns a local resource meeting the given requirement
+     * @param req The requirement that the local resource must meet
+     * @return Returns the found local resource if available
+     */
+    private List searchLocalResources(Requirement req)
     {
-        // For now, guess that if there is a version associated with
-        // the candidate capability that we should choose the highest
-        // version; otherwise, choose the resource with the greatest
-        // number of capabilities.
-        // TODO: OBR - This could probably be improved.
-        Resource best = null;
-        Version bestVersion = null;
+        List matchingCandidates = new ArrayList();
+        Resource[] resources = m_local.getResources();
+        for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
+        {
+            Capability[] caps = resources[resIdx].getCapabilities();
+            for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
+            {
+                if (req.isSatisfied(caps[capIdx]))
+                {
+                    matchingCandidates.add(resources[resIdx]);
+                }
+            }
+        }
+
+        return matchingCandidates;
+    }
+
+    /**
+     * Searches for remote resources that do meet the given requirement
+     * @param req
+     * @return all remote resources meeting the given requirement
+     */
+    private List searchRemoteResources(Requirement req)
+    {
+        List matchingCandidates = new ArrayList();
+
         Repository[] repos = m_admin.listRepositories();
         for (int repoIdx = 0; (repos != null) && (repoIdx < repos.length); repoIdx++)
         {
@@ -311,49 +345,69 @@ public class ResolverImpl implements Resolver
                 {
                     if (req.isSatisfied(caps[capIdx]))
                     {
-                        if (best == null)
-                        {
-                            best = resources[resIdx];
-                            Object v = caps[capIdx].getProperties().get(Resource.VERSION);
-                            if ((v != null) && (v instanceof Version))
-                            {
-                                bestVersion = (Version) v;
-                            }
-                        }
-                        else
-                        {
-                            Object v = caps[capIdx].getProperties().get(Resource.VERSION);
-
-                            // If there is no version, then select the resource
-                            // with the greatest number of capabilities.
-                            if ((v == null) && (bestVersion == null)
-                                && (best.getCapabilities().length < caps.length))
-                            {
-                                best = resources[resIdx];
-                                bestVersion = (Version) v;
-                            }
-                            else if ((v != null) && (v instanceof Version))
-                            {
-                                // If there is no best version or if the current
-                                // resource's version is lower, then select it.
-                                if ((bestVersion == null) || (bestVersion.compareTo(v) < 0))
-                                {
-                                    best = resources[resIdx];
-                                    bestVersion = (Version) v;
-                                }
-                                // If the current resource version is equal to the
-                                // best, then select the one with the greatest
-                                // number of capabilities.
-                                else if ((bestVersion != null) && (bestVersion.compareTo(v) == 0)
-                                    && (best.getCapabilities().length < caps.length))
-                                {
-                                    best = resources[resIdx];
-                                    bestVersion = (Version) v;
-                                }
-                            }
-                        }
+                        matchingCandidates.add(resources[resIdx]);
                     }
                 }
+            }
+        }
+
+        return matchingCandidates;
+    }
+
+    /**
+     * Determines which resource is preferred to deliver the required capability.
+     * This implementation will select the resource with the newest version. If two resources have
+     * the same version will the one with the largest number of cabailities be preferred
+     * @param resources
+     * @return
+     */
+    private Resource getBestResource(List resources) {
+        Version bestVersion = null;
+        Resource best = null;
+
+        for(int resIdx = 0; resIdx < resources.size(); resIdx++)
+        {
+            Resource currentResource = (Resource) resources.get(resIdx);
+
+            if (best == null)
+            {
+                best = currentResource;
+                Object v = currentResource.getProperties().get(Resource.VERSION);
+                if ((v != null) && (v instanceof Version))
+                {
+                    bestVersion = (Version) v;
+                }
+            }
+            else
+            {
+                Object v = currentResource.getProperties().get(Resource.VERSION);
+
+                // If there is no version, then select the resource
+                // with the greatest number of capabilities.
+                if ((v == null) && (bestVersion == null) && (best.getCapabilities().length < currentResource.getCapabilities().length))
+                {
+                    best = currentResource;
+                    bestVersion = (Version) v;
+                }
+                else if ((v != null) && (v instanceof Version))
+                {
+                    // If there is no best version or if the current
+                    // resource's version is lower, then select it.
+                    if ((bestVersion == null) || (bestVersion.compareTo(v) < 0))
+                    {
+                        best = currentResource;
+                        bestVersion = (Version) v;
+                    }
+                    // If the current resource version is equal to the
+                    // best, then select the one with the greatest
+                    // number of capabilities.
+                    else if ((bestVersion != null) && (bestVersion.compareTo(v) == 0)
+                            && (best.getCapabilities().length < currentResource.getCapabilities().length))
+                    {
+                        best = currentResource;
+                        bestVersion = (Version) v;
+                    }
+                }   
             }
         }
 
@@ -427,7 +481,7 @@ public class ResolverImpl implements Resolver
                     try
                     {
                         localResource.getBundle().update(deployResources[i].getURL().openStream());
-    
+
                         // If necessary, save the updated bundle to be
                         // started later.
                         if (start)
@@ -461,7 +515,7 @@ public class ResolverImpl implements Resolver
                             + deployResources[i].getSymbolicName()
                             + "/" + System.currentTimeMillis(),
                             url.openStream());
-    
+
                         // If necessary, save the installed bundle to be
                         // started later.
                         if (start)
@@ -538,6 +592,11 @@ public class ResolverImpl implements Resolver
         return null;
     }
 
+    /**
+     * Returns all local resources with the given symbolic name.
+     * @param symName The symbolic name of the wanted local resources.
+     * @return The local resources with the specified symbolic name.
+     */
     private Resource[] findLocalResources(String symName)
     {
         Resource[] localResources = m_local.getResources();
@@ -594,7 +653,7 @@ public class ResolverImpl implements Resolver
 
         return true;
     }
-    
+
     private Requirement[] getResolvableRequirements(Resource resource, Resource[] resources)
     {
         // For the specified resource, find all requirements that are
