@@ -117,21 +117,23 @@ public class BundlePlugin extends AbstractMojo {
 
  /* transform directives from their XML form to the expected BND syntax (eg. _include becomes -include) */
  protected Map transformDirectives(Map instructions) {
-  Set removedKeys = new HashSet();
+  Map transformedInstructions = new HashMap();
   for (Iterator i = instructions.entrySet().iterator(); i.hasNext();) {
-    final Map.Entry e = (Map.Entry)i.next();
-    final String key = (String)e.getKey();
-    if (e.getValue() == null) {
-      e.setValue("");
-    }
+    Map.Entry e = (Map.Entry)i.next();
+
+    String key = (String)e.getKey();
     if (key.startsWith("_")) {
-      final String transformedKey = "-"+key.substring(1);
-      instructions.put(transformedKey, e.getValue());
-      removedKeys.add(key);
+      key = "-"+key.substring(1);
     }
+
+    String value = (String)e.getValue();
+    if (null == value) {
+      value = "";
+    }
+
+    transformedInstructions.put(key, value);
   }
-  instructions.keySet().removeAll(removedKeys);
-  return instructions;
+  return transformedInstructions;
  }
 
  protected void execute(MavenProject project, Map instructions, Properties properties, Jar[] classpath) throws MojoExecutionException {

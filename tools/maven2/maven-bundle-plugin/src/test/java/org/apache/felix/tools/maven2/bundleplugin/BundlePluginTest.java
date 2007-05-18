@@ -22,6 +22,8 @@ package org.apache.felix.tools.maven2.bundleplugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
 import org.apache.maven.project.MavenProject;
@@ -147,5 +149,43 @@ public class BundlePluginTest
         archiver.addFile( getTestFile( "pom.xml" ), "org/apache/maven/test/resources/someresource" );
         archiver.setDestFile( jarFile );
         archiver.createArchive();
+    }
+
+    public void testTransformDirectives()
+        throws Exception
+    {
+        Map instructions = new TreeMap();
+
+        instructions.put("a", "1");
+        instructions.put("-a", "2");
+        instructions.put("_a", "3");
+        instructions.put("A", "3");
+        instructions.put("_A", "1");
+        instructions.put("_b", "4");
+        instructions.put("b", "6");
+        instructions.put("_B", "6");
+        instructions.put("-B", "5");
+        instructions.put("B", "4");
+
+        instructions.put("z", null);
+        instructions.put("_z", null);
+
+        Map transformedInstructions = plugin.transformDirectives( instructions );
+
+        assertEquals( "1", transformedInstructions.get("a") );
+        assertEquals( "3", transformedInstructions.get("-a") );
+        assertEquals( null, transformedInstructions.get("_a") );
+        assertEquals( "3", transformedInstructions.get("A") );
+        assertEquals( "1", transformedInstructions.get("-A") );
+        assertEquals( null, transformedInstructions.get("_A") );
+        assertEquals( null, transformedInstructions.get("_b") );
+        assertEquals( "4", transformedInstructions.get("-b") );
+        assertEquals( "6", transformedInstructions.get("b") );
+        assertEquals( null, transformedInstructions.get("_B") );
+        assertEquals( "6", transformedInstructions.get("-B") );
+        assertEquals( "4", transformedInstructions.get("B") );
+
+        assertEquals( "", transformedInstructions.get("z") );
+        assertEquals( "", transformedInstructions.get("-z") );
     }
 }
