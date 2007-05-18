@@ -1,6 +1,6 @@
 #!/bin/sh
 
-mvn clean install; 
+ant
 cd main/ ; 
 java -jar bin/felix.jar ; 
 cd ../ 
