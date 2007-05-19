@@ -457,19 +457,16 @@ public class R4SearchPolicyCore implements ModuleListener
         // Start from 1 to skip security manager class.
         for (int i = 1; i < classes.length; i++)
         {
-            // Find the first class on the call stack that is not one
-            // of the R4 search policy classes, nor a class loader or
-            // class itself, because we want to ignore the calls to
-            // ClassLoader.loadClass() and Class.forName().
+            // Find the first class on the call stack that is not from
+            // the class loader that loaded the Felix classes or is not
+            // a class loader or class itself, because we want to ignore
+            // calls to ClassLoader.loadClass() and Class.forName() since
+            // we are trying to find out who instigated the class load.
 // TODO: FRAMEWORK - This check is a hack and we should see if we can think
 // of another way to do it, since it won't necessarily work in all situations.
-             if (!R4SearchPolicyCore.class.equals(classes[i])
-                 && !R4SearchPolicy.class.equals(classes[i])
-                 && !IModule.class.isAssignableFrom(classes[i])
-                 && !Felix.class.equals(classes[i])
-                 && !Bundle.class.isAssignableFrom(classes[i])
-                 && !ClassLoader.class.isAssignableFrom(classes[i])
-                 && !Class.class.isAssignableFrom(classes[i]))
+            if ((this.getClass().getClassLoader() != classes[i].getClassLoader())
+                && !ClassLoader.class.isAssignableFrom(classes[i])
+                && !Class.class.equals(classes[i]))
             {
                 // If the instigating class was not from a bundle, then
                 // delegate to the parent class loader. Otherwise, break
