@@ -1,4 +1,4 @@
-package org.apache.felix.tools.maven2.bundleplugin;
+package org.apache.felix.bundleplugin;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,6 +19,7 @@ package org.apache.felix.tools.maven2.bundleplugin;
  * under the License.
  */
 
+import org.apache.felix.bundleplugin.BundleAllPlugin;
 import java.io.File;
 import java.util.Collections;
 import java.util.Map;

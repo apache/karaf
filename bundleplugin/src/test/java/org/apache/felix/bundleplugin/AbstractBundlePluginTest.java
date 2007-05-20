@@ -1,4 +1,4 @@
-package org.apache.felix.tools.maven2.bundleplugin;
+package org.apache.felix.bundleplugin;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
