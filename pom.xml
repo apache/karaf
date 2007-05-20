@@ -133,11 +133,12 @@
         <module>shell.tui</module>
         <module>bundlerepository</module>
         <module>log</module>
-        <module>eventadmin</module>
+<!--        <module>eventadmin</module>
         <module>eventadmin.bridge.upnp</module>
         <module>eventadmin.bridge.configuration</module>
         <module>eventadmin.bridge.useradmin</module>
         <module>eventadmin.bridge.wireadmin</module>
+-->
         <module>http.jetty</module>
         <module>scr</module>
         <module>configadmin</module>
