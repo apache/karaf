@@ -28,7 +28,7 @@
 
  <modelVersion>4.0.0</modelVersion>
  <groupId>org.apache.felix</groupId>
- <artifactId>maven-bundle-plugin</artifactId>
+ <artifactId>org.apache.felix.bundleplugin</artifactId>
 
  <packaging>maven-plugin</packaging>
  <name>Maven Bundle Plugin</name>

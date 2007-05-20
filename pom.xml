@@ -67,7 +67,7 @@
   Felix contains 3 custom maven packaging plugins. Each creates a jar file
   as an artifact. 
   
-  maven-bundle-plugin 
+  org.apache.felix.bundleplugin 
     (bundle packaging - latest prefered plugin for generating OSGi bundles.)
   maven-osgi-plugin 
     (osgi-bundle packaging - old plugin for generating OSGi bundles.)
@@ -95,7 +95,7 @@
         </property>
       </activation>
       <modules>
-        <module>tools/maven2/maven-bundle-plugin</module>
+        <module>bundleplugin</module>
         <module>tools/maven2/maven-osgi-plugin</module>
         <module>ipojo.plugin</module>
       </modules>
