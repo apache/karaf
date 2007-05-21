@@ -154,7 +154,7 @@ public class BundlePlugin extends AbstractMojo {
    if (mavenResourcePaths.length() > 0) {
      final String includeResource = (String)properties.get(Analyzer.INCLUDE_RESOURCE);
      if (includeResource != null) {
-       properties.put(Analyzer.INCLUDE_RESOURCE, includeResource + ',' + mavenResourcePaths);
+       getLog().warn(Analyzer.INCLUDE_RESOURCE + ": overriding " + mavenResourcePaths + " with " + includeResource );
      } else {
        properties.put(Analyzer.INCLUDE_RESOURCE, mavenResourcePaths);
      }
