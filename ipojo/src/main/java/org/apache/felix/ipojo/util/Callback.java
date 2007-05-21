@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.parser.MethodMetadata;
 
 /**
  * A callback allows calling a method on the component instances.
@@ -100,6 +101,36 @@ public class Callback {
         m_args = new String[args.length];
         for (int i = 0; i < args.length; i++) {
             m_args[i] = args[i].getName();
+        }
+    }
+    
+    /**
+     * Constructor.
+     * @param mm : Method Metadata obtain form manipulation metadata.
+     * @param im : instance manager.
+     */
+    public Callback(MethodMetadata mm, InstanceManager im) {
+        m_isStatic = false;
+        m_method = mm.getMethodName();
+        m_manager = im;
+        String[] args = mm.getMethodArguments();
+        m_args = new String[args.length];
+        for (int i = 0; i < args.length; i++) {
+            // Primitive Array 
+            if (args[i].endsWith("[]") && args[i].indexOf(".") == -1) {
+                String t = args[i].substring(0, args[i].length() - 2);
+                m_args[i] = "[" + getInternalPrimitiveType(t);
+            }
+            // Non-Primitive Array 
+            if (args[i].endsWith("[]") && args[i].indexOf(".") != -1) {
+                String t = args[i].substring(0, args[i].length() - 2);
+                m_args[i] = "[L" + t + ";";
+            }
+            // Simple type 
+            if (!args[i].endsWith("[]")) {
+                m_args[i] = args[i];
+            }
+            
         }
     }
 
