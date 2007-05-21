@@ -1219,6 +1219,76 @@ loop:   for (;;)
     public static boolean compare(Object lhs, String rhs, int operator)
         throws EvaluationException
     {
+        // Try to optimize the common case of strings by just
+        // checking for them directly.
+        if (lhs instanceof String)
+        {
+            switch (operator)
+            {
+                case EQUAL :
+                    return (((String) lhs).compareTo(rhs) == 0);
+                case GREATER_EQUAL :
+                    return (((String) lhs).compareTo(rhs) >= 0);
+                case LESS_EQUAL :
+                    return (((String) lhs).compareTo(rhs) <= 0);
+                case APPROX:
+                    return compareToApprox(((String) lhs), rhs);
+                default:
+                    throw new EvaluationException("Unknown comparison operator..."
+                        + operator);
+            }
+        }
+        else if (lhs instanceof Comparable)
+        {
+            // Here we know that the LHS is a comparable object, so
+            // try to create an object for the RHS by using a constructor
+            // that will take the RHS string as a parameter.
+            Comparable rhsComparable = null;
+            try
+            {
+                // We are expecting to be able to construct a comparable
+                // instance from the RHS string by passing it into the
+                // constructor of the corresponing comparable class. The
+                // Character class is a special case, since its constructor
+                // does not take a string, so handle it separately.
+                if (lhs instanceof Character)
+                {
+                    rhsComparable = new Character(rhs.charAt(0));
+                }
+                else
+                {
+                    rhsComparable = (Comparable) lhs.getClass()
+                        .getConstructor(new Class[] { String.class })
+                            .newInstance(new Object[] { rhs });
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EvaluationException(
+                    "Could not instantiate class "
+                        + lhs.getClass().getName()
+                        + " with constructor String parameter "
+                        + rhs + " " + ex);
+            }
+
+            Comparable lhsComparable = (Comparable) lhs;
+
+            switch (operator)
+            {
+                case EQUAL :
+                    return (lhsComparable.compareTo(rhsComparable) == 0);
+                case GREATER_EQUAL :
+                    return (lhsComparable.compareTo(rhsComparable) >= 0);
+                case LESS_EQUAL :
+                    return (lhsComparable.compareTo(rhsComparable) <= 0);
+                case APPROX:
+                    return compareToApprox(lhsComparable, rhsComparable);
+                default:
+                    throw new EvaluationException("Unknown comparison operator..."
+                        + operator);
+            }
+        }
+
         // Determine class of LHS.
         Class lhsClass = null;
 
@@ -1289,53 +1359,6 @@ loop:   for (;;)
                 return false;
             }
 
-            // Here we know that the LHS is a comparable object, so
-            // try to create an object for the RHS by using a constructor
-            // that will take the RHS string as a parameter.
-            Comparable rhsComparable = null;
-            try
-            {
-                // We are expecting to be able to construct a comparable
-                // instance from the RHS string by passing it into the
-                // constructor of the corresponing comparable class. The
-                // Character class is a special case, since its constructor
-                // does not take a string, so handle it separately.
-                if (lhsClass == Character.class)
-                {
-                    rhsComparable = new Character(rhs.charAt(0));
-                }
-                else
-                {
-                    rhsComparable = (Comparable) lhsClass
-                        .getConstructor(new Class[] { String.class })
-                            .newInstance(new Object[] { rhs });
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EvaluationException(
-                    "Could not instantiate class "
-                        + lhsClass.getName()
-                        + " with constructor String parameter "
-                        + rhs + " " + ex);
-            }
-
-            Comparable lhsComparable = (Comparable) lhs;
-
-            switch (operator)
-            {
-                case EQUAL :
-                    return (lhsComparable.compareTo(rhsComparable) == 0);
-                case GREATER_EQUAL :
-                    return (lhsComparable.compareTo(rhsComparable) >= 0);
-                case LESS_EQUAL :
-                    return (lhsComparable.compareTo(rhsComparable) <= 0);
-                case APPROX:
-                    return compareToApprox(lhsComparable, rhsComparable);
-                default:
-                    throw new EvaluationException("Unknown comparison operator..."
-                        + operator);
-            }
         }
 
         return false;
