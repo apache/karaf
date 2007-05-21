@@ -203,27 +203,30 @@ public class Callback {
     /**
      * Call the method.
      * 
+     * @return the result of the invocation, null for void method, the last result for multi-object instance
      * @throws NoSuchMethodException : Method is not found in the class
      * @throws InvocationTargetException : The method is not static
      * @throws IllegalAccessException : The method can not be invoked
      */
-    public void call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public Object call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (m_methodObj == null) {
             searchMethod();
         }
 
         if (m_isStatic) {
-            m_methodObj.invoke(null, new Object[] {});
+            return m_methodObj.invoke(null, new Object[] {});
         } else {
             // Two cases :
             // - if instances already exists : call on each instances
             // - if no instance exists : create an instance
             if (m_manager.getPojoObjects().length == 0) {
-                m_methodObj.invoke(m_manager.getPojoObject(), new Object[] {});
+                return m_methodObj.invoke(m_manager.getPojoObject(), new Object[] {});
             } else {
+                Object r = null;
                 for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
-                    m_methodObj.invoke(m_manager.getPojoObjects()[i], new Object[] {});
+                    r = m_methodObj.invoke(m_manager.getPojoObjects()[i], new Object[] {});
                 }
+                return r;
             }
         }
     }
@@ -231,44 +234,48 @@ public class Callback {
     /**
      * Call the current callback method on the instance given in parameter.
      * 
-     * @param instance : instance on which call the callbakc
+     * @param instance : instance on which call the callback
+     * @return the result of the invocation, null for void method
      * @throws NoSuchMethodException : the method was not found
      * @throws IllegalAccessException : the method cannont be called
      * @throws InvocationTargetException : an error happens in the method
      */
-    public void call(Object instance) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public Object call(Object instance) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (m_methodObj == null) {
             searchMethod();
         }
-        m_methodObj.invoke(instance, new Object[] {});
+        return m_methodObj.invoke(instance, new Object[] {});
     }
 
     /**
      * Call the callback on the method with the argument given in parameter.
      * 
      * @param arg : the parameters
+     * @return the result of the invocation, null for void method, the last result for multi-object instance
      * @throws NoSuchMethodException : the callback method is not found
      * @throws IllegalAccessException : the callbback method cannot be called
      * @throws InvocationTargetException : an error occurs inside the called
      * method
      */
-    public void call(Object[] arg) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public Object call(Object[] arg) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (m_methodObj == null) {
             searchMethod();
         }
         
         if (m_isStatic) {
-            m_methodObj.invoke(null, arg);
+            return m_methodObj.invoke(null, arg);
         } else {
             // Two cases :
             // - if instances already exists : call on each instances
             // - if no instance exists : create an instance
             if (m_manager.getPojoObjects().length == 0) {
-                m_methodObj.invoke(m_manager.getPojoObject(), arg);
+                return m_methodObj.invoke(m_manager.getPojoObject(), arg);
             } else {
+                Object r = null;
                 for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
-                    m_methodObj.invoke(m_manager.getPojoObjects()[i], arg);
+                    r = m_methodObj.invoke(m_manager.getPojoObjects()[i], arg);
                 }
+                return r;
             }
         }
     }
@@ -279,16 +286,17 @@ public class Callback {
      * 
      * @param instance : instance on which call the callback
      * @param arg : the argument array
+     * @return the result of the invocation, null for void method
      * @throws NoSuchMethodException : the callback method is not found
      * @throws IllegalAccessException : the callbback method cannot be called
      * @throws InvocationTargetException : an error occurs inside the called
      * method
      */
-    public void call(Object instance, Object[] arg) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public Object call(Object instance, Object[] arg) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (m_methodObj == null) {
             searchMethod();
         }
         
-        m_methodObj.invoke(instance, arg);
+        return m_methodObj.invoke(instance, arg);
     }
 }
