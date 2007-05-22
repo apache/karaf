@@ -36,6 +36,10 @@
           <groupId>${pom.groupId}</groupId>
           <artifactId>org.osgi.core</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>${pom.groupId}</groupId>
+          <artifactId>org.osgi.compendium</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -87,7 +91,7 @@
             <Main-Class>org.apache.felix.main.Main</Main-Class>
             <Bundle-Name>Apache Felix</Bundle-Name>
             <Bundle-Description>OSGi R4 framework.</Bundle-Description>
-            <Private-Package>org.apache.felix.main.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.startlevel,org.osgi.service.url</Private-Package>
+            <Private-Package>org.apache.felix.main.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.startlevel,org.osgi.service.url,org.osgi.util.tracker</Private-Package>
             <Import-Package>!*</Import-Package>
             <Include-Resource>{src/main/resources/}</Include-Resource>
           </instructions>
