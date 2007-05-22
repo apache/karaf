@@ -84,9 +84,13 @@ public class ContentClassLoader extends SecureClassLoader
 
     protected Class findClass(String name) throws ClassNotFoundException
     {
-// TODO: ML - We probably need to do this check closer to defineClass() and
-//       protect it with a synchronized block.
-        Class clazz = findLoadedClass(name);
+        // Do a quick check here to see if we can short-circuit this
+        // entire process if the class was already loaded.
+        Class clazz = null;
+        synchronized (this)
+        {
+            clazz = findLoadedClass(name);
+        }
 
         // Search for class in module.
         if (clazz == null)
@@ -104,48 +108,59 @@ public class ContentClassLoader extends SecureClassLoader
 
             if (bytes != null)
             {
-                // We need to try to define a Package object for the class
-                // before we call defineClass(). Get the package name and
-                // see if we have already created the package.
-                String pkgName = Util.getClassPackage(name);
-                if (pkgName.length() > 0)
+                // Before we actually attempt to define the class, grab
+                // the lock for this class loader and make sure than no
+                // other thread has defined this class in the meantime.
+                synchronized (this)
                 {
-                    if (getPackage(pkgName) == null)
+                    clazz = findLoadedClass(name);
+
+                    if (clazz == null)
                     {
-                        Object[] params =
-                            m_contentLoader.getSearchPolicy()
-                                .definePackage(pkgName);
-                        if (params != null)
+                        // We need to try to define a Package object for the class
+                        // before we call defineClass(). Get the package name and
+                        // see if we have already created the package.
+                        String pkgName = Util.getClassPackage(name);
+                        if (pkgName.length() > 0)
                         {
-                            definePackage(
-                                pkgName,
-                                (String) params[0],
-                                (String) params[1],
-                                (String) params[2],
-                                (String) params[3],
-                                (String) params[4],
-                                (String) params[5],
-                                null);
+                            if (getPackage(pkgName) == null)
+                            {
+                                Object[] params =
+                                    m_contentLoader.getSearchPolicy()
+                                        .definePackage(pkgName);
+                                if (params != null)
+                                {
+                                    definePackage(
+                                        pkgName,
+                                        (String) params[0],
+                                        (String) params[1],
+                                        (String) params[2],
+                                        (String) params[3],
+                                        (String) params[4],
+                                        (String) params[5],
+                                        null);
+                                }
+                                else
+                                {
+                                    definePackage(pkgName, null, null,
+                                        null, null, null, null, null);
+                                }
+                            }
+                        }
+
+                        // If we have a security context, then use it to
+                        // define the class with it for security purposes,
+                        // otherwise define the class without a protection domain.
+                        if (m_protectionDomain != null)
+                        {
+                            clazz = defineClass(name, bytes, 0, bytes.length,
+                                m_protectionDomain);
                         }
                         else
                         {
-                            definePackage(pkgName, null, null,
-                                null, null, null, null, null);
+                            clazz = defineClass(name, bytes, 0, bytes.length);
                         }
                     }
-                }
-
-                // If we have a security context, then use it to
-                // define the class with it for security purposes,
-                // otherwise define the class without a protection domain.
-                if (m_protectionDomain != null)
-                {
-                    clazz = defineClass(name, bytes, 0, bytes.length,
-                        m_protectionDomain);
-                }
-                else
-                {
-                    clazz = defineClass(name, bytes, 0, bytes.length);
                 }
             }
         }
