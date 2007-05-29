@@ -52,10 +52,10 @@ public class NullableObjectWriter implements Opcodes {
             is = url.openStream();
             cr = new ClassReader(is);
             MethodSignatureVisitor msv = new MethodSignatureVisitor();
-            cr.accept(msv, true);
+            cr.accept(msv, ClassReader.SKIP_FRAMES);
             is.close();
 
-            ClassWriter cw = new ClassWriter(true);
+            ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 
             // String[] segment = contractName.split("[.]");
             // String className = "org/apache/felix/ipojo/" +

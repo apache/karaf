@@ -72,11 +72,21 @@ public class Callback {
         for (int i = 0; i < args.length; i++) {
             // Primitive Array 
             if (args[i].endsWith("[]") && args[i].indexOf(".") == -1) {
-                m_args[i] = "[" + getInternalPrimitiveType(args[i]);
+                String arr = "";
+                for (int j = 0; j < args[i].length(); j++) {
+                    if (args[i].charAt(j) == '[') { arr += '['; }
+                }
+                int index = args[i].indexOf('[');
+                m_args[i] = arr + getInternalPrimitiveType(args[i].substring(0, index));
             }
             // Non-Primitive Array 
             if (args[i].endsWith("[]") && args[i].indexOf(".") != -1) {
-                m_args[i] = "[L" + args[i] + ";";
+                String arr = "";
+                for (int j = 0; j < args[i].length(); j++) {
+                    if (args[i].charAt(j) == '[') { arr += '['; }
+                }
+                int index = args[i].indexOf('[');
+                m_args[i] = arr + "L" + args[i].substring(0, index) + ";";
             }
             // Simple type 
             if (!args[i].endsWith("[]")) {
@@ -118,19 +128,26 @@ public class Callback {
         for (int i = 0; i < args.length; i++) {
             // Primitive Array 
             if (args[i].endsWith("[]") && args[i].indexOf(".") == -1) {
-                String t = args[i].substring(0, args[i].length() - 2);
-                m_args[i] = "[" + getInternalPrimitiveType(t);
+                String arr = "";
+                for (int j = 0; j < args[i].length(); j++) {
+                    if (args[i].charAt(j) == '[') { arr += '['; }
+                }
+                int index = args[i].indexOf('[');
+                m_args[i] = arr + getInternalPrimitiveType(args[i].substring(0, index));
             }
             // Non-Primitive Array 
             if (args[i].endsWith("[]") && args[i].indexOf(".") != -1) {
-                String t = args[i].substring(0, args[i].length() - 2);
-                m_args[i] = "[L" + t + ";";
+                String arr = "";
+                for (int j = 0; j < args[i].length(); j++) {
+                    if (args[i].charAt(j) == '[') { arr += '['; }
+                }
+                int index = args[i].indexOf('[');
+                m_args[i] = arr + "L" + args[i].substring(0, index) + ";";
             }
             // Simple type 
             if (!args[i].endsWith("[]")) {
                 m_args[i] = args[i];
             }
-            
         }
     }
 

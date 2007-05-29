@@ -380,8 +380,8 @@ public class ConfigurationHandler extends Handler {
         // Propagation of the properties to service registrations :
         if (m_providedServiceHandler != null && !toPropagate.isEmpty()) {
             m_providedServiceHandler.removeProperties(m_propagated);
-
-            // Remove to name props
+            
+            // Remove the name props
             toPropagate.remove("name");
 
             m_providedServiceHandler.addProperties(toPropagate);

@@ -106,7 +106,7 @@ public class Manipulator {
         // First check if the class is already manipulated : 
         ClassReader ckReader = new ClassReader(is1);
         ClassChecker ck = new ClassChecker();
-        ckReader.accept(ck, true);
+        ckReader.accept(ck, ckReader.SKIP_FRAMES);
         is1.close();
         
         m_fields = ck.getFields();
@@ -144,9 +144,9 @@ public class Manipulator {
         	// Instrument all fields
         	InputStream is2 = url.openStream();
         	ClassReader cr0 = new ClassReader(is2);
-        	ClassWriter cw0 = new ClassWriter(true);
+        	ClassWriter cw0 = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         	PreprocessClassAdapter preprocess = new PreprocessClassAdapter(cw0);
-        	cr0.accept(preprocess, false);
+        	cr0.accept(preprocess, ClassReader.SKIP_FRAMES);
         	is2.close();
 
         	try {

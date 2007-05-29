@@ -143,7 +143,7 @@ public class ProvidedService implements ServiceFactory {
     private synchronized void removeProperty(String name) {
         int idx = -1;
         for (int i = 0; i < m_properties.length; i++) {
-            if (m_properties[i].getName() == name) {
+            if (m_properties[i].getName().equals(name)) {
                 idx = i;
                 break;
             }

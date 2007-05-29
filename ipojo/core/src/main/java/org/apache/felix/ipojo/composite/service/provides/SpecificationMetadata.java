@@ -124,7 +124,7 @@ public class SpecificationMetadata {
             is = url.openStream();
             cr = new ClassReader(is);
             msv = new MethodSignatureVisitor();
-            cr.accept(msv, true);
+            cr.accept(msv, ClassReader.SKIP_FRAMES);
             is.close();
         } catch (IOException e) {
             m_handler.getManager().getFactory().getLogger().log(Logger.ERROR, "Cannot open " + name + " : " + e.getMessage());

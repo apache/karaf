@@ -59,13 +59,23 @@ public class FieldMetadata {
     public String getReflectionType() {
         // Primitive Array 
         if (m_type.endsWith("[]") && m_type.indexOf(".") == -1) {
-            String t = m_type.substring(0, m_type.length() - 2);
-            return "[" + getInternalPrimitiveType(t);
+            String arr = "";
+            for (int i = 0; i < m_type.length(); i++) {
+                if (m_type.charAt(i) == '[') { arr += '['; }
+            }
+            int index = m_type.indexOf('[');
+            String t = m_type.substring(0, index);
+            return arr + getInternalPrimitiveType(t);
         }
         // Non-Primitive Array 
         if (m_type.endsWith("[]") && m_type.indexOf(".") != -1) {
-            String t = m_type.substring(0, m_type.length() - 2);
-            return "[L" + t + ";";
+            String arr = "";
+            for (int i = 0; i < m_type.length(); i++) {
+                if (m_type.charAt(i) == '[') { arr += '['; }
+            }
+            int index = m_type.indexOf('[');
+            String t = m_type.substring(0, index);
+            return arr + "L" + t + ";";
         }
         // Simple type 
         if (!m_type.endsWith("[]")) {
