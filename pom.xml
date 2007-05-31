@@ -138,6 +138,7 @@
         <module>scr</module>
         <module>configadmin</module>
         <module>metatype</module>
+        <module>dependencymanager</module>
         
         <module>ipojo/core</module>
         <module>ipojo/metadata</module>
@@ -156,7 +157,6 @@
         <module>shell.gui</module>
         <module>shell.gui.plugin</module>
         <module>org.apache.felix.daemon</module>
-        <module>dependencymanager</module>
 
         <module>examples</module>
 
