@@ -395,7 +395,7 @@ public class Felix
 
         // Now that the system bundle is successfully created we can give
         // its bundle context to the logger so that it can track log services.
-        m_logger.setSystemBundleContext(systembundle.getInfo().getContext());
+        m_logger.setSystemBundleContext(systembundle.getInfo().getBundleContext());
 
         // Now reload the cached bundles.
         BundleArchive[] archives = null;
@@ -523,36 +523,41 @@ ex.printStackTrace();
      * This method cleanly shuts down the framework, it must be called at the
      * end of a session in order to shutdown all active bundles.
     **/
-    public synchronized void shutdown()
+    public void shutdown()
     {
-        // Change framework status from running to stopping.
-        // If framework is not running, then just return.
-        if (m_frameworkStatus != RUNNING_STATUS)
+        // Shut the framework down by calling stop() on the system bundle.
+        // Since stop() on the system bundle will return immediately, we
+        // will synchronize on the framework instance so we can use it to
+        // be notified when the shutdown is complete.
+        synchronized (this)
         {
-            return;
-        }
+            if (m_frameworkStatus == RUNNING_STATUS)
+            {
+                try
+                {
+                    getBundle(0).stop();
+                }
+                catch (BundleException ex)
+                {
+                    fireFrameworkEvent(FrameworkEvent.ERROR, getBundle(0), ex);
+                    m_logger.log(
+                        Logger.LOG_ERROR,
+                        "Error stopping system bundle.",
+                        ex);
+                }
+            }
 
-        // The framework is now in its shutdown sequence.
-        m_frameworkStatus = STOPPING_STATUS;
-
-        // Do the real shutdown work in a separate method to catch any problems
-        // without requiring a huge and ugly try-catch statement.
-        try
-        {
-            shutdownInternal();
-        }
-        catch (Exception ex)
-        {
-            fireFrameworkEvent(FrameworkEvent.ERROR, getBundle(0), ex);
-            m_logger.log(Logger.LOG_ERROR, "Error stopping framework.", ex);
-        }
-
-        // Finally shutdown the JVM if the framework is running stand-alone.
-        String embedded = m_config.get(FelixConstants.EMBEDDED_EXECUTION_PROP);
-        boolean isEmbedded = (embedded == null) ? false : embedded.equals("true");
-        if (!isEmbedded)
-        {
-            m_secureAction.exit(0);
+            while (m_frameworkStatus != INITIAL_STATUS)
+            {
+                try
+                {
+                    wait();
+                }
+                catch (InterruptedException ex)
+                {
+                    // Keep waiting if necessary.
+                }
+            }
         }
     }
 
@@ -562,8 +567,21 @@ ex.printStackTrace();
      * the system bundle, cleaning up any bundle remains and shutting down event
      * dispatching.
      */
-    private void shutdownInternal()
+    void shutdownInternal()
     {
+        synchronized (this)
+        {
+            // Change framework status from running to stopping.
+            // If framework is not running, then just return.
+            if (m_frameworkStatus != RUNNING_STATUS)
+            {
+                return;
+            }
+
+            // The framework is now in its shutdown sequence.
+            m_frameworkStatus = STOPPING_STATUS;
+        }
+
         // Use the start level service to set the start level to zero
         // in order to stop all bundles in the framework. Since framework
         // shutdown happens on its own thread, we can wait for the start
@@ -579,22 +597,6 @@ ex.printStackTrace();
         catch (InvalidSyntaxException ex)
         {
             // Should never happen.
-        }
-
-        // Just like initialize() called the system bundle's start()
-        // method, we must call its stop() method here so that it
-        // can perform any necessary clean up.
-        // Actually, the stop() method just asynchronously would call
-        // this method through shutdown(), hence we call the real SystemBundle
-        // shutdown method.
-        try
-        {
-            ((SystemBundle) getBundle(0)).shutdown();
-        }
-        catch (Exception ex)
-        {
-            fireFrameworkEvent(FrameworkEvent.ERROR, getBundle(0), ex);
-            m_logger.log(Logger.LOG_ERROR, "Error stopping system bundle.", ex);
         }
 
         // Since they may be updated and uninstalled bundles that
@@ -643,28 +645,40 @@ ex.printStackTrace();
         // Shutdown event dispatching queue.
         EventDispatcher.shutdown();
 
-        // The framework is no longer in a usable state.
-        m_frameworkStatus = INITIAL_STATUS;
-
         // Remove all bundles from the module factory so that any
         // open resources will be closed.
         bundles = getBundles();
         for (int i = 0; i < bundles.length; i++)
         {
             BundleImpl bundle = (BundleImpl) bundles[i];
-            try
+            IModule[] modules = bundle.getInfo().getModules();
+            for (int j = 0; j < modules.length; j++)
             {
-                IModule[] modules = bundle.getInfo().getModules();
-                for (int j = 0; j < modules.length; j++)
+                try
                 {
                     m_factory.removeModule(modules[j]);
                 }
+                catch (Exception ex)
+                {
+                    m_logger.log(Logger.LOG_ERROR,
+                       "Unable to clean up " + bundle.getInfo().getLocation(), ex);
+                }
             }
-            catch (Exception ex)
-            {
-                m_logger.log(Logger.LOG_ERROR,
-                   "Unable to clean up " + bundle.getInfo().getLocation(), ex);
-            }
+        }
+
+        // Notify any waiters that the framework is back in its initial state.
+        synchronized (this)
+        {
+            m_frameworkStatus = INITIAL_STATUS;
+            notifyAll();
+        }
+
+        // Finally shutdown the JVM if the framework is running stand-alone.
+        String embedded = m_config.get(FelixConstants.EMBEDDED_EXECUTION_PROP);
+        boolean isEmbedded = (embedded == null) ? false : embedded.equals("true");
+        if (!isEmbedded)
+        {
+            m_secureAction.exit(0);
         }
     }
 
@@ -1281,7 +1295,7 @@ ex.printStackTrace();
         try
         {
             // Set the bundle's context.
-            info.setContext(new BundleContextImpl(this, bundle));
+            info.setBundleContext(new BundleContextImpl(this, bundle));
 
             // Set the bundle's activator.
             info.setActivator(createBundleActivator(bundle.getInfo()));
@@ -1289,8 +1303,7 @@ ex.printStackTrace();
             // Activate the bundle if it has an activator.
             if (bundle.getInfo().getActivator() != null)
             {
-                m_secureAction.startActivator(info.getActivator(),
-                    info.getContext());
+                m_secureAction.startActivator(info.getActivator(),info.getBundleContext());
             }
 
             // TODO: CONCURRENCY - Reconsider firing event outside of the
@@ -1305,8 +1318,8 @@ ex.printStackTrace();
             info.setState(Bundle.RESOLVED);
 
             // Clean up the bundle context.
-            ((BundleContextImpl) info.getContext()).invalidate();
-            info.setContext(null);
+            ((BundleContextImpl) info.getBundleContext()).invalidate();
+            info.setBundleContext(null);
 
             // Unregister any services offered by this bundle.
             m_registry.unregisterServices(bundle);
@@ -1667,8 +1680,7 @@ ex.printStackTrace();
         {
             if (bundle.getInfo().getActivator() != null)
             {
-                m_secureAction.stopActivator(info.getActivator(),
-                    info.getContext());
+                m_secureAction.stopActivator(info.getActivator(),info.getBundleContext());
             }
 
             // Try to save the activator in the cache.
@@ -1696,22 +1708,27 @@ ex.printStackTrace();
             rethrow = th;
         }
 
-        // Clean up the bundle context.
-        ((BundleContextImpl) info.getContext()).invalidate();
-        info.setContext(null);
+        // Do not clean up after the system bundle since it will
+        // clean up after itself.
+        if (info.getBundleId() != 0)
+        {
+            // Clean up the bundle context.
+            ((BundleContextImpl) info.getBundleContext()).invalidate();
+            info.setBundleContext(null);
 
-        // Unregister any services offered by this bundle.
-        m_registry.unregisterServices(bundle);
+            // Unregister any services offered by this bundle.
+            m_registry.unregisterServices(bundle);
 
-        // Release any services being used by this bundle.
-        m_registry.ungetServices(bundle);
+            // Release any services being used by this bundle.
+            m_registry.ungetServices(bundle);
 
-        // The spec says that we must remove all event
-        // listeners for a bundle when it is stopped.
-        m_dispatcher.removeListeners(bundle);
+            // The spec says that we must remove all event
+            // listeners for a bundle when it is stopped.
+            m_dispatcher.removeListeners(bundle);
 
-        info.setState(Bundle.RESOLVED);
-        fireBundleEvent(BundleEvent.STOPPED, bundle);
+            info.setState(Bundle.RESOLVED);
+            fireBundleEvent(BundleEvent.STOPPED, bundle);
+        }
 
         // Throw activator error if there was one.
         if (rethrow != null)

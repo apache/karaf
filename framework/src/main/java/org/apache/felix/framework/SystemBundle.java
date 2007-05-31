@@ -36,11 +36,11 @@ import org.osgi.framework.*;
 class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAction
 {
     private List m_activatorList = null;
-    private SystemBundleActivator m_activator = null;
-    private Thread m_shutdownThread = null;
-    private ICapability[] m_exports = null;
+    private Map m_activatorContextMap = null;
     private IContentLoader m_contentLoader = null;
+    private ICapability[] m_exports = null;
     private Set m_exportNames = null;
+    private Thread m_shutdownThread = null;
 
     protected SystemBundle(Felix felix, BundleInfo info, List activatorList)
     {
@@ -63,6 +63,8 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
 
         m_activatorList = activatorList;
 
+        info.setActivator(new SystemBundleActivator());
+        
         // The system bundle exports framework packages as well as
         // arbitrary user-defined packages from the system class path.
         // We must construct the system bundle's export metadata.
@@ -149,8 +151,8 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
 
         try
         {
-            getInfo().setContext(new BundleContextImpl(getFelix(), this));
-            getActivator().start(getInfo().getContext());
+            getInfo().setBundleContext(new BundleContextImpl(getFelix(), this));
+            getInfo().getActivator().start(getInfo().getBundleContext());
         }
         catch (Throwable throwable)
         {
@@ -163,45 +165,9 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
         // This will be done after the framework is initialized.
     }
 
-    /**
-     * According to the spec, this method asynchronously stops the framework.
-     * To prevent multiple creations of useless separate threads in case of
-     * multiple calls to this method, the shutdown thread is only started if
-     * the framework is still in running state.
-     */
-    public void stop()
+    public void stop() throws BundleException
     {
-        Object sm = System.getSecurityManager();
-
-        if (sm != null)
-        {
-            ((SecurityManager) sm).checkPermission(new AdminPermission(this,
-                AdminPermission.EXECUTE));
-        }
-
-        // Spec says stop() on SystemBundle should return immediately and
-        // shutdown framework on another thread.
-        if (getFelix().getStatus() == Felix.RUNNING_STATUS)
-        {
-            // Initial call of stop, so kick off shutdown.
-            m_shutdownThread = new Thread("FelixShutdown") {
-                public void run()
-                {
-                    try
-                    {
-                        getFelix().shutdown();
-                    }
-                    catch (Exception ex)
-                    {
-                        getFelix().getLogger().log(
-                            Logger.LOG_ERROR,
-                            "SystemBundle: Error while shutting down.", ex);
-                    }
-                }
-            };
-            getInfo().setState(Bundle.STOPPING);
-            m_shutdownThread.start();
-        }
+        super.stop();
     }
 
     public void uninstall() throws BundleException
@@ -226,43 +192,6 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
 
         // TODO: This is supposed to stop and then restart the framework.
         throw new BundleException("System bundle update not implemented yet.");
-    }
-
-    protected BundleActivator getActivator()
-    {
-        if (m_activator == null)
-        {
-            m_activator = new SystemBundleActivator(m_activatorList);
-        }
-        return m_activator;
-    }
-
-    /**
-     * Actually shuts down the system bundle. This method does what actually
-     * the {@link #stop()} method would do for regular bundles. Since the system
-     * bundle has to shutdown the framework, a separate method is used to stop
-     * the system bundle during framework shutdown.
-     *
-     * @throws BundleException If an error occurrs stopping the system bundle
-     *      and any activators "started" on framework start time.
-     */
-    void shutdown() throws BundleException
-    {
-        // Callback from shutdown thread, so do our own stop.
-        try
-        {
-            getFelix().m_secureAction.stopActivator(getActivator(),
-                getInfo().getContext());
-        }
-        catch (Throwable throwable)
-        {
-            throw new BundleException( "Unable to stop system bundle.", throwable );
-        }
-    }
-
-    boolean exports(String packageName)
-    {
-        return m_exportNames.contains(packageName);
     }
 
     public ICapability[] getCapabilities()
@@ -308,29 +237,6 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
         }
     }
     
-    void startExtensionBundle(BundleImpl bundle) 
-    {
-        String activatorClass = (String)
-        bundle.getInfo().getCurrentHeader().get(
-            FelixConstants.FELIX_EXTENSION_ACTIVATOR);
-        
-        if (activatorClass != null)
-        {
-            try
-            {
-                m_activator.addActivator(((BundleActivator)
-                    getClass().getClassLoader().loadClass(
-                    activatorClass.trim()).newInstance()),
-                    new BundleContextImpl(getFelix(), bundle));
-            }
-            catch (Throwable ex)
-            {
-                getFelix().getLogger().log(Logger.LOG_WARNING,
-                    "Unable to start Felix Extension Activator", ex);
-            }
-        }
-    }
-
     public Object run()
     {
         _addExtensionBundle((BundleImpl) m_tempBundle.get());
@@ -389,6 +295,109 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
         parseAndAddExports(headers);
 
         systemArchive.setManifestHeader(headers);
+    }
+
+    void startExtensionBundle(BundleImpl bundle)
+    {
+        String activatorClass = (String)
+        bundle.getInfo().getCurrentHeader().get(
+            FelixConstants.FELIX_EXTENSION_ACTIVATOR);
+        
+        if (activatorClass != null)
+        {
+            try
+            {
+                BundleActivator activator = (BundleActivator)
+                    getClass().getClassLoader().loadClass(
+                        activatorClass.trim()).newInstance();
+                m_activatorList.add(activator);
+                if (m_activatorContextMap == null)
+                {
+                    m_activatorContextMap = new HashMap();
+                }
+                BundleContext context = new BundleContextImpl(getFelix(), bundle);
+                m_activatorContextMap.put(activator, context);
+                activator.start(context);
+            }
+            catch (Throwable ex)
+            {
+                getFelix().getLogger().log(Logger.LOG_WARNING,
+                    "Unable to start Felix Extension Activator", ex);
+            }
+        }
+    }
+
+    private class SystemBundleActivator implements BundleActivator, Runnable
+    {
+        public void start(BundleContext context) throws Exception
+        {
+            getInfo().setBundleContext(context);
+
+            // Start all activators.
+            for (int i = 0; i < m_activatorList.size(); i++)
+            {
+                ((BundleActivator) m_activatorList.get(i)).start(context);
+            }
+        }
+
+        public void stop(BundleContext context) throws Exception
+        {
+            getInfo().setBundleContext(context);
+
+            // Spec says stop() on SystemBundle should return immediately and
+            // shutdown framework on another thread.
+            if (getFelix().getStatus() == Felix.RUNNING_STATUS)
+            {
+                // Initial call of stop, so kick off shutdown.
+                m_shutdownThread = new Thread(this, "FelixShutdown");
+                m_shutdownThread.start();
+            }
+        }
+
+        public void run()
+        {
+            // First, stop all other bundles.
+            try
+            {
+                getFelix().shutdownInternal();
+            }
+            catch (Exception ex)
+            {
+                getFelix().getLogger().log(
+                    Logger.LOG_ERROR,
+                    "SystemBundle: Error while shutting down.", ex);
+            }
+
+            // Next, stop all system bundle activators.
+            if (m_activatorList != null)
+            {
+                // Stop all activators.
+                for (int i = 0; i < m_activatorList.size(); i++)
+                {
+                    try
+                    {
+                        if ((m_activatorContextMap != null) &&
+                            m_activatorContextMap.containsKey(m_activatorList.get(i)))
+                        {
+                            ((BundleActivator) m_activatorList.get(i)).stop(
+                                (BundleContext) m_activatorContextMap.get(
+                                m_activatorList.get(i)));
+                        }
+                        else
+                        {
+                            ((BundleActivator) m_activatorList.get(i)).stop(getInfo().getBundleContext());
+                        }
+                    }
+                    catch (Throwable throwable)
+                    {
+                        getFelix().getLogger().log(
+                            Logger.LOG_WARNING,
+                            "Exception stopping a system bundle activator.",
+                            throwable);
+                    }
+                }
+            }
+        }
     }
 
     private class SystemBundleContentLoader implements IContentLoader

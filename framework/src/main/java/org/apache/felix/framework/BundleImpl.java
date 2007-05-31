@@ -54,7 +54,7 @@ class BundleImpl implements Bundle
 
     public BundleContext getBundleContext()
     {
-        return m_info.getContext();
+        return m_info.getBundleContext();
     }
 
     public long getBundleId()

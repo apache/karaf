@@ -450,12 +450,12 @@ class BundleInfo
         }
     }
 
-    public BundleContext getContext()
+    public BundleContext getBundleContext()
     {
         return m_context;
     }
 
-    public void setContext(BundleContext context)
+    public void setBundleContext(BundleContext context)
     {
         m_context = context;
     }

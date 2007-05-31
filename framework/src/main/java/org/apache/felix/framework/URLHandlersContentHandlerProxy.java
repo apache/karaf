@@ -103,9 +103,7 @@ class URLHandlersContentHandlerProxy extends ContentHandler
         {
             // Get the framework's system bundle context.
             BundleContext context =
-                ((SystemBundleActivator)
-                    ((SystemBundle) framework.getBundle(0)).getActivator())
-                        .getBundleContext();
+                ((BundleImpl) framework.getBundle(0)).getInfo().getBundleContext();
             // Create a filter for the mime type.
             String filter = 
                 "(&(objectClass="
