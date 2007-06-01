@@ -128,11 +128,6 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
         headers.put(FelixConstants.EXPORT_PACKAGE, exportSB.toString());
     }
 
-    public ICapability[] getExports()
-    {
-        return m_exports;
-    }
-
     public IContentLoader getContentLoader()
     {
         return m_contentLoader;
