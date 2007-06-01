@@ -13,7 +13,7 @@
     <dependency>
       <groupId>org.apache.directory.daemon</groupId>
       <artifactId>daemon-bootstrappers</artifactId>
-      <version>1.0-RC2-SNAPSHOT</version>
+      <version>1.1.0</version>
     </dependency>  
 
     <dependency>
@@ -65,7 +65,7 @@
       <plugin>
         <groupId>org.apache.directory.daemon</groupId>
         <artifactId>daemon-plugin</artifactId>
-        <version>1.0-RC2-SNAPSHOT</version>
+        <version>1.1.0</version>
         <configuration>
           <excludes>
             <exclude>ant:ant</exclude>
