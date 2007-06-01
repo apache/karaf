@@ -356,10 +356,11 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
 
         public void run()
         {
-            // First, stop all other bundles.
+            // First, start the framework shutdown, which will
+            // stop all bundles.
             try
             {
-                getFelix().shutdownInternal();
+                getFelix().shutdownInternalStart();
             }
             catch (Exception ex)
             {
@@ -396,6 +397,18 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
                             throwable);
                     }
                 }
+            }
+
+            // Lastly, complete the shutdown.
+            try
+            {
+                getFelix().shutdownInternalFinish();
+            }
+            catch (Exception ex)
+            {
+                getFelix().getLogger().log(
+                    Logger.LOG_ERROR,
+                    "SystemBundle: Error while shutting down.", ex);
             }
         }
     }

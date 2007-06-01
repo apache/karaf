@@ -567,7 +567,7 @@ ex.printStackTrace();
      * the system bundle, cleaning up any bundle remains and shutting down event
      * dispatching.
      */
-    void shutdownInternal()
+    void shutdownInternalStart()
     {
         synchronized (this)
         {
@@ -665,7 +665,10 @@ ex.printStackTrace();
                 }
             }
         }
+    }
 
+    void shutdownInternalFinish()
+    {
         // Notify any waiters that the framework is back in its initial state.
         synchronized (this)
         {
