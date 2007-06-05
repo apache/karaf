@@ -41,8 +41,16 @@ public interface IContentLoader
     public Enumeration getResources(String name);
     public URL getResourceFromContent(String name);
 
-    public boolean hasInputStream(String urlPath)
+    // TODO: ML - For expediency, the index argument was added to these methods
+    // but it is not clear that this makes sense in the long run. This needs to
+    // be readdressed in the future, perhaps by the spec to clearly indicate
+    // how resources on the bundle class path are searched, which is why we
+    // need the index number in the first place -- to differentiate among
+    // resources with the same name on the bundle class path. This was previously
+    // handled as part of the resource path, but that approach is not spec
+    // compliant.
+    public boolean hasInputStream(int index, String urlPath)
         throws IOException;
-    public InputStream getInputStream(String urlPath)
+    public InputStream getInputStream(int index, String urlPath)
         throws IOException;
 }

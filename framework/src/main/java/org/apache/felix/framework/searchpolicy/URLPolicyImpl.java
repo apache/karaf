@@ -41,7 +41,7 @@ public class URLPolicyImpl implements IURLPolicy
         m_module = module;
     }
 
-    public URL createURL(String path)
+    public URL createURL(int port, String path)
     {
          // Add a slash if there is one already, otherwise
          // the is no slash separating the host from the file
@@ -55,7 +55,7 @@ public class URLPolicyImpl implements IURLPolicy
          {
              return m_secureAction.createURL(
                  FelixConstants.BUNDLE_URL_PROTOCOL,
-                 m_module.getId(), -1, path, m_streamHandler);
+                 m_module.getId(), port, path, m_streamHandler);
          }
          catch (MalformedURLException ex)
          {

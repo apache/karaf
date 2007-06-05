@@ -143,7 +143,7 @@ public class ContentLoaderImpl implements IContentLoader
         {
             if (getClassPath()[i].hasEntry(name))
             {
-                url = getURLPolicy().createURL((i + 1) + "/" + name);
+                url = getURLPolicy().createURL(i + 1, name);
             }
         }
 
@@ -169,7 +169,7 @@ public class ContentLoaderImpl implements IContentLoader
                 // that we can differentiate between module content URLs
                 // (where the path will start with 0) and module class
                 // path URLs.
-                v.addElement(getURLPolicy().createURL((i + 1) + "/" + name));
+                v.addElement(getURLPolicy().createURL(i + 1, name));
             }
         }
 
@@ -186,7 +186,7 @@ public class ContentLoaderImpl implements IContentLoader
         // the root of the bundle according to the spec.
         if (name.equals("/"))
         {
-            url = getURLPolicy().createURL("0/");
+            url = getURLPolicy().createURL(0, "/");
         }
 
         if (url == null)
@@ -203,54 +203,38 @@ public class ContentLoaderImpl implements IContentLoader
                 // Module content URLs start with 0, whereas module
                 // class path URLs start with the index into the class
                 // path + 1.
-                url = getURLPolicy().createURL("0/" + name);
+                url = getURLPolicy().createURL(0, name);
             }
         }
 
         return url;
     }
 
-    public boolean hasInputStream(String urlPath)
+    public boolean hasInputStream(int index, String urlPath)
     {
         if (urlPath.startsWith("/"))
         {
             urlPath = urlPath.substring(1);
         }
-        // The urlPath is the path portion of a resource URL
-        // that is contructed above in getResouce() like this:
-        // <index> / <relative-resource-path>
-        // where <index> == 0 is the module content
-        // and <index> > 0 is the index into the class
-        // path - 1.
-        int idx = Integer.parseInt(urlPath.substring(0, urlPath.indexOf('/')));
-        urlPath = urlPath.substring(urlPath.indexOf('/') + 1);
-        if (idx == 0)
+        if (index == 0)
         {
             return m_content.hasEntry(urlPath);
         }
-        return m_contentPath[idx - 1].hasEntry(urlPath);
+        return m_contentPath[index - 1].hasEntry(urlPath);
     }
 
-    public InputStream getInputStream(String urlPath)
+    public InputStream getInputStream(int index, String urlPath)
         throws IOException
     {
         if (urlPath.startsWith("/"))
         {
             urlPath = urlPath.substring(1);
         }
-        // The urlPath is the path portion of a resource URL
-        // that is contructed above in getResouce() like this:
-        // <index> / <relative-resource-path>
-        // where <index> == 0 is the module content
-        // and <index> > 0 is the index into the class
-        // path - 1.
-        int idx = Integer.parseInt(urlPath.substring(0, urlPath.indexOf('/')));
-        urlPath = urlPath.substring(urlPath.indexOf('/') + 1);
-        if (idx == 0)
+        if (index == 0)
         {
             return m_content.getEntryAsStream(urlPath);
         }
-        return m_contentPath[idx - 1].getEntryAsStream(urlPath);
+        return m_contentPath[index - 1].getEntryAsStream(urlPath);
     }
 
     public String toString()

@@ -22,5 +22,13 @@ import java.net.URL;
 
 public interface IURLPolicy
 {
-    public URL createURL(String path);
+    // TODO: ML - For expediency, the port argument was added to this method
+    // but it is not clear that it makes sense in the long run. This needs to
+    // be readdressed in the future, perhaps by the spec to clearly indicate
+    // how resources on the bundle class path are searched, which is why we
+    // need the port number in the first place -- to differentiate among
+    // resources with the same name on the bundle class path. This was previously
+    // handled as part of the resource path, but that approach is not spec
+    // compliant.
+    public URL createURL(int port, String path);
 }

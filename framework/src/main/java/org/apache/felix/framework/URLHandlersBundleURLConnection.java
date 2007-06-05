@@ -55,7 +55,7 @@ class URLHandlersBundleURLConnection extends URLConnection
         }
         // Verify that the resource pointed to be the URL exists.
         // The URL is constructed like this:
-        //     bundle://<module-id>/<resource-path>
+        //     bundle://<module-id>:<bundle-classpath-index>/<resource-path>
         // Where <module-id> = <bundle-id>.<revision>
         long bundleId = Util.getBundleIdFromModuleId(url.getHost());
         BundleImpl bundle = (BundleImpl) m_framework.getBundle(bundleId);
@@ -66,7 +66,7 @@ class URLHandlersBundleURLConnection extends URLConnection
         int revision = Util.getModuleRevisionFromModuleId(url.getHost());
         IModule[] modules = bundle.getInfo().getModules();
         if ((modules == null) || (revision < 0) || (revision >= modules.length) ||
-            !modules[revision].getContentLoader().hasInputStream(url.getPath()))
+            !modules[revision].getContentLoader().hasInputStream(url.getPort(), url.getPath()))
         {
             throw new IOException("Resource does not exist: " + url);
         }
@@ -77,7 +77,7 @@ class URLHandlersBundleURLConnection extends URLConnection
         if (!connected)
         {
             // The URL is constructed like this:
-            //     bundle://<module-id>/<resource-path>
+        //     bundle://<module-id>:<module-classpath-index>/<resource-path>
             // Where <module-id> = <bundle-id>.<revision>
             long bundleId = Util.getBundleIdFromModuleId(url.getHost());
             BundleImpl bundle = (BundleImpl) m_framework.getBundle(bundleId);
@@ -91,7 +91,8 @@ class URLHandlersBundleURLConnection extends URLConnection
             {
                 throw new IOException("Resource does not exist: " + url);
             }
-            m_is = bundle.getInfo().getModules()[revision].getContentLoader().getInputStream(url.getPath());
+            m_is = bundle.getInfo().getModules()[revision]
+                .getContentLoader().getInputStream(url.getPort(), url.getPath());
             m_contentLength = (m_is == null) ? 0 : m_is.available();
             m_contentTime = 0L;
             m_contentType = URLConnection.guessContentTypeFromName(url.getFile());

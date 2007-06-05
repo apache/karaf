@@ -492,12 +492,12 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
             return null;
         }
 
-        public boolean hasInputStream(String urlPath) throws IOException
+        public boolean hasInputStream(int index, String urlPath) throws IOException
         {
             return (getClass().getClassLoader().getResource(urlPath) != null);
         }
 
-        public InputStream getInputStream(String urlPath) throws IOException
+        public InputStream getInputStream(int index, String urlPath) throws IOException
         {
             return getClass().getClassLoader().getResourceAsStream(urlPath);
         }
