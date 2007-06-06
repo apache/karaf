@@ -58,7 +58,7 @@ public class ConfigurationDependency implements Dependency, ManagedService {
 		m_context = context;
 	}
 	
-	public boolean isAvailable() {
+	public synchronized boolean isAvailable() {
 		return m_settings != null;
 	}
 
@@ -100,8 +100,11 @@ public class ConfigurationDependency implements Dependency, ManagedService {
 		}
 		// if these settings did not cause a configuration exception, we determine
 		// if they have caused the dependency state to change
-		Dictionary oldSettings = m_settings;
-		m_settings = settings;
+		Dictionary oldSettings = null; 
+		synchronized (this) {
+			oldSettings = m_settings;
+			m_settings = settings;
+		}
 		if ((oldSettings == null) && (settings != null)) {
 			m_service.dependencyAvailable(this);
 		}
