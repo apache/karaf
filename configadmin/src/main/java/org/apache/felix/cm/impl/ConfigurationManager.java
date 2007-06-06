@@ -448,45 +448,57 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         if ( event.getType() == BundleEvent.UNINSTALLED )
         {
             String location = event.getBundle().getLocation();
-            String filter = "(service.bundleLocation=" + location + ")";
 
             try
             {
-                ConfigurationImpl[] configs = listConfigurations( null, filter );
-                if ( configs != null && configs.length > 0 )
+                PersistenceManager[] pmList = getPersistenceManagers();
+                for ( int i = 0; i < pmList.length; i++ )
                 {
-                    for ( int i = 0; i < configs.length; i++ )
+                    Enumeration configs = pmList[i].getDictionaries();
+                    while ( configs.hasMoreElements() )
                     {
-                        configs[i].setBundleLocation( null );
-                        try
+                        Dictionary config = ( Dictionary ) configs.nextElement();
+
+                        String pid = ( String ) config.get( Constants.SERVICE_PID );
+                        if ( pid != null )
                         {
-                            configs[i].store();
+                            ConfigurationImpl cfg = getCachedConfiguration( pid );
+                            if ( cfg == null )
+                            {
+                                cfg = new ConfigurationImpl( this, pmList[i], config );
+                            }
+
+                            if ( location.equals( cfg.getBundleLocation() ) )
+                            {
+                                cfg.setBundleLocation( null );
+                            }
                         }
-                        catch ( IOException ioe )
+                        else
                         {
-                            log( LogService.LOG_WARNING,
-                                "Problem storing unbound configuration " + configs[i].getPid(), ioe );
+
+                            Factory factory = Factory.getFactory( pmList[i], config );
+                            if ( factory != null )
+                            {
+                                Factory cachedFactory = ( Factory ) factories.get( factory.getFactoryPid() );
+                                if ( cachedFactory != null )
+                                {
+                                    factory = cachedFactory;
+                                }
+
+                                if ( location.equals( factory.getBundleLocation() ) )
+                                {
+                                    factory.setBundleLocation( null );
+                                }
+                            }
                         }
                     }
                 }
+
             }
             catch ( Exception e )
             {
                 log( LogService.LOG_WARNING, "Problem unbinding configurations for bundle " + location, e );
             }
-
-            // unbind cached configurations
-            Iterator configurations = getCachedConfigurations();
-            while ( configurations.hasNext() )
-            {
-                ConfigurationImpl cfg = ( ConfigurationImpl ) configurations.next();
-                if ( location.equals( cfg.getBundleLocation() ) )
-                {
-                    cfg.setBundleLocation( null );
-                }
-            }
-
-            // TODO: find factories to unbind !!
         }
     }
 

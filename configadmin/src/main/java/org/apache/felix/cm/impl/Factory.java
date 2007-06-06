@@ -31,25 +31,27 @@ import org.osgi.service.log.LogService;
 
 
 /**
- * The <code>Factory</code> class is used to manage mappings between factory PIDs
- * the configuration PID belonging to it.
- *
+ * The <code>Factory</code> class is used to manage mappings between factory
+ * PIDs the configuration PID belonging to it.
+ * 
  * @author fmeschbe
  */
 class Factory
 {
 
+    public static final String FACTORY_PID = "factory.pid";
+
     public static final String FACTORY_PID_LIST = "factory.pidList";
 
     // the persistence manager storing this factory mapping
     private PersistenceManager persistenceManager;
-    
+
     // the factory PID of this factory
     private String factoryPid;
-    
-    // the bundle location to which factory PID mapping is bound 
+
+    // the bundle location to which factory PID mapping is bound
     private String bundleLocation;
-    
+
     // the set of configuration PIDs belonging to this factory
     private Set pids;
 
@@ -64,6 +66,19 @@ class Factory
     {
         Dictionary dict = persistenceManager.load( factoryPidToIdentifier( factoryPid ) );
         return new Factory( persistenceManager, factoryPid, dict );
+    }
+
+
+    static Factory getFactory( PersistenceManager persistenceManager, Dictionary props )
+    {
+        // ignore non-Configuration dictionaries
+        String factoryPid = ( String ) props.get( Factory.FACTORY_PID );
+        if ( factoryPid == null )
+        {
+            return null;
+        }
+
+        return new Factory( persistenceManager, factoryPid, props );
     }
 
 
@@ -121,7 +136,7 @@ class Factory
     void setBundleLocation( String bundleLocation )
     {
         this.bundleLocation = bundleLocation;
-        
+
         // 104.15.2.8 The bundle location will be set persistently
         storeSilently();
     }
@@ -166,10 +181,12 @@ class Factory
         }
         else
         {
+            props.put( FACTORY_PID, getFactoryPid() );
             persistenceManager.store( id, props );
         }
     }
-    
+
+
     void storeSilently()
     {
         try
@@ -179,7 +196,8 @@ class Factory
         catch ( IOException ioe )
         {
             // should actually log this problem
-            // configurationManager.log( LogService.LOG_ERROR, "Persisting new bundle location failed", ioe );
+            // configurationManager.log( LogService.LOG_ERROR, "Persisting new
+            // bundle location failed", ioe );
         }
     }
 }

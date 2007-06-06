@@ -65,7 +65,7 @@ import org.osgi.framework.Constants;
  * <tr><th>PID</th><th>Configuration File Name</th></tr>
  * <tr><td><code>sample</code><td><code>sample.config</code></tr>
  * <tr><td><code>org.apache.felix.log.LogService</code><td><code>org/apache/felix/log/LogService.config</code></tr>
- * <tr><td><code>sample.flèche</code><td><code>sample/fl%00e8che.config</code></tr>
+ * <tr><td><code>sample.flï¿½che</code><td><code>sample/fl%00e8che.config</code></tr>
  * </table>
  *
  * @author fmeschbe
@@ -409,10 +409,10 @@ public class FilePersistenceManager implements PersistenceManager
                         {
                             Dictionary dict =  load( cfgFile );
                             
-                            // use the dictionary if it has a PID and the PID
+                            // use the dictionary if it has no PID or the PID
                             // derived file name matches the source file name 
-                            if ( dict.get( Constants.SERVICE_PID ) != null
-                                && cfgFile.equals( getFile( ( String ) dict.get( Constants.SERVICE_PID ) ) ) )
+                            if ( dict.get( Constants.SERVICE_PID ) == null
+                                || cfgFile.equals( getFile( ( String ) dict.get( Constants.SERVICE_PID ) ) ) )
                             {
                                 return dict;
                             }
