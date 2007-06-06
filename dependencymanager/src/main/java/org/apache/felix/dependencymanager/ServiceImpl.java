@@ -1,23 +1,26 @@
 /*
- *   Copyright 2006 The Apache Software Foundation
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.felix.dependencymanager;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -31,7 +34,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * Service implementation.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ServiceImpl implements Service {
     private static final ServiceRegistration NULL_REGISTRATION;
@@ -237,12 +240,22 @@ public class ServiceImpl implements Service {
     private void invoke(String name) {
         if (name != null) {
             // invoke method if it exists
-            AccessibleObject.setAccessible(m_serviceInstance.getClass().getDeclaredMethods(), true);
             try {
-                m_serviceInstance.getClass().getDeclaredMethod(name, null).invoke(m_serviceInstance, null);
-            }
-            catch (NoSuchMethodException e) {
-                // ignore this, we don't care if the method does not exist
+                Class clazz = m_serviceInstance.getClass();
+                while (clazz != null) {
+                	try {
+                	Method method = clazz.getDeclaredMethod(name, null);
+	                	if (method != null) {
+	                		AccessibleObject.setAccessible(new AccessibleObject[] { method }, true);
+	                		method.invoke(m_serviceInstance, null);
+	                		return;
+	                	}
+                	}
+                	catch (NoSuchMethodException e) {
+                		// ignore this, we keep searching if the method does not exist
+                	}
+                	clazz = clazz.getSuperclass();
+                }
             }
             catch (Exception e) {
                 // TODO handle this exception
@@ -340,26 +353,27 @@ public class ServiceImpl implements Service {
         }
     }
 
-    private void initService() {
-        if (m_implementation instanceof Class) {
-            // instantiate
-            try {
-                m_serviceInstance = ((Class) m_implementation).newInstance();
-            } catch (InstantiationException e) {
-                // TODO handle this exception
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                // TODO handle this exception
-                e.printStackTrace();
-            }
-        }
-        else {
-            m_serviceInstance = m_implementation;
-        }
-        // configure the bundle context
-        configureImplementation(BundleContext.class, m_context);
-        configureImplementation(ServiceRegistration.class, NULL_REGISTRATION);
-        
+    void initService() {
+    	if (m_serviceInstance == null) {
+	        if (m_implementation instanceof Class) {
+	            // instantiate
+	            try {
+	                m_serviceInstance = ((Class) m_implementation).newInstance();
+	            } catch (InstantiationException e) {
+	                // TODO handle this exception
+	                e.printStackTrace();
+	            } catch (IllegalAccessException e) {
+	                // TODO handle this exception
+	                e.printStackTrace();
+	            }
+	        }
+	        else {
+	            m_serviceInstance = m_implementation;
+	        }
+	        // configure the bundle context
+	        configureImplementation(BundleContext.class, m_context);
+	        configureImplementation(ServiceRegistration.class, NULL_REGISTRATION);
+    	}        
     }
     
     private void configureService() {
