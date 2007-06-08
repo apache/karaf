@@ -75,7 +75,7 @@ public class ServiceDependencyTest extends TestCase {
 	 * Defines a service with one required dependency that is
 	 * available. Makes sure the service is started.
 	 */
-	public void testRequiredAvailableDependency() throws Exception {
+//	public void testRequiredAvailableDependency() throws Exception {
 //		// setup the mock objects
 //		IMocksControl ctrl = EasyMock.createControl();
 //		BundleContext context = ctrl.createMock(BundleContext.class);
@@ -100,13 +100,13 @@ public class ServiceDependencyTest extends TestCase {
 //		dm.remove(service);
 //		// verify the results
 //		ctrl.verify();
-	}
+//	}
 	
 	/**
 	 * Defines a service with an optional dependency that is not available.
 	 * Makes sure the service is started.
 	 */
-	public void testOptionalDependency() throws Exception {
+//	public void testOptionalDependency() throws Exception {
 //		// setup the mock objects
 //		IMocksControl ctrl = EasyMock.createControl();
 //		BundleContext context = ctrl.createMock(BundleContext.class);
@@ -131,7 +131,7 @@ public class ServiceDependencyTest extends TestCase {
 //		dm.remove(service);
 //		// verify the results
 //		ctrl.verify();
-	}
+//	}
 	
 	public void XtestRequiredAvailableServiceDependency() throws Exception {
 //		// setup the mock objects

@@ -420,6 +420,6 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
     }
     
     public String toString() {
-        return "ServiceDependency[" + m_trackedServiceName + " " + m_trackedServiceFilter + " " + m_isRequired + "] for " + m_service;
+        return "ServiceDependency[" + m_trackedServiceName + " " + m_trackedServiceFilter + "]";
     }
 }

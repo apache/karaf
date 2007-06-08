@@ -29,7 +29,7 @@ import org.osgi.framework.ServiceRegistration;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ServiceRegistrationImpl implements ServiceRegistration {
+public final class ServiceRegistrationImpl implements ServiceRegistration {
     public static final ServiceRegistrationImpl ILLEGAL_STATE = new ServiceRegistrationImpl();
     private ServiceRegistration m_registration;
 
@@ -38,36 +38,30 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
     }
     
     public ServiceReference getReference() {
-        ensureRegistration();
-        return m_registration.getReference();
+        return ensureRegistration().getReference();
     }
 
     public void setProperties(Dictionary dictionary) {
-        ensureRegistration();
-        m_registration.setProperties(dictionary);
+        ensureRegistration().setProperties(dictionary);
     }
 
     public void unregister() {
-        ensureRegistration();
-        m_registration.unregister();
+        ensureRegistration().unregister();
     }
 
     public boolean equals(Object obj) {
-        ensureRegistration();
-        return m_registration.equals(obj);
+        return ensureRegistration().equals(obj);
     }
 
     public int hashCode() {
-        ensureRegistration();
-        return m_registration.hashCode();
+        return ensureRegistration().hashCode();
     }
 
     public String toString() {
-        ensureRegistration();
-        return m_registration.toString();
+        return ensureRegistration().toString();
     }
     
-    private synchronized void ensureRegistration() {
+    private synchronized ServiceRegistration ensureRegistration() {
         while (m_registration == null) {
             try {
                 wait();
@@ -77,15 +71,28 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
                 // service registration ready; if not we wait again
             }
         }
+        // check if we're in an illegal state and throw an exception
         if (ILLEGAL_STATE == m_registration) {
             throw new IllegalStateException("Service is not registered.");
         }
+        return m_registration;
     }
 
+    /**
+     * Sets the service registration and notifies all waiting parties.
+     */
     void setServiceRegistration(ServiceRegistration registration) {
-        m_registration = registration;
         synchronized (this) {
+        	m_registration = registration;
             notifyAll();
         }
     }
+
+    /**
+     * Sets this wrapper to an illegal state, which will cause all threads
+     * that are waiting for this service registration to fail.
+     */
+	void setIllegalState() {
+        setServiceRegistration(ServiceRegistrationImpl.ILLEGAL_STATE);
+	}
 }

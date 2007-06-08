@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class DefaultNullObject implements InvocationHandler {
+public final class DefaultNullObject implements InvocationHandler {
     private static final Boolean DEFAULT_BOOLEAN = Boolean.FALSE;
     private static final Byte DEFAULT_BYTE = new Byte((byte) 0);
     private static final Short DEFAULT_SHORT = new Short((short) 0);

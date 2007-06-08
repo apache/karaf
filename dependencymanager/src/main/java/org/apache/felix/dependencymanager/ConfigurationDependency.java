@@ -79,6 +79,7 @@ public class ConfigurationDependency implements Dependency, ManagedService {
 	}
 
 	public void updated(Dictionary settings) throws ConfigurationException {
+		System.out.println("Updating " + settings);
 		// if non-null settings come in, we have to instantiate the service and
 		// apply these settings
 		((ServiceImpl) m_service).initService();
@@ -93,6 +94,9 @@ public class ConfigurationDependency implements Dependency, ManagedService {
 				// it's okay like this, if the new settings contain errors, we
 				// remain in the state we were, assuming that any error causes
 				// the "old" configuration to stay in effect
+			}
+			else {
+				throw new IllegalStateException("Could not invoke updated on implementation");
 			}
 		}
 		else {
@@ -126,5 +130,9 @@ public class ConfigurationDependency implements Dependency, ManagedService {
         if (m_service != null) {
             throw new IllegalStateException("Cannot modify state while active.");
         }
+    }
+    
+    public String toString() {
+    	return "ConfigurationDependency[" + m_pid + "]";
     }
 }
