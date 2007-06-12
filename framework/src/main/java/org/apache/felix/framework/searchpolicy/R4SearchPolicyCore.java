@@ -466,9 +466,20 @@ public class R4SearchPolicyCore implements ModuleListener
             // a class loader or class itself, because we want to ignore
             // calls to ClassLoader.loadClass() and Class.forName() since
             // we are trying to find out who instigated the class load.
+            // Also since Felix uses threads for changing the start level
+            // and refreshing packages, it is possible that there is no
+            // module classes on the call stack; therefore, as soon as we
+            // see Thread on the call stack we exit this loop. Other cases
+            // where modules actually use threads are not an issue because
+            // the module classes will be on the call stack before the
+            // Thread class.
 // TODO: FRAMEWORK - This check is a hack and we should see if we can think
 // of another way to do it, since it won't necessarily work in all situations.
-            if ((this.getClass().getClassLoader() != classes[i].getClassLoader())
+            if (Thread.class.equals(classes[i]))
+            {
+                break;
+            }
+            else if ((this.getClass().getClassLoader() != classes[i].getClassLoader())
                 && !ClassLoader.class.isAssignableFrom(classes[i])
                 && !Class.class.equals(classes[i]))
             {
