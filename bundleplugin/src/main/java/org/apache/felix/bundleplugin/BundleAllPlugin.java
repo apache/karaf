@@ -324,14 +324,9 @@ public class BundleAllPlugin
         return getBundleName( project.getArtifact() );
     }
 
-    private String getBundleNameFirstPart( Artifact artifact )
-    {
-        return artifact.getGroupId() + "." + artifact.getArtifactId();
-    }
-
     private String getBundleName( Artifact artifact )
     {
-        return getBundleNameFirstPart( artifact ) + "_" + convertVersionToOsgi( artifact.getVersion() ) + ".jar";
+        return getMaven2OsgiConverter().getBundleFileName( artifact );
     }
 
     private boolean alreadyBundled( Artifact artifact )

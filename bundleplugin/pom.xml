@@ -75,5 +75,10 @@
       <version>1.0</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-osgi</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
  </dependencies>
 </project>

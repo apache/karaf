@@ -28,6 +28,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.*;
 import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.osgi.Maven2OsgiConverter;
  
 import aQute.lib.osgi.*;
  
@@ -40,15 +41,6 @@ import aQute.lib.osgi.*;
  */
 public class BundlePlugin extends AbstractMojo {
  
- /** Bundle-Version must match this pattern */
- private static final Pattern OSGI_VERSION_PATTERN = Pattern.compile("[0-9]+(\\.[0-9]+(\\.[0-9]+(\\.[0-9A-Za-z_-]+)?)?)?");
-
- /** pattern used to change - to . */
- //private static final Pattern P_VERSION = Pattern.compile("([0-9]+(\\.[0-9])*)-(.*)");
-
- /** pattern that matches strings that contain only numbers */
- private static final Pattern ONLY_NUMBERS = Pattern.compile("[0-9]+");
-
  private static final Collection SUPPORTED_PROJECT_TYPES = Arrays.asList(new String[]{"jar","bundle"});
 
  /**
@@ -89,7 +81,13 @@ public class BundlePlugin extends AbstractMojo {
   * @parameter
   */
  private Map    instructions = new HashMap();
- 
+
+ private Maven2OsgiConverter maven2OsgiConverter = new Maven2OsgiConverter();
+
+ protected Maven2OsgiConverter getMaven2OsgiConverter() {
+  return maven2OsgiConverter;
+ }
+
  protected MavenProject getProject() {
   return project;
  }
@@ -316,89 +314,12 @@ public class BundlePlugin extends AbstractMojo {
   */
  protected String convertVersionToOsgi(String version)
  {
-     String osgiVersion;
-
-//     Matcher m = P_VERSION.matcher(version);
-//     if (m.matches()) {
-//         osgiVersion = m.group(1) + "." + m.group(3);
-//     }
-
-     /* TODO need a regexp guru here */
-
-     Matcher m;
-     
-     /* if it's already OSGi compliant don't touch it */
-     m = OSGI_VERSION_PATTERN.matcher(version);
-     if (m.matches()) {
-         return version;
-     }
-
-     osgiVersion = version;
-
-     /* check for dated snapshot versions with only major or major and minor */
-     Pattern DATED_SNAPSHOT = Pattern.compile("([0-9])(\\.([0-9]))?(\\.([0-9]))?\\-([0-9]{8}\\.[0-9]{6}\\-[0-9]*)");
-     m = DATED_SNAPSHOT.matcher(osgiVersion);
-     if (m.matches()) {
-         String major = m.group(1);
-         String minor = (m.group(3) != null) ? m.group(3) : "0";
-         String service = (m.group(5) != null) ? m.group(5) : "0";
-         String qualifier = m.group(6).replaceAll( "-", "_" ).replaceAll( "\\.", "_" );
-         osgiVersion = major + "." + minor + "." + service + "." + qualifier;
-     }
-
-     /* else transform first - to . and others to _ */
-     osgiVersion = osgiVersion.replaceFirst( "-", "\\." );
-     osgiVersion = osgiVersion.replaceAll( "-", "_" );
-     m = OSGI_VERSION_PATTERN.matcher(osgiVersion);
-     if (m.matches()) {
-         return osgiVersion;
-     }
-
-     /* remove dots in the middle of the qualifier */
-     Pattern DOTS_IN_QUALIFIER = Pattern.compile("([0-9])(\\.[0-9])?\\.([0-9A-Za-z_-]+)\\.([0-9A-Za-z_-]+)");
-     m = DOTS_IN_QUALIFIER.matcher(osgiVersion);
-     if (m.matches()) {
-         String s1 = m.group(1);
-         String s2 = m.group(2);
-         String s3 = m.group(3);
-         String s4 = m.group(4);
-
-         Matcher qualifierMatcher = ONLY_NUMBERS.matcher( s3 );
-         /* if last portion before dot is only numbers then it's not in the middle of the qualifier */
-         if (!qualifierMatcher.matches()) {
-             osgiVersion = s1 + s2 + "." + s3 + "_" + s4;
-         }
-     }
-
-     /* convert 1.string into 1.0.0.string and 1.2.string into 1.2.0.string */
-     Pattern NEED_TO_FILL_ZEROS = Pattern.compile("([0-9])(\\.([0-9]))?\\.([0-9A-Za-z_-]+)");
-     m = NEED_TO_FILL_ZEROS.matcher(osgiVersion);
-     if (m.matches()) {
-         String major = m.group(1);
-         String minor = ( m.group( 3 ) != null ) ? m.group( 3 ) : "0";
-         String service = "0";
-         String qualifier = m.group(4);
-
-         Matcher qualifierMatcher = ONLY_NUMBERS.matcher( qualifier );
-         /* if last portion is only numbers then it's not a qualifier */
-         if (!qualifierMatcher.matches()) {
-             osgiVersion = major + "." + minor + "." + service + "." + qualifier;
-         }
-     }
-
-     m = OSGI_VERSION_PATTERN.matcher(osgiVersion);
-     /* if still its not OSGi version then add everything as qualifier */
-     if (!m.matches()) {
-         String major = "0";
-         String minor = "0";
-         String service = "0";
-         String qualifier = osgiVersion.replaceAll( "\\.", "_" );
-         osgiVersion = major + "." + minor + "." + service + "." + qualifier;
-     }
-
-     return osgiVersion;
+     return getMaven2OsgiConverter().getVersion( version );
  }
 
+ /**
+  * TODO this should return getMaven2Osgi().getBundleFileName( project.getArtifact() )  
+  */
  protected String getBundleName(MavenProject project) {
   return project.getBuild().getFinalName() + ".jar";
  }
@@ -436,7 +357,7 @@ public class BundlePlugin extends AbstractMojo {
      properties.put(Analyzer.BUNDLE_SYMBOLICNAME, bsn);
      properties.put(Analyzer.IMPORT_PACKAGE, "*");
 
-     String version = convertVersionToOsgi(project.getVersion());
+     String version = getMaven2OsgiConverter().getVersion( project.getVersion() );
      
      properties.put(Analyzer.BUNDLE_VERSION, version);
      header(properties, Analyzer.BUNDLE_DESCRIPTION, project
