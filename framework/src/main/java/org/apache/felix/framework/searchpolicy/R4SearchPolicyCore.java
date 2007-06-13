@@ -497,10 +497,6 @@ public class R4SearchPolicyCore implements ModuleListener
         return null;
     }
 
-// TODO: FRAMEWORK - This implements dynamic imports incorrectly, since it
-//       doesn't iteratively try each "in use" candidate first and it doesn't
-//       do a class space consistency check for the module gaining the
-//       dynamic wire.
     private IWire attemptDynamicImport(IModule importer, String pkgName)
     {
         R4Wire wire = null;
@@ -556,34 +552,30 @@ public class R4SearchPolicyCore implements ModuleListener
                         // Lock module manager instance to ensure that nothing changes.
                         synchronized (m_factory)
                         {
-                            // First check "in use" candidates for a match.
-                            PackageSource[] candidates = getInUseCandidates(req);
-                            // If there is an "in use" candidate, just take the first one.
-                            if (candidates.length > 0)
-                            {
-                                candidate = candidates[0];
-                            }
+                            // Get "in use" and "available" candidates and put
+                            // the "in use" candidates first.
+                            PackageSource[] inuse = getInUseCandidates(req);
+                            PackageSource[] available = getUnusedCandidates(req);
+                            PackageSource[] candidates = new PackageSource[inuse.length + available.length];
+                            System.arraycopy(inuse, 0, candidates, 0, inuse.length);
+                            System.arraycopy(available, 0, candidates, inuse.length, available.length);
 
-                            // If there were no "in use" candidates, then try "available"
-                            // candidates.
-                            if (candidate == null)
+                            // Take the first candidate that can resolve.
+                            for (int candIdx = 0;
+                                (candidate == null) && (candIdx < candidates.length);
+                                candIdx++)
                             {
-                                candidates = getUnusedCandidates(req);
-
-                                // Take the first candidate that can resolve.
-                                for (int candIdx = 0;
-                                    (candidate == null) && (candIdx < candidates.length);
-                                    candIdx++)
+                                try
                                 {
-                                    try
+                                    if (resolveDynamicImportCandidate(
+                                        candidates[candIdx].m_module, importer))
                                     {
-                                        resolve(candidates[candIdx].m_module);
                                         candidate = candidates[candIdx];
                                     }
-                                    catch (ResolveException ex)
-                                    {
-                                        // Ignore candidates that cannot resolve.
-                                    }
+                                }
+                                catch (ResolveException ex)
+                                {
+                                    // Ignore candidates that cannot resolve.
                                 }
                             }
 
@@ -620,6 +612,104 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         }
 
         return null;
+    }
+
+    private boolean resolveDynamicImportCandidate(IModule provider, IModule importer)
+        throws ResolveException
+    {
+        // If the provider of the dynamically imported package is not
+        // resolved, then we need to calculate the candidates to resolve
+        // it and see if there is a consistent class space for the
+        // provider. If there is no consistent class space, then a resolve
+        // exception is thrown.
+        Map candidatesMap = new HashMap();
+        if (!isResolved(provider))
+        {
+            populateCandidatesMap(candidatesMap, provider);
+            findConsistentClassSpace(candidatesMap, provider);
+        }
+
+        // If the provider can be successfully resolved, then verify that
+        // its class space is consistent with the existing class space of the
+        // module that instigated the dynamic import.
+        Map moduleMap = new HashMap();
+        Map importerPkgMap = getModulePackages(moduleMap, importer, candidatesMap);
+
+        // Now we need to calculate the "uses" constraints of every package
+        // accessible to the provider module based on its current candidates.
+        Map usesMap = usesMap = calculateUsesConstraints(provider, moduleMap, candidatesMap);
+
+        // Verify that none of the provider's implied "uses" constraints
+        // in the uses map conflict with anything in the importing module's
+        // package map.
+        for (Iterator iter = usesMap.entrySet().iterator(); iter.hasNext(); )
+        {
+            Map.Entry entry = (Map.Entry) iter.next();
+
+            // For the given "used" package, get that package from the
+            // importing module's package map, if present.
+            ResolvedPackage rp = (ResolvedPackage) importerPkgMap.get(entry.getKey());
+
+            // If the "used" package is also visible to the importing
+            // module, make sure there is no conflicts in the implied
+            // "uses" constraints.
+            if (rp != null)
+            {
+                // Clone the resolve package so we can modify it.
+                rp = (ResolvedPackage) rp.clone();
+
+                // Loop through all implied "uses" constraints for the current
+                // "used" package and verify that all package sources are
+                // compatible with the package source of the importing module's
+                // package map.
+                List constraintList = (List) entry.getValue();
+                for (int constIdx = 0; constIdx < constraintList.size(); constIdx++)
+                {
+                    // Get a specific "uses" constraint for the current "used"
+                    // package.
+                    ResolvedPackage rpUses = (ResolvedPackage) constraintList.get(constIdx);
+                    // Determine if the implied "uses" constraint is compatible with
+                    // the improting module's package sources for the given "used"
+                    // package. They are compatible if one is the subset of the other.
+                    // Retain the union of the two sets if they are compatible.
+                    if (rpUses.isSubset(rp))
+                    {
+                        // Do nothing because we already have the superset.
+                    }
+                    else if (rp.isSubset(rpUses))
+                    {
+                        // Keep the superset, i.e., the union.
+                        rp.m_sourceList.clear();
+                        rp.m_sourceList.addAll(rpUses.m_sourceList);
+                    }
+                    else
+                    {
+                        m_logger.log(
+                            Logger.LOG_DEBUG,
+                            "Constraint violation for " + importer
+                            + " detected; module can see "
+                            + rp + " and " + rpUses);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        Map resolvedModuleWireMap = createWires(candidatesMap, provider);
+
+        // Fire resolved events for all resolved modules;
+        // the resolved modules array will only be set if the resolve
+        // was successful.
+        if (resolvedModuleWireMap != null)
+        {
+            Iterator iter = resolvedModuleWireMap.entrySet().iterator();
+            while (iter.hasNext())
+            {
+                fireModuleResolved((IModule) ((Map.Entry) iter.next()).getKey());
+            }
+        }
+
+        return true;
     }
 
     public String findLibrary(IModule module, String name)
