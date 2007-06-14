@@ -19,8 +19,12 @@
 package org.apache.felix.shell.impl;
 
 import java.io.PrintStream;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 import org.apache.felix.shell.Command;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -41,7 +45,7 @@ public class RefreshCommandImpl implements Command
 
     public String getUsage()
     {
-        return "refresh";
+        return "refresh [<id> ...]";
     }
 
     public String getShortDescription()
@@ -51,6 +55,43 @@ public class RefreshCommandImpl implements Command
 
     public void execute(String s, PrintStream out, PrintStream err)
     {
+        StringTokenizer st = new StringTokenizer(s, " ");
+
+        // Ignore the command name.
+        st.nextToken();
+
+        // Refresh the specified bundles or all if none are specified.
+        List bundleList = new ArrayList();
+        if (st.hasMoreTokens())
+        {
+            while (st.hasMoreTokens())
+            {
+                String id = st.nextToken().trim();
+
+                try
+                {
+                    long l = Long.parseLong(id);
+                    Bundle bundle = m_context.getBundle(l);
+                    if (bundle != null)
+                    {
+                        bundleList.add(bundle);
+                    }
+                    else
+                    {
+                        err.println("Bundle ID " + id + " is invalid.");
+                    }
+                }
+                catch (NumberFormatException ex)
+                {
+                    err.println("Unable to parse id '" + id + "'.");
+                }
+                catch (Exception ex)
+                {
+                    err.println(ex.toString());
+                }
+            }
+        }
+
         // Get package admin service.
         ServiceReference ref = m_context.getServiceReference(
             org.osgi.service.packageadmin.PackageAdmin.class.getName());
@@ -67,6 +108,8 @@ public class RefreshCommandImpl implements Command
             return;
         }
 
-        pa.refreshPackages(null);
+        pa.refreshPackages((bundleList.size() == 0)
+            ? null
+            : (Bundle[]) bundleList.toArray(new Bundle[bundleList.size()]));
     }
 }
