@@ -21,18 +21,18 @@ package org.apache.felix.bundleplugin;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.regex.*;
 import java.util.zip.ZipException;
- 
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.*;
 import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.osgi.Maven2OsgiConverter;
- 
+
 import aQute.lib.osgi.*;
  
 /**
+ * Create an OSGi bundle from Maven project
  * 
  * @goal bundle
  * @phase package
@@ -40,15 +40,16 @@ import aQute.lib.osgi.*;
  * @description build an OSGi bundle jar
  */
 public class BundlePlugin extends AbstractMojo {
- 
+
  private static final Collection SUPPORTED_PROJECT_TYPES = Arrays.asList(new String[]{"jar","bundle"});
 
  /**
+  * The directory for the generated bundles.
+  * 
   * @parameter expression="${project.build.outputDirectory}"
   * @required
-  * @readonly
   */
- File     outputDirectory;
+ private File outputDirectory;
  
  /**
   * The directory for the pom
@@ -82,10 +83,17 @@ public class BundlePlugin extends AbstractMojo {
   */
  private Map    instructions = new HashMap();
 
- private Maven2OsgiConverter maven2OsgiConverter = new Maven2OsgiConverter();
+ /**
+  * @component
+  */
+ private Maven2OsgiConverter maven2OsgiConverter;
 
  protected Maven2OsgiConverter getMaven2OsgiConverter() {
   return maven2OsgiConverter;
+ }
+
+ void setMaven2OsgiConverter(Maven2OsgiConverter maven2OsgiConverter) {
+  this.maven2OsgiConverter = maven2OsgiConverter;
  }
 
  protected MavenProject getProject() {
@@ -264,8 +272,8 @@ public class BundlePlugin extends AbstractMojo {
  protected Jar[] getClasspath(MavenProject project) throws ZipException, IOException {
   List list = new ArrayList();
   
-  if (outputDirectory != null && outputDirectory.exists()) {
-    list.add(new Jar(".", outputDirectory));
+  if (getOutputDirectory() != null && getOutputDirectory().exists()) {
+    list.add(new Jar(".", getOutputDirectory()));
   }
  
   Set artifacts = project.getDependencyArtifacts();
@@ -382,13 +390,17 @@ public class BundlePlugin extends AbstractMojo {
      properties.putAll( getProperies(project.getModel(), "project.", project));
      properties.put("project.baseDir", baseDir );
      properties.put("project.build.directory", getBuildDirectory() );
-     properties.put("project.build.outputdirectory", outputDirectory );
+     properties.put("project.build.outputdirectory", getOutputDirectory() );
      
      return properties;
  }
  
  void setBasedir(File basedir){
      this.baseDir = basedir;
+ }
+
+ File getOutputDirectory(){
+     return this.outputDirectory;
  }
 
  void setOutputDirectory(File outputDirectory){

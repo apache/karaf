@@ -28,6 +28,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.stubs.ArtifactStub;
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.osgi.DefaultMaven2OsgiConverter;
 
 /**
  * Test for {@link BundleAllPlugin}
@@ -57,6 +58,7 @@ public class BundleAllPluginTest
         plugin.setBuildDirectory( buildDirectory.getPath() );
         File outputDirectory = new File( buildDirectory, "classes" );
         plugin.setOutputDirectory( outputDirectory );
+        plugin.setMaven2OsgiConverter( new DefaultMaven2OsgiConverter() );
     }
 
     public void testSnapshotMatch()

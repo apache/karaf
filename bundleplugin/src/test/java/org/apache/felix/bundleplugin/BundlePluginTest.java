@@ -28,6 +28,7 @@ import java.util.TreeMap;
 
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.osgi.DefaultMaven2OsgiConverter;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 
@@ -51,6 +52,7 @@ public class BundlePluginTest
     {
         super.setUp();
         plugin = new BundlePlugin();
+        plugin.setMaven2OsgiConverter( new DefaultMaven2OsgiConverter() );
     }
 
     public void testConvertVersionToOsgi()

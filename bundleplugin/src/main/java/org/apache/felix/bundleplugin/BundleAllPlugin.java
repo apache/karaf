@@ -52,6 +52,7 @@ import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Jar;
 
 /**
+ * Create OSGi bundles from all dependencies in the Maven project
  * 
  * @goal bundleall
  * @phase package
@@ -282,7 +283,7 @@ public class BundleAllPlugin
                 osgiJar.setManifest( manifest );
             }
 
-            outputFile.getParentFile().mkdirs();
+            outputFile.getAbsoluteFile().getParentFile().mkdirs();
             osgiJar.write( outputFile );
 
             BundleInfo bundleInfo = addExportedPackages( project, exportedPackages );
@@ -428,7 +429,7 @@ public class BundleAllPlugin
 
     protected File getOutputFile( Artifact artifact )
     {
-        return new File( getBuildDirectory(), getBundleName( artifact ) );
+        return new File( getOutputDirectory(), getBundleName( artifact ) );
     }
 
     private Artifact resolveArtifact( Artifact artifact )
