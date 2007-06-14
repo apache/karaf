@@ -1436,22 +1436,30 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 ResolvedPackage rp = new ResolvedPackage(pkgName);
                 rp.m_sourceList.add(ps);
                 pkgMap.put(rp.m_name, rp);
+
                 // TODO: FRAMEWORK - Experimental implicit wire concept to try
                 //       to deal with code generation.
                 // Get implicitly imported packages as defined by the provider
                 // of our imported package.
-                Map implicitPkgMap = calculateImplicitImportedPackages(ps, candidatesMap, new HashMap());
+                Map implicitPkgMap = calculateImplicitImportedPackages(
+                    ps.m_module, ps.m_capability, candidatesMap, new HashMap());
                 // Merge the implicitly imported packages with our imports and
                 // verify that there is no overlap.
                 for (Iterator i = implicitPkgMap.entrySet().iterator(); i.hasNext(); )
                 {
                     Map.Entry entry = (Map.Entry) i.next();
-                    if (pkgMap.get(entry.getKey()) != null)
+                    ResolvedPackage implicit = (ResolvedPackage) entry.getValue();
+                    ResolvedPackage existing = (ResolvedPackage) pkgMap.get(entry.getKey());
+                    if ((existing != null) &&
+                        !(existing.isSubset(implicit) && implicit.isSubset(existing)))
                     {
                         throw new ResolveException(
                             "Implicit import of "
                             + entry.getKey()
-                            + " duplicates an existing import.",
+                            + " from "
+                            + implicit
+                            + " duplicates an existing import from "
+                            + existing,
                             targetModule,
                             cs.m_requirement);
                     }
@@ -1473,16 +1481,31 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         // dependencies and add the resolved package source to the
         // imported package map.
         IWire[] wires = targetModule.getWires();
-        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        for (int wireIdx = 0; (wires != null) && (wireIdx < wires.length); wireIdx++)
         {
-            if (wires[i].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+            if (wires[wireIdx].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
             {
                 String pkgName = (String)
-                    wires[i].getCapability().getProperties().get(ICapability.PACKAGE_PROPERTY);
+                    wires[wireIdx].getCapability().getProperties().get(ICapability.PACKAGE_PROPERTY);
                 ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
                 rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
-                rp.m_sourceList.add(new PackageSource(wires[i].getExporter(), wires[i].getCapability()));
+                rp.m_sourceList.add(new PackageSource(wires[wireIdx].getExporter(), wires[wireIdx].getCapability()));
                 pkgMap.put(rp.m_name, rp);
+
+                // TODO: FRAMEWORK - Experimental implicit wire concept to try
+                //       to deal with code generation.
+                // Get implicitly imported packages as defined by the provider
+                // of our imported package.
+                Map implicitPkgMap = calculateImplicitImportedPackagesResolved(
+                    wires[wireIdx].getExporter(), wires[wireIdx].getCapability(), new HashMap());
+                // Merge the implicitly imported packages with our imports.
+                // No need to verify overlap since this is resolved and should
+                // be consistent.
+                for (Iterator i = implicitPkgMap.entrySet().iterator(); i.hasNext(); )
+                {
+                    Map.Entry entry = (Map.Entry) i.next();
+                    pkgMap.put(entry.getKey(), entry.getValue());
+                }
             }
         }
 
@@ -1490,21 +1513,26 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
     }
 
     private Map calculateImplicitImportedPackages(
-        PackageSource psTarget, Map candidatesMap, Map cycleMap)
+        IModule targetModule, ICapability targetCapability,
+        Map candidatesMap, Map cycleMap)
     {
-        return (candidatesMap.get(psTarget.m_module) == null)
-            ? calculateImplicitImportedPackagesResolved(psTarget, cycleMap)
-            : calculateImplicitImportedPackagesUnresolved(psTarget, candidatesMap, cycleMap);      
+        return (candidatesMap.get(targetModule) == null)
+            ? calculateImplicitImportedPackagesResolved(
+                targetModule, targetCapability, cycleMap)
+            : calculateImplicitImportedPackagesUnresolved(
+                targetModule, targetCapability, candidatesMap, cycleMap);      
     }
 
     // TODO: FRAMEWORK - This is currently not defined recursively, but it should be.
     //       Currently, it only assumes that a provider can cause implicit imports for
     //       packages that it exports.
-    private Map calculateImplicitImportedPackagesUnresolved(PackageSource psTarget, Map candidatesMap, Map cycleMap)
+    private Map calculateImplicitImportedPackagesUnresolved(
+        IModule targetModule, ICapability targetCapability,
+        Map candidatesMap, Map cycleMap)
     {
         Map pkgMap = new HashMap();
 
-        R4Directive[] dirs = ((Capability) psTarget.m_capability).getDirectives();
+        R4Directive[] dirs = ((Capability) targetCapability).getDirectives();
         if (dirs != null)
         {
             for (int dirIdx = 0; dirIdx < dirs.length; dirIdx++)
@@ -1517,8 +1545,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                         ResolvedPackage rp = new ResolvedPackage(pkgs[pkgIdx].trim());
                         rp.m_sourceList.add(
                             new PackageSource(
-                                psTarget.m_module,
-                                getExportPackageCapability(psTarget.m_module, pkgs[pkgIdx])));
+                                targetModule,
+                                getExportPackageCapability(targetModule, pkgs[pkgIdx])));
                         pkgMap.put(rp.m_name, rp);
                     }
                 }
@@ -1531,11 +1559,12 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
     // TODO: FRAMEWORK - This is currently not defined recursively, but it should be.
     //       Currently, it only assumes that a provider can cause implicit imports for
     //       packages that it exports.
-    private Map calculateImplicitImportedPackagesResolved(PackageSource psTarget, Map cycleMap)
+    private Map calculateImplicitImportedPackagesResolved(
+        IModule targetModule, ICapability targetCapability, Map cycleMap)
     {
         Map pkgMap = new HashMap();
 
-        R4Directive[] dirs = ((Capability) psTarget.m_capability).getDirectives();
+        R4Directive[] dirs = ((Capability) targetCapability).getDirectives();
         if (dirs != null)
         {
             for (int dirIdx = 0; dirIdx < dirs.length; dirIdx++)
@@ -1548,8 +1577,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                         ResolvedPackage rp = new ResolvedPackage(pkgs[pkgIdx].trim());
                         rp.m_sourceList.add(
                             new PackageSource(
-                                psTarget.m_module,
-                                getExportPackageCapability(psTarget.m_module, pkgs[pkgIdx])));
+                                targetModule,
+                                getExportPackageCapability(targetModule, pkgs[pkgIdx])));
                         pkgMap.put(rp.m_name, rp);
                     }
                 }
@@ -1564,7 +1593,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 //System.out.println("calculateCandidateImplicitPackages("+module+")");
         Map cycleMap = new HashMap();
         cycleMap.put(module, module);
-        return calculateImplicitImportedPackages(psTarget, candidatesMap, cycleMap);
+        return calculateImplicitImportedPackages(
+            psTarget.m_module, psTarget.m_capability, candidatesMap, cycleMap);
     }
 
     private Map calculateExportedPackages(IModule targetModule)
