@@ -2395,6 +2395,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 }
             }
 
+            // Set wires to null, which will remove the module from all
+            // of its dependent modules.
+            ((ModuleImpl) event.getModule()).setWires(null);
             // Remove the module from the "in use" map.
 // TODO: RB - Maybe this can be merged with ModuleData.
             m_inUseCapMap.remove(event.getModule());

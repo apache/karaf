@@ -61,8 +61,14 @@ public class ContentClassLoader extends SecureClassLoader
     protected Class loadClass(String name, boolean resolve)
         throws ClassNotFoundException
     {
+        Class clazz = null;
+
         // Make sure the class was not already loaded.
-        Class clazz = findLoadedClass(name);
+        synchronized (this)
+        {    
+            clazz = findLoadedClass(name);
+        }
+
         if (clazz == null)
         {
             // Ask the search policy for the class.

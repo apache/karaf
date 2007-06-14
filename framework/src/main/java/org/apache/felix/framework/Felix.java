@@ -1571,15 +1571,12 @@ ex.printStackTrace();
                 fireBundleEvent(BundleEvent.UPDATED, bundle);
 
                 // Determine if the bundle is in use by anyone.
-// TODO: FRAMEWORK - This is really inefficient since it will end up looping
-//       through all bundles and their imports, maybe we should keep track of
-//       wiring.
-                List usedPackages = new ArrayList();
-                getExportedPackages(bundle, usedPackages);
                 boolean used = false;
-                for (int i = 0; !used && (i < usedPackages.size()); i++)
+                IModule[] modules = info.getModules();
+                for (int i = 0; !used && (i < modules.length); i++)
                 {
-                    if (((ExportedPackageImpl) usedPackages.get(i)).getImportingBundles() != null)
+                    IModule[] dependents = ((ModuleImpl) modules[i]).getDependents();
+                    if ((dependents != null) && (dependents.length > 0))
                     {
                         used = true;
                     }
@@ -1836,35 +1833,32 @@ ex.printStackTrace();
         fireBundleEvent(BundleEvent.UNINSTALLED, bundle);
 
         // Determine if the bundle is in use by anyone.
-// TODO: FRAMEWORK - This is really inefficient since it will end up looping
-//       through all bundles and their imports, maybe we should keep track of
-//       wiring.
-         List usedPackages = new ArrayList();
-         getExportedPackages(bundle, usedPackages);
-         boolean used = false;
-         for (int i = 0; !used && (i < usedPackages.size()); i++)
-         {
-             if (((ExportedPackageImpl) usedPackages.get(i)).getImportingBundles() != null)
-             {
-                 used = true;
-             }
-         }
+        boolean used = false;
+        IModule[] modules = info.getModules();
+        for (int i = 0; !used && (i < modules.length); i++)
+        {
+            IModule[] dependents = ((ModuleImpl) modules[i]).getDependents();
+            if ((dependents != null) && (dependents.length > 0))
+            {
+                used = true;
+            }
+        }
 
-         // If the bundle is not used by anyone, then garbage
-         // collect it now.
-         if (!used)
-         {
-             try
-             {
-                 refreshPackages(new Bundle[] { bundle });
-             }
-             catch (Exception ex)
-             {
-                 m_logger.log(
-                     Logger.LOG_ERROR,
-                     "Unable to immediately garbage collect the bundle.", ex);
-             }
-         }
+        // If the bundle is not used by anyone, then garbage
+        // collect it now.
+        if (!used)
+        {
+            try
+            {
+                refreshPackages(new Bundle[] { bundle });
+            }
+            catch (Exception ex)
+            {
+                m_logger.log(
+                    Logger.LOG_ERROR,
+                    "Unable to immediately garbage collect the bundle.", ex);
+            }
+        }
     }
 
     //
@@ -2855,36 +2849,62 @@ ex.printStackTrace();
         }
     }
 
-    protected Bundle[] getImportingBundles(ExportedPackage ep)
+    protected Bundle[] getDependentBundles(BundleImpl exporter)
     {
         // Get exporting bundle.
-        BundleImpl exporter = (BundleImpl)
-            ((ExportedPackage) ep).getExportingBundle();
         BundleInfo exporterInfo = exporter.getInfo();
 
         // Create list for storing importing bundles.
         List list = new ArrayList();
-        Bundle[] bundles = getBundles();
 
-        // Check all bundles to see who imports the package.
-        for (int bundleIdx = 0; bundleIdx < bundles.length; bundleIdx++)
+        // Get all dependent modules from all exporter module revisions.
+        IModule[] modules = exporterInfo.getModules();
+        for (int modIdx = 0; modIdx < modules.length; modIdx++)
         {
-            BundleImpl importer = (BundleImpl) bundles[bundleIdx];
-
-            // Check the import wires of all modules for all bundles.
-            IModule[] modules = importer.getInfo().getModules();
-            for (int modIdx = 0; modIdx < modules.length; modIdx++)
+            IModule[] dependents = ((ModuleImpl) modules[modIdx]).getDependents();
+            for (int depIdx = 0;
+                (dependents != null) && (depIdx < dependents.length);
+                depIdx++)
             {
-                IWire wire = Util.getWire(modules[modIdx], ep.getName());
+                Bundle b = getBundle(Util.getBundleIdFromModuleId(dependents[depIdx].getId()));
+                list.add(b);
+            }
+        }
 
-                // If the resolving module is associated with the
-                // exporting bundle, then add current bundle to
-                // import list.
-                if ((wire != null) && exporterInfo.hasModule(wire.getExporter()))
+        // Return the results.
+        if (list.size() > 0)
+        {
+            return (Bundle[]) list.toArray(new Bundle[list.size()]);
+        }
+
+        return null;
+    }
+
+    protected Bundle[] getImportingBundles(ExportedPackage ep)
+    {
+        // Create list for storing importing bundles.
+        List list = new ArrayList();
+
+        // Get exporting bundle information.
+        BundleImpl exporter = (BundleImpl)
+            ((ExportedPackage) ep).getExportingBundle();
+
+        // Search the dependents of the exporter's module revisions
+        // for importers of the specific package.
+        IModule[] expModules = exporter.getInfo().getModules();
+        for (int expIdx = 0; (expModules != null) && (expIdx < expModules.length); expIdx++)
+        {
+            IModule[] depModules = ((ModuleImpl) expModules[expIdx]).getDependents();
+            for (int depIdx = 0; (depModules != null) && (depIdx < depModules.length); depIdx++)
+            {
+                // See if the dependent module has a wire for the specific
+                // package. If so, see if the provider module is from the
+                // exporter and record it if it is.
+                IWire wire = Util.getWire(depModules[depIdx], ep.getName());
+                if ((wire != null) && expModules[expIdx].equals(wire.getExporter()))
                 {
                     // Add the bundle to the list of importers.
-                    list.add(bundles[bundleIdx]);
-                    break;
+                    list.add(getBundle(Util.getBundleIdFromModuleId(depModules[depIdx].getId())));
                 }
             }
         }
@@ -3031,29 +3051,23 @@ ex.printStackTrace();
         fireFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, getBundle(0), null);
     }
 
-    private void populateImportGraph(BundleImpl target, Map map)
+    private void populateImportGraph(BundleImpl exporter, Map map)
     {
-        // Get the exported packages for the specified bundle.
-        ExportedPackage[] pkgs = getExportedPackages(target);
+        // Get all dependent bundles of this bundle.
+        Bundle[] importers = getDependentBundles(exporter);
 
-        for (int pkgIdx = 0; (pkgs != null) && (pkgIdx < pkgs.length); pkgIdx++)
+        for (int impIdx = 0;
+            (importers != null) && (impIdx < importers.length);
+            impIdx++)
         {
-            // Get all imports of this package.
-            Bundle[] importers = getImportingBundles(pkgs[pkgIdx]);
-
-            for (int impIdx = 0;
-                (importers != null) && (impIdx < importers.length);
-                impIdx++)
+            // Avoid cycles if the bundle is already in map.
+            if (!map.containsKey(importers[impIdx]))
             {
-                // Avoid cycles if the bundle is already in map.
-                if (!map.containsKey(importers[impIdx]))
-                {
-                    // Add each importing bundle to map.
-                    map.put(importers[impIdx], importers[impIdx]);
-                    // Now recurse into each bundle to get its importers.
-                    populateImportGraph(
-                        (BundleImpl) importers[impIdx], map);
-                }
+                // Add each importing bundle to map.
+                map.put(importers[impIdx], importers[impIdx]);
+                // Now recurse into each bundle to get its importers.
+                populateImportGraph(
+                    (BundleImpl) importers[impIdx], map);
             }
         }
     }

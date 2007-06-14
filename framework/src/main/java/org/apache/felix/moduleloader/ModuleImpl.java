@@ -31,6 +31,7 @@ public class ModuleImpl implements IModule
     private IModuleDefinition m_md = null;
     private IContentLoader m_contentLoader = null;
     private IWire[] m_wires = null;
+    private IModule[] m_dependents = new IModule[0];
     private Object m_securityContext = null;
 
     ModuleImpl(Logger logger, String id, IModuleDefinition md)
@@ -65,14 +66,73 @@ public class ModuleImpl implements IModule
         m_securityContext = securityContext;
     }
 
-    public IWire[] getWires()
+    public synchronized IWire[] getWires()
     {
         return m_wires;
     }
 
-    public void setWires(IWire[] wires)
+    public synchronized void setWires(IWire[] wires)
     {
+        // Remove module from old wire modules' dependencies.
+        for (int i = 0; (m_wires != null) && (i < m_wires.length); i++)
+        {
+            ((ModuleImpl) m_wires[i].getExporter()).removeDependent(this);
+        }
         m_wires = wires;
+        // Add module to new wire modules' dependencies.
+        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        {
+            ((ModuleImpl) m_wires[i].getExporter()).addDependent(this);
+        }
+    }
+
+    public synchronized void addDependent(IModule module)
+    {
+        // Make sure the dependent module is not already present.
+        for (int i = 0; i < m_dependents.length; i++)
+        {
+            if (m_dependents[i].equals(module))
+            {
+                return;
+            }
+        }
+        IModule[] tmp = new IModule[m_dependents.length + 1];
+        System.arraycopy(m_dependents, 0, tmp, 0, m_dependents.length);
+        tmp[m_dependents.length] = module;
+        m_dependents = tmp;
+    }
+
+    public synchronized void removeDependent(IModule module)
+    {
+        // Make sure the dependent module is not already present.
+        for (int i = 0; i < m_dependents.length; i++)
+        {
+            if (m_dependents[i].equals(module))
+            {
+                // If this is the module, then point to empty list.
+                if ((m_dependents.length - 1) == 0)
+                {
+                    m_dependents = new IModule[0];
+                }
+                // Otherwise, we need to do some array copying.
+                else
+                {
+                    IModule[] tmp = new IModule[m_dependents.length - 1];
+                    System.arraycopy(m_dependents, 0, tmp, 0, i);
+                    if (i < tmp.length)
+                    {
+                        System.arraycopy(
+                            m_dependents, i + 1, tmp, i, tmp.length - i);
+                    }
+                    m_dependents = tmp;
+                }
+            }
+        }
+    }
+
+    public synchronized IModule[] getDependents()
+    {
+        return m_dependents;
     }
 
     public boolean isRemovalPending()

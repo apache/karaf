@@ -178,9 +178,9 @@ class PackageAdminImpl implements PackageAdmin, Runnable
      * @return an array of packages exported by the bundle or null if the
      *         bundle does not export any packages.
     **/
-    public ExportedPackage[] getExportedPackages(Bundle b)
+    public ExportedPackage[] getExportedPackages(Bundle bundle)
     {
-        return m_felix.getExportedPackages(b);
+        return m_felix.getExportedPackages(bundle);
     }
 
     /**
