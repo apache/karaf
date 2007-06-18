@@ -131,6 +131,8 @@
         <module>main</module>
         <module>shell</module>
         <module>shell.tui</module>
+        <module>shell.gui</module>
+        <module>shell.gui.plugin</module>
         <module>bundlerepository</module>
         <module>log</module>
         <module>eventadmin</module>
@@ -139,6 +141,8 @@
         <module>configadmin</module>
         <module>metatype</module>
         <module>dependencymanager</module>
+        <module>servicebinder</module>
+        <module>wireadmin</module>
         
         <module>ipojo/core</module>
         <module>ipojo/metadata</module>
@@ -154,14 +158,10 @@
         </property>
       </activation>
       <modules>
-        <module>shell.gui</module>
-        <module>shell.gui.plugin</module>
         <module>org.apache.felix.daemon</module>
 
         <module>examples</module>
 
-        <module>servicebinder</module>
-        <module>wireadmin</module>
         <module>upnp.extra</module>
         <module>upnp.basedriver</module>
         <module>upnp.tester</module>

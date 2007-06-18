@@ -5,7 +5,7 @@
     <version>0.9.0-incubator-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <packaging>osgi-bundle</packaging>
+  <packaging>bundle</packaging>
   <name>Apache Felix Shell GUI Plugin</name>
   <artifactId>org.apache.felix.shell.gui.plugin</artifactId>
   <dependencies>
@@ -37,22 +37,19 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.felix.plugins</groupId>
-        <artifactId>maven-osgi-plugin</artifactId>
-        <version>${pom.version}</version>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
-          <osgiManifest>
-            <bundleName>ShellGUIPlugin</bundleName>
-            <bundleDescription>A simple set of plugins for the ShellGUI bundle.</bundleDescription>
-            <bundleActivator>auto-detect</bundleActivator>
-            <bundleDocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</bundleDocUrl>
-            <bundleUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</bundleUrl>
-            <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
-            <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
-            <exportService>org.apache.felix.shell.gui.Plugin</exportService>
-            <importService>org.apache.felix.shell.ShellService,org.apache.felix.bundlerepository.RepostioryAdmin</importService>
-          </osgiManifest>
+          <instructions>
+            <Bundle-Name>ShellGUIPlugin</Bundle-Name>
+            <Bundle-Description>A simple set of plugins for the ShellGUI bundle.</Bundle-Description>
+            <Bundle-Activator>org.apache.felix.shell.gui.plugin.Activator</Bundle-Activator>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Export-Service>org.apache.felix.shell.gui.Plugin</Export-Service>
+            <Import-Service>org.apache.felix.shell.ShellService,org.apache.felix.bundlerepository.RepostioryAdmin</Import-Service>
+            <Private-Package>org.apache.felix.shell.gui.plugin.*</Private-Package>
+          </instructions>
         </configuration>
       </plugin>
     </plugins>

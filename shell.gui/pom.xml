@@ -5,7 +5,7 @@
     <version>0.9.0-incubator-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <packaging>osgi-bundle</packaging>
+  <packaging>bundle</packaging>
   <name>Apache Felix Shell GUI</name>
   <artifactId>org.apache.felix.shell.gui</artifactId>
   <dependencies>
@@ -19,21 +19,18 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.felix.plugins</groupId>
-        <artifactId>maven-osgi-plugin</artifactId>
-        <version>${pom.version}</version>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
-          <osgiManifest>
-            <bundleName>ShellGUI</bundleName>
-            <bundleDescription>A simple plugin-oriented GUI shell.</bundleDescription>
-            <bundleActivator>auto-detect</bundleActivator>
-            <bundleDocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</bundleDocUrl>
-            <bundleUrl>http://oscar-osgi.sf.net/obr2/shellgui/${pom.artifactId}-${pom.version}.jar</bundleUrl>
-            <bundleSource>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</bundleSource>
-            <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
-            <exportPackage>${pom.artifactId}; specification-version="1.0.0"</exportPackage>
-          </osgiManifest>
+          <instructions>
+            <Bundle-Name>ShellGUI</Bundle-Name>
+            <Bundle-Description>A simple plugin-oriented GUI shell.</Bundle-Description>
+            <Bundle-Activator>org.apache.felix.shell.gui.impl.Activator</Bundle-Activator>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Export-Package>org.apache.felix.shell.gui; specification-version="1.0.0"</Export-Package>
+            <Private-Package>org.apache.felix.shell.gui.impl</Private-Package>
+          </instructions>
         </configuration>
       </plugin>
     </plugins>

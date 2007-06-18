@@ -5,7 +5,7 @@
     <version>0.9.0-incubator-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <packaging>osgi-bundle</packaging>
+  <packaging>bundle</packaging>
   <name>Apache Felix Service Binder</name>
   <artifactId>org.apache.felix.servicebinder</artifactId>
   <dependencies>
@@ -24,38 +24,28 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.felix.plugins</groupId>
-        <artifactId>maven-osgi-plugin</artifactId>
-        <version>${pom.version}</version>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
-          <osgiManifest>
-            <entries>
-              <property>
-                <name>Metadata-Location</name>
-                <value>metadata.xml</value>
-              </property>
-            </entries>
-            <bundleSymbolicName>${pom.artifactId}</bundleSymbolicName>
-            <bundleName>Service Binder</bundleName>
-            <bundleVendor>Apache Software Foundation</bundleVendor>
-            <!--<bundleVersion>1.1.2</bundleVersion>-->
-            <bundleDescription>
+          <instructions>
+            <Bundle-Name>Service Binder</Bundle-Name>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-Vendor>Apache Felix</Bundle-Vendor>
+            <!--<Bundle-Version>1.1.2</Bundle-Version>-->
+            <Bundle-Description>
               This bundle provides a mechanism to automate service dependency management.
-            </bundleDescription>
-            <bundleActivator>
+            </Bundle-Description>
+            <Bundle-Activator>
               org.apache.felix.servicebinder.impl.Activator
-            </bundleActivator>
-            <exportPackage>
+            </Bundle-Activator>
+            <Export-Package>
               org.apache.felix.servicebinder; specification-version="1.1.0",org.apache.felix.servicebinder.architecture; specification-version="1.1.0"
-            </exportPackage>
-            <importPackage>
-            	 org.osgi.framework
-            </importPackage>
-            <metadataLocation>
-              metadata.xml
-            </metadataLocation>
-          </osgiManifest>
+            </Export-Package>
+            <Private-Package>org.apache.felix.servicebinder.*,org.kxml2.*,org.xmlpull.*</Private-Package>
+            <Import-Package>!org.apache.felix.servicebinder.*,*</Import-Package>
+            <Metadata-Location>metadata.xml</Metadata-Location>
+          </instructions>
         </configuration>
       </plugin>
     </plugins>
