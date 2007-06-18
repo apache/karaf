@@ -43,7 +43,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * A InstanceManager is created for every component instance. *  * When the InstanceManager is instantiated, a collection of DependencyManagers is * created. Each dependency manager corresponds to a required service *  * A InstanceManager follows a sequence of clearly defined steps. *  * 1.- Creation : the binder instance is created, its state becomes CREATED. This step is further divided *                in the following substeps: *                  - The binder instance checks if all of the dependencies are valid, if this *                    is false, it returns. *                  - If the dependendencies are valid, its state becomes executing. The object from *                    the instance class is created (if this object receives a ServiceBinderContext as *                    a parameter in its constructor, the context is passed to it. *                  - The validate() method is called on the dependency managers, this will cause *                    calls on the binding methods to occur *                  - The binder instance adds itself to the list of binder instances in the activator *                  - The binder instance registers the services implemented by the instance object. *  * 2.- Disposal : *  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ * A InstanceManager is created for every component instance. *  * When the InstanceManager is instantiated, a collection of DependencyManagers is * created. Each dependency manager corresponds to a required service *  * A InstanceManager follows a sequence of clearly defined steps. *  * 1.- Creation : the binder instance is created, its state becomes CREATED. This step is further divided *                in the following substeps: *                  - The binder instance checks if all of the dependencies are valid, if this *                    is false, it returns. *                  - If the dependendencies are valid, its state becomes executing. The object from *                    the instance class is created (if this object receives a ServiceBinderContext as *                    a parameter in its constructor, the context is passed to it. *                  - The validate() method is called on the dependency managers, this will cause *                    calls on the binding methods to occur *                  - The binder instance adds itself to the list of binder instances in the activator *                  - The binder instance registers the services implemented by the instance object. *  * 2.- Disposal : *  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 
 public class InstanceManager implements InstanceReference, Instance
@@ -719,7 +719,7 @@ public class InstanceManager implements InstanceReference, Instance
     }
 
 /**
- * This class implements the ServiceBinderContext, which cannot be directly * implemented by the activator because of the getInstanceReference() method
+ * This class implements the ServiceBinderContext, which cannot be directly * implemented by the activator because of the getInstanceReference() method
  */
 
     class ServiceBinderContextImpl implements ServiceBinderContext
@@ -763,7 +763,7 @@ public class InstanceManager implements InstanceReference, Instance
     }
 
 /**
- * The DependencyManager task is to listen to service events and to call the * bind/unbind methods on a given object. It is also responsible for requesting * the unregistration of a service in case a dependency is broken.
+ * The DependencyManager task is to listen to service events and to call the * bind/unbind methods on a given object. It is also responsible for requesting * the unregistration of a service in case a dependency is broken.
  */
 
     class DependencyManager implements ServiceListener, Dependency
@@ -1218,7 +1218,7 @@ public class InstanceManager implements InstanceReference, Instance
     }
 
 /**
- * @version X.XX Feb 3, 2004  * @author Humberto Cervantes
+ * @version X.XX Feb 3, 2004  * @author Humberto Cervantes
  */
 
     static public class StateChangeMulticaster implements InstanceReferenceListener
