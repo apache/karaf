@@ -20,9 +20,7 @@ package org.apache.felix.framework;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.List;
 
 import org.apache.felix.framework.ext.FelixBundleContext;
 import org.osgi.framework.*;
@@ -44,22 +42,24 @@ class BundleContextImpl implements FelixBundleContext
         m_valid = false;
     }
 
-    public void addImportPackage() throws BundleException
+    public void addRequirement(String s) throws BundleException
+    {
+        // TODO: EXPERIMENTAL - Experimental implicit wire concept to try
+        //       to deal with code generation.
+        m_felix.addRequirement(m_bundle, s);
+    }
+
+    public void removeRequirement() throws BundleException
     {
         throw new BundleException("Not implemented yet.");
     }
 
-    public void removeImportPackage() throws BundleException
+    public void addCapability() throws BundleException
     {
         throw new BundleException("Not implemented yet.");
     }
 
-    public void addExportPackage() throws BundleException
-    {
-        throw new BundleException("Not implemented yet.");
-    }
-
-    public void removeExportPackage() throws BundleException
+    public void removeCapability() throws BundleException
     {
         throw new BundleException("Not implemented yet.");
     }

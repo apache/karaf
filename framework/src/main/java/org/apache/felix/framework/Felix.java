@@ -1865,6 +1865,31 @@ ex.printStackTrace();
     // Implementation of BundleContext interface methods.
     //
 
+    protected void addRequirement(BundleImpl bundle, String s) throws BundleException
+    {
+        // TODO: EXPERIMENTAL - Experimental implicit wire concept to try
+        //       to deal with code generation.
+        synchronized (m_factory)
+        {
+            IRequirement[] reqs = ManifestParser.parseImportHeader(s);
+            IRequirement[] dynamics = bundle.getInfo().getCurrentModule()
+                .getDefinition().getDynamicRequirements();
+            if (dynamics == null)
+            {
+                dynamics = reqs;
+            }
+            else
+            {
+                IRequirement[] tmp = new IRequirement[dynamics.length + reqs.length];
+                System.arraycopy(dynamics, 0, tmp, 0, dynamics.length);
+                System.arraycopy(reqs, 0, tmp, dynamics.length, reqs.length);
+                dynamics = tmp;
+            }
+            ((ModuleDefinition) bundle.getInfo().getCurrentModule().getDefinition())
+                .setDynamicRequirements(dynamics);
+        }
+    }
+
     /**
      * Implementation for BundleContext.getProperty(). Returns
      * environment property associated with the framework.

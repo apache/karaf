@@ -23,8 +23,8 @@ import org.osgi.framework.BundleException;
 
 public interface FelixBundleContext extends BundleContext
 {
-    public void addImportPackage() throws BundleException;
-    public void removeImportPackage() throws BundleException;
-    public void addExportPackage() throws BundleException;
-    public void removeExportPackage() throws BundleException;
+    public void addRequirement(String s) throws BundleException;
+    public void removeRequirement() throws BundleException;
+    public void addCapability() throws BundleException;
+    public void removeCapability() throws BundleException;
 }
