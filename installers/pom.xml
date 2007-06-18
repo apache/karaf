@@ -81,7 +81,7 @@
             <copyrightYear>2006</copyrightYear>
             <minimumJavaVersion>1.4</minimumJavaVersion>
             <url>http://felix.apache.org</url>
-            <email>felix-dev@incubator.apache.org</email>
+            <email>dev@felix.apache.org</email>
             <description>Apache OSGi Platform</description>
             <authors>
               <author>Apache Felix Team</author>
