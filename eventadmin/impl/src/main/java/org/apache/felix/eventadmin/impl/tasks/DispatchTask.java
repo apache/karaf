@@ -25,7 +25,7 @@ import org.apache.felix.eventadmin.impl.dispatch.TaskProducer;
  * This class is the core of the event dispatching (for both, synchronous and 
  * asynchronous). It implements handover and timeout capabilities.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class DispatchTask implements Runnable
 {   

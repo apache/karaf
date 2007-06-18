@@ -25,7 +25,7 @@ import org.osgi.service.event.Event;
  * The factory for event handler tasks. Implementations of this interface can be
  * used to create tasks that handle the delivery of events to event handlers.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface HandlerTasks
 {

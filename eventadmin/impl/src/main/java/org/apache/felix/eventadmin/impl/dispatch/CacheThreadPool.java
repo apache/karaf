@@ -31,7 +31,7 @@ import org.apache.felix.eventadmin.impl.tasks.DispatchTask;
  * threads hence, once the pool size is reached older threads will be decoupled from
  * the pool and the newly created are added to it.
  *  
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 // TODO: The least recently used method deployed is rather a hack in this case
 //      it really should be refactored into a plugable strategy. However, I believe 

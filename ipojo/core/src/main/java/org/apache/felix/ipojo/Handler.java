@@ -27,7 +27,7 @@ import org.apache.felix.ipojo.metadata.Element;
  * Handler Abstract Class. An handler need implements tese method to be notifed
  * of lifecycle change, getfield operation and putfield operation
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public abstract class Handler {
 

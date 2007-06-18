@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * Description of an instance entry in the descriptor file *  * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * Description of an instance entry in the descriptor file *  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class InstanceMetadata
 {

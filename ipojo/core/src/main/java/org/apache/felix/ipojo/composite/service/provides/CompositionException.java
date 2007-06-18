@@ -21,7 +21,7 @@ package org.apache.felix.ipojo.composite.service.provides;
 /**
  * Exception throwed when a composition error occurs.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class CompositionException extends Exception {
 

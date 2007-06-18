@@ -26,7 +26,7 @@ import org.apache.felix.upnp.tester.discovery.*;
 import org.apache.felix.upnp.tester.gui.*;
 
 /* 
-* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public  class Mediator {
 	static PropertiesViewer props;

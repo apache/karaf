@@ -31,7 +31,7 @@ import org.apache.felix.ipojo.util.Logger;
  * attached to a field. The value of the property is thefield value. When the
  * value change, the published value change too.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Property {
 

@@ -66,7 +66,7 @@ import java.io.FileNotFoundException;
  * A bundle must have <tt>ServicePermission[GET,WireAdmin]</tt> to get the Wire Admin service to
  * create, modify, find, and delete <tt>Wire</tt> objects.
  *
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class WireAdminImpl implements WireAdmin, ServiceListener {
 

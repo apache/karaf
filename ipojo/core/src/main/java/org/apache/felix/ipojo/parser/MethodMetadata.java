@@ -24,7 +24,7 @@ import org.apache.felix.ipojo.metadata.Element;
  * A Method Metadata represent a method from the implementation class.
  * This class allow to get information about a method : name, arguments, return type...
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class MethodMetadata {
     

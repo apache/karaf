@@ -28,7 +28,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 /* 
-* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public class LogPanel extends JPanel {
     private static JTextArea logArea = new JTextArea(4,50);

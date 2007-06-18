@@ -43,7 +43,7 @@ import org.apache.felix.upnp.extra.util.Converter;
 import org.osgi.service.upnp.UPnPException;
 
 /* 
-* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public class GeneralActionListener implements ServiceListener,ActionListener {
 

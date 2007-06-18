@@ -34,7 +34,7 @@ import org.codehaus.plexus.util.FileUtils;
 /**
  * Package an OSGi jar "bundle."
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Apache Felix Project</a>
+ * @author <a href="mailto:dev@felix.apache.org">Apache Felix Project</a>
  * @version $Rev$, $Date$
  * @goal osgi-bundle
  * @phase package

@@ -30,7 +30,7 @@ import org.apache.felix.ipojo.util.Logger;
 /**
  * Lifecycle callback handler.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class LifecycleCallbackHandler extends Handler {
 

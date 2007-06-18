@@ -25,7 +25,7 @@ import org.osgi.service.event.EventConstants;
  * The factory for <tt>EventHandler</tt> filters based on a certain topic. This
  * implementation uses a cache to speed-up filter creation.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class CacheTopicHandlerFilters implements TopicHandlerFilters
 {

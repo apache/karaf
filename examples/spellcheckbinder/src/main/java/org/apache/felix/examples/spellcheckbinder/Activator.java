@@ -32,7 +32,7 @@ import org.apache.felix.servicebinder.GenericActivator;
  * file. All application functionality is defined in the
  * SpellCheckServiceImpl.java file.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Activator extends GenericActivator
 {

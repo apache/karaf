@@ -22,7 +22,7 @@ package org.apache.felix.servicebinder;
  * A property descriptor that contains the information for properties
  * defined in the meta-data file.
  *
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class PropertyMetadata
 {

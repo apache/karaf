@@ -26,7 +26,7 @@ import org.apache.felix.upnp.basedriver.importer.core.event.structs.StateVarsToN
 
 
 /* 
-* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 
 public class Notifier extends Thread {

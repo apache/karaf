@@ -26,7 +26,7 @@ import java.util.Vector;
 import org.osgi.service.upnp.UPnPEventListener;
 
 /* 
-* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public class Sid2Listeners {
 	private Hashtable sidListener;

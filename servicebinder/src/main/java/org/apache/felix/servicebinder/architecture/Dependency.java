@@ -23,7 +23,7 @@ import org.apache.felix.servicebinder.DependencyMetadata;
 /**
  * Interface for a dependency
  *
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface Dependency
 {

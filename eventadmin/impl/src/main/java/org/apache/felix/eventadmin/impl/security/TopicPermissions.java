@@ -26,7 +26,7 @@ package org.apache.felix.eventadmin.impl.security;
  * to missing security support by the framework (i.e, security is not supported at 
  * all) an instance of <tt>java.lang.Object</tt> will be returned. 
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface TopicPermissions
 {

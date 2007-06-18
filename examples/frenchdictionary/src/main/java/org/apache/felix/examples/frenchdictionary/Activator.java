@@ -31,7 +31,7 @@ import org.osgi.framework.BundleContext;
  * implemented by an inner class. This class is identical to the class in
  * Example 2, except that the dictionary contains French words.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Activator implements BundleActivator
 {

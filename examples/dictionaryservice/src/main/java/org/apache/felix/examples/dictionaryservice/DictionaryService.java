@@ -21,7 +21,7 @@ package org.apache.felix.examples.dictionaryservice;
  * A simple service interface that defines a dictionary service. A dictionary
  * service simply verifies the existence of a word.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface DictionaryService
 {

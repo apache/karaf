@@ -32,7 +32,7 @@ import org.apache.felix.upnp.basedriver.importer.util.HTTPRequestForIcon;
 import org.apache.felix.upnp.basedriver.importer.util.ParseLocation;
 
 /* 
-* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public class UPnPIconImpl implements UPnPIcon {
 

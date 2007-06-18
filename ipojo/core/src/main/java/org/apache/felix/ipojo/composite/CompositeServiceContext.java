@@ -38,7 +38,7 @@ import org.osgi.framework.ServiceRegistration;
  * CompositeServiceContext Class. This class provides an implementation of the
  * service context for composite.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class CompositeServiceContext implements ServiceContext, ServiceListener {
 

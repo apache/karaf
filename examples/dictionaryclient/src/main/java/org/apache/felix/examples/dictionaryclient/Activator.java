@@ -38,7 +38,7 @@ import org.osgi.framework.ServiceReference;
  * stop checking words by entering an empty line, but to start checking words
  * again you must stop and then restart the bundle.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Activator implements BundleActivator
 {

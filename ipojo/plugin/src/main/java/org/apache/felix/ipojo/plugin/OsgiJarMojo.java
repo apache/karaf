@@ -50,7 +50,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 /**
  * Package an OSGi jar "bundle."
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Apache Felix Project</a>
+ * @author <a href="mailto:dev@felix.apache.org">Apache Felix Project</a>
  * @version $Rev$, $Date$
  * @goal ipojo-bundle
  * @phase package

@@ -24,7 +24,7 @@ import org.apache.felix.ipojo.metadata.Element;
  * Manipulation Metadata allows getting information about the implementation class
  * whithout doing reflection. 
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ManipulationMetadata {
     

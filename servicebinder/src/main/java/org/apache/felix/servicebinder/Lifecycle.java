@@ -25,7 +25,7 @@ package org.apache.felix.servicebinder;
  * object life cycle events. See each interface method for
  * a precise description of when the method is invoked.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 **/
 public interface Lifecycle
 {

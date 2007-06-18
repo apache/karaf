@@ -23,7 +23,7 @@ package org.apache.felix.servicebinder.architecture;
  * A service to provide an architectural vision of the instances created by the
  * service binder
  *
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface ArchitectureService
 {

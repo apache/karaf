@@ -98,7 +98,7 @@ import org.osgi.service.event.TopicPermission;
  * (i.e., they are treated the same as with a topic=*).
  * </p>
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 // TODO: Security is in place but untested due to not being implemented by the 
 // framework. However, it needs to be revisited once security is implemented. 

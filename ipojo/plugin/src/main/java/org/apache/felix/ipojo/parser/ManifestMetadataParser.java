@@ -28,7 +28,7 @@ import org.apache.felix.ipojo.plugin.IPojoPluginConfiguration;
 /**
  * Manifest Metadata parser.
  * Read a manifest file and construct metadata
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ManifestMetadataParser {
 

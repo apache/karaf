@@ -33,7 +33,7 @@ import org.objectweb.asm.Type;
 /**
  * Check if the class is already manipulated.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ClassChecker implements ClassVisitor, Opcodes {
 

@@ -22,7 +22,7 @@ package org.apache.felix.eventadmin.impl.tasks;
  * This task will can be used to block a thread that subsequently will be unblocked 
  * once the task is executed.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class BlockTask implements HandlerTask
 {

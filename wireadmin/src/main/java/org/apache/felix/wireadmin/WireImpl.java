@@ -69,7 +69,7 @@ import org.osgi.service.wireadmin.WireAdminEvent;
  * verified by the <tt>Wire</tt> object before it is used in communication. The semantics of the
  * names depend on the Producer service and must not be interpreted by the Wire Admin service.
  *
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a> * 
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a> * 
  */
 public class WireImpl implements Wire, java.io.Serializable 
 {

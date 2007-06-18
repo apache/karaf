@@ -34,7 +34,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * Internal Service Registry. This class is used for in the composition.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ServiceRegistry {
 

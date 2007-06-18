@@ -33,7 +33,7 @@ import org.osgi.framework.BundleContext;
  * The instance manager class manages one instance of a component type. It
  * manages component lifecycle, component instance creation and handlers.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class InstanceManager implements ComponentInstance {
 

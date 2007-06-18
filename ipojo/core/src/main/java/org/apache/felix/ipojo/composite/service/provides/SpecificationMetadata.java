@@ -33,7 +33,7 @@ import org.osgi.framework.BundleContext;
 
 /**
  * Represent a service specification.
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class SpecificationMetadata {
 

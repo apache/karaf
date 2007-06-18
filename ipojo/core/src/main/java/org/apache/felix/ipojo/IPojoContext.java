@@ -37,7 +37,7 @@ import org.osgi.framework.ServiceRegistration;
  * The iPOJO Context is a BundleContext implementation allowing the separation
  * between Bundle context and Service (Bundle) Context.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class IPojoContext implements BundleContext {
 

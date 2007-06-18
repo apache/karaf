@@ -35,7 +35,7 @@ import org.apache.felix.examples.spellcheckservice.SpellCheckService;
  * dependencies to the Service Component Runtime, which automatically manages them and it
  * also automatically registers the spell check services as appropriate.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class SpellCheckServiceImpl implements SpellCheckService
 {

@@ -33,7 +33,7 @@ import org.apache.felix.ipojo.metadata.Element;
  * Service Instantiator Class. This handler allows to instantiate service
  * instance inside the composition.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ServiceInstantiatorHandler extends CompositeHandler {
 

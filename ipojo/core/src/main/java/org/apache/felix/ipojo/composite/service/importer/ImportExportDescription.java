@@ -26,7 +26,7 @@ import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * Description of the Import Export Handler.
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ImportExportDescription extends HandlerDescription {
 

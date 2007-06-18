@@ -21,7 +21,7 @@ package org.apache.felix.ipojo.composite.service.provides;
 /**
  * Field used inside a composition.
  * This class contains all information useful for the generation.
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class FieldMetadata {
 

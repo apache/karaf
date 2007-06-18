@@ -40,7 +40,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * Check and build a compostion, i.e. a pojo containing the composition.
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class CompositionMetadata {
 

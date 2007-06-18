@@ -27,7 +27,7 @@ import org.osgi.service.event.EventHandler;
 /**
  * An implementation of the <tt>HandlerTask</tt> interface.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class HandlerTaskImpl implements HandlerTask
 {

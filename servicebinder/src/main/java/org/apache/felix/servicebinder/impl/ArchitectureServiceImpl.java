@@ -34,7 +34,7 @@ import java.util.ArrayList;
  * an object of this class is created when the
  * service binder bundle is activated
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ArchitectureServiceImpl implements ArchitectureService, Lifecycle
 {

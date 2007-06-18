@@ -33,7 +33,7 @@ import org.osgi.framework.ServiceReference;
 /**
  * Represent a service dependency of the component instance.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Dependency implements ServiceListener {
 

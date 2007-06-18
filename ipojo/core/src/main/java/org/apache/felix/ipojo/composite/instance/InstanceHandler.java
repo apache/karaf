@@ -43,7 +43,7 @@ import org.osgi.framework.ServiceReference;
  * Composite Instance Handler.
  * This handler allo to create an instance inside a composite.
  * This instance is determine by its type and a configuration.
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class InstanceHandler extends CompositeHandler implements ServiceListener, InstanceStateListener {
 

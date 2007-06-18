@@ -29,7 +29,7 @@ import org.osgi.service.upnp.UPnPEventListener;
  * This is message is related to a registration of listener for a 
  * CyberLink Service during the registering of the UPnP Event Listener
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
  
 

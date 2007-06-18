@@ -43,7 +43,7 @@ import org.osgi.service.cm.ManagedServiceFactory;
  * consist in creating and managing component instance build with the component
  * factory. This class could export Factory and ManagedServiceFactory services.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ComponentFactory implements Factory, ManagedServiceFactory {
 

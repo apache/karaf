@@ -24,7 +24,7 @@ import org.objectweb.asm.Opcodes;
 
 /**
  * Manipulate a method to change all getter and setter on field by invocations on getter and setter callbacks.
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class PreprocessCodeAdapter extends MethodAdapter implements Opcodes {
 

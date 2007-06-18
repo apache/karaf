@@ -30,7 +30,7 @@ import org.osgi.framework.ServiceRegistration;
  * Default iPOJO Service Context. this service context delegate all calls on the
  * bundle context.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class DefaultServiceContext implements ServiceContext {
 

@@ -31,7 +31,7 @@ import org.apache.felix.ipojo.util.Logger;
 /**
  * Activator Basic Configuration. - Log Level - Available handlers
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class IPojoConfiguration {
 

@@ -35,7 +35,7 @@ import org.osgi.framework.ServiceReference;
  * a component type which is a composition. It manages component lifecycle, and
  * handlers...
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class CompositeManager implements ComponentInstance {
 

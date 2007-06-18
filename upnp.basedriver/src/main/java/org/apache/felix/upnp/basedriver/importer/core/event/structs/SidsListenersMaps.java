@@ -29,7 +29,7 @@ import org.osgi.service.upnp.UPnPEventListener;
  *  - sid2listener: have SID of Suscribed Service as key and a Vector of UPnPEventListener as value
  *  - listener2sids: have an UPnPEventListener as kay and a Vector of SID of Scriscrobed Service 
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public class SidsListenersMaps {
 	private Sid2Listeners sid2Listeners;

@@ -20,7 +20,7 @@
 package org.apache.felix.upnp.tester.discovery;
 
 /* 
-* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public interface DeviceNodeListener {
 	public void deviceDetected(DeviceNode d);

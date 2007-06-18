@@ -29,7 +29,7 @@ import org.ungoverned.osgi.service.shell.Command;
 
 /**
  * Implementation of the arch command printing the actual architecture.
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ArchCommandImpl implements Command {
 

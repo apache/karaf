@@ -30,7 +30,7 @@ import java.util.Properties;
  * The KxmlParser extends the XmlParser from kxml. This is a very
  * simple parser that does not take into account the DTD
  *
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class KxmlParser extends KXmlParser
 {

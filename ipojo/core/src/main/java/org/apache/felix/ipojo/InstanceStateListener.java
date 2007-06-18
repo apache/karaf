@@ -21,7 +21,7 @@ package org.apache.felix.ipojo;
 /**
  * Instance state listener.
  * This listener allows anyone to be notified when the listened instance state changes. 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface InstanceStateListener {
     

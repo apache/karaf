@@ -31,7 +31,7 @@ import org.osgi.framework.ServiceReference;
  * An instance creator aims to create instances and to track their factories.
  * It's allow to create instance from outside factories.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class InstanceCreator implements ServiceListener {
     /**

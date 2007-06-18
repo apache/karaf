@@ -23,7 +23,7 @@ import java.util.Properties;
 /**
  * Hold values for an OSGi jar "bundle" manifest.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Apache Felix Project</a>
+ * @author <a href="mailto:dev@felix.apache.org">Apache Felix Project</a>
  * @version $Rev$, $Date$
  */
 public class OsgiManifest

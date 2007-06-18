@@ -34,7 +34,7 @@ import org.osgi.framework.BundleContext;
  * This handler manages the importation and the exportation of services from /
  * to the parent context.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ImportExportHandler extends CompositeHandler {
 

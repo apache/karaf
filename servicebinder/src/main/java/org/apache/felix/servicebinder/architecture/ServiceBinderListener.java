@@ -23,7 +23,7 @@ package org.apache.felix.servicebinder.architecture;
  * of the GenericActivator if it wishes to receive notifications about
  * changes in the architecture
  *
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface ServiceBinderListener extends java.util.EventListener
 {

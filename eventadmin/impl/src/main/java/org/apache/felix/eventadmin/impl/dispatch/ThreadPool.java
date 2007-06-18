@@ -31,7 +31,7 @@ import org.apache.felix.eventadmin.impl.tasks.DispatchTask;
  * that the specific threads have not been created by this pool. Note that a closed
  * pool should still execute new tasks but stop pooling threads. 
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface ThreadPool
 {

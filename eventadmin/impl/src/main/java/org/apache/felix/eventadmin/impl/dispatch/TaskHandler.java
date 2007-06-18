@@ -32,7 +32,7 @@ import org.apache.felix.eventadmin.impl.tasks.HandlerTask;
  * @see org.apache.felix.eventadmin.impl.dispatch.TaskQueue
  * @see org.apache.felix.eventadmin.impl.dispatch.TaskProducer
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class TaskHandler implements TaskQueue, TaskProducer
 {

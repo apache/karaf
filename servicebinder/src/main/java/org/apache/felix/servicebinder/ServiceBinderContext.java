@@ -28,7 +28,7 @@ import java.util.List;
  * this interface, they can access the BundleContext along with the list ob
  * binder instances located on the same bundle.
  *
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface ServiceBinderContext
 {

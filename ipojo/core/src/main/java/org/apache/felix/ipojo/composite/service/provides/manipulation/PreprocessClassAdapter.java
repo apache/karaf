@@ -32,7 +32,7 @@ import org.objectweb.asm.Type;
  * information about implemented interfaces - Change GETFIELD and PUTFIELD to
  * called the getter and setter method
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  * 
  */
 public class PreprocessClassAdapter extends ClassAdapter implements Opcodes {

@@ -28,7 +28,7 @@ import java.util.TreeMap;
  * case-insensitive comparison when searching for the key. Any keys put into
  * this map will be converted to a <tt>String</tt> using the
  * <tt>toString()</tt> method, since it is only intended to compare strings.
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class StringMap extends TreeMap {
 

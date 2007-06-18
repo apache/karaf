@@ -27,7 +27,7 @@ import org.apache.felix.servicebinder.parser.ParseException;
 /**
  * Simple content handler that builds a list of service descriptors
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class XmlHandler
 {

@@ -26,7 +26,7 @@ import org.apache.felix.ipojo.architecture.ComponentDescription;
  * Component Type Factory Service. This service is exposed by a instance manager
  * factory, and allows the dynamic creation of component instance.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface Factory {
 

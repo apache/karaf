@@ -22,7 +22,7 @@ package org.apache.felix.eventadmin.impl.tasks;
  * A task that will deliver its event to its <tt>EventHandler</tt> when executed
  * or blacklist the handler, respectively.
  *  
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface HandlerTask
 {

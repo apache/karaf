@@ -40,7 +40,7 @@ import org.osgi.framework.ServiceReference;
  * Manage a service instantiation. This service create componenet instance
  * providing the required service specification.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class SvcInstance implements ServiceListener {
 

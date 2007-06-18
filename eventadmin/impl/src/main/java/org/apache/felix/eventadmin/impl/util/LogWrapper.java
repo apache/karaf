@@ -45,7 +45,7 @@ import org.osgi.framework.ServiceReference;
  * 
  * @see org.osgi.service.log.LogService
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 **/
 // TODO: At the moment we log a message to all currently available LogServices. 
 //       Maybe, we should only log to the one with the highest ranking instead?

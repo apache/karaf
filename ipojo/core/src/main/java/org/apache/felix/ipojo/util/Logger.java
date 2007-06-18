@@ -28,7 +28,7 @@ import org.osgi.service.log.LogService;
 /**
  * iPOJO Logger. This logger send log message to a log service if presents.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Logger implements ServiceListener {
 

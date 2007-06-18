@@ -39,7 +39,7 @@ import java.io.InputStreamReader;
  * The GenericActivator, it will read information from the metadata.xml file
  * and will create the corresponding instance managers
  *
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 abstract public class GenericActivator implements BundleActivator
 {

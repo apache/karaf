@@ -43,7 +43,7 @@ import org.osgi.service.event.EventConstants;
  * available hence, combined with a DynamicImport-Package no hard dependency is 
  * needed. 
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class LogEventAdapter implements ServiceListener
 {

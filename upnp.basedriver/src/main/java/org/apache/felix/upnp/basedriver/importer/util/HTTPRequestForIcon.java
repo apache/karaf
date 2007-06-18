@@ -23,7 +23,7 @@ import java.io.*;
 import java.net.*;
 
 /* 
-* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public class HTTPRequestForIcon {
 	private URL url;

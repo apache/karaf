@@ -21,7 +21,7 @@ package org.apache.felix.eventadmin.impl.tasks;
 /**
  * A task that is used to handover a dispatch thread context to another thread.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface HandoverTask
 {

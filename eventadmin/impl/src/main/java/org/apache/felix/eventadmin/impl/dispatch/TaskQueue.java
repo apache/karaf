@@ -26,7 +26,7 @@ import org.apache.felix.eventadmin.impl.tasks.HandlerTask;
  * are in the same order one after the other in the queue) either at the end or the
  * front of the queue. Additionally, the queue can be closed. 
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface TaskQueue
 {

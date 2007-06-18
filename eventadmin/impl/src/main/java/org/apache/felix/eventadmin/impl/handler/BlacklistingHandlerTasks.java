@@ -41,7 +41,7 @@ import org.osgi.service.event.EventHandler;
  * will match applicable <tt>EventHandler</tt> references. In order to ease some of 
  * the overhead pains of this approach some light caching is going on.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class BlacklistingHandlerTasks implements HandlerTasks
 {

@@ -22,7 +22,7 @@ package org.apache.felix.ipojo;
  * Interface implemented by each object created through an manipulated class.
  * This interface allow to get the component instance from the object.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface Pojo {
 

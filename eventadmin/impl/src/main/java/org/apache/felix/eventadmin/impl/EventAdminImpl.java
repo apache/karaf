@@ -35,7 +35,7 @@ import org.osgi.service.event.EventAdmin;
  * implementations of the <tt>DeliverTasks</tt>. Additionally, a stop method is
  * provided that prevents subsequent events to be delivered.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class EventAdminImpl implements EventAdmin
 {

@@ -34,7 +34,7 @@ import org.osgi.service.event.EventConstants;
  * This class registers itself as a listener for service events and posts them via
  * the EventAdmin as specified in 113.6.5 OSGi R4 compendium.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ServiceEventAdapter implements ServiceListener
 {

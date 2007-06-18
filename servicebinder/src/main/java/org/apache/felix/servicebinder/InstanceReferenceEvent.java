@@ -25,7 +25,7 @@ package org.apache.felix.servicebinder;
  * to listen for this event. The <tt>getSource()</tt> method
  * returns the <tt>InstanceReference</tt> that generated the event.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 **/
 public class InstanceReferenceEvent extends java.util.EventObject
 {

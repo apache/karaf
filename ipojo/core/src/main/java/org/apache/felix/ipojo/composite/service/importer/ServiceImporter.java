@@ -36,7 +36,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * Import a service form the parent to the internal service registry.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ServiceImporter implements ServiceListener {
 

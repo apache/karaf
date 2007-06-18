@@ -30,7 +30,7 @@ import org.osgi.service.event.EventAdmin;
  * the given bundle doesn't pass the check or delegate the call to decorated service
  * instance, respectively.
  *  
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class EventAdminSecurityDecorator implements EventAdmin
 {

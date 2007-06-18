@@ -35,7 +35,7 @@ import org.apache.felix.eventadmin.impl.dispatch.ThreadPool;
  * while the former waits for the synchronous event to be delivered and then return
  * to its <tt>ThreadPool</tt>.
  *  
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class AsyncDeliverTasks implements DeliverTasks, HandoverTask, DeliverTask
 {

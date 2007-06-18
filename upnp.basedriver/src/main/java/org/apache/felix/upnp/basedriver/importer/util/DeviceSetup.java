@@ -41,7 +41,7 @@ import org.apache.felix.upnp.basedriver.importer.core.upnp.UPnPServiceImpl;
 import org.apache.felix.upnp.extra.util.Constants;
 
 /* 
-* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 
 public class DeviceSetup {

@@ -27,7 +27,7 @@ import org.objectweb.asm.Opcodes;
 
 
 /**
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class PreprocessCodeAdapter extends MethodAdapter implements Opcodes {
 

@@ -25,7 +25,7 @@ import org.apache.felix.eventadmin.impl.tasks.HandlerTask;
  * while blocking in the <tt>next()</tt> call until then. Unless there won't be any
  * more tasks in which case <tt>null</tt> is returned.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface TaskProducer
 {

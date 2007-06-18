@@ -29,7 +29,7 @@ import org.osgi.framework.ServiceRegistration;
  * A service context give the access the a service registry. All service
  * interaction should use this service context.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface ServiceContext {
 

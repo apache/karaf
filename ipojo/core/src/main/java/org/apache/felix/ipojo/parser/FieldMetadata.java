@@ -24,7 +24,7 @@ import org.apache.felix.ipojo.metadata.Element;
  * A Field Metadata represent a field of an implementation class.
  * This class allow to avoid reflection to get the type and the name of a field.
  * 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class FieldMetadata {
     
