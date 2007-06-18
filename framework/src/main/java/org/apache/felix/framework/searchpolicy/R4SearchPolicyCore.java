@@ -1437,7 +1437,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 rp.m_sourceList.add(ps);
                 pkgMap.put(rp.m_name, rp);
 
-                // TODO: FRAMEWORK - Experimental implicit wire concept to try
+                // TODO: EXPERIMENTAL - Experimental implicit wire concept to try
                 //       to deal with code generation.
                 // Get implicitly imported packages as defined by the provider
                 // of our imported package, unless we are the provider.
@@ -1495,7 +1495,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 rp.m_sourceList.add(new PackageSource(wires[wireIdx].getExporter(), wires[wireIdx].getCapability()));
                 pkgMap.put(rp.m_name, rp);
 
-                // TODO: FRAMEWORK - Experimental implicit wire concept to try
+                // TODO: EXPERIMENTAL - Experimental implicit wire concept to try
                 //       to deal with code generation.
                 // Get implicitly imported packages as defined by the provider
                 // of our imported package, unless we are the provider.
@@ -1529,7 +1529,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 targetModule, targetCapability, candidatesMap, cycleMap);      
     }
 
-    // TODO: FRAMEWORK - This is currently not defined recursively, but it should be.
+    // TODO: EXPERIMENTAL - This is currently not defined recursively, but it should be.
     //       Currently, it only assumes that a provider can cause implicit imports for
     //       packages that it exports.
     private Map calculateImplicitImportedPackagesUnresolved(
@@ -1562,7 +1562,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         return pkgMap;
     }
 
-    // TODO: FRAMEWORK - This is currently not defined recursively, but it should be.
+    // TODO: EXPERIMENTAL - This is currently not defined recursively, but it should be.
     //       Currently, it only assumes that a provider can cause implicit imports for
     //       packages that it exports.
     private Map calculateImplicitImportedPackagesResolved(
@@ -2171,7 +2171,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                     cs.m_candidates[cs.m_idx].m_module,
                     cs.m_candidates[cs.m_idx].m_capability));
 
-                // TODO: FRAMEWORK - The following is part of an experimental 
+                // TODO: EXPERIMENTAL - The following is part of an experimental 
                 //       implicit imported wire concept. The above code is how
                 //       the wire should normally be created.
                 // Add wires for any implicitly imported package from provider.
