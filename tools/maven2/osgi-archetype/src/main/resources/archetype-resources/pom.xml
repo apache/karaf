@@ -6,7 +6,7 @@
   <packaging>osgi-bundle</packaging>
   <version>${version}</version>
   <name>Simple Bundle Project</name>
-  <url>http://incubator.apache.org/felix</url>
+  <url>http://felix.apache.org</url>
   
   <dependencies>
     <dependency>

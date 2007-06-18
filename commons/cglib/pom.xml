@@ -42,7 +42,7 @@
     </description>
     <organization>
         <name>Apache Felix Project</name>
-        <url>http://incubator.apache.org/felix/</url>
+        <url>http://felix.apache.org/</url>
     </organization>
     <dependencies>
         <dependency>
