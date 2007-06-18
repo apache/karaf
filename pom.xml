@@ -32,7 +32,7 @@
   <packaging>pom</packaging>
   <name>Apache Felix</name>
   <version>0.9.0-incubator-SNAPSHOT</version>
-  <url>http://incubator.apache.org/felix/</url>
+  <url>http://felix.apache.org/</url>
   <description>Apache felix is an OSGi implementation.</description>
 
   <issueManagement>
@@ -43,24 +43,24 @@
   <mailingLists>
     <mailingList>
       <name>Felix Dev</name>
-      <subscribe>felix-dev-subscribe@incubator.apache.org</subscribe>
-      <unsubscribe>felix-dev-unsubscribe@incubator.apache.org</unsubscribe>
+      <subscribe>dev-subscribe@felix.apache.org</subscribe>
+      <unsubscribe>dev-unsubscribe@felix.apache.org</unsubscribe>
       <post>-</post>
-      <archive>http://www.mail-archive.com/felix-dev%40incubator.apache.org/</archive>
+      <archive>http://www.mail-archive.com/dev%40felix.apache.org/</archive>
     </mailingList>
     <mailingList>
       <name>Felix Commits</name>
-      <subscribe>felix-commits-subscribe@incubator.apache.org</subscribe>
-      <unsubscribe>felix-commits-unsubscribe@incubator.apache.org</unsubscribe>
+      <subscribe>commits-subscribe@felix.apache.org</subscribe>
+      <unsubscribe>commits-unsubscribe@felix.apache.org</unsubscribe>
       <post>-</post>
-      <archive>http://www.mail-archive.com/felix-commits%40incubator.apache.org/</archive>
+      <archive>http://www.mail-archive.com/commits%40felix.apache.org/</archive>
     </mailingList>
   </mailingLists>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/felix</connection>
-    <developerConnection>scm:svn:http://svn.apache.org/repos/asf/incubator/felix</developerConnection>
-    <url>http://cvs.apache.org/viewcvs.cgi/incubator/felix/?root=Apache-SVN</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk</connection>
+    <developerConnection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk</developerConnection>
+    <url>http://svn.apache.org/viewvc/felix/trunk/?root=Apache-SVN</url>
   </scm>
 
   <!-- 
