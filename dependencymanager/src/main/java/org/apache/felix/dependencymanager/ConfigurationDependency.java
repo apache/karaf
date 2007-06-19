@@ -79,7 +79,6 @@ public class ConfigurationDependency implements Dependency, ManagedService {
 	}
 
 	public void updated(Dictionary settings) throws ConfigurationException {
-		System.out.println("Updating " + settings);
 		// if non-null settings come in, we have to instantiate the service and
 		// apply these settings
 		((ServiceImpl) m_service).initService();

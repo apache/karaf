@@ -470,7 +470,6 @@ public class ServiceImpl implements Service {
 	}
 
 	private void activateService(State state) {
-		System.out.println("!!!!! activateService: " + this + " " + state);
 		String init, start;
 		synchronized (this) {
 			init = m_callbackInit;
@@ -541,24 +540,10 @@ public class ServiceImpl implements Service {
                 }
             }
             catch (Exception e) {
-                // TODO handle this exception
-                // e.printStackTrace();
-                // TODO remove line below!!!
                 throw new RuntimeException(e);
             }
         }
     }
-    
-//    private boolean allRequiredDependenciesAvailable() {
-//        Iterator i = getDependencies().iterator();
-//        while (i.hasNext()) {
-//            Dependency dependency = (Dependency) i.next();
-//            if (dependency.isRequired() && !dependency.isAvailable()) {
-//                return false;
-//            }
-//        }
-//        return true;
-//    }
     
     private void startTrackingOptional(State state) {
         Iterator i = state.getDependencies().iterator();
