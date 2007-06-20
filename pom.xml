@@ -185,21 +185,7 @@
         <!--Two activation elements don't AND. <jdk>1.5</jdk>-->
       </activation>
       <modules>
-        <module>mosgi.console.ifc</module>
-        <module>mosgi.console.component</module>
-        <module>mosgi.console.gui</module>
-        <module>mosgi.jmx.agent</module>
-        <module>mosgi.jmx.httpconnector</module>
-        <module>mosgi.jmx.registry</module>
-        <module>mosgi.jmx.remotelogger</module>
-        <module>mosgi.jmx.rmiconnector</module>
-        <module>mosgi.managedelements.osgiprobes</module>
-        <module>mosgi.managedelements.osgiprobes.tab</module>
-        <module>mosgi.managedelements.bundlesprobes</module>
-        <module>mosgi.managedelements.bundlesprobes.tab</module>
-        <module>mosgi.managedelements.obrprobe</module>
-        <module>mosgi.managedelements.obrprobe.tab</module>
-        <module>mosgi.managedelements.memoryprobe</module>
+        <module>mosgi</module>
       </modules>
     </profile>
   </profiles>

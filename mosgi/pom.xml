@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<project>
+  <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>0.9.0-incubator-SNAPSHOT</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>mosgi</artifactId>
+  <name>Apache Felix MOSGi</name>
+  <version>0.0.1</version>
+  <packaging>pom</packaging>
+  <modules>
+    <module>mosgi.console.ifc</module>
+    <module>mosgi.console.component</module>
+    <module>mosgi.console.gui</module>
+    <module>mosgi.jmx.agent</module>
+    <module>mosgi.jmx.httpconnector</module>
+    <module>mosgi.jmx.registry</module>
+    <module>mosgi.jmx.remotelogger</module>
+    <module>mosgi.jmx.rmiconnector</module>
+    <module>mosgi.managedelements.osgiprobes</module>
+    <module>mosgi.managedelements.osgiprobes.tab</module>
+    <module>mosgi.managedelements.bundlesprobes</module>
+    <module>mosgi.managedelements.bundlesprobes.tab</module>
+    <module>mosgi.managedelements.obrprobe</module>
+    <module>mosgi.managedelements.obrprobe.tab</module>
+    <module>mosgi.managedelements.memoryprobe</module>
+  </modules>
+</project>
+
