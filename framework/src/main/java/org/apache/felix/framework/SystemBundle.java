@@ -20,11 +20,9 @@ package org.apache.felix.framework;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.util.*;
 
 import org.apache.felix.framework.cache.*;
@@ -33,8 +31,27 @@ import org.apache.felix.framework.util.manifestparser.*;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.*;
 
-class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAction
+class SystemBundle extends BundleImpl implements IModuleDefinition
 {
+    private static final ExtensionManager m_extensionManager;
+
+    static 
+    {
+        ExtensionManager extensionManager = new ExtensionManager();
+        try 
+        {
+            Felix.m_secureAction.addURLToURLClassLoader(Felix.m_secureAction.createURL(
+                Felix.m_secureAction.createURL(null, "felix:", extensionManager),
+                "felix://extensions/", extensionManager), 
+                SystemBundle.class.getClassLoader());
+        } 
+        catch (Exception ex) 
+        {
+            extensionManager = null;
+        }
+        m_extensionManager = extensionManager;
+    }
+    
     private List m_activatorList = null;
     private Map m_activatorContextMap = null;
     private IContentLoader m_contentLoader = null;
@@ -147,7 +164,7 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
         try
         {
             getInfo().setBundleContext(new BundleContextImpl(getFelix(), this));
-            getInfo().getActivator().start(getInfo().getBundleContext());
+            Felix.m_secureAction.startActivator(getInfo().getActivator(), getInfo().getBundleContext());
         }
         catch (Throwable throwable)
         {
@@ -209,36 +226,7 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
         return null;
     }
 
-    private final ThreadLocal m_tempBundle = new ThreadLocal();
-
     void addExtensionBundle(BundleImpl bundle)
-    {
-        if (System.getSecurityManager() != null)
-        {
-            m_tempBundle.set(bundle);
-
-            try
-            {
-                AccessController.doPrivileged(this);
-            }
-            finally
-            {
-                m_tempBundle.set(null);
-            }
-        }
-        else
-        {
-            _addExtensionBundle(bundle);
-        }
-    }
-    
-    public Object run()
-    {
-        _addExtensionBundle((BundleImpl) m_tempBundle.get());
-        return null;
-    }
-
-    private void _addExtensionBundle(BundleImpl bundle)
     {
         SystemBundleArchive systemArchive =
             (SystemBundleArchive) getInfo().getArchive();
@@ -263,19 +251,13 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
             return;
         }
 
-        try
+        if (m_extensionManager != null) 
         {
-            Method addURL =
-                URLClassLoader.class.getDeclaredMethod("addURL",
-                new Class[] {URL.class});
-            addURL.setAccessible(true);
-            addURL.invoke(getClass().getClassLoader(),
-                new Object[] {bundle.getEntry("/")});
+            m_extensionManager.addExtension(getFelix(), bundle);
         }
-        catch (Exception ex)
-        {
+        else {
             getFelix().getLogger().log(Logger.LOG_WARNING,
-                "Unable to add extension bundle to FrameworkClassLoader - Maybe not an URLClassLoader?", ex);
+                "Unable to add extension bundle to FrameworkClassLoader - Maybe not an URLClassLoader?");
             throw new UnsupportedOperationException(
                 "Unable to add extension bundle to FrameworkClassLoader - Maybe not an URLClassLoader?");
         }
@@ -312,7 +294,7 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
                 }
                 BundleContext context = new BundleContextImpl(getFelix(), bundle);
                 m_activatorContextMap.put(activator, context);
-                activator.start(context);
+                Felix.m_secureAction.startActivator(activator, context);
             }
             catch (Throwable ex)
             {
@@ -331,7 +313,8 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
             // Start all activators.
             for (int i = 0; i < m_activatorList.size(); i++)
             {
-                ((BundleActivator) m_activatorList.get(i)).start(context);
+                Felix.m_secureAction.startActivator(
+                    (BundleActivator) m_activatorList.get(i), context);
             }
         }
 
@@ -375,13 +358,13 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
                         if ((m_activatorContextMap != null) &&
                             m_activatorContextMap.containsKey(m_activatorList.get(i)))
                         {
-                            ((BundleActivator) m_activatorList.get(i)).stop(
-                                (BundleContext) m_activatorContextMap.get(
-                                m_activatorList.get(i)));
+                            Felix.m_secureAction.stopActivator((BundleActivator) m_activatorList.get(i),
+                                (BundleContext) m_activatorContextMap.get(m_activatorList.get(i)));
                         }
                         else
                         {
-                            ((BundleActivator) m_activatorList.get(i)).stop(getInfo().getBundleContext());
+                            Felix.m_secureAction.stopActivator((BundleActivator) m_activatorList.get(i),
+                                getInfo().getBundleContext());
                         }
                     }
                     catch (Throwable throwable)
@@ -392,6 +375,11 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
                             throwable);
                     }
                 }
+            }
+             
+            if (m_extensionManager != null)
+            {
+                m_extensionManager.removeExtensions(getFelix());
             }
 
             // Lastly, complete the shutdown.
@@ -506,6 +494,76 @@ class SystemBundle extends BundleImpl implements IModuleDefinition, PrivilegedAc
         {
             // No native libs associated with the system bundle.
             return null;
+        }
+    }
+
+    private static class ExtensionManager extends URLStreamHandler 
+    {
+        private final List m_extensions = new ArrayList();
+        private final Set m_names = new HashSet();
+        private final Map m_sourceToExtensions = new HashMap();
+
+        protected synchronized URLConnection openConnection(URL url) throws IOException
+        {
+            String path = url.getPath();
+
+            if (path.trim().equals("/"))
+            {
+                throw new IOException("Resource not provided by any extension!");
+            }
+
+            for (Iterator iter = m_extensions.iterator(); iter.hasNext();)
+            {
+                URL result = ((Bundle) iter.next()).getEntry(path);
+
+                if (result != null)
+                {
+                    return result.openConnection();
+                }
+            }
+
+            throw new IOException("Resource not provided by any extension!");
+        }
+        
+        synchronized void addExtension(Object source, Bundle extension)
+        {
+            List sourceExtensions = (List) m_sourceToExtensions.get(source);
+
+            if (sourceExtensions == null)
+            {
+                sourceExtensions = new ArrayList();
+                m_sourceToExtensions.put(source, sourceExtensions);
+            }
+
+            sourceExtensions.add(extension);
+
+            _add(extension.getSymbolicName(), extension);
+        }
+
+        synchronized void removeExtensions(Object source)
+        {
+            if (m_sourceToExtensions.remove(source) == null)
+            {
+                return;
+            }
+
+            m_extensions.clear();
+            m_names.clear();
+
+            for (Iterator iter = m_sourceToExtensions.values().iterator(); iter.hasNext();)
+            {
+                Bundle bundle = (Bundle) iter.next();
+                _add(bundle.getSymbolicName(), bundle);
+            }
+        }
+
+        private void _add(String name, Bundle extension)
+        {
+            if (!m_names.contains(name))
+            {
+                m_names.add(name);
+                m_extensions.add(extension);
+            }
         }
     }
 }

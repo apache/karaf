@@ -19,6 +19,7 @@
 package org.apache.felix.framework.util;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.*;
 import java.security.*;
 import java.util.jar.JarFile;
@@ -654,6 +655,32 @@ public class SecureAction
         }
     }
 
+    public void addURLToURLClassLoader(URL extension, ClassLoader loader) throws Exception 
+    {
+        if (System.getSecurityManager() != null) 
+        {
+            Actions actions = (Actions) m_actions.get();
+            actions.set(Actions.ADD_EXTENSION_URL, extension, loader);
+            try 
+            {
+                AccessController.doPrivileged(actions, m_acc);
+            } 
+            catch (PrivilegedActionException e) 
+            {
+                throw e.getException();
+            }
+        }
+        else 
+        {
+            Method addURL =
+                URLClassLoader.class.getDeclaredMethod("addURL",
+                new Class[] {URL.class});
+            addURL.setAccessible(true);
+            addURL.invoke(getClass().getClassLoader(), 
+                new Object[]{extension, loader});
+        }
+    }
+    
     private static class Actions implements PrivilegedExceptionAction
     {
         public static final int GET_PROPERTY_ACTION = 0;
@@ -681,7 +708,7 @@ public class SecureAction
         public static final int CREATE_TMPFILE_ACTION = 22;
         public static final int OPEN_URLCONNECTION_ACTION = 23;
         public static final int OPEN_JARURLCONNECTIONJAR_ACTION = 24;
-
+        public static final int ADD_EXTENSION_URL = 25;
 
         private int m_action = -1;
         private Object m_arg1 = null;
@@ -852,6 +879,14 @@ public class SecureAction
                 else if (m_action == OPEN_JARURLCONNECTIONJAR_ACTION)
                 {
                     return ((JarURLConnection) m_arg1).getJarFile();
+                }
+                else if (m_action == ADD_EXTENSION_URL) 
+                {
+                    Method addURL =
+                        URLClassLoader.class.getDeclaredMethod("addURL",
+                        new Class[] {URL.class});
+                    addURL.setAccessible(true);
+                    addURL.invoke(m_arg2, new Object[]{m_arg1});
                 }
 
                 return null;

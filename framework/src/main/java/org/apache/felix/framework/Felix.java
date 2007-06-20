@@ -35,6 +35,9 @@ import org.osgi.service.startlevel.StartLevel;
 
 public class Felix
 {
+    // The secure action used to do privileged calls
+    static SecureAction m_secureAction = new SecureAction();
+    
     // Logging related member variables.
     private Logger m_logger = null;
     // Config properties.
@@ -102,9 +105,6 @@ public class Felix
     // Execution environment.
     private String m_executionEnvironment = "";
     private Set m_executionEnvironmentCache = new HashSet();
-
-    // The secure action used to do privileged calls
-    protected SecureAction m_secureAction = new SecureAction();
 
     /**
      * <p>
