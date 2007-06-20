@@ -34,42 +34,30 @@ public class MapToDictionary extends Dictionary
 
     public MapToDictionary(Map map)
     {
+        if (map == null)
+        {
+            throw new IllegalArgumentException("Source map cannot be null.");
+        }
         m_map = map;
     }
 
     public Enumeration elements()
     {
-        if (m_map == null)
-        {
-            return null;
-        }
         return new IteratorToEnumeration(m_map.values().iterator());
     }
 
     public Object get(Object key)
     {
-        if (m_map == null)
-        {
-            return null;
-        }
         return m_map.get(key);
     }
 
     public boolean isEmpty()
     {
-        if (m_map == null)
-        {
-            return true;
-        }
         return m_map.isEmpty();
     }
 
     public Enumeration keys()
     {
-        if (m_map == null)
-        {
-            return null;
-        }
         return new IteratorToEnumeration(m_map.keySet().iterator());
     }
 
@@ -85,10 +73,11 @@ public class MapToDictionary extends Dictionary
 
     public int size()
     {
-        if (m_map == null)
-        {
-            return 0;
-        }
         return m_map.size();
+    }
+
+    public String toString()
+    {
+        return m_map.toString();
     }
 }
