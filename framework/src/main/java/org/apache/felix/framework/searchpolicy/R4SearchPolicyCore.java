@@ -19,6 +19,7 @@
 package org.apache.felix.framework.searchpolicy;
 
 import java.io.IOException;
+import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
@@ -481,12 +482,23 @@ public class R4SearchPolicyCore implements ModuleListener
             }
             else if ((this.getClass().getClassLoader() != classes[i].getClassLoader())
                 && !ClassLoader.class.isAssignableFrom(classes[i])
-                && !Class.class.equals(classes[i]))
+                && !Class.class.equals(classes[i])
+                && !Proxy.class.equals(classes[i]))
             {
-                // If the instigating class was not from a bundle, then
-                // delegate to the parent class loader. Otherwise, break
-                // out of loop and return null.
-                if (!ContentClassLoader.class.isInstance(classes[i].getClassLoader()))
+                // If there are no bundles providing exports for this
+                // package and if the instigating class was not from a
+                // bundle, then delegate to the parent class loader.
+                // Otherwise, break out of loop and return null.
+                boolean delegate = true;
+                for (ClassLoader cl = classes[i].getClassLoader(); cl != null; cl = cl.getClass().getClassLoader())
+                {
+                    if (ContentClassLoader.class.isInstance(cl))
+                    {
+                        delegate = false;
+                        break;
+                    }
+                }
+                if (delegate)
                 {
                     return this.getClass().getClassLoader().loadClass(name);
                 }
