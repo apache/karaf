@@ -150,20 +150,26 @@ class ServiceReferenceImpl implements ServiceReference
         // object uses the same class as the requester.
         else if (providerWire == null)
         {
-            try
+            // If the provider is not the exporter of the requester's package,
+            // then try to use the service registration to see if the requester's
+            // class is accessible.
+            if (!((BundleImpl) m_bundle).getInfo().hasModule(requesterWire.getExporter()))
             {
-                // Load the class from the requesting bundle.
-                Class requestClass =
-                    ((BundleImpl) requester).getInfo().getCurrentModule().getClass(className);
-                // Get the service registration and ask it to check
-                // if the service object is assignable to the requesting
-                // bundle's class.
-                allow = getServiceRegistration().isClassAccessible(requestClass);
-            }
-            catch (Exception ex)
-            {
-                // This should not happen, filter to be safe.
-                allow = false;
+                try
+                {
+                    // Load the class from the requesting bundle.
+                    Class requestClass =
+                        ((BundleImpl) requester).getInfo().getCurrentModule().getClass(className);
+                    // Get the service registration and ask it to check
+                    // if the service object is assignable to the requesting
+                    // bundle's class.
+                    allow = getServiceRegistration().isClassAccessible(requestClass);
+                }
+                catch (Exception ex)
+                {
+                    // This should not happen, filter to be safe.
+                    allow = false;
+                }
             }
         }
         // Case 3: Include service reference if the wires have the
