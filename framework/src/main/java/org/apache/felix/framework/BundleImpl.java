@@ -396,7 +396,7 @@ class BundleImpl implements Bundle
 
     public String toString()
     {
-        return "[" + getBundleId() +"]";
+        return m_felix.getBundleSymbolicName(this) + " [" + getBundleId() +"]";
     }
 
     public boolean equals(Object obj)

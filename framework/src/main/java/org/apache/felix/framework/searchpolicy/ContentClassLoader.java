@@ -214,4 +214,9 @@ public class ContentClassLoader extends SecureClassLoader
     {
         return m_contentLoader.getSearchPolicy().findLibrary(name);
     }
+
+    public String toString()
+    {
+        return m_contentLoader.toString();
+    }
 }
