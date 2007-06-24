@@ -69,6 +69,25 @@ public abstract class Handler {
     public Object getterCallback(String fieldName, Object value) {
         return value;
     }
+    
+    /**
+     * This method is called when the execution enter in a method.
+     * 
+     * @param methodId : the method identifier
+     */
+    public void entryCallback(String methodId) {
+    }
+
+    /**
+     * This method is called when the execution exit a method (before a return or a throw).
+     * If the given returned object is an instance of Exception, this means that the method throwed this exception.
+     * If the given returned object is null, either the method is void, either it returns null.
+     * You must not modified the returned object.
+     * @param methodId : the method identifier
+     * @param returnedObj : the returned object (boxed for primitive type)
+     */
+    public void exitCallback(String methodId, Object returnedObj) {
+    }
 
     /**
      * Is the actual state valid for this handler ?

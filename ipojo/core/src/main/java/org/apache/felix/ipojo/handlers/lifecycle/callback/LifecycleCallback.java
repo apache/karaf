@@ -20,7 +20,7 @@ package org.apache.felix.ipojo.handlers.lifecycle.callback;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.parser.MethodMetadata;
 import org.apache.felix.ipojo.util.Callback;
 
 /**
@@ -29,16 +29,21 @@ import org.apache.felix.ipojo.util.Callback;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class LifecycleCallback {
-
+    
     /**
-     * Initial state of the transition.
+     * Invalid to Valid transition.
      */
-    private int m_initialState;
-
+    protected static final int VALIDATE = 1;
+    
     /**
-     * Final state of the transition.
+     * Valid to Invalid transition.
      */
-    private int m_finalState;
+    protected static final int INVALIDATE = 0;
+    
+    /**
+     * Transition on hwich calling the callback.
+     */
+    private int m_transition;
 
     /**
      * Callback object.
@@ -46,35 +51,15 @@ public class LifecycleCallback {
     private Callback m_callback;
 
     /**
-     * Method called by the callback.
-     */
-    private String m_method;
-
-    /**
      * LifecycleCallback constructor.
      * 
      * @param hh : the callback handler calling the callback
-     * @param initialState : initial state of the callback
-     * @param finalState : finali state of the callback
-     * @param method : method to invoke
-     * @param isStatic : is the method static ?
+     * @param transition : transition on which calling the callback
+     * @param mm : method metadata to invoke
      */
-    public LifecycleCallback(LifecycleCallbackHandler hh, String initialState, String finalState, String method, boolean isStatic) {
-        if (initialState.equals("VALID")) {
-            m_initialState = InstanceManager.VALID;
-        }
-        if (initialState.equals("INVALID")) {
-            m_initialState = InstanceManager.INVALID;
-        }
-        if (finalState.equals("VALID")) {
-            m_finalState = InstanceManager.VALID;
-        }
-        if (finalState.equals("INVALID")) {
-            m_finalState = InstanceManager.INVALID;
-        }
-
-        m_method = method;
-        m_callback = new Callback(method, new String[0], isStatic, hh.getInstanceManager());
+    public LifecycleCallback(LifecycleCallbackHandler hh, int transition, MethodMetadata mm) {
+        m_transition = transition;
+        m_callback = new Callback(mm, hh.getInstanceManager());
     }
 
     /**
@@ -88,17 +73,17 @@ public class LifecycleCallback {
     protected void call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         m_callback.call();
     }
-
-    public int getFinalState() {
-        return m_finalState;
+    
+    protected int getTransition() {
+        return m_transition;
     }
-
-    public int getInitialState() {
-        return m_initialState;
-    }
-
-    public String getMethod() {
-        return m_method;
+    
+    /**
+     * Get the method name of the callback.
+     * @return the method name
+     */
+    protected String getMethod() {
+        return m_callback.getMethod();
     }
 
 }

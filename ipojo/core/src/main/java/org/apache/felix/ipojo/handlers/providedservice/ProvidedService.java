@@ -96,7 +96,7 @@ public class ProvidedService implements ServiceFactory {
         m_factoryPolicy = factoryPolicy;
 
         // Add service pid and factory pid
-        addProperty(new Property(this, org.osgi.framework.Constants.SERVICE_PID, handler.getInstanceManager().getInstanceName()));
+        addProperty(new Property(this, org.osgi.framework.Constants.SERVICE_PID, handler.getInstanceManager().getInstanceName()));       
         addProperty(new Property(this, "factory.pid", handler.getInstanceManager().getFactory().getName()));
     }
 

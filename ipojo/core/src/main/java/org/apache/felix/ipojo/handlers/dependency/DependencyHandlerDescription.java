@@ -85,7 +85,7 @@ public class DependencyHandlerDescription extends HandlerDescription {
             if (m_dependencies[i].getState() == 2) {
                 state = "unresolved";
             }
-            Element dep = new Element("Dependency", "");
+            Element dep = new Element("Requires", "");
             dep.addAttribute(new Attribute("Specification", m_dependencies[i].getInterface()));
             dep.addAttribute(new Attribute("Filter", m_dependencies[i].getFilter()));
             dep.addAttribute(new Attribute("State", state));

@@ -25,6 +25,8 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.parser.ManipulationMetadata;
+import org.apache.felix.ipojo.parser.MethodMetadata;
 import org.apache.felix.ipojo.util.Logger;
 
 /**
@@ -91,19 +93,48 @@ public class LifecycleCallbackHandler extends Handler {
         if (metadata.containsAttribute("immediate") && metadata.getAttribute("immediate").equalsIgnoreCase("true")) {
             m_immediate = true;
         }
+        
+        ManipulationMetadata mm = new ManipulationMetadata(metadata);
 
         Element[] hooksMetadata = metadata.getElements("callback");
         for (int i = 0; i < hooksMetadata.length; i++) {
-            // Create an HookMetadata object
-            String initialState = hooksMetadata[i].getAttribute("initial");
-            String finalState = hooksMetadata[i].getAttribute("final");
-            String method = hooksMetadata[i].getAttribute("method");
-            boolean isStatic = false;
-            if (hooksMetadata[i].containsAttribute("isStatic") && hooksMetadata[i].getAttribute("isStatic").equals("true")) {
-                isStatic = true;
+            String methodName = hooksMetadata[i].getAttribute("method");
+            
+            MethodMetadata met = mm.getMethod(methodName, new String[0]);
+            if (met == null) {
+                cm.getFactory().getLogger().log(Logger.ERROR, "The method " + methodName + " is not implemented in the " + cm.getInstanceName());
+                return;
             }
-
-            LifecycleCallback hk = new LifecycleCallback(this, initialState, finalState, method, isStatic);
+            
+            int transition = -1;
+            if (hooksMetadata[i].containsAttribute("transition")) {
+                if (hooksMetadata[i].getAttribute("transition").equalsIgnoreCase("validate")) {
+                    transition = LifecycleCallback.VALIDATE;
+                }
+                if (hooksMetadata[i].getAttribute("transition").equalsIgnoreCase("invalidate")) {
+                    transition = LifecycleCallback.INVALIDATE; 
+                }
+            }
+            
+            //DEPRECATED BLOCK
+            if (hooksMetadata[i].containsAttribute("initial")) {
+                cm.getFactory().getLogger().log(Logger.WARNING, "initial & final are deprecated, please use 'transition=validate|invalidate' instead.");
+                if (hooksMetadata[i].containsAttribute("final")) {
+                    if (hooksMetadata[i].getAttribute("initial").equalsIgnoreCase("valid") && hooksMetadata[i].getAttribute("final").equalsIgnoreCase("invalid")) {
+                        transition = LifecycleCallback.INVALIDATE;
+                    } else {
+                        transition = LifecycleCallback.VALIDATE;
+                    }
+                } 
+            }
+            //END OF DEPRECATED BLOCK
+            
+            if (transition == -1) {
+                cm.getFactory().getLogger().log(Logger.ERROR, "Unknown or malformed transition");
+                return;
+            }
+            
+            LifecycleCallback hk = new LifecycleCallback(this, transition, met);
             addCallback(hk);
         }
         if (m_callbacks.length > 0 || m_immediate) {
@@ -137,17 +168,25 @@ public class LifecycleCallbackHandler extends Handler {
     /**
      * When the state change call the associated callback.
      * 
-     * @param state : the new isntance state.
+     * @param state : the new instance state.
      * @see org.apache.felix.ipojo.Handler#stateChanged(int)
      */
     public void stateChanged(int state) {
+        int transition = -1;
+        if (m_state == ComponentInstance.INVALID && state == ComponentInstance.VALID) {
+            transition = LifecycleCallback.VALIDATE;
+        }
+        if (m_state == ComponentInstance.VALID && state == ComponentInstance.INVALID) {
+            transition = LifecycleCallback.INVALIDATE;
+        }
+        
         // Manage immediate component
-        if (m_state == ComponentInstance.INVALID && state == ComponentInstance.VALID && m_manager.getPojoObjects().length == 0) {
+        if (m_immediate && transition == LifecycleCallback.VALIDATE && m_manager.getPojoObjects().length == 0) {
             m_manager.createPojoObject();
         }
 
         for (int i = 0; i < m_callbacks.length; i++) {
-            if (m_callbacks[i].getInitialState() == m_state && m_callbacks[i].getFinalState() == state) {
+            if (m_callbacks[i].getTransition() == transition) {
                 try {
                     m_callbacks[i].call();
                 } catch (NoSuchMethodException e) {

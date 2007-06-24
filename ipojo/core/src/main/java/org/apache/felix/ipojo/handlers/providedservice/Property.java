@@ -22,7 +22,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.parser.FieldMetadata;
+import org.apache.felix.ipojo.parser.ManipulationMetadata;
 import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Logger;
 
@@ -76,7 +77,7 @@ public class Property {
      * @param value : initial value of the property
      * @param manipulation : manipulation metadata
      */
-    public Property(ProvidedService ps, String name, String field, String type, String value, Element manipulation) {
+    public Property(ProvidedService ps, String name, String field, String type, String value, ManipulationMetadata manipulation) {
         m_providedService = ps;
         m_name = name;
         m_field = field;
@@ -96,16 +97,13 @@ public class Property {
                 ps.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The property " + m_name + " has neither type neither field.");
                 return;
             }
-            for (int j = 0; j < manipulation.getElements("Field").length; j++) {
-                if (field.equals(manipulation.getElements("Field")[j].getAttribute("name"))) {
-                    m_type = manipulation.getElements("Field")[j].getAttribute("type");
-                    break;
-                }
-            }
-            if (m_type == null) {
+            FieldMetadata fm = manipulation.getField(field);
+            if (fm == null) {
                 m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
                         "[" + ps.getInstanceManager().getClassName() + "] A declared property was not found in the class : " + m_field);
+                return;
             }
+            m_type = fm.getFieldType();
         }
 
         if (m_initialValue != null) {

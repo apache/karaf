@@ -140,7 +140,7 @@ public class InstanceCreator implements ServiceListener {
             Factory fact = null;
 
             try {
-                String fil = "(|(" + org.osgi.framework.Constants.SERVICE_PID + "=" + componentType + ")(component.class=" + componentType + "))";
+                String fil = "(|(" + org.osgi.framework.Constants.SERVICE_PID + "=" + componentType + ")(component.class=" + componentType + ")(component.type=" + componentType + ")";
                 ServiceReference[] refs = context.getServiceReferences(org.apache.felix.ipojo.Factory.class.getName(), fil);
                 if (refs != null) {
                     fact = (Factory) m_context.getService(refs[0]);

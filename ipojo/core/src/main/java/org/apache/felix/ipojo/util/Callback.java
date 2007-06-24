@@ -316,4 +316,8 @@ public class Callback {
         
         return m_methodObj.invoke(instance, arg);
     }
+    
+    public String getMethod() {
+        return m_method;
+    }
 }

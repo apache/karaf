@@ -196,7 +196,17 @@ public class ProvidedServiceHandler extends CompositeHandler {
             m_services.add(sm);
         }
 
-        Element[] imports = metadata.getElements("import", "");
+        Element[] imports = metadata.getElements("requires", "");
+        
+        // DEPRECATED BLOCK:
+        if (imports.length == 0) {
+            imports = metadata.getElements("import");
+            if (imports.length != 0) {
+                m_manager.getFactory().getLogger().log(Logger.WARNING, "Import is deprecated, please use 'requires' instead of 'import'");
+            }
+        }
+        // END OF DEPRECATED BLOCK
+        
         for (int i = 0; i < imports.length; i++) {
             String itf = imports[i].getAttribute("specification");
             boolean agg = false;

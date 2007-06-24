@@ -19,14 +19,18 @@
 package org.apache.felix.ipojo.handlers.dependency;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.handlers.dependency.nullable.NullableObjectWriter;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.parser.ParseUtils;
+import org.apache.felix.ipojo.parser.FieldMetadata;
+import org.apache.felix.ipojo.parser.ManipulationMetadata;
+import org.apache.felix.ipojo.parser.MethodMetadata;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.ServiceReference;
 
@@ -157,72 +161,57 @@ public class DependencyHandler extends Handler {
      * @param manipulation : the component-type manipulation metadata
      * @return true if the dependency is valid
      */
-    private boolean checkDependency(Dependency dep, Element manipulation) {
+    private boolean checkDependency(Dependency dep, ManipulationMetadata manipulation) {
         // Check the internal type of dependency
         String field = dep.getField();
         DependencyCallback[] callbacks = dep.getCallbacks();
         
         for (int i = 0; i < callbacks.length; i++) {
-            for (int j = 0; j < manipulation.getElements("Method").length; j++) {
-                if (manipulation.getElements("Method")[j].getAttribute("name").equals(callbacks[i].getMethodName())) {
-                    if (manipulation.getElements("Method")[j].containsAttribute("Arguments")) {
-                        String[] args = ParseUtils.parseArrays(manipulation.getElements("Method")[j].getAttribute("Arguments"));
-                        if (args.length != 1) {
-                            getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "A dependency callback " + callbacks[i].getMethodName() + " must have 0 or 1 argument");
-                            return false;
-                        } else {
-                            callbacks[i].setArgument(args[0]);
-                            if (!args[0].equals(ServiceReference.class.getName())) {
-                                if (dep.getSpecification() == null) {
-                                    dep.setSpecification(args[0]);
-                                }
-                                if (!dep.getSpecification().equals(args[0])) {
-                                    m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The field type [" + args[0] + "] and the needed service interface ["
-                                                + dep.getSpecification() + "] are not the same");
-                                    dep.setSpecification(args[0]);
-                                }
-                            }
-                        }
-                    } else {
-                        callbacks[i].setArgument("EMPTY");
+            MethodMetadata[] mets = manipulation.getMethods(callbacks[i].getMethodName());
+            if (mets.length == 0) {
+                getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "A dependency callback " + callbacks[i].getMethodName() + " does not exist in the implementation");
+                return false;
+            }
+            if (mets[0].getMethodArguments().length > 1) {
+                getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "A dependency callback " + callbacks[i].getMethodName() + " must have 0 or 1 argument");
+                return false;
+            }
+            if (mets[0].getMethodArguments().length == 0) {
+                callbacks[i].setArgument("EMPTY");
+            } else {
+                callbacks[i].setArgument(mets[0].getMethodArguments()[0]);
+                if (!mets[0].getMethodArguments()[0].equals(ServiceReference.class.getName())) {
+                    if (dep.getSpecification() == null) {
+                        dep.setSpecification(mets[0].getMethodArguments()[0]);
+                    }
+                    if (!dep.getSpecification().equals(mets[0].getMethodArguments()[0])) {
+                        m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The field type [" + mets[0].getMethodArguments()[0] + "] and the needed service interface ["
+                                    + dep.getSpecification() + "] are not the same");
+                        dep.setSpecification(mets[0].getMethodArguments()[0]);
                     }
                 }
-            }
+            }   
         }
         
         if (field != null) {
-            String type = null;
-            for (int i = 0; i < manipulation.getElements("Field").length; i++) {
-                if (field.equals(manipulation.getElements("Field")[i].getAttribute("name"))) {
-                    type = manipulation.getElements("Field")[i].getAttribute("type");
-                    break;
-                }
-            }
-
-            if (type == null) {
-                m_manager.getFactory().getLogger().log(Logger.ERROR,
-                        "[DependencyHandler on " + m_manager.getClassName() + "] A declared dependency was not found in the class : " + dep.getField());
+            FieldMetadata fm = manipulation.getField(field);
+            if (field == null) {
+                getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "A dependency field " + field + " does not exist in the implementation class");
                 return false;
             }
+            String type = fm.getFieldType(); 
+            if (type.endsWith("[]")) {
+                // Set the dependency to multiple
+                dep.setAggregate();
+                type = type.substring(0, type.length() - 2);
+            }
 
-            if (type != null) {
-                if (type.endsWith("[]")) {
-                    // Set the dependency to multiple
-                    dep.setAggregate();
-                    type = type.substring(0, type.length() - 2);
-                }
+            if (dep.getSpecification() == null) { dep.setSpecification(type); }
 
-                if (dep.getSpecification() == null) {
-                    dep.setSpecification(type);
-                }
-
-                if (!dep.getSpecification().equals(type)) {
-                    m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The field type [" + type + "] and the needed service interface ["
+            if (!dep.getSpecification().equals(type)) {
+                m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The field type [" + type + "] and the needed service interface ["
                                 + dep.getSpecification() + "] are not the same");
-                    dep.setSpecification(type);
-                }
-            } else {
-                m_manager.getFactory().getLogger().log(Logger.WARNING, "[DependencyHandler on " + m_manager.getClassName() + "] The declared dependency " + dep.getField() + "  does not exist in the code");
+                dep.setSpecification(type);
             }
         }
         
@@ -241,9 +230,23 @@ public class DependencyHandler extends Handler {
         m_manager = im;
         m_dependencies = new Dependency[0];
         m_nullableClasses = new Class[0];
+        
+        ManipulationMetadata manipulation = new ManipulationMetadata(componentMetadata);
+        List fl = new ArrayList();
 
         // Create the dependency according to the component metadata
-        Element[] deps = componentMetadata.getElements("Dependency");
+        Element[] deps = componentMetadata.getElements("Requires"); 
+        
+        // DEPRECATED BLOCK :
+        if (deps.length == 0) {
+            deps = componentMetadata.getElements("Dependency");
+            if (deps.length != 0) {
+                im.getFactory().getLogger().log(Logger.WARNING, "Dependency is deprecated, please use 'requires' instead of 'dependency'");
+            }
+        }
+        // END OF DEPRECATED BLOCK
+
+         
         for (int i = 0; i < deps.length; i++) {
             // Create the dependency metadata
             String field = null;
@@ -285,9 +288,11 @@ public class DependencyHandler extends Handler {
             }
             
             // Check the dependency :
-            Element manipulation = componentMetadata.getElements("Manipulation")[0];
             if (checkDependency(dep, manipulation)) {
                 addDependency(dep);
+                if (dep.getField() != null) {
+                    fl.add(manipulation.getField(dep.getField()));
+                }
             } else {
                 m_manager.getFactory().getLogger().log(Logger.ERROR,
                         "[DependencyHandler on " + m_manager.getClassName() + "] The dependency on " + dep.getField() + " is not valid");
@@ -296,11 +301,7 @@ public class DependencyHandler extends Handler {
         }
 
         if (deps.length > 0) {
-            String[] fields = new String[m_dependencies.length];
-            for (int k = 0; k < m_dependencies.length; k++) {
-                fields[k] = m_dependencies[k].getField();
-            }
-            m_manager.register(this, fields);
+            m_manager.register(this, (FieldMetadata[]) fl.toArray(new FieldMetadata[0]), null);
         }
     }
 

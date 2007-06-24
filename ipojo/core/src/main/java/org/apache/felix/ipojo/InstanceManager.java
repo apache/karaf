@@ -22,10 +22,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.parser.FieldMetadata;
+import org.apache.felix.ipojo.parser.MethodMetadata;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 
@@ -66,6 +69,11 @@ public class InstanceManager implements ComponentInstance {
      * Map [field, handler list] storing handlers interested by the field.
      */
     private HashMap m_fieldRegistration = new HashMap();
+    
+    /**
+     * Map [method identifier, handler list] storing handlers interested by the method.
+     */
+    private HashMap m_methodRegistration = new HashMap();
 
     /**
      * Component state (STOPPED at the beginning).
@@ -91,6 +99,7 @@ public class InstanceManager implements ComponentInstance {
      * Component type information.
      */
     private ComponentDescription m_componentDesc;
+    
 
     // Constructor
     /**
@@ -624,15 +633,16 @@ public class InstanceManager implements ComponentInstance {
      * given in the list.
      * 
      * @param h : the handler to register
-     * @param fields : the fields list
+     * @param fields : the field metadata list
+     * @param methods : the method metadata list
      */
-    public void register(Handler h, String[] fields) {
+    public void register(Handler h, FieldMetadata[] fields, MethodMetadata[] methods) {
         register(h);
-        for (int i = 0; i < fields.length; i++) {
-            if (m_fieldRegistration.get(fields[i]) == null) {
-                m_fieldRegistration.put(fields[i], new Handler[] { h });
+        for (int i = 0; fields != null && i < fields.length; i++) {
+            if (m_fieldRegistration.get(fields[i].getFieldName()) == null) {
+                m_fieldRegistration.put(fields[i].getFieldName(), new Handler[] { h });
             } else {
-                Handler[] list = (Handler[]) m_fieldRegistration.get(fields[i]);
+                Handler[] list = (Handler[]) m_fieldRegistration.get(fields[i].getFieldName());
                 for (int j = 0; j < list.length; j++) {
                     if (list[j] == h) {
                         return;
@@ -641,24 +651,42 @@ public class InstanceManager implements ComponentInstance {
                 Handler[] newList = new Handler[list.length + 1];
                 System.arraycopy(list, 0, newList, 0, list.length);
                 newList[list.length] = h;
-                m_fieldRegistration.put(fields[i], newList);
+                m_fieldRegistration.put(fields[i].getFieldName(), newList);
             }
         }
+        for (int i = 0; methods != null && i < methods.length; i++) {
+            if (m_methodRegistration.get(methods[i].getMethodIdentifier()) == null) {
+                m_methodRegistration.put(methods[i].getMethodIdentifier(), new Handler[] { h });
+            } else {
+                Handler[] list = (Handler[]) m_methodRegistration.get(methods[i].getMethodIdentifier());
+                for (int j = 0; j < list.length; j++) {
+                    if (list[j] == h) {
+                        return;
+                    }
+                }
+                Handler[] newList = new Handler[list.length + 1];
+                System.arraycopy(list, 0, newList, 0, list.length);
+                newList[list.length] = h;
+                m_methodRegistration.put(methods[i].getMethodIdentifier(), newList);
+            }
+        }
+        
     }
 
     /**
      * Unregister an handler for the field list. The handler will not be
-     * notified of field access but is allways register on the instance manager.
+     * notified of field access but is always register on the instance manager.
      * 
      * @param h : the handler to unregister.
-     * @param fields : the fields list
+     * @param fields : the field metadata list
+     * @param methods : the method metadata list
      */
-    public void unregister(Handler h, String[] fields) {
+    public void unregister(Handler h, FieldMetadata[] fields, MethodMetadata[] methods) {
         for (int i = 0; i < fields.length; i++) {
-            if (m_fieldRegistration.get(fields[i]) == null) {
+            if (m_fieldRegistration.get(fields[i].getFieldName()) == null) {
                 break;
             } else {
-                Handler[] list = (Handler[]) m_fieldRegistration.get(fields[i]);
+                Handler[] list = (Handler[]) m_fieldRegistration.get(fields[i].getFieldName());
                 int idx = -1;
                 for (int j = 0; j < list.length; j++) {
                     if (list[j] == h) {
@@ -678,7 +706,35 @@ public class InstanceManager implements ComponentInstance {
                         }
                         list = newList;
                     }
-                    m_fieldRegistration.put(fields[i], list);
+                    m_fieldRegistration.put(fields[i].getFieldName(), list);
+                }
+            }
+        }
+        for (int i = 0; i < methods.length; i++) {
+            if (m_methodRegistration.get(methods[i].getMethodIdentifier()) == null) {
+                break;
+            } else {
+                Handler[] list = (Handler[]) m_methodRegistration.get(methods[i].getMethodIdentifier());
+                int idx = -1;
+                for (int j = 0; j < list.length; j++) {
+                    if (list[j] == h) {
+                        idx = j;
+                        break;
+                    }
+                }
+
+                if (idx >= 0) {
+                    if ((list.length - 1) == 0) {
+                        list = new Handler[0];
+                    } else {
+                        Handler[] newList = new Handler[list.length - 1];
+                        System.arraycopy(list, 0, newList, 0, idx);
+                        if (idx < newList.length) {
+                            System.arraycopy(list, idx + 1, newList, idx, newList.length - idx);
+                        }
+                        list = newList;
+                    }
+                    m_methodRegistration.put(methods[i].getMethodIdentifier(), list);
                 }
             }
         }
@@ -711,6 +767,14 @@ public class InstanceManager implements ComponentInstance {
             }
         }
     }
+    
+    public Set getRegistredFields() {
+        return m_fieldRegistration.keySet();
+    }
+    
+    public Set getRegistredMethods() {
+        return m_methodRegistration.keySet();
+    }
 
     /**
      * This method is called by the manipulated class each time that a GETFIELD
@@ -738,6 +802,31 @@ public class InstanceManager implements ComponentInstance {
             return result;
         } else {
             return initialValue;
+        }
+    }
+    
+    /**
+     * Dispatch entry method event on registred handler.
+     * @param methodId : method id
+     */
+    public void entryCallback(String methodId) {
+        Handler[] list = (Handler[]) m_methodRegistration.get(methodId);
+        for (int i = 0; list != null && i < list.length; i++) {
+            list[i].entryCallback(methodId);
+        }
+    }
+
+    /**
+     * Dispatch exit method event on registred handler.
+     * The given returned object is an instance of Exception if the method has throwed an exception.
+     * If the given object is null, either the method returns void, either the method has returned null.
+     * @param methodId : method id
+     * @param e : returned object.
+     */
+    public void exitCallback(String methodId, Object e) {
+        Handler[] list = (Handler[]) m_methodRegistration.get(methodId);
+        for (int i = 0; list != null && i < list.length; i++) {
+            list[i].exitCallback(methodId, e);
         }
     }
 

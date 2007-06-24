@@ -27,6 +27,8 @@ import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.parser.FieldMetadata;
+import org.apache.felix.ipojo.parser.ManipulationMetadata;
 import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.Constants;
@@ -97,13 +99,14 @@ public class ProvidedServiceHandler extends Handler {
     public void configure(InstanceManager im, Element componentMetadata, Dictionary configuration) {
         // Fix the instance manager & clean the provided service list
         m_manager = im;
+        
+        ManipulationMetadata manipulation = new ManipulationMetadata(componentMetadata);
 
         ComponentDescription cd = im.getComponentDescription();
 
         m_providedServices = new ProvidedService[0];
         // Create the dependency according to the component metadata
         Element[] providedServices = componentMetadata.getElements("Provides");
-        Element manipulation = componentMetadata.getElements("Manipulation")[0];
         for (int i = 0; i < providedServices.length; i++) {
             // Create a ProvidedServiceMetadata object
 
@@ -111,13 +114,9 @@ public class ProvidedServiceHandler extends Handler {
             String[] serviceSpecification = new String[0];
             if (providedServices[i].containsAttribute("interface")) {
                 String serviceSpecificationStr = providedServices[i].getAttribute("interface");
-                // Get serviceSpecification if exist in the metadata
                 serviceSpecification = ParseUtils.parseArrays(serviceSpecificationStr);
             } else {
-                serviceSpecification = new String[manipulation.getElements("Interface").length];
-                for (int j = 0; j < manipulation.getElements("Interface").length; j++) {
-                    serviceSpecification[j] = manipulation.getElements("Interface")[j].getAttribute("name");
-                }
+                serviceSpecification = manipulation.getInterfaces();
             }
             if (serviceSpecification.length == 0) {
                 m_manager.getFactory().getLogger().log(Logger.ERROR,
@@ -194,7 +193,7 @@ public class ProvidedServiceHandler extends Handler {
         }
 
         if (providedServices.length > 0) {
-            String[] fields = new String[0];
+            FieldMetadata[] fields = new FieldMetadata[0];
             for (int i = 0; i < m_providedServices.length; i++) {
                 ProvidedService ps = m_providedServices[i];
                 for (int j = 0; j < ps.getProperties().length; j++) {
@@ -210,15 +209,15 @@ public class ProvidedServiceHandler extends Handler {
                         }
                     }
                     if (prop.getField() != null) {
-                        String[] newFields = new String[fields.length + 1];
+                        FieldMetadata[] newFields = new FieldMetadata[fields.length + 1];
                         System.arraycopy(fields, 0, newFields, 0, fields.length);
-                        newFields[fields.length] = prop.getField();
+                        newFields[fields.length] = manipulation.getField(prop.getField());
                         fields = newFields;
                     }
                 }
             }
 
-            m_manager.register(this, fields);
+            m_manager.register(this, fields, null);
         }
     }
 
@@ -230,48 +229,39 @@ public class ProvidedServiceHandler extends Handler {
      * @param manipulation : componenet-type manipulation metadata.
      * @return true if the provided service is correct
      */
-    private boolean checkProvidedService(ProvidedService ps, Element manipulation) {
+    private boolean checkProvidedService(ProvidedService ps, ManipulationMetadata manipulation) {
 
         for (int i = 0; i < ps.getServiceSpecification().length; i++) {
-            boolean b = false;
-            for (int ii = 0; ii < manipulation.getElements("Interface").length; ii++) {
-                if (manipulation.getElements("Interface")[ii].getAttribute("name").equals(ps.getServiceSpecification()[i])) {
-                    b = true;
-                }
-            }
-            if (!b) {
-                m_manager.getFactory().getLogger().log(
-                        Logger.ERROR,
-                        "[" + m_manager.getClassName() + "] The service specification " + ps.getServiceSpecification()[i]
+            if (! manipulation.isInterfaceImplemented(ps.getServiceSpecification()[i])) {
+                m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The service specification " + ps.getServiceSpecification()[i]
                                 + " is not implemented by the component class");
                 return false;
             }
-
         }
 
-        // Fix internal property type
-        for (int i = 0; i < ps.getProperties().length; i++) {
-            Property prop = ps.getProperties()[i];
-            String field = prop.getField();
-
-            if (field == null) {
-                return true; // Static dependency -> Nothing to check
-            } else {
-                String type = null;
-                for (int j = 0; j < manipulation.getElements("Field").length; j++) {
-                    if (field.equals(manipulation.getElements("Field")[j].getAttribute("name"))) {
-                        type = manipulation.getElements("Field")[j].getAttribute("type");
-                        break;
-                    }
-                }
-                if (type == null) {
-                    m_manager.getFactory().getLogger().log(Logger.ERROR,
-                            "[" + m_manager.getClassName() + "] A declared property was not found in the class : " + prop.getField());
-                    return false;
-                }
-                prop.setType(type); // Set the type
-            }
-        }
+//        // Fix internal property type
+//        for (int i = 0; i < ps.getProperties().length; i++) {
+//            Property prop = ps.getProperties()[i];
+//            String field = prop.getField();
+//
+//            if (field == null) {
+//                return true; // Static property -> Nothing to check
+//            } else {
+//                String type = null;
+//                for (int j = 0; j < manipulation.getElements("Field").length; j++) {
+//                    if (field.equals(manipulation.getElements("Field")[j].getAttribute("name"))) {
+//                        type = manipulation.getElements("Field")[j].getAttribute("type");
+//                        break;
+//                    }
+//                }
+//                if (type == null) {
+//                    m_manager.getFactory().getLogger().log(Logger.ERROR,
+//                            "[" + m_manager.getClassName() + "] A declared property was not found in the class : " + prop.getField());
+//                    return false;
+//                }
+//                prop.setType(type); // Set the type
+//            }
+//        }
         return true;
     }
 

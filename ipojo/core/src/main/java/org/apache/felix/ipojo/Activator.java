@@ -152,7 +152,8 @@ public class Activator implements BundleActivator {
             for (int j = 0; j < m_factories.length; j++) {
                 String componentClass = m_factories[j].getComponentClassName();
                 String factoryName = m_factories[j].getName();
-                if (conf.get("component") != null && (conf.get("component").equals(componentClass) || conf.get("component").equals(factoryName))) {
+                String componentName = m_factories[j].getComponentTypeName();
+                if (conf.get("component") != null && (conf.get("component").equals(componentClass) || conf.get("component").equals(factoryName)) || conf.get("component").equals(componentName)) {
                     try {
                         m_factories[j].createComponentInstance(conf);
                         created = true;

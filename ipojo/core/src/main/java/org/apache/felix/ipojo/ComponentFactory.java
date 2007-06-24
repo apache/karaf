@@ -21,11 +21,13 @@ package org.apache.felix.ipojo;
 import java.io.IOException;
 import java.net.URL;
 import java.security.ProtectionDomain;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.architecture.ComponentDescription;
@@ -52,6 +54,11 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * name (i.e. pid) of the created instance
      */
     private HashMap m_componentInstances = new HashMap();
+    
+    /**
+     * List of the managed instance name. This list is shared by all factories.
+     */
+    private static List m_instancesName = new ArrayList();
 
     /**
      * Ture if the component is a composition.
@@ -76,7 +83,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     /**
      * Composition Name.
      */
-    private String m_compositeName = null;
+    private String m_typeName = null;
 
     /**
      * Classloader to delegate loading.
@@ -188,6 +195,10 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     protected BundleContext getBundleContext() {
         return m_context;
     }
+    
+    protected String getComponentTypeName() {
+        return m_typeName;
+    }
 
     /**
      * Get the implementation class of the component type.
@@ -221,16 +232,10 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
             m_isComposite = true;
             // Get the name
             if (cm.containsAttribute("name")) {
-                m_compositeName = cm.getAttribute("name");
+                m_typeName = cm.getAttribute("name");
             } else {
                 System.err.println("A composite needs a name");
                 return;
-            }
-            // Compute factory name
-            if (m_componentMetadata.containsAttribute("factory") && !m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) {
-                m_factoryName = m_componentMetadata.getAttribute("factory");
-            } else {
-                m_factoryName = m_compositeName;
             }
         } else {
             if (cm.containsAttribute("className")) {
@@ -239,20 +244,56 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
                 System.err.println("A component needs a class name");
                 return;
             }
-            if (m_componentMetadata.containsAttribute("factory") && !m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) {
-                m_factoryName = m_componentMetadata.getAttribute("factory");
-            } else {
-                m_factoryName = m_componentMetadata.getAttribute("className");
+            // Get the name
+            if (cm.containsAttribute("name")) {
+                m_typeName = cm.getAttribute("name");
             }
         }
-        if (m_factoryName != null) {
-            m_logger = new Logger(m_context, m_factoryName, Logger.WARNING);
+        
+        if (m_typeName != null) {
+            m_logger = new Logger(m_context, m_typeName, Logger.WARNING);
         } else {
-            if (m_isComposite) {
-                m_logger = new Logger(m_context, m_compositeName, Logger.WARNING);
-            } else {
-                m_logger = new Logger(m_context, m_componentClassName, Logger.WARNING);
+            m_logger = new Logger(m_context, m_componentClassName, Logger.WARNING);
+        }
+        
+        computeFactoryName();
+        
+    }
+    
+    /**
+     * Compute the factory name.
+     */
+    private void computeFactoryName() {
+        if (m_componentMetadata.containsAttribute("factory")) {
+            // DEPRECATED BLOCK
+            if (m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) {
+                m_logger.log(Logger.WARNING, "'factory=no' is deprecated, Please use 'factory=false' instead of 'factory='no'");
+                m_factoryName = null;
+                return;
             }
+            // END OF DEPRECATED BLOCK
+            if (m_componentMetadata.getAttribute("factory").equalsIgnoreCase("false")) {
+                m_factoryName = null;
+                return;
+            }
+            if (m_componentMetadata.getAttribute("factory").equalsIgnoreCase("true")) {
+                if (m_typeName == null) { //m_typeName is necessary set for composite.
+                    m_factoryName = m_componentMetadata.getAttribute("className");
+                } else {
+                    m_factoryName = m_typeName;
+                }
+                return;
+            }
+            // factory is set with the factory name
+            m_factoryName = m_componentMetadata.getAttribute("factory");
+            return;
+        } else {
+            if (m_typeName == null) { //m_typeName is necessary set for composite.
+                m_factoryName = m_componentMetadata.getAttribute("className");
+            } else {
+                m_factoryName = m_typeName;
+            }
+            return;
         }
     }
 
@@ -269,15 +310,16 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         m_clazz = clazz;
         m_componentClassName = cm.getAttribute("className");
         m_componentMetadata = cm;
-
-        // Get factory PID :
-        if (m_componentMetadata.containsAttribute("factory") && !m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) {
-            m_factoryName = m_componentMetadata.getAttribute("factory");
+        
+        // Get the name
+        if (cm.containsAttribute("name")) {
+            m_typeName = cm.getAttribute("name");
+            m_logger = new Logger(m_context, m_typeName, Logger.WARNING);
         } else {
-            m_factoryName = m_componentMetadata.getAttribute("className");
+            m_logger = new Logger(m_context, m_componentClassName, Logger.WARNING);
         }
 
-        m_logger = new Logger(m_context, m_factoryName, Logger.WARNING);
+        computeFactoryName();
     }
 
     /**
@@ -295,6 +337,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
                     ((InstanceManager) ci).kill(); 
                 } 
             }
+            m_instancesName.remove(ci.getInstanceName());
         }
 
         m_logger.stop();
@@ -332,7 +375,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         }
 
         // Check if the factory should be exposed
-        if (m_componentMetadata.containsAttribute("factory") && m_componentMetadata.getAttribute("factory").equalsIgnoreCase("no")) {
+        if (m_factoryName == null) {
             return;
         }
 
@@ -342,6 +385,9 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
             props.put("component.class", "no implementation class");
         }
         props.put("factory.name", m_factoryName);
+        if (m_typeName != null) {
+            props.put("component.type", m_typeName);
+        }
         props.put("component.providedServiceSpecifications", m_componentDesc.getprovidedServiceSpecification());
         props.put("component.properties", m_componentDesc.getProperties());
         props.put("component.description", m_componentDesc);
@@ -360,6 +406,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * @param ci : the destroyed instance
      */
     protected synchronized void disposed(ComponentInstance ci) {
+        m_instancesName.remove(ci.getInstanceName());
         m_componentInstances.remove(ci.getInstanceName());
     }
 
@@ -432,7 +479,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * not consistent with the component type of this factory.
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
-    public ComponentInstance createComponentInstance(Dictionary configuration) throws UnacceptableConfiguration {
+    public synchronized ComponentInstance createComponentInstance(Dictionary configuration) throws UnacceptableConfiguration {
         if (configuration == null) {
             configuration = new Properties();
         }
@@ -452,8 +499,10 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
             configuration.put("name", pid);
         }
 
-        if (m_componentInstances.containsKey(pid)) {
+        if (m_instancesName.contains(pid)) {
             throw new UnacceptableConfiguration("Name already used : " + pid);
+        } else {
+            m_instancesName.add(pid);
         }
 
         IPojoContext context = new IPojoContext(m_context);
@@ -505,8 +554,10 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
             configuration.put("name", pid);
         }
         
-        if (m_componentInstances.containsKey(pid)) {
+        if (m_instancesName.contains(pid)) {
             throw new UnacceptableConfiguration("Name already used : " + pid);
+        } else {
+            m_instancesName.add(pid);
         }
 
         IPojoContext context = new IPojoContext(m_context, serviceContext);
@@ -532,7 +583,8 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * @param pid : name of the instance to delete
      * @see org.osgi.service.cm.ManagedServiceFactory#deleted(java.lang.String)
      */
-    public void deleted(String pid) {
+    public synchronized void deleted(String pid) {
+        m_instancesName.remove(pid);
         InstanceManager cm = (InstanceManager) m_componentInstances.remove(pid);
         if (cm == null) {
             return; // do nothing, the component does not exist !
@@ -548,7 +600,13 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * @see org.apache.felix.ipojo.Factory#getName()
      */
     public String getName() {
-        return m_factoryName;
+        if (m_factoryName != null) {
+            return m_factoryName;
+        } else if (m_typeName != null) {
+            return m_typeName;
+        } else {
+            return m_componentClassName;
+        }
     }
 
     /**
@@ -561,7 +619,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * @see org.osgi.service.cm.ManagedServiceFactory#updated(java.lang.String,
      * java.util.Dictionary)
      */
-    public void updated(String pid, Dictionary properties) throws ConfigurationException {
+    public synchronized void updated(String pid, Dictionary properties) throws ConfigurationException {
         InstanceManager cm = (InstanceManager) m_componentInstances.get(pid);
         if (cm == null) {
             try {
@@ -574,8 +632,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
         } else {
             try {
                 properties.put("name", pid); // Add the name in the configuration
-                checkAcceptability(properties); // Test if the configuration is
-                // acceptable
+                checkAcceptability(properties); // Test if the configuration is acceptable
             } catch (UnacceptableConfiguration e) {
                 m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
                 throw new ConfigurationException(properties.toString(), e.getMessage());
@@ -656,7 +713,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      */
     private synchronized String generateName() {
         String name = getName() + "-" + m_index;
-        while (m_componentInstances.containsKey(name)) {
+        while (m_instancesName.contains(name)) {
             m_index = m_index + 1;
             name = getName() + "-" + m_index;
         }

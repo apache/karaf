@@ -3,4 +3,5 @@
 	<component className="$YOUR_COMPONENT_CLASS">
    
 	</component>
+	<instance component="$YOUR_COMPONENT_CLASS"/>
 </iPOJO>

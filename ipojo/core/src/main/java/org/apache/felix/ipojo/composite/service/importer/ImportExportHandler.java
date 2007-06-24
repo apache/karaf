@@ -82,7 +82,17 @@ public class ImportExportHandler extends CompositeHandler {
         m_context = im.getContext();
         m_scope = m_manager.getServiceContext();
 
-        Element[] imp = metadata.getElements("import");
+        Element[] imp = metadata.getElements("requires");
+
+        //DEPRECATED BLOCK:
+        if (imp.length == 0) {
+            imp = metadata.getElements("import");
+            if (imp.length != 0) {
+                im.getFactory().getLogger().log(Logger.WARNING, "Import is deprecated, please use 'requires' instead of 'import'");
+            }
+        }
+        // END OF DEPRECATED BLOCK
+        
         Element[] exp = metadata.getElements("export");
 
         for (int i = 0; i < imp.length; i++) {

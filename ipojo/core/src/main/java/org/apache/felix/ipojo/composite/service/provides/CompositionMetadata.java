@@ -28,8 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.ipojo.Factory;
-import org.apache.felix.ipojo.composite.service.provides.manipulation.Manipulator;
-import org.apache.felix.ipojo.composite.service.provides.manipulation.POJOWriter;
+import org.apache.felix.ipojo.manipulation.Manipulator;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.Logger;
@@ -58,16 +57,11 @@ public class CompositionMetadata {
      * Bundle Context.
      */
     private BundleContext m_context;
-
+    
     /**
-     * Manipulated field of the build Pojo. 
+     * Manipulation Metadata.
      */
-    private HashMap m_manipulatedFields = new HashMap();
-
-    /**
-     * Manipulated interface of the build Pojo.
-     */
-    private String[] m_manipulatedInterfaces = new String[0];
+    private Element m_manipulationMetadata;
 
     /**
      * Reference on the handler.
@@ -243,9 +237,8 @@ public class CompositionMetadata {
         byte[] pojo = POJOWriter.dump(url, m_specification.getName(), m_name, getFieldList(), getMethodList());
         Manipulator m = new Manipulator();
         try {
-            byte[] ff = m.process(pojo);
-            m_manipulatedFields = m.getFields();
-            m_manipulatedInterfaces = m.getInterfaces();
+            byte[] ff = m.manipulate(pojo);
+            m_manipulationMetadata = m.getManipulationMetadata();
             return ff;
         } catch (IOException e) {
             e.printStackTrace();
@@ -261,7 +254,7 @@ public class CompositionMetadata {
     protected Element buildMetadata(String in) {
         Element elem = new Element("component", "");
         Attribute className = new Attribute("className", m_name);
-        Attribute factory = new Attribute("factory", "no");
+        Attribute factory = new Attribute("factory", "false");
         elem.addAttribute(className);
         elem.addAttribute(factory);
 
@@ -275,7 +268,7 @@ public class CompositionMetadata {
         for (int i = 0; i < fields.size(); i++) {
             FieldMetadata field = (FieldMetadata) fields.get(i);
             if (field.isUseful() && field.getSpecification().isInterface()) {
-                Element dep = new Element("Dependency", "");
+                Element dep = new Element("requires", "");
                 dep.addAttribute(new Attribute("field", field.getName()));
                 if (field.getSpecification().isOptional()) {
                     dep.addAttribute(new Attribute("optional", "true"));
@@ -299,28 +292,7 @@ public class CompositionMetadata {
         }
 
         // Insert information to metadata
-        Element manip = new Element("Manipulation", "");
-        for (int j = 0; j < m_manipulatedInterfaces.length; j++) {
-            // Create an interface element for each implemented interface
-            Element itf = new Element("Interface", "");
-            Attribute att = new Attribute("name", m_manipulatedInterfaces[j]);
-            itf.addAttribute(att);
-            manip.addElement(itf);
-        }
-
-        Iterator it = m_manipulatedFields.keySet().iterator();
-        while (it.hasNext()) {
-            Element field = new Element("Field", "");
-            String name = (String) it.next();
-            String type = (String) m_manipulatedFields.get(name);
-            Attribute attName = new Attribute("name", name);
-            Attribute attType = new Attribute("type", type);
-            field.addAttribute(attName);
-            field.addAttribute(attType);
-            manip.addElement(field);
-        }
-
-        elem.addElement(manip);
+        elem.addElement(m_manipulationMetadata);
 
         return elem;
     }

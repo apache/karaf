@@ -10,15 +10,27 @@
     <plugins>
       <plugin>
         <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.ipojo.plugin</artifactId>
+        <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
-          <osgiManifest>
-            <bundleName>${pom.name}</bundleName>
-            <bundleDescription>$YOUR_BUNDLE_DESCRIPTION</bundleDescription>
-            <iPOJOMetadata>metadata.xml</iPOJOMetadata>
-          </osgiManifest>
+          <instructions>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Private-Package>YOUR_PRIVATE_PACKAGES</Private-Package>
+            <Import-Package>*</Import-Package> <!-- YOUR_IMPORTED_PACKAGES -->
+            <Export-Package>*</Export-Package> <!-- YOUR_EXPORTED_PACKAGES -->
+          </instructions>
         </configuration>
+      </plugin>
+      <plugin>
+	      <groupId>org.apache.felix</groupId>
+	      <artifactId>org.apache.felix.ipojo.plugin</artifactId>
+		  <executions>
+          	<execution>
+            	<goals>
+	              <goal>ipojo-bundle</goal>
+               </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

@@ -63,7 +63,7 @@ public class ImportExportDescription extends HandlerDescription {
         Element handler = super.getHandlerInfo();
         for (int i = 0; i < m_imports.size(); i++) {
             ServiceImporter imp = (ServiceImporter) m_imports.get(i);
-            Element impo = new Element("Import", "");
+            Element impo = new Element("Requires", "");
             impo.addAttribute(new Attribute("Specification", imp.getSpecification()));
             if (imp.getFilter() != null) { impo.addAttribute(new Attribute("Filter", imp.getFilter())); }
             if (imp.isSatisfied()) {

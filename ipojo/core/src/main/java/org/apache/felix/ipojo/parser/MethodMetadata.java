@@ -62,5 +62,22 @@ public class MethodMetadata {
     public String[] getMethodArguments() { return m_arguments; }
     
     public String getMethodReturn() { return m_return; }
+    
+    /**
+     * Get the method unique identifier. For internal usage only.
+     * @return the method identifier.
+     */
+    public String getMethodIdentifier() {
+        String id = m_name;
+        for (int i = 0; i < m_arguments.length; i++) {
+            String cn = m_arguments[i];
+            if (cn.endsWith("[]")) {
+                cn = cn.replace("[]", "$");
+            }
+            cn = cn.replace(".", "_");
+            id += cn;
+        }
+        return id;
+    }
 
 }

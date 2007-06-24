@@ -6,7 +6,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>org.apache.felix.ipojo.plugin</artifactId>
-  <version>0.7.1-incubator-SNAPSHOT</version>
+  <version>0.7.3-incubator-SNAPSHOT</version>
   <name>Apache Felix iPOJO Maven Plugin</name>
   <packaging>maven-plugin</packaging>
   <dependencies>
@@ -44,6 +44,11 @@
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.ipojo.metadata</artifactId>
       <version>${pom.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.ipojo.manipulator</artifactId>
+      <version>0.7.3-incubator-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
