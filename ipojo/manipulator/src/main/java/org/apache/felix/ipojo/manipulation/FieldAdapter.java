@@ -30,7 +30,7 @@ import org.objectweb.asm.Type;
 
 /**
  * Create getter and setter for each fields .
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class FieldAdapter extends ClassAdapter implements Opcodes {
 
@@ -77,7 +77,7 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
     public FieldVisitor visitField(final int access, final String name, final String desc, final String signature, final Object value) {
 
         if ((access & ACC_STATIC) == 0) {
-            ManipulationProperty.getLogger().log(Level.INFO, "Manipulate the field declaration of " + name);
+            //ManipulationProperty.getLogger().log(Level.INFO, "Manipulate the field declaration of " + name);
             Type type = Type.getType(desc);
 
             if (type.getSort() == Type.ARRAY) {

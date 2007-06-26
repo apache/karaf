@@ -20,61 +20,78 @@ package org.apache.felix.ipojo.metadata;
 
 /**
  * Attribute.
+ * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Attribute {
 
-	/**
-	 * Name of the attribute.
-	 */
-	private String m_name;
+    /**
+     * Name of the attribute.
+     */
+    private String m_name;
 
-	/**
-	 * Value of the attribute.
-	 */
-	private String m_value;
+    /**
+     * Value of the attribute.
+     */
+    private String m_value;
 
-	/**
-	 * Namepsace of the attribute.
-	 */
-	private String m_nameSpace;
+    /**
+     * Namepsace of the attribute.
+     */
+    private String m_nameSpace;
 
-	/**
+    /**
      * Constructor.
-	 * @param name : name of the attribute.
-	 * @param value : value of the attribute.
-	 */
-	public Attribute(String name, String value) {
-		m_name = name.toLowerCase();
-		m_value = value;
-		m_nameSpace = "";
-	}
+     * 
+     * @param name :
+     *            name of the attribute.
+     * @param value :
+     *            value of the attribute.
+     */
+    public Attribute(String name, String value) {
+        m_name = name.toLowerCase();
+        m_value = value;
+        m_nameSpace = "";
+    }
 
-	/**
+    /**
      * Constructor.
-	 * @param name : name of the attribute.
-	 * @param value : value of the attribute.
-	 * @param ns : namespace of the attribute.
-	 */
-	public Attribute(String name, String ns, String value) {
-		m_name = name.toLowerCase();
-		m_value = value;
-		m_nameSpace = ns;
-	}
+     * 
+     * @param name :
+     *            name of the attribute.
+     * @param value :
+     *            value of the attribute.
+     * @param ns :
+     *            namespace of the attribute.
+     */
+    public Attribute(String name, String ns, String value) {
+        m_name = name.toLowerCase();
+        m_value = value;
+        m_nameSpace = ns;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() { return m_name; }
+    /**
+     * Get the attribute name.
+     * @return the name
+     */
+    public String getName() {
+        return m_name;
+    }
 
-	/**
-	 * @return the value
-	 */
-	public String getValue() { return m_value; }
+    /**
+     * Get attribute value.
+     * @return the value
+     */
+    public String getValue() {
+        return m_value;
+    }
 
-	/**
-	 * @return the namespace
-	 */
-	public String getNameSpace() { return m_nameSpace; }
+    /**
+     * Get attribute namespace.
+     * @return the namespace
+     */
+    public String getNameSpace() {
+        return m_nameSpace;
+    }
 
 }

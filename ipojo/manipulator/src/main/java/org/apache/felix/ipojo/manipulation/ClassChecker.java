@@ -33,7 +33,7 @@ import org.objectweb.asm.Type;
 /**
  * Check thaht a POJO is already manipulated or not.
  * Moreover it allows to get manipulation data about this class. 
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ClassChecker implements ClassVisitor, Opcodes {
 

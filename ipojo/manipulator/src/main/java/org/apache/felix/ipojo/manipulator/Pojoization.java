@@ -50,7 +50,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * Pojoization allows creating an iPOJO bundle from a "normal" bundle.  
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Pojoization {
 

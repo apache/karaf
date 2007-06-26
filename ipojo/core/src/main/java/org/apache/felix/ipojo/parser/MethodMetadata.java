@@ -72,9 +72,10 @@ public class MethodMetadata {
         for (int i = 0; i < m_arguments.length; i++) {
             String cn = m_arguments[i];
             if (cn.endsWith("[]")) {
-                cn = cn.replace("[]", "$");
+                cn = cn.replace('[', '$');
+                cn = cn.substring(0, cn.length() - 1);
             }
-            cn = cn.replace(".", "_");
+            cn = cn.replace('.', '_');
             id += cn;
         }
         return id;

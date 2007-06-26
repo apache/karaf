@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <iPOJO>
 	<Component className="org.apache.felix.ipojo.arch.ArchCommandImpl">
-		  <Provides interface="org.ungoverned.osgi.service.shell.Command"/>
-		  <Requires field="archiService" optional="true"/>
+		  <Provides/>
+		  <Requires field="m_archs" optional="true"/>
 	</Component>
 	<instance component="org.apache.felix.ipojo.arch.ArchCommandImpl" name="ArchCommand"/>
 </iPOJO>

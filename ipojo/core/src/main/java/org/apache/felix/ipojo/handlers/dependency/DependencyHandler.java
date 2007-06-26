@@ -195,7 +195,7 @@ public class DependencyHandler extends Handler {
         
         if (field != null) {
             FieldMetadata fm = manipulation.getField(field);
-            if (field == null) {
+            if (fm == null) {
                 getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "A dependency field " + field + " does not exist in the implementation class");
                 return false;
             }

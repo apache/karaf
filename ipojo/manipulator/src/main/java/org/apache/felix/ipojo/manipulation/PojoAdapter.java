@@ -33,7 +33,7 @@ import org.objectweb.asm.Type;
 
 /**
  * Manipulate a POJO class.
- * @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class PojoAdapter extends ClassAdapter implements Opcodes {
 
@@ -194,9 +194,10 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
             for (int i = 0; i < args.length; i++) {
                 String cn = args[i].getClassName();
                 if (cn.endsWith("[]")) {
-                    cn = cn.replace("[]", "$");
+                    cn = cn.replace('[', '$');
+                    cn = cn.substring(0, cn.length() - 1);
                 }
-                cn = cn.replace(".", "_");
+                cn = cn.replace('.', '_');
                 id += cn;
             }
 

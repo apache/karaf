@@ -18,7 +18,6 @@
  */
 package org.apache.felix.ipojo.arch;
 
-
 import java.io.PrintStream;
 
 import org.apache.felix.ipojo.ComponentInstance;
@@ -26,19 +25,21 @@ import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.ungoverned.osgi.service.shell.Command;
 
-
 /**
  * Implementation of the arch command printing the actual architecture.
+ * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ArchCommandImpl implements Command {
 
-	/**
-	 * List of archi service
-	 */
-	private Architecture archiService[];
+    /**
+     * List of arch service.
+     */
+    private Architecture[] m_archs;
 
     /**
+     * Get the command name.
+     * @return the command name (arch)
      * @see org.ungoverned.osgi.service.shell.Command#getName()
      */
     public String getName() {
@@ -46,6 +47,8 @@ public class ArchCommandImpl implements Command {
     }
 
     /**
+     * Get help message.
+     * @return the command usage.
      * @see org.ungoverned.osgi.service.shell.Command#getUsage()
      */
     public String getUsage() {
@@ -53,6 +56,8 @@ public class ArchCommandImpl implements Command {
     }
 
     /**
+     * Get a small description.
+     * @return get a description.
      * @see org.ungoverned.osgi.service.shell.Command#getShortDescription()
      */
     public String getShortDescription() {
@@ -60,32 +65,39 @@ public class ArchCommandImpl implements Command {
     }
 
     /**
+     * Execute the arch command.
+     * @param line : command line
+     * @param out : the default output stream
+     * @param err : the error output stream
      * @see org.ungoverned.osgi.service.shell.Command#execute(java.lang.String, java.io.PrintStream, java.io.PrintStream)
      */
     public void execute(String line, PrintStream out, PrintStream err) {
-        synchronized(this) { 
-        	if(line.substring("arch".length()).trim().length() == 0) {
-        		for(int i=0; i < archiService.length; i++) {
-        			InstanceDescription instance = archiService[i].getInstanceDescription();
-        			if(instance.getState() == ComponentInstance.VALID) {
-        				out.println("Instance " + instance.getName() + " -> valid");
-        			}
-        			if(instance.getState() == ComponentInstance.INVALID) {
-        				out.println("Instance " + instance.getName() + " -> invalid");
-        			}
-        			if(instance.getState() == ComponentInstance.STOPPED) {
-        				out.println("Instance " + instance.getName() + " -> stopped");
-        			}
-        		}
-        	} else {
-        		String line2 = line.substring("arch".length()).trim();
-        		for(int i=0; i < archiService.length; i++) {
-        			InstanceDescription instance = archiService[i].getInstanceDescription();
-        			if(instance.getName().equalsIgnoreCase(line2)) { out.println(instance.getDescription()); return;}
-        		}
-        		err.println("Instance " + line2 + " not found");
-        	}
+        synchronized (this) {
+            if (line.substring("arch".length()).trim().length() == 0) {
+                for (int i = 0; i < m_archs.length; i++) {
+                    InstanceDescription instance = m_archs[i].getInstanceDescription();
+                    if (instance.getState() == ComponentInstance.VALID) {
+                        out.println("Instance " + instance.getName() + " -> valid");
+                    }
+                    if (instance.getState() == ComponentInstance.INVALID) {
+                        out.println("Instance " + instance.getName() + " -> invalid");
+                    }
+                    if (instance.getState() == ComponentInstance.STOPPED) {
+                        out.println("Instance " + instance.getName() + " -> stopped");
+                    }
+                }
+            } else {
+                String line2 = line.substring("arch".length()).trim();
+                for (int i = 0; i < m_archs.length; i++) {
+                    InstanceDescription instance = m_archs[i].getInstanceDescription();
+                    if (instance.getName().equalsIgnoreCase(line2)) {
+                        out.println(instance.getDescription());
+                        return;
+                    }
+                }
+                err.println("Instance " + line2 + " not found");
+            }
         }
-        
+
     }
 }
