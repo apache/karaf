@@ -73,6 +73,10 @@
           <groupId>${pom.groupId}</groupId>
           <artifactId>org.osgi.core</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>net.sf.kxml</groupId>
+          <artifactId>kxml2</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
   </dependencies>
