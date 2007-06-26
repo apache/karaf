@@ -51,22 +51,21 @@ public class ManipulatorMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info("Start bundle manipulation");
-        
         // Get metadata file
-        File meta = new File(outputDirectory + "\\" + metadata);
+        File meta = new File(outputDirectory + "/" + metadata);
         getLog().info("Metadata File : " + meta.getAbsolutePath());
         if(!meta.exists()) {
             throw new MojoExecutionException("the specified metadata file does not exists");
         }
 
         // Get input bundle
-        File in = new File(buildDirectory + "\\" + jarName + ".jar" );
+        File in = new File(buildDirectory + "/" + jarName + ".jar" );
         getLog().info("Input Bundle File : " + in.getAbsolutePath());
         if(!in.exists()) {
             throw new MojoExecutionException("the specified bundle file does not exists");
         }
         
-        File out = new File(buildDirectory + "\\_out.jar");
+        File out = new File(buildDirectory + "/_out.jar");
         
         Pojoization pojo = new Pojoization();
         pojo.pojoization(in, out, meta);
