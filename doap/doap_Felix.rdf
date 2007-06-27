@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl"?>
+<rdf:RDF xml:lang="en"
+         xmlns="http://usefulinc.com/ns/doap#" 
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+         xmlns:asfext="http://projects.apache.org/ns/asfext#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/">
+<!--
+  =======================================================================
+
+   Copyright (c) 2006 The Apache Software Foundation.  
+   All rights reserved.
+
+  =======================================================================
+-->
+  <Project rdf:about="http://felix.apache.org">
+    <created>2007-06-27</created>
+    <license rdf:resource="http://usefulinc.com/doap/licenses/asl20" />
+    <name>Apache Felix</name>
+    <homepage rdf:resource="http://felix.apache.org" />
+    <asfext:pmc rdf:resource="http://geronimo.apache.org" />
+    <shortdesc>OSGi Framework implementation and related technologies.</shortdesc>
+    <bug-database rdf:resource="https://issues.apache.org/jira/browse/FELIX" />
+    <download-page rdf:resource="http://www.apache.org/dist/felix/" />
+    <programming-language>Java</programming-language>
+    <category rdf:resource="http://projects.apache.org/category/network-server" />
+    <repository>
+      <SVNRepository>
+        <location rdf:resource="https://svn.apache.org/repos/asf/felix"/>
+        <browse rdf:resource="http://"/>
+      </SVNRepository>
+    </repository>
+    <maintainer>
+      <foaf:Person>
+        <foaf:name>Felix PMC</foaf:name>
+          <foaf:mbox rdf:resource="mailto:dev@felix.apache.org"/>
+      </foaf:Person>
+    </maintainer>
+    <asfext:implements><asfext:Standard>
+      <asfext:title>OSGi R4 Specification</asfext:title>
+      <asfext:body>OSGi Alliance</asfext:body>
+      <asfext:id></asfext:id>
+      <asfext:url rdf:resource="http://www.osgi.org"/>
+    </asfext:Standard></asfext:implements>
+  </Project>
+</rdf:RDF>
