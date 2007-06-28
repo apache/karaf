@@ -12,21 +12,21 @@
   <version>0.0.1</version>
   <packaging>pom</packaging>
   <modules>
-    <module>mosgi.console.ifc</module>
-    <module>mosgi.console.component</module>
-    <module>mosgi.console.gui</module>
-    <module>mosgi.jmx.agent</module>
-    <module>mosgi.jmx.httpconnector</module>
-    <module>mosgi.jmx.registry</module>
-    <module>mosgi.jmx.remotelogger</module>
-    <module>mosgi.jmx.rmiconnector</module>
-    <module>mosgi.managedelements.osgiprobes</module>
-    <module>mosgi.managedelements.osgiprobes.tab</module>
-    <module>mosgi.managedelements.bundlesprobes</module>
-    <module>mosgi.managedelements.bundlesprobes.tab</module>
-    <module>mosgi.managedelements.obrprobe</module>
-    <module>mosgi.managedelements.obrprobe.tab</module>
-    <module>mosgi.managedelements.memoryprobe</module>
+    <module>console.ifc</module>
+    <module>console.component</module>
+    <module>console.gui</module>
+    <module>jmx.agent</module>
+    <module>jmx.httpconnector</module>
+    <module>jmx.registry</module>
+    <module>jmx.remotelogger</module>
+    <module>jmx.rmiconnector</module>
+    <module>managedelements.osgiprobes</module>
+    <module>managedelements.osgiprobes.tab</module>
+    <module>managedelements.bundlesprobes</module>
+    <module>managedelements.bundlesprobes.tab</module>
+    <module>managedelements.obrprobe</module>
+    <module>managedelements.obrprobe.tab</module>
+    <module>managedelements.memoryprobe</module>
   </modules>
 </project>
 
