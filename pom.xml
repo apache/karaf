@@ -148,6 +148,8 @@
         
         <module>ipojo/core</module>
         <module>ipojo/arch</module>
+	
+	<module>mosgi</module>
       </modules>
     </profile>
     
@@ -174,20 +176,6 @@
         <!--    <module>tools/mangen</module> -->
 
 
-      </modules>
-    </profile>
-
-    <profile>
-      <id>osgi-bundle-mosgi</id>
-      <activation>
-        <property>
-          <name>packaging</name>
-          <value>osgi-bundle-mosgi</value>
-        </property>
-        <!--Two activation elements don't AND. <jdk>1.5</jdk>-->
-      </activation>
-      <modules>
-        <module>mosgi</module>
       </modules>
     </profile>
   </profiles>
