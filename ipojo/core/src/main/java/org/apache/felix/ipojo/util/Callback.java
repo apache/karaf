@@ -209,8 +209,31 @@ public class Callback {
 
             }
         }
+        
+        if (m_methodObj == null) { //look at parent classes
+            methods = m_manager.getClazz().getMethods();
+            for (int i = 0; m_methodObj == null && i < methods.length; i++) {
+                // First check the method name
+                if (methods[i].getName().equals(m_method)) {
+                    // Check arguments
+                    Class[] clazzes = methods[i].getParameterTypes();
+                    if (clazzes.length == m_args.length) { // Test size to avoid useless loop
+                        boolean ok = true;
+                        for (int j = 0; ok && j < m_args.length; j++) {
+                            if (!m_args[j].equals(clazzes[j].getName())) {
+                                ok = false;
+                            }
+                        }
+                        if (ok) {
+                            m_methodObj = methods[i]; // It is the looked method.
+                        } 
+                    }
+                }
+            }
+        }
+        
         if (m_methodObj == null) {
-            m_manager.getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " is not found in the code");
+            m_manager.getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " cannot be called : method not found");
             return;
         } else {
             m_methodObj.setAccessible(true);

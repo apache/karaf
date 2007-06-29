@@ -41,7 +41,7 @@ public class LifecycleCallback {
     protected static final int INVALIDATE = 0;
     
     /**
-     * Transition on hwich calling the callback.
+     * Transition on wich calling the callback.
      */
     private int m_transition;
 
@@ -60,6 +60,18 @@ public class LifecycleCallback {
     public LifecycleCallback(LifecycleCallbackHandler hh, int transition, MethodMetadata mm) {
         m_transition = transition;
         m_callback = new Callback(mm, hh.getInstanceManager());
+    }
+    
+    /**
+     * LifecycleCallback constructor.
+     * 
+     * @param hh : the callback handler calling the callback
+     * @param transition : transition on which calling the callback
+     * @param mm : method name to invoke
+     */
+    public LifecycleCallback(LifecycleCallbackHandler hh, int transition, String mm) {
+        m_transition = transition;
+        m_callback = new Callback(mm, new String[0], false, hh.getInstanceManager());
     }
 
     /**

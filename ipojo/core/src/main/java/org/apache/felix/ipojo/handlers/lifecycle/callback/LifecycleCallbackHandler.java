@@ -101,10 +101,6 @@ public class LifecycleCallbackHandler extends Handler {
             String methodName = hooksMetadata[i].getAttribute("method");
             
             MethodMetadata met = mm.getMethod(methodName, new String[0]);
-            if (met == null) {
-                cm.getFactory().getLogger().log(Logger.ERROR, "The method " + methodName + " is not implemented in the " + cm.getInstanceName());
-                return;
-            }
             
             int transition = -1;
             if (hooksMetadata[i].containsAttribute("transition")) {
@@ -134,7 +130,12 @@ public class LifecycleCallbackHandler extends Handler {
                 return;
             }
             
-            LifecycleCallback hk = new LifecycleCallback(this, transition, met);
+            LifecycleCallback hk = null;
+            if (met != null) { 
+                hk = new LifecycleCallback(this, transition, met);
+            } else {
+                hk = new LifecycleCallback(this, transition, methodName);
+            }
             addCallback(hk);
         }
         if (m_callbacks.length > 0 || m_immediate) {
