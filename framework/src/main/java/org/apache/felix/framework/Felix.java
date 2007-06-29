@@ -336,7 +336,7 @@ public class Felix
         m_policyCore.setModuleFactory(m_factory);
 
         // Initialize event dispatcher.
-        m_dispatcher = new EventDispatcher(m_logger);
+        m_dispatcher = EventDispatcher.start(m_logger);
 
         // Initialize framework properties.
         initializeFrameworkProperties();

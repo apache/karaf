@@ -49,6 +49,7 @@ public class EventDispatcher
     // A single thread is used to deliver events for all dispatchers.
     private static Thread m_thread = null;
     private static String m_threadLock = "thread lock";
+    private static int m_references = 0;
     private static boolean m_stopping = false;
     private static boolean m_stopped = false;
     // List of requests.
@@ -56,9 +57,14 @@ public class EventDispatcher
     // Pooled requests to avoid memory allocation.
     private static final ArrayList m_requestPool = new ArrayList();
 
-    public EventDispatcher(Logger logger)
+    private EventDispatcher(Logger logger)
     {
         m_logger = logger;
+    }
+
+    public static EventDispatcher start(Logger logger)
+    {
+        EventDispatcher eventDispatcher = new EventDispatcher(logger);
 
         synchronized (m_threadLock)
         {
@@ -73,9 +79,16 @@ public class EventDispatcher
                 }, "FelixDispatchQueue");
                 m_thread.start();
             }
-        }
-    }
 
+            // reference counting and flags
+            m_references++;
+            m_stopping = false;
+            m_stopped = false;
+        }
+
+        return eventDispatcher;
+    }
+    
     public static void shutdown()
     {
         synchronized (m_threadLock)
@@ -86,6 +99,13 @@ public class EventDispatcher
                 return;
             }
 
+            // decrement use counter, don't continue if there are users
+            m_references--;
+            if (m_references > 0)
+            {
+                return;
+            }
+            
             // Signal dispatch thread.
             m_stopping = true;
             synchronized (m_requestList)
@@ -104,6 +124,9 @@ public class EventDispatcher
                 {
                 }
             }
+            
+            // remove the thread reference
+            m_thread = null;
         }
     }
 
