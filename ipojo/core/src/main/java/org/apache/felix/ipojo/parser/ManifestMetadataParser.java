@@ -182,6 +182,18 @@ public class ManifestMetadataParser {
         addElement(new Element("iPOJO", ""));
         parseElements(componentClassesStr.trim());
     }
+    
+    /**
+     * Parse the given header and create the instance managers.
+     * 
+     * @param header : the given header of the manifest file
+     * @throws ParseException : if any error occurs
+     */
+    public void parseHeader(String header) throws ParseException {
+        // Add the ipojo element inside the element list
+        addElement(new Element("iPOJO", ""));
+        parseElements(header.trim());
+    }
 
     /**
      * Parse the metadata from the string given in argument.

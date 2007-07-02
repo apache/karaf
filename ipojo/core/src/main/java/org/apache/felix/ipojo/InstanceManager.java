@@ -555,21 +555,16 @@ public class InstanceManager implements ComponentInstance {
 
         } catch (InstantiationException e) {
             m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> The Component Instance cannot be instancied : " + e.getMessage());
-            e.printStackTrace();
         } catch (IllegalAccessException e) {
             m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> The Component Instance is not accessible : " + e.getMessage());
-            e.printStackTrace();
         } catch (SecurityException e) {
             m_factory.getLogger().log(Logger.ERROR,
                     "[" + m_name + "] createInstance -> The Component Instance is not accessible (security reason) : " + e.getMessage());
-            e.printStackTrace();
         } catch (InvocationTargetException e) {
             m_factory.getLogger().log(Logger.ERROR,
                     "[" + m_name + "] createInstance -> Cannot invoke the constructor method (illegal target) : " + e.getMessage());
-            e.printStackTrace();
         } catch (NoSuchMethodException e) {
             m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the constructor (method not found) : " + e.getMessage());
-            e.printStackTrace();
         }
 
         // Register the new instance

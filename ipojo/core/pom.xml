@@ -42,6 +42,7 @@
             <Bundle-Name>iPOJO</Bundle-Name>
             <Bundle-Vendor>Clement ESCOFFIER</Bundle-Vendor>
             <Bundle-Description> iPOJO </Bundle-Description>
+            <Bundle-Activator>org.apache.felix.ipojo.Extender</Bundle-Activator>
             <Import-Package>
               org.osgi.framework, 
               org.osgi.service.cm,

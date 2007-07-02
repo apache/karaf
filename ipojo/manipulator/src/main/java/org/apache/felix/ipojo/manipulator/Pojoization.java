@@ -260,7 +260,6 @@ public class Pojoization {
             e.printStackTrace();
         }
         Attributes att = mf.getMainAttributes();
-        setBundleActivator(att); // Set the bundle activator
         setImports(att); // Set the imports (add ipojo and handler namespaces
         setPOJOMetadata(att); // Add iPOJO-Component
         setCreatedBy(att); // Add iPOJO to the creators
@@ -347,17 +346,6 @@ public class Pojoization {
             this.m_componentMetadata = met;
             m_isManipulated = false;
         }
-    }
-
-    /**
-     * Set the bundle activator in the manifest.
-     * @param att : manifest attribute.
-     */
-    private void setBundleActivator(Attributes att) {
-        if (att.containsKey("Bundle-Activator")) {
-            warn("The bundle contains another Bundle-Activator : " + att.getValue("Bundle-Activator") + " - Replace the existing one");
-        }
-        att.putValue("Bundle-Activator", "org.apache.felix.ipojo.Activator");
     }
 
     /**

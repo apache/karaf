@@ -339,8 +339,6 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
             }
             m_instancesName.remove(ci.getInstanceName());
         }
-
-        m_logger.stop();
         
         m_componentInstances.clear();
         if (m_sr != null) {
