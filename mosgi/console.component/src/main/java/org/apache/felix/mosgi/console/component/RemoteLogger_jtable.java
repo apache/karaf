@@ -169,7 +169,7 @@ public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlug
       JFileChooser jfc=new JFileChooser();
       if (jfc.showSaveDialog(null)==JFileChooser.APPROVE_OPTION & jfc.getSelectedFile()!=null){	
       try{
-        ps=new PrintStream(jfc.getSelectedFile());
+        ps=new PrintStream(new java.io.FileOutputStream(jfc.getSelectedFile()));
         System.out.println("Save remote log into \""+jfc.getSelectedFile().getName()+"\""); }
       catch (FileNotFoundException fnfe){
         System.out.println("err : "+fnfe); }

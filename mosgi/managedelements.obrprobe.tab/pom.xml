@@ -33,6 +33,13 @@
       <artifactId>org.apache.felix.bundlerepository</artifactId>
       <scope>provided</scope>
     </dependency>
+     <dependency>
+       <groupId>mx4j</groupId>
+       <artifactId>mx4j-jmx</artifactId>
+       <version>3.0.1</version>
+       <scope>provided</scope>
+    </dependency>
+   
   </dependencies>
 
   <build>

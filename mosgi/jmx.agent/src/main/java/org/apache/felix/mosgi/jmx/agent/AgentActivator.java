@@ -20,7 +20,7 @@ package org.apache.felix.mosgi.jmx.agent;
 
 import java.util.StringTokenizer;
 
-import java.lang.management.ManagementFactory;
+//import java.lang.management.ManagementFactory;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.Constants;
@@ -113,7 +113,8 @@ public class AgentActivator implements BundleActivator, ServiceListener {
   private void startAgent(String virtual, int minor){
     if (virtual==null && minor >=5){
       Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
-      this.server= ManagementFactory.getPlatformMBeanServer();
+      //this.server= ManagementFactory.getPlatformMBeanServer();
+      this.server = MBeanServerFactory.createMBeanServer();
       AgentActivator.log(LogService.LOG_DEBUG, "A jdk1.5 agent started "+this.server,null);
     }else {
       Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());

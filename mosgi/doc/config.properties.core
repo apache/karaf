@@ -105,6 +105,15 @@ jre-1.3= \
  version="1.3.0"
 
 jre-1.4= \
+ javax.management; \
+ javax.management.loading; \
+ javax.management.modelmbean; \
+ javax.management.monitor; \
+ javax.management.openmbean; \
+ javax.management.relation; \
+ javax.management.remote; \
+ javax.management.remote.rmi; \
+ javax.management.timer; \
  javax.accessibility; \
  javax.imageio; \
  javax.imageio.event; \
