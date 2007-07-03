@@ -454,15 +454,15 @@ public class EventDispatcher
                     (listeners[i + LISTENER_CLASS_OFFSET] == clazz) &&
                     (listeners[i + LISTENER_OBJECT_OFFSET] == l))
                 {
-                    if (l instanceof FrameworkListener)
+                    if (clazz == FrameworkListener.class)
                     {
                         // The spec says to ignore this case.
                     }
-                    else if (l instanceof BundleListener)
+                    else if (clazz == BundleListener.class)
                     {
                         // The spec says to ignore this case.
                     }
-                    else if (l instanceof ServiceListener)
+                    else if (clazz == ServiceListener.class)
                     {
                         // The spec says to update the filter in this case.
                         listeners[i + LISTENER_FILTER_OFFSET] = filter;
