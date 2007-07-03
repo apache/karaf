@@ -28,7 +28,6 @@ import java.io.OutputStream;
 import java.util.BitSet;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.NoSuchElementException;
 import java.util.Stack;
 
@@ -42,11 +41,17 @@ import org.osgi.framework.Constants;
  * properties-like files inside a given directory. All configuration files are
  * located in the same directory.
  * <p>
- * The configuration directory may be set by using the
- * {@link #FilePersistenceManager(String)} naming the path to the directry. When
- * this persistence manager is used by the Configuration Admin Service, the
- * location may be configured using the {@link #CM_CONFIG_DIR} bundle context
- * property.
+ * The configuration directory is set by either the
+ * {@link #FilePersistenceManager(String)} constructor or the
+ * {@link #FilePersistenceManager(BundleContext, String)} constructor. Refer
+ * to the respective JavaDocs for more information.
+ * <p>
+ * When this persistence manager is used by the Configuration Admin Service,
+ * the location may be configured using the
+ * {@link org.apache.felix.cm.impl.ConfigurationManager#CM_CONFIG_DIR} bundle
+ * context property. That is the Configuration Admin Service creates an instance
+ * of this class calling
+ * <code>new FilePersistenceManager(bundleContext, bundleContext.getProperty(CM_CONFIG_DIR))</code>.
  * <p>
  * If the location is not set, the <code>config</code> directory in the current
  * working directory (as set in the <code>user.dir</code> system property) is
@@ -65,13 +70,19 @@ import org.osgi.framework.Constants;
  * <tr><th>PID</th><th>Configuration File Name</th></tr>
  * <tr><td><code>sample</code><td><code>sample.config</code></tr>
  * <tr><td><code>org.apache.felix.log.LogService</code><td><code>org/apache/felix/log/LogService.config</code></tr>
- * <tr><td><code>sample.fl�che</code><td><code>sample/fl%00e8che.config</code></tr>
+ * <tr><td><code>sample.fl&auml;che</code><td><code>sample/fl%00e8che.config</code></tr>
  * </table>
  *
  * @author fmeschbe
  */
 public class FilePersistenceManager implements PersistenceManager
 {
+
+    /**
+     * The default configuration data directory if no location is configured
+     * (value is "config").
+     */
+    public static final String DEFAULT_CONFIG_DIR = "config";
 
     /**
      * The extension of the configuration files.
@@ -111,25 +122,181 @@ public class FilePersistenceManager implements PersistenceManager
 
 
     /**
+     * Encodes a Service PID to a filesystem path as described in the class
+     * JavaDoc above.
+     * <p>
+     * This method is not part of the API of this class and is declared package
+     * private to enable JUnit testing on it. This method may be removed or
+     * modified at any time without notice.
+     * 
+     * @param pid The Service PID to encode into a relative path name.
+     * 
+     * @return The relative path name corresponding to the Service PID.
+     */
+    static String encodePid( String pid )
+    {
+
+        // replace dots by File.separatorChar
+        pid = pid.replace( '.', File.separatorChar );
+
+        // replace slash by File.separatorChar if different
+        if ( File.separatorChar != '/' )
+        {
+            pid = pid.replace( '/', File.separatorChar );
+        }
+
+        // scan for first non-valid character (if any)
+        int first = 0;
+        while ( first < pid.length() && VALID_PATH_CHARS.get( pid.charAt( first ) ) )
+        {
+            first++;
+        }
+
+        // check whether we exhausted
+        if ( first < pid.length() )
+        {
+            StringBuffer buf = new StringBuffer( pid.substring( 0, first ) );
+
+            for ( int i = first; i < pid.length(); i++ )
+            {
+                char c = pid.charAt( i );
+                if ( VALID_PATH_CHARS.get( c ) )
+                {
+                    buf.append( c );
+                }
+                else
+                {
+                    String val = "000" + Integer.toHexString( c );
+                    buf.append( '%' );
+                    buf.append( val.substring( val.length() - 4 ) );
+                }
+            }
+
+            pid = buf.toString();
+        }
+
+        return pid;
+    }
+
+
+    /**
      * Creates an instance of this persistence manager using the given location
      * as the directory to store and retrieve the configuration files.
+     * <p>
+     * This constructor resolves the configuration file location as follows:
+     * <ul>
+     * <li>If <code>location</code> is <code>null</code>, the <code>config</code>
+     * directory in the current working directory as specified in the
+     * <code>user.dir</code> system property is assumed.</li>
+     * <li>Otherwise the named directory is used.</li>
+     * <li>If the directory name resolved in the first or second step is not an
+     * absolute path, it is resolved to an absolute path calling the
+     * <code>File.getAbsoluteFile()</code> method.</li>
+     * <li>If a non-directory file exists as the location found in the previous
+     * step or the named directory (including any parent directories) cannot be
+     * created, an <code>IllegalArgumentException</code> is thrown.</li>
+     * </ul>
+     * <p>
+     * This constructor is equivalent to calling
+     * {@link #FilePersistenceManager(BundleContext, String)} with a
+     * <code>null</code> <code>BundleContext</code>.
      * 
+     * @param location The configuration file location. If this is
+     *      <code>null</code> the <code>config</code> directory below the current
+     *      working directory is used.
+     * 
+     * @throws IllegalArgumentException If the <code>location</code> exists but
+     *      is not a directory or does not exist and cannot be created.
+     */
+    public FilePersistenceManager( String location )
+    {
+        this( null, location );
+    }
+
+
+    /**
+     * Creates an instance of this persistence manager using the given location
+     * as the directory to store and retrieve the configuration files.
+     * <p>
+     * This constructor resolves the configuration file location as follows:
+     * <ul>
+     * <li>If <code>location</code> is <code>null</code>, the <code>config</code>
+     * directory in the persistent storage area of the bundle identified by
+     * <code>bundleContext</code> is used.</li>
+     * <li>If the framework does not support persistent storage area for bundles
+     * in the filesystem or if <code>bundleContext</code> is <code>null</code>,
+     * the <code>config</code> directory in the current working directory as
+     * specified in the <code>user.dir</code> system property is assumed.</li>
+     * <li>Otherwise the named directory is used.</li>
+     * <li>If the directory name resolved in the first, second or third step is
+     * not an absolute path and a <code>bundleContext</code> is provided which
+     * provides access to persistent storage area, the directory name is
+     * resolved as being inside the persistent storage area. Otherwise the
+     * directory name is resolved to an absolute path calling the
+     * <code>File.getAbsoluteFile()</code> method.</li>
+     * <li>If a non-directory file exists as the location found in the previous
+     * step or the named directory (including any parent directories) cannot be
+     * created, an <code>IllegalArgumentException</code> is thrown.</li>
+     * </ul>
+     * 
+     * @param bundleContext The <code>BundleContext</code> to optionally get
+     *      the data location for the configuration files. This may be
+     *      <code>null</code>, in which case this constructor acts exactly the
+     *      same as calling {@link #FilePersistenceManager(String)}.
      * @param location The configuration file location. If this is
      *      <code>null</code> the <code>config</code> directory below the current
      *      working directory is used.
      * 
      * @throws IllegalArgumentException If the location exists but is not a
      *      directory or does not exist and cannot be created.
+     * @throws IllegalStateException If the <code>bundleContext</code> is not
+     *      valid.
      */
-    public FilePersistenceManager( String location )
+    public FilePersistenceManager( BundleContext bundleContext, String location )
     {
+        File locationFile = null;
+
+        // no configured location, use the config dir in the bundle persistent
+        // area
+        if ( location == null && bundleContext != null )
+        {
+            locationFile = bundleContext.getDataFile( DEFAULT_CONFIG_DIR );
+            if ( locationFile != null )
+            {
+                location = locationFile.getAbsolutePath();
+            }
+        }
+
+        // fall back to the current working directory if the platform does
+        // not support filesystem based data area
         if ( location == null )
         {
             location = System.getProperty( "user.dir" ) + "/config";
         }
 
+        // ensure the File object for the location (may have been set already)
+        if ( locationFile == null )
+        {
+            locationFile = new File( location );
+        }
+
+        // ensure the file is absolute
+        if ( !locationFile.isAbsolute() )
+        {
+            if ( bundleContext != null )
+            {
+                File bundleLocationFile = bundleContext.getDataFile( locationFile.getPath() );
+                if ( bundleLocationFile != null )
+                {
+                    locationFile = bundleLocationFile;
+                }
+            }
+            
+            // ensure the file object is an absolute file object
+            locationFile = locationFile.getAbsoluteFile();
+        }
+        
         // check the location
-        File locationFile = new File( location );
         if ( !locationFile.isDirectory() )
         {
             if ( locationFile.exists() )
@@ -144,6 +311,18 @@ public class FilePersistenceManager implements PersistenceManager
         }
 
         this.location = locationFile;
+    }
+
+
+    /**
+     * Returns the directory in which the configuration files are written as
+     * a <code>File</code> object.
+     * 
+     * @return The configuration file location.
+     */
+    public File getLocation()
+    {
+        return location;
     }
 
 
@@ -298,46 +477,7 @@ public class FilePersistenceManager implements PersistenceManager
      */
     private File getFile( String pid )
     {
-        // replace dots by File.separatorChar
-        pid = pid.replace( '.', File.separatorChar );
-
-        // replace slash by File.separatorChar if different
-        if ( File.separatorChar != '/' )
-        {
-            pid = pid.replace( '/', File.separatorChar );
-        }
-
-        // scan for first non-valid character (if any)
-        int first = 0;
-        while ( first < pid.length() && VALID_PATH_CHARS.get( pid.charAt( first ) ) )
-        {
-            first++;
-        }
-
-        // check whether we exhausted
-        if ( first < pid.length() )
-        {
-            StringBuffer buf = new StringBuffer( pid.substring( 0, first ) );
-
-            for ( int i = first; i < pid.length(); i++ )
-            {
-                char c = pid.charAt( i );
-                if ( VALID_PATH_CHARS.get( c ) )
-                {
-                    buf.append( c );
-                }
-                else
-                {
-                    String val = "000" + Integer.toHexString( c );
-                    buf.append( '%' );
-                    buf.append( val.substring( val.length() - 4 ) );
-                }
-            }
-
-            pid = buf.toString();
-        }
-
-        return new File( location, pid + FILE_EXT );
+        return new File( location, encodePid( pid ) + FILE_EXT );
     }
 
     /**

@@ -64,6 +64,19 @@ public class FilePersistenceManagerTest extends TestCase
     }
 
 
+    public void testPidPlain()
+    {
+        assertEquals( "plain", FilePersistenceManager.encodePid( "plain" ) );
+        assertEquals( "plain" + File.separatorChar + "path", FilePersistenceManager.encodePid( "plain.path" ) );
+        assertEquals( "encod%00e8", FilePersistenceManager.encodePid( "encod\u00E8" ) );
+        assertEquals( "encod%00e8" + File.separatorChar + "path", FilePersistenceManager.encodePid( "encod\u00E8/path" ) );
+        assertEquals( "encode" + File.separatorChar + "%1234" + File.separatorChar + "path", FilePersistenceManager
+            .encodePid( "encode/\u1234/path" ) );
+        assertEquals( "encode" + File.separatorChar + " %0025 " + File.separatorChar + "path", FilePersistenceManager
+            .encodePid( "encode/ % /path" ) );
+    }
+
+
     public void testCreateDir()
     {
         assertTrue( file.isDirectory() );

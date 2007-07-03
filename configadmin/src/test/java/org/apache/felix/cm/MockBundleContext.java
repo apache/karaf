@@ -34,7 +34,12 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * The <code>MockBundleContext</code> TODO
+ * The <code>MockBundleContext</code> is a dummy implementation of the
+ * <code>BundleContext</code> interface. No methods are implemented here, that
+ * is all methods have no effect and return <code>null</code> if a return
+ * value is specified.
+ * <p>
+ * Extensions may overwrite methods as see fit.
  *
  * @author fmeschbe
  */
@@ -46,8 +51,6 @@ public class MockBundleContext implements BundleContext
      */
     public void addBundleListener( BundleListener arg0 )
     {
-        // TODO Auto-generated method stub
-
     }
 
 
@@ -56,8 +59,6 @@ public class MockBundleContext implements BundleContext
      */
     public void addFrameworkListener( FrameworkListener arg0 )
     {
-        // TODO Auto-generated method stub
-
     }
 
 
@@ -66,8 +67,6 @@ public class MockBundleContext implements BundleContext
      */
     public void addServiceListener( ServiceListener arg0 )
     {
-        // TODO Auto-generated method stub
-
     }
 
 
@@ -76,8 +75,6 @@ public class MockBundleContext implements BundleContext
      */
     public void addServiceListener( ServiceListener arg0, String arg1 ) throws InvalidSyntaxException
     {
-        // TODO Auto-generated method stub
-
     }
 
 
@@ -86,7 +83,6 @@ public class MockBundleContext implements BundleContext
      */
     public Filter createFilter( String arg0 ) throws InvalidSyntaxException
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -96,7 +92,6 @@ public class MockBundleContext implements BundleContext
      */
     public ServiceReference[] getAllServiceReferences( String arg0, String arg1 ) throws InvalidSyntaxException
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -106,7 +101,6 @@ public class MockBundleContext implements BundleContext
      */
     public Bundle getBundle()
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -116,7 +110,6 @@ public class MockBundleContext implements BundleContext
      */
     public Bundle getBundle( long arg0 )
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -126,7 +119,6 @@ public class MockBundleContext implements BundleContext
      */
     public Bundle[] getBundles()
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -136,7 +128,6 @@ public class MockBundleContext implements BundleContext
      */
     public File getDataFile( String arg0 )
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -146,7 +137,6 @@ public class MockBundleContext implements BundleContext
      */
     public String getProperty( String arg0 )
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -156,7 +146,6 @@ public class MockBundleContext implements BundleContext
      */
     public Object getService( ServiceReference arg0 )
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -166,7 +155,6 @@ public class MockBundleContext implements BundleContext
      */
     public ServiceReference getServiceReference( String arg0 )
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -176,7 +164,6 @@ public class MockBundleContext implements BundleContext
      */
     public ServiceReference[] getServiceReferences( String arg0, String arg1 ) throws InvalidSyntaxException
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -186,7 +173,6 @@ public class MockBundleContext implements BundleContext
      */
     public Bundle installBundle( String arg0 ) throws BundleException
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -196,7 +182,6 @@ public class MockBundleContext implements BundleContext
      */
     public Bundle installBundle( String arg0, InputStream arg1 ) throws BundleException
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -206,7 +191,6 @@ public class MockBundleContext implements BundleContext
      */
     public ServiceRegistration registerService( String[] arg0, Object arg1, Dictionary arg2 )
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -216,7 +200,6 @@ public class MockBundleContext implements BundleContext
      */
     public ServiceRegistration registerService( String arg0, Object arg1, Dictionary arg2 )
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -226,8 +209,6 @@ public class MockBundleContext implements BundleContext
      */
     public void removeBundleListener( BundleListener arg0 )
     {
-        // TODO Auto-generated method stub
-
     }
 
 
@@ -236,8 +217,6 @@ public class MockBundleContext implements BundleContext
      */
     public void removeFrameworkListener( FrameworkListener arg0 )
     {
-        // TODO Auto-generated method stub
-
     }
 
 
@@ -246,8 +225,6 @@ public class MockBundleContext implements BundleContext
      */
     public void removeServiceListener( ServiceListener arg0 )
     {
-        // TODO Auto-generated method stub
-
     }
 
 
@@ -256,8 +233,6 @@ public class MockBundleContext implements BundleContext
      */
     public boolean ungetService( ServiceReference arg0 )
     {
-        // TODO Auto-generated method stub
         return false;
     }
-
 }

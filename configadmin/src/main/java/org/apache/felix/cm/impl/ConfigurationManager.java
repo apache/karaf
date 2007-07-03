@@ -172,7 +172,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         // set up the location (might throw IllegalArgumentException)
         try
         {
-            FilePersistenceManager fpm = new FilePersistenceManager( bundleContext.getProperty( CM_CONFIG_DIR ) );
+            FilePersistenceManager fpm = new FilePersistenceManager( bundleContext,
+                bundleContext.getProperty( CM_CONFIG_DIR ) );
             Hashtable props = new Hashtable();
             props.put( Constants.SERVICE_PID, fpm.getClass().getName() );
             props.put( Constants.SERVICE_DESCRIPTION, "Platform Filesystem Persistence Manager" );
