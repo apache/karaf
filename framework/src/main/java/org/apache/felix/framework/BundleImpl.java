@@ -23,10 +23,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 
-import org.apache.felix.framework.util.MapToDictionary;
 import org.osgi.framework.*;
 
-class BundleImpl implements Bundle
+class BundleImpl extends FelixBundle
 {
     private Felix m_felix = null;
     private BundleInfo m_info = null;
@@ -37,23 +36,22 @@ class BundleImpl implements Bundle
         m_info = info;
     }
 
-    Felix getFelix() // package protected
-    {
-        return m_felix;
-    }
-
-    BundleInfo getInfo() // package protected
+    /* package private */ BundleInfo getInfo()
     {
         return m_info;
     }
 
-    void setInfo(BundleInfo info) // package protected
+    /*
+     * Only used when refreshing a bundle.
+    **/
+    /* package private */ void setInfo(BundleInfo info)
     {
         m_info = info;
     }
 
     public BundleContext getBundleContext()
     {
+// TODO: SECURITY - We need a security check here.
         return m_info.getBundleContext();
     }
 
@@ -228,9 +226,9 @@ class BundleImpl implements Bundle
 
                         break;
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
-
+                        // Silently ignore.
                     }
                 }
             }
@@ -284,9 +282,9 @@ class BundleImpl implements Bundle
 
                         break;
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
-
+                        // Silently ignore.
                     }
                 }
             }
@@ -397,15 +395,6 @@ class BundleImpl implements Bundle
     public String toString()
     {
         return m_felix.getBundleSymbolicName(this) + " [" + getBundleId() +"]";
-    }
-
-    public boolean equals(Object obj)
-    {
-        if (obj instanceof BundleImpl)
-        {
-            return (((BundleImpl) obj).getInfo().getBundleId() == getInfo().getBundleId());
-        }
-        return false;
     }
 
     Object getSignerMatcher()

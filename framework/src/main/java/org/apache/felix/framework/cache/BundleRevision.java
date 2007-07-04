@@ -51,15 +51,6 @@ public abstract class BundleRevision
 
     /**
      * <p>
-     * This constructor is only used by the system bundle archive.
-     * </p>
-    **/
-    BundleRevision()
-    {
-    }
-
-    /**
-     * <p>
      * This class is abstract and cannot be created. It represents a revision
      * of a bundle, i.e., its content. A revision is associated with a particular
      * location string, which is typically in URL format. Subclasses of this

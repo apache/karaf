@@ -16,14 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.framework.cache;
+package org.apache.felix.framework;
 
+import org.apache.felix.framework.cache.*;
 import java.io.File;
 import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
 import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.moduleloader.IContent;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.Bundle;
@@ -38,42 +40,49 @@ import org.osgi.framework.BundleActivator;
 **/
 public class SystemBundleArchive extends BundleArchive
 {
-    private Map m_headerMap = null;
+    private Map m_headerMap = new StringMap(false);
     private BundleRevision m_revision = null;
 
     public SystemBundleArchive()
     {
-        m_revision = new BundleRevision() {
+        try
+        {
+            m_revision = new BundleRevision(null, null, null) {
 
-            public Map getManifestHeader() throws Exception
-            {
-                return m_headerMap;
-            }
+                public Map getManifestHeader() throws Exception
+                {
+                    return m_headerMap;
+                }
 
-            public IContent getContent() throws Exception
-            {
-                return null;
-            }
+                public IContent getContent() throws Exception
+                {
+                    return null;
+                }
 
-            public IContent[] getContentPath() throws Exception
-            {
-                return null;
-            }
+                public IContent[] getContentPath() throws Exception
+                {
+                    return null;
+                }
 
-            public String findLibrary(String libName) throws Exception
-            {
-                return null;
-            }
+                public String findLibrary(String libName) throws Exception
+                {
+                    return null;
+                }
 
-            public void dispose() throws Exception
-            {
-            }
+                public void dispose() throws Exception
+                {
+                }
 
-            protected X509Certificate[] getRevisionCertificates()
-            {
-                return null;
-            }
-        };
+                protected X509Certificate[] getRevisionCertificates()
+                {
+                    return null;
+                }
+            };
+        }
+        catch (Exception ex)
+        {
+            // This should never happen.
+        }
     }
 
     public long getId()
@@ -152,7 +161,6 @@ public class SystemBundleArchive extends BundleArchive
     }
 
     public Map getManifestHeader(int revision)
-        throws Exception
     {
         return m_headerMap;
     }

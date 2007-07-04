@@ -16,34 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.framework;
+package org.apache.felix.framework.util;
 
-import org.osgi.framework.*;
-
-class StartLevelActivator implements BundleActivator
+public class PropertyResolverImpl implements PropertyResolver
 {
-    private Logger m_logger = null;
-    private Felix m_felix = null;
-    private StartLevelImpl m_startLevel = null;
-    private ServiceRegistration m_reg = null;
+    private MutablePropertyResolver m_resolver = null;
 
-    public StartLevelActivator(Logger logger, Felix felix)
+    public PropertyResolverImpl(MutablePropertyResolver resolver)
     {
-        m_logger = logger;
-        m_felix = felix;
+        m_resolver = resolver;
     }
 
-    public void start(BundleContext context) throws Exception
+    public String get(String key)
     {
-        m_startLevel = new StartLevelImpl(m_logger, m_felix);
-        m_reg = context.registerService(
-            org.osgi.service.startlevel.StartLevel.class.getName(),
-            m_startLevel, null);
+        return (m_resolver == null) ? null : m_resolver.get(key);
     }
 
-    public void stop(BundleContext context) throws Exception
+    public String[] getKeys()
     {
-        m_reg.unregister();
-        m_startLevel.stop();
+        return (m_resolver == null) ? null : m_resolver.getKeys();
     }
 }

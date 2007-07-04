@@ -58,7 +58,7 @@ class URLHandlersBundleURLConnection extends URLConnection
         //     bundle://<module-id>:<bundle-classpath-index>/<resource-path>
         // Where <module-id> = <bundle-id>.<revision>
         long bundleId = Util.getBundleIdFromModuleId(url.getHost());
-        BundleImpl bundle = (BundleImpl) m_framework.getBundle(bundleId);
+        FelixBundle bundle = (FelixBundle) m_framework.getBundle(bundleId);
         if (bundle == null)
         {
             throw new IOException("No bundle associated with resource: " + url);
@@ -80,7 +80,7 @@ class URLHandlersBundleURLConnection extends URLConnection
         //     bundle://<module-id>:<module-classpath-index>/<resource-path>
             // Where <module-id> = <bundle-id>.<revision>
             long bundleId = Util.getBundleIdFromModuleId(url.getHost());
-            BundleImpl bundle = (BundleImpl) m_framework.getBundle(bundleId);
+            FelixBundle bundle = (FelixBundle) m_framework.getBundle(bundleId);
             if (bundle == null)
             {
                 throw new IOException("No bundle associated with resource: " + url);

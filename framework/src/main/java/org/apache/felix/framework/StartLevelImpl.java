@@ -36,13 +36,15 @@ public class StartLevelImpl implements StartLevel, Runnable
     private static final int BUNDLE_IDX = 0;
     private static final int STARTLEVEL_IDX = 1;
 
+    private Logger m_logger = null;
     private Felix m_felix = null;
     private List m_requestList = null;
     private Bundle m_systemBundle = null;
     private Thread m_thread = null;
 
-    public StartLevelImpl(Felix felix)
+    public StartLevelImpl(Logger logger, Felix felix)
     {
+        m_logger = logger;
         m_felix = felix;
         m_requestList = new ArrayList();
         m_systemBundle = m_felix.getBundle(0);
@@ -136,7 +138,7 @@ public class StartLevelImpl implements StartLevel, Runnable
             catch (InterruptedException ex)
             {
                 // Log it and ignore since it won't cause much of an issue.
-                m_felix.getLogger().log(
+                m_logger.log(
                     Logger.LOG_WARNING,
                     "Wait for start level change during shutdown interrupted.",
                     ex);

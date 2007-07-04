@@ -22,7 +22,7 @@ import java.util.*;
 
 class FindEntriesEnumeration implements Enumeration
 {
-    private BundleImpl m_bundle = null;
+    private FelixBundle m_bundle = null;
     private Enumeration m_enumeration = null;
     private String m_path = null;
     private String[] m_filePattern = null;
@@ -30,7 +30,7 @@ class FindEntriesEnumeration implements Enumeration
     private Object m_next = null;
 
     public FindEntriesEnumeration(
-        BundleImpl bundle, String path, String filePattern, boolean recurse)
+        FelixBundle bundle, String path, String filePattern, boolean recurse)
     {
         m_bundle = bundle;
         m_path = path;

@@ -88,8 +88,8 @@ public class Requirement implements IRequirement
         return m_filter;
     }
 
-//  TODO: RB - We need to verify that the resolver code does not
-//  touch these implementation-specific methods.
+// TODO: RB - We need to verify that the resolver code does not
+// touch these implementation-specific methods.
 
     public String getPackageName()
     {

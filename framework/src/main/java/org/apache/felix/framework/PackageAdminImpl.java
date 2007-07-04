@@ -96,11 +96,11 @@ class PackageAdminImpl implements PackageAdmin, Runnable
         List list = new ArrayList();
         for (int i = 0; (bundles != null) && (i < bundles.length); i++)
         {
-            String sym = (String) ((BundleImpl) bundles[i])
+            String sym = (String) ((FelixBundle) bundles[i])
                 .getInfo().getCurrentHeader().get(Constants.BUNDLE_SYMBOLICNAME);
             if ((sym != null) && sym.equals(symbolicName))
             {
-                String s = (String) ((BundleImpl) bundles[i])
+                String s = (String) ((FelixBundle) bundles[i])
                     .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION);
                 Version v = (s == null) ? new Version("0.0.0") : new Version(s);
                 if ((vr == null) || vr.isInRange(v))
@@ -114,12 +114,12 @@ class PackageAdminImpl implements PackageAdmin, Runnable
             return null;
         }
         bundles = (Bundle[]) list.toArray(new Bundle[list.size()]);
-        Arrays.sort(bundles, new Comparator() {
+        Arrays.sort(bundles,new Comparator() {
             public int compare(Object o1, Object o2)
             {
-                String s1 = (String) ((BundleImpl) o1)
+                String s1 = (String) ((FelixBundle) o1)
                     .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION);
-                String s2 = (String) ((BundleImpl) o2)
+                String s2 = (String) ((FelixBundle) o2)
                     .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION);
                 Version v1 = (s1 == null) ? new Version("0.0.0") : new Version(s1);
                 Version v2 = (s2 == null) ? new Version("0.0.0") : new Version(s2);

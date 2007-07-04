@@ -19,6 +19,7 @@
 package org.apache.felix.framework;
 
 import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.framework.util.PropertyResolver;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -33,11 +34,13 @@ import org.osgi.framework.BundleContext;
 **/
 class URLHandlersActivator implements BundleActivator
 {
+    private PropertyResolver m_config = null;
     private Felix m_framework = null;
     private BundleContext m_context = null;
 
-    public URLHandlersActivator(Felix framework)
+    public URLHandlersActivator(PropertyResolver config, Felix framework)
     {
+        m_config = config;
         m_framework = framework;
     }
 
@@ -50,10 +53,10 @@ class URLHandlersActivator implements BundleActivator
         m_context = context;
         // Only register the framework with the URL Handlers service
         // if the service is enabled.
-        boolean enable = (m_framework.getConfig().get(
+        boolean enable = (m_config.get(
                 FelixConstants.SERVICE_URLHANDLERS_PROP) == null)
                 ? true
-                : !m_framework.getConfig().get(FelixConstants.SERVICE_URLHANDLERS_PROP).equals("false");
+                : !m_config.get(FelixConstants.SERVICE_URLHANDLERS_PROP).equals("false");
         URLHandlers.registerInstance(m_framework, m_context, enable);
     }
 

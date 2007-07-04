@@ -88,7 +88,7 @@ public class BundleCache
 
     private static SecureAction m_secureAction = new SecureAction();
 
-    public BundleCache(PropertyResolver cfg, Logger logger)
+    public BundleCache(Logger logger, PropertyResolver cfg)
         throws Exception
     {
         m_cfg = cfg;

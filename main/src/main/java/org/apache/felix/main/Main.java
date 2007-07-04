@@ -191,10 +191,11 @@ public class Main
         try
         {
             // Now create an instance of the framework.
-            m_felix = new Felix();
-            m_felix.start(
-                new MutablePropertyResolverImpl(new StringMap(configProps, false)),
+            m_felix = new Felix(
+                new MutablePropertyResolverImpl(
+                    new StringMap(configProps, false)),
                 null);
+            m_felix.start();
         }
         catch (Exception ex)
         {

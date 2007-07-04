@@ -23,7 +23,7 @@ import java.util.Map;
 public class MutablePropertyResolverImpl implements MutablePropertyResolver
 {
     private Map m_props = null;
-    
+
     public MutablePropertyResolverImpl(Map props)
     {
         m_props = props;

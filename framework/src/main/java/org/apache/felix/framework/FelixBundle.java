@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,32 +18,9 @@
  */
 package org.apache.felix.framework;
 
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
 
-class StartLevelActivator implements BundleActivator
+abstract class FelixBundle implements Bundle
 {
-    private Logger m_logger = null;
-    private Felix m_felix = null;
-    private StartLevelImpl m_startLevel = null;
-    private ServiceRegistration m_reg = null;
-
-    public StartLevelActivator(Logger logger, Felix felix)
-    {
-        m_logger = logger;
-        m_felix = felix;
-    }
-
-    public void start(BundleContext context) throws Exception
-    {
-        m_startLevel = new StartLevelImpl(m_logger, m_felix);
-        m_reg = context.registerService(
-            org.osgi.service.startlevel.StartLevel.class.getName(),
-            m_startLevel, null);
-    }
-
-    public void stop(BundleContext context) throws Exception
-    {
-        m_reg.unregister();
-        m_startLevel.stop();
-    }
+    /* package private */ abstract BundleInfo getInfo();
 }

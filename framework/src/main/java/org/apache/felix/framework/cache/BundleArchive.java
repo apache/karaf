@@ -102,7 +102,7 @@ public class BundleArchive
      * because it is special an is not really an archive.
      * </p>
     **/
-    BundleArchive()
+    public BundleArchive()
     {
     }
 

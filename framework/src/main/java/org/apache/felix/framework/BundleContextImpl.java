@@ -27,12 +27,14 @@ import org.osgi.framework.*;
 
 class BundleContextImpl implements FelixBundleContext
 {
+    private Logger m_logger = null;
     private Felix m_felix = null;
-    private BundleImpl m_bundle = null;
+    private FelixBundle m_bundle = null;
     private boolean m_valid = true;
 
-    protected BundleContextImpl(Felix felix, BundleImpl bundle)
+    protected BundleContextImpl(Logger logger, Felix felix, FelixBundle bundle)
     {
+        m_logger = logger;
         m_felix = felix;
         m_bundle = bundle;
     }
@@ -99,7 +101,7 @@ class BundleContextImpl implements FelixBundleContext
     {
         checkValidity();
 
-        return new FilterImpl(m_felix.getLogger(), expr);
+        return new FilterImpl(m_logger, expr);
     }
 
     public Bundle installBundle(String location)
@@ -263,7 +265,7 @@ class BundleContextImpl implements FelixBundleContext
         }
         catch (InvalidSyntaxException ex)
         {
-            m_felix.getLogger().log(Logger.LOG_ERROR, "BundleContextImpl: " + ex);
+            m_logger.log(Logger.LOG_ERROR, "BundleContextImpl: " + ex);
         }
         return null;
     }

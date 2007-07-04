@@ -676,8 +676,7 @@ public class SecureAction
                 URLClassLoader.class.getDeclaredMethod("addURL",
                 new Class[] {URL.class});
             addURL.setAccessible(true);
-            addURL.invoke(getClass().getClassLoader(), 
-                new Object[]{extension, loader});
+            addURL.invoke(loader, new Object[]{extension});
         }
     }
     

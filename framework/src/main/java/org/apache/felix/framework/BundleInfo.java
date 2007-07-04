@@ -52,7 +52,6 @@ class BundleInfo
     private Thread m_lockThread = null;
 
     protected BundleInfo(Logger logger, BundleArchive archive, IModule module)
-        throws Exception
     {
         m_logger = logger;
         m_archive = archive;
@@ -85,7 +84,7 @@ class BundleInfo
      * no limit on the potential number of bundle JAR file revisions.
      * @return array of modules corresponding to the bundle JAR file revisions.
     **/
-    public IModule[] getModules()
+    public synchronized IModule[] getModules()
     {
         return m_modules;
     }
@@ -96,7 +95,7 @@ class BundleInfo
      * @return <tt>true</tt> if the specified module is in the array of modules
      *         associated with this bundle, <tt>false</tt> otherwise.
     **/
-    public boolean hasModule(IModule module)
+    public synchronized boolean hasModule(IModule module)
     {
         for (int i = 0; i < m_modules.length; i++)
         {
@@ -113,7 +112,7 @@ class BundleInfo
      * in the module array.
      * @return the newest module.
     **/
-    public IModule getCurrentModule()
+    public synchronized IModule getCurrentModule()
     {
         return m_modules[m_modules.length - 1];
     }
@@ -123,7 +122,7 @@ class BundleInfo
      * the bundle associated with this <tt>BundleInfo</tt> object.
      * @param module the module to add.
     **/
-    public void addModule(IModule module)
+    public synchronized void addModule(IModule module)
     {
         IModule[] dest = new IModule[m_modules.length + 1];
         System.arraycopy(m_modules, 0, dest, 0, m_modules.length);
@@ -349,12 +348,12 @@ class BundleInfo
         return result;
     }
 
-    public int getState()
+    public synchronized int getState()
     {
         return m_state;
     }
 
-    public void setState(int i)
+    public synchronized void setState(int i)
     {
         m_state = i;
     }
@@ -450,42 +449,42 @@ class BundleInfo
         }
     }
 
-    public BundleContext getBundleContext()
+    public synchronized BundleContext getBundleContext()
     {
         return m_context;
     }
 
-    public void setBundleContext(BundleContext context)
+    public synchronized void setBundleContext(BundleContext context)
     {
         m_context = context;
     }
 
-    public BundleActivator getActivator()
+    public synchronized BundleActivator getActivator()
     {
         return m_activator;
     }
 
-    public void setActivator(BundleActivator activator)
+    public synchronized void setActivator(BundleActivator activator)
     {
         m_activator = activator;
     }
 
-    public boolean isStale()
+    public synchronized boolean isStale()
     {
         return m_stale;
     }
 
-    public void setStale()
+    public synchronized void setStale()
     {
         m_stale = true;
     }
 
-    public boolean isExtension()
+    public synchronized boolean isExtension()
     {
         return m_extension;
     }
 
-    public void setExtension(boolean extension)
+    public synchronized void setExtension(boolean extension)
     {
         m_extension = extension;
     }
@@ -496,12 +495,12 @@ class BundleInfo
     // will only ever be called when the caller is in a synchronized block.
     //
 
-    public boolean isLockable()
+    public synchronized boolean isLockable()
     {
         return (m_lockCount == 0) || (m_lockThread == Thread.currentThread());
     }
 
-    public void lock()
+    public synchronized void lock()
     {
         if ((m_lockCount > 0) && (m_lockThread != Thread.currentThread()))
         {
@@ -511,7 +510,7 @@ class BundleInfo
         m_lockThread = Thread.currentThread();
     }
 
-    public void unlock()
+    public synchronized void unlock()
     {
         if (m_lockCount == 0)
         {
@@ -528,7 +527,7 @@ class BundleInfo
         }
     }
 
-    public void syncLock(BundleInfo info)
+    public synchronized void syncLock(BundleInfo info)
     {
         m_lockCount = info.m_lockCount;
         m_lockThread = info.m_lockThread;
