@@ -68,6 +68,7 @@
         <module>mail</module>
         <module>servlet-api</module>
         <module>xercesImpl</module>
+        <module>xml-apis</module>
         <module>xml-resolver</module>
     </modules>
 </project>
