@@ -19,7 +19,6 @@
 package org.apache.felix.cm.impl;
 
 
-import java.awt.image.ImagingOpException;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -172,8 +171,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         // set up the location (might throw IllegalArgumentException)
         try
         {
-            FilePersistenceManager fpm = new FilePersistenceManager( bundleContext,
-                bundleContext.getProperty( CM_CONFIG_DIR ) );
+            FilePersistenceManager fpm = new FilePersistenceManager( bundleContext, bundleContext
+                .getProperty( CM_CONFIG_DIR ) );
             Hashtable props = new Hashtable();
             props.put( Constants.SERVICE_PID, fpm.getClass().getName() );
             props.put( Constants.SERVICE_DESCRIPTION, "Platform Filesystem Persistence Manager" );
@@ -393,7 +392,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 Dictionary config = ( Dictionary ) configs.nextElement();
 
                 // ignore non-Configuration dictionaries
-                if ( config.get( Constants.SERVICE_PID ) == null )
+                String pid = ( String ) config.get( Constants.SERVICE_PID );
+                if ( pid == null )
                 {
                     continue;
                 }
@@ -411,7 +411,14 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 // check filter
                 if ( filter == null || filter.match( config ) )
                 {
-                    configList.add( new ConfigurationImpl( this, pmList[i], config ) );
+                    // ensure the service.pid and returned a cached config if available
+                    ConfigurationImpl cfg = getCachedConfiguration( pid );
+                    if ( cfg == null )
+                    {
+                        cfg = new ConfigurationImpl( this, pmList[i], config );
+                    }
+
+                    configList.add( cfg );
                 }
             }
         }
