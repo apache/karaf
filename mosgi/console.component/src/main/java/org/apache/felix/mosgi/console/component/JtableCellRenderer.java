@@ -32,12 +32,12 @@ public class JtableCellRenderer extends JLabel implements TableCellRenderer {
 
   public JtableCellRenderer() {
     super();
-    eventName.put(new Integer( Bundle.ACTIVE      ), Color.green  );
-    eventName.put(new Integer( Bundle.INSTALLED   ), Color.orange );
-    eventName.put(new Integer( Bundle.RESOLVED    ), Color.red    );
+    eventName.put(new Integer( Bundle.UNINSTALLED ), Color.black  );
+    eventName.put(new Integer( Bundle.INSTALLED   ), Color.red    );
+    eventName.put(new Integer( Bundle.RESOLVED    ), Color.orange );
     eventName.put(new Integer( Bundle.STARTING    ), Color.gray   );
     eventName.put(new Integer( Bundle.STOPPING    ), Color.gray   );
-    eventName.put(new Integer( Bundle.UNINSTALLED ), Color.black  );
+    eventName.put(new Integer( Bundle.ACTIVE      ), Color.green  );
   }
 
   public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -50,7 +50,7 @@ public class JtableCellRenderer extends JLabel implements TableCellRenderer {
         state=new Integer(-1);
       }
       if (value!=null) {
-        if (((String) value).equals("??/??/??")) {
+        if (((String) value).equals(JtreeCellRenderer.UNKNOWN_DATE)) {
 	  setBackground(Color.white);
         } else{
 	  setBackground((Color) eventName.get(state));

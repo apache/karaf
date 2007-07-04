@@ -20,15 +20,12 @@ import org.apache.felix.mosgi.console.ifc.CommonPlugin;
 import org.apache.felix.mosgi.console.ifc.Plugin;
 import org.apache.felix.mosgi.console.component.MyTree;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Bundle;
 import java.beans.PropertyChangeEvent;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JScrollBar;
-import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -39,7 +36,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import javax.management.Notification;
@@ -53,6 +49,7 @@ import java.util.Vector;
 import java.util.Date;
 import java.util.Enumeration;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 //import org.osgi.service.prefs.Preferences;
 
 public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin, NotificationListener, MouseListener {
@@ -61,24 +58,23 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
   private static final String OLDLOG_NOT_THIS_TIME ="Not this time";
   private static final String OLDLOG_ALWAYS        ="Always";
   private static final String OLDLOG_NEVER         ="Never";
-  private String oldLogChoice=OLDLOG_THIS_TIME;
-  
   private static final String[] LOG_LVL=new String[] {"Error", "Warning", "Info", "Debug"};
-  private Hashtable logLvlHt=new Hashtable(); // treeNode/logLvl
+  
+  private String oldLogChoice=OLDLOG_THIS_TIME;
+  private Hashtable ht_connectedGateway=new Hashtable(); // connString/mbsc
+  protected Hashtable ht_logLvl=new Hashtable(); // DefaultMutableTreeNode/Integer_logLvl
+  protected Vector v_ul=new Vector(); // tree node containing not visible log yet  (placer ce vecteur dans le renderer ???)
 
   private MyTree logTree;
   private TreePath selPath;
   private JPanel jp;
-  private DefaultMutableTreeNode rootNode=new DefaultMutableTreeNode("root");
-  private Hashtable eventName=new Hashtable();
-
-  private Hashtable nodes=new Hashtable();    // connString/mbsc
+  private DefaultMutableTreeNode rootNode=new DefaultMutableTreeNode("");
+  private JScrollBar jsb_horizontal=null;
+  private JScrollBar jsb_vertical=null;
 
   public RemoteLogger_jtree (BundleContext bdlCtx){
-    //super(rootNode);
     super(null);
     setRoot(rootNode);
-    System.out.println("JTree Remote logger"); 
 
     this.jp=new JPanel();
     this.jp.setLayout(new BorderLayout());
@@ -89,22 +85,15 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
     this.logTree.setLargeModel(true);
     this.logTree.setToggleClickCount(-1); 
     this.logTree.setScrollsOnExpand(false);
-    //this.jp.setToolTipText("Select a node to refresh"); // not visible
-    this.logTree.setRootVisible(false);
-    // this create an invisible tree, even if I use "expand" so...
-    // I use expand after the first insert into the tree
-   
+    // if I do this.logTree.setRootVisible(false) => Create an invisible tree, even if I use an "expand"
+    // then need to expand after the first insert into the tree so i give up with root not visible.
     this.logTree.addMouseListener(this);
 
-    jp.add(new JScrollPane(logTree), BorderLayout.CENTER);    
+    JScrollPane jsp=new JScrollPane(logTree);
+    this.jsb_horizontal=jsp.getHorizontalScrollBar();
+    this.jsb_vertical=jsp.getVerticalScrollBar();
+    jp.add(jsp, BorderLayout.CENTER);    
     jp.setMinimumSize(new Dimension(500,25));
-
-    eventName.put(new Integer(Bundle.ACTIVE),     "ACTIVE     ");
-    eventName.put(new Integer(Bundle.INSTALLED),  "INSTALLED  ");
-    eventName.put(new Integer(Bundle.RESOLVED),   "RESOLVED   ");
-    eventName.put(new Integer(Bundle.STARTING),   "STARTING   ");
-    eventName.put(new Integer(Bundle.STOPPING),   "STOPPING   ");
-    eventName.put(new Integer(Bundle.UNINSTALLED),"UNINSTALLED");
   }
 
   /////////////////////////////////////////////////////
@@ -115,11 +104,8 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
   public void mouseExited(MouseEvent e){}
   public void mouseReleased(MouseEvent e){} 
   public void mousePressed(MouseEvent e) {
-    int selRow = logTree.getRowForLocation(e.getX(), e.getY());
+    final int selRow = logTree.getRowForLocation(e.getX(), e.getY());
     selPath = logTree.getPathForLocation(e.getX(), e.getY());
-    JScrollPane jsp_tmp=(JScrollPane) logTree.getParent().getParent();
-    JScrollBar horizontalJsb=jsp_tmp.getHorizontalScrollBar();
-    JScrollBar verticalJsb=jsp_tmp.getVerticalScrollBar();
 
     if ( e.getClickCount()==1 & selRow!=-1 & e.getButton()>1 ) { // show JPopupMenu
       String nodeString="\""+((DefaultMutableTreeNode) selPath.getLastPathComponent()).getUserObject()+"\"";
@@ -127,7 +113,7 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
       JMenuItem jmiRemove=new JMenuItem("Remove logs \""+nodeString.substring(0,Math.min(15,nodeString.length()))+((nodeString.length()>15)?"...\"":"\""));
       jmiRemove.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e){
-	  removeLog_actionPerformed();
+	  removeLog_actionPerformed(selRow);
         }	
       });
       jpopup.add(jmiRemove);
@@ -140,40 +126,50 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
         });
         jpopup.add(jmiLogLvl);
       }
-      jpopup.show(jp, e.getX()-horizontalJsb.getValue(), e.getY()-verticalJsb.getValue());
-    } else if ( e.getClickCount()==2 & selPath!=null) { // expand selected path
+      jpopup.show(jp, e.getX()-jsb_horizontal.getValue(), e.getY()-jsb_vertical.getValue());
+    /*} else if ( e.getClickCount()==2 & selPath!=null) { // expand selected path
       if (logTree.isExpanded(selPath)) {
         logTree.collapsePath(selPath);
       } else {
         logTree.expandPath(selPath);
-      }
+      } */
     } else if ( e.getClickCount()==1 & selPath!=null ) { // reload logTree and let selected path location
-      int horizontal_jsb_init_value=horizontalJsb.getValue();
-      int vertical_jsb_init_value=verticalJsb.getValue();
-      int row_y_init_loc=(int) ((logTree.getRowBounds(selRow)).getY());
-      Enumeration enu=logTree.getExpandedDescendants(new TreePath(rootNode));
-      reload();
-      if (enu!=null) {
-        while (enu.hasMoreElements()) {
-	  logTree.expandPath((TreePath) enu.nextElement());
-        }
-      }
-      // without next line if scrollbar_value=scrollbar_max it's generate a bad shift (may be vertical scrollbar height)
-      logTree.scrollPathToVisible(selPath);
-      int row_y_new_loc=(int) ((logTree.getRowBounds(logTree.getRowForPath(selPath))).getY());
-      int vertical_jsb_new_value=vertical_jsb_init_value+(row_y_new_loc-row_y_init_loc);
-      verticalJsb.setValue(vertical_jsb_new_value);
-      horizontalJsb.setValue(horizontal_jsb_init_value);
-      logTree.setSelectionPath(selPath);
-      logTree.repaint();
+      reloadTree(selRow);
     }
+  }
+  
+  private void reloadTree(int selRow) {
+    int horizontal_jsb_init_value = jsb_horizontal.getValue();
+    int vertical_jsb_init_value = jsb_vertical.getValue();
+    int row_y_init_loc = (int) ((logTree.getRowBounds(selRow)).getY());
+    Enumeration enu = logTree.getExpandedDescendants(new TreePath(rootNode));
+    reload();
+    if ( enu != null ) { // necessaire ce test ?
+      while (enu.hasMoreElements()) {
+        logTree.expandPath((TreePath) enu.nextElement());
+      }
+    }
+    // Redefini tous les noeuds rmiport/profilName comme a jour
+    this.v_ul.removeAllElements();
+    // without next line if scrollbar_value=scrollbar_max it's generate a bad shift (may be vertical scrollbar height)
+    logTree.scrollPathToVisible(selPath);
+    int row_y_new_loc = (int) ((logTree.getRowBounds(logTree.getRowForPath(selPath))).getY());
+    int vertical_jsb_new_value = vertical_jsb_init_value+(row_y_new_loc-row_y_init_loc);
+    jsb_vertical.setValue(vertical_jsb_new_value);
+    jsb_horizontal.setValue(horizontal_jsb_init_value);
+    logTree.setSelectionPath(selPath);
+    logTree.repaint();
   }
 
   /////////////////////////////////////
   //        Plugin Interface         //
   /////////////////////////////////////
-  public String getName(){ return "JTree Remote Logger";}
-  public Component getGUI(){return this.jp;}
+  public String getName(){
+    return "JTree Remote Logger";
+  }
+  public Component getGUI(){
+    return this.jp;
+  }
 
   /* a supprimer si on enleve l'heritage CommonPlugin -> Plugin */
   public String pluginLocation(){
@@ -191,13 +187,20 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
     //        Slow or slowed (by a key pressed for exemple) computer.
     //        => gui.NodesTree fireNewNodeConnection after each PCE_common_plugin_added for each connected nodes
     if (e.getPropertyName().equals(Plugin.NEW_NODE_CONNECTION)){
-      try{
+      try {
         MBeanServerConnection mbsc=(MBeanServerConnection)e.getNewValue();
-	if ( !nodes.containsValue(mbsc) ) {
+	if ( !ht_connectedGateway.containsValue(mbsc) ) {
 	  String connString=(String) e.getOldValue();
 	  mbsc.addNotificationListener(new ObjectName("OSGI:name=Remote Logger"), this, null, connString);
-	  nodes.put(connString, mbsc);
-	  this.addNodesIpRef(connString);
+	  ht_connectedGateway.put(connString, mbsc);
+	  // At gateway connection time : add into the tree an rmiport/profileName node under an ip node
+          String ip=connString.split(":")[0];
+          String ref=connString.split(":")[1];
+          DefaultMutableTreeNode dmtn_ip=createIfNeed(ip, rootNode);
+          DefaultMutableTreeNode dmtn_ref=createIfNeed(ref, dmtn_ip);
+          Integer lL=this.getLogLvl(connString);
+          ht_logLvl.put(dmtn_ref, lL);
+          // ask for old log management choice :
           if (oldLogChoice==OLDLOG_THIS_TIME | oldLogChoice==OLDLOG_NOT_THIS_TIME) {
             JOptionPane jop = new JOptionPane("Do you want old log from gateway :\n"+connString+" ?", JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, new String[] {OLDLOG_THIS_TIME, OLDLOG_NOT_THIS_TIME, OLDLOG_ALWAYS, OLDLOG_NEVER}, OLDLOG_THIS_TIME);
             JDialog dialog = jop.createDialog(jp, "Old log management");
@@ -223,30 +226,29 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
   //       NotificationListener implementation     //  
   ///////////////////////////////////////////////////
   public void handleNotification(Notification notification, Object handback) {
-    TreePath treeP=logTree.getLeadSelectionPath();
-    StringTokenizer st=new StringTokenizer(handback.toString(),":");
-    boolean isOldLog=false;
+    StringTokenizer st=new StringTokenizer(handback.toString(), ":");
     String ip=st.nextToken();
     String ref=st.nextToken();
   
-    st = new StringTokenizer(notification.getMessage(),"*");
+    st = new StringTokenizer(notification.getMessage(), "*");
     long ts=notification.getTimeStamp();
-    String time="??:??:??";
-    String date="??/??/??";
-    if (ts==0) {
-      isOldLog=true;
-    } else {
+    String time=JtreeCellRenderer.UNKNOWN_TIME;
+    String date=JtreeCellRenderer.UNKNOWN_DATE;
+    if (ts!=0) {
       Date timeDate=new Date(ts);
-      //DateFormat dateFormat = new SimpleDateFormat("hh'h'mm dd-MM-yy");
-      DateFormat df = DateFormat.getTimeInstance(DateFormat.MEDIUM); // use local date format
-      DateFormat df2 = DateFormat.getDateInstance(DateFormat.SHORT);
-      time=df.format(timeDate);
-      date=df2.format(timeDate);
+      DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy");
+      DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss:SSS");
+      // if I use local date format there are indentations problems
+      //DateFormat df = DateFormat.getTimeInstance(DateFormat.MEDIUM);
+      //DateFormat df2 = DateFormat.getDateInstance(DateFormat.SHORT);
+      time=timeFormat.format(timeDate);
+      date=dateFormat.format(timeDate);
     }
     String id=st.nextToken();
     String name=st.nextToken();
     String idname=new String(id+" : "+name);
-    String state=""+eventName.get(new Integer((int) Integer.parseInt(st.nextToken())));
+    // bundle state juste after remote loger received a the log entry (in old log case do state="")
+    String state=(String) JtreeCellRenderer.ht_num2string.get(new Integer((int) Integer.parseInt(st.nextToken())));
     String lvl=st.nextToken();
     String msg=st.nextToken();
     // Get and maybe create parents nodes : ip / ref / idname
@@ -254,14 +256,20 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
     DefaultMutableTreeNode dmtn_ref=createIfNeed(ref, dmtn_ip);
     DefaultMutableTreeNode dmtn_idname=createIfNeed(idname, dmtn_ref);
     // insert the leaf with message under id/ref/idname
-    DefaultMutableTreeNode dmtn=new DefaultMutableTreeNode(date+" | "+time+" | "+state+" | "+lvl+" | "+msg,false);
+    DefaultMutableTreeNode dmtn=new DefaultMutableTreeNode(time+" | "+date+" | "+state+" | "+lvl+" | "+msg,false);
     this.insertNodeInto(dmtn, dmtn_idname, 0);
-
-    TreePath selectedPath=this.logTree.getLeadSelectionPath();
-    if (selectedPath!=null) {
-      this.logTree.setSelectionRow(-1);
-      this.logTree.repaint();
+    // if usefull save nodes which contains new log
+    if ( !v_ul.contains(dmtn_ip) ) {
+	v_ul.add(dmtn_ip);
+	v_ul.add(dmtn_ref);
+	v_ul.add(dmtn_idname);
+    } else if ( !v_ul.contains(dmtn_ref) ) {
+	v_ul.add(dmtn_ref);
+	v_ul.add(dmtn_idname);
+    } else if ( !v_ul.contains(dmtn_idname) ) {
+	v_ul.add(dmtn_idname);
     }
+    this.logTree.repaint();
   }
 
   //////////////////////////////////////////
@@ -270,10 +278,10 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
   private Integer getLogLvl(String connString) {
     Integer val=new Integer(0);
     try {
-      MBeanServerConnection mb=(MBeanServerConnection) nodes.get(connString);
+      MBeanServerConnection mb=(MBeanServerConnection) ht_connectedGateway.get(connString);
       val=(Integer) mb.getAttribute(new ObjectName("OSGI:name=Remote Logger"), "LogLvl");
     } catch (Exception exc) {
-      System.out.println("errrrror : "+exc);
+      exc.printStackTrace();
     }
     return val;
   }
@@ -281,7 +289,7 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
   private void setLogLvl(TreePath tp) {
     Object[] o=tp.getPath();
     String connS=""+o[1]+":"+o[2];
-    MBeanServerConnection mb=(MBeanServerConnection) nodes.get(connS);
+    MBeanServerConnection mb=(MBeanServerConnection) ht_connectedGateway.get(connS);
     try {
       Integer curentVal=(Integer) mb.getAttribute(new ObjectName("OSGI:name=Remote Logger"), "LogLvl");
 
@@ -298,21 +306,20 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
 
       mb.setAttribute(new ObjectName("OSGI:name=Remote Logger"), new Attribute("LogLvl", newVal));
       DefaultMutableTreeNode ddmmttnn=(DefaultMutableTreeNode) tp.getLastPathComponent();
-      logLvlHt.put(ddmmttnn, newVal);
+      ht_logLvl.put(ddmmttnn, newVal);
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(jp,"Error with \""+connS+"\" :\n"+ex, "Error :", JOptionPane.ERROR_MESSAGE);
+      ex.printStackTrace();
     }
   }
 
   //////////////////////////////////////////
   //         PRIVATE TOOLS                //
   //////////////////////////////////////////
-  private void removeLog_actionPerformed() {
+  private void removeLog_actionPerformed(int selRow) {
     //System.out.println("selected path="+this.selPath);
     Object[] o= this.selPath.getPath();
     DefaultMutableTreeNode selectedDmtn=(DefaultMutableTreeNode) this.selPath.getLastPathComponent();
-    // Select root to avoid remove the selection and generate select=-1 which generate blue font
-    logTree.setSelectionRow(0);
     if (o.length==5) {
       // Can't remove first child of a bundle to avoid modify tree node color
       if ( ((DefaultMutableTreeNode) selectedDmtn.getParent()).getFirstChild()!=selectedDmtn ) {
@@ -321,48 +328,27 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
     } else if (o.length==4) {
       removeNodeFromParent(selectedDmtn);
     } else if (o.length==3) {
-      Enumeration enume=selectedDmtn.children();
-      Vector v=new Vector();
-      while (enume.hasMoreElements()) {
-        v.add(enume.nextElement()); // modification on an enumeration element destroy the enumeration
-      }
-      for (int i=0; i<v.size() ; i++) {
-        DefaultMutableTreeNode ddmtn_tmp=(DefaultMutableTreeNode) v.elementAt(i);
-        removeNodeFromParent(ddmtn_tmp);
-      }
+      selectedDmtn.removeAllChildren();
+      reloadTree(selRow);
     } else if (o.length==2) {
       Enumeration enu_1=selectedDmtn.children();
       while (enu_1.hasMoreElements()) {
         DefaultMutableTreeNode dmtn_child=(DefaultMutableTreeNode) enu_1.nextElement();
-        Enumeration enu_2=dmtn_child.children();
-        Vector v=new Vector();
-        while (enu_2.hasMoreElements()) {
-          v.add(enu_2.nextElement());
-        }
-        for (int i=0; i<v.size() ; i++) {
-          DefaultMutableTreeNode ddmtn_tmp=(DefaultMutableTreeNode) v.elementAt(i);
-          removeNodeFromParent(ddmtn_tmp);
-        }
+	dmtn_child.removeAllChildren();
       }
+      reloadTree(selRow);
+    } else if (o.length==1) {
+      Enumeration enume=rootNode.children();
+      while (enume.hasMoreElements()) {
+        DefaultMutableTreeNode dmtn_child=(DefaultMutableTreeNode) enume.nextElement();
+	Enumeration enume2=dmtn_child.children();
+        while (enume2.hasMoreElements()) {
+          DefaultMutableTreeNode dmtn_child_child=(DefaultMutableTreeNode) enume2.nextElement();
+	  dmtn_child_child.removeAllChildren();
+	}
+      }
+      reloadTree(selRow); 
     }
-  }
-
-  private void addNodesIpRef(String connString) {
-    String ip=connString.split(":")[0];
-    String ref=connString.split(":")[1];
-    DefaultMutableTreeNode dmtn_ip=createIfNeed(ip, rootNode);
-    DefaultMutableTreeNode dmtn_ref=createIfNeed(ref, dmtn_ip);
-    Integer lL=this.getLogLvl(connString);
-    logLvlHt.put(dmtn_ref, lL);
-    logTree.setSelectionRow(-1);
-    // Unable to set tree expand whithout a first node so :
-    logTree.expandPath(new TreePath(rootNode.getPath()));
-    logTree.repaint();
-  }
-
-  protected Integer getTreeNodeLogLvl(DefaultMutableTreeNode dmtn) {
-    // used by treeCellRenderer
-    return (Integer) logLvlHt.get(dmtn);
   }
 
   private DefaultMutableTreeNode createIfNeed(String nodeToCreateAndGet, DefaultMutableTreeNode parent) {
@@ -378,8 +364,17 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
     if (theNode==null){ // create the node
       theNode=new DefaultMutableTreeNode(nodeToCreateAndGet);
       this.insertNodeInto(theNode, parent, 0);
+      if ( parent==rootNode ) {
+        v_ul.add(rootNode);
+      }
     }
+    
     return theNode;
+  }
+
+  protected String getLogLvl(DefaultMutableTreeNode dmtn) {
+    // used by treeCellRenderer
+    return LOG_LVL[ ((Integer) ht_logLvl.get(dmtn)).intValue() - 1 ];
   }
  
   protected void fireTreeNodesInserted(Object source, Object path[], int childIndices[], Object children[]) {

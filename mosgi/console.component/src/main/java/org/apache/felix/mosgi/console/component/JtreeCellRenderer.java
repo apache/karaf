@@ -20,40 +20,65 @@ package org.apache.felix.mosgi.console.component;
 import org.osgi.framework.BundleContext;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Graphics;
 import java.awt.Font;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.JTree;
-import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.TreeCellRenderer;
-import javax.swing.tree.TreePath;
 import java.util.StringTokenizer;
-import java.util.NoSuchElementException;
 import java.lang.StringBuffer;
+import java.util.Hashtable;
 
 public class JtreeCellRenderer extends DefaultTreeCellRenderer {
 
-  private static final String[] LOG_LVL=new String[] {"", "Error", "Warning", "Info", "Debug"};
+  public static final String UNKNOWN_DATE="??/??/??";
+  public static final String UNKNOWN_TIME="??:??:??:???";
+  public static Hashtable ht_num2string=new Hashtable();
 
   private boolean isLeaf=false;
-
-  private String[] states=new String[]{"ACTIVE","INSTALLED","RESOLVED","STARTING","STOPPING","UNINSTALLED"};
-  private Color[] colors=new Color[]{Color.green,Color.orange,Color.red,Color.gray,Color.gray,Color.black};
-  private ImageIcon[] ii=new ImageIcon[6];
-  private ImageIcon iiOldLog=null;
-
   private RemoteLogger_jtree rl_jtree=null;
+  private static final Font FONT_BIG=new Font("Monospaced",Font.BOLD,14);
+  private static final Font FONT_SMALL=new Font("Monospaced",Font.PLAIN,10);
 
-  public JtreeCellRenderer(BundleContext bdlCtx, RemoteLogger_jtree rl_jtree){
+  private static Hashtable ht_string2color=new Hashtable();
+  private static Hashtable ht_string2icon=new Hashtable();
+  private static ImageIcon iiOldLog=null;
+  private static ImageIcon iiNewLog=null;
+  private static ImageIcon iiNull=null;
+  
+  public JtreeCellRenderer(BundleContext bdlCtx, RemoteLogger_jtree rl_jtree) {
     this.rl_jtree=rl_jtree;
-    for (int i=0 ; i<states.length ; i++){
-      this.ii[i]=new ImageIcon(Toolkit.getDefaultToolkit().getImage(bdlCtx.getBundle().getResource("icons/"+states[i]+".gif")));
-    }
+    
+    String[] states=new String[] {
+      "Uninstalled",
+      "Installed  ",
+      "Resolved   ",
+      "Starting   ",
+      "Stopping   ",
+      "Active     "
+    };
+
+    Color[] colors=new Color[] {
+      Color.black,
+      Color.red,
+      Color.orange,
+      Color.gray,
+      Color.gray,
+      Color.green
+    };
+    
     this.iiOldLog=new ImageIcon(Toolkit.getDefaultToolkit().getImage(bdlCtx.getBundle().getResource("icons/OLDLOG.gif")));
+    this.iiNewLog=new ImageIcon(Toolkit.getDefaultToolkit().getImage(bdlCtx.getBundle().getResource("icons/NEWLOG.gif")));
+    this.iiNull=new ImageIcon(Toolkit.getDefaultToolkit().getImage(bdlCtx.getBundle().getResource("icons/NULL.gif")));
+    
+    for (int i=0 ; i<states.length ; i++) {
+      ht_num2string.put(new Integer((int) Math.pow(2, i)), states[i]);
+      ht_string2color.put(states[i].trim(), colors[i]);
+      ht_string2icon.put(states[i].trim(), new ImageIcon(Toolkit.getDefaultToolkit().getImage(bdlCtx.getBundle().getResource("icons/"+states[i].trim()+".gif"))));
+    }
+
   }
 
   public Dimension getPreferredSize() {
@@ -67,70 +92,77 @@ public class JtreeCellRenderer extends DefaultTreeCellRenderer {
     setText(value.toString());
     setOpaque(true);
     setBackground(Color.white);
-    setFont(new Font("Monospaced",Font.BOLD,14));
+    setFont(FONT_BIG);
     setToolTipText(null);
-    setIcon(null);
     StringTokenizer st=null;
     DefaultMutableTreeNode dmtn=(DefaultMutableTreeNode)value;
+
+    if (rl_jtree.v_ul.contains(dmtn)) {
+      setIcon(iiNewLog);
+    } else {
+      setIcon(iiNull);
+    }
 
     int lvl=dmtn.getLevel(); 
     switch (lvl) {
       case 2: { // port / profilName / logLvl
-        Integer val=rl_jtree.getTreeNodeLogLvl((DefaultMutableTreeNode) value);
-        setText(value+" (log level="+LOG_LVL[val.intValue()]+")");
+        setText(value+" (log level="+rl_jtree.getLogLvl(dmtn)+")");
 	break;
       }
       case 3: { // bundleId / symbolic name / children count
-        // TODO : create a bundleNodeUserObject (getText, getTtt, getStateColor, setNewValues(test,ttt,stateColor))
-        st=new StringTokenizer(dmtn.getFirstChild().toString()," | ");
+        st=new StringTokenizer(dmtn.getFirstChild().toString(),"|");
         if(st!=null) {	
-          String date=st.nextToken();
+          String date=st.nextToken().trim();
           st.nextToken();
-          String state=st.nextToken();
-	  if (tree.getLeadSelectionPath()!=null) {
-	    for (int i=0; i<states.length ; i++) {
-	      if (state.equals(states[i])) {
-	        setBackground(colors[i]);
-	      }
-	    }
-	    StringTokenizer st2 = new StringTokenizer(((DefaultMutableTreeNode)dmtn.getFirstChild()).toString()," | ");
-	    StringBuffer ttt=new StringBuffer("<html><B>IP = </B>"+/*IP=<ip> Profil=<port>/<profil>*/dmtn.getParent().getParent()+"<B> Profil =</B>"+dmtn.getParent()+"<br><B>Bundle : </B>"+/*Bundle : Id=<bundleId> : <bundleSymbolicName>*/dmtn+"<br><B>Date : </B>"+/*<date> - <time>*/st2.nextToken()+" - "+st2.nextToken()+"<br><B>State : "+/*<bundleState>*/st2.nextToken()+"<br>Event "+/*Event <eventNumber> : <logLevel> : <message>*/dmtn.getChildCount()+" : "+st2.nextToken()+" : </B><br>");
-	    while (st2.hasMoreTokens()) {
-	      ttt.append(st2.nextToken()+" ");
-	    }
-	    setToolTipText(ttt+"</html>");
+          String state=st.nextToken().trim();
+	  setBackground((Color) ht_string2color.get(state));
+	  StringTokenizer st2 = new StringTokenizer(((DefaultMutableTreeNode)dmtn.getFirstChild()).toString()," | ");
+	  StringBuffer ttt=new StringBuffer(
+	    "<html><B>IP = </B>"+/*IP=<ip> Profil=<port>/<profil>*/dmtn.getParent().getParent()+"<B> Profil =</B>"+dmtn.getParent()+
+	    "<br><B>Bundle : </B>"+/*Bundle : Id=<bundleId> : <bundleSymbolicName>*/dmtn+
+	    "<br><B>Date : </B>"+/*<date> - <time>*/st2.nextToken()+" - "+st2.nextToken()+
+	    "<br><B>State on last log : "+/*<bundleState>*/st2.nextToken()+
+	      "<br>Event "+/*Event <eventNumber> : <logLevel> : <message>*/dmtn.getChildCount()+" : "+st2.nextToken()+" : </B><br>");
+	  while (st2.hasMoreTokens()) {
+	    ttt.append(st2.nextToken()+" ");
 	  }
+	  setToolTipText(ttt+"</html>");
 	} 
         break;
       }
       case 4: { // icon / date / time / state / logLvl / msg
-        st=new StringTokenizer(dmtn.toString()," | ");
-	setFont(new Font("Monospaced",Font.PLAIN,10));
+        st=new StringTokenizer(dmtn.toString(),"|");
+	setFont(FONT_SMALL);
         if(st!=null){
-          String date=st.nextToken();
+          String time=st.nextToken().trim();
           st.nextToken();
-	  String state=st.nextToken();
-	  for (int i=0 ; i<states.length ; i++){
-	    if (state.equals(states[i])){
-	      if(!date.equals("??/??/??")){
-	        setIcon(ii[i]);
-	      } else{
-	        setIcon(iiOldLog);
-	      }
-	    }
+	  String state=st.nextToken().trim();
+	  ImageIcon ii=(ImageIcon) ht_string2icon.get(state);
+	  if (time.equals(UNKNOWN_TIME)) {
+	    ii=iiOldLog;
 	  }
+	  setIcon(ii);
 	}
       break;
       }
-    }
 
-    if (tree.getLeadSelectionPath()==null) {
-      setForeground(Color.blue);
-    } else {
-      setForeground(Color.black);
-    }
-	
+    }	
     return this;
   }	
 
 }
+
+  /*
+    // Introspection technique :
+    java.lang.Class class_bundle=org.osgi.framework.Bundle.class;
+    java.lang.reflect.Field[] fields=class_bundle.getFields();
+    for (int i=0 ; i<fields.length ; i++) {
+	try {
+		String name=fields[i].getName();
+		int value=fields[i].getInt(null);
+		System.out.println("Cst # "+i+" \""+name+"\" = "+value);
+	}catch (Exception oups) {
+		oups.printStackTrace();
+	}
+  }
+  */

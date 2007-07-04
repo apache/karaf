@@ -54,7 +54,7 @@ public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlug
   private JTable logList;
   private JButton jb_save;
   private String[] columnToolTips=new String[]{"","","","","",
-          "<html><pre> 1 UNINSTALLED black<br> 2 INSTALLED   orange<br> 4 RESOLVED    red<br> 8 STARTING    gray<br>16 STOPPING    gray<br>32 ACTIVE      green",
+          "<html><pre> 1 UNINSTALLED black<br> 2 INSTALLED   red<br> 4 RESOLVED    orange<br> 8 STARTING    gray<br>16 STOPPING    gray<br>32 ACTIVE      green",
 	  "",""};
   private JPanel jbPanel;
   private JPanel jp;
@@ -142,8 +142,8 @@ public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlug
     StringTokenizer st = new StringTokenizer(notification.getMessage(),"*");
     
     long ts=notification.getTimeStamp();
-    String date="??/??/??";
-    String time="??/??/??";
+    String date=JtreeCellRenderer.UNKNOWN_DATE; //"??/??/??";
+    String time=JtreeCellRenderer.UNKNOWN_TIME; //"??/??/??";
     if (ts!=0){ // means it's not an old log
       Date d=new Date(ts);
       //DateFormat dateFormat = new SimpleDateFormat("hh'h'mm dd-MM-yy");
