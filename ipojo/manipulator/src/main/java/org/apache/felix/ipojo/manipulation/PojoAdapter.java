@@ -186,7 +186,8 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
             if (mv == null) {
                 return null;
             } else {
-                return new ConstructorCodeAdapter(mv, access, desc, m_owner);
+                //return new ConstructorCodeAdapter(mv, access, desc, m_owner);
+                return new ConstructorCodeAdapter(mv, m_owner);
             }
         } else {
             Type[] args = Type.getArgumentTypes(desc);
