@@ -31,6 +31,7 @@
         <pkgVersion>1.4</pkgVersion>
         <pomVersion>0001</pomVersion>
         <osgiVersion>${pkgVersion}.0</osgiVersion>
+        <activationVersion>1.1</activationVersion>
     </properties>
     <groupId>org.apache.felix.commons</groupId>
     <artifactId>${pom.groupId}.${pkgArtifactId}</artifactId>
@@ -50,6 +51,11 @@
             <artifactId>${pkgArtifactId}</artifactId>
             <version>${pkgVersion}</version>
         </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>${activationVersion}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -68,20 +74,26 @@
                             javax.mail.internet;version=${pkgVersion},
                             javax.mail.search;version=${pkgVersion},
                             javax.mail.util;version=${pkgVersion},
+                            javax.activation;version=${activationVersion},
                             com.sun.mail.imap;version=${pkgVersion},
                             com.sun.mail.pop3;version=${pkgVersion},
                             com.sun.mail.smtp;version=${pkgVersion}
                         </Export-Package>
                         <Private-Package>
                             com.sun.mail.handlers, com.sun.mail.iap,
-                            com.sun.mail.imap.protocol, com.sun.mail.util
+                            com.sun.mail.imap.protocol, com.sun.mail.util,
+                            com.sun.activation.registries,
+                            com.sun.activation.viewers
                         </Private-Package>
                         <Include-Resource>
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/LICENSE.txt,
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/javamail.charset.map,
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/javamail.default.address.map,
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/javamail.default.providers,
-                            @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/mailcap
+                            @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/mailcap,
+                            @activation-${activationVersion}.jar!/META-INF/LICENSE.txt,
+                            @activation-${activationVersion}.jar!/META-INF/mailcap.default,
+                            @activation-${activationVersion}.jar!/META-INF/mimetypes.default
                         </Include-Resource>
                     </instructions>
                 </configuration>
