@@ -423,7 +423,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             }
         }
 
-        return ( org.apache.felix.cm.impl.ConfigurationImpl[] ) configList.toArray( new ConfigurationImpl[configList
+        return ( ConfigurationImpl[] ) configList.toArray( new ConfigurationImpl[configList
             .size()] );
     }
 
