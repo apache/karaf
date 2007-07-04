@@ -254,13 +254,11 @@ public class FilePersistenceManager implements PersistenceManager
      */
     public FilePersistenceManager( BundleContext bundleContext, String location )
     {
-        File locationFile = null;
-
         // no configured location, use the config dir in the bundle persistent
         // area
         if ( location == null && bundleContext != null )
         {
-            locationFile = bundleContext.getDataFile( DEFAULT_CONFIG_DIR );
+            File locationFile = bundleContext.getDataFile( DEFAULT_CONFIG_DIR );
             if ( locationFile != null )
             {
                 location = locationFile.getAbsolutePath();
@@ -274,13 +272,8 @@ public class FilePersistenceManager implements PersistenceManager
             location = System.getProperty( "user.dir" ) + "/config";
         }
 
-        // ensure the File object for the location (may have been set already)
-        if ( locationFile == null )
-        {
-            locationFile = new File( location );
-        }
-
         // ensure the file is absolute
+        File locationFile = new File( location );
         if ( !locationFile.isAbsolute() )
         {
             if ( bundleContext != null )
