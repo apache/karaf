@@ -28,7 +28,7 @@
     </parent>
     <properties>
         <pkgArtifactId>commons-lang</pkgArtifactId>
-        <pkgVersion>2.2</pkgVersion>
+        <pkgVersion>2.3</pkgVersion>
         <pomVersion>0001</pomVersion>
         <osgiVersion>${pkgVersion}.0</osgiVersion>
     </properties>
