@@ -39,6 +39,35 @@ import junit.framework.TestCase;
 public class FilePersistenceManagerConstructorTest extends TestCase
 {
 
+    /** The current working directory for the tests */
+    private static final String TEST_WORKING_DIRECTORY = "target";
+    
+    /** The Bundle Data Area directory for testing */
+    private static final String BUNDLE_DATA = "bundleData";
+    
+    /** The Configuration location path for testing */
+    private static final String LOCATION_TEST = "test";
+
+    /** the previous working directory to return to on tearDown */
+    private String oldWorkingDirectory;
+    
+    protected void setUp() throws Exception
+    {
+        super.setUp();
+        
+        String testDir = new File(TEST_WORKING_DIRECTORY).getAbsolutePath();
+        
+        oldWorkingDirectory = System.getProperty( "user.dir" );
+        System.setProperty( "user.dir", testDir );
+    }
+    
+    protected void tearDown() throws Exception
+    {
+        System.setProperty( "user.dir", oldWorkingDirectory );
+
+        super.tearDown();
+    }
+    
     /**
      * Test method for {@link org.apache.felix.cm.file.FilePersistenceManager#FilePersistenceManager(java.lang.String)}.
      */
@@ -54,12 +83,12 @@ public class FilePersistenceManagerConstructorTest extends TestCase
         assertFpm(fpm, new File(FilePersistenceManager.DEFAULT_CONFIG_DIR) );
         
         // with a relative path
-        relPath = "test";
+        relPath = LOCATION_TEST;
         fpm = new FilePersistenceManager(relPath);
         assertFpm(fpm, new File(relPath) );
         
         // with an absolute path
-        absPath = new File("test").getAbsolutePath();
+        absPath = new File(LOCATION_TEST).getAbsolutePath();
         fpm = new FilePersistenceManager(absPath);
         assertFpm(fpm, new File(absPath) );
     }
@@ -84,12 +113,12 @@ public class FilePersistenceManagerConstructorTest extends TestCase
         assertFpm(fpm, new File(FilePersistenceManager.DEFAULT_CONFIG_DIR) );
         
         // with a relative path
-        relPath = "test";
+        relPath = LOCATION_TEST;
         fpm = new FilePersistenceManager(relPath);
         assertFpm(fpm, new File(relPath) );
         
         // with an absolute path
-        absPath = new File("test").getAbsolutePath();
+        absPath = new File(LOCATION_TEST).getAbsolutePath();
         fpm = new FilePersistenceManager(absPath);
         assertFpm(fpm, new File(absPath) );
         
@@ -102,18 +131,18 @@ public class FilePersistenceManagerConstructorTest extends TestCase
         assertFpm(fpm, new File(FilePersistenceManager.DEFAULT_CONFIG_DIR) );
         
         // with a relative path
-        relPath = "test";
+        relPath = LOCATION_TEST;
         fpm = new FilePersistenceManager(bundleContext, relPath);
         assertFpm(fpm, new File(relPath) );
         
         // with an absolute path
-        absPath = new File("test").getAbsolutePath();
+        absPath = new File(LOCATION_TEST).getAbsolutePath();
         fpm = new FilePersistenceManager(bundleContext, absPath);
         assertFpm(fpm, new File(absPath) );
 
         
         // third suite: BundleContext with relative data file
-        dataArea = new File("bundleData");
+        dataArea = new File(BUNDLE_DATA);
         bundleContext = new FilePersistenceManagerBundleContext(dataArea);
         
         // with null
@@ -121,17 +150,17 @@ public class FilePersistenceManagerConstructorTest extends TestCase
         assertFpm(fpm, new File(dataArea, FilePersistenceManager.DEFAULT_CONFIG_DIR) );
         
         // with a relative path
-        relPath = "test";
+        relPath = LOCATION_TEST;
         fpm = new FilePersistenceManager(bundleContext, relPath);
         assertFpm(fpm, new File(dataArea, relPath) );
         
         // with an absolute path
-        absPath = new File("test").getAbsolutePath();
+        absPath = new File(LOCATION_TEST).getAbsolutePath();
         fpm = new FilePersistenceManager(bundleContext, absPath);
         assertFpm(fpm, new File(absPath) );
 
         // fourth suite: BundleContext with absolute data file
-        dataArea = new File("bundleData").getAbsoluteFile();
+        dataArea = new File(BUNDLE_DATA).getAbsoluteFile();
         bundleContext = new FilePersistenceManagerBundleContext(dataArea);
         
         // with null
@@ -139,12 +168,12 @@ public class FilePersistenceManagerConstructorTest extends TestCase
         assertFpm(fpm, new File(dataArea, FilePersistenceManager.DEFAULT_CONFIG_DIR) );
         
         // with a relative path
-        relPath = "test";
+        relPath = LOCATION_TEST;
         fpm = new FilePersistenceManager(bundleContext, relPath);
         assertFpm(fpm, new File(dataArea, relPath) );
         
         // with an absolute path
-        absPath = new File("test").getAbsolutePath();
+        absPath = new File(LOCATION_TEST).getAbsolutePath();
         fpm = new FilePersistenceManager(bundleContext, absPath);
         assertFpm(fpm, new File(absPath) );
     }
