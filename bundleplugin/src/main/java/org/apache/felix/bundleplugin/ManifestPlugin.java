@@ -109,6 +109,10 @@ public class ManifestPlugin
 
         analyzer.setProperties( props );
 
+        if ( project.getArtifact().getFile() == null )
+        {
+            throw new NullPointerException( "Artifact file is null" );
+        }
         analyzer.setJar( project.getArtifact().getFile() );
 
         if ( classpath != null )

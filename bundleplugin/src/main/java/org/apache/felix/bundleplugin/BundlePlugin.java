@@ -41,7 +41,12 @@ import aQute.lib.osgi.*;
  */
 public class BundlePlugin extends AbstractMojo {
 
- private static final Collection SUPPORTED_PROJECT_TYPES = Arrays.asList(new String[]{"jar","bundle"});
+ /**
+  * Project types which this plugin supports.
+  * 
+  * @parameter
+  */
+ private List supportedProjectTypes = Arrays.asList(new String[]{"jar","bundle"});
 
  /**
   * The directory for the generated bundles.
@@ -104,8 +109,9 @@ public class BundlePlugin extends AbstractMojo {
   Properties properties = new Properties();
 
   /* ignore project types not supported, useful when the plugin is configured in the parent pom */
-  if (!SUPPORTED_PROJECT_TYPES.contains(getProject().getArtifact().getType())) {
-    getLog().debug("Ignoring project " + getProject().getArtifact() + " : type not supported by bundle plugin");
+  if (!supportedProjectTypes.contains(getProject().getArtifact().getType())) {
+    getLog().debug("Ignoring project " + getProject().getArtifact() + " : type " + getProject().getArtifact().getType() +
+                   " is not supported by bundle plugin, supported types are " + supportedProjectTypes );
     return;
   }
   
