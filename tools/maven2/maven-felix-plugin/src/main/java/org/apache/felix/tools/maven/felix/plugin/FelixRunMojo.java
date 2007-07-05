@@ -588,7 +588,7 @@ public class FelixRunMojo extends AbstractMojo
     /**
      * The felix container used to run the integration tests.
      */
-    private Felix felixContainer = new Felix();
+    private Felix felixContainer;
 
 
     public void execute() throws MojoExecutionException, MojoFailureException
@@ -662,11 +662,26 @@ public class FelixRunMojo extends AbstractMojo
         // -------------------------------------------------------------------
 
         MutablePropertyResolver resolver = new MutablePropertyResolverImpl(props);
-        felixContainer.start( resolver, new ArrayList() );
+        felixContainer = new Felix(resolver, null);
+        try
+        {
+			felixContainer.start();
+		}
+        catch (Exception ex)
+        {
+            // TODO: find out what to do.
+        }
         getLog().info( "-=============================-" );
         getLog().info( "| Felix: successfully started |" );
         getLog().info( "-=============================-" );
-        felixContainer.shutdown();
+        try
+        {
+			felixContainer.stop();
+		}
+        catch (Exception ex)
+        {
+            // TODO: find out what to do.
+        }
         getLog().info( "-==============================-" );
         getLog().info( "| Felix: successfully shutdown |" );
         getLog().info( "-==============================-" );

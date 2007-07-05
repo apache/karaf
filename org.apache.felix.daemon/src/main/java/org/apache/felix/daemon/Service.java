@@ -74,9 +74,9 @@ public class Service implements DaemonApplication
         {
             this.layout = ( FelixLayout ) suppliedLayout;
         }
-
-        instance = new Felix();
+        
         configationProperties = readConfigProperties();
+        instance = new Felix(new MutablePropertyResolverImpl( new StringMap( configationProperties, false ) ), null );
     }
 
 
@@ -96,13 +96,20 @@ public class Service implements DaemonApplication
         }
 
         // start up the instance using the loaded and possibly altered configuration 
-        instance.start( new MutablePropertyResolverImpl( new StringMap( configationProperties, false ) ), null );
+        try
+        {
+            instance.start();
+        }
+        catch (Exception ex) 
+        {
+            // TODO: find out what to do
+        }
     }
 
 
     public void stop( String[] arg0 ) throws Exception
     {
-        instance.shutdown();
+        instance.stop();
     }
 
 
