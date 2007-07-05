@@ -66,6 +66,7 @@
         <module>log4j</module>
         <module>logkit</module>
         <module>mail</module>
+        <module>portlet-api</module>
         <module>servlet-api</module>
         <module>xercesImpl</module>
         <module>xml-apis</module>
