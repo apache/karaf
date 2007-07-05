@@ -30,7 +30,7 @@
         <pkgArtifactId>commons-io</pkgArtifactId>
         <pkgVersion>1.3.2</pkgVersion>
         <pomVersion>0001</pomVersion>
-        <osgiVersion>${pkgVersion}.0</osgiVersion>
+        <osgiVersion>${pkgVersion}</osgiVersion>
     </properties>
     <groupId>org.apache.felix.commons</groupId>
     <artifactId>${pom.groupId}.${pkgArtifactId}</artifactId>
