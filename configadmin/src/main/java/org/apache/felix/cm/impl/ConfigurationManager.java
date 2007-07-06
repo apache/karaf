@@ -515,22 +515,38 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
     private PersistenceManager[] getPersistenceManagers()
     {
-        if ( persistenceManagers == null || persistenceManagerTracker.getTrackingCount() > pmtCount )
+        int currentPmtCount = persistenceManagerTracker.getTrackingCount();
+        if ( persistenceManagers == null || currentPmtCount > pmtCount )
         {
+
+            PersistenceManager[] pm;
 
             ServiceReference[] refs = persistenceManagerTracker.getServiceReferences();
             if ( refs == null || refs.length == 0 )
             {
-                return new PersistenceManager[0];
+                pm = new PersistenceManager[0];
             }
-
-            SortedSet pms = new TreeSet( cmRankComp );
-            for ( int i = 0; i < refs.length; i++ )
+            else
             {
-                pms.add( persistenceManagerTracker.getService( refs[i] ) );
+                // sort the references according to the cmRanking property
+                SortedSet pms = new TreeSet( new RankingComparator( false ) );
+                for ( int i = 0; i < refs.length; i++ )
+                {
+                    pms.add( refs[i] );
+                }
+
+                // create the service array from the sorted set of referenecs
+                pm = new PersistenceManager[pms.size()];
+                int pmIndex = 0;
+                for ( Iterator pi = pms.iterator(); pi.hasNext(); pmIndex++)
+                {
+                    ServiceReference ref = ( ServiceReference ) pi.next();
+                    pm[pmIndex] = ( PersistenceManager ) persistenceManagerTracker.getService( ref );
+                }
             }
 
-            persistenceManagers = ( PersistenceManager[] ) pms.toArray( new PersistenceManager[pms.size()] );
+            pmtCount = currentPmtCount;
+            persistenceManagers = pm;
         }
 
         return persistenceManagers;

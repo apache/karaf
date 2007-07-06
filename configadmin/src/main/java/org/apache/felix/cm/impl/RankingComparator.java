@@ -58,37 +58,39 @@ public class RankingComparator implements Comparator
             return 0;
         }
 
-        int rank1 = getInt( ( ServiceReference ) obj1, rankProperty );
-        int rank2 = getInt( ( ServiceReference ) obj2, rankProperty );
+        long rank1 = getLong( ( ServiceReference ) obj1, rankProperty );
+        long rank2 = getLong( ( ServiceReference ) obj2, rankProperty );
+        boolean order = naturalOrder;
 
         // use service id, if rankings are equal
         if ( rank1 == rank2 )
         {
-            rank1 = getInt( ( ServiceReference ) obj1, Constants.SERVICE_ID );
-            rank2 = getInt( ( ServiceReference ) obj2, Constants.SERVICE_ID );
+            rank1 = getLong( ( ServiceReference ) obj1, Constants.SERVICE_ID );
+            rank2 = getLong( ( ServiceReference ) obj2, Constants.SERVICE_ID );
+            order = false; // always order lower service.id before higher
         }
 
         if ( rank1 == rank2 )
         {
             return 0;
         }
-        else if ( naturalOrder && rank1 > rank2)
+        else if ( order )
         {
-            return 1;
+            return ( rank1 > rank2 ) ? 1 : -1;
         }
         else
         {
-            return -1;
+            return ( rank1 < rank2 ) ? 1 : -1;
         }
     }
 
 
-    private int getInt( ServiceReference sr, String property )
+    private long getLong( ServiceReference sr, String property )
     {
         Object rankObj = sr.getProperty( property );
-        if ( rankObj instanceof Integer )
+        if ( rankObj instanceof Number )
         {
-            return ( ( Integer ) rankObj ).intValue();
+            return ( ( Number ) rankObj ).longValue();
         }
 
         // null or not an integer
