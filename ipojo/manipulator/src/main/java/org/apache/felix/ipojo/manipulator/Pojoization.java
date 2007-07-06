@@ -379,7 +379,7 @@ public class Pojoization {
         if (!imports.containsKey("org.osgi.service.log")) {
             Map verCM = new TreeMap();
             verCM.put("version", "1.3");
-            imports.put("org.osgi.service.cm", verCM);
+            imports.put("org.osgi.service.log", verCM);
         }
         
 
