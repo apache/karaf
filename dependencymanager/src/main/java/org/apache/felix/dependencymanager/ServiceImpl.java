@@ -24,9 +24,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -38,16 +40,6 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class ServiceImpl implements Service {
     private static final ServiceRegistration NULL_REGISTRATION;
-//    private static final int STARTING = 1;
-//    private static final int WAITING_FOR_REQUIRED = 2;
-//    private static final int TRACKING_OPTIONAL = 3;
-//    private static final int STOPPING = 4;
-//    private static final String[] STATE_NAMES = {
-//        "(unknown)", 
-//        "starting", 
-//        "waiting for required dependencies", 
-//        "tracking optional dependencies", 
-//        "stopping"};
     private static final ServiceStateListener[] SERVICE_STATE_LISTENER_TYPE = new ServiceStateListener[] {};
     
     private final BundleContext m_context;
@@ -67,7 +59,6 @@ public class ServiceImpl implements Service {
     private ArrayList m_dependencies = new ArrayList();
     
     // runtime state (calculated from dependencies)
-//    private int m_state;
     private State m_state;
     
     // runtime state (changes because of state changes)
@@ -79,11 +70,8 @@ public class ServiceImpl implements Service {
 
     // work queue
     private final SerialExecutor m_executor = new SerialExecutor();
-//    final LinkedList m_workQueue = new LinkedList();
-//    Runnable m_active;
     
     public ServiceImpl(BundleContext context) {
-//        m_state = STARTING;
     	m_state = new State((List) m_dependencies.clone(), false);
         m_context = context;
         m_callbackInit = "init";
@@ -95,22 +83,17 @@ public class ServiceImpl implements Service {
     
     private void calculateStateChanges(final State oldState, final State newState) {
     	if (oldState.isWaitingForRequired() && newState.isTrackingOptional()) {
-    		// TODO service needs to be activated
-    		// activateService(newState);
         	m_executor.enqueue(new Runnable() {
 				public void run() {
 					activateService(newState);
 				}});
     	}
     	if (oldState.isTrackingOptional() && newState.isWaitingForRequired()) {
-    		// TODO service needs to be deactivated
-    		// deactivateService(oldState);
     		m_executor.enqueue(new Runnable() {
 				public void run() {
 					deactivateService(oldState);
 				}});
     	}
-    	
     	if (oldState.isInactive() && (newState.isTrackingOptional())) {
     		m_executor.enqueue(new Runnable() {
 				public void run() {
@@ -153,37 +136,6 @@ public class ServiceImpl implements Service {
             m_state = newState;
             calculateStateChanges(oldState, newState);
         }
-//        executeWorkInQueue();
-//            if ((state == WAITING_FOR_REQUIRED) && dependency.isRequired()) {
-//            	// if we're waiting for required dependencies, and
-//            	// this is a required dependency, start tracking it
-//            	// ...otherwise, we don't need to do anything yet
-//            	final ServiceImpl impl = this;
-//            	m_workQueue.addLast(new Runnable() {
-//					public void run() {
-//						dependency.start(impl);
-//					}});
-//            }
-//            if (state == TRACKING_OPTIONAL) {
-//            	// start tracking the dependency
-//            	final ServiceImpl impl = this;
-//            	m_workQueue.addLast(new Runnable() {
-//					public void run() {
-//						dependency.start(impl);
-//					}});
-//            	// TODO review this logic
-//            	if (dependency.isRequired() && !dependency.isAvailable()) {
-//            		// if this is a required dependency and it can not
-//            		// be resolved right away, then we need to go back to 
-//            		// the waiting for required state, until this
-//            		// dependency is available
-//                	m_workQueue.addLast(new Runnable() {
-//    					public void run() {
-//    						deactivateService();
-//    					}});
-//            	}
-//        }
-//        executeWorkInQueue();
         return this;
     }
 
@@ -201,27 +153,6 @@ public class ServiceImpl implements Service {
             m_state = newState;
         }
         calculateStateChanges(oldState, newState);
-//    	int state;
-//        synchronized (m_dependencies) {
-//        	state = m_state;
-//            m_dependencies.remove(dependency);
-//        }
-//        if (state == TRACKING_OPTIONAL) {
-//            // if we're tracking optional dependencies, then any
-//            // dependency that is removed can be stopped without
-//            // causing state changes
-//            dependency.stop(this);
-//        }
-//        if ((state == WAITING_FOR_REQUIRED) && dependency.isRequired()) {
-//            // if we're waiting for required dependencies, then
-//            // we only need to stop tracking the dependency if it
-//            // too is required; this might trigger a state change
-//            dependency.stop(this);
-//            // TODO review this logic
-//            if (allRequiredDependenciesAvailable()) {
-//                activateService();
-//            }
-//        }
         return this;
     }
 
@@ -255,19 +186,6 @@ public class ServiceImpl implements Service {
         	});
         	m_executor.execute();
         }
-
-//    	int oldState, newState;
-//    	synchronized (m_dependencies) {
-//    		oldState = m_state;
-//    		newState = calculateState();
-//    	}
-//    	if (dependency.isRequired() && (oldState == WAITING_FOR_REQUIRED) && (newState == TRACKING_OPTIONAL)) {
-//    		activateService();
-//    	}
-//    	// TODO review, only update optional deps here??? nonono probably not
-//        if ((!dependency.isRequired()) && (oldState == TRACKING_OPTIONAL)) {
-//            updateInstance(dependency);
-//        }
     }
 
     public void dependencyChanged(final Dependency dependency) {
@@ -283,13 +201,6 @@ public class ServiceImpl implements Service {
         	});
         	m_executor.execute();
         }
-//    	int state;
-//    	synchronized (m_dependencies) {
-//    		state = m_state;
-//    	}
-//        if (state == TRACKING_OPTIONAL) {
-//            updateInstance(dependency);
-//        }
     }
     
     public void dependencyUnavailable(final Dependency dependency) {
@@ -308,18 +219,6 @@ public class ServiceImpl implements Service {
         	});
         	m_executor.execute();
         }
-//    	int oldState, newState;
-//    	synchronized (m_dependencies) {
-//    		oldState = m_state;
-//    		newState = calculateState();
-//    	}
-//        if (dependency.isRequired() && (oldState == TRACKING_OPTIONAL) && (newState == WAITING_FOR_REQUIRED)) {
-//            deactivateService();
-//        }
-//        if (oldState == TRACKING_OPTIONAL) {
-//            updateInstance(dependency);
-//        }
-//        // TODO note the slight asymmmetry with dependencyAvailable()
     }
 
     public synchronized void start() {
@@ -330,13 +229,6 @@ public class ServiceImpl implements Service {
             m_state = newState;
         }
         calculateStateChanges(oldState, newState);
-//        if ((m_state != STARTING) && (m_state != STOPPING)) {
-//            throw new IllegalStateException("Cannot start from state " + STATE_NAMES[m_state]);
-//        }
-//        startTrackingRequired();
-//        if (allRequiredDependenciesAvailable() && (m_state == WAITING_FOR_REQUIRED)) {
-//            activateService();
-//        }
     }
 
     public synchronized void stop() {
@@ -347,16 +239,6 @@ public class ServiceImpl implements Service {
             m_state = newState;
         }
         calculateStateChanges(oldState, newState);
-//        if ((m_state != WAITING_FOR_REQUIRED) && (m_state != TRACKING_OPTIONAL)) {
-//            if ((m_state > 0) && (m_state < STATE_NAMES.length)) {
-//                throw new IllegalStateException("Cannot stop from state " + STATE_NAMES[m_state]);
-//            }
-//            throw new IllegalStateException("Cannot stop from unknown state.");
-//        }
-//        if (m_state == TRACKING_OPTIONAL) {
-//            deactivateService();
-//        }
-//        stopTrackingRequired();
     }
 
     public synchronized Service setInterface(String serviceName, Dictionary properties) {
@@ -401,8 +283,8 @@ public class ServiceImpl implements Service {
 
 	public synchronized void setServiceProperties(Dictionary serviceProperties) {
 	    m_serviceProperties = serviceProperties;
-	    if (isRegistered() && (m_serviceName != null) && (m_serviceProperties != null)) {
-	        m_registration.setProperties(m_serviceProperties);
+	    if (isRegistered() && (m_serviceName != null)) {
+	        m_registration.setProperties(calculateServiceProperties());
 	    }
 	}
 
@@ -629,12 +511,17 @@ public class ServiceImpl implements Service {
             configureImplementation(ServiceRegistration.class, wrapper);
             // service name can either be a string or an array of strings
             ServiceRegistration registration;
+            
+            // determine service properties
+            Dictionary properties = calculateServiceProperties();
+            
+            // register the service
             try {
                 if (m_serviceName instanceof String) {
-                    registration = m_context.registerService((String) m_serviceName, m_serviceInstance, m_serviceProperties);
+                    registration = m_context.registerService((String) m_serviceName, m_serviceInstance, properties);
                 }
                 else {
-                    registration = m_context.registerService((String[]) m_serviceName, m_serviceInstance, m_serviceProperties);
+                    registration = m_context.registerService((String[]) m_serviceName, m_serviceInstance, properties);
                 }
                 wrapper.setServiceRegistration(registration);
             }
@@ -645,6 +532,38 @@ public class ServiceImpl implements Service {
             }
         }
     }
+
+	private Dictionary calculateServiceProperties() {
+		Dictionary properties = new Properties();
+		addTo(properties, m_serviceProperties);
+		for (int i = 0; i < m_dependencies.size(); i++) {
+			Dependency d = (Dependency) m_dependencies.get(i);
+			if (d instanceof ConfigurationDependency) {
+				ConfigurationDependency cd = (ConfigurationDependency) d;
+				if (cd.isPropagated()) {
+					Dictionary dict = cd.getConfiguration();
+					addTo(properties, dict);
+				}
+			}
+		}
+		if (properties.size() == 0) {
+			properties = null;
+		}
+		return properties;
+	}
+
+	private void addTo(Dictionary properties, Dictionary additional) {
+		if (properties == null) {
+			throw new IllegalArgumentException("Dictionary to add to cannot be null.");
+		}
+		if (additional != null) {
+			Enumeration e = additional.keys();
+			while (e.hasMoreElements()) {
+				Object key = e.nextElement();
+				properties.put(key, additional.get(key));
+			}
+		}
+	}
     
     private void unregisterService() {
         if (m_serviceName != null) {
@@ -661,6 +580,14 @@ public class ServiceImpl implements Service {
             if (sd.isAutoConfig()) {
                 configureImplementation(sd.getInterface(), sd.getService());
             }
+        }
+        else if (dependency instanceof ConfigurationDependency) {
+        	ConfigurationDependency cd = (ConfigurationDependency) dependency;
+        	if (cd.isPropagated()) {
+        		// change service properties accordingly
+        		Dictionary props = calculateServiceProperties();
+        		m_registration.setProperties(props);
+        	}
         }
     }
     

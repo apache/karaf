@@ -53,6 +53,7 @@ public class ConfigurationDependency implements Dependency, ManagedService {
 	private ServiceRegistration m_registration;
 	private volatile Service m_service;
 	private Dictionary m_settings;
+	private boolean m_propagate;
 	
 	public ConfigurationDependency(BundleContext context) {
 		m_context = context;
@@ -64,6 +65,14 @@ public class ConfigurationDependency implements Dependency, ManagedService {
 
 	public boolean isRequired() {
 		return true;
+	}
+	
+	public boolean isPropagated() {
+		return m_propagate;
+	}
+	
+	public Dictionary getConfiguration() {
+		return m_settings;
 	}
 	
 	public void start(Service service) {
@@ -122,6 +131,12 @@ public class ConfigurationDependency implements Dependency, ManagedService {
 	public ConfigurationDependency setPid(String pid) {
 		ensureNotActive();
 		m_pid = pid;
+		return this;
+	}
+	
+	public ConfigurationDependency setPropagate(boolean propagate) {
+		ensureNotActive();
+		m_propagate = propagate;
 		return this;
 	}
 	
