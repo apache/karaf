@@ -54,6 +54,7 @@
         <module>commons-jxpath</module>
         <module>commons-lang</module>
         <module>commons-logging</module>
+        <module>commons-validator</module>
         <module>dom4j</module>
         <module>ehcache</module>
         <module>hibernate</module>
