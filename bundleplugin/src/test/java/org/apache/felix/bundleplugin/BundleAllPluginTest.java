@@ -82,7 +82,7 @@ public class BundleAllPluginTest
     public void testNoReBundling()
         throws Exception
     {
-        File testFile = getTestFile( "target/group.artifact_1.0.0.0.jar" );
+        File testFile = getTestFile( "target/classes/org.apache.maven.maven-model_1.0.0.0.jar" );
         if ( testFile.exists() )
         {
             testFile.delete();
