@@ -29,6 +29,7 @@
  <modelVersion>4.0.0</modelVersion>
  <groupId>org.apache.felix</groupId>
  <artifactId>maven-bundle-plugin</artifactId>
+ <version>0.9.0-incubator-SNAPSHOT</version>
 
  <packaging>maven-plugin</packaging>
  <name>Maven Bundle Plugin</name>
@@ -36,13 +37,12 @@
   embedding packages from the classpath (wildcarded). Plus a zillion
   other features. See http://www.aqute.biz/php/tools/bnd.php
   </description>
- <version>0.9.0-incubator-SNAPSHOT</version>
  
  <dependencies>
   <dependency>
    <groupId>biz.aQute</groupId>
    <artifactId>bndlib</artifactId>
-   <version>0.0.145</version>
+   <version>0.0.160</version>
   </dependency>
   <dependency>
    <groupId>junit</groupId>

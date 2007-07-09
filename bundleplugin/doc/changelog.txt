@@ -17,7 +17,7 @@ bundleplugin.
 * [2007-05-20] Changed package naming.
 * [2007-05-21] Improved handling of resource copying to copy the plugin's
 resources if specified or the standard Maven-specified resources (FELIX-261).
-* [2007-05-24] Updated to BND version 0.0.145.
 * [2007-06-13] Factored out some common code (FELIX-304).
 * [2007-06-14] Enable output folder to be configured (FELIX-305).
 * [2007-07-05] Added support for overriding project type (FELIX-309).
+* [2007-07-09] Updated to BND version 0.0.160.
