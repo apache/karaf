@@ -2683,7 +2683,7 @@ ex.printStackTrace();
                 ServiceReference ref = (ServiceReference) refList.get(refIdx);
 
                 // Now check for castability.
-                if (!Felix.isServiceAssignable(bundle, ref))
+                if (!Util.isServiceAssignable(bundle, ref))
                 {
                     refList.remove(refIdx);
                     refIdx--;
@@ -2758,37 +2758,6 @@ ex.printStackTrace();
 
         return (ServiceReference[]) result.toArray(new ServiceReference[result.size()]);
 
-    }
-
-    /**
-     * This method determines if the requesting bundle is able to cast
-     * the specified service reference based on class visibility rules
-     * of the underlying modules.
-     * @param requester The bundle requesting the service.
-     * @param ref The service in question.
-     * @return <tt>true</tt> if the requesting bundle is able to case
-     *         the service object to a known type.
-    **/
-    public static boolean isServiceAssignable(Bundle requester, ServiceReference ref)
-    {
-        // Boolean flag.
-        boolean allow = true;
-        // Get the service's objectClass property.
-        String[] objectClass = (String[]) ref.getProperty(FelixConstants.OBJECTCLASS);
-
-        // The the service reference is not assignable when the requesting
-        // bundle is wired to a different version of the service object.
-        // NOTE: We are pessimistic here, if any class in the service's
-        // objectClass is not usable by the requesting bundle, then we
-        // disallow the service reference.
-        for (int classIdx = 0; (allow) && (classIdx < objectClass.length); classIdx++)
-        {
-            if (!ref.isAssignableTo(requester, objectClass[classIdx]))
-            {
-                allow = false;
-            }
-        }
-        return allow;
     }
 
     protected Object getService(Bundle bundle, ServiceReference ref)

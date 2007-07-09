@@ -717,7 +717,7 @@ public class EventDispatcher
                 if ((filter == null) || filter.match(((ServiceEvent) event).getServiceReference()))
                 {
                     if ((l instanceof AllServiceListener) ||
-                        Felix.isServiceAssignable(bundle, ((ServiceEvent) event).getServiceReference()))
+                        Util.isServiceAssignable(bundle, ((ServiceEvent) event).getServiceReference()))
                     {
                         if (System.getSecurityManager() != null)
                         {
