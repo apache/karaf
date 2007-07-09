@@ -71,6 +71,15 @@ public class ServiceImpl implements Service {
     // work queue
     private final SerialExecutor m_executor = new SerialExecutor();
     
+    // instance factory
+	private Object m_instanceFactory;
+	private String m_instanceFactoryCreateMethod;
+	
+	// composition manager
+	private Object m_compositionManager;
+	private String m_compositionManagerGetMethod;
+	private Object m_compositionManagerInstance;
+    
     public ServiceImpl(BundleContext context) {
     	m_state = new State((List) m_dependencies.clone(), false);
         m_context = context;
@@ -268,6 +277,26 @@ public class ServiceImpl implements Service {
 	    ensureNotActive();
 	    m_implementation = implementation;
 	    return this;
+	}
+	
+	public synchronized Service setFactory(Object factory, String createMethod) {
+		m_instanceFactory = factory;
+		m_instanceFactoryCreateMethod = createMethod;
+		return this;
+	}
+
+	public synchronized Service setFactory(String createMethod) {
+		return setFactory(null, createMethod);
+	}
+	
+	public synchronized Service setComposition(Object instance, String getMethod) {
+		m_compositionManager = instance;
+		m_compositionManagerGetMethod = getMethod;
+		return this;
+	}
+	
+	public synchronized Service setComposition(String getMethod) {
+		return setComposition(null, getMethod);
 	}
 
 	public String toString() {
@@ -473,15 +502,52 @@ public class ServiceImpl implements Service {
 	            // instantiate
 	            try {
 	                m_serviceInstance = ((Class) m_implementation).newInstance();
-	            } catch (InstantiationException e) {
+	            } 
+	            catch (InstantiationException e) {
 	                // TODO handle this exception
 	                e.printStackTrace();
-	            } catch (IllegalAccessException e) {
+	            } 
+	            catch (IllegalAccessException e) {
 	                // TODO handle this exception
 	                e.printStackTrace();
 	            }
 	        }
 	        else {
+	        	if (m_instanceFactoryCreateMethod != null) {
+	        		Object factory = null;
+		        	if (m_instanceFactory != null) {
+		        		if (m_instanceFactory instanceof Class) {
+		        			try {
+								factory = ((Class) m_instanceFactory).newInstance();
+							} 
+		        			catch (InstantiationException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} 
+		        			catch (IllegalAccessException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+		        		}
+		        		else {
+		        			factory = m_instanceFactory;
+		        		}
+		        	}
+		        	else {
+		        		factory = null; // TODO!!!! where does the factory come from if not explicitly defined
+		        	}
+		        	if (factory == null) {
+		        		throw new IllegalStateException("Factory cannot be null");
+		        	}
+		        	try {
+						Method m = factory.getClass().getDeclaredMethod(m_instanceFactoryCreateMethod, null);
+						m_serviceInstance = m.invoke(factory, null);
+					} 
+		        	catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	        	}
 	        	if (m_implementation == null) {
 	        		throw new IllegalStateException("Implementation cannot be null");
 	        	}
@@ -600,47 +666,75 @@ public class ServiceImpl implements Service {
      * @param instance the instance to fill in
      */
     private void configureImplementation(Class clazz, Object instance) {
-        Class serviceClazz = m_serviceInstance.getClass();
-        while (serviceClazz != null) {
-            Field[] fields = serviceClazz.getDeclaredFields();
-            AccessibleObject.setAccessible(fields, true);
-            for (int j = 0; j < fields.length; j++) {
-                if (fields[j].getType().equals(clazz)) {
-                    try {
-                        // synchronized makes sure the field is actually written to immediately
-                        synchronized (new Object()) {
-                            fields[j].set(m_serviceInstance, instance);
-                        }
-                    }
-                    catch (Exception e) {
-                        System.err.println("Exception while trying to set " + fields[j].getName() +
-                            " of type " + fields[j].getType().getName() +
-                            " by classloader " + fields[j].getType().getClassLoader() +
-                            " which should equal type " + clazz.getName() +
-                            " by classloader " + clazz.getClassLoader() +
-                            " of type " + serviceClazz.getName() +
-                            " by classloader " + serviceClazz.getClassLoader() +
-                            " on " + m_serviceInstance + 
-                            " by classloader " + m_serviceInstance.getClass().getClassLoader() +
-                            "\nDumping stack:"
-                        );
-                        e.printStackTrace();
-                        System.out.println("C: " + clazz);
-                        System.out.println("I: " + instance);
-                        System.out.println("I:C: " + instance.getClass().getClassLoader());
-                        Class[] classes = instance.getClass().getInterfaces();
-                        for (int i = 0; i < classes.length; i++) {
-                            Class c = classes[i];
-                            System.out.println("I:C:I: " + c);
-                            System.out.println("I:C:I:C: " + c.getClassLoader());
-                        }
-                        System.out.println("F: " + fields[j]);
-                        throw new IllegalStateException("Could not set field " + fields[j].getName() + " on " + m_serviceInstance);
-                    }
-                }
-            }
-            serviceClazz = serviceClazz.getSuperclass();
-        }
+    	Object[] instances = null;
+    	if (m_compositionManagerGetMethod != null) {
+			if (m_compositionManager != null) {
+    			m_compositionManagerInstance = m_compositionManager;
+    		}
+    		else {
+    			m_compositionManagerInstance = m_serviceInstance;
+    		}
+    		if (m_compositionManagerInstance != null) {
+	    		try {
+					Method m = m_compositionManagerInstance.getClass().getDeclaredMethod(m_compositionManagerGetMethod, null);
+            		AccessibleObject.setAccessible(new AccessibleObject[] { m }, true);
+					instances = (Object[]) m.invoke(m_compositionManager, null);
+				} 
+	    		catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		}
+    	}
+    	else {
+    		instances = new Object[] { m_serviceInstance };
+    	}
+    	if (instances != null) {
+	    	for (int i = 0; i < instances.length; i++) {
+	    		Object serviceInstance = instances[i];
+		        Class serviceClazz = serviceInstance.getClass();
+		        while (serviceClazz != null) {
+		            Field[] fields = serviceClazz.getDeclaredFields();
+		            AccessibleObject.setAccessible(fields, true);
+		            for (int j = 0; j < fields.length; j++) {
+		                if (fields[j].getType().equals(clazz)) {
+		                    try {
+		                        // synchronized makes sure the field is actually written to immediately
+		                        synchronized (new Object()) {
+		                            fields[j].set(serviceInstance, instance);
+		                        }
+		                    }
+		                    catch (Exception e) {
+		                        System.err.println("Exception while trying to set " + fields[j].getName() +
+		                            " of type " + fields[j].getType().getName() +
+		                            " by classloader " + fields[j].getType().getClassLoader() +
+		                            " which should equal type " + clazz.getName() +
+		                            " by classloader " + clazz.getClassLoader() +
+		                            " of type " + serviceClazz.getName() +
+		                            " by classloader " + serviceClazz.getClassLoader() +
+		                            " on " + serviceInstance + 
+		                            " by classloader " + serviceInstance.getClass().getClassLoader() +
+		                            "\nDumping stack:"
+		                        );
+		                        e.printStackTrace();
+		                        System.out.println("C: " + clazz);
+		                        System.out.println("I: " + instance);
+		                        System.out.println("I:C: " + instance.getClass().getClassLoader());
+		                        Class[] classes = instance.getClass().getInterfaces();
+		                        for (int k = 0; k < classes.length; k++) {
+		                            Class c = classes[k];
+		                            System.out.println("I:C:I: " + c);
+		                            System.out.println("I:C:I:C: " + c.getClassLoader());
+		                        }
+		                        System.out.println("F: " + fields[j]);
+		                        throw new IllegalStateException("Could not set field " + fields[j].getName() + " on " + serviceInstance);
+		                    }
+		                }
+		            }
+		            serviceClazz = serviceClazz.getSuperclass();
+		        }
+	    	}
+    	}
     }
 
     private void configureServices(State state) {
