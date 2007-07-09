@@ -254,7 +254,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
         boolean done = false;
         while (!done && currentClazz != null) {
             done = invokeMethod(instance, currentClazz, methodName,
-                new Class[][] {{ServiceReference.class, m_trackedServiceName}, {ServiceReference.class, Object.class}, {ServiceReference.class}, {Object.class}, {m_trackedServiceName}, {}},
+                new Class[][] {{ServiceReference.class, m_trackedServiceName}, {ServiceReference.class, Object.class}, {ServiceReference.class}, {m_trackedServiceName}, {Object.class}, {}},
                 new Object[][] {{reference, service}, {reference, service}, {reference}, {service}, {service}, {}},
                 false);
             if (!done) {
