@@ -1,0 +1,6 @@
+Changes from 0.8.0-incubator to 1.0.0
+-------------------------------------
+
+* [2007-03-02] Added Bundle.getBundleContext() method, which is part
+  of OSGi R4.1; this is an interim fix until we switch to the OSGi R4.1
+  API definitions.

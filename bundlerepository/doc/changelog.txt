@@ -1,0 +1,11 @@
+Changes from 0.8.0-incubator to 1.0.0
+-------------------------------------
+
+* [2007-03-16] Correctly initialized member fields to avoid incorrectly
+  assigning the source and license URLs. (FELIX-242)
+* [2007-03-19] Parent POM extends Apache POM for Apache-wide policies.
+  (FELIX-260)
+* [2007-05-18] Improved OBR dependency resolution by searching resolving
+  bundles before local bundles and to search through all available
+  candidates to find one that can resolve instead of picking one and failing
+  if it cannot be resolved. (FELIX-285)

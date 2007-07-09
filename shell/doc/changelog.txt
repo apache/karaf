@@ -1,0 +1,8 @@
+Changes from 0.8.0-incubator to 1.0.0
+-------------------------------------
+
+* [2006-12-15] Changed the symbolic name, since it was being calculated
+  incorrectly.
+* [2007-05-03] Modified 'ps' so that it displays reasonable defaults if
+  headers are missing. Also added ability to display symbolic name.
+* [2007-06-14] Modified refresh command to accept bundle IDs.

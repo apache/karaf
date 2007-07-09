@@ -1,23 +1,24 @@
 Changes from 0.8.0-incubator to 1.0.0
 -------------------------------------
+
 * [2007-03-13] <Include-Resources> now supports JAR files in the class path,
-not just JAR files in the project directory.
+  not just JAR files in the project directory.
 * [2007-03-15] Fixed a bug in converting Maven version numbers to OSGi version
-numbers (FELIX-256).
-* [2007-03-28] Added support for using BND directives in the POM file
-(FELIX-218).
+  numbers. (FELIX-256)
+* [2007-03-28] Added support for using BND directives in the POM file.
+  (FELIX-218)
 * [2007-04-10] Added a recursive "bundleall" goal to generate OSGi bundles for
-all dependencies and a "manifest" goal to generate just the manifest
-(FELIX-199).
-* [2007-04-27] Modified the plugin so that it does not run on POM projects
-(FELIX-269).
-* [2007-05-17] Plugin now handles null property values better (FELIX-281).
+  all dependencies and a "manifest" goal to generate just the manifest.
+  (FELIX-199)
+* [2007-04-27] Modified the plugin so that it does not run on POM projects.
+  (FELIX-269)
+* [2007-05-17] Plugin now handles null property values better. (FELIX-281)
 * [2007-05-20] Renamed project directory from maven-bundle-plugin to
-bundleplugin.
+  bundleplugin.
 * [2007-05-20] Changed package naming.
 * [2007-05-21] Improved handling of resource copying to copy the plugin's
-resources if specified or the standard Maven-specified resources (FELIX-261).
-* [2007-06-13] Factored out some common code (FELIX-304).
-* [2007-06-14] Enable output folder to be configured (FELIX-305).
-* [2007-07-05] Added support for overriding project type (FELIX-309).
+  resources if specified or the standard Maven-specified resources. (FELIX-261)
+* [2007-06-13] Factored out some common code. (FELIX-304)
+* [2007-06-14] Enable output folder to be configured. (FELIX-305)
+* [2007-07-05] Added support for overriding project type. (FELIX-309)
 * [2007-07-09] Updated to BND version 0.0.160.
