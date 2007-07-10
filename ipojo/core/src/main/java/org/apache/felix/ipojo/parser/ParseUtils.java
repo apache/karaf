@@ -18,6 +18,8 @@
  */
 package org.apache.felix.ipojo.parser;
 
+import java.util.StringTokenizer;
+
 /**
  * Parse Utils Methods.
  * 
@@ -40,7 +42,7 @@ public class ParseUtils {
             if (m.length() == 0) {
                 return new String[0];
             }
-            String[] values = m.split(",");
+            String[] values = split(m, ",");
             for (int i = 0; i < values.length; i++) {
                 values[i] = values[i].trim();
             }
@@ -48,6 +50,24 @@ public class ParseUtils {
         } else {
             return new String[] { str };
         }
+    }
+    
+    /**
+     * Split method. 
+     * This method is equivalent of the String.split in java 1.4
+     * @param toSplit : String to split
+     * @param separator : separator
+     * @return the token array 
+     */
+    public static String[] split(String toSplit, String separator) {
+        StringTokenizer st = new StringTokenizer(toSplit, separator);
+        String[] result = new String[st.countTokens()];
+        int i = 0;
+        while (st.hasMoreElements()) {
+            result[i] = st.nextToken();
+            i++;
+        }
+        return result;
     }
 
 }

@@ -25,6 +25,7 @@ import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
+import org.apache.felix.ipojo.IPojoContext;
 import org.apache.felix.ipojo.ServiceContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -79,6 +80,11 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
      * Component Instance who creates this registry.
      */
     private ComponentInstance m_instance;
+    
+    /**
+     * Global service context.
+     */
+    private BundleContext m_global;
 
     /**
      * Constructor. This constructor instantiate a service registry with the
@@ -89,6 +95,11 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
     public CompositeServiceContext(BundleContext bc) {
         m_registry = new ServiceRegistry(bc);
         m_parent = bc;
+        if (m_parent instanceof IPojoContext) {
+            m_global = ((IPojoContext) m_parent).getGlobalContext();
+        } else {
+            m_global = m_parent; // the parent context is the global context
+        }
     }
 
     /**
@@ -99,7 +110,6 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
      */
     public CompositeServiceContext(BundleContext bc, ComponentInstance ci) {
         this(bc);
-        m_parent = bc;
         m_instance = ci;
     }
 
@@ -219,7 +229,7 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
      */
     private void importFactories() {
         try {
-            ServiceReference[] refs = m_parent.getServiceReferences(Factory.class.getName(), null);
+            ServiceReference[] refs = m_global.getServiceReferences(Factory.class.getName(), null);
             if (refs != null) {
                 for (int i = 0; i < refs.length; i++) {
                     importFactory(refs[i]);
@@ -242,7 +252,7 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
         for (int j = 0; j < ref.getPropertyKeys().length; j++) {
             dict.put(ref.getPropertyKeys()[j], ref.getProperty(ref.getPropertyKeys()[j]));
         }
-        rec.m_fact = new FactoryProxy((Factory) m_parent.getService(ref), this);
+        rec.m_fact = new FactoryProxy((Factory) m_global.getService(ref), this);
         rec.m_reg = registerService(Factory.class.getName(), rec.m_fact, dict);
         rec.m_ref = ref;
     }
@@ -258,7 +268,7 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
             if (rec.m_ref == ref) {
                 rec.m_reg.unregister();
                 rec.m_fact = null;
-                m_parent.ungetService(rec.m_ref);
+                m_global.ungetService(rec.m_ref);
                 m_factories.remove(rec);
                 return;
             }
@@ -268,13 +278,12 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
     /**
      * Start the registry management.
      */
-    public void start() {
+    public synchronized void start() {
         importFactories();
         try {
-            m_parent.addServiceListener(this, "(" + Constants.OBJECTCLASS + "=" + Factory.class.getName() + ")");
+            m_global.addServiceListener(this, "(" + Constants.OBJECTCLASS + "=" + Factory.class.getName() + ")");
         } catch (InvalidSyntaxException e) {
-            // Should not happen
-            e.printStackTrace();
+            e.printStackTrace(); // Should not happen
         }
     }
 
@@ -282,7 +291,7 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
      * Stop the registry management.
      */
     public synchronized void stop() {
-        m_parent.removeServiceListener(this);
+        m_global.removeServiceListener(this);
         m_registry.reset();
         for (int i = 0; i < m_factories.size(); i++) {
             Record rec = (Record) m_factories.get(i);

@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
@@ -79,10 +78,10 @@ public class Manipulator {
             return false;
         }
 
-        URL url = clazz.toURI().toURL();
+        URL url = clazz.toURL();
 
         // if (url == null) { throw new ClassNotFoundException(name); }
-        ManipulationProperty.getLogger().log(Level.INFO, "Manipulate the class file : " + clazz.getAbsolutePath());
+        ManipulationProperty.getLogger().log(ManipulationProperty.INFO, "Manipulate the class file : " + clazz.getAbsolutePath());
 
         InputStream is1 = url.openStream();
 
@@ -138,7 +137,7 @@ public class Manipulator {
                 fos.write(cw0.toByteArray());
 
                 fos.close();
-                ManipulationProperty.getLogger().log(Level.INFO, "Put the file " + clazz.getAbsolutePath() + " in the jar file");
+                ManipulationProperty.getLogger().log(ManipulationProperty.INFO, "Put the file " + clazz.getAbsolutePath() + " in the jar file");
             } catch (Exception e) {
                 System.err.println("Problem to write the adapted class on the file system " + " [ " + clazz.getAbsolutePath() + " ] " + e.getMessage());
             }

@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -211,7 +210,7 @@ public class Pojoization {
                 }
             }
         } catch (IOException e) {
-            error("Cannot manipulate the Jar file : " + e.getMessage() + " - Cause : " + e.getCause());
+            error("Cannot manipulate the Jar file : " + e.getMessage());
             return;
         }
 
@@ -222,7 +221,7 @@ public class Pojoization {
             jos = null;
             fos = null;
         } catch (IOException e) {
-            error("Cannot close the new Jar file : " + e.getMessage() + " - Cause : " + e.getCause());
+            error("Cannot close the new Jar file : " + e.getMessage());
             return;
         }
     }
@@ -443,7 +442,7 @@ public class Pojoization {
             return new HashMap();
         }
 
-        Map result = new LinkedHashMap();
+        Map result = new HashMap();
         QuotedTokenizer qt = new QuotedTokenizer(value, ";=,");
         char del;
         do {
@@ -525,7 +524,7 @@ public class Pojoization {
         URL url;
         Element[] meta = null;
         try {
-            url = metadata.toURI().toURL();
+            url = metadata.toURL();
             if (url == null) {
                 error("Cannot find the metdata file : " + path);
                 return null;

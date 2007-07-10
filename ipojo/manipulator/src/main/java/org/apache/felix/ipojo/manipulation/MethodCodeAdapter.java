@@ -18,8 +18,6 @@
  */
 package org.apache.felix.ipojo.manipulation;
 
-import java.util.logging.Level;
-
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -68,12 +66,10 @@ public class MethodCodeAdapter extends AdviceAdapter implements Opcodes {
     public void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
         if (owner.equals(m_owner)) {
             if (opcode == GETFIELD) {
-                ManipulationProperty.getLogger().log(Level.INFO, "Manipulate a GETFIELD on : " + name);
                 String gDesc = "()" + desc;
                 visitMethodInsn(INVOKEVIRTUAL, owner, "_get" + name, gDesc);
                 return;
             } else if (opcode == PUTFIELD) {
-                ManipulationProperty.getLogger().log(Level.INFO, "Manipulate a PUTFIELD on : " + name);
                 String sDesc = "(" + desc + ")V";
                 visitMethodInsn(INVOKESPECIAL, owner, "_set" + name, sDesc);
                 return;

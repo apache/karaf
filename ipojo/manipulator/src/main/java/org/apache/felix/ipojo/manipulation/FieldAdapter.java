@@ -18,8 +18,6 @@
  */
 package org.apache.felix.ipojo.manipulation;
 
-import java.util.logging.Level;
-
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -524,7 +522,7 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 break;
 
             default:
-                ManipulationProperty.getLogger().log(Level.SEVERE, "Manipulation problem in " + m_owner + " : a type is not implemented : " + type);
+                ManipulationProperty.getLogger().log(ManipulationProperty.SEVERE, "Manipulation problem in " + m_owner + " : a type is not implemented : " + type);
                 break;
         }
 
@@ -646,7 +644,7 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 mv.visitInsn(RETURN);
                 break;
             default:
-                ManipulationProperty.getLogger().log(Level.SEVERE, "Manipulation Error : Cannot create the setter method for the field : " + name + " (" + type + ")");
+                ManipulationProperty.getLogger().log(ManipulationProperty.SEVERE, "Manipulation Error : Cannot create the setter method for the field : " + name + " (" + type + ")");
                 break;
         }
 

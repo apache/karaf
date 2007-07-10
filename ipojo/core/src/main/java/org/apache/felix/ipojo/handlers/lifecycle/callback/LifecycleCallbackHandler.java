@@ -200,7 +200,7 @@ public class LifecycleCallbackHandler extends Handler {
                     m_manager.getFactory().getLogger().log(
                             Logger.ERROR,
                             "[" + m_manager.getClassName() + "] The callback method " + m_callbacks[i].getMethod() + " has throws an exception : "
-                                    + e.getMessage() + " -> " + e.getCause());
+                                    + e.getMessage());
                 }
             }
         }

@@ -18,10 +18,6 @@
  */
 package org.apache.felix.ipojo.manipulation;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-
 /**
  * Store properties for the manipulation process.
  * 
@@ -29,6 +25,47 @@ import java.util.logging.Logger;
  * 
  */
 public class ManipulationProperty {
+    
+    /**
+     * Logger info level.
+     */
+    public static final int INFO = 0;
+    
+    /**
+     * Logger warning level. 
+     */
+    public static final int WARNING = 1;
+    
+    /**
+     * Logger severe level. 
+     */
+    public static final int SEVERE = 2;
+    
+    /**
+     * Internal logger implementation.
+     */
+    protected static class Logger {
+        /**
+         * Log method.
+         * @param level : level
+         * @param message : message to log
+         */
+        public void log(int level, String message) {
+            if (level >= m_logLevel) {
+                switch (level) {
+                    case INFO:
+                        System.err.println("[INFO] " + message);
+                        break;
+                    case WARNING:
+                        System.err.println("[WARNING] " + message);
+                        break;
+                    case SEVERE:
+                        System.err.println("[SEVERE] " + message);
+                        break;
+                }
+            }
+        }
+    }
 
     /**
      * Manipulator logger.
@@ -38,7 +75,7 @@ public class ManipulationProperty {
     /**
      * Default logger level.
      */
-    private static Level m_logLevel = Level.WARNING;
+    private static int m_logLevel = WARNING;
 
     /**
      * Get the manipulator logger.
@@ -46,9 +83,7 @@ public class ManipulationProperty {
      */
     public static Logger getLogger() {
         if (m_logger == null) {
-            String name = "org.apache.felix.ipojo.manipulator";
-            m_logger = Logger.getLogger(name);
-            m_logger.setLevel(m_logLevel);
+            m_logger = new Logger();
         }
         return m_logger;
     }

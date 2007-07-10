@@ -301,5 +301,13 @@ public class IPojoContext implements BundleContext {
     public boolean ungetService(ServiceReference reference) {
         return m_serviceContext.ungetService(reference);
     }
+    
+    /**
+     * Get the global context, i.e. the bundle context of the factory.
+     * @return the global bundle context.
+     */
+    public BundleContext getGlobalContext() {
+        return m_bundleContext;
+    }
 
 }
