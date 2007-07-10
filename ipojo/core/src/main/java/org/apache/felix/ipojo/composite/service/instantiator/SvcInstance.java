@@ -29,7 +29,7 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.UnacceptableConfiguration;
-import org.apache.felix.ipojo.architecture.PropertyDescription;
+import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
@@ -274,8 +274,9 @@ public class SvcInstance implements ServiceListener {
      */
     private boolean match(Factory fact) {
         // Check if the factory can provide the spec
-        for (int i = 0; i < fact.getComponentDescription().getprovidedServiceSpecification().length; i++) {
-            if (fact.getComponentDescription().getprovidedServiceSpecification()[i].equals(m_specification)) {
+        Element[] provides = fact.getDescription().getElements("provides");
+        for (int i = 0; i < provides.length; i++) {
+            if (provides[i].getAttribute("specification").equals(m_specification)) {
 
                 // Check that the factory needs every properties contained in
                 // the configuration
@@ -310,9 +311,9 @@ public class SvcInstance implements ServiceListener {
      * @return true if the factory support this property
      */
     private boolean containsProperty(String name, Factory factory) {
-        PropertyDescription[] props = factory.getComponentDescription().getProperties();
+        Element[] props = factory.getDescription().getElements("property");
         for (int i = 0; i < props.length; i++) {
-            if (props[i].getName().equalsIgnoreCase(name)) {
+            if (props[i].getAttribute("name").equalsIgnoreCase(name)) {
                 return true;
             }
         }

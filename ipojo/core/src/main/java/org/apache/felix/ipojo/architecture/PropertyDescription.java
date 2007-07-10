@@ -77,17 +77,4 @@ public class PropertyDescription {
         return m_value;
     }
 
-    /**
-     * Get a displayed form of the current property.
-     * @return : a String representing this property.
-     * @see java.lang.Object#toString()
-     */
-    public String toString() {
-        if (m_value != null) {
-            return getName() + " - " + getType() + " - " + getValue();
-        } else {
-            return getName() + " - " + getType() + " - REQUIRED";
-        }
-    }
-
 }

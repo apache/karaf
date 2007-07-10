@@ -20,7 +20,7 @@ package org.apache.felix.ipojo;
 
 import java.util.Dictionary;
 
-import org.apache.felix.ipojo.architecture.ComponentDescription;
+import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * Component Type Factory Service. This service is exposed by a instance manager
@@ -56,7 +56,7 @@ public interface Factory {
      * 
      * @return the component type information.
      */
-    ComponentDescription getComponentDescription();
+    Element getDescription();
 
     /**
      * Check if the given configuration is acceptable as a configuration of a

@@ -21,9 +21,10 @@ package org.apache.felix.ipojo.arch;
 import java.io.PrintStream;
 
 import org.apache.felix.ipojo.ComponentInstance;
+import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
-import org.ungoverned.osgi.service.shell.Command;
+import org.apache.felix.shell.Command;
 
 /**
  * Implementation of the arch command printing the actual architecture.
@@ -36,11 +37,16 @@ public class ArchCommandImpl implements Command {
      * List of arch service.
      */
     private Architecture[] m_archs;
+    
+    /**
+     * Factory services. 
+     */
+    private Factory[] m_factories;
 
     /**
      * Get the command name.
      * @return the command name (arch)
-     * @see org.ungoverned.osgi.service.shell.Command#getName()
+     * @see org.apache.felix.shell.Command#getName()
      */
     public String getName() {
         return "arch";
@@ -49,16 +55,16 @@ public class ArchCommandImpl implements Command {
     /**
      * Get help message.
      * @return the command usage.
-     * @see org.ungoverned.osgi.service.shell.Command#getUsage()
+     * @see org.apache.felix.shell.Command#getUsage()
      */
     public String getUsage() {
-        return "arch [instance name]";
+        return "arch [-factories] [-instances] [-factory factory_name] [-instance instance_name]";
     }
 
     /**
      * Get a small description.
      * @return get a description.
-     * @see org.ungoverned.osgi.service.shell.Command#getShortDescription()
+     * @see org.apache.felix.shell.Command#getShortDescription()
      */
     public String getShortDescription() {
         return "Architecture command : display the architecture";
@@ -69,35 +75,98 @@ public class ArchCommandImpl implements Command {
      * @param line : command line
      * @param out : the default output stream
      * @param err : the error output stream
-     * @see org.ungoverned.osgi.service.shell.Command#execute(java.lang.String, java.io.PrintStream, java.io.PrintStream)
+     * @see org.apache.felix.shell.Command#execute(java.lang.String, java.io.PrintStream, java.io.PrintStream)
      */
     public void execute(String line, PrintStream out, PrintStream err) {
         synchronized (this) {
-            if (line.substring("arch".length()).trim().length() == 0) {
-                for (int i = 0; i < m_archs.length; i++) {
-                    InstanceDescription instance = m_archs[i].getInstanceDescription();
-                    if (instance.getState() == ComponentInstance.VALID) {
-                        out.println("Instance " + instance.getName() + " -> valid");
-                    }
-                    if (instance.getState() == ComponentInstance.INVALID) {
-                        out.println("Instance " + instance.getName() + " -> invalid");
-                    }
-                    if (instance.getState() == ComponentInstance.STOPPED) {
-                        out.println("Instance " + instance.getName() + " -> stopped");
-                    }
-                }
-            } else {
-                String line2 = line.substring("arch".length()).trim();
-                for (int i = 0; i < m_archs.length; i++) {
-                    InstanceDescription instance = m_archs[i].getInstanceDescription();
-                    if (instance.getName().equalsIgnoreCase(line2)) {
-                        out.println(instance.getDescription());
-                        return;
-                    }
-                }
-                err.println("Instance " + line2 + " not found");
+            String line2 = line.substring("arch".length()).trim();
+            
+            if (line2.equalsIgnoreCase("-instances") || line2.length() == 0) {
+                printInstances(out);
+                return;
             }
+            
+            if (line2.equalsIgnoreCase("-factories")) {
+                printFactories(out);
+                return;
+            }
+            
+            if (line2.startsWith("-factory")) {
+                String name = line2.substring("-factory".length()).trim();
+                printFactory(name, out, err);
+                return;
+            }
+            
+            if (line2.startsWith("-instance")) {
+                String name = line2.substring("-instance".length()).trim();
+                printInstance(name, out, err);
+                return;
+            }
+            
+            err.println(getUsage());
         }
 
+    }
+    
+    /**
+     * Print instance list.
+     * @param out : default print stream
+     */
+    private void printInstances(PrintStream out) {
+        for (int i = 0; i < m_archs.length; i++) {
+            InstanceDescription instance = m_archs[i].getInstanceDescription();
+            if (instance.getState() == ComponentInstance.VALID) {
+                out.println("Instance " + instance.getName() + " -> valid");
+            }
+            if (instance.getState() == ComponentInstance.INVALID) {
+                out.println("Instance " + instance.getName() + " -> invalid");
+            }
+            if (instance.getState() == ComponentInstance.STOPPED) {
+                out.println("Instance " + instance.getName() + " -> stopped");
+            }
+        }
+    }
+    
+    /**
+     * Print instance description.
+     * @param name : instance name
+     * @param out : default print stream
+     * @param err : error print stream (if the instance is not found)
+     */
+    private void printInstance(String name, PrintStream out, PrintStream err) {
+        for (int i = 0; i < m_archs.length; i++) {
+            InstanceDescription instance = m_archs[i].getInstanceDescription();
+            if (instance.getName().equalsIgnoreCase(name)) {
+                out.println(instance.getDescription());
+                return;
+            }
+        }
+        err.println("Instance " + name + " not found");
+    }
+    
+    /**
+     * Print Factory information.
+     * @param out : output stream
+     */
+    private void printFactories(PrintStream out) {
+        for (int i = 0; i < m_factories.length; i++) {
+            out.println("Factory " + m_factories[i].getName());
+        }
+    }
+    
+    /**
+     * Print factory description.
+     * @param name : factory name
+     * @param out : default print stream
+     * @param err : error print stream (if the factory is not found)
+     */
+    private void printFactory(String name, PrintStream out, PrintStream err) {
+        for (int i = 0; i < m_factories.length; i++) {
+            if (m_factories[i].getName().equalsIgnoreCase(name)) {
+                out.println(m_factories[i].getDescription());
+                return;
+            }
+        }
+        err.println("Factory " + name + " not found");
     }
 }

@@ -24,7 +24,7 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.UnacceptableConfiguration;
-import org.apache.felix.ipojo.architecture.ComponentDescription;
+import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * Bridge representing a Factory inside a composition.
@@ -86,10 +86,10 @@ public class FactoryProxy implements Factory {
      * configuration properties ...
      * 
      * @return the component type information.
-     * @see org.apache.felix.ipojo.Factory#getComponentDescription()
+     * @see org.apache.felix.ipojo.Factory#getDescription()
      */
-    public ComponentDescription getComponentDescription() {
-        return m_delegate.getComponentDescription();
+    public Element getDescription() {
+        return m_delegate.getDescription();
     }
 
     /**

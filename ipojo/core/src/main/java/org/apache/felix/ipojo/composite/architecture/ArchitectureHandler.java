@@ -110,7 +110,7 @@ public class ArchitectureHandler extends CompositeHandler implements Architectur
     /**
      * Get the instance description.
      * @return the instance description
-     * @see org.apache.felix.ipojo.architecture.Architecture#getComponentDescription()
+     * @see org.apache.felix.ipojo.architecture.Architecture#getDescription()
      */
     public InstanceDescription getInstanceDescription() {
         return m_manager.getInstanceDescription();

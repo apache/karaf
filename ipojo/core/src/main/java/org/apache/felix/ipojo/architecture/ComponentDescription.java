@@ -18,6 +18,9 @@
  */
 package org.apache.felix.ipojo.architecture;
 
+import org.apache.felix.ipojo.metadata.Attribute;
+import org.apache.felix.ipojo.metadata.Element;
+
 /**
  * Component Type information.
  * 
@@ -71,19 +74,7 @@ public class ComponentDescription {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        String res = "";
-        if (m_className == null) {
-            res += "Component Type : " + m_name + " (Composition) \n";
-        } else {
-            res += "Component Type : " + m_name + " (" + m_className + ") \n";
-        }
-        for (int i = 0; i < m_providedServiceSpecification.length; i++) {
-            res += "\tProvides : " + m_providedServiceSpecification[i] + "\n";
-        }
-        for (int i = 0; i < m_properties.length; i++) {
-            res += "\tProperty : " + m_properties[i] + "\n";
-        }
-        return res;
+        return getDescription().toString();
     }
 
     /**
@@ -151,6 +142,42 @@ public class ComponentDescription {
      */
     public String getName() {
         return m_name;
+    }
+    
+    /**
+     * Get the component type description.
+     * @return : the description
+     */
+    public Element getDescription() {
+        Element desc = new Element("Factory", "");
+        
+        desc.addAttribute(new Attribute("name", m_name));
+        
+        if (m_className != null) {
+            desc.addAttribute(new Attribute("Implementation-Class", m_className));
+        } else {
+            desc.addAttribute(new Attribute("Composite", "true"));
+        }
+        
+        for (int i = 0; i < m_providedServiceSpecification.length; i++) {
+            Element prov = new Element("provides", "");
+            prov.addAttribute(new Attribute("specification", m_providedServiceSpecification[i]));
+            desc.addElement(prov);
+        }
+        
+        for (int i = 0; i < m_properties.length; i++) {
+            Element prop = new Element("property", "");
+            prop.addAttribute(new Attribute("name", m_properties[i].getName()));
+            prop.addAttribute(new Attribute("type", m_properties[i].getType()));
+            if (m_properties[i].getValue() != null) {
+                prop.addAttribute(new Attribute("value", m_properties[i].getValue()));
+            } else {
+                prop.addAttribute(new Attribute("value", "REQUIRED"));
+            }
+            desc.addElement(prop);
+        }
+        
+        return desc;
     }
 
 }

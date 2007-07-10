@@ -412,10 +412,10 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
      * Get the component type description attached to this factory.
      * 
      * @return : the component type description
-     * @see org.apache.felix.ipojo.Factory#getComponentDescription()
+     * @see org.apache.felix.ipojo.Factory#getDescription()
      */
-    public ComponentDescription getComponentDescription() {
-        return m_componentDesc;
+    public Element getDescription() {
+        return m_componentDesc.getDescription();
     }
 
     /**
