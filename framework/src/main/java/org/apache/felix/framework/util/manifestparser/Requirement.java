@@ -162,14 +162,6 @@ public class Requirement implements IRequirement
             // Get current attribute from this import package.
             R4Attribute reqAttr = m_attributes[reqAttrIdx];
 
-            // Ignore version attribute, since it is a special case that
-            // has already been compared using isVersionInRange() before
-            // the call to this method was made.
-            if (reqAttr.getName().equals(Constants.VERSION_ATTRIBUTE))
-            {
-                continue;
-            }
-
             // Check if the export package has the same attribute.
             boolean found = false;
             for (int capAttrIdx = 0;
