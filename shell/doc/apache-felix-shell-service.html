@@ -1,0 +1,345 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><title>Apache Felix</title>
+
+
+  
+    
+    <link rel="stylesheet" href="apache-felix-shell-service_files/site.css" type="text/css" media="all">
+    <link rel="stylesheet" href="apache-felix-shell-service_files/print.css" type="text/css" media="print">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"></head><body linkifytime="77" linkified="1" linkifying="false">
+    <div class="title">
+      <img alt="Logo" src="apache-felix-shell-service_files/apache-felix-small.png" align="right">
+    </div>
+    <div class="menu">
+      <ul>
+        <li><a href="http://cwiki.apache.org/FELIX/index.html">home</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/news.html">news</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/status.html">status</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/license.html">license</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/downloads.html">downloads</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/documentation.html">documentation</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/committers.html">committers</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/mailinglists.html">mailing lists</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/faq.html">faq</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/roadmap.html">roadmap</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/sourcecode.html">source code</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/codingstandards.html">coding standards</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/issuetracking.html">issue tracking</a></li>
+        <li><a href="http://cwiki.apache.org/FELIX/dependencies.html">dependencies</a></li>
+      </ul>
+    </div>
+    <div class="main">
+<h1><a name="ApacheFelixShellService-ApacheFelixShellService"></a>Apache Felix Shell Service</h1>
+
+<ul>
+	<li><a href="#ApacheFelixShellService-overview" title="overview on Apache Felix Shell Service">Overview</a></li>
+	<li><a href="#ApacheFelixShellService-service" title="service on Apache Felix Shell Service">How the Shell Service Works</a></li>
+	<li><a href="#ApacheFelixShellService-commands" title="commands on Apache Felix Shell Service">How Commands Work</a></li>
+	<li><a href="#ApacheFelixShellService-creating" title="creating on Apache Felix Shell Service">Creating a Command</a></li>
+	<li><a href="#ApacheFelixShellService-security" title="security on Apache Felix Shell Service">Security and the Shell Service</a></li>
+	<li><a href="#ApacheFelixShellService-feedback" title="feedback on Apache Felix Shell Service">Feedback</a></li>
+</ul>
+
+
+<p><a name="ApacheFelixShellService-overview"></a></p>
+
+<h2><a name="ApacheFelixShellService-Overview"></a>Overview</h2>
+
+<p>In order to interact with Felix it is necessary to have some sort of
+interactive shell that allows you to issue commands to the framework
+and to obtain information from it. The OSGi specification does not
+define how an OSGi framework should provide this interactivity. Felix
+defines a shell service for creating and executing arbitrary commands.
+The shell service does not define a user interface, only a service API.</p>
+
+<p>The benefit of the Felix shell service approach is that it is possible to:</p>
+
+<ul>
+	<li>have multiple shell user interfaces (e.g., textual and graphical),</li>
+	<li>add custom commands to the shell (i.e., bundles can make commands available via the shell service), and</li>
+	<li>use the shell service from other bundles/services.</li>
+</ul>
+
+
+<p>The remainder of this document describes how the shell service works
+and how to create custom commands for it. This document does not
+describe how to use the command shell, nor does it describe the
+text-based or GUI-based user interfaces that are available for the
+shell.</p>
+
+<p><a name="ApacheFelixShellService-service"></a></p>
+
+<h2><a name="ApacheFelixShellService-HowtheShellServiceWorks"></a>How the Shell Service Works</h2>
+
+<p>The Felix shell service is intended to be a simple, but extensible
+shell service that can have multiple user interface implementations,
+all of which are independent from the Felix framework. The shell
+service is currently not intended to be sophisticated, rather it is
+just a mechanism to execute commands. The shell service maintains a
+list of command services, each of which have a unique command name. The
+shell service is defined by the following service interface:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">package</span> org.apache.felix.shell;
+
+<span class="code-keyword">public</span> <span class="code-keyword">interface</span> ShellService
+{
+    <span class="code-keyword">public</span> <span class="code-object">String</span>[] getCommands();
+    <span class="code-keyword">public</span> <span class="code-object">String</span> getCommandUsage(<span class="code-object">String</span> name);
+    <span class="code-keyword">public</span> <span class="code-object">String</span> getCommandDescription(<span class="code-object">String</span> name);
+    <span class="code-keyword">public</span> ServiceReference getCommandReference(<span class="code-object">String</span> name);
+    <span class="code-keyword">public</span> void executeCommand(
+        <span class="code-object">String</span> commandLine, PrintStream out, PrintStream err)
+        <span class="code-keyword">throws</span> Exception;
+}</pre>
+</div></div>
+
+<p>Using the shell service interface, it is possible to access and
+execute available commands. The shell service methods perform the
+following functions:</p>
+
+<ul>
+	<li><tt>getCommands()</tt> - returns an array of strings that correspond to the names of the installed shell commands.</li>
+	<li><tt>getCommandUsage()</tt> - returns the command usage string for a particular command name</li>
+	<li><tt>getCommandDescription()</tt> - returns a short description for a particular command name.</li>
+	<li><tt>getCommandReference()</tt> - returns the service reference for a particular command name.</li>
+	<li><tt>executeCommand()</tt> - executes a particular command using the specified command line and print streams.</li>
+</ul>
+
+
+<p>Most of the shell service methods require no explanation except for
+the executeCommand() method. Even though this method is the most
+complex, it is still fairly simplistic. The assumption of the shell
+service is that a command line will be typed by the user (or perhaps
+constructed by a GUI) and passed into it for execution. The shell
+service interprets the command line in a very simplistic fashion; it
+takes the leading string of characters terminated by a space character
+(not including it) and assumes that this leading token is the command
+name. Consider the following command line:</p>
+
+<div class="preformatted"><div class="preformattedContent">
+<pre>update 3 <a style="color: rgb(0, 102, 32); background-color: rgb(255, 249, 171);" class="linkification-ext" href="http://www.foo.com/bar.jar" title="Linkification: http://www.foo.com/bar.jar">http://www.foo.com/bar.jar</a>
+</pre>
+</div></div>
+
+<p>The shell service interprets this as an <tt>update</tt> command and
+will search for a command service with the same name. If a
+corresponding command service is not found, then it will print an error
+message to the error print stream. If a corresponding command service
+is found, then it will pass the entire command line string and the
+print streams into the <tt>executeCommand()</tt> method of the command service (for a more detailed description of command services, see the next section).</p>
+
+<p>Notice that there is no method to add commands to the shell service
+interface. This is because commands are implemented as OSGi services
+and the shell service listens for service events and when a command
+service registers/unregisters it automatically updates its list of
+commands accordingly.</p>
+
+<p><a name="ApacheFelixShellService-commands"></a></p>
+
+<h2><a name="ApacheFelixShellService-HowCommandsWork"></a>How Commands Work</h2>
+
+<p>All commands available in the shell service are implemented as OSGi
+services. The advantage of this approach is two-fold: the shell service
+can leverage OSGi service events to maintain its list of available
+commands and the set available commands is dynamically extendable by
+installed bundles. The command service interface is defined as follows:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">package</span> org.ungoverned.osgi.service.shell;
+
+<span class="code-keyword">public</span> <span class="code-keyword">interface</span> Command
+{
+    <span class="code-keyword">public</span> <span class="code-object">String</span> getName();
+    <span class="code-keyword">public</span> <span class="code-object">String</span> getUsage();
+    <span class="code-keyword">public</span> <span class="code-object">String</span> getShortDescription();
+    <span class="code-keyword">public</span> void execute(<span class="code-object">String</span> line, PrintStream out, PrintStream err);
+}</pre>
+</div></div>
+
+<p>The semantics of the command service methods are:</p>
+
+<ul>
+	<li><tt>getName()</tt> - returns the name of the command; this must not contain whitespace and must be unique.</li>
+	<li><tt>getUsage()</tt>
+- returns the usage string of the command; this should be one line and
+as short as possible (this is used for generating the help command
+output).</li>
+	<li><tt>getShortDescription()</tt> - returns a short
+description of the command; this should be one line and as short as
+possible (this is used for generating the help command output).</li>
+	<li><tt>execute()</tt> - executes the command's functionality using supplied command line and print streams.</li>
+</ul>
+
+
+<p><a name="ApacheFelixShellService-creating"></a></p>
+
+<h2><a name="ApacheFelixShellService-CreatingaCommand"></a>Creating a Command</h2>
+
+<p>The following example creates a simple version of the <tt>start</tt> command.</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">package</span> test;
+
+<span class="code-keyword">import</span> java.io.PrintStream;
+<span class="code-keyword">import</span> java.net.URL;
+<span class="code-keyword">import</span> java.net.MalformedURLException;
+<span class="code-keyword">import</span> java.util.StringTokenizer;
+
+<span class="code-keyword">import</span> org.osgi.framework.*;
+<span class="code-keyword">import</span> org.apache.felix.shell.ShellService;
+<span class="code-keyword">import</span> org.apache.felix.shell.Command;
+
+<span class="code-keyword">public</span> class MyStartCommandImpl <span class="code-keyword">implements</span> Command
+{
+    <span class="code-keyword">private</span> BundleContext m_context = <span class="code-keyword">null</span>;
+
+    <span class="code-keyword">public</span> MyStartCommandImpl(BundleContext context)
+    {
+        m_context = context;
+    }
+
+    <span class="code-keyword">public</span> <span class="code-object">String</span> getName()
+    {
+        <span class="code-keyword">return</span> <span class="code-quote">"mystart"</span>;
+    }
+
+    <span class="code-keyword">public</span> <span class="code-object">String</span> getUsage()
+    {
+        <span class="code-keyword">return</span> <span class="code-quote">"mystart &lt;id&gt; [&lt;id&gt; ...]"</span>;
+    }
+
+    <span class="code-keyword">public</span> <span class="code-object">String</span> getShortDescription()
+    {
+        <span class="code-keyword">return</span> <span class="code-quote">"start bundle(s)."</span>;
+    }
+
+    <span class="code-keyword">public</span> void execute(<span class="code-object">String</span> s, PrintStream out, PrintStream err)
+    {
+        StringTokenizer st = <span class="code-keyword">new</span> StringTokenizer(s, <span class="code-quote">" "</span>);
+
+        <span class="code-comment">// Ignore the command name.
+</span>        st.nextToken();
+
+        <span class="code-comment">// There should be at least one bundle id.
+</span>        <span class="code-keyword">if</span> (st.countTokens() &gt;= 1)
+        {
+            <span class="code-keyword">while</span> (st.hasMoreTokens())
+            {
+                <span class="code-object">String</span> id = st.nextToken().trim();
+
+                <span class="code-keyword">try</span> {
+                    <span class="code-object">long</span> l = <span class="code-object">Long</span>.valueOf(id).longValue();
+                    Bundle bundle = m_context.getBundle(l);
+                    <span class="code-keyword">if</span> (bundle != <span class="code-keyword">null</span>)
+                    {
+                        bundle.start();
+                    }
+                    <span class="code-keyword">else</span>
+                    {
+                        err.println(<span class="code-quote">"Bundle ID "</span> + id + <span class="code-quote">" is invalid."</span>);
+                    }
+                } <span class="code-keyword">catch</span> (NumberFormatException ex) {
+                    err.println(<span class="code-quote">"Unable to parse id '"</span> + id + <span class="code-quote">"'."</span>);
+                } <span class="code-keyword">catch</span> (BundleException ex) {
+                    <span class="code-keyword">if</span> (ex.getNestedException() != <span class="code-keyword">null</span>)
+                        err.println(ex.getNestedException().toString());
+                    <span class="code-keyword">else</span>
+                        err.println(ex.toString());
+                } <span class="code-keyword">catch</span> (Exception ex) {
+                    err.println(ex.toString());
+                }
+            }
+        }
+        <span class="code-keyword">else</span>
+        {
+            err.println(<span class="code-quote">"Incorrect number of arguments"</span>);
+        }
+    }
+}</pre>
+</div></div>
+
+<p>A bundle activator class is needed for packaging the command servce; the bundle activator registers the command service in its <tt>start()</tt> method. Note: You do not need one activator per command, a single activator can register any number of commands.</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">package</span> test;
+
+<span class="code-keyword">import</span> org.osgi.framework.BundleActivator;
+<span class="code-keyword">import</span> org.osgi.framework.BundleContext;
+
+<span class="code-keyword">public</span> class MyStartActivator <span class="code-keyword">implements</span> BundleActivator
+{
+    <span class="code-keyword">private</span> <span class="code-keyword">transient</span> BundleContext m_context = <span class="code-keyword">null</span>;
+
+    <span class="code-keyword">public</span> void start(BundleContext context)
+    {
+        m_context = context;
+
+        <span class="code-comment">// Register the command service.
+</span>        context.registerService(
+            org.apache.felix.shell.Command.class.getName(),
+            <span class="code-keyword">new</span> MyStartCommandImpl(m_context), <span class="code-keyword">null</span>);
+    }
+
+    <span class="code-keyword">public</span> void stop(BundleContext context)
+    {
+        <span class="code-comment">// Services are automatically unregistered so
+</span>        <span class="code-comment">// we don't have to unregister the factory here.
+</span>    }
+}</pre>
+</div></div>
+
+<p>To compile these classes you will need to have the <tt>framework.jar</tt> file on your class path. Compile all of the source files using a command like:</p>
+
+<div class="preformatted"><div class="preformattedContent">
+<pre>java -d c:\classes *.java
+</pre>
+</div></div>
+
+<p>This command compiles all of the source files and outputs the generated class files into a subdirectory of the <tt>c:\classes</tt> directory, called test, named after the package of the source files; for the above command to work, the <tt>c:\classes</tt>
+directory must exist. Once you have compiled all of the above classes,
+you need to create a bundle JAR file of the generated package
+directory. The bundle JAR file needs a manifest, so create a file
+called <tt>manifest.mf</tt> with the following contents:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">Bundle-Name: My Start Command
+Bundle-Description: A 'start' command <span class="code-keyword">for</span> the shell service.
+Bundle-Activator: test.MyStartActivator
+Bundle-ClassPath: .
+Import-Package: org.apache.felix.shell</pre>
+</div></div>
+
+<p>To create the bundle JAR file, issue the command:</p>
+
+<div class="preformatted"><div class="preformattedContent">
+<pre>jar cfm mystart.jar manifest.mf -C c:\classes test
+</pre>
+</div></div>
+
+<p>This command creates a JAR file using the manifest you created and
+includes all of the classes in the test directory inside of the <tt>c:\classes</tt>
+directory. Once the bundle JAR file is created, you are ready to add
+the command service to the shell service; simply start Felix and
+install and start the bundle created by the above command. By doing so,
+the new <tt>mystart</tt> command is made available via the shell service.</p>
+
+<p><a name="ApacheFelixShellService-security"></a></p>
+
+<h2><a name="ApacheFelixShellService-SecurityandtheShellService"></a>Security and the Shell Service</h2>
+
+<p>The shell service security handling is quite simple, all security is
+handled by the standard OSGi framework mechanisms. For example, if a
+bundle should not be able to register a shell service, then it should
+not be given the corresponding service permission. Security handling
+may change in future release after some experience is gained through
+usage.</p>
+
+<p><a name="ApacheFelixShellService-feedback"></a></p>
+
+<h2><a name="ApacheFelixShellService-Feedback"></a>Feedback</h2>
+
+<p>Subscribe to the Felix users mailing list by sending a message to <span class="nobr"><a href="mailto:users-subscribe@felix.apache.org" title="Send mail to users-subscribe@felix.apache.org" rel="nofollow">users-subscribe@felix.apache.org<sup><img class="rendericon" src="apache-felix-shell-service_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>; after subscribing, email questions or feedback to <span class="nobr"><a href="mailto:users@felix.apache.org" title="Send mail to users@felix.apache.org" rel="nofollow">users@felix.apache.org<sup><img class="rendericon" src="apache-felix-shell-service_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>.</p>
+    </div>
+  
+</body></html>
