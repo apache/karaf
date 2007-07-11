@@ -30,7 +30,7 @@ import org.osgi.framework.*;
 public class ManifestParser
 {
     private Logger m_logger = null;
-    private PropertyResolver m_config = null;
+    private Map m_configMap = null;
     private Map m_headerMap = null;
     private String m_bundleSymbolicName = null;
     private Version m_bundleVersion = null;
@@ -40,11 +40,11 @@ public class ManifestParser
     private R4LibraryClause[] m_libraryHeaders = null;
     private boolean m_libraryHeadersOptional = false;
 
-    public ManifestParser(Logger logger, PropertyResolver config, Map headerMap)
+    public ManifestParser(Logger logger, Map configMap, Map headerMap)
         throws BundleException
     {
         m_logger = logger;
-        m_config = config;
+        m_configMap = configMap;
         m_headerMap = headerMap;
 
         // Verify that only manifest version 2 is specified.
@@ -329,7 +329,7 @@ public class ManifestParser
             // Search for matching native clauses.
             for (int i = 0; i < m_libraryHeaders.length; i++)
             {
-                if (m_libraryHeaders[i].match(m_config))
+                if (m_libraryHeaders[i].match(m_configMap))
                 {
                     clauseList.add(m_libraryHeaders[i]);
                 }

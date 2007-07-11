@@ -33,7 +33,7 @@ import org.osgi.framework.*;
 public class R4SearchPolicyCore implements ModuleListener
 {
     private Logger m_logger = null;
-    private PropertyResolver m_config = null;
+    private Map m_configMap = null;
     private IModuleFactory m_factory = null;
     // Maps a package name to an array of modules.
     private Map m_availPkgIndexMap = new HashMap();
@@ -59,13 +59,13 @@ public class R4SearchPolicyCore implements ModuleListener
     // Re-usable security manager for accessing class context.
     private static SecurityManagerEx m_sm = new SecurityManagerEx();
 
-    public R4SearchPolicyCore(Logger logger, PropertyResolver config)
+    public R4SearchPolicyCore(Logger logger, Map configMap)
     {
         m_logger = logger;
-        m_config = config;
+        m_configMap = configMap;
 
         // Read the boot delegation property and parse it.
-        String s = m_config.get(Constants.FRAMEWORK_BOOTDELEGATION);
+        String s = (String) m_configMap.get(Constants.FRAMEWORK_BOOTDELEGATION);
         s = (s == null) ? "java.*" : s + ",java.*";
         StringTokenizer st = new StringTokenizer(s, " ,");
         m_bootPkgs = new String[st.countTokens()];

@@ -43,10 +43,10 @@ public class Felix extends FelixBundle
     
     // Logging related member variables.
     private Logger m_logger = null; // TODO: KARL - Why package private?
-    // Config properties.
-    private PropertyResolver m_config = null;
-    // Configuration properties passed into constructor.
-    private MutablePropertyResolver m_configMutable = null;
+    // Immutable config properties.
+    private Map m_configMap = null;
+    // Mutable configuration properties passed into constructor.
+    private Map m_configMutableMap = null;
 
     // MODULE FACTORY.
     private IModuleFactory m_factory = null;
@@ -115,21 +115,24 @@ public class Felix extends FelixBundle
      * <p>
      * This method starts the framework instance; instances of the framework
      * are dormant until this method is called. The caller may also provide
-     * <tt>MutablePropertyResolver</tt> implementations that the instance will
-     * use to obtain configuration or framework properties. Configuration
-     * properties are used internally by the framework and its extensions to alter
-     * its default behavior. Framework properties are used by bundles
-     * and are accessible from <tt>BundleContext.getProperty()</tt>.
+     * <tt>Map</tt> instance that will be used to obtain configuration or
+     * framework properties. Configuration properties are used internally by
+     * the framework and its extensions to alter its default behavior.
+     * Framework properties are used by bundles and are accessible from
+     * <tt>BundleContext.getProperty()</tt>. This map instance is used
+     * directly (i.e., it is not copied), which means that it is possible to
+     * change the property values externally at run time, but this is strongly
+     * discouraged for the framework's configuration properties.
      * </p>
      * <p>
      * Configuration properties are the sole means to configure the framework's
      * default behavior; the framework does not refer to any system properties for
-     * configuration information. If a <tt>MutablePropertyResolver</tt> is
-     * supplied to this method for configuration properties, then the framework will
-     * consult the <tt>MutablePropertyResolver</tt> instance for any and all
-     * configuration properties. It is possible to specify a <tt>null</tt>
-     * configuration property resolver, in which case the framework will use its
-     * default behavior in all cases. However, if the
+     * configuration information. If a <tt>Map</tt> is supplied to this method
+     * for configuration properties, then the framework will consult the
+     * <tt>Map</tt> instance for any and all configuration properties. It is
+     * possible to specify a <tt>null</tt> for the configuration property map,
+     * in which case the framework will use its default behavior in all cases.
+     * However, if the
      * <a href="cache/DefaultBundleCache.html"><tt>DefaulBundleCache</tt></a>
      * is used, then at a minimum a profile name or profile directory must
      * be specified.
@@ -207,17 +210,16 @@ public class Felix extends FelixBundle
      * class documentation for more information.
      * </p>
      *
-     * @param configMutable An object for obtaining configuration properties,
+     * @param configMutableMap An map for obtaining configuration properties,
      *        may be <tt>null</tt>.
      * @param activatorList A list of System Bundle activators.
     **/
-    public Felix(MutablePropertyResolver configMutable, List activatorList)
+    public Felix(Map configMutableMap, List activatorList)
     {
         // Initialize member variables.
-        m_factory = null;
-        m_configMutable = (configMutable == null)
-            ? new MutablePropertyResolverImpl(new StringMap(false)) : configMutable;
-        m_config = new PropertyResolverImpl(m_configMutable);
+        m_configMutableMap = (configMutableMap == null)
+            ? new StringMap(false) : configMutableMap;
+        m_configMap = Collections.unmodifiableMap(m_configMutableMap);
         m_activatorList = activatorList;
 
         // Create logger with appropriate log level. Even though the
@@ -225,7 +227,7 @@ public class Felix extends FelixBundle
         // services, it is created now because it is needed before
         // the system bundle is created. The system bundle's context
         // will be set below after the system bundle is created.
-        m_logger = new Logger(m_configMutable.get(FelixConstants.LOG_LEVEL_PROP));
+        m_logger = new Logger((String) m_configMutableMap.get(FelixConstants.LOG_LEVEL_PROP));
 
         // Initialize other member variables.
         m_activeStartLevel = FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
@@ -247,7 +249,7 @@ public class Felix extends FelixBundle
         m_systemBundleInfo = new BundleInfo(
             m_logger, new SystemBundleArchive(), null);
         m_extensionManager = 
-            new ExtensionManager(m_logger, m_config, m_systemBundleInfo);
+            new ExtensionManager(m_logger, m_configMap, m_systemBundleInfo);
         m_systemBundleInfo.addModule(
             m_factory.createModule("0", m_extensionManager));
     }
@@ -577,7 +579,7 @@ public class Felix extends FelixBundle
 
         try
         {
-            m_cache = new BundleCache(m_logger, m_config);
+            m_cache = new BundleCache(m_logger, m_configMap);
         }
         catch (Exception ex)
         {
@@ -585,7 +587,7 @@ public class Felix extends FelixBundle
             ex.printStackTrace();
 
             // Only shutdown the JVM if the framework is running stand-alone.
-            String embedded = m_config.get(
+            String embedded = (String) m_configMap.get(
                 FelixConstants.EMBEDDED_EXECUTION_PROP);
             boolean isEmbedded = (embedded == null)
                 ? false : embedded.equals("true");
@@ -600,7 +602,7 @@ public class Felix extends FelixBundle
         }
 
         // Create search policy for module loader.
-        m_policyCore = new R4SearchPolicyCore(m_logger, m_config);
+        m_policyCore = new R4SearchPolicyCore(m_logger, m_configMap);
 
         // Add a resolver listener to the search policy
         // so that we will be notified when modules are resolved
@@ -783,7 +785,7 @@ ex.printStackTrace();
 
         // Get the framework's default start level.
         int startLevel = FelixConstants.FRAMEWORK_DEFAULT_STARTLEVEL;
-        String s = m_config.get(FelixConstants.FRAMEWORK_STARTLEVEL_PROP);
+        String s = (String) m_configMap.get(FelixConstants.FRAMEWORK_STARTLEVEL_PROP);
         if (s != null)
         {
             try
@@ -1107,7 +1109,7 @@ ex.printStackTrace();
     **/
     protected int getInitialBundleStartLevel()
     {
-        String s = m_config.get(FelixConstants.BUNDLE_STARTLEVEL_PROP);
+        String s = (String) m_configMap.get(FelixConstants.BUNDLE_STARTLEVEL_PROP);
 
         if (s != null)
         {
@@ -1143,7 +1145,7 @@ ex.printStackTrace();
                 "Initial start level must be greater than zero.");
         }
 
-        m_configMutable.put(
+        m_configMutableMap.put(
             FelixConstants.BUNDLE_STARTLEVEL_PROP, Integer.toString(startLevel));
     }
 
@@ -1910,7 +1912,7 @@ ex.printStackTrace();
             // Try to save the activator in the cache.
             // NOTE: This is non-standard OSGi behavior and only
             // occurs if strictness is disabled.
-            String strict = m_config.get(FelixConstants.STRICT_OSGI_PROP);
+            String strict = (String) m_configMap.get(FelixConstants.STRICT_OSGI_PROP);
             boolean isStrict = (strict == null) ? true : strict.equals("true");
             if (!isStrict)
             {
@@ -2124,7 +2126,7 @@ ex.printStackTrace();
     protected String getProperty(String key)
     {
         // First, check the config properties.
-        String val = (String) m_config.get(key);
+        String val = (String) m_configMap.get(key);
         // If not found, then try the system properties.
         return (val == null) ? System.getProperty(key) : val;
     }
@@ -3297,7 +3299,7 @@ ex.printStackTrace();
         Object securityContext, boolean isExtensionBundle)
         throws Exception
     {
-        ManifestParser mp = new ManifestParser(m_logger, m_config, headerMap);
+        ManifestParser mp = new ManifestParser(m_logger, m_configMap, headerMap);
 
         // Verify that the bundle symbolic name and version is unique.
         if (mp.getManifestVersion().equals("2"))
@@ -3374,7 +3376,7 @@ ex.printStackTrace();
 
         BundleActivator activator = null;
 
-        String strict = m_config.get(FelixConstants.STRICT_OSGI_PROP);
+        String strict = (String) m_configMap.get(FelixConstants.STRICT_OSGI_PROP);
         boolean isStrict = (strict == null) ? true : strict.equals("true");
         if (!isStrict)
         {
@@ -3515,25 +3517,25 @@ ex.printStackTrace();
     private void initializeFrameworkProperties()
     {
         // Standard OSGi properties.
-        m_configMutable.put(
+        m_configMutableMap.put(
             FelixConstants.FRAMEWORK_VERSION,
             FelixConstants.FRAMEWORK_VERSION_VALUE);
-        m_configMutable.put(
+        m_configMutableMap.put(
             FelixConstants.FRAMEWORK_VENDOR,
             FelixConstants.FRAMEWORK_VENDOR_VALUE);
-        m_configMutable.put(
+        m_configMutableMap.put(
             FelixConstants.FRAMEWORK_LANGUAGE,
             System.getProperty("user.language"));
-        m_configMutable.put(
+        m_configMutableMap.put(
             FelixConstants.FRAMEWORK_OS_VERSION,
             System.getProperty("os.version"));
 
         String s = null;
         s = R4LibraryClause.normalizeOSName(System.getProperty("os.name"));
-        m_configMutable.put(FelixConstants.FRAMEWORK_OS_NAME, s);
+        m_configMutableMap.put(FelixConstants.FRAMEWORK_OS_NAME, s);
         s = R4LibraryClause.normalizeProcessor(System.getProperty("os.arch"));
-        m_configMutable.put(FelixConstants.FRAMEWORK_PROCESSOR, s);
-        m_configMutable.put(
+        m_configMutableMap.put(FelixConstants.FRAMEWORK_PROCESSOR, s);
+        m_configMutableMap.put(
             FelixConstants.FELIX_VERSION_PROPERTY, getFrameworkVersion());
     }
 
@@ -3575,21 +3577,21 @@ ex.printStackTrace();
         // the start level to which the bundles are assigned is specified by
         // appending a ".n" to the auto-install property name, where "n" is
         // the desired start level for the list of bundles.
-        String[] keys = m_config.getKeys();
-        for (int i = 0; (keys != null) && (i < keys.length); i++)
+        for (Iterator i = m_configMap.keySet().iterator(); i.hasNext(); )
         {
-            if (keys[i].startsWith(FelixConstants.AUTO_INSTALL_PROP))
+            String key = (String) i.next();
+            if (key.startsWith(FelixConstants.AUTO_INSTALL_PROP))
             {
                 int startLevel = 1;
                 try
                 {
-                    startLevel = Integer.parseInt(keys[i].substring(keys[i].lastIndexOf('.') + 1));
+                    startLevel = Integer.parseInt(key.substring(key.lastIndexOf('.') + 1));
                 }
                 catch (NumberFormatException ex)
                 {
-                    m_logger.log(Logger.LOG_ERROR, "Invalid property: " + keys[i]);
+                    m_logger.log(Logger.LOG_ERROR, "Invalid property: " + key);
                 }
-                StringTokenizer st = new StringTokenizer(m_config.get(keys[i]), "\" ",true);
+                StringTokenizer st = new StringTokenizer((String) m_configMap.get(key), "\" ",true);
                 if (st.countTokens() > 0)
                 {
                     String location = null;
@@ -3622,20 +3624,21 @@ ex.printStackTrace();
         // where "n" is the desired start level for the list of bundles.
         // The following code starts bundles in two passes, first it installs
         // them, then it starts them.
-        for (int i = 0; (keys != null) && (i < keys.length); i++)
+        for (Iterator i = m_configMap.keySet().iterator(); i.hasNext(); )
         {
-            if (keys[i].startsWith(FelixConstants.AUTO_START_PROP))
+            String key = (String) i.next();
+            if (key.startsWith(FelixConstants.AUTO_START_PROP))
             {
                 int startLevel = 1;
                 try
                 {
-                    startLevel = Integer.parseInt(keys[i].substring(keys[i].lastIndexOf('.') + 1));
+                    startLevel = Integer.parseInt(key.substring(key.lastIndexOf('.') + 1));
                 }
                 catch (NumberFormatException ex)
                 {
-                    m_logger.log(Logger.LOG_ERROR, "Invalid property: " + keys[i]);
+                    m_logger.log(Logger.LOG_ERROR, "Invalid property: " + key);
                 }
-                StringTokenizer st = new StringTokenizer(m_config.get(keys[i]), "\" ",true);
+                StringTokenizer st = new StringTokenizer((String) m_configMap.get(key), "\" ",true);
                 if (st.countTokens() > 0)
                 {
                     String location = null;
@@ -3661,11 +3664,12 @@ ex.printStackTrace();
         }
 
         // Now loop through and start the installed bundles.
-        for (int i = 0; (keys != null) && (i < keys.length); i++)
+        for (Iterator i = m_configMap.keySet().iterator(); i.hasNext(); )
         {
-            if (keys[i].startsWith(FelixConstants.AUTO_START_PROP))
+            String key = (String) i.next();
+            if (key.startsWith(FelixConstants.AUTO_START_PROP))
             {
-                StringTokenizer st = new StringTokenizer(m_config.get(keys[i]), "\" ",true);
+                StringTokenizer st = new StringTokenizer((String) m_configMap.get(key), "\" ",true);
                 if (st.countTokens() > 0)
                 {
                     String location = null;
@@ -3786,7 +3790,7 @@ ex.printStackTrace();
             // Add the bundle activator for the start level service.
             m_activatorList.add(new StartLevelActivator(m_logger, Felix.this));
             // Add the bundle activator for the url handler service.
-            m_activatorList.add(new URLHandlersActivator(m_config, Felix.this));
+            m_activatorList.add(new URLHandlersActivator(m_configMap, Felix.this));
 
             // Start all activators.
             for (int i = 0; i < m_activatorList.size(); i++)
@@ -3949,7 +3953,7 @@ ex.printStackTrace();
             }
 
             // Finally shutdown the JVM if the framework is running stand-alone.
-            String embedded = m_config.get(FelixConstants.EMBEDDED_EXECUTION_PROP);
+            String embedded = (String) m_configMap.get(FelixConstants.EMBEDDED_EXECUTION_PROP);
             boolean isEmbedded = (embedded == null) ? false : embedded.equals("true");
             if (!isEmbedded)
             {

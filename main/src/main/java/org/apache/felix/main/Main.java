@@ -25,7 +25,6 @@ import java.util.*;
 
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.cache.BundleCache;
-import org.apache.felix.framework.util.MutablePropertyResolverImpl;
 import org.apache.felix.framework.util.StringMap;
 
 /**
@@ -97,8 +96,8 @@ public class Main
      *       the desired URL using the <tt>felix.config.properties</tt>
      *       system property; this should be set using the <tt>-D</tt> syntax
      *       when executing the JVM. Refer to the
-     *       <a href="Felix.html#start(org.apache.felix.framework.util.MutablePropertyResolver, org.apache.felix.framework.util.MutablePropertyResolver, java.util.List)">
-     *       <tt>Felix.start()</tt></a> method documentation for more
+     *       <a href="Felix.html#Felix(java.util.Map, java.util.List)">
+     *       <tt>Felix</tt></a> constructor documentation for more
      *       information on the framework configuration options.
      *   </li>
      *   <li><i><b>Perform system property variable substitution on configuration
@@ -116,10 +115,11 @@ public class Main
      *       <a href="cache/DefaultBundleCache.html"><tt>DefaultBundleCache</tt></a>
      *       documentation for more details its configuration options.
      *   </li>
-     *   <li><i><b>Creates and starts a framework instance.</b></i> A simple
-     *       <a href="util/MutablePropertyResolver.html"><tt>MutablePropertyResolver</tt></a>
+     *   <li><i><b>Creates and starts a framework instance.</b></i> A 
+     *       case insensitive
+     *       <a href="util/StringMap.html"><tt>StringMap</tt></a>
      *       is created for the configuration property file and is passed
-     *       into the framework when it is started.
+     *       into the framework.
      *   </li>
      * </ol>
      * <p>
@@ -131,8 +131,8 @@ public class Main
      * the configuration property file cannot be found, the framework will appear to
      * be hung or deadlocked. This is not the case, it is executing correctly,
      * there is just no way to interact with it. Refer to the
-     * <a href="Felix.html#start(org.apache.felix.framework.util.MutablePropertyResolver, org.apache.felix.framework.util.MutablePropertyResolver, java.util.List)">
-     * <tt>Felix.start()</tt></a> method documentation for more information on
+     * <a href="Felix.html#Felix(java.util.Map, java.util.List)">
+     * <tt>Felix</tt></a> constructor documentation for more information on
      * framework configuration options.
      * </p>
      * @param argv An array of arguments, all of which are ignored.
@@ -191,10 +191,7 @@ public class Main
         try
         {
             // Now create an instance of the framework.
-            m_felix = new Felix(
-                new MutablePropertyResolverImpl(
-                    new StringMap(configProps, false)),
-                null);
+            m_felix = new Felix(new StringMap(configProps, false), null);
             m_felix.start();
         }
         catch (Exception ex)

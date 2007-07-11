@@ -22,7 +22,6 @@ import java.io.*;
 import java.util.*;
 
 import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.util.PropertyResolver;
 import org.apache.felix.framework.util.SecureAction;
 
 /**
@@ -81,17 +80,17 @@ public class BundleCache
     protected static transient final String CACHE_DIR_NAME = ".felix";
     protected static transient final String BUNDLE_DIR_PREFIX = "bundle";
 
-    private PropertyResolver m_cfg = null;
+    private Map m_configMap = null;
     private Logger m_logger = null;
     private File m_profileDir = null;
     private BundleArchive[] m_archives = null;
 
     private static SecureAction m_secureAction = new SecureAction();
 
-    public BundleCache(Logger logger, PropertyResolver cfg)
+    public BundleCache(Logger logger, Map configMap)
         throws Exception
     {
-        m_cfg = cfg;
+        m_configMap = configMap;
         m_logger = logger;
         initialize();
     }
@@ -252,7 +251,7 @@ public class BundleCache
         // Get buffer size value.
         try
         {
-            String sBufSize = m_cfg.get(CACHE_BUFSIZE_PROP);
+            String sBufSize = (String) m_configMap.get(CACHE_BUFSIZE_PROP);
             if (sBufSize != null)
             {
                 BUFSIZE = Integer.parseInt(sBufSize);
@@ -264,7 +263,7 @@ public class BundleCache
         }
 
         // See if the profile directory is specified.
-        String profileDirStr = m_cfg.get(CACHE_PROFILE_DIR_PROP);
+        String profileDirStr = (String) m_configMap.get(CACHE_PROFILE_DIR_PROP);
         if (profileDirStr != null)
         {
             m_profileDir = new File(profileDirStr);
@@ -277,7 +276,7 @@ public class BundleCache
 
             // First, determine the location of the cache directory; it
             // can either be specified or in the default location.
-            String cacheDirStr = m_cfg.get(CACHE_DIR_PROP);
+            String cacheDirStr = (String) m_configMap.get(CACHE_DIR_PROP);
             if (cacheDirStr == null)
             {
                 // Since no cache directory was specified, put it
@@ -289,7 +288,7 @@ public class BundleCache
             }
 
             // Now, get the profile name.
-            String profileName = m_cfg.get(CACHE_PROFILE_PROP);
+            String profileName = (String) m_configMap.get(CACHE_PROFILE_PROP);
             if (profileName == null)
             {
                 throw new IllegalArgumentException(

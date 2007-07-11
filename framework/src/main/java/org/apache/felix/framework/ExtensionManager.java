@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.framework.util.FelixConstants;
-import org.apache.felix.framework.util.PropertyResolver;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
@@ -133,7 +132,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
      * @param config the configuration to read properties from.
      * @param systemBundleInfo the info to change if we need to add exports.
      */
-    ExtensionManager(Logger logger, PropertyResolver config, BundleInfo systemBundleInfo)
+    ExtensionManager(Logger logger, Map configMap, BundleInfo systemBundleInfo)
     {
         m_logger = logger;
         m_systemBundleInfo = systemBundleInfo;
@@ -143,7 +142,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         Map map = ((SystemBundleArchive) m_systemBundleInfo.getArchive()).getManifestHeader(0);
         // Initialize header map as a case insensitive map.
         map.put(FelixConstants.BUNDLE_VERSION,
-            config.get(FelixConstants.FELIX_VERSION_PROPERTY));
+            configMap.get(FelixConstants.FELIX_VERSION_PROPERTY));
         map.put(FelixConstants.BUNDLE_SYMBOLICNAME,
             FelixConstants.SYSTEM_BUNDLE_SYMBOLICNAME);
         map.put(FelixConstants.BUNDLE_NAME, "System Bundle");
@@ -162,7 +161,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         try
         {
             setCapabilities(ManifestParser.parseExportHeader(
-                config.get(Constants.FRAMEWORK_SYSTEMPACKAGES)));
+                (String) configMap.get(Constants.FRAMEWORK_SYSTEMPACKAGES)));
         }
         catch (Exception ex)
         {
@@ -170,7 +169,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
             m_logger.log(
                 Logger.LOG_ERROR,
                 "Error parsing system bundle export statement: "
-                + config.get(Constants.FRAMEWORK_SYSTEMPACKAGES), ex);
+                + configMap.get(Constants.FRAMEWORK_SYSTEMPACKAGES), ex);
         }
     }
 

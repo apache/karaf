@@ -86,12 +86,12 @@ public class R4LibraryClause
         return m_selectionFilter;
     }
 
-    public boolean match(PropertyResolver config) throws BundleException
+    public boolean match(Map configMap) throws BundleException
     {
-        String normal_osname = normalizeOSName(config.get(Constants.FRAMEWORK_OS_NAME));
-        String normal_processor = normalizeProcessor(config.get(Constants.FRAMEWORK_PROCESSOR));
-        String normal_osversion = normalizeOSVersion(config.get(Constants.FRAMEWORK_OS_VERSION));
-        String normal_language = config.get(Constants.FRAMEWORK_LANGUAGE);
+        String normal_osname = normalizeOSName((String) configMap.get(Constants.FRAMEWORK_OS_NAME));
+        String normal_processor = normalizeProcessor((String) configMap.get(Constants.FRAMEWORK_PROCESSOR));
+        String normal_osversion = normalizeOSVersion((String) configMap.get(Constants.FRAMEWORK_OS_VERSION));
+        String normal_language = (String) configMap.get(Constants.FRAMEWORK_LANGUAGE);
 
         // Check library's osname.
         if (!checkOSNames(normal_osname, getOSNames()))
@@ -124,7 +124,7 @@ public class R4LibraryClause
         // Check library's selection-filter if specified.
         if ((getSelectionFilter() != null) &&
             (getSelectionFilter().length() >= 0) &&
-            !checkSelectionFilter(config, getSelectionFilter()))
+            !checkSelectionFilter(configMap, getSelectionFilter()))
         {
             return false;
         }
@@ -190,15 +190,15 @@ public class R4LibraryClause
         return false;
     }
 
-    private boolean checkSelectionFilter(PropertyResolver config, String expr)
+    private boolean checkSelectionFilter(Map configMap, String expr)
         throws BundleException
     {
         // Get all framework properties
         Dictionary dict = new Hashtable();
-        String[] keys = config.getKeys();
-        for (int i = 0; i < keys.length; i++)
+        for (Iterator i = configMap.keySet().iterator(); i.hasNext(); )
         {
-            dict.put(keys[i], config.get(keys[i]));
+            Object key = i.next();
+            dict.put(key, configMap.get(key));
         }
         // Compute expression
         try
