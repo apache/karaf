@@ -22,3 +22,5 @@ Changes from 0.8.0-incubator to 1.0.0
 * [2007-06-14] Enable output folder to be configured. (FELIX-305)
 * [2007-07-05] Added support for overriding project type. (FELIX-309)
 * [2007-07-09] Updated to BND version 0.0.160.
+* [2007-07-11] Fix a possible NullPointerException in the manifest goal. (FELIX-326)
+

@@ -5,6 +5,7 @@
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
     <version>0.9.0-incubator-SNAPSHOT</version>
+    <relativePath>../pom/pom.xml</relativePath>
   </parent>
   <packaging>jar</packaging>
   <name>Apache Felix Installers</name>

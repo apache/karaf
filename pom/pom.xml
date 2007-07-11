@@ -33,6 +33,7 @@
   <name>Apache Felix</name>
   <version>0.9.0-incubator-SNAPSHOT</version>
   <url>http://felix.apache.org/</url>
+  <inceptionYear>2006</inceptionYear>
   <description>Apache felix is an OSGi implementation.</description>
 
   <issueManagement>
@@ -95,11 +96,11 @@
         </property>
       </activation>
       <modules>
-        <module>bundleplugin</module>
-        <module>tools/maven2/maven-osgi-plugin</module>
-        <module>ipojo/metadata</module>
-        <module>ipojo/manipulator</module>
-        <module>ipojo/plugin</module>
+        <module>../bundleplugin</module>
+        <module>../tools/maven2/maven-osgi-plugin</module>
+        <module>../ipojo/metadata</module>
+        <module>../ipojo/manipulator</module>
+        <module>../ipojo/plugin</module>
       </modules>
     </profile>
 
@@ -125,31 +126,31 @@
         </property>
       </activation>
       <modules>
-        <module>org.osgi.foundation</module>
-        <module>javax.servlet</module>
-        <module>org.osgi.core</module>
-        <module>org.osgi.compendium</module>
-        <module>framework</module>
-        <module>main</module>
-        <module>shell</module>
-        <module>shell.tui</module>
-        <module>shell.gui</module>
-        <module>shell.gui.plugin</module>
-        <module>bundlerepository</module>
-        <module>log</module>
-        <module>eventadmin</module>
-        <module>http.jetty</module>
-        <module>scr</module>
-        <module>configadmin</module>
-        <module>metatype</module>
-        <module>dependencymanager</module>
-        <module>servicebinder</module>
-        <module>wireadmin</module>
+        <module>../org.osgi.foundation</module>
+        <module>../javax.servlet</module>
+        <module>../org.osgi.core</module>
+        <module>../org.osgi.compendium</module>
+        <module>../framework</module>
+        <module>../main</module>
+        <module>../shell</module>
+        <module>../shell.tui</module>
+        <module>../shell.gui</module>
+        <module>../shell.gui.plugin</module>
+        <module>../bundlerepository</module>
+        <module>../log</module>
+        <module>../eventadmin</module>
+        <module>../http.jetty</module>
+        <module>../scr</module>
+        <module>../configadmin</module>
+        <module>../metatype</module>
+        <module>../dependencymanager</module>
+        <module>../servicebinder</module>
+        <module>../wireadmin</module>
         
-        <module>ipojo/core</module>
-        <module>ipojo/arch</module>
+        <module>../ipojo/core</module>
+        <module>../ipojo/arch</module>
 	
-	<module>mosgi</module>
+	<module>../mosgi</module>
       </modules>
     </profile>
     
@@ -162,16 +163,16 @@
         </property>
       </activation>
       <modules>
-        <module>org.apache.felix.daemon</module>
+        <module>../org.apache.felix.daemon</module>
 
-        <module>examples</module>
+        <module>../examples</module>
 
-        <module>upnp.extra</module>
-        <module>upnp.basedriver</module>
-        <module>upnp.tester</module>
-        <module>upnp.sample.tv</module>
-        <module>upnp.sample.clock</module>
-        <module>upnp.sample.binaryLight</module>
+        <module>../upnp.extra</module>
+        <module>../upnp.basedriver</module>
+        <module>../upnp.tester</module>
+        <module>../upnp.sample.tv</module>
+        <module>../upnp.sample.clock</module>
+        <module>../upnp.sample.binaryLight</module>
 
         <!--    <module>tools/mangen</module> -->
 
@@ -327,6 +328,11 @@
           <artifactId>maven-bundle-plugin</artifactId>
           <version>0.9.0-incubator-SNAPSHOT</version>
         </plugin>
+<!--        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-remote-resources-plugin</artifactId>
+          <version>1.0-alpha-5</version>
+        </plugin> -->
       </plugins>
     </pluginManagement>
     <plugins>
@@ -345,6 +351,23 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
       </plugin -->
+      <!-- We want to package up license resources in the JARs produced
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-remote-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>process</goal>
+            </goals>
+            <configuration>
+              <resourceBundles>
+                <resourceBundle>org.apache:apache-jar-resource-bundle:1.0</resourceBundle>
+              </resourceBundles>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>-->
     </plugins>
   </build>
   <reporting>
