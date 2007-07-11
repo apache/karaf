@@ -111,9 +111,12 @@ public class ManifestPlugin
 
         if ( project.getArtifact().getFile() == null )
         {
-            throw new NullPointerException( "Artifact file is null" );
+            analyzer.setJar( getOutputDirectory() );
         }
-        analyzer.setJar( project.getArtifact().getFile() );
+        else
+        {
+            analyzer.setJar( project.getArtifact().getFile() );
+        }
 
         if ( classpath != null )
             analyzer.setClasspath( classpath );
