@@ -65,6 +65,8 @@ public class Parser
 
     // Flag indicating presense of BigDecimal.
     private static boolean m_hasBigDecimal = false;
+	
+	private static final Class[] STRING_CLASS = new Class[] { String.class };
 
     static 
     {
@@ -555,7 +557,7 @@ loop:   for (;;)
                     result = ((Boolean) operands.pop()).booleanValue();
                 }
             }
-            operands.push(new Boolean(result));
+            operands.push((result ? Boolean.TRUE : Boolean.FALSE));
         }
 
         public String toString()
@@ -620,7 +622,7 @@ loop:   for (;;)
                     result = ((Boolean) operands.pop()).booleanValue();
                 }
             }
-            operands.push(new Boolean(result));
+            operands.push((result ? Boolean.TRUE : Boolean.FALSE));
         }
 
         public String toString()
@@ -666,7 +668,7 @@ loop:   for (;;)
                 fewOperands("NOT");
             }
             boolean result = !((Boolean) operands.pop()).booleanValue();
-            operands.push(new Boolean(result));
+            operands.push((result ? Boolean.TRUE : Boolean.FALSE));
         }
 
         public String toString()
@@ -717,7 +719,7 @@ loop:   for (;;)
 
             Object lhs = operands.pop();
 
-            operands.push(new Boolean(compare(lhs, rhs, EQUAL)));
+            operands.push((compare(lhs, rhs, EQUAL) ? Boolean.TRUE : Boolean.FALSE));
         }
 
         public String toString()
@@ -775,7 +777,7 @@ loop:   for (;;)
             }
             Object lhs = operands.pop();
 
-            operands.push(new Boolean(compare(lhs, rhs, GREATER_EQUAL)));
+            operands.push((compare(lhs, rhs, GREATER_EQUAL) ? Boolean.TRUE : Boolean.FALSE));
         }
 
         public String toString()
@@ -831,7 +833,7 @@ loop:   for (;;)
                 fewOperands("<=");
             }
             Object lhs = (Object) operands.pop();
-            operands.push(new Boolean(compare(lhs, rhs, LESS_EQUAL)));
+            operands.push((compare(lhs, rhs, LESS_EQUAL) ? Boolean.TRUE : Boolean.FALSE));
         }
 
         public String toString()
@@ -887,7 +889,7 @@ loop:   for (;;)
                 fewOperands("~=");
             }
             Object lhs = operands.pop();
-            operands.push(new Boolean(compare(lhs, rhs, APPROX)));
+            operands.push((compare(lhs, rhs, APPROX) ? Boolean.TRUE : Boolean.FALSE));
         }
 
         public String toString()
@@ -935,7 +937,7 @@ loop:   for (;;)
             throws EvaluationException
         {
             Object value = mapper.lookup(attribute);
-            operands.push(new Boolean(value != null));
+            operands.push((value != null) ? Boolean.TRUE : Boolean.FALSE);
         }
 
         public String toString()
@@ -1258,7 +1260,7 @@ loop:   for (;;)
                 else
                 {
                     rhsComparable = (Comparable) lhs.getClass()
-                        .getConstructor(new Class[] { String.class })
+                        .getConstructor(STRING_CLASS)
                             .newInstance(new Object[] { rhs });
                 }
             }
@@ -1382,7 +1384,7 @@ loop:   for (;;)
             array = new Boolean[src.length];
             for (int i = 0; i < src.length; i++)
             {
-                ((Object[]) array)[i] = new Boolean(src[i]);
+                ((Object[]) array)[i] = (src[i] ? Boolean.TRUE : Boolean.FALSE);
             }
         }
         else if (clazz == Character.TYPE)

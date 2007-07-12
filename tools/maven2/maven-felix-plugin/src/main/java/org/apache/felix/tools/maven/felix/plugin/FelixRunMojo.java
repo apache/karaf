@@ -27,8 +27,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.framework.Felix;
-import org.apache.felix.framework.util.MutablePropertyResolver;
-import org.apache.felix.framework.util.MutablePropertyResolverImpl;
+import org.apache.felix.framework.util.StringMap;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -661,8 +660,7 @@ public class FelixRunMojo extends AbstractMojo
         // Start up Felix with resolver and shut it down
         // -------------------------------------------------------------------
 
-        MutablePropertyResolver resolver = new MutablePropertyResolverImpl(props);
-        felixContainer = new Felix(resolver, null);
+        felixContainer = new Felix(new StringMap(props, false), null);
         try
         {
 			felixContainer.start();

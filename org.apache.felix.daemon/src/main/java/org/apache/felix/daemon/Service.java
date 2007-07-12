@@ -30,7 +30,6 @@ import org.apache.directory.daemon.InstallationLayout;
 
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.cache.BundleCache;
-import org.apache.felix.framework.util.MutablePropertyResolverImpl;
 import org.apache.felix.framework.util.StringMap;
 
 
@@ -76,7 +75,7 @@ public class Service implements DaemonApplication
         }
         
         configationProperties = readConfigProperties();
-        instance = new Felix(new MutablePropertyResolverImpl( new StringMap( configationProperties, false ) ), null );
+        instance = new Felix(new StringMap(configationProperties, false ), null );
     }
 
 
