@@ -1075,7 +1075,7 @@ loop:   for (;;)
                     }
                 }
 
-                operands.push((result) ? Boolean.TRUE : Boolean.FALSE);
+                operands.push(result ? Boolean.TRUE : Boolean.FALSE);
             }
             else
             {
@@ -1292,16 +1292,16 @@ loop:   for (;;)
         }
 
         // Determine class of LHS.
-        Class lhsClass = null;
+        Class lhsClass = lhs.getClass();
 
         // If LHS is an array, then call compare() on each element
         // of the array until a match is found.
-        if (lhs.getClass().isArray())
+        if (lhsClass.isArray())
         {
             // First, if this is an array of primitives, then convert
             // the entire array to an array of the associated
             // primitive wrapper class instances.
-            if (lhs.getClass().getComponentType().isPrimitive())
+            if (lhsClass.getComponentType().isPrimitive())
             {
                 lhs = convertPrimitiveArray(lhs);
             }
@@ -1330,9 +1330,6 @@ loop:   for (;;)
         }
         else
         {
-            // Get the class of LHS.
-            lhsClass = lhs.getClass();
-
             // At this point we are expecting the LHS to be a comparable,
             // but Boolean is a special case since it is the only primitive
             // wrapper class that does not implement comparable; deal with
@@ -1349,7 +1346,7 @@ loop:   for (;;)
                 try
                 {
                     Object rhsObject = lhsClass
-                        .getConstructor(new Class[] { String.class })
+                        .getConstructor(STRING_CLASS)
                             .newInstance(new Object[] { rhs });
                         return lhs.equals(rhsObject);
                 }
