@@ -766,6 +766,13 @@ public class ManifestParser
                 }
             }
 
+            // Always add the default version if not specified.
+            if ((v == null) && (sv == null))
+            {
+                v = new R4Attribute(
+                    Constants.VERSION_ATTRIBUTE, Version.emptyVersion, false);
+            }
+
             // Ensure that only the "version" attribute is used and convert
             // it to the appropriate type.
             if ((v != null) || (sv != null))
