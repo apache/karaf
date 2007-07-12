@@ -76,10 +76,10 @@ public class Pojoization {
     /**
      * Class map (jar entry, byte[]).
      */
-    private HashMap m_classes = new HashMap();
+    private Map m_classes = new HashMap();
 
     /**
-     * Referendec packages by the composite.
+     * Referenced packages by the composite.
      */
     private List m_referredPackages;
 

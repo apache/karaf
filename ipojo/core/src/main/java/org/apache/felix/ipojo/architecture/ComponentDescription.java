@@ -69,8 +69,8 @@ public class ComponentDescription {
     }
 
     /**
-     * Get a displayable form of the current component type description.
-     * @return displayable form of the component type description
+     * Get a printable form of the current component type description.
+     * @return printable form of the component type description
      * @see java.lang.Object#toString()
      */
     public String toString() {

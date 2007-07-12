@@ -20,6 +20,7 @@ package org.apache.felix.ipojo.composite;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.osgi.framework.BundleContext;
@@ -46,12 +47,12 @@ public class ServiceRegistry {
     /**
      * List of service listeners.
      */
-    private ArrayList m_listeners = new ArrayList(); // ListenerInfo List
+    private List m_listeners = new ArrayList(); // ListenerInfo List
 
     /**
      * List of service registration.
      */
-    private ArrayList m_regs = new ArrayList();
+    private List m_regs = new ArrayList();
 
     /**
      * A "real" bundle context to create LDAP filter.
@@ -114,7 +115,7 @@ public class ServiceRegistry {
     /**
      * Unregister a service listener.
      * 
-     * @param arg0 : the service listenenr to remove
+     * @param arg0 : the service listener to remove
      */
     public void removeServiceListener(ServiceListener arg0) {
         m_listeners.remove(arg0);
@@ -163,7 +164,7 @@ public class ServiceRegistry {
      */
     private void fireServiceChanged(ServiceEvent event) {
         synchronized (this) {
-            // Iterate on the service listenner list to notify service listener
+            // Iterate on the service listener list to notify service listener
             for (int i = 0; i < m_listeners.size(); i++) {
                 ListenerInfo li = (ListenerInfo) m_listeners.get(i);
                 ServiceReference sr = event.getServiceReference();
@@ -193,7 +194,7 @@ public class ServiceRegistry {
                 filter = m_bc.createFilter(expr);
             }
 
-            ArrayList refs = new ArrayList();
+            List refs = new ArrayList();
 
             for (int i = 0; i < m_regs.size(); i++) {
                 ServiceRegistrationImpl reg = (ServiceRegistrationImpl) m_regs.get(i);
@@ -300,7 +301,7 @@ public class ServiceRegistry {
             try {
                 li.m_filter = m_bc.createFilter(filter);
             } catch (InvalidSyntaxException ex) {
-                System.err.println("Scope Service Registry : Problem when creatin a service listener " + ex.getMessage());
+                System.err.println("Scope Service Registry : Problem when creating a service listener " + ex.getMessage());
             }
             m_listeners.add(li);
         }

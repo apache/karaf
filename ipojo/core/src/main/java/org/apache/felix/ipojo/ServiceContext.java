@@ -26,7 +26,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * A service context give the access the a service registry. All service
+ * A service context give the access the a service broker. All service
  * interaction should use this service context.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
@@ -35,7 +35,7 @@ public interface ServiceContext {
 
     /**
      * Add a service listener.
-     * @param listener : the service lsitener to add.
+     * @param listener : the service listener to add.
      * @param filter : the LDAP filter
      * @throws InvalidSyntaxException : occurs when the LDAP filter is malformed
      * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener, java.lang.String)
@@ -77,10 +77,10 @@ public interface ServiceContext {
 
     /**
      * Get service reference list for the given query.
-     * @param clazz : the name of the requried service interface
+     * @param clazz : the name of the required service interface
      * @param filter : LDAP filter to apply on service provider
      * @return : the array of consistent service reference or null if no available provider
-     * @throws InvalidSyntaxException : occrus if the LDAP filter is malformed
+     * @throws InvalidSyntaxException : occurs if the LDAP filter is malformed
      * @see org.osgi.framework.BundleContext#getServiceReferences(java.lang.String, java.lang.String)
      */
     ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException;

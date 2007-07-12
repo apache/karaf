@@ -50,7 +50,7 @@ public class InstanceHandlerDescription extends HandlerDescription {
     }
 
     /**
-     * Build service instantiator handler description.
+     * Build handler description.
      * @return the handler description
      * @see org.apache.felix.ipojo.architecture.HandlerDescription#getHandlerInfo()
      */
@@ -70,6 +70,8 @@ public class InstanceHandlerDescription extends HandlerDescription {
                     state = "valid"; break;
                 case ComponentInstance.INVALID : 
                     state = "invalid"; break;
+                default :
+                    break;
             }
             instance.addAttribute(new Attribute("State", state));
             instance.addElement(inst.getInstanceDescription().getDescription());

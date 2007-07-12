@@ -19,7 +19,7 @@
 package org.apache.felix.ipojo;
 
 /**
- * UnacceptableConfiguration is throwed when a factory refuses to create an
+ * UnacceptableConfiguration occurs when a factory refuses to create an
  * instance.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

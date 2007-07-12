@@ -21,6 +21,7 @@ package org.apache.felix.ipojo.manipulation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
@@ -48,9 +49,9 @@ public class ClassChecker implements ClassVisitor, Opcodes {
     private String[] m_itfs = new String[0];
 
     /**
-     * Field hashmap [field name, type] discovered in the component class.
+     * Field map [field name, type] discovered in the component class.
      */
-    private HashMap m_fields = new HashMap();
+    private Map m_fields = new HashMap();
 
     /**
      * Method List of method descriptor discovered in the component class.
@@ -206,9 +207,9 @@ public class ClassChecker implements ClassVisitor, Opcodes {
 
     /**
      * Get collected fields.
-     * @return the field hashmap [field_name, type].
+     * @return the field map [field_name, type].
      */
-    public HashMap getFields() {
+    public Map getFields() {
         return m_fields;
     }
 

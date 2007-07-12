@@ -44,7 +44,7 @@ public interface ComponentInstance {
 
     /**
      * Component Instance State : INVALID. The component is invalid when it
-     * start or when a component dependency is unvalid.
+     * start or when a component dependency is invalid.
      */
     int INVALID = 1;
 
@@ -115,7 +115,7 @@ public interface ComponentInstance {
     boolean isStarted();
 
     /**
-     * Re-configurare an instance. Do nothing if the instance does not support
+     * Re-configure an instance. Do nothing if the instance does not support
      * dynamic reconfiguration. The reconfiguration does not stop the instance.
      * 
      * @param configuration : the new configuration.

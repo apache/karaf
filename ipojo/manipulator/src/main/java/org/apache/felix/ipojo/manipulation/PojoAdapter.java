@@ -60,7 +60,7 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
     /**
      * Getter/Setter methods creator.
      */
-    FieldAdapter m_getterSetterCreator = new FieldAdapter(cv);
+    private FieldAdapter m_getterSetterCreator = new FieldAdapter(cv);
 
     /**
      * Constructor.

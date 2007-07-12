@@ -21,6 +21,7 @@ package org.apache.felix.ipojo.handlers.dependency;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.util.Logger;
@@ -201,8 +202,8 @@ public class Dependency implements ServiceListener {
      * Build the map [service object, service reference] of used services.
      * @return the used service.
      */
-    public HashMap getUsedServices() {
-        HashMap hm = new HashMap();
+    public Map getUsedServices() {
+        Map hm = new HashMap();
         if (m_isAggregate) {
             for (int i = 0; i < m_ref.length; i++) {
                 if (i < m_services.length) {

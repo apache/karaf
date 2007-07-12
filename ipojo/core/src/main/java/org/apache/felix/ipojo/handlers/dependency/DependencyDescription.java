@@ -19,6 +19,7 @@
 package org.apache.felix.ipojo.handlers.dependency;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.osgi.framework.ServiceReference;
 
@@ -54,24 +55,14 @@ public class DependencyDescription {
     private String m_filter;
 
     /**
-     * Hashmap [Instance reference, service reference] of the used service.
+     * Map [Instance reference, service reference] of the used service.
      */
-    private HashMap m_usedServices = new HashMap();
+    private Map m_usedServices = new HashMap();
 
     /**
      * The list of service reference.
      */
     private ServiceReference[] m_serviceReferences;
-
-    public boolean isMultiple() { return m_multiple; }
-
-    public boolean isOptional() { return m_optional; }
-
-    public String getFilter() { return m_filter; }
-
-    public String getInterface() { return m_interface; }
-
-    public int getState() { return m_state; }
 
     /**
      * Constructor.
@@ -90,6 +81,16 @@ public class DependencyDescription {
         m_state = state;
         m_serviceReferences = new ServiceReference[0];
     }
+
+    public boolean isMultiple() { return m_multiple; }
+
+    public boolean isOptional() { return m_optional; }
+
+    public String getFilter() { return m_filter; }
+
+    public String getInterface() { return m_interface; }
+
+    public int getState() { return m_state; }
 
     /**
      * Get the service refrence array.
@@ -111,15 +112,15 @@ public class DependencyDescription {
 
     /**
      * Get the used service map.
-     * @return the hashmap [object reference, service reference] containing the used services
+     * @return the map [object reference, service reference] containing the used services
      */
-    public HashMap getUsedServices() { return m_usedServices; }
+    public Map getUsedServices() { return m_usedServices; }
 
     /**
      * Set the usedServices.
      * @param hm : the new usedService
      */
-    public void setUsedServices(HashMap hm) {
+    public void setUsedServices(Map hm) {
         m_usedServices = hm;
     }
 

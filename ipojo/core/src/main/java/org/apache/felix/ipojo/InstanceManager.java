@@ -22,6 +22,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.ipojo.architecture.ComponentDescription;
@@ -68,12 +69,12 @@ public class InstanceManager implements ComponentInstance {
     /**
      * Map [field, handler list] storing handlers interested by the field.
      */
-    private HashMap m_fieldRegistration = new HashMap();
+    private Map m_fieldRegistration = new HashMap();
     
     /**
      * Map [method identifier, handler list] storing handlers interested by the method.
      */
-    private HashMap m_methodRegistration = new HashMap();
+    private Map m_methodRegistration = new HashMap();
 
     /**
      * Component state (STOPPED at the beginning).
@@ -81,7 +82,7 @@ public class InstanceManager implements ComponentInstance {
     private int m_state = STOPPED;
 
     /**
-     * Manipulated clazz.
+     * Manipulated class.
      */
     private Class m_clazz;
 
@@ -115,14 +116,14 @@ public class InstanceManager implements ComponentInstance {
     }
 
     /**
-     * Configure the instance manager. Stop the existings handler, clear the
+     * Configure the instance manager. Stop the existing handler, clear the
      * handler list, change the metadata, recreate the handlers
      * 
      * @param cm : the component type metadata
      * @param configuration : the configuration of the instance
      */
     public void configure(Element cm, Dictionary configuration) {
-        // Stop all previous registred handler
+        // Stop all previous registered handler
         if (m_handlers.length != 0) {
             stop();
         }
@@ -133,7 +134,7 @@ public class InstanceManager implements ComponentInstance {
         // Set the component-type metadata
         m_className = cm.getAttribute("className");
         if (m_className == null) {
-            m_factory.getLogger().log(Logger.ERROR, "The class name of the component cannot be setted, it does not exist in the metadata");
+            m_factory.getLogger().log(Logger.ERROR, "The class name of the component cannot be set, it does not exist in the metadata");
         }
 
         // ComponentInfo initialization
@@ -180,7 +181,7 @@ public class InstanceManager implements ComponentInstance {
     }
 
     /**
-     * Get the compoenent-type description of the current instance.
+     * Get the component type description of the current instance.
      * @return the component type information.
      * @see org.apache.felix.ipojo.ComponentInstance#getComponentDescription()
      */
@@ -476,7 +477,7 @@ public class InstanceManager implements ComponentInstance {
 
     /**
      * Remove an instance from the created instance list.
-     * The instance will be eated by the garbage collector.
+     * The instance will be destroyed by the garbage collector.
      * 
      * @param o : the instance to remove
      */
@@ -738,7 +739,7 @@ public class InstanceManager implements ComponentInstance {
     /**
      * Unregister the given handler.
      * 
-     * @param h : the handler to unregiter
+     * @param h : the handler to unregister
      */
     public void unregister(Handler h) {
         int idx = -1;
@@ -801,7 +802,7 @@ public class InstanceManager implements ComponentInstance {
     }
     
     /**
-     * Dispatch entry method event on registred handler.
+     * Dispatch entry method event on registered handler.
      * @param methodId : method id
      */
     public void entryCallback(String methodId) {
@@ -812,8 +813,8 @@ public class InstanceManager implements ComponentInstance {
     }
 
     /**
-     * Dispatch exit method event on registred handler.
-     * The given returned object is an instance of Exception if the method has throwed an exception.
+     * Dispatch exit method event on registered handler.
+     * The given returned object is an instance of Exception if the method has launched an exception.
      * If the given object is null, either the method returns void, either the method has returned null.
      * @param methodId : method id
      * @param e : returned object.

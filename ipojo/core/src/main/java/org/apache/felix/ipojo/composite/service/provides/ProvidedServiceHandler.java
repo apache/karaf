@@ -54,7 +54,7 @@ public class ProvidedServiceHandler extends CompositeHandler {
     /**
      * List of managed services.
      */
-    private ArrayList m_managedServices = new ArrayList();
+    private List m_managedServices = new ArrayList();
 
     /**
      * Handler validity. False if
@@ -64,7 +64,7 @@ public class ProvidedServiceHandler extends CompositeHandler {
     /**
      * List of component type.
      */
-    private ArrayList m_types;
+    private List m_types;
 
     /**
      * Configure the handler.

@@ -140,7 +140,8 @@ public class InstanceCreator implements ServiceListener {
             Factory fact = null;
 
             try {
-                String fil = "(|(" + org.osgi.framework.Constants.SERVICE_PID + "=" + componentType + ")(component.class=" + componentType + ")(component.type=" + componentType + ")";
+                String fil = "(|(" + org.osgi.framework.Constants.SERVICE_PID + "=" + componentType + ")" 
+                    + "(component.class=" + componentType + ")(component.type=" + componentType + "))";
                 ServiceReference[] refs = context.getServiceReferences(org.apache.felix.ipojo.Factory.class.getName(), fil);
                 if (refs != null) {
                     fact = (Factory) m_context.getService(refs[0]);
@@ -153,7 +154,7 @@ public class InstanceCreator implements ServiceListener {
             }
         }
 
-        // Register a service listenner on Factory Service
+        // Register a service listener on Factory Service
         try {
             m_context.addServiceListener(this, "(objectClass=" + Factory.class.getName() + ")");
         } catch (InvalidSyntaxException e) {
@@ -164,7 +165,7 @@ public class InstanceCreator implements ServiceListener {
     /**
      * Create an instance using the given factory and the given configuration.
      * 
-     * @param fact : the facotry name to used.
+     * @param fact : the factory name to used.
      * @param config : the configuration.
      */
     private void createInstance(Factory fact, ManagedConfiguration config) {

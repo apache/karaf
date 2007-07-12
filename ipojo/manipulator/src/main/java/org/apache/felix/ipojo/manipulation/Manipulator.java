@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
@@ -43,7 +44,7 @@ public class Manipulator {
     /**
      * Store the visited fields : [name fo the field, type of the field].
      */
-    private HashMap m_fields = new HashMap();
+    private Map m_fields = new HashMap();
 
     /**
      * Store the interface implemented by the class.
@@ -95,7 +96,7 @@ public class Manipulator {
 
         // Get interface and remove POJO interface is presents
         String[] its = ck.getInterfaces();
-        ArrayList l = new ArrayList();
+        List l = new ArrayList();
         for (int i = 0; i < its.length; i++) {
             l.add(its[i]);
         }
@@ -168,7 +169,7 @@ public class Manipulator {
 
         // Get interface and remove POJO interface is presents
         String[] its = ck.getInterfaces();
-        ArrayList l = new ArrayList();
+        List l = new ArrayList();
         for (int i = 0; i < its.length; i++) {
             l.add(its[i]);
         }

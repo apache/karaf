@@ -18,7 +18,9 @@
  */
 package org.apache.felix.ipojo.composite.instance;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
@@ -41,7 +43,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * Composite Instance Handler.
- * This handler allo to create an instance inside a composite.
+ * This handler allows creating an instance inside a composite.
  * This instance is determine by its type and a configuration.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -152,7 +154,7 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
     /**
      * Create an instance using the given factory and the given configuration.
      * 
-     * @param fact : the facotry name to used.
+     * @param fact : the factory name to used.
      * @param config : the configuration.
      */
     private void createInstance(Factory fact, ManagedConfiguration config) {
@@ -226,7 +228,7 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
     
     
     /**
-     * Configrue method.
+     * Configure method.
      * @param im : instance manager.
      * @param metadata : component type metadata.
      * @param configuration : instance configuration.
@@ -284,7 +286,7 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
      * Parse a property.
      * @param prop : the current element to parse
      * @param dict : the dictionary to populate
-     * @throws ParseException : occurs if the proeprty cannot be parsed correctly
+     * @throws ParseException : occurs if the property cannot be parsed correctly
      */
     private void parseProperty(Element prop, Dictionary dict) throws ParseException {
         // Check that the property has a name
@@ -332,7 +334,7 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
             }
         }
 
-        // Register a service listenner on Factory Service
+        // Register a service listener on Factory Service
         try {
             m_context.addServiceListener(this, "(objectClass=" + Factory.class.getName() + ")");
         } catch (InvalidSyntaxException e) {
@@ -388,12 +390,16 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
                 if (m_validity && ! checkValidity()) {
                     m_manager.checkInstanceState();
                 }
+                break;
+            default :
+                break;
+            
         }
     }
     
     /**
-     * Method returning an instance object of the given componenet type.
-     * This method must be coalled only on 'primitive' type.
+     * Method returning an instance object of the given component type.
+     * This method must be called only on 'primitive' type.
      * @param type : type.
      * @return an instance object or null if not found.
      */
@@ -406,9 +412,19 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
         return null;
     }
     
+    /**
+     * Return the handler description, i.e. the state of created instances.
+     * @return the handler description.
+     * @see org.apache.felix.ipojo.CompositeHandler#getDescription()
+     */
     public HandlerDescription getDescription() {
-        //TODO
-        return null;
+        List l = new ArrayList();
+        for (int i = 0; i < m_configurations.length; i++) {
+            if (m_configurations[i].getInstance() != null) {
+                l.add(m_configurations[i]);
+            }
+        }
+        return new InstanceHandlerDescription(InstanceHandler.class.getName(), m_validity, l);
     }
 
 }

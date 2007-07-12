@@ -137,7 +137,7 @@ public class ServiceExporter implements ServiceListener {
 
     /**
      * Start method.
-     * Start the provider traking and the publication.
+     * Start the provider tracking and the publication.
      */
     public void start() {
         try {
@@ -260,24 +260,21 @@ public class ServiceExporter implements ServiceListener {
 
         if (ev.getType() == ServiceEvent.MODIFIED) {
             if (m_filter.match(ev.getServiceReference())) {
-                // Test if the ref is always matching with the filter
+                // Test if the reference is always matching with the filter
                 List l = getRecordsByRef(ev.getServiceReference());
-                if (l.size() > 0) { // The ref is already contained => update
-                    // the properties
-                    for (int i = 0; i < l.size(); i++) { // Stop the implied
-                        // record
+                if (l.size() > 0) { // The reference is already contained => update the properties
+                    for (int i = 0; i < l.size(); i++) { // Stop the implied record
                         Record rec = (Record) l.get(i);
                         if (rec.m_reg != null) {
                             rec.m_reg.setProperties(getProps(rec.m_ref));
                         }
                     }
-                } else { // it is a new mathcing service => add it
+                } else { // it is a new matching service => add it
                     arrivalManagement(ev.getServiceReference());
                 }
             } else {
                 List l = getRecordsByRef(ev.getServiceReference());
-                if (l.size() > 0) { // The ref is already contained => the
-                    // service does no more match
+                if (l.size() > 0) { // The reference is already contained => the service does no more match
                     departureManagement(ev.getServiceReference());
                 }
             }
@@ -327,14 +324,12 @@ public class ServiceExporter implements ServiceListener {
         }
         m_records.removeAll(l);
 
-        // Check the validity & if we need to reimport the service
+        // Check the validity & if we need to re-import the service
         if (m_records.size() > 0) {
             // There is other available services
             if (!m_aggregate) { // Import the next one
                 Record rec = (Record) m_records.get(0);
-                if (rec.m_svcObject == null) { // It is the first service who
-                    // disappears - create the next
-                    // one
+                if (rec.m_svcObject == null) { // It is the first service which disappears - create the next one
                     rec.m_svcObject = m_origin.getService(rec.m_ref);
                     rec.m_reg = m_destination.registerService(m_specification, rec.m_svcObject, getProps(rec.m_ref));
                 }

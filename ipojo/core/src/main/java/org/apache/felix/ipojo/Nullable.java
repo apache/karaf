@@ -19,7 +19,7 @@
 package org.apache.felix.ipojo;
 
 /**
- * A nullable object must implement this interface.
+ * A Nullable object must implement this interface.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */

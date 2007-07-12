@@ -31,7 +31,7 @@ import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 
 /**
- * This handler manages the importation and the exportation of services from /
+ * This handler manages the import and the export of services from /
  * to the parent context.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
@@ -126,8 +126,7 @@ public class ImportExportHandler extends CompositeHandler {
             boolean aggregate = false;
             String specification = null;
 
-            if (!exp[i].containsAttribute("specification")) { // Malformed
-                                                                // exports
+            if (!exp[i].containsAttribute("specification")) { // Malformed exports
                 im.getFactory().getLogger().log(Logger.ERROR, "Malformed exports : the specification attribute is mandatory");
             } else {
                 specification = exp[i].getAttribute("specification");
@@ -148,8 +147,7 @@ public class ImportExportHandler extends CompositeHandler {
                     }
                 }
                 ServiceExporter si = new ServiceExporter(specification, filter, aggregate, optional, m_scope, m_context, this);
-                // Update the componenet type description
-
+                // Update the component type description
                 m_manager.getComponentDescription().addProvidedServiceSpecification(specification);
                 m_exporters.add(si);
             }
@@ -250,7 +248,7 @@ public class ImportExportHandler extends CompositeHandler {
     /**
      * Notify the handler that an exporter becomes invalid.
      * 
-     * @param exporter : the impcated exporter.
+     * @param exporter : the implicated exporter.
      */
     protected void invalidating(ServiceExporter exporter) {
         // An import is no more valid
@@ -263,7 +261,7 @@ public class ImportExportHandler extends CompositeHandler {
     /**
      * Notify the handler that an exporter becomes valid.
      * 
-     * @param exporter : the impcated exporter.
+     * @param exporter : the implicated exporter.
      */
     protected void validating(ServiceExporter exporter) {
         // An import becomes valid
@@ -274,7 +272,7 @@ public class ImportExportHandler extends CompositeHandler {
     }
 
     /**
-     * Get the composite maanger.
+     * Get the composite manager.
      * @return the attached composite manager.
      */
     protected CompositeManager getManager() {

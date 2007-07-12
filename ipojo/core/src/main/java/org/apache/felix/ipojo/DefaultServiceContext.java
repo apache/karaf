@@ -50,7 +50,7 @@ public class DefaultServiceContext implements ServiceContext {
 
     /**
      * Add a service listener.
-     * @param listener : the service lsitener to add.
+     * @param listener : the service listener to add.
      * @param filter : the LDAP filter
      * @throws InvalidSyntaxException : occurs when the LDAP filter is malformed
      * @see org.apache.felix.ipojo.ServiceContext#addServiceListener(org.osgi.framework.ServiceListener, java.lang.String)
@@ -102,10 +102,10 @@ public class DefaultServiceContext implements ServiceContext {
 
     /**
      * Get service reference list for the given query.
-     * @param clazz : the name of the requried service interface
+     * @param clazz : the name of the required service interface
      * @param filter : LDAP filter to apply on service provider
      * @return : the array of consistent service reference or null if no available provider
-     * @throws InvalidSyntaxException : occrus if the LDAP filter is malformed
+     * @throws InvalidSyntaxException : occurs if the LDAP filter is malformed
      * @see org.apache.felix.ipojo.ServiceContext#getServiceReferences(java.lang.String, java.lang.String)
      */
     public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
@@ -139,7 +139,7 @@ public class DefaultServiceContext implements ServiceContext {
 
     /**
      * Remove a service listener.
-     * @param listener : the service listner to remove
+     * @param listener : the service listener to remove
      * @see org.apache.felix.ipojo.ServiceContext#removeServiceListener(org.osgi.framework.ServiceListener)
      */
     public void removeServiceListener(ServiceListener listener) {
@@ -149,7 +149,7 @@ public class DefaultServiceContext implements ServiceContext {
 
     /**
      * Unget the service reference.
-     * @param reference : the reference to unget
+     * @param reference : the service reference to unget
      * @return true if you are the last user of the reference
      * @see org.apache.felix.ipojo.ServiceContext#ungetService(org.osgi.framework.ServiceReference)
      */

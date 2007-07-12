@@ -115,7 +115,7 @@ public class ServiceInstantiatorHandler extends CompositeHandler {
 
     /**
      * Check the handler validity.
-     * @return true if oall created service isntance are valid
+     * @return true if all created service instances are valid
      * @see org.apache.felix.ipojo.CompositeHandler#isValid()
      */
     public boolean isValid() {

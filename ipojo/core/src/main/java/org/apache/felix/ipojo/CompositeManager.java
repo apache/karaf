@@ -96,14 +96,14 @@ public class CompositeManager implements ComponentInstance {
     }
 
     /**
-     * Configure the instance manager. Stop the existings handler, clear the
+     * Configure the instance manager. Stop the existing handler, clear the
      * handler list, change the metadata, recreate the handler
      * 
      * @param cm : the component type metadata
      * @param configuration : the configuration of the instance
      */
     public void configure(Element cm, Dictionary configuration) {
-        // Stop all previous registred handler
+        // Stop all previous registered handler
         if (m_handlers.length != 0) {
             stop();
         }
@@ -194,8 +194,8 @@ public class CompositeManager implements ComponentInstance {
     }
 
     /**
-     * REturn the list of handlers plugged on this instace.
-     * @return the list of the registred handlers.
+     * REturn the list of handlers plugged on this instance.
+     * @return the list of the registered handlers.
      */
     public CompositeHandler[] getRegistredCompositeHandlers() {
         return m_handlers;
@@ -438,7 +438,7 @@ public class CompositeManager implements ComponentInstance {
     /**
      * Unregister the given handler.
      * 
-     * @param h : the handler to unregiter
+     * @param h : the handler to unregister
      */
     public void unregister(CompositeHandler h) {
         int idx = -1;
@@ -505,7 +505,7 @@ public class CompositeManager implements ComponentInstance {
 
     /**
      * Reconfigure the current instance.
-     * @param configuration : the new instance ocnfiguration.
+     * @param configuration : the new instance configuration.
      * @see org.apache.felix.ipojo.ComponentInstance#reconfigure(java.util.Dictionary)
      */
     public void reconfigure(Dictionary configuration) {

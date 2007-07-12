@@ -42,6 +42,36 @@ public class ManipulationProperty {
     public static final int SEVERE = 2;
     
     /**
+     * Activator internal package name.
+     */
+    protected static final String IPOJO_INTERNAL_PACKAGE_NAME = "org/apache/felix/ipojo/";
+
+    /**
+     * Ipojo internal package name for internal descriptor.
+     */
+    protected static final String IPOJO_INTERNAL_DESCRIPTOR = "L" + IPOJO_INTERNAL_PACKAGE_NAME;
+
+    /**
+     * iPOJO Package name.
+     */
+    protected static final String IPOJO_PACKAGE_NAME = "org.apache.felix.ipojo";
+
+    /**
+     * Helper array for bytecode manipulation of primitive type.
+     */
+    protected static final String[][] PRIMITIVE_BOXING_INFORMATION = new String[][] { 
+        { "V", "ILLEGAL", "ILLEGAL" }, 
+        { "Z", "java/lang/Boolean", "booleanValue" },
+        { "C", "java/lang/Character", "charValue" }, 
+        { "B", "java/lang/Byte", "byteValue" }, 
+        { "S", "java/lang/Short", "shortValue" }, 
+        { "I", "java/lang/Integer", "intValue" },
+        { "F", "java/lang/Float", "floatValue" }, 
+        { "J", "java/lang/Long", "longValue" }, 
+        { "D", "java/lang/Double", "doubleValue" }
+    };
+    
+    /**
      * Internal logger implementation.
      */
     protected static class Logger {
@@ -62,6 +92,9 @@ public class ManipulationProperty {
                     case SEVERE:
                         System.err.println("[SEVERE] " + message);
                         break;
+                    default:
+                        System.err.println("[SEVERE] " + message);
+                        break;
                 }
             }
         }
@@ -76,6 +109,7 @@ public class ManipulationProperty {
      * Default logger level.
      */
     private static int m_logLevel = WARNING;
+    
 
     /**
      * Get the manipulator logger.
@@ -87,34 +121,4 @@ public class ManipulationProperty {
         }
         return m_logger;
     }
-
-    /**
-     * iPOJO Package name.
-     */
-    protected static final String IPOJO_PACKAGE_NAME = "org.apache.felix.ipojo";
-
-    /**
-     * Activator internal package name.
-     */
-    protected static final String IPOJO_INTERNAL_PACKAGE_NAME = "org/apache/felix/ipojo/";
-
-    /**
-     * Ipojo internal package name for internal descriptor.
-     */
-    protected static final String IPOJO_INTERNAL_DESCRIPTOR = "L" + IPOJO_INTERNAL_PACKAGE_NAME;
-
-    /**
-     * Helper array for bytecode manipulation of primitive type.
-     */
-    protected static final String[][] PRIMITIVE_BOXING_INFORMATION = new String[][] { { "V", "ILLEGAL", "ILLEGAL" }, // Void type [0]
-        { "Z", "java/lang/Boolean", "booleanValue" }, // boolean [1]
-        { "C", "java/lang/Character", "charValue" }, // char [2]
-        { "B", "java/lang/Byte", "byteValue" }, // byte [3]
-        { "S", "java/lang/Short", "shortValue" }, // short [4]
-        { "I", "java/lang/Integer", "intValue" }, // int [5]
-        { "F", "java/lang/Float", "floatValue" }, // float [6]
-        { "J", "java/lang/Long", "longValue" }, // long [7]
-        { "D", "java/lang/Double", "doubleValue" } // double [8]
-    };
-
 }

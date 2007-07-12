@@ -22,6 +22,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -37,7 +38,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
 /**
- * Manage a service instantiation. This service create componenet instance
+ * Manage a service instantiation. This service create component instance
  * providing the required service specification.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
@@ -57,7 +58,7 @@ public class SvcInstance implements ServiceListener {
     /**
      * Map of factory references => instance or NO_INSTANCE.
      */
-    private HashMap /* ServiceReference */m_usedRef = new HashMap();
+    private Map /* ServiceReference */m_usedRef = new HashMap();
 
     /**
      * Does we instantiate several provider ?
@@ -95,8 +96,8 @@ public class SvcInstance implements ServiceListener {
      * @param h : the handler.
      * @param spec : required specification.
      * @param conf : instance configuration.
-     * @param isAgg : is the svc instance an aggregate service ?
-     * @param isOpt : is the svc instance optional ?
+     * @param isAgg : is the service instance an aggregate service ?
+     * @param isOpt : is the service instance optional ?
      * @param filt : LDAP filter
      */
     public SvcInstance(ServiceInstantiatorHandler h, String spec, Dictionary conf, boolean isAgg, boolean isOpt, String filt) {
@@ -123,7 +124,7 @@ public class SvcInstance implements ServiceListener {
             e.printStackTrace(); // Should not happens
         }
 
-        // Init the instances
+        // Initialize the instances
         if (m_usedRef.size() > 0) {
             Set keys = m_usedRef.keySet();
             Iterator it = keys.iterator();
@@ -234,10 +235,10 @@ public class SvcInstance implements ServiceListener {
     }
 
     /**
-     * Init the list of available factory.
+     * Initialize the list of available factory.
      */
     public void initFactoryList() {
-        // Init factory list
+        // Initialize factory list
         try {
             ServiceReference[] refs = m_context.getServiceReferences(Factory.class.getName(), m_filterStr);
             if (refs == null) {
@@ -246,7 +247,7 @@ public class SvcInstance implements ServiceListener {
             for (int i = 0; i < refs.length; i++) {
                 ServiceReference ref = refs[i];
                 Factory fact = (Factory) m_context.getService(ref);
-                // Check provided spec & conf
+                // Check provided specification & configuration
                 if (match(fact)) {
                     m_usedRef.put(ref, null);
                 }
@@ -259,7 +260,7 @@ public class SvcInstance implements ServiceListener {
     }
 
     /**
-     * Check if the service isntance is statisfed.
+     * Check if the service instance is satisfed.
      * @return true if the service instance if satisfied.
      */
     public boolean isSatisfied() {
@@ -273,7 +274,7 @@ public class SvcInstance implements ServiceListener {
      * @return true if the factory match, false otherwise.
      */
     private boolean match(Factory fact) {
-        // Check if the factory can provide the spec
+        // Check if the factory can provide the specification
         Element[] provides = fact.getDescription().getElements("provides");
         for (int i = 0; i < provides.length; i++) {
             if (provides[i].getAttribute("specification").equals(m_specification)) {
@@ -356,7 +357,7 @@ public class SvcInstance implements ServiceListener {
             return;
         }
         if (ev.getType() == ServiceEvent.UNREGISTERING) {
-            // Remove the ref is contained
+            // Remove the reference is contained
             Object o = m_usedRef.remove(ev.getServiceReference());
             if (o != null) {
                 stopInstance(ev.getServiceReference());
@@ -384,10 +385,10 @@ public class SvcInstance implements ServiceListener {
     }
 
     /**
-     * Get the map of used references [ref, component instance].
+     * Get the map of used references [reference, component instance].
      * @return the map of used references.
      */
-    protected HashMap getUsedReferences() {
+    protected Map getUsedReferences() {
         return m_usedRef;
     }
 

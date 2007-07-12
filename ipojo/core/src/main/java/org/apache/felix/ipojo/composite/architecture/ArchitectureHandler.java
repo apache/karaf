@@ -93,7 +93,7 @@ public class ArchitectureHandler extends CompositeHandler implements Architectur
      * @see org.apache.felix.ipojo.Handler#start()
      */
     public void start() {
-        // Unregister the service if already registred
+        // Unregister the service if already registered
         if (m_sr != null) {
             m_sr.unregister();
         }

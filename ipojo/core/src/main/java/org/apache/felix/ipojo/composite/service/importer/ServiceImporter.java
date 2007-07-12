@@ -46,7 +46,7 @@ public class ServiceImporter implements ServiceListener {
     private ServiceContext m_destination;
 
     /**
-     * Origine Context.
+     * Origin Context.
      */
     private BundleContext m_origine;
 
@@ -108,7 +108,7 @@ public class ServiceImporter implements ServiceListener {
     /**
      * Constructor.
      * 
-     * @param specification : targetted specification
+     * @param specification : targeted specification
      * @param filter : LDAP filter
      * @param multiple : should the importer imports several services ?
      * @param optional : is the import optional ?
@@ -213,7 +213,7 @@ public class ServiceImporter implements ServiceListener {
     }
 
     /**
-     * Check if the import is statisfied.
+     * Check if the import is satisfied.
      * @return true if the import is optional or at least one provider is imported
      */
     public boolean isSatisfied() {
@@ -252,24 +252,21 @@ public class ServiceImporter implements ServiceListener {
 
         if (ev.getType() == ServiceEvent.MODIFIED) {
             if (m_filter.match(ev.getServiceReference())) {
-                // Test if the ref is always matching with the filter
+                // Test if the reference is always matching with the filter
                 List l = getRecordsByRef(ev.getServiceReference());
-                if (l.size() > 0) { // The ref is already contained => update
-                                    // the properties
-                    for (int i = 0; i < l.size(); i++) { // Stop the implied
-                                                            // record
+                if (l.size() > 0) { // The reference is already contained => update the properties
+                    for (int i = 0; i < l.size(); i++) { // Stop the implied record
                         Record rec = (Record) l.get(i);
                         if (rec.m_reg != null) {
                             rec.m_reg.setProperties(getProps(rec.m_ref));
                         }
                     }
-                } else { // it is a new mathcing service => add it
+                } else { // it is a new matching service => add it
                     arrivalManagement(ev.getServiceReference());
                 }
             } else {
                 List l = getRecordsByRef(ev.getServiceReference());
-                if (l.size() > 0) { // The ref is already contained => the
-                                    // service does no more match
+                if (l.size() > 0) { // The reference is already contained => the service does no more match
                     departureManagement(ev.getServiceReference());
                 }
             }
@@ -277,8 +274,7 @@ public class ServiceImporter implements ServiceListener {
     }
 
     /**
-     * Manage the arrival of a consitent service.
-     * 
+     * Manage the arrival of a consistent service.
      * @param ref : the arrival service reference
      */
     private void arrivalManagement(ServiceReference ref) {
@@ -289,9 +285,7 @@ public class ServiceImporter implements ServiceListener {
             rec.m_ref = ref;
             m_records.add(rec);
             // Publishing ?
-            if (m_records.size() == 1 || m_aggregate) { // If the service is the
-                                                        // first one, or if it
-                                                        // is a multiple imports
+            if (m_records.size() == 1 || m_aggregate) { // If the service is the first one, or if it is a multiple imports
                 rec.m_svcObject = m_origine.getService(rec.m_ref);
                 rec.m_reg = m_destination.registerService(m_specification, rec.m_svcObject, getProps(rec.m_ref));
             }
@@ -321,14 +315,12 @@ public class ServiceImporter implements ServiceListener {
         }
         m_records.removeAll(l);
 
-        // Check the validity & if we need to reimport the service
+        // Check the validity & if we need to re-import the service
         if (m_records.size() > 0) {
             // There is other available services
             if (!m_aggregate) { // Import the next one
                 Record rec = (Record) m_records.get(0);
-                if (rec.m_svcObject == null) { // It is the first service who
-                                                // disappears - create the next
-                                                // one
+                if (rec.m_svcObject == null) { // It is the first service which disappears - create the next one
                     rec.m_svcObject = m_origine.getService(rec.m_ref);
                     rec.m_reg = m_destination.registerService(m_specification, rec.m_svcObject, getProps(rec.m_ref));
                 }

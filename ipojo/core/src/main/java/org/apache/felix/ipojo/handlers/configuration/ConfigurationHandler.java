@@ -21,6 +21,7 @@ package org.apache.felix.ipojo.handlers.configuration;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.Handler;
@@ -123,7 +124,7 @@ public class ConfigurationHandler extends Handler {
 
         Element[] configurables = confs[0].getElements("Property");
 
-        ArrayList ff = new ArrayList();
+        List ff = new ArrayList();
         
         for (int i = 0; i < configurables.length; i++) {
             String fieldName = null;

@@ -38,7 +38,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 /**
- * Check and build a compostion, i.e. a pojo containing the composition.
+ * Check and build a composition, i.e. a POJO containing the composition.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class CompositionMetadata {
@@ -214,7 +214,7 @@ public class CompositionMetadata {
                         FieldMetadata field = ((Mapping) availableSvcMethods.get(met)).getField();
                         field.setUseful(true);
                         method.setDelegation(field);
-                        // Test optionality
+                        // Test optional
                         if (field.isOptional() && !method.getExceptions().contains("java/lang/UnsupportedOperationException")) {
                             m_handler.getManager().getFactory().getLogger().log(Logger.WARNING, "The method " + method.getMethodName() + " could not be provided correctly : the specification " + field.getSpecification().getName() + " is optional");
                         }
@@ -222,7 +222,7 @@ public class CompositionMetadata {
                 }
             }
             if (!found) {
-                throw new CompositionException("Unconsistent composition - the method " + method.getMethodName() + " could not be delegated");
+                throw new CompositionException("Inconsistent composition - the method " + method.getMethodName() + " could not be delegated");
             }
         }
     }
@@ -311,7 +311,7 @@ public class CompositionMetadata {
     }
 
     /**
-     * Get the method lsit contained in the implemented specification.
+     * Get the method list contained in the implemented specification.
      * @return the List of implemented method.
      */
     private List getMethodList() {

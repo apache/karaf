@@ -23,7 +23,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
 /**
- * Internal service reference implemenation. This class is used for in the
+ * Internal service reference implementation. This class is used for in the
  * composition.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

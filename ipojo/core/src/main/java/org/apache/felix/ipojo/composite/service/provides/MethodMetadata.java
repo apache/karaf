@@ -19,6 +19,7 @@
 package org.apache.felix.ipojo.composite.service.provides;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.felix.ipojo.handlers.dependency.nullable.MethodSignature;
 
@@ -51,15 +52,15 @@ public class MethodMetadata {
     /**
      * List of arguments. 
      */
-    private ArrayList/* <String> */m_arguments = new ArrayList/* <String> */();
+    private List/* <String> */m_arguments = new ArrayList/* <String> */();
 
     /**
      * List of exceptions.
      */
-    private ArrayList/* <String> */m_exceptions = new ArrayList/* <String> */();
+    private List/* <String> */m_exceptions = new ArrayList/* <String> */();
     
     /**
-     * Delegator field.
+     * Delegation field.
      */
     private FieldMetadata m_delegation;
 
@@ -94,19 +95,17 @@ public class MethodMetadata {
         m_exceptions.add(exception);
     }
 
-    public ArrayList/* <String> */getArguments() {
+    public List/* <String> */getArguments() {
         return m_arguments;
     }
 
-    public ArrayList/* <String> */getExceptions() {
+    public List/* <String> */getExceptions() {
         return m_exceptions;
     }
 
     public String getMethodName() {
         return m_methodName;
     }
-
-    
 
     public void setDelegation(FieldMetadata dm) {
         m_delegation = dm;
@@ -133,16 +132,12 @@ public class MethodMetadata {
             }
         }
 
-//        for (int i = 0; i < m_exceptions.size(); i++) {
-//            if (! mm.getExceptions().contains(m_exceptions.get(i))) { return false; }
-//        }
-
         return true;
     }
 
     /**
      * Equals method for Method Signature.
-     * @param ms : the method signatur to compare.
+     * @param ms : the method signature to compare.
      * @return true if the given method signature is equals to the current method metadata.
      */
     public boolean equals(MethodSignature ms) {

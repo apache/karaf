@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.felix.ipojo.handlers.dependency.nullable.MethodSignature;
 import org.apache.felix.ipojo.handlers.dependency.nullable.MethodSignatureVisitor;
@@ -45,10 +46,10 @@ public class SpecificationMetadata {
     /**
      * List of the method contained in the specification.
      */
-    private ArrayList/* <MethodMetadata> */m_methods = new ArrayList/* <MethodMetadata> */();
+    private List/* <MethodMetadata> */m_methods = new ArrayList/* <MethodMetadata> */();
 
     /**
-     * Is the specificatino an aggregate?
+     * Is the specification an aggregate?
      */
     private boolean m_isAggregate;
 
@@ -72,37 +73,6 @@ public class SpecificationMetadata {
      */
     private ProvidedServiceHandler m_handler;
 
-    public String getName() {
-        return m_name;
-    }
-
-    public ArrayList/* <MethodMetadata> */getMethods() {
-        return m_methods;
-    }
-
-    /**
-     * Add a method metadata to the current specification.
-     * @param mm : the method metadata to add.
-     */
-    public void addMethod(MethodMetadata mm) {
-        m_methods.add(mm);
-    }
-
-    /**
-     * Get a method by its name.
-     * @param name : method name
-     * @return the method metadata contained in the current specification with the given name. Null if the method is not found.
-     */
-    public MethodMetadata getMethodByName(String name) {
-        for (int i = 0; i < m_methods.size(); i++) {
-            MethodMetadata met = (MethodMetadata) m_methods.get(i);
-            if (met.getMethodName().equals(name)) {
-                return met;
-            }
-        }
-        return null;
-    }
-
     /**
      * Constructor.
      * @param name : specification name.
@@ -114,7 +84,7 @@ public class SpecificationMetadata {
     public SpecificationMetadata(String name, BundleContext bc, boolean isAggregate, boolean isOptional, ProvidedServiceHandler psd) {
         m_name = name;
         m_handler = psd;
-
+    
         // Populate methods :
         URL url = bc.getBundle().getResource(name.replace('.', '/') + ".class");
         InputStream is = null;
@@ -130,13 +100,13 @@ public class SpecificationMetadata {
             m_handler.getManager().getFactory().getLogger().log(Logger.ERROR, "Cannot open " + name + " : " + e.getMessage());
             return;
         }
-
+    
         MethodSignature[] containsMethods = msv.getMethods();
         for (int i = 0; i < containsMethods.length; i++) {
             MethodSignature met = containsMethods[i];
             String desc = met.getDesc();
             MethodMetadata method = new MethodMetadata(met.getName(), desc);
-
+    
             Type[] args = Type.getArgumentTypes(desc);
             String[] exceptionClasses = met.getException();
             for (int j = 0; j < args.length; j++) {
@@ -145,14 +115,14 @@ public class SpecificationMetadata {
             for (int j = 0; j < exceptionClasses.length; j++) {
                 method.addException(exceptionClasses[j]);
             }
-
+    
             addMethod(method);
         }
-
+    
         m_isAggregate = isAggregate;
         m_isOptional = isOptional;
     }
-    
+
     /**
      * Constructor.
      * @param c : class
@@ -177,10 +147,41 @@ public class SpecificationMetadata {
             for (int j = 0; j < exceptionClasses.length; j++) {
                 method.addException(exceptionClasses[j].getName());
             }
-
+    
             addMethod(method);
         }
         m_isInterface = false;
+    }
+
+    public String getName() {
+        return m_name;
+    }
+
+    public List/* <MethodMetadata> */getMethods() {
+        return m_methods;
+    }
+
+    /**
+     * Add a method metadata to the current specification.
+     * @param mm : the method metadata to add.
+     */
+    public void addMethod(MethodMetadata mm) {
+        m_methods.add(mm);
+    }
+
+    /**
+     * Get a method by its name.
+     * @param name : method name
+     * @return the method metadata contained in the current specification with the given name. Null if the method is not found.
+     */
+    public MethodMetadata getMethodByName(String name) {
+        for (int i = 0; i < m_methods.size(); i++) {
+            MethodMetadata met = (MethodMetadata) m_methods.get(i);
+            if (met.getMethodName().equals(name)) {
+                return met;
+            }
+        }
+        return null;
     }
 
     public boolean isAggregate() {

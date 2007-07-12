@@ -19,7 +19,7 @@
 package org.apache.felix.ipojo.composite.service.provides;
 
 /**
- * Exception throwed when a composition error occurs.
+ * Exception occurs when a composition error occurs.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -44,7 +44,7 @@ public class CompositionException extends Exception {
     }
 
     /**
-     * Get the excepttion message.
+     * Get the exception message.
      * @return the message.
      * @see java.lang.Throwable#getMessage()
      */

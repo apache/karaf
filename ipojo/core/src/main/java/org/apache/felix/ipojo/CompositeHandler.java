@@ -25,7 +25,7 @@ import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * Composite Handler Abstract Class. An composite handler need implements these
- * method to be notifed of lifecycle change...
+ * method to be notified of lifecycle change...
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */

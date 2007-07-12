@@ -44,11 +44,11 @@ import org.osgi.framework.ServiceRegistration;
 public class CompositeServiceContext implements ServiceContext, ServiceListener {
 
     /**
-     * Structure stoing the referense, the factory and the registration.
+     * Structure storing the reference, the factory and the registration.
      */
     private class Record {
         /**
-         * Reference of the proxed factory from the external context.
+         * Reference of the represented factory from the external context.
          */
         private ServiceReference m_ref;
         /**
@@ -56,7 +56,7 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
          */
         private ServiceRegistration m_reg;
         /**
-         * Proxed Factory. 
+         * Represented Factory. 
          */
         private FactoryProxy m_fact;
     }
@@ -124,9 +124,9 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
 
     /**
      * Add a filtered service listener.
-     * @param arg0 : the service listner object to add
+     * @param arg0 : the service listener object to add
      * @param arg1 : the LDAP filter for this listener
-     * @throws InvalidSyntaxException : throwed if the LDAP filter is malformed
+     * @throws InvalidSyntaxException : occurs if the LDAP filter is malformed
      * @see org.apache.felix.ipojo.ServiceContext#addServiceListener(org.osgi.framework.ServiceListener,
      * java.lang.String)
      */
@@ -136,7 +136,7 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
 
     /**
      * Get all service references.
-     * @param arg0 : The requried service interface.
+     * @param arg0 : The required service interface.
      * @param arg1 : LDAP filter
      * @return the list of all service reference matching with the query
      * @throws InvalidSyntaxException : occurs when the given filter is malformed
@@ -160,7 +160,7 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
     
     /**
      * Get a service reference for the required interface.
-     * @param arg0 : the requried interface name
+     * @param arg0 : the required interface name
      * @return the service reference or null if no available provider
      * @see org.apache.felix.ipojo.ServiceContext#getServiceReference(java.lang.String)
      */

@@ -84,6 +84,8 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
             case BundleEvent.STOPPING:
                 closeManagementFor(event.getBundle());
                 break;
+            default: 
+                break;
         }
 
     }

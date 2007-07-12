@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.ipojo.ComponentInstance;
@@ -32,7 +33,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * Internal service registration implemenation. This class is used for in the
+ * Internal service registration implementation. This class is used for in the
  * composition.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
@@ -75,6 +76,11 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
     private ServiceReferenceImpl m_ref = null;
 
     /**
+     * Property Keys List.
+     */
+    private transient List m_list = new ArrayList();
+
+    /**
      * Constructor.
      * 
      * @param registry : the service registry
@@ -95,7 +101,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
         // This reference is the "standard" reference for this service and will
         // always be returned by getReference().
         // Since all reference to this service are supposed to be equal, we use
-        // the hashcode of this reference for
+        // the hash code of this reference for
         // a references to this service in ServiceReference.
         m_ref = new ServiceReferenceImpl(cm, this);
     }
@@ -159,11 +165,6 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
     }
 
     /**
-     * Property Keys List.
-     */
-    private transient ArrayList m_list = new ArrayList();
-
-    /**
      * Get the property keys.
      * @return the property keys list.
      */
@@ -196,7 +197,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
     /**
      * Initialize properties.
      * 
-     * @param dict : serivce properties to publish.
+     * @param dict : service properties to publish.
      */
     private void initializeProperties(Dictionary dict) {
         // Create a case insensitive map.

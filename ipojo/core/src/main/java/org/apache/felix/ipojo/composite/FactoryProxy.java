@@ -46,7 +46,7 @@ public class FactoryProxy implements Factory {
     /**
      * Constructor.
      * 
-     * @param fact : the targetted factory.
+     * @param fact : the targeted factory.
      * @param s : the service context to target.
      */
     public FactoryProxy(Factory fact, ServiceContext s) {
@@ -119,7 +119,7 @@ public class FactoryProxy implements Factory {
      * 
      * @param conf : the configuration to reconfigure the instance.
      * @throws UnacceptableConfiguration : if the given configuration is not
-     * consistent for the tragetted instance.
+     * consistent for the targeted instance.
      * @see org.apache.felix.ipojo.Factory#reconfigure(java.util.Dictionary)
      */
     public void reconfigure(Dictionary conf) throws UnacceptableConfiguration {

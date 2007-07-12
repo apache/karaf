@@ -46,7 +46,7 @@ public interface Factory {
      * @param configuration : the configuration properties for this component.
      * @param serviceContext : the service context of the component.
      * @return the created instance manager.
-     * @throws UnacceptableConfiguration : when the given configuration isnot valid.
+     * @throws UnacceptableConfiguration : when the given configuration is not valid.
      */
     ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration;
 
@@ -79,7 +79,7 @@ public interface Factory {
      * 
      * @param conf : the configuration to reconfigure the instance.
      * @throws UnacceptableConfiguration : if the given configuration is not
-     * consistent for the tragetted instance.
+     * consistent for the targeted instance.
      */
     void reconfigure(Dictionary conf) throws UnacceptableConfiguration;
 

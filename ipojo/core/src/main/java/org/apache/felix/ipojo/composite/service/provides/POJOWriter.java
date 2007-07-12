@@ -33,7 +33,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 /**
- * Create the proxy class.
+ * Create the Proxy class.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -75,7 +75,7 @@ public class POJOWriter implements Opcodes {
     }
 
     /**
-     * Return the proxy classname for the contract contractname by delegating on available service.
+     * Return the proxy 'classname' for the contract 'contractname' by delegating on available service.
      * @param url URL of the needed contract
      * @param contractName : The interface to implement
      * @param className : The class name to create
@@ -140,19 +140,6 @@ public class POJOWriter implements Opcodes {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        // Write the class :
-//        try {
-//            FileOutputStream fos = new FileOutputStream(
-//                    "F:\\dev\\workspaces\\iPOJO_dev\\Test_Manipulator\\manipulated\\org\\apache\\felix\\ipojo\\test\\scenarios\\component\\"
-//                            + className.replace('/', '.') + ".class");
-//
-//            fos.write(b);
-//
-//            fos.close();
-//        } catch (Exception e) {
-//            System.err.println("Exception : " + e.getMessage());
-//        }
 
         return b;
     }

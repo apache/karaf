@@ -18,9 +18,9 @@
  */
 package org.apache.felix.ipojo.composite.service.instantiator;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.ipojo.ComponentInstance;
@@ -30,7 +30,7 @@ import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.ServiceReference;
 
 /**
- * Description of the Service Instantiator Handler.
+ * Description of the Service Creator Handler.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -69,7 +69,7 @@ public class ServiceInstantiatorDescription extends HandlerDescription {
                 state = "resolved";
             }
             service.addAttribute(new Attribute("State", state));
-            HashMap map = inst.getUsedReferences();
+            Map map = inst.getUsedReferences();
             Set keys = map.keySet();
             Iterator it = keys.iterator();
             while (it.hasNext()) {
