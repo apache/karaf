@@ -253,13 +253,13 @@ public class LocalRepositoryImpl implements Repository
                     
                     String low = imports[impIdx].isLowInclusive()
                                 ? "(version>=" + imports[impIdx].getVersion() + ")"
-                                : "(!(version<=" + imports[impIdx].getVersion() + ")";
+                                : "(!(version<=" + imports[impIdx].getVersion() + "))";
 
                     if (imports[impIdx].getVersionHigh() != null)
                     {
                         String high = imports[impIdx].isHighInclusive()
                             ? "(version<=" + imports[impIdx].getVersionHigh() + ")"
-                            : "(!(version>=" + imports[impIdx].getVersionHigh() + ")";
+                            : "(!(version>=" + imports[impIdx].getVersionHigh() + "))";
                         req.setFilter("(&(package="
                             + imports[impIdx].getName() + ")"
                             + low + high + ")");
