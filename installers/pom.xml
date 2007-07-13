@@ -4,11 +4,12 @@
   <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
-    <version>0.9.0-incubator-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <relativePath>../pom/pom.xml</relativePath>
   </parent>
   <packaging>jar</packaging>
   <name>Apache Felix Installers</name>
+  <version>0.9.0-SNAPSHOT</version>
   <artifactId>installers</artifactId>
   <dependencies>
     <dependency>
@@ -33,31 +34,31 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.main</artifactId>
-      <version>${pom.version}</version>
+      <version>0.9.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.daemon</artifactId>
-      <version>${pom.version}</version>
+      <version>0.9.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell</artifactId>
-      <version>${pom.version}</version>
+      <version>1.1.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell.tui</artifactId>
-      <version>${pom.version}</version>
+      <version>1.1.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.bundlerepository</artifactId>
-      <version>${pom.version}</version>
+      <version>1.1.0-SNAPSHOT</version>
     </dependency>
 
   </dependencies>

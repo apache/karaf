@@ -22,11 +22,12 @@
     <parent>
         <groupId>org.apache.felix</groupId>
         <artifactId>felix</artifactId>
-        <version>0.9.0-incubator-SNAPSHOT</version>
+        <version>1.1.0-SNAPSHOT</version>
         <relativePath>../pom/pom.xml</relativePath>
     </parent>
 
     <artifactId>org.apache.felix.configadmin</artifactId>
+    <version>0.9.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>Apache Felix Configuration Admin Service</name>
@@ -38,10 +39,12 @@
         <dependency>
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.osgi.compendium</artifactId>
+            <version>0.9.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -50,7 +53,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>0.9.0-incubator-SNAPSHOT</version>
+                <version>1.1.0-SNAPSHOT</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>

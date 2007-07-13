@@ -2,7 +2,7 @@
     <parent>
         <groupId>org.apache.felix</groupId>
         <artifactId>felix</artifactId>
-        <version>0.9.0-incubator-SNAPSHOT</version>
+        <version>1.1.0-SNAPSHOT</version>
         <relativePath>../pom/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -12,16 +12,17 @@
         Implementation of the Declarative Services specification 1.0
     </description>
     <artifactId>org.apache.felix.scr</artifactId>
+    <version>0.9.0-SNAPSHOT</version>
     <dependencies>
         <dependency>
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>${pom.version}</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>${pom.version}</version>
+            <version>0.9.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>net.sf.kxml</groupId>
@@ -34,7 +35,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-		        <version>0.9.0-incubator-SNAPSHOT</version>
+		<version>1.1.0-SNAPSHOT</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>

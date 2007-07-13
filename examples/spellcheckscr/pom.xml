@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
-    <version>0.9.0-incubator-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <relativePath>../../pom/pom.xml</relativePath>
   </parent>
 
@@ -32,25 +32,26 @@
   <packaging>bundle</packaging>
   <name>Apache Felix Examples: Spell Check w/ SCR</name>
   <artifactId>org.apache.felix.examples.spellcheckscr</artifactId>
+  <version>0.9.0-SNAPSHOT</version>
   <description>${description}</description>
 
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>${pom.version}</version>
+      <version>1.1.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.examples.dictionaryservice</artifactId>
-      <version>${pom.version}</version>
+      <version>0.9.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.examples.spellcheckservice</artifactId>
-      <version>${pom.version}</version>
+      <version>0.9.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
@@ -60,6 +61,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
