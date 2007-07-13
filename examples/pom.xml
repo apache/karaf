@@ -41,6 +41,10 @@
       </activation>
       <modules>
           <module>spellcheckscr</module>
+          <module>servicebased.host</module>
+          <module>servicebased.circle</module>
+          <module>servicebased.square</module>
+          <module>servicebased.triangle</module>
       </modules>
     </profile>
   </profiles>

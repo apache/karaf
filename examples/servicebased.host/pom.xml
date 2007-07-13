@@ -1,0 +1,75 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<project>
+
+  <parent>
+    <groupId>org.apache</groupId>
+    <artifactId>apache</artifactId>
+    <version>4</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>bundle</packaging>
+  <name>Apache Felix Service-Based Host</name>
+  <description>A simple application that embeds Felix and uses the service model for extensibility.</description>
+  <groupId>org.apache.felix.example</groupId>
+  <artifactId>servicebased.host</artifactId>
+  <version>1.0.0</version>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.framework</artifactId>
+      <version>0.9.0-incubator-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>0.9.0-incubator-SNAPSHOT</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Main-Class>org.apache.felix.example.servicebased.host.Activator</Main-Class>
+            <Import-Package>org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.url,org.osgi.service.startlevel,org.osgi.util.tracker,*</Import-Package>
+            <Export-Package>org.apache.felix.example.servicebased.host.service.*</Export-Package>
+            <Private-Package>org.apache.felix.example.servicebased.host.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.osgi.*</Private-Package>
+            <Bundle-Activator>org.apache.felix.example.servicebased.host.Activator</Bundle-Activator>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>apache.snapshots</id>
+      <name>snapshot plugins</name>
+      <url>
+        http://people.apache.org/repo/m2-snapshot-repository
+      </url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+</project>
