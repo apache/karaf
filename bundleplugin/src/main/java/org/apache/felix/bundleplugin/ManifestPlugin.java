@@ -19,6 +19,7 @@
 package org.apache.felix.bundleplugin;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -109,12 +110,17 @@ public class ManifestPlugin
 
         analyzer.setProperties( props );
 
-        if ( project.getArtifact().getFile() == null )
+        File file = project.getArtifact().getFile();
+        if ( file == null )
         {
             analyzer.setJar( getOutputDirectory() );
         }
         else
         {
+            if ( !file.exists() )
+            {
+                file.mkdirs();
+            }
             analyzer.setJar( project.getArtifact().getFile() );
         }
 
