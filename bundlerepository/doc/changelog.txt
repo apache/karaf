@@ -9,3 +9,5 @@ Changes from 0.8.0-incubator to 1.0.0
   bundles before local bundles and to search through all available
   candidates to find one that can resolve instead of picking one and failing
   if it cannot be resolved. (FELIX-285)
+* [2007-07-13] Fixed LDAP filter syntax bug when using inclusive version
+  ranges. (FELIX-327)
