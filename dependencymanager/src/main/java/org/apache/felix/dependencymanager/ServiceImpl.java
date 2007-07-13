@@ -19,6 +19,7 @@
 package org.apache.felix.dependencymanager;
 
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -39,7 +40,8 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ServiceImpl implements Service {
-    private static final ServiceRegistration NULL_REGISTRATION;
+    private static final Class[] VOID = new Class[] {};
+	private static final ServiceRegistration NULL_REGISTRATION;
     private static final ServiceStateListener[] SERVICE_STATE_LISTENER_TYPE = new ServiceStateListener[] {};
     
     private final BundleContext m_context;
@@ -280,6 +282,7 @@ public class ServiceImpl implements Service {
 	}
 	
 	public synchronized Service setFactory(Object factory, String createMethod) {
+	    ensureNotActive();
 		m_instanceFactory = factory;
 		m_instanceFactoryCreateMethod = createMethod;
 		return this;
@@ -290,6 +293,7 @@ public class ServiceImpl implements Service {
 	}
 	
 	public synchronized Service setComposition(Object instance, String getMethod) {
+	    ensureNotActive();
 		m_compositionManager = instance;
 		m_compositionManagerGetMethod = getMethod;
 		return this;
@@ -495,13 +499,19 @@ public class ServiceImpl implements Service {
             }
         }
     }
+    
+    private Object createInstance(Class clazz) throws SecurityException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+		Constructor constructor = clazz.getConstructor(VOID);
+    	AccessibleObject.setAccessible(new AccessibleObject[] { constructor }, true);
+        return clazz.newInstance();
+    }
 
     void initService() {
     	if (m_serviceInstance == null) {
 	        if (m_implementation instanceof Class) {
 	            // instantiate
 	            try {
-	                m_serviceInstance = ((Class) m_implementation).newInstance();
+	            	m_serviceInstance = createInstance((Class) m_implementation);
 	            } 
 	            catch (InstantiationException e) {
 	                // TODO handle this exception
@@ -510,7 +520,13 @@ public class ServiceImpl implements Service {
 	            catch (IllegalAccessException e) {
 	                // TODO handle this exception
 	                e.printStackTrace();
-	            }
+	            } catch (SecurityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 	        }
 	        else {
 	        	if (m_instanceFactoryCreateMethod != null) {
@@ -518,13 +534,19 @@ public class ServiceImpl implements Service {
 		        	if (m_instanceFactory != null) {
 		        		if (m_instanceFactory instanceof Class) {
 		        			try {
-								factory = ((Class) m_instanceFactory).newInstance();
+								factory = createInstance((Class) m_instanceFactory);
 							} 
 		        			catch (InstantiationException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							} 
 		        			catch (IllegalAccessException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (SecurityException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (NoSuchMethodException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
@@ -535,6 +557,8 @@ public class ServiceImpl implements Service {
 		        	}
 		        	else {
 		        		factory = null; // TODO!!!! where does the factory come from if not explicitly defined
+		        		// could be the activator?
+		        		// could be ???
 		        	}
 		        	if (factory == null) {
 		        		throw new IllegalStateException("Factory cannot be null");
