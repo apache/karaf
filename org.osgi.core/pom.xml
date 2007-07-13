@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
-    <version>0.9.0-incubator-SNAPSHOT</version>
+    <version>1.0.0</version>
     <relativePath>../pom/pom.xml</relativePath>
   </parent>
   <organization>
@@ -31,12 +31,14 @@
   <name>OSGi R4 Core Bundle</name>
   <description>OSGi Service Platform Release 4 Core Interfaces and Classes.</description>
   <artifactId>org.osgi.core</artifactId>
+  <version>1.0.0</version>
   <packaging>bundle</packaging>
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
+        <version>1.0.0</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>

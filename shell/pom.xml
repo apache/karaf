@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
-    <version>0.9.0-incubator-SNAPSHOT</version>
+    <version>1.0.0</version>
     <relativePath>../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -32,7 +32,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>${pom.version}</version>
+      <version>1.0.0</version>
     </dependency>
   </dependencies>
   <build>
@@ -40,6 +40,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
+        <version>1.0.0</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>

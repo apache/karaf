@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
-    <version>0.9.0-incubator-SNAPSHOT</version>
+    <version>1.0.0</version>
     <relativePath>../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -28,16 +28,17 @@
   <name>Apache Felix Bundle Repository</name>
   <description>Bundle repository service.</description>
   <artifactId>org.apache.felix.bundlerepository</artifactId>
+  <version>1.0.0</version>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>${pom.version}</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell</artifactId>
-      <version>${pom.version}</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>net.sf.kxml</groupId>
@@ -50,6 +51,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
+        <version>1.0.0</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
@@ -58,7 +60,7 @@
             <Import-Package>!javax.xml.parsers,!org.xml.sax,*</Import-Package>
             <DynamicImport-Package>org.apache.felix.shell</DynamicImport-Package>
             <Bundle-Activator>${pom.artifactId}.Activator</Bundle-Activator>
-            <Bundle-DocUrl>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</Bundle-DocUrl>
+            <Bundle-DocURL>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</Bundle-DocURL>
             <Bundle-Url>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</Bundle-Url>
             <Bundle-Source>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</Bundle-Source>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>

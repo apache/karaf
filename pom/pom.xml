@@ -31,7 +31,7 @@
   <artifactId>felix</artifactId>
   <packaging>pom</packaging>
   <name>Apache Felix</name>
-  <version>0.9.0-incubator-SNAPSHOT</version>
+  <version>1.0.0</version>
   <url>http://felix.apache.org/</url>
   <inceptionYear>2006</inceptionYear>
   <description>Apache felix is an OSGi implementation.</description>
@@ -181,47 +181,6 @@
     </profile>
   </profiles>
 
-  <!-- Specify a default version number for dependencies -->
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.osgi.core</artifactId>
-        <version>0.9.0-incubator-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.osgi.compendium</artifactId>
-        <version>0.9.0-incubator-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.framework</artifactId>
-        <version>0.9.0-incubator-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.bundlerepository</artifactId>
-        <version>0.9.0-incubator-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.mosgi.jmx.registry</artifactId>
-        <version>0.9.0-incubator-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.mosgi.jmx.agent</artifactId>
-        <version>0.9.0-incubator-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.mosgi.console.ifc</artifactId>
-        <version>0.9.0-incubator-SNAPSHOT</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <distributionManagement>
     <site>
       <id>felix website</id>
@@ -326,7 +285,7 @@
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>0.9.0-incubator-SNAPSHOT</version>
+          <version>1.0.0</version>
         </plugin>
 <!--        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
