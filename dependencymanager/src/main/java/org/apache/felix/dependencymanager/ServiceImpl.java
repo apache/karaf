@@ -18,7 +18,6 @@
  */
 package org.apache.felix.dependencymanager;
 
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -443,7 +442,7 @@ public class ServiceImpl implements Service {
                 	try {
                 	Method method = clazz.getDeclaredMethod(name, null);
 	                	if (method != null) {
-	                		AccessibleObject.setAccessible(new AccessibleObject[] { method }, true);
+	                		method.setAccessible(true);
 	                		method.invoke(m_serviceInstance, null);
 	                		return;
 	                	}
@@ -502,7 +501,7 @@ public class ServiceImpl implements Service {
     
     private Object createInstance(Class clazz) throws SecurityException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 		Constructor constructor = clazz.getConstructor(VOID);
-    	AccessibleObject.setAccessible(new AccessibleObject[] { constructor }, true);
+		constructor.setAccessible(true);
         return clazz.newInstance();
     }
 
@@ -701,7 +700,7 @@ public class ServiceImpl implements Service {
     		if (m_compositionManagerInstance != null) {
 	    		try {
 					Method m = m_compositionManagerInstance.getClass().getDeclaredMethod(m_compositionManagerGetMethod, null);
-            		AccessibleObject.setAccessible(new AccessibleObject[] { m }, true);
+            		m.setAccessible(true);
 					instances = (Object[]) m.invoke(m_compositionManager, null);
 				} 
 	    		catch (Exception e) {
@@ -719,10 +718,10 @@ public class ServiceImpl implements Service {
 		        Class serviceClazz = serviceInstance.getClass();
 		        while (serviceClazz != null) {
 		            Field[] fields = serviceClazz.getDeclaredFields();
-		            AccessibleObject.setAccessible(fields, true);
 		            for (int j = 0; j < fields.length; j++) {
 		                if (fields[j].getType().equals(clazz)) {
 		                    try {
+		                    	fields[j].setAccessible(true);
 		                        // synchronized makes sure the field is actually written to immediately
 		                        synchronized (new Object()) {
 		                            fields[j].set(serviceInstance, instance);
