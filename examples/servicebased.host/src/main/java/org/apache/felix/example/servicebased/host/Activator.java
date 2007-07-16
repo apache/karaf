@@ -135,7 +135,7 @@ public class Activator implements BundleActivator, Runnable
     {
         // Create a temporary bundle cache directory and
         // make sure to clean it up on exit.
-        final File cachedir = File.createTempFile("felix.example", null);
+        final File cachedir = File.createTempFile("felix.example.servicebased", null);
         cachedir.delete();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run()

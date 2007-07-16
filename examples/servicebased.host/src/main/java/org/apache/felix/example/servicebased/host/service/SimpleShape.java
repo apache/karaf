@@ -27,7 +27,7 @@ import java.awt.Point;
  * <ul>
  *   <li>simple.shape.name - A <tt>String</tt> name for the shape.
  *   </li>
- *   <li>simple.shape.icon - A <tt>Icon</tt> for the shape.
+ *   <li>simple.shape.icon - An <tt>Icon</tt> for the shape.
  *   </li>
  * </ul>
 **/
