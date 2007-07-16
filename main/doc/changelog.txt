@@ -1,0 +1,20 @@
+Changes from 0.8.0-incubator to 1.0.0
+-------------------------------------
+
+* [2007-01-31] Changed how the system packages property is calculated to
+  make it more robust; previously it was leaving a dangling comma if the
+  execution platform was not known.
+* [2007-02-05] Added system package support for Java 6. (FELIX-201)
+* [2007-02-13] Removed support for trusted certificate authorities; this
+  will be added later as an extension.
+* [2007-03-16] Felix configuration properties can now be set as system
+  properties when using the standard launcher. (FELIX-250)
+* [2007-03-28] No longer including config.properties in the JAR file.
+* [2007-04-13] The javax.net and javax.net.ssl packages were missing
+  from the system packages properties.
+* [2007-04-13] Fixed a bug where the launcher was not correctly calculating
+  the installation directory correctly.
+* [2007-05-07] Was accidentally including OBR service interface package
+  in main JAR.
+* [2007-05-22] Now includes the Service Tracker package in main JAR.
+* [2007-07-04] Modified to use the new Felix embedding API.

@@ -1,0 +1,52 @@
+Changes from 0.8.0-incubator to 1.0.0
+-------------------------------------
+
+* [2007-01-18] Added support for bundle header localization. (FELIX-27)
+* [2007-01-22] Modified framework resolver to support a generic
+  capability/requirement model.
+* [2007-01-22] Reorganized and centralized manifest parsing code and added
+  support for resolver's generic capability/requirement model. (FELIX-98)
+* [2007-01-22] Improved native library naming normalization. (FELIX-26)
+* [2007-01-23] No longer eagerly resolving classes loaded from modules
+  since this was causing verification errors with IBM J9.
+* [2007-01-25] Added some support for execution environment checking.
+  (FELIX-23)
+* [2007-01-29] Added support for getAllServiceReferences(). (FELIX-32)
+* [2007-01-31] Added Require-Bundle support to resolve using the generic
+  capability/requirement model of the resolver. (FELIX-28)
+* [2007-02-05] Fixed a bug in processor type normalization for x86-64
+  processors.
+* [2007-02-09] The resolver previously ignored packages that were pending
+  removal when resolving new bundles, now it does not.
+* [2007-02-09] Bundles are automatically refreshed when updated/uninstalled
+  if none of their exported packages are in use.
+* [2007-02-13] Added support for extension bundles. (FELIX-30)
+* [2007-03-02] Added a Bundle.getBundleContext() method until actual
+  support for OSGi R4.1.
+* [2007-04-26] Modified Bundle.findEntries() to return URLs to directory
+  entries as well as file entries.
+* [2007-05-06] Modified LDAP evaluator to special case the fact that
+  BigDecimal is not available in Foundation profile.
+* [2007-05-21] Made some performance improvements in LDAP evaluation.
+* [2007-05-22] Modified JAR file to include Service Tracker package.
+* [2007-05-22] Improved concurrency handling around checking for already
+  loaded classes and defining classes.
+* [2007-06-05] Modified resource URLs to use port number rather than
+  prepend information to the resource path.
+* [2007-06-13] Improved dynamic imports to cycle through all available
+  candidates when checking for class space consistency.
+* [2007-06-18] Improved service registry filtering based on class versions
+  to allow a bundle to register a service for a different version of class
+  that it can access.
+* [2007-06-21] Modified our "last ditch effort" to guess when to delegate
+  to the system bundle to make it a little more robust.
+* [2007-06-29] Fixed a bug in EventDispatcher that was causing asynchronous
+  events to not be fired after stopping the framework instance and creating
+  a new instance. (FELIX-314)
+* [2007-07-03] Fixed a bug in EventDispatcher that would not correctly
+  update a listener when it implemented multiple listener interfaces.
+* [2007-07-04] Modified Felix framework class to implement the Bundle
+  interface to improve the startup/shutdown sequence and to provide a
+  simplified API for creating framework instances.
+* [2007-07-11] Removed the PropertyResolver-related classes and now only
+  use Maps for configuration properties. (FELIX-324)
