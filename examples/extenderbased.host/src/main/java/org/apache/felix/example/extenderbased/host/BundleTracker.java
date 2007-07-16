@@ -26,33 +26,34 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.SynchronousBundleListener;
 
 /**
- * This is a simple class that only tracks active bundles. It must be given
- * a bundle context upon creation, which it uses to listen for bundle events.
- * It may also be given a bundle tracker customizer object which it will
- * notify about changes in the list of active bundles. The bundle tracker
- * must be opened to track objects and closed when it is no longer needed.
+ * This is a very simple bundle tracker utility class that tracks active
+ * bundles. The tracker must be given a bundle context upon creation,
+ * which it uses to listen for bundle events. The bundle tracker must be
+ * opened to track objects and closed when it is no longer needed. This
+ * class is abstract, which means in order to use it you must create a
+ * subclass of it. Subclasses must implement the <tt>addedBundle()</tt>
+ * and <tt>removedBundle()</tt> methods, which can be used to perform some
+ * custom action upon the activation or deactivation of bundles. Since this
+ * tracker is quite simple, its concurrency control approach is also
+ * simplistic. This means that subclasses should take great care to ensure
+ * that their <tt>addedBundle()</tt> and <tt>removedBundle()</tt> methods
+ * are very simple and do not do anything to change the state of any bundles.
 **/
-public class BundleTracker implements BundleTrackerCustomizer
+public abstract class BundleTracker
 {
-    private Set m_bundleSet = new HashSet();
-    private BundleContext m_context;
-    private BundleTrackerCustomizer m_customizer;
-    private SynchronousBundleListener m_listener;
-    private boolean m_open;
+    final Set m_bundleSet = new HashSet();
+    final BundleContext m_context;
+    final SynchronousBundleListener m_listener;
+    boolean m_open;
 
     /**
      * Constructs a bundle tracker object that will use the specified
-     * bundle context for listening to bundle events and will notify the
-     * specified bundle tracker customizer about changes in the set of
-     * active bundles.
+     * bundle context.
      * @param context The bundle context to use to track bundles.
-     * @param customizer The bundle tracker customerizer to inform about
-     *        changes in the active set of bundles.
     **/
-    public BundleTracker(BundleContext context, BundleTrackerCustomizer customizer)
+    public BundleTracker(BundleContext context)
     {
         m_context = context;
-        m_customizer = (customizer == null) ? this : customizer;
         m_listener = new SynchronousBundleListener() {
             public void bundleChanged(BundleEvent evt)
             {
@@ -68,7 +69,7 @@ public class BundleTracker implements BundleTrackerCustomizer
                         if (!m_bundleSet.contains(evt.getBundle()))
                         {
                             m_bundleSet.add(evt.getBundle());
-                            m_customizer.addedBundle(evt.getBundle());
+                            addedBundle(evt.getBundle());
                         }
                     }
                     else if (evt.getType() == BundleEvent.STOPPED)
@@ -76,7 +77,7 @@ public class BundleTracker implements BundleTrackerCustomizer
                         if (m_bundleSet.contains(evt.getBundle()))
                         {
                             m_bundleSet.remove(evt.getBundle());
-                            m_customizer.removedBundle(evt.getBundle());
+                            removedBundle(evt.getBundle());
                         }
                     }
                 }
@@ -110,7 +111,7 @@ public class BundleTracker implements BundleTrackerCustomizer
                 if (bundles[i].getState() == Bundle.ACTIVE)
                 {
                     m_bundleSet.add(bundles[i]);
-                    m_customizer.addedBundle(bundles[i]);
+                    addedBundle(bundles[i]);
                 }
             }
         }
@@ -127,34 +128,32 @@ public class BundleTracker implements BundleTrackerCustomizer
 
             m_context.removeBundleListener(m_listener);
 
-            Bundle[] bundles = getBundles();
+            Bundle[] bundles = (Bundle[]) m_bundleSet.toArray(new Bundle[m_bundleSet.size()]);
             for (int i = 0; i < bundles.length; i++)
             {
                 if (m_bundleSet.remove(bundles[i]))
                 {
-                    m_customizer.removedBundle(bundles[i]);
+                    removedBundle(bundles[i]);
                 }
             }
         }
     }
 
     /**
-     * A default implementation of the bundle tracker customizer that
-     * does nothing.
+     * Subclasses must implement this method; it can be used to perform
+     * actions upon the activation of a bundle. Subclasses should keep
+     * this method implementation as simple as possible and should not
+     * cause the change in any bundle state to avoid concurrency issues.
      * @param bundle The bundle being added to the active set.
     **/
-    public void addedBundle(Bundle bundle)
-    {
-        // Do nothing by default.
-    }
+    protected abstract void addedBundle(Bundle bundle);
 
     /**
-     * A default implementation of the bundle tracker customizer that
-     * does nothing.
+     * Subclasses must implement this method; it can be used to perform
+     * actions upon the deactivation of a bundle. Subclasses should keep
+     * this method implementation as simple as possible and should not
+     * cause the change in any bundle state to avoid concurrency issues.
      * @param bundle The bundle being removed from the active set.
     **/
-    public void removedBundle(Bundle bundle)
-    {
-        // Do nothing by default.
-    }
+    protected abstract void removedBundle(Bundle bundle);
 }

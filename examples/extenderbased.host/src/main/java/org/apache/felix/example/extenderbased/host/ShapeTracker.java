@@ -27,11 +27,10 @@ import org.osgi.framework.BundleContext;
 /**
  * Extends the <tt>BundleTracker</tt> to create a tracker for
  * <tt>SimpleShape</tt> extensions. The tracker is responsible for
- * listener for the arrival/departure of <tt>SimpleShape</tt>
- * extensions and informing the application about the availability
- * of shapes. This tracker forces all notifications to be processed
- * on the Swing event thread to avoid synchronization and redraw
- * issues.
+ * listening for <tt>SimpleShape</tt> extensions and informing the
+ * application about the availability of shapes. This tracker forces
+ * all notifications to be processed on the Swing event thread to
+ * avoid synchronization and redraw issues.
 **/
 public class ShapeTracker extends BundleTracker
 {
@@ -51,7 +50,7 @@ public class ShapeTracker extends BundleTracker
     **/
     public ShapeTracker(BundleContext context, DrawingFrame frame)
     {
-        super(context, null);
+        super(context);
         m_frame = frame;
     }
 
@@ -60,7 +59,7 @@ public class ShapeTracker extends BundleTracker
      * the application object about the added extensions.
      * @param bundle The activated bundle.
     **/
-    public void addedBundle(Bundle bundle)
+    protected void addedBundle(Bundle bundle)
     {
         processBundleOnEventThread(ADDED, bundle);
     }
@@ -70,7 +69,7 @@ public class ShapeTracker extends BundleTracker
      * the application object about removed extensions.
      * @param bundle The inactivated bundle.
     **/
-    public void removedBundle(Bundle bundle)
+    protected void removedBundle(Bundle bundle)
     {
         processBundleOnEventThread(REMOVED, bundle);
     }
