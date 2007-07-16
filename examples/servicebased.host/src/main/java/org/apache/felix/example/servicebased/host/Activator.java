@@ -125,8 +125,8 @@ public class Activator implements BundleActivator, Runnable
      * Enables the bundle to run as a stand-alone application. When this
      * static <tt>main()</tt> method is invoked, the application creates
      * its own embedded Felix framework instance and interacts with the
-     * internal services to providing drawing functionality. To successfully
-     * launch as a stand-alone application, the method should be invoked from
+     * internal services to provide drawing functionality. To successfully
+     * launch as a stand-alone application, this method should be invoked from
      * the bundle's installation directory using "<tt>java -jar</tt>".
      * @param argv The command-line arguments.
      * @throws Exception If anything goes wrong.
