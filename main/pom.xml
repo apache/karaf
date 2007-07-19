@@ -20,19 +20,19 @@
  <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <relativePath>../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <packaging>bundle</packaging>
   <name>Apache Felix Main</name>
   <artifactId>org.apache.felix.main</artifactId>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.framework</artifactId>
-      <version>0.9.0-SNAPSHOT</version>
+      <version>1.0.0</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -49,7 +49,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.0.0</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -60,7 +60,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell.tui</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.0.0</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -71,7 +71,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.bundlerepository</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.0.0</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -92,7 +92,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
@@ -107,6 +107,64 @@
         </configuration>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+               <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>${pom.groupId}</groupId>
+                  <artifactId>org.apache.felix.framework</artifactId>
+                  <version>1.0.0</version>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy</id>
+            <phase>install</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+                <artifactItems>
+                  <artifactItem>
+                     <groupId>${pom.groupId}</groupId>
+                     <artifactId>org.apache.felix.shell</artifactId>
+                     <version>1.0.0</version>
+                     <type>jar</type>
+                     <overWrite>true</overWrite>
+                     <outputDirectory>${project.build.directory}/bundle</outputDirectory >
+                   </artifactItem>
+                   <artifactItem>
+                     <groupId>${pom.groupId}</groupId>
+                     <artifactId>org.apache.felix.shell.tui</artifactId>
+                     <version>1.0.0</version>
+                     <type>jar</type>
+                     <overWrite>true</overWrite>
+                     <outputDirectory>${project.build.directory}/bundle</outputDirectory >
+                   </artifactItem>
+                   <artifactItem>
+                     <groupId>${pom.groupId}</groupId>
+                     <artifactId>org.apache.felix.bundlerepository</artifactId>
+                     <version>1.0.0</version>
+                     <type>jar</type>
+                     <overWrite>true</overWrite>
+                     <outputDirectory>${project.build.directory}/bundle</outputDirectory >
+                   </artifactItem>
+                 </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
@@ -118,17 +176,12 @@
                 <delete dir="${basedir}/conf"/>
                 <mkdir dir="${basedir}/conf"/>
                 <delete dir="${basedir}/bundle"/>
-                <mkdir dir="${basedir}/bundle"/>
-<copy file="${basedir}/target/org.apache.felix.main-${pom.version}.jar"
-      tofile="${basedir}/bin/felix.jar"/>
-<copy file="${basedir}/target/classes/config.properties"
-      todir="${basedir}/conf"/>
-<copy file="${basedir}/../shell/target/org.apache.felix.shell-1.1.0-SNAPSHOT.jar"
-      todir="${basedir}/bundle"/>
-<copy file="${basedir}/../shell.tui/target/org.apache.felix.shell.tui-1.1.0-SNAPSHOT.jar"
-      todir="${basedir}/bundle"/>
-<copy file="${basedir}/../bundlerepository/target/org.apache.felix.bundlerepository-1.1.0-SNAPSHOT.jar"
-      todir="${basedir}/bundle"/>
+                <copy file="${basedir}/target/org.apache.felix.main-${pom.version}.jar"
+                     tofile="${basedir}/bin/felix.jar"/>
+                <copy file="${basedir}/target/classes/config.properties"
+                     todir="${basedir}/conf"/>
+                <move file="${basedir}/target/bundle"
+                     todir="${basedir}"/>
               </tasks>
             </configuration>
             <goals>
