@@ -1904,9 +1904,9 @@ ex.printStackTrace();
 
         try
         {
-            if (bundle.getInfo().getActivator() != null)
+            if (info.getActivator() != null)
             {
-                m_secureAction.stopActivator(info.getActivator(),info.getBundleContext());
+                m_secureAction.stopActivator(info.getActivator(), info.getBundleContext());
             }
 
             // Try to save the activator in the cache.
@@ -3816,7 +3816,7 @@ ex.printStackTrace();
         {
             // First, start the framework shutdown, which will
             // stop all bundles.
-            synchronized (this)
+            synchronized (Felix.this)
             {
                 // Change framework state from active to stopping.
                 // If framework is not active, then just return.
@@ -3946,10 +3946,10 @@ ex.printStackTrace();
             }
 
             // Notify any waiters that the framework is back in its initial state.
-            synchronized (this)
+            synchronized (Felix.this)
             {
                 m_systemBundleInfo.setState(Bundle.UNINSTALLED);
-                notifyAll();
+                Felix.this.notifyAll();
             }
 
             // Finally shutdown the JVM if the framework is running stand-alone.
