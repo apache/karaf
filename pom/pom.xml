@@ -147,9 +147,11 @@
         <module>../servicebinder</module>
         <module>../wireadmin</module>
         
+        <!--
         <module>../ipojo/core</module>
         <module>../ipojo/arch</module>
-	
+	-->
+
         <module>../mosgi</module> 
       </modules>
     </profile>
