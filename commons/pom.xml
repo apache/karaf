@@ -20,27 +20,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>felix</artifactId>
-        <version>1.0.0</version>
-        <relativePath>../pom/pom.xml</relativePath>
-    </parent>
     <packaging>pom</packaging>
-    <name>Apache Felix Commons: Build</name>
+    <name>Apache Felix Commons: Reactor</name>
     <groupId>org.apache.felix.commons</groupId>
-    <artifactId>build</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <artifactId>reactor</artifactId>
+    <version>1</version>
     <description>
-        These subprojects wrap common third-party jars as OSGi bundles.
+        This is just a convenience reactor build.
     </description>
-    <scm>
-      <connection>scm:svn:http://svn.apache.org/repos/felix/trunk/commons</connection>
-      <developerConnection>scm:svn:https://svn.apache.org/repos/felix/trunk/commons</developerConnection>
-      <url>http://svn.apache.org/viewcvs/felix/trunk/commons</url>
-    </scm>
+
     <modules>
+        <!-- parent pom for all contained modules -->
+        <module>pom</module>
+        <!-- The bundles: -->
         <module>activation</module>
         <module>antlr</module>
         <module>aopalliance</module>
@@ -81,52 +75,4 @@
         <module>xml-apis</module>
         <module>xml-resolver</module>
     </modules>
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>2.0-beta-6</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <version>1.0-alpha-3</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
-    
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-release-plugin</artifactId>
-                        <configuration>
-                            <tagBase>http://svn.apache.org/repos/felix/releases</tagBase>
-                            <useReleaseProfile>false</useReleaseProfile>
-                            <goals>deploy</goals>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

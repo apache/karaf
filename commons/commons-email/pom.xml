@@ -25,6 +25,7 @@
         <groupId>org.apache.felix.commons</groupId>
         <artifactId>build</artifactId>
         <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom</relativePath>
     </parent>
     <properties>
         <pkgArtifactId>commons-email</pkgArtifactId>
