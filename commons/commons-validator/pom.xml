@@ -42,6 +42,12 @@
     <name>Apache Felix Project</name>
     <url>http://incubator.apache.org/felix/</url>
   </organization>
+    <scm>
+      <connection>scm:svn:http://svn.apache.org/repos/felix/trunk/commons/commons-validator</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/felix/trunk/commons/commons-validator</developerConnection>
+      <url>http://svn.apache.org/viewcvs/felix/trunk/commons/commons-validator</url>
+    </scm>
+
   <dependencies>
     <dependency>
       <groupId>commons-validator</groupId>

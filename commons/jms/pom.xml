@@ -44,6 +44,12 @@
         <name>Apache Felix Project</name>
         <url>http://felix.apache.org/</url>
     </organization>
+    <scm>
+      <connection>scm:svn:http://svn.apache.org/repos/felix/trunk/commons/jms</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/felix/trunk/commons/jms</developerConnection>
+      <url>http://svn.apache.org/viewcvs/felix/trunk/commons/jms</url>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>

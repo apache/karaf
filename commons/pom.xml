@@ -35,6 +35,11 @@
     <description>
         These subprojects wrap common third-party jars as OSGi bundles.
     </description>
+    <scm>
+      <connection>scm:svn:http://svn.apache.org/repos/felix/trunk/commons</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/felix/trunk/commons</developerConnection>
+      <url>http://svn.apache.org/viewcvs/felix/trunk/commons</url>
+    </scm>
     <modules>
         <module>activation</module>
         <module>antlr</module>

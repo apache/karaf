@@ -44,6 +44,12 @@
         <name>Apache Felix Project</name>
         <url>http://felix.apache.org/</url>
     </organization>
+    <scm>
+      <connection>scm:svn:http://svn.apache.org/repos/felix/trunk/commons/commons-fileupload</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/felix/trunk/commons/commons-fileupload</developerConnection>
+      <url>http://svn.apache.org/viewcvs/felix/trunk/commons/commons-fileupload</url>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>commons-fileupload</groupId>

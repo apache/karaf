@@ -44,6 +44,11 @@
         <name>Apache Felix Project</name>
         <url>http://felix.apache.org/</url>
     </organization>
+    <scm>
+      <connection>scm:svn:http://svn.apache.org/repos/felix/trunk/commons/aopalliance</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/felix/trunk/commons/aopalliance</developerConnection>
+      <url>http://svn.apache.org/viewcvs/felix/trunk/commons/aopalliance</url>
+    </scm>
     <dependencies>
         <dependency>
             <groupId>aopalliance</groupId>

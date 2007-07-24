@@ -51,6 +51,12 @@
         <url>http://felix.apache.org/</url>
     </organization>
 
+    <scm>
+      <connection>scm:svn:http://svn.apache.org/repos/felix/trunk/commons/xml-apis</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/felix/trunk/commons/xml-apis</developerConnection>
+      <url>http://svn.apache.org/viewcvs/felix/trunk/commons/xml-apis</url>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>${pkgArtifactId}</groupId>
