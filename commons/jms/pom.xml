@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.felix.commons</groupId>
         <artifactId>build</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <properties>
         <pkgArtifactId>jms</pkgArtifactId>
@@ -46,17 +46,23 @@
     </organization>
     <dependencies>
         <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jms_1.1_spec</artifactId>
+            <version>${pkgVersion}</version>
+        </dependency>
+        <!-- 
+        <dependency>
             <groupId>javax.jms</groupId>
             <artifactId>${pkgArtifactId}</artifactId>
             <version>${pkgVersion}</version>
         </dependency>
+         -->
     </dependencies>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.1.0-SNAPSHOT</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>

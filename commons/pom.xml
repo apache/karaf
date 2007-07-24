@@ -24,14 +24,14 @@
     <parent>
         <groupId>org.apache.felix</groupId>
         <artifactId>felix</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <relativePath>../pom/pom.xml</relativePath>
     </parent>
     <packaging>pom</packaging>
     <name>Apache Felix Commons: Build</name>
     <groupId>org.apache.felix.commons</groupId>
     <artifactId>build</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <description>
         These subprojects wrap common third-party jars as OSGi bundles.
     </description>
@@ -60,11 +60,11 @@
         <module>dom4j</module>
         <module>ehcache</module>
         <module>hibernate</module>
-        <!--<module>hsqldb</module>-->
-        <!--<module>jms</module>-->
-        <!--<module>jmxtools</module>-->
+        <module>hsqldb</module>
+        <module>jms</module>
+        <!-- <module>jmxtools</module>  -->
         <module>jstl</module>
-        <!--<module>jta</module>-->
+        <module>jta</module>
         <module>jzlib</module>
         <module>log4j</module>
         <module>logkit</module>
