@@ -30,7 +30,7 @@
     <packaging>pom</packaging>
     <name>Apache Felix Commons: Build</name>
     <groupId>org.apache.felix.commons</groupId>
-    <artifactId>build</artifactId>
+    <artifactId>commons-build</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <description>
         These subprojects wrap common third-party jars as OSGi bundles.
