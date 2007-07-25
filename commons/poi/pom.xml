@@ -71,6 +71,7 @@
               *;version=${pkgVersion}
             </Export-Package>
             <Include-Resource>
+              src/main/resources,
               @${pkgArtifactId}-${pkgVersion}.jar!/font_metrics.properties
             </Include-Resource>
           </instructions>

@@ -70,6 +70,7 @@
                         </Bundle-SymbolicName>
                         <Export-Package>*;version=${pkgVersion}</Export-Package>
                         <Include-Resource>
+                            src/main/resources,
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/LICENSE.txt
                         </Include-Resource>
                     </instructions>

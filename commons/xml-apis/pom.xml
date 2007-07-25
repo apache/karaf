@@ -106,6 +106,7 @@
                           org.apache.bcel.*,org.apache.env.*
                         </Private-Package>
                         <Include-Resource>
+                          src/main/resources,
                           @xercesImpl-2.8.1.jar!/META-INF/services/**,
                           @xalan-2.7.0.jar!/META-INF/services/**
                         </Include-Resource>

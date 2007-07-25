@@ -105,6 +105,7 @@
                             org.apache.xerces.xs.datatypes, org.w3c.dom.html
                         </Private-Package>
                         <Include-Resource>
+                            src/main/resources,
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/LICENSE,
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/NOTICE,
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/services,
