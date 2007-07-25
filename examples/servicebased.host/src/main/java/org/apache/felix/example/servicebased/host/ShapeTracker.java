@@ -41,6 +41,8 @@ public class ShapeTracker extends ServiceTracker
     private static final int MODIFIED = 2;
     // Flag indicating a removed shape.
     private static final int REMOVED = 3;
+    // The bundle context used for tracking.
+    private BundleContext m_context;
     // The application object to notify.
     private DrawingFrame m_frame;
 
@@ -54,6 +56,7 @@ public class ShapeTracker extends ServiceTracker
     public ShapeTracker(BundleContext context, DrawingFrame frame)
     {
         super(context, SimpleShape.class.getName(), null);
+        m_context = context;
         m_frame = frame;
     }
 
@@ -65,7 +68,7 @@ public class ShapeTracker extends ServiceTracker
     **/
     public Object addingService(ServiceReference ref)
     {
-        SimpleShape shape = (SimpleShape) super.addingService(ref);
+        SimpleShape shape = new DefaultShape(m_context, ref);
         processShapeOnEventThread(ADDED, ref, shape);
         return shape;
     }
@@ -90,7 +93,7 @@ public class ShapeTracker extends ServiceTracker
     public void removedService(ServiceReference ref, Object svc)
     {
         processShapeOnEventThread(REMOVED, ref, (SimpleShape) svc);
-        super.removedService(ref, svc);
+        ((DefaultShape) svc).dispose();
     }
 
     /**
