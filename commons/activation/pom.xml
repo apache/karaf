@@ -76,6 +76,7 @@
                             com.sun.activation.viewers
                         </Private-Package>
                         <Include-Resource>
+                            src/main/resources,
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/LICENSE.txt,
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/mailcap.default,
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/mimetypes.default

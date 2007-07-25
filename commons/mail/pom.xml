@@ -93,6 +93,7 @@
                             com.sun.activation.viewers
                         </Private-Package>
                         <Include-Resource>
+                            src/main/resources,
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/LICENSE.txt,
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/javamail.charset.map,
                             @${pkgArtifactId}-${pkgVersion}.jar!/META-INF/javamail.default.address.map,
