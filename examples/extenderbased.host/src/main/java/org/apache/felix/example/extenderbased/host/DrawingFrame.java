@@ -26,6 +26,13 @@ import javax.swing.*;
 
 import org.apache.felix.example.extenderbased.host.extension.SimpleShape;
 
+/**
+ * This class represents the main application class, which is a JFrame subclass
+ * that manages a toolbar of shapes and a drawing canvas. This class does not
+ * directly interact with the underlying OSGi framework; instead, it is injected
+ * with the available <tt>SimpleShape</tt> instances to eliminate any
+ * dependencies on the OSGi application programming interfaces.
+**/
 public class DrawingFrame extends JFrame
     implements MouseListener, MouseMotionListener
 {
@@ -34,11 +41,14 @@ public class DrawingFrame extends JFrame
     private JToolBar m_toolbar;
     private String m_selected;
     private JPanel m_panel;
-    private Map m_shapes = new HashMap();
     private ShapeComponent m_selectedComponent;
+    private Map m_shapes = new HashMap();
     private SimpleShape m_defaultShape = new DefaultShape();
     private ActionListener m_reusableActionListener = new ShapeActionListener();
 
+    /**
+     * Default constructor that populates the main window.
+    **/
     public DrawingFrame()
     {
         super("Extender-Based Host");
@@ -55,11 +65,22 @@ public class DrawingFrame extends JFrame
         setSize(400, 400);
     }
 
+    /**
+     * This method sets the currently selected shape to be used for drawing
+     * on the canvas.
+     * @param name The name of the shape to use for drawing on the canvas.
+    **/
     public void selectShape(String name)
     {
         m_selected = name;
     }
 
+    /**
+     * Retrieves the available <tt>SimpleShape</tt> associated with the given name.
+     * @param name The name of the <tt>SimpleShape</tt> to retrieve.
+     * @return The corresponding <tt>SimpleShape</tt> instance if available or
+     *         <tt>null</tt>.
+    **/
     public SimpleShape getShape(String name)
     {
         ShapeInfo info = (ShapeInfo) m_shapes.get(name);
@@ -73,6 +94,12 @@ public class DrawingFrame extends JFrame
         }
     }
 
+    /**
+     * Injects an available <tt>SimpleShape</tt> into the drawing frame.
+     * @param name The name of the injected <tt>SimpleShape</tt>.
+     * @param icon The icon associated with the injected <tt>SimpleShape</tt>.
+     * @param shape The injected <tt>SimpleShape</tt> instance.
+    **/
     public void addShape(String name, Icon icon, SimpleShape shape)
     {
         m_shapes.put(name, new ShapeInfo(name, icon, shape));
@@ -90,6 +117,10 @@ public class DrawingFrame extends JFrame
         repaint();
     }
 
+    /**
+     * Removes a no longer available <tt>SimpleShape</tt> from the drawing frame.
+     * @param name The name of the <tt>SimpleShape</tt> to remove.
+    **/
     public void removeShape(String name)
     {
         m_shapes.remove(name);
@@ -118,6 +149,11 @@ public class DrawingFrame extends JFrame
         }
     }
 
+    /**
+     * Implements method for the <tt>MouseListener</tt> interface to
+     * draw the selected shape into the drawing canvas.
+     * @param evt The associated mouse event.
+    **/
     public void mouseClicked(MouseEvent evt)
     {
         if (m_selected == null)
@@ -135,14 +171,27 @@ public class DrawingFrame extends JFrame
         }
     }
 
+    /**
+     * Implements an empty method for the <tt>MouseListener</tt> interface.
+     * @param evt The associated mouse event.
+    **/
     public void mouseEntered(MouseEvent evt)
     {
     }
 
+    /**
+     * Implements an empty method for the <tt>MouseListener</tt> interface.
+     * @param evt The associated mouse event.
+    **/
     public void mouseExited(MouseEvent evt)
     {
     }
 
+    /**
+     * Implements method for the <tt>MouseListener</tt> interface to initiate
+     * shape dragging.
+     * @param evt The associated mouse event.
+    **/
     public void mousePressed(MouseEvent evt)
     {
         Component c = m_panel.getComponentAt(evt.getPoint());
@@ -155,6 +204,11 @@ public class DrawingFrame extends JFrame
         }
     }
 
+    /**
+     * Implements method for the <tt>MouseListener</tt> interface to complete
+     * shape dragging.
+     * @param evt The associated mouse event.
+    **/
     public void mouseReleased(MouseEvent evt)
     {
         if (m_selectedComponent != null)
@@ -168,45 +222,31 @@ public class DrawingFrame extends JFrame
         }
     }
 
+    /**
+     * Implements method for the <tt>MouseMotionListener</tt> interface to
+     * move a dragged shape.
+     * @param evt The associated mouse event.
+    **/
     public void mouseDragged(MouseEvent evt)
     {
         m_selectedComponent.setBounds(
             evt.getX() - BOX / 2, evt.getY() - BOX / 2, BOX, BOX);
     }
 
+    /**
+     * Implements an empty method for the <tt>MouseMotionListener</tt>
+     * interface.
+     * @param evt The associated mouse event.
+    **/
     public void mouseMoved(MouseEvent evt)
     {
     }
 
-    private class DefaultShape implements SimpleShape
-    {
-        private ImageIcon m_icon = null;
-
-        public void draw(Graphics2D g2, Point p)
-        {
-            if (m_icon == null)
-            {
-                try
-                {
-                    m_icon = new ImageIcon(this.getClass().getResource("underc.png"));
-                }
-                catch (Exception ex)
-                {
-                    ex.printStackTrace();
-                    g2.setColor(Color.red);
-                    g2.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
-                    return;
-                }
-            }
-            g2.drawImage(m_icon.getImage(), 0, 0, null);
-        }
-
-        public String getName()
-        {
-            return "Default";
-        }
-    }
-
+    /**
+     * Simple action listener for shape tool bar buttons that sets
+     * the drawing frame's currently selected shape when receiving
+     * an action event.
+    **/
     private class ShapeActionListener implements ActionListener
     {
         public void actionPerformed(ActionEvent evt)
@@ -215,6 +255,10 @@ public class DrawingFrame extends JFrame
         }
     }
 
+    /**
+     * This class is used to record the various information pertaining to
+     * an available shape.
+    **/
     private static class ShapeInfo
     {
         public String m_name;

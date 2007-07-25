@@ -38,6 +38,8 @@ public class ShapeTracker extends BundleTracker
     private static final int ADDED = 1;
     // Flag indicating a removed shape.
     private static final int REMOVED = 2;
+    // The bundle context used for tracking.
+    private BundleContext m_context;
     // The application object to notify.
     private DrawingFrame m_frame;
 
@@ -51,6 +53,7 @@ public class ShapeTracker extends BundleTracker
     public ShapeTracker(BundleContext context, DrawingFrame frame)
     {
         super(context);
+        m_context = context;
         m_frame = frame;
     }
 
@@ -126,16 +129,11 @@ public class ShapeTracker extends BundleTracker
                 String iconPath = (String) dict.get(SimpleShape.ICON_PROPERTY);
                 Icon icon = new ImageIcon(bundle.getResource(iconPath));
                 // Get the class of the extension.
-                String classPath = (String) dict.get(SimpleShape.CLASS_PROPERTY);
-                try
-                {
-                    Class clazz = bundle.loadClass(classPath);
-                    m_frame.addShape(name, icon, (SimpleShape) clazz.newInstance());
-                }
-                catch (Exception ex)
-                {
-                    // This should never happen in this example.
-                }
+                String className = (String) dict.get(SimpleShape.CLASS_PROPERTY);
+                m_frame.addShape(
+                    name,
+                    icon,
+                    new DefaultShape(m_context, bundle.getBundleId(), className));
                 break;
 
             case REMOVED:
