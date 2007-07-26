@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -112,8 +112,9 @@ public class OsgiJarMojo extends AbstractMojo {
 
 	/**
 	 * The maven archive configuration to use.
+	 * @parameter
 	 */
-	private MavenArchiveConfiguration	archiveConfig			= new MavenArchiveConfiguration();
+	private MavenArchiveConfiguration	archive			= new MavenArchiveConfiguration();
 
 	/**
 	 * The comma separated list of tokens to include in the JAR. Default is
@@ -268,8 +269,8 @@ public class OsgiJarMojo extends AbstractMojo {
 		}
 
 		verifyBundleActivator(mainJar);
-		
-		archiver.createArchive(project, archiveConfig);
+
+		archiver.createArchive(project, archive);
 		project.getArtifact().setFile(jarFile);
 	}
 
@@ -280,7 +281,7 @@ public class OsgiJarMojo extends AbstractMojo {
 				case 0:
                     break;
 				case 1:
-                    archiveConfig.addManifestEntry("Bundle-Activator", mainJar.activators.get(0));
+                    archive.addManifestEntry("Bundle-Activator", mainJar.activators.get(0));
 				    break;
 				default:
 					getLog().info("[OSGi] Multiple activators found, unable to auto-detect." );
@@ -302,7 +303,7 @@ public class OsgiJarMojo extends AbstractMojo {
             }
 		}
 		if (sb.length() > 0)
-			archiveConfig.addManifestEntry("Bundle-Classpath", sb.toString());
+			archive.addManifestEntry("Bundle-Classpath", sb.toString());
 	}
 
 	/**
@@ -363,7 +364,7 @@ public class OsgiJarMojo extends AbstractMojo {
 					}
 				}
 			}
-			archiveConfig.addManifestEntry(
+			archive.addManifestEntry(
 					"Export-Package",
 					printClauses(exports));
 		}
@@ -478,7 +479,7 @@ public class OsgiJarMojo extends AbstractMojo {
 			sb.append(i.next());
 			del = ", ";
 		}
-		archiveConfig.addManifestEntry("Import-Package", sb.toString());
+		archive.addManifestEntry("Import-Package", sb.toString());
 	}
 
 	/**
@@ -599,7 +600,7 @@ public class OsgiJarMojo extends AbstractMojo {
 			getLog().info(
 					"Manifest file: " + file.getAbsolutePath()
 							+ " will be used");
-			archiveConfig.setManifestFile(file);
+			archive.setManifestFile(file);
 		}
 		else {
 			getLog().info("No manifest file specified. Default will be used.");
@@ -621,7 +622,7 @@ public class OsgiJarMojo extends AbstractMojo {
 			getLog().debug(
 					"Bundle manifest will be modified with the following entries: "
 							+ entries.toString());
-			archiveConfig.addManifestEntries(entries);
+			archive.addManifestEntries(entries);
 		}
 		else {
 			getLog()
