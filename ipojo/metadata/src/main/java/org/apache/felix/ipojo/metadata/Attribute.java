@@ -36,17 +36,14 @@ public class Attribute {
     private String m_value;
 
     /**
-     * Namepsace of the attribute.
+     * Namespace of the attribute.
      */
     private String m_nameSpace;
 
     /**
      * Constructor.
-     * 
-     * @param name :
-     *            name of the attribute.
-     * @param value :
-     *            value of the attribute.
+     * @param name : name of the attribute.
+     * @param value : value of the attribute.
      */
     public Attribute(String name, String value) {
         m_name = name.toLowerCase();
@@ -56,13 +53,9 @@ public class Attribute {
 
     /**
      * Constructor.
-     * 
-     * @param name :
-     *            name of the attribute.
-     * @param value :
-     *            value of the attribute.
-     * @param ns :
-     *            namespace of the attribute.
+     * @param name : name of the attribute.
+     * @param value : value of the attribute.
+     * @param ns : namespace of the attribute.
      */
     public Attribute(String name, String ns, String value) {
         m_name = name.toLowerCase();

@@ -41,13 +41,12 @@ public class Element {
     private Attribute[] m_attributes = new Attribute[0];
 
     /**
-     * List of the subelement of the element.
+     * List of the sub-element of the element.
      */
     private Element[] m_elements = new Element[0];
 
     /**
      * Constructor.
-     * 
      * @param name : the name of the element
      * @param ns : the namespace of the element
      */
@@ -90,10 +89,8 @@ public class Element {
 
     /**
      * Return the value of the attribute given in parameter.
-     * 
-     * @param name :
-     *            the name of the searched attribute
-     * @return the value of the attrbitue given in parameter, null if the attribute does not exist
+     * @param name : the name of the searched attribute
+     * @return the value of the attribute given in parameter, null if the attribute does not exist
      */
     public String getAttribute(String name) {
         name = name.toLowerCase();
@@ -107,12 +104,9 @@ public class Element {
     }
 
     /**
-     * Return the value of the attrbitue "name" of the namespace "ns".
-     * 
-     * @param name :
-     *            name of the attribute to find
-     * @param ns :
-     *            namespace of the attribute to find
+     * Return the value of the attribute "name" of the namespace "ns".
+     * @param name : name of the attribute to find
+     * @param ns : namespace of the attribute to find
      * @return the String value of the attribute, or null if the attribute is not found.
      */
     public String getAttribute(String name, String ns) {
@@ -127,10 +121,8 @@ public class Element {
     }
 
     /**
-     * Add a subelement.
-     * 
-     * @param elem :
-     *            the element to add
+     * Add a sub-element.
+     * @param elem : the element to add
      */
     public void addElement(Element elem) {
         for (int i = 0; (m_elements != null) && (i < m_elements.length); i++) {
@@ -167,10 +159,8 @@ public class Element {
     }
 
     /**
-     * Remove a subelement.
-     * 
-     * @param elem :
-     *            the element to remove
+     * Remove a sub-element.
+     * @param elem : the element to remove
      */
     public void removeElement(Element elem) {
         int idx = -1;
@@ -197,9 +187,7 @@ public class Element {
 
     /**
      * Add a attribute.
-     * 
-     * @param att :
-     *            the attribute to add
+     * @param att : the attribute to add
      */
     public void addAttribute(Attribute att) {
         for (int i = 0; (m_attributes != null) && (i < m_attributes.length); i++) {
@@ -220,9 +208,7 @@ public class Element {
 
     /**
      * Remove an attribute.
-     * 
-     * @param att :
-     *            the attribute to remove
+     * @param att : the attribute to remove
      */
     public void removeAttribute(Attribute att) {
         int idx = -1;
@@ -249,9 +235,7 @@ public class Element {
 
     /**
      * Get the elements array of the element type given in parameter. This method look for an empty namespace.
-     * 
-     * @param name :
-     *            the type of the element to find (element name)
+     * @param name : the type of the element to find (element name)
      * @return the resulting element array (empty if the search failed)
      */
     public Element[] getElements(String name) {
@@ -267,11 +251,8 @@ public class Element {
 
     /**
      * Get the elements array of the element type given in parameter.
-     * 
-     * @param name :
-     *            the type of the element to find (element name)
-     * @param ns :
-     *            the namespace of the element
+     * @param name : the type of the element to find (element name)
+     * @param ns : the namespace of the element
      * @return the resulting element array (empty if the search failed)
      */
     public Element[] getElements(String name, String ns) {
@@ -286,10 +267,8 @@ public class Element {
     }
 
     /**
-     * Is the element contains a subelement of the type given in parameter. This method does not manage the namespace
-     * 
-     * @param name :
-     *            type of the element to check.
+     * Is the element contains a sub-element of the type given in parameter. This method does not manage the namespace
+     * @param name : type of the element to check.
      * @return true if the element contains an element of the type "name"
      */
     public boolean containsElement(String name) {
@@ -303,12 +282,9 @@ public class Element {
     }
 
     /**
-     * Is the element contains a subelement of the type given in parameter. This method does not manage the namespace
-     * 
-     * @param name :
-     *            type of the element to check.
-     * @param ns :
-     *            the namespace of the element to check.
+     * Is the element contains a sub-element of the type given in parameter. This method does not manage the namespace
+     * @param name : type of the element to check.
+     * @param ns : the namespace of the element to check.
      * @return true if the element contains an element of the type "name"
      */
     public boolean containsElement(String name, String ns) {
@@ -324,9 +300,7 @@ public class Element {
 
     /**
      * Is the element contains an attribute of the name given in parameter.
-     * 
-     * @param name :
-     *            name of the element
+     * @param name : name of the element
      * @return true if the element contains an attribute of the type "name"
      */
     public boolean containsAttribute(String name) {
@@ -442,7 +416,7 @@ public class Element {
 
     /**
      * Internal method to compute the toString method.
-     * @param indent : indetnation to use.
+     * @param indent : indentation to use.
      * @return : the String form of this element.
      */
     private String toString(int indent) {
