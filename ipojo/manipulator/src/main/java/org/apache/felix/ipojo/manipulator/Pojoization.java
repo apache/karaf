@@ -64,12 +64,12 @@ public class Pojoization {
     private Element[] m_metadata;
 
     /**
-     * Errors occured during the manipulation.
+     * Errors which occur during the manipulation.
      */
     private List m_errors = new ArrayList();
 
     /**
-     * Warnings occured during the manipulation.
+     * Warnings which occur during the manipulation.
      */
     private List m_warnings = new ArrayList();
 
@@ -173,7 +173,7 @@ public class Pojoization {
             Enumeration entries = inputJar.entries();
             while (entries.hasMoreElements()) {
                 JarEntry curEntry = (JarEntry) entries.nextElement();
-                // Check if we need to manipulate the clazz
+                // Check if we need to manipulate the class
                 if (m_classes.containsKey(curEntry.getName())) {
                     JarEntry je = new JarEntry(curEntry.getName());
                     byte[] outClazz = (byte[]) m_classes.get(curEntry.getName());
@@ -234,7 +234,7 @@ public class Pojoization {
         Enumeration entries = inputJar.entries();
         while (entries.hasMoreElements()) {
             JarEntry curEntry = (JarEntry) entries.nextElement();
-            // Check if we need to manipulate the clazz
+            // Check if we need to manipulate the class
             for (int i = 0; i < m_components.size(); i++) {
                 ComponentInfo ci = (ComponentInfo) m_components.get(i);
                 if (ci.m_classname.equals(curEntry.getName())) {
@@ -299,7 +299,7 @@ public class Pojoization {
     /**
      * Return the list of "concrete" component.
      * @param meta : metadata.
-     * @return the list of compionent info requiring a manipulation.
+     * @return the list of component info requiring a manipulation.
      */
     private List getDeclaredComponents(Element[] meta) {
         List componentClazzes = new ArrayList();
@@ -396,7 +396,7 @@ public class Pojoization {
             }
         }
 
-        // Add refered imports from the metadata
+        // Add referred imports from the metadata
         for (int i = 0; i < m_referredPackages.size(); i++) {
             String pack = (String) m_referredPackages.get(i);
             imports.put(pack, new TreeMap());
@@ -526,7 +526,7 @@ public class Pojoization {
         try {
             url = metadata.toURL();
             if (url == null) {
-                error("Cannot find the metdata file : " + path);
+                error("Cannot find the metadata file : " + path);
                 return null;
             }
 
@@ -565,7 +565,7 @@ public class Pojoization {
      * Generate manipulation metadata.
      * @param element : actual element. 
      * @param actual : actual manipulation metadata.
-     * @return : given amnipulation metadata + manipulation metadata of the given element.
+     * @return : given manipulation metadata + manipulation metadata of the given element.
      */
     private String buildManifestMetadata(Element element, String actual) {
         String result = "";

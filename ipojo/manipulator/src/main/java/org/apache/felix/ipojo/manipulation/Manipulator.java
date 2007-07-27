@@ -36,13 +36,13 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
 /**
- * iPOJO Bytecode Manipulator.
+ * iPOJO Byte code Manipulator.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  * 
  */
 public class Manipulator {
     /**
-     * Store the visited fields : [name fo the field, type of the field].
+     * Store the visited fields : [name of the field, type of the field].
      */
     private Map m_fields = new HashMap();
 
@@ -62,16 +62,16 @@ public class Manipulator {
      * @param name : The name of the class
      * @param outputDirectory : output directory where the class if stored.
      * @return true if the class is correctly manipulated.
-     * @throws Exception : throwed if the manipulation failed.
+     * @throws Exception : occurs if the manipulation failed.
      */
     public boolean manipulate(String name, File outputDirectory) throws Exception {
 
-        // Init field, itfs and methods
+        // Initialize fields, interfaces and methods
         m_fields = new HashMap();
         m_interfaces = new String[0];
         m_methods = new ArrayList();
 
-        // gets an input stream to read the bytecode of the class
+        // gets an input stream to read the byte code of the class
         String path = outputDirectory + "/" + name.replace('.', '/') + ".class";
         File clazz = new File(path);
 
@@ -149,12 +149,9 @@ public class Manipulator {
 
     /**
      * Manipulate the given byte array.
-     * 
-     * @param origin :
-     *            original class.
+     * @param origin : original class.
      * @return the manipulated class.
-     * @throws IOException :
-     *             if an error occurs during the manipulation.
+     * @throws IOException : if an error occurs during the manipulation.
      */
     public byte[] manipulate(byte[] origin) throws IOException {
         InputStream is1 = new ByteArrayInputStream(origin);

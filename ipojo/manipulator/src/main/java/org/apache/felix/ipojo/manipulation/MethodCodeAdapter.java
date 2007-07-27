@@ -45,7 +45,7 @@ public class MethodCodeAdapter extends AdviceAdapter implements Opcodes {
      * MethodCodeAdapter constructor. 
      * @param mv : MethodVisitor
      * @param owner : Name of the class
-     * @param access : Method acess
+     * @param access : Method access
      * @param name : Method name
      * @param desc : Method descriptor
      */
@@ -61,7 +61,7 @@ public class MethodCodeAdapter extends AdviceAdapter implements Opcodes {
      * @param opcode : visited operation code
      * @param owner : owner of the field
      * @param name : name of the field
-     * @param desc : decriptor of the field
+     * @param desc : descriptor of the field
      */
     public void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
         if (owner.equals(m_owner)) {
@@ -160,7 +160,7 @@ public class MethodCodeAdapter extends AdviceAdapter implements Opcodes {
     }
 
     /**
-     * Compute mx local and max stack size.
+     * Compute max local and max stack size.
      * @param maxStack : new stack size.
      * @param maxLocals : max local (do not modified, super will update it automatically).
      * @see org.objectweb.asm.commons.LocalVariablesSorter#visitMaxs(int, int)

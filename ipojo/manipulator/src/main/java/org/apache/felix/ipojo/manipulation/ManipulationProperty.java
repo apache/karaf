@@ -57,7 +57,7 @@ public class ManipulationProperty {
     protected static final String IPOJO_PACKAGE_NAME = "org.apache.felix.ipojo";
 
     /**
-     * Helper array for bytecode manipulation of primitive type.
+     * Helper array for byte code manipulation of primitive type.
      */
     protected static final String[][] PRIMITIVE_BOXING_INFORMATION = new String[][] { 
         { "V", "ILLEGAL", "ILLEGAL" }, 

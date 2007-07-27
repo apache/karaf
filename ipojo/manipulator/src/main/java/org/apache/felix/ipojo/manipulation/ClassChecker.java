@@ -32,7 +32,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 /**
- * Check thaht a POJO is already manipulated or not.
+ * Check that a POJO is already manipulated or not.
  * Moreover it allows to get manipulation data about this class. 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -105,9 +105,9 @@ public class ClassChecker implements ClassVisitor, Opcodes {
 
     /**
      * Visit the class.
-     * Update the implemented insterface list.
+     * Update the implemented interface list.
      * @param version : version of the class
-     * @param access : acess of the class
+     * @param access : access of the class
      * @param name : name of the class
      * @param signature : signature of the class
      * @param superName : super class of the class
@@ -124,7 +124,7 @@ public class ClassChecker implements ClassVisitor, Opcodes {
      * Visit sources.
      * Do nothing
      * @param source : the name of the source file from which the class was compiled. May be null.
-       @param debug : additional debug information to compute the correspondance between source and compiled elements of the class. May be null.
+       @param debug : additional debug information to compute the relationship between source and compiled elements of the class. May be null.
      * @see org.objectweb.asm.ClassVisitor#visitSource(java.lang.String, java.lang.String)
      */
     public void visitSource(String source, String debug) { }
@@ -134,8 +134,7 @@ public class ClassChecker implements ClassVisitor, Opcodes {
      * @param owner - internal name of the enclosing class of the class.
      * @param name - the name of the method that contains the class, or null if the class is not enclosed in a method of its enclosing class.
      * @param desc - the descriptor of the method that contains the class, or null if the class is not enclosed in a method of its enclosing class.
-     * @see org.objectweb.asm.ClassVisitor#visitOuterClass(java.lang.String,
-     *      java.lang.String, java.lang.String)
+     * @see org.objectweb.asm.ClassVisitor#visitOuterClass(java.lang.String, java.lang.String, java.lang.String)
      */
     public void visitOuterClass(String owner, String name, String desc) {
     }
@@ -180,8 +179,7 @@ public class ClassChecker implements ClassVisitor, Opcodes {
      * @param signature - the method's signature. May be null if the method parameters, return type and exceptions do not use generic types.
      * @param exceptions - the internal names of the method's exception classes (see getInternalName). May be null.
      * @return nothing.
-     * @see org.objectweb.asm.ClassVisitor#visitMethod(int, java.lang.String,
-     *      java.lang.String, java.lang.String, java.lang.String[])
+     * @see org.objectweb.asm.ClassVisitor#visitMethod(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
      */
     public MethodVisitor visitMethod(int access, String name, String desc,
             String signature, String[] exceptions) {

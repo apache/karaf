@@ -54,7 +54,7 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
      * @param access : Access modifier
      * @param name : name of the visited element
      * @param signature : signature of the visited element
-     * @param superName : superclasses (extend clause)
+     * @param superName : superclass (extend clause)
      * @param interfaces : implement clause
      */
     public void visit(final int version, final int access, final String name, final String signature, final String superName, final String[] interfaces) {
@@ -65,7 +65,7 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
      * Visit a Field.
      * Inject the getter and the setter method for this field.
      * @see org.objectweb.asm.ClassVisitor#visitField(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
-     * @param access : acces modifier
+     * @param access : access modifier
      * @param name : name of the field
      * @param desc : description of the field
      * @param signature : signature of the field
@@ -470,7 +470,6 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 break;
 
             case Type.OBJECT:
-
                 Label l03 = new Label();
                 mv.visitLabel(l03);
                 mv.visitVarInsn(ALOAD, 0);
@@ -532,13 +531,9 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
 
     /**
      * Create the setter method for one property. The name of the method is _set+name of the field
-     * 
-     * @param name :
-     *            name of the field representing a property
-     * @param desc :
-     *            description of the setter method
-     * @param type :
-     *            type of the property
+     * @param name : name of the field representing a property
+     * @param desc : description of the setter method
+     * @param type : type of the property
      */
     private void createSimpleSetter(String name, String desc, Type type) {
         MethodVisitor mv = cv.visitMethod(ACC_PRIVATE, "_set" + name, desc, null, null);
@@ -623,7 +618,6 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 break;
 
             case Type.OBJECT:
-
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitVarInsn(ALOAD, 1);
                 mv.visitFieldInsn(PUTFIELD, m_owner, name, "L" + type.getInternalName() + ";");

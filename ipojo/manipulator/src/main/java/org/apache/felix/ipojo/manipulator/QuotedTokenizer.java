@@ -37,7 +37,7 @@ public class QuotedTokenizer {
     int m_index = 0;
 
     /**
-     * Default spearators to use.
+     * Default separator to use.
      */
     String m_separators;
 
@@ -78,7 +78,7 @@ public class QuotedTokenizer {
 
     /**
      * Constructors.
-     * Fixe returnTokens to false.
+     * Set returnTokens to false.
      * @param string : input String.
      * @param separators : separators
      */

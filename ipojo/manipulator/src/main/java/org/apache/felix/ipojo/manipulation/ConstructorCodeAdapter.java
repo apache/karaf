@@ -30,7 +30,8 @@ import org.objectweb.asm.Opcodes;
  */
 public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
 
-    /** The owner class of the field.
+    /** 
+     * The class containing the field.
      * m_owner : String
      */
     private String m_owner;
@@ -40,7 +41,8 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
      */
     private boolean m_superDetected;
 
-    /** PropertyCodeAdapter constructor.
+    /** 
+     * PropertyCodeAdapter constructor.
      * A new FiledCodeAdapter should be create for each method visit.
      * @param mv MethodVisitor
      * @param owner Name of the class
@@ -52,12 +54,13 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
     }
 
 
-    /** Visit Method for Field instance (GETFIELD).
+    /** 
+     * Visit Method for Field instance (GETFIELD).
      * @see org.objectweb.asm.MethodVisitor#visitFieldInsn(int, String, String, String)
      * @param opcode : visited operation code
      * @param owner : owner of the field
      * @param name : name of the field
-     * @param desc : decriptor of the field
+     * @param desc : descriptor of the field
      */
     public void visitFieldInsn(
             final int opcode,
@@ -80,7 +83,7 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
     }
     
     /**
-     * Vist a method invocation insruction.
+     * Visit a method invocation instruction.
      * After the super constructor invocation, insert the _setComponentManager invocation.
      * @param opcode : opcode
      * @param owner : method owning class
@@ -130,7 +133,7 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
     
     /**
      * Visit an increment instruction.
-     * If incrementing a varialbe, increment the variable index.
+     * If incrementing a variable, increment the variable index.
      * @param var : variable index
      * @param increment : increment
      * @see org.objectweb.asm.MethodAdapter#visitIincInsn(int, int)
@@ -150,7 +153,7 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
      * @param desc : variable descriptor
      * @param signature : variable signature
      * @param start : beginning label 
-     * @param end : endind label
+     * @param end : ending label
      * @param index :variable index
      * @see org.objectweb.asm.MethodAdapter#visitLocalVariable(java.lang.String, java.lang.String, java.lang.String, org.objectweb.asm.Label, org.objectweb.asm.Label, int)
      */

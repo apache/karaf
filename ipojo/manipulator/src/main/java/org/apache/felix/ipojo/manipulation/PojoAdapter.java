@@ -163,7 +163,7 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
     /**
      * Visit a method.
      * Manipulate constructor and methods. Does nothing with clinit and class$
-     * @param access : method acess
+     * @param access : method access
      * @param name : method name
      * @param desc : method descriptor
      * @param signature : method signature
@@ -257,7 +257,7 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
     private void addPOJOInterface(int version, int access, String name, String signature, String superName, String[] interfaces) {
 
         // Add the POJO interface to the interface list
-        // Check that the POJO interface isnot already in the list
+        // Check that the POJO interface is not already in the list
         boolean found = false;
         for (int i = 0; i < interfaces.length; i++) {
             if (interfaces[i].equals(m_pojo)) {

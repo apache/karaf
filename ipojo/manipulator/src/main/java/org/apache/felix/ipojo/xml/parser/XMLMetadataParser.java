@@ -41,7 +41,7 @@ public class XMLMetadataParser implements ContentHandler {
     private Element[] m_elements = new Element[0];
 
     /**
-     * Get componenet type metadata. (both component and composite)
+     * Get component type metadata. (both component and composite)
      * 
      * @return a components metadata
      * @throws ParseException
