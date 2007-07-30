@@ -146,6 +146,7 @@
         <module>../dependencymanager</module>
         <module>../servicebinder</module>
         <module>../wireadmin</module>
+        <module>../prefs</module>
         
         <!--
         <module>../ipojo/core</module>
