@@ -17,12 +17,16 @@
  specific language governing permissions and limitations
  under the License.
 -->
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.apache.felix</groupId>
         <artifactId>felix</artifactId>
         <version>1.0.0</version>
+        <relativePath>../pom</relativePath>
     </parent>
 
     <artifactId>org.apache.felix.preferences</artifactId>
@@ -63,15 +67,15 @@
                     <instructions>
                         <Bundle-Category>osgi</Bundle-Category>
                         <Export-Package>
-                            org.apache.felix.sandbox.preferences,
+                            org.apache.felix.prefs,
                             org.osgi.service.prefs;version=1.1
                         </Export-Package>
                         <Private-Package>
-                            org.apache.felix.sandbox.preferences.*,
+                            org.apache.felix.prefs.*,
                             org.apache.commons.codec.binary.*
                         </Private-Package>
                         <Bundle-Activator>
-                            org.apache.felix.sandbox.preferences.impl.PreferencesManager
+                            org.apache.felix.prefs.impl.PreferencesManager
                         </Bundle-Activator>
                     </instructions>
                 </configuration>
