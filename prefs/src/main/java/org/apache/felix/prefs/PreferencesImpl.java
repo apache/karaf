@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.preferences;
+package org.apache.felix.prefs;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.codec.binary.Base64;
+import org.codehaus.plexus.util.Base64;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 

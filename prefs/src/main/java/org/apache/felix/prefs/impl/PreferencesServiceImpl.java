@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.preferences.impl;
+package org.apache.felix.prefs.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.felix.sandbox.preferences.BackingStoreManager;
-import org.apache.felix.sandbox.preferences.PreferencesDescription;
-import org.apache.felix.sandbox.preferences.PreferencesImpl;
+import org.apache.felix.prefs.BackingStoreManager;
+import org.apache.felix.prefs.PreferencesDescription;
+import org.apache.felix.prefs.PreferencesImpl;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
