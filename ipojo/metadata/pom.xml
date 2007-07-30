@@ -7,7 +7,25 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>org.apache.felix.ipojo.metadata</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
   <version>0.7.3-SNAPSHOT</version>
   <name>Apache Felix iPOJO Metadata</name>
+  <build>
+  <plugins>
+  	<plugin>
+    	<groupId>org.apache.felix</groupId>
+    	<artifactId>maven-bundle-plugin</artifactId>
+    	<version>1.1.0-SNAPSHOT</version>
+    	<extensions>true</extensions>
+    	<configuration>
+        	<instructions>          
+          		<Bundle-Name>iPOJO Manipulator</Bundle-Name>
+		        <Bundle-Vendor>Clement ESCOFFIER</Bundle-Vendor>
+        		<Bundle-Description> iPOJO Metadata </Bundle-Description>
+          		<Export-Package>org.apache.felix.ipojo.metadata</Export-Package>
+        	</instructions>
+    	</configuration>
+  	</plugin>
+  </plugins>
+  </build>
 </project>

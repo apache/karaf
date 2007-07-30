@@ -46,9 +46,9 @@
             <Bundle-Name>iPOJO Manipulator</Bundle-Name>
             <Bundle-Vendor>Clement ESCOFFIER</Bundle-Vendor>
             <Bundle-Description> iPOJO Manipulator </Bundle-Description>
+            <Export-Package>org.apache.felix.ipojo.manipulator</Export-Package>
             <Private-Package>
             	org.apache.felix.ipojo.manipulation,
-            	org.apache.felix.ipojo.manipulator,
             	org.apache.felix.ipojo.xml.parser,
               	org.objectweb.asm,
               	org.objectweb.asm.commons,

@@ -201,7 +201,11 @@ public class Manipulator {
             finalWriter = cw0;
         }
         // The file is in the bundle
-        return finalWriter.toByteArray();
+        if (ck.isalreadyManipulated()) {
+            return new byte[0];
+        } else {
+            return finalWriter.toByteArray();
+        }
     }
 
     /**

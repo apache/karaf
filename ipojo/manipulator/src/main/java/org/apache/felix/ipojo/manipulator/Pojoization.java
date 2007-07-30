@@ -147,7 +147,7 @@ public class Pojoization {
         try {
             inputJar = new JarFile(in);
         } catch (IOException e) {
-            error("Cannot the input file is not a JarFile : " + in.getAbsolutePath());
+            error("The input file is not a JarFile : " + in.getAbsolutePath());
             return;
         }
 
@@ -182,6 +182,7 @@ public class Pojoization {
                         jos.write(outClazz);
                         jos.closeEntry();
                     } else { // The class is already manipulated
+                        jos.putNextEntry(curEntry);
                         InputStream currIn = inputJar.getInputStream(curEntry);
                         int c;
                         int i = 0;
@@ -415,7 +416,9 @@ public class Pojoization {
         for (int i = 0; i < m_metadata.length; i++) {
             meta += buildManifestMetadata(m_metadata[i], "");
         }
-        att.putValue("iPOJO-Components", meta);
+        if (!meta.equals("")) { 
+            att.putValue("iPOJO-Components", meta);
+        }
     }
 
     /**
@@ -555,7 +558,7 @@ public class Pojoization {
         }
 
         if (meta == null || meta.length == 0) {
-            warn("Neither component, neither instance in " + path);
+            warn("Neither component types, nor instances in " + path);
         }
 
         return meta;
@@ -595,3 +598,4 @@ public class Pojoization {
     }
 
 }
+
