@@ -29,7 +29,7 @@
         <relativePath>../pom</relativePath>
     </parent>
 
-    <artifactId>org.apache.felix.preferences</artifactId>
+    <artifactId>org.apache.felix.prefs</artifactId>
     <packaging>bundle</packaging>
     <version>0.1.0-SNAPSHOT</version>
 
