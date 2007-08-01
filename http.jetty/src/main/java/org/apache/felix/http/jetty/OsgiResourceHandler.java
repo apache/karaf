@@ -175,25 +175,37 @@ public class OsgiResourceHandler extends AbstractHttpHandler
             throws
                     IOException
     {
-        OutputStream os = response.getOutputStream();
-        InputStream is = url.openStream();
-        int len = 0;
-        byte[] buf = new byte[1024];
-        int n = 0;
-
-        while ((n = is.read(buf, 0, buf.length)) >= 0)
-        {
-            os.write(buf, 0, n);
-            len += n;
-        }
+        OutputStream os = null;
+        InputStream is = null;
         
-        try 
+        try
         {
-            response.setContentLength(len);
-        } 
-        catch (IllegalStateException ex) 
-        {
-            System.err.println("OsgiResourceHandler: " + ex);
+            os = response.getOutputStream();
+            is = url.openStream();
+        
+            int len = 0;
+            byte[] buf = new byte[1024];
+            int n = 0;
+    
+            while ((n = is.read(buf, 0, buf.length)) >= 0)
+            {
+                os.write(buf, 0, n);
+                len += n;
+            }
+            
+            try 
+            {
+                response.setContentLength(len);
+            } 
+            catch (IllegalStateException ex) 
+            {
+                System.err.println("OsgiResourceHandler: " + ex);
+            }
         }
+        finally
+        {
+            if (is != null) is.close();
+            if (os != null) os.close();
+        }        
     }
 }
