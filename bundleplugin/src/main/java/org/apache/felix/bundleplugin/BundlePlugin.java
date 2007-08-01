@@ -250,7 +250,6 @@ public class BundlePlugin extends AbstractMojo {
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             throw new MojoExecutionException("Unknown error occurred", e);
         }
     }
