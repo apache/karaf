@@ -19,7 +19,6 @@
 package org.apache.felix.bundleplugin;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -35,7 +34,7 @@ import aQute.lib.osgi.Jar;
 
 /**
  * Generate an OSGi manifest for this project
- * 
+ *
  * @goal manifest
  * @phase process-classes
  * @requiresDependencyResolution runtime
@@ -56,18 +55,18 @@ public class ManifestPlugin
         Manifest manifest;
         try
         {
-            manifest = getManifest( project, instructions, properties, classpath );
+            manifest = this.getManifest( project, instructions, properties, classpath );
         }
         catch ( IOException e )
         {
             throw new MojoExecutionException( "Error trying to generate Manifest", e );
         }
 
-        File outputFile = new File( manifestLocation + "/MANIFEST.MF" );
+        File outputFile = new File( this.manifestLocation + "/MANIFEST.MF" );
 
         try
         {
-            writeManifest( manifest, outputFile );
+            this.writeManifest( manifest, outputFile );
         }
         catch ( IOException e )
         {
@@ -78,19 +77,19 @@ public class ManifestPlugin
     public Manifest getManifest( MavenProject project, Jar[] classpath )
         throws IOException
     {
-        return getManifest( project, null, null, classpath );
+        return this.getManifest( project, null, null, classpath );
     }
 
     public Manifest getManifest( MavenProject project, Map instructions, Properties properties, Jar[] classpath )
         throws IOException
     {
-        return getAnalyzer( project, instructions, properties, classpath ).getJar().getManifest();
+        return this.getAnalyzer( project, instructions, properties, classpath ).getJar().getManifest();
     }
 
     protected Analyzer getAnalyzer( MavenProject project, Jar[] classpath )
         throws IOException
     {
-        return getAnalyzer( project, new HashMap(), new Properties(), classpath );
+        return this.getAnalyzer( project, new HashMap(), new Properties(), classpath );
     }
 
     protected Analyzer getAnalyzer( MavenProject project, Map instructions, Properties properties, Jar[] classpath )
@@ -98,7 +97,7 @@ public class ManifestPlugin
     {
         PackageVersionAnalyzer analyzer = new PackageVersionAnalyzer();
 
-        Properties props = getDefaultProperties( project );
+        Properties props = this.getDefaultProperties( project );
         props.putAll( properties );
 
         if ( !instructions.containsKey( Analyzer.IMPORT_PACKAGE ) )
@@ -106,14 +105,14 @@ public class ManifestPlugin
             props.put( Analyzer.IMPORT_PACKAGE, "*" );
         }
 
-        props.putAll( transformDirectives( instructions ) );
+        props.putAll( this.transformDirectives( instructions ) );
 
         analyzer.setProperties( props );
 
         File file = project.getArtifact().getFile();
         if ( file == null )
         {
-            analyzer.setJar( getOutputDirectory() );
+            analyzer.setJar( this.getOutputDirectory() );
         }
         else
         {
