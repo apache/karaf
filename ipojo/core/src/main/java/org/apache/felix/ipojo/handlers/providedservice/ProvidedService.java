@@ -100,8 +100,6 @@ public class ProvidedService implements ServiceFactory {
         addProperty(new Property(this, "factory.pid", handler.getInstanceManager().getFactory().getName()));
     }
 
-    // TODO check if we need to erase previous props or add to the previous
-    // props.
     /**
      * Add properties to the provided service.
      * 

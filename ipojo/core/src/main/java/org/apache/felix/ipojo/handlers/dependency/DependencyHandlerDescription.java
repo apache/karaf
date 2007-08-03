@@ -18,11 +18,13 @@
  */
 package org.apache.felix.ipojo.handlers.dependency;
 
-import java.util.Iterator;
+import java.util.List;
 
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Dependency Handler Description.
@@ -88,12 +90,30 @@ public class DependencyHandlerDescription extends HandlerDescription {
             Element dep = new Element("Requires", "");
             dep.addAttribute(new Attribute("Specification", m_dependencies[i].getInterface()));
             dep.addAttribute(new Attribute("Filter", m_dependencies[i].getFilter()));
+            
+            if (m_dependencies[i].isOptional()) {
+                dep.addAttribute(new Attribute("Optional", "true"));
+            } else {
+                dep.addAttribute(new Attribute("Optional", "false"));
+            }
+
+            if (m_dependencies[i].isMultiple()) {
+                dep.addAttribute(new Attribute("Aggregate", "true"));
+            } else {
+                dep.addAttribute(new Attribute("Aggregate", "false"));
+            }
+            
             dep.addAttribute(new Attribute("State", state));
             Element usages = new Element("Usages", "");
-            Iterator it = m_dependencies[i].getUsedServices().keySet().iterator();
-            while (it.hasNext()) {
+            List list = m_dependencies[i].getUsedServices();
+            for (int j = 0; j < list.size(); j++) {
                 Element use = new Element("Use", "");
-                use.addAttribute(new Attribute("object", it.next().toString()));
+                ServiceReference ref = (ServiceReference) list.get(i);
+                use.addAttribute(new Attribute("service.id", (String) ref.getProperty(Constants.SERVICE_ID)));
+                String pid = (String) ref.getProperty(Constants.SERVICE_PID);
+                if (pid != null) {
+                    use.addAttribute(new Attribute("service.pid", pid));
+                }
                 usages.addElement(use);
             }
             deps.addElement(dep);

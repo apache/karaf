@@ -851,6 +851,14 @@ public class InstanceManager implements ComponentInstance {
     public BundleContext getContext() {
         return m_context;
     }
+    
+    public BundleContext getGlobalContext() {
+        return ((IPojoContext) m_context).getGlobalContext();
+    }
+    
+    public ServiceContext getLocalServiceContext() {
+        return ((IPojoContext) m_context).getServiceContext();
+    }
 
     /**
      * Check the state of all handlers.

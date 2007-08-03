@@ -88,7 +88,7 @@ public class CompositionMetadata {
 
         // Get implemented service specification
         String spec = description.getAttribute("specification");
-        m_specification = new SpecificationMetadata(spec, m_context, false, false, m_handler);
+        m_specification = new SpecificationMetadata(spec, m_context, false, false, m_handler);        
 
         Element[] mappings = description.getElements("delegation");
         for (int i = 0; i < mappings.length; i++) {
@@ -270,6 +270,7 @@ public class CompositionMetadata {
             if (field.isUseful() && field.getSpecification().isInterface()) {
                 Element dep = new Element("requires", "");
                 dep.addAttribute(new Attribute("field", field.getName()));
+                dep.addAttribute(new Attribute("scope", "composite"));
                 if (field.getSpecification().isOptional()) {
                     dep.addAttribute(new Attribute("optional", "true"));
                 }

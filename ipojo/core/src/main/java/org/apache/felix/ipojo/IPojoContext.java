@@ -309,5 +309,13 @@ public class IPojoContext implements BundleContext {
     public BundleContext getGlobalContext() {
         return m_bundleContext;
     }
+    
+    /**
+     * Get the service context, i.e. the composite context.
+     * @return the service context.
+     */
+    public ServiceContext getServiceContext() {
+        return m_serviceContext;
+    }
 
 }

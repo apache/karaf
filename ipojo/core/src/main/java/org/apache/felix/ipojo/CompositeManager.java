@@ -521,4 +521,22 @@ public class CompositeManager implements ComponentInstance {
     public ServiceContext getServiceContext() {
         return m_internalContext;
     }
+
+    /**
+     * Get the global bundle context.
+     * @return the global bundle context.
+     */
+    public BundleContext getGlobalContext() {
+        IPojoContext c = (IPojoContext) m_context;
+        return c.getGlobalContext();
+    }
+    
+    /**
+     * Get the parent service context.
+     * @return the parent service context.
+     */
+    public ServiceContext getParentServiceContext() {
+        IPojoContext c = (IPojoContext) m_context;
+        return c.getServiceContext();
+    }
 }

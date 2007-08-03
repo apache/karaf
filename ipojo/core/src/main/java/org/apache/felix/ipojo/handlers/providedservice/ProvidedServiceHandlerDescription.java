@@ -82,7 +82,7 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
     public Element getHandlerInfo() {
         Element services = super.getHandlerInfo();
         for (int i = 0; i < m_providedServices.length; i++) {
-            Element service = new Element("service", "");
+            Element service = new Element("provides", "");
             String state = "unregistered";
             if (m_providedServices[i].getState() == ProvidedService.REGISTERED) {
                 state = "registered";

@@ -23,6 +23,7 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.felix.ipojo.PolicyServiceContext;
 import org.apache.felix.ipojo.ServiceContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -46,9 +47,9 @@ public class ServiceImporter implements ServiceListener {
     private ServiceContext m_destination;
 
     /**
-     * Origin Context.
+     * Context where service need to be found. 
      */
-    private BundleContext m_origine;
+    private ServiceContext m_origin;
 
     /**
      * Imported Specification.
@@ -79,6 +80,11 @@ public class ServiceImporter implements ServiceListener {
      * Is the importer valid?
      */
     private boolean m_isValid;
+    
+    /**
+     * Resolving policy.
+     */
+    private int m_policy;
 
     /**
      * Reference on the handler.
@@ -106,6 +112,16 @@ public class ServiceImporter implements ServiceListener {
     private List/*<Record>*/m_records = new ArrayList()/* <Record> */;
 
     /**
+     * Requirement Id.
+     */
+    private String m_id;
+
+    /**
+     * Is this requirement attached to a service-level requirement.
+     */
+    private boolean m_isServiceLevelRequirement;
+
+    /**
      * Constructor.
      * 
      * @param specification : targeted specification
@@ -114,12 +130,13 @@ public class ServiceImporter implements ServiceListener {
      * @param optional : is the import optional ?
      * @param from : parent context
      * @param to : internal context
+     * @param policy : resolving policy
+     * @param id : requirement id (may be null)
      * @param in : handler
      */
-    public ServiceImporter(String specification, String filter, boolean multiple, boolean optional, BundleContext from, ServiceContext to,
+    public ServiceImporter(String specification, String filter, boolean multiple, boolean optional, BundleContext from, ServiceContext to, int policy, String id,
             ImportExportHandler in) {
         this.m_destination = to;
-        this.m_origine = from;
         try {
             this.m_filter = from.createFilter(filter);
         } catch (InvalidSyntaxException e) {
@@ -130,6 +147,18 @@ public class ServiceImporter implements ServiceListener {
         this.m_specification = specification;
         this.m_optional = optional;
         this.m_handler = in;
+        
+        if (m_id == null) {
+            m_id = m_specification;
+        } else {
+            m_id = id;
+        }
+        
+        if (policy == -1) {
+            m_policy = PolicyServiceContext.LOCAL_AND_GLOBAL;  
+        } else {
+            m_policy = policy;
+        }
     }
 
     /**
@@ -137,7 +166,8 @@ public class ServiceImporter implements ServiceListener {
      */
     public void start() {
         try {
-            ServiceReference[] refs = m_origine.getServiceReferences(m_specification, null);
+            m_origin = new PolicyServiceContext(m_handler.getManager().getGlobalContext(), m_handler.getManager().getParentServiceContext(), m_policy);
+            ServiceReference[] refs = m_origin.getServiceReferences(m_specification, null);
             if (refs != null) {
                 for (int i = 0; i < refs.length; i++) {
                     if (m_filter.match(refs[i])) {
@@ -156,19 +186,19 @@ public class ServiceImporter implements ServiceListener {
             if (m_aggregate) {
                 for (int i = 0; i < m_records.size(); i++) {
                     Record rec = (Record) m_records.get(i);
-                    rec.m_svcObject = m_origine.getService(rec.m_ref);
+                    rec.m_svcObject = m_origin.getService(rec.m_ref);
                     rec.m_reg = m_destination.registerService(m_specification, rec.m_svcObject, getProps(rec.m_ref));
                 }
             } else {
                 Record rec = (Record) m_records.get(0);
-                rec.m_svcObject = m_origine.getService(rec.m_ref);
+                rec.m_svcObject = m_origin.getService(rec.m_ref);
                 rec.m_reg = m_destination.registerService(m_specification, rec.m_svcObject, getProps(rec.m_ref));
             }
         }
 
         // Register service listener
         try {
-            m_origine.addServiceListener(this, "(" + Constants.OBJECTCLASS + "=" + m_specification + ")");
+            m_origin.addServiceListener(this, "(" + Constants.OBJECTCLASS + "=" + m_specification + ")");
         } catch (InvalidSyntaxException e) {
             e.printStackTrace();
         }
@@ -196,14 +226,14 @@ public class ServiceImporter implements ServiceListener {
      */
     public void stop() {
 
-        m_origine.removeServiceListener(this);
+        m_origin.removeServiceListener(this);
 
         for (int i = 0; i < m_records.size(); i++) {
             Record rec = (Record) m_records.get(i);
             rec.m_svcObject = null;
             if (rec.m_reg != null) {
                 rec.m_reg.unregister();
-                m_origine.ungetService(rec.m_ref);
+                m_origin.ungetService(rec.m_ref);
                 rec.m_ref = null;
             }
         }
@@ -286,7 +316,7 @@ public class ServiceImporter implements ServiceListener {
             m_records.add(rec);
             // Publishing ?
             if (m_records.size() == 1 || m_aggregate) { // If the service is the first one, or if it is a multiple imports
-                rec.m_svcObject = m_origine.getService(rec.m_ref);
+                rec.m_svcObject = m_origin.getService(rec.m_ref);
                 rec.m_reg = m_destination.registerService(m_specification, rec.m_svcObject, getProps(rec.m_ref));
             }
             // Compute the new state
@@ -310,7 +340,7 @@ public class ServiceImporter implements ServiceListener {
                 rec.m_svcObject = null;
                 rec.m_reg.unregister();
                 rec.m_reg = null;
-                m_origine.ungetService(rec.m_ref);
+                m_origin.ungetService(rec.m_ref);
             }
         }
         m_records.removeAll(l);
@@ -321,7 +351,7 @@ public class ServiceImporter implements ServiceListener {
             if (!m_aggregate) { // Import the next one
                 Record rec = (Record) m_records.get(0);
                 if (rec.m_svcObject == null) { // It is the first service which disappears - create the next one
-                    rec.m_svcObject = m_origine.getService(rec.m_ref);
+                    rec.m_svcObject = m_origin.getService(rec.m_ref);
                     rec.m_reg = m_destination.registerService(m_specification, rec.m_svcObject, getProps(rec.m_ref));
                 }
             }
@@ -352,6 +382,32 @@ public class ServiceImporter implements ServiceListener {
 
     public String getFilter() {
         return m_filterStr;
+    }
+    
+    /**
+     * Set that this dependency is a service level dependency.
+     * This forces the scoping policy to be STRICT. 
+     * @param b
+     */
+    public void setServiceLevelDependency() {
+        m_isServiceLevelRequirement = true;
+        m_policy = PolicyServiceContext.LOCAL;
+    }
+
+    public String getId() {
+        return m_id;
+    }
+    
+    public boolean isServiceLevelRequirement() {
+        return m_isServiceLevelRequirement;
+    }
+    
+    public boolean isAggregate() {
+        return m_aggregate;
+    }
+    
+    public boolean isOptional() {
+        return m_optional;
     }
 
 }

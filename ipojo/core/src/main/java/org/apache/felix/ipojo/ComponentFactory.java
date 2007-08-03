@@ -91,7 +91,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
     private FactoryClassloader m_classLoader = null;
 
     /**
-     * Component Type provided by this factory. //TODO Should be keep this
+     * Component Type provided by this factory. //TODO Should we keep this ?
      * reference ?
      */
     private Element m_componentMetadata;
@@ -347,13 +347,13 @@ public class ComponentFactory implements Factory, ManagedServiceFactory {
 
         // create a ghost component
         if (!m_isComposite) {
-            final InstanceManager ghost = new InstanceManager(this, m_context);
+            final InstanceManager ghost = new InstanceManager(this, new IPojoContext(m_context));
             final Properties p = new Properties();
             p.put("name", "ghost");
             ghost.configure(m_componentMetadata, p);
             m_componentDesc = ghost.getComponentDescription();
         } else {
-            final CompositeManager ghost = new CompositeManager(this, m_context);
+            final CompositeManager ghost = new CompositeManager(this, new IPojoContext(m_context));
             final Properties p = new Properties();
             p.put("name", "ghost");
             ghost.configure(m_componentMetadata, p);

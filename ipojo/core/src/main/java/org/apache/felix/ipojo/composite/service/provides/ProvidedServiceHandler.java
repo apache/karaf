@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.composite.service.provides;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
@@ -25,8 +26,13 @@ import java.util.List;
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.CompositeHandler;
 import org.apache.felix.ipojo.CompositeManager;
+import org.apache.felix.ipojo.PolicyServiceContext;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
+import org.apache.felix.ipojo.composite.service.importer.ImportExportHandler;
+import org.apache.felix.ipojo.composite.service.importer.ServiceImporter;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.parser.ManifestMetadataParser;
+import org.apache.felix.ipojo.parser.ParseException;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 
@@ -84,22 +90,27 @@ public class ProvidedServiceHandler extends CompositeHandler {
         if (provides.length == 0) {
             return;
         }
+        
+        for (int i = 0; i < provides.length; i++) {
+            ProvidedService ps = new ProvidedService(this, provides[i], "" + i);
+            m_managedServices.add(ps);
+            // Check requirements against the service specification
+            if (!checkServiceSpecification(ps)) {
+                return;
+            }
+            im.getComponentDescription().addProvidedServiceSpecification(ps.getSpecification());
+        }
 
         // Compute imports and instances
         computeAvailableServices(metadata);
         computeAvailableTypes(metadata);
 
-        for (int i = 0; i < provides.length; i++) {
-            ProvidedService ps = new ProvidedService(this, provides[i], "" + i);
-            m_managedServices.add(ps);
-            im.getComponentDescription().addProvidedServiceSpecification(ps.getSpecification());
-        }
-
+        
         im.register(this);
     }
 
     /**
-     * Start metod.
+     * Start method.
      * Start all managed provided service.
      * @see org.apache.felix.ipojo.CompositeHandler#start()
      */
@@ -128,7 +139,7 @@ public class ProvidedServiceHandler extends CompositeHandler {
 
     /**
      * Stop method.
-     * Stop all managedprovided service.
+     * Stop all managed provided service.
      * @see org.apache.felix.ipojo.CompositeHandler#stop()
      */
     public void stop() {
@@ -220,6 +231,131 @@ public class ProvidedServiceHandler extends CompositeHandler {
             SpecificationMetadata sm = new SpecificationMetadata(itf, m_context, agg, opt, this);
             m_services.add(sm);
         }
+    }
+    
+    /**
+     * Check composite requirement against service specification requirement is available.
+     * @param ps : the provided service to check
+     * @return true if the composite is a correct implementation of the service
+     */
+    private boolean checkServiceSpecification(ProvidedService ps) {
+        try {
+            Class spec = m_manager.getFactory().loadClass(ps.getSpecification());
+            Field specField = spec.getField("specification");     
+            Object o = specField.get(null);
+            if (!(o instanceof String)) {
+                m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getInstanceName() + "] The specification field of the service specification " + ps.getSpecification() + " need to be a String");                                                                                                                                                                    
+                return false;
+            } else {
+                Element specification = ManifestMetadataParser.parse((String) o);
+                Element[] reqs = specification.getElements("requires");
+                for (int j = 0; j < reqs.length; j++) {
+                    ServiceImporter imp = getAttachedRequirement(reqs[j]);
+                    if (imp != null) {
+                        // Fix service-level dependency flag
+                        imp.setServiceLevelDependency();
+                    }
+                    if (!isRequirementCorrect(imp, reqs[j])) {
+                        return false;
+                    }
+                }
+            }
+        } catch (NoSuchFieldException e) {
+            return true;  // No specification field
+        } catch (ClassNotFoundException e) {
+            m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getInstanceName() + "] The service specification " + ps.getSpecification() + " cannot be load");                                                                                                                                                                    
+            return false;
+        } catch (IllegalArgumentException e) {
+            m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getInstanceName() + "] The field 'specification' of the service specification " + ps.getSpecification() + " is not accessible : " + e.getMessage());                                                                                                                                                                    
+            return false;
+        } catch (IllegalAccessException e) {
+            m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getInstanceName() + "] The field 'specification' of the service specification " + ps.getSpecification() + " is not accessible : " + e.getMessage());                                                                                                                                                                    
+            return false;
+        } catch (ParseException e) {
+            m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getInstanceName() + "] The field 'specification' of the service specification " + ps.getSpecification() + " does not contain a valid String : " + e.getMessage());                                                                                                                                                                    
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Look for the implementation (i.e. composite) requirement for the given service-level requirement metadata.
+     * @param element : the service-level requirement metadata
+     * @return the ServiceImporter object, null if not found or if the DependencyHandler is not plugged to the instance
+     */
+    private ServiceImporter getAttachedRequirement(Element element) {
+        ImportExportHandler ih = (ImportExportHandler) m_manager.getCompositeHandler(ImportExportHandler.class.getName());
+        if (ih == null) { 
+            return null;
+        }
+        
+        if (element.containsAttribute("id")) {
+            // Look for dependency Id
+            String id = element.getAttribute("id");
+            for (int i = 0; i < ih.getRequirements().size(); i++) {
+                ServiceImporter imp = (ServiceImporter) ih.getRequirements().get(i);
+                if (imp.getId().equals(id)) {
+                    return imp; 
+                }
+            }
+        }
+        
+        // If not found or no id, look for a dependency with the same specification
+        String requirement = element.getAttribute("specification");
+        for (int i = 0; i < ih.getRequirements().size(); i++) {
+            ServiceImporter imp = (ServiceImporter) ih.getRequirements().get(i);
+            if (imp.getSpecification().equals(requirement)) {
+                return imp; 
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Check the correctness of the composite requirement against the service level dependency.
+     * @param imp : requirement to check
+     * @param elem : service-level dependency metadata
+     * @return true if the dependency is correct, false otherwise
+     */
+    private boolean isRequirementCorrect(ServiceImporter imp, Element elem) {
+        boolean opt = false;
+        if (elem.containsAttribute("optional") && elem.getAttribute("optional").equalsIgnoreCase("true")) {
+            opt = false;
+        }
+        
+        boolean agg = false;
+        if (elem.containsAttribute("aggregate") && elem.getAttribute("aggregate").equalsIgnoreCase("true")) {
+            agg = false;
+        }
+
+        if (imp == null && !opt) {
+            // Add the missing requirement
+            ImportExportHandler ih = (ImportExportHandler) m_manager.getCompositeHandler(ImportExportHandler.class.getName());
+            String spec = elem.getAttribute("specification");
+            String filter = null;
+            if (elem.containsAttribute("filter")) {
+                filter = elem.getAttribute("filter");
+            }
+            ServiceImporter si = new ServiceImporter(spec, filter, agg, opt, m_manager.getContext(), m_manager.getServiceContext(), PolicyServiceContext.LOCAL, null, ih);
+            ih.getRequirements().add(si);
+        }
+        
+        if (imp.isAggregate() && !agg) {
+            getManager().getFactory().getLogger().log(Logger.ERROR, "[" + getManager().getInstanceName() + "] The requirement " + elem.getAttribute("specification") + " is aggregate in the implementation and is declared as a simple service-level requirement");
+            return false;
+        }
+      
+        if (elem.containsAttribute("filter")) {
+            String filter = elem.getAttribute("filter");
+            String filter2 = imp.getFilter();
+            if (filter2 == null || !filter2.equalsIgnoreCase(filter)) {
+                getManager().getFactory().getLogger().log(Logger.ERROR, "[" + getManager().getInstanceName() + "] The specification requirement " + elem.getAttribute("specification") + " as not the same filter as declared in the service-level requirement");
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     public HandlerDescription getDescription() {

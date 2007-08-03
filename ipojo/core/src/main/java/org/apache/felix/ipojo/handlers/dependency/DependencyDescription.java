@@ -18,8 +18,8 @@
  */
 package org.apache.felix.ipojo.handlers.dependency;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.osgi.framework.ServiceReference;
 
@@ -55,20 +55,20 @@ public class DependencyDescription {
     private String m_filter;
 
     /**
-     * Map [Instance reference, service reference] of the used service.
+     * List[service reference] of the used service.
      */
-    private Map m_usedServices = new HashMap();
+    private List m_usedServices = new ArrayList();
 
     /**
      * The list of service reference.
      */
-    private ServiceReference[] m_serviceReferences;
+    private List m_serviceReferences;
 
     /**
      * Constructor.
-     * @param itf : the needed itf
+     * @param itf : the needed interface
      * @param multiple : is the dependency a multiple dependency ?
-     * @param optional : is the depdendency optional ?
+     * @param optional : is the dependency optional ?
      * @param filter : the filter
      * @param state : the state
      */
@@ -79,7 +79,7 @@ public class DependencyDescription {
         m_optional = optional;
         m_filter = filter;
         m_state = state;
-        m_serviceReferences = new ServiceReference[0];
+        m_serviceReferences = new ArrayList();
     }
 
     public boolean isMultiple() { return m_multiple; }
@@ -93,34 +93,34 @@ public class DependencyDescription {
     public int getState() { return m_state; }
 
     /**
-     * Get the service refrence array.
+     * Get the service reference list.
      * @return the array of service reference (only if the cardinality could be n).
      */
-    public ServiceReference[] getServiceReferences() { return m_serviceReferences; }
+    public List getServiceReferences() { return m_serviceReferences; }
 
     /**
      * Get the service reference if only 1 used.
      * @return the ServiceReference (only if the cardinality could be 1).
      */
-    public ServiceReference getServiceReference() { return m_serviceReferences[0]; }
+    public ServiceReference getServiceReference() { return (ServiceReference) m_serviceReferences.get(0); }
 
     /**
      * Set the service reference array.
-     * @param sr : the array of service reference
+     * @param sr : the list of service reference
      */
-    public void setServiceReferences(ServiceReference[] sr) { m_serviceReferences = sr; }
+    public void setServiceReferences(List sr) { m_serviceReferences = sr; }
 
     /**
-     * Get the used service map.
-     * @return the map [object reference, service reference] containing the used services
+     * Get the used service list.
+     * @return the list [service reference] containing the used services
      */
-    public Map getUsedServices() { return m_usedServices; }
+    public List getUsedServices() { return m_usedServices; }
 
     /**
      * Set the usedServices.
-     * @param hm : the new usedService
+     * @param hm : the list of used service reference.
      */
-    public void setUsedServices(Map hm) {
+    public void setUsedServices(List hm) {
         m_usedServices = hm;
     }
 

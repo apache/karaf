@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.felix.ipojo.CompositeHandler;
 import org.apache.felix.ipojo.CompositeManager;
+import org.apache.felix.ipojo.PolicyServiceContext;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Element;
@@ -116,7 +117,24 @@ public class ImportExportHandler extends CompositeHandler {
                         filter = "(&" + filter + imp[i].getAttribute("filter") + ")";
                     }
                 }
-                ServiceImporter si = new ServiceImporter(specification, filter, aggregate, optional, m_context, m_scope, this);
+                
+                String id = null;
+                if (imp[i].containsAttribute("id")) {
+                    id = imp[i].getAttribute("id");
+                }
+                
+                int scopePolicy = -1;
+                if (imp[i].containsAttribute("scope")) {
+                    if (imp[i].getAttribute("scope").equalsIgnoreCase("global")) {
+                        scopePolicy = PolicyServiceContext.GLOBAL;
+                    } else if (imp[i].getAttribute("scope").equalsIgnoreCase("composite")) {
+                        scopePolicy = PolicyServiceContext.LOCAL;
+                    } else if (imp[i].getAttribute("scope").equalsIgnoreCase("composite+global")) {
+                        scopePolicy = PolicyServiceContext.LOCAL_AND_GLOBAL;
+                    }                
+                }
+                
+                ServiceImporter si = new ServiceImporter(specification, filter, aggregate, optional, m_context, m_scope, scopePolicy, id, this);
                 m_importers.add(si);
             }
         }
@@ -286,5 +304,9 @@ public class ImportExportHandler extends CompositeHandler {
      */
     public HandlerDescription getDescription() {
         return new ImportExportDescription(this.getClass().getName(), isValid(), m_importers, m_exporters);
+    }
+    
+    public List getRequirements() {
+        return m_importers;
     }
 }

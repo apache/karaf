@@ -21,7 +21,7 @@ package org.apache.felix.ipojo.parser;
 import java.util.StringTokenizer;
 
 /**
- * Parse Utils Methods.
+ * Parse Utility Methods.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -69,5 +69,4 @@ public class ParseUtils {
         }
         return result;
     }
-
 }

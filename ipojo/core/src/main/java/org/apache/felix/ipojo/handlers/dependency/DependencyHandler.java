@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.PolicyServiceContext;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.handlers.dependency.nullable.NullableObjectWriter;
 import org.apache.felix.ipojo.metadata.Element;
@@ -269,8 +270,24 @@ public class DependencyHandler extends Handler {
             if (deps[i].containsAttribute("aggregate") && deps[i].getAttribute("aggregate").equals("true")) {
                 aggregate = true;
             }
+            
+            String id = null;
+            if (deps[i].containsAttribute("id")) {
+                id = deps[i].getAttribute("id");
+            }
+            
+            int scopePolicy = -1;
+            if (deps[i].containsAttribute("scope")) {
+                if (deps[i].getAttribute("scope").equalsIgnoreCase("global")) {
+                    scopePolicy = PolicyServiceContext.GLOBAL;
+                } else if (deps[i].getAttribute("scope").equalsIgnoreCase("composite")) {
+                    scopePolicy = PolicyServiceContext.LOCAL;
+                } else if (deps[i].getAttribute("scope").equalsIgnoreCase("composite+global")) {
+                    scopePolicy = PolicyServiceContext.LOCAL_AND_GLOBAL;
+                }                
+            }
 
-            Dependency dep = new Dependency(this, field, serviceSpecification, filter, optional, aggregate);
+            Dependency dep = new Dependency(this, field, serviceSpecification, filter, optional, aggregate, id, scopePolicy);
             
             // Look for dependency callback :
             for (int j = 0; j < (deps[i].getElements("Callback", "")).length; j++) {

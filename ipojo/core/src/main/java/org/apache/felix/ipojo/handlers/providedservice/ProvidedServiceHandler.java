@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.handlers.providedservice;
 
+import java.lang.reflect.Field;
 import java.util.Dictionary;
 import java.util.Properties;
 
@@ -26,9 +27,13 @@ import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.architecture.PropertyDescription;
+import org.apache.felix.ipojo.handlers.dependency.Dependency;
+import org.apache.felix.ipojo.handlers.dependency.DependencyHandler;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.FieldMetadata;
+import org.apache.felix.ipojo.parser.ManifestMetadataParser;
 import org.apache.felix.ipojo.parser.ManipulationMetadata;
+import org.apache.felix.ipojo.parser.ParseException;
 import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.Constants;
@@ -226,42 +231,129 @@ public class ProvidedServiceHandler extends Handler {
      * metadata are consistent.
      * 
      * @param ps : the provided service to check.
-     * @param manipulation : componenet-type manipulation metadata.
+     * @param manipulation : component-type manipulation metadata.
      * @return true if the provided service is correct
      */
     private boolean checkProvidedService(ProvidedService ps, ManipulationMetadata manipulation) {
-
         for (int i = 0; i < ps.getServiceSpecification().length; i++) {
+            // Check the implementation of the specification
             if (! manipulation.isInterfaceImplemented(ps.getServiceSpecification()[i])) {
                 m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The service specification " + ps.getServiceSpecification()[i]
                                 + " is not implemented by the component class");
                 return false;
             }
+            
+            // Check service level dependencies
+            try {
+                Class spec = m_manager.getFactory().loadClass(ps.getServiceSpecification()[i]);
+                Field specField = spec.getField("specification");     
+                Object o = specField.get(null);
+                if (!(o instanceof String)) {
+                    m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The specification field of the service specification " + ps.getServiceSpecification()[i] + " need to be a String");                                                                                                                                                                    
+                    return false;
+                } else {
+                    Element specification = ManifestMetadataParser.parse((String) o);
+                    Element[] deps = specification.getElements("requires");
+                    for (int j = 0; j < deps.length; j++) {
+                        Dependency d = getAttachedDependency(deps[j]);
+                        if (d != null) {
+                            // Fix service-level dependency flag
+                            d.setServiceLevelDependency();
+                        }
+                        if (!isDependencyCorrect(d, deps[j])) {
+                            return false;
+                        }
+                    }
+                }
+            } catch (NoSuchFieldException e) {
+                return true;  // No specification field
+            } catch (ClassNotFoundException e) {
+                m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The service specification " + ps.getServiceSpecification()[i] + " cannot be load");                                                                                                                                                                    
+                return false;
+            } catch (IllegalArgumentException e) {
+                m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());                                                                                                                                                                    
+                return false;
+            } catch (IllegalAccessException e) {
+                m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());                                                                                                                                                                    
+                return false;
+            } catch (ParseException e) {
+                m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " does not contain a valid String : " + e.getMessage());                                                                                                                                                                    
+                return false;
+            }
         }
 
-//        // Fix internal property type
-//        for (int i = 0; i < ps.getProperties().length; i++) {
-//            Property prop = ps.getProperties()[i];
-//            String field = prop.getField();
-//
-//            if (field == null) {
-//                return true; // Static property -> Nothing to check
-//            } else {
-//                String type = null;
-//                for (int j = 0; j < manipulation.getElements("Field").length; j++) {
-//                    if (field.equals(manipulation.getElements("Field")[j].getAttribute("name"))) {
-//                        type = manipulation.getElements("Field")[j].getAttribute("type");
-//                        break;
-//                    }
-//                }
-//                if (type == null) {
-//                    m_manager.getFactory().getLogger().log(Logger.ERROR,
-//                            "[" + m_manager.getClassName() + "] A declared property was not found in the class : " + prop.getField());
-//                    return false;
-//                }
-//                prop.setType(type); // Set the type
-//            }
-//        }
+        return true;
+    }
+
+    /**
+     * Look for the implementation (i.e. component) dependency for the given service-level requirement metadata.
+     * @param element : the service-level requirement metadata
+     * @return the Dependency object, null if not found or if the DependencyHandler is not plugged to the instance
+     */
+    private Dependency getAttachedDependency(Element element) {
+        DependencyHandler dh = (DependencyHandler) m_manager.getHandler(DependencyHandler.class.getName());
+        if (dh == null) { 
+            return null;
+        }
+        
+        if (element.containsAttribute("id")) {
+            // Look for dependency Id
+            String id = element.getAttribute("id");
+            for (int i = 0; i < dh.getDependencies().length; i++) {
+                if (dh.getDependencies()[i].getId().equals(id)) {
+                    return dh.getDependencies()[i]; 
+                }
+            }
+        }
+        
+        // If not found or no id, look for a dependency with the same specification
+        String requirement = element.getAttribute("specification");
+        for (int i = 0; i < dh.getDependencies().length; i++) {
+            if (dh.getDependencies()[i].getSpecification().equals(requirement)) {
+                return dh.getDependencies()[i]; 
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Check the correctness of the implementation dependency against the service level dependency.
+     * @param dep : dependency to check
+     * @param elem : service-level dependency metadata
+     * @return true if the dependency is correct, false otherwise
+     */
+    private boolean isDependencyCorrect(Dependency dep, Element elem) {
+        boolean opt = false;
+        if (elem.containsAttribute("optional") && elem.getAttribute("optional").equalsIgnoreCase("true")) {
+            opt = false;
+        }
+        
+        boolean agg = false;
+        if (elem.containsAttribute("aggregate") && elem.getAttribute("aggregate").equalsIgnoreCase("true")) {
+            agg = false;
+        }
+
+        if (dep == null && !opt) {
+            m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The requirement " + elem.getAttribute("specification") + " is not present in the implementation and is declared as a mandatory service-level requirement");
+            return false;
+        }
+        
+        
+        if (dep.isAggregate() && !agg) {
+            m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The requirement " + elem.getAttribute("specification") + " is aggregate in the implementation and is declared as a simple service-level requirement");
+            return false;
+        }
+      
+        if (elem.containsAttribute("filter")) {
+            String filter = elem.getAttribute("filter");
+            String filter2 = dep.getFilter();
+            if (filter2 == null || !filter2.equalsIgnoreCase(filter)) {
+                m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The specification requirement " + elem.getAttribute("specification") + " as not the same filter as declared in the service-level requirement");
+                return false;
+            }
+        }
+        
         return true;
     }
 

@@ -20,10 +20,14 @@ package org.apache.felix.ipojo.handlers.dependency;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.felix.ipojo.IPojoContext;
 import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.PolicyServiceContext;
+import org.apache.felix.ipojo.ServiceContext;
+import org.apache.felix.ipojo.composite.CompositeServiceContext;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -67,6 +71,11 @@ public class Dependency implements ServiceListener {
      * Service Specification required by the dependency.
      */
     private String m_specification;
+    
+    /**
+     * Dependency ID (declared ID, if not declare use the specification).
+     */
+    private String m_id;
 
     /**
      * Is the dependency a multiple dependency ?
@@ -82,6 +91,16 @@ public class Dependency implements ServiceListener {
      * LDAP Filter of the Dependency (String form).
      */
     private String m_strFilter;
+    
+    /**
+     * Is the dependency a service level dependency.
+     */
+    private boolean m_isServiceLevelRequirement = false;
+    
+    /**
+     * Resolution policy.
+     */
+    private int m_policy = PolicyServiceContext.LOCAL_AND_GLOBAL; 
 
     /**
      * Array of Service Objects. When cardinality = 1 : just the first element
@@ -91,13 +110,19 @@ public class Dependency implements ServiceListener {
     private Object[] m_services = new Object[0];
 
     /**
-     * Array of service references. m_ref : Array
+     * Array of service references.
+     * m_ref : Array
      */
-    private ServiceReference[] m_ref = new ServiceReference[0];
+    private List m_references = new ArrayList();
+    
+    /**
+     * Array of service reference containing used service references. 
+     */
+    private List m_usedReferences = new ArrayList();
 
     /**
-     * State of the dependency. 0 : stopped, 1 : valid, 2 : invalid. m_state :
-     * int
+     * State of the dependency. 0 : stopped, 1 : valid, 2 : invalid. 
+     * m_state : int
      */
     private int m_state;
 
@@ -108,8 +133,8 @@ public class Dependency implements ServiceListener {
     private boolean m_change;
 
     /**
-     * Class of the dependency. Usefull to create in the case of multiple
-     * dependency
+     * Class of the dependency. 
+     * Useful to create in the case of multiple dependency
      */
     private Class m_clazz;
 
@@ -117,9 +142,14 @@ public class Dependency implements ServiceListener {
      * LDAP Filter of the dependency.
      */
     private Filter m_filter;
+    
+    /**
+     * Service Context in which resolving the dependency.
+     */
+    private ServiceContext m_serviceContext;
 
     /**
-     * Dependency contructor. After the creation the dependency is not started.
+     * Dependency constructor. After the creation the dependency is not started.
      * 
      * @param dh : the dependency handler managing this dependency
      * @param field : field of the dependency
@@ -127,14 +157,29 @@ public class Dependency implements ServiceListener {
      * @param filter : LDAP filter of the dependency
      * @param isOptional : is the dependency an optional dependency ?
      * @param isAggregate : is the dependency an aggregate dependency
+     * @param id : id of the dependency, may be null
+     * @param policy : resolution policy
      */
-    public Dependency(DependencyHandler dh, String field, String spec, String filter, boolean isOptional, boolean isAggregate) {
+    public Dependency(DependencyHandler dh, String field, String spec, String filter, boolean isOptional, boolean isAggregate, String id, int policy) {
         m_handler = dh;
         m_field = field;
         m_specification = spec;
         m_isOptional = isOptional;
         m_strFilter = filter;
         m_isAggregate = isAggregate;
+        if (m_id == null) {
+            m_id = m_specification;
+        } else {
+            m_id = id;
+        }
+        if (policy != -1) {
+            m_policy = policy;
+        }
+        // Fix the policy according to the level
+        if ((m_policy == PolicyServiceContext.LOCAL_AND_GLOBAL || m_policy == PolicyServiceContext.LOCAL) && ! ((((IPojoContext) m_handler.getInstanceManager().getContext()).getServiceContext()) instanceof CompositeServiceContext)) {
+            // We are not in a composite : BOTH | STRICT => GLOBAL
+            m_policy = PolicyServiceContext.GLOBAL;
+        }
     }
 
     public String getField() {
@@ -199,32 +244,29 @@ public class Dependency implements ServiceListener {
     }
 
     /**
-     * Build the map [service object, service reference] of used services.
+     * Build the List [service reference] of used services.
      * @return the used service.
      */
-    public Map getUsedServices() {
-        Map hm = new HashMap();
+    public List getUsedServices() {
+        List list = new ArrayList();
         if (m_isAggregate) {
-            for (int i = 0; i < m_ref.length; i++) {
-                if (i < m_services.length) {
-                    hm.put(((Object) m_services[i]).toString(), m_ref[i]);
-                }
-            }
+            list.addAll(m_usedReferences);
+            return list;
         } else {
-            if (m_ref.length != 0 && m_services.length != 0) {
-                hm.put((m_services[0]).toString(), m_ref[0]);
-            }
+            if (m_usedReferences.size() != 0 && m_services.length != 0) {
+                list.add(m_usedReferences.get(0));
+            } 
         }
-        return hm;
+        return list;
     }
 
     /**
-     * A dependency is satisfied if it is optional of ref.length != 0.
+     * A dependency is satisfied if it is optional or there is useful references.
      * 
-     * @return true is the dependency is satified
+     * @return true is the dependency is satisfied
      */
     protected boolean isSatisfied() {
-        return m_isOptional || m_ref.length != 0;
+        return m_isOptional || ! m_references.isEmpty();
     }
 
     /**
@@ -235,13 +277,7 @@ public class Dependency implements ServiceListener {
      * the dependency.
      */
     protected Object get() {
-        // m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO,
-        // "[" + m_handler.getInstanceManager().getClassName() + "] Call get for
-        // a dependency on : " + m_metadata.getServiceSpecification()
-        // + " Multiple : " + m_metadata.isMultiple() + " Optional : " +
-        // m_metadata.isOptional());
         try {
-
             // 1 : Test if there is any change in the reference list :
             if (!m_change) {
                 if (!m_isAggregate) {
@@ -257,11 +293,9 @@ public class Dependency implements ServiceListener {
             // m_services array
             m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO,
                     "[" + m_handler.getInstanceManager().getClassName() + "] Create a service array of " + m_clazz.getName());
-            m_services = (Object[]) Array.newInstance(m_clazz, m_ref.length);
+            
 
-            for (int i = 0; i < m_ref.length; i++) {
-                m_services[i] = m_handler.getInstanceManager().getContext().getService(m_ref[i]);
-            }
+            buildServiceObjectArray();
 
             m_change = false;
             // m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO,
@@ -325,17 +359,36 @@ public class Dependency implements ServiceListener {
     }
 
     /**
-     * Method calld when a service event is throwed.
+     * Create the service object array according to the resolving policy.
+     */
+    private void buildServiceObjectArray() {
+        if (m_isAggregate) {
+            m_services = (Object[]) Array.newInstance(m_clazz, m_references.size());
+            for (int i = 0; i < m_references.size(); i++) {
+                m_services[i] = getService((ServiceReference) m_references.get(i));
+            }
+        } else {
+            if (m_references.size() == 0) {
+                m_services = new Object[0];
+            } else {
+                m_services = new Object[] { getService((ServiceReference) m_references.get(0)) };
+            }
+        }
+    }
+
+    /**
+     * Method called when a service event occurs.
      * 
      * @see org.osgi.framework.ServiceListener#serviceChanged(org.osgi.framework.ServiceEvent)
-     * @param event : the received service event
+     * @param event :
+     *            the received service event
      */
     public void serviceChanged(ServiceEvent event) {
         synchronized (this) {
 
             // If a service goes way.
             if (event.getType() == ServiceEvent.UNREGISTERING) {
-                if (containsSR(event.getServiceReference())) {
+                if (m_references.contains(event.getServiceReference())) {
                     departureManagement(event.getServiceReference());
                 }
                 return;
@@ -351,11 +404,11 @@ public class Dependency implements ServiceListener {
             // If a service is modified
             if (event.getType() == ServiceEvent.MODIFIED) {
                 if (m_filter.match(event.getServiceReference())) {
-                    if (!containsSR(event.getServiceReference())) {
+                    if (!m_references.contains(event.getServiceReference())) {
                         arrivalManagement(event.getServiceReference());
                     }
                 } else {
-                    if (containsSR(event.getServiceReference())) {
+                    if (m_references.contains(event.getServiceReference())) {
                         departureManagement(event.getServiceReference());
                     }
                 }
@@ -371,10 +424,10 @@ public class Dependency implements ServiceListener {
      * @param ref : the arriving service reference
      */
     private void arrivalManagement(ServiceReference ref) {
-        addReference(ref);
+        m_references.add(ref);
         if (isSatisfied()) {
             m_state = RESOLVED;
-            if (m_isAggregate || m_ref.length == 1) {
+            if (m_isAggregate || ! m_references.isEmpty()) {
                 m_change = true;
                 callBindMethod(ref);
             }
@@ -389,35 +442,35 @@ public class Dependency implements ServiceListener {
      */
     private void departureManagement(ServiceReference ref) {
         // Call unbind method
-        if (!m_isAggregate && ref == m_ref[0]) {
+        boolean hasChanged = false;
+        if (m_usedReferences.contains(ref)) {
             callUnbindMethod(ref);
-        }
-        if (m_isAggregate) {
-            callUnbindMethod(ref);
+            // Unget the service reference
+            ungetService(ref);
+            hasChanged = true;
         }
 
-        // Unget the service reference
-        m_handler.getInstanceManager().getContext().ungetService(ref);
-        int index = removeReference(ref);
+        // Remove from the list (remove on both to be sure.
+        m_references.remove(ref);
 
         // Is the state valid or invalid
-        if (m_ref.length == 0 && !m_isOptional) {
+        if (m_references.isEmpty() && !m_isOptional) {
             m_state = UNRESOLVED;
-        }
-        if (m_ref.length == 0 && m_isOptional) {
+        } else {
             m_state = RESOLVED;
         }
+
         // Is there any change ?
-        if (!m_isAggregate && index == 0) {
-            m_change = true;
-            if (m_ref.length != 0) {
-                callBindMethod(m_ref[0]);
+        if (!m_isAggregate) {
+            if (hasChanged) {
+                m_change = true;
+                if (!m_references.isEmpty()) {
+                    callBindMethod((ServiceReference) m_references.get(0));
+                }
+            } else {
+                m_change = false;
             }
-        }
-        if (!m_isAggregate && index != 0) {
-            m_change = false;
-        }
-        if (m_isAggregate) {
+        } else {
             m_change = true;
         }
 
@@ -435,7 +488,7 @@ public class Dependency implements ServiceListener {
             for (int i = 0; i < m_callbacks.length; i++) {
                 if (m_callbacks[i].getMethodType() == DependencyCallback.UNBIND) {
                     try {
-                        m_callbacks[i].call(ref, m_handler.getInstanceManager().getContext().getService(ref));
+                        m_callbacks[i].call(ref, getService(ref));
                     } catch (NoSuchMethodException e) {
                         m_handler.getInstanceManager().getFactory().getLogger().log(
                                 Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " does not exist in the class "
@@ -451,7 +504,7 @@ public class Dependency implements ServiceListener {
                         m_handler.getInstanceManager().getFactory().getLogger().log(
                                 Logger.ERROR,
                                 "The method " + m_callbacks[i].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName()
-                                        + "thorws an exception : " + e.getMessage());
+                                        + "throws an exception : " + e.getMessage());
                         return;
                     }
                 }
@@ -460,24 +513,43 @@ public class Dependency implements ServiceListener {
     }
 
     /**
+     * Get a service object for the given reference according to the resolving policy.
+     * @param ref : service reference
+     * @return the service object
+     */
+    private Object getService(ServiceReference ref) {
+        if (!m_usedReferences.contains(ref)) {
+            m_usedReferences.add(ref);
+        }
+        return m_serviceContext.getService(ref);
+    }
+    
+    /**
+     * Unget the given service reference according to the resolving policy.
+     * @param ref : service reference to unget
+     */
+    private void ungetService(ServiceReference ref) {
+        m_usedReferences.remove(ref);
+        m_serviceContext.ungetService(ref);
+    }
+
+    /**
      * Call the bind method.
      * 
      * @param instance : instance on which calling the bind method.
      */
     protected void callBindMethod(Object instance) {
-        // Check optional case : nullable object case : do not call bind on
-        // nullable object
-        if (m_isOptional && m_ref.length == 0) {
+        // Check optional case : nullable object case : do not call bind on nullable object
+        if (m_isOptional && m_references.isEmpty()) {
             return;
         }
 
         if (m_isAggregate) {
-            for (int i = 0; i < m_ref.length; i++) {
+            for (int i = 0; i < m_references.size(); i++) {
                 for (int j = 0; j < m_callbacks.length; j++) {
                     if (m_callbacks[j].getMethodType() == DependencyCallback.BIND) {
                         try {
-                            m_callbacks[j].callOnInstance(instance, m_ref[i], m_handler.getInstanceManager()
-                                    .getContext().getService(m_ref[i]));
+                            m_callbacks[j].callOnInstance(instance, (ServiceReference) m_references.get(i), getService((ServiceReference) m_references.get(i)));
                         } catch (NoSuchMethodException e) {
                             m_handler.getInstanceManager().getFactory().getLogger().log(
                                     Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " does not exist in the class "
@@ -503,7 +575,7 @@ public class Dependency implements ServiceListener {
             for (int j = 0; j < m_callbacks.length; j++) {
                 if (m_callbacks[j].getMethodType() == DependencyCallback.BIND) {
                     try {
-                        m_callbacks[j].callOnInstance(instance, m_ref[0], m_handler.getInstanceManager().getContext().getService(m_ref[0]));
+                        m_callbacks[j].callOnInstance(instance, (ServiceReference) m_references.get(0), getService((ServiceReference) m_references.get(0)));
                     } catch (NoSuchMethodException e) {
                         m_handler.getInstanceManager().getFactory().getLogger().log(
                                 Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " does not exist in the class "
@@ -538,7 +610,7 @@ public class Dependency implements ServiceListener {
             for (int i = 0; i < m_callbacks.length; i++) {
                 if (m_callbacks[i].getMethodType() == DependencyCallback.BIND) {
                     try {
-                        m_callbacks[i].call(ref, m_handler.getInstanceManager().getContext().getService(ref));
+                        m_callbacks[i].call(ref, getService(ref));
                     } catch (NoSuchMethodException e) {
                         m_handler.getInstanceManager().getFactory().getLogger().log(
                                 Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " does not exist in the class "
@@ -554,7 +626,7 @@ public class Dependency implements ServiceListener {
                         m_handler.getInstanceManager().getFactory().getLogger().log(
                                 Logger.ERROR,
                                 "The method " + m_callbacks[i].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName()
-                                        + "thorws an exception : " + e.getMessage());
+                                        + "throws an exception : " + e.getMessage());
                         return;
                     }
                 }
@@ -566,6 +638,9 @@ public class Dependency implements ServiceListener {
      * Start the dependency.
      */
     public void start() {
+        
+        m_serviceContext = new PolicyServiceContext(m_handler.getInstanceManager().getGlobalContext(), m_handler.getInstanceManager().getLocalServiceContext(), m_policy);
+        
         // Construct the filter with the objectclass + filter
         String classnamefilter = "(objectClass=" + m_specification + ")";
         String filter = "";
@@ -588,44 +663,61 @@ public class Dependency implements ServiceListener {
 
         try {
             // Look if the service is already present :
-            ServiceReference[] sr = m_handler.getInstanceManager().getContext().getServiceReferences(m_specification, filter);
-            if (sr != null) {
-                for (int i = 0; i < sr.length; i++) {
-                    addReference(sr[i]);
-                }
+            if (lookForServiceReferences(m_specification, filter)) {
                 m_state = RESOLVED;
             }
             // Register a listener :
-            m_handler.getInstanceManager().getContext().addServiceListener(this);
-            m_filter = m_handler.getInstanceManager().getContext().createFilter(filter); // Store
-                                                                                            // the
-                                                                                            // filter
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO,
-                    "[" + m_handler.getInstanceManager().getClassName() + "] Create a filter from : " + filter);
+            m_serviceContext.addServiceListener(this);
+         
+            m_filter = m_handler.getInstanceManager().getContext().createFilter(filter); // Store the filter
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] Create a filter from : " + filter);
             m_change = true;
         } catch (InvalidSyntaxException e1) {
             m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                    "[" + m_handler.getInstanceManager().getClassName() + "] A filter is malformed : " + filter);
-            e1.printStackTrace();
+                    "[" + m_handler.getInstanceManager().getClassName() + "] A filter is malformed : " + filter + " - " + e1.getMessage());
         }
+    }
+
+    /**
+     * Look for available service.
+     * @param specification : required specification.
+     * @param filter : LDAP Filter
+     * @return true if at least one service is found.
+     */
+    private boolean lookForServiceReferences(String specification, String filter) {
+        boolean success = false; // Are the query fulfilled ?
+        try {
+            ServiceReference[] refs = m_serviceContext.getServiceReferences(specification, filter);
+            if (refs != null) {
+                success = true;
+                for (int i = 0; i < refs.length; i++) {
+                    m_references.add(refs[i]);
+                }
+            }
+        } catch (InvalidSyntaxException e) {
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
+                    "The requirement on " + m_specification + " does not have a vlid filter : " + e.getMessage());
+        }
+        return success;
     }
 
     /**
      * Stop the dependency.
      */
     public void stop() {
-        m_handler.getInstanceManager().getContext().removeServiceListener(this);
+        m_serviceContext.removeServiceListener(this);
         
         m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO,
                 "[" + m_handler.getInstanceManager().getInstanceName() + "] Stop a dependency on : " + m_specification + " with " + m_strFilter + " (" + m_handler.getInstanceManager() + ")");
         m_state = UNRESOLVED;
 
         // Unget all services references
-        for (int i = 0; i < m_ref.length; i++) {
-            m_handler.getInstanceManager().getContext().ungetService(m_ref[i]);
+        for (int i = 0; i < m_usedReferences.size(); i++) {
+            ungetService((ServiceReference) m_usedReferences.get(i));
         }
 
-        m_ref = new ServiceReference[0];
+        m_references.clear();
+        m_usedReferences.clear();
         m_clazz = null;
         m_services = new Object[0];
     }
@@ -637,96 +729,43 @@ public class Dependency implements ServiceListener {
      */
     public int getState() {
         if (m_isOptional) { 
-            return 1;
+            return RESOLVED;
         } else { 
             return m_state;
         }
     }
 
     /**
-     * Return the list of service reference.
+     * Return the list of used service reference.
      * 
      * @return the service reference list.
      */
-    public ServiceReference[] getServiceReferences() {
-        return m_ref;
-    }
-
-    /**
-     * Add a service reference in the current list.
-     * 
-     * @param r : the new service reference to add
-     */
-    private void addReference(ServiceReference r) {
-        for (int i = 0; (m_ref != null) && (i < m_ref.length); i++) {
-            if (m_ref[i] == r) {
-                return;
-            }
-        }
-
-        if (m_ref != null) {
-            ServiceReference[] newSR = new ServiceReference[m_ref.length + 1];
-            System.arraycopy(m_ref, 0, newSR, 0, m_ref.length);
-            newSR[m_ref.length] = r;
-            m_ref = newSR;
-        } else {
-            m_ref = new ServiceReference[] { r };
-        }
-    }
-
-    /**
-     * Find if a service registration il already registred.
-     * 
-     * @param sr : the service registration to find.
-     * @return true if the service registration is already in the array
-     */
-    private boolean containsSR(ServiceReference sr) {
-        for (int i = 0; i < m_ref.length; i++) {
-            if (m_ref[i] == sr) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Remove a service reference in the current list.
-     * 
-     * @param r : the new service reference to remove
-     * @return the index of the founded element, or -1 if the element is not
-     * found
-     */
-    private int removeReference(ServiceReference r) {
-        if (m_ref == null) {
-            m_ref = new ServiceReference[0];
-        }
-
-        int idx = -1;
-        for (int i = 0; i < m_ref.length; i++) {
-            if (m_ref[i] == r) {
-                idx = i;
-                break;
-            }
-        }
-
-        if (idx >= 0) {
-            // If this is the module, then point to empty list.
-            if ((m_ref.length - 1) == 0) {
-                m_ref = new ServiceReference[0];
-            } else { // Otherwise, we need to do some array copying.
-                ServiceReference[] newSR = new ServiceReference[m_ref.length - 1];
-                System.arraycopy(m_ref, 0, newSR, 0, idx);
-                if (idx < newSR.length) {
-                    System.arraycopy(m_ref, idx + 1, newSR, idx, newSR.length - idx);
-                }
-                m_ref = newSR;
-            }
-        }
-        return idx;
+    public List getServiceReferences() {
+        List refs = new ArrayList();
+        refs.addAll(m_references);
+        return refs;
     }
     
     protected DependencyCallback[] getCallbacks() {
         return m_callbacks;
+    }
+
+    /**
+     * Set that this dependency is a service level dependency.
+     * This forces the scoping policy to be STRICT. 
+     * @param b
+     */
+    public void setServiceLevelDependency() {
+        m_isServiceLevelRequirement = true;
+        m_policy = PolicyServiceContext.LOCAL;
+    }
+
+    public String getId() {
+        return m_id;
+    }
+    
+    public boolean isServiceLevelRequirement() {
+        return m_isServiceLevelRequirement;
     }
 
 }
