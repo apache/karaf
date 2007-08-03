@@ -69,6 +69,7 @@
         <module>logkit</module>
         <module>mail</module>
         <module>poi</module>
+        <module>poi-scratchpad</module>
         <module>portlet-api</module>
         <module>servlet-api</module>
         <module>xercesImpl</module>
