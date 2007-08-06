@@ -181,4 +181,8 @@ public class ServiceInstantiatorHandler extends CompositeHandler {
     protected CompositeManager getManager() {
         return m_manager;
     }
+    
+    public List getInstances() {
+        return m_instances;
+    }
 }

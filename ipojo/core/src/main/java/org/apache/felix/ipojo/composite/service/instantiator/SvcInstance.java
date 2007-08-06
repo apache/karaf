@@ -383,6 +383,14 @@ public class SvcInstance implements ServiceListener {
     public String getSpecification() {
         return m_specification;
     }
+    
+    public boolean isAggregate() {
+        return m_isAggregate;
+    }
+    
+    public boolean isOptional() {
+        return m_isOptional;
+    }
 
     /**
      * Get the map of used references [reference, component instance].

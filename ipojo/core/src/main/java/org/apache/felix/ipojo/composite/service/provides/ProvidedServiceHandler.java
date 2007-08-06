@@ -28,8 +28,11 @@ import org.apache.felix.ipojo.CompositeHandler;
 import org.apache.felix.ipojo.CompositeManager;
 import org.apache.felix.ipojo.PolicyServiceContext;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
+import org.apache.felix.ipojo.composite.instance.InstanceHandler;
 import org.apache.felix.ipojo.composite.service.importer.ImportExportHandler;
 import org.apache.felix.ipojo.composite.service.importer.ServiceImporter;
+import org.apache.felix.ipojo.composite.service.instantiator.ServiceInstantiatorHandler;
+import org.apache.felix.ipojo.composite.service.instantiator.SvcInstance;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ManifestMetadataParser;
 import org.apache.felix.ipojo.parser.ParseException;
@@ -102,8 +105,8 @@ public class ProvidedServiceHandler extends CompositeHandler {
         }
 
         // Compute imports and instances
-        computeAvailableServices(metadata);
-        computeAvailableTypes(metadata);
+        computeAvailableServices();
+        computeAvailableTypes();
 
         
         im.register(this);
@@ -186,48 +189,29 @@ public class ProvidedServiceHandler extends CompositeHandler {
     }
 
     /**
-     * Build available specification.
-     * 
-     * @param metadata : composite metadata
+     * Build the list of available specifications.
      */
-    private void computeAvailableServices(Element metadata) {
+    private void computeAvailableServices() {
         // Get instantiated services :
-        Element[] services = metadata.getElements("service", "");
-        for (int i = 0; i < services.length; i++) {
-            String itf = services[i].getAttribute("specification");
-            boolean agg = false;
-            boolean opt = false;
-            if (services[i].containsAttribute("aggregate") && services[i].getAttribute("aggregate").equalsIgnoreCase("true")) {
-                agg = true;
-            }
-            if (services[i].containsAttribute("optional") && services[i].getAttribute("optional").equalsIgnoreCase("true")) {
-                opt = true;
-            }
+        ImportExportHandler ih = (ImportExportHandler) m_manager.getCompositeHandler(ImportExportHandler.class.getName());
+        ServiceInstantiatorHandler sh = (ServiceInstantiatorHandler) m_manager.getCompositeHandler(ServiceInstantiatorHandler.class.getName());
+        
+        for (int i = 0; sh != null && i < sh.getInstances().size(); i++) {
+            SvcInstance svc = (SvcInstance) sh.getInstances().get(i);
+            String itf = svc.getSpecification();
+            boolean agg = svc.isAggregate();
+            boolean opt = svc.isOptional();
+            
             SpecificationMetadata sm = new SpecificationMetadata(itf, m_context, agg, opt, this);
             m_services.add(sm);
         }
 
-        Element[] imports = metadata.getElements("requires", "");
-        
-        // DEPRECATED BLOCK:
-        if (imports.length == 0) {
-            imports = metadata.getElements("import");
-            if (imports.length != 0) {
-                m_manager.getFactory().getLogger().log(Logger.WARNING, "Import is deprecated, please use 'requires' instead of 'import'");
-            }
-        }
-        // END OF DEPRECATED BLOCK
-        
-        for (int i = 0; i < imports.length; i++) {
-            String itf = imports[i].getAttribute("specification");
-            boolean agg = false;
-            boolean opt = false;
-            if (imports[i].containsAttribute("aggregate") && imports[i].getAttribute("aggregate").equalsIgnoreCase("true")) {
-                agg = true;
-            }
-            if (imports[i].containsAttribute("optional") && imports[i].getAttribute("optional").equalsIgnoreCase("true")) {
-                opt = true;
-            }
+        for (int i = 0; ih != null && i < ih.getRequirements().size(); i++) {
+            ServiceImporter si = (ServiceImporter) ih.getRequirements().get(i);
+            String itf = si.getSpecification();
+            boolean agg = si.isAggregate();
+            boolean opt = si.isOptional();
+            
             SpecificationMetadata sm = new SpecificationMetadata(itf, m_context, agg, opt, this);
             m_services.add(sm);
         }
@@ -321,24 +305,34 @@ public class ProvidedServiceHandler extends CompositeHandler {
     private boolean isRequirementCorrect(ServiceImporter imp, Element elem) {
         boolean opt = false;
         if (elem.containsAttribute("optional") && elem.getAttribute("optional").equalsIgnoreCase("true")) {
-            opt = false;
+            opt = true;
         }
         
         boolean agg = false;
         if (elem.containsAttribute("aggregate") && elem.getAttribute("aggregate").equalsIgnoreCase("true")) {
-            agg = false;
+            agg = true;
         }
 
-        if (imp == null && !opt) {
+        if (imp == null) {
+            //TODO do we need to add the requirement for optional service-level dependency ?
             // Add the missing requirement
             ImportExportHandler ih = (ImportExportHandler) m_manager.getCompositeHandler(ImportExportHandler.class.getName());
+            if (ih == null) {
+                // Add the importer handler 
+                ih = new ImportExportHandler();
+                ih.configure(m_manager, new Element("composite", "") , null); // Enter fake info in the configure method.
+                m_manager.register(ih);
+            }
             String spec = elem.getAttribute("specification");
-            String filter = null;
+            String filter = "(&(objectClass=" + spec + ")(!(service.pid=" + m_manager.getInstanceName() + ")))"; // Cannot import yourself
             if (elem.containsAttribute("filter")) {
-                filter = elem.getAttribute("filter");
+                if (!elem.getAttribute("filter").equals("")) {
+                    filter = "(&" + filter + elem.getAttribute("filter") + ")";
+                }
             }
             ServiceImporter si = new ServiceImporter(spec, filter, agg, opt, m_manager.getContext(), m_manager.getServiceContext(), PolicyServiceContext.LOCAL, null, ih);
             ih.getRequirements().add(si);
+            return true;
         }
         
         if (imp.isAggregate() && !agg) {
@@ -363,16 +357,14 @@ public class ProvidedServiceHandler extends CompositeHandler {
     }
     
     /**
-     * Build available instance type.
-     * 
-     * @param metadata : composite metadata
+     * Build available instance types.
      */
-    private void computeAvailableTypes(Element metadata) {
-        m_types = new ArrayList();
-        Element[] instances = metadata.getElements("instance", "");
-        for (int i = 0; i < instances.length; i++) {
-            String itf = instances[i].getAttribute("component");
-            m_types.add(itf);
+    private void computeAvailableTypes() {
+        InstanceHandler ih = (InstanceHandler) m_manager.getCompositeHandler(InstanceHandler.class.getName());       
+        if (ih == null) {
+            m_types = new ArrayList();
+        } else {
+            m_types = ih.getUsedType();
         }
     }
 

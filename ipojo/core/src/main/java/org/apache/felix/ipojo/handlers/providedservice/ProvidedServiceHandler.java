@@ -326,12 +326,12 @@ public class ProvidedServiceHandler extends Handler {
     private boolean isDependencyCorrect(Dependency dep, Element elem) {
         boolean opt = false;
         if (elem.containsAttribute("optional") && elem.getAttribute("optional").equalsIgnoreCase("true")) {
-            opt = false;
+            opt = true;
         }
         
         boolean agg = false;
         if (elem.containsAttribute("aggregate") && elem.getAttribute("aggregate").equalsIgnoreCase("true")) {
-            agg = false;
+            agg = true;
         }
 
         if (dep == null && !opt) {
@@ -340,12 +340,12 @@ public class ProvidedServiceHandler extends Handler {
         }
         
         
-        if (dep.isAggregate() && !agg) {
+        if (dep != null && dep.isAggregate() && !agg) {
             m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getClassName() + "] The requirement " + elem.getAttribute("specification") + " is aggregate in the implementation and is declared as a simple service-level requirement");
             return false;
         }
       
-        if (elem.containsAttribute("filter")) {
+        if (dep != null && elem.containsAttribute("filter")) {
             String filter = elem.getAttribute("filter");
             String filter2 = dep.getFilter();
             if (filter2 == null || !filter2.equalsIgnoreCase(filter)) {

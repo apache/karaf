@@ -113,7 +113,7 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
 
         /**
          * Return the used factory name.
-         * @return the factory
+         * @return the factory name
          */
         String getFactory() {
             return m_factoryName;
@@ -425,6 +425,18 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
             }
         }
         return new InstanceHandlerDescription(InstanceHandler.class.getName(), m_validity, l);
+    }
+    
+    /**
+     * Get the list of used component type.
+     * @return the list containing the used component type
+     */
+    public List getUsedType() {
+        List result = new ArrayList();
+        for (int i = 0; i < m_configurations.length; i++) {
+            result.add(m_configurations[i].getConfiguration().get("component"));
+        }
+        return result;
     }
 
 }
