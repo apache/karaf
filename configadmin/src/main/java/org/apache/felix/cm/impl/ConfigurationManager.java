@@ -925,7 +925,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 ConfigurationImpl cfg;
                 try
                 {
-                    cfg = getConfiguration( pid, bundleLocation );
+                    cfg = getConfiguration( pid, false );
                 }
                 catch ( IOException ioe )
                 {
@@ -945,7 +945,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 else if ( !factoryPid.equals( cfg.getFactoryPid() ) )
                 {
                     log( LogService.LOG_ERROR, "Configuration " + pid + " referred to by factory " + factoryPid
-                        + " does not exist seems to belong to factory " + cfg.getFactoryPid(), null );
+                        + " seems to belong to factory " + cfg.getFactoryPid(), null );
                     factory.removePID( pid );
                     factory.storeSilently();
                     continue;
@@ -1040,7 +1040,11 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                                 return;
                             }
 
-                            srv.updated( config.getProperties() );
+                            // prepare the configuration for the service (call plugins)
+                            Dictionary dictionary = callPlugins( sr[0], config );
+
+                            // update the ManagedService with the properties
+                            srv.updated( dictionary );
                         }
                         finally
                         {
@@ -1076,7 +1080,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                                 return;
                             }
 
-                            srv.updated( config.getPid(), config.getProperties() );
+
+                            // prepare the configuration for the service (call plugins)
+                            Dictionary dictionary = callPlugins( sr[0], config );
+
+                            // update the ManagedServiceFactory with the properties
+                            srv.updated( config.getPid(), dictionary );
                         }
                         finally
                         {
