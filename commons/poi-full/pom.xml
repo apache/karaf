@@ -27,7 +27,7 @@
         <relativePath>../pom</relativePath>
     </parent>
     <properties>
-        <pkgArtifactId>poi-scratchpad</pkgArtifactId>
+        <pkgArtifactId>poi-full</pkgArtifactId>
         <pkgVersion>3.0.1-FINAL</pkgVersion>
         <pomVersion>0001</pomVersion>
         <osgiVersion>${pkgVersion}</osgiVersion>
@@ -39,23 +39,33 @@
     <packaging>bundle</packaging>
     <name>${pkgArtifactId} bundle</name>
     <description>
-        This bundle simply wraps ${pkgArtifactId}-${pkgVersion}.jar.
+        This bundle simply wraps poi-${pkgVersion}.jar, poi-contrib-${pkgVersion}.jar and poi-scratchpad-${pkgVersion}.jar.
     </description>
     <organization>
         <name>Apache Felix Project</name>
-        <url>http://incubator.apache.org/felix/</url>
+        <url>http://felix.apache.org/</url>
     </organization>
 
     <scm>
-      <connection>scm:svn:http://svn.apache.org/repos/felix/trunk/commons/poi-scratchpad</connection>
-      <developerConnection>scm:svn:https://svn.apache.org/repos/felix/trunk/commons/poi-scratchpad</developerConnection>
-      <url>http://svn.apache.org/viewcvs/felix/trunk/commons/poi-scratchpad</url>
+      <connection>scm:svn:http://svn.apache.org/repos/felix/trunk/commons/poi-full</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/felix/trunk/commons/poi-full</developerConnection>
+      <url>http://svn.apache.org/viewcvs/felix/trunk/commons/poi-full</url>
     </scm>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.poi</groupId>
-            <artifactId>${pkgArtifactId}</artifactId>
+            <artifactId>poi</artifactId>
+            <version>${pkgVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-contrib</artifactId>
+            <version>${pkgVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-scratchpad</artifactId>
             <version>${pkgVersion}</version>
         </dependency>
     </dependencies>
@@ -73,6 +83,10 @@
                         <Export-Package>
                             *;version=${pkgVersion}
                         </Export-Package>
+                        <Include-Resource>
+                            src/main/resources,
+                            @poi-${pkgVersion}.jar!/font_metrics.properties
+                        </Include-Resource>
                     </instructions>
                 </configuration>
             </plugin>

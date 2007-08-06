@@ -41,7 +41,7 @@
     </description>
   <organization>
     <name>Apache Felix Project</name>
-    <url>http://incubator.apache.org/felix/</url>
+    <url>http://felix.apache.org/</url>
   </organization>
     <scm>
       <connection>scm:svn:http://svn.apache.org/repos/felix/trunk/commons/commons-validator</connection>
