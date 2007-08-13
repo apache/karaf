@@ -175,6 +175,10 @@ public class BundlePlugin extends AbstractMojo {
             {
                 value = "";
             }
+            else
+            {
+                value = value.replaceAll("[\r\n]", "");
+            }
 
             transformedInstructions.put(key, value);
         }
