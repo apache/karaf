@@ -1,0 +1,56 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+ <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+    <relativePath>../../pom/pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>org.apache.felix.ipojo.ant</artifactId>
+  <packaging>bundle</packaging>
+  <version>0.7.3-SNAPSHOT</version>
+  <name>iPOJO Ant Task</name>
+  <dependencies>
+  	<dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.ipojo.metadata</artifactId>
+      <version>0.7.3-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.ipojo.manipulator</artifactId>
+      <version>0.7.3-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>2.4.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>ant</groupId>
+    	<artifactId>ant</artifactId>
+    	<version>1.6.5</version>
+    </dependency>
+  </dependencies>
+  
+  <build>
+  <plugins>
+  	<plugin>
+    	<groupId>org.apache.felix</groupId>
+    	<artifactId>maven-bundle-plugin</artifactId>
+    	<version>1.1.0-SNAPSHOT</version>
+    	<extensions>true</extensions>
+    	<configuration>
+        	<instructions>          
+          		<Bundle-Name>iPOJO Ant Task</Bundle-Name>
+		        <Bundle-Vendor>Clement ESCOFFIER</Bundle-Vendor>
+        		<Bundle-Description> iPOJO Ant Task </Bundle-Description>
+        		<Private-Package>org.apache.felix.ipojo.metadata, org.apache.felix.ipojo.manipulator, org.apache.felix.ipojo.xml.parser, org.apache.felix.ipojo.manipulation*, org.objectweb.asm, org.objectweb.asm.commons, org.apache.xerces.parsers, org.apache.xerces.xni*, org.apache.xerces.impl*, org.apache.xerces.util.*</Private-Package>
+          		<Export-Package>org.apache.felix.ipojo.task</Export-Package>
+        	</instructions>
+    	</configuration>
+  	</plugin>
+  </plugins>
+  </build>
+</project>
