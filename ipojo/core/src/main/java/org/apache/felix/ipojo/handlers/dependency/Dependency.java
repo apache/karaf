@@ -135,7 +135,6 @@ public class Dependency implements ServiceListener {
      */
     private ServiceContext m_serviceContext;
     
-    
     /**
      * Thread Local.
      */
@@ -730,10 +729,6 @@ public class Dependency implements ServiceListener {
                 // Exit the method flow => Release all object
                 m_usage.getObjects().clear();
                 List refs = m_usage.getReferences();
-                for (int i = 0; i < refs.size(); i++) {
-                    ServiceReference ref = (ServiceReference) refs.get(i);
-                    ungetService(ref);
-                }
                 refs.clear();
             }
         }
