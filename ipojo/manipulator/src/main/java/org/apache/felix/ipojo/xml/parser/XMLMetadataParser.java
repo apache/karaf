@@ -18,9 +18,6 @@
  */
 package org.apache.felix.ipojo.xml.parser;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.xml.sax.Attributes;
@@ -61,28 +58,6 @@ public class XMLMetadataParser implements ContentHandler {
             l++;
         }
         return metadata;
-    }
-
-    /**
-     * Get packages referenced by composite.
-     * 
-     * @return the list of referenced packages.
-     */
-    public List getReferredPackages() {
-        List referred = new ArrayList();
-        Element[] compo = m_elements[0].getElements("Composite");
-        for (int i = 0; i < compo.length; i++) {
-            for (int j = 0; j < compo[i].getElements().length; j++) {
-                if (compo[i].getElements()[j].containsAttribute("specification")) {
-                    String p = compo[i].getElements()[j].getAttribute("specification");
-                    int last = p.lastIndexOf('.');
-                    if (last != -1) {
-                        referred.add(p.substring(0, last));
-                    }
-                }
-            }
-        }
-        return referred;
     }
 
     /**

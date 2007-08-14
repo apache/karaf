@@ -23,20 +23,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.EmptyVisitor;
 
 /**
  * Check that a POJO is already manipulated or not.
  * Moreover it allows to get manipulation data about this class. 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ClassChecker implements ClassVisitor, Opcodes {
+public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes {
 
     /**
      * True if the class is already manipulated.
@@ -121,56 +120,6 @@ public class ClassChecker implements ClassVisitor, Opcodes {
     }
 
     /**
-     * Visit sources.
-     * Do nothing
-     * @param source : the name of the source file from which the class was compiled. May be null.
-       @param debug : additional debug information to compute the relationship between source and compiled elements of the class. May be null.
-     * @see org.objectweb.asm.ClassVisitor#visitSource(java.lang.String, java.lang.String)
-     */
-    public void visitSource(String source, String debug) { }
-
-    /**
-     * Visit an outer class.
-     * @param owner - internal name of the enclosing class of the class.
-     * @param name - the name of the method that contains the class, or null if the class is not enclosed in a method of its enclosing class.
-     * @param desc - the descriptor of the method that contains the class, or null if the class is not enclosed in a method of its enclosing class.
-     * @see org.objectweb.asm.ClassVisitor#visitOuterClass(java.lang.String, java.lang.String, java.lang.String)
-     */
-    public void visitOuterClass(String owner, String name, String desc) {
-    }
-
-    /**
-     * Visit an annotation.
-     * Do nothing.
-     * @param desc - the class descriptor of the annotation class.
-     * @param visible - true if the annotation is visible at runtime.
-     * @return null.
-     * @see org.objectweb.asm.ClassVisitor#visitAnnotation(java.lang.String, boolean)
-     */
-    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        return null;
-    }
-
-    /**
-     * Visit a non standard attribute of the class.
-     * @param attr - an attribute.
-     * @see org.objectweb.asm.ClassVisitor#visitAttribute(org.objectweb.asm.Attribute)
-     */
-    public void visitAttribute(Attribute attr) {
-    }
-
-    /**
-     * Visit an inner class.
-     * @param name - the internal name of an inner class (see getInternalName).
-     * @param outerName - the internal name of the class to which the inner class belongs (see getInternalName). May be null for not member classes.
-     * @param innerName - the (simple) name of the inner class inside its enclosing class. May be null for anonymous inner classes.
-     * @param access - the access flags of the inner class as originally declared in the enclosing class.
-     * @see org.objectweb.asm.ClassVisitor#visitInnerClass(java.lang.String,
-     *      java.lang.String, java.lang.String, int)
-     */
-    public void visitInnerClass(String name, String outerName, String innerName, int access) { }
-
-    /**
      * Visit a method.
      * Update the method list (except if it init or clinit.
      * @param  access - the method's access flags (see Opcodes). This parameter also indicates if the method is synthetic and/or deprecated.
@@ -188,13 +137,7 @@ public class ClassChecker implements ClassVisitor, Opcodes {
         }
         return null;
     }
-
-    /**
-     * End of the class visit.
-     * @see org.objectweb.asm.ClassVisitor#visitEnd()
-     */
-    public void visitEnd() { }
-
+    
     /**
      * Get collected interfaces.
      * @return the interfaces implemented by the component class.

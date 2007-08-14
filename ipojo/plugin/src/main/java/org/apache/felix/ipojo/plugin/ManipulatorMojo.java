@@ -80,7 +80,8 @@ public class ManipulatorMojo extends AbstractMojo {
         File meta = new File(m_outputDirectory + "/" + m_metadata);
         getLog().info("Metadata File : " + meta.getAbsolutePath());
         if (!meta.exists()) {
-            throw new MojoExecutionException("the specified metadata file does not exists");
+            getLog().info("No metadata file found - try to use only annotations");
+            meta = null;
         }
 
         // Get input bundle

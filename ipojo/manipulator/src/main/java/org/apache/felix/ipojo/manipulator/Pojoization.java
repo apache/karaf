@@ -39,13 +39,14 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
 import org.apache.felix.ipojo.manipulation.Manipulator;
+import org.apache.felix.ipojo.manipulation.annotations.MetadataCollector;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.xml.parser.ParseException;
 import org.apache.felix.ipojo.xml.parser.XMLMetadataParser;
+import org.objectweb.asm.ClassReader;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * Pojoization allows creating an iPOJO bundle from a "normal" bundle.  
@@ -61,7 +62,7 @@ public class Pojoization {
     /**
      * Metadata (in internal format).
      */
-    private Element[] m_metadata;
+    private Element[] m_metadata = new Element[0];
 
     /**
      * Errors which occur during the manipulation.
@@ -114,18 +115,28 @@ public class Pojoization {
      * @param metadataFile : iPOJO metadata file (XML). 
      */
     public void pojoization(File in, File out, File metadataFile) {
-        // Get the metadata.xml location
-        String path = metadataFile.getAbsolutePath();
-        if (!path.startsWith("/")) {
-            path = "/" + path;
+        // Get the metadata.xml location if not null
+        if (metadataFile != null) {
+            String path = metadataFile.getAbsolutePath();
+            if (!path.startsWith("/")) {
+                path = "/" + path;
+            }
+            m_metadata = parseXMLMetadata(path);
         }
-        m_metadata = parseXMLMetadata(path);
+        
+        JarFile inputJar;
+        try {
+            inputJar = new JarFile(in);
+        } catch (IOException e) {
+            error("The input file " + in.getAbsolutePath() + " is not a Jar file");
+            return;
+        }
 
         // Get the list of declared component
         m_components = getDeclaredComponents(m_metadata);
 
         // Start the manipulation
-        manipulation(in, out);
+        manipulation(inputJar, out);
 
         // Check that all declared components are manipulated
         for (int i = 0; i < m_components.size(); i++) {
@@ -137,21 +148,47 @@ public class Pojoization {
     }
 
     /**
+     * Parse the content of the input Jar file to detect annotated classes.
+     * @param inC : the class to inspect.
+     */
+    private void computeAnnotations(byte[] inC) {
+        ClassReader cr = new ClassReader(inC);
+        MetadataCollector xml = new MetadataCollector();
+        cr.accept(xml, 0);
+        if (xml.isAnnotated()) {
+            boolean toskip = false;
+            for (int i = 0; !toskip && i < m_metadata.length; i++) {
+                if (m_metadata[i].containsAttribute("name")
+                        && m_metadata[i].getAttribute("name").equalsIgnoreCase(xml.getElem().getAttribute("name"))) {
+                    toskip = true;
+                    warn("The component " + xml.getElem().getAttribute("name") + " is overriden by the metadata file");
+                }
+            }
+            if (!toskip) {
+                if (m_metadata != null || m_metadata.length != 0) {
+                    Element[] newElementsList = new Element[m_metadata.length + 1];
+                    System.arraycopy(m_metadata, 0, newElementsList, 0, m_metadata.length);
+                    newElementsList[m_metadata.length] = xml.getElem();
+                    m_metadata = newElementsList;
+                } else {
+                    m_metadata = new Element[] { xml.getElem() };
+                }
+                String name = m_metadata[m_metadata.length - 1].getAttribute("classname");
+                name = name.replace('.', '/');
+                name += ".class";
+                m_components.add(new ComponentInfo(name, m_metadata[m_metadata.length - 1]));
+            }
+        }
+    }
+
+    /**
      * Manipulate the Bundle.
-     * @param in : original bundle
+     * @param inputJar : original bundle (JarFile)
      * @param out : final bundle
      */
-    private void manipulation(File in, File out) {
-        // Get a jar file from the given file
-        JarFile inputJar = null;
-        try {
-            inputJar = new JarFile(in);
-        } catch (IOException e) {
-            error("The input file is not a JarFile : " + in.getAbsolutePath());
-            return;
-        }
-
+    private void manipulation(JarFile inputJar, File out) {
         manipulateComponents(inputJar); // Manipulate classes
+        m_referredPackages = getReferredPackages();
         Manifest mf = doManifest(inputJar); // Compute the manifest
 
         // Create a new Jar file
@@ -161,7 +198,7 @@ public class Pojoization {
             fos = new FileOutputStream(out);
             jos = new JarOutputStream(fos, mf);
         } catch (FileNotFoundException e1) {
-            error("Cannot manipulate the Jar file : the file " + out.getAbsolutePath() + " not found");
+            error("Cannot manipulate the Jar file : the output file " + out.getAbsolutePath() + " is not found");
             return;
         } catch (IOException e) {
             error("Cannot manipulate the Jar file : cannot access to " + out.getAbsolutePath());
@@ -235,12 +272,30 @@ public class Pojoization {
         Enumeration entries = inputJar.entries();
         while (entries.hasMoreElements()) {
             JarEntry curEntry = (JarEntry) entries.nextElement();
-            // Check if we need to manipulate the class
-            for (int i = 0; i < m_components.size(); i++) {
-                ComponentInfo ci = (ComponentInfo) m_components.get(i);
-                if (ci.m_classname.equals(curEntry.getName())) {
-                    byte[] outClazz = manipulateComponent(inputJar, curEntry, ci);
-                    m_classes.put(curEntry.getName(), outClazz);
+            if (curEntry.getName().endsWith(".class")) {
+                try {
+                    InputStream currIn = inputJar.getInputStream(curEntry);
+                    byte[] in = new byte[0];
+                    int c;
+                    while ((c = currIn.read()) >= 0) {
+                        byte[] in2 = new byte[in.length + 1];
+                        System.arraycopy(in, 0, in2, 0, in.length);
+                        in2[in.length] = (byte) c;
+                        in = in2;
+                    }
+                    currIn.close();
+                    computeAnnotations(in);
+                    // Check if we need to manipulate the class
+                    for (int i = 0; i < m_components.size(); i++) {
+                        ComponentInfo ci = (ComponentInfo) m_components.get(i);
+                        if (ci.m_classname.equals(curEntry.getName())) {
+                            byte[] outClazz = manipulateComponent(in, curEntry, ci);
+                            m_classes.put(curEntry.getName(), outClazz);
+                        }
+                    }
+                } catch (IOException e) {
+                    error("Cannot read the class : " + curEntry.getName());
+                    return;
                 }
             }
         }
@@ -268,24 +323,14 @@ public class Pojoization {
 
     /**
      * Manipulate a component class.
-     * @param inputJar : input bundle
+     * @param in : the byte array of the class to manipulate
      * @param je : Jar entry of the classes
      * @param ci : attached component info (containing metadata and manipulation metadata)
      * @return the generated class (byte array)
      */
-    private byte[] manipulateComponent(JarFile inputJar, JarEntry je, ComponentInfo ci) {
+    private byte[] manipulateComponent(byte[] in, JarEntry je, ComponentInfo ci) {
         Manipulator man = new Manipulator();
         try {
-            InputStream currIn = inputJar.getInputStream(je);
-            byte[] in = new byte[0];
-            int c;
-            while ((c = currIn.read()) >= 0) {
-                byte[] in2 = new byte[in.length + 1];
-                System.arraycopy(in, 0, in2, 0, in.length);
-                in2[in.length] = (byte) c;
-                in = in2;
-            }
-            currIn.close();
             byte[] out = man.manipulate(in); // iPOJO manipulation
             // Insert information to metadata
             ci.m_componentMetadata.addElement(man.getManipulationMetadata());
@@ -529,18 +574,17 @@ public class Pojoization {
         try {
             url = metadata.toURL();
             if (url == null) {
-                error("Cannot find the metadata file : " + path);
-                return null;
+                warn("Cannot find the metadata file : " + path);
+                return new Element[0];
             }
 
-            InputStream stream = url.openStream();
-            XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+            InputStream stream = url.openStream();            
+            XMLReader parser = (XMLReader) Class.forName("org.apache.xerces.parsers.SAXParser").newInstance();
             XMLMetadataParser handler = new XMLMetadataParser();
             parser.setContentHandler(handler);
             InputSource is = new InputSource(stream);
             parser.parse(is);
             meta = handler.getMetadata();
-            m_referredPackages = handler.getReferredPackages();
             stream.close();
 
         } catch (MalformedURLException e) {
@@ -555,6 +599,15 @@ public class Pojoization {
         } catch (SAXException e) {
             error("Parsing Error when parsing (Sax Error) the XML file " + path + " : " + e.getMessage());
             return null;
+        } catch (InstantiationException e) {
+            error("Cannot instantiate the SAX parser for the XML file " + path + " : " + e.getMessage());
+            return null;
+        } catch (IllegalAccessException e) {
+            error("Cannot instantiate  the SAX parser (IllegalAccess) for the XML file " + path + " : " + e.getMessage());
+            return null;
+        } catch (ClassNotFoundException e) {
+            error("Cannot load the Sax Parser : " + e.getMessage());
+            return null;
         }
 
         if (meta == null || meta.length == 0) {
@@ -562,6 +615,29 @@ public class Pojoization {
         }
 
         return meta;
+    }
+    
+    /**
+     * Get packages referenced by composite.
+     * 
+     * @return the list of referenced packages.
+     */
+    private List getReferredPackages() {
+        List referred = new ArrayList();
+        for (int i = 0; i < m_metadata.length; i++) {
+            if (m_metadata[i].getName().equalsIgnoreCase("composite")) {
+                for (int j = 0; j < m_metadata[i].getElements().length; j++) {
+                    if (m_metadata[i].getElements()[j].containsAttribute("specification")) {
+                        String p = m_metadata[i].getElements()[j].getAttribute("specification");
+                        int last = p.lastIndexOf('.');
+                        if (last != -1) {
+                            referred.add(p.substring(0, last));
+                        }
+                    }
+                }
+            }
+        }
+        return referred;
     }
 
     /**

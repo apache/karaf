@@ -19,7 +19,7 @@
     	<extensions>true</extensions>
     	<configuration>
         	<instructions>          
-          		<Bundle-Name>iPOJO Manipulator</Bundle-Name>
+          		<Bundle-Name>iPOJO Metadata</Bundle-Name>
 		        <Bundle-Vendor>Clement ESCOFFIER</Bundle-Vendor>
         		<Bundle-Description> iPOJO Metadata </Bundle-Description>
           		<Export-Package>org.apache.felix.ipojo.metadata</Export-Package>

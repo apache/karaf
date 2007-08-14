@@ -129,7 +129,7 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
     /**
      * Visit a field.
      * Call the adapter generating getter and setter methods.
-     * @param access : field acess.
+     * @param access : field access.
      * @param name : field name
      * @param desc : field descriptor
      * @param signature : field signature

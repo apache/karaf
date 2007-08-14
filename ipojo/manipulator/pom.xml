@@ -49,6 +49,7 @@
             <Export-Package>org.apache.felix.ipojo.manipulator</Export-Package>
             <Private-Package>
             	org.apache.felix.ipojo.manipulation,
+            	org.apache.felix.ipojo.manipulation.annotations,
             	org.apache.felix.ipojo.xml.parser,
               	org.objectweb.asm,
               	org.objectweb.asm.commons,

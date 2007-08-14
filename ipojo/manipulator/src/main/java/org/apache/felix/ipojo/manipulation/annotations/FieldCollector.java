@@ -1,0 +1,279 @@
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.felix.ipojo.manipulation.annotations;
+
+import org.apache.felix.ipojo.metadata.Attribute;
+import org.apache.felix.ipojo.metadata.Element;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.commons.EmptyVisitor;
+
+/**
+ * Collect field annotations. 
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ */
+public class FieldCollector extends EmptyVisitor implements FieldVisitor {
+    
+    /**
+     * Collected element.
+     */
+    private Element m_element;
+    
+    /**
+     * Field name. 
+     */
+    private String m_field;
+    
+    /**
+     * Constructor.
+     * @param fieldName : field name
+     * @param elem : element on which append the collected metadata.
+     */
+    public FieldCollector(String fieldName, Element elem) {
+        m_element = elem;
+        m_field = fieldName;
+    }
+
+    /**
+     * Visit annotations on the current field.
+     * @param arg0 : annotation name
+     * @param arg1 : is the annotation a runtime annotation.
+     * @return the annotation visitor visiting the annotation
+     * @see org.objectweb.asm.FieldVisitor#visitAnnotation(java.lang.String, boolean)
+     */
+    public AnnotationVisitor visitAnnotation(String arg0, boolean arg1) {
+        if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Requires;")) {
+            return new RequiresAnnotationParser(m_field);
+        }
+        if (arg0.equals("Lorg/apache/felix/ipojo/annotations/ServiceProperty;")) {
+            if (m_element.getElements("Provides", "").length == 0) {
+                System.err.println("The component does not provide services, skip ServiceProperty for " + m_field);
+                return null;
+            }
+            Element provides = m_element.getElements("Provides", "")[0];
+            return new PropertyAnnotationParser(provides, m_field);
+        }
+        if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Property;")) {
+            Element parent = null;
+            if (m_element.getElements("Properties", "").length == 0) {
+                parent = new Element("Properties", "");
+                m_element.addElement(parent);
+            }
+            parent = m_element.getElements("Properties", "")[0];
+            return new PropertyAnnotationParser(parent, m_field);
+        }
+        return null;
+       
+    }
+    
+    /**
+     * AnnotationVisitor parsing the @requires annotation.
+     */
+    private final class RequiresAnnotationParser extends EmptyVisitor implements AnnotationVisitor {
+        
+        /**
+         * Dependency field.
+         */
+        private String m_field;
+        
+        /**
+         * Dependency filter.
+         */
+        private String m_filter;
+        
+        /**
+         * Is the dependency optional ?
+         */
+        private String m_optional;
+        
+        /**
+         * Is the dependency aggregate ?
+         */
+        private String m_aggregate;
+        
+        /**
+         * Dependency specification.
+         */
+        private String m_specification;
+        
+        /**
+         * Dependency id.
+         */
+        private String m_id;
+        
+        /**
+         * Constructor.
+         * @param name : field name.
+         */
+        private RequiresAnnotationParser(String name) {
+            m_field = name;
+        }
+
+        /**
+         * Visit one "simple" annotation.
+         * @param arg0 : annotation name
+         * @param arg1 : annotation value
+         * @see org.objectweb.asm.AnnotationVisitor#visit(java.lang.String, java.lang.Object)
+         */
+        public void visit(String arg0, Object arg1) {
+            if (arg0.equals("filter")) {
+                m_filter = arg1.toString();
+                return;
+            }
+            if (arg0.equals("optional")) {
+                m_optional = arg1.toString();
+                return;
+            }
+            if (arg0.equals("specification")) {
+                m_specification = arg1.toString();
+                return;
+            }
+            if (arg0.equals("id")) {
+                m_id = arg1.toString();
+                return;
+            }
+        }
+
+        /**
+         * End of the annotation.
+         * Create a "requires" element
+         * @see org.objectweb.asm.AnnotationVisitor#visitEnd()
+         */
+        public void visitEnd() { 
+         // Check if it is a full-determined requirement
+            Element req = null;
+            Element[] reqs = m_element.getElements("requires");
+            for (int i = 0; i < reqs.length; i++) {
+                if (reqs[i].containsAttribute("id") && (reqs[i].getAttribute("id").equals(m_id) || reqs[i].getAttribute("id").equals(m_field))) {
+                    req = reqs[i];
+                    break;
+                }
+            }
+            if (req == null) {
+                // Add the complete requires
+                req = new Element("requires", "");
+            }
+            req.addAttribute(new Attribute("field", m_field));
+            if (m_specification != null) {
+                req.addAttribute(new Attribute("interface", m_specification));
+            }
+            if (m_aggregate != null) {
+                req.addAttribute(new Attribute("aggregate", m_aggregate));
+            }
+            if (m_filter != null) {
+                req.addAttribute(new Attribute("filter", m_filter));
+            }
+            if (m_optional != null) {
+                req.addAttribute(new Attribute("optional", m_optional));
+            }
+            if (m_id != null) {
+                req.addAttribute(new Attribute("id", m_id));
+            }
+            m_element.addElement(req);
+            return;
+        }
+    }
+    
+    /**
+     * Parse a @property annotation.
+     */
+    private final class PropertyAnnotationParser extends EmptyVisitor implements AnnotationVisitor {
+        
+        /**
+         * Parent element (element on which append collected metadata).
+         */
+        private Element m_parent;
+        
+        /**
+         * Field name. 
+         */
+        private String m_field;
+        
+        /**
+         * Property name. 
+         */
+        private String m_name;
+        
+        /**
+         * Property value.  
+         */
+        private String m_value;
+        
+        
+        /**
+         * Constructor.
+         * @param parent : parent element.
+         * @param field : field name.
+         */
+        private PropertyAnnotationParser(Element parent, String field) {
+            m_parent = parent;
+            m_field = field;
+        }
+
+        /**
+         * Visit one "simple" annotation.
+         * @param arg0 : annotation name
+         * @param arg1 : annotation value
+         * @see org.objectweb.asm.AnnotationVisitor#visit(java.lang.String, java.lang.Object)
+         */
+        public void visit(String arg0, Object arg1) {
+            if (arg0.equals("name")) {
+                m_name = arg1.toString();
+                return;
+            }
+            if (arg0.equals("value")) {
+                m_value = arg1.toString();
+                return;
+            }
+        }
+
+        /**
+         * End of the annotation.
+         * Create a "property" element
+         * @see org.objectweb.asm.AnnotationVisitor#visitEnd()
+         */
+        public void visitEnd() {
+            if (m_name == null) {
+                m_name = m_field;
+            }
+            
+            Element[] props = m_parent.getElements("Property");
+            Element prop = null;
+            for (int i = 0; prop == null && i < props.length; i++) {
+                if (props[i].containsAttribute("name") && props[i].getAttribute("name").equals(m_name)) {
+                    prop = props[i];
+                }
+            }
+            
+            if (prop == null) {
+                prop = new Element("property", "");
+                m_parent.addElement(prop);
+                if (m_name != null) { 
+                    prop.addAttribute(new Attribute("name", m_name));
+                }
+            }
+            
+            prop.addAttribute(new Attribute("field", m_field));
+            if (m_value != null) {
+                prop.addAttribute(new Attribute("value", m_value));
+            }
+            
+        }
+    }
+}
