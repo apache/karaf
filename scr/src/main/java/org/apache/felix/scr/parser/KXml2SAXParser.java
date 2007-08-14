@@ -32,9 +32,7 @@ import org.xmlpull.v1.XmlPullParserException;
  */
 public class KXml2SAXParser extends KXmlParser {
 
-	public String uri="uri";
-
-	/**
+    /**
 	* The constructor for a parser, it receives a java.io.Reader.
 	*
 	* @param   reader  The reader

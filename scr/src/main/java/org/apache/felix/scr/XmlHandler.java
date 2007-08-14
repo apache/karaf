@@ -45,6 +45,12 @@ public class XmlHandler implements KXml2SAXHandler {
     // PropertyMetaData whose value attribute is missing, hence has element data
     private PropertyMetadata m_pendingProperty;
 
+    /** Flag for detecting the first element. */
+    protected boolean firstElement = true;
+
+    /** Override namespace. */
+    protected String overrideNamespace;
+
     /**
      * Method called when a tag opens
      *
@@ -55,9 +61,20 @@ public class XmlHandler implements KXml2SAXHandler {
     **/
     public void startElement(String uri, String localName, Properties attrib)
     throws ParseException {
-        // we process elements in the default namespace and in the scr namespace only
-        // TODO - To be 100% correct we should only listen to the scr namespace
-        if ( "".equals(uri) || NAMESPACE_URI.equals(uri) ) {
+        // according to the spec, the elements should have the namespace,
+        // except when the root element is the "component" element
+        // So we check this for the first element, we receive.
+        if ( this.firstElement ) {
+            this.firstElement = false;
+            if ( localName.equals("component") && "".equals(uri) ) {
+                this.overrideNamespace = NAMESPACE_URI;
+            }
+        }
+
+        if ( this.overrideNamespace != null && "".equals(uri) ) {
+            uri = this.overrideNamespace;
+        }
+        if ( NAMESPACE_URI.equals(uri) ) {
         	try {
 
     	    	// 112.4.3 Component Element
@@ -175,9 +192,11 @@ public class XmlHandler implements KXml2SAXHandler {
     */
     public void endElement(String uri, String localName) throws ParseException
     {
-        // we process elements in the default namespace and in the scr namespace only
-        // TODO - To be 100% correct we should only listen to the scr namespace
-        if ( "".equals(uri) || NAMESPACE_URI.equals(uri) ) {
+        if ( this.overrideNamespace != null && "".equals(uri) ) {
+            uri = this.overrideNamespace;
+        }
+
+        if ( NAMESPACE_URI.equals(uri) ) {
             if (localName.equals("component"))
             {
             	// When the closing tag for a component is found, the component is validated to check if
