@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -31,23 +31,20 @@ import org.xmlpull.v1.XmlPullParserException;
  *
  */
 public class KXml2SAXParser extends KXmlParser {
-	
+
 	public String uri="uri";
 
-	private Reader reader;
-	
 	/**
 	* The constructor for a parser, it receives a java.io.Reader.
 	*
 	* @param   reader  The reader
-	* @throws XmlPullParserException 
+	* @throws XmlPullParserException
 	*/
 	public KXml2SAXParser(Reader reader) throws XmlPullParserException {
 		super();
-		this.reader=reader;
-	    setInput(reader);
+	    this.setInput(reader);
 	}
-	
+
 	/**
 	* Parser from the reader provided in the constructor, and call
 	* the startElement and endElement in a KxmlHandler
@@ -57,30 +54,30 @@ public class KXml2SAXParser extends KXmlParser {
 	*/
 	public void parseXML(KXml2SAXHandler handler) throws Exception {
 
-		while (next() != XmlPullParser.END_DOCUMENT) {
-			handler.setLineNumber(getLineNumber());
-			handler.setColumnNumber(getColumnNumber());
-			if (getEventType() == XmlPullParser.START_TAG) {
+		while (this.next() != XmlPullParser.END_DOCUMENT) {
+			handler.setLineNumber(this.getLineNumber());
+			handler.setColumnNumber(this.getColumnNumber());
+			if (this.getEventType() == XmlPullParser.START_TAG) {
 				Properties props = new Properties();
-				for (int i = 0; i < getAttributeCount(); i++) {
-					props.put(getAttributeName(i), getAttributeValue(i));
+				for (int i = 0; i < this.getAttributeCount(); i++) {
+					props.put(this.getAttributeName(i), this.getAttributeValue(i));
 				}
 				handler.startElement(
-					getNamespace(),
-					getName(),
-					getName(),
+					this.getNamespace(),
+					this.getName(),
+					this.getName(),
 					props);
-			} else if (getEventType() == XmlPullParser.END_TAG) {
-				handler.endElement(getNamespace(), getName(), getName());
-			} else if (getEventType() == XmlPullParser.TEXT) {
-				String text = getText();
+			} else if (this.getEventType() == XmlPullParser.END_TAG) {
+				handler.endElement(this.getNamespace(), this.getName(), this.getName());
+			} else if (this.getEventType() == XmlPullParser.TEXT) {
+				String text = this.getText();
 				handler.characters(text.toCharArray(),0,text.length());
-			} else if (getEventType() == XmlPullParser.PROCESSING_INSTRUCTION) {
+			} else if (this.getEventType() == XmlPullParser.PROCESSING_INSTRUCTION) {
 				// TODO extract the target from the evt.getText()
-				handler.processingInstruction(null,getText()); 
+				handler.processingInstruction(null,this.getText());
 			} else {
 				// do nothing
 			}
 		}
-	}	
+	}
 }
