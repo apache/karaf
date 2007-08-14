@@ -35,8 +35,9 @@ public class ComponentMetadata {
 	private String m_factory = null;
 	
 	// 112.4.3: Controls whether component configurations must be immediately activated after becoming 
-	// satisfied or whether activation should be delayed. (optional, default value is false).
-	private boolean m_immediate = false;
+	// satisfied or whether activation should be delayed. (optional, default value depends
+	// on whether the component has a service element or not).
+	private Boolean m_immediate = null;
 	
     // 112.4.4 Implementation Element (required)
     private String m_implementationClassName = null;
@@ -106,7 +107,7 @@ public class ComponentMetadata {
     	if(m_validated) {
     		return;
     	}
-    	m_immediate = immediate;
+    	m_immediate = immediate ? Boolean.TRUE : Boolean.FALSE;
     }   
     
     /**
@@ -191,12 +192,25 @@ public class ComponentMetadata {
     }
     
     /**
-     * Returns the flag that defines the activation policy for the component
+     * Returns the flag that defines the activation policy for the component.
+     * <p>
+     * This method may only be trusted after this instance has been validated
+     * by the {@link #validate()} call. Else it will either return the value
+     * of an explicitly set "immediate" attribute or return false if a service
+     * element is set or true otherwise. This latter default value deduction
+     * may be unsafe while the descriptor has not been completely read.
+     * 
      * 
      * @return a boolean that defines the activation policy
      */
     public boolean isImmediate() {
-    	return m_immediate;
+        // return explicit value if known
+        if ( m_immediate != null ) {
+            return m_immediate.booleanValue();
+        }
+
+        // deduce default value from service element presence
+        return m_service == null;
     }
     
     /**
@@ -281,16 +295,22 @@ public class ComponentMetadata {
     	
     	// 112.2.3 A delayed component specifies a service, is not specified to be a factory component
     	// and does not have the immediate attribute of the component element set to true.
-    	if(m_immediate == false && m_service == null) {
-    		throw new ComponentException("Component '"+m_name+"' is specified as being delayed but does not provide any service.");
-    	}    	
+    	if ( m_immediate != null && isImmediate() == false && m_service == null ) {
+            throw new ComponentException( "Component '" + m_name
+                + "' is specified as being delayed but does not provide any service." );
+        }    	
     	
-    	if ( m_factory != null && m_immediate == false) {
+    	if ( m_factory != null && isImmediate() == false) {
     		throw new ComponentException("A factory cannot be a delayed component");
     	}
     	
-    	// TODO: 112.4.6 The serviceFactory attribute (of a provided service) must not be true if 
+    	// 112.4.6 The serviceFactory attribute (of a provided service) must not be true if 
     	// the component is a factory component or an immediate component
+    	if ( m_service != null ) {
+            if ( m_service.isServiceFactory() && ( isFactory() || isImmediate() ) ) {
+                throw new ComponentException( "A ServiceFactory service cannot be a factory or immediate component" );
+            }
+        }
 
     	
     	m_validated = true;
