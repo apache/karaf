@@ -43,6 +43,7 @@ public class KXml2SAXParser extends KXmlParser {
 	public KXml2SAXParser(Reader reader) throws XmlPullParserException {
 		super();
 	    this.setInput(reader);
+	    this.setFeature(FEATURE_PROCESS_NAMESPACES, true);
 	}
 
 	/**
@@ -65,13 +66,12 @@ public class KXml2SAXParser extends KXmlParser {
 				handler.startElement(
 					this.getNamespace(),
 					this.getName(),
-					this.getName(),
 					props);
 			} else if (this.getEventType() == XmlPullParser.END_TAG) {
-				handler.endElement(this.getNamespace(), this.getName(), this.getName());
+				handler.endElement(this.getNamespace(), this.getName());
 			} else if (this.getEventType() == XmlPullParser.TEXT) {
 				String text = this.getText();
-				handler.characters(text.toCharArray(),0,text.length());
+				handler.characters(text);
 			} else if (this.getEventType() == XmlPullParser.PROCESSING_INSTRUCTION) {
 				// TODO extract the target from the evt.getText()
 				handler.processingInstruction(null,this.getText());

@@ -50,11 +50,10 @@ public class XmlHandler implements KXml2SAXHandler {
      *
      * @param   uri
      * @param   localName
-     * @param   qName
      * @param   attrib
      * @exception   ParseException
     **/
-    public void startElement(String uri, String localName, String qName, Properties attrib)
+    public void startElement(String uri, String localName, Properties attrib)
     throws ParseException {
         // we process elements in the default namespace and in the scr namespace only
         // TODO - To be 100% correct we should only listen to the scr namespace
@@ -172,10 +171,9 @@ public class XmlHandler implements KXml2SAXHandler {
     *
     * @param   uri
     * @param   localName
-    * @param   qName
     * @exception   ParseException
     */
-    public void endElement(String uri, String localName, String qName) throws ParseException
+    public void endElement(String uri, String localName) throws ParseException
     {
         // we process elements in the default namespace and in the scr namespace only
         // TODO - To be 100% correct we should only listen to the scr namespace
@@ -204,30 +202,39 @@ public class XmlHandler implements KXml2SAXHandler {
         return this.m_components;
     }
 
-	public void characters( char[] ch, int offset, int length ) throws Exception
+	/**
+	 * @see org.apache.felix.scr.parser.KXml2SAXHandler#characters(java.lang.String)
+	 */
+	public void characters( String text ) throws ParseException
     {
         // 112.4.5 If the value attribute is not specified, the body must contain one or more values
         if ( this.m_pendingProperty != null )
         {
-            this.m_pendingProperty.setValues( new String( ch, offset, length ) );
+            this.m_pendingProperty.setValues( text );
             this.m_currentComponent.addProperty( this.m_pendingProperty );
             this.m_pendingProperty = null;
         }
     }
 
-	public void processingInstruction(String target, String data) throws Exception {
+	/**
+	 * @see org.apache.felix.scr.parser.KXml2SAXHandler#processingInstruction(java.lang.String, java.lang.String)
+	 */
+	public void processingInstruction(String target, String data) throws ParseException {
 		// Not used
-
 	}
 
+	/**
+	 * @see org.apache.felix.scr.parser.KXml2SAXHandler#setLineNumber(int)
+	 */
 	public void setLineNumber(int lineNumber) {
 		// Not used
-
 	}
 
+	/**
+	 * @see org.apache.felix.scr.parser.KXml2SAXHandler#setColumnNumber(int)
+	 */
 	public void setColumnNumber(int columnNumber) {
 		// Not used
-
 	}
 }
 

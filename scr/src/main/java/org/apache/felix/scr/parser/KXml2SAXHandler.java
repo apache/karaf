@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,54 +21,49 @@ package org.apache.felix.scr.parser;
 import java.util.Properties;
 
 /**
- * Interface for SAX handler with kXML
+ * Interface for a SAX like handler with kXML
  */
 public interface KXml2SAXHandler {
 
-	/**
+   /**
 	* Method called when parsing text
 	*
-	* @param   ch
-	* @param   offset
-	* @param   length
-	* @exception   SAXException
+	* @param   text
+	* @exception   ParseException
 	*/
-	public void characters(char[] ch, int offset, int length) throws Exception;
+   void characters(String text) throws ParseException;
 
-	/**
+   /**
 	* Method called when a tag opens
 	*
 	* @param   uri
 	* @param   localName
-	* @param   qName
 	* @param   attrib
-	* @exception   SAXException
-	**/
-	public void startElement(
+	* @exception   ParseException
+	*/
+	void startElement(
 		String uri,
 		String localName,
-		String qName,
 		Properties attrib)
-		throws Exception;
-	/**
+		throws ParseException;
+
+   /**
 	* Method called when a tag closes
 	*
 	* @param   uri
 	* @param   localName
-	* @param   qName
-	* @exception   SAXException
+	* @exception   ParseException
 	*/
-	public void endElement(
-		java.lang.String uri,
-		java.lang.String localName,
-		java.lang.String qName)
-		throws Exception;
+    void endElement(
+		String uri,
+		String localName)
+		throws ParseException;
 
-	public void processingInstruction(String target,
+    void processingInstruction(String target,
 									  String data)
 							   throws Exception;
-		
-	public void setLineNumber(int lineNumber);
 
-	public void setColumnNumber(int columnNumber);
+	void setLineNumber(int lineNumber);
+
+	void setColumnNumber(int columnNumber);
 }
