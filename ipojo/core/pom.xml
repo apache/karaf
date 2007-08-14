@@ -61,7 +61,7 @@
               	org.apache.felix.ipojo.handlers.lifecycle.callback,
               	org.objectweb.asm,
               	org.objectweb.asm.commons,
-              	org.objectweb.asm.tree <!-- to remove -->
+              	org.objectweb.asm.tree  <!-- to remove -->
             </Private-Package>
             <Export-Package>
               org.apache.felix.ipojo; version="0.7.3", 

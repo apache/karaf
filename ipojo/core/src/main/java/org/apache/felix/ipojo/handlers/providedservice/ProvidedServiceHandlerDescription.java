@@ -23,6 +23,7 @@ import java.util.Iterator;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
+import org.osgi.framework.Constants;
 
 /**
  * Provided Service Handler Description.
@@ -83,10 +84,6 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
         Element services = super.getHandlerInfo();
         for (int i = 0; i < m_providedServices.length; i++) {
             Element service = new Element("provides", "");
-            String state = "unregistered";
-            if (m_providedServices[i].getState() == ProvidedService.REGISTERED) {
-                state = "registered";
-            }
             String spec = "[";
             for (int j = 0; j < m_providedServices[i].getServiceSpecification().length; j++) {
                 if (j == 0) {
@@ -97,7 +94,14 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
             }
             spec += "]";
             service.addAttribute(new Attribute("specifications", spec));
-            service.addAttribute(new Attribute("state", state));
+
+            if (m_providedServices[i].getState() == ProvidedService.REGISTERED) {
+                service.addAttribute(new Attribute("state", "registered"));
+                service.addAttribute(new Attribute("service.id", m_providedServices[i].getServiceReference().getProperty(Constants.SERVICE_ID).toString()));
+            } else {
+                service.addAttribute(new Attribute("state", "unregistered"));
+            }
+            
             Iterator it = m_providedServices[i].getProperties().keySet().iterator();
             while (it.hasNext()) {
                 Element prop = new Element("property", "");

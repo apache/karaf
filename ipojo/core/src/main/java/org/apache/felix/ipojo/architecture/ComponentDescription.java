@@ -47,16 +47,23 @@ public class ComponentDescription {
      * Get the name of this component type.
      */
     private String m_name;
+    
+    /**
+     * Bundle Id of the bundle containing this type.
+     */
+    private long m_bundleId;
 
     /**
      * Constructor.
      * 
      * @param name : name of the component type (factory name).
      * @param className : implementation class.
+     * @param bundle : bundle id.
      */
-    public ComponentDescription(String name, String className) {
+    public ComponentDescription(String name, String className, long bundle) {
         m_name = name;
         m_className = className;
+        m_bundleId = bundle;
     }
 
     /**
@@ -152,6 +159,7 @@ public class ComponentDescription {
         Element desc = new Element("Factory", "");
         
         desc.addAttribute(new Attribute("name", m_name));
+        desc.addAttribute(new Attribute("bundle", "" + m_bundleId));
         
         if (m_className != null) {
             desc.addAttribute(new Attribute("Implementation-Class", m_className));

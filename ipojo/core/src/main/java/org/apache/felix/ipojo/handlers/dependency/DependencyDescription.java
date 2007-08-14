@@ -55,7 +55,7 @@ public class DependencyDescription {
     private String m_filter;
 
     /**
-     * List[service reference] of the used service.
+     * Set[service reference] of the used service.
      */
     private List m_usedServices = new ArrayList();
 
@@ -111,7 +111,7 @@ public class DependencyDescription {
     public void setServiceReferences(List sr) { m_serviceReferences = sr; }
 
     /**
-     * Get the used service list.
+     * Get the used service set.
      * @return the list [service reference] containing the used services
      */
     public List getUsedServices() { return m_usedServices; }

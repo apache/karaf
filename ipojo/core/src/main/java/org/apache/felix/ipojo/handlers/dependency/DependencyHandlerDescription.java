@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.handlers.dependency;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.felix.ipojo.architecture.HandlerDescription;
@@ -89,7 +90,10 @@ public class DependencyHandlerDescription extends HandlerDescription {
             }
             Element dep = new Element("Requires", "");
             dep.addAttribute(new Attribute("Specification", m_dependencies[i].getInterface()));
-            dep.addAttribute(new Attribute("Filter", m_dependencies[i].getFilter()));
+            
+            if (!m_dependencies[i].getFilter().equals("")) {
+                dep.addAttribute(new Attribute("Filter", m_dependencies[i].getFilter()));
+            }
             
             if (m_dependencies[i].isOptional()) {
                 dep.addAttribute(new Attribute("Optional", "true"));
@@ -104,18 +108,19 @@ public class DependencyHandlerDescription extends HandlerDescription {
             }
             
             dep.addAttribute(new Attribute("State", state));
-            Element usages = new Element("Usages", "");
-            List list = m_dependencies[i].getUsedServices();
-            for (int j = 0; j < list.size(); j++) {
-                Element use = new Element("Use", "");
-                ServiceReference ref = (ServiceReference) list.get(i);
-                use.addAttribute(new Attribute("service.id", (String) ref.getProperty(Constants.SERVICE_ID)));
+            List set = m_dependencies[i].getUsedServices();
+            Iterator it = set.iterator();
+            while (it.hasNext()) {
+                Element use = new Element("Uses", "");
+                ServiceReference ref = (ServiceReference) it.next();
+                use.addAttribute(new Attribute("service.id", ref.getProperty(Constants.SERVICE_ID).toString()));
                 String pid = (String) ref.getProperty(Constants.SERVICE_PID);
                 if (pid != null) {
                     use.addAttribute(new Attribute("service.pid", pid));
                 }
-                usages.addElement(use);
+                dep.addElement(use);
             }
+            
             deps.addElement(dep);
         }
         return deps;

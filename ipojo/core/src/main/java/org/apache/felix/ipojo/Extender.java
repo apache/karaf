@@ -193,6 +193,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
             InstanceCreator creator = (InstanceCreator) m_creators.get(e2.nextElement());
             creator.stop();
         }
+        m_creators = null;
     }
     
     /**

@@ -103,13 +103,6 @@ public class Dependency implements ServiceListener {
     private int m_policy = PolicyServiceContext.LOCAL_AND_GLOBAL; 
 
     /**
-     * Array of Service Objects. When cardinality = 1 : just the first element
-     * is returned When cardinality = ?..n : all the array is returned
-     * m_services : Array
-     */
-    private Object[] m_services = new Object[0];
-
-    /**
      * Array of service references.
      * m_ref : Array
      */
@@ -127,12 +120,6 @@ public class Dependency implements ServiceListener {
     private int m_state;
 
     /**
-     * True if the reference list change after the creation of a service object
-     * array.
-     */
-    private boolean m_change;
-
-    /**
      * Class of the dependency. 
      * Useful to create in the case of multiple dependency
      */
@@ -147,6 +134,12 @@ public class Dependency implements ServiceListener {
      * Service Context in which resolving the dependency.
      */
     private ServiceContext m_serviceContext;
+    
+    
+    /**
+     * Thread Local.
+     */
+    private ServiceUsage m_usage = new ServiceUsage();
 
     /**
      * Dependency constructor. After the creation the dependency is not started.
@@ -244,20 +237,17 @@ public class Dependency implements ServiceListener {
     }
 
     /**
-     * Build the List [service reference] of used services.
+     * Build the Set [service reference] of used services.
      * @return the used service.
      */
     public List getUsedServices() {
-        List list = new ArrayList();
-        if (m_isAggregate) {
-            list.addAll(m_usedReferences);
-            return list;
-        } else {
-            if (m_usedReferences.size() != 0 && m_services.length != 0) {
-                list.add(m_usedReferences.get(0));
-            } 
+        List set = new ArrayList();
+        for (int i = 0; i < m_usedReferences.size(); i++) {
+            if (! set.contains(m_usedReferences.get(i))) {
+                set.add(m_usedReferences.get(i));
+            }
         }
-        return list;
+        return set;
     }
 
     /**
@@ -278,100 +268,58 @@ public class Dependency implements ServiceListener {
      */
     protected Object get() {
         try {
-            // 1 : Test if there is any change in the reference list :
-            if (!m_change) {
-                if (!m_isAggregate) {
-                    if (m_services.length > 0) {
-                        return m_services[0];
+            // Initialize the thread local object is not already touched.
+            if (m_usage.getObjects().isEmpty()) {
+                if (isAggregate()) {
+                    m_usage.getReferences().addAll(m_references);
+                    for (int i = 0; i < m_references.size(); i++) {
+                        m_usage.getObjects().add(getService((ServiceReference) m_references.get(i)));
                     }
                 } else {
-                    return m_services;
+                    if (!m_references.isEmpty()) {
+                        m_usage.getReferences().add(m_references.get(0));
+                        m_usage.getObjects().add(getService((ServiceReference) m_references.get(0)));
+                    } else {
+                        // Add a nullable object
+                        // Load the nullable class
+                        String className = m_specification + "Nullable";
+                        Class nullableClazz = m_handler.getNullableClass(className);
+
+                        if (nullableClazz == null) {
+                            m_handler.getInstanceManager().getFactory().getLogger().log(
+                                    Logger.INFO,
+                                    "[" + m_handler.getInstanceManager().getClassName()
+                                            + "] Cannot load the nullable class to return a dependency object for "
+                                            + m_field + " -> " + m_specification);
+                            return null;
+                        }
+
+                        // The nullable class is loaded, create the object and add it
+                        Object instance = nullableClazz.newInstance();
+                        m_usage.getObjects().add(instance);
+                    }
                 }
+                m_usage.setStackLevel(1);
             }
 
-            // 2 : Else there is a change in the list -> recompute the
-            // m_services array
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO,
-                    "[" + m_handler.getInstanceManager().getClassName() + "] Create a service array of " + m_clazz.getName());
-            
-
-            buildServiceObjectArray();
-
-            m_change = false;
-            // m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO,
-            // "[" + m_handler.getInstanceManager().getClassName() + "] Create
-            // an array with the size " + m_services.length);
-
-            // 3 : The service object list is populated, I return either the
-            // first service object, either the array.
-            // Return null or an empty array if no service are found.
             if (!m_isAggregate) {
-                if (m_services.length > 0) {
-                    return m_services[0];
-                } else {
-                    // Load the nullable class
-                    // String[] segment =
-                    // m_metadata.getServiceSpecification().split("[.]");
-                    // String className = "org.apache.felix.ipojo." +
-                    // segment[segment.length - 1] + "Nullable";
-                    String className = m_specification + "Nullable";
-                    // m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO,
-                    // "[" + m_handler.getInstanceManager().getClassName() + "]
-                    // Try to load the nullable class for " +
-                    // getMetadata().getServiceSpecification() + " -> " +
-                    // className);
-                    Class nullableClazz = m_handler.getNullableClass(className);
-
-                    if (nullableClazz == null) {
-                        m_handler.getInstanceManager().getFactory().getLogger().log(
-                                Logger.INFO,
-                                "[" + m_handler.getInstanceManager().getClassName() + "] Cannot load the nullable class to return a dependency object for "
-                                        + m_field + " -> " + m_specification);
-                        return null;
-                    }
-
-                    // The nullable class is loaded, create the object and
-                    // return it
-                    Object instance = nullableClazz.newInstance();
-                    // m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO,
-                    // "[" + m_handler.getInstanceManager().getClassName() + "]
-                    // Nullable object created for " +
-                    // getMetadata().getServiceSpecification() + " -> " +
-                    // instance);
-                    return instance;
-                }
+                return m_usage.getObjects().get(0);
             } else { // Multiple dependency
-                return m_services;
+                return (Object[]) m_usage.getObjects().toArray((Object[]) Array.newInstance(m_clazz, 0));
             }
+
         } catch (Exception e) {
             // There is a problem in the dependency resolving (like in stopping
             // method)
-            if (!m_isAggregate) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                        "[" + m_handler.getInstanceManager().getClassName() + "] Return null, an exception was throwed in the get method", e);
+            if (!m_isAggregate) { 
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] Return null, an exception was throwed in the get method", e);
                 return null;
             } else {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                        "[" + m_handler.getInstanceManager().getClassName() + "] Return an empty array, an exception was throwed in the get method", e);
+                m_handler.getInstanceManager().getFactory().getLogger().log(
+                        Logger.ERROR,
+                        "[" + m_handler.getInstanceManager().getClassName()
+                                + "] Return an empty array, an exception was throwed in the get method", e);
                 return Array.newInstance(m_clazz, 0);
-            }
-        }
-    }
-
-    /**
-     * Create the service object array according to the resolving policy.
-     */
-    private void buildServiceObjectArray() {
-        if (m_isAggregate) {
-            m_services = (Object[]) Array.newInstance(m_clazz, m_references.size());
-            for (int i = 0; i < m_references.size(); i++) {
-                m_services[i] = getService((ServiceReference) m_references.get(i));
-            }
-        } else {
-            if (m_references.size() == 0) {
-                m_services = new Object[0];
-            } else {
-                m_services = new Object[] { getService((ServiceReference) m_references.get(0)) };
             }
         }
     }
@@ -428,7 +376,6 @@ public class Dependency implements ServiceListener {
         if (isSatisfied()) {
             m_state = RESOLVED;
             if (m_isAggregate || ! m_references.isEmpty()) {
-                m_change = true;
                 callBindMethod(ref);
             }
         }
@@ -437,7 +384,6 @@ public class Dependency implements ServiceListener {
 
     /**
      * Method called when a service goes away.
-     * 
      * @param ref : the leaving service reference
      */
     private void departureManagement(ServiceReference ref) {
@@ -447,10 +393,11 @@ public class Dependency implements ServiceListener {
             callUnbindMethod(ref);
             // Unget the service reference
             ungetService(ref);
+            m_usedReferences.remove(ref);
             hasChanged = true;
         }
 
-        // Remove from the list (remove on both to be sure.
+        // Remove from the list.
         m_references.remove(ref);
 
         // Is the state valid or invalid
@@ -463,15 +410,10 @@ public class Dependency implements ServiceListener {
         // Is there any change ?
         if (!m_isAggregate) {
             if (hasChanged) {
-                m_change = true;
                 if (!m_references.isEmpty()) {
                     callBindMethod((ServiceReference) m_references.get(0));
                 }
-            } else {
-                m_change = false;
             }
-        } else {
-            m_change = true;
         }
 
         m_handler.checkContext();
@@ -529,7 +471,6 @@ public class Dependency implements ServiceListener {
      * @param ref : service reference to unget
      */
     private void ungetService(ServiceReference ref) {
-        m_usedReferences.remove(ref);
         m_serviceContext.ungetService(ref);
     }
 
@@ -671,7 +612,6 @@ public class Dependency implements ServiceListener {
          
             m_filter = m_handler.getInstanceManager().getContext().createFilter(filter); // Store the filter
             m_handler.getInstanceManager().getFactory().getLogger().log(Logger.INFO, "[" + m_handler.getInstanceManager().getClassName() + "] Create a filter from : " + filter);
-            m_change = true;
         } catch (InvalidSyntaxException e1) {
             m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
                     "[" + m_handler.getInstanceManager().getClassName() + "] A filter is malformed : " + filter + " - " + e1.getMessage());
@@ -719,7 +659,6 @@ public class Dependency implements ServiceListener {
         m_references.clear();
         m_usedReferences.clear();
         m_clazz = null;
-        m_services = new Object[0];
     }
 
     /**
@@ -766,6 +705,38 @@ public class Dependency implements ServiceListener {
     
     public boolean isServiceLevelRequirement() {
         return m_isServiceLevelRequirement;
+    }
+
+    /**
+     * Method called when a thread enters in a method.
+     * @param method : method id.
+     */
+    public void entry(String method) {
+        if (! m_usage.getObjects().isEmpty()) {
+            int level = m_usage.getStackLevel();
+            m_usage.setStackLevel(level++);
+        }
+    }
+    
+    /**
+     * Method called when a thread exits a method.
+     * @param method : the method id.
+     */
+    public void exit(String method) {
+        if (! m_usage.getObjects().isEmpty()) {
+            int level = m_usage.getStackLevel();
+            level = level - 1;
+            if (level == 0) {
+                // Exit the method flow => Release all object
+                m_usage.getObjects().clear();
+                List refs = m_usage.getReferences();
+                for (int i = 0; i < refs.size(); i++) {
+                    ServiceReference ref = (ServiceReference) refs.get(i);
+                    ungetService(ref);
+                }
+                refs.clear();
+            }
+        }
     }
 
 }

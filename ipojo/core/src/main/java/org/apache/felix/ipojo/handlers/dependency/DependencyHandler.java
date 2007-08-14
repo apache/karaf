@@ -318,7 +318,7 @@ public class DependencyHandler extends Handler {
         }
 
         if (deps.length > 0) {
-            m_manager.register(this, (FieldMetadata[]) fl.toArray(new FieldMetadata[0]), null);
+            m_manager.register(this, (FieldMetadata[]) fl.toArray(new FieldMetadata[0]), manipulation.getMethods());
         }
     }
 
@@ -392,6 +392,33 @@ public class DependencyHandler extends Handler {
         // Else return the value
         return value;
     }
+    
+    /**
+     * Method Entry callback.
+     * @param methodId : method Id.
+     * @see org.apache.felix.ipojo.Handler#entryCallback(java.lang.String)
+     */
+    public void entryCallback(String methodId) {
+        for (int i = 0; i < m_dependencies.length; i++) {
+            Dependency dep = m_dependencies[i];
+            dep.entry(methodId);
+        }
+    }
+    
+    /**
+     * Method Exit callback.
+     * @param methodId : method id.
+     * @param returnedObj : returned object.
+     * @see org.apache.felix.ipojo.Handler#exitCallback(java.lang.String, java.lang.Object)
+     */
+    public void exitCallback(String methodId, Object returnedObj) {
+        for (int i = 0; i < m_dependencies.length; i++) {
+            Dependency dep = m_dependencies[i];
+            dep.exit(methodId);
+        }
+    }
+    
+    
 
     /**
      * Check the handler validity.

@@ -138,7 +138,7 @@ public class InstanceManager implements ComponentInstance {
         }
 
         // ComponentInfo initialization
-        m_componentDesc = new ComponentDescription(m_factory.getName(), m_className);
+        m_componentDesc = new ComponentDescription(m_factory.getName(), m_className, m_context.getBundle().getBundleId());
 
         // Add the name
         m_name = (String) configuration.get("name");
