@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,7 +19,6 @@
 package org.apache.felix.scr;
 
 
-import java.awt.Component;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -53,22 +52,22 @@ public class ComponentRegistry implements ConfigurationListener
 
     ComponentRegistry( BundleContext context )
     {
-        m_componentNames = new HashMap();
-        m_componentCounter = -1;
+        this.m_componentNames = new HashMap();
+        this.m_componentCounter = -1;
 
         Dictionary props = new Hashtable();
         props.put( Constants.SERVICE_DESCRIPTION, "Service Component Configuration Support" );
         props.put( Constants.SERVICE_VENDOR, "Apache Software Foundation" );
-        registration = context.registerService( ConfigurationListener.class.getName(), this, props );
+        this.registration = context.registerService( ConfigurationListener.class.getName(), this, props );
     }
 
 
     void dispose()
     {
-        if ( registration != null )
+        if ( this.registration != null )
         {
-            registration.unregister();
-            registration = null;
+            this.registration.unregister();
+            this.registration = null;
         }
     }
 
@@ -78,7 +77,7 @@ public class ComponentRegistry implements ConfigurationListener
     public void configurationEvent( ConfigurationEvent configEvent )
     {
         String pid = configEvent.getPid();
-        ComponentManager cm = getComponent( pid );
+        ComponentManager cm = this.getComponent( pid );
         if ( cm != null )
         {
             cm.reconfigure();
@@ -90,39 +89,39 @@ public class ComponentRegistry implements ConfigurationListener
 
     long createComponentId()
     {
-        m_componentCounter++;
-        return m_componentCounter;
+        this.m_componentCounter++;
+        return this.m_componentCounter;
     }
 
 
     void checkComponentName( String name )
     {
-        if ( m_componentNames.containsKey( name ) )
+        if ( this.m_componentNames.containsKey( name ) )
         {
             throw new ComponentException( "The component name '" + name + "' has already been registered." );
         }
 
         // reserve the name
-        m_componentNames.put( name, name );
+        this.m_componentNames.put( name, name );
     }
 
 
     void registerComponent( String name, ComponentManager component )
     {
         // only register the component if there is a registration for it !
-        if ( !name.equals( m_componentNames.get( name ) ) )
+        if ( !name.equals( this.m_componentNames.get( name ) ) )
         {
             // this is not expected if all works ok
             throw new ComponentException( "The component name '" + name + "' has already been registered." );
         }
 
-        m_componentNames.put( name, component );
+        this.m_componentNames.put( name, component );
     }
 
 
     ComponentManager getComponent( String name )
     {
-        Object entry = m_componentNames.get( name );
+        Object entry = this.m_componentNames.get( name );
 
         // only return the entry if non-null and not a reservation
         if ( entry instanceof ComponentManager )
@@ -136,6 +135,6 @@ public class ComponentRegistry implements ConfigurationListener
 
     void unregisterComponent( String name )
     {
-        m_componentNames.remove( name );
+        this.m_componentNames.remove( name );
     }
 }

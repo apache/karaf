@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,32 +18,31 @@
  */
 package org.apache.felix.scr;
 
-import java.util.Dictionary;
 
 /**
- * This interface is provided so that there can be multiple implementations of 
- * managers that are responsible for managing component's lifecycle.  
- * 
+ * This interface is provided so that there can be multiple implementations of
+ * managers that are responsible for managing component's lifecycle.
+ *
  */
 public interface ComponentManager {
-	
+
 	/**
 	 * Enable the component
 	 */
 	public void enable();
-	
+
     /**
      * Reconfigure the component with configuration data newly retrieved from
      * the Configuration Admin Service.
      */
     public void reconfigure();
-    
+
     /**
      * Disable the component. After disabling the component may be re-enabled
      * by calling the {@link #enable()} method.
      */
     public void disable();
-    
+
 	/**
 	 * Dispose the component. After disposing the component manager it must not
      * be used anymore.
@@ -52,7 +51,7 @@ public interface ComponentManager {
 
 	/**
 	 * Get the component information
-	 * 
+	 *
 	 * @return a ComponentMetadata object
 	 */
 	public ComponentMetadata getComponentMetadata();

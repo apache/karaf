@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -24,12 +24,9 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentFactory;
@@ -60,8 +57,8 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         ComponentRegistry componentRegistry )
     {
         super( activator, metadata );
-        m_componentRegistry = componentRegistry;
-        m_createdComponents = new IdentityHashMap();
+        this.m_componentRegistry = componentRegistry;
+        this.m_createdComponents = new IdentityHashMap();
     }
 
 
@@ -70,7 +67,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
      */
     public ComponentInstance newInstance( Dictionary dictionary )
     {
-        return ( ComponentInstance ) createComponentManager( dictionary );
+        return ( ComponentInstance ) this.createComponentManager( dictionary );
     }
 
 
@@ -87,11 +84,11 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
 
     protected ServiceRegistration registerComponentService()
     {
-        Activator.trace( "registering component factory", getComponentMetadata() );
+        Activator.trace( "registering component factory", this.getComponentMetadata() );
 
-        Dictionary serviceProperties = getProperties();
-        return getActivator().getBundleContext().registerService( new String[]
-            { ComponentFactory.class.getName(), ManagedServiceFactory.class.getName() }, getService(),
+        Dictionary serviceProperties = this.getProperties();
+        return this.getActivator().getBundleContext().registerService( new String[]
+            { ComponentFactory.class.getName(), ManagedServiceFactory.class.getName() }, this.getService(),
             serviceProperties );
     }
 
@@ -106,14 +103,14 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     protected Dictionary getProperties()
     {
         Dictionary props = new Hashtable();
-        
+
         // 112.5.5 The Component Factory service must register with the following properties
-        props.put( ComponentConstants.COMPONENT_NAME, getComponentMetadata().getName() );
-        props.put( ComponentConstants.COMPONENT_FACTORY, getComponentMetadata().getFactoryIdentifier() );
-        
+        props.put( ComponentConstants.COMPONENT_NAME, this.getComponentMetadata().getName() );
+        props.put( ComponentConstants.COMPONENT_FACTORY, this.getComponentMetadata().getFactoryIdentifier() );
+
         // also register with the factory PID
-        props.put( Constants.SERVICE_PID, getComponentMetadata().getName() );
-        
+        props.put( Constants.SERVICE_PID, this.getComponentMetadata().getName() );
+
         return props;
     }
 
@@ -129,23 +126,23 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     public void updated( String pid, Dictionary configuration )
     {
         ComponentManager cm;
-        if ( m_configuredServices != null )
+        if ( this.m_configuredServices != null )
         {
-            cm = ( ComponentManager ) m_configuredServices.get( pid );
+            cm = ( ComponentManager ) this.m_configuredServices.get( pid );
         }
         else
         {
-            m_configuredServices = new HashMap();
+            this.m_configuredServices = new HashMap();
             cm = null;
         }
 
         if ( cm == null )
         {
             // create a new instance with the current configuration
-            cm = createComponentManager( configuration );
+            cm = this.createComponentManager( configuration );
 
             // keep a reference for future updates
-            m_configuredServices.put( pid, cm );
+            this.m_configuredServices.put( pid, cm );
         }
         else
         {
@@ -163,12 +160,12 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
 
     public void deleted( String pid )
     {
-        if ( m_configuredServices != null )
+        if ( this.m_configuredServices != null )
         {
-            ComponentManager cm = ( ComponentManager ) m_configuredServices.remove( pid );
+            ComponentManager cm = ( ComponentManager ) this.m_configuredServices.remove( pid );
             if ( cm != null )
             {
-                disposeComponentManager( cm );
+                this.disposeComponentManager( cm );
             }
         }
 
@@ -177,7 +174,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
 
     public String getName()
     {
-        return "Component Factory " + getComponentMetadata().getName();
+        return "Component Factory " + this.getComponentMetadata().getName();
     }
 
 
@@ -190,15 +187,15 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
      */
     private ComponentManager createComponentManager( Dictionary configuration )
     {
-        long componentId = m_componentRegistry.createComponentId();
-        ComponentManager cm = ManagerFactory.createManager( getActivator(), getComponentMetadata(), componentId );
+        long componentId = this.m_componentRegistry.createComponentId();
+        ComponentManager cm = ManagerFactory.createManager( this.getActivator(), this.getComponentMetadata(), componentId );
 
         // add the new component to the activators instances
-        getActivator().getInstanceReferences().add( cm );
+        this.getActivator().getInstanceReferences().add( cm );
 
         // register with the internal set of created components
-        m_createdComponents.put(cm, cm);
-        
+        this.m_createdComponents.put(cm, cm);
+
         // inject configuration if possible
         if ( cm instanceof ImmediateComponentManager )
         {
@@ -207,37 +204,18 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
 
         // immediately enable this ComponentManager
         cm.enable();
-        
+
         return cm;
     }
-    
+
     private void disposeComponentManager(ComponentManager cm) {
         // remove from created components
-        m_createdComponents.remove( cm );
-        
+        this.m_createdComponents.remove( cm );
+
         // remove from activators list
-        getActivator().getInstanceReferences().remove( cm );
-        
+        this.getActivator().getInstanceReferences().remove( cm );
+
         // finally dispose it
         cm.dispose();
-    }
-    
-    private class ComponentInstanceWrapper implements ComponentInstance {
-        
-        private ComponentManager m_component;
-        
-        ComponentInstanceWrapper(ComponentManager component) {
-            m_component = component;
-        }
-        
-        public Object getInstance()
-        {
-            return ((ComponentInstance) m_component).getInstance();
-        }
-        
-        public void dispose()
-        {
-            disposeComponentManager( m_component );
-        }
     }
 }
