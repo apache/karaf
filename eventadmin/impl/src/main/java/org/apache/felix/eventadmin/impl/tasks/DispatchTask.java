@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,50 +22,21 @@ import org.apache.felix.eventadmin.impl.dispatch.Scheduler;
 import org.apache.felix.eventadmin.impl.dispatch.TaskProducer;
 
 /**
- * This class is the core of the event dispatching (for both, synchronous and 
+ * This class is the core of the event dispatching (for both, synchronous and
  * asynchronous). It implements handover and timeout capabilities.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class DispatchTask implements Runnable
-{   
-    // A null scheduler object that does not schedule given tasks
-    private static final Scheduler NULL_SCHEDULER = new Scheduler()
-    {
-        /**
-         * This is a null object and will do nothing with the given task
-         * 
-         * @param task A task that is not used
-         * 
-         * @see org.apache.felix.eventadmin.impl.dispatch.Scheduler#schedule(java.lang.Runnable)
-         */
-        public void schedule(final Runnable task)
-        {
-            // This is a null object and will do nothing with the given task
-        }
-
-        /**
-         * This is a null object and will do nothing with the given task
-         * 
-         * @param task A task that is not used
-         * @parma nice A value that is not used
-         * 
-         * @see org.apache.felix.eventadmin.impl.dispatch.Scheduler#schedule(java.lang.Runnable, int)
-         */
-        public void schedule(final Runnable task, final int nice)
-        {
-            // This is a null object and will do nothing with the given task
-        }
-    };
-
+{
     // A null producer object that will return null on any call to next()
     private static final TaskProducer NULL_PRODUCER = new TaskProducer()
     {
         /**
          * This is a null object and will return <tt>null</tt>
-         * 
+         *
          * @return <tt>null</tt>
-         * 
+         *
          * @see org.apache.felix.eventadmin.impl.dispatch.TaskProducer#next()
          */
         public HandlerTask next()
@@ -79,17 +50,17 @@ public class DispatchTask implements Runnable
     {
         /**
          * This is a null object that will do nothing.
-         * 
+         *
          * @parma task A task that is not used
-         * 
+         *
          * @see org.apache.felix.eventadmin.impl.tasks.HandoverTask#execute(org.apache.felix.eventadmin.impl.tasks.DispatchTask)
          */
         public void execute(final DispatchTask task)
         {
             // This is a null object that will do nothing.
-        } 
+        }
     };
-    
+
     //  The internal lock for this object used instead synchronized(this)
     final Object m_lock = new Object();
 
@@ -111,9 +82,9 @@ public class DispatchTask implements Runnable
     private boolean m_isHolding = false;
 
     /**
-     * The constructor of the object. 
-     * 
-     * @param producer The producer (i.e., the event queue) that provides the next 
+     * The constructor of the object.
+     *
+     * @param producer The producer (i.e., the event queue) that provides the next
      *      tasks
      * @param scheduler The scheduler to use for timeout actions
      * @param handover The callback to use on timeouts and handovers
@@ -121,13 +92,13 @@ public class DispatchTask implements Runnable
     public DispatchTask(final TaskProducer producer, final Scheduler scheduler,
         final HandoverTask handover)
     {
-        m_producer = producer;
+        this.m_producer = producer;
 
-        m_scheduler = scheduler;
+        this.m_scheduler = scheduler;
 
-        m_handover = handover;
+        this.m_handover = handover;
     }
-    
+
     /*
      * Construct a new object from a old one.
      */
@@ -137,107 +108,107 @@ public class DispatchTask implements Runnable
     }
 
     /**
-     * This will loop until the producer returns <tt>null</tt>. Until then the 
+     * This will loop until the producer returns <tt>null</tt>. Until then the
      * returned tasks are executed.
-     * 
+     *
      * @see java.lang.Runnable#run()
      */
     public void run()
     {
-        for (HandlerTask manager = m_producer.next(); null != manager; manager = m_producer
+        for (HandlerTask manager = this.m_producer.next(); null != manager; manager = this.m_producer
             .next())
         {
-            synchronized (m_lock)
+            synchronized (this.m_lock)
             {
-                // Set-up the timeout 
-                m_blackListTask = new BlackListTask(manager);
+                // Set-up the timeout
+                this.m_blackListTask = new BlackListTask(manager);
 
-                m_scheduler.schedule(m_blackListTask);
+                this.m_scheduler.schedule(this.m_blackListTask);
             }
 
             // HandlerTask does catch exceptions hence, we don't need to do it.
             manager.execute();
 
-            synchronized (m_lock)
+            synchronized (this.m_lock)
             {
-                // release the timeout 
-                m_blackListTask.cancel();
+                // release the timeout
+                this.m_blackListTask.cancel();
             }
         }
     }
 
     /**
-     * This method will trigger a callback to the handover callback and stop this 
+     * This method will trigger a callback to the handover callback and stop this
      * task.
      */
     public void handover()
     {
-        synchronized (m_lock)
+        synchronized (this.m_lock)
         {
             // release the timeout
-            m_blackListTask.cancel();
+            this.m_blackListTask.cancel();
 
             // spin-off a new thread
-            m_handover.execute(new DispatchTask(this));
+            this.m_handover.execute(new DispatchTask(this));
 
-            stop();
+            this.stop();
         }
     }
-    
+
     /**
      * This method stops the tasks without a handover
      */
     public void stop()
     {
-        synchronized (m_lock)
+        synchronized (this.m_lock)
         {
             // release the timeout
-            m_blackListTask.cancel();
+            this.m_blackListTask.cancel();
 
-            m_handover = NULL_HANDOVER;
+            this.m_handover = NULL_HANDOVER;
 
-            m_producer = NULL_PRODUCER;
+            this.m_producer = NULL_PRODUCER;
 
-            m_scheduler = NULL_SCHEDULER;
+            this.m_scheduler = Scheduler.NULL_SCHEDULER;
         }
     }
 
     /**
-     * This will pause the task (including its timeout clock) until a call to 
+     * This will pause the task (including its timeout clock) until a call to
      * <tt>resume()</tt>
      */
     public void hold()
     {
-        synchronized (m_lock)
+        synchronized (this.m_lock)
         {
             // release the timeout
-            m_blackListTask.cancel();
+            this.m_blackListTask.cancel();
 
             // record the time that we already used
-            int pastTime = (int) (System.currentTimeMillis() - m_blackListTask
+            int pastTime = (int) (System.currentTimeMillis() - this.m_blackListTask
                 .getTime());
 
             // spin-off a new thread
-            m_handover.execute(new DispatchTask(this));
+            this.m_handover.execute(new DispatchTask(this));
 
             // block until a call to resume()
-            m_isHolding = true;
+            this.m_isHolding = true;
 
-            while (m_isHolding)
+            while (this.m_isHolding)
             {
                 try
                 {
-                    m_lock.wait();
+                    this.m_lock.wait();
                 } catch (InterruptedException e)
                 {
                 }
             }
 
             // restore the timeout
-            m_blackListTask = new BlackListTask(m_blackListTask, 
+            this.m_blackListTask = new BlackListTask(this.m_blackListTask,
                 System.currentTimeMillis() - pastTime);
 
-            m_scheduler.schedule(m_blackListTask, pastTime);
+            this.m_scheduler.schedule(this.m_blackListTask, pastTime);
         }
     }
 
@@ -246,11 +217,11 @@ public class DispatchTask implements Runnable
      */
     public void resume()
     {
-        synchronized (m_lock)
+        synchronized (this.m_lock)
         {
-            m_isHolding = false;
+            this.m_isHolding = false;
 
-            m_lock.notifyAll();
+            this.m_lock.notifyAll();
         }
     }
 
@@ -272,12 +243,12 @@ public class DispatchTask implements Runnable
         {
             this(manager, System.currentTimeMillis());
         }
-        
+
         BlackListTask(final HandlerTask manager, final long time)
         {
-            m_manager = manager;
-            
-            m_time = time;
+            this.m_manager = manager;
+
+            this.m_time = time;
         }
 
         BlackListTask(final BlackListTask old, final long time)
@@ -290,24 +261,24 @@ public class DispatchTask implements Runnable
          */
         public long getTime()
         {
-            return m_time;
+            return this.m_time;
         }
 
         /**
-         * We have been triggered hence, blacklist the handler except if we are 
+         * We have been triggered hence, blacklist the handler except if we are
          * already canceled
-         * 
+         *
          * @see java.lang.Runnable#run()
          */
         public void run()
         {
-            synchronized (m_lock)
+            synchronized (DispatchTask.this.m_lock)
             {
-                if (!m_canceled)
+                if (!this.m_canceled)
                 {
-                    m_manager.blackListHandler();
+                    this.m_manager.blackListHandler();
 
-                    handover();
+                    DispatchTask.this.handover();
                 }
             }
         }
@@ -317,9 +288,9 @@ public class DispatchTask implements Runnable
          */
         public void cancel()
         {
-            synchronized (m_lock)
+            synchronized (DispatchTask.this.m_lock)
             {
-                m_canceled = true;
+                this.m_canceled = true;
             }
         }
     }
