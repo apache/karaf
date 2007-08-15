@@ -18,21 +18,17 @@
  */
 package org.apache.felix.framework.cache;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.jar.Manifest;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.security.cert.X509Certificate;
+import java.util.*;
+import java.util.jar.*;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
-import org.apache.felix.moduleloader.DirectoryContent;
-import org.apache.felix.moduleloader.IContent;
-import org.apache.felix.moduleloader.JarContent;
+import org.apache.felix.moduleloader.*;
 
 /**
  * <p>
@@ -58,7 +54,7 @@ class DirectoryRevision extends BundleRevision
 
         // If the revision directory exists, then we don't
         // need to initialize since it has already been done.
-        if (BundleCache.getSecureAction().fileExists(this.getRevisionRootDir()))
+        if (BundleCache.getSecureAction().fileExists(getRevisionRootDir()))
         {
             return;
         }
@@ -66,11 +62,11 @@ class DirectoryRevision extends BundleRevision
         // Create revision directory, we only need this to store the
         // revision location, since nothing else needs to be extracted
         // since we are referencing a read directory already.
-        if (!BundleCache.getSecureAction().mkdir(this.getRevisionRootDir()))
+        if (!BundleCache.getSecureAction().mkdir(getRevisionRootDir()))
         {
-            this.getLogger().log(
+            getLogger().log(
                 Logger.LOG_ERROR,
-                this.getClass().getName() + ": Unable to create revision directory.");
+                getClass().getName() + ": Unable to create revision directory.");
             throw new IOException("Unable to create archive directory.");
         }
     }
@@ -122,7 +118,7 @@ class DirectoryRevision extends BundleRevision
         // objects for everything on the class path.
 
         // Get the bundle's manifest header.
-        Map map = this.getManifestHeader();
+        Map map = getManifestHeader();
 
         // Find class path meta-data.
         String classPath = (map == null)
@@ -178,7 +174,7 @@ class DirectoryRevision extends BundleRevision
 // TODO: This will need to consider security.
     public String findLibrary(String libName) throws Exception
     {
-        return BundleCache.getSecureAction().getAbsolutePath(new File(this.m_refDir, libName));
+        return BundleCache.getSecureAction().getAbsolutePath(new File(m_refDir, libName));
     }
 
     public void dispose() throws Exception

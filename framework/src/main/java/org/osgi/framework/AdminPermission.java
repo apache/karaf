@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,19 +18,10 @@
  */
 package org.osgi.framework;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.BasicPermission;
-import java.security.Permission;
-import java.security.PermissionCollection;
-import java.security.PrivilegedAction;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.StringTokenizer;
+import java.security.*;
+import java.util.*;
 
 import org.apache.felix.framework.FilterImpl;
 
@@ -125,12 +116,12 @@ public final class AdminPermission extends BasicPermission
 
 	AdminPermission p = (AdminPermission) obj;
 
-	return this.getName().equals(p.getName()) && (m_actionMask == p.m_actionMask);
+	return getName().equals(p.getName()) && (m_actionMask == p.m_actionMask);
     }
 
     public int hashCode()
     {
-	return this.getName().hashCode() ^ this.getActions().hashCode();
+	return getName().hashCode() ^ getActions().hashCode();
     }
 
     public String getActions()
@@ -170,12 +161,12 @@ public final class AdminPermission extends BasicPermission
         // filter is "*".
         if (admin.getName().equals("(id=*)"))
         {
-            return this.getName().equals("(id=*)");
+            return getName().equals("(id=*)");
         }
 
         // Next, if this object was create with a "*" we can return true
         // (This way we avoid creating and matching a filter).
-        if (this.getName().equals("(id=*)"))
+        if (getName().equals("(id=*)"))
         {
             return true;
         }
@@ -186,7 +177,7 @@ public final class AdminPermission extends BasicPermission
         {
             try
             {
-                m_filterImpl = new FilterImpl(this.getName());
+                m_filterImpl = new FilterImpl(getName());
             }
             catch (InvalidSyntaxException ex)
             {
@@ -222,9 +213,9 @@ public final class AdminPermission extends BasicPermission
                 {
                     public Object run()
                     {
-                        AdminPermission.this.m_bundleDict.put("location", AdminPermission.this.m_bundle.getLocation());
-
-                        createSigner(AdminPermission.this.m_bundle, AdminPermission.this.m_bundleDict);
+                        m_bundleDict.put("location", m_bundle.getLocation());
+                        
+                        createSigner(m_bundle, m_bundleDict);
                         return null;
                     }
                 });
@@ -245,9 +236,9 @@ public final class AdminPermission extends BasicPermission
             Method method = bundle.getClass().getDeclaredMethod(
                 "getSignerMatcher", null);
             method.setAccessible(true);
-
+            
             Object signer = method.invoke(bundle, null);
-
+            
             if (signer != null)
             {
                 dict.put("signer", signer);
@@ -407,7 +398,7 @@ final class AdminPermissionCollection extends PermissionCollection
         {
             throw new IllegalArgumentException("Invalid permission: " + permission);
         }
-        else if (this.isReadOnly())
+        else if (isReadOnly())
         {
             throw new SecurityException(
                 "Cannot add to read-only permission collection.");
