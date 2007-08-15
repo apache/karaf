@@ -288,7 +288,7 @@ public class DispatchTask implements Runnable
          */
         public void cancel()
         {
-            synchronized (DispatchTask.m_lock)
+            synchronized (DispatchTask.this.m_lock)
             {
                 m_canceled = true;
             }
