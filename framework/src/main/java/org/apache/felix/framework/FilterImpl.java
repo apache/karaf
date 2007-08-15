@@ -21,6 +21,7 @@ package org.apache.felix.framework;
 import java.io.CharArrayReader;
 import java.io.IOException;
 import java.util.*;
+import java.lang.ref.SoftReference;
 
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.ldap.*;
@@ -34,10 +35,10 @@ import org.osgi.framework.*;
 **/
 public class FilterImpl implements Filter
 {
-    private Logger m_logger = null;
-    private String m_toString = null;
-    private Evaluator m_evaluator = null;
-    private SimpleMapper m_mapper = null;
+    private final ThreadLocal m_cache = new ThreadLocal();
+    private final Logger m_logger;
+    private final Object[] m_program;
+    private volatile String m_toString;
 
 // TODO: FilterImpl needs a logger, this is a hack for FrameworkUtil.
     public FilterImpl(String expr) throws InvalidSyntaxException
@@ -57,32 +58,28 @@ public class FilterImpl implements Filter
             throw new InvalidSyntaxException("Filter cannot be null", null);
         }
 
-        if (expr != null)
+        CharArrayReader car = new CharArrayReader(expr.toCharArray());
+        LdapLexer lexer = new LdapLexer(car);
+        Parser parser = new Parser(lexer);
+        try
         {
-            CharArrayReader car = new CharArrayReader(expr.toCharArray());
-            LdapLexer lexer = new LdapLexer(car);
-            Parser parser = new Parser(lexer);
-            try
-            {
-                if (!parser.start())
-                {
-                    throw new InvalidSyntaxException(
-                        "Failed to parse LDAP query.", expr);
-                }
-            }
-            catch (ParseException ex)
+            if (!parser.start())
             {
                 throw new InvalidSyntaxException(
-                    ex.getMessage(), expr);
+                    "Failed to parse LDAP query.", expr);
             }
-            catch (IOException ex)
-            {
-                throw new InvalidSyntaxException(
-                    ex.getMessage(), expr);
-            }
-            m_evaluator = new Evaluator(parser.getProgram());
-            m_mapper = new SimpleMapper();
         }
+        catch (ParseException ex)
+        {
+            throw new InvalidSyntaxException(
+               ex.getMessage(), expr);
+        }
+        catch (IOException ex)
+        {
+            throw new InvalidSyntaxException(
+                ex.getMessage(), expr);
+        }
+        m_program = parser.getProgram();
     }
 
     /**
@@ -114,6 +111,71 @@ public class FilterImpl implements Filter
         return toString().hashCode();
     }
 
+    private boolean match(Dictionary dict, ServiceReference ref, boolean caseSensitive) 
+        throws IllegalArgumentException
+    {
+        SoftReference tupleRef = (SoftReference) m_cache.get();
+        Evaluator evaluator = null;
+        SimpleMapper mapper = null;
+        Object[] tuple = null;
+
+        if (tupleRef != null) 
+        {
+            tuple = (Object[]) tupleRef.get();
+        }
+
+        if (tuple == null) 
+        {
+            evaluator = new Evaluator(m_program);
+            mapper = new SimpleMapper();
+        }
+        else 
+        {
+            evaluator = (Evaluator) tuple[0];
+            mapper = (SimpleMapper) tuple[1];
+        }
+
+        try 
+        {
+            if (dict != null) 
+            {
+                mapper.setSource(dict, caseSensitive);
+            }
+            else 
+            {
+                mapper.setSource(ref);
+            }
+
+            return evaluator.evaluate(mapper);
+        } 
+        catch (AttributeNotFoundException ex)
+        {
+            log(Logger.LOG_DEBUG, "FilterImpl: Attribute not found.", ex);
+        }
+        catch (EvaluationException ex)
+        {
+            log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);
+        }
+        finally 
+        {
+            if (dict != null) 
+            {
+                mapper.setSource(null, caseSensitive);
+            }
+            else 
+            {
+                mapper.setSource(null);
+            }
+            
+            if (tuple == null) 
+            {
+                m_cache.set(new SoftReference(new Object[] {evaluator, mapper}));
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Filter using a <tt>Dictionary</tt> object. The <tt>Filter</tt>
      * is executed using the <tt>Dictionary</tt> object's keys and values.
@@ -127,25 +189,7 @@ public class FilterImpl implements Filter
     public boolean match(Dictionary dict)
         throws IllegalArgumentException
     {
-        try
-        {
-            // Since the mapper instance is reused, we should
-            // null the source after use to avoid potential
-            // garbage collection issues.
-            m_mapper.setSource(dict, false);
-            boolean result = m_evaluator.evaluate(m_mapper);
-            m_mapper.setSource(null, false);
-            return result;
-        }
-        catch (AttributeNotFoundException ex)
-        {
-            log(Logger.LOG_DEBUG, "FilterImpl: Attribute not found.", ex);
-        }
-        catch (EvaluationException ex)
-        {
-            log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);
-        }
-        return false;
+        return match(dict, null, false);
     }
 
     /**
@@ -158,48 +202,12 @@ public class FilterImpl implements Filter
     **/
     public boolean match(ServiceReference ref)
     {
-        try
-        {
-            // Since the mapper instance is reused, we should
-            // null the source after use to avoid potential
-            // garbage collection issues.
-            m_mapper.setSource(ref);
-            boolean result = m_evaluator.evaluate(m_mapper);
-            m_mapper.setSource(null);
-            return result;
-        }
-        catch (AttributeNotFoundException ex)
-        {
-            log(Logger.LOG_DEBUG, "FilterImpl: Attribute not found.", ex);
-        }
-        catch (EvaluationException ex)
-        {
-            log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);
-        }
-        return false;
+        return match(null, ref, false);
     }
 
     public boolean matchCase(Dictionary dict)
     {
-        try
-        {
-            // Since the mapper instance is reused, we should
-            // null the source after use to avoid potential
-            // garbage collection issues.
-            m_mapper.setSource(dict, true);
-            boolean result = m_evaluator.evaluate(m_mapper);
-            m_mapper.setSource(null, true);
-            return result;
-        }
-        catch (AttributeNotFoundException ex)
-        {
-            log(Logger.LOG_DEBUG, "FilterImpl: Attribute not found.", ex);
-        }
-        catch (EvaluationException ex)
-        {
-            log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);
-        }
-        return false;
+        return match(dict, null, true);
     }
 
     /**
@@ -210,9 +218,21 @@ public class FilterImpl implements Filter
     {
         if (m_toString == null)
         {
-            m_toString = m_evaluator.toStringInfix();
+            m_toString = new Evaluator(m_program).toStringInfix();
         }
         return m_toString;
+    }
+
+    private void log(int flag, String msg, Throwable th)
+    {
+        if (m_logger == null)
+        {
+            System.out.println(msg + ": " + th);
+        }
+        else
+        {
+            m_logger.log(flag, msg, th);
+        }
     }
 
     static class SimpleMapper implements Mapper
@@ -270,18 +290,6 @@ public class FilterImpl implements Filter
                 return m_ref.getProperty(name);
             }
             return m_map.get(name);
-        }
-    }
-
-    private void log(int flag, String msg, Throwable th)
-    {
-        if (m_logger == null)
-        {
-            System.out.println(msg + ": " + th);
-        }
-        else
-        {
-            m_logger.log(flag, msg, th);
         }
     }
 }
