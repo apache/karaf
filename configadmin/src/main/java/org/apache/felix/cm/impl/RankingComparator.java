@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -23,7 +23,6 @@ import java.util.Comparator;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.ConfigurationPlugin;
 
 
 /**
@@ -58,15 +57,15 @@ public class RankingComparator implements Comparator
             return 0;
         }
 
-        long rank1 = getLong( ( ServiceReference ) obj1, rankProperty );
-        long rank2 = getLong( ( ServiceReference ) obj2, rankProperty );
-        boolean order = naturalOrder;
+        long rank1 = this.getLong( ( ServiceReference ) obj1, this.rankProperty );
+        long rank2 = this.getLong( ( ServiceReference ) obj2, this.rankProperty );
+        boolean order = this.naturalOrder;
 
         // use service id, if rankings are equal
         if ( rank1 == rank2 )
         {
-            rank1 = getLong( ( ServiceReference ) obj1, Constants.SERVICE_ID );
-            rank2 = getLong( ( ServiceReference ) obj2, Constants.SERVICE_ID );
+            rank1 = this.getLong( ( ServiceReference ) obj1, Constants.SERVICE_ID );
+            rank2 = this.getLong( ( ServiceReference ) obj2, Constants.SERVICE_ID );
             order = false; // always order lower service.id before higher
         }
 

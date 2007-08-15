@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -27,13 +27,12 @@ import java.util.Set;
 
 import org.apache.felix.cm.PersistenceManager;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.log.LogService;
 
 
 /**
  * The <code>Factory</code> class is used to manage mappings between factory
  * PIDs the configuration PID belonging to it.
- * 
+ *
  * @author fmeschbe
  */
 class Factory
@@ -101,7 +100,7 @@ class Factory
         this( persistenceManager, factoryPid );
 
         // set bundle location
-        bundleLocation = ( String ) props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
+        this.bundleLocation = ( String ) props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
 
         // set pids
         String[] pidList = ( String[] ) props.get( FACTORY_PID_LIST );
@@ -109,7 +108,7 @@ class Factory
         {
             for ( int i = 0; i < pidList.length; i++ )
             {
-                pids.add( pidList[i] );
+                this.pids.add( pidList[i] );
             }
         }
     }
@@ -117,19 +116,19 @@ class Factory
 
     PersistenceManager getPersistenceManager()
     {
-        return persistenceManager;
+        return this.persistenceManager;
     }
 
 
     String getFactoryPid()
     {
-        return factoryPid;
+        return this.factoryPid;
     }
 
 
     String getBundleLocation()
     {
-        return bundleLocation;
+        return this.bundleLocation;
     }
 
 
@@ -138,25 +137,25 @@ class Factory
         this.bundleLocation = bundleLocation;
 
         // 104.15.2.8 The bundle location will be set persistently
-        storeSilently();
+        this.storeSilently();
     }
 
 
     Set getPIDs()
     {
-        return new HashSet( pids );
+        return new HashSet( this.pids );
     }
 
 
     boolean addPID( String pid )
     {
-        return pids.add( pid );
+        return this.pids.add( pid );
     }
 
 
     boolean removePID( String pid )
     {
-        return pids.remove( pid );
+        return this.pids.remove( pid );
     }
 
 
@@ -164,25 +163,25 @@ class Factory
     {
         Hashtable props = new Hashtable();
 
-        if ( bundleLocation != null )
+        if ( this.bundleLocation != null )
         {
-            props.put( ConfigurationAdmin.SERVICE_BUNDLELOCATION, getBundleLocation() );
+            props.put( ConfigurationAdmin.SERVICE_BUNDLELOCATION, this.getBundleLocation() );
         }
 
-        if ( !pids.isEmpty() )
+        if ( !this.pids.isEmpty() )
         {
-            props.put( FACTORY_PID_LIST, pids.toArray( new String[pids.size()] ) );
+            props.put( FACTORY_PID_LIST, this.pids.toArray( new String[this.pids.size()] ) );
         }
 
-        String id = factoryPidToIdentifier( getFactoryPid() );
+        String id = factoryPidToIdentifier( this.getFactoryPid() );
         if ( props.isEmpty() )
         {
-            persistenceManager.delete( id );
+            this.persistenceManager.delete( id );
         }
         else
         {
-            props.put( FACTORY_PID, getFactoryPid() );
-            persistenceManager.store( id, props );
+            props.put( FACTORY_PID, this.getFactoryPid() );
+            this.persistenceManager.store( id, props );
         }
     }
 
@@ -191,7 +190,7 @@ class Factory
     {
         try
         {
-            store();
+            this.store();
         }
         catch ( IOException ioe )
         {

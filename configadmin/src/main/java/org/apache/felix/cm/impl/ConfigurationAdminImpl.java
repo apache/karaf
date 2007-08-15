@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,8 +20,6 @@ package org.apache.felix.cm.impl;
 
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
@@ -64,7 +62,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
 
     Bundle getBundle()
     {
-        return bundle;
+        return this.bundle;
     }
 
 
@@ -75,7 +73,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
      */
     public Configuration createFactoryConfiguration( String factoryPid ) throws IOException
     {
-        return wrap( configurationManager.createFactoryConfiguration( this, factoryPid ) );
+        return this.wrap( this.configurationManager.createFactoryConfiguration( this, factoryPid ) );
     }
 
 
@@ -84,9 +82,9 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
      */
     public Configuration createFactoryConfiguration( String factoryPid, String location ) throws IOException
     {
-        checkPermission();
+        this.checkPermission();
 
-        return wrap( configurationManager.createFactoryConfiguration( factoryPid, location ) );
+        return this.wrap( this.configurationManager.createFactoryConfiguration( factoryPid, location ) );
     }
 
 
@@ -95,18 +93,18 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
      */
     public Configuration getConfiguration( String pid ) throws IOException
     {
-        ConfigurationImpl config = configurationManager.getConfiguration( pid );
+        ConfigurationImpl config = this.configurationManager.getConfiguration( pid );
 
         if ( config.getBundleLocation() == null )
         {
-            config.setBundleLocation( getBundle().getLocation() );
+            config.setBundleLocation( this.getBundle().getLocation() );
         }
-        else if ( !config.getBundleLocation().equals( getBundle().getLocation() ) )
+        else if ( !config.getBundleLocation().equals( this.getBundle().getLocation() ) )
         {
-            checkPermission();
+            this.checkPermission();
         }
 
-        return wrap( config );
+        return this.wrap( config );
     }
 
 
@@ -115,9 +113,9 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
      */
     public Configuration getConfiguration( String pid, String location ) throws IOException
     {
-        checkPermission();
+        this.checkPermission();
 
-        return wrap( configurationManager.getConfiguration( pid, location ) );
+        return this.wrap( this.configurationManager.getConfiguration( pid, location ) );
     }
 
 
@@ -126,7 +124,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
      */
     public Configuration[] listConfigurations( String filter ) throws IOException, InvalidSyntaxException
     {
-        ConfigurationImpl ci[] = configurationManager.listConfigurations( this, filter );
+        ConfigurationImpl ci[] = this.configurationManager.listConfigurations( this, filter );
         if ( ci == null )
         {
             return null;
@@ -135,7 +133,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
         Configuration[] cfgs = new Configuration[ci.length];
         for ( int i = 0; i < cfgs.length; i++ )
         {
-            cfgs[i] = wrap( ci[i] );
+            cfgs[i] = this.wrap( ci[i] );
         }
 
         return cfgs;
@@ -157,7 +155,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
      */
     boolean hasPermission()
     {
-        return bundle.hasPermission( new ConfigurationPermission( "*", ConfigurationPermission.CONFIGURE ) );
+        return this.bundle.hasPermission( new ConfigurationPermission( "*", ConfigurationPermission.CONFIGURE ) );
     }
 
 
@@ -165,15 +163,15 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
      * Checks whether the bundle to which this instance has been given has the
      * <code>CONFIGURE</code> permission and throws a <code>SecurityException</code>
      * if this is not the case.
-     * 
+     *
      * @throws SecurityException if the bundle to which this instance belongs
      *      does not have the <code>CONFIGURE</code> permission.
      */
     void checkPermission()
     {
-        if ( !hasPermission() )
+        if ( !this.hasPermission() )
         {
-            throw new SecurityException( "Bundle " + bundle.getSymbolicName()
+            throw new SecurityException( "Bundle " + this.bundle.getSymbolicName()
                 + " not permitted for Configuration Tasks" );
         }
     }
