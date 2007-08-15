@@ -55,14 +55,14 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
 
     void dispose()
     {
-        this.bundle = null;
-        this.configurationManager = null;
+        bundle = null;
+        configurationManager = null;
     }
 
 
     Bundle getBundle()
     {
-        return this.bundle;
+        return bundle;
     }
 
 
@@ -73,7 +73,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
      */
     public Configuration createFactoryConfiguration( String factoryPid ) throws IOException
     {
-        return this.wrap( this.configurationManager.createFactoryConfiguration( this, factoryPid ) );
+        return this.wrap( configurationManager.createFactoryConfiguration( this, factoryPid ) );
     }
 
 
@@ -84,7 +84,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
     {
         this.checkPermission();
 
-        return this.wrap( this.configurationManager.createFactoryConfiguration( factoryPid, location ) );
+        return this.wrap( configurationManager.createFactoryConfiguration( factoryPid, location ) );
     }
 
 
@@ -93,7 +93,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
      */
     public Configuration getConfiguration( String pid ) throws IOException
     {
-        ConfigurationImpl config = this.configurationManager.getConfiguration( pid );
+        ConfigurationImpl config = configurationManager.getConfiguration( pid );
 
         if ( config.getBundleLocation() == null )
         {
@@ -115,7 +115,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
     {
         this.checkPermission();
 
-        return this.wrap( this.configurationManager.getConfiguration( pid, location ) );
+        return this.wrap( configurationManager.getConfiguration( pid, location ) );
     }
 
 
@@ -124,7 +124,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
      */
     public Configuration[] listConfigurations( String filter ) throws IOException, InvalidSyntaxException
     {
-        ConfigurationImpl ci[] = this.configurationManager.listConfigurations( this, filter );
+        ConfigurationImpl ci[] = configurationManager.listConfigurations( this, filter );
         if ( ci == null )
         {
             return null;
@@ -155,7 +155,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
      */
     boolean hasPermission()
     {
-        return this.bundle.hasPermission( new ConfigurationPermission( "*", ConfigurationPermission.CONFIGURE ) );
+        return bundle.hasPermission( new ConfigurationPermission( "*", ConfigurationPermission.CONFIGURE ) );
     }
 
 
@@ -171,7 +171,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
     {
         if ( !this.hasPermission() )
         {
-            throw new SecurityException( "Bundle " + this.bundle.getSymbolicName()
+            throw new SecurityException( "Bundle " + bundle.getSymbolicName()
                 + " not permitted for Configuration Tasks" );
         }
     }

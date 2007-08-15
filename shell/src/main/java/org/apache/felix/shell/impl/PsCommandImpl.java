@@ -34,7 +34,7 @@ public class PsCommandImpl implements Command
 
     public PsCommandImpl(BundleContext context)
     {
-        this.m_context = context;
+        m_context = context;
     }
 
     public String getName()
@@ -55,12 +55,12 @@ public class PsCommandImpl implements Command
     public void execute(String s, PrintStream out, PrintStream err)
     {
         // Get start level service.
-        ServiceReference ref = this.m_context.getServiceReference(
+        ServiceReference ref = m_context.getServiceReference(
             org.osgi.service.startlevel.StartLevel.class.getName());
         StartLevel sl = null;
         if (ref != null)
         {
-            sl = (StartLevel) this.m_context.getService(ref);
+            sl = (StartLevel) m_context.getService(ref);
         }
 
         if (sl == null)
@@ -97,7 +97,7 @@ public class PsCommandImpl implements Command
                 }
             }
         }
-        Bundle[] bundles = this.m_context.getBundles();
+        Bundle[] bundles = m_context.getBundles();
         if (bundles != null)
         {
             // Display active start level.

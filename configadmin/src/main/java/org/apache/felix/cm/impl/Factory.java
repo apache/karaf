@@ -91,7 +91,7 @@ class Factory
     {
         this.persistenceManager = persistenceManager;
         this.factoryPid = factoryPid;
-        this.pids = new HashSet();
+        pids = new HashSet();
     }
 
 
@@ -100,7 +100,7 @@ class Factory
         this( persistenceManager, factoryPid );
 
         // set bundle location
-        this.bundleLocation = ( String ) props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
+        bundleLocation = ( String ) props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
 
         // set pids
         String[] pidList = ( String[] ) props.get( FACTORY_PID_LIST );
@@ -108,7 +108,7 @@ class Factory
         {
             for ( int i = 0; i < pidList.length; i++ )
             {
-                this.pids.add( pidList[i] );
+                pids.add( pidList[i] );
             }
         }
     }
@@ -116,19 +116,19 @@ class Factory
 
     PersistenceManager getPersistenceManager()
     {
-        return this.persistenceManager;
+        return persistenceManager;
     }
 
 
     String getFactoryPid()
     {
-        return this.factoryPid;
+        return factoryPid;
     }
 
 
     String getBundleLocation()
     {
-        return this.bundleLocation;
+        return bundleLocation;
     }
 
 
@@ -137,25 +137,25 @@ class Factory
         this.bundleLocation = bundleLocation;
 
         // 104.15.2.8 The bundle location will be set persistently
-        this.storeSilently();
+        storeSilently();
     }
 
 
     Set getPIDs()
     {
-        return new HashSet( this.pids );
+        return new HashSet( pids );
     }
 
 
     boolean addPID( String pid )
     {
-        return this.pids.add( pid );
+        return pids.add( pid );
     }
 
 
     boolean removePID( String pid )
     {
-        return this.pids.remove( pid );
+        return pids.remove( pid );
     }
 
 
@@ -163,25 +163,25 @@ class Factory
     {
         Hashtable props = new Hashtable();
 
-        if ( this.bundleLocation != null )
+        if ( bundleLocation != null )
         {
             props.put( ConfigurationAdmin.SERVICE_BUNDLELOCATION, this.getBundleLocation() );
         }
 
-        if ( !this.pids.isEmpty() )
+        if ( !pids.isEmpty() )
         {
-            props.put( FACTORY_PID_LIST, this.pids.toArray( new String[this.pids.size()] ) );
+            props.put( FACTORY_PID_LIST, pids.toArray( new String[pids.size()] ) );
         }
 
         String id = factoryPidToIdentifier( this.getFactoryPid() );
         if ( props.isEmpty() )
         {
-            this.persistenceManager.delete( id );
+            persistenceManager.delete( id );
         }
         else
         {
             props.put( FACTORY_PID, this.getFactoryPid() );
-            this.persistenceManager.store( id, props );
+            persistenceManager.store( id, props );
         }
     }
 

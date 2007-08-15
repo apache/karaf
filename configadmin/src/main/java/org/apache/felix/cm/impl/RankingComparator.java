@@ -57,9 +57,9 @@ public class RankingComparator implements Comparator
             return 0;
         }
 
-        long rank1 = this.getLong( ( ServiceReference ) obj1, this.rankProperty );
-        long rank2 = this.getLong( ( ServiceReference ) obj2, this.rankProperty );
-        boolean order = this.naturalOrder;
+        long rank1 = this.getLong( ( ServiceReference ) obj1, rankProperty );
+        long rank2 = this.getLong( ( ServiceReference ) obj2, rankProperty );
+        boolean order = naturalOrder;
 
         // use service id, if rankings are equal
         if ( rank1 == rank2 )

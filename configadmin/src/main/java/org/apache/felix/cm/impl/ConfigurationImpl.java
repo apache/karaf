@@ -29,8 +29,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;
-implementation of the Configuration
- * Admin Service Specification <i>Configuration object</i> (section 104.4).
+
+/**
+-* The <code>ConfigurationImpl</code> is the implementation of the Configuration * Admin Service Specification <i>Configuration object</i> (section 104.4).
  *
  * @author fmeschbe
  */
@@ -93,11 +94,11 @@ class ConfigurationImpl
         this.configurationManager = configurationManager;
         this.persistenceManager = persistenceManager;
 
-        this.pid = ( String ) properties.remove( Constants.SERVICE_PID );
-        this.factoryPID = ( String ) properties.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
-        this.bundleLocation = ( String ) properties.remove( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
+        pid = ( String ) properties.remove( Constants.SERVICE_PID );
+        factoryPID = ( String ) properties.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
+        bundleLocation = ( String ) properties.remove( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
 
-        this.configure( properties );
+        configure( properties );
     }
 
 
@@ -107,7 +108,7 @@ class ConfigurationImpl
         this.configurationManager = configurationManager;
         this.persistenceManager = persistenceManager;
         this.pid = pid;
-        this.factoryPID = factoryPid;
+        factoryPID = factoryPid;
     }
 
 
@@ -118,10 +119,10 @@ class ConfigurationImpl
     {
         if ( !this.isDeleted() )
         {
-            this.persistenceManager.delete( this.pid );
-            this.persistenceManager = null;
+            persistenceManager.delete( pid );
+            persistenceManager = null;
 
-            this.configurationManager.deleted( this );
+            configurationManager.deleted( this );
         }
     }
 
@@ -131,7 +132,7 @@ class ConfigurationImpl
      */
     public String getPid()
     {
-        return this.pid;
+        return pid;
     }
 
 
@@ -140,7 +141,7 @@ class ConfigurationImpl
      */
     public String getFactoryPid()
     {
-        return this.factoryPID;
+        return factoryPID;
     }
 
 
@@ -149,7 +150,7 @@ class ConfigurationImpl
      */
     public String getBundleLocation()
     {
-        return this.bundleLocation;
+        return bundleLocation;
     }
 
 
@@ -159,15 +160,15 @@ class ConfigurationImpl
     public Dictionary getProperties()
     {
         // no properties yet
-        if ( this.properties == null )
+        if ( properties == null )
         {
             return null;
         }
 
-        CaseInsensitiveDictionary props = new CaseInsensitiveDictionary( this.properties );
+        CaseInsensitiveDictionary props = new CaseInsensitiveDictionary( properties );
 
         // fix special properties (pid, factory PID, bundle location)
-        this.setAutoProperties( props, false );
+        setAutoProperties( props, false );
 
         return props;
     }
@@ -189,7 +190,7 @@ class ConfigurationImpl
             }
             catch ( IOException ioe )
             {
-                this.configurationManager.log( LogService.LOG_ERROR, "Persisting new bundle location failed", ioe );
+                configurationManager.log( LogService.LOG_ERROR, "Persisting new bundle location failed", ioe );
             }
         }
     }
@@ -203,19 +204,19 @@ class ConfigurationImpl
         if ( !this.isDeleted() )
         {
             // read configuration from persistence (again)
-            Dictionary properties = this.persistenceManager.load( this.pid );
+            Dictionary properties = persistenceManager.load( pid );
 
             // ensure serviceReference pid
             String servicePid = ( String ) properties.get( Constants.SERVICE_PID );
-            if ( servicePid != null && !this.pid.equals( servicePid ) )
+            if ( servicePid != null && !pid.equals( servicePid ) )
             {
-                throw new IOException( "PID of configuration file does match requested PID; expected " + this.pid + ", got "
+                throw new IOException( "PID of configuration file does match requested PID; expected " + pid + ", got "
                     + servicePid );
             }
 
             this.configure( properties );
 
-            this.configurationManager.updated( this );
+            configurationManager.updated( this );
         }
     }
 
@@ -231,11 +232,11 @@ class ConfigurationImpl
 
             this.setAutoProperties( newProperties, true );
 
-            this.persistenceManager.store( this.pid, newProperties );
+            persistenceManager.store( pid, newProperties );
 
             this.configure( newProperties );
 
-            this.configurationManager.updated( this );
+            configurationManager.updated( this );
         }
     }
 
@@ -251,7 +252,7 @@ class ConfigurationImpl
 
         if ( obj instanceof Configuration )
         {
-            return this.pid.equals( ( ( Configuration ) obj ).getPid() );
+            return pid.equals( ( ( Configuration ) obj ).getPid() );
         }
 
         return false;
@@ -260,13 +261,13 @@ class ConfigurationImpl
 
     public int hashCode()
     {
-        return this.pid.hashCode();
+        return pid.hashCode();
     }
 
 
     public String toString()
     {
-        return "Configuration PID=" + this.pid + ", factoryPID=" + this.factoryPID + ", bundleLocation=" + this.bundleLocation;
+        return "Configuration PID=" + pid + ", factoryPID=" + factoryPID + ", bundleLocation=" + bundleLocation;
     }
 
 
@@ -280,13 +281,13 @@ class ConfigurationImpl
 
     ServiceReference getServiceReference()
     {
-        return this.serviceReference;
+        return serviceReference;
     }
 
 
     void store() throws IOException
     {
-        Dictionary props = this.getProperties();
+        Dictionary props = getProperties();
 
         // if this is a new configuration, we just use an empty Dictionary
         if ( props == null )
@@ -302,20 +303,20 @@ class ConfigurationImpl
         }
 
         // only store now, if this is not a new configuration
-        this.persistenceManager.store( this.pid, props );
+        persistenceManager.store( pid, props );
     }
 
 
     boolean isDeleted()
     {
-        if ( this.persistenceManager != null )
+        if ( persistenceManager != null )
         {
-            if ( this.properties == null || this.persistenceManager.exists( this.pid ) )
+            if ( properties == null || persistenceManager.exists( pid ) )
             {
                 return false;
             }
 
-            this.persistenceManager = null;
+            persistenceManager = null;
         }
 
         return true;
@@ -330,11 +331,11 @@ class ConfigurationImpl
         // ensure CaseInsensitiveDictionary
         if ( properties instanceof CaseInsensitiveDictionary )
         {
-            this.properties = ( CaseInsensitiveDictionary ) properties;
+            this.properties = (CaseInsensitiveDictionary)properties;
         }
         else
         {
-            this.properties = new CaseInsensitiveDictionary( properties );
+            properties = new CaseInsensitiveDictionary( properties );
         }
     }
 
@@ -342,8 +343,8 @@ class ConfigurationImpl
     void setAutoProperties( Dictionary properties, boolean withBundleLocation )
     {
         // set pid and factory pid in the properties
-        this.replaceProperty( properties, Constants.SERVICE_PID, this.pid );
-        this.replaceProperty( properties, ConfigurationAdmin.SERVICE_FACTORYPID, this.factoryPID );
+        this.replaceProperty( properties, Constants.SERVICE_PID, pid );
+        this.replaceProperty( properties, ConfigurationAdmin.SERVICE_FACTORYPID, factoryPID );
 
         // bundle location is not set here
         if ( withBundleLocation )
