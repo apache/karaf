@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,11 +20,24 @@ package org.apache.felix.framework.util;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EventListener;
+import java.util.EventObject;
 
-import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.Logger;
-import org.osgi.framework.*;
+import org.osgi.framework.AllServiceListener;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServicePermission;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.SynchronousBundleListener;
 
 public class EventDispatcher
 {
@@ -59,7 +72,7 @@ public class EventDispatcher
 
     private EventDispatcher(Logger logger)
     {
-        m_logger = logger;
+        this.m_logger = logger;
     }
 
     public static EventDispatcher start(Logger logger)
@@ -88,7 +101,7 @@ public class EventDispatcher
 
         return eventDispatcher;
     }
-    
+
     public static void shutdown()
     {
         synchronized (m_threadLock)
@@ -105,7 +118,7 @@ public class EventDispatcher
             {
                 return;
             }
-            
+
             // Signal dispatch thread.
             m_stopping = true;
             synchronized (m_requestList)
@@ -124,7 +137,7 @@ public class EventDispatcher
                 {
                 }
             }
-            
+
             // remove the thread reference
             m_thread = null;
         }
@@ -145,7 +158,7 @@ public class EventDispatcher
 
         // See if we can simply update the listener, if so then
         // return immediately.
-        if (updateListener(bundle, clazz, l, filter))
+        if (this.updateListener(bundle, clazz, l, filter))
         {
             return;
         }
@@ -158,17 +171,17 @@ public class EventDispatcher
 
             if (clazz == FrameworkListener.class)
             {
-                listeners = m_frameworkListeners;
+                listeners = this.m_frameworkListeners;
             }
             else if (clazz == BundleListener.class)
             {
                 if (SynchronousBundleListener.class.isInstance(l))
                 {
-                    listeners = m_syncBundleListeners;
+                    listeners = this.m_syncBundleListeners;
                 }
                 else
                 {
-                    listeners = m_bundleListeners;
+                    listeners = this.m_bundleListeners;
                 }
             }
             else if (clazz == ServiceListener.class)
@@ -180,7 +193,7 @@ public class EventDispatcher
                     acc = ((SecurityManager) sm).getSecurityContext();
                 }
 
-                listeners = m_serviceListeners;
+                listeners = this.m_serviceListeners;
             }
             else
             {
@@ -216,22 +229,22 @@ public class EventDispatcher
 
             if (clazz == FrameworkListener.class)
             {
-                m_frameworkListeners = listeners;
+                this.m_frameworkListeners = listeners;
             }
             else if (clazz == BundleListener.class)
             {
                 if (SynchronousBundleListener.class.isInstance(l))
                 {
-                    m_syncBundleListeners = listeners;
+                    this.m_syncBundleListeners = listeners;
                 }
                 else
                 {
-                    m_bundleListeners = listeners;
+                    this.m_bundleListeners = listeners;
                 }
             }
             else if (clazz == ServiceListener.class)
             {
-                m_serviceListeners = listeners;
+                this.m_serviceListeners = listeners;
             }
         }
     }
@@ -256,22 +269,22 @@ public class EventDispatcher
 
             if (clazz == FrameworkListener.class)
             {
-                listeners = m_frameworkListeners;
+                listeners = this.m_frameworkListeners;
             }
             else if (clazz == BundleListener.class)
             {
                 if (SynchronousBundleListener.class.isInstance(l))
                 {
-                    listeners = m_syncBundleListeners;
+                    listeners = this.m_syncBundleListeners;
                 }
                 else
                 {
-                    listeners = m_bundleListeners;
+                    listeners = this.m_bundleListeners;
                 }
             }
             else if (clazz == ServiceListener.class)
             {
-                listeners = m_serviceListeners;
+                listeners = this.m_serviceListeners;
             }
             else
             {
@@ -320,22 +333,22 @@ public class EventDispatcher
 
             if (clazz == FrameworkListener.class)
             {
-                m_frameworkListeners = listeners;
+                this.m_frameworkListeners = listeners;
             }
             else if (clazz == BundleListener.class)
             {
                 if (SynchronousBundleListener.class.isInstance(l))
                 {
-                    m_syncBundleListeners = listeners;
+                    this.m_syncBundleListeners = listeners;
                 }
                 else
                 {
-                    m_bundleListeners = listeners;
+                    this.m_bundleListeners = listeners;
                 }
             }
             else if (clazz == ServiceListener.class)
             {
-                m_serviceListeners = listeners;
+                this.m_serviceListeners = listeners;
             }
         }
     }
@@ -350,7 +363,7 @@ public class EventDispatcher
         synchronized (this)
         {
             // Remove all framework listeners associated with the specified bundle.
-            Object[] listeners = m_frameworkListeners;
+            Object[] listeners = this.m_frameworkListeners;
             for (int i = listeners.length - LISTENER_ARRAY_INCREMENT;
                 i >= 0;
                 i -= LISTENER_ARRAY_INCREMENT)
@@ -362,12 +375,12 @@ public class EventDispatcher
                 {
                     Class clazz = (Class) listeners[i + LISTENER_CLASS_OFFSET];
                     EventListener l = (EventListener) listeners[i + LISTENER_OBJECT_OFFSET];
-                    removeListener(bundle, clazz, l);
+                    this.removeListener(bundle, clazz, l);
                 }
             }
 
             // Remove all bundle listeners associated with the specified bundle.
-            listeners = m_bundleListeners;
+            listeners = this.m_bundleListeners;
             for (int i = listeners.length - LISTENER_ARRAY_INCREMENT;
                 i >= 0;
                 i -= LISTENER_ARRAY_INCREMENT)
@@ -379,13 +392,13 @@ public class EventDispatcher
                 {
                     Class clazz = (Class) listeners[i + LISTENER_CLASS_OFFSET];
                     EventListener l = (EventListener) listeners[i + LISTENER_OBJECT_OFFSET];
-                    removeListener(bundle, clazz, l);
+                    this.removeListener(bundle, clazz, l);
                 }
             }
 
             // Remove all synchronous bundle listeners associated with
             // the specified bundle.
-            listeners = m_syncBundleListeners;
+            listeners = this.m_syncBundleListeners;
             for (int i = listeners.length - LISTENER_ARRAY_INCREMENT;
                 i >= 0;
                 i -= LISTENER_ARRAY_INCREMENT)
@@ -397,12 +410,12 @@ public class EventDispatcher
                 {
                     Class clazz = (Class) listeners[i + LISTENER_CLASS_OFFSET];
                     EventListener l = (EventListener) listeners[i + LISTENER_OBJECT_OFFSET];
-                    removeListener(bundle, clazz, l);
+                    this.removeListener(bundle, clazz, l);
                 }
             }
 
             // Remove all service listeners associated with the specified bundle.
-            listeners = m_serviceListeners;
+            listeners = this.m_serviceListeners;
             for (int i = listeners.length - LISTENER_ARRAY_INCREMENT;
                 i >= 0;
                 i -= LISTENER_ARRAY_INCREMENT)
@@ -414,7 +427,7 @@ public class EventDispatcher
                 {
                     Class clazz = (Class) listeners[i + LISTENER_CLASS_OFFSET];
                     EventListener l = (EventListener) listeners[i + LISTENER_OBJECT_OFFSET];
-                    removeListener(bundle, clazz, l);
+                    this.removeListener(bundle, clazz, l);
                 }
             }
         }
@@ -428,24 +441,24 @@ public class EventDispatcher
 
             if (clazz == FrameworkListener.class)
             {
-                listeners = m_frameworkListeners;
+                listeners = this.m_frameworkListeners;
             }
             else if (clazz == BundleListener.class)
             {
                 if (SynchronousBundleListener.class.isInstance(l))
                 {
-                    listeners = m_syncBundleListeners;
+                    listeners = this.m_syncBundleListeners;
                 }
                 else
                 {
-                    listeners = m_bundleListeners;
+                    listeners = this.m_bundleListeners;
                 }
             }
             else if (clazz == ServiceListener.class)
             {
-                listeners = m_serviceListeners;
+                listeners = this.m_serviceListeners;
             }
-    
+
             // See if the listener is already registered, if so then
             // handle it according to the spec.
             for (int i = 0; i < listeners.length; i += LISTENER_ARRAY_INCREMENT)
@@ -481,11 +494,11 @@ public class EventDispatcher
         Object[] listeners = null;
         synchronized (this)
         {
-            listeners = m_frameworkListeners;
+            listeners = this.m_frameworkListeners;
         }
 
         // Fire all framework listeners on a separate thread.
-        fireEventAsynchronously(m_logger, Request.FRAMEWORK_EVENT, listeners, event);
+        this.fireEventAsynchronously(this.m_logger, Request.FRAMEWORK_EVENT, listeners, event);
     }
 
     public void fireBundleEvent(BundleEvent event)
@@ -495,12 +508,12 @@ public class EventDispatcher
         Object[] syncListeners = null;
         synchronized (this)
         {
-            listeners = m_bundleListeners;
-            syncListeners = m_syncBundleListeners;
+            listeners = this.m_bundleListeners;
+            syncListeners = this.m_syncBundleListeners;
         }
 
         // Fire synchronous bundle listeners immediately on the calling thread.
-        fireEventImmediately(m_logger, Request.BUNDLE_EVENT, syncListeners, event);
+        fireEventImmediately(this.m_logger, Request.BUNDLE_EVENT, syncListeners, event);
 
         // The spec says that asynchronous bundle listeners do not get events
         // of types STARTING or STOPPING.
@@ -508,7 +521,7 @@ public class EventDispatcher
             (event.getType() != BundleEvent.STOPPING))
         {
             // Fire asynchronous bundle listeners on a separate thread.
-            fireEventAsynchronously(m_logger, Request.BUNDLE_EVENT, listeners, event);
+            this.fireEventAsynchronously(this.m_logger, Request.BUNDLE_EVENT, listeners, event);
         }
     }
 
@@ -518,11 +531,11 @@ public class EventDispatcher
         Object[] listeners = null;
         synchronized (this)
         {
-            listeners = m_serviceListeners;
+            listeners = this.m_serviceListeners;
         }
 
         // Fire all service events immediately on the calling thread.
-        fireEventImmediately(m_logger, Request.SERVICE_EVENT, listeners, event);
+        fireEventImmediately(this.m_logger, Request.SERVICE_EVENT, listeners, event);
     }
 
     private void fireEventAsynchronously(
@@ -685,7 +698,7 @@ public class EventDispatcher
         if (objectClass != null)
         {
             boolean hasPermission = false;
-            
+
             Object sm = System.getSecurityManager();
             if ((acc != null) && (sm != null))
             {
@@ -693,15 +706,15 @@ public class EventDispatcher
                     !hasPermission && (i < objectClass.length);
                     i++)
                 {
-                    try 
+                    try
                     {
                         ServicePermission perm =
                             new ServicePermission(
                                 objectClass[i], ServicePermission.GET);
                         ((SecurityManager) sm).checkPermission(perm, acc);
                         hasPermission = true;
-                    } 
-                    catch (Exception ex) 
+                    }
+                    catch (Exception ex)
                     {
                     }
                 }

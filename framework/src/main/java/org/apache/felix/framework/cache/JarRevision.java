@@ -18,12 +18,18 @@
  */
 package org.apache.felix.framework.cache;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.security.PrivilegedActionException;
-import java.security.cert.X509Certificate;
-import java.util.*;
-import java.util.jar.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
 import org.apache.felix.framework.Logger;
@@ -31,7 +37,9 @@ import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
-import org.apache.felix.moduleloader.*;
+import org.apache.felix.moduleloader.ContentDirectoryContent;
+import org.apache.felix.moduleloader.IContent;
+import org.apache.felix.moduleloader.JarContent;
 
 /**
  * <p>
@@ -69,24 +77,24 @@ class JarRevision extends BundleRevision
 
         if (byReference)
         {
-            m_bundleFile = new File(location.substring(
+            this.m_bundleFile = new File(location.substring(
                 location.indexOf(BundleArchive.FILE_PROTOCOL)
                     + BundleArchive.FILE_PROTOCOL.length()));
         }
         else
         {
-            m_bundleFile = new File(getRevisionRootDir(), BUNDLE_JAR_FILE);
+            this.m_bundleFile = new File(this.getRevisionRootDir(), BUNDLE_JAR_FILE);
         }
 
         // Save and process the bundle JAR.
-        initialize(byReference, is);
+        this.initialize(byReference, is);
     }
 
     public synchronized Map getManifestHeader() throws Exception
     {
-        if (m_header != null)
+        if (this.m_header != null)
         {
-            return m_header;
+            return this.m_header;
         }
 
         // Get the embedded resource.
@@ -95,7 +103,7 @@ class JarRevision extends BundleRevision
         try
         {
             // Open bundle JAR file.
-            jarFile = BundleCache.getSecureAction().openJAR(m_bundleFile);
+            jarFile = BundleCache.getSecureAction().openJAR(this.m_bundleFile);
             // Error if no jar file.
             if (jarFile == null)
             {
@@ -104,8 +112,8 @@ class JarRevision extends BundleRevision
             // Get manifest.
             Manifest mf = jarFile.getManifest();
             // Create a case insensitive map of manifest attributes.
-            m_header = new StringMap(mf.getMainAttributes(), false);
-            return m_header;
+            this.m_header = new StringMap(mf.getMainAttributes(), false);
+            return this.m_header;
 
         }
         finally
@@ -116,7 +124,7 @@ class JarRevision extends BundleRevision
 
     public IContent getContent() throws Exception
     {
-        return new JarContent(m_bundleFile);
+        return new JarContent(this.m_bundleFile);
     }
 
     public synchronized IContent[] getContentPath() throws Exception
@@ -126,10 +134,10 @@ class JarRevision extends BundleRevision
         // is on the bundle's class path and then creating content
         // objects for everything on the class path.
 
-        File embedDir = new File(getRevisionRootDir(), EMBEDDED_DIRECTORY);
+        File embedDir = new File(this.getRevisionRootDir(), EMBEDDED_DIRECTORY);
 
         // Get the bundle's manifest header.
-        Map map = getManifestHeader();
+        Map map = this.getManifestHeader();
 
         // Find class path meta-data.
         String classPath = (map == null)
@@ -148,8 +156,8 @@ class JarRevision extends BundleRevision
         JarFile bundleJar = null;
         try
         {
-            bundleJar = BundleCache.getSecureAction().openJAR(m_bundleFile);
-            IContent self = new JarContent(m_bundleFile);
+            bundleJar = BundleCache.getSecureAction().openJAR(this.m_bundleFile);
+            IContent self = new JarContent(this.m_bundleFile);
             List contentList = new ArrayList();
             for (int i = 0; i < classPathStrings.length; i++)
             {
@@ -197,7 +205,7 @@ class JarRevision extends BundleRevision
     public synchronized String findLibrary(String libName) throws Exception
     {
         // Get bundle lib directory.
-        File libDir = new File(getRevisionRootDir(), LIBRARY_DIRECTORY);
+        File libDir = new File(this.getRevisionRootDir(), LIBRARY_DIRECTORY);
         // Get lib file.
         File libFile = new File(libDir, File.separatorChar + libName);
         // Make sure that the library's parent directory exists;
@@ -219,7 +227,7 @@ class JarRevision extends BundleRevision
 
             try
             {
-                bundleJar = BundleCache.getSecureAction().openJAR(m_bundleFile);
+                bundleJar = BundleCache.getSecureAction().openJAR(this.m_bundleFile);
                 ZipEntry ze = bundleJar.getEntry(libName);
                 if (ze == null)
                 {
@@ -263,17 +271,17 @@ class JarRevision extends BundleRevision
         {
             // If the revision directory exists, then we don't
             // need to initialize since it has already been done.
-            if (BundleCache.getSecureAction().fileExists(getRevisionRootDir()))
+            if (BundleCache.getSecureAction().fileExists(this.getRevisionRootDir()))
             {
                 return;
             }
 
             // Create revision directory.
-            if (!BundleCache.getSecureAction().mkdir(getRevisionRootDir()))
+            if (!BundleCache.getSecureAction().mkdir(this.getRevisionRootDir()))
             {
-                getLogger().log(
+                this.getLogger().log(
                     Logger.LOG_ERROR,
-                    getClass().getName() + ": Unable to create revision directory.");
+                    this.getClass().getName() + ": Unable to create revision directory.");
                 throw new IOException("Unable to create archive directory.");
             }
 
@@ -283,7 +291,7 @@ class JarRevision extends BundleRevision
                 {
                     // Do it the manual way to have a chance to
                     // set request properties such as proxy auth.
-                    URL url = new URL(getLocation());
+                    URL url = new URL(this.getLocation());
                     URLConnection conn = url.openConnection();
 
                     // Support for http proxy authentication.
@@ -303,10 +311,10 @@ class JarRevision extends BundleRevision
                 }
 
                 // Save the bundle jar file.
-                BundleCache.copyStreamToFile(is, m_bundleFile);
+                BundleCache.copyStreamToFile(is, this.m_bundleFile);
             }
 
-            preprocessBundleJar();
+            this.preprocessBundleJar();
         }
         finally
         {
@@ -327,7 +335,7 @@ class JarRevision extends BundleRevision
         // for their existence all the time.
         //
 
-        File embedDir = new File(getRevisionRootDir(), EMBEDDED_DIRECTORY);
+        File embedDir = new File(this.getRevisionRootDir(), EMBEDDED_DIRECTORY);
         if (!BundleCache.getSecureAction().fileExists(embedDir))
         {
             if (!BundleCache.getSecureAction().mkdir(embedDir))
@@ -336,7 +344,7 @@ class JarRevision extends BundleRevision
             }
         }
 
-        File libDir = new File(getRevisionRootDir(), LIBRARY_DIRECTORY);
+        File libDir = new File(this.getRevisionRootDir(), LIBRARY_DIRECTORY);
         if (!BundleCache.getSecureAction().fileExists(libDir))
         {
             if (!BundleCache.getSecureAction().mkdir(libDir))
@@ -352,7 +360,7 @@ class JarRevision extends BundleRevision
         try
         {
             // Get the bundle's manifest header.
-            Map map = getManifestHeader();
+            Map map = this.getManifestHeader();
 
             // Find class path meta-data.
             String classPath = (map == null)
@@ -371,14 +379,14 @@ class JarRevision extends BundleRevision
             {
                 if (!classPathStrings[i].equals(FelixConstants.CLASS_PATH_DOT))
                 {
-                    extractEmbeddedJar(classPathStrings[i]);
+                    this.extractEmbeddedJar(classPathStrings[i]);
                 }
             }
 
         }
         catch (PrivilegedActionException ex)
         {
-            throw ((PrivilegedActionException) ex).getException();
+            throw (ex).getException();
         }
     }
 
@@ -397,7 +405,7 @@ class JarRevision extends BundleRevision
 
         // If JAR is already extracted, then don't re-extract it...
         File jarFile = new File(
-            getRevisionRootDir(), EMBEDDED_DIRECTORY + File.separatorChar + jarPath);
+            this.getRevisionRootDir(), EMBEDDED_DIRECTORY + File.separatorChar + jarPath);
 
         if (!BundleCache.getSecureAction().fileExists(jarFile))
         {
@@ -406,13 +414,13 @@ class JarRevision extends BundleRevision
             try
             {
                 // Make sure class path entry is a JAR file.
-                bundleJar = BundleCache.getSecureAction().openJAR(m_bundleFile);
+                bundleJar = BundleCache.getSecureAction().openJAR(this.m_bundleFile);
                 ZipEntry ze = bundleJar.getEntry(jarPath);
                 if (ze == null)
                 {
 // TODO: FRAMEWORK - Per the spec, this should fire a FrameworkEvent.INFO event;
 //       need to create an "Eventer" class like "Logger" perhaps.
-                    getLogger().log(Logger.LOG_INFO, "Class path entry not found: " + jarPath);
+                    this.getLogger().log(Logger.LOG_INFO, "Class path entry not found: " + jarPath);
                     return;
                 }
                 // If the zip entry is a directory, then ignore it since

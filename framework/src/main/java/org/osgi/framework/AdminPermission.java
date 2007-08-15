@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,10 +18,19 @@
  */
 package org.osgi.framework;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.*;
-import java.util.*;
+import java.security.AccessController;
+import java.security.BasicPermission;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.PrivilegedAction;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.StringTokenizer;
 
 import org.apache.felix.framework.FilterImpl;
 
@@ -83,14 +92,14 @@ public final class AdminPermission extends BasicPermission
     public AdminPermission(Bundle bundle, String actions)
     {
         this(createName(bundle), actions);
-        m_bundle = bundle;
+        this.m_bundle = bundle;
     }
 
     // This constructor is only used when granting an admin permission.
 	public AdminPermission(String filter, String actions)
     {
 		super((filter == null) || (filter.equals("*")) ? "(id=*)" : filter);
-        m_actionMask = parseActions(actions);
+        this.m_actionMask = parseActions(actions);
     }
 
     // This constructor is only used by the admin permission collection
@@ -99,7 +108,7 @@ public final class AdminPermission extends BasicPermission
     AdminPermission(String filter, int actionMask)
     {
         super((filter == null) || (filter.equals("*")) ? "(id=*)" : filter);
-        m_actionMask = actionMask;
+        this.m_actionMask = actionMask;
     }
 
     public boolean equals(Object obj)
@@ -116,21 +125,21 @@ public final class AdminPermission extends BasicPermission
 
 	AdminPermission p = (AdminPermission) obj;
 
-	return getName().equals(p.getName()) && (m_actionMask == p.m_actionMask);
+	return this.getName().equals(p.getName()) && (this.m_actionMask == p.m_actionMask);
     }
 
     public int hashCode()
     {
-	return getName().hashCode() ^ getActions().hashCode();
+	return this.getName().hashCode() ^ this.getActions().hashCode();
     }
 
     public String getActions()
     {
-        if (m_actions == null)
+        if (this.m_actions == null)
         {
-            m_actions = createActionString(m_actionMask);
+            this.m_actions = createActionString(this.m_actionMask);
         }
-	return m_actions;
+	return this.m_actions;
     }
 
     public boolean implies(Permission p)
@@ -151,7 +160,7 @@ public final class AdminPermission extends BasicPermission
         }
 
         // Make sure the action mask is a subset.
-        if ((m_actionMask & admin.m_actionMask) != admin.m_actionMask)
+        if ((this.m_actionMask & admin.m_actionMask) != admin.m_actionMask)
         {
             return false;
         }
@@ -161,23 +170,23 @@ public final class AdminPermission extends BasicPermission
         // filter is "*".
         if (admin.getName().equals("(id=*)"))
         {
-            return getName().equals("(id=*)");
+            return this.getName().equals("(id=*)");
         }
 
         // Next, if this object was create with a "*" we can return true
         // (This way we avoid creating and matching a filter).
-        if (getName().equals("(id=*)"))
+        if (this.getName().equals("(id=*)"))
         {
             return true;
         }
 
         // Otherwise, see if this permission's filter matches the
         // dictionary of the passed in permission.
-        if (m_filterImpl == null)
+        if (this.m_filterImpl == null)
         {
             try
             {
-                m_filterImpl = new FilterImpl(getName());
+                this.m_filterImpl = new FilterImpl(this.getName());
             }
             catch (InvalidSyntaxException ex)
             {
@@ -185,7 +194,7 @@ public final class AdminPermission extends BasicPermission
             }
         }
 
-        return m_filterImpl.match(admin.getBundleDictionary());
+        return this.m_filterImpl.match(admin.getBundleDictionary());
     }
 
     public PermissionCollection newPermissionCollection()
@@ -195,16 +204,16 @@ public final class AdminPermission extends BasicPermission
 
     private Dictionary getBundleDictionary()
     {
-        if (m_bundleDict == null)
+        if (this.m_bundleDict == null)
         {
             // Add bundle properties to dictionary.
-            m_bundleDict = new Hashtable();
-            m_bundleDict.put("id", new Long(m_bundle.getBundleId()));
+            this.m_bundleDict = new Hashtable();
+            this.m_bundleDict.put("id", new Long(this.m_bundle.getBundleId()));
 
-            String symbolicName = m_bundle.getSymbolicName();
+            String symbolicName = this.m_bundle.getSymbolicName();
             if (symbolicName != null)
             {
-                m_bundleDict.put("name", symbolicName);
+                this.m_bundleDict.put("name", symbolicName);
             }
             // Add location in privileged block since it performs a security check.
             if (System.getSecurityManager() != null)
@@ -213,20 +222,20 @@ public final class AdminPermission extends BasicPermission
                 {
                     public Object run()
                     {
-                        m_bundleDict.put("location", m_bundle.getLocation());
-                        
-                        createSigner(m_bundle, m_bundleDict);
+                        AdminPermission.this.m_bundleDict.put("location", AdminPermission.this.m_bundle.getLocation());
+
+                        createSigner(AdminPermission.this.m_bundle, AdminPermission.this.m_bundleDict);
                         return null;
                     }
                 });
             }
             else
             {
-                m_bundleDict.put("location", m_bundle.getLocation());
-                createSigner(m_bundle, m_bundleDict);
+                this.m_bundleDict.put("location", this.m_bundle.getLocation());
+                createSigner(this.m_bundle, this.m_bundleDict);
             }
         }
-        return m_bundleDict;
+        return this.m_bundleDict;
     }
 
     private static void createSigner(Bundle bundle, Dictionary dict)
@@ -236,9 +245,9 @@ public final class AdminPermission extends BasicPermission
             Method method = bundle.getClass().getDeclaredMethod(
                 "getSignerMatcher", null);
             method.setAccessible(true);
-            
+
             Object signer = method.invoke(bundle, null);
-            
+
             if (signer != null)
             {
                 dict.put("signer", signer);
@@ -398,26 +407,26 @@ final class AdminPermissionCollection extends PermissionCollection
         {
             throw new IllegalArgumentException("Invalid permission: " + permission);
         }
-        else if (isReadOnly())
+        else if (this.isReadOnly())
         {
             throw new SecurityException(
                 "Cannot add to read-only permission collection.");
         }
 
         AdminPermission admin = (AdminPermission) permission;
-        AdminPermission current = (AdminPermission) m_map.get(admin.getName());
+        AdminPermission current = (AdminPermission) this.m_map.get(admin.getName());
         if (current != null)
         {
             if (admin.m_actionMask != current.m_actionMask)
             {
-                m_map.put(admin.getName(),
+                this.m_map.put(admin.getName(),
                     new AdminPermission(admin.getName(),
                         admin.m_actionMask | current.m_actionMask));
             }
         }
         else
         {
-            m_map.put(admin.getName(), admin);
+            this.m_map.put(admin.getName(), admin);
         }
     }
 
@@ -428,7 +437,7 @@ final class AdminPermissionCollection extends PermissionCollection
             return false;
         }
 
-        for (Iterator iter = m_map.values().iterator(); iter.hasNext(); )
+        for (Iterator iter = this.m_map.values().iterator(); iter.hasNext(); )
         {
             if (((AdminPermission) iter.next()).implies(permission))
             {
@@ -441,6 +450,6 @@ final class AdminPermissionCollection extends PermissionCollection
 
     public Enumeration elements()
     {
-        return Collections.enumeration(m_map.values());
+        return Collections.enumeration(this.m_map.values());
     }
 }

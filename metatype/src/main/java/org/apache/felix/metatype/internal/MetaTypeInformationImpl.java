@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,7 +20,6 @@ package org.apache.felix.metatype.internal;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -41,7 +40,7 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  * The <code>MetaTypeInformationImpl</code> class implements the
  * <code>MetaTypeInformation</code> interface returned from the
  * <code>MetaTypeService</code>.
- * 
+ *
  * @author fmeschbe
  */
 public class MetaTypeInformationImpl implements MetaTypeInformation {
@@ -69,68 +68,68 @@ public class MetaTypeInformationImpl implements MetaTypeInformation {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.osgi.service.metatype.MetaTypeInformation#getBundle()
      */
     public Bundle getBundle() {
-        return bundle;
+        return this.bundle;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.osgi.service.metatype.MetaTypeInformation#getFactoryPids()
      */
     public String[] getFactoryPids() {
-        return (String[]) factoryPids.toArray(new String[factoryPids.size()]);
+        return (String[]) this.factoryPids.toArray(new String[this.factoryPids.size()]);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.osgi.service.metatype.MetaTypeInformation#getPids()
      */
     public String[] getPids() {
-        return (String[]) pids.toArray(new String[pids.size()]);
+        return (String[]) this.pids.toArray(new String[this.pids.size()]);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.osgi.service.metatype.MetaTypeProvider#getLocales()
      */
     public String[] getLocales() {
-        if (locales == null) {
+        if (this.locales == null) {
             synchronized (this) {
                 Set newLocales = new TreeSet();
-                for (Iterator mi = metaTypeProviders.values().iterator(); mi.hasNext();) {
+                for (Iterator mi = this.metaTypeProviders.values().iterator(); mi.hasNext();) {
                     MetaTypeProvider mtp = (MetaTypeProvider) mi.next();
-                    addValues(newLocales, mtp.getLocales());
+                    this.addValues(newLocales, mtp.getLocales());
                 }
-                locales = newLocales;
+                this.locales = newLocales;
             }
         }
 
-        return (String[]) locales.toArray(new String[locales.size()]);
+        return (String[]) this.locales.toArray(new String[this.locales.size()]);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.osgi.service.metatype.MetaTypeProvider#getObjectClassDefinition(java.lang.String,
      *      java.lang.String)
      */
     public ObjectClassDefinition getObjectClassDefinition(String id,
             String locale) {
-        MetaTypeProvider mtp = (MetaTypeProvider) metaTypeProviders.get(id);
+        MetaTypeProvider mtp = (MetaTypeProvider) this.metaTypeProviders.get(id);
         return (mtp != null) ? mtp.getObjectClassDefinition(id, locale) : null;
     }
-    
+
     // ---------- internal support for metadata -------------------------------
 
     Designate getDesignate( String pid )
     {
-        Object mto = metaTypeProviders.get( pid );
+        Object mto = this.metaTypeProviders.get( pid );
         if ( mto instanceof DefaultMetaTypeProvider )
         {
             return ( ( DefaultMetaTypeProvider ) mto ).getDesignate( pid );
@@ -138,14 +137,14 @@ public class MetaTypeInformationImpl implements MetaTypeInformation {
 
         return null;
     }
-    
+
     // ---------- setters to fill the values -----------------------------------
 
     protected void addMetaData(MetaData md) {
         if (md.getDesignates() != null) {
             // meta type provide to register by PID
-            DefaultMetaTypeProvider dmtp = new DefaultMetaTypeProvider(bundle, md);
-            
+            DefaultMetaTypeProvider dmtp = new DefaultMetaTypeProvider(this.bundle, md);
+
             Iterator designates = md.getDesignates().values().iterator();
             while (designates.hasNext()) {
                 Designate designate = (Designate) designates.next();
@@ -164,19 +163,19 @@ public class MetaTypeInformationImpl implements MetaTypeInformation {
                 }
 
                 // gather pids and factory pids
-                pids.add(designate.getPid());
+                this.pids.add(designate.getPid());
                 if (designate.getFactoryPid() != null) {
-                    factoryPids.add( designate.getFactoryPid() );
+                    this.factoryPids.add( designate.getFactoryPid() );
                 }
 
                 // register a metatype provider for the pid
-                addMetaTypeProvider(designate.getPid(), dmtp);
+                this.addMetaTypeProvider(designate.getPid(), dmtp);
             }
         }
     }
 
     protected void addPids(String[] pids) {
-        addValues(this.pids, pids);
+        this.addValues(this.pids, pids);
     }
 
     protected void removePid(String pid) {
@@ -184,7 +183,7 @@ public class MetaTypeInformationImpl implements MetaTypeInformation {
     }
 
     protected void addFactoryPids(String[] factoryPids) {
-        addValues(this.factoryPids, factoryPids);
+        this.addValues(this.factoryPids, factoryPids);
     }
 
     protected void removeFactoryPid(String factoryPid) {
@@ -193,15 +192,15 @@ public class MetaTypeInformationImpl implements MetaTypeInformation {
 
     protected void addMetaTypeProvider(String key, MetaTypeProvider mtp) {
         if (key != null && mtp != null) {
-            metaTypeProviders.put(key, mtp);
-            locales = null;
+            this.metaTypeProviders.put(key, mtp);
+            this.locales = null;
         }
     }
 
     protected MetaTypeProvider removeMetaTypeProvider(String key) {
         if (key != null) {
-            locales = null;
-            return (MetaTypeProvider) metaTypeProviders.remove(key);
+            this.locales = null;
+            return (MetaTypeProvider) this.metaTypeProviders.remove(key);
         }
 
         return null;

@@ -22,13 +22,36 @@ import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.util.*;
-import org.apache.felix.framework.util.manifestparser.*;
-import org.apache.felix.moduleloader.*;
-import org.osgi.framework.*;
+import org.apache.felix.framework.util.SecurityManagerEx;
+import org.apache.felix.framework.util.Util;
+import org.apache.felix.framework.util.manifestparser.Capability;
+import org.apache.felix.framework.util.manifestparser.ManifestParser;
+import org.apache.felix.framework.util.manifestparser.R4Directive;
+import org.apache.felix.framework.util.manifestparser.R4Library;
+import org.apache.felix.framework.util.manifestparser.Requirement;
+import org.apache.felix.moduleloader.ICapability;
+import org.apache.felix.moduleloader.IModule;
+import org.apache.felix.moduleloader.IModuleFactory;
+import org.apache.felix.moduleloader.IRequirement;
+import org.apache.felix.moduleloader.IWire;
+import org.apache.felix.moduleloader.ModuleEvent;
+import org.apache.felix.moduleloader.ModuleImpl;
+import org.apache.felix.moduleloader.ModuleListener;
+import org.apache.felix.moduleloader.ResourceNotFoundException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.PackagePermission;
+import org.osgi.framework.Version;
 
 public class R4SearchPolicyCore implements ModuleListener
 {
@@ -61,39 +84,39 @@ public class R4SearchPolicyCore implements ModuleListener
 
     public R4SearchPolicyCore(Logger logger, Map configMap)
     {
-        m_logger = logger;
-        m_configMap = configMap;
+        this.m_logger = logger;
+        this.m_configMap = configMap;
 
         // Read the boot delegation property and parse it.
-        String s = (String) m_configMap.get(Constants.FRAMEWORK_BOOTDELEGATION);
+        String s = (String) this.m_configMap.get(Constants.FRAMEWORK_BOOTDELEGATION);
         s = (s == null) ? "java.*" : s + ",java.*";
         StringTokenizer st = new StringTokenizer(s, " ,");
-        m_bootPkgs = new String[st.countTokens()];
-        m_bootPkgWildcards = new boolean[m_bootPkgs.length];
-        for (int i = 0; i < m_bootPkgs.length; i++)
+        this.m_bootPkgs = new String[st.countTokens()];
+        this.m_bootPkgWildcards = new boolean[this.m_bootPkgs.length];
+        for (int i = 0; i < this.m_bootPkgs.length; i++)
         {
             s = st.nextToken();
             if (s.endsWith("*"))
             {
-                m_bootPkgWildcards[i] = true;
+                this.m_bootPkgWildcards[i] = true;
                 s = s.substring(0, s.length() - 1);
             }
-            m_bootPkgs[i] = s;
+            this.m_bootPkgs[i] = s;
         }
     }
 
     public IModuleFactory getModuleFactory()
     {
-        return m_factory;
+        return this.m_factory;
     }
 
     public void setModuleFactory(IModuleFactory factory)
         throws IllegalStateException
     {
-        if (m_factory == null)
+        if (this.m_factory == null)
         {
-            m_factory = factory;
-            m_factory.addModuleListener(this);
+            this.m_factory = factory;
+            this.m_factory.addModuleListener(this);
         }
         else
         {
@@ -104,17 +127,17 @@ public class R4SearchPolicyCore implements ModuleListener
 
     protected synchronized boolean isResolved(IModule module)
     {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
+        ModuleData data = (ModuleData) this.m_moduleDataMap.get(module);
         return (data == null) ? false : data.m_resolved;
     }
 
     protected synchronized void setResolved(IModule module, boolean resolved)
     {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
+        ModuleData data = (ModuleData) this.m_moduleDataMap.get(module);
         if (data == null)
         {
             data = new ModuleData(module);
-            m_moduleDataMap.put(module, data);
+            this.m_moduleDataMap.put(module, data);
         }
         data.m_resolved = resolved;
     }
@@ -149,7 +172,7 @@ public class R4SearchPolicyCore implements ModuleListener
     {
         try
         {
-            return (Class) findClassOrResource(module, name, true);
+            return (Class) this.findClassOrResource(module, name, true);
         }
         catch (ResourceNotFoundException ex)
         {
@@ -157,7 +180,7 @@ public class R4SearchPolicyCore implements ModuleListener
         }
         catch (ClassNotFoundException ex)
         {
-            String msg = diagnoseClassLoadError(module, name);
+            String msg = this.diagnoseClassLoadError(module, name);
             throw new ClassNotFoundException(msg, ex);
         }
 
@@ -170,7 +193,7 @@ public class R4SearchPolicyCore implements ModuleListener
     {
         try
         {
-            return (URL) findClassOrResource(module, name, false);
+            return (URL) this.findClassOrResource(module, name, false);
         }
         catch (ClassNotFoundException ex)
         {
@@ -194,7 +217,7 @@ public class R4SearchPolicyCore implements ModuleListener
 // for each class load.
         try
         {
-            resolve(module);
+            this.resolve(module);
         }
         catch (ResolveException ex)
         {
@@ -222,7 +245,7 @@ public class R4SearchPolicyCore implements ModuleListener
         // not take a stand on this issue.
         if (pkgName.length() > 0)
         {
-            for (int i = 0; i < m_bootPkgs.length; i++)
+            for (int i = 0; i < this.m_bootPkgs.length; i++)
             {
                 // A wildcarded boot delegation package will be in the form of
                 // "foo.", so if the package is wildcarded do a startsWith() or a
@@ -230,14 +253,14 @@ public class R4SearchPolicyCore implements ModuleListener
                 // request should be delegated to the parent class loader. If the
                 // package is not wildcarded, then simply do an equals() test to
                 // see if the request should be delegated to the parent class loader.
-                if ((m_bootPkgWildcards[i] &&
-                    (pkgName.startsWith(m_bootPkgs[i]) ||
-                    m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
-                    || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
+                if ((this.m_bootPkgWildcards[i] &&
+                    (pkgName.startsWith(this.m_bootPkgs[i]) ||
+                    this.m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
+                    || (!this.m_bootPkgWildcards[i] && this.m_bootPkgs[i].equals(pkgName)))
                 {
                     try
                     {
-                        urls = getClass().getClassLoader().getResources(name);
+                        urls = this.getClass().getClassLoader().getResources(name);
                         return urls;
                     }
                     catch (IOException ex)
@@ -278,7 +301,7 @@ public class R4SearchPolicyCore implements ModuleListener
         // At this point, the module's imports were searched and so was the
         // the module's content. Now we make an attempt to load the
         // class/resource via a dynamic import, if possible.
-        IWire wire = attemptDynamicImport(module, pkgName);
+        IWire wire = this.attemptDynamicImport(module, pkgName);
         if (wire != null)
         {
             urls = wire.getResources(name);
@@ -300,7 +323,7 @@ public class R4SearchPolicyCore implements ModuleListener
 // for each class load.
         try
         {
-            resolve(module);
+            this.resolve(module);
         }
         catch (ResolveException ex)
         {
@@ -338,7 +361,7 @@ public class R4SearchPolicyCore implements ModuleListener
 
         // Delegate any packages listed in the boot delegation
         // property to the parent class loader.
-        for (int i = 0; i < m_bootPkgs.length; i++)
+        for (int i = 0; i < this.m_bootPkgs.length; i++)
         {
             // A wildcarded boot delegation package will be in the form of "foo.",
             // so if the package is wildcarded do a startsWith() or a regionMatches()
@@ -351,14 +374,14 @@ public class R4SearchPolicyCore implements ModuleListener
                 // Only consider delegation if we have a package name, since
                 // we don't want to promote the default package. The spec does
                 // not take a stand on this issue.
-                if ((m_bootPkgWildcards[i] &&
-                    (pkgName.startsWith(m_bootPkgs[i]) ||
-                    m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
-                    || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
+                if ((this.m_bootPkgWildcards[i] &&
+                    (pkgName.startsWith(this.m_bootPkgs[i]) ||
+                    this.m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
+                    || (!this.m_bootPkgWildcards[i] && this.m_bootPkgs[i].equals(pkgName)))
                 {
                     return (isClass)
-                        ? (Object) getClass().getClassLoader().loadClass(name)
-                        : (Object) getClass().getClassLoader().getResource(name);
+                        ? (Object) this.getClass().getClassLoader().loadClass(name)
+                        : (Object) this.getClass().getClassLoader().getResource(name);
                 }
             }
         }
@@ -366,7 +389,7 @@ public class R4SearchPolicyCore implements ModuleListener
         // Look in the module's imports. Note that the search may
         // be aborted if this method throws an exception, otherwise
         // it continues if a null is returned.
-        Object result = searchImports(module, name, isClass);
+        Object result = this.searchImports(module, name, isClass);
 
         // If not found, try the module's own class path.
         if (result == null)
@@ -378,7 +401,7 @@ public class R4SearchPolicyCore implements ModuleListener
             // If still not found, then try the module's dynamic imports.
             if (result == null)
             {
-                result = searchDynamicImports(module, name, pkgName, isClass);
+                result = this.searchDynamicImports(module, name, pkgName, isClass);
             }
         }
 
@@ -424,7 +447,7 @@ public class R4SearchPolicyCore implements ModuleListener
         // At this point, the module's imports were searched and so was the
         // the module's content. Now we make an attempt to load the
         // class/resource via a dynamic import, if possible.
-        IWire wire = attemptDynamicImport(module, pkgName);
+        IWire wire = this.attemptDynamicImport(module, pkgName);
 
         // If the dynamic import was successful, then this initial
         // time we must directly return the result from dynamically
@@ -562,12 +585,12 @@ public class R4SearchPolicyCore implements ModuleListener
                     try
                     {
                         // Lock module manager instance to ensure that nothing changes.
-                        synchronized (m_factory)
+                        synchronized (this.m_factory)
                         {
                             // Get "in use" and "available" candidates and put
                             // the "in use" candidates first.
-                            PackageSource[] inuse = getInUseCandidates(req);
-                            PackageSource[] available = getUnusedCandidates(req);
+                            PackageSource[] inuse = this.getInUseCandidates(req);
+                            PackageSource[] available = this.getUnusedCandidates(req);
                             PackageSource[] candidates = new PackageSource[inuse.length + available.length];
                             System.arraycopy(inuse, 0, candidates, 0, inuse.length);
                             System.arraycopy(available, 0, candidates, inuse.length, available.length);
@@ -579,7 +602,7 @@ public class R4SearchPolicyCore implements ModuleListener
                             {
                                 try
                                 {
-                                    if (resolveDynamicImportCandidate(
+                                    if (this.resolveDynamicImportCandidate(
                                         candidates[candIdx].m_module, importer))
                                     {
                                         candidate = candidates[candIdx];
@@ -610,14 +633,14 @@ public class R4SearchPolicyCore implements ModuleListener
                                     importer, dynamics[i], candidate.m_module, candidate.m_capability);
                                 newWires[newWires.length - 1] = wire;
                                 ((ModuleImpl) importer).setWires(newWires);
-m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
+this.m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                                 return wire;
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        m_logger.log(Logger.LOG_ERROR, "Unable to dynamically import package.", ex);
+                        this.m_logger.log(Logger.LOG_ERROR, "Unable to dynamically import package.", ex);
                     }
                 }
             }
@@ -635,21 +658,21 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         // provider. If there is no consistent class space, then a resolve
         // exception is thrown.
         Map candidatesMap = new HashMap();
-        if (!isResolved(provider))
+        if (!this.isResolved(provider))
         {
-            populateCandidatesMap(candidatesMap, provider);
-            findConsistentClassSpace(candidatesMap, provider);
+            this.populateCandidatesMap(candidatesMap, provider);
+            this.findConsistentClassSpace(candidatesMap, provider);
         }
 
         // If the provider can be successfully resolved, then verify that
         // its class space is consistent with the existing class space of the
         // module that instigated the dynamic import.
         Map moduleMap = new HashMap();
-        Map importerPkgMap = getModulePackages(moduleMap, importer, candidatesMap);
+        Map importerPkgMap = this.getModulePackages(moduleMap, importer, candidatesMap);
 
         // Now we need to calculate the "uses" constraints of every package
         // accessible to the provider module based on its current candidates.
-        Map usesMap = usesMap = calculateUsesConstraints(provider, moduleMap, candidatesMap);
+        Map usesMap = this.calculateUsesConstraints(provider, moduleMap, candidatesMap);
 
         // Verify that none of the provider's implied "uses" constraints
         // in the uses map conflict with anything in the importing module's
@@ -696,7 +719,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     }
                     else
                     {
-                        m_logger.log(
+                        this.m_logger.log(
                             Logger.LOG_DEBUG,
                             "Constraint violation for " + importer
                             + " detected; module can see "
@@ -707,7 +730,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             }
         }
 
-        Map resolvedModuleWireMap = createWires(candidatesMap, provider);
+        Map resolvedModuleWireMap = this.createWires(candidatesMap, provider);
 
         // Fire resolved events for all resolved modules;
         // the resolved modules array will only be set if the resolve
@@ -717,7 +740,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             Iterator iter = resolvedModuleWireMap.entrySet().iterator();
             while (iter.hasNext())
             {
-                fireModuleResolved((IModule) ((Map.Entry) iter.next()).getKey());
+                this.fireModuleResolved((IModule) ((Map.Entry) iter.next()).getKey());
             }
         }
 
@@ -749,14 +772,14 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
-        synchronized (m_factory)
+        synchronized (this.m_factory)
         {
             PackageSource[] candidates = m_emptySources;
             if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
                 (((Requirement) req).getPackageName() != null))
             {
                 String pkgName = ((Requirement) req).getPackageName();
-                IModule[] modules = (IModule[]) m_inUsePkgIndexMap.get(pkgName);
+                IModule[] modules = (IModule[]) this.m_inUsePkgIndexMap.get(pkgName);
                 for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
                 {
                     ICapability inUseCap = Util.getSatisfyingCapability(modules[modIdx], req);
@@ -768,7 +791,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                                 new PackagePermission(pkgName,
                                     PackagePermission.EXPORT)))
                         {
-                            m_logger.log(Logger.LOG_DEBUG,
+                            this.m_logger.log(Logger.LOG_DEBUG,
                                 "PackagePermission.EXPORT denied for "
                                 + pkgName
                                 + "from " + modules[modIdx].getId());
@@ -786,7 +809,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             }
             else
             {
-                Iterator i = m_inUseCapMap.entrySet().iterator();
+                Iterator i = this.m_inUseCapMap.entrySet().iterator();
                 while (i.hasNext())
                 {
                     Map.Entry entry = (Map.Entry) i.next();
@@ -804,7 +827,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                                         (String) inUseCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY),
                                         PackagePermission.EXPORT)))
                             {
-                                m_logger.log(Logger.LOG_DEBUG,
+                                this.m_logger.log(Logger.LOG_DEBUG,
                                     "PackagePermission.EXPORT denied for "
                                     + inUseCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY)
                                     + "from " + module.getId());
@@ -827,7 +850,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
     private boolean isCapabilityInUse(IModule module, ICapability cap)
     {
-        ICapability[] caps = (ICapability[]) m_inUseCapMap.get(module);
+        ICapability[] caps = (ICapability[]) this.m_inUseCapMap.get(module);
         for (int i = 0; (caps != null) && (i < caps.length); i++)
         {
             if (caps[i].equals(cap))
@@ -842,18 +865,18 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
-        synchronized (m_factory)
+        synchronized (this.m_factory)
         {
             // Get all modules.
             IModule[] modules = null;
             if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
                 (((Requirement) req).getPackageName() != null))
             {
-                modules = (IModule[]) m_availPkgIndexMap.get(((Requirement) req).getPackageName());
+                modules = (IModule[]) this.m_availPkgIndexMap.get(((Requirement) req).getPackageName());
             }
             else
             {
-                modules = m_factory.getModules();
+                modules = this.m_factory.getModules();
             }
 
             // Create list of compatible providers.
@@ -864,7 +887,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 ICapability cap = Util.getSatisfyingCapability(modules[modIdx], req);
                 // If compatible and it is not currently used, then add
                 // the available candidate to the list.
-                if ((cap != null) && !isCapabilityInUse(modules[modIdx], cap))
+                if ((cap != null) && !this.isCapabilityInUse(modules[modIdx], cap))
                 {
                     PackageSource[] tmp = new PackageSource[candidates.length + 1];
                     System.arraycopy(candidates, 0, tmp, 0, candidates.length);
@@ -881,7 +904,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         throws ResolveException
     {
         // If the module is already resolved, then we can just return.
-        if (isResolved(rootModule))
+        if (this.isResolved(rootModule))
         {
             return;
         }
@@ -901,7 +924,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         // Synchronize on the module manager, because we don't want
         // any modules being added or removed while we are in the
         // middle of this operation.
-        synchronized (m_factory)
+        synchronized (this.m_factory)
         {
             // The first step is to populate the candidates map. This
             // will use the target module to populate the candidates map
@@ -914,7 +937,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             // this map will be resolved, only the target module and
             // any candidates selected to resolve its requirements and the
             // transitive requirements this implies.
-            populateCandidatesMap(candidatesMap, rootModule);
+            this.populateCandidatesMap(candidatesMap, rootModule);
 
             // The next step is to use the candidates map to determine if
             // the class space for the root module is consistent. This
@@ -926,7 +949,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             // a consistent set of candidates; otherwise, a resolve exception
             // is thrown if it exhausts all possible combinations and could
             // not find a consistent class space.
-            findConsistentClassSpace(candidatesMap, rootModule);
+            this.findConsistentClassSpace(candidatesMap, rootModule);
 
             // The final step is to create the wires for the root module and
             // transitively all modules that are to be resolved from the
@@ -936,7 +959,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             // to fire resolved events outside of the synchronized block.
             // The resolved module wire map maps a module to its array of
             // wires.
-            resolvedModuleWireMap = createWires(candidatesMap, rootModule);
+            resolvedModuleWireMap = this.createWires(candidatesMap, rootModule);
 
 //dumpUsedPackages();
         } // End of synchronized block on module manager.
@@ -949,7 +972,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             Iterator iter = resolvedModuleWireMap.entrySet().iterator();
             while (iter.hasNext())
             {
-                fireModuleResolved((IModule) ((Map.Entry) iter.next()).getKey());
+                this.fireModuleResolved((IModule) ((Map.Entry) iter.next()).getKey());
             }
         }
     }
@@ -981,8 +1004,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             // package maps. Candidates "in use" have higher priority
             // than "available" ones, so put the "in use" candidates
             // at the front of the list of candidates.
-            PackageSource[] inuse = getInUseCandidates(reqs[reqIdx]);
-            PackageSource[] available = getUnusedCandidates(reqs[reqIdx]);
+            PackageSource[] inuse = this.getInUseCandidates(reqs[reqIdx]);
+            PackageSource[] available = this.getUnusedCandidates(reqs[reqIdx]);
             PackageSource[] candidates = new PackageSource[inuse.length + available.length];
             System.arraycopy(inuse, 0, candidates, 0, inuse.length);
             System.arraycopy(available, 0, candidates, inuse.length, available.length);
@@ -998,9 +1021,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     {
                         // Only populate the resolver map with modules that
                         // are not already resolved.
-                        if (!isResolved(candidates[candIdx].m_module))
+                        if (!this.isResolved(candidates[candIdx].m_module))
                         {
-                            populateCandidatesMap(candidatesMap, candidates[candIdx].m_module);
+                            this.populateCandidatesMap(candidatesMap, candidates[candIdx].m_module);
                         }
                     }
                     catch (ResolveException ex)
@@ -1052,7 +1075,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         synchronized (this)
         {
             System.out.println("PACKAGES IN USE MAP:");
-            for (Iterator i = m_inUseCapMap.entrySet().iterator(); i.hasNext(); )
+            for (Iterator i = this.m_inUseCapMap.entrySet().iterator(); i.hasNext(); )
             {
                 Map.Entry entry = (Map.Entry) i.next();
                 ICapability[] caps = (ICapability[]) entry.getValue();
@@ -1096,7 +1119,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         // Test the current potential candidates to determine if they
         // are consistent. Keep looping until we find a consistent
         // set or an exception is thrown.
-        while (!isClassSpaceConsistent(rootModule, moduleMap, cycleMap, candidatesMap))
+        while (!this.isClassSpaceConsistent(rootModule, moduleMap, cycleMap, candidatesMap))
         {
             // The incrementCandidateConfiguration() method requires
             // ordered access to the candidates map, so we will create
@@ -1107,12 +1130,12 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 for (Iterator iter = candidatesMap.entrySet().iterator();
                     iter.hasNext(); )
                 {
-                    candidatesList.add((List) ((Map.Entry) iter.next()).getValue());
+                    candidatesList.add(((Map.Entry) iter.next()).getValue());
                 }
             }
 
             // Increment the candidate configuration so we can test again.
-            incrementCandidateConfiguration(candidatesList);
+            this.incrementCandidateConfiguration(candidatesList);
 
             // Clear the module map.
             moduleMap.clear();
@@ -1141,11 +1164,11 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         Map pkgMap = null;
         try
         {
-            pkgMap = getModulePackages(moduleMap, targetModule, candidatesMap);
+            pkgMap = this.getModulePackages(moduleMap, targetModule, candidatesMap);
         }
         catch (ResolveException ex)
         {
-            m_logger.log(
+            this.m_logger.log(
                 Logger.LOG_DEBUG,
                 "Constraint violation for " + targetModule + " detected.",
                 ex);
@@ -1164,7 +1187,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
             {
                 PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
-                if (!isClassSpaceConsistent(ps.m_module, moduleMap, cycleMap, candidatesMap))
+                if (!this.isClassSpaceConsistent(ps.m_module, moduleMap, cycleMap, candidatesMap))
                 {
                     return false;
                 }
@@ -1176,11 +1199,11 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         Map usesMap = null;
         try
         {
-            usesMap = calculateUsesConstraints(targetModule, moduleMap, candidatesMap);
+            usesMap = this.calculateUsesConstraints(targetModule, moduleMap, candidatesMap);
         }
         catch (ResolveException ex)
         {
-            m_logger.log(
+            this.m_logger.log(
                 Logger.LOG_DEBUG,
                 "Constraint violation for " + targetModule + " detected.",
                 ex);
@@ -1231,7 +1254,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     }
                     else
                     {
-                        m_logger.log(
+                        this.m_logger.log(
                             Logger.LOG_DEBUG,
                             "Constraint violation for " + targetModule
                             + " detected; module can see "
@@ -1261,7 +1284,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         Map cycleMap = new HashMap();
 
         // Get all packages accessible by the target module.
-        Map pkgMap = getModulePackages(moduleMap, targetModule, candidatesMap);
+        Map pkgMap = this.getModulePackages(moduleMap, targetModule, candidatesMap);
 
         // Each package accessible from the target module is potentially
         // comprised of one or more modules, called package sources. The
@@ -1274,7 +1297,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             ResolvedPackage rp = (ResolvedPackage) entry.getValue();
             for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
             {
-                usesMap = calculateUsesConstraints(
+                usesMap = this.calculateUsesConstraints(
                     (PackageSource) rp.m_sourceList.get(srcIdx),
                     moduleMap, usesMap, cycleMap, candidatesMap);
             }
@@ -1299,7 +1322,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
         // Get all packages accessible from the module of the
         // target package source.
-        Map pkgMap = getModulePackages(moduleMap, psTarget.m_module, candidatesMap);
+        Map pkgMap = this.getModulePackages(moduleMap, psTarget.m_module, candidatesMap);
 
         // Get capability (i.e., package) of the target package source.
         Capability cap = (Capability) psTarget.m_capability;
@@ -1322,7 +1345,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 // and combine the "uses" constraints for each package source.
                 for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
                 {
-                    usesMap = calculateUsesConstraints(
+                    usesMap = this.calculateUsesConstraints(
                         (PackageSource) rp.m_sourceList.get(srcIdx),
                         moduleMap, usesMap, cycleMap, candidatesMap);
                 }
@@ -1350,7 +1373,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
         if (map == null)
         {
-            map = calculateModulePackages(module, candidatesMap);
+            map = this.calculateModulePackages(module, candidatesMap);
             moduleMap.put(module, map);
 //if (!module.getId().equals("0"))
 //{
@@ -1379,9 +1402,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         throws ResolveException
     {
 //System.out.println("calculateModulePackages("+module+")");
-        Map importedPackages = calculateImportedPackages(module, candidatesMap);
-        Map exportedPackages = calculateExportedPackages(module);
-        Map requiredPackages = calculateRequiredPackages(module, candidatesMap);
+        Map importedPackages = this.calculateImportedPackages(module, candidatesMap);
+        Map exportedPackages = this.calculateExportedPackages(module);
+        Map requiredPackages = this.calculateRequiredPackages(module, candidatesMap);
 
         // Merge exported packages into required packages. If a package is both
         // exported and required, then append the exported source to the end of
@@ -1418,8 +1441,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         throws ResolveException
     {
         return (candidatesMap.get(targetModule) == null)
-            ? calculateImportedPackagesResolved(targetModule)
-            : calculateImportedPackagesUnresolved(targetModule, candidatesMap);
+            ? this.calculateImportedPackagesResolved(targetModule)
+            : this.calculateImportedPackagesUnresolved(targetModule, candidatesMap);
     }
 
     private Map calculateImportedPackagesUnresolved(IModule targetModule, Map candidatesMap)
@@ -1455,7 +1478,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 // of our imported package, unless we are the provider.
                 if (!targetModule.equals(ps.m_module))
                 {
-                    Map implicitPkgMap = calculateImplicitImportedPackages(
+                    Map implicitPkgMap = this.calculateImplicitImportedPackages(
                         ps.m_module, ps.m_capability, candidatesMap, new HashMap());
                     // Merge the implicitly imported packages with our imports and
                     // verify that there is no overlap.
@@ -1513,7 +1536,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 // of our imported package, unless we are the provider.
                 if (!targetModule.equals(wires[wireIdx].getExporter()))
                 {
-                    Map implicitPkgMap = calculateImplicitImportedPackagesResolved(
+                    Map implicitPkgMap = this.calculateImplicitImportedPackagesResolved(
                         wires[wireIdx].getExporter(), wires[wireIdx].getCapability(), new HashMap());
                     // Merge the implicitly imported packages with our imports.
                     // No need to verify overlap since this is resolved and should
@@ -1535,10 +1558,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         Map candidatesMap, Map cycleMap)
     {
         return (candidatesMap.get(targetModule) == null)
-            ? calculateImplicitImportedPackagesResolved(
+            ? this.calculateImplicitImportedPackagesResolved(
                 targetModule, targetCapability, cycleMap)
-            : calculateImplicitImportedPackagesUnresolved(
-                targetModule, targetCapability, candidatesMap, cycleMap);      
+            : this.calculateImplicitImportedPackagesUnresolved(
+                targetModule, targetCapability, candidatesMap, cycleMap);
     }
 
     // TODO: EXPERIMENTAL - This is currently not defined recursively, but it should be.
@@ -1614,11 +1637,11 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         {
             Map cycleMap = new HashMap();
             cycleMap.put(module, module);
-            return calculateImplicitImportedPackages(
+            return this.calculateImplicitImportedPackages(
                 psTarget.m_module, psTarget.m_capability, candidatesMap, cycleMap);
         }
 
-        return null;      
+        return null;
     }
 
     private Map calculateExportedPackages(IModule targetModule)
@@ -1648,8 +1671,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
     private Map calculateRequiredPackages(IModule targetModule, Map candidatesMap)
     {
         return (candidatesMap.get(targetModule) == null)
-            ? calculateRequiredPackagesResolved(targetModule)
-            : calculateRequiredPackagesUnresolved(targetModule, candidatesMap);      
+            ? this.calculateRequiredPackagesResolved(targetModule)
+            : this.calculateRequiredPackagesUnresolved(targetModule, candidatesMap);
     }
 
     private Map calculateRequiredPackagesUnresolved(IModule targetModule, Map candidatesMap)
@@ -1672,7 +1695,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 Map cycleMap = new HashMap();
                 cycleMap.put(targetModule, targetModule);
                 Map requireMap =
-                    calculateExportedAndReexportedPackages(
+                    this.calculateExportedAndReexportedPackages(
                         ps, candidatesMap, cycleMap);
 
                 // Take the flattened required package map for the current
@@ -1720,7 +1743,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 Map cycleMap = new HashMap();
                 cycleMap.put(targetModule, targetModule);
                 Map requireMap =
-                    calculateExportedAndReexportedPackagesResolved(
+                    this.calculateExportedAndReexportedPackagesResolved(
                         wires[i].getExporter(), cycleMap);
 
                 // Take the flattened required package map for the current
@@ -1752,8 +1775,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         PackageSource psTarget, Map candidatesMap, Map cycleMap)
     {
         return (candidatesMap.get(psTarget.m_module) == null)
-            ? calculateExportedAndReexportedPackagesResolved(psTarget.m_module, cycleMap)
-            : calculateExportedAndReexportedPackagesUnresolved(psTarget, candidatesMap, cycleMap);      
+            ? this.calculateExportedAndReexportedPackagesResolved(psTarget.m_module, cycleMap)
+            : this.calculateExportedAndReexportedPackagesUnresolved(psTarget, candidatesMap, cycleMap);
     }
 
     private Map calculateExportedAndReexportedPackagesUnresolved(
@@ -1800,7 +1823,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
                 // Recursively calculate the required packages for the
                 // current candidate.
-                Map requiredMap = calculateExportedAndReexportedPackages(ps, candidatesMap, cycleMap);
+                Map requiredMap = this.calculateExportedAndReexportedPackages(ps, candidatesMap, cycleMap);
 
                 // Merge the candidate's exported and required packages
                 // into the complete set of required packages.
@@ -1916,7 +1939,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
                 // Recursively calculate the required packages for the
                 // wire's exporting module.
-                Map requiredMap = calculateExportedAndReexportedPackagesResolved(wires[i].getExporter(), cycleMap);
+                Map requiredMap = this.calculateExportedAndReexportedPackagesResolved(wires[i].getExporter(), cycleMap);
 
                 // Merge the wires exported and re-exported packages
                 // into the complete set of required packages.
@@ -1997,7 +2020,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 //System.out.println("calculateCandidateRequiredPackages("+module+")");
         Map cycleMap = new HashMap();
         cycleMap.put(module, module);
-        return calculateExportedAndReexportedPackages(psTarget, candidatesMap, cycleMap);
+        return this.calculateExportedAndReexportedPackages(psTarget, candidatesMap, cycleMap);
     }
 
     private void incrementCandidateConfiguration(List resolverList)
@@ -2032,7 +2055,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
     private Map createWires(Map candidatesMap, IModule rootModule)
     {
         Map resolvedModuleWireMap =
-            populateWireMap(candidatesMap, rootModule, new HashMap());
+            this.populateWireMap(candidatesMap, rootModule, new HashMap());
         Iterator iter = resolvedModuleWireMap.entrySet().iterator();
         while (iter.hasNext())
         {
@@ -2041,7 +2064,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             IWire[] wires = (IWire[]) entry.getValue();
 
             // Set the module's resolved and wiring attribute.
-            setResolved(module, true);
+            this.setResolved(module, true);
             // Only add wires attribute if some exist; export
             // only modules may not have wires.
             if (wires.length > 0)
@@ -2056,11 +2079,11 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 (wires != null) && (wireIdx < wires.length);
                 wireIdx++)
             {
-m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
+this.m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 // Add the exporter module of the wire to the "in use" capability map.
-                ICapability[] inUseCaps = (ICapability[]) m_inUseCapMap.get(wires[wireIdx].getExporter());
+                ICapability[] inUseCaps = (ICapability[]) this.m_inUseCapMap.get(wires[wireIdx].getExporter());
                 inUseCaps = addCapabilityToArray(inUseCaps, wires[wireIdx].getCapability());
-                m_inUseCapMap.put(wires[wireIdx].getExporter(), inUseCaps);
+                this.m_inUseCapMap.put(wires[wireIdx].getExporter(), inUseCaps);
 
                 // If the capability is a package, then add the exporter module
                 // of the wire to the "in use" package index and remove it
@@ -2071,15 +2094,15 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                     String pkgName = (String)
                         wires[wireIdx].getCapability().getProperties().get(ICapability.PACKAGE_PROPERTY);
                     // Add to "in use" package index.
-                    indexPackageCapability(
-                        m_inUsePkgIndexMap,
+                    this.indexPackageCapability(
+                        this.m_inUsePkgIndexMap,
                         wires[wireIdx].getExporter(),
                         wires[wireIdx].getCapability());
                     // Remove from "available" package index.
-                    m_availPkgIndexMap.put(
+                    this.m_availPkgIndexMap.put(
                         pkgName,
                         removeModuleFromArray(
-                            (IModule[]) m_availPkgIndexMap.get(pkgName),
+                            (IModule[]) this.m_availPkgIndexMap.get(pkgName),
                             wires[wireIdx].getExporter()));
                 }
             }
@@ -2107,9 +2130,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 }
                 if (!matched)
                 {
-                    ICapability[] inUseCaps = (ICapability[]) m_inUseCapMap.get(module);
+                    ICapability[] inUseCaps = (ICapability[]) this.m_inUseCapMap.get(module);
                     inUseCaps = addCapabilityToArray(inUseCaps, caps[capIdx]);
-                    m_inUseCapMap.put(module, inUseCaps);
+                    this.m_inUseCapMap.put(module, inUseCaps);
 
                     // If the capability is a package, then add the exporter module
                     // of the wire to the "in use" package index and remove it
@@ -2120,15 +2143,15 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                         String pkgName = (String)
                             caps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY);
                         // Add to "in use" package index.
-                        indexPackageCapability(
-                            m_inUsePkgIndexMap,
+                        this.indexPackageCapability(
+                            this.m_inUsePkgIndexMap,
                             module,
                             caps[capIdx]);
                         // Remove from "available" package index.
-                        m_availPkgIndexMap.put(
+                        this.m_availPkgIndexMap.put(
                             pkgName,
                             removeModuleFromArray(
-                                (IModule[]) m_availPkgIndexMap.get(pkgName),
+                                (IModule[]) this.m_availPkgIndexMap.get(pkgName),
                                 module));
                     }
                 }
@@ -2142,7 +2165,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
     {
         // If the module is already resolved or it is part of
         // a cycle, then just return the wire map.
-        if (isResolved(importer) || (wireMap.get(importer) != null))
+        if (this.isResolved(importer) || (wireMap.get(importer) != null))
         {
             return wireMap;
         }
@@ -2172,7 +2195,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                     cs.m_requirement,
                     cs.m_candidates[cs.m_idx].m_module,
                     cs.m_candidates[cs.m_idx].m_capability,
-                    calculateCandidateRequiredPackages(importer, cs.m_candidates[cs.m_idx], candidatesMap)));
+                    this.calculateCandidateRequiredPackages(importer, cs.m_candidates[cs.m_idx], candidatesMap)));
             }
             else
             {
@@ -2183,11 +2206,11 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                     cs.m_candidates[cs.m_idx].m_module,
                     cs.m_candidates[cs.m_idx].m_capability));
 
-                // TODO: EXPERIMENTAL - The following is part of an experimental 
+                // TODO: EXPERIMENTAL - The following is part of an experimental
                 //       implicit imported wire concept. The above code is how
                 //       the wire should normally be created.
                 // Add wires for any implicitly imported package from provider.
-                Map pkgMap = calculateCandidateImplicitImportedPackages(
+                Map pkgMap = this.calculateCandidateImplicitImportedPackages(
                     importer, cs.m_candidates[cs.m_idx], candidatesMap);
                 if (pkgMap != null)
                 {
@@ -2205,7 +2228,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             }
 
             // Create any necessary wires for the selected candidate module.
-            wireMap = populateWireMap(
+            wireMap = this.populateWireMap(
                 candidatesMap, cs.m_candidates[cs.m_idx].m_module, wireMap);
         }
 
@@ -2237,9 +2260,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         synchronized (m_emptyListeners)
         {
             // If we have no listeners, then just add the new listener.
-            if (m_listeners == m_emptyListeners)
+            if (this.m_listeners == m_emptyListeners)
             {
-                m_listeners = new ResolveListener[] { l };
+                this.m_listeners = new ResolveListener[] { l };
             }
             // Otherwise, we need to do some array copying.
             // Notice, the old array is always valid, so if
@@ -2248,10 +2271,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             // and is not affected by the new value.
             else
             {
-                ResolveListener[] newList = new ResolveListener[m_listeners.length + 1];
-                System.arraycopy(m_listeners, 0, newList, 0, m_listeners.length);
-                newList[m_listeners.length] = l;
-                m_listeners = newList;
+                ResolveListener[] newList = new ResolveListener[this.m_listeners.length + 1];
+                System.arraycopy(this.m_listeners, 0, newList, 0, this.m_listeners.length);
+                newList[this.m_listeners.length] = l;
+                this.m_listeners = newList;
             }
         }
     }
@@ -2273,9 +2296,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         {
             // Try to find the instance in our list.
             int idx = -1;
-            for (int i = 0; i < m_listeners.length; i++)
+            for (int i = 0; i < this.m_listeners.length; i++)
             {
-                if (m_listeners[i].equals(l))
+                if (this.m_listeners[i].equals(l))
                 {
                     idx = i;
                     break;
@@ -2286,9 +2309,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             if (idx >= 0)
             {
                 // If this is the last listener, then point to empty list.
-                if (m_listeners.length == 1)
+                if (this.m_listeners.length == 1)
                 {
-                    m_listeners = m_emptyListeners;
+                    this.m_listeners = m_emptyListeners;
                 }
                 // Otherwise, we need to do some array copying.
                 // Notice, the old array is always valid, so if
@@ -2297,14 +2320,14 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 // and is not affected by the new value.
                 else
                 {
-                    ResolveListener[] newList = new ResolveListener[m_listeners.length - 1];
-                    System.arraycopy(m_listeners, 0, newList, 0, idx);
+                    ResolveListener[] newList = new ResolveListener[this.m_listeners.length - 1];
+                    System.arraycopy(this.m_listeners, 0, newList, 0, idx);
                     if (idx < newList.length)
                     {
-                        System.arraycopy(m_listeners, idx + 1, newList, idx,
+                        System.arraycopy(this.m_listeners, idx + 1, newList, idx,
                             newList.length - idx);
                     }
-                    m_listeners = newList;
+                    this.m_listeners = newList;
                 }
             }
         }
@@ -2321,7 +2344,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
         // Get a copy of the listener array, which is guaranteed
         // to not be null.
-        ResolveListener[] listeners = m_listeners;
+        ResolveListener[] listeners = this.m_listeners;
 
         // Loop through listeners and fire events.
         for (int i = 0; i < listeners.length; i++)
@@ -2329,7 +2352,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             // Lazily create event.
             if (event == null)
             {
-                event = new ModuleEvent(m_factory, module);
+                event = new ModuleEvent(this.m_factory, module);
             }
             listeners[i].moduleResolved(event);
         }
@@ -2347,7 +2370,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
         // Get a copy of the listener array, which is guaranteed
         // to not be null.
-        ResolveListener[] listeners = m_listeners;
+        ResolveListener[] listeners = this.m_listeners;
 
         // Loop through listeners and fire events.
         for (int i = 0; i < listeners.length; i++)
@@ -2355,7 +2378,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             // Lazily create event.
             if (event == null)
             {
-                event = new ModuleEvent(m_factory, module);
+                event = new ModuleEvent(this.m_factory, module);
             }
             listeners[i].moduleUnresolved(event);
         }
@@ -2367,7 +2390,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
     public void moduleAdded(ModuleEvent event)
     {
-        synchronized (m_factory)
+        synchronized (this.m_factory)
         {
             // When a module is added, create an aggregated list of available
             // exports to simplify later processing when resolving bundles.
@@ -2379,7 +2402,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             {
                 if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                 {
-                    indexPackageCapability(m_availPkgIndexMap, module, caps[i]);
+                    this.indexPackageCapability(this.m_availPkgIndexMap, module, caps[i]);
                 }
             }
         }
@@ -2393,7 +2416,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
         // Synchronize on the module manager, since we don't want any
         // bundles to be installed or removed.
-        synchronized (m_factory)
+        synchronized (this.m_factory)
         {
             // Remove exports from package maps.
             ICapability[] caps = event.getModule().getDefinition().getCapabilities();
@@ -2405,19 +2428,19 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                     String pkgName = (String)
                         caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
                     // Remove from "available" package map.
-                    IModule[] modules = (IModule[]) m_availPkgIndexMap.get(pkgName);
+                    IModule[] modules = (IModule[]) this.m_availPkgIndexMap.get(pkgName);
                     if (modules != null)
                     {
                         modules = removeModuleFromArray(modules, event.getModule());
-                        m_availPkgIndexMap.put(pkgName, modules);
+                        this.m_availPkgIndexMap.put(pkgName, modules);
                     }
 
                     // Remove from "in use" package map.
-                    modules = (IModule[]) m_inUsePkgIndexMap.get(pkgName);
+                    modules = (IModule[]) this.m_inUsePkgIndexMap.get(pkgName);
                     if (modules != null)
                     {
                         modules = removeModuleFromArray(modules, event.getModule());
-                        m_inUsePkgIndexMap.put(pkgName, modules);
+                        this.m_inUsePkgIndexMap.put(pkgName, modules);
                     }
                 }
             }
@@ -2427,9 +2450,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             ((ModuleImpl) event.getModule()).setWires(null);
             // Remove the module from the "in use" map.
 // TODO: RB - Maybe this can be merged with ModuleData.
-            m_inUseCapMap.remove(event.getModule());
+            this.m_inUseCapMap.remove(event.getModule());
             // Finally, remove module data.
-            m_moduleDataMap.remove(event.getModule());
+            this.m_moduleDataMap.remove(event.getModule());
         }
     }
 
@@ -2652,7 +2675,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         public boolean m_resolved = false;
         public ModuleData(IModule module)
         {
-            m_module = module;
+            this.m_module = module;
         }
     }
 
@@ -2665,12 +2688,12 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         public boolean m_visited = false;
         public CandidateSet(IModule module, IRequirement requirement, PackageSource[] candidates)
         {
-            m_module = module;
-            m_requirement = requirement;
-            m_candidates = candidates;
-            if (isResolved(m_module))
+            this.m_module = module;
+            this.m_requirement = requirement;
+            this.m_candidates = candidates;
+            if (R4SearchPolicyCore.this.isResolved(this.m_module))
             {
-                m_visited = true;
+                this.m_visited = true;
             }
         }
     }
@@ -2689,17 +2712,17 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
         public PackageSource(IModule module, ICapability capability)
         {
-            m_module = module;
-            m_capability = capability;
+            this.m_module = module;
+            this.m_capability = capability;
         }
 
         public int compareTo(Object o)
         {
             PackageSource ps = (PackageSource) o;
 
-            if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+            if (this.m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
             {
-                Version thisVersion = ((Capability) m_capability).getPackageVersion();
+                Version thisVersion = ((Capability) this.m_capability).getPackageVersion();
                 Version version = ((Capability) ps.m_capability).getPackageVersion();
 
                 // Sort in reverse version order.
@@ -2715,7 +2738,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 else
                 {
                     // Sort further by ascending bundle ID.
-                    long thisId = Util.getBundleIdFromModuleId(m_module.getId());
+                    long thisId = Util.getBundleIdFromModuleId(this.m_module.getId());
                     long id = Util.getBundleIdFromModuleId(ps.m_module.getId());
                     if (thisId < id)
                     {
@@ -2738,8 +2761,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         {
             final int PRIME = 31;
             int result = 1;
-            result = PRIME * result + ((m_capability == null) ? 0 : m_capability.hashCode());
-            result = PRIME * result + ((m_module == null) ? 0 : m_module.hashCode());
+            result = PRIME * result + ((this.m_capability == null) ? 0 : this.m_capability.hashCode());
+            result = PRIME * result + ((this.m_module == null) ? 0 : this.m_module.hashCode());
             return result;
         }
 
@@ -2753,12 +2776,12 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             {
                 return false;
             }
-            if (getClass() != o.getClass())
+            if (this.getClass() != o.getClass())
             {
                 return false;
             }
             PackageSource ps = (PackageSource) o;
-            return (m_module.equals(ps.m_module) && (m_capability == ps.m_capability));
+            return (this.m_module.equals(ps.m_module) && (this.m_capability == ps.m_capability));
         }
     }
 
@@ -2776,28 +2799,28 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
         public ResolvedPackage(String name)
         {
-            m_name = name;
+            this.m_name = name;
         }
 
         public boolean isSubset(ResolvedPackage rp)
         {
-            if (m_sourceList.size() > rp.m_sourceList.size())
+            if (this.m_sourceList.size() > rp.m_sourceList.size())
             {
                 return false;
             }
-            else if (!m_name.equals(rp.m_name))
+            else if (!this.m_name.equals(rp.m_name))
             {
                 return false;
             }
 
             // Determine if the target set of source modules is a subset.
-            return rp.m_sourceList.containsAll(m_sourceList);
+            return rp.m_sourceList.containsAll(this.m_sourceList);
         }
 
         public Object clone()
         {
-            ResolvedPackage rp = new ResolvedPackage(m_name);
-            rp.m_sourceList.addAll(m_sourceList);
+            ResolvedPackage rp = new ResolvedPackage(this.m_name);
+            rp.m_sourceList.addAll(this.m_sourceList);
             return rp;
         }
 
@@ -2807,28 +2830,28 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             // package sources and maintaining ordering.
             for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
             {
-                if (!m_sourceList.contains(rp.m_sourceList.get(srcIdx)))
+                if (!this.m_sourceList.contains(rp.m_sourceList.get(srcIdx)))
                 {
-                    m_sourceList.add(rp.m_sourceList.get(srcIdx));
+                    this.m_sourceList.add(rp.m_sourceList.get(srcIdx));
                 }
             }
         }
 
         public String toString()
         {
-            return toString("", new StringBuffer()).toString();
+            return this.toString("", new StringBuffer()).toString();
         }
 
         public StringBuffer toString(String padding, StringBuffer sb)
         {
             sb.append(padding);
-            sb.append(m_name);
+            sb.append(this.m_name);
             sb.append(" from [");
-            for (int i = 0; i < m_sourceList.size(); i++)
+            for (int i = 0; i < this.m_sourceList.size(); i++)
             {
-                PackageSource ps = (PackageSource) m_sourceList.get(i);
+                PackageSource ps = (PackageSource) this.m_sourceList.get(i);
                 sb.append(ps.m_module);
-                if ((i + 1) < m_sourceList.size())
+                if ((i + 1) < this.m_sourceList.size())
                 {
                     sb.append(", ");
                 }
@@ -2951,9 +2974,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         if (imp != null)
         {
             // Try to see if there is an exporter available.
-            PackageSource[] exporters = getInUseCandidates(imp);
+            PackageSource[] exporters = this.getInUseCandidates(imp);
             exporters = (exporters.length == 0)
-                ? getUnusedCandidates(imp) : exporters;
+                ? this.getUnusedCandidates(imp) : exporters;
 
             // An exporter might be available, but it may have attributes
             // that do not match the importer's required attributes, so
@@ -2965,9 +2988,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 {
                     IRequirement pkgReq = new Requirement(
                         ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
-                    exporters = getInUseCandidates(pkgReq);
+                    exporters = this.getInUseCandidates(pkgReq);
                     exporters = (exporters.length == 0)
-                        ? getUnusedCandidates(pkgReq) : exporters;
+                        ? this.getUnusedCandidates(pkgReq) : exporters;
                 }
                 catch (InvalidSyntaxException ex)
                 {
@@ -3016,14 +3039,14 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         {
             // This should never happen.
         }
-        PackageSource[] exporters = getInUseCandidates(pkgReq);
-        exporters = (exporters.length == 0) ? getUnusedCandidates(pkgReq) : exporters;
+        PackageSource[] exporters = this.getInUseCandidates(pkgReq);
+        exporters = (exporters.length == 0) ? this.getUnusedCandidates(pkgReq) : exporters;
         if (exporters.length > 0)
         {
             boolean classpath = false;
             try
             {
-                getClass().getClassLoader().loadClass(name);
+                this.getClass().getClassLoader().loadClass(name);
                 classpath = true;
             }
             catch (Exception ex)
@@ -3072,7 +3095,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         // class loader.
         try
         {
-            getClass().getClassLoader().loadClass(name);
+            this.getClass().getClassLoader().loadClass(name);
 
             StringBuffer sb = new StringBuffer("*** Package '");
             sb.append(pkgName);

@@ -18,7 +18,17 @@
  */
 package org.apache.felix.framework.cache;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Serializable;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.ObjectInputStreamX;
@@ -126,21 +136,21 @@ public class BundleArchive
     public BundleArchive(Logger logger, File archiveRootDir, long id,
         String location, InputStream is) throws Exception
     {
-        m_logger = logger;
-        m_archiveRootDir = archiveRootDir;
-        m_id = id;
-        if (m_id <= 0)
+        this.m_logger = logger;
+        this.m_archiveRootDir = archiveRootDir;
+        this.m_id = id;
+        if (this.m_id <= 0)
         {
             throw new IllegalArgumentException(
                 "Bundle ID cannot be less than or equal to zero.");
         }
-        m_originalLocation = location;
+        this.m_originalLocation = location;
 
         // Save state.
-        initialize();
+        this.initialize();
 
         // Add a revision for the content.
-        revise(m_originalLocation, is);
+        this.revise(this.m_originalLocation, is);
     }
 
     /**
@@ -158,8 +168,8 @@ public class BundleArchive
     public BundleArchive(Logger logger, File archiveRootDir)
         throws Exception
     {
-        m_logger = logger;
-        m_archiveRootDir = archiveRootDir;
+        this.m_logger = logger;
+        this.m_archiveRootDir = archiveRootDir;
 
         // Add a revision for each one that already exists in the file
         // system. The file system might contain more than one revision
@@ -173,8 +183,8 @@ public class BundleArchive
             // Count the number of existing revision directories, which
             // will be in a directory named like:
             //     "${REVISION_DIRECTORY)${refresh-count}.${revision-count}"
-            File revisionRootDir = new File(m_archiveRootDir,
-                REVISION_DIRECTORY + getRefreshCount() + "." + revisionCount);
+            File revisionRootDir = new File(this.m_archiveRootDir,
+                REVISION_DIRECTORY + this.getRefreshCount() + "." + revisionCount);
             if (!BundleCache.getSecureAction().fileExists(revisionRootDir))
             {
                 break;
@@ -191,14 +201,14 @@ public class BundleArchive
         // revisions since they will be purged immediately on framework startup.
         if (revisionCount > 1)
         {
-            m_revisions = new BundleRevision[revisionCount - 1];
+            this.m_revisions = new BundleRevision[revisionCount - 1];
         }
 
         // Add the revision object for the most recent revision. We first try
         // to read the location from the current revision - if that fails we
         // likely have an old bundle cache and read the location the old way.
         // The next revision will update the bundle cache.
-        revise(getRevisionLocation(revisionCount - 1), null);
+        this.revise(this.getRevisionLocation(revisionCount - 1), null);
     }
 
     /**
@@ -210,9 +220,9 @@ public class BundleArchive
     **/
     public synchronized long getId() throws Exception
     {
-        if (m_id > 0)
+        if (this.m_id > 0)
         {
-            return m_id;
+            return this.m_id;
         }
 
         // Read bundle location.
@@ -221,9 +231,9 @@ public class BundleArchive
         try
         {
             is = BundleCache.getSecureAction()
-                .getFileInputStream(new File(m_archiveRootDir, BUNDLE_ID_FILE));
+                .getFileInputStream(new File(this.m_archiveRootDir, BUNDLE_ID_FILE));
             br = new BufferedReader(new InputStreamReader(is));
-            m_id = Long.parseLong(br.readLine());
+            this.m_id = Long.parseLong(br.readLine());
         }
         catch (FileNotFoundException ex)
         {
@@ -232,8 +242,8 @@ public class BundleArchive
             // identifier numbers. This is a hack to deal with old archives that
             // did not save their bundle identifier, but instead had it passed
             // into them. Eventually, this can be removed.
-            m_id = Long.parseLong(
-                m_archiveRootDir.getName().substring(
+            this.m_id = Long.parseLong(
+                this.m_archiveRootDir.getName().substring(
                     BundleCache.BUNDLE_DIR_PREFIX.length()));
         }
         finally
@@ -242,7 +252,7 @@ public class BundleArchive
             if (is != null) is.close();
         }
 
-        return m_id;
+        return this.m_id;
     }
 
     /**
@@ -254,9 +264,9 @@ public class BundleArchive
     **/
     public synchronized String getLocation() throws Exception
     {
-        if (m_originalLocation != null)
+        if (this.m_originalLocation != null)
         {
-            return m_originalLocation;
+            return this.m_originalLocation;
         }
 
         // Read bundle location.
@@ -265,10 +275,10 @@ public class BundleArchive
         try
         {
             is = BundleCache.getSecureAction()
-                .getFileInputStream(new File(m_archiveRootDir, BUNDLE_LOCATION_FILE));
+                .getFileInputStream(new File(this.m_archiveRootDir, BUNDLE_LOCATION_FILE));
             br = new BufferedReader(new InputStreamReader(is));
-            m_originalLocation = br.readLine();
-            return m_originalLocation;
+            this.m_originalLocation = br.readLine();
+            return this.m_originalLocation;
         }
         finally
         {
@@ -288,13 +298,13 @@ public class BundleArchive
     **/
     public synchronized int getPersistentState() throws Exception
     {
-        if (m_persistentState >= 0)
+        if (this.m_persistentState >= 0)
         {
-            return m_persistentState;
+            return this.m_persistentState;
         }
 
         // Get bundle state file.
-        File stateFile = new File(m_archiveRootDir, BUNDLE_STATE_FILE);
+        File stateFile = new File(this.m_archiveRootDir, BUNDLE_STATE_FILE);
 
         // If the state file doesn't exist, then
         // assume the bundle was installed.
@@ -314,17 +324,17 @@ public class BundleArchive
             String s = br.readLine();
             if (s.equals(ACTIVE_STATE))
             {
-                m_persistentState = Bundle.ACTIVE;
+                this.m_persistentState = Bundle.ACTIVE;
             }
             else if (s.equals(UNINSTALLED_STATE))
             {
-                m_persistentState = Bundle.UNINSTALLED;
+                this.m_persistentState = Bundle.UNINSTALLED;
             }
             else
             {
-                m_persistentState = Bundle.INSTALLED;
+                this.m_persistentState = Bundle.INSTALLED;
             }
-            return m_persistentState;
+            return this.m_persistentState;
         }
         finally
         {
@@ -350,7 +360,7 @@ public class BundleArchive
         try
         {
             os = BundleCache.getSecureAction()
-                .getFileOutputStream(new File(m_archiveRootDir, BUNDLE_STATE_FILE));
+                .getFileOutputStream(new File(this.m_archiveRootDir, BUNDLE_STATE_FILE));
             bw = new BufferedWriter(new OutputStreamWriter(os));
             String s = null;
             switch (state)
@@ -366,13 +376,13 @@ public class BundleArchive
                     break;
             }
             bw.write(s, 0, s.length());
-            m_persistentState = state;
+            this.m_persistentState = state;
         }
         catch (IOException ex)
         {
-            m_logger.log(
+            this.m_logger.log(
                 Logger.LOG_ERROR,
-                getClass().getName() + ": Unable to record state - " + ex);
+                this.getClass().getName() + ": Unable to record state - " + ex);
             throw ex;
         }
         finally
@@ -391,13 +401,13 @@ public class BundleArchive
     **/
     public synchronized int getStartLevel() throws Exception
     {
-        if (m_startLevel >= 0)
+        if (this.m_startLevel >= 0)
         {
-            return m_startLevel;
+            return this.m_startLevel;
         }
 
         // Get bundle start level file.
-        File levelFile = new File(m_archiveRootDir, BUNDLE_START_LEVEL_FILE);
+        File levelFile = new File(this.m_archiveRootDir, BUNDLE_START_LEVEL_FILE);
 
         // If the start level file doesn't exist, then
         // return an error.
@@ -414,8 +424,8 @@ public class BundleArchive
             is = BundleCache.getSecureAction()
                 .getFileInputStream(levelFile);
             br = new BufferedReader(new InputStreamReader(is));
-            m_startLevel = Integer.parseInt(br.readLine());
-            return m_startLevel;
+            this.m_startLevel = Integer.parseInt(br.readLine());
+            return this.m_startLevel;
         }
         finally
         {
@@ -439,17 +449,17 @@ public class BundleArchive
         try
         {
             os = BundleCache.getSecureAction()
-                .getFileOutputStream(new File(m_archiveRootDir, BUNDLE_START_LEVEL_FILE));
+                .getFileOutputStream(new File(this.m_archiveRootDir, BUNDLE_START_LEVEL_FILE));
             bw = new BufferedWriter(new OutputStreamWriter(os));
             String s = Integer.toString(level);
             bw.write(s, 0, s.length());
-            m_startLevel = level;
+            this.m_startLevel = level;
         }
         catch (IOException ex)
         {
-            m_logger.log(
+            this.m_logger.log(
                 Logger.LOG_ERROR,
-                getClass().getName() + ": Unable to record start level - " + ex);
+                this.getClass().getName() + ": Unable to record start level - " + ex);
             throw ex;
         }
         finally
@@ -468,13 +478,13 @@ public class BundleArchive
     **/
     public synchronized long getLastModified() throws Exception
     {
-        if (m_lastModified >= 0)
+        if (this.m_lastModified >= 0)
         {
-            return m_lastModified;
+            return this.m_lastModified;
         }
 
         // Get bundle last modification time file.
-        File lastModFile = new File(m_archiveRootDir, BUNDLE_LASTMODIFIED_FILE);
+        File lastModFile = new File(this.m_archiveRootDir, BUNDLE_LASTMODIFIED_FILE);
 
         // If the last modification file doesn't exist, then
         // return an error.
@@ -490,8 +500,8 @@ public class BundleArchive
         {
             is = BundleCache.getSecureAction().getFileInputStream(lastModFile);
             br = new BufferedReader(new InputStreamReader(is));
-            m_lastModified = Long.parseLong(br.readLine());
-            return m_lastModified;
+            this.m_lastModified = Long.parseLong(br.readLine());
+            return this.m_lastModified;
         }
         finally
         {
@@ -518,17 +528,17 @@ public class BundleArchive
         try
         {
             os = BundleCache.getSecureAction()
-                .getFileOutputStream(new File(m_archiveRootDir, BUNDLE_LASTMODIFIED_FILE));
+                .getFileOutputStream(new File(this.m_archiveRootDir, BUNDLE_LASTMODIFIED_FILE));
             bw = new BufferedWriter(new OutputStreamWriter(os));
             String s = Long.toString(lastModified);
             bw.write(s, 0, s.length());
-            m_lastModified = lastModified;
+            this.m_lastModified = lastModified;
         }
         catch (IOException ex)
         {
-            m_logger.log(
+            this.m_logger.log(
                 Logger.LOG_ERROR,
-                getClass().getName() + ": Unable to record last modification time - " + ex);
+                this.getClass().getName() + ": Unable to record last modification time - " + ex);
             throw ex;
         }
         finally
@@ -555,7 +565,7 @@ public class BundleArchive
             throw new IllegalArgumentException("The data file path cannot contain a reference to the \"..\" directory.");
 
         // Get bundle data directory.
-        File dataDir = new File(m_archiveRootDir, DATA_DIRECTORY);
+        File dataDir = new File(this.m_archiveRootDir, DATA_DIRECTORY);
         // Create the data directory if necessary.
         if (!BundleCache.getSecureAction().fileExists(dataDir))
         {
@@ -581,7 +591,7 @@ public class BundleArchive
         throws Exception
     {
         // Get bundle activator file.
-        File activatorFile = new File(m_archiveRootDir, BUNDLE_ACTIVATOR_FILE);
+        File activatorFile = new File(this.m_archiveRootDir, BUNDLE_ACTIVATOR_FILE);
         // If the activator file doesn't exist, then
         // assume there isn't one.
         if (!BundleCache.getSecureAction().fileExists(activatorFile))
@@ -602,9 +612,9 @@ public class BundleArchive
         }
         catch (Exception ex)
         {
-            m_logger.log(
+            this.m_logger.log(
                 Logger.LOG_ERROR,
-                getClass().getName() + ": Trying to deserialize - " + ex);
+                this.getClass().getName() + ": Trying to deserialize - " + ex);
         }
         finally
         {
@@ -635,15 +645,15 @@ public class BundleArchive
         try
         {
             os = BundleCache.getSecureAction()
-                .getFileOutputStream(new File(m_archiveRootDir, BUNDLE_ACTIVATOR_FILE));
+                .getFileOutputStream(new File(this.m_archiveRootDir, BUNDLE_ACTIVATOR_FILE));
             oos = new ObjectOutputStream(os);
             oos.writeObject(obj);
         }
         catch (IOException ex)
         {
-            m_logger.log(
+            this.m_logger.log(
                 Logger.LOG_ERROR,
-                getClass().getName() + ": Unable to serialize activator - " + ex);
+                this.getClass().getName() + ": Unable to serialize activator - " + ex);
             throw ex;
         }
         finally
@@ -661,7 +671,7 @@ public class BundleArchive
     **/
     public synchronized int getRevisionCount()
     {
-        return (m_revisions == null) ? 0 : m_revisions.length;
+        return (this.m_revisions == null) ? 0 : this.m_revisions.length;
     }
 
     /**
@@ -672,9 +682,9 @@ public class BundleArchive
     **/
     public synchronized BundleRevision getRevision(int i)
     {
-        if ((i >= 0) && (i < getRevisionCount()))
+        if ((i >= 0) && (i < this.getRevisionCount()))
         {
-            return m_revisions[i];
+            return this.m_revisions[i];
         }
         return null;
     }
@@ -698,25 +708,25 @@ public class BundleArchive
         {
             location = "inputstream:";
         }
-        BundleRevision revision = createRevisionFromLocation(location, is);
+        BundleRevision revision = this.createRevisionFromLocation(location, is);
         if (revision == null)
         {
             throw new Exception("Unable to revise archive.");
         }
 
-        setRevisionLocation(location, (m_revisions == null) ? 0 : m_revisions.length);
+        this.setRevisionLocation(location, (this.m_revisions == null) ? 0 : this.m_revisions.length);
 
         // Add new revision to revision array.
-        if (m_revisions == null)
+        if (this.m_revisions == null)
         {
-            m_revisions = new BundleRevision[] { revision };
+            this.m_revisions = new BundleRevision[] { revision };
         }
         else
         {
-            BundleRevision[] tmp = new BundleRevision[m_revisions.length + 1];
-            System.arraycopy(m_revisions, 0, tmp, 0, m_revisions.length);
-            tmp[m_revisions.length] = revision;
-            m_revisions = tmp;
+            BundleRevision[] tmp = new BundleRevision[this.m_revisions.length + 1];
+            System.arraycopy(this.m_revisions, 0, tmp, 0, this.m_revisions.length);
+            tmp[this.m_revisions.length] = revision;
+            this.m_revisions = tmp;
         }
     }
 
@@ -735,33 +745,33 @@ public class BundleArchive
     public synchronized boolean undoRevise() throws Exception
     {
         // Can only undo the revision if there is more than one.
-        if (getRevisionCount() <= 1)
+        if (this.getRevisionCount() <= 1)
         {
             return false;
         }
 
-        String location = getRevisionLocation(m_revisions.length - 2);
+        String location = this.getRevisionLocation(this.m_revisions.length - 2);
 
         try
         {
-            m_revisions[m_revisions.length - 1].dispose();
+            this.m_revisions[this.m_revisions.length - 1].dispose();
         }
         catch(Exception ex)
         {
-           m_logger.log(Logger.LOG_ERROR, getClass().getName() +
+           this.m_logger.log(Logger.LOG_ERROR, this.getClass().getName() +
                ": Unable to dispose latest revision", ex);
         }
 
-        File revisionDir = new File(m_archiveRootDir, REVISION_DIRECTORY +
-            getRefreshCount() + "." + (m_revisions.length - 1));
+        File revisionDir = new File(this.m_archiveRootDir, REVISION_DIRECTORY +
+            this.getRefreshCount() + "." + (this.m_revisions.length - 1));
 
         if (BundleCache.getSecureAction().fileExists(revisionDir))
         {
             BundleCache.deleteDirectoryTree(revisionDir);
         }
 
-        BundleRevision[] tmp = new BundleRevision[m_revisions.length - 1];
-        System.arraycopy(m_revisions, 0, tmp, 0, m_revisions.length - 1);
+        BundleRevision[] tmp = new BundleRevision[this.m_revisions.length - 1];
+        System.arraycopy(this.m_revisions, 0, tmp, 0, this.m_revisions.length - 1);
 
         return true;
     }
@@ -773,8 +783,8 @@ public class BundleArchive
         try
         {
             is = BundleCache.getSecureAction().getFileInputStream(new File(
-                new File(m_archiveRootDir, REVISION_DIRECTORY +
-                getRefreshCount() + "." + revision), REVISION_LOCATION_FILE));
+                new File(this.m_archiveRootDir, REVISION_DIRECTORY +
+                this.getRefreshCount() + "." + revision), REVISION_LOCATION_FILE));
 
             br = new BufferedReader(new InputStreamReader(is));
             return br.readLine();
@@ -795,8 +805,8 @@ public class BundleArchive
         {
             os = BundleCache.getSecureAction()
                 .getFileOutputStream(new File(
-                    new File(m_archiveRootDir, REVISION_DIRECTORY +
-                    getRefreshCount() + "." + revision), REVISION_LOCATION_FILE));
+                    new File(this.m_archiveRootDir, REVISION_DIRECTORY +
+                    this.getRefreshCount() + "." + revision), REVISION_LOCATION_FILE));
             bw = new BufferedWriter(new OutputStreamWriter(os));
             bw.write(location, 0, location.length());
         }
@@ -817,9 +827,9 @@ public class BundleArchive
     public synchronized void purge() throws Exception
     {
         // Get the current refresh count.
-        long refreshCount = getRefreshCount();
+        long refreshCount = this.getRefreshCount();
         // Get the current revision count.
-        int count = getRevisionCount();
+        int count = this.getRevisionCount();
 
         // Dispose and delete all but the current revision.
         File revisionDir = null;
@@ -829,11 +839,11 @@ public class BundleArchive
             // circumstances, such as if this bundle archive was created
             // for an existing bundle that was updated, but not refreshed
             // due to a system crash; see the constructor code for details.
-            if (m_revisions[i] != null)
+            if (this.m_revisions[i] != null)
             {
-                m_revisions[i].dispose();
+                this.m_revisions[i].dispose();
             }
-            revisionDir = new File(m_archiveRootDir, REVISION_DIRECTORY + refreshCount + "." + i);
+            revisionDir = new File(this.m_archiveRootDir, REVISION_DIRECTORY + refreshCount + "." + i);
             if (BundleCache.getSecureAction().fileExists(revisionDir))
             {
                 BundleCache.deleteDirectoryTree(revisionDir);
@@ -843,27 +853,27 @@ public class BundleArchive
         // We still need to dispose the current revision, but we
         // don't want to delete it, because we want to rename it
         // to the new refresh level.
-        m_revisions[count - 1].dispose();
+        this.m_revisions[count - 1].dispose();
 
         // Save the current revision location for use later when
         // we recreate the revision.
-        String location = getRevisionLocation(count -1);
+        String location = this.getRevisionLocation(count -1);
 
         // Increment the refresh count.
-        setRefreshCount(refreshCount + 1);
+        this.setRefreshCount(refreshCount + 1);
 
         // Rename the current revision directory to be the zero revision
         // of the new refresh level.
-        File currentDir = new File(m_archiveRootDir, REVISION_DIRECTORY + (refreshCount + 1) + ".0");
-        revisionDir = new File(m_archiveRootDir, REVISION_DIRECTORY + refreshCount + "." + (count - 1));
+        File currentDir = new File(this.m_archiveRootDir, REVISION_DIRECTORY + (refreshCount + 1) + ".0");
+        revisionDir = new File(this.m_archiveRootDir, REVISION_DIRECTORY + refreshCount + "." + (count - 1));
         BundleCache.getSecureAction().renameFile(revisionDir, currentDir);
 
         // Null the revision array since they are all invalid now.
-        m_revisions = null;
+        this.m_revisions = null;
         // Finally, recreate the revision for the current location.
-        BundleRevision revision = createRevisionFromLocation(location, null);
+        BundleRevision revision = this.createRevisionFromLocation(location, null);
         // Create new revision array.
-        m_revisions = new BundleRevision[] { revision };
+        this.m_revisions = new BundleRevision[] { revision };
     }
 
     /**
@@ -874,13 +884,13 @@ public class BundleArchive
     **/
     /* package */ void dispose() throws Exception
     {
-        if (!BundleCache.deleteDirectoryTree(m_archiveRootDir))
+        if (!BundleCache.deleteDirectoryTree(this.m_archiveRootDir))
         {
-            m_logger.log(
+            this.m_logger.log(
                 Logger.LOG_ERROR,
-                getClass().getName()
+                this.getClass().getName()
                     + ": Unable to delete archive directory - "
-                    + m_archiveRootDir);
+                    + this.m_archiveRootDir);
         }
     }
 
@@ -900,33 +910,33 @@ public class BundleArchive
         {
             // If the archive directory exists, then we don't
             // need to initialize since it has already been done.
-            if (BundleCache.getSecureAction().fileExists(m_archiveRootDir))
+            if (BundleCache.getSecureAction().fileExists(this.m_archiveRootDir))
             {
                 return;
             }
 
             // Create archive directory, if it does not exist.
-            if (!BundleCache.getSecureAction().mkdir(m_archiveRootDir))
+            if (!BundleCache.getSecureAction().mkdir(this.m_archiveRootDir))
             {
-                m_logger.log(
+                this.m_logger.log(
                     Logger.LOG_ERROR,
-                    getClass().getName() + ": Unable to create archive directory.");
+                    this.getClass().getName() + ": Unable to create archive directory.");
                 throw new IOException("Unable to create archive directory.");
             }
 
             // Save id.
             os = BundleCache.getSecureAction()
-                .getFileOutputStream(new File(m_archiveRootDir, BUNDLE_ID_FILE));
+                .getFileOutputStream(new File(this.m_archiveRootDir, BUNDLE_ID_FILE));
             bw = new BufferedWriter(new OutputStreamWriter(os));
-            bw.write(Long.toString(m_id), 0, Long.toString(m_id).length());
+            bw.write(Long.toString(this.m_id), 0, Long.toString(this.m_id).length());
             bw.close();
             os.close();
 
             // Save location string.
             os = BundleCache.getSecureAction()
-                .getFileOutputStream(new File(m_archiveRootDir, BUNDLE_LOCATION_FILE));
+                .getFileOutputStream(new File(this.m_archiveRootDir, BUNDLE_LOCATION_FILE));
             bw = new BufferedWriter(new OutputStreamWriter(os));
-            bw.write(m_originalLocation, 0, m_originalLocation.length());
+            bw.write(this.m_originalLocation, 0, this.m_originalLocation.length());
         }
         finally
         {
@@ -948,9 +958,9 @@ public class BundleArchive
     **/
     private String getCurrentLocation() throws Exception
     {
-        if (m_currentLocation != null)
+        if (this.m_currentLocation != null)
         {
-            return m_currentLocation;
+            return this.m_currentLocation;
         }
 
         // Read current location.
@@ -959,14 +969,14 @@ public class BundleArchive
         try
         {
             is = BundleCache.getSecureAction()
-                .getFileInputStream(new File(m_archiveRootDir, CURRENT_LOCATION_FILE));
+                .getFileInputStream(new File(this.m_archiveRootDir, CURRENT_LOCATION_FILE));
             br = new BufferedReader(new InputStreamReader(is));
-            m_currentLocation = br.readLine();
-            return m_currentLocation;
+            this.m_currentLocation = br.readLine();
+            return this.m_currentLocation;
         }
         catch (FileNotFoundException ex)
         {
-            return getLocation();
+            return this.getLocation();
         }
         finally
         {
@@ -993,10 +1003,10 @@ public class BundleArchive
         try
         {
             os = BundleCache.getSecureAction()
-                .getFileOutputStream(new File(m_archiveRootDir, CURRENT_LOCATION_FILE));
+                .getFileOutputStream(new File(this.m_archiveRootDir, CURRENT_LOCATION_FILE));
             bw = new BufferedWriter(new OutputStreamWriter(os));
             bw.write(location, 0, location.length());
-            m_currentLocation = location;
+            this.m_currentLocation = location;
         }
         finally
         {
@@ -1022,8 +1032,8 @@ public class BundleArchive
         // native libraries so that we can reload them. Thus, we use the
         // refresh counter as a way to change the name of the revision
         // directory to give native libraries new absolute names.
-        File revisionRootDir = new File(m_archiveRootDir,
-            REVISION_DIRECTORY + getRefreshCount() + "." + getRevisionCount());
+        File revisionRootDir = new File(this.m_archiveRootDir,
+            REVISION_DIRECTORY + this.getRefreshCount() + "." + this.getRevisionCount());
 
         BundleRevision result = null;
 
@@ -1051,22 +1061,22 @@ public class BundleArchive
                 // flag set to true.
                 if (BundleCache.getSecureAction().isFileDirectory(file))
                 {
-                    result = new DirectoryRevision(m_logger, revisionRootDir, location);
+                    result = new DirectoryRevision(this.m_logger, revisionRootDir, location);
                 }
                 else
                 {
-                    result = new JarRevision(m_logger, revisionRootDir, location, true);
+                    result = new JarRevision(this.m_logger, revisionRootDir, location, true);
                 }
             }
             else if (location.startsWith(INPUTSTREAM_PROTOCOL))
             {
                 // Assume all input streams point to JAR files.
-                result = new JarRevision(m_logger, revisionRootDir, location, false, is);
+                result = new JarRevision(this.m_logger, revisionRootDir, location, false, is);
             }
             else
             {
                 // Anything else is assumed to be a URL to a JAR file.
-                result = new JarRevision(m_logger, revisionRootDir, location, false);
+                result = new JarRevision(this.m_logger, revisionRootDir, location, false);
             }
         }
         catch (Exception ex)
@@ -1075,9 +1085,9 @@ public class BundleArchive
             {
                 if (!BundleCache.deleteDirectoryTree(revisionRootDir))
                 {
-                    m_logger.log(
+                    this.m_logger.log(
                         Logger.LOG_ERROR,
-                        getClass().getName()
+                        this.getClass().getName()
                             + ": Unable to delete revision directory - "
                             + revisionRootDir);
                 }
@@ -1106,13 +1116,13 @@ public class BundleArchive
     {
         // If we have already read the refresh counter file,
         // then just return the result.
-        if (m_refreshCount >= 0)
+        if (this.m_refreshCount >= 0)
         {
-            return m_refreshCount;
+            return this.m_refreshCount;
         }
 
         // Get refresh counter file.
-        File counterFile = new File(m_archiveRootDir, REFRESH_COUNTER_FILE);
+        File counterFile = new File(this.m_archiveRootDir, REFRESH_COUNTER_FILE);
 
         // If the refresh counter file doesn't exist, then
         // assume the counter is at zero.
@@ -1157,7 +1167,7 @@ public class BundleArchive
         throws Exception
     {
         // Get refresh counter file.
-        File counterFile = new File(m_archiveRootDir, REFRESH_COUNTER_FILE);
+        File counterFile = new File(this.m_archiveRootDir, REFRESH_COUNTER_FILE);
 
         // Write the refresh counter.
         OutputStream os = null;
@@ -1169,13 +1179,13 @@ public class BundleArchive
             bw = new BufferedWriter(new OutputStreamWriter(os));
             String s = Long.toString(counter);
             bw.write(s, 0, s.length());
-            m_refreshCount = counter;
+            this.m_refreshCount = counter;
         }
         catch (IOException ex)
         {
-            m_logger.log(
+            this.m_logger.log(
                 Logger.LOG_ERROR,
-                getClass().getName() + ": Unable to write refresh counter: " + ex);
+                this.getClass().getName() + ": Unable to write refresh counter: " + ex);
             throw ex;
         }
         finally

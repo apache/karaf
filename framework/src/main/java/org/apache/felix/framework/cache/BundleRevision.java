@@ -19,10 +19,7 @@
 package org.apache.felix.framework.cache;
 
 import java.io.File;
-import java.io.InputStream;
-import java.security.cert.*;
-import java.util.*;
-import java.util.jar.*;
+import java.util.Map;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.moduleloader.IContent;
@@ -70,9 +67,9 @@ public abstract class BundleRevision
     public BundleRevision(Logger logger, File revisionRootDir, String location)
         throws Exception
     {
-        m_logger = logger;
-        m_revisionRootDir = revisionRootDir;
-        m_location = location;
+        this.m_logger = logger;
+        this.m_revisionRootDir = revisionRootDir;
+        this.m_location = location;
     }
 
 
@@ -84,7 +81,7 @@ public abstract class BundleRevision
     **/
     public Logger getLogger()
     {
-        return m_logger;
+        return this.m_logger;
     }
 
     /**
@@ -95,7 +92,7 @@ public abstract class BundleRevision
     **/
     public File getRevisionRootDir()
     {
-        return m_revisionRootDir;
+        return this.m_revisionRootDir;
     }
 
     /**
@@ -106,7 +103,7 @@ public abstract class BundleRevision
     **/
     public String getLocation()
     {
-        return m_location;
+        return this.m_location;
     }
 
     /**
