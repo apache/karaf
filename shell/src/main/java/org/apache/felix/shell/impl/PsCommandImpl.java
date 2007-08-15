@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,11 +19,13 @@
 package org.apache.felix.shell.impl;
 
 import java.io.PrintStream;
-import java.util.Dictionary;
 import java.util.StringTokenizer;
 
 import org.apache.felix.shell.Command;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.startlevel.StartLevel;
 
 public class PsCommandImpl implements Command
@@ -32,7 +34,7 @@ public class PsCommandImpl implements Command
 
     public PsCommandImpl(BundleContext context)
     {
-        m_context = context;
+        this.m_context = context;
     }
 
     public String getName()
@@ -53,12 +55,12 @@ public class PsCommandImpl implements Command
     public void execute(String s, PrintStream out, PrintStream err)
     {
         // Get start level service.
-        ServiceReference ref = m_context.getServiceReference(
+        ServiceReference ref = this.m_context.getServiceReference(
             org.osgi.service.startlevel.StartLevel.class.getName());
         StartLevel sl = null;
         if (ref != null)
         {
-            sl = (StartLevel) m_context.getService(ref);
+            sl = (StartLevel) this.m_context.getService(ref);
         }
 
         if (sl == null)
@@ -95,7 +97,7 @@ public class PsCommandImpl implements Command
                 }
             }
         }
-        Bundle[] bundles = m_context.getBundles();
+        Bundle[] bundles = this.m_context.getBundles();
         if (bundles != null)
         {
             // Display active start level.
@@ -173,7 +175,7 @@ public class PsCommandImpl implements Command
                     id = " " + id;
                 }
                 out.println("[" + id + "] ["
-                    + getStateString(bundles[i].getState())
+                    + this.getStateString(bundles[i].getState())
                     + "] [" + level + "] " + name);
             }
         }
