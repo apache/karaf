@@ -52,22 +52,22 @@ public class ComponentRegistry implements ConfigurationListener
 
     ComponentRegistry( BundleContext context )
     {
-        this.m_componentNames = new HashMap();
-        this.m_componentCounter = -1;
+        m_componentNames = new HashMap();
+        m_componentCounter = -1;
 
         Dictionary props = new Hashtable();
         props.put( Constants.SERVICE_DESCRIPTION, "Service Component Configuration Support" );
         props.put( Constants.SERVICE_VENDOR, "Apache Software Foundation" );
-        this.registration = context.registerService( ConfigurationListener.class.getName(), this, props );
+        registration = context.registerService( ConfigurationListener.class.getName(), this, props );
     }
 
 
     void dispose()
     {
-        if ( this.registration != null )
+        if ( registration != null )
         {
-            this.registration.unregister();
-            this.registration = null;
+            registration.unregister();
+            registration = null;
         }
     }
 
@@ -89,39 +89,39 @@ public class ComponentRegistry implements ConfigurationListener
 
     long createComponentId()
     {
-        this.m_componentCounter++;
-        return this.m_componentCounter;
+        m_componentCounter++;
+        return m_componentCounter;
     }
 
 
     void checkComponentName( String name )
     {
-        if ( this.m_componentNames.containsKey( name ) )
+        if ( m_componentNames.containsKey( name ) )
         {
             throw new ComponentException( "The component name '" + name + "' has already been registered." );
         }
 
         // reserve the name
-        this.m_componentNames.put( name, name );
+        m_componentNames.put( name, name );
     }
 
 
     void registerComponent( String name, ComponentManager component )
     {
         // only register the component if there is a registration for it !
-        if ( !name.equals( this.m_componentNames.get( name ) ) )
+        if ( !name.equals( m_componentNames.get( name ) ) )
         {
             // this is not expected if all works ok
             throw new ComponentException( "The component name '" + name + "' has already been registered." );
         }
 
-        this.m_componentNames.put( name, component );
+        m_componentNames.put( name, component );
     }
 
 
     ComponentManager getComponent( String name )
     {
-        Object entry = this.m_componentNames.get( name );
+        Object entry = m_componentNames.get( name );
 
         // only return the entry if non-null and not a reservation
         if ( entry instanceof ComponentManager )
@@ -135,6 +135,6 @@ public class ComponentRegistry implements ConfigurationListener
 
     void unregisterComponent( String name )
     {
-        this.m_componentNames.remove( name );
+        m_componentNames.remove( name );
     }
 }

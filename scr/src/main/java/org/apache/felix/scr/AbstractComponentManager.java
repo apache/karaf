@@ -90,13 +90,13 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      */
     protected AbstractComponentManager(BundleComponentActivator activator, ComponentMetadata metadata)
     {
-        this.m_activator = activator;
-        this.m_componentMetadata = metadata;
+        m_activator = activator;
+        m_componentMetadata = metadata;
 
-        this.m_state = STATE_DISABLED;
-        this.m_dependencyManagers = new ArrayList();
+        m_state = STATE_DISABLED;
+        m_dependencyManagers = new ArrayList();
 
-        Activator.trace("Component created", this.m_componentMetadata);
+        Activator.trace("Component created", m_componentMetadata);
     }
 
     //---------- Asynchronous frontend to state change methods ----------------
@@ -144,7 +144,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      */
     public final void reconfigure()
     {
-        Activator.trace( "Deactivating and Activating to reconfigure", this.m_componentMetadata );
+        Activator.trace( "Deactivating and Activating to reconfigure", m_componentMetadata );
         this.reactivate();
     }
 
@@ -223,23 +223,23 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
         if (this.getState() == STATE_DESTROYED)
         {
-            Activator.error( "Destroyed Component cannot be enabled", this.m_componentMetadata );
+            Activator.error( "Destroyed Component cannot be enabled", m_componentMetadata );
             return;
         }
         else if (this.getState() != STATE_DISABLED)
         {
-            Activator.trace( "Component is already enabled", this.m_componentMetadata );
+            Activator.trace( "Component is already enabled", m_componentMetadata );
             return;
         }
 
-        Activator.trace("Enabling component", this.m_componentMetadata);
+        Activator.trace("Enabling component", m_componentMetadata);
 
     	try
     	{
 	        // If this component has got dependencies, create dependency managers for each one of them.
-	        if (this.m_componentMetadata.getDependencies().size() != 0)
+	        if (m_componentMetadata.getDependencies().size() != 0)
 	        {
-	            Iterator dependencyit = this.m_componentMetadata.getDependencies().iterator();
+	            Iterator dependencyit = m_componentMetadata.getDependencies().iterator();
 
 	            while(dependencyit.hasNext())
 	            {
@@ -247,21 +247,21 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
 	                DependencyManager depmanager = new DependencyManager(this, currentdependency);
 
-	                this.m_dependencyManagers.add(depmanager);
+	                m_dependencyManagers.add(depmanager);
 	            }
 	        }
 
             // enter enabled state before trying to activate
 	        this.setState( STATE_ENABLED );
 
-            Activator.trace("Component enabled", this.m_componentMetadata);
+            Activator.trace("Component enabled", m_componentMetadata);
 
             // immediately activate the compopnent, no need to schedule again
 	        this.activateInternal();
     	}
     	catch(Exception ex)
     	{
-    		Activator.exception( "Failed enabling Component", this.m_componentMetadata, ex );
+    		Activator.exception( "Failed enabling Component", m_componentMetadata, ex );
 
             // ensure we get back to DISABLED state
             // immediately disable, no need to schedule again
@@ -293,18 +293,18 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
          // go to the activating state
          this.setState(STATE_ACTIVATING);
 
-         Activator.trace("Activating component", this.m_componentMetadata);
+         Activator.trace("Activating component", m_componentMetadata);
 
          // Before creating the implementation object, we are going to
          // test if all the mandatory dependencies are satisfied
-         Iterator it = this.m_dependencyManagers.iterator();
+         Iterator it = m_dependencyManagers.iterator();
          while (it.hasNext())
          {
              DependencyManager dm = (DependencyManager)it.next();
              if (!dm.isValid())
              {
                  // at least one dependency is not satisfied
-                 Activator.trace( "Dependency not satisfied: " + dm.getName(), this.m_componentMetadata );
+                 Activator.trace( "Dependency not satisfied: " + dm.getName(), m_componentMetadata );
                  this.setState(STATE_UNSATISFIED);
                  return;
              }
@@ -322,9 +322,9 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
          this.setState(this.getSatisfiedState());
 
          // 5. Register provided services
-         this.m_serviceRegistration = this.registerComponentService();
+         m_serviceRegistration = this.registerComponentService();
 
-         Activator.trace("Component activated", this.m_componentMetadata);
+         Activator.trace("Component activated", m_componentMetadata);
      }
 
      /**
@@ -349,7 +349,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
          // start deactivation by resetting the state
          this.setState( STATE_DEACTIVATING );
 
-         Activator.trace("Deactivating component", this.m_componentMetadata);
+         Activator.trace("Deactivating component", m_componentMetadata);
 
          // 0.- Remove published services from the registry
          this.unregisterComponentService();
@@ -364,7 +364,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
          // reset to state UNSATISFIED
          this.setState( STATE_UNSATISFIED );
 
-         Activator.trace("Component deactivated", this.m_componentMetadata);
+         Activator.trace("Component deactivated", m_componentMetadata);
      }
 
      private void disableInternal()
@@ -375,22 +375,22 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
          // deactivate first, this does nothing if not active/registered/factory
          this.deactivateInternal();
 
-         Activator.trace("Disabling component", this.m_componentMetadata);
+         Activator.trace("Disabling component", m_componentMetadata);
 
          // close all service listeners now, they are recreated on enable
          // Stop the dependency managers to listen to events...
-         Iterator it = this.m_dependencyManagers.iterator();
+         Iterator it = m_dependencyManagers.iterator();
          while (it.hasNext())
          {
              DependencyManager dm = (DependencyManager)it.next();
              dm.close();
          }
-         this.m_dependencyManagers.clear();
+         m_dependencyManagers.clear();
 
          // we are now disabled, ready for re-enablement or complete destroyal
          this.setState( STATE_DISABLED );
 
-         Activator.trace("Component disabled", this.m_componentMetadata);
+         Activator.trace("Component disabled", m_componentMetadata);
      }
 
      /**
@@ -408,10 +408,10 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
          this.setState( STATE_DESTROYED );
 
          // release references (except component metadata for logging purposes)
-         this.m_activator = null;
-         this.m_dependencyManagers = null;
+         m_activator = null;
+         m_dependencyManagers = null;
 
-         Activator.trace("Component disposed", this.m_componentMetadata);
+         Activator.trace("Component disposed", m_componentMetadata);
      }
 
      //---------- Component handling methods ----------------------------------
@@ -451,11 +451,11 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
       * @return
       */
      private int getSatisfiedState() {
-         if (this.m_componentMetadata.isFactory())
+         if (m_componentMetadata.isFactory())
          {
              return STATE_FACTORY;
          }
-         else if (this.m_componentMetadata.isImmediate())
+         else if (m_componentMetadata.isImmediate())
          {
              return STATE_ACTIVE;
          }
@@ -484,10 +484,10 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
      protected void unregisterComponentService()
      {
-         if ( this.m_serviceRegistration != null )
+         if ( m_serviceRegistration != null )
          {
-             this.m_serviceRegistration.unregister();
-             this.m_serviceRegistration = null;
+             m_serviceRegistration.unregister();
+             m_serviceRegistration = null;
 
              Activator.trace( "unregistering the services", this.getComponentMetadata() );
          }
@@ -496,11 +496,11 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     //**********************************************************************************************************
 
     BundleComponentActivator getActivator() {
-        return this.m_activator;
+        return m_activator;
     }
 
     Iterator getDependencyManagers() {
-        return this.m_dependencyManagers.iterator();
+        return m_dependencyManagers.iterator();
     }
 
     DependencyManager getDependencyManager( String name )
@@ -562,28 +562,28 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     }
 
     ServiceReference getServiceReference() {
-        return ( this.m_serviceRegistration != null ) ? this.m_serviceRegistration.getReference() : null;
+        return ( m_serviceRegistration != null ) ? m_serviceRegistration.getReference() : null;
     }
 
     /**
      *
      */
     public ComponentMetadata getComponentMetadata() {
-    	return this.m_componentMetadata;
+    	return m_componentMetadata;
     }
 
     int getState() {
-        return this.m_state;
+        return m_state;
     }
 
     /**
      * sets the state of the manager
     **/
     protected synchronized void setState(int newState) {
-        Activator.trace( "State transition : " + this.stateToString( this.m_state ) + " -> " + this.stateToString( newState ),
-            this.m_componentMetadata );
+        Activator.trace( "State transition : " + this.stateToString( m_state ) + " -> " + this.stateToString( newState ),
+            m_componentMetadata );
 
-        this.m_state = newState;
+        m_state = newState;
     }
 
     public String stateToString(int state) {

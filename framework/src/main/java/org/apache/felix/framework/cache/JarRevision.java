@@ -77,13 +77,13 @@ class JarRevision extends BundleRevision
 
         if (byReference)
         {
-            this.m_bundleFile = new File(location.substring(
+            m_bundleFile = new File(location.substring(
                 location.indexOf(BundleArchive.FILE_PROTOCOL)
                     + BundleArchive.FILE_PROTOCOL.length()));
         }
         else
         {
-            this.m_bundleFile = new File(this.getRevisionRootDir(), BUNDLE_JAR_FILE);
+            m_bundleFile = new File(this.getRevisionRootDir(), BUNDLE_JAR_FILE);
         }
 
         // Save and process the bundle JAR.
@@ -92,9 +92,9 @@ class JarRevision extends BundleRevision
 
     public synchronized Map getManifestHeader() throws Exception
     {
-        if (this.m_header != null)
+        if (m_header != null)
         {
-            return this.m_header;
+            return m_header;
         }
 
         // Get the embedded resource.
@@ -103,7 +103,7 @@ class JarRevision extends BundleRevision
         try
         {
             // Open bundle JAR file.
-            jarFile = BundleCache.getSecureAction().openJAR(this.m_bundleFile);
+            jarFile = BundleCache.getSecureAction().openJAR(m_bundleFile);
             // Error if no jar file.
             if (jarFile == null)
             {
@@ -112,8 +112,8 @@ class JarRevision extends BundleRevision
             // Get manifest.
             Manifest mf = jarFile.getManifest();
             // Create a case insensitive map of manifest attributes.
-            this.m_header = new StringMap(mf.getMainAttributes(), false);
-            return this.m_header;
+            m_header = new StringMap(mf.getMainAttributes(), false);
+            return m_header;
 
         }
         finally
@@ -124,7 +124,7 @@ class JarRevision extends BundleRevision
 
     public IContent getContent() throws Exception
     {
-        return new JarContent(this.m_bundleFile);
+        return new JarContent(m_bundleFile);
     }
 
     public synchronized IContent[] getContentPath() throws Exception
@@ -156,8 +156,8 @@ class JarRevision extends BundleRevision
         JarFile bundleJar = null;
         try
         {
-            bundleJar = BundleCache.getSecureAction().openJAR(this.m_bundleFile);
-            IContent self = new JarContent(this.m_bundleFile);
+            bundleJar = BundleCache.getSecureAction().openJAR(m_bundleFile);
+            IContent self = new JarContent(m_bundleFile);
             List contentList = new ArrayList();
             for (int i = 0; i < classPathStrings.length; i++)
             {
@@ -227,7 +227,7 @@ class JarRevision extends BundleRevision
 
             try
             {
-                bundleJar = BundleCache.getSecureAction().openJAR(this.m_bundleFile);
+                bundleJar = BundleCache.getSecureAction().openJAR(m_bundleFile);
                 ZipEntry ze = bundleJar.getEntry(libName);
                 if (ze == null)
                 {
@@ -311,7 +311,7 @@ class JarRevision extends BundleRevision
                 }
 
                 // Save the bundle jar file.
-                BundleCache.copyStreamToFile(is, this.m_bundleFile);
+                BundleCache.copyStreamToFile(is, m_bundleFile);
             }
 
             this.preprocessBundleJar();
@@ -414,7 +414,7 @@ class JarRevision extends BundleRevision
             try
             {
                 // Make sure class path entry is a JAR file.
-                bundleJar = BundleCache.getSecureAction().openJAR(this.m_bundleFile);
+                bundleJar = BundleCache.getSecureAction().openJAR(m_bundleFile);
                 ZipEntry ze = bundleJar.getEntry(jarPath);
                 if (ze == null)
                 {

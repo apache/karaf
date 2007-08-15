@@ -57,8 +57,8 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         ComponentRegistry componentRegistry )
     {
         super( activator, metadata );
-        this.m_componentRegistry = componentRegistry;
-        this.m_createdComponents = new IdentityHashMap();
+        m_componentRegistry = componentRegistry;
+        m_createdComponents = new IdentityHashMap();
     }
 
 
@@ -126,13 +126,13 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     public void updated( String pid, Dictionary configuration )
     {
         ComponentManager cm;
-        if ( this.m_configuredServices != null )
+        if ( m_configuredServices != null )
         {
-            cm = ( ComponentManager ) this.m_configuredServices.get( pid );
+            cm = ( ComponentManager ) m_configuredServices.get( pid );
         }
         else
         {
-            this.m_configuredServices = new HashMap();
+            m_configuredServices = new HashMap();
             cm = null;
         }
 
@@ -142,7 +142,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
             cm = this.createComponentManager( configuration );
 
             // keep a reference for future updates
-            this.m_configuredServices.put( pid, cm );
+            m_configuredServices.put( pid, cm );
         }
         else
         {
@@ -160,9 +160,9 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
 
     public void deleted( String pid )
     {
-        if ( this.m_configuredServices != null )
+        if ( m_configuredServices != null )
         {
-            ComponentManager cm = ( ComponentManager ) this.m_configuredServices.remove( pid );
+            ComponentManager cm = ( ComponentManager ) m_configuredServices.remove( pid );
             if ( cm != null )
             {
                 this.disposeComponentManager( cm );
@@ -187,14 +187,14 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
      */
     private ComponentManager createComponentManager( Dictionary configuration )
     {
-        long componentId = this.m_componentRegistry.createComponentId();
+        long componentId = m_componentRegistry.createComponentId();
         ComponentManager cm = ManagerFactory.createManager( this.getActivator(), this.getComponentMetadata(), componentId );
 
         // add the new component to the activators instances
         this.getActivator().getInstanceReferences().add( cm );
 
         // register with the internal set of created components
-        this.m_createdComponents.put(cm, cm);
+        m_createdComponents.put(cm, cm);
 
         // inject configuration if possible
         if ( cm instanceof ImmediateComponentManager )
@@ -210,7 +210,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
 
     private void disposeComponentManager(ComponentManager cm) {
         // remove from created components
-        this.m_createdComponents.remove( cm );
+        m_createdComponents.remove( cm );
 
         // remove from activators list
         this.getActivator().getInstanceReferences().remove( cm );

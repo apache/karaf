@@ -67,9 +67,9 @@ public abstract class BundleRevision
     public BundleRevision(Logger logger, File revisionRootDir, String location)
         throws Exception
     {
-        this.m_logger = logger;
-        this.m_revisionRootDir = revisionRootDir;
-        this.m_location = location;
+        m_logger = logger;
+        m_revisionRootDir = revisionRootDir;
+        m_location = location;
     }
 
 
@@ -81,7 +81,7 @@ public abstract class BundleRevision
     **/
     public Logger getLogger()
     {
-        return this.m_logger;
+        return m_logger;
     }
 
     /**
@@ -92,7 +92,7 @@ public abstract class BundleRevision
     **/
     public File getRevisionRootDir()
     {
-        return this.m_revisionRootDir;
+        return m_revisionRootDir;
     }
 
     /**
@@ -103,7 +103,7 @@ public abstract class BundleRevision
     **/
     public String getLocation()
     {
-        return this.m_location;
+        return m_location;
     }
 
     /**

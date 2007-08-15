@@ -67,10 +67,10 @@ class DependencyManager implements ServiceListener
     DependencyManager( AbstractComponentManager componentManager, ReferenceMetadata dependency )
         throws InvalidSyntaxException
     {
-        this.m_componentManager = componentManager;
-        this.m_dependencyMetadata = dependency;
-        this.m_bindUsesServiceReference = false;
-        this.m_tracked = new HashMap();
+        m_componentManager = componentManager;
+        m_dependencyMetadata = dependency;
+        m_bindUsesServiceReference = false;
+        m_tracked = new HashMap();
 
         // register the service listener
         String filterString = "(" + Constants.OBJECTCLASS + "=" + dependency.getInterface() + ")";
@@ -117,12 +117,12 @@ class DependencyManager implements ServiceListener
      */
     void close()
     {
-        BundleContext context = this.m_componentManager.getActivator().getBundleContext();
+        BundleContext context = m_componentManager.getActivator().getBundleContext();
         context.removeServiceListener( this );
 
-        synchronized ( this.m_tracked )
+        synchronized ( m_tracked )
         {
-            for ( Iterator ri = this.m_tracked.keySet().iterator(); ri.hasNext(); )
+            for ( Iterator ri = m_tracked.keySet().iterator(); ri.hasNext(); )
             {
                 ServiceReference sr = ( ServiceReference ) ri.next();
                 context.ungetService( sr );
@@ -137,9 +137,9 @@ class DependencyManager implements ServiceListener
      */
     int size()
     {
-        synchronized ( this.m_tracked )
+        synchronized ( m_tracked )
         {
-            return this.m_tracked.size();
+            return m_tracked.size();
         }
     }
 
@@ -149,11 +149,11 @@ class DependencyManager implements ServiceListener
      */
     ServiceReference getServiceReference()
     {
-        synchronized ( this.m_tracked )
+        synchronized ( m_tracked )
         {
-            if ( this.m_tracked.size() > 0 )
+            if ( m_tracked.size() > 0 )
             {
-                return ( ServiceReference ) this.m_tracked.keySet().iterator().next();
+                return ( ServiceReference ) m_tracked.keySet().iterator().next();
             }
 
             return null;
@@ -167,11 +167,11 @@ class DependencyManager implements ServiceListener
      */
     ServiceReference[] getServiceReferences()
     {
-        synchronized ( this.m_tracked )
+        synchronized ( m_tracked )
         {
-            if ( this.m_tracked.size() > 0 )
+            if ( m_tracked.size() > 0 )
             {
-                return ( ServiceReference[] ) this.m_tracked.keySet().toArray( new ServiceReference[this.m_tracked.size()] );
+                return ( ServiceReference[] ) m_tracked.keySet().toArray( new ServiceReference[m_tracked.size()] );
             }
 
             return null;
@@ -184,9 +184,9 @@ class DependencyManager implements ServiceListener
      */
     Object getService( ServiceReference serviceReference )
     {
-        synchronized ( this.m_tracked )
+        synchronized ( m_tracked )
         {
-            return this.m_tracked.get( serviceReference );
+            return m_tracked.get( serviceReference );
         }
     }
 
@@ -196,11 +196,11 @@ class DependencyManager implements ServiceListener
      */
     Object getService()
     {
-        synchronized ( this.m_tracked )
+        synchronized ( m_tracked )
         {
-            if ( this.m_tracked.size() > 0 )
+            if ( m_tracked.size() > 0 )
             {
-                return this.m_tracked.values().iterator().next();
+                return m_tracked.values().iterator().next();
             }
 
             return null;
@@ -214,11 +214,11 @@ class DependencyManager implements ServiceListener
      */
     Object[] getServices()
     {
-        synchronized ( this.m_tracked )
+        synchronized ( m_tracked )
         {
-            if ( this.m_tracked.size() > 0 )
+            if ( m_tracked.size() > 0 )
             {
-                return this.m_tracked.values().toArray( new ServiceReference[this.m_tracked.size()] );
+                return m_tracked.values().toArray( new ServiceReference[m_tracked.size()] );
             }
 
             return null;
@@ -233,7 +233,7 @@ class DependencyManager implements ServiceListener
      */
     String getName()
     {
-        return this.m_dependencyMetadata.getName();
+        return m_dependencyMetadata.getName();
     }
 
 
@@ -243,7 +243,7 @@ class DependencyManager implements ServiceListener
      */
     boolean isValid()
     {
-        return this.size() > 0 || this.m_dependencyMetadata.isOptional();
+        return this.size() > 0 || m_dependencyMetadata.isOptional();
     }
 
 
@@ -278,7 +278,7 @@ class DependencyManager implements ServiceListener
             int max = 1;
             boolean retval = true;
 
-            if ( this.m_dependencyMetadata.isMultiple() == true )
+            if ( m_dependencyMetadata.isMultiple() == true )
             {
                 max = refs.length;
             }
@@ -290,7 +290,7 @@ class DependencyManager implements ServiceListener
                 {
                     // There was an exception when calling the bind method
                     Activator.error( "Dependency Manager: Possible exception in the bind method during initialize()",
-                        this.m_componentManager.getComponentMetadata() );
+                        m_componentManager.getComponentMetadata() );
                     return false;
                 }
             }
@@ -355,7 +355,7 @@ class DependencyManager implements ServiceListener
             method = AbstractComponentManager.getMethod( targetClass, methodname, new Class[]
                 { ServiceReference.class } );
 
-            this.m_bindUsesServiceReference = true;
+            m_bindUsesServiceReference = true;
         }
         catch ( NoSuchMethodException ex )
         {
@@ -364,9 +364,9 @@ class DependencyManager implements ServiceListener
             {
                 // Case2
 
-                this.m_bindUsesServiceReference = false;
+                m_bindUsesServiceReference = false;
 
-                parameterClass = this.m_componentManager.getActivator().getBundleContext().getBundle().loadClass(
+                parameterClass = m_componentManager.getActivator().getBundleContext().getBundle().loadClass(
                     parameterClassName );
 
                 method = AbstractComponentManager.getMethod( targetClass, methodname, new Class[]
@@ -425,7 +425,7 @@ class DependencyManager implements ServiceListener
             }
             catch ( ClassNotFoundException ex2 )
             {
-                Activator.exception( "Cannot load class used as parameter " + parameterClassName, this.m_componentManager
+                Activator.exception( "Cannot load class used as parameter " + parameterClassName, m_componentManager
                     .getComponentMetadata(), ex2 );
             }
         }
@@ -457,10 +457,10 @@ class DependencyManager implements ServiceListener
             try
             {
                 // Get the bind method
-                Activator.trace( "getting bind: " + this.m_dependencyMetadata.getBind(), this.m_componentManager
+                Activator.trace( "getting bind: " + m_dependencyMetadata.getBind(), m_componentManager
                     .getComponentMetadata() );
-                Method bindMethod = this.getBindingMethod( this.m_dependencyMetadata.getBind(), implementationObject.getClass(),
-                    this.m_dependencyMetadata.getInterface() );
+                Method bindMethod = this.getBindingMethod( m_dependencyMetadata.getBind(), implementationObject.getClass(),
+                    m_dependencyMetadata.getInterface() );
 
                 if ( bindMethod == null )
                 {
@@ -468,14 +468,14 @@ class DependencyManager implements ServiceListener
                     // error
                     // message with the log service, if present, and ignore the
                     // method
-                    Activator.error( "bind() method not found", this.m_componentManager.getComponentMetadata() );
+                    Activator.error( "bind() method not found", m_componentManager.getComponentMetadata() );
                     return false;
                 }
 
                 // Get the parameter
                 Object parameter;
 
-                if ( this.m_bindUsesServiceReference == false )
+                if ( m_bindUsesServiceReference == false )
                 {
                     parameter = service;
                 }
@@ -488,7 +488,7 @@ class DependencyManager implements ServiceListener
                 bindMethod.invoke( implementationObject, new Object[]
                     { parameter } );
 
-                Activator.trace( "bound: " + this.getName(), this.m_componentManager.getComponentMetadata() );
+                Activator.trace( "bound: " + this.getName(), m_componentManager.getComponentMetadata() );
 
                 return true;
             }
@@ -498,17 +498,17 @@ class DependencyManager implements ServiceListener
                 // public, SCR must log an error
                 // message with the log service, if present, and ignore the
                 // method
-                Activator.exception( "bind() method cannot be called", this.m_componentManager.getComponentMetadata(), ex );
+                Activator.exception( "bind() method cannot be called", m_componentManager.getComponentMetadata(), ex );
                 return false;
             }
             catch ( InvocationTargetException ex )
             {
-                Activator.exception( "DependencyManager : exception while invoking " + this.m_dependencyMetadata.getBind()
-                    + "()", this.m_componentManager.getComponentMetadata(), ex );
+                Activator.exception( "DependencyManager : exception while invoking " + m_dependencyMetadata.getBind()
+                    + "()", m_componentManager.getComponentMetadata(), ex );
                 return false;
             }
         }
-        else if ( implementationObject == null && this.m_componentManager.getComponentMetadata().isImmediate() == false )
+        else if ( implementationObject == null && m_componentManager.getComponentMetadata().isImmediate() == false )
         {
             return true;
         }
@@ -537,16 +537,16 @@ class DependencyManager implements ServiceListener
         {
             try
             {
-                Activator.trace( "getting unbind: " + this.m_dependencyMetadata.getUnbind(), this.m_componentManager
+                Activator.trace( "getting unbind: " + m_dependencyMetadata.getUnbind(), m_componentManager
                     .getComponentMetadata() );
-                Method unbindMethod = this.getBindingMethod( this.m_dependencyMetadata.getUnbind(), implementationObject
-                    .getClass(), this.m_dependencyMetadata.getInterface() );
+                Method unbindMethod = this.getBindingMethod( m_dependencyMetadata.getUnbind(), implementationObject
+                    .getClass(), m_dependencyMetadata.getInterface() );
 
                 // Recover the object that is bound from the map.
                 // Object parameter = m_boundServices.get(ref);
                 Object parameter = null;
 
-                if ( this.m_bindUsesServiceReference == true )
+                if ( m_bindUsesServiceReference == true )
                 {
                     parameter = ref;
                 }
@@ -561,14 +561,14 @@ class DependencyManager implements ServiceListener
                     // error
                     // message with the log service, if present, and ignore the
                     // method
-                    Activator.error( "unbind() method not found", this.m_componentManager.getComponentMetadata() );
+                    Activator.error( "unbind() method not found", m_componentManager.getComponentMetadata() );
                     return false;
                 }
 
                 unbindMethod.invoke( implementationObject, new Object[]
                     { parameter } );
 
-                Activator.trace( "unbound: " + this.getName(), this.m_componentManager.getComponentMetadata() );
+                Activator.trace( "unbound: " + this.getName(), m_componentManager.getComponentMetadata() );
 
                 return true;
             }
@@ -578,18 +578,18 @@ class DependencyManager implements ServiceListener
                 // public, SCR must log an error
                 // message with the log service, if present, and ignore the
                 // method
-                Activator.exception( "unbind() method cannot be called", this.m_componentManager.getComponentMetadata(), ex );
+                Activator.exception( "unbind() method cannot be called", m_componentManager.getComponentMetadata(), ex );
                 return false;
             }
             catch ( InvocationTargetException ex )
             {
-                Activator.exception( "DependencyManager : exception while invoking " + this.m_dependencyMetadata.getUnbind()
-                    + "()", this.m_componentManager.getComponentMetadata(), ex );
+                Activator.exception( "DependencyManager : exception while invoking " + m_dependencyMetadata.getUnbind()
+                    + "()", m_componentManager.getComponentMetadata(), ex );
                 return false;
             }
 
         }
-        else if ( implementationObject == null && this.m_componentManager.getComponentMetadata().isImmediate() == false )
+        else if ( implementationObject == null && m_componentManager.getComponentMetadata().isImmediate() == false )
         {
             return true;
         }
@@ -605,10 +605,10 @@ class DependencyManager implements ServiceListener
     private void addingService( ServiceReference reference )
     {
         // get the service and keep it here (for now or later)
-        Object service = this.m_componentManager.getActivator().getBundleContext().getService( reference );
-        synchronized ( this.m_tracked )
+        Object service = m_componentManager.getActivator().getBundleContext().getService( reference );
+        synchronized ( m_tracked )
         {
-            this.m_tracked.put( reference, service );
+            m_tracked.put( reference, service );
         }
 
         // forward the event if in event handling state
@@ -618,25 +618,25 @@ class DependencyManager implements ServiceListener
             // the component is UNSATISFIED if enabled but any of the references
             // have been missing when activate was running the last time or
             // the component has been deactivated
-            if ( this.m_componentManager.getState() == AbstractComponentManager.STATE_UNSATISFIED )
+            if ( m_componentManager.getState() == AbstractComponentManager.STATE_UNSATISFIED )
             {
-                this.m_componentManager.activate();
+                m_componentManager.activate();
             }
 
             // Otherwise, this checks for dynamic 0..1, 0..N, and 1..N
             // it never
             // checks for 1..1 dynamic which is done above by the
             // validate()
-            else if ( !this.m_dependencyMetadata.isStatic() )
+            else if ( !m_dependencyMetadata.isStatic() )
             {
                 // For dependency that are aggregates, always bind the
                 // service
                 // Otherwise only bind if bind services is zero, which
                 // captures the 0..1 case
                 // (size is still zero as we are called for the first service)
-                if ( this.m_dependencyMetadata.isMultiple() || this.size() == 0 )
+                if ( m_dependencyMetadata.isMultiple() || this.size() == 0 )
                 {
-                    this.invokeBindMethod( this.m_componentManager.getInstance(), reference, service );
+                    this.invokeBindMethod( m_componentManager.getInstance(), reference, service );
                 }
             }
         }
@@ -647,9 +647,9 @@ class DependencyManager implements ServiceListener
     {
         // remove the service from the internal registry, ignore if not cached
         Object service;
-        synchronized ( this.m_tracked )
+        synchronized ( m_tracked )
         {
-            service = this.m_tracked.remove( reference );
+            service = m_tracked.remove( reference );
         }
 
         // do nothing in the unlikely case that we do not have it cached
@@ -662,18 +662,18 @@ class DependencyManager implements ServiceListener
         {
             // A static dependency is broken the instance manager will
             // be invalidated
-            if ( this.m_dependencyMetadata.isStatic() )
+            if ( m_dependencyMetadata.isStatic() )
             {
                 // setStateDependency(DependencyChangeEvent.DEPENDENCY_INVALID);
                 try
                 {
-                    Activator.trace( "Dependency Manager: Static dependency is broken", this.m_componentManager
+                    Activator.trace( "Dependency Manager: Static dependency is broken", m_componentManager
                         .getComponentMetadata() );
-                    this.m_componentManager.reactivate();
+                    m_componentManager.reactivate();
                 }
                 catch ( Exception ex )
                 {
-                    Activator.exception( "Exception while recreating dependency ", this.m_componentManager
+                    Activator.exception( "Exception while recreating dependency ", m_componentManager
                         .getComponentMetadata(), ex );
                 }
             }
@@ -683,7 +683,7 @@ class DependencyManager implements ServiceListener
                 // Release references to the service, call unbinder
                 // method
                 // and eventually request service unregistration
-                Object instance = this.m_componentManager.getInstance();
+                Object instance = m_componentManager.getInstance();
                 this.invokeUnbindMethod( instance, reference, service );
 
                 // The only thing we need to do here is check if we can
@@ -700,13 +700,13 @@ class DependencyManager implements ServiceListener
                     // try to reinitialize
                     if ( !this.bind( instance ) )
                     {
-                        if ( !this.m_dependencyMetadata.isOptional() )
+                        if ( !m_dependencyMetadata.isOptional() )
                         {
                             Activator
                                 .trace(
                                     "Dependency Manager: Mandatory dependency not fullfilled and no replacements available... unregistering service...",
-                                    this.m_componentManager.getComponentMetadata() );
-                            this.m_componentManager.reactivate();
+                                    m_componentManager.getComponentMetadata() );
+                            m_componentManager.reactivate();
                         }
                     }
                 }
@@ -714,13 +714,13 @@ class DependencyManager implements ServiceListener
         }
 
         // finally unget the service
-        this.m_componentManager.getActivator().getBundleContext().ungetService( reference );
+        m_componentManager.getActivator().getBundleContext().ungetService( reference );
     }
 
 
     private boolean handleServiceEvent()
     {
-        return ( this.m_componentManager.getState() & STATE_MASK ) != 0;
+        return ( m_componentManager.getState() & STATE_MASK ) != 0;
         //        return state != AbstractComponentManager.INSTANCE_DESTROYING
         //            && state != AbstractComponentManager.INSTANCE_DESTROYED
         //            && state != AbstractComponentManager.INSTANCE_CREATING

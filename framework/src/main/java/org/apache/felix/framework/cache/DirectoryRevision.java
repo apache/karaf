@@ -52,7 +52,7 @@ class DirectoryRevision extends BundleRevision
         Logger logger, File revisionRootDir, String location) throws Exception
     {
         super(logger, revisionRootDir, location);
-        this.m_refDir = new File(location.substring(
+        m_refDir = new File(location.substring(
             location.indexOf(BundleArchive.FILE_PROTOCOL)
                 + BundleArchive.FILE_PROTOCOL.length()));
 
@@ -78,9 +78,9 @@ class DirectoryRevision extends BundleRevision
     public synchronized Map getManifestHeader()
         throws Exception
     {
-        if (this.m_header != null)
+        if (m_header != null)
         {
-            return this.m_header;
+            return m_header;
         }
 
         // Read the header file from the reference directory.
@@ -90,7 +90,7 @@ class DirectoryRevision extends BundleRevision
         {
             // Open manifest file.
             is = BundleCache.getSecureAction()
-                .getFileInputStream(new File(this.m_refDir, "META-INF/MANIFEST.MF"));
+                .getFileInputStream(new File(m_refDir, "META-INF/MANIFEST.MF"));
             // Error if no jar file.
             if (is == null)
             {
@@ -100,8 +100,8 @@ class DirectoryRevision extends BundleRevision
             // Get manifest.
             Manifest mf = new Manifest(is);
             // Create a case insensitive map of manifest attributes.
-            this.m_header = new StringMap(mf.getMainAttributes(), false);
-            return this.m_header;
+            m_header = new StringMap(mf.getMainAttributes(), false);
+            return m_header;
         }
         finally
         {
@@ -111,7 +111,7 @@ class DirectoryRevision extends BundleRevision
 
     public IContent getContent() throws Exception
     {
-        return new DirectoryContent(this.m_refDir);
+        return new DirectoryContent(m_refDir);
     }
 
     public synchronized IContent[] getContentPath() throws Exception
@@ -138,7 +138,7 @@ class DirectoryRevision extends BundleRevision
         }
 
         // Create the bundles class path.
-        IContent self = new DirectoryContent(this.m_refDir);
+        IContent self = new DirectoryContent(m_refDir);
         List contentList = new ArrayList();
         for (int i = 0; i < classPathStrings.length; i++)
         {
@@ -149,7 +149,7 @@ class DirectoryRevision extends BundleRevision
             else
             {
                 // Determine if the class path entry is a file or directory.
-                File file = new File(this.m_refDir, classPathStrings[i]);
+                File file = new File(m_refDir, classPathStrings[i]);
                 if (BundleCache.getSecureAction().isFileDirectory(file))
                 {
                     contentList.add(new DirectoryContent(file));

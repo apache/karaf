@@ -92,11 +92,11 @@ public class DispatchTask implements Runnable
     public DispatchTask(final TaskProducer producer, final Scheduler scheduler,
         final HandoverTask handover)
     {
-        this.m_producer = producer;
+        m_producer = producer;
 
-        this.m_scheduler = scheduler;
+        m_scheduler = scheduler;
 
-        this.m_handover = handover;
+        m_handover = handover;
     }
 
     /*
@@ -115,24 +115,24 @@ public class DispatchTask implements Runnable
      */
     public void run()
     {
-        for (HandlerTask manager = this.m_producer.next(); null != manager; manager = this.m_producer
+        for (HandlerTask manager = m_producer.next(); null != manager; manager = m_producer
             .next())
         {
-            synchronized (this.m_lock)
+            synchronized (m_lock)
             {
                 // Set-up the timeout
-                this.m_blackListTask = new BlackListTask(manager);
+                m_blackListTask = new BlackListTask(manager);
 
-                this.m_scheduler.schedule(this.m_blackListTask);
+                m_scheduler.schedule(m_blackListTask);
             }
 
             // HandlerTask does catch exceptions hence, we don't need to do it.
             manager.execute();
 
-            synchronized (this.m_lock)
+            synchronized (m_lock)
             {
                 // release the timeout
-                this.m_blackListTask.cancel();
+                m_blackListTask.cancel();
             }
         }
     }
@@ -143,13 +143,13 @@ public class DispatchTask implements Runnable
      */
     public void handover()
     {
-        synchronized (this.m_lock)
+        synchronized (m_lock)
         {
             // release the timeout
-            this.m_blackListTask.cancel();
+            m_blackListTask.cancel();
 
             // spin-off a new thread
-            this.m_handover.execute(new DispatchTask(this));
+            m_handover.execute(new DispatchTask(this));
 
             this.stop();
         }
@@ -160,16 +160,16 @@ public class DispatchTask implements Runnable
      */
     public void stop()
     {
-        synchronized (this.m_lock)
+        synchronized (m_lock)
         {
             // release the timeout
-            this.m_blackListTask.cancel();
+            m_blackListTask.cancel();
 
-            this.m_handover = NULL_HANDOVER;
+            m_handover = NULL_HANDOVER;
 
-            this.m_producer = NULL_PRODUCER;
+            m_producer = NULL_PRODUCER;
 
-            this.m_scheduler = Scheduler.NULL_SCHEDULER;
+            m_scheduler = Scheduler.NULL_SCHEDULER;
         }
     }
 
@@ -179,36 +179,36 @@ public class DispatchTask implements Runnable
      */
     public void hold()
     {
-        synchronized (this.m_lock)
+        synchronized (m_lock)
         {
             // release the timeout
-            this.m_blackListTask.cancel();
+            m_blackListTask.cancel();
 
             // record the time that we already used
-            int pastTime = (int) (System.currentTimeMillis() - this.m_blackListTask
+            int pastTime = (int) (System.currentTimeMillis() - m_blackListTask
                 .getTime());
 
             // spin-off a new thread
-            this.m_handover.execute(new DispatchTask(this));
+            m_handover.execute(new DispatchTask(this));
 
             // block until a call to resume()
-            this.m_isHolding = true;
+            m_isHolding = true;
 
-            while (this.m_isHolding)
+            while (m_isHolding)
             {
                 try
                 {
-                    this.m_lock.wait();
+                    m_lock.wait();
                 } catch (InterruptedException e)
                 {
                 }
             }
 
             // restore the timeout
-            this.m_blackListTask = new BlackListTask(this.m_blackListTask,
+            m_blackListTask = new BlackListTask(m_blackListTask,
                 System.currentTimeMillis() - pastTime);
 
-            this.m_scheduler.schedule(this.m_blackListTask, pastTime);
+            m_scheduler.schedule(m_blackListTask, pastTime);
         }
     }
 
@@ -217,11 +217,11 @@ public class DispatchTask implements Runnable
      */
     public void resume()
     {
-        synchronized (this.m_lock)
+        synchronized (m_lock)
         {
-            this.m_isHolding = false;
+            m_isHolding = false;
 
-            this.m_lock.notifyAll();
+            m_lock.notifyAll();
         }
     }
 
@@ -246,9 +246,9 @@ public class DispatchTask implements Runnable
 
         BlackListTask(final HandlerTask manager, final long time)
         {
-            this.m_manager = manager;
+            m_manager = manager;
 
-            this.m_time = time;
+            m_time = time;
         }
 
         BlackListTask(final BlackListTask old, final long time)
@@ -261,7 +261,7 @@ public class DispatchTask implements Runnable
          */
         public long getTime()
         {
-            return this.m_time;
+            return m_time;
         }
 
         /**
@@ -274,9 +274,9 @@ public class DispatchTask implements Runnable
         {
             synchronized (DispatchTask.this.m_lock)
             {
-                if (!this.m_canceled)
+                if (!m_canceled)
                 {
-                    this.m_manager.blackListHandler();
+                    m_manager.blackListHandler();
 
                     DispatchTask.this.handover();
                 }
@@ -288,9 +288,9 @@ public class DispatchTask implements Runnable
          */
         public void cancel()
         {
-            synchronized (DispatchTask.this.m_lock)
+            synchronized (DispatchTask.m_lock)
             {
-                this.m_canceled = true;
+                m_canceled = true;
             }
         }
     }

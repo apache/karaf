@@ -62,7 +62,7 @@ class ImmediateComponentManager extends AbstractComponentManager
     {
         super(activator, metadata);
 
-        this.m_componentId = componentId;
+        m_componentId = componentId;
     }
 
 
@@ -80,16 +80,16 @@ class ImmediateComponentManager extends AbstractComponentManager
         // if something failed craeating the object, we fell back to
         // unsatisfied !!
         if (tmpComponent != null) {
-            this.m_componentContext = tmpContext;
-            this.m_implementationObject = tmpComponent;
+            m_componentContext = tmpContext;
+            m_implementationObject = tmpComponent;
         }
     }
 
     protected void deleteComponent() {
-        this.disposeImplementationObject( this.m_implementationObject, this.m_componentContext );
-        this.m_implementationObject = null;
-        this.m_componentContext = null;
-        this.m_properties = null;
+        this.disposeImplementationObject( m_implementationObject, m_componentContext );
+        m_implementationObject = null;
+        m_componentContext = null;
+        m_properties = null;
     }
 
 
@@ -101,7 +101,7 @@ class ImmediateComponentManager extends AbstractComponentManager
     * @return the object that implements the services
     */
     public Object getInstance() {
-        return this.m_implementationObject;
+        return m_implementationObject;
     }
 
     protected Object createImplementationObject(ComponentContext componentContext) {
@@ -224,11 +224,11 @@ class ImmediateComponentManager extends AbstractComponentManager
      * factory component.
      */
     protected Object getService() {
-        return this.m_implementationObject;
+        return m_implementationObject;
     }
 
     protected void setFactoryProperties(Dictionary dictionary) {
-        this.m_factoryProperties = this.copyTo( null, dictionary );
+        m_factoryProperties = this.copyTo( null, dictionary );
     }
 
     /**
@@ -245,7 +245,7 @@ class ImmediateComponentManager extends AbstractComponentManager
 
         // TODO: Currently on ManagedService style configuration is supported, ManagedServiceFactory style is missing
 
-        if ( this.m_properties == null )
+        if ( m_properties == null )
         {
 
             // 1. the properties from the component descriptor
@@ -269,16 +269,16 @@ class ImmediateComponentManager extends AbstractComponentManager
             }
 
             // 3. copy any component factory properties, not supported yet
-            this.copyTo( props, this.m_factoryProperties );
+            this.copyTo( props, m_factoryProperties );
 
             // 4. set component.name and component.id
             props.put( ComponentConstants.COMPONENT_NAME, this.getComponentMetadata().getName() );
-            props.put( ComponentConstants.COMPONENT_ID, new Long( this.m_componentId ) );
+            props.put( ComponentConstants.COMPONENT_ID, new Long( m_componentId ) );
 
-            this.m_properties = props;
+            m_properties = props;
         }
 
-        return this.m_properties;
+        return m_properties;
     }
 
 }
