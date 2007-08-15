@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -43,11 +43,11 @@ import org.xmlpull.v1.XmlPullParserException;
  * class by overwriting the the factory methods to create specialized versions.
  * One notable use of this is the extension of the {@link AD} class to overwrite
  * the {@link AD#validate(String)} method. In this case, the {@link #createAD()}
- * method would be overwritten to return an instance of the extending class. 
+ * method would be overwritten to return an instance of the extending class.
  * <p>
  * This class is not thread safe. Using instances of this class in multiple
  * threads concurrently is not supported and will fail.
- * 
+ *
  * @author fmeschbe
  */
 public class MetaDataReader
@@ -64,13 +64,13 @@ public class MetaDataReader
      * This method is almost identical to
      * <code>return parse(url.openStream());</code> but also sets the string
      * representation of the URL as a location helper for error messages.
-     * 
+     *
      * @param url The <code>URL</code> providing access to the XML document.
-     * 
+     *
      * @return A {@link MetaData} providing access to the
      *      raw contents of the XML document.
-     *      
-     * @throws IOException If an I/O error occurrs accessing the stream. 
+     *
+     * @throws IOException If an I/O error occurrs accessing the stream.
      * @throws XmlPullParserException If an error occurrs parsing the XML
      *      document.
      */
@@ -80,8 +80,9 @@ public class MetaDataReader
         try
         {
             ins = url.openStream();
-            parser.setProperty( "http://xmlpull.org/v1/doc/properties.html#location", url.toString() );
-            return parse( ins );
+            this.parser.setProperty( "http://xmlpull.org/v1/doc/properties.html#location", url.toString() );
+            this.parser.setFeature(KXmlParser.FEATURE_PROCESS_NAMESPACES, true);
+            return this.parse( ins );
         }
         finally
         {
@@ -106,38 +107,38 @@ public class MetaDataReader
      * This method starts reading at the current position of the input stream
      * and returns immediately after completely reading a single meta type
      * document. The stream is not closed by this method.
-     * 
+     *
      * @param ins The <code>InputStream</code> providing the XML document
-     * 
+     *
      * @return A {@link MetaData} providing access to the
      *      raw contents of the XML document.
-     *      
-     * @throws IOException If an I/O error occurrs accessing the stream. 
+     *
+     * @throws IOException If an I/O error occurrs accessing the stream.
      * @throws XmlPullParserException If an error occurrs parsing the XML
      *      document.
      */
     public MetaData parse( InputStream ins ) throws IOException, XmlPullParserException
     {
         // set the parser input, use null encoding to force detection with <?xml?>
-        parser.setInput( ins, null );
+        this.parser.setInput( ins, null );
 
         MetaData mti = null;
 
-        int eventType = parser.getEventType();
+        int eventType = this.parser.getEventType();
         while ( eventType != XmlPullParser.END_DOCUMENT )
         {
             if ( eventType == XmlPullParser.START_TAG )
             {
-                if ( "MetaData".equals( parser.getName() ) )
+                if ( "MetaData".equals( this.parser.getName() ) )
                 {
-                    mti = readMetaData();
+                    mti = this.readMetaData();
                 }
                 else
                 {
-                    ignoreElement();
+                    this.ignoreElement();
                 }
             }
-            eventType = parser.next();
+            eventType = this.parser.next();
         }
 
         return mti;
@@ -146,37 +147,37 @@ public class MetaDataReader
 
     private MetaData readMetaData() throws IOException, XmlPullParserException
     {
-        MetaData mti = createMetaData();
-        mti.setLocalePrefix( getOptionalAttribute( "localization" ) );
+        MetaData mti = this.createMetaData();
+        mti.setLocalePrefix( this.getOptionalAttribute( "localization" ) );
 
-        int eventType = parser.next();
+        int eventType = this.parser.next();
         while ( eventType != XmlPullParser.END_DOCUMENT )
         {
             if ( eventType == XmlPullParser.START_TAG )
             {
-                if ( "OCD".equals( parser.getName() ) )
+                if ( "OCD".equals( this.parser.getName() ) )
                 {
-                    mti.addObjectClassDefinition( readOCD() );
+                    mti.addObjectClassDefinition( this.readOCD() );
                 }
-                else if ( "Designate".equals( parser.getName() ) )
+                else if ( "Designate".equals( this.parser.getName() ) )
                 {
-                    mti.addDesignate( readDesignate() );
+                    mti.addDesignate( this.readDesignate() );
                 }
                 else
                 {
-                    ignoreElement();
+                    this.ignoreElement();
                 }
             }
             else if ( eventType == XmlPullParser.END_TAG )
             {
-                if ( "MetaData".equals( parser.getName() ) )
+                if ( "MetaData".equals( this.parser.getName() ) )
                 {
                     break;
                 }
 
-                throw unexpectedElement();
+                throw this.unexpectedElement();
             }
-            eventType = parser.next();
+            eventType = this.parser.next();
         }
 
         return mti;
@@ -185,24 +186,24 @@ public class MetaDataReader
 
     private OCD readOCD() throws IOException, XmlPullParserException
     {
-        OCD ocd = createOCD();
-        ocd.setId( getRequiredAttribute( "id" ) );
-        ocd.setName( getRequiredAttribute( "name" ) );
-        ocd.setDescription( getOptionalAttribute( "description" ) );
+        OCD ocd = this.createOCD();
+        ocd.setId( this.getRequiredAttribute( "id" ) );
+        ocd.setName( this.getRequiredAttribute( "name" ) );
+        ocd.setDescription( this.getOptionalAttribute( "description" ) );
 
-        int eventType = parser.next();
+        int eventType = this.parser.next();
         while ( eventType != XmlPullParser.END_DOCUMENT )
         {
             if ( eventType == XmlPullParser.START_TAG )
             {
-                if ( "AD".equals( parser.getName() ) )
+                if ( "AD".equals( this.parser.getName() ) )
                 {
-                    ocd.addAttributeDefinition( readAD() );
+                    ocd.addAttributeDefinition( this.readAD() );
                 }
-                else if ( "Icon".equals( parser.getName() ) )
+                else if ( "Icon".equals( this.parser.getName() ) )
                 {
-                    String res = getRequiredAttribute( "resource" );
-                    String sizeString = getRequiredAttribute( "size" );
+                    String res = this.getRequiredAttribute( "resource" );
+                    String sizeString = this.getRequiredAttribute( "size" );
                     try
                     {
                         Integer size = Integer.decode( sizeString );
@@ -216,21 +217,21 @@ public class MetaDataReader
                 }
                 else
                 {
-                    ignoreElement();
+                    this.ignoreElement();
                 }
             }
             else if ( eventType == XmlPullParser.END_TAG )
             {
-                if ( "OCD".equals( parser.getName() ) )
+                if ( "OCD".equals( this.parser.getName() ) )
                 {
                     break;
                 }
-                else if ( !"Icon".equals( parser.getName() ) )
+                else if ( !"Icon".equals( this.parser.getName() ) )
                 {
-                    throw unexpectedElement();
+                    throw this.unexpectedElement();
                 }
             }
-            eventType = parser.next();
+            eventType = this.parser.next();
         }
 
         return ocd;
@@ -239,37 +240,37 @@ public class MetaDataReader
 
     private Designate readDesignate() throws IOException, XmlPullParserException
     {
-        Designate designate = createDesignate();
-        designate.setPid( getRequiredAttribute( "pid" ) );
-        designate.setFactoryPid( getOptionalAttribute( "factoryPid" ) );
-        designate.setBundleLocation( getOptionalAttribute( "bundle" ) );
-        designate.setOptional( getOptionalAttribute( "optional", false ) );
-        designate.setMerge( getOptionalAttribute( "merge", false ) );
+        Designate designate = this.createDesignate();
+        designate.setPid( this.getRequiredAttribute( "pid" ) );
+        designate.setFactoryPid( this.getOptionalAttribute( "factoryPid" ) );
+        designate.setBundleLocation( this.getOptionalAttribute( "bundle" ) );
+        designate.setOptional( this.getOptionalAttribute( "optional", false ) );
+        designate.setMerge( this.getOptionalAttribute( "merge", false ) );
 
-        int eventType = parser.next();
+        int eventType = this.parser.next();
         while ( eventType != XmlPullParser.END_DOCUMENT )
         {
             if ( eventType == XmlPullParser.START_TAG )
             {
-                if ( "Object".equals( parser.getName() ) )
+                if ( "Object".equals( this.parser.getName() ) )
                 {
-                    designate.setObject( readObject() );
+                    designate.setObject( this.readObject() );
                 }
                 else
                 {
-                    ignoreElement();
+                    this.ignoreElement();
                 }
             }
             else if ( eventType == XmlPullParser.END_TAG )
             {
-                if ( "Designate".equals( parser.getName() ) )
+                if ( "Designate".equals( this.parser.getName() ) )
                 {
                     break;
                 }
 
-                throw unexpectedElement();
+                throw this.unexpectedElement();
             }
-            eventType = parser.next();
+            eventType = this.parser.next();
         }
 
         return designate;
@@ -278,46 +279,46 @@ public class MetaDataReader
 
     private AD readAD() throws IOException, XmlPullParserException
     {
-        AD ad = createAD();
-        ad.setID( getRequiredAttribute( "id" ) );
-        ad.setName( getRequiredAttribute( "name" ) );
-        ad.setDescription( getOptionalAttribute( "description" ) );
-        ad.setType( getRequiredAttribute( "type" ) );
-        ad.setCardinality( getOptionalAttribute( "cardinality", 0 ) );
-        ad.setMin( getOptionalAttribute( "min" ) );
-        ad.setMax( getOptionalAttribute( "min" ) );
-        ad.setDefaultValue( getOptionalAttribute( "default" ) );
-        ad.setRequired( getOptionalAttribute( "required", true ) );
+        AD ad = this.createAD();
+        ad.setID( this.getRequiredAttribute( "id" ) );
+        ad.setName( this.getRequiredAttribute( "name" ) );
+        ad.setDescription( this.getOptionalAttribute( "description" ) );
+        ad.setType( this.getRequiredAttribute( "type" ) );
+        ad.setCardinality( this.getOptionalAttribute( "cardinality", 0 ) );
+        ad.setMin( this.getOptionalAttribute( "min" ) );
+        ad.setMax( this.getOptionalAttribute( "min" ) );
+        ad.setDefaultValue( this.getOptionalAttribute( "default" ) );
+        ad.setRequired( this.getOptionalAttribute( "required", true ) );
 
         Map options = new LinkedHashMap();
-        int eventType = parser.next();
+        int eventType = this.parser.next();
         while ( eventType != XmlPullParser.END_DOCUMENT )
         {
             if ( eventType == XmlPullParser.START_TAG )
             {
-                if ( "Option".equals( parser.getName() ) )
+                if ( "Option".equals( this.parser.getName() ) )
                 {
-                    String value = getRequiredAttribute( "value" );
-                    String label = getRequiredAttribute( "label" );
+                    String value = this.getRequiredAttribute( "value" );
+                    String label = this.getRequiredAttribute( "label" );
                     options.put( value, label );
                 }
                 else
                 {
-                    ignoreElement();
+                    this.ignoreElement();
                 }
             }
             else if ( eventType == XmlPullParser.END_TAG )
             {
-                if ( "AD".equals( parser.getName() ) )
+                if ( "AD".equals( this.parser.getName() ) )
                 {
                     break;
                 }
-                else if ( !"Option".equals( parser.getName() ) )
+                else if ( !"Option".equals( this.parser.getName() ) )
                 {
-                    throw unexpectedElement();
+                    throw this.unexpectedElement();
                 }
             }
-            eventType = parser.next();
+            eventType = this.parser.next();
         }
 
         ad.setOptions( options );
@@ -328,32 +329,32 @@ public class MetaDataReader
 
     private DesignateObject readObject() throws IOException, XmlPullParserException
     {
-        DesignateObject oh = createDesignateObject();
-        oh.setOcdRef( getRequiredAttribute( "ocdref" ) );
+        DesignateObject oh = this.createDesignateObject();
+        oh.setOcdRef( this.getRequiredAttribute( "ocdref" ) );
 
-        int eventType = parser.next();
+        int eventType = this.parser.next();
         while ( eventType != XmlPullParser.END_DOCUMENT )
         {
             if ( eventType == XmlPullParser.START_TAG )
             {
-                if ( "Attribute".equals( parser.getName() ) )
+                if ( "Attribute".equals( this.parser.getName() ) )
                 {
-                    oh.addAttribute( readAttribute() );
+                    oh.addAttribute( this.readAttribute() );
                 }
                 else
                 {
-                    ignoreElement();
+                    this.ignoreElement();
                 }
             }
             else if ( eventType == XmlPullParser.END_TAG )
             {
-                if ( "Object".equals( parser.getName() ) )
+                if ( "Object".equals( this.parser.getName() ) )
                 {
                     break;
                 }
-                throw unexpectedElement();
+                throw this.unexpectedElement();
             }
-            eventType = parser.next();
+            eventType = this.parser.next();
         }
 
         return oh;
@@ -362,38 +363,38 @@ public class MetaDataReader
 
     private Attribute readAttribute() throws IOException, XmlPullParserException
     {
-        Attribute ah = createAttribute();
-        ah.setAdRef( getRequiredAttribute( "adref" ) );
-        ah.addContent( getOptionalAttribute( "content" ) );
+        Attribute ah = this.createAttribute();
+        ah.setAdRef( this.getRequiredAttribute( "adref" ) );
+        ah.addContent( this.getOptionalAttribute( "content" ) );
 
-        int eventType = parser.next();
+        int eventType = this.parser.next();
         while ( eventType != XmlPullParser.END_DOCUMENT )
         {
             if ( eventType == XmlPullParser.START_TAG )
             {
-                if ( "Value".equals( parser.getName() ) )
+                if ( "Value".equals( this.parser.getName() ) )
                 {
-                    ah.addContent( parser.nextText() );
-                    eventType = parser.getEventType();
+                    ah.addContent( this.parser.nextText() );
+                    eventType = this.parser.getEventType();
                     continue;
                 }
                 else
                 {
-                    ignoreElement();
+                    this.ignoreElement();
                 }
             }
             else if ( eventType == XmlPullParser.END_TAG )
             {
-                if ( "Attribute".equals( parser.getName() ) )
+                if ( "Attribute".equals( this.parser.getName() ) )
                 {
                     break;
                 }
-                else if ( !"Value".equals( parser.getName() ) )
+                else if ( !"Value".equals( this.parser.getName() ) )
                 {
-                    throw unexpectedElement();
+                    throw this.unexpectedElement();
                 }
             }
-            eventType = parser.next();
+            eventType = this.parser.next();
         }
 
         return ah;
@@ -404,40 +405,40 @@ public class MetaDataReader
 
     private String getRequiredAttribute( String attrName ) throws XmlPullParserException
     {
-        String attrVal = parser.getAttributeValue( null, attrName );
+        String attrVal = this.parser.getAttributeValue( null, attrName );
         if ( attrVal != null )
         {
             return attrVal;
         }
 
         // fail if value is missing
-        throw missingAttribute( attrName );
+        throw this.missingAttribute( attrName );
     }
 
 
     private String getOptionalAttribute( String attrName )
     {
-        return getOptionalAttribute( attrName, ( String ) null );
+        return this.getOptionalAttribute( attrName, ( String ) null );
     }
 
 
     private String getOptionalAttribute( String attrName, String defaultValue )
     {
-        String attrVal = parser.getAttributeValue( null, attrName );
+        String attrVal = this.parser.getAttributeValue( null, attrName );
         return ( attrVal != null ) ? attrVal : defaultValue;
     }
 
 
     private boolean getOptionalAttribute( String attrName, boolean defaultValue )
     {
-        String attrVal = parser.getAttributeValue( null, attrName );
+        String attrVal = this.parser.getAttributeValue( null, attrName );
         return ( attrVal != null ) ? "true".equalsIgnoreCase( attrVal ) : defaultValue;
     }
 
 
     private int getOptionalAttribute( String attrName, int defaultValue )
     {
-        String attrVal = parser.getAttributeValue( null, attrName );
+        String attrVal = this.parser.getAttributeValue( null, attrName );
         if ( attrVal != null && attrVal.length() > 0 )
         {
             try
@@ -460,22 +461,22 @@ public class MetaDataReader
 
     private void ignoreElement() throws IOException, XmlPullParserException
     {
-        String ignoredElement = parser.getName();
+        String ignoredElement = this.parser.getName();
 
         int depth = 0; // enable nested ignored elements
-        int eventType = parser.next();
+        int eventType = this.parser.next();
         while ( eventType != XmlPullParser.END_DOCUMENT )
         {
             if ( eventType == XmlPullParser.START_TAG )
             {
-                if ( ignoredElement.equals( parser.getName() ) )
+                if ( ignoredElement.equals( this.parser.getName() ) )
                 {
                     depth++;
                 }
             }
             else if ( eventType == XmlPullParser.END_TAG )
             {
-                if ( ignoredElement.equals( parser.getName() ) )
+                if ( ignoredElement.equals( this.parser.getName() ) )
                 {
                     if ( depth <= 0 )
                     {
@@ -485,22 +486,22 @@ public class MetaDataReader
                     depth--;
                 }
             }
-            eventType = parser.next();
+            eventType = this.parser.next();
         }
     }
 
 
     private XmlPullParserException missingAttribute( String attrName )
     {
-        String message = "Missing Attribute " + attrName + " in element " + parser.getName();
-        return new XmlPullParserException( message, parser, null );
+        String message = "Missing Attribute " + attrName + " in element " + this.parser.getName();
+        return new XmlPullParserException( message, this.parser, null );
     }
 
 
     private XmlPullParserException unexpectedElement()
     {
-        String message = "Illegal Element " + parser.getName();
-        return new XmlPullParserException( message, parser, null );
+        String message = "Illegal Element " + this.parser.getName();
+        return new XmlPullParserException( message, this.parser, null );
     }
 
 
