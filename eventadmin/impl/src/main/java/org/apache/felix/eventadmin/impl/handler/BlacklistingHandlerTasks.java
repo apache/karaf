@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -35,12 +35,12 @@ import org.osgi.service.event.EventHandler;
 /**
  * This class is an implementation of the HandlerTasks interface that does provide
  * blacklisting of event handlers. Furthermore, handlers are determined from the
- * framework on any call to <tt>createHandlerTasks()</tt> hence, there is no 
- * book-keeping of <tt>EventHandler</tt> services while they come and go but a 
+ * framework on any call to <tt>createHandlerTasks()</tt> hence, there is no
+ * book-keeping of <tt>EventHandler</tt> services while they come and go but a
  * query for each sent event. In order to do this, an ldap-filter is created that
- * will match applicable <tt>EventHandler</tt> references. In order to ease some of 
+ * will match applicable <tt>EventHandler</tt> references. In order to ease some of
  * the overhead pains of this approach some light caching is going on.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class BlacklistingHandlerTasks implements HandlerTasks
@@ -63,8 +63,8 @@ public class BlacklistingHandlerTasks implements HandlerTasks
     private final TopicPermissions m_topicPermissions;
 
     /**
-     * The constructor of the factory. 
-     * 
+     * The constructor of the factory.
+     *
      * @param context The context of the bundle
      * @param blackList The set to use for keeping track of blacklisted references
      * @param topicHandlerFilters The factory for topic handler filters
@@ -81,7 +81,7 @@ public class BlacklistingHandlerTasks implements HandlerTasks
         checkNull(topicHandlerFilters, "TopicHandlerFilters");
         checkNull(filters, "Filters");
         checkNull(topicPermissions, "TopicPermissions");
-        
+
         m_context = context;
 
         m_blackList = blackList;
@@ -96,9 +96,9 @@ public class BlacklistingHandlerTasks implements HandlerTasks
     /**
      * Create the handler tasks for the event. All matching event handlers are
      * determined and delivery tasks for them returned.
-     * 
+     *
      * @param event The event for which' handlers delivery tasks must be created
-     * 
+     *
      * @return A delivery task for each handler that matches the given event
      *
      * @see org.apache.felix.eventadmin.impl.handler.HandlerTasks#createHandlerTasks(org.osgi.service.event.Event)
@@ -107,7 +107,7 @@ public class BlacklistingHandlerTasks implements HandlerTasks
     {
         final List result = new ArrayList();
 
-        ServiceReference[] handlerRefs = new ServiceReference[0];
+        ServiceReference[] handlerRefs = null;
 
         try
         {
@@ -119,12 +119,12 @@ public class BlacklistingHandlerTasks implements HandlerTasks
             LogWrapper.getLogger().log(LogWrapper.LOG_WARNING,
                 "Invalid EVENT_TOPIC [" + event.getTopic() + "]", e);
         }
-        
+
         if(null == handlerRefs)
         {
             handlerRefs = new ServiceReference[0];
         }
-        
+
         for (int i = 0; i < handlerRefs.length; i++)
         {
             if (!m_blackList.contains(handlerRefs[i])
@@ -162,13 +162,13 @@ public class BlacklistingHandlerTasks implements HandlerTasks
     /**
      * Blacklist the given service reference. This is a private method and only
      * public due to its usage in a friend class.
-     * 
+     *
      * @param handlerRef The service reference to blacklist
      */
     public void blackList(final ServiceReference handlerRef)
     {
         m_blackList.add(handlerRef);
-        
+
         LogWrapper.getLogger().log(
             LogWrapper.LOG_WARNING,
             "Blacklisting ServiceReference [" + handlerRef + " | Bundle("
@@ -180,7 +180,7 @@ public class BlacklistingHandlerTasks implements HandlerTasks
      * the ref is not blacklisted and the service is not unregistered. The
      * NullEventHandler object is returned otherwise. This is a private method and
      * only public due to its usage in a friend class.
-     * 
+     *
      * @param handlerRef The service reference for which to get its service
      * @return The service of the reference or a null object if the service is
      *      unregistered
@@ -192,22 +192,22 @@ public class BlacklistingHandlerTasks implements HandlerTasks
 
         return (EventHandler) ((null != result) ? result : m_nullEventHandler);
     }
-    
+
     /**
-     * Unget the service reference for the given event handler unless it is the 
+     * Unget the service reference for the given event handler unless it is the
      * NullEventHandler. This is a private method and only public due to
      * its usage in a friend class.
-     * 
+     *
      * @param handler The event handler service to unget
      * @param handlerRef The service reference to unget
      */
-    public void ungetEventHandler(final EventHandler handler, 
+    public void ungetEventHandler(final EventHandler handler,
             final ServiceReference handlerRef)
     {
             if(m_nullEventHandler != handler)
             {
                 // Is the handler not unregistered or blacklisted?
-                if(!m_blackList.contains(handlerRef) && (null != 
+                if(!m_blackList.contains(handlerRef) && (null !=
                     handlerRef.getBundle()))
                 {
                     m_context.ungetService(handlerRef);
@@ -216,7 +216,7 @@ public class BlacklistingHandlerTasks implements HandlerTasks
     }
 
     /*
-     * This is a null object that is supposed to do nothing. This is used once an 
+     * This is a null object that is supposed to do nothing. This is used once an
      * EventHandler is requested for a service reference that is either stale
      * (i.e., unregistered) or blacklisted
      */
@@ -224,18 +224,18 @@ public class BlacklistingHandlerTasks implements HandlerTasks
     {
         /**
          * This is a null object that is supposed to do nothing at this point.
-         * 
+         *
          * @param event an event that is not used
          */
         public void handleEvent(final Event event)
         {
             // This is a null object that is supposed to do nothing at this
-            // point. This is used once a EventHandler is requested for a 
+            // point. This is used once a EventHandler is requested for a
             // servicereference that is either stale (i.e., unregistered) or
             // blacklisted.
         }
     };
-    
+
     /*
      * This is a utility method that will throw a <tt>NullPointerException</tt>
      * in case that the given object is null. The message will be of the form name +
