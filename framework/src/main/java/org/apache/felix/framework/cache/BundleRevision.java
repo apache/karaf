@@ -19,10 +19,7 @@
 package org.apache.felix.framework.cache;
 
 import java.io.File;
-import java.io.InputStream;
-import java.security.cert.*;
-import java.util.*;
-import java.util.jar.*;
+import java.util.Map;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.moduleloader.IContent;

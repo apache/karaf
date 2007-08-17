@@ -18,12 +18,18 @@
  */
 package org.apache.felix.framework.cache;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.security.PrivilegedActionException;
-import java.security.cert.X509Certificate;
-import java.util.*;
-import java.util.jar.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
 import org.apache.felix.framework.Logger;
@@ -31,7 +37,9 @@ import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
-import org.apache.felix.moduleloader.*;
+import org.apache.felix.moduleloader.ContentDirectoryContent;
+import org.apache.felix.moduleloader.IContent;
+import org.apache.felix.moduleloader.JarContent;
 
 /**
  * <p>
@@ -378,7 +386,7 @@ class JarRevision extends BundleRevision
         }
         catch (PrivilegedActionException ex)
         {
-            throw ((PrivilegedActionException) ex).getException();
+            throw ex.getException();
         }
     }
 

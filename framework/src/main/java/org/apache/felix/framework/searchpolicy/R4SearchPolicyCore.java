@@ -22,13 +22,36 @@ import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.util.*;
-import org.apache.felix.framework.util.manifestparser.*;
-import org.apache.felix.moduleloader.*;
-import org.osgi.framework.*;
+import org.apache.felix.framework.util.SecurityManagerEx;
+import org.apache.felix.framework.util.Util;
+import org.apache.felix.framework.util.manifestparser.Capability;
+import org.apache.felix.framework.util.manifestparser.ManifestParser;
+import org.apache.felix.framework.util.manifestparser.R4Directive;
+import org.apache.felix.framework.util.manifestparser.R4Library;
+import org.apache.felix.framework.util.manifestparser.Requirement;
+import org.apache.felix.moduleloader.ICapability;
+import org.apache.felix.moduleloader.IModule;
+import org.apache.felix.moduleloader.IModuleFactory;
+import org.apache.felix.moduleloader.IRequirement;
+import org.apache.felix.moduleloader.IWire;
+import org.apache.felix.moduleloader.ModuleEvent;
+import org.apache.felix.moduleloader.ModuleImpl;
+import org.apache.felix.moduleloader.ModuleListener;
+import org.apache.felix.moduleloader.ResourceNotFoundException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.PackagePermission;
+import org.osgi.framework.Version;
 
 public class R4SearchPolicyCore implements ModuleListener
 {
@@ -649,7 +672,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 
         // Now we need to calculate the "uses" constraints of every package
         // accessible to the provider module based on its current candidates.
-        Map usesMap = usesMap = calculateUsesConstraints(provider, moduleMap, candidatesMap);
+        Map usesMap = calculateUsesConstraints(provider, moduleMap, candidatesMap);
 
         // Verify that none of the provider's implied "uses" constraints
         // in the uses map conflict with anything in the importing module's
@@ -1107,7 +1130,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 for (Iterator iter = candidatesMap.entrySet().iterator();
                     iter.hasNext(); )
                 {
-                    candidatesList.add((List) ((Map.Entry) iter.next()).getValue());
+                    candidatesList.add(((Map.Entry) iter.next()).getValue());
                 }
             }
 
@@ -1538,7 +1561,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             ? calculateImplicitImportedPackagesResolved(
                 targetModule, targetCapability, cycleMap)
             : calculateImplicitImportedPackagesUnresolved(
-                targetModule, targetCapability, candidatesMap, cycleMap);      
+                targetModule, targetCapability, candidatesMap, cycleMap);
     }
 
     // TODO: EXPERIMENTAL - This is currently not defined recursively, but it should be.
@@ -1618,7 +1641,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 psTarget.m_module, psTarget.m_capability, candidatesMap, cycleMap);
         }
 
-        return null;      
+        return null;
     }
 
     private Map calculateExportedPackages(IModule targetModule)
@@ -1649,7 +1672,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
     {
         return (candidatesMap.get(targetModule) == null)
             ? calculateRequiredPackagesResolved(targetModule)
-            : calculateRequiredPackagesUnresolved(targetModule, candidatesMap);      
+            : calculateRequiredPackagesUnresolved(targetModule, candidatesMap);
     }
 
     private Map calculateRequiredPackagesUnresolved(IModule targetModule, Map candidatesMap)
@@ -1753,7 +1776,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
     {
         return (candidatesMap.get(psTarget.m_module) == null)
             ? calculateExportedAndReexportedPackagesResolved(psTarget.m_module, cycleMap)
-            : calculateExportedAndReexportedPackagesUnresolved(psTarget, candidatesMap, cycleMap);      
+            : calculateExportedAndReexportedPackagesUnresolved(psTarget, candidatesMap, cycleMap);
     }
 
     private Map calculateExportedAndReexportedPackagesUnresolved(
@@ -2183,7 +2206,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                     cs.m_candidates[cs.m_idx].m_module,
                     cs.m_candidates[cs.m_idx].m_capability));
 
-                // TODO: EXPERIMENTAL - The following is part of an experimental 
+                // TODO: EXPERIMENTAL - The following is part of an experimental
                 //       implicit imported wire concept. The above code is how
                 //       the wire should normally be created.
                 // Add wires for any implicitly imported package from provider.

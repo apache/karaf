@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,10 +18,19 @@
  */
 package org.osgi.framework;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.*;
-import java.util.*;
+import java.security.AccessController;
+import java.security.BasicPermission;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.PrivilegedAction;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.StringTokenizer;
 
 import org.apache.felix.framework.FilterImpl;
 
@@ -214,7 +223,7 @@ public final class AdminPermission extends BasicPermission
                     public Object run()
                     {
                         m_bundleDict.put("location", m_bundle.getLocation());
-                        
+
                         createSigner(m_bundle, m_bundleDict);
                         return null;
                     }
@@ -236,9 +245,9 @@ public final class AdminPermission extends BasicPermission
             Method method = bundle.getClass().getDeclaredMethod(
                 "getSignerMatcher", null);
             method.setAccessible(true);
-            
+
             Object signer = method.invoke(bundle, null);
-            
+
             if (signer != null)
             {
                 dict.put("signer", signer);

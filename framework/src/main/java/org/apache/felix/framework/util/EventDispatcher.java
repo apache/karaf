@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,11 +20,24 @@ package org.apache.felix.framework.util;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EventListener;
+import java.util.EventObject;
 
-import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.Logger;
-import org.osgi.framework.*;
+import org.osgi.framework.AllServiceListener;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServicePermission;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.SynchronousBundleListener;
 
 public class EventDispatcher
 {
@@ -88,7 +101,7 @@ public class EventDispatcher
 
         return eventDispatcher;
     }
-    
+
     public static void shutdown()
     {
         synchronized (m_threadLock)
@@ -105,7 +118,7 @@ public class EventDispatcher
             {
                 return;
             }
-            
+
             // Signal dispatch thread.
             m_stopping = true;
             synchronized (m_requestList)
@@ -124,7 +137,7 @@ public class EventDispatcher
                 {
                 }
             }
-            
+
             // remove the thread reference
             m_thread = null;
         }
@@ -445,7 +458,7 @@ public class EventDispatcher
             {
                 listeners = m_serviceListeners;
             }
-    
+
             // See if the listener is already registered, if so then
             // handle it according to the spec.
             for (int i = 0; i < listeners.length; i += LISTENER_ARRAY_INCREMENT)
@@ -685,7 +698,7 @@ public class EventDispatcher
         if (objectClass != null)
         {
             boolean hasPermission = false;
-            
+
             Object sm = System.getSecurityManager();
             if ((acc != null) && (sm != null))
             {
@@ -693,15 +706,15 @@ public class EventDispatcher
                     !hasPermission && (i < objectClass.length);
                     i++)
                 {
-                    try 
+                    try
                     {
                         ServicePermission perm =
                             new ServicePermission(
                                 objectClass[i], ServicePermission.GET);
                         ((SecurityManager) sm).checkPermission(perm, acc);
                         hasPermission = true;
-                    } 
-                    catch (Exception ex) 
+                    }
+                    catch (Exception ex)
                     {
                     }
                 }

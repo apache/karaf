@@ -18,17 +18,21 @@
  */
 package org.apache.felix.framework.cache;
 
-import java.io.*;
-import java.net.MalformedURLException;
-import java.security.cert.X509Certificate;
-import java.util.*;
-import java.util.jar.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.jar.Manifest;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
-import org.apache.felix.moduleloader.*;
+import org.apache.felix.moduleloader.DirectoryContent;
+import org.apache.felix.moduleloader.IContent;
+import org.apache.felix.moduleloader.JarContent;
 
 /**
  * <p>
