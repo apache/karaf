@@ -25,12 +25,12 @@ import org.apache.felix.ipojo.handlers.architecture.ArchitectureHandler;
 import org.apache.felix.ipojo.handlers.configuration.ConfigurationHandler;
 import org.apache.felix.ipojo.handlers.dependency.DependencyHandler;
 import org.apache.felix.ipojo.handlers.lifecycle.callback.LifecycleCallbackHandler;
+import org.apache.felix.ipojo.handlers.lifecycle.controller.ControllerHandler;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
 import org.apache.felix.ipojo.util.Logger;
 
 /**
- * Activator Basic Configuration. - Log Level - Available handlers
- * 
+ * iPOJO Configuration : Default Log Level - Available (core) handlers.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class IPojoConfiguration {
@@ -47,8 +47,9 @@ public class IPojoConfiguration {
         DependencyHandler.class, 
         ProvidedServiceHandler.class, 
         ConfigurationHandler.class,
-        LifecycleCallbackHandler.class, 
-        ArchitectureHandler.class 
+        LifecycleCallbackHandler.class,
+        ControllerHandler.class,
+        ArchitectureHandler.class
     };
 
     /**

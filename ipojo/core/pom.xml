@@ -59,6 +59,7 @@
     			org.apache.felix.ipojo.handlers.configuration,
     			org.apache.felix.ipojo.handlers.dependency.nullable,
               	org.apache.felix.ipojo.handlers.lifecycle.callback,
+              	org.apache.felix.ipojo.handlers.lifecycle.controller,
               	org.objectweb.asm,
               	org.objectweb.asm.commons,
               	org.objectweb.asm.tree  <!-- to remove -->

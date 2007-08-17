@@ -382,7 +382,7 @@ public class ProvidedServiceHandler extends Handler {
      * java.lang.Object)
      */
     public void setterCallback(String fieldName, Object value) {
-        // Verify that the field name coreespond to a dependency
+        // Verify that the field name correspond to a dependency
         for (int i = 0; i < m_providedServices.length; i++) {
             ProvidedService ps = m_providedServices[i];
             boolean update = false;
@@ -433,7 +433,7 @@ public class ProvidedServiceHandler extends Handler {
      * @see org.apache.felix.ipojo.CompositeHandler#stateChanged(int)
      */
     public void stateChanged(int state) {
-        // If the new state is UNRESOLVED => unregister all the services
+        // If the new state is INVALID => unregister all the services
         if (state == InstanceManager.INVALID) {
             for (int i = 0; i < m_providedServices.length; i++) {
                 m_providedServices[i].unregisterService();
@@ -441,14 +441,13 @@ public class ProvidedServiceHandler extends Handler {
             return;
         }
 
-        // If the new state is VALID => regiter all the services
+        // If the new state is VALID => register all the services
         if (state == InstanceManager.VALID) {
             for (int i = 0; i < m_providedServices.length; i++) {
                 m_providedServices[i].registerService();
             }
             return;
         }
-
     }
 
     /**

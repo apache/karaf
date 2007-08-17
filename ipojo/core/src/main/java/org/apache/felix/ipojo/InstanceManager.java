@@ -20,8 +20,10 @@ package org.apache.felix.ipojo;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -94,15 +96,23 @@ public class InstanceManager implements ComponentInstance {
     /**
      * Instance State Listener List.
      */
-    private InstanceStateListener[] m_instanceListeners = new InstanceStateListener[0];
+    private List m_instanceListeners = new ArrayList();
 
     /**
      * Component type information.
      */
     private ComponentDescription m_componentDesc;
     
+   /**
+    * Is the component instance state changing?
+    */
+    private boolean m_inTransition = false;
+    
+    /**
+     * Queue of stored state changed. 
+     */
+    private List m_stateQueue = new ArrayList();
 
-    // Constructor
     /**
      * Construct a new Component Manager.
      * 
@@ -275,8 +285,8 @@ public class InstanceManager implements ComponentInstance {
         m_pojoObjects = new Object[0];
 
         m_state = STOPPED;
-        for (int i = 0; i < m_instanceListeners.length; i++) {
-            m_instanceListeners[i].stateChanged(this, STOPPED);
+        for (int i = 0; i < m_instanceListeners.size(); i++) {
+            ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, STOPPED);
         }
     }
     
@@ -289,8 +299,8 @@ public class InstanceManager implements ComponentInstance {
             stop();
         }
         
-        for (int i = 0; i < m_instanceListeners.length; i++) {
-            m_instanceListeners[i].stateChanged(this, DISPOSED);
+        for (int i = 0; i < m_instanceListeners.size(); i++) {
+            ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, DISPOSED);
         }
         
         m_factory.disposed(this);
@@ -300,7 +310,7 @@ public class InstanceManager implements ComponentInstance {
         m_fieldRegistration = new HashMap();
         m_clazz = null;
         m_pojoObjects = new Object[0];
-        m_instanceListeners = new InstanceStateListener[0];
+        m_instanceListeners.clear();
     }
     
     /**
@@ -312,8 +322,8 @@ public class InstanceManager implements ComponentInstance {
             stop();
         }
         
-        for (int i = 0; i < m_instanceListeners.length; i++) {
-            m_instanceListeners[i].stateChanged(this, DISPOSED);
+        for (int i = 0; i < m_instanceListeners.size(); i++) {
+            ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, DISPOSED);
         }
 
         // Cleaning
@@ -322,16 +332,24 @@ public class InstanceManager implements ComponentInstance {
         m_fieldRegistration = new HashMap();
         m_clazz = null;
         m_pojoObjects = new Object[0];
-        m_instanceListeners = new InstanceStateListener[0];
+        m_instanceListeners.clear();
     }
-
+    
     /**
      * Set the state of the component instance.
-     * Ff the state changed call the stateChanged(int) method on the handlers.
+     * if the state changed call the stateChanged(int) method on the handlers.
+     * This method has a reentrant mechanism. If in the flow of the first call the method is called another times, 
+     * the second call is stored and executed after the first one is finished.
      * @param state : the new state
      */
-    public void setState(int state) {
+    private synchronized void setState(int state) {
+        if (m_inTransition) {
+            m_stateQueue.add(new Integer(state)); 
+            return;
+        }
+        
         if (m_state != state) {
+            m_inTransition = true;
 
             // Log the state change
             if (state == INVALID) {
@@ -347,9 +365,15 @@ public class InstanceManager implements ComponentInstance {
                 m_handlers[i].stateChanged(state);
             }
             
-            for (int i = 0; i < m_instanceListeners.length; i++) {
-                m_instanceListeners[i].stateChanged(this, state);
+            for (int i = 0; i < m_instanceListeners.size(); i++) {
+                ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, state);
             }
+        }
+        
+        m_inTransition = false;
+        if (! m_stateQueue.isEmpty()) {
+            int newState = ((Integer) (m_stateQueue.remove(0))).intValue();
+            setState(newState);
         }
     }
 
@@ -372,53 +396,21 @@ public class InstanceManager implements ComponentInstance {
     }
     
     /**
-     * Add an instance to the created instance list.
-     * @param listener : the instance state listener to add.
+     * Register an instance state listener.
+     * @param listener : listener to register.
      * @see org.apache.felix.ipojo.ComponentInstance#addInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
      */
     public void addInstanceStateListener(InstanceStateListener listener) {
-        for (int i = 0; (m_instanceListeners != null) && (i < m_instanceListeners.length); i++) {
-            if (m_instanceListeners[i] == listener) {
-                return;
-            }
-        }
-
-        if (m_instanceListeners.length > 0) {
-            InstanceStateListener[] newInstances = new InstanceStateListener[m_instanceListeners.length + 1];
-            System.arraycopy(m_instanceListeners, 0, newInstances, 0, m_instanceListeners.length);
-            newInstances[m_instanceListeners.length] = listener;
-            m_instanceListeners = newInstances;
-        } else {
-            m_instanceListeners = new InstanceStateListener[] { listener };
-        }
+        m_instanceListeners.add(listener);
     }
-    
+
     /**
-     * Remove an instance state listener.
-     * @param listener : the listener to remove
+     * Unregister an instance state listener.
+     * @param listener : listener to unregister.
      * @see org.apache.felix.ipojo.ComponentInstance#removeInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
      */
     public void removeInstanceStateListener(InstanceStateListener listener) {
-        int idx = -1;
-        for (int i = 0; i < m_instanceListeners.length; i++) {
-            if (m_instanceListeners[i] == listener) {
-                idx = i;
-                break;
-            }
-        }
-        
-        if (idx >= 0) {
-            if ((m_instanceListeners.length - 1) == 0) {
-                m_instanceListeners = new InstanceStateListener[0];
-            } else {
-                InstanceStateListener[] newInstances = new InstanceStateListener[m_instanceListeners.length - 1];
-                System.arraycopy(m_instanceListeners, 0, newInstances, 0, idx);
-                if (idx < newInstances.length) {
-                    System.arraycopy(m_instanceListeners, idx + 1, newInstances, idx, newInstances.length - idx);
-                }
-                m_instanceListeners = newInstances;
-            }
-        }
+        m_instanceListeners.remove(listener);
     }
 
     // ===================== end Lifecycle management =====================

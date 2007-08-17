@@ -67,18 +67,12 @@ public class ConfigurableProperty {
      * Configurable Property Constructor. At least the method or the field need
      * to be referenced.
      * 
-     * @param name :
-     *            name of the property (optional)
-     * @param field :
-     *            name of the field
-     * @param method :
-     *            method name
-     * @param value :
-     *            initial value of the property (optional)
-     * @param type :
-     *            the type of the property
-     * @param ch :
-     *            configuration handler managing this configurable property
+     * @param name : name of the property (optional)
+     * @param field : name of the field
+     * @param method : method name
+     * @param value : initial value of the property (optional)
+     * @param type : the type of the property
+     * @param ch : configuration handler managing this configurable property
      */
     public ConfigurableProperty(String name, String field, String method, String value, String type,
             ConfigurationHandler ch) {
@@ -107,14 +101,13 @@ public class ConfigurableProperty {
     /**
      * Set the value of the property.
      * 
-     * @param strValue :
-     *            value of the property (String)
-     * @param type :
-     *            type of the property
+     * @param strValue : value of the property (String)
+     * @param type : type of the property
      */
     private void setValue(String strValue, String type) {
         Object value = null;
-
+        
+        // Syntactic sugar to avoid writing java.lang.String
         if (type.equals("string") || type.equals("String")) {
             value = new String(strValue);
             m_type = java.lang.String.class;
@@ -202,10 +195,8 @@ public class ConfigurableProperty {
     /**
      * Set array value to the current property.
      * 
-     * @param internalType :
-     *            type of the property
-     * @param values :
-     *            new property value
+     * @param internalType : type of the property
+     * @param values : new property value
      */
     private void setArrayValue(String internalType, String[] values) {
         if (internalType.equals("string") || internalType.equals("String")) {
@@ -345,8 +336,7 @@ public class ConfigurableProperty {
     /**
      * Fix the value of the property.
      * 
-     * @param value :
-     *            the new value.
+     * @param value : the new value.
      */
     public void setValue(Object value) {
         m_value = value;
@@ -406,7 +396,7 @@ public class ConfigurableProperty {
             m_handler.getInstanceManager().getFactory().getLogger().log(
                     Logger.ERROR,
                     "The method " + m_method + " in the class " + m_handler.getInstanceManager().getClassName()
-                            + "thorws an exception : " + e.getMessage());
+                            + "throws an exception : " + e.getMessage());
             return;
         }
     }
