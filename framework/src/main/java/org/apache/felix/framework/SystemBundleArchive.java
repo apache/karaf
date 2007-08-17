@@ -40,11 +40,14 @@ import org.osgi.framework.BundleActivator;
 **/
 public class SystemBundleArchive extends BundleArchive
 {
+    private BundleCache m_cache;
     private Map m_headerMap = new StringMap(false);
-    private BundleRevision m_revision = null;
+    private BundleRevision m_revision;
 
-    public SystemBundleArchive()
+    public SystemBundleArchive(BundleCache cache)
     {
+        m_cache = cache;
+
         try
         {
             m_revision = new BundleRevision(null, null, null) {
@@ -124,7 +127,7 @@ public class SystemBundleArchive extends BundleArchive
 
     public File getDataFile(String fileName) throws Exception
     {
-        return null;
+        return m_cache.getSystemBundleDataFile(fileName);
     }
 
     public BundleActivator getActivator(IModule module)

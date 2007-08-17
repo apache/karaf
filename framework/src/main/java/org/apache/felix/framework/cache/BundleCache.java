@@ -191,6 +191,43 @@ public class BundleCache
         }
     }
 
+    /**
+     * Provides the system bundle access to its private storage area; this
+     * special case is necessary since the system bundle is not really a
+     * bundle and therefore must be treated in a special way.
+     * @param fileName the name of the file in the system bundle's private area.
+     * @return a <tt>File</tt> object corresponding to the specified file name.
+     * @throws Exception if any error occurs.
+    **/
+    public synchronized File getSystemBundleDataFile(String fileName) throws Exception
+    {
+        // Make sure system bundle directory exists.
+        File sbDir = new File(m_profileDir, BUNDLE_DIR_PREFIX + Long.toString(0));
+
+        // If the system bundle directory exists, then we don't
+        // need to initialize since it has already been done.
+        if (!getSecureAction().fileExists(sbDir))
+        {
+            // Create system bundle directory, if it does not exist.
+            if (!getSecureAction().mkdirs(sbDir))
+            {
+                m_logger.log(
+                    Logger.LOG_ERROR,
+                    getClass().getName() + ": Unable to create system bundle directory.");
+                throw new IOException("Unable to create system bundle directory.");
+            }
+        }
+
+        // Do some sanity checking.
+        if ((fileName.length() > 0) && (fileName.charAt(0) == File.separatorChar))
+            throw new IllegalArgumentException("The data file path must be relative, not absolute.");
+        else if (fileName.indexOf("..") >= 0)
+            throw new IllegalArgumentException("The data file path cannot contain a reference to the \"..\" directory.");
+
+        // Return the data file.
+        return new File(sbDir, fileName);
+    }
+
     //
     // Static file-related utility methods.
     //
@@ -323,8 +360,10 @@ public class BundleCache
         File[] children = getSecureAction().listDirectory(m_profileDir);
         for (int i = 0; (children != null) && (i < children.length); i++)
         {
-            // Ignore directories that aren't bundle directories.
-            if (children[i].getName().startsWith(BUNDLE_DIR_PREFIX))
+            // Ignore directories that aren't bundle directories or
+            // is the system bundle directory.
+            if (children[i].getName().startsWith(BUNDLE_DIR_PREFIX) &&
+                !children[i].getName().equals(BUNDLE_DIR_PREFIX + Long.toString(0)))
             {
                 // Recreate the bundle archive.
                 try

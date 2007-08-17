@@ -58,14 +58,14 @@ public class Felix extends FelixBundle
 
     // Maps a bundle location to a bundle location;
     // used to reserve a location when installing a bundle.
-    private Map m_installRequestMap = null;
+    private Map m_installRequestMap = new HashMap();
     // This lock must be acquired to modify m_installRequestMap;
     // to help avoid deadlock this lock as priority 1 and should
     // be acquired before locks with lower priority.
     private Object[] m_installRequestLock_Priority1 = new Object[0];
 
     // Maps a bundle location to a bundle.
-    private HashMap m_installedBundleMap = null;
+    private HashMap m_installedBundleMap = new HashMap();
     // This lock must be acquired to modify m_installedBundleMap;
     // to help avoid deadlock this lock as priority 2 and should
     // be acquired before locks with lower priority.
@@ -229,25 +229,42 @@ public class Felix extends FelixBundle
         // will be set below after the system bundle is created.
         m_logger = new Logger((String) m_configMutableMap.get(FelixConstants.LOG_LEVEL_PROP));
 
-        // Initialize other member variables.
-        m_activeStartLevel = FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
-        m_installRequestMap = new HashMap();
-        m_installedBundleMap = new HashMap();
-        m_uninstalledBundles = null;
-        m_cache = null;
-        m_systemBundleInfo = null;
-        m_nextId = 1L;
-        m_dispatcher = null;
-
         // Initialize framework properties.
         initializeFrameworkProperties();
+
+        // Create the bundle cache since we need it for the system bundle
+        // archive, which in turn is needed by the system bundle info,
+        // which we need to keep track of the framework state.
+        try
+        {
+            m_cache = new BundleCache(m_logger, m_configMap);
+        }
+        catch (Exception ex)
+        {
+            System.err.println("Error creating bundle cache:");
+            ex.printStackTrace();
+
+            // Only shutdown the JVM if the framework is running stand-alone.
+            String embedded = (String) m_configMap.get(
+                FelixConstants.EMBEDDED_EXECUTION_PROP);
+            boolean isEmbedded = (embedded == null)
+                ? false : embedded.equals("true");
+            if (!isEmbedded)
+            {
+                m_secureAction.exit(-1);
+            }
+            else
+            {
+                throw new RuntimeException(ex.toString());
+            }
+        }
 
         // Create the module factory and add the system bundle
         // module to it, since we need the system bundle info
         // object to keep track of the framework state.
         m_factory = new ModuleFactoryImpl(m_logger);
         m_systemBundleInfo = new BundleInfo(
-            m_logger, new SystemBundleArchive(), null);
+            m_logger, new SystemBundleArchive(m_cache), null);
         m_extensionManager = 
             new ExtensionManager(m_logger, m_configMap, m_systemBundleInfo);
         m_systemBundleInfo.addModule(
@@ -577,30 +594,6 @@ public class Felix extends FelixBundle
             }
         });
 
-        try
-        {
-            m_cache = new BundleCache(m_logger, m_configMap);
-        }
-        catch (Exception ex)
-        {
-            System.err.println("Error creating bundle cache:");
-            ex.printStackTrace();
-
-            // Only shutdown the JVM if the framework is running stand-alone.
-            String embedded = (String) m_configMap.get(
-                FelixConstants.EMBEDDED_EXECUTION_PROP);
-            boolean isEmbedded = (embedded == null)
-                ? false : embedded.equals("true");
-            if (!isEmbedded)
-            {
-                m_secureAction.exit(-1);
-            }
-            else
-            {
-                throw new RuntimeException(ex.toString());
-            }
-        }
-
         // Create search policy for module loader.
         m_policyCore = new R4SearchPolicyCore(m_logger, m_configMap);
 
@@ -680,6 +673,7 @@ public class Felix extends FelixBundle
 
             m_installedBundleMap.put(
                 m_systemBundleInfo.getLocation(), this);
+
             // Manually resolve the System Bundle, which will cause its
             // state to be set to RESOLVED.
             try
@@ -726,7 +720,8 @@ public class Felix extends FelixBundle
         {
             m_logger.log(
                 Logger.LOG_ERROR,
-                "Unable to list saved bundles: " + ex, ex);
+                "Unable to list saved bundles.",
+                ex);
             archives = null;
         }
 
@@ -737,9 +732,9 @@ public class Felix extends FelixBundle
         {
             try
             {
-                // Make sure our id generator is not going to overlap.
-                // TODO: FRAMEWORK - This is not correct since it may lead to re-used
-                // ids, which is not okay according to OSGi.
+                // Keep track of the max bundle ID currently in use since we
+                // will need to use this as our next bundle ID value if the
+                // persisted value cannot be read.
                 m_nextId = Math.max(m_nextId, archives[i].getId() + 1);
 
                 // It is possible that a bundle in the cache was previously
@@ -783,6 +778,12 @@ ex.printStackTrace();
             }
         }
 
+        // Now that we have loaded all cached bundles and have determined the
+        // max bundle ID of cached bundles, we need to try to load the next
+        // bundle ID from persistent storage. In case of failure, we should
+        // keep the max value.
+        m_nextId = Math.max(m_nextId, loadNextId());
+        
         // Get the framework's default start level.
         int startLevel = FelixConstants.FRAMEWORK_DEFAULT_STARTLEVEL;
         String s = (String) m_configMap.get(FelixConstants.FRAMEWORK_STARTLEVEL_PROP);
@@ -3763,11 +3764,98 @@ ex.printStackTrace();
     /**
      * Generated the next valid bundle identifier.
     **/
+    private long loadNextId()
+    {
+        synchronized (m_nextIdLock)
+        {
+            // Read persisted next bundle identifier.
+            InputStream is = null;
+            BufferedReader br = null;
+            try
+            {
+                File file = m_cache.getSystemBundleDataFile("bundle.id");
+                is = m_secureAction.getFileInputStream(file);
+                br = new BufferedReader(new InputStreamReader(is));
+                return Long.parseLong(br.readLine());
+            }
+            catch (FileNotFoundException ex)
+            {
+                // Ignore this case because we assume that this is the
+                // initial startup of the framework and therefore the
+                // file does not exist yet.
+            }
+            catch (Exception ex)
+            {
+                m_logger.log(
+                    Logger.LOG_WARNING,
+                    "Unable to initialize next bundle identifier from persistent storage.",
+                    ex);
+            }
+            finally
+            {
+                try
+                {
+                    if (br != null) br.close();
+                    if (is != null) is.close();
+                }
+                catch (Exception ex)
+                {
+                    m_logger.log(
+                        Logger.LOG_WARNING,
+                        "Unable to close next bundle identifier file.",
+                        ex);
+                }
+            }
+        }
+
+        return -1;
+    }
+
     private long getNextId()
     {
         synchronized (m_nextIdLock)
         {
-            return m_nextId++;
+            // Save the current id.
+            long id = m_nextId;
+
+            // Increment the next id.
+            m_nextId++;
+
+            // Write the bundle state.
+            OutputStream os = null;
+            BufferedWriter bw = null;
+            try
+            {
+                File file = m_cache.getSystemBundleDataFile("bundle.id");
+                os = m_secureAction.getFileOutputStream(file);
+                bw = new BufferedWriter(new OutputStreamWriter(os));
+                String s = Long.toString(m_nextId);
+                bw.write(s, 0, s.length());
+            }
+            catch (Exception ex)
+            {
+                m_logger.log(
+                    Logger.LOG_WARNING,
+                    "Unable to save next bundle identifier to persistent storage.",
+                    ex);
+            }
+            finally
+            {
+                try
+                {
+                    if (bw != null) bw.close();
+                    if (os != null) os.close();
+                }
+                catch (Exception ex)
+                {
+                    m_logger.log(
+                        Logger.LOG_WARNING,
+                        "Unable to close next bundle identifier file.",
+                        ex);
+                }
+            }
+
+            return id;
         }
     }
 
