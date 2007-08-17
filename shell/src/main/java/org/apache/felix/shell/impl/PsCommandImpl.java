@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,11 +19,13 @@
 package org.apache.felix.shell.impl;
 
 import java.io.PrintStream;
-import java.util.Dictionary;
 import java.util.StringTokenizer;
 
 import org.apache.felix.shell.Command;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.startlevel.StartLevel;
 
 public class PsCommandImpl implements Command
