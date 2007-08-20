@@ -97,6 +97,7 @@
       </activation>
       <modules>
         <module>../bundleplugin</module>
+        <module>../scrplugin</module>
         <module>../tools/maven2/maven-osgi-plugin</module>
         <module>../ipojo/metadata</module>
         <module>../ipojo/manipulator</module>
