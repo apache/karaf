@@ -224,9 +224,9 @@ public class Activator implements BundleActivator
         m_asyncQueue = new TaskHandler();
 
         m_syncQueue = new TaskHandler();
-        
-        m_admin = new EventAdminImpl(handlerTasks, 
-            createAsyncExecuters(m_asyncQueue, m_syncQueue, scheduler, m_pool), 
+
+        m_admin = createEventAdmin(handlerTasks,
+            createAsyncExecuters(m_asyncQueue, m_syncQueue, scheduler, m_pool),
             createSyncExecuters(m_syncQueue, scheduler, m_pool));
 
         // register the admin wrapped in a service factory (SecureEventAdminFactory)
@@ -291,7 +291,22 @@ public class Activator implements BundleActivator
 
         m_pool = null;
     }
-    
+
+
+    /**
+     * Create a event admin implementation.
+     * @param handlerTasks
+     * @param asyncExecuters
+     * @param syncExecuters
+     * @return
+     */
+    protected EventAdminImpl createEventAdmin(HandlerTasks handlerTasks,
+                                              DeliverTasks asyncExecuters,
+                                              DeliverTasks syncExecuters)
+    {
+        return new EventAdminImpl(handlerTasks, asyncExecuters, syncExecuters);
+    }
+
     /*
      * Create an AsyncDeliverTasks object that is used to dispatch asynchronous
      * events. Additionally, the asynchronous dispatch queue is initialized and
