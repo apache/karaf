@@ -93,7 +93,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
      */
     public Configuration getConfiguration( String pid ) throws IOException
     {
-        ConfigurationImpl config = configurationManager.getConfiguration( pid );
+        ConfigurationImpl config = configurationManager.getConfiguration( pid, getBundle().getLocation() );
 
         if ( config.getBundleLocation() == null )
         {

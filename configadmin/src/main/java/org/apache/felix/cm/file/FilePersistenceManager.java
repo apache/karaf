@@ -72,6 +72,29 @@ import org.osgi.framework.Constants;
  * <tr><td><code>org.apache.felix.log.LogService</code><td><code>org/apache/felix/log/LogService.config</code></tr>
  * <tr><td><code>sample.fl&auml;che</code><td><code>sample/fl%00e8che.config</code></tr>
  * </table>
+ * <p>
+ * <b>Mulithreading Issues</b>
+ * <p>
+ * In a multithreaded environment the {@link #store(String, Dictionary)} and
+ * {@link #load(File)} methods may be called at the the quasi-same time for the
+ * same configuration PID. It may no happen, that the store method starts
+ * writing the file and the load method might at the same time read from the
+ * file currently being written and thus loading corrupt data (if data is
+ * available at all).
+ * <p>
+ * To prevent this situation from happening, the methods use synchronization
+ * and temporary files as follows:
+ * <ul>
+ * <li>The {@link #store(String, Dictionary)} method writes a temporary file
+ * with file extension <code>.tmp</code>. When done, the file is renamed to
+ * actual configuration file name as implied by the PID. This last step of
+ * renaming the file is synchronized on the FilePersistenceManager instance.</li>
+ * <li>The {@link #load(File)} method is completeley synchronized on the
+ * FilePersistenceManager instance such that the {@link #store} method might
+ * inadvertantly try to replace the file while it is being read.</li>
+ * <li>Finally the <code>Iterator</code> returned by {@link #getDictionaries()}
+ * is implemented such that any temporary configuration file is just ignored.</li>
+ * </ul>
  *
  * @author fmeschbe
  */
@@ -88,6 +111,14 @@ public class FilePersistenceManager implements PersistenceManager
      * The extension of the configuration files.
      */
     private static final String FILE_EXT = ".config";
+
+    /**
+     * The extension of the configuration files, while they are being written
+     * (value is ".tmp").
+     * 
+     * @see #store(String, Dictionary)
+     */
+    private static final String TMP_EXT = ".tmp";
 
     private static final BitSet VALID_PATH_CHARS;
 
@@ -389,16 +420,33 @@ public class FilePersistenceManager implements PersistenceManager
     public void store( String pid, Dictionary props ) throws IOException
     {
         OutputStream out = null;
+        File tmpFile = null;
         try
         {
             File cfgFile = getFile( pid );
             
             // ensure parent path
-            cfgFile.getParentFile().mkdirs();
+            File cfgDir = cfgFile.getParentFile();
+            cfgDir.mkdirs();
 
-            
-            out = new FileOutputStream( cfgFile );
+            // write the configuration to a temporary file
+            tmpFile = File.createTempFile( cfgFile.getName(), TMP_EXT, cfgDir );
+            out = new FileOutputStream( tmpFile );
             ConfigurationHandler.write( out, props );
+            out.close();
+
+            // after writing the file, rename it but ensure, that no other
+            // might at the same time open the new file
+            // see load(File)
+            synchronized (this) {
+                // make sure the cfg file does not exists (just for sanity)
+                if (cfgFile.exists()) {
+                    cfgFile.delete();
+                }
+                
+                // rename the temporary file to the new file
+                tmpFile.renameTo( cfgFile );
+            }
         }
         finally
         {
@@ -412,6 +460,10 @@ public class FilePersistenceManager implements PersistenceManager
                 {
                     // ignore
                 }
+            }
+            
+            if (tmpFile.exists()) {
+                tmpFile.delete();
             }
         }
     }
@@ -430,23 +482,32 @@ public class FilePersistenceManager implements PersistenceManager
      */
     private Dictionary load( File cfgFile ) throws IOException
     {
-        InputStream ins = null;
-        try
+        // synchronize this instance to make at least sure, the file is
+        // not at the same time accessed by another thread (see store())
+        // we have to synchronize the complete load time as the store
+        // method might want to replace the file while we are reading and
+        // still have the file open. This might be a problem e.g. in Windows
+        // environments, where files may not be removed which are still open
+        synchronized ( this )
         {
-            ins = new FileInputStream( cfgFile );
-            return ConfigurationHandler.read( ins );
-        }
-        finally
-        {
-            if ( ins != null )
+            InputStream ins = null;
+            try
             {
-                try
+                ins = new FileInputStream( cfgFile );
+                return ConfigurationHandler.read( ins );
+            }
+            finally
+            {
+                if ( ins != null )
                 {
-                    ins.close();
-                }
-                catch ( IOException ioe )
-                {
-                    // ignore
+                    try
+                    {
+                        ins.close();
+                    }
+                    catch ( IOException ioe )
+                    {
+                        // ignore
+                    }
                 }
             }
         }
@@ -536,7 +597,7 @@ public class FilePersistenceManager implements PersistenceManager
                 {
 
                     File cfgFile = fileList[idx++];
-                    if ( cfgFile.isFile() )
+                    if ( cfgFile.isFile() && !cfgFile.getName().endsWith( TMP_EXT ))
                     {
                         try
                         {

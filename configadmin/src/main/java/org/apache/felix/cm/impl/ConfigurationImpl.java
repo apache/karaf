@@ -39,6 +39,24 @@ class ConfigurationImpl
 {
 
     /**
+     * The name of a synthetic property stored in the persisted configuration
+     * data to indicate that the configuration data is new, that is created but
+     * never updated (value is "_felix_.cm.newConfiguration").
+     * <p>
+     * This special property is stored by the
+     * {@link #ConfigurationImpl(ConfigurationManager, PersistenceManager, String, String, String)}
+     * constructor, when the configuration is first created and persisted and is
+     * interpreted by the
+     * {@link #ConfigurationImpl(ConfigurationManager, PersistenceManager, Dictionary)}
+     * method when the configuration data is loaded in a new object.
+     * <p>
+     * The goal of this property is to keep the information on whether
+     * configuration data is new (but persisted as per the spec) or has already
+     * been assigned with possible no data.
+     */
+    private static final String CONFIGURATION_NEW = "_felix_.cm.newConfiguration";
+    
+    /**
      * The {@link ConfigurationManager configuration manager} instance which
      * caused this configuration object to be created.
      */
@@ -83,7 +101,8 @@ class ConfigurationImpl
      * The configuration data of this configuration instance. This is a private
      * copy of the properties of which a copy is made when the
      * {@link #getProperties()} method is called. This field is <code>null</code> if
-     * the configuration has been created and never stored to persistence.
+     * the configuration has been created and never been updated with acutal
+     * configuration properties.
      */
     private CaseInsensitiveDictionary properties;
 
@@ -98,17 +117,26 @@ class ConfigurationImpl
         factoryPID = ( String ) properties.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
         bundleLocation = ( String ) properties.remove( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
 
-        configure( properties );
+        // set the properties internally
+        configureFromPersistence( properties );
     }
 
 
     ConfigurationImpl( ConfigurationManager configurationManager, PersistenceManager persistenceManager, String pid,
-        String factoryPid )
+        String factoryPid, String bundleLocation ) throws IOException
     {
         this.configurationManager = configurationManager;
         this.persistenceManager = persistenceManager;
         this.pid = pid;
-        factoryPID = factoryPid;
+        this.factoryPID = factoryPid;
+        this.bundleLocation = bundleLocation;
+        this.properties = null;
+
+        // this is a new configuration object, store immediately
+        Dictionary props = new Hashtable();
+        setAutoProperties( props, true );
+        props.put( CONFIGURATION_NEW, Boolean.TRUE );
+        persistenceManager.store( pid, props );
     }
 
 
@@ -117,7 +145,7 @@ class ConfigurationImpl
      */
     public void delete() throws IOException
     {
-        if ( !this.isDeleted() )
+        if ( !isDeleted() )
         {
             persistenceManager.delete( pid );
             persistenceManager = null;
@@ -179,14 +207,14 @@ class ConfigurationImpl
      */
     public void setBundleLocation( String bundleLocation )
     {
-        if ( !this.isDeleted() )
+        if ( !isDeleted() )
         {
             this.bundleLocation = bundleLocation;
 
             // 104.15.2.8 The bundle location will be set persistently
             try
             {
-                this.store();
+                store();
             }
             catch ( IOException ioe )
             {
@@ -201,7 +229,7 @@ class ConfigurationImpl
      */
     public void update() throws IOException
     {
-        if ( !this.isDeleted() )
+        if ( !isDeleted() )
         {
             // read configuration from persistence (again)
             Dictionary properties = persistenceManager.load( pid );
@@ -214,7 +242,7 @@ class ConfigurationImpl
                     + servicePid );
             }
 
-            this.configure( properties );
+            configureFromPersistence( properties );
 
             configurationManager.updated( this );
         }
@@ -226,15 +254,15 @@ class ConfigurationImpl
      */
     public void update( Dictionary properties ) throws IOException
     {
-        if ( !this.isDeleted() )
+        if ( !isDeleted() )
         {
             CaseInsensitiveDictionary newProperties = new CaseInsensitiveDictionary( properties );
 
-            this.setAutoProperties( newProperties, true );
+            setAutoProperties( newProperties, true );
 
             persistenceManager.store( pid, newProperties );
 
-            this.configure( newProperties );
+            configure( newProperties );
 
             configurationManager.updated( this );
         }
@@ -295,15 +323,21 @@ class ConfigurationImpl
             props = new Hashtable();
 
             // add automatic properties including the bundle location (if set)
-            this.setAutoProperties( props, true );
+            setAutoProperties( props, true );
         }
-        else if ( this.getBundleLocation() != null )
+        else if ( getBundleLocation() != null )
         {
-            props.put( ConfigurationAdmin.SERVICE_BUNDLELOCATION, this.getBundleLocation() );
+            props.put( ConfigurationAdmin.SERVICE_BUNDLELOCATION, getBundleLocation() );
         }
 
         // only store now, if this is not a new configuration
         persistenceManager.store( pid, props );
+    }
+
+
+    boolean isNew()
+    {
+        return properties == null;
     }
 
 
@@ -323,19 +357,33 @@ class ConfigurationImpl
     }
 
 
+    private void configureFromPersistence( Dictionary properties )
+    {
+        // if the this is not an empty/new configuration, accept the properties
+        // otherwise just set the properties field to null
+        if ( properties.get( CONFIGURATION_NEW ) == null )
+        {
+            configure( properties );
+        }
+        else
+        {
+            this.properties = null;
+        }
+    }
+    
     private void configure( Dictionary properties )
     {
         // remove predefined properties
-        this.clearAutoProperties( properties );
+        clearAutoProperties( properties );
 
         // ensure CaseInsensitiveDictionary
         if ( properties instanceof CaseInsensitiveDictionary )
         {
-            this.properties = (CaseInsensitiveDictionary)properties;
+            this.properties = ( CaseInsensitiveDictionary ) properties;
         }
         else
         {
-            properties = new CaseInsensitiveDictionary( properties );
+            this.properties = new CaseInsensitiveDictionary( properties );
         }
     }
 
@@ -343,13 +391,13 @@ class ConfigurationImpl
     void setAutoProperties( Dictionary properties, boolean withBundleLocation )
     {
         // set pid and factory pid in the properties
-        this.replaceProperty( properties, Constants.SERVICE_PID, pid );
-        this.replaceProperty( properties, ConfigurationAdmin.SERVICE_FACTORYPID, factoryPID );
+        replaceProperty( properties, Constants.SERVICE_PID, pid );
+        replaceProperty( properties, ConfigurationAdmin.SERVICE_FACTORYPID, factoryPID );
 
         // bundle location is not set here
         if ( withBundleLocation )
         {
-            this.replaceProperty( properties, ConfigurationAdmin.SERVICE_BUNDLELOCATION, this.getBundleLocation() );
+            replaceProperty( properties, ConfigurationAdmin.SERVICE_BUNDLELOCATION, getBundleLocation() );
         }
         else
         {

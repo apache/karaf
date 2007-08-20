@@ -271,11 +271,18 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     }
 
 
-    void cacheConfiguration( ConfigurationImpl configuration )
+    ConfigurationImpl cacheConfiguration( ConfigurationImpl configuration )
     {
         synchronized ( configurations )
         {
+            Object existing = configurations.get( configuration.getPid() );
+            if ( existing != null )
+            {
+                return ( ConfigurationImpl ) existing;
+            }
+
             configurations.put( configuration.getPid(), configuration );
+            return configuration;
         }
     }
 
@@ -310,8 +317,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         // create the configuration
         String pid = createPid( factoryPid );
-        ConfigurationImpl config = createConfiguration( pid, factoryPid );
-        config.setBundleLocation( configurationAdmin.getBundle().getLocation() );
+        ConfigurationImpl config = createConfiguration( pid, factoryPid, configurationAdmin.getBundle().getLocation() );
 
         // add the configuration to the factory
         factory.addPID( pid );
@@ -331,11 +337,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     {
         // create the configuration
         String pid = createPid( factoryPid );
-        ConfigurationImpl config = createConfiguration( pid, factoryPid );
-        if ( location != null )
-        {
-            config.setBundleLocation( location );
-        }
+        ConfigurationImpl config = createConfiguration( pid, factoryPid, location );
 
         // add the configuration to the factory
         Factory factory = getFactory( factoryPid );
@@ -346,26 +348,41 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     }
 
 
-    ConfigurationImpl getConfiguration( String pid ) throws IOException
+    ConfigurationImpl getExistingConfiguration( String pid ) throws IOException
     {
-        return getConfiguration( pid, true );
-    }
-
-
-    ConfigurationImpl getConfiguration( String pid, String bundleLocation ) throws IOException
-    {
-        ConfigurationImpl config = getConfiguration( pid, false );
-
-        if ( config == null )
+        ConfigurationImpl config = getCachedConfiguration( pid );
+        if ( config != null )
         {
-            config = createConfiguration( pid, null );
-            if ( bundleLocation != null )
+            return config;
+        }
+        
+        PersistenceManager[] pmList = getPersistenceManagers();
+        for ( int i = 0; i < pmList.length; i++ )
+        {
+            if ( pmList[i].exists( pid ) )
             {
-                config.setBundleLocation( bundleLocation );
+                Dictionary props = pmList[i].load( pid );
+                config = new ConfigurationImpl( this, pmList[i], props );
+                return cacheConfiguration( config );
             }
         }
+        
+        // neither the cache nor any persistence manager has configuration
+        return null;
+    }
+    
+    
+    ConfigurationImpl getConfiguration( String pid, String bundleLocation ) throws IOException
+    {
+        // check for existing (cached or persistent) configuration
+        ConfigurationImpl config = getExistingConfiguration( pid );
+        if ( config != null )
+        {
+            return config;
+        }
 
-        return config;
+        // else create new configuration also setting the bundle location
+        return createConfiguration( pid, null, bundleLocation );
     }
 
 
@@ -577,42 +594,13 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     }
 
 
-    ConfigurationImpl getConfiguration( String pid, boolean create ) throws IOException
+    ConfigurationImpl createConfiguration( String pid, String factoryPid, String bundleLocation ) throws IOException
     {
-        ConfigurationImpl config = getCachedConfiguration( pid );
-        if ( config != null )
-        {
-            return config;
-        }
+        // create the configuration (which will also be stored immediately)
+        ConfigurationImpl config = new ConfigurationImpl( this, getPersistenceManagers()[0], pid, factoryPid,
+            bundleLocation );
 
-        PersistenceManager[] pmList = getPersistenceManagers();
-        for ( int i = 0; i < pmList.length; i++ )
-        {
-            if ( pmList[i].exists( pid ) )
-            {
-                Dictionary props = pmList[i].load( pid );
-                config = new ConfigurationImpl( this, pmList[i], props );
-                cacheConfiguration( config );
-                return config;
-            }
-        }
-
-        // if getting here, there is no configuration yet, optionally create new
-        return ( create ) ? createConfiguration( pid, null ) : null;
-    }
-
-
-    ConfigurationImpl createConfiguration( String pid, String factoryPid ) throws IOException
-    {
-        ConfigurationImpl config = new ConfigurationImpl( this, getPersistenceManagers()[0], pid, factoryPid );
-
-        // immediately store the configuration, yet getProperties() must still
-        // return null
-        config.store();
-
-        cacheConfiguration( config );
-
-        return config;
+        return cacheConfiguration( config );
     }
 
 
@@ -648,9 +636,27 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     }
 
 
+    /**
+     * Calls the registered configuration plugins on the given configuration
+     * object unless the configuration has just been created and not been
+     * updated yet.
+     * 
+     * @param sr The service reference of the managed service (factory) which
+     *            is to be updated with configuration
+     * @param cfg The configuration object whose properties have to be passed
+     *            through the plugins
+     * @return The properties from the configuration object passed through the
+     *         plugins or <code>null</code> if the configuration object has
+     *         been newly created and no properties exist yet.
+     */
     private Dictionary callPlugins( ServiceReference sr, ConfigurationImpl cfg )
     {
         Dictionary props = cfg.getProperties();
+        
+        // guard against NPE for new configuration never updated
+        if (props == null) {
+            return null;
+        }
 
         ServiceReference[] plugins = null;
         try
@@ -804,44 +810,65 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         public void run()
         {
+            // get or load configuration for the pid
             ConfigurationImpl cfg;
             try
             {
-                cfg = getConfiguration( pid, sr.getBundle().getLocation() );
+                cfg = getExistingConfiguration( pid );
             }
             catch ( IOException ioe )
             {
                 log( LogService.LOG_ERROR, "Error loading configuration for " + pid, ioe );
                 return;
             }
+            
+            // this will be set below to be given to the service
+            Dictionary dictionary;
 
-            // 104.3 Ignore duplicate PIDs from other bundles and report them to
-            // the log
-            // 104.4.1 No update call back for PID already bound to another
-            // bundle location
-            String bundleLocation = sr.getBundle().getLocation();
-            if ( cfg.getBundleLocation() != null && !bundleLocation.equals( cfg.getBundleLocation() ) )
+            // check configuration and call plugins if existing and not new
+            if ( cfg != null && !cfg.isNew() )
             {
-                log( LogService.LOG_ERROR, "Cannot use configuration for " + pid + " requested by bundle "
-                    + sr.getBundle().getLocation() + " but belongs to " + cfg.getBundleLocation(), null );
-                return;
-            }
 
-            // 104.3 Report an error in the log if more than one service with
-            // the same PID asks for the configuration
-            if ( cfg.getServiceReference() != null && !sr.equals( cfg.getServiceReference() ) )
-            {
-                log( LogService.LOG_ERROR, "Configuration for " + pid + " has already been used for service "
-                    + cfg.getServiceReference() + " and will now also be given to " + sr, null );
+                // 104.3 Ignore duplicate PIDs from other bundles and report
+                // them to the log
+                // 104.4.1 No update call back for PID already bound to another
+                // bundle location
+                // 104.4.1 assign configuration to bundle if unassigned
+                String bundleLocation = sr.getBundle().getLocation();
+                if ( cfg.getBundleLocation() == null )
+                {
+                    cfg.setBundleLocation( bundleLocation );
+                }
+                else if ( !bundleLocation.equals( cfg.getBundleLocation() ) )
+                {
+                    log( LogService.LOG_ERROR, "Cannot use configuration for " + pid + " requested by bundle "
+                        + sr.getBundle().getLocation() + " but belongs to " + cfg.getBundleLocation(), null );
+                    return;
+                }
+
+                // 104.3 Report an error in the log if more than one service
+                // with
+                // the same PID asks for the configuration
+                if ( cfg.getServiceReference() != null && !sr.equals( cfg.getServiceReference() ) )
+                {
+                    log( LogService.LOG_ERROR, "Configuration for " + pid + " has already been used for service "
+                        + cfg.getServiceReference() + " and will now also be given to " + sr, null );
+                }
+                else
+                {
+                    // assign the configuration to the service
+                    cfg.setServiceReference( sr );
+                }
+
+                // prepare the configuration for the service (call plugins)
+                dictionary = callPlugins( sr, cfg );
             }
             else
             {
-                // assign the configuration to the service
-                cfg.setServiceReference( sr );
+                // 104.5.3 ManagedService.updated must be called with null
+                // if no configuration is available
+                dictionary = null;
             }
-
-            // prepare the configuration for the service (call plugins)
-            Dictionary dictionary = callPlugins( sr, cfg );
 
             // update the service with the configuration
             try
@@ -925,7 +952,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 ConfigurationImpl cfg;
                 try
                 {
-                    cfg = getConfiguration( pid, false );
+                    cfg = getExistingConfiguration( pid );
                 }
                 catch ( IOException ioe )
                 {
@@ -940,6 +967,13 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                         + " does not exist", null );
                     factory.removePID( pid );
                     factory.storeSilently();
+                    continue;
+                }
+                else if ( cfg.isNew() )
+                {
+                    // Configuration has just been created but not yet updated
+                    // we currently just ignore it and have the update mechanism
+                    // provide the configuration to the ManagedServiceFactory
                     continue;
                 }
                 else if ( !factoryPid.equals( cfg.getFactoryPid() ) )
@@ -972,7 +1006,11 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 // update the service with the configuration
                 try
                 {
-                    service.updated( pid, dictionary );
+                    // only, if there is non-null configuration data
+                    if ( dictionary != null )
+                    {
+                        service.updated( pid, dictionary );
+                    }
                 }
                 catch ( ConfigurationException ce )
                 {
@@ -1085,7 +1123,11 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                             Dictionary dictionary = callPlugins( sr[0], config );
 
                             // update the ManagedServiceFactory with the properties
-                            srv.updated( config.getPid(), dictionary );
+                            // only, if there is non-null configuration data
+                            if ( dictionary != null )
+                            {
+                                srv.updated( config.getPid(), dictionary );
+                            }
                         }
                         finally
                         {
