@@ -40,9 +40,9 @@
 	</description>
 
 	<scm>
-		<connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/maven-scr-plugin</connection>
-		<developerConnection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/maven-scr-plugin</developerConnection>
-		<url>http://svn.apache.org/repos/asf/felix/maven-scr-plugin</url>
+		<connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/scrplugin</connection>
+		<developerConnection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/scrplugin</developerConnection>
+		<url>http://svn.apache.org/repos/asf/felix/scrplugin</url>
 	</scm>
 
 	<dependencies>
