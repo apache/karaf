@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.scrplugin.xml;
+package org.apache.felix.scrplugin.xml;
 
 import java.io.File;
 import java.io.FileReader;
@@ -35,13 +35,13 @@ import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.felix.sandbox.scrplugin.om.Component;
-import org.apache.felix.sandbox.scrplugin.om.Components;
-import org.apache.felix.sandbox.scrplugin.om.Implementation;
-import org.apache.felix.sandbox.scrplugin.om.Interface;
-import org.apache.felix.sandbox.scrplugin.om.Property;
-import org.apache.felix.sandbox.scrplugin.om.Reference;
-import org.apache.felix.sandbox.scrplugin.om.Service;
+import org.apache.felix.scrplugin.om.Component;
+import org.apache.felix.scrplugin.om.Components;
+import org.apache.felix.scrplugin.om.Implementation;
+import org.apache.felix.scrplugin.om.Interface;
+import org.apache.felix.scrplugin.om.Property;
+import org.apache.felix.scrplugin.om.Reference;
+import org.apache.felix.scrplugin.om.Service;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;

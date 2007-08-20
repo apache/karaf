@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.scrplugin.tags.cl;
+package org.apache.felix.scrplugin.tags.cl;
 
-import org.apache.felix.sandbox.scrplugin.tags.JavaParameter;
+import org.apache.felix.scrplugin.tags.JavaParameter;
 
 /**
  * <code>ClassLoaderJavaParameter.java</code>...

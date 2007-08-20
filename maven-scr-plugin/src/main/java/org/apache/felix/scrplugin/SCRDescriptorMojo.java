@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.scrplugin;
+package org.apache.felix.scrplugin;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,21 +25,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.felix.sandbox.scrplugin.om.Component;
-import org.apache.felix.sandbox.scrplugin.om.Components;
-import org.apache.felix.sandbox.scrplugin.om.Implementation;
-import org.apache.felix.sandbox.scrplugin.om.Interface;
-import org.apache.felix.sandbox.scrplugin.om.metatype.AttributeDefinition;
-import org.apache.felix.sandbox.scrplugin.om.metatype.Designate;
-import org.apache.felix.sandbox.scrplugin.om.metatype.MTObject;
-import org.apache.felix.sandbox.scrplugin.om.metatype.MetaData;
-import org.apache.felix.sandbox.scrplugin.om.metatype.OCD;
-import org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription;
-import org.apache.felix.sandbox.scrplugin.tags.JavaClassDescriptorManager;
-import org.apache.felix.sandbox.scrplugin.tags.JavaField;
-import org.apache.felix.sandbox.scrplugin.tags.JavaTag;
-import org.apache.felix.sandbox.scrplugin.xml.ComponentDescriptorIO;
-import org.apache.felix.sandbox.scrplugin.xml.MetaTypeIO;
+import org.apache.felix.scrplugin.om.Component;
+import org.apache.felix.scrplugin.om.Components;
+import org.apache.felix.scrplugin.om.Implementation;
+import org.apache.felix.scrplugin.om.Interface;
+import org.apache.felix.scrplugin.om.Property;
+import org.apache.felix.scrplugin.om.Reference;
+import org.apache.felix.scrplugin.om.Service;
+import org.apache.felix.scrplugin.om.metatype.AttributeDefinition;
+import org.apache.felix.scrplugin.om.metatype.Designate;
+import org.apache.felix.scrplugin.om.metatype.MTObject;
+import org.apache.felix.scrplugin.om.metatype.MetaData;
+import org.apache.felix.scrplugin.om.metatype.OCD;
+import org.apache.felix.scrplugin.tags.JavaClassDescription;
+import org.apache.felix.scrplugin.tags.JavaClassDescriptorManager;
+import org.apache.felix.scrplugin.tags.JavaField;
+import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.xml.ComponentDescriptorIO;
+import org.apache.felix.scrplugin.xml.MetaTypeIO;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -336,7 +339,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
             return false;
         }
 
-        org.apache.felix.sandbox.scrplugin.om.Service service = new org.apache.felix.sandbox.scrplugin.om.Service();
+        final Service service = new Service();
         component.setService(service);
         boolean serviceFactory = false;
         for (int i=0; i < services.length; i++) {
@@ -380,7 +383,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         }
 
         if (!StringUtils.isEmpty(name)) {
-            org.apache.felix.sandbox.scrplugin.om.Property prop = new org.apache.felix.sandbox.scrplugin.om.Property(property);
+            final Property prop = new Property(property);
             prop.setName(name);
             prop.setType(property.getNamedParameter(Constants.PROPERTY_TYPE));
             final String value = property.getNamedParameter(Constants.PROPERTY_VALUE);
@@ -483,7 +486,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         }
 
         if (!StringUtils.isEmpty(name)) {
-            org.apache.felix.sandbox.scrplugin.om.Reference ref = new org.apache.felix.sandbox.scrplugin.om.Reference(reference);
+            final Reference ref = new Reference(reference);
             ref.setName(name);
             ref.setInterfacename(type);
             ref.setCardinality(reference.getNamedParameter(Constants.REFERENCE_CARDINALITY));

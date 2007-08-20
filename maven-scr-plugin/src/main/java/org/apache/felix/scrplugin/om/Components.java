@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.scrplugin.om;
+package org.apache.felix.scrplugin.om;
 
 import java.util.ArrayList;
 import java.util.List;

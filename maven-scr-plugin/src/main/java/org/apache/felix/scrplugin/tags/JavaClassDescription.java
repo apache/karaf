@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.scrplugin.tags;
+package org.apache.felix.scrplugin.tags;
 
 import org.apache.maven.plugin.MojoExecutionException;
 

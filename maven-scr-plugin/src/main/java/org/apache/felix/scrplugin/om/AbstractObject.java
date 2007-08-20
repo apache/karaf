@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.scrplugin.om;
+package org.apache.felix.scrplugin.om;
 
-import org.apache.felix.sandbox.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.JavaTag;
 
 /**
  * The <code>AbstractObject</code>

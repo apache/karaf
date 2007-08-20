@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.scrplugin.tags.cl;
+package org.apache.felix.scrplugin.tags.cl;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.felix.sandbox.scrplugin.Constants;
-import org.apache.felix.sandbox.scrplugin.om.Reference;
-import org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription;
-import org.apache.felix.sandbox.scrplugin.tags.JavaField;
-import org.apache.felix.sandbox.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.Constants;
+import org.apache.felix.scrplugin.om.Reference;
+import org.apache.felix.scrplugin.tags.JavaClassDescription;
+import org.apache.felix.scrplugin.tags.JavaField;
+import org.apache.felix.scrplugin.tags.JavaTag;
 
 /**
  * <code>ClassLoaderJavaTag.java</code>...

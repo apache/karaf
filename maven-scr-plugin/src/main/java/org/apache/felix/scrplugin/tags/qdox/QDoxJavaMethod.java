@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.scrplugin.tags.qdox;
+package org.apache.felix.scrplugin.tags.qdox;
 
-import org.apache.felix.sandbox.scrplugin.tags.JavaMethod;
-import org.apache.felix.sandbox.scrplugin.tags.JavaParameter;
+import org.apache.felix.scrplugin.tags.JavaMethod;
+import org.apache.felix.scrplugin.tags.JavaParameter;
 
 /**
  * <code>QDoxJavaMethod.java</code>...

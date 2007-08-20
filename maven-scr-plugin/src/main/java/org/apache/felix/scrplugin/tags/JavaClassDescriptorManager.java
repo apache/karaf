@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.scrplugin.tags;
+package org.apache.felix.scrplugin.tags;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,12 +34,12 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-import org.apache.felix.sandbox.scrplugin.Constants;
-import org.apache.felix.sandbox.scrplugin.om.Component;
-import org.apache.felix.sandbox.scrplugin.om.Components;
-import org.apache.felix.sandbox.scrplugin.tags.cl.ClassLoaderJavaClassDescription;
-import org.apache.felix.sandbox.scrplugin.tags.qdox.QDoxJavaClassDescription;
-import org.apache.felix.sandbox.scrplugin.xml.ComponentDescriptorIO;
+import org.apache.felix.scrplugin.Constants;
+import org.apache.felix.scrplugin.om.Component;
+import org.apache.felix.scrplugin.om.Components;
+import org.apache.felix.scrplugin.tags.cl.ClassLoaderJavaClassDescription;
+import org.apache.felix.scrplugin.tags.qdox.QDoxJavaClassDescription;
+import org.apache.felix.scrplugin.xml.ComponentDescriptorIO;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.plugin.MojoExecutionException;

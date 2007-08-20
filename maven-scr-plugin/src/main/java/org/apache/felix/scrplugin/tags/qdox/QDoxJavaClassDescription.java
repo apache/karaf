@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.scrplugin.tags.qdox;
+package org.apache.felix.scrplugin.tags.qdox;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription;
-import org.apache.felix.sandbox.scrplugin.tags.JavaClassDescriptorManager;
-import org.apache.felix.sandbox.scrplugin.tags.JavaField;
-import org.apache.felix.sandbox.scrplugin.tags.JavaMethod;
-import org.apache.felix.sandbox.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.JavaClassDescription;
+import org.apache.felix.scrplugin.tags.JavaClassDescriptorManager;
+import org.apache.felix.scrplugin.tags.JavaField;
+import org.apache.felix.scrplugin.tags.JavaMethod;
+import org.apache.felix.scrplugin.tags.JavaTag;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import com.thoughtworks.qdox.model.DocletTag;

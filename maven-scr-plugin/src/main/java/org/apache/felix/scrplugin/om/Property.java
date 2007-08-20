@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.scrplugin.om;
+package org.apache.felix.scrplugin.om;
 
 import java.util.List;
 
-import org.apache.felix.sandbox.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.JavaTag;
 
 /**
  * <code>Property.java</code>...

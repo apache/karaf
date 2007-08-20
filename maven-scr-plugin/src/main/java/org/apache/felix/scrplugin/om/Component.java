@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.scrplugin.om;
+package org.apache.felix.scrplugin.om;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription;
-import org.apache.felix.sandbox.scrplugin.tags.JavaMethod;
-import org.apache.felix.sandbox.scrplugin.tags.JavaParameter;
-import org.apache.felix.sandbox.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.JavaClassDescription;
+import org.apache.felix.scrplugin.tags.JavaMethod;
+import org.apache.felix.scrplugin.tags.JavaParameter;
+import org.apache.felix.scrplugin.tags.JavaTag;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**

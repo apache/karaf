@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.scrplugin.xml;
+package org.apache.felix.scrplugin.xml;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -32,11 +32,11 @@ import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.felix.sandbox.scrplugin.om.metatype.AttributeDefinition;
-import org.apache.felix.sandbox.scrplugin.om.metatype.Designate;
-import org.apache.felix.sandbox.scrplugin.om.metatype.MTObject;
-import org.apache.felix.sandbox.scrplugin.om.metatype.MetaData;
-import org.apache.felix.sandbox.scrplugin.om.metatype.OCD;
+import org.apache.felix.scrplugin.om.metatype.AttributeDefinition;
+import org.apache.felix.scrplugin.om.metatype.Designate;
+import org.apache.felix.scrplugin.om.metatype.MTObject;
+import org.apache.felix.scrplugin.om.metatype.MetaData;
+import org.apache.felix.scrplugin.om.metatype.OCD;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
