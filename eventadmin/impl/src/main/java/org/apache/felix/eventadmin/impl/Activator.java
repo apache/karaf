@@ -225,7 +225,8 @@ public class Activator implements BundleActivator
 
         m_syncQueue = new TaskHandler();
 
-        m_admin = createEventAdmin(handlerTasks,
+        m_admin = createEventAdmin(context,
+            handlerTasks,
             createAsyncExecuters(m_asyncQueue, m_syncQueue, scheduler, m_pool),
             createSyncExecuters(m_syncQueue, scheduler, m_pool));
 
@@ -295,12 +296,14 @@ public class Activator implements BundleActivator
 
     /**
      * Create a event admin implementation.
+     * @param context      The bundle context
      * @param handlerTasks
      * @param asyncExecuters
      * @param syncExecuters
      * @return
      */
-    protected EventAdminImpl createEventAdmin(HandlerTasks handlerTasks,
+    protected EventAdminImpl createEventAdmin(BundleContext context,
+                                              HandlerTasks handlerTasks,
                                               DeliverTasks asyncExecuters,
                                               DeliverTasks syncExecuters)
     {
