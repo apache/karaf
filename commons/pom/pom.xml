@@ -10,14 +10,14 @@
     <name>Apache Felix Commons: Build</name>
     <groupId>org.apache.felix.commons</groupId>
     <artifactId>commons-build</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <description>
         These subprojects wrap common third-party jars as OSGi bundles.
     </description>
     <scm>
-      <connection>scm:svn:http://svn.apache.org/repos/asf/felix/releases/commons-build-1.0.0</connection>
-      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/commons-build-1.0.0</developerConnection>
-      <url>http://svn.apache.org/viewcvs/felix/releases/commons-build-1.0.0</url>
+      <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/commons/pom</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/commons/pom</developerConnection>
+      <url>http://svn.apache.org/viewcvs/felix/trunk/commons/pom</url>
     </scm>
 
     <build>
