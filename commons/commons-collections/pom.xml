@@ -14,7 +14,7 @@
     </properties>
     <groupId>org.apache.felix.commons</groupId>
     <artifactId>${pom.groupId}.${pkgArtifactId}</artifactId>
-    <version>3.2.0-0001</version>
+    <version>3.2.0-0002-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>${pkgArtifactId} bundle</name>
     <description>
@@ -25,9 +25,9 @@
         <url>http://felix.apache.org/</url>
     </organization>
     <scm>
-      <connection>scm:svn:http://svn.apache.org/repos/asf/felix/releases/org.apache.felix.commons.commons-collections-3.2.0-0001</connection>
-      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.commons.commons-collections-3.2.0-0001</developerConnection>
-      <url>http://svn.apache.org/viewcvs/felix/releases/org.apache.felix.commons.commons-collections-3.2.0-0001</url>
+      <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/commons/commons-collections</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/commons/commons-collections</developerConnection>
+      <url>http://svn.apache.org/viewcvs/felix/trunk/commons/commons-collections</url>
     </scm>
     <dependencies>
         <dependency>
