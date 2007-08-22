@@ -224,7 +224,9 @@ public class Component extends AbstractObject {
                     }
 
                     // verify service
-                    this.getService().validate(issues, warnings);
+                    if (this.getService() != null) {
+                        this.getService().validate(issues, warnings);
+                    }
 
                     // serviceFactory must not be true for immediate of component factory
                     if (this.isServiceFactory() && this.isImmediate() != null && this.isImmediate().booleanValue() && this.getFactory() != null) {
