@@ -30,7 +30,7 @@
     <properties>
         <pkgArtifactId>activation</pkgArtifactId>
         <pkgVersion>1.1</pkgVersion>
-        <pomVersion>0001</pomVersion>
+        <pomVersion>0002</pomVersion>
         <osgiVersion>${pkgVersion}.0</osgiVersion>
     </properties>
     <groupId>org.apache.felix.commons</groupId>

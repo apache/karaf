@@ -30,7 +30,7 @@
     <properties>
         <pkgArtifactId>commons-beanutils</pkgArtifactId>
         <pkgVersion>1.7.0</pkgVersion>
-        <pomVersion>0001</pomVersion>
+        <pomVersion>0002</pomVersion>
         <osgiVersion>${pkgVersion}</osgiVersion>
     </properties>
     <groupId>org.apache.felix.commons</groupId>
