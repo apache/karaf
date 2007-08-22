@@ -25,7 +25,7 @@
     <parent>
         <groupId>org.apache.felix.commons</groupId>
         <artifactId>commons-build</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <relativePath>../pom</relativePath>
     </parent>
     
@@ -53,8 +53,8 @@
     </organization>
 
     <scm>
-      <connection>scm:svn:http://svn.apache.org/repos/felix/trunk/commons/xml-apis</connection>
-      <developerConnection>scm:svn:https://svn.apache.org/repos/felix/trunk/commons/xml-apis</developerConnection>
+      <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/commons/xml-apis</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/commons/xml-apis</developerConnection>
       <url>http://svn.apache.org/viewcvs/felix/trunk/commons/xml-apis</url>
     </scm>
 

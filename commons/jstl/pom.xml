@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.felix.commons</groupId>
         <artifactId>commons-build</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <relativePath>../pom</relativePath>
     </parent>
     <properties>
@@ -46,8 +46,8 @@
         <url>http://felix.apache.org/</url>
     </organization>
     <scm>
-      <connection>scm:svn:http://svn.apache.org/repos/felix/trunk/commons/jstl</connection>
-      <developerConnection>scm:svn:https://svn.apache.org/repos/felix/trunk/commons/jstl</developerConnection>
+      <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/commons/jstl</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/commons/jstl</developerConnection>
       <url>http://svn.apache.org/viewcvs/felix/trunk/commons/jstl</url>
     </scm>
 
