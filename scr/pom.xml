@@ -17,7 +17,7 @@
         <dependency>
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>1.1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>${pom.groupId}</groupId>
@@ -35,7 +35,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-		<version>1.1.0-SNAPSHOT</version>
+                <version>1.0.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -49,12 +49,12 @@
                             org.apache.felix.scr.Activator
                         </Bundle-Activator>
                         <Export-Package>
-                            org.osgi.service.cm, org.osgi.service.component
+                            org.osgi.service.cm,
+                            org.osgi.service.component
                         </Export-Package>
                         <Private-Package>
                             org.apache.felix.scr.*, org.kxml2.io,
-                            org.osgi.util.tracker,
-                            org.xmlpull.v1
+                            org.osgi.util.tracker, org.xmlpull.v1
                         </Private-Package>
                         <DynamicImport-Package>
                             org.osgi.service.log
