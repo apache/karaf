@@ -35,7 +35,7 @@
 
     <groupId>org.apache.felix.commons</groupId>
     <artifactId>${pom.groupId}.${pkgArtifactId}</artifactId>
-    <version>3.0.1-FINAL-0001</version>
+    <version>3.0.1-FINAL-0002-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>${pkgArtifactId} bundle</name>
     <description>
@@ -47,9 +47,9 @@
     </organization>
 
     <scm>
-      <connection>scm:svn:http://svn.apache.org/repos/asf/felix/releases/org.apache.felix.commons.poi-full-3.0.1-FINAL-0001</connection>
-      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.commons.poi-full-3.0.1-FINAL-0001</developerConnection>
-      <url>http://svn.apache.org/viewcvs/felix/releases/org.apache.felix.commons.poi-full-3.0.1-FINAL-0001</url>
+      <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/commons/poi-full</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/commons/poi-full</developerConnection>
+      <url>http://svn.apache.org/viewcvs/felix/trunk/commons/poi-full</url>
     </scm>
 
     <dependencies>
