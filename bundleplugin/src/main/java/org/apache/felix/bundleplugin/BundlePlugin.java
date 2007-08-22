@@ -340,21 +340,24 @@ public class BundlePlugin extends AbstractMojo {
             list.add(new Jar(".", this.getOutputDirectory()));
         }
 
-        Set artifacts = project.getDependencyArtifacts();
+        Set artifacts = project.getArtifacts();
         for (Iterator it = artifacts.iterator(); it.hasNext();)
         {
             Artifact artifact = (Artifact) it.next();
-            if (Artifact.SCOPE_COMPILE.equals(artifact.getScope())
-                || Artifact.SCOPE_SYSTEM.equals(artifact.getScope())
-                || Artifact.SCOPE_PROVIDED.equals(artifact.getScope()))
+            if (artifact.getArtifactHandler().isAddedToClasspath())
             {
-                File file = this.getFile(artifact);
-                if (file == null)
+                if (Artifact.SCOPE_COMPILE.equals(artifact.getScope())
+                    || Artifact.SCOPE_SYSTEM.equals(artifact.getScope())
+                    || Artifact.SCOPE_PROVIDED.equals(artifact.getScope()))
                 {
-                    throw new RuntimeException("File is not available for artifact " + artifact + " in project " + project.getArtifact());
+                    File file = this.getFile(artifact);
+                    if (file == null)
+                    {
+                        throw new RuntimeException("File is not available for artifact " + artifact + " in project " + project.getArtifact());
+                    }
+                    Jar jar = new Jar(artifact.getArtifactId(), file);
+                    list.add(jar);
                 }
-                Jar jar = new Jar(artifact.getArtifactId(), file);
-                list.add(jar);
             }
         }
         Jar[] cp = new Jar[list.size()];
