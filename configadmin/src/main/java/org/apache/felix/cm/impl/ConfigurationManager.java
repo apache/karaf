@@ -459,10 +459,10 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     }
 
 
-    void fireConfigurationEvent( int type, ConfigurationImpl config )
+    void fireConfigurationEvent( int type, String pid, String factoryPid )
     {
 
-        updateThread.schedule( new FireConfigurationEvent( type, config ) );
+        updateThread.schedule( new FireConfigurationEvent( type, pid, factoryPid) );
     }
 
 
@@ -895,7 +895,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
             // 104.5.3 CM_UPDATED is sent asynchronously to all
             // ConfigurationListeners
-            fireConfigurationEvent( ConfigurationEvent.CM_UPDATED, cfg );
+            fireConfigurationEvent( ConfigurationEvent.CM_UPDATED, pid, null );
         }
     }
 
@@ -1154,18 +1154,21 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 log( LogService.LOG_ERROR, "Unexpected problem updating configuration", t );
             }
 
-            fireConfigurationEvent( ConfigurationEvent.CM_UPDATED, config );
+            fireConfigurationEvent( ConfigurationEvent.CM_UPDATED, config.getPid(), config.getFactoryPid() );
         }
     }
 
     private class DeleteConfiguration implements Runnable
     {
-        private ConfigurationImpl config;
+
+        private String pid;
+        private String factoryPid;
 
 
         DeleteConfiguration( ConfigurationImpl config )
         {
-            this.config = config;
+            this.pid = config.getPid();
+            this.factoryPid = config.getFactoryPid();
         }
 
 
@@ -1173,10 +1176,10 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         {
             try
             {
-                if ( config.getFactoryPid() == null )
+                if ( factoryPid == null )
                 {
                     ServiceReference[] sr = bundleContext.getServiceReferences( ManagedService.class.getName(), "("
-                        + Constants.SERVICE_PID + "=" + config.getPid() + ")" );
+                        + Constants.SERVICE_PID + "=" + pid + ")" );
                     if ( sr != null && sr.length > 0 )
                     {
                         ManagedService srv = ( ManagedService ) bundleContext.getService( sr[0] );
@@ -1193,18 +1196,18 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 else
                 {
                     // remove the pid from the factory
-                    Factory factory = getFactory( config.getFactoryPid() );
-                    factory.removePID( config.getPid() );
+                    Factory factory = getFactory( factoryPid );
+                    factory.removePID( pid );
                     factory.store();
 
                     ServiceReference[] sr = bundleContext.getServiceReferences( ManagedServiceFactory.class.getName(),
-                        "(" + Constants.SERVICE_PID + "=" + config.getFactoryPid() + ")" );
+                        "(" + Constants.SERVICE_PID + "=" + factoryPid + ")" );
                     if ( sr != null && sr.length > 0 )
                     {
                         ManagedServiceFactory srv = ( ManagedServiceFactory ) bundleContext.getService( sr[0] );
                         try
                         {
-                            srv.deleted( config.getPid() );
+                            srv.deleted( pid );
                         }
                         finally
                         {
@@ -1231,7 +1234,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 log( LogService.LOG_ERROR, "Unexpected problem updating configuration", t );
             }
 
-            fireConfigurationEvent( ConfigurationEvent.CM_DELETED, config );
+            fireConfigurationEvent( ConfigurationEvent.CM_DELETED, pid, factoryPid );
         }
     }
 
@@ -1239,13 +1242,16 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     {
         private int type;
 
-        private ConfigurationImpl config;
+        private String pid;
+        
+        private String factoryPid;
 
 
-        FireConfigurationEvent( int type, ConfigurationImpl config )
+        FireConfigurationEvent( int type, String pid, String factoryPid )
         {
             this.type = type;
-            this.config = config;
+            this.pid = pid;
+            this.factoryPid = factoryPid;
         }
 
 
@@ -1258,8 +1264,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 return;
             }
 
-            ConfigurationEvent event = new ConfigurationEvent( configurationAdminReference, type, config
-                .getFactoryPid(), config.getPid() );
+            ConfigurationEvent event = new ConfigurationEvent( configurationAdminReference, type, factoryPid, pid);
 
             for ( int i = 0; i < srs.length; i++ )
             {
