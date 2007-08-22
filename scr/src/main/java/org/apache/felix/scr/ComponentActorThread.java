@@ -38,7 +38,7 @@ class ComponentActorThread extends Thread
     ComponentActorThread()
     {
         super( "SCR Component Actor" );
-        this.tasks = new LinkedList();
+        tasks = new LinkedList();
     }
 
 

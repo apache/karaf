@@ -77,7 +77,7 @@ public class ComponentRegistry implements ConfigurationListener
     public void configurationEvent( ConfigurationEvent configEvent )
     {
         String pid = configEvent.getPid();
-        ComponentManager cm = this.getComponent( pid );
+        ComponentManager cm = getComponent( pid );
         if ( cm != null )
         {
             cm.reconfigure();

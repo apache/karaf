@@ -18,7 +18,11 @@
  */
 package org.apache.felix.scr;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 
 import org.osgi.service.component.ComponentException;
 

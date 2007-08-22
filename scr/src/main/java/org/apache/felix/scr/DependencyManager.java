@@ -85,7 +85,7 @@ class DependencyManager implements ServiceListener
             filterString );
         for ( int i = 0; refs != null && i < refs.length; i++ )
         {
-            this.addingService( refs[i] );
+            addingService( refs[i] );
         }
     }
 
@@ -97,14 +97,14 @@ class DependencyManager implements ServiceListener
         switch ( event.getType() )
         {
             case ServiceEvent.REGISTERED:
-                this.addingService( event.getServiceReference() );
+                addingService( event.getServiceReference() );
                 break;
             case ServiceEvent.MODIFIED:
-                this.removedService( event.getServiceReference() );
-                this.addingService( event.getServiceReference() );
+                removedService( event.getServiceReference() );
+                addingService( event.getServiceReference() );
                 break;
             case ServiceEvent.UNREGISTERING:
-                this.removedService( event.getServiceReference() );
+                removedService( event.getServiceReference() );
                 break;
         }
     }
@@ -243,7 +243,7 @@ class DependencyManager implements ServiceListener
      */
     boolean isValid()
     {
-        return this.size() > 0 || m_dependencyMetadata.isOptional();
+        return size() > 0 || m_dependencyMetadata.isOptional();
     }
 
 
@@ -257,7 +257,7 @@ class DependencyManager implements ServiceListener
     {
         // If no references were received, we have to check if the dependency
         // is optional, if it is not then the dependency is invalid
-        if ( !this.isValid() )
+        if ( !isValid() )
         {
             return false;
         }
@@ -270,7 +270,7 @@ class DependencyManager implements ServiceListener
         }
 
         // Get service references
-        ServiceReference refs[] = this.getServiceReferences();
+        ServiceReference refs[] = getServiceReferences();
 
         // refs can be null if the dependency is optional
         if ( refs != null )
@@ -285,7 +285,7 @@ class DependencyManager implements ServiceListener
 
             for ( int index = 0; index < max; index++ )
             {
-                retval = this.invokeBindMethod( instance, refs[index], this.getService( refs[index] ) );
+                retval = invokeBindMethod( instance, refs[index], getService( refs[index] ) );
                 if ( retval == false && ( max == 1 ) )
                 {
                     // There was an exception when calling the bind method
@@ -313,14 +313,14 @@ class DependencyManager implements ServiceListener
             return;
         }
 
-        ServiceReference[] allrefs = this.getServiceReferences();
+        ServiceReference[] allrefs = getServiceReferences();
 
         if ( allrefs == null )
             return;
 
         for ( int i = 0; i < allrefs.length; i++ )
         {
-            this.invokeUnbindMethod( instance, allrefs[i], this.getService( allrefs[i] ) );
+            invokeUnbindMethod( instance, allrefs[i], getService( allrefs[i] ) );
         }
     }
 
@@ -459,7 +459,7 @@ class DependencyManager implements ServiceListener
                 // Get the bind method
                 Activator.trace( "getting bind: " + m_dependencyMetadata.getBind(), m_componentManager
                     .getComponentMetadata() );
-                Method bindMethod = this.getBindingMethod( m_dependencyMetadata.getBind(), implementationObject.getClass(),
+                Method bindMethod = getBindingMethod( m_dependencyMetadata.getBind(), implementationObject.getClass(),
                     m_dependencyMetadata.getInterface() );
 
                 if ( bindMethod == null )
@@ -488,7 +488,7 @@ class DependencyManager implements ServiceListener
                 bindMethod.invoke( implementationObject, new Object[]
                     { parameter } );
 
-                Activator.trace( "bound: " + this.getName(), m_componentManager.getComponentMetadata() );
+                Activator.trace( "bound: " + getName(), m_componentManager.getComponentMetadata() );
 
                 return true;
             }
@@ -539,7 +539,7 @@ class DependencyManager implements ServiceListener
             {
                 Activator.trace( "getting unbind: " + m_dependencyMetadata.getUnbind(), m_componentManager
                     .getComponentMetadata() );
-                Method unbindMethod = this.getBindingMethod( m_dependencyMetadata.getUnbind(), implementationObject
+                Method unbindMethod = getBindingMethod( m_dependencyMetadata.getUnbind(), implementationObject
                     .getClass(), m_dependencyMetadata.getInterface() );
 
                 // Recover the object that is bound from the map.
@@ -568,7 +568,7 @@ class DependencyManager implements ServiceListener
                 unbindMethod.invoke( implementationObject, new Object[]
                     { parameter } );
 
-                Activator.trace( "unbound: " + this.getName(), m_componentManager.getComponentMetadata() );
+                Activator.trace( "unbound: " + getName(), m_componentManager.getComponentMetadata() );
 
                 return true;
             }
@@ -612,7 +612,7 @@ class DependencyManager implements ServiceListener
         }
 
         // forward the event if in event handling state
-        if ( this.handleServiceEvent() )
+        if ( handleServiceEvent() )
         {
 
             // the component is UNSATISFIED if enabled but any of the references
@@ -634,9 +634,9 @@ class DependencyManager implements ServiceListener
                 // Otherwise only bind if bind services is zero, which
                 // captures the 0..1 case
                 // (size is still zero as we are called for the first service)
-                if ( m_dependencyMetadata.isMultiple() || this.size() == 0 )
+                if ( m_dependencyMetadata.isMultiple() || size() == 0 )
                 {
-                    this.invokeBindMethod( m_componentManager.getInstance(), reference, service );
+                    invokeBindMethod( m_componentManager.getInstance(), reference, service );
                 }
             }
         }
@@ -658,7 +658,7 @@ class DependencyManager implements ServiceListener
             return;
         }
 
-        if ( this.handleServiceEvent() )
+        if ( handleServiceEvent() )
         {
             // A static dependency is broken the instance manager will
             // be invalidated
@@ -684,7 +684,7 @@ class DependencyManager implements ServiceListener
                 // method
                 // and eventually request service unregistration
                 Object instance = m_componentManager.getInstance();
-                this.invokeUnbindMethod( instance, reference, service );
+                invokeUnbindMethod( instance, reference, service );
 
                 // The only thing we need to do here is check if we can
                 // reinitialize
@@ -695,10 +695,10 @@ class DependencyManager implements ServiceListener
                 // In the case of aggregates, this will only invalidate
                 // them since they
                 // can't be repaired.
-                if ( this.size() == 0 )
+                if ( size() == 0 )
                 {
                     // try to reinitialize
-                    if ( !this.bind( instance ) )
+                    if ( !bind( instance ) )
                     {
                         if ( !m_dependencyMetadata.isOptional() )
                         {
