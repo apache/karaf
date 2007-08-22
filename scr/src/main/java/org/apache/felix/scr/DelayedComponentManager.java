@@ -18,15 +18,17 @@
  */
 package org.apache.felix.scr;
 
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
+
 
 /**
  * The <code>DelayedComponentManager</code> TODO
  *
  * @author fmeschbe
- * @version $Rev: 538123 $, $Date$
+ * @version $Rev$, $Date$
  */
 public class DelayedComponentManager extends ImmediateComponentManager implements ServiceFactory
 {
@@ -41,47 +43,55 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
         super( activator, metadata, componentId );
     }
 
-    protected void createComponent()
+
+    protected boolean createComponent()
     {
         // nothing to do here for a delayed component, will be done in the
         // getService method for the first bundle acquiring the component
+        return true;
     }
+
 
     protected void deleteComponent()
     {
         // only have to delete, if there is actually an instance
-        if (this.getInstance() != null) {
+        if ( getInstance() != null )
+        {
             super.deleteComponent();
         }
     }
+
 
     protected Object getService()
     {
         return this;
     }
 
+
     //---------- ServiceFactory interface -------------------------------------
 
     public Object getService( Bundle arg0, ServiceRegistration arg1 )
     {
-        Activator.trace("DelayedComponentServiceFactory.getService()", this.getComponentMetadata());
+        Activator.trace( "DelayedComponentServiceFactory.getService()", getComponentMetadata() );
         // When the getServiceMethod is called, the implementation object must be created
         // unless another bundle has already retrievd it
 
-        if (this.getInstance() == null) {
+        if ( getInstance() == null )
+        {
             super.createComponent();
 
             // if component creation failed, we were deactivated and the state
             // is not REGISTERED any more. Otherwise go to standard ACTIVE
             // state now
-            if (this.getState() == STATE_REGISTERED)
+            if ( getState() == STATE_REGISTERED )
             {
-                this.setState( STATE_ACTIVE );
+                setState( STATE_ACTIVE );
             }
         }
 
-        return this.getInstance();
+        return getInstance();
     }
+
 
     public void ungetService( Bundle arg0, ServiceRegistration arg1, Object arg2 )
     {

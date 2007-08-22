@@ -18,6 +18,7 @@
  */
 package org.apache.felix.scr;
 
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -52,15 +53,16 @@ class ImmediateComponentManager extends AbstractComponentManager
     // the component properties, also used as service properties
     private Dictionary m_properties;
 
+
     /**
      * The constructor receives both the activator and the metadata
      *
      * @param activator
      * @param metadata
      */
-    ImmediateComponentManager(BundleComponentActivator activator, ComponentMetadata metadata, long componentId)
+    ImmediateComponentManager( BundleComponentActivator activator, ComponentMetadata metadata, long componentId )
     {
-        super(activator, metadata);
+        super( activator, metadata );
 
         m_componentId = componentId;
     }
@@ -72,21 +74,27 @@ class ImmediateComponentManager extends AbstractComponentManager
     // 4. Call the activate method, if present
     // if this method is overwritten, the deleteComponent method should
     // also be overwritten
-    protected void createComponent()
+    protected boolean createComponent()
     {
         ComponentContext tmpContext = new ComponentContextImpl( this );
-        Object tmpComponent = this.createImplementationObject( tmpContext );
+        Object tmpComponent = createImplementationObject( tmpContext );
 
-        // if something failed craeating the object, we fell back to
-        // unsatisfied !!
-        if (tmpComponent != null) {
-            m_componentContext = tmpContext;
-            m_implementationObject = tmpComponent;
+        // if something failed creating the component instance, return false
+        if ( tmpComponent == null )
+        {
+            return false;
         }
+
+        // otherwise set the context and component instance and return true
+        m_componentContext = tmpContext;
+        m_implementationObject = tmpComponent;
+        return true;
     }
 
-    protected void deleteComponent() {
-        this.disposeImplementationObject( m_implementationObject, m_componentContext );
+
+    protected void deleteComponent()
+    {
+        disposeImplementationObject( m_implementationObject, m_componentContext );
         m_implementationObject = null;
         m_componentContext = null;
         m_properties = null;
@@ -100,11 +108,14 @@ class ImmediateComponentManager extends AbstractComponentManager
     *
     * @return the object that implements the services
     */
-    public Object getInstance() {
+    public Object getInstance()
+    {
         return m_implementationObject;
     }
 
-    protected Object createImplementationObject(ComponentContext componentContext) {
+
+    protected Object createImplementationObject( ComponentContext componentContext )
+    {
         Object implementationObject;
 
         // 1. Load the component implementation class
@@ -113,23 +124,22 @@ class ImmediateComponentManager extends AbstractComponentManager
         try
         {
             // 112.4.4 The class is retrieved with the loadClass method of the component's bundle
-            Class c = this.getActivator().getBundleContext().getBundle().loadClass(this.getComponentMetadata().getImplementationClassName());
+            Class c = getActivator().getBundleContext().getBundle().loadClass(
+                getComponentMetadata().getImplementationClassName() );
 
             // 112.4.4 The class must be public and have a public constructor without arguments so component instances
             // may be created by the SCR with the newInstance method on Class
             implementationObject = c.newInstance();
         }
-        catch (Exception ex)
+        catch ( Exception ex )
         {
-            // failed to instantiate, deactivate the component and return null
-            Activator.exception( "Error during instantiation of the implementation object", this.getComponentMetadata(), ex );
-            this.deactivate();
+            // failed to instantiate, return null
+            Activator.exception( "Error during instantiation of the implementation object", getComponentMetadata(), ex );
             return null;
         }
 
-
         // 3. Bind the target services
-        Iterator it = this.getDependencyManagers();
+        Iterator it = getDependencyManagers();
         while ( it.hasNext() )
         {
             // if a dependency turned unresolved since the validation check,
@@ -139,8 +149,16 @@ class ImmediateComponentManager extends AbstractComponentManager
             if ( !dm.bind( implementationObject ) )
             {
                 Activator.error( "Cannot create component instance due to failure to bind reference " + dm.getName(),
-                    this.getComponentMetadata() );
-                this.deactivate();
+                    getComponentMetadata() );
+
+                // make sure, we keep no bindings
+                it = getDependencyManagers();
+                while ( it.hasNext() )
+                {
+                    dm = ( DependencyManager ) it.next();
+                    dm.unbind( implementationObject );
+                }
+
                 return null;
             }
         }
@@ -157,22 +175,33 @@ class ImmediateComponentManager extends AbstractComponentManager
         catch ( NoSuchMethodException ex )
         {
             // We can safely ignore this one
-            Activator.trace( "activate() method is not implemented", this.getComponentMetadata() );
+            Activator.trace( "activate() method is not implemented", getComponentMetadata() );
         }
         catch ( IllegalAccessException ex )
         {
             // Ignored, but should it be logged?
-            Activator.trace( "activate() method cannot be called", this.getComponentMetadata() );
+            Activator.trace( "activate() method cannot be called", getComponentMetadata() );
         }
         catch ( InvocationTargetException ex )
         {
             // 112.5.8 If the activate method throws an exception, SCR must log an error message
-            // containing the exception with the Log Service
-            Activator.exception( "The activate method has thrown an exception", this.getComponentMetadata(), ex );
+            // containing the exception with the Log Service and activation fails
+            Activator.exception( "The activate method has thrown an exception", getComponentMetadata(), ex );
+
+            // make sure, we keep no bindings
+            it = getDependencyManagers();
+            while ( it.hasNext() )
+            {
+                DependencyManager dm = ( DependencyManager ) it.next();
+                dm.unbind( implementationObject );
+            }
+
+            return null;
         }
 
         return implementationObject;
     }
+
 
     protected void disposeImplementationObject( Object implementationObject, ComponentContext componentContext )
     {
@@ -188,22 +217,22 @@ class ImmediateComponentManager extends AbstractComponentManager
         catch ( NoSuchMethodException ex )
         {
             // We can safely ignore this one
-            Activator.trace( "deactivate() method is not implemented", this.getComponentMetadata() );
+            Activator.trace( "deactivate() method is not implemented", getComponentMetadata() );
         }
         catch ( IllegalAccessException ex )
         {
             // Ignored, but should it be logged?
-            Activator.trace( "deactivate() method cannot be called", this.getComponentMetadata() );
+            Activator.trace( "deactivate() method cannot be called", getComponentMetadata() );
         }
         catch ( InvocationTargetException ex )
         {
             // 112.5.12 If the deactivate method throws an exception, SCR must log an error message
             // containing the exception with the Log Service and continue
-            Activator.exception( "The deactivate method has thrown an exception", this.getComponentMetadata(), ex );
+            Activator.exception( "The deactivate method has thrown an exception", getComponentMetadata(), ex );
         }
 
         // 2. Unbind any bound services
-        Iterator it = this.getDependencyManagers();
+        Iterator it = getDependencyManagers();
 
         while ( it.hasNext() )
         {
@@ -215,6 +244,7 @@ class ImmediateComponentManager extends AbstractComponentManager
         // nothing to do, we keep no references on per-Bundle services
     }
 
+
     /**
      * Returns the service object to be registered if the service element is
      * specified.
@@ -223,13 +253,17 @@ class ImmediateComponentManager extends AbstractComponentManager
      * ServiceFactory to register in the case of a delayed or a service
      * factory component.
      */
-    protected Object getService() {
+    protected Object getService()
+    {
         return m_implementationObject;
     }
 
-    protected void setFactoryProperties(Dictionary dictionary) {
-        m_factoryProperties = this.copyTo( null, dictionary );
+
+    protected void setFactoryProperties( Dictionary dictionary )
+    {
+        m_factoryProperties = copyTo( null, dictionary );
     }
+
 
     /**
      * Returns the (private copy) of the Component properties to be used
@@ -249,30 +283,31 @@ class ImmediateComponentManager extends AbstractComponentManager
         {
 
             // 1. the properties from the component descriptor
-            Dictionary props = this.copyTo( null, this.getComponentMetadata().getProperties() );
+            Dictionary props = copyTo( null, getComponentMetadata().getProperties() );
 
             // 2. overlay with Configuration Admin properties
-            ConfigurationAdmin ca = this.getActivator().getConfigurationAdmin();
+            ConfigurationAdmin ca = getActivator().getConfigurationAdmin();
             if ( ca != null )
             {
                 try
                 {
-                    Configuration cfg = ca.getConfiguration( this.getComponentMetadata().getName() );
-                    if (cfg != null) {
-                        this.copyTo( props, cfg.getProperties() );
+                    Configuration cfg = ca.getConfiguration( getComponentMetadata().getName() );
+                    if ( cfg != null )
+                    {
+                        copyTo( props, cfg.getProperties() );
                     }
                 }
                 catch ( IOException ioe )
                 {
-                    Activator.exception( "Problem getting Configuration", this.getComponentMetadata(), ioe );
+                    Activator.exception( "Problem getting Configuration", getComponentMetadata(), ioe );
                 }
             }
 
             // 3. copy any component factory properties, not supported yet
-            this.copyTo( props, m_factoryProperties );
+            copyTo( props, m_factoryProperties );
 
             // 4. set component.name and component.id
-            props.put( ComponentConstants.COMPONENT_NAME, this.getComponentMetadata().getName() );
+            props.put( ComponentConstants.COMPONENT_NAME, getComponentMetadata().getName() );
             props.put( ComponentConstants.COMPONENT_ID, new Long( m_componentId ) );
 
             m_properties = props;

@@ -53,9 +53,10 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
     /* (non-Javadoc)
      * @see org.apache.felix.scr.AbstractComponentManager#createComponent()
      */
-    protected void createComponent()
+    protected boolean createComponent()
     {
         // nothing to do, this is handled by getService
+        return true;
     }
 
 
@@ -98,17 +99,18 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
         Object service = createImplementationObject( serviceContext );
 
         // register the components component context if successfull
-        if (service != null) {
+        if ( service != null )
+        {
             serviceContext.setImplementationObject( service );
             serviceContexts.put( service, serviceContext );
 
             // if this is the first use of this component, switch to ACTIVE state
-            if (getState() == STATE_REGISTERED)
+            if ( getState() == STATE_REGISTERED )
             {
                 setState( STATE_ACTIVE );
             }
         }
-        
+
         return service;
     }
 
@@ -124,7 +126,7 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
         // private ComponentContext and implementation instances
         ComponentContext serviceContext = ( ComponentContext ) serviceContexts.remove( service );
         disposeImplementationObject( service, serviceContext );
-        
+
         // if this was the last use of the component, go back to REGISTERED state
         if ( serviceContexts.isEmpty() && getState() == STATE_ACTIVE )
         {
@@ -132,39 +134,47 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
         }
     }
 
-    private static class BundleComponentContext extends ComponentContextImpl implements ComponentInstance {
-        
+    private static class BundleComponentContext extends ComponentContextImpl implements ComponentInstance
+    {
+
         private Bundle m_usingBundle;
         private Object m_implementationObject;
 
-        BundleComponentContext(AbstractComponentManager componentManager, Bundle usingBundle) {
-            super(componentManager);
-            
+
+        BundleComponentContext( AbstractComponentManager componentManager, Bundle usingBundle )
+        {
+            super( componentManager );
+
             m_usingBundle = usingBundle;
         }
-        
+
+
         private void setImplementationObject( Object implementationObject )
         {
             m_implementationObject = implementationObject;
         }
-        
+
+
         public Bundle getUsingBundle()
         {
             return m_usingBundle;
         }
-        
+
+
         public ComponentInstance getComponentInstance()
         {
             return this;
         }
-        
+
+
         //---------- ComponentInstance interface ------------------------------
-        
+
         public Object getInstance()
         {
             return m_implementationObject;
         }
-        
+
+
         public void dispose()
         {
             getComponentManager().dispose();
