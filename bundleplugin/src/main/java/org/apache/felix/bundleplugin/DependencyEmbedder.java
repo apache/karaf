@@ -39,11 +39,11 @@ import aQute.lib.osgi.header.OSGiHeader;
  */
 public class DependencyEmbedder
 {
-    public static String EMBED_DEPENDENCY    = "Embed-Dependency";
-    public static String EMBED_DIRECTORY     = "Embed-Directory";
-    public static String EMBED_STRIP_GROUP   = "Embed-StripGroup";
-    public static String EMBED_STRIP_VERSION = "Embed-StripVersion";
-    public static String EMBED_TRANSITIVE    = "Embed-Transitive";
+    public static final String EMBED_DEPENDENCY    = "Embed-Dependency";
+    public static final String EMBED_DIRECTORY     = "Embed-Directory";
+    public static final String EMBED_STRIP_GROUP   = "Embed-StripGroup";
+    public static final String EMBED_STRIP_VERSION = "Embed-StripVersion";
+    public static final String EMBED_TRANSITIVE    = "Embed-Transitive";
 
     /**
      * Dependency artifacts.
