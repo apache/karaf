@@ -221,6 +221,13 @@ public class BundlePlugin extends AbstractMojo {
             builder.setProperties(properties);
             builder.setClasspath(classpath);
 
+            Collection embeddableArtifacts = getEmbeddableArtifacts(properties);
+            if (embeddableArtifacts.size() > 0)
+            {
+                // add BND instructions to embed selected dependencies
+                new DependencyEmbedder(embeddableArtifacts).processHeaders(properties);
+            }
+
             builder.build();
             Jar jar = builder.getJar();
             this.doMavenMetadata(project, jar);
@@ -537,5 +544,20 @@ public class BundlePlugin extends AbstractMojo {
         }
 
         return resourcePaths.toString();
+    }
+
+    Collection getEmbeddableArtifacts(Properties properties)
+    {
+        String embedTransitive = properties.getProperty(DependencyEmbedder.EMBED_TRANSITIVE);
+        if (Boolean.valueOf(embedTransitive).booleanValue())
+        {
+            // includes transitive dependencies
+            return project.getArtifacts();
+        }
+        else
+        {
+            // only includes direct dependencies
+            return project.getDependencyArtifacts();
+        }
     }
 }
