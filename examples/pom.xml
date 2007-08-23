@@ -21,15 +21,6 @@
         </property>
       </activation>
       <modules>
-          <module>eventlistener</module>
-          <module>dictionaryservice</module>
-          <module>dictionaryservice.itest</module>
-          <module>frenchdictionary</module>
-          <module>dictionaryclient</module>
-          <module>dictionaryclient2</module>
-          <module>spellcheckservice</module>
-          <module>spellcheckclient</module>
-          <module>spellcheckbinder</module>
       </modules>
     </profile>
     <profile>
@@ -41,6 +32,15 @@
         </property>
       </activation>
       <modules>
+          <module>eventlistener</module>
+          <module>dictionaryservice</module>
+          <module>dictionaryservice.itest</module>
+          <module>frenchdictionary</module>
+          <module>dictionaryclient</module>
+          <module>dictionaryclient2</module>
+          <module>spellcheckservice</module>
+          <module>spellcheckclient</module>
+          <module>spellcheckbinder</module>
           <module>spellcheckscr</module>
           <module>servicebased.host</module>
           <module>servicebased.circle</module>

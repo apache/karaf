@@ -153,6 +153,8 @@
         <module>../ipojo/arch</module>
 
         <module>../mosgi</module> 
+
+        <module>../examples</module>
       </modules>
     </profile>
     
@@ -166,8 +168,6 @@
       </activation>
       <modules>
         <module>../org.apache.felix.daemon</module>
-
-        <module>../examples</module>
 
         <module>../upnp.extra</module>
         <module>../upnp.basedriver</module>

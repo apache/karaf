@@ -30,7 +30,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <packaging>bundle</packaging>
-  <name>Apache Felix Examples: Spell Check w/ SCR</name>
+  <name>Apache Felix Example Spell Check w/ SCR</name>
   <artifactId>org.apache.felix.examples.spellcheckscr</artifactId>
   <version>0.9.0-SNAPSHOT</version>
   <description>${description}</description>
@@ -39,7 +39,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.0.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -61,11 +61,10 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <!-- docs in http://cwiki.apache.org/FELIX/bundle-plugin-for-maven-bnd.html and http://cwiki.apache.org/FELIX/osgi-plugin-for-maven-2.html -->
             <Private-Package>${pom.artifactId}.*</Private-Package>
             <Import-Package>*</Import-Package>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>

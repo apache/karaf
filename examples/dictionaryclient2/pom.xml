@@ -6,15 +6,15 @@
     <relativePath>../../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <packaging>osgi-bundle</packaging>
-  <name>Apache Felix Examples: Dynamic Dictionary Client</name>
+  <packaging>bundle</packaging>
+  <name>Apache Felix Example Dynamic Dictionary Client</name>
   <artifactId>org.apache.felix.examples.dictionaryclient2</artifactId>
   <version>0.9.0-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.0.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -27,24 +27,25 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.felix.plugins</groupId>
-        <artifactId>maven-osgi-plugin</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>1.0.0</version>
         <extensions>true</extensions>
         <configuration>
-          <osgiManifest>
-            <bundleName>Dynamic Dictionary Client Example</bundleName>
-            <bundleVendor>Apache Software Foundation</bundleVendor>
-            <bundleDescription>
+          <instructions>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-Name>Example Dynamic Dictionary Client</Bundle-Name>
+            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+            <Bundle-Description>
               A client bundle with more complex requirements for the dictionary.
-            </bundleDescription>
-            <bundleActivator>
+            </Bundle-Description>
+            <Bundle-Activator>
               org.apache.felix.examples.dictionaryclient2.Activator
-            </bundleActivator>
-            <importPackage>
-              org.osgi.framework, org.apache.felix.examples.dictionaryservice
-            </importPackage>
-          </osgiManifest>
+            </Bundle-Activator>
+            <Private-Package>
+              org.apache.felix.examples.dictionaryclient2.*
+            </Private-Package>
+          </instructions>
         </configuration>
       </plugin>
     </plugins>
