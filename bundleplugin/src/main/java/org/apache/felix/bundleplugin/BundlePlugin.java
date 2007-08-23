@@ -110,6 +110,11 @@ public class BundlePlugin extends AbstractMojo {
      */
     private Maven2OsgiConverter maven2OsgiConverter;
 
+
+    private static final String MAVEN_RESOURCES = "{maven-resources}";
+    private static final String MAVEN_RESOURCES_REGEX = "\\{maven-resources\\}";
+
+
     protected Maven2OsgiConverter getMaven2OsgiConverter()
     {
         return this.maven2OsgiConverter;
@@ -209,8 +214,18 @@ public class BundlePlugin extends AbstractMojo {
                 final String includeResource = (String)properties.get(Analyzer.INCLUDE_RESOURCE);
                 if (includeResource != null)
                 {
-                    this.getLog().warn(Analyzer.INCLUDE_RESOURCE + ": overriding " + mavenResourcePaths + " with " + includeResource );
-                } else
+                    if (includeResource.indexOf(MAVEN_RESOURCES) >= 0)
+                    {
+                        String combinedResource = includeResource.replaceAll(MAVEN_RESOURCES_REGEX, mavenResourcePaths);
+                        properties.put(Analyzer.INCLUDE_RESOURCE, combinedResource);
+                    }
+                    else
+                    {
+                        this.getLog().warn(Analyzer.INCLUDE_RESOURCE + ": overriding " + mavenResourcePaths + " with " +
+                            includeResource + " (add " + MAVEN_RESOURCES + " if you want to include the maven resources)");
+                    }
+                }
+                else
                 {
                     properties.put(Analyzer.INCLUDE_RESOURCE, mavenResourcePaths);
                 }
