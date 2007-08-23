@@ -134,6 +134,12 @@ class BundleImpl extends FelixBundle
             ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                 AdminPermission.METADATA));
         }
+
+        if (locale == null)
+        {
+            locale = Locale.getDefault().toString();
+        }
+
         return m_felix.getBundleHeaders(this, locale);
     }
 
