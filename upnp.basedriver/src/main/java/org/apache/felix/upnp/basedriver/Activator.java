@@ -76,6 +76,8 @@ public class Activator implements BundleActivator {
 	    Activator.logger.setCyberDebug(cyberLog);
 
         UPnP.setXMLParser(new JaxpParser());
+        UPnP.setEnable(UPnP.USE_ONLY_IPV4_ADDR);
+        UPnP.setDisable(UPnP.USE_LOOPBACK_ADDR);
 		
 		//Setting up Base Driver Exporter
 		this.queue = new RootDeviceExportingQueue();

@@ -127,6 +127,12 @@
         </property>
       </activation>
       <modules>
+        <module>../upnp.extra</module>
+        <module>../upnp.basedriver</module>
+        <module>../upnp.tester</module>
+        <module>../upnp.sample.tv</module>
+        <module>../upnp.sample.clock</module>
+        <module>../upnp.sample.binaryLight</module>
         <module>../org.osgi.foundation</module>
         <module>../javax.servlet</module>
         <module>../org.osgi.core</module>
@@ -168,13 +174,6 @@
       </activation>
       <modules>
         <module>../org.apache.felix.daemon</module>
-
-        <module>../upnp.extra</module>
-        <module>../upnp.basedriver</module>
-        <module>../upnp.tester</module>
-        <module>../upnp.sample.tv</module>
-        <module>../upnp.sample.clock</module>
-        <module>../upnp.sample.binaryLight</module>
 
         <!--    <module>tools/mangen</module> -->
 

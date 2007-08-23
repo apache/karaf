@@ -7,17 +7,17 @@
     <relativePath>../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <packaging>osgi-bundle</packaging>
+  <packaging>bundle</packaging>
   <groupId>org.apache.felix</groupId>
   <name>Apache Felix UPnP Base Driver</name>
   <artifactId>org.apache.felix.upnp.basedriver</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
   <repositories>
     <!-- For snapshots (no release jars or non-apache jars)           -->
     <repository>
-      <id>domoware.isti.cnr.it</id>
-      <name>DomoWare Repository for Missing Artifacts</name>
-      <url>http://domoware.isti.cnr.it/maven2</url>
+      <id>cgupnpjava.sourceforge.net</id>
+      <name>CyberLink for Java repository</name>
+      <url>http://cgupnpjava.sourceforge.net/snapshots-repository/</url>
     </repository>
   </repositories>   <!-- <url>http://maven.apache.org</url> -->
   <dependencies>
@@ -40,38 +40,38 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org-cybergarage</groupId>
-      <artifactId>cyberlink-upnp-patched</artifactId>
-      <version>1.7.2</version>
-      <scope>provided</scope>
+      <groupId>org.cybergarage.cyberlink</groupId>
+      <artifactId>upnp-stack</artifactId>
+      <version>1.8.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.felix.plugins</groupId>
-        <artifactId>maven-osgi-plugin</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
         <extensions>true</extensions>
         <configuration>
-          <osgiManifest>
-            <bundleName>UPnPBaseDriver</bundleName>
-            <bundleVendor>Apache Software Foundation</bundleVendor>
-            <bundleVersion>0.1.0</bundleVersion>
-            <bundleDescription>
+          <instructions>
+            <Bundle-Name>${pom.name}</Bundle-Name>
+            <Bundle-Activator>org.apache.felix.upnp.basedriver.Activator</Bundle-Activator>
+            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+            <Bundle-Version>0.2.0</Bundle-Version>
+            <Bundle-Author><![CDATA[Matteo Demuru <demuru@apache.org>,Francesco Furfari <furfari@apache.org>,Stefano "Kismet" Lenzi <lenzi@apache.org>]]></Bundle-Author>
+            <Bundle-Description>
                	A Bundle implementation of the UPnP Service Specification R4
-            </bundleDescription>
-            <bundleSymbolicName>org.apache.felix.upnp.basedriver</bundleSymbolicName>
-		    <bundleActivator>org.apache.felix.upnp.basedriver.Activator</bundleActivator>
-          </osgiManifest>
-          <manifestFile>src/main/resources/release/META-INF/Manifest.mf</manifestFile>
+            </Bundle-Description>
+            <Bundle-SymbolicName>org.apache.felix.upnp.basedriver</Bundle-SymbolicName>
+            <Export-Package>org.cybergarage.upnp</Export-Package>
+            <Import-Package>
+              org.apache.felix.upnp.extra.*, org.xml.sax.*, org.osgi.*, javax.*, org.w3c.*, 
+              !org.apache.xerces.*, !org.kxml2.io, !org.xmlpull.v1
+            </Import-Package>
+            <Private-Package>org.apache.felix.upnp.basedriver.*,org.cybergarage.*</Private-Package>
+          </instructions>
         </configuration>
       </plugin>
     </plugins>
-    <resources>
-      <resource>
-	  <directory>src/main/resources/release</directory>
-      </resource>
-    </resources>
   </build>
 </project>

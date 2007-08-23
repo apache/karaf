@@ -7,11 +7,11 @@
     <relativePath>../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <packaging>osgi-bundle</packaging>
+  <packaging>bundle</packaging>
   <groupId>org.apache.felix</groupId>
   <name>Apache Felix UPnP Extra </name>
   <artifactId>org.apache.felix.upnp.extra</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
   <!-- <url>http://maven.apache.org</url> -->
   <dependencies>
     <dependency>
@@ -24,23 +24,23 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.felix.plugins</groupId>
-        <artifactId>maven-osgi-plugin</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
         <extensions>true</extensions>
         <configuration>
-          <osgiManifest>
-            <bundleName>UPnPExtra</bundleName>
-            <bundleVendor>Apache Software Foundation</bundleVendor>
-            <bundleVersion>0.1.0</bundleVersion>
-            <bundleDescription>
+          <instructions>
+            <Bundle-Name>${pom.name}</Bundle-Name>
+            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+            <Bundle-Version>0.2.0</Bundle-Version>
+            <Bundle-Author><![CDATA[Matteo Demuru <demuru@apache.org>,Francesco Furfari <furfari@apache.org>,Stefano "Kismet" Lenzi <lenzi@apache.org>]]></Bundle-Author>
+            <Bundle-Description>
                	A library used to extend the integration between UPnP and OSGi that is not part of the standard. Also services that allow to change the beahviour of the UPnP Base Driver
-            </bundleDescription>
-            <bundleSymbolicName>org.apache.felix.upnp.extra</bundleSymbolicName>
-            <exportPackage>
-               	org.apache.felix.upnp.extra.util;specification-version=1.0,org.apache.felix.upnp.extra.controller;specification-version=1.0
-            </exportPackage>
-          </osgiManifest>
+            </Bundle-Description>
+            <Bundle-SymbolicName>org.apache.felix.upnp.extra</Bundle-SymbolicName>
+            <Export-Package>org.apache.felix.upnp.extra.*</Export-Package>
+            <Private-Package>org.apache.xerces.impl.dv.util</Private-Package>
+          </instructions>
         </configuration>
       </plugin>
     </plugins>

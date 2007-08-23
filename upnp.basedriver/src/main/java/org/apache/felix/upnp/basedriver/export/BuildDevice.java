@@ -28,6 +28,7 @@ import org.cybergarage.upnp.ArgumentList;
 import org.cybergarage.upnp.Device;
 import org.cybergarage.upnp.Service;
 import org.cybergarage.upnp.StateVariable;
+import org.cybergarage.upnp.RootDescription;
 import org.cybergarage.upnp.xml.DeviceData;
 import org.cybergarage.xml.Node;
 
@@ -37,8 +38,6 @@ import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPService;
 import org.osgi.service.upnp.UPnPStateVariable;
-
-import org.ungoverned.device.RootDescription;
 
 import org.apache.felix.upnp.basedriver.Activator;
 import org.apache.felix.upnp.extra.util.Converter;
