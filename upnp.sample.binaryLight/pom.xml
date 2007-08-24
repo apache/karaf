@@ -44,7 +44,6 @@
           <instructions>
             <Bundle-Name>${pom.name}</Bundle-Name>
             <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
-            <Bundle-Version>0.2.0</Bundle-Version>
             <Bundle-Author><![CDATA[Matteo Demuru <demuru@apache.org>,Francesco Furfari <furfari@apache.org>,Stefano "Kismet" Lenzi <lenzi@apache.org>]]></Bundle-Author>
             <Bundle-Description>
                	Standardized BinaryLight DCPs to test UPnP Base Driver

@@ -15,9 +15,16 @@
   <repositories>
     <!-- For snapshots (no release jars or non-apache jars)           -->
     <repository>
-      <id>cgupnpjava.sourceforge.net</id>
+      <id>snapshot.cgupnpjava.sourceforge.net</id>
       <name>CyberLink for Java repository</name>
       <url>http://cgupnpjava.sourceforge.net/snapshots-repository/</url>
+      <releases><enabled>false</enabled></releases>
+    </repository>
+    <repository>
+      <id>cgupnpjava.sourceforge.net</id>
+      <name>CyberLink for Java repository</name>
+      <url>http://cgupnpjava.sourceforge.net/repository/</url>
+      <snapshot><enabled>false</enabled></snapshot>
     </repository>
   </repositories>   <!-- <url>http://maven.apache.org</url> -->
   <dependencies>
@@ -57,7 +64,6 @@
             <Bundle-Name>${pom.name}</Bundle-Name>
             <Bundle-Activator>org.apache.felix.upnp.basedriver.Activator</Bundle-Activator>
             <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
-            <Bundle-Version>0.2.0</Bundle-Version>
             <Bundle-Author><![CDATA[Matteo Demuru <demuru@apache.org>,Francesco Furfari <furfari@apache.org>,Stefano "Kismet" Lenzi <lenzi@apache.org>]]></Bundle-Author>
             <Bundle-Description>
                	A Bundle implementation of the UPnP Service Specification R4
