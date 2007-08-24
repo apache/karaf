@@ -892,10 +892,6 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             {
                 log( LogService.LOG_ERROR, sr + ": Unexpected problem updating configuration", t );
             }
-
-            // 104.5.3 CM_UPDATED is sent asynchronously to all
-            // ConfigurationListeners
-            fireConfigurationEvent( ConfigurationEvent.CM_UPDATED, pid, null );
         }
     }
 
