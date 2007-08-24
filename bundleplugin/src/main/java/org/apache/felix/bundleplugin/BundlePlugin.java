@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.zip.ZipException;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.License;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.AbstractMojo;
@@ -57,6 +58,11 @@ import aQute.lib.osgi.Jar;
  * @description build an OSGi bundle jar
  */
 public class BundlePlugin extends AbstractMojo {
+
+    /**
+     * @component
+     */
+    private ArtifactHandlerManager artifactHandlerManager;
 
     /**
      * Project types which this plugin supports.
@@ -265,7 +271,11 @@ public class BundlePlugin extends AbstractMojo {
             {
                 jarFile.getParentFile().mkdirs();
                 builder.getJar().write(jarFile);
-                project.getArtifact().setFile(jarFile);
+                Artifact bundleArtifact = project.getArtifact();
+                bundleArtifact.setFile(jarFile);
+
+                // workaround for MNG-1682: force maven to install artifact using the "jar" handler
+                bundleArtifact.setArtifactHandler( artifactHandlerManager.getArtifactHandler( "jar" ) );
             }
             for (Iterator w = warnings.iterator(); w.hasNext();)
             {
