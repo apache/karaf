@@ -24,7 +24,7 @@
       <id>cgupnpjava.sourceforge.net</id>
       <name>CyberLink for Java repository</name>
       <url>http://cgupnpjava.sourceforge.net/repository/</url>
-      <snapshot><enabled>false</enabled></snapshot>
+      <snapshots><enabled>false</enabled></snapshots>
     </repository>
   </repositories>   <!-- <url>http://maven.apache.org</url> -->
   <dependencies>
