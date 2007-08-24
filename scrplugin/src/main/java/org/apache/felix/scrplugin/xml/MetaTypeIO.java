@@ -19,18 +19,11 @@
 package org.apache.felix.scrplugin.xml;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.sax.TransformerHandler;
-import javax.xml.transform.stream.StreamResult;
 
 import org.apache.felix.scrplugin.om.metatype.AttributeDefinition;
 import org.apache.felix.scrplugin.om.metatype.Designate;
@@ -50,8 +43,6 @@ import org.xml.sax.helpers.AttributesImpl;
  *
  */
 public class MetaTypeIO {
-
-    private static final SAXTransformerFactory FACTORY = (SAXTransformerFactory) TransformerFactory.newInstance();
 
     public static final String NAMESPACE_URI = "http://www.osgi.org/xmlns/metatype/v1.0.0";
 
@@ -75,16 +66,7 @@ public class MetaTypeIO {
     public static void write(MetaData metaData, File file)
     throws MojoExecutionException {
         try {
-            FileWriter writer = new FileWriter(file);
-            final TransformerHandler transformerHandler = FACTORY.newTransformerHandler();
-            final Transformer transformer = transformerHandler.getTransformer();
-            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformerHandler.setResult(new StreamResult(writer));
-
-            generateXML(metaData, transformerHandler);
+            generateXML(metaData, IOUtils.getSerializer(file));
         } catch (TransformerException e) {
             throw new MojoExecutionException("Unable to write xml to " + file, e);
         } catch (SAXException e) {

@@ -19,21 +19,11 @@
 package org.apache.felix.scrplugin.xml;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.sax.TransformerHandler;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
 import org.apache.felix.scrplugin.om.Component;
 import org.apache.felix.scrplugin.om.Components;
@@ -87,15 +77,11 @@ public class ComponentDescriptorIO {
 
     private static final String INTERFACE_QNAME = PREFIX + ':' + INTERFACE;
 
-    private static final SAXTransformerFactory FACTORY = (SAXTransformerFactory) TransformerFactory.newInstance();
-
     public static Components read(File file)
     throws MojoExecutionException {
         try {
-            final Transformer transformer = FACTORY.newTransformer();
             final XmlHandler xmlHandler = new XmlHandler();
-            transformer.transform(new StreamSource(new FileReader(file)),
-                    new SAXResult(xmlHandler));
+            IOUtils.parse(file, xmlHandler);
             return xmlHandler.components;
         } catch (TransformerException e) {
             throw new MojoExecutionException("Unable to read xml.", e);
@@ -113,16 +99,7 @@ public class ComponentDescriptorIO {
     public static void write(Components components, File file)
     throws MojoExecutionException {
         try {
-            FileWriter writer = new FileWriter(file);
-            final TransformerHandler transformerHandler = FACTORY.newTransformerHandler();
-            final Transformer transformer = transformerHandler.getTransformer();
-            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformerHandler.setResult(new StreamResult(writer));
-
-            generateXML(components, transformerHandler);
+            generateXML(components, IOUtils.getSerializer(file));
         } catch (TransformerException e) {
             throw new MojoExecutionException("Unable to write xml to " + file, e);
         } catch (SAXException e) {
