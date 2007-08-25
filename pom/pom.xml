@@ -127,12 +127,12 @@
         </property>
       </activation>
       <modules>
-        <module>../upnp.extra</module>
-        <module>../upnp.basedriver</module>
-        <module>../upnp.tester</module>
-        <module>../upnp.sample.tv</module>
-        <module>../upnp.sample.clock</module>
-        <module>../upnp.sample.binaryLight</module>
+        <module>../upnp/upnp.extra</module>
+        <module>../upnp/upnp.basedriver</module>
+        <module>../upnp/upnp.tester</module>
+        <module>../upnp/samples/upnp.sample.tv</module>
+        <module>../upnp/samples/upnp.sample.clock</module>
+        <module>../upnp/samples/upnp.sample.binaryLight</module>
         <module>../org.osgi.foundation</module>
         <module>../javax.servlet</module>
         <module>../org.osgi.core</module>
