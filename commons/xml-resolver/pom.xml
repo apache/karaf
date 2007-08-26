@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.felix.commons</groupId>
         <artifactId>commons-build</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1-SNAPSHOT</version>
         <relativePath>../pom</relativePath>
     </parent>
     <properties>
