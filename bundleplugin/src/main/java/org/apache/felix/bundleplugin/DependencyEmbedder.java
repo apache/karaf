@@ -270,9 +270,9 @@ public class DependencyEmbedder
 
     public static void embedDependency(Properties properties, Artifact dependency)
     {
-        File jarFile = dependency.getFile();
+        File sourceFile = dependency.getFile();
 
-        if (null != jarFile && jarFile.exists())
+        if (null != sourceFile && sourceFile.exists())
         {
             String bundleClassPath = properties.getProperty(Analyzer.BUNDLE_CLASSPATH);
             String includeResource = properties.getProperty(Analyzer.INCLUDE_RESOURCE);
@@ -312,15 +312,23 @@ public class DependencyEmbedder
             File targetFile;
             if (Boolean.valueOf(embedStripVersion).booleanValue())
             {
-                targetFile = new File(embedDirectory, dependency.getArtifactId() + ".jar");
+                String extension = dependency.getArtifactHandler().getExtension();
+                if (extension != null)
+                {
+                    targetFile = new File(embedDirectory, dependency.getArtifactId() + "." + extension);
+                }
+                else
+                {
+                    targetFile = new File(embedDirectory, dependency.getArtifactId());
+                }
             }
             else
             {
-                targetFile = new File(embedDirectory, jarFile.getName());
+                targetFile = new File(embedDirectory, sourceFile.getName());
             }
 
             bundleClassPath += targetFile;
-            includeResource += targetFile + "=" + jarFile;
+            includeResource += targetFile + "=" + sourceFile;
 
             properties.setProperty(Analyzer.BUNDLE_CLASSPATH, bundleClassPath);
             properties.setProperty(Analyzer.INCLUDE_RESOURCE, includeResource);
@@ -329,9 +337,9 @@ public class DependencyEmbedder
 
     public static void inlineDependency(Properties properties, Artifact dependency)
     {
-        File jarFile = dependency.getFile();
+        File sourceFile = dependency.getFile();
 
-        if (null != jarFile && jarFile.exists())
+        if (null != sourceFile && sourceFile.exists())
         {
             String includeResource = properties.getProperty(Analyzer.INCLUDE_RESOURCE);
 
@@ -344,7 +352,7 @@ public class DependencyEmbedder
                 includeResource += ",";
             }
 
-            includeResource += "@" + jarFile;
+            includeResource += "@" + sourceFile;
 
             properties.setProperty(Analyzer.INCLUDE_RESOURCE, includeResource);
         }
