@@ -31,7 +31,7 @@
 	<version>0.3.0-SNAPSHOT</version>
 	<packaging>maven-plugin</packaging>
 
-	<name>Maven Scr Plugin</name>
+	<name>Maven SCR Plugin</name>
 	<description>
 		Maven plugin for generating OSGi service descriptors based on annotations.
 	</description>
