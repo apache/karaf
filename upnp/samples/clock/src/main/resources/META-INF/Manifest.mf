@@ -1,4 +1,0 @@
-Bundle-Author: Matteo Demuru <demuru@apache.org>,Francesco Furfari <furfari@apache.org>,Satoshi Konno <konno@users.sourceforge.
- net>,Stefano "Kismet" Lenzi <lenzi@apache.org>
-Bundle-ClassPath: .
-
