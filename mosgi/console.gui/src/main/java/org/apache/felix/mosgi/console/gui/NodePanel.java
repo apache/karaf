@@ -73,6 +73,9 @@ public class NodePanel extends JTabbedPane implements PropertyChangeListener, Ch
     }
   }
 
+  /////////////////////////////////////////
+  //   PropertyChangeListener Impl.      //
+  /////////////////////////////////////////
   public void propertyChange(PropertyChangeEvent event) {
     //System.out.println("   PCE : "+event.getPropertyName());
     if (event.getPropertyName().equals(Plugin.PLUGIN_ADDED)) {
@@ -94,91 +97,97 @@ public class NodePanel extends JTabbedPane implements PropertyChangeListener, Ch
       /* Update the tabs (Plugin) in the JTabbedPane (NodePanel) */
       MBeanServerConnection mbsc = (MBeanServerConnection)event.getNewValue();
       String connString = (String) event.getOldValue();
-      try {
-	this.clean();
-        Set ons = mbsc.queryNames( null, null );
-        for( Iterator i=ons.iterator(); i.hasNext(); ) {
-	  ObjectName name = ( ObjectName )i.next();
-          if ( "TabUI".equals(name.getDomain()) ) {
-	    /* Get the plugin implementation via a bundle */
-	    String tabBundle = (String) mbsc.getAttribute(name, "BundleName");
-	    if (tabBundle!=null){
-              Plugin p = (Plugin) this.pluginList.get(tabBundle);
-              if (p == null){
-  	        Bundle b = m_context.installBundle(tabBundle);
-	        b.start();
-                System.out.println(" - Bundle started: \""+name.toString()+"\" - "+tabBundle);
-                //Thread.sleep(5000);
-              }else{
-                System.out.println(" - Register service plugin: "+p);
-                p.registerServicePlugin();
-              }
-
-//            ServiceReference[] sr = b.getRegisteredServices();
-//            System.out.println(sr);
-//            Plugin p;
-//            for (int j=0 ; j < sr.length ; j++) {
-//              p=(Plugin)m_context.getService(sr[j]);
-//              this.add(p.getName(), p.getGUI());
-//              this.a.addPropertyChangeListener(p);
-//            }
-
-//            System.out.println("Delegation for this");
-//            printcl = this.getClass().getClassLoader();
-//            while (printcl != null) {
-//              System.out.println(printcl);
-//              printcl = printcl.getParent();
-//            }
-//            System.out.println("{bootstrap loader}");
-//            System.out.println("");
-
-              /* Get the tab object */
-//            Object tabObj = mbsc.getAttribute(name, "Tab");
-// 
-//            System.out.println("Delegation for tabObj: " + tabObj);
-//            printcl = tabObj.getClass().getClassLoader();
-//            while (printcl != null) {
-//              System.out.println(printcl);
-//              printcl = printcl.getParent();
-//            }
-//            System.out.println("{bootstrap loader}");
-//            System.out.println("");
-  
-//            System.out.println("tabObj.getName(): " + ((fr.inria.ares.managedelements.testprobe.tab.TestProbeTabUI) tabObj).getName());
-              
-              /* Cast the tab */  
-//            Plugin tab = (Plugin)tabObj;
-              /* register the tab on the JTabbedPane */
-//            this.add(tab.getName(), tab.getGUI());
-            } else{
-	      System.out.println(" - No bundleName attribute defined for \""+name.toString()+"\". I cannot install tab");
-            }
-          }
-        }
-        a.firePropertyChangedEvent(Plugin.NEW_NODE_READY, connString, mbsc);
-        a.firePropertyChangedEvent(Plugin.PLUGIN_ACTIVATED, null, this.getComponentAt(0).getName());
-
-      } catch (MBeanException e) {
-        System.err.println("MBeanException : "+e);
-//    } catch (MalformedObjectNameException e) {
-//      System.err.println(e);
-      } catch (AttributeNotFoundException e) {
-        System.err.println("AttributeNotFoundException : "+e);
-      } catch (InstanceNotFoundException e) {
-        System.err.println("InstanceNotFoundException : "+e);
-      } catch (ReflectionException e) {
-        System.err.println("ReflectionException : "+e);
-      } catch (IOException e) {
-        System.err.println("IOException : "+e);
-      } catch (BundleException e) {
-        System.err.println("BundleException : "+e);
-      } catch (Exception e) {
-        System.err.println("Exception : "+e);
-      }
-//    } catch (java.lang.InterruptedException e) {
-//      System.err.println(e);
-//    }
+      startMBeanTabBundles(connString, mbsc);
     }
+  }
+
+  private void startMBeanTabBundles(String connString, MBeanServerConnection mbsc) {
+    try {
+      this.clean();
+      Set set_on = mbsc.queryNames( null, null ); // ioe
+      Object[] ons=set_on.toArray();
+      int oldUnstartedBundleNbr=0;
+
+      do {
+        Vector v_unstartedBundle=new Vector();
+        oldUnstartedBundleNbr=ons.length;
+	for (int i=0;i<ons.length;i++) {
+	  ObjectName name= (ObjectName) ons[i];
+          if ( "TabUI".equals(name.getDomain()) ) {
+            /* Get the plugin implementation via a bundle */
+	    try {
+              String tabBundle = (String) mbsc.getAttribute(name, "BundleName"); // mbe, anfe, be, infe, re
+              if (tabBundle!=null){
+                Plugin p = (Plugin) this.pluginList.get(tabBundle);
+                if (p == null){
+                  Bundle b = m_context.installBundle(tabBundle); // be
+                  try {
+	            b.start(); // be2
+                    System.out.println(" - Bundle started: \""+name.toString()+"\" - "+tabBundle);
+	          }catch(BundleException be2) { // be2
+                    System.out.println(" - Unable to start: \""+name.toString()+"\" - "+tabBundle);
+		    be2.printStackTrace();
+		    v_unstartedBundle.add(name);
+	          }
+                }else {
+                  System.out.println(" - Register service plugin: "+p);
+                  p.registerServicePlugin();
+                }
+/*              ServiceReference[] sr = b.getRegisteredServices();
+ *              System.out.println(sr);
+ *              Plugin p;
+ *              for (int j=0 ; j < sr.length ; j++) {
+ *                p=(Plugin)m_context.getService(sr[j]);
+ *                this.add(p.getName(), p.getGUI());
+ *                this.a.addPropertyChangeListener(p);
+ *              }
+ *
+ *              System.out.println("Delegation for this");
+ *              printcl = this.getClass().getClassLoader();
+ *              while (printcl != null) {
+ *                System.out.println(printcl);
+ *                printcl = printcl.getParent();
+ *              }
+ *              System.out.println("{bootstrap loader}");
+ *              System.out.println("");
+ *
+ *              // Get the tab object
+ *              Object tabObj = mbsc.getAttribute(name, "Tab");
+ * 
+ *              System.out.println("Delegation for tabObj: " + tabObj);
+ *              printcl = tabObj.getClass().getClassLoader();
+ *              while (printcl != null) {
+ *                System.out.println(printcl);
+ *                printcl = printcl.getParent();
+ *              }
+ *              System.out.println("{bootstrap loader}");
+ *              System.out.println("");
+ *  
+ *              System.out.println("tabObj.getName(): " + ((fr.inria.ares.managedelements.testprobe.tab.TestProbeTabUI) tabObj).getName());
+ *              
+ *              // Cast the tab   
+ *              Plugin tab = (Plugin)tabObj;
+ *              // register the tab on the JTabbedPane 
+ *              this.add(tab.getName(), tab.getGUI());
+ */
+              } else{
+	        System.out.println(" - No bundleName attribute defined for \""+name.toString()+"\". I cannot install tab");
+              }
+            }catch (MBeanException mbe) { mbe.printStackTrace(); // mbe
+	    }catch (AttributeNotFoundException anfe) { anfe.printStackTrace(); // anfe
+	    }catch (BundleException be) { be.printStackTrace(); // be
+	    }catch (InstanceNotFoundException infe) { infe.printStackTrace(); // infe
+	    }catch (ReflectionException re) { re.printStackTrace(); // re
+	    }
+	  }
+        }
+	ons=v_unstartedBundle.toArray();
+      }while ( oldUnstartedBundleNbr != ons.length );
+
+    }catch (IOException ioe) { ioe.printStackTrace(); // ioe
+    }
+    a.firePropertyChangedEvent(Plugin.NEW_NODE_READY, connString, mbsc);
+    a.firePropertyChangedEvent(Plugin.PLUGIN_ACTIVATED, null, this.getComponentAt(0).getName());
   }
 
   private void clean(){
