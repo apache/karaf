@@ -234,6 +234,8 @@ public class ComponentDescriptorIO {
         IOUtils.addAttribute(ai, "value", property.getValue());
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.PROPERTY, ComponentDescriptorIO.PROPERTY_QNAME, ai);
         if ( property.getMultiValue() != null && property.getMultiValue().length > 0 ) {
+            // generate a new line first
+            IOUtils.text(contentHandler, "\n");
             for(int i=0; i<property.getMultiValue().length; i++) {
                 IOUtils.text(contentHandler, "    ");
                 IOUtils.text(contentHandler, property.getMultiValue()[i]);
