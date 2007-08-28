@@ -63,6 +63,9 @@ public class MetaTypeIO {
     protected static final String AD_ELEMENT = "AD";
     protected static final String AD_ELEMENT_QNAME = PREFIX + ':' + AD_ELEMENT;
 
+    protected static final String OPTION_ELEMENT = "Option";
+    protected static final String OPTION_ELEMENT_QNAME = PREFIX + ':' + OPTION_ELEMENT;
+
     public static void write(MetaData metaData, File file)
     throws MojoExecutionException {
         try {
@@ -89,7 +92,7 @@ public class MetaTypeIO {
         contentHandler.startPrefixMapping(PREFIX, NAMESPACE_URI);
 
         final AttributesImpl ai = new AttributesImpl();
-        addAttribute(ai, "localization", metaData.getLocalization());
+        IOUtils.addAttribute(ai, "localization", metaData.getLocalization());
 
         contentHandler.startElement(NAMESPACE_URI, METADATA_ELEMENT, METADATA_ELEMENT_QNAME, ai);
 
@@ -111,9 +114,9 @@ public class MetaTypeIO {
     protected static void generateXML(OCD ocd, ContentHandler contentHandler)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
-        addAttribute(ai, "id", ocd.getId());
-        addAttribute(ai, "name", ocd.getName());
-        addAttribute(ai, "description", ocd.getDescription());
+        IOUtils.addAttribute(ai, "id", ocd.getId());
+        IOUtils.addAttribute(ai, "name", ocd.getName());
+        IOUtils.addAttribute(ai, "description", ocd.getDescription());
         contentHandler.startElement(NAMESPACE_URI, OCD_ELEMENT, OCD_ELEMENT_QNAME, ai);
 
         final Iterator i = ocd.getProperties().iterator();
@@ -128,8 +131,8 @@ public class MetaTypeIO {
     protected static void generateXML(AttributeDefinition ad, ContentHandler contentHandler)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
-        addAttribute(ai, "id", ad.getId());
-        addAttribute(ai, "type", ad.getType());
+        IOUtils.addAttribute(ai, "id", ad.getId());
+        IOUtils.addAttribute(ai, "type", ad.getType());
         if ( ad.getDefaultMultiValue() != null ) {
             final StringBuffer buf = new StringBuffer();
             for(int i=0; i<ad.getDefaultMultiValue().length; i++) {
@@ -138,22 +141,23 @@ public class MetaTypeIO {
                 }
                 buf.append(ad.getDefaultMultiValue()[i]);
             }
-            addAttribute(ai, "default", buf);
+            IOUtils.addAttribute(ai, "default", buf);
         } else {
-            addAttribute(ai, "default", ad.getDefaultValue());
+            IOUtils.addAttribute(ai, "default", ad.getDefaultValue());
         }
-        addAttribute(ai, "name", ad.getName());
-        addAttribute(ai, "description", ad.getDescription());
-        addAttribute(ai, "cardinality", ad.getCardinality());
+        IOUtils.addAttribute(ai, "name", ad.getName());
+        IOUtils.addAttribute(ai, "description", ad.getDescription());
+        IOUtils.addAttribute(ai, "cardinality", ad.getCardinality());
         contentHandler.startElement(NAMESPACE_URI, AD_ELEMENT, AD_ELEMENT_QNAME, ai);
 
         if (ad.getOptions() != null) {
             for (Iterator oi=ad.getOptions().entrySet().iterator(); oi.hasNext(); ) {
                 final Map.Entry entry = (Map.Entry) oi.next();
                 ai.clear();
-                addAttribute(ai, "value", String.valueOf(entry.getKey()));
-                addAttribute(ai, "label", String.valueOf(entry.getValue()));
-                contentHandler.startElement(NAMESPACE_URI, "Option", PREFIX + ':' + "Option", ai);
+                IOUtils.addAttribute(ai, "value", String.valueOf(entry.getKey()));
+                IOUtils.addAttribute(ai, "label", String.valueOf(entry.getValue()));
+                contentHandler.startElement(NAMESPACE_URI, OPTION_ELEMENT, OPTION_ELEMENT_QNAME, ai);
+                contentHandler.endElement(NAMESPACE_URI, OPTION_ELEMENT, OPTION_ELEMENT_QNAME);
             }
         }
 
@@ -163,7 +167,7 @@ public class MetaTypeIO {
     protected static void generateXML(Designate designate, ContentHandler contentHandler)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
-        addAttribute(ai, "pid", designate.getPid());
+        IOUtils.addAttribute(ai, "pid", designate.getPid());
         contentHandler.startElement(NAMESPACE_URI, DESIGNATE_ELEMENT, DESIGNATE_ELEMENT_QNAME, ai);
 
         generateXML(designate.getObject(), contentHandler);
@@ -174,23 +178,8 @@ public class MetaTypeIO {
     protected static void generateXML(MTObject obj, ContentHandler contentHandler)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
-        addAttribute(ai, "ocdref", obj.getOcdref());
+        IOUtils.addAttribute(ai, "ocdref", obj.getOcdref());
         contentHandler.startElement(NAMESPACE_URI, OBJECT_ELEMENT, OBJECT_ELEMENT_QNAME, ai);
         contentHandler.endElement(NAMESPACE_URI, OBJECT_ELEMENT, OBJECT_ELEMENT_QNAME);
     }
-
-    /**
-     * Helper method to add an attribute.
-     * This implementation adds a new attribute with the given name
-     * and value. Before adding the value is checked for non-null.
-     * @param ai    The attributes impl receiving the additional attribute.
-     * @param name  The name of the attribute.
-     * @param value The value of the attribute.
-     */
-    protected static void addAttribute(AttributesImpl ai, String name, Object value) {
-        if ( value != null ) {
-            ai.addAttribute("", name, name, "CDATA", value.toString());
-        }
-    }
-
 }

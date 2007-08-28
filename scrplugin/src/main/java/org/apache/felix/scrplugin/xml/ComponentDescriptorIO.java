@@ -144,10 +144,10 @@ public class ComponentDescriptorIO {
     protected static void generateXML(Component component, ContentHandler contentHandler)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
-        addAttribute(ai, "enabled", component.isEnabled());
-        addAttribute(ai, "immediate",component.isImmediate());
-        addAttribute(ai, "name", component.getName());
-        addAttribute(ai, "factory", component.getFactory());
+        IOUtils.addAttribute(ai, "enabled", component.isEnabled());
+        IOUtils.addAttribute(ai, "immediate",component.isImmediate());
+        IOUtils.addAttribute(ai, "name", component.getName());
+        IOUtils.addAttribute(ai, "factory", component.getFactory());
 
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.COMPONENT, ComponentDescriptorIO.COMPONENT_QNAME, ai);
         generateXML(component.getImplementation(), contentHandler);
@@ -180,7 +180,7 @@ public class ComponentDescriptorIO {
     protected static void generateXML(Implementation implementation, ContentHandler contentHandler)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
-        addAttribute(ai, "class", implementation.getClassame());
+        IOUtils.addAttribute(ai, "class", implementation.getClassame());
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.IMPLEMENTATION, ComponentDescriptorIO.IMPLEMENTATION_QNAME, ai);
         contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.IMPLEMENTATION, ComponentDescriptorIO.IMPLEMENTATION_QNAME);
     }
@@ -194,7 +194,7 @@ public class ComponentDescriptorIO {
     protected static void generateXML(Service service, ContentHandler contentHandler)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
-        addAttribute(ai, "servicefactory", service.getServicefactory());
+        IOUtils.addAttribute(ai, "servicefactory", service.getServicefactory());
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.SERVICE, ComponentDescriptorIO.SERVICE_QNAME, ai);
         if ( service.getInterfaces() != null ) {
             final Iterator i = service.getInterfaces().iterator();
@@ -215,7 +215,7 @@ public class ComponentDescriptorIO {
     protected static void generateXML(Interface interf, ContentHandler contentHandler)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
-        addAttribute(ai, "interface", interf.getInterfacename());
+        IOUtils.addAttribute(ai, "interface", interf.getInterfacename());
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.INTERFACE, ComponentDescriptorIO.INTERFACE_QNAME, ai);
         contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.INTERFACE, ComponentDescriptorIO.INTERFACE_QNAME);
     }
@@ -229,15 +229,15 @@ public class ComponentDescriptorIO {
     protected static void generateXML(Property property, ContentHandler contentHandler)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
-        addAttribute(ai, "name", property.getName());
-        addAttribute(ai, "type", property.getType());
-        addAttribute(ai, "value", property.getValue());
+        IOUtils.addAttribute(ai, "name", property.getName());
+        IOUtils.addAttribute(ai, "type", property.getType());
+        IOUtils.addAttribute(ai, "value", property.getValue());
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.PROPERTY, ComponentDescriptorIO.PROPERTY_QNAME, ai);
         if ( property.getMultiValue() != null && property.getMultiValue().length > 0 ) {
             for(int i=0; i<property.getMultiValue().length; i++) {
-                text(contentHandler, "    ");
-                text(contentHandler, property.getMultiValue()[i]);
-                text(contentHandler, "\n");
+                IOUtils.text(contentHandler, "    ");
+                IOUtils.text(contentHandler, property.getMultiValue()[i]);
+                IOUtils.text(contentHandler, "\n");
             }
         }
         contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.PROPERTY, ComponentDescriptorIO.PROPERTY_QNAME);
@@ -252,43 +252,15 @@ public class ComponentDescriptorIO {
     protected static void generateXML(Reference reference, ContentHandler contentHandler)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
-        addAttribute(ai, "name", reference.getName());
-        addAttribute(ai, "interface", reference.getInterfacename());
-        addAttribute(ai, "cardinality", reference.getCardinality());
-        addAttribute(ai, "policy", reference.getPolicy());
-        addAttribute(ai, "target", reference.getTarget());
-        addAttribute(ai, "bind", reference.getBind());
-        addAttribute(ai, "unbind", reference.getUnbind());
+        IOUtils.addAttribute(ai, "name", reference.getName());
+        IOUtils.addAttribute(ai, "interface", reference.getInterfacename());
+        IOUtils.addAttribute(ai, "cardinality", reference.getCardinality());
+        IOUtils.addAttribute(ai, "policy", reference.getPolicy());
+        IOUtils.addAttribute(ai, "target", reference.getTarget());
+        IOUtils.addAttribute(ai, "bind", reference.getBind());
+        IOUtils.addAttribute(ai, "unbind", reference.getUnbind());
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.REFERENCE, ComponentDescriptorIO.REFERENCE_QNAME, ai);
         contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.REFERENCE, ComponentDescriptorIO.REFERENCE_QNAME);
-    }
-
-    /**
-     * Helper method to add an attribute.
-     * This implementation adds a new attribute with the given name
-     * and value. Before adding the value is checked for non-null.
-     * @param ai    The attributes impl receiving the additional attribute.
-     * @param name  The name of the attribute.
-     * @param value The value of the attribute.
-     */
-    protected static void addAttribute(AttributesImpl ai, String name, Object value) {
-        if ( value != null ) {
-            ai.addAttribute("", name, name, "CDATA", value.toString());
-        }
-    }
-
-    /**
-     * Helper method writing out a string.
-     * @param ch
-     * @param text
-     * @throws SAXException
-     */
-    protected static void text(ContentHandler ch, String text)
-    throws SAXException {
-        if ( text != null ) {
-            final char[] c = text.toCharArray();
-            ch.characters(c, 0, c.length);
-        }
     }
 
     /**

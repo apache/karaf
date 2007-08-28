@@ -375,4 +375,31 @@ public class IOUtils {
         }
     }
 
+    /**
+     * Helper method to add an attribute.
+     * This implementation adds a new attribute with the given name
+     * and value. Before adding the value is checked for non-null.
+     * @param ai    The attributes impl receiving the additional attribute.
+     * @param name  The name of the attribute.
+     * @param value The value of the attribute.
+     */
+    protected static void addAttribute(AttributesImpl ai, String name, Object value) {
+        if ( value != null ) {
+            ai.addAttribute("", name, name, "CDATA", value.toString());
+        }
+    }
+
+    /**
+     * Helper method writing out a string.
+     * @param ch
+     * @param text
+     * @throws SAXException
+     */
+    protected static void text(ContentHandler ch, String text)
+    throws SAXException {
+        if ( text != null ) {
+            final char[] c = text.toCharArray();
+            ch.characters(c, 0, c.length);
+        }
+    }
 }
