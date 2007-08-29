@@ -41,6 +41,8 @@ import org.apache.felix.scrplugin.tags.JavaClassDescription;
 import org.apache.felix.scrplugin.tags.JavaClassDescriptorManager;
 import org.apache.felix.scrplugin.tags.JavaField;
 import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription;
+import org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription.Modification;
 import org.apache.felix.scrplugin.xml.ComponentDescriptorIO;
 import org.apache.felix.scrplugin.xml.MetaTypeIO;
 import org.apache.maven.model.Resource;
@@ -240,7 +242,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
         // fields
         do {
-            JavaField[] fields = description.getFields();
+            final JavaField[] fields = description.getFields();
             for (int i=0; fields != null && i < fields.length; i++) {
                 JavaTag tag = fields[i].getTagByName(Constants.REFERENCE);
                 if (tag != null) {
@@ -471,7 +473,8 @@ public class SCRDescriptorMojo extends AbstractMojo {
      * @param defaultName
      * @param component
      */
-    protected void doReference(JavaTag reference, String defaultName, Component component) {
+    protected void doReference(JavaTag reference, String defaultName, Component component)
+    throws MojoExecutionException {
         String name = reference.getNamedParameter(Constants.REFERENCE_NAME);
         if (StringUtils.isEmpty(name)) {
             name = defaultName;
@@ -486,20 +489,56 @@ public class SCRDescriptorMojo extends AbstractMojo {
         }
 
         if (!StringUtils.isEmpty(name)) {
-            final Reference ref = new Reference(reference);
+            final Reference ref = new Reference(reference, component.getJavaClassDescription());
             ref.setName(name);
             ref.setInterfacename(type);
             ref.setCardinality(reference.getNamedParameter(Constants.REFERENCE_CARDINALITY));
             ref.setPolicy(reference.getNamedParameter(Constants.REFERENCE_POLICY));
             ref.setTarget(reference.getNamedParameter(Constants.REFERENCE_TARGET));
-            String value;
-            value = reference.getNamedParameter(Constants.REFERENCE_BIND);
-            if ( value != null ) {
-                ref.setBind(value);
+            final String bindValue = reference.getNamedParameter(Constants.REFERENCE_BIND);
+            if ( bindValue != null ) {
+                ref.setBind(bindValue);
             }
-            value = reference.getNamedParameter(Constants.REFERENCE_UNDBIND);
-            if ( value != null ) {
-                ref.setUnbind(value);
+            final String unbindValue = reference.getNamedParameter(Constants.REFERENCE_UNDBIND);
+            if ( unbindValue != null ) {
+                ref.setUnbind(unbindValue);
+            }
+            // if this is a field we look for the bind/unbind methods
+            // and create them if they are not availabe
+            if ( false ) {
+                if ( reference.getField() != null && component.getJavaClassDescription() instanceof ModifiableJavaClassDescription ) {
+                    String changed = null;
+                    // Only create method if no bind name has been specified
+                    if ( bindValue == null && ref.findMethod(ref.getBind()) == null ) {
+                        // create bind method
+                        final String realMethodName = "bind" + Character.toUpperCase(name.charAt(0))
+                        + name.substring(1);
+                        changed = ((ModifiableJavaClassDescription)component.getJavaClassDescription()).addProtectedMethod(
+                                realMethodName,
+                                type,
+                                "{this." + reference.getField().getName() + "=param;}");
+                    }
+                    if ( unbindValue == null && ref.findMethod(ref.getUnbind()) == null ) {
+                        // create unbind method
+                        final String realMethodName = "unbind" + Character.toUpperCase(name.charAt(0))
+                        + name.substring(1);
+                        final String c = ((ModifiableJavaClassDescription)component.getJavaClassDescription()).addProtectedMethod(
+                                realMethodName,
+                                type,
+                                "{this." + reference.getField().getName() + "=null;}");
+                        if ( changed == null ) {
+                            changed = c;
+                        } else {
+                            changed = changed + c;
+                        }
+                    }
+                    if ( changed != null ) {
+                        Modification mod = new Modification();
+                        mod.lineNumber = 10;
+                        mod.content = changed;
+                        ((ModifiableJavaClassDescription)component.getJavaClassDescription()).writeClassFile(new Modification[] {mod});
+                    }
+                }
             }
             component.addReference(ref);
         }

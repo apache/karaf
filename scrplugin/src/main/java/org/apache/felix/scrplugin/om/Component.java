@@ -79,6 +79,16 @@ public class Component extends AbstractObject {
     }
 
     /**
+     * Return the associated java class description
+     */
+    public JavaClassDescription getJavaClassDescription() {
+        if ( this.tag != null ) {
+            return this.tag.getJavaClassDescription();
+        }
+        return null;
+    }
+
+    /**
      * @return
      */
     public List getProperties() {

@@ -18,6 +18,9 @@
  */
 package org.apache.felix.scrplugin.tags.qdox;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,10 +30,12 @@ import org.apache.felix.scrplugin.tags.JavaClassDescriptorManager;
 import org.apache.felix.scrplugin.tags.JavaField;
 import org.apache.felix.scrplugin.tags.JavaMethod;
 import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import com.thoughtworks.qdox.model.DocletTag;
 import com.thoughtworks.qdox.model.JavaClass;
+import com.thoughtworks.qdox.model.JavaParameter;
 import com.thoughtworks.qdox.model.JavaSource;
 import com.thoughtworks.qdox.model.Type;
 
@@ -38,15 +43,19 @@ import com.thoughtworks.qdox.model.Type;
  * <code>QDoxJavaClassDescription.java</code>...
  *
  */
-public class QDoxJavaClassDescription implements JavaClassDescription {
+public class QDoxJavaClassDescription
+    implements JavaClassDescription, ModifiableJavaClassDescription {
 
     protected final JavaClass javaClass;
 
     protected final JavaClassDescriptorManager manager;
 
+    protected final JavaSource source;
+
     public QDoxJavaClassDescription(JavaSource source, JavaClassDescriptorManager m) {
         this.javaClass = source.getClasses()[0];
         this.manager = m;
+        this.source = source;
     }
 
     /**
@@ -216,4 +225,49 @@ public class QDoxJavaClassDescription implements JavaClassDescription {
     public boolean isPublic() {
         return this.javaClass.isPublic();
     }
+
+    /**
+     * @see org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription#addProtectedMethod(java.lang.String, java.lang.String, java.lang.String)
+     */
+    public String addProtectedMethod(String name, String paramType, String contents) {
+        final JavaParameter param = new JavaParameter(new Type(paramType), "param");
+        final JavaParameter[] params = new JavaParameter[] {param};
+        final com.thoughtworks.qdox.model.JavaMethod meth = new com.thoughtworks.qdox.model.JavaMethod();
+        meth.setName(name);
+        meth.setSourceCode(contents);
+        meth.setParameters(params);
+        meth.setModifiers(new String[] {"protected"});
+        this.javaClass.addMethod(meth);
+        return "protected void " + name + "(" + paramType + " param)" + contents + " ";
+    }
+
+    /**
+     * @see org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription#writeClassFile(org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription.Modification[])
+     */
+    public void writeClassFile(Modification[] mods) {
+        if ( mods != null && mods.length > 0 ) {
+            try {
+                final LineNumberReader reader = new LineNumberReader(new FileReader(this.source.getFile()));
+                for(int i=0; i<mods.length; i++) {
+                    int lineNumber = mods[i].lineNumber;
+                    while ( reader.getLineNumber() < lineNumber ) {
+                        final String line = reader.readLine();
+                        System.out.println(line);
+                    }
+                    final String line = reader.readLine();
+                    System.out.print(line);
+                    System.out.println(mods[i].content);
+                }
+                String line;
+                while ( (line = reader.readLine()) != null ) {
+                    System.out.println(line);
+                }
+                reader.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

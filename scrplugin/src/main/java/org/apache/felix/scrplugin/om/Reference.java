@@ -40,18 +40,21 @@ public class Reference extends AbstractObject {
     protected String bind;
     protected String unbind;
 
+    protected final JavaClassDescription javaClassDescription;
+
     /**
      * Default constructor.
      */
     public Reference() {
-        this(null);
+        this(null, null);
     }
 
     /**
      * Constructor from java source.
      */
-    public Reference(JavaTag t) {
+    public Reference(JavaTag t, JavaClassDescription desc) {
         super(t);
+        this.javaClassDescription = desc;
         // set default values
         this.setBind("bind");
         this.setUnbind("unbind");
@@ -133,19 +136,14 @@ public class Reference extends AbstractObject {
         }
 
         // validate bind and unbind methods
-        JavaClassDescription javaClass = this.tag.getJavaClassDescription();
-        if (javaClass != null) {
-            this.bind = this.validateMethod(javaClass, this.bind, issues, warnings);
-            this.unbind = this.validateMethod(javaClass, this.unbind, issues, warnings);
-        } else {
-            issues.add(this.getMessage("Cannot find Java class to which the reference belongs"));
-        }
+        this.bind = this.validateMethod(this.bind, issues, warnings);
+        this.unbind = this.validateMethod(this.unbind, issues, warnings);
     }
 
-    protected String validateMethod(JavaClassDescription javaClass, String methodName, List issues, List warnings)
+    protected String validateMethod(String methodName, List issues, List warnings)
     throws MojoExecutionException {
 
-        JavaMethod method = this.findMethod(javaClass, methodName);
+        JavaMethod method = this.findMethod(methodName);
 
         if (method == null) {
             issues.add(this.getMessage("Missing method " + methodName + " for reference " + this.getName()));
@@ -162,17 +160,16 @@ public class Reference extends AbstractObject {
         return method.getName();
     }
 
-    protected JavaMethod findMethod(JavaClassDescription javaClass, String methodName)
+    public JavaMethod findMethod(String methodName)
     throws MojoExecutionException {
-
         String[] sig = new String[]{ this.getInterfacename() };
         String[] sig2 = new String[]{ "org.osgi.framework.ServiceReference" };
 
         // service interface or ServiceReference first
         String realMethodName = methodName;
-        JavaMethod method = javaClass.getMethodBySignature(realMethodName, sig);
+        JavaMethod method = this.javaClassDescription.getMethodBySignature(realMethodName, sig);
         if (method == null) {
-            method = javaClass.getMethodBySignature(realMethodName, sig2);
+            method = this.javaClassDescription.getMethodBySignature(realMethodName, sig2);
         }
 
         // append reference name with service interface and ServiceReference
@@ -180,10 +177,10 @@ public class Reference extends AbstractObject {
             realMethodName = methodName + Character.toUpperCase(this.name.charAt(0))
             + this.name.substring(1);
 
-            method = javaClass.getMethodBySignature(realMethodName, sig);
+            method = this.javaClassDescription.getMethodBySignature(realMethodName, sig);
         }
         if (method == null) {
-            method = javaClass.getMethodBySignature(realMethodName, sig2);
+            method = this.javaClassDescription.getMethodBySignature(realMethodName, sig2);
         }
 
         // append type name with service interface and ServiceReference
@@ -191,10 +188,10 @@ public class Reference extends AbstractObject {
             int lastDot = this.getInterfacename().lastIndexOf('.');
             realMethodName = methodName
                 + this.getInterfacename().substring(lastDot + 1);
-            method = javaClass.getMethodBySignature(realMethodName, sig);
+            method = this.javaClassDescription.getMethodBySignature(realMethodName, sig);
         }
         if (method == null) {
-            method = javaClass.getMethodBySignature(realMethodName, sig2);
+            method = this.javaClassDescription.getMethodBySignature(realMethodName, sig2);
         }
 
         return method;
