@@ -22,9 +22,11 @@ import java.util.Map;
 
 public class AttributeDefinition {
 
+    public static final String DEFAULT_TYPE = "String";
+    
     protected String id;
 
-    protected String type;
+    protected String type = DEFAULT_TYPE;
 
     protected String defaultValue;
 
@@ -51,7 +53,10 @@ public class AttributeDefinition {
     }
 
     public void setType(String type) {
-        this.type = type;
+        // do not overwrite default or currently set type
+        if (type != null) {
+            this.type = type;
+        }
     }
 
     public Object getDefaultValue() {
@@ -59,15 +64,19 @@ public class AttributeDefinition {
     }
 
     public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
-        this.defaultMultiValue = null;
+        if (defaultValue != null) {
+            this.defaultValue = defaultValue;
+            this.defaultMultiValue = null;
+        }
     }
 
     public void setDefaultMultiValue(String[] values) {
-        this.defaultValue = null;
-        this.defaultMultiValue = values;
-        if (values != null && values.length > 0 && this.cardinality == null ) {
-            this.cardinality = new Integer(Integer.MAX_VALUE);
+        if (values != null) {
+            this.defaultValue = null;
+            this.defaultMultiValue = values;
+            if (values != null && values.length > 0 && this.cardinality == null ) {
+                this.cardinality = new Integer(Integer.MAX_VALUE);
+            }
         }
     }
 

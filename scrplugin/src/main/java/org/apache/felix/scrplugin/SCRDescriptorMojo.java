@@ -51,6 +51,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.StringUtils;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * The <code>SCRDescriptorMojo</code>
@@ -407,7 +408,18 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 }
             }
 
-            final boolean isPrivate = this.getBoolean(property, Constants.PROPERTY_PRIVATE, false);
+            // property is private if explicitly marked or a well known
+            // service property such as service.pid
+            final boolean isPrivate = getBoolean(property,
+                Constants.PROPERTY_PRIVATE, false)
+                || name.equals(org.osgi.framework.Constants.SERVICE_PID)
+                || name.equals(org.osgi.framework.Constants.SERVICE_DESCRIPTION)
+                || name.equals(org.osgi.framework.Constants.SERVICE_ID)
+                || name.equals(org.osgi.framework.Constants.SERVICE_RANKING)
+                || name.equals(org.osgi.framework.Constants.SERVICE_VENDOR)
+                || name.equals(ConfigurationAdmin.SERVICE_BUNDLELOCATION)
+                || name.equals(ConfigurationAdmin.SERVICE_FACTORYPID);
+            
             // if this is a public property and the component is generating metatype info
             // store the information!
             if ( !isPrivate && ocd != null ) {
