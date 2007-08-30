@@ -31,6 +31,9 @@ import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentFactory;
 import org.osgi.service.component.ComponentInstance;
+import org.osgi.service.log.LogService;
+
+import sun.security.action.GetBooleanAction;
 
 
 /**
@@ -87,7 +90,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
 
     protected ServiceRegistration registerComponentService()
     {
-        Activator.trace( "registering component factory", getComponentMetadata() );
+        getActivator().log( LogService.LOG_DEBUG, "registering component factory", getComponentMetadata(), null );
 
         Dictionary serviceProperties = getProperties();
         return getActivator().getBundleContext().registerService( new String[]

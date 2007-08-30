@@ -29,6 +29,7 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.log.LogService;
 
 
 /**
@@ -134,7 +135,8 @@ class ImmediateComponentManager extends AbstractComponentManager
         catch ( Exception ex )
         {
             // failed to instantiate, return null
-            Activator.exception( "Error during instantiation of the implementation object", getComponentMetadata(), ex );
+            getActivator().log( LogService.LOG_ERROR, "Error during instantiation of the implementation object",
+                getComponentMetadata(), ex );
             return null;
         }
 
@@ -148,8 +150,9 @@ class ImmediateComponentManager extends AbstractComponentManager
             DependencyManager dm = ( DependencyManager ) it.next();
             if ( !dm.bind( implementationObject ) )
             {
-                Activator.error( "Cannot create component instance due to failure to bind reference " + dm.getName(),
-                    getComponentMetadata() );
+                getActivator().log( LogService.LOG_ERROR,
+                    "Cannot create component instance due to failure to bind reference " + dm.getName(),
+                    getComponentMetadata(), null );
 
                 // make sure, we keep no bindings
                 it = getDependencyManagers();
@@ -175,18 +178,21 @@ class ImmediateComponentManager extends AbstractComponentManager
         catch ( NoSuchMethodException ex )
         {
             // We can safely ignore this one
-            Activator.trace( "activate() method is not implemented", getComponentMetadata() );
+            getActivator().log( LogService.LOG_DEBUG, "activate() method is not implemented", getComponentMetadata(),
+                null );
         }
         catch ( IllegalAccessException ex )
         {
             // Ignored, but should it be logged?
-            Activator.trace( "activate() method cannot be called", getComponentMetadata() );
+            getActivator().log( LogService.LOG_DEBUG, "activate() method cannot be called", getComponentMetadata(),
+                null );
         }
         catch ( InvocationTargetException ex )
         {
             // 112.5.8 If the activate method throws an exception, SCR must log an error message
             // containing the exception with the Log Service and activation fails
-            Activator.exception( "The activate method has thrown an exception", getComponentMetadata(), ex );
+            getActivator().log( LogService.LOG_ERROR, "The activate method has thrown an exception",
+                getComponentMetadata(), ex.getCause() );
 
             // make sure, we keep no bindings
             it = getDependencyManagers();
@@ -217,18 +223,21 @@ class ImmediateComponentManager extends AbstractComponentManager
         catch ( NoSuchMethodException ex )
         {
             // We can safely ignore this one
-            Activator.trace( "deactivate() method is not implemented", getComponentMetadata() );
+            getActivator().log( LogService.LOG_DEBUG, "deactivate() method is not implemented", getComponentMetadata(),
+                null );
         }
         catch ( IllegalAccessException ex )
         {
             // Ignored, but should it be logged?
-            Activator.trace( "deactivate() method cannot be called", getComponentMetadata() );
+            getActivator().log( LogService.LOG_DEBUG, "deactivate() method cannot be called", getComponentMetadata(),
+                null );
         }
         catch ( InvocationTargetException ex )
         {
             // 112.5.12 If the deactivate method throws an exception, SCR must log an error message
             // containing the exception with the Log Service and continue
-            Activator.exception( "The deactivate method has thrown an exception", getComponentMetadata(), ex );
+            getActivator().log( LogService.LOG_ERROR, "The deactivate method has thrown an exception",
+                getComponentMetadata(), ex.getCause() );
         }
 
         // 2. Unbind any bound services
@@ -299,7 +308,8 @@ class ImmediateComponentManager extends AbstractComponentManager
                 }
                 catch ( IOException ioe )
                 {
-                    Activator.exception( "Problem getting Configuration", getComponentMetadata(), ioe );
+                    getActivator().log( LogService.LOG_ERROR, "Problem getting Configuration", getComponentMetadata(),
+                        ioe );
                 }
             }
 

@@ -31,6 +31,7 @@ import java.util.List;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentInstance;
+import org.osgi.service.log.LogService;
 
 
 /**
@@ -97,7 +98,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         m_state = STATE_DISABLED;
         m_dependencyManagers = new ArrayList();
 
-        Activator.trace( "Component created", m_componentMetadata );
+        getActivator().log( LogService.LOG_DEBUG, "Component created", m_componentMetadata, null );
     }
 
 
@@ -150,7 +151,8 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      */
     public final void reconfigure()
     {
-        Activator.trace( "Deactivating and Activating to reconfigure", m_componentMetadata );
+        getActivator().log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure", m_componentMetadata,
+            null );
         reactivate();
     }
 
@@ -159,16 +161,19 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      * Cycles this component by deactivating it and - if still satisfied -
      * activating it again.
      * <p>
-     * This method schedules the reactivation for asynchronous execution.
+     * This method immediately deactivates the component to prevent action
+     * with old configuration/references and schedules the reactivation for
+     * asynchronous execution.
      */
     public final void reactivate()
     {
+        // synchronously deactivate and schedule activation asynchronously
+        deactivateInternal();
+
         getActivator().schedule( new Runnable()
         {
             public void run()
             {
-                deactivateInternal();
-                Activator.trace( "Dependency Manager: RECREATING", m_componentMetadata );
                 activateInternal();
             }
         } );
@@ -178,17 +183,14 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     /**
      * Deactivates the component.
      * <p>
-     * This method schedules the deactivation for asynchronous execution.
+     * This method unlike other state change methods immediately takes
+     * action and deactivates the component. The reason for this is, that this
+     * method is called when a required service is not available any more and
+     * hence the component cannot work.
      */
     public final void deactivate()
     {
-        getActivator().schedule( new Runnable()
-        {
-            public void run()
-            {
-                deactivateInternal();
-            }
-        } );
+        deactivateInternal();
     }
 
 
@@ -239,16 +241,17 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
         if ( getState() == STATE_DESTROYED )
         {
-            Activator.error( "Destroyed Component cannot be enabled", m_componentMetadata );
+            getActivator().log( LogService.LOG_ERROR, "Destroyed Component cannot be enabled", m_componentMetadata,
+                null );
             return;
         }
         else if ( getState() != STATE_DISABLED )
         {
-            Activator.trace( "Component is already enabled", m_componentMetadata );
+            getActivator().log( LogService.LOG_DEBUG, "Component is already enabled", m_componentMetadata, null );
             return;
         }
 
-        Activator.trace( "Enabling component", m_componentMetadata );
+        getActivator().log( LogService.LOG_DEBUG, "Enabling component", m_componentMetadata, null );
 
         try
         {
@@ -270,14 +273,14 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             // enter enabled state before trying to activate
             setState( STATE_ENABLED );
 
-            Activator.trace( "Component enabled", m_componentMetadata );
+            getActivator().log( LogService.LOG_DEBUG, "Component enabled", m_componentMetadata, null );
 
             // immediately activate the compopnent, no need to schedule again
             activateInternal();
         }
         catch ( Exception ex )
         {
-            Activator.exception( "Failed enabling Component", m_componentMetadata, ex );
+            getActivator().log( LogService.LOG_ERROR, "Failed enabling Component", m_componentMetadata, ex );
 
             // ensure we get back to DISABLED state
             // immediately disable, no need to schedule again
@@ -298,19 +301,24 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      */
     private void activateInternal()
     {
-        // CONCURRENCY NOTE: This method is called either by the enable()
-        //     method or by the dependency managers or the reconfigure() method
-        if ( ( getState() & ( STATE_ENABLED | STATE_UNSATISFIED ) ) == 0 )
+        // CONCURRENCY NOTE: This method is only called from within the
+        //     ComponentActorThread to enable, activate or reactivate the
+        //     component. Still we use the setStateConditional to not create
+        //     a race condition with the deactivateInternal method
+        if ( !setStateConditional( STATE_ENABLED | STATE_UNSATISFIED, STATE_ACTIVATING ) )
         {
-            // This state can only be entered from the ENABLED (in the enable()
-            // method) or UNSATISFIED (missing references) states
             return;
         }
 
-        // go to the activating state
-        setState( STATE_ACTIVATING );
+        // we cannot activate if the component activator is shutting down
+        if ( !isActive() )
+        {
+            getActivator().log( LogService.LOG_DEBUG,
+                "Component cannot be activated because the Activator is being disposed", m_componentMetadata, null );
+            return;
+        }
 
-        Activator.trace( "Activating component", m_componentMetadata );
+        getActivator().log( LogService.LOG_DEBUG, "Activating component", m_componentMetadata, null );
 
         // Before creating the implementation object, we are going to
         // test if all the mandatory dependencies are satisfied
@@ -321,7 +329,8 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             if ( !dm.isValid() )
             {
                 // at least one dependency is not satisfied
-                Activator.trace( "Dependency not satisfied: " + dm.getName(), m_componentMetadata );
+                getActivator().log( LogService.LOG_DEBUG, "Dependency not satisfied: " + dm.getName(),
+                    m_componentMetadata, null );
                 setState( STATE_UNSATISFIED );
                 return;
             }
@@ -334,7 +343,8 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         if ( !createComponent() )
         {
             // component creation failed, not active now
-            Activator.error( "Component instance could not be created, activation failed", m_componentMetadata );
+            getActivator().log( LogService.LOG_ERROR, "Component instance could not be created, activation failed",
+                m_componentMetadata, null );
 
             // set state to unsatisfied
             setState( STATE_UNSATISFIED );
@@ -350,7 +360,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         // 5. Register provided services
         m_serviceRegistration = registerComponentService();
 
-        Activator.trace( "Component activated", m_componentMetadata );
+        getActivator().log( LogService.LOG_DEBUG, "Component activated", m_componentMetadata, null );
     }
 
 
@@ -364,19 +374,18 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     **/
     private void deactivateInternal()
     {
-        // CONCURRENCY NOTE: This method may be called either from application
-        // code or by the dependency managers or reconfiguration
-        if ( ( getState() & ( STATE_ACTIVATING | STATE_ACTIVE | STATE_REGISTERED | STATE_FACTORY ) ) == 0 )
+        // CONCURRENCY NOTE: This method may be called either from the
+        //     ComponentActorThread to handle application induced disabling or
+        //     as a result of an unsatisfied service dependency leading to
+        //     component deactivation. We therefore have to guard against
+        //     paralell state changes.from application
+        if ( !setStateConditional( STATE_ACTIVATING | STATE_ACTIVE | STATE_REGISTERED | STATE_FACTORY,
+            STATE_DEACTIVATING ) )
         {
-            // This state can only be entered from the ACTIVATING (if activation
-            // fails), ACTIVE, REGISTERED or FACTORY states
             return;
         }
 
-        // start deactivation by resetting the state
-        setState( STATE_DEACTIVATING );
-
-        Activator.trace( "Deactivating component", m_componentMetadata );
+        getActivator().log( LogService.LOG_DEBUG, "Deactivating component", m_componentMetadata, null );
 
         // 0.- Remove published services from the registry
         unregisterComponentService();
@@ -391,7 +400,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         // reset to state UNSATISFIED
         setState( STATE_UNSATISFIED );
 
-        Activator.trace( "Component deactivated", m_componentMetadata );
+        getActivator().log( LogService.LOG_DEBUG, "Component deactivated", m_componentMetadata, null );
     }
 
 
@@ -403,7 +412,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         // deactivate first, this does nothing if not active/registered/factory
         deactivateInternal();
 
-        Activator.trace( "Disabling component", m_componentMetadata );
+        getActivator().log( LogService.LOG_DEBUG, "Disabling component", m_componentMetadata, null );
 
         // close all service listeners now, they are recreated on enable
         // Stop the dependency managers to listen to events...
@@ -418,7 +427,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         // we are now disabled, ready for re-enablement or complete destroyal
         setState( STATE_DISABLED );
 
-        Activator.trace( "Component disabled", m_componentMetadata );
+        getActivator().log( LogService.LOG_DEBUG, "Component disabled", m_componentMetadata, null );
     }
 
 
@@ -436,11 +445,11 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         // this component must not be used any more
         setState( STATE_DESTROYED );
 
+        getActivator().log( LogService.LOG_DEBUG, "Component disposed", m_componentMetadata, null );
+
         // release references (except component metadata for logging purposes)
         m_activator = null;
         m_dependencyManagers = null;
-
-        Activator.trace( "Component disposed", m_componentMetadata );
     }
 
 
@@ -508,7 +517,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     {
         if ( getComponentMetadata().getServiceMetadata() != null )
         {
-            Activator.trace( "registering services", getComponentMetadata() );
+            getActivator().log( LogService.LOG_DEBUG, "registering services", getComponentMetadata(), null );
 
             // get a copy of the component properties as service properties
             Dictionary serviceProperties = copyTo( null, getProperties() );
@@ -528,7 +537,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             m_serviceRegistration.unregister();
             m_serviceRegistration = null;
 
-            Activator.trace( "unregistering the services", getComponentMetadata() );
+            getActivator().log( LogService.LOG_DEBUG, "unregistering the services", getComponentMetadata(), null );
         }
     }
 
@@ -538,6 +547,19 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     BundleComponentActivator getActivator()
     {
         return m_activator;
+    }
+
+
+    /**
+     * Returns <code>true</code> if this instance has not been disposed off
+     * yet and the BundleComponentActivator is still active. If the Bundle
+     * Component Activator is being disposed off as a result of stopping the
+     * owning bundle, this method returns <code>false</code>.
+     */
+    private boolean isActive()
+    {
+        BundleComponentActivator bca = getActivator();
+        return bca != null && bca.isActive();
     }
 
 
@@ -636,10 +658,36 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     **/
     protected synchronized void setState( int newState )
     {
-        Activator.trace( "State transition : " + stateToString( m_state ) + " -> " + stateToString( newState ),
-            m_componentMetadata );
+        getActivator().log( LogService.LOG_DEBUG,
+            "State transition : " + stateToString( m_state ) + " -> " + stateToString( newState ), m_componentMetadata,
+            null );
 
         m_state = newState;
+    }
+
+
+    /**
+     * If the state is currently one of the <code>requiredStates</code>, the
+     * state is set to <code>newState</code> and <code>true</code> is returned.
+     * Otherwise the state is not changed and <code>false</code> is returned.
+     * <p>
+     * This method atomically checks the current state and sets the new state.
+     * 
+     * @param requiredStates The set of states required for the state change to
+     *          happen.
+     * @param newState The new state to go into.
+     * @return <code>true</code> if the state was one of the required states and
+     *          the new state has now been entered.
+     */
+    protected synchronized boolean setStateConditional( int requiredStates, int newState )
+    {
+        if ( ( getState() & requiredStates ) != 0 )
+        {
+            setState( newState );
+            return true;
+        }
+
+        return false;
     }
 
 

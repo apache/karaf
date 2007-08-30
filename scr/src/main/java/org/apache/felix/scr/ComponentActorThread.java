@@ -21,6 +21,8 @@ package org.apache.felix.scr;
 
 import java.util.LinkedList;
 
+import org.osgi.service.log.LogService;
+
 
 /**
  * The <code>ComponentActorThread</code> is the thread used to act upon registered
@@ -72,17 +74,19 @@ class ComponentActorThread extends Thread
             // return if the task is this thread itself
             if ( task == this )
             {
+                Activator.log( LogService.LOG_DEBUG, null, "Shutting down ComponentActorThread", null );
                 return;
             }
 
             // otherwise execute the task, log any issues
             try
             {
+                Activator.log( LogService.LOG_DEBUG, null, "Running task [" + task + "]", null );
                 task.run();
             }
             catch ( Throwable t )
             {
-                Activator.exception( "Unexpected problem executing task", null, t );
+                Activator.log( LogService.LOG_ERROR, null, "Unexpected problem executing task", t );
             }
         }
     }
@@ -104,6 +108,9 @@ class ComponentActorThread extends Thread
             // append to the task queue
             tasks.add( task );
 
+            Activator.log( LogService.LOG_DEBUG, null, "Adding task [" + task + "] as #" + tasks.size()
+                + " in the queue", null );
+            
             // notify the waiting thread
             tasks.notifyAll();
         }

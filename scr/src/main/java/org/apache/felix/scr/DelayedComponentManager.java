@@ -22,6 +22,7 @@ package org.apache.felix.scr;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.log.LogService;
 
 
 /**
@@ -72,7 +73,9 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
 
     public Object getService( Bundle arg0, ServiceRegistration arg1 )
     {
-        Activator.trace( "DelayedComponentServiceFactory.getService()", getComponentMetadata() );
+        getActivator().log( LogService.LOG_DEBUG, "DelayedComponentServiceFactory.getService()",
+            getComponentMetadata(), null );
+        
         // When the getServiceMethod is called, the implementation object must be created
         // unless another bundle has already retrievd it
 
@@ -83,10 +86,7 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
             // if component creation failed, we were deactivated and the state
             // is not REGISTERED any more. Otherwise go to standard ACTIVE
             // state now
-            if ( getState() == STATE_REGISTERED )
-            {
-                setState( STATE_ACTIVE );
-            }
+            setStateConditional( STATE_REGISTERED, STATE_ACTIVE );
         }
 
         return getInstance();

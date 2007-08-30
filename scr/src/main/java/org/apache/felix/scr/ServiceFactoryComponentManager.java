@@ -26,6 +26,7 @@ import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentInstance;
+import org.osgi.service.log.LogService;
 
 
 /**
@@ -91,7 +92,9 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
      */
     public Object getService( Bundle bundle, ServiceRegistration registration )
     {
-        Activator.trace( "DelayedServiceFactoryServiceFactory.getService()", getComponentMetadata() );
+        getActivator().log( LogService.LOG_DEBUG, "DelayedServiceFactoryServiceFactory.getService()",
+            getComponentMetadata(), null );
+
         // When the getServiceMethod is called, the implementation object must be created
 
         // private ComponentContext and implementation instances
@@ -105,10 +108,7 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
             serviceContexts.put( service, serviceContext );
 
             // if this is the first use of this component, switch to ACTIVE state
-            if ( getState() == STATE_REGISTERED )
-            {
-                setState( STATE_ACTIVE );
-            }
+            setStateConditional( STATE_REGISTERED, STATE_ACTIVE );
         }
 
         return service;
@@ -120,7 +120,9 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
      */
     public void ungetService( Bundle bundle, ServiceRegistration registration, Object service )
     {
-        Activator.trace( "DelayedServiceFactoryServiceFactory.ungetService()", getComponentMetadata() );
+        getActivator().log( LogService.LOG_DEBUG, "DelayedServiceFactoryServiceFactory.ungetService()",
+            getComponentMetadata(), null );
+
         // When the ungetServiceMethod is called, the implementation object must be deactivated
 
         // private ComponentContext and implementation instances
@@ -128,9 +130,9 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
         disposeImplementationObject( service, serviceContext );
 
         // if this was the last use of the component, go back to REGISTERED state
-        if ( serviceContexts.isEmpty() && getState() == STATE_ACTIVE )
+        if ( serviceContexts.isEmpty() )
         {
-            setState( STATE_REGISTERED );
+            setStateConditional( STATE_ACTIVE, STATE_REGISTERED );
         }
     }
 

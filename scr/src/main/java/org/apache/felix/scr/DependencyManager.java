@@ -32,6 +32,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogService;
 
 
 /**
@@ -289,8 +290,9 @@ class DependencyManager implements ServiceListener
                 if ( retval == false && ( max == 1 ) )
                 {
                     // There was an exception when calling the bind method
-                    Activator.error( "Dependency Manager: Possible exception in the bind method during initialize()",
-                        m_componentManager.getComponentMetadata() );
+                    m_componentManager.getActivator().log( LogService.LOG_ERROR,
+                        "Dependency Manager: Possible exception in the bind method during initialize()",
+                        m_componentManager.getComponentMetadata(), null );
                     return false;
                 }
             }
@@ -425,8 +427,9 @@ class DependencyManager implements ServiceListener
             }
             catch ( ClassNotFoundException ex2 )
             {
-                Activator.exception( "Cannot load class used as parameter " + parameterClassName, m_componentManager
-                    .getComponentMetadata(), ex2 );
+                m_componentManager.getActivator().log( LogService.LOG_ERROR,
+                    "Cannot load class used as parameter " + parameterClassName,
+                    m_componentManager.getComponentMetadata(), ex2 );
             }
         }
 
@@ -457,18 +460,18 @@ class DependencyManager implements ServiceListener
             try
             {
                 // Get the bind method
-                Activator.trace( "getting bind: " + m_dependencyMetadata.getBind(), m_componentManager
-                    .getComponentMetadata() );
+                m_componentManager.getActivator().log( LogService.LOG_DEBUG,
+                    "getting bind: " + m_dependencyMetadata.getBind(), m_componentManager.getComponentMetadata(), null );
                 Method bindMethod = getBindingMethod( m_dependencyMetadata.getBind(), implementationObject.getClass(),
                     m_dependencyMetadata.getInterface() );
 
                 if ( bindMethod == null )
                 {
                     // 112.3.1 If the method is not found , SCR must log an
-                    // error
-                    // message with the log service, if present, and ignore the
-                    // method
-                    Activator.error( "bind() method not found", m_componentManager.getComponentMetadata() );
+                    // error message with the log service, if present, and
+                    // ignore the method
+                    m_componentManager.getActivator().log( LogService.LOG_ERROR, "bind() method not found",
+                        m_componentManager.getComponentMetadata(), null );
                     return false;
                 }
 
@@ -488,7 +491,8 @@ class DependencyManager implements ServiceListener
                 bindMethod.invoke( implementationObject, new Object[]
                     { parameter } );
 
-                Activator.trace( "bound: " + getName(), m_componentManager.getComponentMetadata() );
+                m_componentManager.getActivator().log( LogService.LOG_DEBUG, "bound: " + getName(),
+                    m_componentManager.getComponentMetadata(), null );
 
                 return true;
             }
@@ -498,13 +502,15 @@ class DependencyManager implements ServiceListener
                 // public, SCR must log an error
                 // message with the log service, if present, and ignore the
                 // method
-                Activator.exception( "bind() method cannot be called", m_componentManager.getComponentMetadata(), ex );
+                m_componentManager.getActivator().log( LogService.LOG_ERROR, "bind() method cannot be called",
+                    m_componentManager.getComponentMetadata(), ex );
                 return false;
             }
             catch ( InvocationTargetException ex )
             {
-                Activator.exception( "DependencyManager : exception while invoking " + m_dependencyMetadata.getBind()
-                    + "()", m_componentManager.getComponentMetadata(), ex );
+                m_componentManager.getActivator().log( LogService.LOG_ERROR,
+                    "DependencyManager : exception while invoking " + m_dependencyMetadata.getBind() + "()",
+                    m_componentManager.getComponentMetadata(), ex );
                 return false;
             }
         }
@@ -537,8 +543,9 @@ class DependencyManager implements ServiceListener
         {
             try
             {
-                Activator.trace( "getting unbind: " + m_dependencyMetadata.getUnbind(), m_componentManager
-                    .getComponentMetadata() );
+                m_componentManager.getActivator().log( LogService.LOG_DEBUG,
+                    "getting unbind: " + m_dependencyMetadata.getUnbind(), m_componentManager.getComponentMetadata(),
+                    null );
                 Method unbindMethod = getBindingMethod( m_dependencyMetadata.getUnbind(), implementationObject
                     .getClass(), m_dependencyMetadata.getInterface() );
 
@@ -561,14 +568,16 @@ class DependencyManager implements ServiceListener
                     // error
                     // message with the log service, if present, and ignore the
                     // method
-                    Activator.error( "unbind() method not found", m_componentManager.getComponentMetadata() );
+                    m_componentManager.getActivator().log( LogService.LOG_ERROR, "unbind() method not found",
+                        m_componentManager.getComponentMetadata(), null );
                     return false;
                 }
 
                 unbindMethod.invoke( implementationObject, new Object[]
                     { parameter } );
 
-                Activator.trace( "unbound: " + getName(), m_componentManager.getComponentMetadata() );
+                m_componentManager.getActivator().log( LogService.LOG_DEBUG, "unbound: " + getName(),
+                    m_componentManager.getComponentMetadata(), null );
 
                 return true;
             }
@@ -578,13 +587,15 @@ class DependencyManager implements ServiceListener
                 // public, SCR must log an error
                 // message with the log service, if present, and ignore the
                 // method
-                Activator.exception( "unbind() method cannot be called", m_componentManager.getComponentMetadata(), ex );
+                m_componentManager.getActivator().log( LogService.LOG_ERROR, "unbind() method cannot be called",
+                    m_componentManager.getComponentMetadata(), ex );
                 return false;
             }
             catch ( InvocationTargetException ex )
             {
-                Activator.exception( "DependencyManager : exception while invoking " + m_dependencyMetadata.getUnbind()
-                    + "()", m_componentManager.getComponentMetadata(), ex );
+                m_componentManager.getActivator().log( LogService.LOG_ERROR,
+                    "DependencyManager : exception while invoking " + m_dependencyMetadata.getUnbind() + "()",
+                    m_componentManager.getComponentMetadata(), ex.getCause() );
                 return false;
             }
 
@@ -667,14 +678,17 @@ class DependencyManager implements ServiceListener
                 // setStateDependency(DependencyChangeEvent.DEPENDENCY_INVALID);
                 try
                 {
-                    Activator.trace( "Dependency Manager: Static dependency is broken", m_componentManager
-                        .getComponentMetadata() );
+                    m_componentManager.getActivator().log(
+                        LogService.LOG_DEBUG,
+                        "Dependency Manager: Static dependency on " + m_dependencyMetadata.getName() + "/"
+                            + m_dependencyMetadata.getInterface() + " is broken",
+                        m_componentManager.getComponentMetadata(), null );
                     m_componentManager.reactivate();
                 }
                 catch ( Exception ex )
                 {
-                    Activator.exception( "Exception while recreating dependency ", m_componentManager
-                        .getComponentMetadata(), ex );
+                    m_componentManager.getActivator().log( LogService.LOG_ERROR,
+                        "Exception while recreating dependency ", m_componentManager.getComponentMetadata(), ex );
                 }
             }
             // dynamic dependency
@@ -702,11 +716,13 @@ class DependencyManager implements ServiceListener
                     {
                         if ( !m_dependencyMetadata.isOptional() )
                         {
-                            Activator
-                                .trace(
-                                    "Dependency Manager: Mandatory dependency not fullfilled and no replacements available... unregistering service...",
-                                    m_componentManager.getComponentMetadata() );
-                            m_componentManager.reactivate();
+                            m_componentManager.getActivator().log(
+                                LogService.LOG_DEBUG,
+                                "Dependency Manager: Deactivating component due to mandatory dependency on "
+                                    + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
+                                    + " not fullfilled and no replacement(s) available",
+                                m_componentManager.getComponentMetadata(), null );
+                            m_componentManager.deactivate();
                         }
                     }
                 }

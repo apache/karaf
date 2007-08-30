@@ -18,6 +18,8 @@
  */
 package org.apache.felix.scr;
 
+import org.osgi.service.log.LogService;
+
 
 /**
  * This factory allows other types of ComponentManagers to be provided.
@@ -30,7 +32,7 @@ public class ManagerFactory
     static ComponentManager createManager( BundleComponentActivator activator, ComponentMetadata metadata,
         long componentId )
     {
-        Activator.trace( "ManagerFactory.createManager", metadata );
+        activator.log( LogService.LOG_DEBUG, "ManagerFactory.createManager", metadata, null );
         if ( metadata.isImmediate() )
         {
             return new ImmediateComponentManager( activator, metadata, componentId );
