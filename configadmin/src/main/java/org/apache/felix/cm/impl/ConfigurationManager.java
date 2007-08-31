@@ -99,6 +99,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
      */
     public static final String CM_CONFIG_DIR = "felix.cm.dir";
 
+    // The name of the LogService (not using the class, which might be missing)
+    private static final String LOG_SERVICE_NAME = "org.osgi.service.log.LogService";
+    
     // random number generator to create configuration PIDs for factory
     // configurations
     private static SecureRandom numberGenerator;
@@ -152,7 +155,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     public void start( BundleContext bundleContext )
     {
         // track the log service using a ServiceTracker
-        logTracker = new ServiceTracker( bundleContext, LogService.class.getName(), null );
+        logTracker = new ServiceTracker( bundleContext, LOG_SERVICE_NAME , null );
         logTracker.open();
 
         // set up some fields
@@ -205,6 +208,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         // start handling ManagedService[Factory] services
         managedServiceTracker = new ManagedServiceTracker();
         managedServiceFactoryTracker = new ManagedServiceFactoryTracker();
+        
+        // check logging
+        log(LogService.LOG_ERROR, "CM Started", null);
     }
 
 
@@ -755,10 +761,10 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
     void log( int level, String message, Throwable t )
     {
-        LogService log = ( LogService ) logTracker.getService();
+        Object log = logTracker.getService();
         if ( log != null )
         {
-            log.log( configurationAdminReference, level, message, t );
+            ( ( LogService ) log ).log( configurationAdminReference, level, message, t );
             return;
         }
 

@@ -69,6 +69,9 @@
                         <Bundle-Activator>
                             org.apache.felix.cm.impl.ConfigurationManager
                         </Bundle-Activator>
+                        <DynamicImport-Package>
+                            org.osgi.service.log
+                        </DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
