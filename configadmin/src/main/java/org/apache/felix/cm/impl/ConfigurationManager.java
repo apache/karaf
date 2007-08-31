@@ -208,9 +208,6 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         // start handling ManagedService[Factory] services
         managedServiceTracker = new ManagedServiceTracker();
         managedServiceFactoryTracker = new ManagedServiceFactoryTracker();
-        
-        // check logging
-        log(LogService.LOG_ERROR, "CM Started", null);
     }
 
 
