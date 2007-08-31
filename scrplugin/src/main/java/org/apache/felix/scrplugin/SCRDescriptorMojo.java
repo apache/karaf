@@ -137,7 +137,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         // if we have abstract descriptors, write them
         final File adFile = new File(this.outputDirectory, Constants.ABSTRACT_DESCRIPTOR_RELATIVE_PATH);
         if ( !abstractComponents.getComponents().isEmpty() ) {
-            this.getLog().info("Writing abstract service descriptor " + adFile + " with " + components.getComponents().size() + " entries.");
+            this.getLog().info("Writing abstract service descriptor " + adFile + " with " + abstractComponents.getComponents().size() + " entries.");
             adFile.getParentFile().mkdirs();
             ComponentDescriptorIO.write(abstractComponents, adFile);
         } else {
@@ -419,7 +419,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 || name.equals(org.osgi.framework.Constants.SERVICE_VENDOR)
                 || name.equals(ConfigurationAdmin.SERVICE_BUNDLELOCATION)
                 || name.equals(ConfigurationAdmin.SERVICE_FACTORYPID);
-            
+
             // if this is a public property and the component is generating metatype info
             // store the information!
             if ( !isPrivate && ocd != null ) {
