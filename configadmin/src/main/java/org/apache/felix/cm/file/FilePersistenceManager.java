@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -115,7 +115,7 @@ public class FilePersistenceManager implements PersistenceManager
     /**
      * The extension of the configuration files, while they are being written
      * (value is ".tmp").
-     * 
+     *
      * @see #store(String, Dictionary)
      */
     private static final String TMP_EXT = ".tmp";
@@ -159,9 +159,9 @@ public class FilePersistenceManager implements PersistenceManager
      * This method is not part of the API of this class and is declared package
      * private to enable JUnit testing on it. This method may be removed or
      * modified at any time without notice.
-     * 
+     *
      * @param pid The Service PID to encode into a relative path name.
-     * 
+     *
      * @return The relative path name corresponding to the Service PID.
      */
     static String encodePid( String pid )
@@ -231,11 +231,11 @@ public class FilePersistenceManager implements PersistenceManager
      * This constructor is equivalent to calling
      * {@link #FilePersistenceManager(BundleContext, String)} with a
      * <code>null</code> <code>BundleContext</code>.
-     * 
+     *
      * @param location The configuration file location. If this is
      *      <code>null</code> the <code>config</code> directory below the current
      *      working directory is used.
-     * 
+     *
      * @throws IllegalArgumentException If the <code>location</code> exists but
      *      is not a directory or does not exist and cannot be created.
      */
@@ -269,7 +269,7 @@ public class FilePersistenceManager implements PersistenceManager
      * step or the named directory (including any parent directories) cannot be
      * created, an <code>IllegalArgumentException</code> is thrown.</li>
      * </ul>
-     * 
+     *
      * @param bundleContext The <code>BundleContext</code> to optionally get
      *      the data location for the configuration files. This may be
      *      <code>null</code>, in which case this constructor acts exactly the
@@ -277,7 +277,7 @@ public class FilePersistenceManager implements PersistenceManager
      * @param location The configuration file location. If this is
      *      <code>null</code> the <code>config</code> directory below the current
      *      working directory is used.
-     * 
+     *
      * @throws IllegalArgumentException If the location exists but is not a
      *      directory or does not exist and cannot be created.
      * @throws IllegalStateException If the <code>bundleContext</code> is not
@@ -315,11 +315,11 @@ public class FilePersistenceManager implements PersistenceManager
                     locationFile = bundleLocationFile;
                 }
             }
-            
+
             // ensure the file object is an absolute file object
             locationFile = locationFile.getAbsoluteFile();
         }
-        
+
         // check the location
         if ( !locationFile.isDirectory() )
         {
@@ -341,7 +341,7 @@ public class FilePersistenceManager implements PersistenceManager
     /**
      * Returns the directory in which the configuration files are written as
      * a <code>File</code> object.
-     * 
+     *
      * @return The configuration file location.
      */
     public File getLocation()
@@ -356,7 +356,7 @@ public class FilePersistenceManager implements PersistenceManager
      * <p>
      * This method is a lazy implementation, which is just one configuration
      * file ahead of the current enumeration location.
-     * 
+     *
      * @return an enumeration of configuration data returned as instances of
      *      the <code>Dictionary</code> class.
      */
@@ -368,7 +368,7 @@ public class FilePersistenceManager implements PersistenceManager
 
     /**
      * Deletes the file for the given identifier.
-     * 
+     *
      * @param pid The identifier of the configuration file to delete.
      */
     public void delete( String pid )
@@ -380,9 +380,9 @@ public class FilePersistenceManager implements PersistenceManager
     /**
      * Returns <code>true</code> if a (configuration) file exists for the given
      * identifier.
-     * 
+     *
      * @param pid The identifier of the configuration file to check.
-     * 
+     *
      * @return <code>true</code> if the file exists
      */
     public boolean exists( String pid )
@@ -394,9 +394,9 @@ public class FilePersistenceManager implements PersistenceManager
     /**
      * Reads the (configuration) for the given identifier into a
      * <code>Dictionary</code> object.
-     * 
+     *
      * @param pid The identifier of the configuration file to delete.
-     * 
+     *
      * @return The configuration read from the file. This <code>Dictionary</code>
      *      may be empty if the file contains no configuration information
      *      or is not properly formatted.
@@ -410,11 +410,11 @@ public class FilePersistenceManager implements PersistenceManager
     /**
      * Stores the contents of the <code>Dictionary</code> in a file denoted
      * by the given identifier.
-     * 
+     *
      * @param pid The identifier of the configuration file to which to write
      *      the configuration contents.
      * @param props The configuration data to write.
-     * 
+     *
      * @throws IOException If an error occurrs writing the configuration data.
      */
     public void store( String pid, Dictionary props ) throws IOException
@@ -424,7 +424,7 @@ public class FilePersistenceManager implements PersistenceManager
         try
         {
             File cfgFile = getFile( pid );
-            
+
             // ensure parent path
             File cfgDir = cfgFile.getParentFile();
             cfgDir.mkdirs();
@@ -443,7 +443,7 @@ public class FilePersistenceManager implements PersistenceManager
                 if (cfgFile.exists()) {
                     cfgFile.delete();
                 }
-                
+
                 // rename the temporary file to the new file
                 tmpFile.renameTo( cfgFile );
             }
@@ -461,8 +461,9 @@ public class FilePersistenceManager implements PersistenceManager
                     // ignore
                 }
             }
-            
-            if (tmpFile.exists()) {
+
+            if (tmpFile != null && tmpFile.exists())
+            {
                 tmpFile.delete();
             }
         }
@@ -472,11 +473,11 @@ public class FilePersistenceManager implements PersistenceManager
     /**
      * Loads the contents of the <code>cfgFile</code> into a new
      * <code>Dictionary</code> object.
-     * 
+     *
      * @param cfgFile The file from which to load the data.
-     * 
+     *
      * @return A new <code>Dictionary</code> object providing the file contents.
-     * 
+     *
      * @throws java.io.FileNotFoundException If the given file does not exist.
      * @throws IOException If an error occurrs reading the configuration file.
      */
@@ -524,9 +525,9 @@ public class FilePersistenceManager implements PersistenceManager
      * </ul>
      * Before returning the path name, the parent directory and any ancestors
      * are created.
-     *  
+     *
      * @param pid The identifier for which to create the abstract file name.
-     * 
+     *
      * @return The abstract path name, which the parent directory path created.
      */
     private File getFile( String pid )
@@ -602,9 +603,9 @@ public class FilePersistenceManager implements PersistenceManager
                         try
                         {
                             Dictionary dict =  load( cfgFile );
-                            
+
                             // use the dictionary if it has no PID or the PID
-                            // derived file name matches the source file name 
+                            // derived file name matches the source file name
                             if ( dict.get( Constants.SERVICE_PID ) == null
                                 || cfgFile.equals( getFile( ( String ) dict.get( Constants.SERVICE_PID ) ) ) )
                             {
