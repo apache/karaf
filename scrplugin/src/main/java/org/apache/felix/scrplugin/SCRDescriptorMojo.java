@@ -42,7 +42,6 @@ import org.apache.felix.scrplugin.tags.JavaClassDescriptorManager;
 import org.apache.felix.scrplugin.tags.JavaField;
 import org.apache.felix.scrplugin.tags.JavaTag;
 import org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription;
-import org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription.Modification;
 import org.apache.felix.scrplugin.xml.ComponentDescriptorIO;
 import org.apache.felix.scrplugin.xml.MetaTypeIO;
 import org.apache.maven.model.Resource;
@@ -58,7 +57,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * generates a service descriptor file based on annotations found in the sources.
  *
  * @goal scr
- * @phase generate-resources
+ * @phase process-classes
  * @description Build Service Descriptors from Java Source
  * @requiresDependencyResolution compile
  */
@@ -94,8 +93,18 @@ public class SCRDescriptorMojo extends AbstractMojo {
      */
     private String metaTypeName;
 
+    /**
+     * This flag controls the generation of the bind/unbind methods.
+     * @parameter default-value="true"
+     */
+    private boolean generateAccessors;
+
+    /**
+     * @see org.apache.maven.plugin.AbstractMojo#execute()
+     */
     public void execute() throws MojoExecutionException, MojoFailureException {
         this.getLog().debug("Starting SCRDescriptorMojo....");
+        this.getLog().debug("..generating accessors: " + this.generateAccessors);
 
         boolean hasFailures = false;
 
@@ -517,38 +526,21 @@ public class SCRDescriptorMojo extends AbstractMojo {
             }
             // if this is a field we look for the bind/unbind methods
             // and create them if they are not availabe
-            if ( false ) {
+            if ( this.generateAccessors ) {
                 if ( reference.getField() != null && component.getJavaClassDescription() instanceof ModifiableJavaClassDescription ) {
-                    String changed = null;
+                    boolean createBind = false;
+                    boolean createUnbind = false;
                     // Only create method if no bind name has been specified
                     if ( bindValue == null && ref.findMethod(ref.getBind()) == null ) {
                         // create bind method
-                        final String realMethodName = "bind" + Character.toUpperCase(name.charAt(0))
-                        + name.substring(1);
-                        changed = ((ModifiableJavaClassDescription)component.getJavaClassDescription()).addProtectedMethod(
-                                realMethodName,
-                                type,
-                                "{this." + reference.getField().getName() + "=param;}");
+                        createBind = true;
                     }
                     if ( unbindValue == null && ref.findMethod(ref.getUnbind()) == null ) {
                         // create unbind method
-                        final String realMethodName = "unbind" + Character.toUpperCase(name.charAt(0))
-                        + name.substring(1);
-                        final String c = ((ModifiableJavaClassDescription)component.getJavaClassDescription()).addProtectedMethod(
-                                realMethodName,
-                                type,
-                                "{this." + reference.getField().getName() + "=null;}");
-                        if ( changed == null ) {
-                            changed = c;
-                        } else {
-                            changed = changed + c;
-                        }
+                        createUnbind = true;
                     }
-                    if ( changed != null ) {
-                        Modification mod = new Modification();
-                        mod.lineNumber = 10;
-                        mod.content = changed;
-                        ((ModifiableJavaClassDescription)component.getJavaClassDescription()).writeClassFile(new Modification[] {mod});
+                    if ( createBind || createUnbind ) {
+                        ((ModifiableJavaClassDescription)component.getJavaClassDescription()).addMethods(name, type, createBind, createUnbind);
                     }
                 }
             }

@@ -18,15 +18,11 @@
  */
 package org.apache.felix.scrplugin.tags;
 
+import org.apache.maven.plugin.MojoExecutionException;
+
 
 public interface ModifiableJavaClassDescription {
 
-    String addProtectedMethod(String name, String paramType, String contents);
-
-    void writeClassFile(Modification[] mods);
-
-    public static final class Modification {
-        public int lineNumber;
-        public String content;
-    }
+    void addMethods(String propertyName, String className, boolean createBind, boolean createUnbind)
+    throws MojoExecutionException;
 }

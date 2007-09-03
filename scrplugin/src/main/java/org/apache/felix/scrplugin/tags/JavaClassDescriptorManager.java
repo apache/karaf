@@ -74,6 +74,9 @@ public class JavaClassDescriptorManager {
     /** The component definitions from other bundles hashed by classname. */
     protected final Map componentDescriptions = new HashMap();
 
+    /** The maven project. */
+    protected final MavenProject project;
+
     /**
      * Construct a new manager.
      * @param log
@@ -85,6 +88,7 @@ public class JavaClassDescriptorManager {
                                       final MavenProject project)
     throws MojoFailureException, MojoExecutionException {
         this.log = log;
+        this.project = project;
         this.classloader = this.getCompileClassLoader(project);
 
         // get all the class sources through qdox
@@ -174,6 +178,13 @@ public class JavaClassDescriptorManager {
      */
     public ClassLoader getClassLoader() {
         return this.classloader;
+    }
+
+    /**
+     * Return the project.
+     */
+    public MavenProject getProject() {
+        return this.project;
     }
 
     /**

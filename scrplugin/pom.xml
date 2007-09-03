@@ -55,6 +55,13 @@
 			<version>1.0</version>
 			<scope>compile</scope>
 		</dependency>
+		
+		<dependency>
+		   <groupId>asm</groupId>
+		   <artifactId>asm-all</artifactId>
+		   <version>3.0</version>
+		</dependency>
+		
 		<dependency>
 		    <groupId>org.apache.commons</groupId>
 		    <artifactId>commons-io</artifactId>

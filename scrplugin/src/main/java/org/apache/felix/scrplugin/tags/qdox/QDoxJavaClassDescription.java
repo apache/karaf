@@ -18,9 +18,9 @@
  */
 package org.apache.felix.scrplugin.tags.qdox;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.LineNumberReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +32,11 @@ import org.apache.felix.scrplugin.tags.JavaMethod;
 import org.apache.felix.scrplugin.tags.JavaTag;
 import org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.ClassNode;
 
 import com.thoughtworks.qdox.model.DocletTag;
 import com.thoughtworks.qdox.model.JavaClass;
@@ -227,47 +232,70 @@ public class QDoxJavaClassDescription
     }
 
     /**
-     * @see org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription#addProtectedMethod(java.lang.String, java.lang.String, java.lang.String)
+     * @see org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription#addMethods(java.lang.String, java.lang.String, boolean, boolean)
      */
-    public String addProtectedMethod(String name, String paramType, String contents) {
-        final JavaParameter param = new JavaParameter(new Type(paramType), "param");
+    public void addMethods(String propertyName,
+                           String className,
+                           boolean createBind,
+                           boolean createUnbind)
+    throws MojoExecutionException {
+        // now do byte code manipulation
+        final String targetDirectory = this.manager.getProject().getBuild().getOutputDirectory();
+        final String fileName = targetDirectory + File.separatorChar +  this.getName().replace('.', File.separatorChar) + ".class";
+        final ClassNode cn = new ClassNode();
+        try {
+            final ClassReader reader = new ClassReader(new FileInputStream(fileName));
+            reader.accept(cn, 0);
+
+            final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+            cn.accept(writer);
+            this.createBind(writer, propertyName, className);
+            this.createUnbind(writer, propertyName, className);
+
+            final FileOutputStream fos = new FileOutputStream(fileName);
+            fos.write(writer.toByteArray());
+            fos.close();
+        } catch (Exception e) {
+            throw new MojoExecutionException("Unable to add methods to " + this.getName(), e);
+        }
+    }
+
+    protected void createBind(ClassWriter cw, String propertyName, String typeName) {
+        final org.objectweb.asm.Type type = org.objectweb.asm.Type.getType("L" + typeName + ";");
+        final String methodName = "bind" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
+        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PROTECTED, methodName, "(" + type.toString() + ")V", null, null);
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitVarInsn(type.getOpcode(Opcodes.ILOAD), 1);
+        mv.visitFieldInsn(Opcodes.PUTFIELD, this.getName(), propertyName, type.toString());
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(0, 0);
+        // add to qdox
+        final JavaParameter param = new JavaParameter(new Type(typeName), "param");
         final JavaParameter[] params = new JavaParameter[] {param};
         final com.thoughtworks.qdox.model.JavaMethod meth = new com.thoughtworks.qdox.model.JavaMethod();
-        meth.setName(name);
-        meth.setSourceCode(contents);
+        meth.setName(methodName);
         meth.setParameters(params);
         meth.setModifiers(new String[] {"protected"});
         this.javaClass.addMethod(meth);
-        return "protected void " + name + "(" + paramType + " param)" + contents + " ";
-    }
+      }
 
-    /**
-     * @see org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription#writeClassFile(org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription.Modification[])
-     */
-    public void writeClassFile(Modification[] mods) {
-        if ( mods != null && mods.length > 0 ) {
-            try {
-                final LineNumberReader reader = new LineNumberReader(new FileReader(this.source.getFile()));
-                for(int i=0; i<mods.length; i++) {
-                    int lineNumber = mods[i].lineNumber;
-                    while ( reader.getLineNumber() < lineNumber ) {
-                        final String line = reader.readLine();
-                        System.out.println(line);
-                    }
-                    final String line = reader.readLine();
-                    System.out.print(line);
-                    System.out.println(mods[i].content);
-                }
-                String line;
-                while ( (line = reader.readLine()) != null ) {
-                    System.out.println(line);
-                }
-                reader.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-    }
+    protected void createUnbind(ClassWriter cw, String propertyName, String typeName) {
+        final org.objectweb.asm.Type type = org.objectweb.asm.Type.getType("L" + typeName + ";");
+        final String methodName = "unbind" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
+        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PROTECTED, methodName, "(" + type.toString() + ")V", null, null);
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitInsn(Opcodes.ACONST_NULL);
+        mv.visitFieldInsn(Opcodes.PUTFIELD, this.getName(), propertyName, type.toString());
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(0, 0);
+        // add to qdox
+        final JavaParameter param = new JavaParameter(new Type(typeName), "param");
+        final JavaParameter[] params = new JavaParameter[] {param};
+        final com.thoughtworks.qdox.model.JavaMethod meth = new com.thoughtworks.qdox.model.JavaMethod();
+        meth.setName(methodName);
+        meth.setParameters(params);
+        meth.setModifiers(new String[] {"protected"});
+        this.javaClass.addMethod(meth);
+      }
 
 }
