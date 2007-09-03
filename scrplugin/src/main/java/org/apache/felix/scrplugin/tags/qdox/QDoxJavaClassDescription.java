@@ -249,8 +249,12 @@ public class QDoxJavaClassDescription
 
             final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
             cn.accept(writer);
-            this.createBind(writer, propertyName, className);
-            this.createUnbind(writer, propertyName, className);
+            if ( createBind ) {
+                this.createMethod(writer, propertyName, className, true);
+            }
+            if ( createUnbind ) {
+                this.createMethod(writer, propertyName, className, false);
+            }
 
             final FileOutputStream fos = new FileOutputStream(fileName);
             fos.write(writer.toByteArray());
@@ -260,12 +264,16 @@ public class QDoxJavaClassDescription
         }
     }
 
-    protected void createBind(ClassWriter cw, String propertyName, String typeName) {
-        final org.objectweb.asm.Type type = org.objectweb.asm.Type.getType("L" + typeName + ";");
-        final String methodName = "bind" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
+    protected void createMethod(ClassWriter cw, String propertyName, String typeName, boolean bind) {
+        final org.objectweb.asm.Type type = org.objectweb.asm.Type.getType("L" + typeName.replace('.', '/') + ";");
+        final String methodName = (bind ? "" : "un") + "bind" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
         MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PROTECTED, methodName, "(" + type.toString() + ")V", null, null);
         mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitVarInsn(type.getOpcode(Opcodes.ILOAD), 1);
+        if ( bind ) {
+            mv.visitVarInsn(type.getOpcode(Opcodes.ILOAD), 1);
+        } else {
+            mv.visitInsn(Opcodes.ACONST_NULL);
+        }
         mv.visitFieldInsn(Opcodes.PUTFIELD, this.getName(), propertyName, type.toString());
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(0, 0);
@@ -277,25 +285,5 @@ public class QDoxJavaClassDescription
         meth.setParameters(params);
         meth.setModifiers(new String[] {"protected"});
         this.javaClass.addMethod(meth);
-      }
-
-    protected void createUnbind(ClassWriter cw, String propertyName, String typeName) {
-        final org.objectweb.asm.Type type = org.objectweb.asm.Type.getType("L" + typeName + ";");
-        final String methodName = "unbind" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
-        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PROTECTED, methodName, "(" + type.toString() + ")V", null, null);
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitInsn(Opcodes.ACONST_NULL);
-        mv.visitFieldInsn(Opcodes.PUTFIELD, this.getName(), propertyName, type.toString());
-        mv.visitInsn(Opcodes.RETURN);
-        mv.visitMaxs(0, 0);
-        // add to qdox
-        final JavaParameter param = new JavaParameter(new Type(typeName), "param");
-        final JavaParameter[] params = new JavaParameter[] {param};
-        final com.thoughtworks.qdox.model.JavaMethod meth = new com.thoughtworks.qdox.model.JavaMethod();
-        meth.setName(methodName);
-        meth.setParameters(params);
-        meth.setModifiers(new String[] {"protected"});
-        this.javaClass.addMethod(meth);
-      }
-
+    }
 }
