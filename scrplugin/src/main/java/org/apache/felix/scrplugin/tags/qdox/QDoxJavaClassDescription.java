@@ -247,7 +247,7 @@ public class QDoxJavaClassDescription
             final ClassReader reader = new ClassReader(new FileInputStream(fileName));
             reader.accept(cn, 0);
 
-            final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+            final ClassWriter writer = new ClassWriter(0);
             cn.accept(writer);
             if ( createBind ) {
                 this.createMethod(writer, propertyName, className, true);
@@ -274,9 +274,9 @@ public class QDoxJavaClassDescription
         } else {
             mv.visitInsn(Opcodes.ACONST_NULL);
         }
-        mv.visitFieldInsn(Opcodes.PUTFIELD, this.getName(), propertyName, type.toString());
+        mv.visitFieldInsn(Opcodes.PUTFIELD, this.getName().replace('.', '/'), propertyName, type.toString());
         mv.visitInsn(Opcodes.RETURN);
-        mv.visitMaxs(0, 0);
+        mv.visitMaxs(2, 2);
         // add to qdox
         final JavaParameter param = new JavaParameter(new Type(typeName), "param");
         final JavaParameter[] params = new JavaParameter[] {param};
