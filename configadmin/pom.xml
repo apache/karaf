@@ -58,6 +58,9 @@
                 <configuration>
                     <instructions>
                         <Bundle-Category>osgi</Bundle-Category>
+                        <Bundle-SymbolicName>
+                            ${artifactId}
+                        </Bundle-SymbolicName>
                         <Export-Package>
                             org.apache.felix.cm,
                             org.apache.felix.cm.file,
