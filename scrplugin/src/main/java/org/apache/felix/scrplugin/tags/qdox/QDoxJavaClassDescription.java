@@ -32,6 +32,7 @@ import org.apache.felix.scrplugin.tags.JavaMethod;
 import org.apache.felix.scrplugin.tags.JavaTag;
 import org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
@@ -234,10 +235,10 @@ public class QDoxJavaClassDescription
     /**
      * @see org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription#addMethods(java.lang.String, java.lang.String, boolean, boolean)
      */
-    public void addMethods(String propertyName,
-                           String className,
-                           boolean createBind,
-                           boolean createUnbind)
+    public void addMethods(final String propertyName,
+                           final String className,
+                           final boolean createBind,
+                           final boolean createUnbind)
     throws MojoExecutionException {
         // now do byte code manipulation
         final String targetDirectory = this.manager.getProject().getBuild().getOutputDirectory();
@@ -248,7 +249,34 @@ public class QDoxJavaClassDescription
             reader.accept(cn, 0);
 
             final ClassWriter writer = new ClassWriter(0);
-            cn.accept(writer);
+
+            // remove existing implementation von previous builds
+            final ClassAdapter adapter = new ClassAdapter(writer) {
+
+                protected final String bindMethodName = "bind" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
+                protected final String unbindMethodName = "unbind" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
+                protected final String description = "(L" + className.replace('.', '/') + ";)V";
+
+                /**
+                 * @see org.objectweb.asm.ClassAdapter#visitMethod(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
+                 */
+                public MethodVisitor visitMethod(int access,
+                                                 String name,
+                                                 String desc,
+                                                 String signature,
+                                                 String[] exceptions) {
+                    if ( createBind && name.equals(bindMethodName) && description.equals(desc) ) {
+                        return null;
+                    }
+                    if ( createUnbind && name.equals(unbindMethodName)  && description.equals(desc) ) {
+                        return null;
+                    }
+                    return super.visitMethod(access, name, desc, signature, exceptions);
+                }
+
+            };
+
+            cn.accept(adapter);
             if ( createBind ) {
                 this.createMethod(writer, propertyName, className, true);
             }
