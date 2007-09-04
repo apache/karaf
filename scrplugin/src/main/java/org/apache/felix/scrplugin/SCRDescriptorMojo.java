@@ -525,8 +525,8 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 ref.setUnbind(unbindValue);
             }
             // if this is a field we look for the bind/unbind methods
-            // and create them if they are not availabe
-            if ( this.generateAccessors ) {
+            // and create them if they are not availabe and the component is not abstract
+            if ( !component.isAbstract() && this.generateAccessors ) {
                 if ( reference.getField() != null && component.getJavaClassDescription() instanceof ModifiableJavaClassDescription ) {
                     boolean createBind = false;
                     boolean createUnbind = false;
