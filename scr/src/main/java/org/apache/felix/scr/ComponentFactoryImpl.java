@@ -33,8 +33,6 @@ import org.osgi.service.component.ComponentFactory;
 import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.log.LogService;
 
-import sun.security.action.GetBooleanAction;
-
 
 /**
  * The <code>ComponentFactoryImpl</code> TODO
