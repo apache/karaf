@@ -63,42 +63,55 @@ public class Reference extends AbstractObject {
     public String getName() {
         return this.name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
+
     public String getInterfacename() {
         return this.interfacename;
     }
+
     public void setInterfacename(String interfacename) {
         this.interfacename = interfacename;
     }
+
     public String getTarget() {
         return this.target;
     }
+
     public void setTarget(String target) {
         this.target = target;
     }
+
     public String getCardinality() {
         return this.cardinality;
     }
+
     public void setCardinality(String cardinality) {
         this.cardinality = cardinality;
     }
+
     public String getPolicy() {
         return this.policy;
     }
+
     public void setPolicy(String policy) {
         this.policy = policy;
     }
+
     public String getBind() {
         return this.bind;
     }
+
     public void setBind(String bind) {
         this.bind = bind;
     }
+
     public String getUnbind() {
         return this.unbind;
     }
+
     public void setUnbind(String unbind) {
         this.unbind = unbind;
     }

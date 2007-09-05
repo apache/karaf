@@ -514,7 +514,13 @@ public class SCRDescriptorMojo extends AbstractMojo {
             ref.setName(name);
             ref.setInterfacename(type);
             ref.setCardinality(reference.getNamedParameter(Constants.REFERENCE_CARDINALITY));
+            if ( ref.getCardinality() == null ) {
+                ref.setCardinality("1..1");
+            }
             ref.setPolicy(reference.getNamedParameter(Constants.REFERENCE_POLICY));
+            if ( ref.getPolicy() == null ) {
+                ref.setPolicy("static");
+            }
             ref.setTarget(reference.getNamedParameter(Constants.REFERENCE_TARGET));
             final String bindValue = reference.getNamedParameter(Constants.REFERENCE_BIND);
             if ( bindValue != null ) {
@@ -524,23 +530,26 @@ public class SCRDescriptorMojo extends AbstractMojo {
             if ( unbindValue != null ) {
                 ref.setUnbind(unbindValue);
             }
-            // if this is a field we look for the bind/unbind methods
+            // if this is a field with a single cardinality,
+            // we look for the bind/unbind methods
             // and create them if they are not availabe and the component is not abstract
             if ( !component.isAbstract() && this.generateAccessors ) {
                 if ( reference.getField() != null && component.getJavaClassDescription() instanceof ModifiableJavaClassDescription ) {
-                    boolean createBind = false;
-                    boolean createUnbind = false;
-                    // Only create method if no bind name has been specified
-                    if ( bindValue == null && ref.findMethod(ref.getBind()) == null ) {
-                        // create bind method
-                        createBind = true;
-                    }
-                    if ( unbindValue == null && ref.findMethod(ref.getUnbind()) == null ) {
-                        // create unbind method
-                        createUnbind = true;
-                    }
-                    if ( createBind || createUnbind ) {
-                        ((ModifiableJavaClassDescription)component.getJavaClassDescription()).addMethods(name, type, createBind, createUnbind);
+                    if ( ref.getCardinality().equals("0..1") || ref.getCardinality().equals("1..1") ) {
+                        boolean createBind = false;
+                        boolean createUnbind = false;
+                        // Only create method if no bind name has been specified
+                        if ( bindValue == null && ref.findMethod(ref.getBind()) == null ) {
+                            // create bind method
+                            createBind = true;
+                        }
+                        if ( unbindValue == null && ref.findMethod(ref.getUnbind()) == null ) {
+                            // create unbind method
+                            createUnbind = true;
+                        }
+                        if ( createBind || createUnbind ) {
+                            ((ModifiableJavaClassDescription)component.getJavaClassDescription()).addMethods(name, type, createBind, createUnbind);
+                        }
                     }
                 }
             }
