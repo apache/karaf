@@ -261,7 +261,16 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
                 tag = fields[i].getTagByName(Constants.PROPERTY);
                 if (tag != null) {
-                    this.doProperty(tag, fields[i].getInitializationExpression(), component, ocd);
+                    String defaultName = null;
+                    if ( "java.lang.String".equals(fields[i].getType()) ) {
+                        defaultName = fields[i].getInitializationExpression().trim();
+                        int pos = defaultName.indexOf("\"");
+                        if ( pos != -1 ) {
+                            defaultName = defaultName.substring(pos + 1);
+                            defaultName = defaultName.substring(0, defaultName.lastIndexOf("\""));
+                        }
+                    }
+                    this.doProperty(tag, defaultName, component, ocd);
                 }
             }
 
@@ -388,10 +397,8 @@ public class SCRDescriptorMojo extends AbstractMojo {
      */
     protected void doProperty(JavaTag property, String defaultName, Component component, OCD ocd) {
         String name = property.getNamedParameter(Constants.PROPERTY_NAME);
-        if (StringUtils.isEmpty(name) && defaultName!= null) {
-            name = defaultName.trim();
-            if (name.startsWith("\"")) name = name.substring(1);
-            if (name.endsWith("\"")) name = name.substring(0, name.length()-1);
+        if (StringUtils.isEmpty(name) && defaultName != null) {
+            name = defaultName;
         }
 
         if (!StringUtils.isEmpty(name)) {
