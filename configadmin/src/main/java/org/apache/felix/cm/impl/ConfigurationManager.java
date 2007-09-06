@@ -44,6 +44,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
 import org.osgi.service.cm.ConfigurationException;
@@ -112,6 +113,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     // the BundleContext of the Configuration Admin Service bundle
     private BundleContext bundleContext;
 
+    // the service registration of the configuration admin
+    private ServiceRegistration configurationAdminRegistration;
+    
     // the service reference to the ConfigurationAdmin service
     private ServiceReference configurationAdminReference;
 
@@ -203,7 +207,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         props.put( Constants.SERVICE_PID, "org.apache.felix.cm.ConfigurationAdmin" );
         props.put( Constants.SERVICE_DESCRIPTION, "Configuration Admin Service Specification 1.2 Implementation" );
         props.put( Constants.SERVICE_VENDOR, "Apache Software Foundation" );
-        bundleContext.registerService( ConfigurationAdmin.class.getName(), caf, props );
+        configurationAdminRegistration = bundleContext.registerService( ConfigurationAdmin.class.getName(), caf, props );
 
         // start handling ManagedService[Factory] services
         managedServiceTracker = new ManagedServiceTracker();
@@ -213,6 +217,11 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
     public void stop( BundleContext bundleContext )
     {
+
+        // immediately unregister the Configuration Admin before cleaning up
+        configurationAdminRegistration.unregister();
+        configurationAdminRegistration = null;
+        
         // stop handling ManagedService[Factory] services
         managedServiceFactoryTracker.close();
         managedServiceTracker.close();
