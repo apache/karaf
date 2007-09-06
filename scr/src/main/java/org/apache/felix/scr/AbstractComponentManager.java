@@ -299,7 +299,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      *   4. Call the activate method, if present
      *   [5. Register provided services]
      */
-    private void activateInternal()
+    private synchronized void activateInternal()
     {
         // CONCURRENCY NOTE: This method is only called from within the
         //     ComponentActorThread to enable, activate or reactivate the
@@ -315,6 +315,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         {
             getActivator().log( LogService.LOG_DEBUG,
                 "Component cannot be activated because the Activator is being disposed", m_componentMetadata, null );
+            setState( STATE_UNSATISFIED );
             return;
         }
 
@@ -372,13 +373,13 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      * 2. Unbind any bound services
      * 3. Release references to the component instance and component context
     **/
-    private void deactivateInternal()
+    private synchronized void deactivateInternal()
     {
         // CONCURRENCY NOTE: This method may be called either from the
         //     ComponentActorThread to handle application induced disabling or
         //     as a result of an unsatisfied service dependency leading to
         //     component deactivation. We therefore have to guard against
-        //     paralell state changes.from application
+        //     paralell state changes.
         if ( !setStateConditional( STATE_ACTIVATING | STATE_ACTIVE | STATE_REGISTERED | STATE_FACTORY,
             STATE_DEACTIVATING ) )
         {
