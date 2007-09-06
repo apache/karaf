@@ -187,8 +187,8 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
         // create metatype information
         File mtFile = new File(this.outputDirectory, "OSGI-INF" + File.separator + "metatype" + File.separator + this.metaTypeName);
-        mtFile.getParentFile().mkdirs();
         if ( metaData.getDescriptors().size() > 0 ) {
+            mtFile.getParentFile().mkdirs();
             MetaTypeIO.write(metaData, mtFile);
         } else {
             if ( mtFile.exists() ) {
