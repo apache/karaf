@@ -307,6 +307,12 @@ class DependencyManager implements ServiceListener
 
             // we have at least on service bound
             success = true;
+            
+            // if the reference is not multiple, we are already done
+            if ( !m_dependencyMetadata.isMultiple() )
+            {
+                break;
+            }
         }
 
         // success will be true, if the service is optional or if at least
