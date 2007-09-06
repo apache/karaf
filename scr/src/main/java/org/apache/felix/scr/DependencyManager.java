@@ -274,31 +274,45 @@ class DependencyManager implements ServiceListener
         ServiceReference refs[] = getServiceReferences();
 
         // refs can be null if the dependency is optional
-        if ( refs != null )
+        if ( refs == null )
         {
-            int max = 1;
-            boolean retval = true;
-
-            if ( m_dependencyMetadata.isMultiple() == true )
+            return true;
+        }
+        
+        // assume success to begin with: if the dependency is optional,
+        // we don't care, whether we can bind a service. Otherwise, we
+        /// require at least one service to be bound, thus we require
+        // flag being set in the loop below
+        boolean success = m_dependencyMetadata.isOptional();
+        
+        // number of services to bind
+        for ( int index = 0; index < refs.length; index++ )
+        {
+            // get the service, don't try to bind if the service has gone
+            // since we got the service references above
+            Object service = getService( refs[index] );
+            if ( service == null )
             {
-                max = refs.length;
+                m_componentManager.getActivator().log( LogService.LOG_INFO,
+                    "Dependency Manager: Service " + refs[index] + " has already gone, not binding",
+                    m_componentManager.getComponentMetadata(), null );
+                continue;
             }
 
-            for ( int index = 0; index < max; index++ )
-            {
-                retval = invokeBindMethod( instance, refs[index], getService( refs[index] ) );
-                if ( retval == false && ( max == 1 ) )
-                {
-                    // There was an exception when calling the bind method
-                    m_componentManager.getActivator().log( LogService.LOG_ERROR,
-                        "Dependency Manager: Possible exception in the bind method during initialize()",
-                        m_componentManager.getComponentMetadata(), null );
-                    return false;
-                }
-            }
+            // call the bind method, but ignore success:
+            // 112.5.7 If a bind method throws an exception, SCR must log
+            // an error message (done in invokeBindMethod) but the activation
+            // does not fail
+            invokeBindMethod( instance, refs[index], service );
+
+            // we have at least on service bound
+            success = true;
         }
 
-        return true;
+        // success will be true, if the service is optional or if at least
+        // one service was available to be bound (regardless of whether the
+        // bind method succeeded or not)
+        return success;
     }
 
 
@@ -452,8 +466,7 @@ class DependencyManager implements ServiceListener
     private boolean invokeBindMethod( Object implementationObject, ServiceReference ref, Object service )
     {
         // The bind method is only invoked if the implementation object is not
-        // null. This is valid
-        // for both immediate and delayed components
+        // null. This is valid for both immediate and delayed components
         if ( implementationObject != null )
         {
 
