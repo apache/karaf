@@ -58,6 +58,7 @@
         <module>ehcache</module>
         <module>hibernate</module>
         <module>hsqldb</module>
+	<module>jline</module>
         <module>jms</module>
         <!-- <module>jmxtools</module>  -->
         <module>jstl</module>
