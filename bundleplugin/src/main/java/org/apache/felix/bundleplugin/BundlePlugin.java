@@ -544,6 +544,12 @@ public class BundlePlugin extends AbstractMojo {
                 {
                     path = path.substring(basePath.length() + 1);
                 }
+                // replace windows backslash with a slash
+                // this is a workaround for a problem with bnd 0.0.189
+                if ( File.separatorChar != '/' )
+                {
+                    path = path.replace(File.separatorChar, '/');
+                }
 
                 if (targetPath != null)
                 {
