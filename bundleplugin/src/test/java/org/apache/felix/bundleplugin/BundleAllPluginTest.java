@@ -24,7 +24,6 @@ import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.stubs.ArtifactStub;
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
 import org.apache.maven.project.MavenProject;

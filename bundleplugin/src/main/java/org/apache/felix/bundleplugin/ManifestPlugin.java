@@ -19,6 +19,7 @@
 package org.apache.felix.bundleplugin;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -56,6 +57,10 @@ public class ManifestPlugin
         try
         {
             manifest = this.getManifest( project, instructions, properties, classpath );
+        }
+        catch ( FileNotFoundException e )
+        {
+            throw new MojoExecutionException( "Cannot find " + e.getMessage() + " (manifest goal must be run after compile phase)", e );
         }
         catch ( IOException e )
         {
@@ -112,16 +117,15 @@ public class ManifestPlugin
         File file = project.getArtifact().getFile();
         if ( file == null )
         {
-            analyzer.setJar( this.getOutputDirectory() );
+            file = getOutputDirectory();
         }
-        else
+
+        if ( !file.exists() )
         {
-            if ( !file.exists() )
-            {
-                file.mkdirs();
-            }
-            analyzer.setJar( project.getArtifact().getFile() );
+            throw new FileNotFoundException( file.getPath() );
         }
+
+        analyzer.setJar( file );
 
         if ( classpath != null )
             analyzer.setClasspath( classpath );
