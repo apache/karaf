@@ -123,7 +123,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
             final JavaTag tag = javaSources[i].getTagByName(Constants.COMPONENT);
             if (tag != null) {
                 this.getLog().debug("Processing service class " + javaSources[i].getName());
-                final Component comp = this.createComponent(javaSources[i], metaData);
+                final Component comp = this.createComponent(javaSources[i], tag, metaData);
                 if (comp != null) {
                     if ( comp.isAbstract() ) {
                         this.getLog().debug("Adding abstract descriptor " + comp);
@@ -219,10 +219,9 @@ public class SCRDescriptorMojo extends AbstractMojo {
      * @return The generated component descriptor or null if any error occurs.
      * @throws MojoExecutionException
      */
-    protected Component createComponent(JavaClassDescription description, MetaData metaData)
+    protected Component createComponent(JavaClassDescription description, JavaTag componentTag, MetaData metaData)
     throws MojoExecutionException {
-
-        final JavaTag componentTag = description.getTagByName(Constants.COMPONENT);
+        // create a new component
         final Component component = new Component(componentTag);
 
         // set implementation
@@ -277,6 +276,23 @@ public class SCRDescriptorMojo extends AbstractMojo {
             description = description.getSuperClass();
         } while (inherited && description != null);
 
+        // pid handling
+        final boolean createPid = this.getBoolean(componentTag, Constants.COMPONENT_CREATE_PID, true);
+        if ( createPid ) {
+            // check for an existing pid first
+            boolean found = false;
+            final Iterator iter = component.getProperties().iterator();
+            while ( !found && iter.hasNext() ) {
+                final Property prop = (Property)iter.next();
+                found = org.osgi.framework.Constants.SERVICE_PID.equals( prop.getName() );
+            }
+            if ( !found ) {
+                final Property pid = new Property();
+                component.addProperty(pid);
+                pid.setName(org.osgi.framework.Constants.SERVICE_PID);
+                pid.setValue(component.getName());
+            }
+        }
         final List issues = new ArrayList();
         final List warnings = new ArrayList();
         component.validate(issues, warnings);

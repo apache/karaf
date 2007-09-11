@@ -87,6 +87,9 @@ public class Property extends AbstractObject {
      * warnings can be added to the warnings list.
      */
     public void validate(List issues, List warnings) {
-        // might want to check name and type
+        if ( name == null || name.trim().length() == 0 ) {
+            issues.add(this.getMessage("Property name can not be empty."));
+        }
+        // might want to check type (and value)
     }
 }
