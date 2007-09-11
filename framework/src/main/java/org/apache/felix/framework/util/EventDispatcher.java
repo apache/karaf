@@ -82,12 +82,17 @@ public class EventDispatcher
         synchronized (m_threadLock)
         {
             // Start event dispatching thread if necessary.
-            if (m_thread == null)
+            if (m_thread == null || !m_thread.isAlive())
             {
                 m_thread = new Thread(new Runnable() {
                     public void run()
                     {
                         EventDispatcher.run();
+                        // Ensure we update state even if stopped by external cause
+                        // e.g. an Applet VM forceably killing threads
+                        m_thread = null;
+                        m_stopped = true;
+                        m_stopping = false;
                     }
                 }, "FelixDispatchQueue");
                 m_thread.start();
@@ -125,21 +130,6 @@ public class EventDispatcher
             {
                 m_requestList.notify();
             }
-
-            // Wait for dispatch thread to stop.
-            while (!m_stopped)
-            {
-                try
-                {
-                    m_threadLock.wait();
-                }
-                catch (InterruptedException ex)
-                {
-                }
-            }
-
-            // remove the thread reference
-            m_thread = null;
         }
     }
 
@@ -786,11 +776,6 @@ public class EventDispatcher
                 // has been called then exit, otherwise dispatch event.
                 if ((m_requestList.size() == 0) && (m_stopping))
                 {
-                    synchronized (m_threadLock)
-                    {
-                        m_stopped = true;
-                        m_threadLock.notifyAll();
-                    }
                     return;
                 }
 
