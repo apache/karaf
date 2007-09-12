@@ -92,7 +92,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
@@ -100,7 +100,7 @@
             <Main-Class>org.apache.felix.main.Main</Main-Class>
             <Bundle-Name>Apache Felix</Bundle-Name>
             <Bundle-Description>OSGi R4 framework.</Bundle-Description>
-            <Private-Package>org.apache.felix.main.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.startlevel,org.osgi.service.url,org.osgi.util.tracker</Private-Package>
+            <Private-Package>org.apache.felix.main.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.osgi.framework;-split-package:=merge-last,org.osgi.service.packageadmin;-split-package:=merge-last,org.osgi.service.startlevel;-split-package:=merge-last,org.osgi.service.url;-split-package:=merge-last,org.osgi.util.tracker;-split-package:=merge-last</Private-Package>
             <Import-Package>!*</Import-Package>
             <Include-Resource>{src/main/resources/}</Include-Resource>
           </instructions>
@@ -110,23 +110,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
-          <execution>
-            <id>unpack</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <configuration>
-               <outputDirectory>${project.build.outputDirectory}</outputDirectory>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>${pom.groupId}</groupId>
-                  <artifactId>org.apache.felix.framework</artifactId>
-                  <version>1.1.0-SNAPSHOT</version>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
           <execution>
             <id>copy</id>
             <phase>install</phase>
