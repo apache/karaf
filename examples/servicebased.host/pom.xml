@@ -48,7 +48,7 @@
         <configuration>
           <instructions>
             <Main-Class>org.apache.felix.example.servicebased.host.Activator</Main-Class>
-            <Import-Package>org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.url,org.osgi.service.startlevel,org.osgi.util.tracker,*</Import-Package>
+            <Import-Package>javax.microedition.io;resolution:=optional, org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.url,org.osgi.service.startlevel,org.osgi.util.tracker,*</Import-Package>
             <Export-Package>org.apache.felix.example.servicebased.host.service.*</Export-Package>
             <Private-Package>org.apache.felix.example.servicebased.host.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.osgi.*</Private-Package>
             <Bundle-Activator>org.apache.felix.example.servicebased.host.Activator</Bundle-Activator>
