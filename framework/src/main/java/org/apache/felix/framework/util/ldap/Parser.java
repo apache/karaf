@@ -38,14 +38,6 @@ public class Parser
     public static final char RPAREN = ')';
     public static final char STAR = '*';
 
-    // Define the list of legal leading and trailing
-    // characters in an attribute name.
-    public static final String ATTRIBUTECHARS0 =
-        ".abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
-    // Define the list of legal internal characters in an attribute name.
-    public static final String ATTRIBUTECHARS1 =
-        ".abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_ ";
-
     // Define an enum for substring procedure
     public static final int SIMPLE = 0;
     public static final int PRESENT = 1;
@@ -65,8 +57,8 @@ public class Parser
 
     // Flag indicating presense of BigDecimal.
     private static boolean m_hasBigDecimal = false;
-	
-	private static final Class[] STRING_CLASS = new Class[] { String.class };
+    
+    private static final Class[] STRING_CLASS = new Class[] { String.class };
 
     static 
     {
@@ -179,7 +171,7 @@ public class Parser
                 int cnt = filterlist();
                 if (cnt == 0)
                 {
-                    return false;
+                    return item((c == '&') ? "&" : "|");
                 }
                 // Code: [And|Or](cnt)
                 program.add(
@@ -191,21 +183,21 @@ public class Parser
                 lexer.get();
                 if (!filter())
                 {
-                    return false;
+                    return item("!");
                 }
                 // Code: Not()
                 program.add(new NotOperator());
                 return true;
+            case '=':
+            case '>':
+            case '<':
+            case '~':
+            case '(':
+            case ')':
             case EOF :
                 return false;
             default :
-                // check for key
-                if (ATTRIBUTECHARS0.indexOf(c) <= 0)
-                {
-                    return false;
-                }
-                boolean b = item();
-                return b;
+                return item("");        
         }
     }
 
@@ -234,16 +226,15 @@ public class Parser
     <present> ::= <attr> '=*'
     <substring> ::= <attr> '=' <initial> <any> <final>
     */
-    boolean item() throws ParseException, IOException
+    boolean item(String start) throws ParseException, IOException
     {
         debug("item");
 
-        StringBuffer attr = new StringBuffer();
+        StringBuffer attr = new StringBuffer(start);
         if (!attribute(attr))
         {
             return false;
         }
-
         lexer.skipwhitespace(); // assume allowable before equal operator
         // note: I treat the =* case as = followed by a special substring
         int op = equalop();
@@ -326,27 +317,46 @@ public class Parser
     {
         debug("attribute");
         lexer.skipwhitespace();
-        buf.setLength(0);
-        int c = lexer.peek(); // need to make sure there
+        int c = lexer.peek(); 
+        // need to make sure there
         // is at least one KEYCHAR
-        if (c == EOF)
+        switch (c) 
         {
-            return false;
-        }
-        if (ATTRIBUTECHARS0.indexOf(c) < 0)
-        {
-            return false;
+            case '=':
+            case '>':
+            case '<':
+            case '~':
+            case '(':
+            case ')':
+            case EOF:
+                return false;
+            default:
+                break;
         }
 
-        do
+        boolean parsing = true;
+        while (parsing)
         {
             buf.append((char) lexer.get());
+            c = lexer.peek();
+            switch (c) 
+            {
+                case '=':
+                case '>':
+                case '<':
+                case '~':
+                case '(':
+                case ')':
+                case EOF:
+                    parsing = false;
+                default:
+                    break;
+            }
         }
-        while (ATTRIBUTECHARS1.indexOf(lexer.peek()) >= 0);
 
         // The above may have accumulated trailing blanks that must be removed
         int i = buf.length() - 1;
-        while (i > 0 && buf.charAt(i) == ' ')
+        while (i > 0 && Character.isWhitespace(buf.charAt(i)))
         {
             i--;
         }
@@ -443,6 +453,7 @@ loop:   for (;;)
                     }
                     ss.append((char) c);
                     break;
+                case LPAREN:
                 case EOF :
                     if (pieces.size() > 0)
                     {
@@ -1186,7 +1197,7 @@ loop:   for (;;)
             {
                 String piece = (String) pieces[i];
                 if (i > 0)
-				{
+                {
                     b.append("*");
                 }
                 b.append(piece);
@@ -1318,11 +1329,11 @@ loop:   for (;;)
         }
         // If LHS is a vector, then call compare() on each element
         // of the vector until a match is found.
-        else if (lhs instanceof Vector)
+        else if (lhs instanceof Collection)
         {
-            for (Enumeration e = ((Vector) lhs).elements(); e.hasMoreElements();)
+            for (Iterator iter = ((Collection) lhs).iterator(); iter.hasNext();)
             {
-                if (compare(e.nextElement(), rhs, operator))
+                if (compare(iter.next(), rhs, operator))
                 {
                     return true;
                 }
