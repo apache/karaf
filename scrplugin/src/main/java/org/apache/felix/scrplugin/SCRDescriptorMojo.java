@@ -209,8 +209,11 @@ public class SCRDescriptorMojo extends AbstractMojo {
             resource.setDirectory(this.outputDirectory.getAbsolutePath());
             this.project.addResource(resource);
         }
+        
         // and set include accordingly
-        this.project.getProperties().setProperty("Service-Component", "OSGI-INF/" + this.finalName);
+        String svcComp = project.getProperties().getProperty("Service-Component");
+        svcComp= (svcComp == null) ? "OSGI-INF/" + finalName : svcComp + ", " + "OSGI-INF/" + finalName;
+        project.getProperties().setProperty("Service-Component", svcComp);
     }
 
     /**
