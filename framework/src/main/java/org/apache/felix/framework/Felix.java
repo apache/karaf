@@ -2839,7 +2839,7 @@ ex.printStackTrace();
                 }
             }
         }
-        return null;
+        return (getInfo().getCurrentModule().getClass(clazz.getName()) == clazz) ? this : null;
     }
 
     /**
