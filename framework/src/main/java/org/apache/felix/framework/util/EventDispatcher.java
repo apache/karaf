@@ -61,11 +61,10 @@ public class EventDispatcher
 
     // A single thread is used to deliver events for all dispatchers.
     private static Thread m_thread = null;
-    private static String m_threadLock = "thread lock";
-    private static String m_shutdownLock = "thread shutdown lock";
+    private static String m_threadLock = new String("thread lock");
     private static int m_references = 0;
-    private static boolean m_stopping = false;
-    
+    private static volatile boolean m_stopping = false;
+
     // List of requests.
     private static final ArrayList m_requestList = new ArrayList();
     // Pooled requests to avoid memory allocation.
@@ -86,29 +85,31 @@ public class EventDispatcher
             if (m_thread == null || !m_thread.isAlive())
             {
                 m_stopping = false;
-                
+
                 m_thread = new Thread(new Runnable() {
                     public void run()
                     {
-                        EventDispatcher.run();
-                        // Ensure we update state even if stopped by external cause
-                        // e.g. an Applet VM forceably killing threads
-                        synchronized (m_threadLock)
+                        try
                         {
-                            m_thread = null;
-                            m_stopping = false;
-                            m_references = 0;
+                            EventDispatcher.run();
                         }
-                        
-                        synchronized (m_shutdownLock)
+                        finally 
                         {
-                            m_shutdownLock.notifyAll();
+                             // Ensure we update state even if stopped by external cause
+                            // e.g. an Applet VM forceably killing threads
+                            synchronized (m_threadLock)
+                            {
+                                m_thread = null;
+                                m_stopping = false;
+                                m_references = 0;
+                                m_threadLock.notifyAll();
+                            }
                         }
                     }
                 }, "FelixDispatchQueue");
                 m_thread.start();
             }
-            
+
             // reference counting and flags
             m_references++;
         }
@@ -132,24 +133,24 @@ public class EventDispatcher
             {
                 return;
             }
-            
+
             m_stopping = true;
         }
-        
+
         // Signal dispatch thread.
         synchronized (m_requestList)
         {
             m_requestList.notify();
         }
-        
+
         // Use separate lock for shutdown to prevent any chance of nested lock deadlock
-        synchronized (m_shutdownLock)
+        synchronized (m_threadLock)
         {
             while (m_thread != null)
             {
                 try
                 {
-                    m_shutdownLock.wait();
+                    m_threadLock.wait();
                 }
                 catch (InterruptedException ex)
                 {
