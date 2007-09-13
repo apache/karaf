@@ -62,9 +62,10 @@ public class EventDispatcher
     // A single thread is used to deliver events for all dispatchers.
     private static Thread m_thread = null;
     private static String m_threadLock = "thread lock";
+    private static String m_shutdownLock = "thread shutdown lock";
     private static int m_references = 0;
     private static boolean m_stopping = false;
-    private static boolean m_stopped = false;
+    
     // List of requests.
     private static final ArrayList m_requestList = new ArrayList();
     // Pooled requests to avoid memory allocation.
@@ -84,24 +85,32 @@ public class EventDispatcher
             // Start event dispatching thread if necessary.
             if (m_thread == null || !m_thread.isAlive())
             {
+                m_stopping = false;
+                
                 m_thread = new Thread(new Runnable() {
                     public void run()
                     {
                         EventDispatcher.run();
                         // Ensure we update state even if stopped by external cause
                         // e.g. an Applet VM forceably killing threads
-                        m_thread = null;
-                        m_stopped = true;
-                        m_stopping = false;
+                        synchronized (m_threadLock)
+                        {
+                            m_thread = null;
+                            m_stopping = false;
+                            m_references = 0;
+                        }
+                        
+                        synchronized (m_shutdownLock)
+                        {
+                            m_shutdownLock.notifyAll();
+                        }
                     }
                 }, "FelixDispatchQueue");
                 m_thread.start();
             }
-
+            
             // reference counting and flags
             m_references++;
-            m_stopping = false;
-            m_stopped = false;
         }
 
         return eventDispatcher;
@@ -111,8 +120,8 @@ public class EventDispatcher
     {
         synchronized (m_threadLock)
         {
-            // Return if already stopped.
-            if (m_stopped)
+            // Return if already dead or stopping.
+            if (m_thread == null || m_stopping)
             {
                 return;
             }
@@ -123,12 +132,28 @@ public class EventDispatcher
             {
                 return;
             }
-
-            // Signal dispatch thread.
+            
             m_stopping = true;
-            synchronized (m_requestList)
+        }
+        
+        // Signal dispatch thread.
+        synchronized (m_requestList)
+        {
+            m_requestList.notify();
+        }
+        
+        // Use separate lock for shutdown to prevent any chance of nested lock deadlock
+        synchronized (m_shutdownLock)
+        {
+            while (m_thread != null)
             {
-                m_requestList.notify();
+                try
+                {
+                    m_shutdownLock.wait();
+                }
+                catch (InterruptedException ex)
+                {
+                }
             }
         }
     }
@@ -531,8 +556,9 @@ public class EventDispatcher
     private void fireEventAsynchronously(
         Logger logger, int type, Object[] listeners, EventObject event)
     {
+        //TODO: should possibly check this within thread lock, seems to be ok though without
         // If dispatch thread is stopped, then ignore dispatch request.
-        if (m_stopped || m_stopping)
+        if (m_stopping || m_thread == null)
         {
             return;
         }
