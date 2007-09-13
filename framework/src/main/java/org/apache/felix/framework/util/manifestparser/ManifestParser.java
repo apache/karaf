@@ -119,32 +119,20 @@ public class ManifestParser
         ICapability[] exportCaps = parseExportHeader(
             (String) headerMap.get(Constants.EXPORT_PACKAGE));
 
-        // Create non-duplicated export array.
-        dupeMap.clear();
+        // Verify that "java.*" packages are not exported.
         for (int capIdx = 0; capIdx < exportCaps.length; capIdx++)
         {
             // Verify that the named package has not already been declared.
             String pkgName = (String)
                 exportCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY);
-            if (dupeMap.get(pkgName) == null)
+            // Verify that java.* packages are not exported.
+            if (pkgName.startsWith("java."))
             {
-                // Verify that java.* packages are not exported.
-                if (pkgName.startsWith("java."))
-                {
-                    throw new BundleException(
-                        "Exporting java.* packages not allowed: " + pkgName);
-                }
-                dupeMap.put(pkgName, exportCaps[capIdx]);
+                throw new BundleException(
+                    "Exporting java.* packages not allowed: " + pkgName);
             }
-            else
-            {
-                // TODO: FRAMEWORK - Exports can be duplicated, so fix this.
-                m_logger.log(Logger.LOG_WARNING, "Duplicate export - " + pkgName);
-            }
+            capList.add(exportCaps[capIdx]);
         }
-
-        // Add export package capabilities to capability list.
-        capList.addAll(dupeMap.values());
 
         // Create an array of all capabilities.
         m_capabilities = (ICapability[]) capList.toArray(new ICapability[capList.size()]);
