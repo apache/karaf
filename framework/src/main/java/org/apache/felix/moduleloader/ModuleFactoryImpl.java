@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -70,6 +70,28 @@ public class ModuleFactoryImpl implements IModuleFactory
         fireModuleAdded(module);
 
         return module;
+    }
+
+    /**
+     * This is an experimental method that is likely to change or go
+     * away - so don't use it for now.
+     *
+     * Note to self, we need to think about what the implications of
+     * this are and whether we are fine with them.
+     */
+    public void refreshModule(IModule module)
+    {
+        boolean fire = false;
+
+        synchronized (this)
+        {
+            fire = (m_moduleMap.get(module.getId()) != null);
+        }
+
+        if (fire)
+        {
+            fireModuleRefreshed(module);
+        }
     }
 
     public void removeModule(IModule module)
@@ -267,6 +289,34 @@ public class ModuleFactoryImpl implements IModuleFactory
                 event = new ModuleEvent(this, module);
             }
             listeners[i].moduleRemoved(event);
+        }
+    }
+
+    /**
+     * This is an experimental method that is likely to change or go
+     * away - so don't use it for now.
+     *
+     * Note to self, we need to think about what the implications of
+     * this are and whether we are fine with them.
+     */
+    protected void fireModuleRefreshed(IModule module)
+    {
+     // Event holder.
+        ModuleEvent event = null;
+
+        // Get a copy of the listener array, which is guaranteed
+        // to not be null.
+        ModuleListener[] listeners = m_listeners;
+
+        // Loop through listeners and fire events.
+        for (int i = 0; i < listeners.length; i++)
+        {
+            // Lazily create event.
+            if (event == null)
+            {
+                event = new ModuleEvent(this, module);
+            }
+            listeners[i].moduleRefreshed(event);
         }
     }
 }

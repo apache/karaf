@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -48,4 +48,13 @@ public interface ModuleListener extends EventListener
      * @param event the event object containing the event details.
     **/
     public void moduleRemoved(ModuleEvent event);
+
+    /**
+     * This is an experimental method that is likely to change or go
+     * away - so don't use it for now.
+     *
+     * Note to self, we need to think about what the implications of
+     * this are and whether we are fine with them.
+     */
+    public void moduleRefreshed(ModuleEvent event);
 }
