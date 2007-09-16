@@ -1,3 +1,9 @@
+Changes from 1.0.0 to 1.0.1
+---------------------------
+
+* [2007-09-16] Update to framework version 1.0.1.
+
+
 Changes from 0.8.0-incubator to 1.0.0
 -------------------------------------
 
