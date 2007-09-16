@@ -780,6 +780,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             {
                 String pkgName = ((Requirement) req).getPackageName();
                 IModule[] modules = (IModule[]) m_inUsePkgIndexMap.get(pkgName);
+
                 for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
                 {
                     ICapability inUseCap = Util.getSatisfyingCapability(modules[modIdx], req);
@@ -2456,6 +2457,64 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         }
     }
 
+    /**
+     * This is an experimental method that is likely to change or go
+     * away - so don't use it for now.
+     *
+     * Note to self, we need to think about what the implications of
+     * this are and whether we are fine with them.
+     */
+    /*
+     * This method is used by the framework to let us know that we need to re-read
+     * the system bundle capabilities which have been extended by an extension bundle.
+     *
+     * For now we assume that capabilities have been added only. We might need to
+     * enforce that at one point of time.
+     */
+    public void moduleRefreshed(ModuleEvent event)
+    {
+        synchronized (m_factory)
+        {
+            IModule module = event.getModule();
+         // Remove exports from package maps.
+            ICapability[] caps = event.getModule().getDefinition().getCapabilities();
+            // Add exports to available package map.
+            for (int i = 0; (caps != null) && (i < caps.length); i++)
+            {
+                if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                {
+                    indexPackageCapability(m_availPkgIndexMap, module, caps[i]);
+                }
+
+
+                ICapability[] inUseCaps = (ICapability[]) m_inUseCapMap.get(module);
+                inUseCaps = addCapabilityToArray(inUseCaps, caps[i]);
+                m_inUseCapMap.put(module, inUseCaps);
+
+                // If the capability is a package, then add the exporter module
+                // of the wire to the "in use" package index and remove it
+                // from the "available" package index.
+                if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                {
+                    // Get package name.
+                    String pkgName = (String)
+                        caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
+                    // Add to "in use" package index.
+                    indexPackageCapability(
+                        m_inUsePkgIndexMap,
+                        module,
+                        caps[i]);
+                    // Remove from "available" package index.
+                    m_availPkgIndexMap.put(
+                        pkgName,
+                        removeModuleFromArray(
+                            (IModule[]) m_availPkgIndexMap.get(pkgName),
+                            module));
+                }
+            }
+        }
+    }
+
     private void indexPackageCapability(Map map, IModule module, ICapability capability)
     {
         if (capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
@@ -2579,35 +2638,39 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         }
 
         int idx = -1;
-        for (int i = 0; i < modules.length; i++)
+        do
         {
-            if (modules[i] == m)
+            idx = -1;
+            for (int i = 0; i < modules.length; i++)
             {
-                idx = i;
-                break;
-            }
-        }
-
-        if (idx >= 0)
-        {
-            // If this is the module, then point to empty list.
-            if ((modules.length - 1) == 0)
-            {
-                modules = m_emptyModules;
-            }
-            // Otherwise, we need to do some array copying.
-            else
-            {
-                IModule[] newModules = new IModule[modules.length - 1];
-                System.arraycopy(modules, 0, newModules, 0, idx);
-                if (idx < newModules.length)
+                if (modules[i] == m)
                 {
-                    System.arraycopy(
-                        modules, idx + 1, newModules, idx, newModules.length - idx);
+                    idx = i;
+                    break;
                 }
-                modules = newModules;
             }
-        }
+
+            if (idx >= 0)
+            {
+                // If this is the module, then point to empty list.
+                if ((modules.length - 1) == 0)
+                {
+                    modules = m_emptyModules;
+                }
+                // Otherwise, we need to do some array copying.
+                else
+                {
+                    IModule[] newModules = new IModule[modules.length - 1];
+                    System.arraycopy(modules, 0, newModules, 0, idx);
+                    if (idx < newModules.length)
+                    {
+                        System.arraycopy(
+                            modules, idx + 1, newModules, idx, newModules.length - idx);
+                    }
+                    modules = newModules;
+                }
+            }
+        } while (idx >= 0);
         return modules;
     }
 

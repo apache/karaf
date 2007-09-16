@@ -40,7 +40,7 @@ public class Felix extends FelixBundle
 
     // The extension manager to handle extension bundles
     private ExtensionManager m_extensionManager;
-    
+
     // Logging related member variables.
     private Logger m_logger = null; // TODO: KARL - Why package private?
     // Immutable config properties.
@@ -265,7 +265,7 @@ public class Felix extends FelixBundle
         m_factory = new ModuleFactoryImpl(m_logger);
         m_systemBundleInfo = new BundleInfo(
             m_logger, new SystemBundleArchive(m_cache), null);
-        m_extensionManager = 
+        m_extensionManager =
             new ExtensionManager(m_logger, m_configMap, m_systemBundleInfo);
         m_systemBundleInfo.addModule(
             m_factory.createModule("0", m_extensionManager));
@@ -783,7 +783,7 @@ ex.printStackTrace();
         // bundle ID from persistent storage. In case of failure, we should
         // keep the max value.
         m_nextId = Math.max(m_nextId, loadNextId());
-        
+
         // Get the framework's default start level.
         int startLevel = FelixConstants.FRAMEWORK_DEFAULT_STARTLEVEL;
         String s = (String) m_configMap.get(FelixConstants.FRAMEWORK_STARTLEVEL_PROP);
@@ -1727,7 +1727,7 @@ ex.printStackTrace();
                             new AdminPermission(bundle, AdminPermission.LIFECYCLE));
                     }
 
-                    // We need to check whether this is an update to an 
+                    // We need to check whether this is an update to an
                     // extension bundle (info.isExtension) or an update from
                     // a normal bundle to an extension bundle
                     // (isExtensionBundle())
@@ -1744,12 +1744,13 @@ ex.printStackTrace();
 
                     // If this is an update from a normal to an extension bundle
                     // then attach the extension or else if this already is
-                    // an extension bundle then done allow it to be resolved 
+                    // an extension bundle then done allow it to be resolved
                     // again as per spec.
                     if (!bundle.getInfo().isExtension() &&
                         m_extensionManager.isExtensionBundle(bundle.getInfo().getCurrentHeader()))
                     {
                         m_extensionManager.addExtensionBundle(this, bundle);
+                        m_factory.refreshModule(m_systemBundleInfo.getCurrentModule());
                         bundle.getInfo().setState(Bundle.RESOLVED);
                     }
                     else if (bundle.getInfo().isExtension())
@@ -1803,9 +1804,12 @@ ex.printStackTrace();
                 for (int i = 0; !used && (i < modules.length); i++)
                 {
                     IModule[] dependents = ((ModuleImpl) modules[i]).getDependents();
-                    if ((dependents != null) && (dependents.length > 0))
+                    for (int j = 0; (dependents != null) && (j < dependents.length) && !used; j++)
                     {
-                        used = true;
+                        if (dependents[j] != modules[i])
+                        {
+                            used = true;
+                        }
                     }
                 }
 
@@ -2065,9 +2069,12 @@ ex.printStackTrace();
         for (int i = 0; !used && (i < modules.length); i++)
         {
             IModule[] dependents = ((ModuleImpl) modules[i]).getDependents();
-            if ((dependents != null) && (dependents.length > 0))
+            for (int j = 0; (dependents != null) && (j < dependents.length) && !used; j++)
             {
-                used = true;
+                if (dependents[j] != modules[i])
+                {
+                    used = true;
+                }
             }
         }
 
@@ -2239,6 +2246,7 @@ ex.printStackTrace();
                 else
                 {
                     m_extensionManager.addExtensionBundle(this, bundle);
+                    m_factory.refreshModule(m_systemBundleInfo.getCurrentModule());
                 }
 
             }
@@ -2289,8 +2297,8 @@ ex.printStackTrace();
             {
                 m_installedBundleMap.put(location, bundle);
             }
-            
-            if (bundle.getInfo().isExtension()) 
+
+            if (bundle.getInfo().isExtension())
             {
                 FelixBundle systemBundle = (FelixBundle) getBundle(0);
                 acquireBundleLock(systemBundle);
@@ -2852,8 +2860,6 @@ ex.printStackTrace();
     **/
     protected ExportedPackage[] getExportedPackages(String pkgName)
     {
-        ExportedPackage[] pkgs = null;
-
         // First, get all exporters of the package.
         R4SearchPolicyCore.PackageSource[] exporters =
             m_policyCore.getInUseCandidates(
@@ -2865,8 +2871,14 @@ ex.printStackTrace();
 
         if (exporters != null)
         {
-            pkgs = new ExportedPackage[exporters.length];
-            for (int pkgIdx = 0; pkgIdx < pkgs.length; pkgIdx++)
+            List pkgs = new ArrayList();
+
+            Requirement req = new Requirement(ICapability.PACKAGE_NAMESPACE,
+                null,
+                null,
+                new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) });
+
+            for (int pkgIdx = 0; pkgIdx < exporters.length; pkgIdx++)
             {
                 // Get the bundle associated with the current exporting module.
                 FelixBundle bundle = (FelixBundle) getBundle(
@@ -2885,25 +2897,22 @@ ex.printStackTrace();
                 IModule[] modules = bundle.getInfo().getModules();
                 for (int modIdx = 0; modIdx < modules.length; modIdx++)
                 {
-                    Capability ec = (Capability)
-                        Util.getSatisfyingCapability(
-                            modules[modIdx],
-                            new Requirement(
-                                ICapability.PACKAGE_NAMESPACE,
-                                null,
-                                null,
-                                new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) }));
-
-                    if (ec != null)
+                    ICapability[] ec = modules[modIdx].getDefinition().getCapabilities();
+                    for (int i = 0; (ec != null) && (i < ec.length); i++)
                     {
-                        pkgs[pkgIdx] =
-                            new ExportedPackageImpl(this, bundle, modules[modIdx], ec);
+                        if (ec[i].getNamespace().equals(req.getNamespace()) &&
+                            req.isSatisfied(ec[i]))
+                        {
+                            pkgs.add(new ExportedPackageImpl(this, bundle, modules[modIdx], (Capability) ec[i]));
+                        }
                     }
                 }
             }
+
+            return (pkgs.isEmpty()) ? null : (ExportedPackage[]) pkgs.toArray(new ExportedPackage[pkgs.size()]);
         }
 
-        return pkgs;
+        return null;
     }
 
     /**
@@ -3060,7 +3069,12 @@ ex.printStackTrace();
                 // package. If so, see if the provider module is from the
                 // exporter and record it if it is.
                 IWire wire = Util.getWire(depModules[depIdx], ep.getName());
-                if ((wire != null) && expModules[expIdx].equals(wire.getExporter()))
+                if ((wire != null) && expModules[expIdx].equals(wire.getExporter()) &&
+                    wire.getRequirement().isSatisfied(
+                    new Capability(ICapability.PACKAGE_NAMESPACE, null, new R4Attribute[] {
+                        new R4Attribute(ICapability.PACKAGE_PROPERTY, ep.getName(), false),
+                        new R4Attribute(ICapability.VERSION_PROPERTY, ep.getVersion(), false)
+                    })))
                 {
                     // Add the bundle to the list of importers.
                     list.add(getBundle(Util.getBundleIdFromModuleId(depModules[depIdx].getId())));
@@ -3121,7 +3135,7 @@ ex.printStackTrace();
         FelixBundle[] bundles = acquireBundleRefreshLocks(targets);
 
         boolean restart = false;
-        
+
         Bundle systemBundle = getBundle(0);
 
         // We need to restart the framework if either an extension bundle is
