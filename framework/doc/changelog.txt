@@ -1,3 +1,33 @@
+Changes from 1.0.0 to 1.0.1
+---------------------------
+
+* [2007-07-23] Fixed a bug in the framework shutdown process which was 
+  causing threads calling Felix.stopAndWait() to not get notified that 
+  the framework had shutdown. (FELIX-329)
+* [2007-08-15] Fixed a bug in the LDAP filter which was not thread safe 
+  on execution. (FELIX-338)
+* [2007-08-17] Added support for persistent last used bundle ID to avoid
+  re-use of bundle identifiers. (FELIX-339)
+* [2007-08-23] Modified BundleImpl.getHeaders(Locale) to accept a null 
+  locale. (FELIX-346)
+* [2007-09-11] Added support to handle external termination of Felix 
+  which was not handled or detected and prevented a restart of future 
+  Felix instances in the same VM. (FELIX-363)
+* [2007-09-12] Add support for Collection values in the LDAP filter to 
+  match the 4.1 spec. 
+* [2007-09-12] Fixed a bug in the LDAP filter where attributes where 
+  limited to [a-zA-Z ] so didn't allow for e.g., numbers. (FELIX-361)
+* [2007-09-13] Enable support for exporting the same package more than 
+  once (FELIX-101).
+* [2007-09-13] Returns the system bundle from a call to 
+  PackageAdmin.getBundle(Class) in case the class comes from the 
+  classloader (or one of its parents) that loaded Felix and the system 
+  bundle exports the package.
+* [2007-09-16] Fixed a bug in class space filtering in the service registry 
+  that could result in class cast exceptions for service clients.
+* [2007-09-16] Fixed a bug that prevented extension bundle exports to be 
+  usable.
+
 Changes from 0.8.0-incubator to 1.0.0
 -------------------------------------
 
