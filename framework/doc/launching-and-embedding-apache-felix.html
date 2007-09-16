@@ -1,35 +1,30 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html><head><title>Apache Felix - Launching and Embedding Apache Felix</title><link rel="stylesheet" href="launching-and-embedding-apache-felix_files/site.css" type="text/css" media="all"><link rel="stylesheet" href="launching-and-embedding-apache-felix_files/print.css" type="text/css" media="print"><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"></head><body linkifying="true">&amp;t
+<html><head><title>Apache Felix - Launching and Embedding Apache Felix</title>
 
 
   
     
-    
-    
-    
-  
-    <div class="title">
-      <a href="http://cwiki.apache.org/FELIX/index.html"><img alt="Apache Felix" src="launching-and-embedding-apache-felix_files/felix_logo.png" align="left" border="0"></a><a href="http://www.apache.org/"><img alt="Apache" src="launching-and-embedding-apache-felix_files/apache.png" align="right" border="0"></a>
-    </div>
+    <link rel="stylesheet" href="launching-and-embedding-apache-felix_files/site.css" type="text/css" media="all">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"></head><body>
+    <div class="title"><div class="logo"><a href="http://felix.apache.org/site/index.html"><img alt="Apache Felix" src="launching-and-embedding-apache-felix_files/logo.png" border="0"></a></div><div class="header"><a href="http://www.apache.org/"><img alt="Apache" src="launching-and-embedding-apache-felix_files/apache.png" border="0"></a></div></div>
     <div class="menu">
-      <ul>
-        <li><a href="http://cwiki.apache.org/FELIX/index.html">home</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/news.html">news</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/status.html">status</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/license.html">license</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/downloads.html">downloads</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/documentation.html">documentation</a></li>
-        <li><a href="http://cwiki.apache.org/confluence/x/O-">wiki</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/committers.html">committers</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/mailinglists.html">mailing lists</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/faq.html">faq</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/roadmap.html">roadmap</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/sourcecode.html">source code</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/codingstandards.html">coding standards</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/issuetracking.html">issue tracking</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/dependencies.html">dependencies</a></li>
-      </ul>
-    </div>
+<ul>
+	<li><a href="http://felix.apache.org/site/index.html" title="Index">home</a></li>
+	<li><a href="http://felix.apache.org/site/news.html" title="news">news</a></li>
+	<li><a href="http://felix.apache.org/site/status.html" title="status">status</a></li>
+	<li><a href="http://felix.apache.org/site/license.html" title="license">license</a></li>
+	<li><span class="nobr"><a href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<sup><img class="rendericon" src="launching-and-embedding-apache-felix_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><a href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</a></li>
+	<li><a href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</a></li>
+	<li><span class="nobr"><a href="http://cwiki.apache.org/confluence/x/O-" title="Visit page outside Confluence" rel="nofollow">wiki<sup><img class="rendericon" src="launching-and-embedding-apache-felix_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><a href="http://felix.apache.org/site/committers.html" title="committers">committers</a></li>
+	<li><a href="http://felix.apache.org/site/faq.html" title="faq">faq</a></li>
+	<li><a href="http://felix.apache.org/site/roadmap.html" title="roadmap">roadmap</a></li>
+	<li><a href="http://felix.apache.org/site/sourcecode.html" title="sourcecode">source code</a></li>
+	<li><a href="http://felix.apache.org/site/codingstandards.html" title="codingstandards">coding standards</a></li>
+	<li><a href="http://felix.apache.org/site/issuetracking.html" title="issuetracking">issue tracking</a></li>
+	<li><a href="http://felix.apache.org/site/dependencies.html" title="dependencies">dependencies</a></li>
+</ul> </div>
     <div class="main">
 <h1><a name="LaunchingandEmbeddingApacheFelix-LaunchingandEmbeddingApacheFelix"></a>Launching and Embedding Apache Felix</h1>
 
@@ -55,6 +50,7 @@
 	</ul>
 	</li>
 	<li><a href="#LaunchingandEmbeddingApacheFelix-caveat" title="caveat on Launching and Embedding Apache Felix">Caveat</a></li>
+	<li><a href="#LaunchingandEmbeddingApacheFelix-feedback" title="feedback on Launching and Embedding Apache Felix">Feedback</a></li>
 </ul>
 
 
@@ -145,9 +141,9 @@ start Felix are ones that tell it where/how to locate the bundle cache
 profile directory where installed bundles will be cached. Felix' bundle
 cache implementation allows you to configure the location where bundles
 are cached using configuration properties. At a minimum, either a
-bundle cache profile name or directory must be specified; see the <a href="http://cwiki.apache.org/FELIX/apache-felix-bundle-cache.html" title="Apache Felix Bundle Cache">bundle cache document</a> for more detailed information on configuring the bundle cache.</p>
+bundle cache profile name or directory must be specified; see the <a href="http://felix.apache.org/site/apache-felix-bundle-cache.html" title="Apache Felix Bundle Cache">bundle cache document</a> for more detailed information on configuring the bundle cache.</p>
 
-<p>Besides configuration properties for the bundle cache, it is usually necessary to set the <tt>org.osgi.framework.system.packages</tt> configuration property to export packages from the class path, such as the OSGi interface classes (e.g., <tt>org.osgi.framework</tt>) on which all bundles depend. If you are creating a launcher for Felix, then the <tt>felix.auto.start</tt> configuration property may also be used to automatically install and start various bundles; see the <a href="http://cwiki.apache.org/FELIX/apache-felix-usage-documentation.html#ApacheFelixUsageDocumentation-configuringfelix" title="configuring-felix on Apache Felix Usage Documentation">usage document</a> for more information on configuring Felix and on the various configuration properties.</p>
+<p>Besides configuration properties for the bundle cache, it is usually necessary to set the <tt>org.osgi.framework.system.packages</tt> configuration property to export packages from the class path, such as the OSGi interface classes (e.g., <tt>org.osgi.framework</tt>) on which all bundles depend. If you are creating a launcher for Felix, then the <tt>felix.auto.start</tt> configuration property may also be used to automatically install and start various bundles; see the <a href="http://felix.apache.org/site/apache-felix-usage-documentation.html#ApacheFelixUsageDocumentation-configuringfelix" title="configuring-felix on Apache Felix Usage Documentation">usage document</a> for more information on configuring Felix and on the various configuration properties.</p>
 
 <p>The remainder of this section describes how the standard Felix
 launcher works as well as how to create a custom launcher for Felix.</p>
@@ -247,7 +243,7 @@ having precedence.</li>
 properties that are set as system properties will be copied into the
 set of configuration properties to provide an easy way to add to or
 override configuration properties specified in the <tt>config.properties</tt> file.</li>
-	<li>Try to load the profile name or profile directory configuration properties. At least one of these must be specified so that the <a href="http://cwiki.apache.org/FELIX/apache-felix-bundle-cache.html" title="Apache Felix Bundle Cache">bundle cache</a> knows where to save installed bundles.</li>
+	<li>Try to load the profile name or profile directory configuration properties. At least one of these must be specified so that the <a href="http://felix.apache.org/site/apache-felix-bundle-cache.html" title="Apache Felix Bundle Cache">bundle cache</a> knows where to save installed bundles.</li>
 	<li>If
 either the profile name or profile directory configuration property has
 not been specified, then ask the user to specify a profile name and add
@@ -934,5 +930,12 @@ standard Java reflection to invoke methods on the service object.</p>
 compiled and may be out of date with respect to the current Felix
 source code. If you find errors please report them so the that they can
 be corrected.</p>
+
+<p><a name="LaunchingandEmbeddingApacheFelix-feedback"></a></p>
+
+<h2><a name="LaunchingandEmbeddingApacheFelix-Feedback"></a>Feedback</h2>
+
+<p>Subscribe to the Felix users mailing list by sending a message to <span class="nobr"><a href="mailto:users-subscribe@felix.apache.org" title="Send mail to users-subscribe@felix.apache.org" rel="nofollow">users-subscribe@felix.apache.org<sup><img class="rendericon" src="launching-and-embedding-apache-felix_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>; after subscribing, email questions or feedback to <span class="nobr"><a href="mailto:users@felix.apache.org" title="Send mail to users@felix.apache.org" rel="nofollow">users@felix.apache.org<sup><img class="rendericon" src="launching-and-embedding-apache-felix_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>.</p>
     </div>
-  </body></html>
+  
+</body></html>
