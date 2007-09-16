@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -33,7 +33,7 @@ class ServiceReferenceImpl implements ServiceReference
         m_registration = reg;
         m_bundle = bundle;
     }
-    
+
     protected ServiceRegistrationImpl getServiceRegistration()
     {
         return m_registration;
@@ -140,7 +140,7 @@ class ServiceReferenceImpl implements ServiceReference
         // refernce. In case 3, we simply compare the exporting
         // modules from the package wiring to determine if we need
         // to filter the service reference.
-        
+
         // Case 1: Always include service reference.
         if (requesterWire == null)
         {
@@ -170,6 +170,13 @@ class ServiceReferenceImpl implements ServiceReference
                     // This should not happen, filter to be safe.
                     allow = false;
                 }
+            }
+            else
+            {
+                // O.k. the provider is the exporter of the requester's package, now check
+                // if the requester is wired to the latest version of the provider, if so
+                // then allow else don't (the provider has been updated but not refreshed).
+                allow = ((FelixBundle) m_bundle).getInfo().getCurrentModule() == requesterWire.getExporter();
             }
         }
         // Case 3: Include service reference if the wires have the
