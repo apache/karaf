@@ -171,7 +171,7 @@ class ImmediateComponentManager extends AbstractComponentManager
         try
         {
             Method activateMethod = getMethod( implementationObject.getClass(), "activate", new Class[]
-                { ComponentContext.class } );
+                { ComponentContext.class }, false );
             activateMethod.invoke( implementationObject, new Object[]
                 { componentContext } );
         }
@@ -216,7 +216,7 @@ class ImmediateComponentManager extends AbstractComponentManager
         try
         {
             Method deactivateMethod = getMethod( implementationObject.getClass(), "deactivate", new Class[]
-                { ComponentContext.class } );
+                { ComponentContext.class }, false );
             deactivateMethod.invoke( implementationObject, new Object[]
                 { componentContext } );
         }

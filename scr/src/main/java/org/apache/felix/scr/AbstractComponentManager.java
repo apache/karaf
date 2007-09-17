@@ -731,40 +731,34 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      * @param name The name of the method.
      * @param parameterTypes The parameters to the method. Passing
      *      <code>null</code> is equivalent to using an empty array.
+     * @param only Whether to only look at the declared methods of the given
+     *      class or also inspect the super classes.
      *
      * @return The named method with enforced accessibility
      *
      * @throws NoSuchMethodException If no public or protected method with
      *      the given name can be found in the class or any of its super classes.
      */
-    static Method getMethod( Class clazz, String name, Class[] parameterTypes ) throws NoSuchMethodException
+    static Method getMethod( Class clazz, String name, Class[] parameterTypes, boolean only ) throws NoSuchMethodException
     {
-        // try the default mechanism first, which only yields public methods
-        try
-        {
-            return clazz.getMethod( name, parameterTypes );
-        }
-        catch ( NoSuchMethodException nsme )
-        {
-            // it is ok to not find a public method, try to find a protected now
-        }
-
-        // now use method declarations, requiring walking up the class
-        // hierarchy manually. this algorithm also returns protected methods
-        // which is, what we need here
         for ( ; clazz != null; clazz = clazz.getSuperclass() )
         {
             try
             {
+                // find the declared method in this class
                 Method method = clazz.getDeclaredMethod( name, parameterTypes );
 
-                // only accept a protected method, a public method should
-                // have been found above and neither private nor package
-                // protected methods are acceptable here
-                if ( Modifier.isProtected( method.getModifiers() ) )
+                // accept public and protected methods only and ensure accessibility
+                if ( Modifier.isPublic( method.getModifiers() ) || Modifier.isProtected( method.getModifiers() ) )
                 {
                     method.setAccessible( true );
                     return method;
+                }
+
+                // if only the clazz is to be scanned terminate here
+                if ( only )
+                {
+                    break;
                 }
             }
             catch ( NoSuchMethodException nsme )
