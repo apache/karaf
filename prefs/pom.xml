@@ -66,6 +66,9 @@
                 <configuration>
                     <instructions>
                         <Bundle-Category>osgi</Bundle-Category>
+                        <Bundle-SymbolicName>
+                            ${artifactId}
+                        </Bundle-SymbolicName>
                         <Export-Package>
                             org.apache.felix.prefs,
                             org.osgi.service.prefs;version=1.1
