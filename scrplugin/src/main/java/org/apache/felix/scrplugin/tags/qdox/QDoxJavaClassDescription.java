@@ -35,6 +35,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
@@ -299,10 +300,17 @@ public class QDoxJavaClassDescription
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         if ( bind ) {
             mv.visitVarInsn(type.getOpcode(Opcodes.ILOAD), 1);
+            mv.visitFieldInsn(Opcodes.PUTFIELD, this.getName().replace('.', '/'), propertyName, type.toString());
         } else {
+            mv.visitFieldInsn(Opcodes.GETFIELD, this.getName().replace('.', '/'), propertyName, type.toString());
+            mv.visitVarInsn(Opcodes.ALOAD, 1);
+            final Label jmpLabel = new Label();
+            mv.visitJumpInsn(Opcodes.IF_ACMPNE, jmpLabel);
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
             mv.visitInsn(Opcodes.ACONST_NULL);
+            mv.visitFieldInsn(Opcodes.PUTFIELD, this.getName().replace('.', '/'), propertyName, type.toString());
+            mv.visitLabel(jmpLabel);
         }
-        mv.visitFieldInsn(Opcodes.PUTFIELD, this.getName().replace('.', '/'), propertyName, type.toString());
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(2, 2);
         // add to qdox
