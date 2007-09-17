@@ -113,19 +113,143 @@ class DependencyManager implements ServiceListener
         {
             case ServiceEvent.REGISTERED:
                 m_size++;
-                addingService( event.getServiceReference() );
+                serviceAdded( event.getServiceReference() );
                 break;
             case ServiceEvent.MODIFIED:
-                removedService( event.getServiceReference() );
-                addingService( event.getServiceReference() );
+                serviceRemoved( event.getServiceReference() );
+                serviceAdded( event.getServiceReference() );
                 break;
             case ServiceEvent.UNREGISTERING:
                 m_size--;
-                removedService( event.getServiceReference() );
+                serviceRemoved( event.getServiceReference() );
                 break;
         }
     }
 
+
+    private void serviceAdded( ServiceReference reference )
+    {
+        // if the component is currently unsatisfied, it may become satisfied
+        // by adding this service, try to activate
+        if ( m_componentManager.getState() == AbstractComponentManager.STATE_UNSATISFIED )
+        {
+            m_componentManager.activate();
+        }
+
+        // otherwise check whether the component is in a state to handle the event
+        else if ( handleServiceEvent() )
+        {
+            // if the dependency is static and adding the service has an
+            // influence on service binding because the dependency is multiple
+            // or optional and unbound, the component needs to be reactivated
+            if ( m_dependencyMetadata.isStatic() )
+            {
+                // only reactivate if the service has an influence on binding
+                if ( m_dependencyMetadata.isMultiple() || !isBound() )
+                {
+                    m_componentManager.reactivate();
+                }
+            }
+
+            // otherwise bind if we have a bind method and the service needs
+            // be bound
+            else if ( m_dependencyMetadata.getBind() != null && ( m_dependencyMetadata.isMultiple() || !isBound() ) )
+            {
+                // bind the service, getting it if required
+                invokeBindMethod( m_componentManager.getInstance(), reference );
+            }
+        }
+    }
+
+
+    private void serviceRemoved( ServiceReference reference )
+    {
+        // check whether we are bound to that service, do nothing if not
+        if ( getBoundService( reference ) == null )
+        {
+            return;
+        }
+
+        if ( handleServiceEvent() )
+        {
+            // if the dependency is not satisfied anymore, we have to
+            // deactivate the component 
+            if ( !isSatisfied() )
+            {
+                m_componentManager.getActivator()
+                    .log(
+                        LogService.LOG_DEBUG,
+                        "Dependency Manager: Deactivating component due to mandatory dependency on "
+                            + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
+                            + " not satisfied", m_componentManager.getComponentMetadata(), null );
+
+                // deactivate the component now
+                m_componentManager.deactivate();
+            }
+
+            // if the dependency is static, we have to reactivate the component
+            // to "remove" the dependency
+            else if ( m_dependencyMetadata.isStatic() )
+            {
+                try
+                {
+                    m_componentManager.getActivator().log(
+                        LogService.LOG_DEBUG,
+                        "Dependency Manager: Static dependency on " + m_dependencyMetadata.getName() + "/"
+                            + m_dependencyMetadata.getInterface() + " is broken",
+                        m_componentManager.getComponentMetadata(), null );
+                    m_componentManager.reactivate();
+                }
+                catch ( Exception ex )
+                {
+                    m_componentManager.getActivator().log( LogService.LOG_ERROR,
+                        "Exception while recreating dependency ", m_componentManager.getComponentMetadata(), ex );
+                }
+            }
+
+            // dynamic dependency, multiple or single but this service is the bound one
+            else
+            {
+
+                // the component instance to unbind/bind services
+                Object instance = m_componentManager.getInstance();
+
+                // call the unbind method if one is defined
+                if ( m_dependencyMetadata.getUnbind() != null )
+                {
+                    invokeUnbindMethod( instance, reference );
+                }
+                
+                // if binding to another service fails for a singleton
+                // reference, we have to deactivate the component
+                if ( !m_dependencyMetadata.isMultiple() )
+                {
+                    // in the unexpected case that rebinding fails, we will
+                    // deactivate the component
+                    if ( !bind( instance ) )
+                    {
+                        m_componentManager.getActivator().log(
+                            LogService.LOG_DEBUG,
+                            "Dependency Manager: Deactivating component due to mandatory dependency on "
+                                + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
+                                + " not satisfied", m_componentManager.getComponentMetadata(), null );
+                        m_componentManager.deactivate();
+
+                    }
+                }
+            }
+        }
+    }
+
+
+    private boolean handleServiceEvent()
+    {
+        return ( m_componentManager.getState() & STATE_MASK ) != 0;
+        //        return state != AbstractComponentManager.INSTANCE_DESTROYING
+        //            && state != AbstractComponentManager.INSTANCE_DESTROYED
+        //            && state != AbstractComponentManager.INSTANCE_CREATING
+        //            && state != AbstractComponentManager.INSTANCE_CREATED;
+    }
 
     //---------- Service tracking support -------------------------------------
 
@@ -362,7 +486,7 @@ class DependencyManager implements ServiceListener
      * registered in the framework and available to this dependency manager is
      * not zero.
      */
-    boolean isValid()
+    boolean isSatisfied()
     {
         return size() > 0 || m_dependencyMetadata.isOptional();
     }
@@ -379,7 +503,7 @@ class DependencyManager implements ServiceListener
     {
         // If no references were received, we have to check if the dependency
         // is optional, if it is not then the dependency is invalid
-        if ( !isValid() )
+        if ( !isSatisfied() )
         {
             return false;
         }
@@ -768,128 +892,4 @@ class DependencyManager implements ServiceListener
         }
     }
 
-
-    private void addingService( ServiceReference reference )
-    {
-        // if the component is currently unsatisfied, it may become satisfied
-        // by adding this service, try to activate
-        if ( m_componentManager.getState() == AbstractComponentManager.STATE_UNSATISFIED )
-        {
-            m_componentManager.activate();
-        }
-
-        // otherwise check whether the component is in a state to handle the event
-        else if ( handleServiceEvent() )
-        {
-            // if the dependency is static and adding the service has an
-            // influence on service binding because the dependency is multiple
-            // or optional and unbound, the component needs to be reactivated
-            if ( m_dependencyMetadata.isStatic() )
-            {
-                // only reactivate if the service has an influence on binding
-                if ( m_dependencyMetadata.isMultiple() || !isBound() )
-                {
-                    m_componentManager.reactivate();
-                }
-            }
-
-            // otherwise bind if we have a bind method and the service needs
-            // be bound
-            else if ( m_dependencyMetadata.getBind() != null && ( m_dependencyMetadata.isMultiple() || !isBound() ) )
-            {
-                // bind the service, getting it if required
-                invokeBindMethod( m_componentManager.getInstance(), reference );
-            }
-        }
-    }
-
-
-    public void removedService( ServiceReference reference )
-    {
-        // check whether we are bound to that service, do nothing if not
-        if ( getBoundService( reference ) == null )
-        {
-            return;
-        }
-
-        if ( handleServiceEvent() )
-        {
-            // if the dependency is not satisfied anymore, we have to
-            // deactivate the component 
-            if ( !isValid() )
-            {
-                m_componentManager.getActivator()
-                    .log(
-                        LogService.LOG_DEBUG,
-                        "Dependency Manager: Deactivating component due to mandatory dependency on "
-                            + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
-                            + " not satisfied", m_componentManager.getComponentMetadata(), null );
-
-                // deactivate the component now
-                m_componentManager.deactivate();
-            }
-
-            // if the dependency is static, we have to reactivate the component
-            // to "remove" the dependency
-            else if ( m_dependencyMetadata.isStatic() )
-            {
-                try
-                {
-                    m_componentManager.getActivator().log(
-                        LogService.LOG_DEBUG,
-                        "Dependency Manager: Static dependency on " + m_dependencyMetadata.getName() + "/"
-                            + m_dependencyMetadata.getInterface() + " is broken",
-                        m_componentManager.getComponentMetadata(), null );
-                    m_componentManager.reactivate();
-                }
-                catch ( Exception ex )
-                {
-                    m_componentManager.getActivator().log( LogService.LOG_ERROR,
-                        "Exception while recreating dependency ", m_componentManager.getComponentMetadata(), ex );
-                }
-            }
-
-            // dynamic dependency, multiple or single but this service is the bound one
-            else
-            {
-
-                // the component instance to unbind/bind services
-                Object instance = m_componentManager.getInstance();
-
-                // call the unbind method if one is defined
-                if ( m_dependencyMetadata.getUnbind() != null )
-                {
-                    invokeUnbindMethod( instance, reference );
-                }
-                
-                // if binding to another service fails for a singleton
-                // reference, we have to deactivate the component
-                if ( !m_dependencyMetadata.isMultiple() )
-                {
-                    // in the unexpected case that rebinding fails, we will
-                    // deactivate the component
-                    if ( !bind( instance ) )
-                    {
-                        m_componentManager.getActivator().log(
-                            LogService.LOG_DEBUG,
-                            "Dependency Manager: Deactivating component due to mandatory dependency on "
-                                + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
-                                + " not satisfied", m_componentManager.getComponentMetadata(), null );
-                        m_componentManager.deactivate();
-
-                    }
-                }
-            }
-        }
-    }
-
-
-    private boolean handleServiceEvent()
-    {
-        return ( m_componentManager.getState() & STATE_MASK ) != 0;
-        //        return state != AbstractComponentManager.INSTANCE_DESTROYING
-        //            && state != AbstractComponentManager.INSTANCE_DESTROYED
-        //            && state != AbstractComponentManager.INSTANCE_CREATING
-        //            && state != AbstractComponentManager.INSTANCE_CREATED;
-    }
 }

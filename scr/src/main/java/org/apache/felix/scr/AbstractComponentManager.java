@@ -327,7 +327,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         while ( it.hasNext() )
         {
             DependencyManager dm = ( DependencyManager ) it.next();
-            if ( !dm.isValid() )
+            if ( !dm.isSatisfied() )
             {
                 // at least one dependency is not satisfied
                 getActivator().log( LogService.LOG_DEBUG, "Dependency not satisfied: " + dm.getName(),
