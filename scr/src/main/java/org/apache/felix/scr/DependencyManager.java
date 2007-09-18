@@ -107,6 +107,10 @@ class DependencyManager implements ServiceListener
 
     //---------- ServiceListener interface ------------------------------------
 
+    /**
+     * Called when a registered service changes state. In the case of service
+     * modification the service is assumed to be removed and added again.
+     */
     public void serviceChanged( ServiceEvent event )
     {
         switch ( event.getType() )
@@ -127,6 +131,17 @@ class DependencyManager implements ServiceListener
     }
 
 
+    /**
+     * Called by the {@link #serviceChanged(ServiceEvent)} method if a new
+     * service is registered with the system or if a registered service has been
+     * modified.
+     * <p>
+     * Depending on the component state and dependency configuration, the
+     * component may be activated, re-activated or the service just be provided.
+     * 
+     * @param reference The reference to the service newly registered or
+     *      modified.
+     */
     private void serviceAdded( ServiceReference reference )
     {
         // if the component is currently unsatisfied, it may become satisfied
@@ -162,6 +177,18 @@ class DependencyManager implements ServiceListener
     }
 
 
+    /**
+     * Called by the {@link #serviceChanged(ServiceEvent)} method if an existing
+     * service is unregistered from the system or if a registered service has
+     * been modified.
+     * <p>
+     * Depending on the component state and dependency configuration, the
+     * component may be deactivated, re-activated, the service just be unbound
+     * with or without a replacement service.
+     * 
+     * @param reference The reference to the service unregistering or being
+     *      modified.
+     */
     private void serviceRemoved( ServiceReference reference )
     {
         // check whether we are bound to that service, do nothing if not
@@ -214,18 +241,12 @@ class DependencyManager implements ServiceListener
                 // the component instance to unbind/bind services
                 Object instance = m_componentManager.getInstance();
 
-                // call the unbind method if one is defined
-                if ( m_dependencyMetadata.getUnbind() != null )
-                {
-                    invokeUnbindMethod( instance, reference );
-                }
-                
-                // if binding to another service fails for a singleton
-                // reference, we have to deactivate the component
+                // try to bind a replacement service first if this is a unary
+                // cardinality reference and a replacement is available.
                 if ( !m_dependencyMetadata.isMultiple() )
                 {
-                    // in the unexpected case that rebinding fails, we will
-                    // deactivate the component
+                    // if the dependency is mandatory and no replacement is
+                    // available, bind returns false and we deactivate
                     if ( !bind( instance ) )
                     {
                         m_componentManager.getActivator().log(
@@ -234,8 +255,16 @@ class DependencyManager implements ServiceListener
                                 + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
                                 + " not satisfied", m_componentManager.getComponentMetadata(), null );
                         m_componentManager.deactivate();
-
+                        
+                        // abort here we do not need to do more
+                        return;
                     }
+                }
+
+                // call the unbind method if one is defined
+                if ( m_dependencyMetadata.getUnbind() != null )
+                {
+                    invokeUnbindMethod( instance, reference );
                 }
             }
         }
@@ -254,7 +283,10 @@ class DependencyManager implements ServiceListener
     //---------- Service tracking support -------------------------------------
 
     /**
-     * Stops using this dependency manager
+     * Disposes off this dependency manager by removing as a service listener
+     * and ungetting all services, which are still kept in the list of our
+     * bound services. This list will not be empty if the service lookup
+     * method is used by the component to access the service.
      */
     void close()
     {
@@ -398,7 +430,20 @@ class DependencyManager implements ServiceListener
     }
 
 
-    // TODO
+    /**
+     * Adds the {@link #BOUND_SERVICE_SENTINEL} object as a pseudo service to
+     * the map of bound services. This method allows keeping track of services
+     * which have been bound but not retrieved from the service registry, which
+     * is the case if the bind method is called with a ServiceReference instead
+     * of the service object itself.
+     * <p>
+     * We have to keep track of all services for which we called the bind
+     * method to be able to call the unbind method in case the service is
+     * unregistered.
+     * 
+     * @param serviceReference The reference to the service being marked as
+     *      bound.
+     */
     private void bindService( ServiceReference serviceReference )
     {
         m_bound.put( serviceReference, BOUND_SERVICE_SENTINEL );
