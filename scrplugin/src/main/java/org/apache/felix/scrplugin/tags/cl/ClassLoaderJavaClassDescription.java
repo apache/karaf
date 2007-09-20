@@ -59,9 +59,17 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
         return null;
     }
 
-    public JavaClassDescription[] getImplementedInterfaces() {
-        // TODO Auto-generated method stub
-        return null;
+    public JavaClassDescription[] getImplementedInterfaces() throws MojoExecutionException {
+        Class[] implemented = clazz.getInterfaces();
+        if (implemented == null || implemented.length == 0) {
+            return null;
+        }
+        
+        JavaClassDescription[] jcd = new JavaClassDescription[implemented.length];
+        for (int i=0; i < jcd.length; i++) {
+            jcd[i] = manager.getJavaClassDescription(implemented[i].getName());
+        }
+        return jcd;
     }
 
     /**
