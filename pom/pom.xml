@@ -159,6 +159,7 @@
         <module>../ipojo/arch</module>
 
         <module>../mosgi</module> 
+        <module>../jmood</module> 
 
         <module>../examples</module>
       </modules>
