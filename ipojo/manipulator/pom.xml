@@ -21,12 +21,12 @@
       <groupId>asm</groupId>
       <artifactId>asm-commons</artifactId>
       <version>3.0</version>
-    </dependency>
-    <!-- to remove -->
-    <dependency>
-      <groupId>asm</groupId>
-      <artifactId>asm-tree</artifactId>
-      <version>3.0</version>
+      <exclusions>
+    	<exclusion>
+      		<groupId>asm</groupId>
+      		<artifactId>asm-tree</artifactId>
+    	</exclusion>
+  	   </exclusions>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
@@ -52,8 +52,7 @@
             	org.apache.felix.ipojo.manipulation.annotations,
             	org.apache.felix.ipojo.xml.parser,
               	org.objectweb.asm,
-              	org.objectweb.asm.commons,
-              	org.objectweb.asm.tree <!-- to remove -->
+              	org.objectweb.asm.commons
             </Private-Package>
           </instructions>
         </configuration>

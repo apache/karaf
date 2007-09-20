@@ -48,7 +48,8 @@
             <Import-Package>
               org.osgi.framework, 
               org.osgi.service.cm,
-              org.osgi.service.log
+              org.osgi.service.log,
+			  !org.objectweb.asm*
             </Import-Package>
             <Private-Package>
             	org.apache.felix.ipojo.manipulation,
@@ -60,9 +61,7 @@
     			org.apache.felix.ipojo.handlers.dependency.nullable,
               	org.apache.felix.ipojo.handlers.lifecycle.callback,
               	org.apache.felix.ipojo.handlers.lifecycle.controller,
-              	org.objectweb.asm,
-              	org.objectweb.asm.commons,
-              	org.objectweb.asm.tree  <!-- to remove -->
+              	org.objectweb.asm*;-split-package:=merge-first
             </Private-Package>
             <Export-Package>
               org.apache.felix.ipojo; version="0.7.3", 

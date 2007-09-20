@@ -172,9 +172,11 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
      * @see org.objectweb.asm.ClassAdapter#visitMethod(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
      */
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        if (name.equals("<clinit>") || name.equals("class$")) {
+        // Avoid manipulating special method
+		if (name.equals("<clinit>") || name.equals("class$")) {
             return super.visitMethod(access, name, desc, signature, exceptions);
         }
+		// The constructor is manipulated separatly
         if (name.equals("<init>")) {
             // 1) change the constructor descriptor (add a component manager arg as first argument)
             String newDesc = desc.substring(1);
@@ -189,7 +191,13 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
                 //return new ConstructorCodeAdapter(mv, access, desc, m_owner);
                 return new ConstructorCodeAdapter(mv, m_owner);
             }
-        } else {
+        } else { // "Normal methods"
+
+			// avoid manipulating static methods.
+		  	if ((access & ACC_STATIC) == ACC_STATIC) {
+		  			return super.visitMethod(access, name, desc, signature, exceptions);
+            }
+			
             Type[] args = Type.getArgumentTypes(desc);
             String id = name;
             for (int i = 0; i < args.length; i++) {
