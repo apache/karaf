@@ -16,26 +16,20 @@
  */
 package org.apache.felix.jmood;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
-
-import javax.management.MBeanServerConnection;
 
 import org.apache.felix.framework.Felix;
-import org.apache.felix.framework.util.MutablePropertyResolver;
-import org.apache.felix.framework.util.MutablePropertyResolverImpl;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 public class FelixLauncher {
 
-    private MutablePropertyResolver props;
+    private Map props;
 	private Felix framework;
 	private List bundles;
 	private List packages;
@@ -47,12 +41,10 @@ public class FelixLauncher {
 		clearCache(cacheDir);
     	cacheDir.mkdir();
         
-        framework = new Felix();
-		Map m=new HashMap();
 		bundles=new ArrayList();
 		packages=new ArrayList();
 
-        props = new MutablePropertyResolverImpl(m);
+        props = new HashMap();
         props.put("felix.cache.profiledir", cacheDir.getAbsolutePath());
 
     }
@@ -64,7 +56,7 @@ public class FelixLauncher {
 		if(!packages.contains(packageName))
 		packages.add(packageName);
 	}
-	public void start(){
+	public void start() throws BundleException {
 		StringBuffer autostart=new StringBuffer();
 		for (int i=0; i<bundles.size(); i++){
 			String bundle=(String)bundles.get(i);
@@ -81,12 +73,13 @@ public class FelixLauncher {
 		
         props.put(Constants.FRAMEWORK_SYSTEMPACKAGES, spkg.toString());
 
-        framework.start(props,null);
+        framework = new Felix(props, null);
+        framework.start();
 	}
 	public void blockingStart() throws Exception{
 		this.start();
         int to=0;
-        while(framework.getStatus()!=Felix.RUNNING_STATUS) {
+        while(framework.getState()!=Bundle.ACTIVE) {
             Thread.sleep(10);
             to++;
             if(to>100) throw new Exception("timeout");
@@ -94,7 +87,8 @@ public class FelixLauncher {
 
 	}
 	public void shutdown(){
-		framework.shutdown();
+		framework.stopAndWait();
+		framework = null;
 		clearCache(cacheDir);
 	}
 

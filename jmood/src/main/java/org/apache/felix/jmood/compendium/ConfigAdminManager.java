@@ -109,7 +109,7 @@ public class ConfigAdminManager extends NotificationBroadcasterSupport
         //FIXME this should not be invoked
         //if created, the configuration is attached to the management agent's location
 		ac.debug("ConfigAdmin, getting config for pid: "+pid);
-		if (pid.contains(":")) throw new IllegalArgumentException("pid not compliant with jmx. Please remove ':' from the pid");
+		if (pid.indexOf(':') >= 0) throw new IllegalArgumentException("pid not compliant with jmx. Please remove ':' from the pid");
 		ConfigurationAdmin cad=ac.getConfigurationAdmin();
 		if (cad != null) {
 			Configuration config = cad.getConfiguration(pid);
@@ -129,7 +129,7 @@ public class ConfigAdminManager extends NotificationBroadcasterSupport
 	public String getConfiguration(String pid, String location)
 		throws Exception {
 		//":" is reserved in objectnames, as a work around we do not permit pids containing it
-			if (pid.contains(":")) throw new IllegalArgumentException("pid not compliant with jmx. Please remove ':' from the pid");
+			if (pid.indexOf(':') >= 0) throw new IllegalArgumentException("pid not compliant with jmx. Please remove ':' from the pid");
 			ConfigurationAdmin cad=ac.getConfigurationAdmin();
 		if (cad != null) {
 			Configuration config = cad.getConfiguration(pid, location);
