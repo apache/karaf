@@ -330,9 +330,15 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             if ( !dm.isSatisfied() )
             {
                 // at least one dependency is not satisfied
-                getActivator().log( LogService.LOG_DEBUG, "Dependency not satisfied: " + dm.getName(),
+                getActivator().log( LogService.LOG_INFO, "Dependency not satisfied: " + dm.getName(),
                     m_componentMetadata, null );
                 setState( STATE_UNSATISFIED );
+            }
+            
+            // if at least one dependency is missing, we cannot continue and
+            // have to return
+            if (getState() == STATE_UNSATISFIED)
+            {
                 return;
             }
         }
