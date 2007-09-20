@@ -46,7 +46,7 @@
           		<Bundle-Name>iPOJO Ant Task</Bundle-Name>
 		        <Bundle-Vendor>Clement ESCOFFIER</Bundle-Vendor>
         		<Bundle-Description> iPOJO Ant Task </Bundle-Description>
-        		<Private-Package>org.apache.felix.ipojo.metadata, org.apache.felix.ipojo.manipulator, org.apache.felix.ipojo.xml.parser, org.apache.felix.ipojo.manipulation*, org.objectweb.asm, org.objectweb.asm.commons, org.apache.xerces.parsers, org.apache.xerces.xni*, org.apache.xerces.impl*, org.apache.xerces.util.*</Private-Package>
+        		<Private-Package>org.apache.felix.ipojo.metadata, org.apache.felix.ipojo.manipulator, org.apache.felix.ipojo.xml.parser, org.apache.felix.ipojo.manipulation*, org.objectweb.asm;-split-package:=merge-first, org.objectweb.asm.commons;-split-package:=merge-first, org.apache.xerces.parsers, org.apache.xerces.xni*, org.apache.xerces.impl*, org.apache.xerces.util.*</Private-Package>
           		<Export-Package>org.apache.felix.ipojo.task</Export-Package>
         	</instructions>
     	</configuration>
