@@ -148,6 +148,10 @@ class DependencyManager implements ServiceListener
         // by adding this service, try to activate
         if ( m_componentManager.getState() == AbstractComponentManager.STATE_UNSATISFIED )
         {
+            m_componentManager.getActivator().log( LogService.LOG_INFO,
+                "Dependency Manager: Service " + m_dependencyMetadata.getName() + " registered, trying to activate",
+                m_componentManager.getComponentMetadata(), null );
+
             m_componentManager.activate();
         }
 
