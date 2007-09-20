@@ -1,64 +1,66 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
- <parent>
-    <groupId>org.apache.felix</groupId>
-    <artifactId>felix</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
-    <relativePath>../pom/pom.xml</relativePath>
-  </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <name>JMXIntrospector</name>
-  <packaging>osgi-bundle</packaging>
-  <version>0.9.0-SNAPSHOT</version>
-  <artifactId>${groupId}.jmxintrospector</artifactId>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib</artifactId>
-      <version>2.1_3</version>
-    </dependency>
-  </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix.plugins</groupId>
-        <artifactId>maven-osgi-plugin</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
-        <extensions>true</extensions>
-        <configuration>
-            <inlinedArtifacts>
-        	    <inlinedArtifact>cglib</inlinedArtifact>
-          	</inlinedArtifacts>
-          <osgiManifest>
-            <bundleName>${name}</bundleName>
-            <bundleSymbolicName>${artifactId}</bundleSymbolicName>
-            <exportPackage>
-            org.apache.felix.jmxintrospector
-            </exportPackage>
-          </osgiManifest>
-        </configuration>
-      </plugin>
-        <plugin>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>felix</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
+        <relativePath>../pom/pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <name>JMXIntrospector</name>
+    <packaging>bundle</packaging>
+    <version>0.9.0-SNAPSHOT</version>
+    <artifactId>${groupId}.jmxintrospector</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>2.1_3</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>1.1.0-SNAPSHOT</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.apache.felix.jmxintrospector,
+                            net.sf.cglib.core, net.sf.cglib.proxy,
+                            net.sf.cglib.reflect, org.objectweb.asm
+                        </Export-Package>
+                        <Import-Package>
+                            org.objectweb.asm.util;resolution:=optional,
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>5</source><!--should fail if not java6-->
                     <target>5</target>
                 </configuration>
-             </plugin>      
-    <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-surefire-plugin</artifactId>
-      <configuration>
-        <skip>true</skip>
-      </configuration>
-    </plugin>
-    </plugins>
-  </build>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
