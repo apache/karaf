@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
 import org.apache.maven.artifact.Artifact;
@@ -58,6 +59,13 @@ import aQute.lib.osgi.Jar;
  * @description build an OSGi bundle jar
  */
 public class BundlePlugin extends AbstractMojo {
+
+    /**
+     * Directory where the manifest will be written
+     * 
+     * @parameter expression="${manifestLocation}" default-value="${project.build.outputDirectory}/META-INF"
+     */
+    protected String manifestLocation;
 
     /**
      * @component
@@ -274,15 +282,30 @@ public class BundlePlugin extends AbstractMojo {
                 Artifact bundleArtifact = project.getArtifact();
                 bundleArtifact.setFile(jarFile);
 
+                if (manifestLocation != null && manifestLocation.length() > 0)
+                {
+                    File outputFile = new File( manifestLocation, "MANIFEST.MF" );
+
+                    try
+                    {
+                        Manifest manifest = builder.getJar().getManifest();
+                        ManifestPlugin.writeManifest( manifest, outputFile );
+                    }
+                    catch ( IOException e )
+                    {
+                        getLog().error( "Error trying to write Manifest to file " + outputFile, e );
+                    }
+                }
+                
                 // workaround for MNG-1682: force maven to install artifact using the "jar" handler
                 bundleArtifact.setArtifactHandler( artifactHandlerManager.getArtifactHandler( "jar" ) );
             }
+
             for (Iterator w = warnings.iterator(); w.hasNext();)
             {
                 String msg = (String) w.next();
                 this.getLog().warn("Warning building bundle " + project.getArtifact() + " : " + msg);
             }
-
         }
         catch (Exception e)
         {

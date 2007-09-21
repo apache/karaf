@@ -43,13 +43,6 @@ import aQute.lib.osgi.Jar;
 public class ManifestPlugin
     extends BundlePlugin
 {
-
-    /**
-     * Directory where the manifest will be written
-     * @parameter expression="${project.build.outputDirectory}/META-INF"
-     */
-    private String manifestLocation;
-
     protected void execute( MavenProject project, Map instructions, Properties properties, Jar[] classpath )
         throws MojoExecutionException
     {
@@ -71,7 +64,7 @@ public class ManifestPlugin
 
         try
         {
-            this.writeManifest( manifest, outputFile );
+            writeManifest( manifest, outputFile );
         }
         catch ( IOException e )
         {
@@ -144,7 +137,7 @@ public class ManifestPlugin
         return analyzer;
     }
 
-    public void writeManifest( Manifest manifest, File outputFile )
+    public static void writeManifest( Manifest manifest, File outputFile )
         throws IOException
     {
         outputFile.getParentFile().mkdirs();
