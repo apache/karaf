@@ -265,47 +265,50 @@ public class BundlePlugin extends AbstractMojo {
             List errors = builder.getErrors();
             List warnings = builder.getWarnings();
 
-            if (errors.size() > 0)
-            {
-                jarFile.delete();
-                for (Iterator e = errors.iterator(); e.hasNext();)
-                {
-                     String msg = (String) e.next();
-                     this.getLog().error("Error building bundle " + project.getArtifact() + " : " + msg);
-                }
-                throw new MojoFailureException("Found errors, see log");
-            }
-            else
-            {
-                jarFile.getParentFile().mkdirs();
-                builder.getJar().write(jarFile);
-                Artifact bundleArtifact = project.getArtifact();
-                bundleArtifact.setFile(jarFile);
-
-                if (manifestLocation != null && manifestLocation.length() > 0)
-                {
-                    File outputFile = new File( manifestLocation, "MANIFEST.MF" );
-
-                    try
-                    {
-                        Manifest manifest = builder.getJar().getManifest();
-                        ManifestPlugin.writeManifest( manifest, outputFile );
-                    }
-                    catch ( IOException e )
-                    {
-                        getLog().error( "Error trying to write Manifest to file " + outputFile, e );
-                    }
-                }
-                
-                // workaround for MNG-1682: force maven to install artifact using the "jar" handler
-                bundleArtifact.setArtifactHandler( artifactHandlerManager.getArtifactHandler( "jar" ) );
-            }
-
             for (Iterator w = warnings.iterator(); w.hasNext();)
             {
                 String msg = (String) w.next();
                 this.getLog().warn("Warning building bundle " + project.getArtifact() + " : " + msg);
             }
+            for (Iterator e = errors.iterator(); e.hasNext();)
+            {
+                 String msg = (String) e.next();
+                 this.getLog().error("Error building bundle " + project.getArtifact() + " : " + msg);
+            }
+
+            if (errors.size() > 0)
+            {
+                String failok = properties.getProperty( "-failok" );
+                if (null == failok || "false".equalsIgnoreCase( failok ))
+                {
+                    jarFile.delete();
+
+                    throw new MojoFailureException("Found errors, see log");
+                }
+            }
+
+            jarFile.getParentFile().mkdirs();
+            builder.getJar().write(jarFile);
+            Artifact bundleArtifact = project.getArtifact();
+            bundleArtifact.setFile(jarFile);
+
+            if (manifestLocation != null && manifestLocation.length() > 0)
+            {
+                File outputFile = new File( manifestLocation, "MANIFEST.MF" );
+
+                try
+                {
+                    Manifest manifest = builder.getJar().getManifest();
+                    ManifestPlugin.writeManifest( manifest, outputFile );
+                }
+                catch ( IOException e )
+                {
+                    getLog().error( "Error trying to write Manifest to file " + outputFile, e );
+                }
+            }
+            
+            // workaround for MNG-1682: force maven to install artifact using the "jar" handler
+            bundleArtifact.setArtifactHandler( artifactHandlerManager.getArtifactHandler( "jar" ) );
         }
         catch (Exception e)
         {
