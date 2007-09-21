@@ -97,10 +97,9 @@
       </activation>
       <modules>
         <module>../bundleplugin</module>
+        <module>../maven-obr-plugin</module>
         <module>../scrplugin</module>
         <module>../tools/maven2/maven-osgi-plugin</module>
-        <module>../ipojo/metadata</module>
-        <module>../ipojo/manipulator</module>
         <module>../ipojo/plugin</module>
       </modules>
     </profile>
@@ -133,6 +132,7 @@
         <module>../upnp/samples/tv</module>
         <module>../upnp/samples/clock</module>
         <module>../upnp/samples/binarylight</module>
+        
         <module>../org.osgi.foundation</module>
         <module>../javax.servlet</module>
         <module>../org.osgi.core</module>
@@ -157,6 +157,8 @@
         
         <module>../ipojo/core</module>
         <module>../ipojo/arch</module>
+        <module>../ipojo/metadata</module>
+        <module>../ipojo/manipulator</module>
 
         <module>../mosgi</module> 
         <module>../jmood</module> 

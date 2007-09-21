@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<!-- definition of simple elements -->
+
+<!-- definition of attribute  -->
+<xs:attribute name="name"     type="xs:string"/>
+<xs:attribute name="filter"   type="xs:string"/>
+<xs:attribute name="extend"   type="xs:boolean"/>
+<xs:attribute name="multiple" type="xs:boolean"/>
+<xs:attribute name="optional" type="xs:boolean"/>
+<xs:attribute name="id" type="xs:string"/>
+<xs:attribute name="n" type="xs:string"/>
+<xs:attribute name="v" type="xs:string"/>
+<xs:attribute name="t" type="xs:string"/>
+
+<xs:element name="require">
+  <xs:complexType mixed="true">
+    <xs:attribute ref="name"     use="required"/>
+    <xs:attribute ref="filter"   use="required"/>
+    <xs:attribute ref="extend"   use="required"/>
+    <xs:attribute ref="multiple" use="required"/>
+    <xs:attribute ref="optional" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="category">
+  <xs:complexType>
+	<xs:attribute ref="id" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="p">
+  <xs:complexType>
+	<xs:attribute ref="n" use="required"/>
+    <xs:attribute ref="v" use="required"/>
+    <xs:attribute ref="t" />
+  </xs:complexType>
+</xs:element>
+
+
+<xs:element name="capability">
+  <xs:complexType>
+    <xs:sequence>
+  		<xs:element ref="p" minOccurs="0" maxOccurs="unbounded"/>
+	</xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="resource">
+  <xs:complexType>
+    <xs:sequence>
+		  <xs:element ref="capability" minOccurs="0" maxOccurs="unbounded"/> 
+		  <xs:element ref="require" minOccurs="0" maxOccurs="unbounded"/> 
+		  <xs:element ref="category" minOccurs="0" maxOccurs="unbounded"/> 
+	</xs:sequence>
+  </xs:complexType>
+</xs:element>
+</xs:schema>

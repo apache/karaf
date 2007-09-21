@@ -28,18 +28,26 @@
  </parent>
 
  <modelVersion>4.0.0</modelVersion>
- <groupId>org.apache.felix</groupId>
+
  <artifactId>maven-bundle-plugin</artifactId>
  <version>1.1.0-SNAPSHOT</version>
-
  <packaging>maven-plugin</packaging>
+ 
  <name>Maven Bundle Plugin</name>
- <description> provides a maven plugin that allows that builds the jar by
-  embedding packages from the classpath (wildcarded). Plus a zillion
-  other features. See http://www.aqute.biz/php/tools/bnd.php
-  </description>
+ <description>
+  Provides a maven plugin which allows the creation of an OSGi bundle by
+  embedding used packages as class or jars by inspecting the classpath used to
+  compile the bundle. Plus a zillion other features. 
+  The plugin relies on the bnd tools, so to gather more information you can look
+  at is documentation http://www.aqute.biz/php/tools/bnd.php
+ </description>
  
  <dependencies>
+  <dependency>
+   <groupId>org.apache.felix</groupId>
+   <artifactId>maven-obr-plugin</artifactId>
+   <version>0.1.0-SNAPSHOT</version>
+  </dependency>
   <dependency>
    <groupId>biz.aQute</groupId>
    <artifactId>bndlib</artifactId>
