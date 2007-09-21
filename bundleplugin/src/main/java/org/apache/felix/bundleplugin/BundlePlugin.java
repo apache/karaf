@@ -501,9 +501,7 @@ public class BundlePlugin extends AbstractMojo {
         properties.put(Analyzer.BUNDLE_SYMBOLICNAME, bsn);
         properties.put(Analyzer.IMPORT_PACKAGE, "*");
 
-        String version = this.getMaven2OsgiConverter().getVersion( project.getVersion() );
-
-        properties.put(Analyzer.BUNDLE_VERSION, version);
+        properties.put(Analyzer.BUNDLE_VERSION, project.getVersion());
         this.header(properties, Analyzer.BUNDLE_DESCRIPTION, project
            .getDescription());
         this.header(properties, Analyzer.BUNDLE_LICENSE, this.printLicenses(project
