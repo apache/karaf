@@ -62,8 +62,6 @@ public class Component extends AbstractObject {
     /** Is this an abstract description? */
     protected boolean isAbstract;
 
-    protected boolean serviceFactory;
-
     /**
      * Default constructor.
      */
@@ -171,14 +169,6 @@ public class Component extends AbstractObject {
         this.isAbstract = isAbstract;
     }
 
-    public boolean isServiceFactory() {
-        return this.serviceFactory;
-    }
-
-    public void setServiceFactory(boolean serviceFactory) {
-        this.serviceFactory = serviceFactory;
-    }
-
     /**
      * Validate the component description.
      * If errors occur a message is added to the issues list,
@@ -234,12 +224,14 @@ public class Component extends AbstractObject {
                     }
 
                     // verify service
+                    boolean isServiceFactory = false;
                     if (this.getService() != null) {
                         this.getService().validate(issues, warnings);
+                        isServiceFactory = Boolean.valueOf(this.getService().getServicefactory()).booleanValue();
                     }
 
                     // serviceFactory must not be true for immediate of component factory
-                    if (this.isServiceFactory() && this.isImmediate() != null && this.isImmediate().booleanValue() && this.getFactory() != null) {
+                    if (isServiceFactory && this.isImmediate() != null && this.isImmediate().booleanValue() && this.getFactory() != null) {
                         issues.add(this.getMessage("Component must not be a ServiceFactory, if immediate and/or component factory: " + javaClass.getName()));
                     }
 

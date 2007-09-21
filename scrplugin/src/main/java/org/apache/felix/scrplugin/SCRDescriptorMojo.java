@@ -233,8 +233,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         final OCD ocd = this.doComponent(componentTag, component, metaData);
 
         boolean inherited = this.getBoolean(componentTag, Constants.COMPONENT_INHERIT, false);
-        boolean serviceFactory = this.doServices(description.getTagsByName(Constants.SERVICE, inherited), component, description);
-        component.setServiceFactory(serviceFactory);
+        this.doServices(description.getTagsByName(Constants.SERVICE, inherited), component, description);
 
         // properties
         final JavaTag[] properties = description.getTagsByName(Constants.PROPERTY, inherited);
@@ -372,11 +371,11 @@ public class SCRDescriptorMojo extends AbstractMojo {
      * @return
      * @throws MojoExecutionException
      */
-    protected boolean doServices(JavaTag[] services, Component component, JavaClassDescription description)
+    protected void doServices(JavaTag[] services, Component component, JavaClassDescription description)
     throws MojoExecutionException {
         // no services, hence certainly no service factory
         if (services == null || services.length == 0) {
-            return false;
+            return;
         }
 
         final Service service = new Service();
@@ -406,7 +405,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
             serviceFactory |= this.getBoolean(services[i], Constants.SERVICE_FACTORY, false);
         }
 
-        return serviceFactory;
+        service.setServicefactory(serviceFactory);
     }
 
     /**
