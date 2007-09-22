@@ -70,11 +70,9 @@
                         <Export-Package>
                             javax.servlet;version=${pkgVersion},
                             javax.servlet.http;version=${pkgVersion},
-                            javax.servlet.jsp;version=${pkgVersion},
-                            javax.servlet.jsp.tagext;version=${pkgVersion}
                         </Export-Package>
                         <Private-Package>
-                            javax.servlet.jsp.resources, javax.servlet.resources
+                            javax.servlet.resources
                         </Private-Package>
                     </instructions>
                 </configuration>
