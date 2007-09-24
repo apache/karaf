@@ -40,7 +40,7 @@
 		</install>
               <deploy>
                 org.apache.maven.plugins:maven-deploy-plugin:deploy,
-                org.apache.felix:maven-obr-plugin:deploy
+                org.apache.felix:maven-obr-plugin:deployment
               </deploy>
             </phases>
             <!-- END SNIPPET: bundle-lifecycle -->
