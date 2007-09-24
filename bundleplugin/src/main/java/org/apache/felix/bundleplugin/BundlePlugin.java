@@ -62,7 +62,7 @@ public class BundlePlugin extends AbstractMojo {
 
     /**
      * Directory where the manifest will be written
-     * 
+     *
      * @parameter expression="${manifestLocation}" default-value="${project.build.outputDirectory}/META-INF"
      */
     protected String manifestLocation;
@@ -222,27 +222,86 @@ public class BundlePlugin extends AbstractMojo {
             properties.putAll(this.transformDirectives(instructions));
 
             // pass maven resource paths onto BND analyzer
-            String mavenResourcePaths = this.getMavenResourcePaths();
-            if (mavenResourcePaths.length() > 0)
+            final String mavenResourcePaths = this.getMavenResourcePaths();
+            final String includeResource = (String)properties.get(Analyzer.INCLUDE_RESOURCE);
+            if (includeResource != null)
             {
-                final String includeResource = (String)properties.get(Analyzer.INCLUDE_RESOURCE);
-                if (includeResource != null)
+                if (includeResource.indexOf(MAVEN_RESOURCES) >= 0)
                 {
-                    if (includeResource.indexOf(MAVEN_RESOURCES) >= 0)
-                    {
+                	// if there is no maven resource path, we do a special treatment and replace
+                	// every occurance of MAVEN_RESOURCES and a following comma with an empty string
+                	if ( mavenResourcePaths.length() == 0 )
+                	{
+                		String cleanedResource = includeResource;
+                		int index = 0;
+                		do
+                		{
+                		    index = cleanedResource.indexOf(MAVEN_RESOURCES);
+                		    if ( index != -1 )
+                		    {
+                		    	// search the next comma
+                		    	int pos = cleanedResource.indexOf(',', index);
+                		    	if ( pos == -1 ) {
+                		    		// no comma follwing, so we just strip of the rest
+                		    		if ( index == 0 )
+                		    		{
+                		    			cleanedResource = "";
+                		    		}
+                		    		else
+                		    		{
+                		    			cleanedResource = cleanedResource.substring(0, index);
+                		    			// remove preceding comma
+                		    			pos = cleanedResource.lastIndexOf(',');
+                		    			if ( pos == 0 )
+                		    			{
+                		    				cleanedResource = "";
+                		    			}
+                		    			else if ( pos > 0 )
+                		    			{
+                		    				cleanedResource = cleanedResource.substring(0, pos);
+                		    			}
+                		    		}
+                		    	}
+                		    	else
+                		    	{
+                		    		// there is a comma following, so we just remove everything from the MAVEN_RESOURCE including the comma
+                    		    	if ( index > 0 )
+                    		    	{
+                    		    		cleanedResource = cleanedResource.substring(0, index) + cleanedResource.substring(pos + 1);
+                    		    	}
+                    		    	else
+                    		    	{
+                    		    		cleanedResource = cleanedResource.substring(pos + 1);
+                    		    	}
+                		    	}
+                		    }
+                		} while ( index != -1 );
+                		// trim whitespaces and update property
+                		cleanedResource = cleanedResource.trim();
+                		if ( cleanedResource.length() > 0 )
+                		{
+                            properties.put(Analyzer.INCLUDE_RESOURCE, cleanedResource);
+                		}
+                		else
+                		{
+                			properties.remove(Analyzer.INCLUDE_RESOURCE);
+                		}
+                	}
+                	else
+                	{
                         String combinedResource = includeResource.replaceAll(MAVEN_RESOURCES_REGEX, mavenResourcePaths);
                         properties.put(Analyzer.INCLUDE_RESOURCE, combinedResource);
-                    }
-                    else
-                    {
-                        this.getLog().warn(Analyzer.INCLUDE_RESOURCE + ": overriding " + mavenResourcePaths + " with " +
-                            includeResource + " (add " + MAVEN_RESOURCES + " if you want to include the maven resources)");
-                    }
+                	}
                 }
-                else
+                else if ( mavenResourcePaths.length() > 0 )
                 {
-                    properties.put(Analyzer.INCLUDE_RESOURCE, mavenResourcePaths);
+                    this.getLog().warn(Analyzer.INCLUDE_RESOURCE + ": overriding " + mavenResourcePaths + " with " +
+                        includeResource + " (add " + MAVEN_RESOURCES + " if you want to include the maven resources)");
                 }
+            }
+            else if (mavenResourcePaths.length() > 0 )
+            {
+                properties.put(Analyzer.INCLUDE_RESOURCE, mavenResourcePaths);
             }
 
             Builder builder = new Builder();
@@ -306,7 +365,7 @@ public class BundlePlugin extends AbstractMojo {
                     getLog().error( "Error trying to write Manifest to file " + outputFile, e );
                 }
             }
-            
+
             // workaround for MNG-1682: force maven to install artifact using the "jar" handler
             bundleArtifact.setArtifactHandler( artifactHandlerManager.getArtifactHandler( "jar" ) );
         }
