@@ -112,6 +112,7 @@ public class ConfigurableProperty {
             value = new String(strValue);
             m_type = java.lang.String.class;
         }
+		
         if (type.equals("boolean")) {
             value = new Boolean(strValue);
             m_type = Boolean.TYPE;

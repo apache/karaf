@@ -175,11 +175,7 @@ public class ConfigurationHandler extends Handler {
                 ff.add(fm);
             } else {
                 MethodMetadata[] mm = manipulation.getMethods(methodName);
-                if (mm.length == 0) {
-                    m_manager.getFactory().getLogger().log(Logger.ERROR,
-                            "[" + m_manager.getClassName() + "] The method " + methodName + " does not exist in the implementation");
-                    return;
-                } else {
+                if (mm.length != 0) {
                     if (mm[0].getMethodArguments().length != 1) {
                         m_manager.getFactory().getLogger().log(Logger.ERROR,
                                 "[" + m_manager.getClassName() + "] The method " + methodName + " does not have one argument");
@@ -191,7 +187,15 @@ public class ConfigurationHandler extends Handler {
                         return;
                     }
                     type = mm[0].getMethodArguments()[0];
-                }
+                } else {
+					// Else, the method is in a super class, look for the type attribute to get the type (if not already discovered)
+					if (type == null && configurables[i].containsAttribute("type")) { 
+							type = configurables[i].getAttribute("type"); 
+					} else {
+						m_manager.getFactory().getLogger().log(Logger.ERROR, "The type of the property cannot be discovered, please add a 'type' attribute");
+						return;
+					}
+				}
             }
 
             ConfigurableProperty cp = new ConfigurableProperty(name, fieldName, methodName, value, type, this);
@@ -224,10 +228,10 @@ public class ConfigurationHandler extends Handler {
     }
 
     /**
-     * Stop method.
-     * Do nothing.
-     * @see org.apache.felix.ipojo.Handler#stop()
-     */
+      * Stop method.
+      * Do nothing.
+      * @see org.apache.felix.ipojo.Handler#stop()
+      */
     public void stop() {
     }
 
