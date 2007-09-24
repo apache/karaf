@@ -71,6 +71,7 @@
         <module>poi</module>
         <module>poi-full</module>
         <module>portlet-api</module>
+        <module>quartz</module>
         <module>servlet-api</module>
         <module>xercesImpl</module>
         <module>xml-apis</module>
