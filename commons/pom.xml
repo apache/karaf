@@ -61,6 +61,7 @@
 	<module>jline</module>
         <module>jms</module>
         <!-- <module>jmxtools</module>  -->
+        <module>jsp-api</module>
         <module>jstl</module>
         <module>jta</module>
         <module>jzlib</module>
