@@ -228,70 +228,25 @@ public class BundlePlugin extends AbstractMojo {
             {
                 if (includeResource.indexOf(MAVEN_RESOURCES) >= 0)
                 {
-                	// if there is no maven resource path, we do a special treatment and replace
-                	// every occurance of MAVEN_RESOURCES and a following comma with an empty string
-                	if ( mavenResourcePaths.length() == 0 )
-                	{
-                		String cleanedResource = includeResource;
-                		int index = 0;
-                		do
-                		{
-                		    index = cleanedResource.indexOf(MAVEN_RESOURCES);
-                		    if ( index != -1 )
-                		    {
-                		    	// search the next comma
-                		    	int pos = cleanedResource.indexOf(',', index);
-                		    	if ( pos == -1 ) {
-                		    		// no comma follwing, so we just strip of the rest
-                		    		if ( index == 0 )
-                		    		{
-                		    			cleanedResource = "";
-                		    		}
-                		    		else
-                		    		{
-                		    			cleanedResource = cleanedResource.substring(0, index);
-                		    			// remove preceding comma
-                		    			pos = cleanedResource.lastIndexOf(',');
-                		    			if ( pos == 0 )
-                		    			{
-                		    				cleanedResource = "";
-                		    			}
-                		    			else if ( pos > 0 )
-                		    			{
-                		    				cleanedResource = cleanedResource.substring(0, pos);
-                		    			}
-                		    		}
-                		    	}
-                		    	else
-                		    	{
-                		    		// there is a comma following, so we just remove everything from the MAVEN_RESOURCE including the comma
-                    		    	if ( index > 0 )
-                    		    	{
-                    		    		cleanedResource = cleanedResource.substring(0, index) + cleanedResource.substring(pos + 1);
-                    		    	}
-                    		    	else
-                    		    	{
-                    		    		cleanedResource = cleanedResource.substring(pos + 1);
-                    		    	}
-                		    	}
-                		    }
-                		} while ( index != -1 );
-                		// trim whitespaces and update property
-                		cleanedResource = cleanedResource.trim();
-                		if ( cleanedResource.length() > 0 )
-                		{
+                    // if there is no maven resource path, we do a special treatment and replace
+                    // every occurance of MAVEN_RESOURCES and a following comma with an empty string
+                    if ( mavenResourcePaths.length() == 0 )
+                    {
+                        String cleanedResource = removeMavenResourcesTag( includeResource );
+                        if ( cleanedResource.length() > 0 )
+                        {
                             properties.put(Analyzer.INCLUDE_RESOURCE, cleanedResource);
-                		}
-                		else
-                		{
-                			properties.remove(Analyzer.INCLUDE_RESOURCE);
-                		}
-                	}
-                	else
-                	{
+                        }
+                        else
+                        {
+                            properties.remove(Analyzer.INCLUDE_RESOURCE);
+                        }
+                    }
+                    else
+                    {
                         String combinedResource = includeResource.replaceAll(MAVEN_RESOURCES_REGEX, mavenResourcePaths);
                         properties.put(Analyzer.INCLUDE_RESOURCE, combinedResource);
-                	}
+                    }
                 }
                 else if ( mavenResourcePaths.length() > 0 )
                 {
@@ -373,6 +328,27 @@ public class BundlePlugin extends AbstractMojo {
         {
             throw new MojoExecutionException("Unknown error occurred", e);
         }
+    }
+
+    private String removeMavenResourcesTag( String includeResource )
+    {
+        StringBuffer buf = new StringBuffer();
+
+        String[] clauses = includeResource.split(",");
+        for (int i = 0; i < clauses.length; i++)
+        {
+            String clause = clauses[i].trim();
+            if (!MAVEN_RESOURCES.equals(clause))
+            {
+                if (buf.length() > 0)
+                {
+                    buf.append(',');
+                }
+                buf.append(clause);
+            }
+        }
+
+        return buf.toString();
     }
 
     private Map getProperies(Model projectModel, String prefix, Object model)
