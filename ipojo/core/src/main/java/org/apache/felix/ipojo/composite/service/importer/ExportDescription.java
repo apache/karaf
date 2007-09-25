@@ -20,6 +20,7 @@ package org.apache.felix.ipojo.composite.service.importer;
 
 import java.util.List;
 
+import org.apache.felix.ipojo.CompositeHandler;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
@@ -28,12 +29,7 @@ import org.apache.felix.ipojo.metadata.Element;
  * Description of the Import Export Handler.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ImportExportDescription extends HandlerDescription {
-
-    /**
-     * List of imports.
-     */
-    private List m_imports;
+public class ExportDescription extends HandlerDescription {
 
     /**
      * List of exports.
@@ -43,14 +39,11 @@ public class ImportExportDescription extends HandlerDescription {
     /**
      * Constructor.
      * 
-     * @param name : name of the handler
-     * @param isValid : handler validity
-     * @param importers : list of managed imports
+     * @param h : composite handler
      * @param exporters : list of managed exports
      */
-    public ImportExportDescription(String name, boolean isValid, List importers, List exporters) {
-        super(name, isValid);
-        m_imports = importers;
+    public ExportDescription(CompositeHandler h, List exporters) {
+        super(h);
         m_exports = exporters;
     }
 
@@ -61,26 +54,9 @@ public class ImportExportDescription extends HandlerDescription {
      */
     public Element getHandlerInfo() {
         Element handler = super.getHandlerInfo();
-        for (int i = 0; i < m_imports.size(); i++) {
-            ServiceImporter imp = (ServiceImporter) m_imports.get(i);
-            Element impo = new Element("Requires", "");
-            impo.addAttribute(new Attribute("Specification", imp.getSpecification()));
-            if (imp.getFilter() != null) { impo.addAttribute(new Attribute("Filter", imp.getFilter())); }
-            if (imp.isSatisfied()) {
-                impo.addAttribute(new Attribute("State", "resolved"));
-                for (int j = 0; j < imp.getProviders().size(); j++) {
-                    Element pr = new Element("Provider", "");
-                    pr.addAttribute(new Attribute("name", (String) imp.getProviders().get(j)));
-                    impo.addElement(pr);
-                }
-            } else {
-                impo.addAttribute(new Attribute("State", "unresolved"));
-            }
-            handler.addElement(impo);
-        }
         for (int i = 0; i < m_exports.size(); i++) {
             ServiceExporter exp = (ServiceExporter) m_exports.get(i);
-            Element expo = new Element("Export", "");
+            Element expo = new Element("Exports", "");
             expo.addAttribute(new Attribute("Specification", exp.getSpecification()));
             expo.addAttribute(new Attribute("Filter", exp.getFilter()));
             if (exp.isSatisfied()) {
@@ -93,5 +69,4 @@ public class ImportExportDescription extends HandlerDescription {
         return handler;
 
     }
-
 }

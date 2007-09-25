@@ -20,13 +20,11 @@ package org.apache.felix.ipojo;
 
 import java.util.Dictionary;
 
-import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.osgi.framework.BundleContext;
 
 /**
  * The component instance class manages one instance of a component type.
- * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface ComponentInstance {
@@ -76,13 +74,6 @@ public interface ComponentInstance {
      * @return the actual state of the component instance.
      */
     int getState();
-
-    /**
-     * Return component-type description of this instance.
-     * @return the component type information. Each handler can participate to
-     * the component description.
-     */
-    ComponentDescription getComponentDescription();
 
     /**
      * Return the instance description.

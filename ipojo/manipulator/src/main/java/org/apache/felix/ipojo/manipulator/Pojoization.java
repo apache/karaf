@@ -40,6 +40,7 @@ import java.util.jar.Manifest;
 
 import org.apache.felix.ipojo.manipulation.Manipulator;
 import org.apache.felix.ipojo.manipulation.annotations.MetadataCollector;
+import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.xml.parser.ParseException;
 import org.apache.felix.ipojo.xml.parser.XMLMetadataParser;
@@ -89,7 +90,6 @@ public class Pojoization {
      * @param mes : error message.
      */
     private void error(String mes) {
-        System.out.println("An error occurs during the pojoization : " + mes);
         m_errors.add(mes);
     }
 
@@ -98,7 +98,6 @@ public class Pojoization {
      * @param mes : warning message
      */
     public void warn(String mes) {
-        System.out.println("An warning occurs during the pojoization : " + mes);
         m_warnings.add(mes);
     }
 
@@ -356,6 +355,12 @@ public class Pojoization {
                 name += ".class";
                 componentClazzes.add(new ComponentInfo(name, meta[i]));
             }
+            if (meta[i].getName().equalsIgnoreCase("handler") && meta[i].containsAttribute("className")) {
+                String name = meta[i].getAttribute("classname");
+                name = name.replace('.', '/');
+                name += ".class";
+                componentClazzes.add(new ComponentInfo(name, meta[i]));
+            }
         }
         return componentClazzes;
     }
@@ -409,7 +414,7 @@ public class Pojoization {
     private void setImports(Attributes att) {
         Map imports = parseHeader(att.getValue("Import-Package"));
         Map ver = new TreeMap();
-        ver.put("version", "0.7.3");
+        ver.put("version", "0.7.5");
         if (!imports.containsKey("org.apache.felix.ipojo")) {
             imports.put("org.apache.felix.ipojo", ver);
         }
@@ -425,21 +430,6 @@ public class Pojoization {
             Map verCM = new TreeMap();
             verCM.put("version", "1.3");
             imports.put("org.osgi.service.log", verCM);
-        }
-        
-
-        // Add handler namespace
-        String[][] namespaces = computeHandlerNamespace();
-        for (int j = 0; j < namespaces.length; j++) {
-            for (int k = 0; k < namespaces[j].length; k++) {
-                if (!namespaces[j][k].equals("")) {
-                    int lastIndex = namespaces[j][k].lastIndexOf('.');
-                    String ns = namespaces[j][k].substring(0, lastIndex);
-                    if (!imports.containsKey(ns)) {
-                        imports.put(ns, new TreeMap());
-                    }
-                }
-            }
         }
 
         // Add referred imports from the metadata
@@ -464,18 +454,6 @@ public class Pojoization {
         if (!meta.equals("")) { 
             att.putValue("iPOJO-Components", meta);
         }
-    }
-
-    /**
-     * Build the list of namespaces used in the metadata. (first-order only). 
-     * @return the list of namespaces [array of component [ array of namespace ] ].
-     */
-    private String[][] computeHandlerNamespace() {
-        String[][] ns = new String[m_metadata.length][];
-        for (int i = 0; i < m_metadata.length; i++) {
-            ns[i] = m_metadata[i].getNamespaces();
-        }
-        return ns;
     }
 
     /**
@@ -588,7 +566,7 @@ public class Pojoization {
             stream.close();
 
         } catch (MalformedURLException e) {
-            error("Malformed Mtadata URL for " + path);
+            error("Malformed Metadata URL for " + path);
             return null;
         } catch (IOException e) {
             error("Cannot open the file : " + path);
@@ -619,19 +597,19 @@ public class Pojoization {
     
     /**
      * Get packages referenced by composite.
-     * 
      * @return the list of referenced packages.
      */
     private List getReferredPackages() {
         List referred = new ArrayList();
         for (int i = 0; i < m_metadata.length; i++) {
             if (m_metadata[i].getName().equalsIgnoreCase("composite")) {
-                for (int j = 0; j < m_metadata[i].getElements().length; j++) {
-                    if (m_metadata[i].getElements()[j].containsAttribute("specification")) {
-                        String p = m_metadata[i].getElements()[j].getAttribute("specification");
-                        int last = p.lastIndexOf('.');
+                Element[] elems = m_metadata[i].getElements();
+                for (int j = 0; j < elems.length; j++) {
+                    String att = elems[j].getAttribute("specification");
+                    if (att != null) {
+                        int last = att.lastIndexOf('.');
                         if (last != -1) {
-                            referred.add(p.substring(0, last));
+                            referred.add(att.substring(0, last));
                         }
                     }
                 }
@@ -654,16 +632,19 @@ public class Pojoization {
             result = actual + element.getNameSpace() + ":" + element.getName() + " { ";
         }
 
-        for (int i = 0; i < element.getAttributes().length; i++) {
-            if (element.getAttributes()[i].getNameSpace().equals("")) {
-                result = result + "$" + element.getAttributes()[i].getName() + "=\"" + element.getAttributes()[i].getValue() + "\" ";
+        Attribute[] atts = element.getAttributes();
+        for (int i = 0; i < atts.length; i++) {
+            Attribute current = (Attribute) atts[i];
+            if (current.getNameSpace().equals("")) {
+                result = result + "$" + current.getName() + "=\"" + current.getValue() + "\" ";
             } else {
-                result = result + "$" + element.getAttributes()[i].getNameSpace() + ":" + element.getAttributes()[i].getName() + "=\"" + element.getAttributes()[i].getValue() + "\" ";
+                result = result + "$" + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue() + "\" ";
             }
         }
 
-        for (int i = 0; i < element.getElements().length; i++) {
-            result = buildManifestMetadata(element.getElements()[i], result);
+        Element[] elems = element.getElements();
+        for (int i = 0; i < elems.length; i++) {
+            result = buildManifestMetadata(elems[i], result);
         }
 
         return result + "}";

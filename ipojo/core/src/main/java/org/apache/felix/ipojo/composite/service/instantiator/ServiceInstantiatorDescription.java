@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.ipojo.ComponentInstance;
+import org.apache.felix.ipojo.CompositeHandler;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
@@ -44,12 +45,11 @@ public class ServiceInstantiatorDescription extends HandlerDescription {
     /**
      * Constructor.
      * 
-     * @param arg0 : name of the handler
-     * @param arg1 : validity of the handler
+     * @param h : composite handler
      * @param insts : list of service instance
      */
-    public ServiceInstantiatorDescription(String arg0, boolean arg1, List insts) {
-        super(arg0, arg1);
+    public ServiceInstantiatorDescription(CompositeHandler h, List insts) {
+        super(h);
         m_instances = insts;
     }
 
@@ -77,7 +77,7 @@ public class ServiceInstantiatorDescription extends HandlerDescription {
                 Object o = map.get(ref);
                 if (o != null) {
                     Element fact = new Element("Factory", "");
-                    fact.addAttribute(new Attribute("Name", ((ComponentInstance) o).getComponentDescription().getName()));
+                    fact.addAttribute(new Attribute("Name", ((ComponentInstance) o).getFactory().getName()));
                     service.addElement(fact);
                 }
             }

@@ -104,11 +104,11 @@ public class ServiceRegistry {
     public boolean ungetService(ComponentInstance cm, ServiceReference ref) {
 
         ServiceRegistrationImpl reg = ((ServiceReferenceImpl) ref).getServiceRegistration();
-        if (!reg.isValid()) {
-            return false;
-        } else {
+        if (reg.isValid()) {
             reg.ungetService(cm, reg.getService());
             return true;
+        } else {
+            return false;
         }
     }
 
@@ -159,11 +159,10 @@ public class ServiceRegistry {
 
     /**
      * Dispatch a service event.
-     * 
      * @param event : the service to dispatch
      */
     private void fireServiceChanged(ServiceEvent event) {
-        synchronized (this) {
+        synchronized (m_listeners) {
             // Iterate on the service listener list to notify service listener
             for (int i = 0; i < m_listeners.size(); i++) {
                 ListenerInfo li = (ListenerInfo) m_listeners.get(i);
@@ -184,10 +183,11 @@ public class ServiceRegistry {
      * @param className : required interface
      * @param expr : LDAP filter
      * @return : the list of available service references.
-     * @throws InvalidSyntaxException occurs when the LDAP filter is malformed.
+     * @throws InvalidSyntaxException
+     *             occurs when the LDAP filter is malformed.
      */
     public ServiceReference[] getServiceReferences(String className, String expr) throws InvalidSyntaxException {
-        synchronized (this) {
+        synchronized (m_regs) {
             // Define filter if expression is not null.
             Filter filter = null;
             if (expr != null) {
@@ -238,7 +238,7 @@ public class ServiceRegistry {
      * @return the first available provider or null if none available.
      */
     public ServiceReference getServiceReference(String clazz) {
-        synchronized (this) {
+        synchronized (m_regs) {
             try {
                 ServiceReference[] refs = getServiceReferences(clazz, null);
                 if (refs != null) {
@@ -253,13 +253,12 @@ public class ServiceRegistry {
 
     /**
      * Get a service object.
-     * 
      * @param cm : component instance requiring the service.
      * @param ref : the required reference.
      * @return the service object.
      */
     public Object getService(ComponentInstance cm, ServiceReference ref) {
-        synchronized (this) {
+        synchronized (m_regs) {
             // Look for the service registration for this ref
             ServiceRegistrationImpl reg = ((ServiceReferenceImpl) ref).getServiceRegistration();
             if (reg.isValid()) {
@@ -274,14 +273,13 @@ public class ServiceRegistry {
     /**
      * Get all service references consistent with the given interface and
      * filter.
-     * 
      * @param clazz : the required interface.
      * @param filter : the LDAP filter.
      * @return the list of all service reference or null if none available.
      * @throws InvalidSyntaxException occurs when the LDAP filter is malformed.
      */
     public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
-        synchronized (this) {
+        synchronized (m_regs) {
             // Can delegate on getServiceReference, indeed their is no test on
             // the "modularity" conflict.
             return getServiceReferences(clazz, filter);
@@ -290,26 +288,28 @@ public class ServiceRegistry {
 
     /**
      * Add a service listener with a filter.
-     * 
      * @param listener : the service listener to add
      * @param filter : LDAP filter
      */
     public void addServiceListener(ServiceListener listener, String filter) {
-        synchronized (this) {
-            ListenerInfo li = new ListenerInfo();
-            li.m_listener = listener;
-            try {
-                li.m_filter = m_bc.createFilter(filter);
-            } catch (InvalidSyntaxException ex) {
-                System.err.println("Scope Service Registry : Problem when creating a service listener " + ex.getMessage());
-            }
-            m_listeners.add(li);
+        // If the filter is null, subscribe with no filter.
+        if (filter == null) {
+            addServiceListener(listener);
+            return;
         }
+        
+        ListenerInfo li = new ListenerInfo();
+        li.m_listener = listener;
+        try {
+            li.m_filter = m_bc.createFilter(filter);
+        } catch (InvalidSyntaxException ex) {
+            System.err.println("Scope Service Registry : Problem when creating a service listener " + ex.getMessage());
+        }
+        m_listeners.add(li);
     }
 
     /**
      * Dispatch a service properties modified event.
-     * 
      * @param reg : the implicated service registration.
      */
     public void servicePropertiesModified(ServiceRegistrationImpl reg) {
@@ -318,14 +318,11 @@ public class ServiceRegistry {
 
     /**
      * Unregister a service.
-     * 
      * @param reg : the service registration to unregister
      */
     public void unregisterService(ServiceRegistrationImpl reg) {
-        synchronized (this) {
-            m_regs.remove(reg);
-            fireServiceChanged(new ServiceEvent(ServiceEvent.UNREGISTERING, reg.getReference()));
-        }
+        m_regs.remove(reg);
+        fireServiceChanged(new ServiceEvent(ServiceEvent.UNREGISTERING, reg.getReference()));
     }
 
     /**

@@ -138,14 +138,5 @@ public class StringMap extends TreeMap {
         public void setCaseSensitive(boolean b) {
             m_isCaseSensitive = b;
         }
-
-        /**
-         * Does not support cloning.
-         * @return The current map
-         * @see java.lang.Object#clone()
-         */
-        public Object clone() {
-            return this;
-        }
     }
 }

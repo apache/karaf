@@ -18,14 +18,14 @@
  */
 package org.apache.felix.ipojo;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.apache.felix.ipojo.architecture.Architecture;
-import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.composite.CompositeServiceContext;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -37,17 +37,7 @@ import org.osgi.framework.ServiceReference;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class CompositeManager implements ComponentInstance {
-
-    /**
-     * Parent factory (ComponentFactory).
-     */
-    private ComponentFactory m_factory;
-
-    /**
-     * Name of the component instance.
-     */
-    private String m_name;
+public class CompositeManager implements ComponentInstance, InstanceStateListener {
 
     /**
      * The context of the component.
@@ -55,44 +45,73 @@ public class CompositeManager implements ComponentInstance {
     private BundleContext m_context;
 
     /**
-     * Composite Handler list.
+     * Parent factory (ComponentFactory).
      */
-    private CompositeHandler[] m_handlers = new CompositeHandler[0];
+    private ComponentFactory m_factory;
 
     /**
-     * Component state (STOPPED at the beginning).
+     * Composite Handler list.
      */
-    private int m_state = STOPPED;
-    
+    private HandlerManager[] m_handlers = new HandlerManager[0];
+
     /**
      * Instance State Listener List.
      */
-    private InstanceStateListener[] m_instanceListeners = new InstanceStateListener[0];
-
-
-    /**
-     * Component type information.
-     */
-    private ComponentDescription m_componentDesc;
+    private List m_instanceListeners = new ArrayList();
 
     /**
      * Internal service context of the composition.
      */
     private CompositeServiceContext m_internalContext;
+    
+    /**
+     * Name of the component instance.
+     */
+    private String m_name;
 
-    // Constructor
+    /**
+     * Component state (STOPPED at the beginning).
+     */
+    private int m_state = STOPPED;
+
     /**
      * Construct a new Component Manager.
-     * 
      * @param factory : the factory managing the instance manager
      * @param bc : the bundle context to give to the instance
+     * @param handlers : the handlers to plug
      */
-    public CompositeManager(ComponentFactory factory, BundleContext bc) {
+    public CompositeManager(ComponentFactory factory, BundleContext bc, HandlerManager[] handlers) {
         m_factory = factory;
         m_context = bc;
         // Initialize the service context.
         m_internalContext = new CompositeServiceContext(m_context, this);
-        m_factory.getLogger().log(Logger.INFO, "[Bundle " + m_context.getBundle().getBundleId() + "] Create an instance manager from the factory " + m_factory);
+        m_handlers = handlers;
+    }
+
+    /**
+     * Plug the given handler to the current container.
+     * @param h : the handler to plug.
+     */
+    public synchronized void addCompositeHandler(HandlerManager h) {
+        if (m_handlers.length > 0) {
+            HandlerManager[] newInstances = new HandlerManager[m_handlers.length + 1];
+            System.arraycopy(m_handlers, 0, newInstances, 0, m_handlers.length);
+            newInstances[m_handlers.length] = h;
+            m_handlers = newInstances;
+        } else {
+            m_handlers = new HandlerManager[] { h };
+        }
+    }
+
+    /**
+     * Add an instance to the created instance list.
+     * @param listener : the instance state listener to add.
+     * @see org.apache.felix.ipojo.ComponentInstance#addInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
+     */
+    public void addInstanceStateListener(InstanceStateListener listener) {
+        synchronized (m_instanceListeners) {
+            m_instanceListeners.add(listener);
+        }
     }
 
     /**
@@ -101,76 +120,89 @@ public class CompositeManager implements ComponentInstance {
      * 
      * @param cm : the component type metadata
      * @param configuration : the configuration of the instance
+     * @throws ConfigurationException : occurs when the component type are incorrect.
      */
-    public void configure(Element cm, Dictionary configuration) {
-        // Stop all previous registered handler
-        if (m_handlers.length != 0) {
-            stop();
-        }
-
-        // Clear the handler list
-        m_handlers = new CompositeHandler[0];
-
-        // ComponentInfo initialization
-        m_componentDesc = new ComponentDescription(m_factory.getName());
-
+    public void configure(Element cm, Dictionary configuration) throws ConfigurationException {        
         // Add the name
         m_name = (String) configuration.get("name");
-
+        
         // Create the standard handlers and add these handlers to the list
-        for (int i = 0; i < IPojoConfiguration.INTERNAL_COMPOSITE_HANDLERS.length; i++) {
-            // Create a new instance
-            try {
-                CompositeHandler h = (CompositeHandler) IPojoConfiguration.INTERNAL_COMPOSITE_HANDLERS[i].newInstance();
-                h.configure(this, cm, configuration);
-            } catch (InstantiationException e) {
-                m_factory.getLogger().log(Logger.ERROR,
-                        "[" + m_name + "] Cannot instantiate the handler " + IPojoConfiguration.INTERNAL_HANDLERS[i] + " : " + e.getMessage());
-            } catch (IllegalAccessException e) {
-                m_factory.getLogger().log(Logger.ERROR,
-                        "[" + m_name + "] Cannot instantiate the handler " + IPojoConfiguration.INTERNAL_HANDLERS[i] + " : " + e.getMessage());
-            }
+        for (int i = 0; i < m_handlers.length; i++) {
+            m_handlers[i].init(this, cm, configuration);
         }
+    }
+    
+    /** 
+     * Dispose the instance.
+     * @see org.apache.felix.ipojo.ComponentInstance#dispose()
+     */
+    public void dispose() {
+        if (m_state > STOPPED) { stop(); }
+        
+        for (int i = 0; i < m_instanceListeners.size(); i++) {
+            ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, DISPOSED);
+        }
+        
+        m_factory.disposed(this);
 
-        // Look for namespaces
-        for (int i = 0; i < cm.getNamespaces().length; i++) {
-            if (!cm.getNamespaces()[i].equals("")) {
-                // It is not an internal handler, try to load it
-                try {
-                    Class c = m_context.getBundle().loadClass(cm.getNamespaces()[i]);
-                    CompositeHandler h = (CompositeHandler) c.newInstance();
-                    h.configure(this, cm, configuration);
-                } catch (ClassNotFoundException e) {
-                    m_factory.getLogger()
-                            .log(Logger.ERROR, "[" + m_name + "] Cannot instantiate the handler " + cm.getNamespaces()[i] + " : " + e.getMessage());
-                } catch (InstantiationException e) {
-                    m_factory.getLogger()
-                            .log(Logger.ERROR, "[" + m_name + "] Cannot instantiate the handler " + cm.getNamespaces()[i] + " : " + e.getMessage());
-                } catch (IllegalAccessException e) {
-                    m_factory.getLogger()
-                            .log(Logger.ERROR, "[" + m_name + "] Cannot instantiate the handler " + cm.getNamespaces()[i] + " : " + e.getMessage());
-                }
-            }
+        // Cleaning
+        m_state = DISPOSED;
+        for (int i = 0; i < m_handlers.length; i++) {
+            m_handlers[i].dispose();
         }
+        m_handlers = new HandlerManager[0];
+        m_instanceListeners.clear();
     }
 
     /**
-     * Return the component type description of this instance.
-     * @return the component type information.
-     * @see org.apache.felix.ipojo.ComponentInstance#getComponentDescription()
+     * Return a specified handler.
+     * @param name : class name of the handler to find
+     * @return : the handler, or null if not found
      */
-    public ComponentDescription getComponentDescription() {
-        return m_componentDesc;
+    public CompositeHandler getCompositeHandler(String name) {
+        for (int i = 0; i < m_handlers.length; i++) {
+            HandlerFactory fact = (HandlerFactory) m_handlers[i].getFactory();
+            if (fact.getHandlerName().equals(name) || fact.getComponentClassName().equals(name)) {
+                return (CompositeHandler) m_handlers[i].getHandler();
+            }
+        }
+        return null;
     }
 
+    /**
+     * Get the bundle context used by this instance.
+     * @return the parent context of the instance.
+     * @see org.apache.felix.ipojo.ComponentInstance#getContext()
+     */
+    public BundleContext getContext() {
+        return m_context;
+    }
+
+    /**
+     * Get the factory which create this instance.
+     * @return the factory of the component
+     * @see org.apache.felix.ipojo.ComponentInstance#getFactory()
+     */
+    public ComponentFactory getFactory() {
+        return m_factory;
+    }
+    
+    /**
+     * Get the global bundle context.
+     * @return the global bundle context.
+     */
+    public BundleContext getGlobalContext() {
+        IPojoContext c = (IPojoContext) m_context;
+        return c.getGlobalContext();
+    }
+    
     /**
      * Return the instance description of this instance.
      * @return the instance description.
      * @see org.apache.felix.ipojo.ComponentInstance#getInstanceDescription()
      */
-    public synchronized InstanceDescription getInstanceDescription() {
-        int componentState = getState();
-        InstanceDescription instanceDescription = new InstanceDescription(m_name, componentState, getContext().getBundle().getBundleId(), m_componentDesc);
+    public InstanceDescription getInstanceDescription() {
+        InstanceDescription instanceDescription = new InstanceDescription(m_name, m_state, getContext().getBundle().getBundleId(), m_factory.getComponentDescription());
         CompositeHandler[] handlers = getRegistredCompositeHandlers();
         for (int i = 0; i < handlers.length; i++) {
             instanceDescription.addHandler(handlers[i].getDescription());
@@ -194,144 +226,43 @@ public class CompositeManager implements ComponentInstance {
     }
 
     /**
+     * Get the instance name.
+     * @return the instance name
+     * @see org.apache.felix.ipojo.ComponentInstance#getInstanceName()
+     */
+    public String getInstanceName() {
+        return m_name;
+    }
+
+    /**
+     * Get the parent service context.
+     * @return the parent service context.
+     */
+    public ServiceContext getParentServiceContext() {
+        IPojoContext c = (IPojoContext) m_context;
+        return c.getServiceContext();
+    }
+
+    /**
      * REturn the list of handlers plugged on this instance.
      * @return the list of the registered handlers.
      */
     public CompositeHandler[] getRegistredCompositeHandlers() {
-        return m_handlers;
-    }
-
-    /**
-     * Return a specified handler.
-     * 
-     * @param name : class name of the handler to find
-     * @return : the handler, or null if not found
-     */
-    public CompositeHandler getCompositeHandler(String name) {
+        CompositeHandler[] h = new CompositeHandler[m_handlers.length];
         for (int i = 0; i < m_handlers.length; i++) {
-            if (m_handlers[i].getClass().getName().equalsIgnoreCase(name)) {
-                return m_handlers[i];
-            }
+            h[i] = (CompositeHandler) m_handlers[i].getHandler();
         }
-        return null;
-    }
-
-    // ===================== Lifecycle management =====================
-
-    /**
-     * Start the instance manager.
-     */
-    public void start() {
-        if (m_state != STOPPED) {
-            return;
-        } // Instance already started
-
-        // Start all the handlers
-        m_factory.getLogger().log(Logger.INFO, "[" + m_name + "] Start the instance manager with " + m_handlers.length + " handlers");
-
-        // The new state of the component is UNRESOLVED
-        m_state = INVALID;
-
-        m_internalContext.start(); // Turn on the factory tracking
-
-        for (int i = 0; i < m_handlers.length; i++) {
-            m_handlers[i].start();
-        }
-
-        // Defines the state of the component :
-        checkInstanceState();
-    }
-
-    /**
-     * Stop the instance manager.
-     */
-    public void stop() {
-        if (m_state == STOPPED) {
-            return;
-        } // Instance already stopped
-
-        setState(INVALID);
-        // Stop all the handlers
-        for (int i = m_handlers.length - 1; i > -1; i--) {
-            m_handlers[i].stop();
-        }
-
-        m_internalContext.stop(); // Turn off the factory tracking
-        m_state = STOPPED;
-        
-        for (int i = 0; i < m_instanceListeners.length; i++) {
-            m_instanceListeners[i].stateChanged(this, STOPPED);
-        }
-    }
-    
-    /** 
-     * Dispose the instance.
-     * @see org.apache.felix.ipojo.ComponentInstance#dispose()
-     */
-    public void dispose() {
-        if (m_state > STOPPED) {
-            stop();
-        }
-        
-        for (int i = 0; i < m_instanceListeners.length; i++) {
-            m_instanceListeners[i].stateChanged(this, DISPOSED);
-        }
-        
-        m_factory.disposed(this);
-
-        // Cleaning
-        m_state = DISPOSED;
-        m_handlers = new CompositeHandler[0];
-        m_instanceListeners = new InstanceStateListener[0];
+        return h;
     }
     
     /**
-     * Kill the current instance.
-     * Only the factory of this instance can call this method.
+     * Get the internal service context of this instance.
+     * @return the internal service context.
      */
-    protected void kill() {
-        if (m_state > STOPPED) {
-            stop();
-        }
-        
-        for (int i = 0; i < m_instanceListeners.length; i++) {
-            m_instanceListeners[i].stateChanged(this, DISPOSED);
-        }
-
-        // Cleaning
-        m_state = DISPOSED;
-        m_handlers = new CompositeHandler[0];
-        m_instanceListeners = new InstanceStateListener[0];
+    public ServiceContext getServiceContext() {
+        return m_internalContext;
     }
-
-    /**
-     * Set the state of the component. 
-     * Ff the state changed call the stateChanged(int) method on the handlers.
-     * @param state : new state
-     */
-    public void setState(int state) {
-        if (m_state != state) {
-
-            // Log the state change
-            if (state == INVALID) {
-                m_factory.getLogger().log(Logger.INFO, "[" + m_name + "]  State -> INVALID");
-            }
-            if (state == VALID) {
-                m_factory.getLogger().log(Logger.INFO, "[" + m_name + "] State -> VALID");
-            }
-
-            // The state changed call the handler stateChange method
-            m_state = state;
-            for (int i = m_handlers.length - 1; i > -1; i--) {
-                m_handlers[i].stateChanged(state);
-            }
-            
-            for (int i = 0; i < m_instanceListeners.length; i++) {
-                m_instanceListeners[i].stateChanged(this, state);
-            }
-        }
-    }
-
+    
     /**
      * Get the actual state of the instance.
      * @return the actual state of the instance
@@ -340,167 +271,14 @@ public class CompositeManager implements ComponentInstance {
     public int getState() {
         return m_state;
     }
-
+    
     /**
      * Check if the instance is started.
      * @return true if the instance is started.
      * @see org.apache.felix.ipojo.ComponentInstance#isStarted()
      */
     public boolean isStarted() {
-        return m_state != STOPPED;
-    }
-    
-    /**
-     * Add an instance to the created instance list.
-     * @param listener : the instance state listener to add.
-     * @see org.apache.felix.ipojo.ComponentInstance#addInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
-     */
-    public void addInstanceStateListener(InstanceStateListener listener) {
-        for (int i = 0; (m_instanceListeners != null) && (i < m_instanceListeners.length); i++) {
-            if (m_instanceListeners[i] == listener) {
-                return;
-            }
-        }
-
-        if (m_instanceListeners.length > 0) {
-            InstanceStateListener[] newInstances = new InstanceStateListener[m_instanceListeners.length + 1];
-            System.arraycopy(m_instanceListeners, 0, newInstances, 0, m_instanceListeners.length);
-            newInstances[m_instanceListeners.length] = listener;
-            m_instanceListeners = newInstances;
-        } else {
-            m_instanceListeners = new InstanceStateListener[] { listener };
-        }
-    }
-    
-    /**
-     * Remove an instance state listener.
-     * @param listener : the listener to remove
-     * @see org.apache.felix.ipojo.ComponentInstance#removeInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
-     */
-    public void removeInstanceStateListener(InstanceStateListener listener) {
-        int idx = -1;
-        for (int i = 0; i < m_instanceListeners.length; i++) {
-            if (m_instanceListeners[i] == listener) {
-                idx = i;
-                break;
-            }
-        }
-        
-        if (idx >= 0) {
-            if ((m_instanceListeners.length - 1) == 0) {
-                m_instanceListeners = new InstanceStateListener[0];
-            } else {
-                InstanceStateListener[] newInstances = new InstanceStateListener[m_instanceListeners.length - 1];
-                System.arraycopy(m_instanceListeners, 0, newInstances, 0, idx);
-                if (idx < newInstances.length) {
-                    System.arraycopy(m_instanceListeners, idx + 1, newInstances, idx, newInstances.length - idx);
-                }
-                m_instanceListeners = newInstances;
-            }
-        }
-    }
-
-    // ===================== end Lifecycle management =====================
-
-    // ================== Class & Instance management ===================
-
-    /**
-     * Get the factory which create this instance.
-     * @return the factory of the component
-     * @see org.apache.felix.ipojo.ComponentInstance#getFactory()
-     */
-    public ComponentFactory getFactory() {
-        return m_factory;
-    }
-
-    // ======================== Handlers Management ======================
-
-    /**
-     * Register the given handler to the current instance manager.
-     * 
-     * @param h : the handler to register
-     */
-    public void register(CompositeHandler h) {
-        for (int i = 0; (m_handlers != null) && (i < m_handlers.length); i++) {
-            if (m_handlers[i] == h) {
-                return;
-            }
-        }
-
-        if (m_handlers != null) {
-            CompositeHandler[] newList = new CompositeHandler[m_handlers.length + 1];
-            System.arraycopy(m_handlers, 0, newList, 0, m_handlers.length);
-            newList[m_handlers.length] = h;
-            m_handlers = newList;
-        }
-    }
-
-    /**
-     * Unregister the given handler.
-     * 
-     * @param h : the handler to unregister
-     */
-    public void unregister(CompositeHandler h) {
-        int idx = -1;
-        for (int i = 0; i < m_handlers.length; i++) {
-            if (m_handlers[i] == h) {
-                idx = i;
-                break;
-            }
-        }
-
-        if (idx >= 0) {
-            if ((m_handlers.length - 1) == 0) {
-                m_handlers = new CompositeHandler[0];
-            } else {
-                CompositeHandler[] newList = new CompositeHandler[m_handlers.length - 1];
-                System.arraycopy(m_handlers, 0, newList, 0, idx);
-                if (idx < newList.length) {
-                    System.arraycopy(m_handlers, idx + 1, newList, idx, newList.length - idx);
-                }
-                m_handlers = newList;
-            }
-        }
-    }
-
-    /**
-     * Get the bundle context used by this instance.
-     * @return the parent context of the instance.
-     * @see org.apache.felix.ipojo.ComponentInstance#getContext()
-     */
-    public BundleContext getContext() {
-        return m_context;
-    }
-
-    /**
-     * Check the state of all handlers.
-     */
-    public void checkInstanceState() {
-        m_factory.getLogger().log(Logger.INFO, "[" + m_name + "] Check the instance state");
-        boolean isValid = true;
-        for (int i = 0; i < m_handlers.length; i++) {
-            boolean b = m_handlers[i].isValid();
-            isValid = isValid && b;
-        }
-
-        // Update the component state if necessary
-        if (!isValid && m_state == VALID) {
-            // Need to update the state to UNRESOLVED
-            setState(INVALID);
-            return;
-        }
-        if (isValid && m_state == INVALID) {
-            setState(VALID);
-        }
-    }
-
-    /**
-     * Get the instance name.
-     * @return the instance name
-     * @see org.apache.felix.ipojo.ComponentInstance#getInstanceName()
-     */
-    public String getInstanceName() {
-        return m_name;
+        return m_state > STOPPED;
     }
 
     /**
@@ -515,28 +293,136 @@ public class CompositeManager implements ComponentInstance {
     }
 
     /**
-     * Get the internal service context of this instance.
-     * @return the internal service context.
+     * Remove an instance state listener.
+     * @param listener : the listener to remove
+     * @see org.apache.felix.ipojo.ComponentInstance#removeInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
      */
-    public ServiceContext getServiceContext() {
-        return m_internalContext;
+    public void removeInstanceStateListener(InstanceStateListener listener) {
+        synchronized (m_instanceListeners) {
+            m_instanceListeners.remove(listener);
+        }
     }
 
     /**
-     * Get the global bundle context.
-     * @return the global bundle context.
+     * Set the state of the component. 
+     * if the state changed call the stateChanged(int) method on the handlers.
+     * @param state : new state
      */
-    public BundleContext getGlobalContext() {
-        IPojoContext c = (IPojoContext) m_context;
-        return c.getGlobalContext();
+    public void setState(int state) {
+        if (m_state != state) {
+
+            // The state changed call the handler stateChange method
+            m_state = state;
+            for (int i = m_handlers.length - 1; i > -1; i--) {
+                m_handlers[i].getHandler().stateChanged(state);
+            }
+            
+            for (int i = 0; i < m_instanceListeners.size(); i++) {
+                ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, state);
+            }
+        }
+    }
+
+    /**
+     * Start the instance manager.
+     */
+    public synchronized void start() {
+        if (m_state > STOPPED) {
+            return;
+        } // Instance already started
+
+
+        // The new state of the component is UNRESOLVED
+        m_state = INVALID;
+
+        m_internalContext.start(); // Turn on the factory tracking
+
+        for (int i = 0; i < m_handlers.length; i++) {
+            m_handlers[i].start();
+            m_handlers[i].addInstanceStateListener(this);
+        }
+        
+        for (int i = 0; i < m_handlers.length; i++) {
+            if (m_handlers[i].getState() != VALID) {
+                setState(INVALID);
+                return;
+            }
+        }
+        setState(VALID);
+        
+    }
+
+    /**
+     * State Change listener callback.
+     * This method is notified at each time a plugged handler becomes invalid.
+     * @param instance : changing instance 
+     * @param newState : new state
+     * @see org.apache.felix.ipojo.InstanceStateListener#stateChanged(org.apache.felix.ipojo.ComponentInstance, int)
+     */
+    public synchronized void stateChanged(ComponentInstance instance, int newState) {
+        if (m_state <= STOPPED) { return; }
+     
+        // Update the component state if necessary
+        if (newState == INVALID && m_state == VALID) {
+            // Need to update the state to UNRESOLVED
+            setState(INVALID);
+            return;
+        }
+        if (newState == VALID && m_state == INVALID) {
+            // An handler becomes valid => check if all handlers are valid
+            boolean isValid = true;
+            for (int i = 0; i < m_handlers.length; i++) {
+                isValid = isValid && m_handlers[i].getState() == VALID;
+            }
+            
+            if (isValid) { setState(VALID); }
+        }
+        if (newState == DISPOSED) {
+            kill();
+        }
+    }
+
+    /**
+     * Stop the instance manager.
+     */
+    public synchronized void stop() {
+        if (m_state <= STOPPED) {
+            return;
+        } // Instance already stopped
+
+        setState(INVALID);
+        // Stop all the handlers
+        for (int i = m_handlers.length - 1; i > -1; i--) {
+            m_handlers[i].removeInstanceStateListener(this);
+            m_handlers[i].stop();
+        }
+
+        m_internalContext.stop(); // Turn off the factory tracking
+        m_state = STOPPED;
+        
+        for (int i = 0; i < m_instanceListeners.size(); i++) {
+            ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, STOPPED);
+        }
     }
     
     /**
-     * Get the parent service context.
-     * @return the parent service context.
+     * Kill the current instance.
+     * Only the factory of this instance can call this method.
      */
-    public ServiceContext getParentServiceContext() {
-        IPojoContext c = (IPojoContext) m_context;
-        return c.getServiceContext();
+    protected synchronized void kill() {
+        if (m_state > STOPPED) { stop(); }
+        
+        for (int i = 0; i < m_instanceListeners.size(); i++) {
+            ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, DISPOSED);
+        }
+
+        // Cleaning
+        m_state = DISPOSED;
+        
+        for (int i = 0; i < m_handlers.length; i++) {
+            m_handlers[i].dispose();
+        }
+        m_handlers = new HandlerManager[0];
+        m_instanceListeners.clear();
     }
 }

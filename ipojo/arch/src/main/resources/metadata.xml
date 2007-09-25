@@ -3,7 +3,8 @@
 	<Component className="org.apache.felix.ipojo.arch.ArchCommandImpl">
 		  <Provides/>
 		  <Requires field="m_archs" optional="true"/>
-		  <Requires field="m_factories" optional="true"/>
+		  <Requires field="m_factories" optional="true" filter="(!(handler.name=*))"/>
+		  <Requires field="m_handlers" optional="true" filter="(handler.name=*)"/>
 	</Component>
 	<instance component="org.apache.felix.ipojo.arch.ArchCommandImpl" name="ArchCommand"/>
 </iPOJO>

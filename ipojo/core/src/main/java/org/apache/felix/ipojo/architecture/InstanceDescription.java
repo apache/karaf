@@ -150,8 +150,7 @@ public class InstanceDescription {
         // Verify that the dependency description is not already in the array.
         for (int i = 0; i < m_containedInstances.length; i++) {
             if (m_containedInstances[i] == inst) {
-                return; // NOTHING TO DO, the description is already in the
-                        // array
+                return; // NOTHING TO DO, the description is already in the array
             }
         }
         // The component Description is not in the array, add it
@@ -232,10 +231,12 @@ public class InstanceDescription {
             instance.addElement(obj);
         }
         // Contained instance (exposing architecture) (empty if primitive)
-        for (int i = 0; i < m_containedInstances.length; i++) {
+        if (m_containedInstances.length > 0) {
             Element inst = new Element("ContainedInstances", "");
-            inst.addElement(m_containedInstances[i].getDescription());
-            instance.addElement(inst);
+            for (int i = 0; i < m_containedInstances.length; i++) {
+                inst.addElement(m_containedInstances[i].getDescription());
+                instance.addElement(inst);
+            }
         }
         return instance;
 

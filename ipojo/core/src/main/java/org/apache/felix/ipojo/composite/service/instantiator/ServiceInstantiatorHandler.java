@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.CompositeHandler;
-import org.apache.felix.ipojo.CompositeManager;
+import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Element;
@@ -38,14 +38,10 @@ import org.apache.felix.ipojo.metadata.Element;
 public class ServiceInstantiatorHandler extends CompositeHandler {
 
     /**
-     * Composite Manager.
-     */
-    private CompositeManager m_manager;
-
-    /**
      * Is the handler valid ?
+     * (Lifecycle controller)
      */
-    private boolean m_isValid = false;
+    private boolean m_isValid;
 
     /**
      * List of instances to manage.
@@ -55,25 +51,27 @@ public class ServiceInstantiatorHandler extends CompositeHandler {
     /**
      * Configure the handler.
      * 
-     * @param im : the instance manager
      * @param metadata : the metadata of the component
      * @param conf : the instance configuration
+     * @throws ConfigurationException : the specification attribute is missing
      * @see org.apache.felix.ipojo.CompositeHandler#configure(org.apache.felix.ipojo.CompositeManager,
      * org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
-    public void configure(CompositeManager im, Element metadata, Dictionary conf) {
-        m_manager = im;
+    public void configure(Element metadata, Dictionary conf) throws ConfigurationException {
         Element[] services = metadata.getElements("service");
         for (int i = 0; i < services.length; i++) {
+            if (!services[i].containsAttribute("specification")) {
+                throw new ConfigurationException("Malformed service : the specification attribute is mandatory", getCompositeManager().getFactory().getName());
+            }
             String spec = services[i].getAttribute("specification");
-            String filter = "(&(objectClass=" + Factory.class.getName() + ")(!(service.pid=" + m_manager.getComponentDescription().getName() + ")))"; // Cannot reinstantiate yourself
+            String filter = "(&(objectClass=" + Factory.class.getName() + ")(!(factory.name=" + getCompositeManager().getFactory().getComponentDescription().getName() + "))(factory.state=1))"; // Cannot reinstantiate yourself
             if (services[i].containsAttribute("filter")) {
-                String classnamefilter = "(&(objectClass=" + Factory.class.getName() + ")(!(service.pid=" + m_manager.getComponentDescription().getName() + ")))"; // Cannot reinstantiate yourself
-                filter = "";
-                if (!services[i].getAttribute("filter").equals("")) {
-                    filter = "(&" + classnamefilter + services[i].getAttribute("filter") + ")";
-                } else {
+                String classnamefilter = "(&(objectClass=" + Factory.class.getName() + ")(!(factory.name=" + getCompositeManager().getFactory().getComponentDescription().getName() + "))(factory.state=1))"; // Cannot reinstantiate yourself
+                filter = null;
+                if ("".equals(services[i].getAttribute("filter"))) {
                     filter = classnamefilter;
+                } else {
+                    filter = "(&" + classnamefilter + services[i].getAttribute("filter") + ")";
                 }
             }
             Properties prop = new Properties();
@@ -93,9 +91,6 @@ public class ServiceInstantiatorHandler extends CompositeHandler {
             SvcInstance inst = new SvcInstance(this, spec, prop, agg, opt, filter);
             m_instances.add(inst);
         }
-        if (m_instances.size() > 0) {
-            m_manager.register(this);
-        }
     }
 
     /**
@@ -110,7 +105,7 @@ public class ServiceInstantiatorHandler extends CompositeHandler {
             inst.start();
         }
 
-        m_isValid = isValid();
+        m_isValid = isHandlerValid();
     }
 
     /**
@@ -118,7 +113,7 @@ public class ServiceInstantiatorHandler extends CompositeHandler {
      * @return true if all created service instances are valid
      * @see org.apache.felix.ipojo.CompositeHandler#isValid()
      */
-    public boolean isValid() {
+    private boolean isHandlerValid() {
         for (int i = 0; i < m_instances.size(); i++) {
             SvcInstance inst = (SvcInstance) m_instances.get(i);
             if (!inst.isSatisfied()) {
@@ -146,8 +141,7 @@ public class ServiceInstantiatorHandler extends CompositeHandler {
      */
     public void validate() {
         if (!m_isValid) {
-            if (isValid()) {
-                m_manager.checkInstanceState();
+            if (isHandlerValid()) {
                 m_isValid = true;
             }
         }
@@ -158,8 +152,7 @@ public class ServiceInstantiatorHandler extends CompositeHandler {
      */
     public void invalidate() {
         if (m_isValid) {
-            if (!isValid()) {
-                m_manager.checkInstanceState();
+            if (!isHandlerValid()) {
                 m_isValid = false;
             }
         }
@@ -171,15 +164,7 @@ public class ServiceInstantiatorHandler extends CompositeHandler {
      * @see org.apache.felix.ipojo.CompositeHandler#getDescription()
      */
     public HandlerDescription getDescription() {
-        return new ServiceInstantiatorDescription(this.getClass().getName(), isValid(), m_instances);
-    }
-
-    /**
-     * Get the composite manager.
-     * @return the composite manager.
-     */
-    protected CompositeManager getManager() {
-        return m_manager;
+        return new ServiceInstantiatorDescription(this, m_instances);
     }
     
     public List getInstances() {

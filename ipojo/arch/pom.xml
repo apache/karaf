@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <packaging>bundle</packaging>
   <name>Apache Felix iPOJO Arch Command</name>
-  <version>0.7.3-SNAPSHOT</version>
+  <version>0.7.5-SNAPSHOT</version>
   <artifactId>org.apache.felix.ipojo.arch</artifactId>
   <dependencies>
     <dependency>

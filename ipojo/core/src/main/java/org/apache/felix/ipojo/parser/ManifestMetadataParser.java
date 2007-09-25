@@ -49,7 +49,8 @@ public class ManifestMetadataParser {
     public Element[] getComponentsMetadata() throws ParseException {
         Element[] components = m_elements[0].getElements("Component");
         Element[] composites = m_elements[0].getElements("Composite");
-        Element[] all = new Element[components.length + composites.length];
+        Element[] handlers = m_elements[0].getElements("Handler");
+        Element[] all = new Element[components.length + composites.length + handlers.length];
         int l = 0;
         for (int i = 0; i < components.length; i++) {
             all[l] = components[i];
@@ -57,6 +58,10 @@ public class ManifestMetadataParser {
         }
         for (int i = 0; i < composites.length; i++) {
             all[l] = composites[i];
+            l++;
+        }
+        for (int i = 0; i < handlers.length; i++) {
+            all[l] = handlers[i];
             l++;
         }
         return all;

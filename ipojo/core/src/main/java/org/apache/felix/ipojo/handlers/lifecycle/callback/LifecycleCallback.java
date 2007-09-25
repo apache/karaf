@@ -41,7 +41,7 @@ public class LifecycleCallback {
     protected static final int INVALIDATE = 0;
     
     /**
-     * Transition on wich calling the callback.
+     * Transition on which calling the callback.
      */
     private int m_transition;
 

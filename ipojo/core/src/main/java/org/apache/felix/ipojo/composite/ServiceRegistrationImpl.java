@@ -78,7 +78,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
     /**
      * Property Keys List.
      */
-    private transient List m_list = new ArrayList();
+    private List m_list = new ArrayList();
 
     /**
      * Constructor.

@@ -21,6 +21,7 @@ package org.apache.felix.ipojo.composite.service.provides;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.felix.ipojo.CompositeHandler;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
@@ -40,11 +41,11 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
     /**
      * Constructor.
      * 
-     * @param isValid : the validity of the provided service handler.
+     * @param h : composite handler.
      * @param ps : The list of Provided Service.
      */
-    public ProvidedServiceHandlerDescription(boolean isValid, List ps) {
-        super(ProvidedServiceHandler.class.getName(), isValid);
+    public ProvidedServiceHandlerDescription(CompositeHandler h, List ps) {
+        super(h);
         m_providedServices = ps;
     }
 

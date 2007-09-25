@@ -46,7 +46,7 @@ public class ConfigurableProperty {
     /**
      * Method of the property.
      */
-    private String m_method;
+    private Callback m_method;
 
     /**
      * Value of the property.
@@ -74,12 +74,10 @@ public class ConfigurableProperty {
      * @param type : the type of the property
      * @param ch : configuration handler managing this configurable property
      */
-    public ConfigurableProperty(String name, String field, String method, String value, String type,
-            ConfigurationHandler ch) {
+    public ConfigurableProperty(String name, String field, String method, String value, String type, ConfigurationHandler ch) {
         m_handler = ch;
 
         m_field = field;
-        m_method = method;
 
         if (name != null) {
             m_name = name;
@@ -96,52 +94,54 @@ public class ConfigurableProperty {
             setValue(value, type);
         }
 
+        if (method != null) {
+            m_method = new Callback(method, new String[] { m_type.getName() }, false, m_handler.getInstanceManager());
+        }
+
     }
 
     /**
      * Set the value of the property.
-     * 
      * @param strValue : value of the property (String)
      * @param type : type of the property
      */
     private void setValue(String strValue, String type) {
         Object value = null;
-        
+
         // Syntactic sugar to avoid writing java.lang.String
-        if (type.equals("string") || type.equals("String")) {
+        if ("string".equals(type) || "String".equals(type)) {
             value = new String(strValue);
             m_type = java.lang.String.class;
         }
-		
         if (type.equals("boolean")) {
             value = new Boolean(strValue);
             m_type = Boolean.TYPE;
         }
-        if (type.equals("byte")) {
+        if ("byte".equals(type)) {
             value = new Byte(strValue);
             m_type = Byte.TYPE;
         }
-        if (type.equals("short")) {
+        if ("short".equals(type)) {
             value = new Short(strValue);
             m_type = Short.TYPE;
         }
-        if (type.equals("int")) {
+        if ("int".equals(type)) {
             value = new Integer(strValue);
             m_type = Integer.TYPE;
         }
-        if (type.equals("long")) {
+        if ("long".equals(type)) {
             value = new Long(strValue);
             m_type = Long.TYPE;
         }
-        if (type.equals("float")) {
+        if ("float".equals(type)) {
             value = new Float(strValue);
             m_type = Float.TYPE;
         }
-        if (type.equals("double")) {
+        if ("double".equals(type)) {
             value = new Double(strValue);
             m_type = Double.TYPE;
         }
-        if (type.equals("char")) {
+        if ("char".equals(type)) {
             value = new Character(strValue.charAt(0));
             m_type = Character.TYPE;
         }
@@ -161,24 +161,19 @@ public class ConfigurableProperty {
                 Constructor cst = m_type.getConstructor(new Class[] { String.class });
                 value = cst.newInstance(new Object[] { strValue });
             } catch (ClassNotFoundException e) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                        "Class not found exception in setValue on " + type + " : " + e.getMessage());
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Class not found exception in setValue on " + type + " : " + e.getMessage());
                 return;
             } catch (SecurityException e) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                        "Security excption in setValue on " + type + " : " + e.getMessage());
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Security excption in setValue on " + type + " : " + e.getMessage());
                 return;
             } catch (NoSuchMethodException e) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                        "Constructor not found exeption in setValue on " + type + " : " + e.getMessage());
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Constructor not found exeption in setValue on " + type + " : " + e.getMessage());
                 return;
             } catch (IllegalArgumentException e) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                        "Argument problem to call the constructor of the type " + type);
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Argument problem to call the constructor of the type " + type);
                 return;
             } catch (InstantiationException e) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                        "Instantiation problem  " + type);
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Instantiation problem  " + type);
                 return;
             } catch (IllegalAccessException e) {
                 m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Illegal Access " + type);
@@ -200,7 +195,7 @@ public class ConfigurableProperty {
      * @param values : new property value
      */
     private void setArrayValue(String internalType, String[] values) {
-        if (internalType.equals("string") || internalType.equals("String")) {
+        if ("string".equals(internalType) || "String".equals(internalType)) {
             String[] str = new String[values.length];
             for (int i = 0; i < values.length; i++) {
                 str[i] = new String(values[i]);
@@ -209,7 +204,7 @@ public class ConfigurableProperty {
             m_type = new String[0].getClass();
             return;
         }
-        if (internalType.equals("boolean")) {
+        if ("boolean".equals(internalType)) {
             boolean[] bool = new boolean[values.length];
             for (int i = 0; i < values.length; i++) {
                 bool[i] = new Boolean(values[i]).booleanValue();
@@ -218,7 +213,7 @@ public class ConfigurableProperty {
             m_type = new boolean[0].getClass();
             return;
         }
-        if (internalType.equals("byte")) {
+        if ("byte".equals(internalType)) {
             byte[] byt = new byte[values.length];
             for (int i = 0; i < values.length; i++) {
                 byt[i] = new Byte(values[i]).byteValue();
@@ -227,7 +222,7 @@ public class ConfigurableProperty {
             m_type = new byte[0].getClass();
             return;
         }
-        if (internalType.equals("short")) {
+        if ("short".equals(internalType)) {
             short[] shor = new short[values.length];
             for (int i = 0; i < values.length; i++) {
                 shor[i] = new Short(values[i]).shortValue();
@@ -236,7 +231,7 @@ public class ConfigurableProperty {
             m_type = new short[0].getClass();
             return;
         }
-        if (internalType.equals("int")) {
+        if ("int".equals(internalType)) {
             int[] in = new int[values.length];
             for (int i = 0; i < values.length; i++) {
                 in[i] = new Integer(values[i]).intValue();
@@ -245,7 +240,7 @@ public class ConfigurableProperty {
             m_type = new int[0].getClass();
             return;
         }
-        if (internalType.equals("long")) {
+        if ("long".equals(internalType)) {
             long[] ll = new long[values.length];
             for (int i = 0; i < values.length; i++) {
                 ll[i] = new Long(values[i]).longValue();
@@ -254,7 +249,7 @@ public class ConfigurableProperty {
             m_type = new long[0].getClass();
             return;
         }
-        if (internalType.equals("float")) {
+        if ("float".equals(internalType)) {
             float[] fl = new float[values.length];
             for (int i = 0; i < values.length; i++) {
                 fl[i] = new Float(values[i]).floatValue();
@@ -263,7 +258,7 @@ public class ConfigurableProperty {
             m_type = new float[0].getClass();
             return;
         }
-        if (internalType.equals("double")) {
+        if ("double".equals(internalType)) {
             double[] dl = new double[values.length];
             for (int i = 0; i < values.length; i++) {
                 dl[i] = new Double(values[i]).doubleValue();
@@ -272,7 +267,7 @@ public class ConfigurableProperty {
             m_type = new double[0].getClass();
             return;
         }
-        if (internalType.equals("char")) {
+        if ("char".equals(internalType)) {
             char[] dl = new char[values.length];
             for (int i = 0; i < values.length; i++) {
                 dl[i] = values[i].toCharArray()[0];
@@ -295,26 +290,19 @@ public class ConfigurableProperty {
             m_type = ob.getClass();
             return;
         } catch (ClassNotFoundException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                    "Class not found exception in setValue on " + internalType);
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Class not found exception in setValue on " + internalType);
         } catch (SecurityException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                    "Secutiry Exception in setValue on " + internalType);
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Secutiry Exception in setValue on " + internalType);
         } catch (NoSuchMethodException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                    "Constructor not found exception in setValue on " + internalType);
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Constructor not found exception in setValue on " + internalType);
         } catch (IllegalArgumentException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                    "Argument problem to call the constructor of the type " + internalType);
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Argument problem to call the constructor of the type " + internalType);
         } catch (InstantiationException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                    "Instantiation problem  " + internalType);
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Instantiation problem  " + internalType);
         } catch (IllegalAccessException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                    "Illegal Access Exception in  " + internalType);
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Illegal Access Exception in  " + internalType);
         } catch (InvocationTargetException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                    "Invocation problem " + internalType);
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Invocation problem " + internalType);
         }
     }
 
@@ -326,8 +314,29 @@ public class ConfigurableProperty {
         return m_field;
     }
 
+    /**
+     * Get method name, null if no method.
+     * @return the method name.
+     */
     public String getMethod() {
-        return m_method;
+        if (m_method == null) { return null; }
+        return m_method.getMethod();
+    }
+
+    /**
+     * Check if the property has a method callback.
+     * @return true if the property has a method.
+     */
+    public boolean hasMethod() {
+        return m_method != null;
+    }
+
+    /**
+     * Check if the property has a field.
+     * @return true if the property has a field.
+     */
+    public boolean hasField() {
+        return m_field != null;
     }
 
     public Object getValue() {
@@ -347,57 +356,36 @@ public class ConfigurableProperty {
      * Invoke the method (if specified).
      */
     public void invoke() {
-        Callback cb = new Callback(m_method, new String[] { m_type.getName() }, false, m_handler.getInstanceManager());
         try {
-            cb.call(new Object[] { m_value });
+            m_method.call(new Object[] { m_value });
         } catch (NoSuchMethodException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(
-                    Logger.ERROR, "The method " + m_method + " does not exist in the class "
-                            + m_handler.getInstanceManager().getClassName());
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
             return;
         } catch (IllegalAccessException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(
-                    Logger.ERROR,
-                    "The method " + m_method + " is not accessible in the class "
-                            + m_handler.getInstanceManager().getClassName());
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
             return;
         } catch (InvocationTargetException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(
-                    Logger.ERROR,
-                    "The method " + m_method + " in the class " + m_handler.getInstanceManager().getClassName()
-                            + "thorws an exception : " + e.getMessage());
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " in the class " + m_handler.getInstanceManager().getClassName() + "thorws an exception : " + e.getMessage());
             return;
         }
     }
 
     /**
-     * Handler createInstance method. This method is overided to allow delayed
-     * callback invocation.
-     * 
-     * @param instance :
-     *            the created object
-     * @see org.apache.felix.ipojo.Handler#createInstance(java.lang.Object)
+     * Handler createInstance method. This method is overided to allow delayed callback invocation.
+     * @param instance : the created object
+     * @see org.apache.felix.ipojo.Handler#objectCreated(java.lang.Object)
      */
     public void invoke(Object instance) {
-        Callback cb = new Callback(m_method, new String[] { m_type.getName() }, false, m_handler.getInstanceManager());
         try {
-            cb.call(instance, new Object[] { m_value });
+            m_method.call(instance, new Object[] { m_value });
         } catch (NoSuchMethodException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(
-                    Logger.ERROR, "The method " + m_method + " does not exist in the class "
-                            + m_handler.getInstanceManager().getClassName());
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
             return;
         } catch (IllegalAccessException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(
-                    Logger.ERROR,
-                    "The method " + m_method + " is not accessible in the class "
-                            + m_handler.getInstanceManager().getClassName());
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
             return;
         } catch (InvocationTargetException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(
-                    Logger.ERROR,
-                    "The method " + m_method + " in the class " + m_handler.getInstanceManager().getClassName()
-                            + "throws an exception : " + e.getMessage());
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getMessage());
             return;
         }
     }

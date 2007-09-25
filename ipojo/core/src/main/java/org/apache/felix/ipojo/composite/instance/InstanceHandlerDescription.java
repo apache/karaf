@@ -21,7 +21,9 @@ package org.apache.felix.ipojo.composite.instance;
 import java.util.List;
 
 import org.apache.felix.ipojo.ComponentInstance;
+import org.apache.felix.ipojo.CompositeHandler;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
+import org.apache.felix.ipojo.composite.instance.InstanceHandler.ManagedConfiguration;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 
@@ -40,12 +42,11 @@ public class InstanceHandlerDescription extends HandlerDescription {
     /**
      * Constructor.
      * 
-     * @param arg0 : name of the handler
-     * @param arg1 : validity of the handler
+     * @param h : handler
      * @param insts : list of component instances
      */
-    public InstanceHandlerDescription(String arg0, boolean arg1, List insts) {
-        super(arg0, arg1);
+    public InstanceHandlerDescription(CompositeHandler h, List insts) {
+        super(h);
         m_instances = insts;
     }
 
@@ -57,25 +58,31 @@ public class InstanceHandlerDescription extends HandlerDescription {
     public Element getHandlerInfo() {
         Element instances = super.getHandlerInfo();
         for (int i = 0; i < m_instances.size(); i++) {
-            ComponentInstance inst = (ComponentInstance) m_instances.get(i);
+            ManagedConfiguration inst = (ManagedConfiguration) m_instances.get(i);
             Element instance = new Element("Instance", "");
-            instance.addAttribute(new Attribute("Name", inst.getInstanceName()));
-            String state = null;
-            switch(inst.getState()) {
-                case ComponentInstance.DISPOSED : 
-                    state = "disposed"; break;
-                case ComponentInstance.STOPPED : 
-                    state = "stopped"; break;
-                case ComponentInstance.VALID : 
-                    state = "valid"; break;
-                case ComponentInstance.INVALID : 
-                    state = "invalid"; break;
-                default :
-                    break;
+            if (inst.getInstance() != null) {
+                instance.addAttribute(new Attribute("Factory", inst.getFactory()));
+                instance.addAttribute(new Attribute("Name", inst.getInstance().getInstanceName()));
+                String state = null;
+                switch(inst.getInstance().getState()) {
+                    case ComponentInstance.DISPOSED : 
+                        state = "disposed"; break;
+                    case ComponentInstance.STOPPED : 
+                        state = "stopped"; break;
+                    case ComponentInstance.VALID : 
+                        state = "valid"; break;
+                    case ComponentInstance.INVALID : 
+                        state = "invalid"; break;
+                    default :
+                        break;
+                }
+                instance.addAttribute(new Attribute("State", state));
+                instance.addElement(inst.getInstance().getInstanceDescription().getDescription());
+            } else {
+                instance.addAttribute(new Attribute("Factory", inst.getConfiguration().get("component").toString()));
+                instance.addAttribute(new Attribute("State", "Not Available"));
             }
-            instance.addAttribute(new Attribute("State", state));
-            instance.addElement(inst.getInstanceDescription().getDescription());
-            instances.addElement(instances);
+            instances.addElement(instance);
         }
         return instances;
     }

@@ -169,26 +169,7 @@ public class POJOWriter implements Opcodes {
             }
         }
 
-        if (!delegator.isAggregate()) {
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitFieldInsn(GETFIELD, className, delegator.getName(), "L" + delegator.getSpecification().getName().replace('.', '/') + ";");
-
-            // Loads args
-            Type[] args = Type.getArgumentTypes(desc);
-            for (int i = 0; i < args.length; i++) {
-                writeLoad(args[i], i + 1, mv);
-            }
-
-            // Invoke
-            if (delegator.getSpecification().isInterface()) {
-                mv.visitMethodInsn(INVOKEINTERFACE, delegator.getSpecification().getName().replace('.', '/'), name, desc);
-            } else {
-                mv.visitMethodInsn(INVOKEVIRTUAL, delegator.getSpecification().getName().replace('.', '/'), name, desc);
-            }
-
-            // Return
-            writeReturn(Type.getReturnType(desc), mv);
-        } else {
+        if (delegator.isAggregate()) {
             if (method.getPolicy() == MethodMetadata.ONE_POLICY) {
                 // Aggregate and One Policy
                 mv.visitVarInsn(ALOAD, 0);
@@ -254,6 +235,25 @@ public class POJOWriter implements Opcodes {
                 mv.visitLabel(l5b);
                 mv.visitInsn(RETURN);
             }
+        } else {
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitFieldInsn(GETFIELD, className, delegator.getName(), "L" + delegator.getSpecification().getName().replace('.', '/') + ";");
+
+            // Loads args
+            Type[] args = Type.getArgumentTypes(desc);
+            for (int i = 0; i < args.length; i++) {
+                writeLoad(args[i], i + 1, mv);
+            }
+
+            // Invoke
+            if (delegator.getSpecification().isInterface()) {
+                mv.visitMethodInsn(INVOKEINTERFACE, delegator.getSpecification().getName().replace('.', '/'), name, desc);
+            } else {
+                mv.visitMethodInsn(INVOKEVIRTUAL, delegator.getSpecification().getName().replace('.', '/'), name, desc);
+            }
+
+            // Return
+            writeReturn(Type.getReturnType(desc), mv);
         }
 
         mv.visitMaxs(0, 0);

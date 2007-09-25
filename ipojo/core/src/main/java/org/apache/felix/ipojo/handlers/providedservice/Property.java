@@ -178,35 +178,35 @@ public class Property {
         }
 
         // Simple :
-        if (m_type.equals("string") || m_type.equals("String")) {
+        if ("string".equals(m_type) || "String".equals(m_type)) {
             m_value = new String(value);
             return;
         }
-        if (m_type.equals("boolean")) {
+        if ("boolean".equals(m_type)) {
             m_value = new Boolean(value);
             return;
         }
-        if (m_type.equals("byte")) {
+        if ("byte".equals(m_type)) {
             m_value = new Byte(value);
             return;
         }
-        if (m_type.equals("short")) {
+        if ("short".equals(m_type)) {
             m_value = new Short(value);
             return;
         }
-        if (m_type.equals("int")) {
+        if ("int".equals(m_type)) {
             m_value = new Integer(value);
             return;
         }
-        if (m_type.equals("long")) {
+        if ("long".equals(m_type)) {
             m_value = new Long(value);
             return;
         }
-        if (m_type.equals("float")) {
+        if ("float".equals(m_type)) {
             m_value = new Float(value);
             return;
         }
-        if (m_type.equals("double")) {
+        if ("double".equals(m_type)) {
             m_value = new Double(value);
             return;
         }
@@ -243,11 +243,11 @@ public class Property {
      * @param values : the new value
      */
     private void setArrayValue(String internalType, String[] values) {
-        if (internalType.equals("string") || internalType.equals("String")) {
+        if ("string".equals(internalType) || "String".equals(internalType)) {
             m_value = values;
             return;
         }
-        if (internalType.equals("boolean")) {
+        if ("boolean".equals(internalType)) {
             boolean[] bool = new boolean[values.length];
             for (int i = 0; i < values.length; i++) {
                 bool[i] = new Boolean(values[i]).booleanValue();
@@ -255,7 +255,7 @@ public class Property {
             m_value = bool;
             return;
         }
-        if (internalType.equals("byte")) {
+        if ("byte".equals(internalType)) {
             byte[] byt = new byte[values.length];
             for (int i = 0; i < values.length; i++) {
                 byt[i] = new Byte(values[i]).byteValue();
@@ -263,7 +263,7 @@ public class Property {
             m_value = byt;
             return;
         }
-        if (internalType.equals("short")) {
+        if ("short".equals(internalType)) {
             short[] shor = new short[values.length];
             for (int i = 0; i < values.length; i++) {
                 shor[i] = new Short(values[i]).shortValue();
@@ -271,7 +271,7 @@ public class Property {
             m_value = shor;
             return;
         }
-        if (internalType.equals("int")) {
+        if ("int".equals(internalType)) {
             int[] in = new int[values.length];
             for (int i = 0; i < values.length; i++) {
                 in[i] = new Integer(values[i]).intValue();
@@ -279,7 +279,7 @@ public class Property {
             m_value = in;
             return;
         }
-        if (internalType.equals("long")) {
+        if ("long".equals(internalType)) {
             long[] ll = new long[values.length];
             for (int i = 0; i < values.length; i++) {
                 ll[i] = new Long(values[i]).longValue();
@@ -287,7 +287,7 @@ public class Property {
             m_value = ll;
             return;
         }
-        if (internalType.equals("float")) {
+        if ("float".equals(internalType)) {
             float[] fl = new float[values.length];
             for (int i = 0; i < values.length; i++) {
                 fl[i] = new Float(values[i]).floatValue();
@@ -295,7 +295,7 @@ public class Property {
             m_value = fl;
             return;
         }
-        if (internalType.equals("double")) {
+        if ("double".equals(internalType)) {
             double[] dl = new double[values.length];
             for (int i = 0; i < values.length; i++) {
                 dl[i] = new Double(values[i]).doubleValue();

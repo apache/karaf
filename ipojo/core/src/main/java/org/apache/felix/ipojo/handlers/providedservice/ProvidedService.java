@@ -95,14 +95,13 @@ public class ProvidedService implements ServiceFactory {
         m_serviceSpecification = specification;
         m_factoryPolicy = factoryPolicy;
 
-        // Add service pid and factory pid
-        addProperty(new Property(this, org.osgi.framework.Constants.SERVICE_PID, handler.getInstanceManager().getInstanceName()));       
-        addProperty(new Property(this, "factory.pid", handler.getInstanceManager().getFactory().getName()));
+        // Add instance name & factory name
+        addProperty(new Property(this, "instance.name", handler.getInstanceManager().getInstanceName()));       
+        addProperty(new Property(this, "factory.name", handler.getInstanceManager().getFactory().getName()));
     }
 
     /**
      * Add properties to the provided service.
-     * 
      * @param props : the properties to attached to the service registration
      */
     protected void setProperties(Property[] props) {
@@ -219,8 +218,8 @@ public class ProvidedService implements ServiceFactory {
 
     /**
      * Register the service. The service object must be able to serve this
-     * service. To avoid cycle in Check Context, the registred service is set to
-     * registred before the real registration.
+     * service. To avoid cycle in Check Context, the registered service is set to
+     * registered before the real registration.
      */
     protected synchronized void registerService() {
         if (m_serviceRegistration == null) {
@@ -240,11 +239,7 @@ public class ProvidedService implements ServiceFactory {
      */
     protected synchronized void unregisterService() {
         if (m_serviceRegistration != null) {
-            try {
-                m_serviceRegistration.unregister();
-            } catch (Exception e) {
-                return;
-            }
+            m_serviceRegistration.unregister();
             m_serviceRegistration = null;
         }
     }
@@ -310,7 +305,6 @@ public class ProvidedService implements ServiceFactory {
 
     /**
      * Add properties to the list.
-     * 
      * @param props : properties to add
      */
     protected void addProperties(Dictionary props) {
@@ -325,7 +319,6 @@ public class ProvidedService implements ServiceFactory {
 
     /**
      * Remove properties from the list.
-     * 
      * @param props : properties to remove
      */
     protected void deleteProperties(Dictionary props) {

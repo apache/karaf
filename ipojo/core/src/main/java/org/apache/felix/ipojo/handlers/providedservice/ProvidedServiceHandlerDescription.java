@@ -20,6 +20,7 @@ package org.apache.felix.ipojo.handlers.providedservice;
 
 import java.util.Iterator;
 
+import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
@@ -39,11 +40,10 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
 
     /**
      * Constructor.
-     * 
-     * @param isValid : the validity of the provided service handler.
+     * @param h : handler.
      */
-    public ProvidedServiceHandlerDescription(boolean isValid) {
-        super(ProvidedServiceHandler.class.getName(), isValid);
+    public ProvidedServiceHandlerDescription(Handler h) {
+        super(h);
     }
 
     /**

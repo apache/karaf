@@ -18,12 +18,14 @@
  */
 package org.apache.felix.ipojo.architecture;
 
+import java.util.List;
+
+import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 
 /**
- * Component Type information.
- * 
+ * Component Type description.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ComponentDescription {
@@ -47,32 +49,43 @@ public class ComponentDescription {
      * Get the name of this component type.
      */
     private String m_name;
-    
+
     /**
      * Bundle Id of the bundle containing this type.
      */
     private long m_bundleId;
 
     /**
-     * Constructor.
-     * 
-     * @param name : name of the component type (factory name).
-     * @param className : implementation class.
-     * @param bundle : bundle id.
+     * State of the factory.
      */
-    public ComponentDescription(String name, String className, long bundle) {
+    private int m_state;
+
+    /**
+     * Required handler list.
+     */
+    private List m_rh;
+
+    /**
+     * Missing handler list.
+     */
+    private List m_mh;
+
+    /**
+     * Constructor.
+     * @param name : name.
+     * @param className : implementation class or "composite"
+     * @param state : state of the type (valid or invalid)
+     * @param rh : required handler list
+     * @param mh : missing handler list
+     * @param bundle : bundle containing the type
+     */
+    public ComponentDescription(String name, String className, int state, List rh, List mh, long bundle) {
         m_name = name;
         m_className = className;
         m_bundleId = bundle;
-    }
-
-    /**
-     * Constructor for composite.
-     * 
-     * @param name : name of the component type (factory name).
-     */
-    public ComponentDescription(String name) {
-        m_name = name;
+        m_state = state;
+        m_rh = rh;
+        m_mh = mh;
     }
 
     /**
@@ -94,27 +107,33 @@ public class ComponentDescription {
 
     /**
      * Get component-type properties.
-     * @return the list of configuration properties accepted by the component type
-     * type.
+     * @return the list of configuration properties accepted by the component type type.
      */
     public PropertyDescription[] getProperties() {
         return m_properties;
     }
 
     /**
+     * Add a String property in the component type.
+     * @param name : property name.
+     * @param value : property value.
+     */
+    public void addProperty(String name, String value) {
+        PropertyDescription pd = new PropertyDescription(name, String.class.getName(), value);
+        addProperty(pd);
+    }
+
+    /**
      * Add a configuration properties to the component type.
-     * 
      * @param pd : the property to add
      */
     public void addProperty(PropertyDescription pd) {
-        if (pd.getName().equals("name")) {
+        if ("name".equals(pd.getName())) {
             pd = new PropertyDescription(pd.getName(), pd.getType(), null); // Erase the instance name
         }
-        
+
         for (int i = 0; i < m_properties.length; i++) {
-            if (m_properties[i].getName().equals(pd.getName())) {
-                return;
-            }
+            if (m_properties[i].getName().equals(pd.getName())) { return; }
         }
 
         PropertyDescription[] newProps = new PropertyDescription[m_properties.length + 1];
@@ -133,8 +152,7 @@ public class ComponentDescription {
 
     /**
      * Add a provided service to the component type.
-     * @param serviceSpecification : the provided service to add (interface
-     * name)
+     * @param serviceSpecification : the provided service to add (interface name)
      */
     public void addProvidedServiceSpecification(String serviceSpecification) {
         String[] newSs = new String[m_providedServiceSpecification.length + 1];
@@ -150,29 +168,43 @@ public class ComponentDescription {
     public String getName() {
         return m_name;
     }
-    
+
     /**
      * Get the component type description.
      * @return : the description
      */
     public Element getDescription() {
         Element desc = new Element("Factory", "");
-        
+
         desc.addAttribute(new Attribute("name", m_name));
         desc.addAttribute(new Attribute("bundle", "" + m_bundleId));
-        
+
         if (m_className != null) {
             desc.addAttribute(new Attribute("Implementation-Class", m_className));
         } else {
             desc.addAttribute(new Attribute("Composite", "true"));
         }
-        
+
+        String state = "valid";
+        if (m_state == Factory.INVALID) {
+            state = "invalid";
+        }
+        desc.addAttribute(new Attribute("state", state));
+
+        // Display required & missing handlers
+        Element rh = new Element("RequiredHandlers", "");
+        rh.addAttribute(new Attribute("list", m_rh.toString()));
+        Element mh = new Element("MissingHandlers", "");
+        mh.addAttribute(new Attribute("list", m_mh.toString()));
+        desc.addElement(rh);
+        desc.addElement(mh);
+
         for (int i = 0; i < m_providedServiceSpecification.length; i++) {
             Element prov = new Element("provides", "");
             prov.addAttribute(new Attribute("specification", m_providedServiceSpecification[i]));
             desc.addElement(prov);
         }
-        
+
         for (int i = 0; i < m_properties.length; i++) {
             Element prop = new Element("property", "");
             prop.addAttribute(new Attribute("name", m_properties[i].getName()));
@@ -184,7 +216,7 @@ public class ComponentDescription {
             }
             desc.addElement(prop);
         }
-        
+
         return desc;
     }
 

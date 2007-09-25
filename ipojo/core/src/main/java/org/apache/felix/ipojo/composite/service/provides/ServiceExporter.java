@@ -180,7 +180,7 @@ public class ServiceExporter implements ServiceListener {
 
     /**
      * Transform service reference property in a dictionary.
-     * Service.PID and Factory.PID are injected too.
+     * instance.name and factory.name are injected too.
      * @param ref : the service reference.
      * @return the dictionary containing all property of the given service reference.
      */
@@ -191,8 +191,8 @@ public class ServiceExporter implements ServiceListener {
             prop.put(keys[i], ref.getProperty(keys[i]));
         }
 
-        prop.put(Constants.SERVICE_PID, m_ps.getManager().getInstanceName());
-        prop.put("factory.pid", m_ps.getManager().getFactory().getName());
+        prop.put("instance.name", m_ps.getManager().getInstanceName());
+        prop.put("factory.name", m_ps.getManager().getFactory().getName());
 
         return prop;
     }
@@ -215,7 +215,6 @@ public class ServiceExporter implements ServiceListener {
         }
 
         m_records.clear();
-
     }
 
     /**
@@ -293,7 +292,7 @@ public class ServiceExporter implements ServiceListener {
      * Manage the arrival of a service.
      * @param ref : the new service reference.
      */
-    private synchronized void arrivalManagement(ServiceReference ref) {
+    private void arrivalManagement(ServiceReference ref) {
         // Check if the new service match
         if (m_filter.match(ref)) {
             // Add it to the record list
@@ -319,7 +318,7 @@ public class ServiceExporter implements ServiceListener {
      * Manage the departure of a service.
      * @param ref : the new service reference.
      */
-    private synchronized void departureManagement(ServiceReference ref) {
+    private void departureManagement(ServiceReference ref) {
         List l = getRecordsByRef(ref);
         for (int i = 0; i < l.size(); i++) { // Stop the implied record
             Record rec = (Record) l.get(i);

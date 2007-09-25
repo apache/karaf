@@ -1,0 +1,41 @@
+<ipojo>
+<!-- Primitives handler -->
+<handler classname="org.apache.felix.ipojo.handlers.lifecycle.controller.ControllerHandler" name="controller"/>
+<handler classname="org.apache.felix.ipojo.handlers.lifecycle.callback.LifecycleCallbackHandler" name="callback"/>
+<handler classname="org.apache.felix.ipojo.handlers.dependency.DependencyHandler" name="requires">
+	<controller field="m_state"/>
+</handler>
+<handler classname="org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler" name="provides"/>
+<handler classname="org.apache.felix.ipojo.handlers.configuration.ConfigurationHandler" name="properties"/>
+<handler classname="org.apache.felix.ipojo.handlers.architecture.ArchitectureHandler" name="architecture">
+	<provides>
+		<property field="m_name" name="instance.name" value=""/>
+	</provides>
+</handler>
+
+<!-- Composite Handler -->
+<handler classname="org.apache.felix.ipojo.composite.instance.InstanceHandler" name="instance" type="composite">
+	<controller field="m_isValid"/>
+	<requires filter="(factory.state=1)" field="m_factories" optional="true">
+		<callback type="bind" method="bindFactory"/>
+		<callback type="unbind" method="unbindFactory"/>
+	</requires>
+</handler>
+<handler classname="org.apache.felix.ipojo.composite.service.importer.ImportHandler" name="requires" type="composite">
+	<controller field="m_valid"/>
+</handler>
+<handler classname="org.apache.felix.ipojo.composite.service.importer.ExportHandler" name="exports" type="composite">
+	<controller field="m_valid"/>
+</handler>
+<handler classname="org.apache.felix.ipojo.composite.service.instantiator.ServiceInstantiatorHandler" name="service" type="composite">
+	<controller field="m_isValid"/>
+</handler>
+<handler classname="org.apache.felix.ipojo.composite.service.provides.ProvidedServiceHandler" name="provides" type="composite">
+	<controller field="m_valid"/>
+</handler>
+<handler classname="org.apache.felix.ipojo.composite.architecture.ArchitectureHandler" name="architecture" type="composite">
+	<provides>
+		<property field="m_name" name="instance.name" value=""/>
+	</provides>
+</handler>
+</ipojo>

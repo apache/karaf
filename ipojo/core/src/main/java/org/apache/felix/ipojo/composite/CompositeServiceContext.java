@@ -18,6 +18,8 @@
  */
 package org.apache.felix.ipojo.composite;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
@@ -27,10 +29,15 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.IPojoContext;
 import org.apache.felix.ipojo.ServiceContext;
+import org.apache.felix.ipojo.util.Tracker;
+import org.apache.felix.ipojo.util.TrackerCustomizer;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -41,7 +48,7 @@ import org.osgi.framework.ServiceRegistration;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class CompositeServiceContext implements ServiceContext, ServiceListener {
+public class CompositeServiceContext implements ServiceContext, TrackerCustomizer {
 
     /**
      * Structure storing the reference, the factory and the registration.
@@ -85,6 +92,11 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
      * Global service context.
      */
     private BundleContext m_global;
+    
+    /**
+     * Tracker tracking Factories to import.
+     */
+    private Tracker m_tracker;
 
     /**
      * Constructor. This constructor instantiate a service registry with the
@@ -225,34 +237,18 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
     }
 
     /**
-     * Initiate the factory list.
-     */
-    private void importFactories() {
-        try {
-            ServiceReference[] refs = m_global.getServiceReferences(Factory.class.getName(), null);
-            if (refs != null) {
-                for (int i = 0; i < refs.length; i++) {
-                    importFactory(refs[i]);
-                }
-            }
-        } catch (InvalidSyntaxException e) {
-            e.printStackTrace(); // Should not happen
-        }
-    }
-
-    /**
      * Import a factory form the parent to the internal registry.
      * 
      * @param ref : the reference of the factory to import.
      */
-    private void importFactory(ServiceReference ref) {
+    private void importFactory(ServiceReference ref) {        
         Record rec = new Record();
         m_factories.add(rec);
         Dictionary dict = new Properties();
         for (int j = 0; j < ref.getPropertyKeys().length; j++) {
             dict.put(ref.getPropertyKeys()[j], ref.getProperty(ref.getPropertyKeys()[j]));
         }
-        rec.m_fact = new FactoryProxy((Factory) m_global.getService(ref), this);
+        rec.m_fact = new FactoryProxy((Factory) m_tracker.getService(ref), this);
         rec.m_reg = registerService(Factory.class.getName(), rec.m_fact, dict);
         rec.m_ref = ref;
     }
@@ -266,9 +262,11 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
         for (int i = 0; i < m_factories.size(); i++) {
             Record rec = (Record) m_factories.get(i);
             if (rec.m_ref == ref) {
-                rec.m_reg.unregister();
-                rec.m_fact = null;
-                m_global.ungetService(rec.m_ref);
+                if (rec.m_reg != null) {
+                    rec.m_reg.unregister();
+                    rec.m_fact = null;
+                }
+                m_tracker.ungetService(rec.m_ref);
                 m_factories.remove(rec);
                 return;
             }
@@ -278,44 +276,22 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
     /**
      * Start the registry management.
      */
-    public synchronized void start() {
-        importFactories();
-        try {
-            m_global.addServiceListener(this, "(" + Constants.OBJECTCLASS + "=" + Factory.class.getName() + ")");
-        } catch (InvalidSyntaxException e) {
-            e.printStackTrace(); // Should not happen
-        }
+    public void start() {
+        m_tracker = new Tracker(m_global, Factory.class.getName(), this);
+        m_tracker.open();
     }
 
     /**
      * Stop the registry management.
      */
     public synchronized void stop() {
-        m_global.removeServiceListener(this);
+        m_tracker.close();
         m_registry.reset();
         for (int i = 0; i < m_factories.size(); i++) {
             Record rec = (Record) m_factories.get(i);
             removeFactory(rec.m_ref);
         }
-    }
-
-    /**
-     * Service Listener implementation.
-     * @param event : the service event
-     * @see org.osgi.framework.ServiceListener#serviceChanged(org.osgi.framework.ServiceEvent)
-     */
-    public void serviceChanged(ServiceEvent event) {
-        if (event.getType() == ServiceEvent.REGISTERED) {
-            if (!containsRef(event.getServiceReference())) {
-                importFactory(event.getServiceReference());
-            }
-            return;
-        }
-        if (event.getType() == ServiceEvent.UNREGISTERING) {
-            if (containsRef(event.getServiceReference())) {
-                removeFactory(event.getServiceReference());
-            }
-        }
+        m_tracker = null;
     }
 
     /**
@@ -332,5 +308,173 @@ public class CompositeServiceContext implements ServiceContext, ServiceListener 
             }
         }
         return false;
+    }
+
+    /**
+     * Add a bundle listener.
+     * Delegate on the global bundle context.
+     * @param arg0 : bundle listener to add
+     * @see org.osgi.framework.BundleContext#addBundleListener(org.osgi.framework.BundleListener)
+     */
+    public void addBundleListener(BundleListener arg0) {
+        m_global.addBundleListener(arg0);
+    }
+
+    /**
+     * Add a framework listener.
+     * Delegate on the global bundle context.
+     * @param arg0 : framework listener to add.
+     * @see org.osgi.framework.BundleContext#addFrameworkListener(org.osgi.framework.FrameworkListener)
+     */
+    public void addFrameworkListener(FrameworkListener arg0) {
+        m_global.addFrameworkListener(arg0);
+    }
+
+    /**
+     * Create a LDAP filter.
+     * @param arg0 : String-form of the filter
+     * @return the created filter object
+     * @throws InvalidSyntaxException : if the given argument is not a valid against the LDAP grammar.
+     * @see org.osgi.framework.BundleContext#createFilter(java.lang.String)
+     */
+    public Filter createFilter(String arg0) throws InvalidSyntaxException {
+        return m_global.createFilter(arg0);
+    }
+
+    /**
+     * Get the current bundle.
+     * @return the current bundle
+     * @see org.osgi.framework.BundleContext#getBundle()
+     */
+    public Bundle getBundle() {
+        return m_global.getBundle();
+    }
+
+    /**
+     * Get the bundle object with the given id.
+     * @param id : bundle id
+     * @return the bundle object
+     * @see org.osgi.framework.BundleContext#getBundle(long)
+     */
+    public Bundle getBundle(long id) {
+        return m_global.getBundle(id);
+    }
+
+    /**
+     * Get installed bundles.
+     * @return the list of installed bundles
+     * @see org.osgi.framework.BundleContext#getBundles()
+     */
+    public Bundle[] getBundles() {
+        return m_global.getBundles();
+    }
+
+
+    /**
+     * Get a data file.
+     * @param filename : File name.
+     * @return the File object
+     * @see org.osgi.framework.BundleContext#getDataFile(java.lang.String)
+     */
+    public File getDataFile(String filename) {
+        return m_global.getDataFile(filename);
+    }
+
+    /**
+     * Get a property value.
+     * @param key : key of the asked property
+     * @return the property value (object) or null if no property are associated with the given key
+     * @see org.osgi.framework.BundleContext#getProperty(java.lang.String)
+     */
+    public String getProperty(String key) {
+        return m_global.getProperty(key);
+    }
+
+    /**
+     * Install a bundle.
+     * @param location : URL of the bundle to install
+     * @return the installed bundle
+     * @throws BundleException : if the bundle cannot be installed correctly
+     * @see org.osgi.framework.BundleContext#installBundle(java.lang.String)
+     */
+    public Bundle installBundle(String location) throws BundleException {
+        return m_global.installBundle(location);
+    }
+
+    /**
+     * Install a bundle.
+     * @param location : URL of the bundle to install
+     * @param input : 
+     * @return the installed bundle
+     * @throws BundleException : if the bundle cannot be installed correctly
+     * @see org.osgi.framework.BundleContext#installBundle(java.lang.String, java.io.InputStream)
+     */
+    public Bundle installBundle(String location, InputStream input) throws BundleException {
+        return m_global.installBundle(location, input);
+    }
+
+    /**
+     * Remove a bundle listener.
+     * @param listener : the listener to remove
+     * @see org.osgi.framework.BundleContext#removeBundleListener(org.osgi.framework.BundleListener)
+     */
+    public void removeBundleListener(BundleListener listener) {
+        m_global.removeBundleListener(listener);
+    }
+
+    /**
+     * Remove a framework listener.
+     * @param listener : the listener to remove
+     * @see org.osgi.framework.BundleContext#removeFrameworkListener(org.osgi.framework.FrameworkListener)
+     */
+    public void removeFrameworkListener(FrameworkListener listener) {
+        m_global.removeFrameworkListener(listener);
+    }
+
+    /**
+     * A new factory is detected.
+     * @param reference : service reference
+     * @return true if not already imported.
+     * @see org.apache.felix.ipojo.util.TrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+     */
+    public boolean addingService(ServiceReference reference) {
+        if (!containsRef(reference)) {
+            importFactory(reference);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * An imported factory is modified.
+     * @param reference : modified reference
+     * @param service : factory object.
+     * @see org.apache.felix.ipojo.util.TrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    public void modifiedService(ServiceReference reference, Object service) {
+        for (int i = 0; i < m_factories.size(); i++) {
+            Record rec = (Record) m_factories.get(i);
+            if (rec.m_ref == reference) {
+                Dictionary dict = new Properties();
+                for (int j = 0; j < reference.getPropertyKeys().length; j++) {
+                    dict.put(reference.getPropertyKeys()[j], reference.getProperty(reference.getPropertyKeys()[j]));
+                }
+                rec.m_reg.setProperties(dict);
+                return;
+            }
+        }
+    }
+
+    /**
+     * An imported factory disappears.
+     * @param reference : reference
+     * @param service : factory object.
+     * @see org.apache.felix.ipojo.util.TrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    public void removedService(ServiceReference reference, Object service) {
+        if (containsRef(reference)) {
+            removeFactory(reference);
+        }
+        
     }
 }

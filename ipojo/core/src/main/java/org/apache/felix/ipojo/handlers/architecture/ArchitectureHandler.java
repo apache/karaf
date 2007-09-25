@@ -19,34 +19,19 @@
 package org.apache.felix.ipojo.handlers.architecture;
 
 import java.util.Dictionary;
-import java.util.Properties;
 
-import org.apache.felix.ipojo.Handler;
-import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.metadata.Element;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
+import org.apache.felix.ipojo.util.Logger;
 
 /**
- * Achtiecture Handler : do reflection on your component.
+ * Architecture Handler : do reflection on your component.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ArchitectureHandler extends Handler implements Architecture {
-
-    /**
-     * Instance Manager.
-     */
-    private InstanceManager m_manager;
-
-    /**
-     * Service Registration of the Architecture service provided by this
-     * handler.
-     */
-    private ServiceRegistration m_sr;
+public class ArchitectureHandler extends PrimitiveHandler implements Architecture {
 
     /**
      * Name of the component.
@@ -56,56 +41,26 @@ public class ArchitectureHandler extends Handler implements Architecture {
     /**
      * Configure the handler.
      * 
-     * @param im : the instance manager
      * @param metadata : the metadata of the component
      * @param configuration : the instance configuration
-     * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager,
-     * org.apache.felix.ipojo.metadata.Element)
+     * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
-    public void configure(InstanceManager im, Element metadata, Dictionary configuration) {
-        if (metadata.containsAttribute("architecture")) {
-            String isArchitectureEnabled = (metadata.getAttribute("architecture")).toLowerCase();
-            if (isArchitectureEnabled.equalsIgnoreCase("true")) {
-                im.register(this);
-            }
-        }
-
+    public void configure(Element metadata, Dictionary configuration) {
         m_name = (String) configuration.get("name");
-
-        m_manager = im;
     }
 
     /**
      * Stop method.
-     * Unregister the service if published.
      * @see org.apache.felix.ipojo.Handler#stop()
      */
-    public void stop() {
-        if (m_sr != null) {
-            m_sr.unregister();
-            m_sr = null;
-        }
-    }
+    public void stop() {  }
 
     /**
      * Start method.
-     * Register the service.
      * @see org.apache.felix.ipojo.Handler#start()
      */
-    public void start() {
-        // Unregister the service if already registred
-        if (m_sr != null) {
-            m_sr.unregister();
-        }
-
-        // Register the ManagedService
-        BundleContext bc = m_manager.getContext();
-        Dictionary properties = new Properties();
-        properties.put("Component.Implementation.Class", m_manager.getClassName());
-        properties.put(Constants.SERVICE_PID, m_name);
-
-        m_sr = bc.registerService(Architecture.class.getName(), this, properties);
-
+    public void start() {  
+        log(Logger.INFO, "Start architecture handler with " + m_name + " name");
     }
 
     /**
@@ -114,7 +69,6 @@ public class ArchitectureHandler extends Handler implements Architecture {
      * @see org.apache.felix.ipojo.architecture.Architecture#getDescription()
      */
     public InstanceDescription getInstanceDescription() {
-        return m_manager.getInstanceDescription();
+        return getInstanceManager().getInstanceDescription();
     }
-
 }

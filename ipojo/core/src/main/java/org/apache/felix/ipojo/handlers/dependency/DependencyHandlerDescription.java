@@ -21,10 +21,10 @@ package org.apache.felix.ipojo.handlers.dependency;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -41,11 +41,10 @@ public class DependencyHandlerDescription extends HandlerDescription {
 
     /**
      * Constructor.
-     * 
-     * @param isValid : the validity of the dependency handler.
+     * @param h : Handler.
      */
-    public DependencyHandlerDescription(boolean isValid) {
-        super(DependencyHandler.class.getName(), isValid);
+    public DependencyHandlerDescription(Handler h) {
+        super(h);
     }
 
     /**
@@ -91,7 +90,7 @@ public class DependencyHandlerDescription extends HandlerDescription {
             Element dep = new Element("Requires", "");
             dep.addAttribute(new Attribute("Specification", m_dependencies[i].getInterface()));
             
-            if (!m_dependencies[i].getFilter().equals("")) {
+            if (!"".equals(m_dependencies[i].getFilter())) {
                 dep.addAttribute(new Attribute("Filter", m_dependencies[i].getFilter()));
             }
             
@@ -113,10 +112,10 @@ public class DependencyHandlerDescription extends HandlerDescription {
             while (it.hasNext()) {
                 Element use = new Element("Uses", "");
                 ServiceReference ref = (ServiceReference) it.next();
-                use.addAttribute(new Attribute("service.id", ref.getProperty(Constants.SERVICE_ID).toString()));
-                String pid = (String) ref.getProperty(Constants.SERVICE_PID);
-                if (pid != null) {
-                    use.addAttribute(new Attribute("service.pid", pid));
+                use.addAttribute(new Attribute("instance.name", ref.getProperty("instance.name").toString()));
+                String in = (String) ref.getProperty("instance.name");
+                if (in != null) {
+                    use.addAttribute(new Attribute("instance.name", in));
                 }
                 dep.addElement(use);
             }

@@ -9,7 +9,7 @@
   <packaging>bundle</packaging>
   <name>Apache Felix iPOJO</name>
   <artifactId>org.apache.felix.ipojo</artifactId>
-  <version>0.7.3-SNAPSHOT</version>
+  <version>0.7.5-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
@@ -24,12 +24,12 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.ipojo.metadata</artifactId>
-      <version>0.7.3-SNAPSHOT</version>
+      <version>0.7.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.ipojo.manipulator</artifactId>
-      <version>0.7.3-SNAPSHOT</version>
+      <version>0.7.5-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
@@ -64,19 +64,35 @@
               	org.objectweb.asm*;-split-package:=merge-first
             </Private-Package>
             <Export-Package>
-              org.apache.felix.ipojo; version="0.7.3", 
-              org.apache.felix.ipojo.metadata; version="0.7.3", 
-              org.apache.felix.ipojo.architecture; version="0.7.3", 
-              org.apache.felix.ipojo.parser; version="0.7.3",
-              org.apache.felix.ipojo.util; version="0.7.3",
-              org.apache.felix.ipojo.handlers.dependency; version="0.7.3",
-              org.apache.felix.ipojo.handlers.providedservice; version="0.7.3", 
-              org.apache.felix.ipojo.composite; version="0.7.3",
+              org.apache.felix.ipojo; version="0.7.5", 
+              org.apache.felix.ipojo.metadata; version="0.7.5", 
+              org.apache.felix.ipojo.architecture; version="0.7.5", 
+              org.apache.felix.ipojo.parser; version="0.7.5",
+              org.apache.felix.ipojo.util; version="0.7.5",
+              org.apache.felix.ipojo.handlers.dependency; version="0.7.5",
+              org.apache.felix.ipojo.handlers.providedservice; version="0.7.5", 
+              org.apache.felix.ipojo.composite; version="0.7.5",
               org.osgi.service.cm,
               org.osgi.service.log
             </Export-Package>
+            <_donotcopy>(CVS|.svn|.+.bak|~.+|metadata.xml)</_donotcopy>
           </instructions>
         </configuration>
+      </plugin>
+       <plugin>
+	      <groupId>org.apache.felix</groupId>
+	      <artifactId>org.apache.felix.ipojo.plugin</artifactId>
+              <version>${pom.version}</version>
+		  <executions>
+          	<execution>
+            	<goals>
+	              <goal>ipojo-bundle</goal>
+               </goals>
+            <configuration>
+   				<metadata>metadata.xml</metadata>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

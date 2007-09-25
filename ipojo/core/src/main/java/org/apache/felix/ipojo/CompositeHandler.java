@@ -18,10 +18,6 @@
  */
 package org.apache.felix.ipojo;
 
-import java.util.Dictionary;
-
-import org.apache.felix.ipojo.architecture.HandlerDescription;
-import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * Composite Handler Abstract Class. An composite handler need implements these
@@ -29,58 +25,60 @@ import org.apache.felix.ipojo.metadata.Element;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public abstract class CompositeHandler {
-
+public abstract class CompositeHandler extends Handler {
+    
     /**
-     * Configure the handler.
-     * 
-     * @param im : the instance manager
-     * @param metadata : the metadata of the component
-     * @param configuration : the instance configuration
+     * Composite Handler type.
      */
-    public abstract void configure(CompositeManager im, Element metadata, Dictionary configuration);
-
+    public static final String HANDLER_TYPE = "composite";
+    
     /**
-     * Stop the handler : stop the management.
+     * Reference on the composite manager.
      */
-    public abstract void stop();
-
+    private CompositeManager m_manager;
+    
     /**
-     * Start the handler : start the management.
+     * Set the manager.
+     * This method me be called only once time.
+     * @param cm : the composite manager.
      */
-    public abstract void start();
-
-    /**
-     * Is the actual state valid for this handler ?
-     * 
-     * @return true is the state seems valid for the handler
-     */
-    public boolean isValid() {
-        return true;
+    public final void attach(ComponentInstance cm) {
+        m_manager = (CompositeManager) cm;
     }
-
-    /**
-     * This method is called when the component state changed.
-     * 
-     * @param state : the new state
-     */
-    public void stateChanged(int state) {
+    
+    public final CompositeManager getCompositeManager() {
+        return m_manager;
     }
-
+        
     /**
-     * Return the description of the handler.
-     * @return the description of the handler.
+     * Log method.
+     * @param level : message level (Logger class constant)
+     * @param message : message to log
      */
-    public HandlerDescription getDescription() {
-        return new HandlerDescription(this.getClass().getName(), isValid());
+    public void log(int level, String message) {
+        m_manager.getFactory().getLogger().log(level, message);
     }
-
+    
     /**
-     * The instance is reconfiguring.
-     * 
-     * @param configuration : New instance configuration.
+     * Log method.
+     * @param level : message level (Logger class constant)
+     * @param message : message to log
+     * @param ex : exception to attach to the message
      */
-    public void reconfigure(Dictionary configuration) {
+    public void log(int level, String message, Throwable ex) {
+        m_manager.getFactory().getLogger().log(level, message, ex);
     }
-
+    
+    /**
+     * Get a plugged handler of the same container.
+     * This method must be call only in the start method (or after).
+     * In the configure method, this method can not return a consistent
+     * result as all handlers are not plugged. 
+     * @param name : name of the handler to find (class name). 
+     * @return the composite handler object or null if the handler is not found.
+     */
+    public final Handler getHandler(String name) {
+        return m_manager.getCompositeHandler(name);
+    }
+    
 }

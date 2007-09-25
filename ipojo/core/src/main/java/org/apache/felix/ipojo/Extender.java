@@ -66,7 +66,6 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      */
     private long m_bundleId;
     
-    
     /**
      * Bundle Listener Notification.
      * @param event : the bundle event.
@@ -160,10 +159,15 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
         m_components = new Hashtable();
         m_creators = new Hashtable();
         
-        synchronized (this) {
-            for (int i = 0; i < bc.getBundles().length; i++) {
-                if (bc.getBundles()[i].getState() == Bundle.ACTIVE) {
-                    startManagementFor(bc.getBundles()[i]);
+        // Begin by initializing core handlers
+        startManagementFor(bc.getBundle());
+        
+        synchronized (m_components) {
+            synchronized (m_creators) {
+                for (int i = 0; i < bc.getBundles().length; i++) {
+                    if (bc.getBundles()[i].getState() == Bundle.ACTIVE) {
+                        startManagementFor(bc.getBundles()[i]);
+                    }
                 }
             }
         }
@@ -190,7 +194,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
         m_components = null;
         Enumeration e2 = m_creators.keys();
         while (e2.hasMoreElements()) {
-            InstanceCreator creator = (InstanceCreator) m_creators.get(e2.nextElement());
+            InstanceCreator creator = (InstanceCreator) m_creators.remove(e2.nextElement());
             creator.stop();
         }
         m_creators = null;
@@ -201,9 +205,18 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      * @param cm : the new component metadata.
      * @param bundle : the bundle.
      */
-    private void addComponentFactory(Bundle bundle, Element cm) {        
-        ComponentFactory factory = new ComponentFactory(bundle.getBundleContext(), cm);
-        
+    private void addComponentFactory(Bundle bundle, Element cm) {
+        ComponentFactory factory = null;
+        if (cm.getName().equalsIgnoreCase("component")) {
+            factory = new ComponentFactory(bundle.getBundleContext(), cm);
+        } else if (cm.getName().equalsIgnoreCase("composite")) {
+            factory = new CompositeFactory(bundle.getBundleContext(), cm);
+        } else if (cm.getName().equalsIgnoreCase("handler")) {
+            factory = new HandlerFactory(bundle.getBundleContext(), cm);
+        } else {
+            err("Not recognized element type : " + cm.getName(), null);
+        }
+
         ComponentFactory[] cfs = (ComponentFactory[]) m_components.get(bundle);
         
         // If the factory array is not empty add the new factory at the end
@@ -219,7 +232,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     }
     
     /**
-     * Start the management factories and create instances.
+     * Start the management of factories and create instances.
      * @param bundle : the bundle. 
      * @param confs : the instances to create.
      */
@@ -227,43 +240,15 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
         ComponentFactory[] cfs = (ComponentFactory[]) m_components.get(bundle);
         
         // Start the factories
-        for (int j = 0; cfs != null && j < cfs.length; j++) {
-            cfs[j].start();
-        }
-
-        Dictionary[] outsiders = new Dictionary[0];
-        
-        for (int i = 0; confs != null && i < confs.length; i++) {
-            Dictionary conf = confs[i];
-            boolean created = false;
-            for (int j = 0; cfs != null && j < cfs.length; j++) {
-                String componentClass = cfs[j].getComponentClassName();
-                String factoryName = cfs[j].getName();
-                String componentName = cfs[j].getComponentTypeName();
-                if (conf.get("component") != null && (conf.get("component").equals(componentClass) || conf.get("component").equals(factoryName)) || conf.get("component").equals(componentName)) {
-                    try {
-                        cfs[j].createComponentInstance(conf);
-                        created = true;
-                    } catch (UnacceptableConfiguration e) {
-                        System.err.println("Cannot create the instance " + conf.get("name") + " : " + e.getMessage());
-                    }
-                }
-            }
-            if (!created && conf.get("component") != null) {
-                if (outsiders.length != 0) {
-                    Dictionary[] newList = new Dictionary[outsiders.length + 1];
-                    System.arraycopy(outsiders, 0, newList, 0, outsiders.length);
-                    newList[outsiders.length] = conf;
-                    outsiders = newList;
-                } else {
-                    outsiders = new Dictionary[] { conf };
-                }
+        if (cfs != null) {
+            for (int j = 0; j < cfs.length; j++) {
+                cfs[j].start();
             }
         }
 
         // Create the instance creator if needed.
-        if (outsiders.length > 0) {
-            m_creators.put(bundle, new InstanceCreator(bundle.getBundleContext(), outsiders));
+        if (confs.length > 0) {
+            m_creators.put(bundle, new InstanceCreator(bundle.getBundleContext(), confs, cfs));
         }
     }
     
@@ -285,5 +270,4 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
             System.err.println("[iPOJO-Core] " + message);
         }
     }
-
 }

@@ -19,49 +19,62 @@
 package org.apache.felix.ipojo;
 
 import java.util.Dictionary;
+import java.util.List;
 
+import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.metadata.Element;
 
 /**
- * Component Type Factory Service. This service is exposed by a instance manager
- * factory, and allows the dynamic creation of component instance.
- * 
+ * Component Type Factory Service. This service is exposed by a instance manager factory, and allows the dynamic creation of component instance.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface Factory {
 
     /**
+     * Factory State. A valid factory is a factory where all required handlers are available.
+     */
+    int VALID = 1;
+
+    /**
+     * Factory State. An invalid factory is a factory where at least one required handler is unavailable. Creating an instance with an invalid factory failed.
+     */
+    int INVALID = 0;
+
+    /**
      * Create an instance manager (i.e. component type instance).
-     * 
      * @param configuration : the configuration properties for this component.
      * @return the created instance manager.
      * @throws UnacceptableConfiguration : when a given configuration is not valid.
+     * @throws MissingHandlerException : when an handler is missing.
+     * @throws ConfigurationException : when the instance configuration failed.
      */
-    ComponentInstance createComponentInstance(Dictionary configuration) throws UnacceptableConfiguration;
+    ComponentInstance createComponentInstance(Dictionary configuration) throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException;
 
     /**
-     * Create an instance manager (i.e. component type instance). This has these
-     * service interaction in the scope given in argument.
-     * 
+     * Create an instance manager (i.e. component type instance). This has these service interaction in the scope given in argument.
      * @param configuration : the configuration properties for this component.
      * @param serviceContext : the service context of the component.
      * @return the created instance manager.
      * @throws UnacceptableConfiguration : when the given configuration is not valid.
+     * @throws MissingHandlerException : when an handler is missing.
+     * @throws ConfigurationException : when the instance configuration failed.
      */
-    ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration;
+    ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException;
 
     /**
-     * Get the component type information containing provided service,
-     * configuration properties ...
-     * 
+     * Get the component type information containing provided service, configuration properties ...
      * @return the component type information.
      */
     Element getDescription();
 
     /**
-     * Check if the given configuration is acceptable as a configuration of a
-     * component instance.
-     * 
+     * Get the component type description.
+     * @return the component type description object
+     */
+    ComponentDescription getComponentDescription();
+
+    /**
+     * Check if the given configuration is acceptable as a configuration of a component instance.
      * @param conf : the configuration to test
      * @return true if the configuration is acceptable
      */
@@ -74,13 +87,35 @@ public interface Factory {
     String getName();
 
     /**
-     * Reconfigure an instance already created. This configuration need to have
-     * the name property to identify the instance.
-     * 
+     * Reconfigure an instance already created. This configuration need to have the name property to identify the instance.
      * @param conf : the configuration to reconfigure the instance.
-     * @throws UnacceptableConfiguration : if the given configuration is not
-     * consistent for the targeted instance.
+     * @throws UnacceptableConfiguration : if the given configuration is not consistent for the targeted instance.
+     * @throws MissingHandlerException : when an handler is missing.
      */
-    void reconfigure(Dictionary conf) throws UnacceptableConfiguration;
+    void reconfigure(Dictionary conf) throws UnacceptableConfiguration, MissingHandlerException;
+
+    /**
+     * Add a factory state listener on the current factory.
+     * @param l : the listener to add
+     */
+    void addFactoryStateListener(FactoryStateListener l);
+
+    /**
+     * Remove the given factory state listener from the listener list.
+     * @param l : the listener to remove
+     */
+    void removeFactoryStateListener(FactoryStateListener l);
+
+    /**
+     * Get the list of missing handlers.
+     * @return the list containing the name of missing handlers (Name : namespace:name)
+     */
+    List getMissingHandlers();
+
+    /**
+     * Get the list of required handlers.
+     * @return the list containing the name of required handlers (Name : namespace:name)
+     */
+    List getRequiredHandlers();
 
 }

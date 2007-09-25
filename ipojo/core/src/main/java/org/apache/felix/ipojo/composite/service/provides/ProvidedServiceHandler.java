@@ -25,11 +25,15 @@ import java.util.List;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.CompositeHandler;
-import org.apache.felix.ipojo.CompositeManager;
+import org.apache.felix.ipojo.ConfigurationException;
+import org.apache.felix.ipojo.Factory;
+import org.apache.felix.ipojo.HandlerManager;
+import org.apache.felix.ipojo.IPojoConfiguration;
 import org.apache.felix.ipojo.PolicyServiceContext;
+import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.composite.instance.InstanceHandler;
-import org.apache.felix.ipojo.composite.service.importer.ImportExportHandler;
+import org.apache.felix.ipojo.composite.service.importer.ImportHandler;
 import org.apache.felix.ipojo.composite.service.importer.ServiceImporter;
 import org.apache.felix.ipojo.composite.service.instantiator.ServiceInstantiatorHandler;
 import org.apache.felix.ipojo.composite.service.instantiator.SvcInstance;
@@ -38,17 +42,13 @@ import org.apache.felix.ipojo.parser.ManifestMetadataParser;
 import org.apache.felix.ipojo.parser.ParseException;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Composite Provided Service Handler.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ProvidedServiceHandler extends CompositeHandler {
-
-    /**
-     * Reference on the instance.
-     */
-    private CompositeManager m_manager;
 
     /**
      * External context.
@@ -66,7 +66,8 @@ public class ProvidedServiceHandler extends CompositeHandler {
     private List m_managedServices = new ArrayList();
 
     /**
-     * Handler validity. False if
+     * Handler validity.
+     * (Lifecycle controller)
      */
     private boolean m_valid = false;
 
@@ -76,40 +77,42 @@ public class ProvidedServiceHandler extends CompositeHandler {
     private List m_types;
 
     /**
+     * Initialize the component type.
+     * @param cd : component type description to populate.
+     * @param metadata : component type metadata.
+     * @throws ConfigurationException : metadata are incorrect.
+     * @see org.apache.felix.ipojo.Handler#initializeComponentFactory(org.apache.felix.ipojo.architecture.ComponentDescription, org.apache.felix.ipojo.metadata.Element)
+     */
+    public void initializeComponentFactory(ComponentDescription cd, Element metadata) throws ConfigurationException {
+        Element[] provides = metadata.getElements("provides", "");
+        for (int i = 0; i < provides.length; i++) {
+            if (provides[i].containsAttribute("specification")) {
+                String spec = provides[i].getAttribute("specification");
+                cd.addProvidedServiceSpecification(spec);
+            } else {
+                throw new ConfigurationException("Malformed provides : the specification attribute is mandatory", getCompositeManager().getFactory().getName());
+            }
+        }
+    }
+
+    /**
      * Configure the handler.
-     * 
-     * @param im : the instance manager
      * @param metadata : the metadata of the component
      * @param configuration : the instance configuration
      * @see org.apache.felix.ipojo.CompositeHandler#configure(org.apache.felix.ipojo.CompositeManager,
      * org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
-    public void configure(CompositeManager im, Element metadata, Dictionary configuration) {
-        m_manager = im;
-        m_context = im.getContext();
+    public void configure(Element metadata, Dictionary configuration) {
+        m_context = getCompositeManager().getContext();
 
         // Get composition metadata
         Element[] provides = metadata.getElements("provides", "");
-        if (provides.length == 0) {
-            return;
-        }
-        
+        if (provides.length == 0) { return; }
+
         for (int i = 0; i < provides.length; i++) {
             ProvidedService ps = new ProvidedService(this, provides[i], "" + i);
             m_managedServices.add(ps);
-            // Check requirements against the service specification
-            if (!checkServiceSpecification(ps)) {
-                return;
-            }
-            im.getComponentDescription().addProvidedServiceSpecification(ps.getSpecification());
         }
-
-        // Compute imports and instances
-        computeAvailableServices();
-        computeAvailableTypes();
-
-        
-        im.register(this);
     }
 
     /**
@@ -118,26 +121,22 @@ public class ProvidedServiceHandler extends CompositeHandler {
      * @see org.apache.felix.ipojo.CompositeHandler#start()
      */
     public void start() {
+        // Compute imports and instances
+        computeAvailableServices();
+        computeAvailableTypes();
+        
         for (int i = 0; i < m_managedServices.size(); i++) {
             ProvidedService ps = (ProvidedService) m_managedServices.get(i);
             try {
+                checkServiceSpecification(ps);
                 ps.start();
             } catch (CompositionException e) {
-                m_manager.getFactory().getLogger().log(Logger.ERROR, "Cannot start the provided service handler", e);
-                m_valid = false;
+                log(Logger.ERROR, "Cannot start the provided service handler", e);
+                if (m_valid) { m_valid = false; }
                 return;
             }
         }
-        m_valid  = true;
-    }
-    
-    /**
-     * Check the handler validity.
-     * @return true if the handler is valid.
-     * @see org.apache.felix.ipojo.CompositeHandler#isValid()
-     */
-    public boolean isValid() {
-        return m_valid;
+        m_valid = true;
     }
 
     /**
@@ -166,7 +165,7 @@ public class ProvidedServiceHandler extends CompositeHandler {
             return;
         }
 
-        // If the new state is VALID => regiter all the services
+        // If the new state is VALID => register all the services
         if (state == ComponentInstance.VALID) {
             for (int i = 0; i < m_managedServices.size(); i++) {
                 ProvidedService ps = (ProvidedService) m_managedServices.get(i);
@@ -174,10 +173,6 @@ public class ProvidedServiceHandler extends CompositeHandler {
             }
             return;
         }
-    }
-
-    protected CompositeManager getManager() {
-        return m_manager;
     }
 
     /**
@@ -193,15 +188,15 @@ public class ProvidedServiceHandler extends CompositeHandler {
      */
     private void computeAvailableServices() {
         // Get instantiated services :
-        ImportExportHandler ih = (ImportExportHandler) m_manager.getCompositeHandler(ImportExportHandler.class.getName());
-        ServiceInstantiatorHandler sh = (ServiceInstantiatorHandler) m_manager.getCompositeHandler(ServiceInstantiatorHandler.class.getName());
-        
+        ImportHandler ih = (ImportHandler) getHandler(IPojoConfiguration.IPOJO_NAMESPACE + ":requires");
+        ServiceInstantiatorHandler sh = (ServiceInstantiatorHandler) getHandler(IPojoConfiguration.IPOJO_NAMESPACE + ":service");
+
         for (int i = 0; sh != null && i < sh.getInstances().size(); i++) {
             SvcInstance svc = (SvcInstance) sh.getInstances().get(i);
             String itf = svc.getSpecification();
             boolean agg = svc.isAggregate();
             boolean opt = svc.isOptional();
-            
+
             SpecificationMetadata sm = new SpecificationMetadata(itf, m_context, agg, opt, this);
             m_services.add(sm);
         }
@@ -211,26 +206,23 @@ public class ProvidedServiceHandler extends CompositeHandler {
             String itf = si.getSpecification();
             boolean agg = si.isAggregate();
             boolean opt = si.isOptional();
-            
+
             SpecificationMetadata sm = new SpecificationMetadata(itf, m_context, agg, opt, this);
             m_services.add(sm);
         }
     }
-    
+
     /**
      * Check composite requirement against service specification requirement is available.
      * @param ps : the provided service to check
-     * @return true if the composite is a correct implementation of the service
+     * @throws CompositionException : occurs if the specification field of the service specification cannot be analyzed correctly.
      */
-    private boolean checkServiceSpecification(ProvidedService ps) {
+    private void checkServiceSpecification(ProvidedService ps) throws CompositionException {
         try {
-            Class spec = m_manager.getFactory().loadClass(ps.getSpecification());
-            Field specField = spec.getField("specification");     
+            Class spec = getCompositeManager().getFactory().loadClass(ps.getSpecification());
+            Field specField = spec.getField("specification");
             Object o = specField.get(null);
-            if (!(o instanceof String)) {
-                m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getInstanceName() + "] The specification field of the service specification " + ps.getSpecification() + " need to be a String");                                                                                                                                                                    
-                return false;
-            } else {
+            if (o instanceof String) {
                 Element specification = ManifestMetadataParser.parse((String) o);
                 Element[] reqs = specification.getElements("requires");
                 for (int j = 0; j < reqs.length; j++) {
@@ -239,128 +231,135 @@ public class ProvidedServiceHandler extends CompositeHandler {
                         // Fix service-level dependency flag
                         imp.setServiceLevelDependency();
                     }
-                    if (!isRequirementCorrect(imp, reqs[j])) {
-                        return false;
-                    }
+                    checkRequirement(imp, reqs[j]);
                 }
+            } else {
+                log(Logger.ERROR, "[" + getCompositeManager().getInstanceName() + "] The specification field of the service specification " + ps.getSpecification() + " need to be a String");
+                throw new CompositionException("Service Specification checking failed : The specification field of the service specification " + ps.getSpecification() + " need to be a String");
             }
         } catch (NoSuchFieldException e) {
-            return true;  // No specification field
+            return; // No specification field
         } catch (ClassNotFoundException e) {
-            m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getInstanceName() + "] The service specification " + ps.getSpecification() + " cannot be load");                                                                                                                                                                    
-            return false;
+            log(Logger.ERROR, "[" + getCompositeManager().getInstanceName() + "] The service specification " + ps.getSpecification() + " cannot be load");
+            throw new CompositionException("The service specification " + ps.getSpecification() + " cannot be load : " + e.getMessage());
         } catch (IllegalArgumentException e) {
-            m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getInstanceName() + "] The field 'specification' of the service specification " + ps.getSpecification() + " is not accessible : " + e.getMessage());                                                                                                                                                                    
-            return false;
+            log(Logger.ERROR, "[" + getCompositeManager().getInstanceName() + "] The field 'specification' of the service specification " + ps.getSpecification() + " is not accessible : " + e.getMessage());
+            throw new CompositionException("The field 'specification' of the service specification " + ps.getSpecification() + " is not accessible : " + e.getMessage());
         } catch (IllegalAccessException e) {
-            m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getInstanceName() + "] The field 'specification' of the service specification " + ps.getSpecification() + " is not accessible : " + e.getMessage());                                                                                                                                                                    
-            return false;
+            log(Logger.ERROR, "[" + getCompositeManager().getInstanceName() + "] The field 'specification' of the service specification " + ps.getSpecification() + " is not accessible : " + e.getMessage());
+            throw new CompositionException("The field 'specification' of the service specification " + ps.getSpecification() + " is not accessible : " + e.getMessage());
         } catch (ParseException e) {
-            m_manager.getFactory().getLogger().log(Logger.ERROR, "[" + m_manager.getInstanceName() + "] The field 'specification' of the service specification " + ps.getSpecification() + " does not contain a valid String : " + e.getMessage());                                                                                                                                                                    
-            return false;
+            log(Logger.ERROR, "[" + getCompositeManager().getInstanceName() + "] The field 'specification' of the service specification " + ps.getSpecification() + " does not contain a valid String : " + e.getMessage());
+            throw new CompositionException("The field 'specification' of the service specification " + ps.getSpecification() + " does not contain a valid String : " + e.getMessage());
         }
-        return true;
     }
-    
+
     /**
      * Look for the implementation (i.e. composite) requirement for the given service-level requirement metadata.
      * @param element : the service-level requirement metadata
      * @return the ServiceImporter object, null if not found or if the DependencyHandler is not plugged to the instance
      */
     private ServiceImporter getAttachedRequirement(Element element) {
-        ImportExportHandler ih = (ImportExportHandler) m_manager.getCompositeHandler(ImportExportHandler.class.getName());
-        if (ih == null) { 
-            return null;
-        }
-        
+        ImportHandler ih = (ImportHandler) getHandler(IPojoConfiguration.IPOJO_NAMESPACE + ":requires");
+        if (ih == null) { return null; }
+
         if (element.containsAttribute("id")) {
             // Look for dependency Id
             String id = element.getAttribute("id");
             for (int i = 0; i < ih.getRequirements().size(); i++) {
                 ServiceImporter imp = (ServiceImporter) ih.getRequirements().get(i);
-                if (imp.getId().equals(id)) {
-                    return imp; 
-                }
+                if (imp.getId().equals(id)) { return imp; }
             }
         }
-        
+
         // If not found or no id, look for a dependency with the same specification
         String requirement = element.getAttribute("specification");
         for (int i = 0; i < ih.getRequirements().size(); i++) {
             ServiceImporter imp = (ServiceImporter) ih.getRequirements().get(i);
-            if (imp.getSpecification().equals(requirement)) {
-                return imp; 
-            }
+            if (imp.getSpecification().equals(requirement)) { return imp; }
         }
-        
         return null;
     }
-    
+
     /**
      * Check the correctness of the composite requirement against the service level dependency.
      * @param imp : requirement to check
      * @param elem : service-level dependency metadata
-     * @return true if the dependency is correct, false otherwise
+     * @throws CompositionException : occurs if the requirement does not match with service-level specification requirement
      */
-    private boolean isRequirementCorrect(ServiceImporter imp, Element elem) {
+    private void checkRequirement(ServiceImporter imp, Element elem) throws CompositionException {
         boolean opt = false;
         if (elem.containsAttribute("optional") && elem.getAttribute("optional").equalsIgnoreCase("true")) {
             opt = true;
         }
-        
+
         boolean agg = false;
         if (elem.containsAttribute("aggregate") && elem.getAttribute("aggregate").equalsIgnoreCase("true")) {
             agg = true;
         }
 
         if (imp == null) {
-            //TODO do we need to add the requirement for optional service-level dependency ?
             // Add the missing requirement
-            ImportExportHandler ih = (ImportExportHandler) m_manager.getCompositeHandler(ImportExportHandler.class.getName());
+            ImportHandler ih = (ImportHandler) getHandler(IPojoConfiguration.IPOJO_NAMESPACE + ":requires");
             if (ih == null) {
-                // Add the importer handler 
-                ih = new ImportExportHandler();
-                ih.configure(m_manager, new Element("composite", "") , null); // Enter fake info in the configure method.
-                m_manager.register(ih);
+                // Look for the import handler factory
+                HandlerManager ci = null;
+                try {
+                    ServiceReference[] refs = m_context.getServiceReferences(Factory.class.getName(), "(&(handler.name=requires)(handler.namespace=" + IPojoConfiguration.IPOJO_NAMESPACE + ")(handler.type=composite))");
+                    Factory factory = (Factory) m_context.getService(refs[0]);
+                    ci = (HandlerManager) factory.createComponentInstance(null, getCompositeManager().getServiceContext());
+                } catch (Exception e) {
+                    e.printStackTrace(); // Should not happen
+                }
+                // Add the required handler 
+                try {
+                    ci.init(getCompositeManager(), new Element("composite", ""), null);
+                } catch (ConfigurationException e) {
+                    log(Logger.ERROR, "Internal error : cannot configure the Import Handler : " + e.getMessage());
+                    throw new CompositionException("Internal error : cannot configure the Import Handler : " + e.getMessage());
+                }
+                ih = (ImportHandler) ci.getHandler();
+                getCompositeManager().addCompositeHandler(ci);
             }
             String spec = elem.getAttribute("specification");
-            String filter = "(&(objectClass=" + spec + ")(!(service.pid=" + m_manager.getInstanceName() + ")))"; // Cannot import yourself
+            String filter = "(&(objectClass=" + spec + ")(!(instance.name=" + getCompositeManager().getInstanceName() + ")))"; // Cannot import yourself
             if (elem.containsAttribute("filter")) {
-                if (!elem.getAttribute("filter").equals("")) {
+                if (!"".equals(elem.getAttribute("filter"))) {
                     filter = "(&" + filter + elem.getAttribute("filter") + ")";
                 }
             }
-            ServiceImporter si = new ServiceImporter(spec, filter, agg, opt, m_manager.getContext(), m_manager.getServiceContext(), PolicyServiceContext.LOCAL, null, ih);
+            
+            ServiceImporter si = new ServiceImporter(spec, filter, agg, opt, getCompositeManager().getContext(), getCompositeManager().getServiceContext(), PolicyServiceContext.LOCAL, null, ih);
             ih.getRequirements().add(si);
-            return true;
+            SpecificationMetadata sm = new SpecificationMetadata(spec, m_context, agg, opt, this);
+            m_services.add(sm); // Update the available types
+            return;
         }
-        
+
         if (imp.isAggregate() && !agg) {
-            getManager().getFactory().getLogger().log(Logger.ERROR, "[" + getManager().getInstanceName() + "] The requirement " + elem.getAttribute("specification") + " is aggregate in the implementation and is declared as a simple service-level requirement");
-            return false;
+            log(Logger.ERROR, "[" + getCompositeManager().getInstanceName() + "] The requirement " + elem.getAttribute("specification") + " is aggregate in the implementation and is declared as a simple service-level requirement");
+            throw new CompositionException("The requirement " + elem.getAttribute("specification") + " is aggregate in the implementation and is declared as a simple service-level requirement");
         }
-      
+
         if (elem.containsAttribute("filter")) {
             String filter = elem.getAttribute("filter");
             String filter2 = imp.getFilter();
             if (filter2 == null || !filter2.equalsIgnoreCase(filter)) {
-                getManager().getFactory().getLogger().log(Logger.ERROR, "[" + getManager().getInstanceName() + "] The specification requirement " + elem.getAttribute("specification") + " as not the same filter as declared in the service-level requirement");
-                return false;
+                log(Logger.ERROR, "[" + getCompositeManager().getInstanceName() + "] The specification requirement " + elem.getAttribute("specification") + " as not the same filter as declared in the service-level requirement");
+                throw new CompositionException("The specification requirement " + elem.getAttribute("specification") + " as not the same filter as declared in the service-level requirement");
             }
         }
-        
-        return true;
     }
 
     public HandlerDescription getDescription() {
-        return new ProvidedServiceHandlerDescription(true, m_managedServices);
+        return new ProvidedServiceHandlerDescription(this, m_managedServices);
     }
-    
+
     /**
      * Build available instance types.
      */
     private void computeAvailableTypes() {
-        InstanceHandler ih = (InstanceHandler) m_manager.getCompositeHandler(InstanceHandler.class.getName());       
+        InstanceHandler ih = (InstanceHandler) getHandler(IPojoConfiguration.IPOJO_NAMESPACE + ":instance");
         if (ih == null) {
             m_types = new ArrayList();
         } else {

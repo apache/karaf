@@ -141,6 +141,7 @@ public class Manipulator {
                 ManipulationProperty.getLogger().log(ManipulationProperty.INFO, "Put the file " + clazz.getAbsolutePath() + " in the jar file");
             } catch (Exception e) {
                 System.err.println("Problem to write the adapted class on the file system " + " [ " + clazz.getAbsolutePath() + " ] " + e.getMessage());
+                e.printStackTrace();
             }
         }
         // The file is in the bundle

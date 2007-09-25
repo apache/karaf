@@ -75,7 +75,6 @@ public class Logger {
         m_name = name;
         m_level = level;
         m_context = bc;
-
     }
 
     /**
@@ -86,9 +85,7 @@ public class Logger {
      */
     public void log(int level, String msg) {
         if (m_level >= level) {
-            synchronized (this) {
-                dispatch(level, msg, null);
-            }
+            dispatch(level, msg, null);
         }
     }
 
@@ -101,9 +98,7 @@ public class Logger {
      */
     public void log(int level, String msg, Throwable ex) {
         if (m_level >= level) {
-            synchronized (this) {
-                dispatch(level, msg, ex);
-            }
+            dispatch(level, msg, ex);
         }
     }
 

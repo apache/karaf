@@ -22,7 +22,7 @@ import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * Manipulation Metadata allows getting information about the implementation class
- * whithout doing reflection. 
+ * without doing reflection. 
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -52,16 +52,19 @@ public class ManipulationMetadata {
      */
     public ManipulationMetadata(Element metadata) {
         Element manip = metadata.getElements("manipulation", "")[0];
-        for (int i = 0; i < manip.getElements().length; i++) {
-            if (manip.getElements()[i].getName().equals("field")) {
-                FieldMetadata fm = new FieldMetadata(manip.getElements()[i]);
-                addField(fm);
-            } else if (manip.getElements()[i].getName().equals("method")) {
-                MethodMetadata fm = new MethodMetadata(manip.getElements()[i]);
-                addMethod(fm);
-            } else if (manip.getElements()[i].getName().equals("interface")) {
-                addInterface(manip.getElements()[i].getAttribute("name"));
-            }
+        Element[] fields = manip.getElements("field");
+        for (int i = 0; i < fields.length; i++) {
+            FieldMetadata fm = new FieldMetadata(fields[i]);
+            addField(fm);
+        }
+        Element[] methods = manip.getElements("method");
+        for (int i = 0; i < methods.length; i++) {
+            MethodMetadata fm = new MethodMetadata(methods[i]);
+            addMethod(fm);
+        }
+        Element[] itfs = manip.getElements("interface");
+        for (int i = 0; i < itfs.length; i++) {
+            addInterface(itfs[i].getAttribute("name"));
         }
     }
     

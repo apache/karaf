@@ -293,7 +293,7 @@ public class Callback {
      * @param arg : the parameters
      * @return the result of the invocation, null for void method, the last result for multi-object instance
      * @throws NoSuchMethodException : the callback method is not found
-     * @throws IllegalAccessException : the callbback method cannot be called
+     * @throws IllegalAccessException : the callback method cannot be called
      * @throws InvocationTargetException : an error occurs inside the called
      * method
      */

@@ -25,21 +25,17 @@ import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.CompositeHandler;
-import org.apache.felix.ipojo.CompositeManager;
+import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.InstanceStateListener;
+import org.apache.felix.ipojo.MissingHandlerException;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.UnacceptableConfiguration;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ParseException;
 import org.apache.felix.ipojo.util.Logger;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
 
 /**
  * Composite Instance Handler.
@@ -47,38 +43,30 @@ import org.osgi.framework.ServiceReference;
  * This instance is determine by its type and a configuration.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class InstanceHandler extends CompositeHandler implements ServiceListener, InstanceStateListener {
+public class InstanceHandler extends CompositeHandler implements InstanceStateListener {
 
-    /**
-     * Bundle context.
-     */
-    private BundleContext m_context;
-    
     /**
      * Internal context.
      */
     private ServiceContext m_scope;
+
+    /**
+     * Is the handler valid ?
+     * (Lifecycle controller)
+     */
+    private boolean m_isValid = false;
     
     /**
-     * Instance logger.
+     * Available factories.
      */
-    private Logger m_logger;
+    private Factory[] m_factories;
     
-    /**
-     * Composite Manager.
-     */
-    private CompositeManager m_manager;
-    
-    /**
-     * IS the handler valid ?
-     */
-    private boolean m_validity = false;
-    
+
     /**
      * This structure aims to manage a configuration. It stores all necessary
      * information to create an instance and to track the factory.
      */
-    private class ManagedConfiguration {
+    class ManagedConfiguration {
         /**
          * Configuration of the instance to create.
          */
@@ -93,6 +81,11 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
          * Created instance.
          */
         private ComponentInstance m_instance;
+        
+        /**
+         * Desired Factory (can be the classname).
+         */
+        private String m_desiredFactory;
 
         /**
          * Constructor.
@@ -101,6 +94,7 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
          */
         ManagedConfiguration(Dictionary conf) {
             m_configuration = conf;
+            m_desiredFactory = (String) conf.get("component");
         }
 
         /**
@@ -117,6 +111,10 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
          */
         String getFactory() {
             return m_factoryName;
+        }
+        
+        String getNeededFactoryName() {
+            return m_desiredFactory;
         }
 
         /**
@@ -164,49 +162,48 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
             config.setFactory(fact.getName());
             config.getInstance().addInstanceStateListener(this);
         } catch (UnacceptableConfiguration e) {
-            m_logger.log(Logger.ERROR, "A factory is available for the configuration but the configuration is not acceptable", e);
+            log(Logger.ERROR, "A factory is available for the configuration but the configuration is not acceptable", e);
+        } catch (MissingHandlerException e) {
+            log(Logger.ERROR, "The instance creation has failed, at least one handler is missing", e);
+        } catch (ConfigurationException e) {
+            log(Logger.ERROR, "The instance creation has failed, an error during the configuration has occured", e);
         }
     }
-
+    
     /**
-     * Service Listener implementation.
-     * @param ev : the service event
-     * @see org.osgi.framework.ServiceListener#serviceChanged(org.osgi.framework.ServiceEvent)
+     * A new valid factory appears.
+     * @param f : factory.
      */
-    public void serviceChanged(ServiceEvent ev) {
-        ServiceReference ref = ev.getServiceReference();
-        String factoryName = (String) ref.getProperty(org.osgi.framework.Constants.SERVICE_PID);
-        String componentClass = (String) ref.getProperty("component.class");
+    public void bindFactory(Factory f) {
         boolean implicated = false;
-        if (ev.getType() == ServiceEvent.REGISTERED) {
-            for (int i = 0; i < m_configurations.length; i++) {
-                if (m_configurations[i].getInstance() == null
-                        && (m_configurations[i].getConfiguration().get("component").equals(factoryName)
-                        || m_configurations[i].getConfiguration().get("component").equals(componentClass))) {
-                    Factory fact = (Factory) m_context.getService(ref);
-                    createInstance(fact, m_configurations[i]);
-                    implicated = true;
-                }
+        String factName = f.getName();
+        String className = f.getComponentDescription().getClassName();
+        for (int i = 0; i < m_configurations.length; i++) {
+            if (m_configurations[i].getInstance() == null && (m_configurations[i].getNeededFactoryName().equals(factName) || m_configurations[i].getNeededFactoryName().equals(className))) {
+                createInstance(f, m_configurations[i]);
+                implicated = true;
             }
-            if (implicated && !m_validity && checkValidity()) {
-                m_manager.checkInstanceState();
-            }
-            return;
         }
-
-        if (ev.getType() == ServiceEvent.UNREGISTERING) {
-            for (int i = 0; i < m_configurations.length; i++) {
-                if (m_configurations[i].getInstance() != null && m_configurations[i].getFactory().equals(factoryName)) {
-                    m_configurations[i].setInstance(null);
-                    m_configurations[i].setFactory(null);
-                    m_context.ungetService(ref);
-                    implicated = true;
-                }
+        if (implicated && ! m_isValid) {
+            checkValidity();
+        }
+    }
+    
+    /**
+     * An existing factory disappears or becomes invalid.
+     * @param f : factory
+     */
+    public void unbindFactory(Factory f) {
+        boolean implicated = false;
+        for (int i = 0; i < m_configurations.length; i++) {
+            if (m_configurations[i].getInstance() != null && m_configurations[i].getFactory().equals(f.getName())) {
+                m_configurations[i].setInstance(null);
+                m_configurations[i].setFactory(null);
+                implicated = true;
             }
-            if (implicated && m_validity && !checkValidity()) {
-                m_manager.checkInstanceState();
-            }
-            return;
+        }
+        if (implicated && m_isValid) {
+            checkValidity();
         }
     }
 
@@ -214,31 +211,28 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
      * Stop all created instances.
      */
     public synchronized void stop() {
-        m_context.removeServiceListener(this);
         for (int i = 0; i < m_configurations.length; i++) {
             if (m_configurations[i].getInstance() != null) {
                 m_configurations[i].getInstance().removeInstanceStateListener(this);
-                m_configurations[i].getInstance().dispose();
+                if (m_configurations[i].getInstance().getState() != ComponentInstance.DISPOSED) {
+                    m_configurations[i].getInstance().dispose();
+                }
             }
             m_configurations[i].setInstance(null);
             m_configurations[i].setFactory(null);
         }
-        m_configurations = null;
+        m_configurations = new ManagedConfiguration[0];
     }
-    
-    
+
     /**
      * Configure method.
-     * @param im : instance manager.
      * @param metadata : component type metadata.
      * @param configuration : instance configuration.
+     * @throws ConfigurationException : occurs an instance cannot be parsed correctly. 
      * @see org.apache.felix.ipojo.CompositeHandler#configure(org.apache.felix.ipojo.CompositeManager, org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
-    public void configure(CompositeManager im, Element metadata, Dictionary configuration) {
-        m_manager = im;
-        m_context = im.getContext();
-        m_logger = im.getFactory().getLogger();
-        m_scope = im.getServiceContext();
+    public void configure(Element metadata, Dictionary configuration) throws ConfigurationException {
+        m_scope = getCompositeManager().getServiceContext();
         Element[] instances = metadata.getElements("instance");
         m_configurations = new ManagedConfiguration[instances.length];
         for (int i = 0; i < instances.length; i++) {
@@ -246,20 +240,15 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
             try {
                 conf = parseInstance(instances[i]);
             } catch (ParseException e) {
-                m_logger.log(Logger.ERROR, "An instance cannot be parsed correctly", e);
-                return;
+                log(Logger.ERROR, "An instance cannot be parsed correctly", e);
+                throw new ConfigurationException("An instance cannot be parsed correctly : " + e.getMessage(), getCompositeManager().getFactory().getName());
             }
             m_configurations[i] = new ManagedConfiguration(conf);
         }
-
-        if (m_configurations.length > 0) {
-            im.register(this);
-        }
     }
-    
+
     /**
      * Parse an Element to get a dictionary.
-     * 
      * @param instance : the Element describing an instance.
      * @return : the resulting dictionary
      * @throws ParseException : occurs when a configuration cannot be parse correctly.
@@ -269,10 +258,8 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
         if (instance.containsAttribute("name")) {
             dict.put("name", instance.getAttribute("name"));
         }
-        if (!instance.containsAttribute("component")) {
-            throw new ParseException("An instance does not have the 'component' attribute");
-        }
-        
+        if (!instance.containsAttribute("component")) { throw new ParseException("An instance does not have the 'component' attribute"); }
+
         dict.put("component", instance.getAttribute("component"));
 
         for (int i = 0; i < instance.getElements("property").length; i++) {
@@ -281,7 +268,7 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
 
         return dict;
     }
-    
+
     /**
      * Parse a property.
      * @param prop : the current element to parse
@@ -290,9 +277,7 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
      */
     private void parseProperty(Element prop, Dictionary dict) throws ParseException {
         // Check that the property has a name
-        if (!prop.containsAttribute("name")) {
-            throw new ParseException("A property does not have the 'name' attribute");
-        }
+        if (!prop.containsAttribute("name")) { throw new ParseException("A property does not have the 'name' attribute"); }
         // Final case : the property element has a 'value' attribute
         if (prop.containsAttribute("value")) {
             dict.put(prop.getAttribute("name"), prop.getAttribute("value"));
@@ -300,9 +285,7 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
             // Recursive case
             // Check if there is 'property' element
             Element[] subProps = prop.getElements("property");
-            if (subProps.length == 0) {
-                throw new ParseException("A complex property must have at least one 'property' sub-element");
-            }
+            if (subProps.length == 0) { throw new ParseException("A complex property must have at least one 'property' sub-element"); }
             Dictionary dict2 = new Properties();
             for (int i = 0; i < subProps.length; i++) {
                 parseProperty(subProps[i], dict2);
@@ -315,45 +298,20 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
      * Start method.
      * @see org.apache.felix.ipojo.CompositeHandler#start()
      */
-    public void start() {
-        for (int i = 0; i < m_configurations.length; i++) {
-
-            // Get the component type name :
-            String componentType = (String) m_configurations[i].getConfiguration().get("component");
-            Factory fact = null;
-
-            try {
-                String fil = "(|(" + org.osgi.framework.Constants.SERVICE_PID + "=" + componentType + ")(component.class=" + componentType + "))";
-                ServiceReference[] refs = m_context.getServiceReferences(org.apache.felix.ipojo.Factory.class.getName(), fil);
-                if (refs != null) {
-                    fact = (Factory) m_context.getService(refs[0]);
-                    createInstance(fact, m_configurations[i]);
+    public void start() { 
+        for (int j = 0; j < m_factories.length; j++) {
+            String factName = m_factories[j].getName();
+            String className = m_factories[j].getComponentDescription().getClassName(); 
+            for (int i = 0; i < m_configurations.length; i++) {
+                if (m_configurations[i].getInstance() == null && (m_configurations[i].getNeededFactoryName().equals(factName) || m_configurations[i].getNeededFactoryName().equals(className))) {
+                    createInstance(m_factories[j], m_configurations[i]);
                 }
-            } catch (InvalidSyntaxException e) {
-                m_logger.log(Logger.ERROR, "Invalid syntax filter for the type : " + componentType, e);
             }
         }
-
-        // Register a service listener on Factory Service
-        try {
-            m_context.addServiceListener(this, "(objectClass=" + Factory.class.getName() + ")");
-        } catch (InvalidSyntaxException e) {
-            m_logger.log(Logger.ERROR, "Invalid syntax filter when registering a listener on Factory Service", e);
-        }
         
-        //Compute validity 
         checkValidity();
     }
-    
-    /**
-     * The handler is valid if all managed instances are created and are valid.
-     * @return true if all managed configuration have been instanciated and are valid.
-     * @see org.apache.felix.ipojo.CompositeHandler#isValid()
-     */
-    public boolean isValid() {
-        return m_validity;
-    }
-    
+
     /**
      * Check handler validity.
      * The method update the m_validity field.
@@ -362,56 +320,57 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
     private boolean checkValidity() {
         for (int i = 0; i < m_configurations.length; i++) {
             if (m_configurations[i].getInstance() == null || m_configurations[i].getInstance().getState() != ComponentInstance.VALID) {
-                m_validity = false;
+                m_isValid = false;
                 return false;
             }
         }
-        m_validity = true;
+        m_isValid = true;
         return true;
     }
 
-    /** Instance state listener.
+    /**
+     *  Instance state listener.
      *  This method listens when managed instance states change.
      *  @param instance : instance
      *  @param newState : the now state of the given instance
      *  @see org.apache.felix.ipojo.InstanceStateListener#stateChanged(org.apache.felix.ipojo.ComponentInstance, int)
      */
     public void stateChanged(ComponentInstance instance, int newState) {
-        switch(newState) {
-            case ComponentInstance.DISPOSED : 
-            case ComponentInstance.STOPPED :
+        switch (newState) {
+            case ComponentInstance.DISPOSED:
+            case ComponentInstance.STOPPED:
                 break; // Should not happen
-            case ComponentInstance.VALID :
-                if (! m_validity && checkValidity()) { 
-                    m_manager.checkInstanceState();
+            case ComponentInstance.VALID:
+                if (!m_isValid) {
+                    checkValidity();
                 }
                 break;
-            case ComponentInstance.INVALID :
-                if (m_validity && ! checkValidity()) {
-                    m_manager.checkInstanceState();
+            case ComponentInstance.INVALID:
+                if (m_isValid) {
+                    checkValidity();
                 }
                 break;
-            default :
+            default:
                 break;
-            
+
         }
     }
-    
+
     /**
      * Method returning an instance object of the given component type.
      * This method must be called only on 'primitive' type.
      * @param type : type.
      * @return an instance object or null if not found.
      */
-    public Object getObjectFromInstance(String type)  {
+    public Object getObjectFromInstance(String type) {
         for (int i = 0; i < m_configurations.length; i++) {
-            if (m_configurations[i].getInstance() != null && type.equals(m_configurations[i].getFactory()) && m_configurations[i].getInstance().getState() == ComponentInstance.VALID) {
-                return ((InstanceManager) m_configurations[i].getInstance()).getPojoObject();
+            if (m_configurations[i].getInstance() != null && type.equals(m_configurations[i].getFactory()) && m_configurations[i].getInstance().getState() == ComponentInstance.VALID) { 
+                return ((InstanceManager) m_configurations[i].getInstance()).getPojoObject(); 
             }
         }
         return null;
     }
-    
+
     /**
      * Return the handler description, i.e. the state of created instances.
      * @return the handler description.
@@ -420,13 +379,11 @@ public class InstanceHandler extends CompositeHandler implements ServiceListener
     public HandlerDescription getDescription() {
         List l = new ArrayList();
         for (int i = 0; i < m_configurations.length; i++) {
-            if (m_configurations[i].getInstance() != null) {
-                l.add(m_configurations[i]);
-            }
+            l.add(m_configurations[i]);
         }
-        return new InstanceHandlerDescription(InstanceHandler.class.getName(), m_validity, l);
+        return new InstanceHandlerDescription(this, l);
     }
-    
+
     /**
      * Get the list of used component type.
      * @return the list containing the used component type

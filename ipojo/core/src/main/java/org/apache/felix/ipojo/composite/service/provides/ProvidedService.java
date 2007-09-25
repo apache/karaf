@@ -24,13 +24,14 @@ import java.util.Properties;
 import org.apache.felix.ipojo.ComponentFactory;
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.CompositeManager;
+import org.apache.felix.ipojo.ConfigurationException;
+import org.apache.felix.ipojo.MissingHandlerException;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.UnacceptableConfiguration;
 import org.apache.felix.ipojo.composite.instance.InstanceHandler;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 
 /**
  * Composite Provided Service.
@@ -96,7 +97,7 @@ public class ProvidedService {
      * @param name : name of this provided service.
      */
     public ProvidedService(ProvidedServiceHandler handler, Element element, String name) {
-        m_manager = handler.getManager();
+        m_manager = handler.getCompositeManager();
         m_scope = m_manager.getServiceContext();
         m_context = m_manager.getContext();
         m_composition = new CompositionMetadata(m_manager.getContext(), element, handler, name);
@@ -110,7 +111,7 @@ public class ProvidedService {
     public void start() throws CompositionException {
         m_composition.buildMapping();
         
-        m_instanceName = m_composition.getSpecificationMetadata().getName() + "Provider";
+        m_instanceName = m_composition.getSpecificationMetadata().getName() + "Provider-Gen";
         m_clazz = m_composition.buildPOJO();
         m_metadata = m_composition.buildMetadata(m_instanceName);
 
@@ -119,7 +120,7 @@ public class ProvidedService {
         m_factory.start();
 
         // Create the exports
-        m_exports = new ServiceExporter(m_composition.getSpecificationMetadata().getName(), "(" + Constants.SERVICE_PID + "=" + m_instanceName + ")", false, false,
+        m_exports = new ServiceExporter(m_composition.getSpecificationMetadata().getName(), "(instance.name=" + m_instanceName + ")", false, false,
                 m_scope, m_context, this);
         m_exports.start();
     }
@@ -189,10 +190,13 @@ public class ProvidedService {
                 }
             }
             try {
-                m_instance = m_factory.createComponentInstance(p, m_scope);
+                m_instance = m_factory.createComponentInstance(p, m_manager.getServiceContext());
             } catch (UnacceptableConfiguration e) {
                 e.printStackTrace();
-                return;
+            } catch (MissingHandlerException e) {
+                e.printStackTrace();
+            } catch (ConfigurationException e) {
+                e.printStackTrace();
             }
         }
     }

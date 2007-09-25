@@ -9,18 +9,18 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>org.apache.felix.ipojo.ant</artifactId>
   <packaging>bundle</packaging>
-  <version>0.7.3-SNAPSHOT</version>
+  <version>0.7.5-SNAPSHOT</version>
   <name>iPOJO Ant Task</name>
   <dependencies>
   	<dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.ipojo.metadata</artifactId>
-      <version>0.7.3-SNAPSHOT</version>
+      <version>0.7.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.ipojo.manipulator</artifactId>
-      <version>0.7.3-SNAPSHOT</version>
+      <version>0.7.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>xerces</groupId>

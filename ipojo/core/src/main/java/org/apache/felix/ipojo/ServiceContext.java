@@ -20,6 +20,7 @@ package org.apache.felix.ipojo;
 
 import java.util.Dictionary;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
@@ -31,7 +32,7 @@ import org.osgi.framework.ServiceRegistration;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public interface ServiceContext {
+public interface ServiceContext extends BundleContext {
 
     /**
      * Add a service listener.

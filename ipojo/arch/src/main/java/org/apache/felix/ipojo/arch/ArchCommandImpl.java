@@ -22,6 +22,7 @@ import java.io.PrintStream;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
+import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.shell.Command;
@@ -42,6 +43,12 @@ public class ArchCommandImpl implements Command {
      * Factory services. 
      */
     private Factory[] m_factories;
+    
+    
+    /**
+     * Handler Factories.
+     */
+    private Factory[] m_handlers;
 
     /**
      * Get the command name.
@@ -58,7 +65,7 @@ public class ArchCommandImpl implements Command {
      * @see org.apache.felix.shell.Command#getUsage()
      */
     public String getUsage() {
-        return "arch [-factories] [-instances] [-factory factory_name] [-instance instance_name]";
+        return "arch [-factories] [-instances] [-handlers] [-factory factory_name] [-instance instance_name]";
     }
 
     /**
@@ -78,39 +85,43 @@ public class ArchCommandImpl implements Command {
      * @see org.apache.felix.shell.Command#execute(java.lang.String, java.io.PrintStream, java.io.PrintStream)
      */
     public void execute(String line, PrintStream out, PrintStream err) {
-        synchronized (this) {
-            String line2 = line.substring("arch".length()).trim();
-            
-            if (line2.equalsIgnoreCase("-instances") || line2.length() == 0) {
-                printInstances(out);
-                return;
-            }
-            
-            if (line2.equalsIgnoreCase("-factories")) {
-                printFactories(out);
-                return;
-            }
-            
-            if (line2.startsWith("-factory")) {
-                String name = line2.substring("-factory".length()).trim();
-                printFactory(name, out, err);
-                return;
-            }
-            
-            if (line2.startsWith("-instance")) {
-                String name = line2.substring("-instance".length()).trim();
-                printInstance(name, out, err);
-                return;
-            }
-            
-            err.println(getUsage());
+        String line2 = line.substring("arch".length()).trim();
+
+        if (line2.equalsIgnoreCase("-instances") || line2.length() == 0) {
+            printInstances(out);
+            return;
         }
 
+        if (line2.equalsIgnoreCase("-factories")) {
+            printFactories(out);
+            return;
+        }
+
+        if (line2.startsWith("-factory")) {
+            String name = line2.substring("-factory".length()).trim();
+            printFactory(name, out, err);
+            return;
+        }
+
+        if (line2.startsWith("-instance")) {
+            String name = line2.substring("-instance".length()).trim();
+            printInstance(name, out, err);
+            return;
+        }
+
+        if (line2.startsWith("-handlers")) {
+            printHandlers(out);
+            return;
+        }
+
+        err.println(getUsage());
     }
     
     /**
      * Print instance list.
-     * @param out : default print stream
+     * 
+     * @param out :
+     *            default print stream
      */
     private void printInstances(PrintStream out) {
         for (int i = 0; i < m_archs.length; i++) {
@@ -150,7 +161,11 @@ public class ArchCommandImpl implements Command {
      */
     private void printFactories(PrintStream out) {
         for (int i = 0; i < m_factories.length; i++) {
-            out.println("Factory " + m_factories[i].getName());
+            if (m_factories[i].getMissingHandlers().size() == 0) {
+                out.println("Factory " + m_factories[i].getName() + " (VALID)");
+            } else {
+                out.println("Factory " + m_factories[i].getName() + " (INVALID : " + m_factories[i].getMissingHandlers() + ")");
+            }
         }
     }
     
@@ -168,5 +183,24 @@ public class ArchCommandImpl implements Command {
             }
         }
         err.println("Factory " + name + " not found");
+    }
+    
+    /**
+     * Print the list of available handlers (and validity).
+     * @param out : default print stream
+     */
+    private void printHandlers(PrintStream out) {
+        for (int i = 0; i < m_handlers.length; i++) {
+            HandlerFactory hf = (HandlerFactory) m_handlers[i];
+            String name = hf.getHandlerName();
+            if ("composite".equals(hf.getType())) {
+                name = name + " [composite]";
+            }
+            if (hf.getMissingHandlers().size() == 0) {
+                out.println("Handler " + name + " (VALID)");
+            } else {
+                out.println("Handler " + name + " (INVALID : " + hf.getMissingHandlers() + ")");
+            }
+        }
     }
 }

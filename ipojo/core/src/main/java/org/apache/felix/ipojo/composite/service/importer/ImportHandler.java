@@ -23,7 +23,7 @@ import java.util.Dictionary;
 import java.util.List;
 
 import org.apache.felix.ipojo.CompositeHandler;
-import org.apache.felix.ipojo.CompositeManager;
+import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.PolicyServiceContext;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
@@ -37,12 +37,7 @@ import org.osgi.framework.BundleContext;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ImportExportHandler extends CompositeHandler {
-
-    /**
-     * Composite Manager.
-     */
-    private CompositeManager m_manager;
+public class ImportHandler extends CompositeHandler {
 
     /**
      * Service Scope.
@@ -60,52 +55,35 @@ public class ImportExportHandler extends CompositeHandler {
     private List m_importers = new ArrayList();
 
     /**
-     * List of exporters.
-     */
-    private List m_exporters = new ArrayList();
-
-    /**
      * Is the handler valid ?
+     * (Lifecycle controller)
      */
     private boolean m_valid;
+    
 
     /**
      * Configure the handler.
      * 
-     * @param im : the instance manager
      * @param metadata : the metadata of the component
      * @param conf : the instance configuration
+     * @throws ConfigurationException : the specification attribute is missing. 
      * @see org.apache.felix.ipojo.CompositeHandler#configure(org.apache.felix.ipojo.CompositeManager,
      * org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
-    public void configure(CompositeManager im, Element metadata, Dictionary conf) {
-        m_manager = im;
-        m_context = im.getContext();
-        m_scope = m_manager.getServiceContext();
+    public void configure(Element metadata, Dictionary conf) throws ConfigurationException {
+        m_context = getCompositeManager().getContext();
+        m_scope = getCompositeManager().getServiceContext();
 
         Element[] imp = metadata.getElements("requires");
-
-        //DEPRECATED BLOCK:
-        if (imp.length == 0) {
-            imp = metadata.getElements("import");
-            if (imp.length != 0) {
-                im.getFactory().getLogger().log(Logger.WARNING, "Import is deprecated, please use 'requires' instead of 'import'");
-            }
-        }
-        // END OF DEPRECATED BLOCK
-        
-        Element[] exp = metadata.getElements("export");
 
         for (int i = 0; i < imp.length; i++) {
             boolean optional = false;
             boolean aggregate = false;
             String specification = null;
 
-            if (!imp[i].containsAttribute("specification")) { // Malformed import
-                im.getFactory().getLogger().log(Logger.ERROR, "Malformed import : the specification attribute is mandatory");
-            } else {
+            if (imp[i].containsAttribute("specification")) {
                 specification = imp[i].getAttribute("specification");
-                String filter = "(&(objectClass=" + specification + ")(!(service.pid=" + m_manager.getInstanceName() + ")))"; // Cannot import yourself
+                String filter = "(&(objectClass=" + specification + ")(!(instance.name=" + getCompositeManager().getInstanceName() + ")))"; // Cannot import yourself
                 if (imp[i].containsAttribute("optional") && imp[i].getAttribute("optional").equalsIgnoreCase("true")) {
                     optional = true;
                 }
@@ -113,7 +91,7 @@ public class ImportExportHandler extends CompositeHandler {
                     aggregate = true;
                 }
                 if (imp[i].containsAttribute("filter")) {
-                    if (!imp[i].getAttribute("filter").equals("")) {
+                    if (!"".equals(imp[i].getAttribute("filter"))) {
                         filter = "(&" + filter + imp[i].getAttribute("filter") + ")";
                     }
                 }
@@ -133,46 +111,12 @@ public class ImportExportHandler extends CompositeHandler {
                         scopePolicy = PolicyServiceContext.LOCAL_AND_GLOBAL;
                     }                
                 }
-                
                 ServiceImporter si = new ServiceImporter(specification, filter, aggregate, optional, m_context, m_scope, scopePolicy, id, this);
                 m_importers.add(si);
+            } else { // Malformed import
+                log(Logger.ERROR, "Malformed imports : the specification attribute is mandatory");
+                throw new ConfigurationException("Malformed imports : the specification attribute is mandatory", getCompositeManager().getFactory().getName());
             }
-        }
-
-        for (int i = 0; i < exp.length; i++) {
-            boolean optional = false;
-            boolean aggregate = false;
-            String specification = null;
-
-            if (!exp[i].containsAttribute("specification")) { // Malformed exports
-                im.getFactory().getLogger().log(Logger.ERROR, "Malformed exports : the specification attribute is mandatory");
-            } else {
-                specification = exp[i].getAttribute("specification");
-                String filter = "(objectClass=" + specification + ")";
-                if (exp[i].containsAttribute("optional") && exp[i].getAttribute("optional").equalsIgnoreCase("true")) {
-                    optional = true;
-                }
-                if (exp[i].containsAttribute("aggregate") && exp[i].getAttribute("aggregate").equalsIgnoreCase("true")) {
-                    aggregate = true;
-                }
-                if (exp[i].containsAttribute("filter")) {
-                    String classnamefilter = "(objectClass=" + specification + ")";
-                    filter = "";
-                    if (!imp[i].getAttribute("filter").equals("")) {
-                        filter = "(&" + classnamefilter + exp[i].getAttribute("filter") + ")";
-                    } else {
-                        filter = classnamefilter;
-                    }
-                }
-                ServiceExporter si = new ServiceExporter(specification, filter, aggregate, optional, m_scope, m_context, this);
-                // Update the component type description
-                m_manager.getComponentDescription().addProvidedServiceSpecification(specification);
-                m_exporters.add(si);
-            }
-        }
-
-        if (m_importers.size() > 0 || m_exporters.size() > 0) {
-            im.register(this);
         }
     }
 
@@ -186,12 +130,7 @@ public class ImportExportHandler extends CompositeHandler {
             ServiceImporter si = (ServiceImporter) m_importers.get(i);
             si.start();
         }
-
-        for (int i = 0; i < m_exporters.size(); i++) {
-            ServiceExporter se = (ServiceExporter) m_exporters.get(i);
-            se.start();
-        }
-
+        isHandlerValid();
     }
 
     /**
@@ -204,11 +143,6 @@ public class ImportExportHandler extends CompositeHandler {
             ServiceImporter si = (ServiceImporter) m_importers.get(i);
             si.stop();
         }
-
-        for (int i = 0; i < m_exporters.size(); i++) {
-            ServiceExporter se = (ServiceExporter) m_exporters.get(i);
-            se.stop();
-        }
     }
 
     /**
@@ -216,7 +150,7 @@ public class ImportExportHandler extends CompositeHandler {
      * @return true if all importers and exporters are valid
      * @see org.apache.felix.ipojo.CompositeHandler#isValid()
      */
-    public boolean isValid() {
+    public boolean isHandlerValid() {
         for (int i = 0; i < m_importers.size(); i++) {
             ServiceImporter si = (ServiceImporter) m_importers.get(i);
             if (!si.isSatisfied()) {
@@ -224,15 +158,6 @@ public class ImportExportHandler extends CompositeHandler {
                 return false;
             }
         }
-
-        for (int i = 0; i < m_exporters.size(); i++) {
-            ServiceExporter se = (ServiceExporter) m_exporters.get(i);
-            if (!se.isSatisfied()) {
-                m_valid = false;
-                return false;
-            }
-        }
-
         m_valid = true;
         return true;
     }
@@ -245,9 +170,8 @@ public class ImportExportHandler extends CompositeHandler {
     protected void invalidating(ServiceImporter importer) {
         // An import is no more valid
         if (m_valid) {
-            m_manager.checkInstanceState();
+            m_valid = false;
         }
-
     }
 
     /**
@@ -257,44 +181,9 @@ public class ImportExportHandler extends CompositeHandler {
      */
     protected void validating(ServiceImporter importer) {
         // An import becomes valid
-        if (!m_valid && isValid()) {
-            m_manager.checkInstanceState();
+        if (!m_valid) {
+            isHandlerValid();
         }
-
-    }
-
-    /**
-     * Notify the handler that an exporter becomes invalid.
-     * 
-     * @param exporter : the implicated exporter.
-     */
-    protected void invalidating(ServiceExporter exporter) {
-        // An import is no more valid
-        if (m_valid) {
-            m_manager.checkInstanceState();
-        }
-
-    }
-
-    /**
-     * Notify the handler that an exporter becomes valid.
-     * 
-     * @param exporter : the implicated exporter.
-     */
-    protected void validating(ServiceExporter exporter) {
-        // An import becomes valid
-        if (!m_valid && isValid()) {
-            m_manager.checkInstanceState();
-        }
-
-    }
-
-    /**
-     * Get the composite manager.
-     * @return the attached composite manager.
-     */
-    protected CompositeManager getManager() {
-        return m_manager;
     }
 
     /**
@@ -303,7 +192,7 @@ public class ImportExportHandler extends CompositeHandler {
      * @see org.apache.felix.ipojo.CompositeHandler#getDescription()
      */
     public HandlerDescription getDescription() {
-        return new ImportExportDescription(this.getClass().getName(), isValid(), m_importers, m_exporters);
+        return new ImportDescription(this, m_importers);
     }
     
     public List getRequirements() {

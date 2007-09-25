@@ -18,10 +18,17 @@
  */
 package org.apache.felix.ipojo;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.Dictionary;
 
 import org.apache.felix.ipojo.composite.ServiceReferenceImpl;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
@@ -56,12 +63,12 @@ public class PolicyServiceContext implements ServiceContext {
     /**
      * Global service registry.
      */
-    private BundleContext m_global;
+    public BundleContext m_global;
     
     /**
      * Local (Composite) Service Registry.
      */
-    private ServiceContext m_local;
+    public ServiceContext m_local;
     
     /**
      * Resolving policy.
@@ -292,6 +299,127 @@ public class PolicyServiceContext implements ServiceContext {
         } else {
             return m_global.ungetService(reference);
         }
+    }
+
+    /**
+     * Add a bundle listener.
+     * Delegate on the global bundle context.
+     * @param arg0 : bundle listener to add
+     * @see org.osgi.framework.BundleContext#addBundleListener(org.osgi.framework.BundleListener)
+     */
+    public void addBundleListener(BundleListener arg0) {
+        m_global.addBundleListener(arg0);
+    }
+
+    /**
+     * Add a framework listener.
+     * Delegate on the global bundle context.
+     * @param arg0 : framework listener to add.
+     * @see org.osgi.framework.BundleContext#addFrameworkListener(org.osgi.framework.FrameworkListener)
+     */
+    public void addFrameworkListener(FrameworkListener arg0) {
+        m_global.addFrameworkListener(arg0);
+    }
+
+    /**
+     * Create a LDAP filter.
+     * @param arg0 : String-form of the filter
+     * @return the created filter object
+     * @throws InvalidSyntaxException : if the given argument is not a valid against the LDAP grammar.
+     * @see org.osgi.framework.BundleContext#createFilter(java.lang.String)
+     */
+    public Filter createFilter(String arg0) throws InvalidSyntaxException {
+        return m_global.createFilter(arg0);
+    }
+
+    /**
+     * Get the current bundle.
+     * @return the current bundle
+     * @see org.osgi.framework.BundleContext#getBundle()
+     */
+    public Bundle getBundle() {
+        return m_global.getBundle();
+    }
+
+    /**
+     * Get the bundle object with the given id.
+     * @param id : bundle id
+     * @return the bundle object
+     * @see org.osgi.framework.BundleContext#getBundle(long)
+     */
+    public Bundle getBundle(long id) {
+        return m_global.getBundle(id);
+    }
+
+    /**
+     * Get installed bundles.
+     * @return the list of installed bundles
+     * @see org.osgi.framework.BundleContext#getBundles()
+     */
+    public Bundle[] getBundles() {
+        return m_global.getBundles();
+    }
+
+
+    /**
+     * Get a data file.
+     * @param filename : File name.
+     * @return the File object
+     * @see org.osgi.framework.BundleContext#getDataFile(java.lang.String)
+     */
+    public File getDataFile(String filename) {
+        return m_global.getDataFile(filename);
+    }
+
+    /**
+     * Get a property value.
+     * @param key : key of the asked property
+     * @return the property value (object) or null if no property are associated with the given key
+     * @see org.osgi.framework.BundleContext#getProperty(java.lang.String)
+     */
+    public String getProperty(String key) {
+        return m_global.getProperty(key);
+    }
+
+    /**
+     * Install a bundle.
+     * @param location : URL of the bundle to install
+     * @return the installed bundle
+     * @throws BundleException : if the bundle cannot be installed correctly
+     * @see org.osgi.framework.BundleContext#installBundle(java.lang.String)
+     */
+    public Bundle installBundle(String location) throws BundleException {
+        return m_global.installBundle(location);
+    }
+
+    /**
+     * Install a bundle.
+     * @param location : URL of the bundle to install
+     * @param input : 
+     * @return the installed bundle
+     * @throws BundleException : if the bundle cannot be installed correctly
+     * @see org.osgi.framework.BundleContext#installBundle(java.lang.String, java.io.InputStream)
+     */
+    public Bundle installBundle(String location, InputStream input) throws BundleException {
+        return m_global.installBundle(location, input);
+    }
+
+    /**
+     * Remove a bundle listener.
+     * @param listener : the listener to remove
+     * @see org.osgi.framework.BundleContext#removeBundleListener(org.osgi.framework.BundleListener)
+     */
+    public void removeBundleListener(BundleListener listener) {
+        m_global.removeBundleListener(listener);
+    }
+
+    /**
+     * Remove a framework listener.
+     * @param listener : the listener to remove
+     * @see org.osgi.framework.BundleContext#removeFrameworkListener(org.osgi.framework.FrameworkListener)
+     */
+    public void removeFrameworkListener(FrameworkListener listener) {
+        m_global.removeFrameworkListener(listener);
     }
 
 }

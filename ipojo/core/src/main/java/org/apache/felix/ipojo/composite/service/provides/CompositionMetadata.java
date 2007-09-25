@@ -33,7 +33,6 @@ import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
@@ -95,7 +94,7 @@ public class CompositionMetadata {
             String methodName = mappings[i].getAttribute("method");
             MethodMetadata method = m_specification.getMethodByName(methodName);
             if (method == null) {
-                m_handler.getManager().getFactory().getLogger().log(Logger.ERROR, "The method " + methodName + " does not exist in the specicifation " + spec);
+                m_handler.log(Logger.ERROR, "The method " + methodName + " does not exist in the specicifation " + spec);
                 return;
             }
 
@@ -127,9 +126,9 @@ public class CompositionMetadata {
         for (int i = 0; i < m_handler.getInstanceType().size(); i++) {
             String type = (String) m_handler.getInstanceType().get(i);
             try {
-                ServiceReference[] refs = m_context.getServiceReferences(Factory.class.getName(), "(" + Constants.SERVICE_PID + "=" + type + ")");
+                ServiceReference[] refs = m_context.getServiceReferences(Factory.class.getName(), "(factory.name=" + type + ")");
                 if (refs == null) {
-                    m_handler.getManager().getFactory().getLogger().log(Logger.ERROR, "The factory " + type + " is not available, cannot check the composition");
+                    m_handler.log(Logger.ERROR, "The factory " + type + " is not available, cannot check the composition");
                     throw new CompositionException("The factory " + type + " needs to be available to check the composition");
                 } else {
                     String className = (String) refs[0].getProperty("component.class");
@@ -142,9 +141,9 @@ public class CompositionMetadata {
                     index++;
                 }
             } catch (InvalidSyntaxException e) {
-                m_handler.getManager().getFactory().getLogger().log(Logger.ERROR, "A LDAP filter is not valid : " + e.getMessage());
+                m_handler.log(Logger.ERROR, "A LDAP filter is not valid : " + e.getMessage());
             } catch (ClassNotFoundException e) {
-                m_handler.getManager().getFactory().getLogger().log(Logger.ERROR, "The implementation class of a component cannot be loaded : " + e.getMessage());
+                m_handler.log(Logger.ERROR, "The implementation class of a component cannot be loaded : " + e.getMessage());
             }
         }
 
@@ -207,7 +206,7 @@ public class CompositionMetadata {
             if (!found) { // If not found looks inside method contained in services.
                 keys = availableSvcMethods.keySet(); // Look first in methods contained in the glue code
                 it = keys.iterator();
-                while (it.hasNext() & !found) {
+                while (!found && it.hasNext()) {
                     MethodMetadata met = (MethodMetadata) it.next();
                     if (met.equals(method)) {
                         found = true;
@@ -216,7 +215,7 @@ public class CompositionMetadata {
                         method.setDelegation(field);
                         // Test optional
                         if (field.isOptional() && !method.getExceptions().contains("java/lang/UnsupportedOperationException")) {
-                            m_handler.getManager().getFactory().getLogger().log(Logger.WARNING, "The method " + method.getMethodName() + " could not be provided correctly : the specification " + field.getSpecification().getName() + " is optional");
+                            m_handler.log(Logger.WARNING, "The method " + method.getMethodName() + " could not be provided correctly : the specification " + field.getSpecification().getName() + " is optional");
                         }
                     }
                 }
@@ -243,7 +242,7 @@ public class CompositionMetadata {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return new byte[0];
     }
 
     /**
@@ -257,6 +256,9 @@ public class CompositionMetadata {
         Attribute factory = new Attribute("factory", "false");
         elem.addAttribute(className);
         elem.addAttribute(factory);
+        
+        // Add architcture for debug
+        elem.addAttribute(new Attribute("architecture", "true"));
 
         // Provides
         Element provides = new Element("provides", "");
@@ -274,7 +276,7 @@ public class CompositionMetadata {
                 if (field.getSpecification().isOptional()) {
                     dep.addAttribute(new Attribute("optional", "true"));
                 }
-                dep.addAttribute(new Attribute("filter", "(!(service.pid=" + in + "))"));
+                dep.addAttribute(new Attribute("filter", "(!(instance.name=" + in + "))"));
                 elem.addElement(dep);
             }
         }
@@ -294,7 +296,7 @@ public class CompositionMetadata {
 
         // Insert information to metadata
         elem.addElement(m_manipulationMetadata);
-
+        
         return elem;
     }
 

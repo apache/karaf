@@ -97,7 +97,7 @@ public class DependencyCallback {
      */
     public void setArgument(String arg) {
         m_argument = arg;
-        if (arg.equals("EMPTY")) {
+        if ("EMPTY".equals(arg)) {
             m_callback = new Callback(m_method, new String[0], false, m_manager);
         } else {
             m_callback = new Callback(m_method, new String[] {arg}, false, m_manager);
@@ -130,7 +130,7 @@ public class DependencyCallback {
      * @throws IllegalAccessException : The method can not be invoked
      */
     protected void call(ServiceReference ref, Object obj) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        if (m_argument.equals("EMPTY")) {
+        if ("EMPTY".equals(m_argument)) {
             m_callback.call(new Object[] {});
         } else {
             if (m_argument.equals(ServiceReference.class.getName())) {
@@ -153,7 +153,7 @@ public class DependencyCallback {
      * @throws InvocationTargetException
      */
     protected void callOnInstance(Object instance, ServiceReference ref, Object obj) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        if (m_argument.equals("EMPTY")) {
+        if ("EMPTY".equals(m_argument)) {
             m_callback.call(instance, new Object[] {});
             return;
         }

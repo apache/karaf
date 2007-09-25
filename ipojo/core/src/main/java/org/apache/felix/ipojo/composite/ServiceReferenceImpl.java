@@ -34,6 +34,11 @@ public class ServiceReferenceImpl implements ServiceReference {
      * Service Registration attached to the service reference.
      */
     private ServiceRegistrationImpl m_registration = null;
+    
+    /**
+     * Component Instance.
+     */
+    private ComponentInstance m_cm;
 
     /**
      * Constructor.
@@ -43,6 +48,7 @@ public class ServiceReferenceImpl implements ServiceReference {
      */
     public ServiceReferenceImpl(ComponentInstance cm, ServiceRegistrationImpl sr) {
         m_registration = sr;
+        m_cm = cm;
     }
 
     /**
@@ -51,7 +57,7 @@ public class ServiceReferenceImpl implements ServiceReference {
      * @see org.osgi.framework.ServiceReference#getBundle()
      */
     public Bundle getBundle() {
-        throw new UnsupportedOperationException("getUsingBundles is not supported in scope");
+        return m_cm.getContext().getBundle();
     }
 
     /**

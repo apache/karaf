@@ -22,8 +22,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Dictionary;
 
 import org.apache.felix.ipojo.ComponentInstance;
-import org.apache.felix.ipojo.Handler;
+import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ManipulationMetadata;
 import org.apache.felix.ipojo.parser.MethodMetadata;
@@ -34,7 +35,7 @@ import org.apache.felix.ipojo.util.Logger;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class LifecycleCallbackHandler extends Handler {
+public class LifecycleCallbackHandler extends PrimitiveHandler {
 
     /**
      * The list of the callback of the component.
@@ -45,12 +46,6 @@ public class LifecycleCallbackHandler extends Handler {
      * State of the instance manager (unresolved at the beginning).
      */
     private int m_state = InstanceManager.INVALID;
-
-    /**
-     * The instance manager.
-     */
-    private InstanceManager m_manager;
-
     /**
      * Does a POJO object be created at starting.
      */
@@ -81,13 +76,12 @@ public class LifecycleCallbackHandler extends Handler {
 
     /**
      * Configure the handler.
-     * @param cm : the instance manager
      * @param metadata : the component type metadata
      * @param configuration : the instance configuration
+     * @throws ConfigurationException : one callback metadata is not correct (either the transition or the method are not correct).
      * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager, org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
-    public void configure(InstanceManager cm, Element metadata, Dictionary configuration) {
-        m_manager = cm;
+    public void configure(Element metadata, Dictionary configuration) throws ConfigurationException {
         m_callbacks = new LifecycleCallback[0];
 
         if (metadata.containsAttribute("immediate") && metadata.getAttribute("immediate").equalsIgnoreCase("true")) {
@@ -98,6 +92,9 @@ public class LifecycleCallbackHandler extends Handler {
 
         Element[] hooksMetadata = metadata.getElements("callback");
         for (int i = 0; i < hooksMetadata.length; i++) {
+            if (! hooksMetadata[i].containsAttribute("method")) {
+                throw new ConfigurationException("Lifecycle callback : A callback needs to contains a method attribute", getInstanceManager().getFactory().getName());
+            }
             String methodName = hooksMetadata[i].getAttribute("method");
             
             MethodMetadata met = mm.getMethod(methodName, new String[0]);
@@ -114,7 +111,7 @@ public class LifecycleCallbackHandler extends Handler {
             
             //DEPRECATED BLOCK
             if (hooksMetadata[i].containsAttribute("initial")) {
-                cm.getFactory().getLogger().log(Logger.WARNING, "initial & final are deprecated, please use 'transition=validate|invalidate' instead.");
+                log(Logger.WARNING, "initial & final are deprecated, please use 'transition=validate|invalidate' instead.");
                 if (hooksMetadata[i].containsAttribute("final")) {
                     if (hooksMetadata[i].getAttribute("initial").equalsIgnoreCase("valid") && hooksMetadata[i].getAttribute("final").equalsIgnoreCase("invalid")) {
                         transition = LifecycleCallback.INVALIDATE;
@@ -126,8 +123,8 @@ public class LifecycleCallbackHandler extends Handler {
             //END OF DEPRECATED BLOCK
             
             if (transition == -1) {
-                cm.getFactory().getLogger().log(Logger.ERROR, "Unknown or malformed transition");
-                return;
+                log(Logger.ERROR, "Unknown or malformed transition");
+                throw new ConfigurationException("Lifecycle callback : Unknown or malformed transition", getInstanceManager().getFactory().getName());
             }
             
             LifecycleCallback hk = null;
@@ -137,9 +134,6 @@ public class LifecycleCallbackHandler extends Handler {
                 hk = new LifecycleCallback(this, transition, methodName);
             }
             addCallback(hk);
-        }
-        if (m_callbacks.length > 0 || m_immediate) {
-            m_manager.register(this);
         }
     }
 
@@ -159,14 +153,6 @@ public class LifecycleCallbackHandler extends Handler {
     }
 
     /**
-     * Get the instance manager.
-     * @return the instance manager
-     */
-    protected InstanceManager getInstanceManager() {
-        return m_manager;
-    }
-
-    /**
      * When the state change call the associated callback.
      * 
      * @param state : the new instance state.
@@ -182,8 +168,8 @@ public class LifecycleCallbackHandler extends Handler {
         }
         
         // Manage immediate component
-        if (m_immediate && transition == LifecycleCallback.VALIDATE && m_manager.getPojoObjects().length == 0) {
-            m_manager.createPojoObject();
+        if (m_immediate && transition == LifecycleCallback.VALIDATE && getInstanceManager().getPojoObjects().length == 0) {
+            getInstanceManager().getPojoObject();
         }
 
         for (int i = 0; i < m_callbacks.length; i++) {
@@ -191,15 +177,15 @@ public class LifecycleCallbackHandler extends Handler {
                 try {
                     m_callbacks[i].call();
                 } catch (NoSuchMethodException e) {
-                    m_manager.getFactory().getLogger().log(Logger.ERROR,
-                            "[" + m_manager.getClassName() + "] The callback method " + m_callbacks[i].getMethod() + " is not found", e);
+                    log(Logger.ERROR,
+                            "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " is not found", e);
                 } catch (IllegalAccessException e) {
-                    m_manager.getFactory().getLogger().log(Logger.ERROR,
-                            "[" + m_manager.getClassName() + "] The callback method " + m_callbacks[i].getMethod() + " is not accessible", e);
+                    log(Logger.ERROR,
+                            "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " is not accessible", e);
                 } catch (InvocationTargetException e) {
-                    m_manager.getFactory().getLogger().log(
+                    log(
                             Logger.ERROR,
-                            "[" + m_manager.getClassName() + "] The callback method " + m_callbacks[i].getMethod() + " has throws an exception : "
+                            "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " has throws an exception : "
                                     + e.getMessage());
                 }
             }
@@ -207,5 +193,4 @@ public class LifecycleCallbackHandler extends Handler {
         // Update to internal state
         m_state = state;
     }
-
 }

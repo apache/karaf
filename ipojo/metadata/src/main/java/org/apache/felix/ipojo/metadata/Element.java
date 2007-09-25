@@ -18,6 +18,14 @@
  */
 package org.apache.felix.ipojo.metadata;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Element.
  * 
@@ -36,14 +44,18 @@ public class Element {
     private String m_nameSpace;
 
     /**
-     * List of the attributes of the element.
+     * Map of attributes of the element.
+     * The map key is the qualified name of the attribute (ns:name)
+     * The value is the attribute object.
      */
-    private Attribute[] m_attributes = new Attribute[0];
+    private Map m_attributes = new HashMap();
 
     /**
-     * List of the sub-element of the element.
+     * Map of the sub-element of the element.
+     * The map key is the element qualified name (ns:name).
+     * The value is the array of element of this name.
      */
-    private Element[] m_elements = new Element[0];
+    private Map m_elements = new HashMap();
 
     /**
      * Constructor.
@@ -52,7 +64,7 @@ public class Element {
      */
     public Element(String name, String ns) {
         m_name = name.toLowerCase();
-        m_nameSpace = ns;
+        m_nameSpace = ns.toLowerCase();
     }
 
     /**
@@ -60,7 +72,16 @@ public class Element {
      * @return the sub elements
      */
     public Element[] getElements() {
-        return m_elements;
+        Collection col = m_elements.values();
+        Iterator it = col.iterator();
+        List list = new ArrayList();
+        while (it.hasNext()) {
+            Element[] v = (Element[]) it.next();
+            for (int i = 0; i < v.length; i++) {
+                list.add(v[i]);
+            }
+        }
+        return (Element[]) list.toArray(new Element[0]);
     }
 
     /**
@@ -68,7 +89,7 @@ public class Element {
      * @return the attributes
      */
     public Attribute[] getAttributes() {
-        return m_attributes;
+        return (Attribute[]) m_attributes.values().toArray(new Attribute[0]);
     }
 
     /**
@@ -94,13 +115,12 @@ public class Element {
      */
     public String getAttribute(String name) {
         name = name.toLowerCase();
-        for (int i = 0; i < m_attributes.length; i++) {
-            if (m_attributes[i].getName().equals(name)) {
-                return m_attributes[i].getValue();
-            }
+        Attribute att = (Attribute) m_attributes.get(name);
+        if (att == null) {
+            return null;
+        } else {
+            return att.getValue();
         }
-        System.err.println("[Error in Metadata] The attribute " + name + " does not exist in " + m_name + " [" + m_nameSpace + "]");
-        return null;
     }
 
     /**
@@ -110,14 +130,20 @@ public class Element {
      * @return the String value of the attribute, or null if the attribute is not found.
      */
     public String getAttribute(String name, String ns) {
-        name = name.toLowerCase();
-        for (int i = 0; i < m_attributes.length; i++) {
-            if (m_attributes[i].getName().equals(name) && m_attributes[i].getNameSpace().equals(ns)) {
-                return m_attributes[i].getValue();
-            }
+        name = ns.toLowerCase() + ":" + name.toLowerCase();
+        return getAttribute(name);
+    }
+    
+    /**
+     * Get the qualified name of the current element.
+     * @return the qualified name of the current element.
+     */
+    private String getQualifiedName() {
+        if (m_nameSpace.equals("")) {
+            return m_name;
+        } else {
+            return m_nameSpace + ":" + m_name;
         }
-        System.err.println("[Error in Metadata] The attribute " + name + "[" + ns + "] does not exist in " + m_name + " [" + m_nameSpace + "]");
-        return null;
     }
 
     /**
@@ -125,36 +151,14 @@ public class Element {
      * @param elem : the element to add
      */
     public void addElement(Element elem) {
-        for (int i = 0; (m_elements != null) && (i < m_elements.length); i++) {
-            if (m_elements[i] == elem) {
-                return;
-            }
-        }
-
-        if (m_elements != null) {
-            Element[] newElementsList = new Element[m_elements.length + 1];
-            System.arraycopy(m_elements, 0, newElementsList, 0, m_elements.length);
-            newElementsList[m_elements.length] = elem;
-            m_elements = newElementsList;
+        Element[] array = (Element[]) m_elements.get(elem.getQualifiedName());
+        if (array == null) {
+            m_elements.put(elem.getQualifiedName(), new Element[] {elem});
         } else {
-            m_elements = new Element[] { elem };
-        }
-    }
-
-    /**
-     * Add an element to the given list.
-     * @param list : the input list.
-     * @param elem : the element to add.
-     * @return the returned element list.
-     */
-    private static Element[] addElement(Element[] list, Element elem) {
-        if (list != null) {
-            Element[] newElementsList = new Element[list.length + 1];
-            System.arraycopy(list, 0, newElementsList, 0, list.length);
-            newElementsList[list.length] = elem;
-            return newElementsList;
-        } else {
-            return new Element[] { elem };
+            Element[] newElementsList = new Element[array.length + 1];
+            System.arraycopy(array, 0, newElementsList, 0, array.length);
+            newElementsList[array.length] = elem;
+            m_elements.put(elem.getQualifiedName(), newElementsList);
         }
     }
 
@@ -163,24 +167,29 @@ public class Element {
      * @param elem : the element to remove
      */
     public void removeElement(Element elem) {
-        int idx = -1;
-        for (int i = 0; i < m_elements.length; i++) {
-            if (m_elements[i] == elem) {
-                idx = i;
-                break;
-            }
-        }
-
-        if (idx >= 0) {
-            if ((m_elements.length - 1) == 0) {
-                m_elements = new Element[0];
-            } else {
-                Element[] newElementsList = new Element[m_elements.length - 1];
-                System.arraycopy(m_elements, 0, newElementsList, 0, idx);
-                if (idx < newElementsList.length) {
-                    System.arraycopy(m_elements, idx + 1, newElementsList, idx, newElementsList.length - idx);
+        Element[] array = (Element[]) m_elements.get(elem.getQualifiedName());
+        if (array == null) {
+            return;
+        } else {
+            int idx = -1;
+            for (int i = 0; i < array.length; i++) {
+                if (array[i] == elem) {
+                    idx = i;
+                    break;
                 }
-                m_elements = newElementsList;
+            }
+
+            if (idx >= 0) {
+                if ((array.length - 1) == 0) {
+                    m_elements.remove(elem.getQualifiedName());
+                } else {
+                    Element[] newElementsList = new Element[array.length - 1];
+                    System.arraycopy(array, 0, newElementsList, 0, idx);
+                    if (idx < newElementsList.length) {
+                        System.arraycopy(array, idx + 1, newElementsList, idx, newElementsList.length - idx);
+                    }
+                    m_elements.put(elem.getQualifiedName(), newElementsList); // Update the stored list.
+                }
             }
         }
     }
@@ -190,20 +199,11 @@ public class Element {
      * @param att : the attribute to add
      */
     public void addAttribute(Attribute att) {
-        for (int i = 0; (m_attributes != null) && (i < m_attributes.length); i++) {
-            if (m_attributes[i] == att) {
-                return;
-            }
+        String name = att.getName().toLowerCase();
+        if (!att.getNameSpace().equals("")) {
+            name = att.getNameSpace().toLowerCase() + ":" + name;
         }
-
-        if (m_attributes != null) {
-            Attribute[] newAttributesList = new Attribute[m_attributes.length + 1];
-            System.arraycopy(m_attributes, 0, newAttributesList, 0, m_attributes.length);
-            newAttributesList[m_attributes.length] = att;
-            m_attributes = newAttributesList;
-        } else {
-            m_attributes = new Attribute[] { att };
-        }
+        m_attributes.put(name, att);
     }
 
     /**
@@ -211,26 +211,11 @@ public class Element {
      * @param att : the attribute to remove
      */
     public void removeAttribute(Attribute att) {
-        int idx = -1;
-        for (int i = 0; i < m_attributes.length; i++) {
-            if (m_attributes[i] == att) {
-                idx = i;
-                break;
-            }
+        String name = att.getName();
+        if (!att.getNameSpace().equals("")) {
+            name = att.getNameSpace() + ":" + name;
         }
-
-        if (idx >= 0) {
-            if ((m_attributes.length - 1) == 0) {
-                m_attributes = new Attribute[0];
-            } else {
-                Attribute[] newAttributesList = new Attribute[m_attributes.length - 1];
-                System.arraycopy(m_attributes, 0, newAttributesList, 0, idx);
-                if (idx < newAttributesList.length) {
-                    System.arraycopy(m_attributes, idx + 1, newAttributesList, idx, newAttributesList.length - idx);
-                }
-                m_attributes = newAttributesList;
-            }
-        }
+        m_attributes.remove(name);
     }
 
     /**
@@ -240,13 +225,12 @@ public class Element {
      */
     public Element[] getElements(String name) {
         name = name.toLowerCase();
-        Element[] list = new Element[0];
-        for (int i = 0; i < m_elements.length; i++) {
-            if (m_elements[i].getName().equalsIgnoreCase(name) && m_elements[i].getNameSpace().equals("")) {
-                list = Element.addElement(list, m_elements[i]);
-            }
+        Element[] elems = (Element[]) m_elements.get(name);
+        if (elems == null) {
+            return new Element[0];
+        } else {
+            return elems;
         }
-        return list;
     }
 
     /**
@@ -256,46 +240,34 @@ public class Element {
      * @return the resulting element array (empty if the search failed)
      */
     public Element[] getElements(String name, String ns) {
-        name = name.toLowerCase();
-        Element[] list = new Element[0];
-        for (int i = 0; i < m_elements.length; i++) {
-            if (m_elements[i].getName().equals(name) && m_elements[i].getNameSpace().equals(ns)) {
-                list = Element.addElement(list, m_elements[i]);
-            }
+        if (ns == null || ns.equals("")) {
+            return getElements(name);
         }
-        return list;
+        name = ns + ":" + name;
+        return getElements(name);
     }
 
     /**
-     * Is the element contains a sub-element of the type given in parameter. This method does not manage the namespace
+     * Is the element contains a sub-element of the type given in parameter.
      * @param name : type of the element to check.
      * @return true if the element contains an element of the type "name"
      */
     public boolean containsElement(String name) {
         name = name.toLowerCase();
-        for (int i = 0; i < m_elements.length; i++) {
-            if (m_elements[i].getName().equals(name)) {
-                return true;
-            }
-        }
-        return false;
+        return m_elements.containsKey(name);
     }
 
     /**
-     * Is the element contains a sub-element of the type given in parameter. This method does not manage the namespace
+     * Is the element contains a sub-element of the type given in parameter. 
      * @param name : type of the element to check.
      * @param ns : the namespace of the element to check.
      * @return true if the element contains an element of the type "name"
      */
     public boolean containsElement(String name, String ns) {
-        name = name.toLowerCase();
-        ns = ns.toLowerCase();
-        for (int i = 0; i < m_elements.length; i++) {
-            if (m_elements[i].getName().equals(name) && m_elements[i].getNameSpace().equals(ns)) {
-                return true;
-            }
+        if (ns != null && !ns.equals("")) {
+            name = ns + ":" + name;
         }
-        return false;
+        return containsElement(name);
     }
 
     /**
@@ -304,57 +276,9 @@ public class Element {
      * @return true if the element contains an attribute of the type "name"
      */
     public boolean containsAttribute(String name) {
-        name = name.toLowerCase();
-        for (int i = 0; i < m_attributes.length; i++) {
-            if (m_attributes[i].getName().equals(name)) {
-                return true;
-            }
-        }
-        return false;
+        return m_attributes.containsKey(name.toLowerCase());
     }
-
-    /**
-     * Get used namespace.
-     * @return the first-order namespaces list of the current element. First-order namespace are namespace of the element attribute and namespaces of its direct sub-element.
-     */
-    public String[] getNamespaces() {
-        String[] ns = new String[0];
-
-        // Look for each direct sub-element
-        for (int i = 0; i < m_elements.length; i++) {
-            boolean found = false;
-            for (int j = 0; !found && j < ns.length; j++) {
-                if (ns[j].equals(m_elements[i].getNameSpace())) {
-                    found = true;
-                }
-            }
-            if (!found) {
-                String[] newNSList = new String[ns.length + 1];
-                System.arraycopy(ns, 0, newNSList, 0, ns.length);
-                newNSList[ns.length] = m_elements[i].getNameSpace();
-                ns = newNSList;
-            }
-        }
-
-        // Look for each attribute
-        for (int i = 0; i < m_attributes.length; i++) {
-            boolean found = false;
-            for (int j = 0; !found && j < ns.length; j++) {
-                if (ns[j].equals(m_attributes[i].getNameSpace())) {
-                    found = true;
-                }
-            }
-            if (!found) {
-                String[] newNSList = new String[ns.length + 1];
-                System.arraycopy(ns, 0, newNSList, 0, ns.length);
-                newNSList[ns.length] = m_attributes[i].getNameSpace();
-                ns = newNSList;
-            }
-        }
-
-        return ns;
-    }
-
+    
     /**
      * Get the XML form of this element.
      * @return the XML snippet representing this element.
@@ -376,29 +300,36 @@ public class Element {
             tabs += "\t";
         }
 
-        if (m_nameSpace.equals("")) {
+        if ("".equals(m_nameSpace)) {
             xml = tabs + "<" + m_name;
         } else {
             xml = tabs + "<" + m_nameSpace + ":" + m_name;
         }
 
-        for (int i = 0; i < m_attributes.length; i++) {
-            Attribute current = m_attributes[i];
-            if (current.getNameSpace().equals("")) {
+        Set keys = m_attributes.keySet();
+        Iterator it = keys.iterator();
+        while (it.hasNext()) {
+            Attribute current = (Attribute) m_attributes.get(it.next());
+            if ("".equals(current.getNameSpace())) {
                 xml += " " + current.getName() + "=\"" + current.getValue() + "\"";
             } else {
                 xml += " " + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue() + "\"";
             }
         }
 
-        if (m_elements.length == 0) {
+        if (m_elements.size() == 0) {
             xml += "/>";
             return xml;
         } else {
             xml += ">";
-            for (int i = 0; i < m_elements.length; i++) {
-                xml += "\n";
-                xml += m_elements[i].toXMLString(indent + 1);
+            keys = m_elements.keySet();
+            it = keys.iterator();
+            while (it.hasNext()) {
+                Element[] e = (Element[]) m_elements.get(it.next());
+                for (int i = 0; i < e.length; i++) {
+                    xml += "\n";
+                    xml += e[i].toXMLString(indent + 1);
+                }
             }
             xml += "\n" + tabs + "</" + m_name + ">";
             return xml;
@@ -427,27 +358,34 @@ public class Element {
             tabs += "\t";
         }
 
-        if (m_nameSpace.equals("")) {
+        if ("".equals(m_nameSpace)) {
             xml = tabs + m_name;
         } else {
             xml = tabs + m_nameSpace + ":" + m_name;
         }
 
-        for (int i = 0; i < m_attributes.length; i++) {
-            Attribute current = m_attributes[i];
-            if (current.getNameSpace().equals("")) {
+        Set keys = m_attributes.keySet();
+        Iterator it = keys.iterator();
+        while (it.hasNext()) {
+            Attribute current = (Attribute) m_attributes.get(it.next());
+            if ("".equals(current.getNameSpace())) {
                 xml += " " + current.getName() + "=\"" + current.getValue() + "\"";
             } else {
                 xml += " " + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue() + "\"";
             }
         }
 
-        if (m_elements.length == 0) {
+        if (m_elements.size() == 0) {
             return xml;
         } else {
-            for (int i = 0; i < m_elements.length; i++) {
-                xml += "\n";
-                xml += m_elements[i].toString(indent + 1);
+            keys = m_elements.keySet();
+            it = keys.iterator();
+            while (it.hasNext()) {
+                Element[] e = (Element[]) m_elements.get(it.next());
+                for (int i = 0; i < e.length; i++) {
+                    xml += "\n";
+                    xml += e[i].toString(indent + 1);
+                }
             }
             return xml;
         }

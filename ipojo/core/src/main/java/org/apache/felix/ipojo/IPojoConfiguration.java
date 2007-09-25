@@ -19,7 +19,7 @@
 package org.apache.felix.ipojo;
 
 import org.apache.felix.ipojo.composite.instance.InstanceHandler;
-import org.apache.felix.ipojo.composite.service.importer.ImportExportHandler;
+import org.apache.felix.ipojo.composite.service.importer.ImportHandler;
 import org.apache.felix.ipojo.composite.service.instantiator.ServiceInstantiatorHandler;
 import org.apache.felix.ipojo.handlers.architecture.ArchitectureHandler;
 import org.apache.felix.ipojo.handlers.configuration.ConfigurationHandler;
@@ -39,6 +39,12 @@ public class IPojoConfiguration {
      * iPOJO logger log level.
      */
     public static final int LOG_LEVEL = Logger.WARNING;
+    
+    
+    /**
+     * iPOJO Default Namespace.
+     */
+    public static final String IPOJO_NAMESPACE = "org.apache.felix.ipojo";
 
     /**
      * Available handlers in the iPOJO bundle.
@@ -57,10 +63,11 @@ public class IPojoConfiguration {
      */
     public static final Class[] INTERNAL_COMPOSITE_HANDLERS = new Class[] { 
         ServiceInstantiatorHandler.class, 
-        ImportExportHandler.class,
+        ImportHandler.class,
         InstanceHandler.class,
         org.apache.felix.ipojo.composite.service.provides.ProvidedServiceHandler.class,
         org.apache.felix.ipojo.composite.architecture.ArchitectureHandler.class
     };
+    
 
 }

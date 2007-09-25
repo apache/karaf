@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.FieldMetadata;
@@ -41,32 +40,42 @@ import org.osgi.framework.BundleContext;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class InstanceManager implements ComponentInstance {
+public class InstanceManager implements ComponentInstance, InstanceStateListener {
 
+    /**
+     * Name of the component instance.
+     */
+    protected String m_name;
+
+    /**
+     * Name of the component type implementation class.
+     */
+    protected String m_className;
+    
+    /**
+     * Handler list.
+     */
+    protected HandlerManager[] m_handlers = new HandlerManager[0];
+
+    /**
+     * Component state (STOPPED at the beginning).
+     */
+    protected int m_state = STOPPED;
+    
+    /**
+     * Instance State Listener List.
+     */
+    protected List m_instanceListeners = new ArrayList();
+    
     /**
      * Parent factory (ComponentFactory).
      */
     private ComponentFactory m_factory;
 
     /**
-     * Name of the component instance.
-     */
-    private String m_name;
-
-    /**
-     * Name of the component type implementation class.
-     */
-    private String m_className;
-
-    /**
      * The context of the component.
      */
     private BundleContext m_context;
-
-    /**
-     * Handler list.
-     */
-    private Handler[] m_handlers = new Handler[0];
 
     /**
      * Map [field, handler list] storing handlers interested by the field.
@@ -79,11 +88,6 @@ public class InstanceManager implements ComponentInstance {
     private Map m_methodRegistration = new HashMap();
 
     /**
-     * Component state (STOPPED at the beginning).
-     */
-    private int m_state = STOPPED;
-
-    /**
      * Manipulated class.
      */
     private Class m_clazz;
@@ -92,17 +96,7 @@ public class InstanceManager implements ComponentInstance {
      * Instances of the components.
      */
     private Object[] m_pojoObjects = new Object[0];
-    
-    /**
-     * Instance State Listener List.
-     */
-    private List m_instanceListeners = new ArrayList();
 
-    /**
-     * Component type information.
-     */
-    private ComponentDescription m_componentDesc;
-    
    /**
     * Is the component instance state changing?
     */
@@ -118,11 +112,12 @@ public class InstanceManager implements ComponentInstance {
      * 
      * @param factory : the factory managing the instance manager
      * @param bc : the bundle context to give to the instance
+     * @param handlers : handlers array
      */
-    public InstanceManager(ComponentFactory factory, BundleContext bc) {
+    public InstanceManager(ComponentFactory factory, BundleContext bc, HandlerManager[] handlers) {
         m_factory = factory;
         m_context = bc;
-        m_factory.getLogger().log(Logger.INFO, "[Bundle " + m_context.getBundle().getBundleId() + "] Create an instance manager from the factory " + m_factory);
+        m_handlers = handlers;
     }
 
     /**
@@ -131,72 +126,18 @@ public class InstanceManager implements ComponentInstance {
      * 
      * @param cm : the component type metadata
      * @param configuration : the configuration of the instance
+     * @throws ConfigurationException : occurs if the metadata are not correct
      */
-    public void configure(Element cm, Dictionary configuration) {
-        // Stop all previous registered handler
-        if (m_handlers.length != 0) {
-            stop();
-        }
-
-        // Clear the handler list
-        m_handlers = new Handler[0];
-
-        // Set the component-type metadata
+    public void configure(Element cm, Dictionary configuration) throws ConfigurationException {
         m_className = cm.getAttribute("className");
-        if (m_className == null) {
-            m_factory.getLogger().log(Logger.ERROR, "The class name of the component cannot be set, it does not exist in the metadata");
-        }
-
-        // ComponentInfo initialization
-        m_componentDesc = new ComponentDescription(m_factory.getName(), m_className, m_context.getBundle().getBundleId());
-
+        
         // Add the name
         m_name = (String) configuration.get("name");
         
         // Create the standard handlers and add these handlers to the list
-        for (int i = 0; i < IPojoConfiguration.INTERNAL_HANDLERS.length; i++) {
-            // Create a new instance
-            try {
-                Handler h = (Handler) IPojoConfiguration.INTERNAL_HANDLERS[i].newInstance();
-                h.configure(this, cm, configuration);
-            } catch (InstantiationException e) {
-                m_factory.getLogger().log(Logger.ERROR,
-                        "[" + m_name + "] Cannot instantiate the handler " + IPojoConfiguration.INTERNAL_HANDLERS[i] + " : " + e.getMessage());
-            } catch (IllegalAccessException e) {
-                m_factory.getLogger().log(Logger.ERROR,
-                        "[" + m_name + "] Cannot instantiate the handler " + IPojoConfiguration.INTERNAL_HANDLERS[i] + " : " + e.getMessage());
-            }
+        for (int i = 0; i < m_handlers.length; i++) {
+            m_handlers[i].init(this, cm, configuration);
         }
-
-        // Look for namespaces
-        for (int i = 0; i < cm.getNamespaces().length; i++) {
-            if (!cm.getNamespaces()[i].equals("")) {
-                // It is not an internal handler, try to load it
-                try {
-                    Class c = m_context.getBundle().loadClass(cm.getNamespaces()[i]);
-                    Handler h = (Handler) c.newInstance();
-                    h.configure(this, cm, configuration);
-                } catch (ClassNotFoundException e) {
-                    m_factory.getLogger()
-                            .log(Logger.ERROR, "[" + m_name + "] Cannot instantiate the handler " + cm.getNamespaces()[i] + " : " + e.getMessage());
-                } catch (InstantiationException e) {
-                    m_factory.getLogger()
-                            .log(Logger.ERROR, "[" + m_name + "] Cannot instantiate the handler " + cm.getNamespaces()[i] + " : " + e.getMessage());
-                } catch (IllegalAccessException e) {
-                    m_factory.getLogger()
-                            .log(Logger.ERROR, "[" + m_name + "] Cannot instantiate the handler " + cm.getNamespaces()[i] + " : " + e.getMessage());
-                }
-            }
-        }
-    }
-
-    /**
-     * Get the component type description of the current instance.
-     * @return the component type information.
-     * @see org.apache.felix.ipojo.ComponentInstance#getComponentDescription()
-     */
-    public ComponentDescription getComponentDescription() {
-        return m_componentDesc;
     }
 
     /**
@@ -206,7 +147,7 @@ public class InstanceManager implements ComponentInstance {
      */
     public InstanceDescription getInstanceDescription() {
         int componentState = getState();
-        InstanceDescription instanceDescription = new InstanceDescription(m_name, componentState, getContext().getBundle().getBundleId(), m_componentDesc);
+        InstanceDescription instanceDescription = new InstanceDescription(m_name, componentState, getContext().getBundle().getBundleId(), m_factory.getComponentDescription());
 
         String[] objects = new String[getPojoObjects().length];
         for (int i = 0; i < getPojoObjects().length; i++) {
@@ -226,59 +167,64 @@ public class InstanceManager implements ComponentInstance {
      * @return the handler array of plugged handlers.
      */
     public Handler[] getRegistredHandlers() {
-        return m_handlers;
+        Handler[] h = new Handler[m_handlers.length];
+        for (int i = 0; i < m_handlers.length; i++) {
+            h[i] = m_handlers[i].getHandler();
+        }
+        return h;
     }
 
     /**
      * Return a specified handler.
      * 
-     * @param name : class name of the handler to find
+     * @param name : class name of the handler to find or its qualified name (namespace:name)
      * @return : the handler, or null if not found
      */
     public Handler getHandler(String name) {
         for (int i = 0; i < m_handlers.length; i++) {
-            if (m_handlers[i].getClass().getName().equalsIgnoreCase(name)) {
-                return m_handlers[i];
+            HandlerFactory fact = (HandlerFactory) m_handlers[i].getHandler().getInstance().getFactory();
+            if (fact.getHandlerName().equals(name)) {
+                return m_handlers[i].getHandler();
             }
         }
         return null;
     }
 
-    // ===================== Lifecycle management =====================
-
     /**
      * Start the instance manager.
      */
-    public void start() {
+    public synchronized void start() {
         if (m_state != STOPPED) {
             return;
         } // Instance already started
-
-        // Start all the handlers
-        m_factory.getLogger().log(Logger.INFO, "[" + m_name + "] Start the instance manager with " + m_handlers.length + " handlers");
-
-        // The new state of the component is UNRESOLVED
-        m_state = INVALID;
-
+        
         for (int i = 0; i < m_handlers.length; i++) {
+            m_handlers[i].addInstanceStateListener(this);
             m_handlers[i].start();
         }
-
-        // Defines the state of the component :
-        checkInstanceState();
+        
+        for (int i = 0; i < m_handlers.length; i++) {
+            if (m_handlers[i].getState() != VALID) {
+                setState(INVALID);
+                return;
+            }
+        }
+        setState(VALID);
     }
 
     /**
      * Stop the instance manager.
      */
-    public void stop() {
+    public synchronized void stop() {
         if (m_state == STOPPED) {
             return;
         } // Instance already stopped
-
+        
         setState(INVALID);
+        
         // Stop all the handlers
         for (int i = m_handlers.length - 1; i > -1; i--) {
+            m_handlers[i].removeInstanceStateListener(this);
             m_handlers[i].stop();
         }
         
@@ -294,22 +240,28 @@ public class InstanceManager implements ComponentInstance {
      * Dispose the instance.
      * @see org.apache.felix.ipojo.ComponentInstance#dispose()
      */
-    public void dispose() {
+    public synchronized void dispose() {
         if (m_state > STOPPED) { // Valid or invalid
             stop();
         }
+        
+        m_state = DISPOSED;
         
         for (int i = 0; i < m_instanceListeners.size(); i++) {
             ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, DISPOSED);
         }
         
         m_factory.disposed(this);
-
-        // Cleaning
-        m_handlers = new Handler[0];
+        
+        for (int i = 0; i < m_handlers.length; i++) {
+            m_handlers[i].dispose();
+        }
+        
+        m_handlers = new HandlerManager[0];
         m_fieldRegistration = new HashMap();
+        m_methodRegistration = new HashMap();
         m_clazz = null;
-        m_pojoObjects = new Object[0];
+        m_inTransition = false;
         m_instanceListeners.clear();
     }
     
@@ -328,10 +280,16 @@ public class InstanceManager implements ComponentInstance {
 
         // Cleaning
         m_state = DISPOSED;
-        m_handlers = new Handler[0];
+        
+        for (int i = 0; i < m_handlers.length; i++) {
+            m_handlers[i].dispose();
+        }
+        
+        m_handlers = new HandlerManager[0];
         m_fieldRegistration = new HashMap();
+        m_methodRegistration = new HashMap();
         m_clazz = null;
-        m_pojoObjects = new Object[0];
+        m_inTransition = false;
         m_instanceListeners.clear();
     }
     
@@ -342,7 +300,7 @@ public class InstanceManager implements ComponentInstance {
      * the second call is stored and executed after the first one is finished.
      * @param state : the new state
      */
-    private synchronized void setState(int state) {
+    public void setState(int state) {
         if (m_inTransition) {
             m_stateQueue.add(new Integer(state)); 
             return;
@@ -351,18 +309,10 @@ public class InstanceManager implements ComponentInstance {
         if (m_state != state) {
             m_inTransition = true;
 
-            // Log the state change
-            if (state == INVALID) {
-                m_factory.getLogger().log(Logger.INFO, "[" + m_name + "]  State -> INVALID");
-            }
-            if (state == VALID) {
-                m_factory.getLogger().log(Logger.INFO, "[" + m_name + "] State -> VALID");
-            }
-
             // The state changed call the handler stateChange method
             m_state = state;
             for (int i = m_handlers.length - 1; i > -1; i--) {
-                m_handlers[i].stateChanged(state);
+                m_handlers[i].getHandler().stateChanged(state);
             }
             
             for (int i = 0; i < m_instanceListeners.size(); i++) {
@@ -401,7 +351,9 @@ public class InstanceManager implements ComponentInstance {
      * @see org.apache.felix.ipojo.ComponentInstance#addInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
      */
     public void addInstanceStateListener(InstanceStateListener listener) {
-        m_instanceListeners.add(listener);
+        synchronized (m_instanceListeners) {
+            m_instanceListeners.add(listener);
+        }
     }
 
     /**
@@ -410,12 +362,10 @@ public class InstanceManager implements ComponentInstance {
      * @see org.apache.felix.ipojo.ComponentInstance#removeInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
      */
     public void removeInstanceStateListener(InstanceStateListener listener) {
-        m_instanceListeners.remove(listener);
+        synchronized (m_instanceListeners) {
+            m_instanceListeners.remove(listener);
+        }
     }
-
-    // ===================== end Lifecycle management =====================
-
-    // ================== Class & Instance management ===================
 
     /**
      * Get the factory which create the current instance.
@@ -450,7 +400,7 @@ public class InstanceManager implements ComponentInstance {
      * Add an instance to the created instance list.
      * @param o : the instance to add
      */
-    private void addInstance(Object o) {
+    private synchronized void addInstance(Object o) {
         for (int i = 0; (m_pojoObjects != null) && (i < m_pojoObjects.length); i++) {
             if (m_pojoObjects[i] == o) {
                 return;
@@ -468,12 +418,20 @@ public class InstanceManager implements ComponentInstance {
     }
 
     /**
-     * Remove an instance from the created instance list.
-     * The instance will be destroyed by the garbage collector.
-     * 
-     * @param o : the instance to remove
+     * Get the array of object created by the instance.
+     * @return the created instance of the component instance.
      */
-    private void removeInstance(Object o) {
+    public Object[] getPojoObjects() {
+        return m_pojoObjects;
+    }
+
+    /**
+     * Delete the created instance (remove it from the list, to allow the
+     * garbage collector to eat the instance).
+     * 
+     * @param o : the instance to delete
+     */
+    public synchronized void deletePojoObject(Object o) {
         int idx = -1;
         for (int i = 0; i < m_pojoObjects.length; i++) {
             if (m_pojoObjects[i] == o) {
@@ -497,24 +455,6 @@ public class InstanceManager implements ComponentInstance {
     }
 
     /**
-     * Get the array of object created by the instance.
-     * @return the created instance of the component instance.
-     */
-    public Object[] getPojoObjects() {
-        return m_pojoObjects;
-    }
-
-    /**
-     * Delete the created instance (remove it from the list, to allow the
-     * garbage collector to eat the instance).
-     * 
-     * @param o : the instance to delete
-     */
-    public void deletePojoObject(Object o) {
-        removeInstance(o);
-    }
-
-    /**
      * Create an instance of the component. This method need to be called one
      * time only for singleton provided service
      * 
@@ -527,7 +467,6 @@ public class InstanceManager implements ComponentInstance {
         }
         Object instance = null;
         try {
-
             // Try to find if there is a constructor with a bundle context as
             // parameter :
             try {
@@ -554,17 +493,20 @@ public class InstanceManager implements ComponentInstance {
             m_factory.getLogger().log(Logger.ERROR,
                     "[" + m_name + "] createInstance -> The Component Instance is not accessible (security reason) : " + e.getMessage());
         } catch (InvocationTargetException e) {
-            m_factory.getLogger().log(Logger.ERROR,
-                    "[" + m_name + "] createInstance -> Cannot invoke the constructor method (illegal target) : " + e.getMessage());
+            m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the constructor method (illegal target) : " + e.getMessage());
+            e.printStackTrace();
         } catch (NoSuchMethodException e) {
             m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the constructor (method not found) : " + e.getMessage());
+        }
+        if (instance == null) {
+            m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot create the instance");
         }
 
         // Register the new instance
         addInstance(instance);
         // Call createInstance on Handlers :
         for (int i = 0; i < m_handlers.length; i++) {
-            m_handlers[i].createInstance(instance);
+            ((PrimitiveHandler) m_handlers[i].getHandler()).objectCreated(instance);
         }
         return instance;
     }
@@ -574,7 +516,7 @@ public class InstanceManager implements ComponentInstance {
      * If no object created, create and return one object.
      * @return the instance of the component instance to use for singleton component
      */
-    public Object getPojoObject() {
+    public synchronized Object getPojoObject() {
         if (m_pojoObjects.length == 0) {
             createPojoObject();
         }
@@ -592,30 +534,6 @@ public class InstanceManager implements ComponentInstance {
         return m_clazz;
     }
 
-    // ================== end Class & Instance management ================
-
-    // ======================== Handlers Management ======================
-
-    /**
-     * Register the given handler to the current instance manager.
-     * 
-     * @param h : the handler to register
-     */
-    public void register(Handler h) {
-        for (int i = 0; (m_handlers != null) && (i < m_handlers.length); i++) {
-            if (m_handlers[i] == h) {
-                return;
-            }
-        }
-
-        if (m_handlers != null) {
-            Handler[] newList = new Handler[m_handlers.length + 1];
-            System.arraycopy(m_handlers, 0, newList, 0, m_handlers.length);
-            newList[m_handlers.length] = h;
-            m_handlers = newList;
-        }
-    }
-
     /**
      * Register an handler. The handler will be notified of event on each field
      * given in the list.
@@ -624,19 +542,18 @@ public class InstanceManager implements ComponentInstance {
      * @param fields : the field metadata list
      * @param methods : the method metadata list
      */
-    public void register(Handler h, FieldMetadata[] fields, MethodMetadata[] methods) {
-        register(h);
+    public void register(PrimitiveHandler h, FieldMetadata[] fields, MethodMetadata[] methods) {
         for (int i = 0; fields != null && i < fields.length; i++) {
             if (m_fieldRegistration.get(fields[i].getFieldName()) == null) {
-                m_fieldRegistration.put(fields[i].getFieldName(), new Handler[] { h });
+                m_fieldRegistration.put(fields[i].getFieldName(), new PrimitiveHandler[] { h });
             } else {
-                Handler[] list = (Handler[]) m_fieldRegistration.get(fields[i].getFieldName());
+                PrimitiveHandler[] list = (PrimitiveHandler[]) m_fieldRegistration.get(fields[i].getFieldName());
                 for (int j = 0; j < list.length; j++) {
                     if (list[j] == h) {
                         return;
                     }
                 }
-                Handler[] newList = new Handler[list.length + 1];
+                PrimitiveHandler[] newList = new PrimitiveHandler[list.length + 1];
                 System.arraycopy(list, 0, newList, 0, list.length);
                 newList[list.length] = h;
                 m_fieldRegistration.put(fields[i].getFieldName(), newList);
@@ -644,15 +561,15 @@ public class InstanceManager implements ComponentInstance {
         }
         for (int i = 0; methods != null && i < methods.length; i++) {
             if (m_methodRegistration.get(methods[i].getMethodIdentifier()) == null) {
-                m_methodRegistration.put(methods[i].getMethodIdentifier(), new Handler[] { h });
+                m_methodRegistration.put(methods[i].getMethodIdentifier(), new PrimitiveHandler[] { h });
             } else {
-                Handler[] list = (Handler[]) m_methodRegistration.get(methods[i].getMethodIdentifier());
+                PrimitiveHandler[] list = (PrimitiveHandler[]) m_methodRegistration.get(methods[i].getMethodIdentifier());
                 for (int j = 0; j < list.length; j++) {
                     if (list[j] == h) {
                         return;
                     }
                 }
-                Handler[] newList = new Handler[list.length + 1];
+                PrimitiveHandler[] newList = new PrimitiveHandler[list.length + 1];
                 System.arraycopy(list, 0, newList, 0, list.length);
                 newList[list.length] = h;
                 m_methodRegistration.put(methods[i].getMethodIdentifier(), newList);
@@ -669,12 +586,12 @@ public class InstanceManager implements ComponentInstance {
      * @param fields : the field metadata list
      * @param methods : the method metadata list
      */
-    public void unregister(Handler h, FieldMetadata[] fields, MethodMetadata[] methods) {
+    public void unregister(PrimitiveHandler h, FieldMetadata[] fields, MethodMetadata[] methods) {
         for (int i = 0; i < fields.length; i++) {
             if (m_fieldRegistration.get(fields[i].getFieldName()) == null) {
                 break;
             } else {
-                Handler[] list = (Handler[]) m_fieldRegistration.get(fields[i].getFieldName());
+                PrimitiveHandler[] list = (PrimitiveHandler[]) m_fieldRegistration.get(fields[i].getFieldName());
                 int idx = -1;
                 for (int j = 0; j < list.length; j++) {
                     if (list[j] == h) {
@@ -685,9 +602,9 @@ public class InstanceManager implements ComponentInstance {
 
                 if (idx >= 0) {
                     if ((list.length - 1) == 0) {
-                        list = new Handler[0];
+                        list = new PrimitiveHandler[0];
                     } else {
-                        Handler[] newList = new Handler[list.length - 1];
+                        PrimitiveHandler[] newList = new PrimitiveHandler[list.length - 1];
                         System.arraycopy(list, 0, newList, 0, idx);
                         if (idx < newList.length) {
                             System.arraycopy(list, idx + 1, newList, idx, newList.length - idx);
@@ -702,7 +619,7 @@ public class InstanceManager implements ComponentInstance {
             if (m_methodRegistration.get(methods[i].getMethodIdentifier()) == null) {
                 break;
             } else {
-                Handler[] list = (Handler[]) m_methodRegistration.get(methods[i].getMethodIdentifier());
+                PrimitiveHandler[] list = (PrimitiveHandler[]) m_methodRegistration.get(methods[i].getMethodIdentifier());
                 int idx = -1;
                 for (int j = 0; j < list.length; j++) {
                     if (list[j] == h) {
@@ -713,9 +630,9 @@ public class InstanceManager implements ComponentInstance {
 
                 if (idx >= 0) {
                     if ((list.length - 1) == 0) {
-                        list = new Handler[0];
+                        list = new PrimitiveHandler[0];
                     } else {
-                        Handler[] newList = new Handler[list.length - 1];
+                        PrimitiveHandler[] newList = new PrimitiveHandler[list.length - 1];
                         System.arraycopy(list, 0, newList, 0, idx);
                         if (idx < newList.length) {
                             System.arraycopy(list, idx + 1, newList, idx, newList.length - idx);
@@ -724,34 +641,6 @@ public class InstanceManager implements ComponentInstance {
                     }
                     m_methodRegistration.put(methods[i].getMethodIdentifier(), list);
                 }
-            }
-        }
-    }
-
-    /**
-     * Unregister the given handler.
-     * 
-     * @param h : the handler to unregister
-     */
-    public void unregister(Handler h) {
-        int idx = -1;
-        for (int i = 0; i < m_handlers.length; i++) {
-            if (m_handlers[i] == h) {
-                idx = i;
-                break;
-            }
-        }
-
-        if (idx >= 0) {
-            if ((m_handlers.length - 1) == 0) {
-                m_handlers = new Handler[0];
-            } else {
-                Handler[] newList = new Handler[m_handlers.length - 1];
-                System.arraycopy(m_handlers, 0, newList, 0, idx);
-                if (idx < newList.length) {
-                    System.arraycopy(m_handlers, idx + 1, newList, idx, newList.length - idx);
-                }
-                m_handlers = newList;
             }
         }
     }
@@ -772,13 +661,13 @@ public class InstanceManager implements ComponentInstance {
      * @param fieldName : the field name on which the GETFIELD instruction is
      * called
      * @param initialValue : the value of the field in the code
-     * @return the value decided by the last asked handler (throw a warining if
+     * @return the value decided by the last asked handler (throw a warning if
      * two fields decide two different values)
      */
-    public Object getterCallback(String fieldName, Object initialValue) {
+    public synchronized Object getterCallback(String fieldName, Object initialValue) {
         Object result = null;
         // Get the list of registered handlers
-        Handler[] list = (Handler[]) m_fieldRegistration.get(fieldName);
+        PrimitiveHandler[] list = (PrimitiveHandler[]) m_fieldRegistration.get(fieldName);
         for (int i = 0; list != null && i < list.length; i++) {
             Object handlerResult = list[i].getterCallback(fieldName, initialValue);
             if (handlerResult != initialValue) {
@@ -797,8 +686,8 @@ public class InstanceManager implements ComponentInstance {
      * Dispatch entry method event on registered handler.
      * @param methodId : method id
      */
-    public void entryCallback(String methodId) {
-        Handler[] list = (Handler[]) m_methodRegistration.get(methodId);
+    public synchronized void entryCallback(String methodId) {
+        PrimitiveHandler[] list = (PrimitiveHandler[]) m_methodRegistration.get(methodId);
         for (int i = 0; list != null && i < list.length; i++) {
             list[i].entryCallback(methodId);
         }
@@ -811,8 +700,8 @@ public class InstanceManager implements ComponentInstance {
      * @param methodId : method id
      * @param e : returned object.
      */
-    public void exitCallback(String methodId, Object e) {
-        Handler[] list = (Handler[]) m_methodRegistration.get(methodId);
+    public synchronized void exitCallback(String methodId, Object e) {
+        PrimitiveHandler[] list = (PrimitiveHandler[]) m_methodRegistration.get(methodId);
         for (int i = 0; list != null && i < list.length; i++) {
             list[i].exitCallback(methodId, e);
         }
@@ -826,9 +715,9 @@ public class InstanceManager implements ComponentInstance {
      * called
      * @param objectValue : the value of the field
      */
-    public void setterCallback(String fieldName, Object objectValue) {
+    public synchronized void setterCallback(String fieldName, Object objectValue) {
         // Get the list of registered handlers
-        Handler[] list = (Handler[]) m_fieldRegistration.get(fieldName);
+        PrimitiveHandler[] list = (PrimitiveHandler[]) m_fieldRegistration.get(fieldName);
 
         for (int i = 0; list != null && i < list.length; i++) {
             list[i].setterCallback(fieldName, objectValue);
@@ -853,29 +742,6 @@ public class InstanceManager implements ComponentInstance {
     }
 
     /**
-     * Check the state of all handlers.
-     */
-    public void checkInstanceState() {
-        if (!isStarted()) { return; }
-        
-        boolean isValid = true;
-        for (int i = 0; i < m_handlers.length; i++) {
-            boolean b = m_handlers[i].isValid();
-            isValid = isValid && b;
-        }
-     
-        // Update the component state if necessary
-        if (!isValid && m_state == VALID) {
-            // Need to update the state to UNRESOLVED
-            setState(INVALID);
-            return;
-        }
-        if (isValid && m_state == INVALID) {
-            setState(VALID);
-        }
-    }
-
-    /**
      * Get the instance name.
      * @return the instance name.
      * @see org.apache.felix.ipojo.ComponentInstance#getInstanceName()
@@ -891,7 +757,7 @@ public class InstanceManager implements ComponentInstance {
      */
     public void reconfigure(Dictionary configuration) {
         for (int i = 0; i < m_handlers.length; i++) {
-            m_handlers[i].reconfigure(configuration);
+            m_handlers[i].getHandler().reconfigure(configuration);
         }
     }
 
@@ -903,6 +769,34 @@ public class InstanceManager implements ComponentInstance {
         return m_className;
     }
 
-    // ======================= end Handlers Management =====================
-
+    /**
+     * State Change listener callback.
+     * This method is notified at each time a plugged handler becomes invalid.
+     * @param instance : changing instance 
+     * @param newState : new state
+     * @see org.apache.felix.ipojo.InstanceStateListener#stateChanged(org.apache.felix.ipojo.ComponentInstance, int)
+     */
+    public synchronized void stateChanged(ComponentInstance instance, int newState) {
+        if (m_state <= STOPPED) { return; }
+        
+        // Update the component state if necessary
+        if (newState == INVALID && m_state == VALID) {
+            // Need to update the state to UNRESOLVED
+            setState(INVALID);
+            return;
+        }
+        if (newState == VALID && m_state == INVALID) {
+            // An handler becomes valid => check if all handlers are valid
+            for (int i = 0; i < m_handlers.length; i++) {
+                if (m_handlers[i].getState() != VALID) { return; }
+            }
+            setState(VALID);
+            return;
+        }
+        
+        if (newState == DISPOSED) {
+            dispose();
+        }
+        
+    }
 }

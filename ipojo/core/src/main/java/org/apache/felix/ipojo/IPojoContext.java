@@ -39,7 +39,7 @@ import org.osgi.framework.ServiceRegistration;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class IPojoContext implements BundleContext {
+public class IPojoContext implements BundleContext, ServiceContext {
 
     /**
      * BundleContext used to access bundle method.
@@ -58,7 +58,6 @@ public class IPojoContext implements BundleContext {
      */
     public IPojoContext(BundleContext bc) {
         m_bundleContext = bc;
-        m_serviceContext = new DefaultServiceContext(bc);
     }
 
     /**
@@ -100,7 +99,11 @@ public class IPojoContext implements BundleContext {
      * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener, java.lang.String)
      */
     public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
-        m_serviceContext.addServiceListener(listener, filter);
+        if (m_serviceContext == null) {
+            m_bundleContext.addServiceListener(listener, filter);
+        } else {
+            m_serviceContext.addServiceListener(listener, filter);
+        }
     }
 
     /**
@@ -109,7 +112,11 @@ public class IPojoContext implements BundleContext {
      * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener)
      */
     public void addServiceListener(ServiceListener listener) {
-        m_serviceContext.addServiceListener(listener);
+        if (m_serviceContext == null) {
+            m_bundleContext.addServiceListener(listener);
+        } else {
+            m_serviceContext.addServiceListener(listener);
+        }
     }
 
 
@@ -133,7 +140,11 @@ public class IPojoContext implements BundleContext {
      * @see org.osgi.framework.BundleContext#getAllServiceReferences(java.lang.String, java.lang.String)
      */
     public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
-        return m_serviceContext.getAllServiceReferences(clazz, filter);
+        if (m_serviceContext == null) {
+            return m_bundleContext.getAllServiceReferences(clazz, filter);
+        } else {
+            return m_serviceContext.getAllServiceReferences(clazz, filter);
+        }
     }
 
     /**
@@ -192,7 +203,11 @@ public class IPojoContext implements BundleContext {
      * @see org.osgi.framework.BundleContext#getService(org.osgi.framework.ServiceReference)
      */
     public Object getService(ServiceReference reference) {
-        return m_serviceContext.getService(reference);
+        if (m_serviceContext == null) {
+            return m_bundleContext.getService(reference);
+        } else {
+            return m_serviceContext.getService(reference);
+        }
     }
 
     /**
@@ -202,7 +217,11 @@ public class IPojoContext implements BundleContext {
      * @see org.osgi.framework.BundleContext#getServiceReference(java.lang.String)
      */
     public ServiceReference getServiceReference(String clazz) {
-        return m_serviceContext.getServiceReference(clazz);
+        if (m_serviceContext == null) {
+            return m_bundleContext.getServiceReference(clazz);
+        } else {
+            return m_serviceContext.getServiceReference(clazz);
+        }
     }
 
     /**
@@ -214,7 +233,11 @@ public class IPojoContext implements BundleContext {
      * @see org.osgi.framework.BundleContext#getServiceReferences(java.lang.String, java.lang.String)
      */
     public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
-        return m_serviceContext.getServiceReferences(clazz, filter);
+        if (m_serviceContext == null) {
+            return m_bundleContext.getServiceReferences(clazz, filter);
+        } else {
+            return m_serviceContext.getServiceReferences(clazz, filter);
+        }
     }
 
     /**
@@ -249,7 +272,11 @@ public class IPojoContext implements BundleContext {
      * @see org.apache.felix.ipojo.ServiceContext#registerService(java.lang.String[], java.lang.Object, java.util.Dictionary)
      */
     public ServiceRegistration registerService(String[] clazzes, Object service, Dictionary properties) {
-        return m_serviceContext.registerService(clazzes, service, properties);
+        if (m_serviceContext == null) {
+            return m_bundleContext.registerService(clazzes, service, properties);
+        } else {
+            return m_serviceContext.registerService(clazzes, service, properties);
+        }
     }
 
     /**
@@ -261,7 +288,11 @@ public class IPojoContext implements BundleContext {
      * @see org.osgi.framework.BundleContext#registerService(java.lang.String, java.lang.Object, java.util.Dictionary)
      */
     public ServiceRegistration registerService(String clazz, Object service, Dictionary properties) {
-        return m_serviceContext.registerService(clazz, service, properties);
+        if (m_serviceContext == null) {
+            return m_bundleContext.registerService(clazz, service, properties);
+        } else {
+            return m_serviceContext.registerService(clazz, service, properties);
+        }
     }
 
     /**
@@ -289,7 +320,11 @@ public class IPojoContext implements BundleContext {
      * @see org.osgi.framework.BundleContext#removeServiceListener(org.osgi.framework.ServiceListener)
      */
     public void removeServiceListener(ServiceListener listener) {
-        m_serviceContext.removeServiceListener(listener);
+        if (m_serviceContext == null) {
+            m_bundleContext.removeServiceListener(listener);
+        } else {
+            m_serviceContext.removeServiceListener(listener);
+        }
     }
 
     /**
@@ -299,7 +334,11 @@ public class IPojoContext implements BundleContext {
      * @see org.osgi.framework.BundleContext#ungetService(org.osgi.framework.ServiceReference)
      */
     public boolean ungetService(ServiceReference reference) {
-        return m_serviceContext.ungetService(reference);
+        if (m_serviceContext == null) {
+            return m_bundleContext.ungetService(reference);
+        } else {
+            return m_serviceContext.ungetService(reference);
+        }
     }
     
     /**
@@ -315,6 +354,9 @@ public class IPojoContext implements BundleContext {
      * @return the service context.
      */
     public ServiceContext getServiceContext() {
+        if (m_serviceContext == null) {
+            return this;
+        }
         return m_serviceContext;
     }
 

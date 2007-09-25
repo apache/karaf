@@ -19,16 +19,20 @@
 package org.apache.felix.ipojo.composite;
 
 import java.util.Dictionary;
+import java.util.List;
 
 import org.apache.felix.ipojo.ComponentInstance;
+import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.Factory;
+import org.apache.felix.ipojo.FactoryStateListener;
+import org.apache.felix.ipojo.MissingHandlerException;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.UnacceptableConfiguration;
+import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * Bridge representing a Factory inside a composition.
- * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class FactoryProxy implements Factory {
@@ -45,7 +49,6 @@ public class FactoryProxy implements Factory {
 
     /**
      * Constructor.
-     * 
      * @param fact : the targeted factory.
      * @param s : the service context to target.
      */
@@ -56,35 +59,36 @@ public class FactoryProxy implements Factory {
 
     /**
      * Create an instance manager (i.e. component type instance).
-     * 
      * @param configuration : the configuration properties for this component.
      * @return the created instance manager.
      * @throws UnacceptableConfiguration : when a given configuration is not valid.
+     * @throws MissingHandlerException : occurs when the creation failed due to a missing handler (the factory should be invalid)
+     * @throws ConfigurationException : occurs when the creation failed due to a configuration issue
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
-    public ComponentInstance createComponentInstance(Dictionary configuration) throws UnacceptableConfiguration {
+    public ComponentInstance createComponentInstance(Dictionary configuration) throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException {
         return m_delegate.createComponentInstance(configuration, m_context);
     }
 
     /**
      * Create an instance manager (i.e. component type instance). This has these
      * service interaction in the scope given in argument.
-     * 
      * @param configuration : the configuration properties for this component.
      * @param serviceContext : the service context of the component.
      * @return the created instance manager.
-     * @throws UnacceptableConfiguration : when the given configuration isnot valid.
+     * @throws UnacceptableConfiguration : when the given configuration is not valid.
+     * @throws MissingHandlerException : when at least one handler is missing. 
+     * @throws ConfigurationException : when an issue occurs during the oconfiguration of the instance.
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary,
      * org.apache.felix.ipojo.ServiceContext)
      */
-    public ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration {
+    public ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException {
         return m_delegate.createComponentInstance(configuration, serviceContext);
     }
 
     /**
      * Get the component type information containing provided service,
      * configuration properties ...
-     * 
      * @return the component type information.
      * @see org.apache.felix.ipojo.Factory#getDescription()
      */
@@ -104,7 +108,6 @@ public class FactoryProxy implements Factory {
     /**
      * Check if the given configuration is acceptable as a configuration of a
      * component instance.
-     * 
      * @param conf : the configuration to test
      * @return true if the configuration is acceptable
      * @see org.apache.felix.ipojo.Factory#isAcceptable(java.util.Dictionary)
@@ -116,14 +119,46 @@ public class FactoryProxy implements Factory {
     /**
      * Reconfigure an instance already created. This configuration need to have
      * the name property to identify the instance.
-     * 
      * @param conf : the configuration to reconfigure the instance.
      * @throws UnacceptableConfiguration : if the given configuration is not
      * consistent for the targeted instance.
+     * @throws MissingHandlerException : when at least one handler is missing
      * @see org.apache.felix.ipojo.Factory#reconfigure(java.util.Dictionary)
      */
-    public void reconfigure(Dictionary conf) throws UnacceptableConfiguration {
+    public void reconfigure(Dictionary conf) throws UnacceptableConfiguration, MissingHandlerException {
         m_delegate.reconfigure(conf);
+    }
+
+    /**
+     * Add a factory listener.
+     * @param l : the listener to add.
+     * @see org.apache.felix.ipojo.Factory#addFactoryStateListener(org.apache.felix.ipojo.FactoryStateListener)
+     */
+    public void addFactoryStateListener(FactoryStateListener l) {
+        m_delegate.addFactoryStateListener(l);
+
+    }
+
+    public List getMissingHandlers() {
+        return m_delegate.getMissingHandlers();
+    }
+
+    public List getRequiredHandlers() {
+        return m_delegate.getRequiredHandlers();
+    }
+
+    /**
+     * Remove a service listener.
+     * @param l : the listener to remove
+     * @see org.apache.felix.ipojo.Factory#removeFactoryStateListener(org.apache.felix.ipojo.FactoryStateListener)
+     */
+    public void removeFactoryStateListener(FactoryStateListener l) {
+        m_delegate.removeFactoryStateListener(l);
+
+    }
+
+    public ComponentDescription getComponentDescription() {
+        return m_delegate.getComponentDescription();
     }
 
 }

@@ -64,7 +64,7 @@ public class SpecificationMetadata {
     private boolean m_isInterface = true;
     
     /**
-     * Componenet Type.
+     * Component Type.
      */
     private String m_componentType = null;
 
@@ -97,7 +97,7 @@ public class SpecificationMetadata {
             cr.accept(msv, ClassReader.SKIP_FRAMES);
             is.close();
         } catch (IOException e) {
-            m_handler.getManager().getFactory().getLogger().log(Logger.ERROR, "Cannot open " + name + " : " + e.getMessage());
+            m_handler.log(Logger.ERROR, "Cannot open " + name + " : " + e.getMessage());
             return;
         }
     
@@ -126,7 +126,7 @@ public class SpecificationMetadata {
     /**
      * Constructor.
      * @param c : class
-     * @param type : componenet type
+     * @param type : component type
      * @param psd : the parent handler
      */
     public SpecificationMetadata(Class c, String type, ProvidedServiceHandler psd) {

@@ -41,13 +41,13 @@ public class XMLMetadataParser implements ContentHandler {
      * Get component type metadata. (both component and composite)
      * 
      * @return a components metadata
-     * @throws ParseException
-     *             when an error occurs in the xml parsing
+     * @throws ParseException :  occurs in the xml parsing
      */
     public Element[] getComponentsMetadata() throws ParseException {
         Element[] comp = m_elements[0].getElements("Component");
         Element[] compo = m_elements[0].getElements("Composite");
-        Element[] metadata = new Element[comp.length + compo.length];
+        Element[] handl = m_elements[0].getElements("Handler");
+        Element[] metadata = new Element[comp.length + compo.length + handl.length];
         int l = 0;
         for (int i = 0; i < comp.length; i++) {
             metadata[l] = comp[i];
@@ -55,6 +55,10 @@ public class XMLMetadataParser implements ContentHandler {
         }
         for (int i = 0; i < compo.length; i++) {
             metadata[l] = compo[i];
+            l++;
+        }
+        for (int i = 0; i < handl.length; i++) {
+            metadata[l] = handl[i];
             l++;
         }
         return metadata;
@@ -70,7 +74,8 @@ public class XMLMetadataParser implements ContentHandler {
         Element[] comp = m_elements[0].getElements("Component");
         Element[] compo = m_elements[0].getElements("Composite");
         Element[] conf = m_elements[0].getElements("Instance");
-        Element[] metadata = new Element[comp.length + conf.length + compo.length];
+        Element[] handl = m_elements[0].getElements("Handler");
+        Element[] metadata = new Element[comp.length + conf.length + compo.length + handl.length];
         int l = 0;
         for (int i = 0; i < comp.length; i++) {
             metadata[l] = comp[i];
@@ -82,6 +87,10 @@ public class XMLMetadataParser implements ContentHandler {
         }
         for (int i = 0; i < conf.length; i++) {
             metadata[l] = conf[i];
+            l++;
+        }
+        for (int i = 0; i < handl.length; i++) {
+            metadata[l] = handl[i];
             l++;
         }
         return metadata;
@@ -123,12 +132,12 @@ public class XMLMetadataParser implements ContentHandler {
         // Get the last element of the list
         Element lastElement = removeLastElement();
 
-        // Check if the name is consitent with the name of this end tag
-        if (!lastElement.getName().equalsIgnoreCase(qName) && !lastElement.getNameSpace().equals(namespaceURI)) {
+        // Check if the name is consistent with the name of this end tag
+        if (!lastElement.getName().equalsIgnoreCase(qName) && !lastElement.getNameSpace().equalsIgnoreCase(namespaceURI)) {
             throw new SAXException("Parse error when ending an element : " + qName + " [" + namespaceURI + "]");
         }
 
-        // The name is consitent
+        // The name is consistent
         // Add this element last element with if it is not the root
         if (m_elements.length != 0) {
             Element newQueue = m_elements[m_elements.length - 1];
