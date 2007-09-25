@@ -24,9 +24,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,10 +41,12 @@ import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTree;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
@@ -62,6 +66,8 @@ import aQute.lib.osgi.Jar;
 public class BundleAllPlugin
     extends ManifestPlugin
 {
+
+    private static final String LS = System.getProperty( "line.separator" );
 
     private static final Pattern SNAPSHOT_VERSION_PATTERN = Pattern.compile( "[0-9]{8}_[0-9]{6}_[0-9]+" );
 
@@ -115,6 +121,16 @@ public class BundleAllPlugin
      */
     private MavenProjectBuilder mavenProjectBuilder;
 
+    /**
+     * Ignore missing artifacts that are not required by current project but are required by the
+     * transitive dependencies.
+     * 
+     * @parameter
+     */
+    private boolean ignoreMissingArtifacts;
+
+    private Set artifactsBeingProcessed = new HashSet(); 
+
     public void execute()
         throws MojoExecutionException
     {
@@ -151,6 +167,13 @@ public class BundleAllPlugin
             return null;
         }
 
+        if ( artifactsBeingProcessed.contains( project.getArtifact() ) )
+        {
+            getLog().warn( "Ignoring artifact due to dependency cycle " + project.getArtifact() );
+            return null;
+        }
+        artifactsBeingProcessed.add( project.getArtifact() );
+
         DependencyTree dependencyTree;
 
         try
@@ -163,9 +186,9 @@ public class BundleAllPlugin
             throw new MojoExecutionException( "Unable to build dependency tree", e );
         }
 
-        getLog().debug( "Will bundle the following dependency tree\n" + dependencyTree );
-
         BundleInfo bundleInfo = new BundleInfo();
+
+        getLog().debug( "Will bundle the following dependency tree" + LS + dependencyTree );
 
         for ( Iterator it = dependencyTree.inverseIterator(); it.hasNext(); )
         {
@@ -176,13 +199,36 @@ public class BundleAllPlugin
                 break;
             }
 
-            Artifact artifact = resolveArtifact( node.getArtifact() );
+            if ( Artifact.SCOPE_SYSTEM.equals( node.getArtifact().getScope() ) )
+            {
+                getLog().debug( "Ignoring system scoped artifact " + node.getArtifact() );
+                continue;
+            }
+
+            Artifact artifact;
+            try
+            {
+                artifact = resolveArtifact( node.getArtifact() );
+            }
+            catch ( ArtifactNotFoundException e )
+            {
+                if ( ignoreMissingArtifacts )
+                {
+                    continue;
+                }
+                else
+                {
+                    throw new MojoExecutionException( "Artifact was not found in the repo" + node.getArtifact(), e );
+                }
+            }
+
             node.getArtifact().setFile( artifact.getFile() );
 
-            if ( node.getDepth() > depth )
+            int nodeDepth = node.getDepth();
+            if ( nodeDepth > depth )
             {
                 /* node is deeper than we want */
-                getLog().debug( "Ignoring " + node.getArtifact() + ", depth is " + node.getDepth() + ", bigger than " + depth );
+                getLog().debug( "Ignoring " + node.getArtifact() + ", depth is " + nodeDepth + ", bigger than " + depth );
                 continue;
             }
 
@@ -191,16 +237,25 @@ public class BundleAllPlugin
             {
                 childProject = mavenProjectBuilder.buildFromRepository( artifact, remoteRepositories, localRepository,
                                                                         true );
+                if ( childProject.getDependencyArtifacts() == null )
+                {
+                    childProject.setDependencyArtifacts( childProject.createArtifacts( factory, null, null ) );
+                }
             }
             catch ( ProjectBuildingException e )
             {
                 throw new MojoExecutionException( "Unable to build project object for artifact " + artifact, e );
             }
+            catch ( InvalidDependencyVersionException e )
+            {
+                throw new MojoExecutionException( "Invalid dependency version for artifact " + artifact );
+            }
+
             childProject.setArtifact( artifact );
             getLog().debug( "Child project artifact location: " + childProject.getArtifact().getFile() );
 
-            if ( ( artifact.getScope().equals( Artifact.SCOPE_COMPILE ) )
-                || ( artifact.getScope().equals( Artifact.SCOPE_RUNTIME ) ) )
+            if ( ( Artifact.SCOPE_COMPILE.equals( artifact.getScope() ) )
+                || ( Artifact.SCOPE_RUNTIME.equals( artifact.getScope() ) ) )
             {
                 BundleInfo subBundleInfo = bundleAll( childProject, depth - 1 );
                 if ( subBundleInfo != null )
@@ -216,6 +271,21 @@ public class BundleAllPlugin
             }
         }
 
+        return bundleRoot( project, bundleInfo );
+    }
+
+    /**
+     * Bundle the root of a dependency tree after all its children have been bundled
+     * 
+     * @param project
+     * @param bundleInfo
+     * @return
+     * @throws MojoExecutionException
+     */
+    private BundleInfo bundleRoot( MavenProject project, BundleInfo bundleInfo )
+        throws MojoExecutionException
+    {
+        /* do not bundle the project the mojo was called on */
         if ( getProject() != project )
         {
             getLog().debug( "Project artifact location: " + project.getArtifact().getFile() );
@@ -226,7 +296,6 @@ public class BundleAllPlugin
                 bundleInfo.merge( subBundleInfo );
             }
         }
-
         return bundleInfo;
     }
 
@@ -301,7 +370,11 @@ public class BundleAllPlugin
     private boolean isOsgi( Jar jar )
         throws IOException
     {
-        return jar.getManifest().getMainAttributes().getValue( Analyzer.BUNDLE_NAME ) != null;
+        if ( jar.getManifest() != null )
+        {
+            return jar.getManifest().getMainAttributes().getValue( Analyzer.BUNDLE_NAME ) != null;
+        }
+        return false;
     }
 
     private BundleInfo addExportedPackages( MavenProject project, Collection packages )
@@ -433,18 +506,30 @@ public class BundleAllPlugin
     }
 
     private Artifact resolveArtifact( Artifact artifact )
-        throws MojoExecutionException
+        throws MojoExecutionException, ArtifactNotFoundException
     {
-        Artifact resolvedArtifact = factory.createArtifact( artifact.getGroupId(), artifact.getArtifactId(), artifact
-            .getVersion(), artifact.getScope(), artifact.getType() );
+        VersionRange versionRange;
+        if ( artifact.getVersion() != null )
+        {
+            versionRange = VersionRange.createFromVersion( artifact.getVersion() );
+        }
+        else
+        {
+            versionRange = artifact.getVersionRange();
+        }
+
+        /*
+         * there's a bug with ArtifactFactory#createDependencyArtifact(String, String, VersionRange,
+         * String, String, String) that ignores the scope parameter, that's why we use the one with
+         * the extra null parameter
+         */
+        Artifact resolvedArtifact = factory.createDependencyArtifact( artifact.getGroupId(), artifact.getArtifactId(),
+                                                                      versionRange, artifact.getType(), artifact
+                                                                          .getClassifier(), artifact.getScope(), null );
 
         try
         {
             artifactResolver.resolve( resolvedArtifact, remoteRepositories, localRepository );
-        }
-        catch ( ArtifactNotFoundException e )
-        {
-            throw new MojoExecutionException( "Artifact was not found in the repo" + resolvedArtifact, e );
         }
         catch ( ArtifactResolutionException e )
         {
