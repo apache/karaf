@@ -124,7 +124,6 @@ public class BundlePlugin extends AbstractMojo {
      */
     private Maven2OsgiConverter maven2OsgiConverter;
 
-
     private static final String MAVEN_RESOURCES = "{maven-resources}";
     private static final String MAVEN_RESOURCES_REGEX = "\\{maven-resources\\}";
 
@@ -392,10 +391,12 @@ public class BundlePlugin extends AbstractMojo {
         {
             License l = (License) i.next();
             String url = l.getUrl();
+            if (url == null) continue;
             sb.append(del);
             sb.append(url);
             del = ", ";
         }
+        if (sb.length() == 0) return null;
         return sb;
     }
 
@@ -446,7 +447,8 @@ public class BundlePlugin extends AbstractMojo {
                     File file = this.getFile(artifact);
                     if (file == null)
                     {
-                        throw new RuntimeException("File is not available for artifact " + artifact + " in project " + project.getArtifact());
+                        getLog().warn( "File is not available for artifact " + artifact + " in project " + project.getArtifact() );
+                        continue;
                     }
                     Jar jar = new Jar(artifact.getArtifactId(), file);
                     list.add(jar);
@@ -539,8 +541,10 @@ public class BundlePlugin extends AbstractMojo {
         properties.put(Analyzer.BUNDLE_VERSION, project.getVersion());
         this.header(properties, Analyzer.BUNDLE_DESCRIPTION, project
            .getDescription());
-        this.header(properties, Analyzer.BUNDLE_LICENSE, this.printLicenses(project
-           .getLicenses()));
+        StringBuffer licenseText = this.printLicenses(project.getLicenses());
+        if (licenseText != null) {
+            this.header(properties, Analyzer.BUNDLE_LICENSE, licenseText);
+        }
         this.header(properties, Analyzer.BUNDLE_NAME, project.getName());
 
         if (project.getOrganization() != null)
