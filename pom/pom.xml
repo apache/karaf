@@ -101,7 +101,6 @@
         <module>../bundleplugin</module>
         <module>../scrplugin</module>
         <module>../tools/maven2/maven-osgi-plugin</module>
-        <module>../ipojo/plugin</module>
       </modules>
     </profile>
 
@@ -159,10 +158,7 @@
         <module>../wireadmin</module>
         <module>../prefs</module>
         
-        <module>../ipojo/core</module>
-        <module>../ipojo/arch</module>
-        <module>../ipojo/metadata</module>
-        <module>../ipojo/manipulator</module>
+        <module>../ipojo</module>
 
         <module>../mosgi</module> 
         <module>../jmood</module> 

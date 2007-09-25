@@ -10,7 +10,7 @@
   <artifactId>org.apache.felix.ipojo.ant</artifactId>
   <packaging>bundle</packaging>
   <version>0.7.5-SNAPSHOT</version>
-  <name>iPOJO Ant Task</name>
+  <name>Apache Felix iPOJO Ant Task</name>
   <dependencies>
   	<dependency>
       <groupId>${pom.groupId}</groupId>
