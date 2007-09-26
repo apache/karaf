@@ -43,7 +43,7 @@
       </plugin>
       <plugin>
 	      <groupId>org.apache.felix</groupId>
-	      <artifactId>org.apache.felix.ipojo.plugin</artifactId>
+	      <artifactId>maven-ipojo-plugin</artifactId>
               <version>${pom.version}</version>
 		  <executions>
           	<execution>
