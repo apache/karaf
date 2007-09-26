@@ -35,20 +35,11 @@
               <test>org.apache.maven.plugins:maven-surefire-plugin:test</test>
               <package>org.apache.felix:maven-bundle-plugin:bundle</package>
               <install>
-                org.apache.maven.plugins:maven-install-plugin:install<!--,
-REMOVED         org.apache.felix:maven-obr-plugin:repository-->
+                org.apache.maven.plugins:maven-install-plugin:install,
+                org.apache.felix:maven-bundle-plugin:install
               </install>
-              <deploy>
-                org.apache.maven.plugins:maven-deploy-plugin:deploy<!--,
-REMOVED         org.apache.felix:maven-obr-plugin:deployment-->
-              </deploy>
+              <deploy>org.apache.maven.plugins:maven-deploy-plugin:deploy</deploy>
             </phases>
-<!--
-            <optional-mojos>
-              <optional-mojo>org.apache.felix:maven-obr-plugin:repository</optional-mojo>
-              <optional-mojo>org.apache.felix:maven-obr-plugin:deployment</optional-mojo>
-            </optional-mojos>
--->
             <!-- END SNIPPET: bundle-lifecycle -->
           </lifecycle>
         </lifecycles>
