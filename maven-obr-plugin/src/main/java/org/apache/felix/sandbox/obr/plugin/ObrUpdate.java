@@ -230,6 +230,7 @@ public class ObrUpdate {
         }
 
         // the repository.xml file have been modified, so we save it
+        m_logger.info("Writing OBR metadata");
         writeToFile(m_repoFilename, m_root);
     }
 
@@ -264,7 +265,7 @@ public class ObrUpdate {
             try {
 
             	fout.createNewFile();
-                m_logger.info("Created new repository.xml file in "+fout.getAbsolutePath());
+                m_logger.info("Created "+fout.getAbsolutePath());
             } catch (IOException e) {
                 m_logger.error("Cannot create file " + fout.getAbsolutePath());
                 e.printStackTrace();
@@ -304,7 +305,7 @@ public class ObrUpdate {
     private Document parseFile(String filename, DocumentBuilder constructor) {
         if (constructor == null) { return null; }
         // The document is the root of the DOM tree.
-        m_logger.info("Try to open: " + filename);
+        m_logger.info("Parsing " + filename);
         Document doc = null;
         try {
             doc = constructor.parse(new File(filename));

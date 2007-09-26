@@ -314,42 +314,42 @@ public class ResourcesBundle {
 
         if (ebi.getPresentationName() != null) {
             this.setPresentationName(ebi.getPresentationName());
-            if (project.getName() != null) { m_logger.warn("pom property override:<presentationname> " + project.getName()); }
+            if (project.getName() != null) { m_logger.debug("pom property override:<presentationname> " + project.getName()); }
         } else {
             this.setPresentationName(project.getName());
         }
 
         if (ebi.getSymbolicName() != null) {
             this.setSymbolicName(ebi.getSymbolicName());
-            if (project.getArtifactId() != null) { m_logger.warn("pom property override:<symbolicname> " + project.getArtifactId()); }
+            if (project.getArtifactId() != null) { m_logger.debug("pom property override:<symbolicname> " + project.getArtifactId()); }
         } else {
             this.setSymbolicName(project.getArtifactId());
         }
 
         if (ebi.getVersion() != null) {
             this.setVersion(ebi.getVersion());
-            if (project.getVersion() != null) { m_logger.warn("pom property override:<version> " + project.getVersion()); }
+            if (project.getVersion() != null) { m_logger.debug("pom property override:<version> " + project.getVersion()); }
         } else {
             this.setVersion(project.getVersion());
         }
 
         if (ebi.getDescription() != null) {
             this.setDescription(ebi.getDescription());
-            if (project.getDescription() != null) { m_logger.warn("pom property override:<description> " + project.getDescription()); }
+            if (project.getDescription() != null) { m_logger.debug("pom property override:<description> " + project.getDescription()); }
         } else {
             this.setDescription(project.getDescription());
         }
 
         if (ebi.getDocumentation() != null) {
             this.setDocumentation(ebi.getDocumentation());
-            if (project.getUrl() != null) { m_logger.warn("pom property override:<documentation> " + project.getUrl()); }
+            if (project.getUrl() != null) { m_logger.debug("pom property override:<documentation> " + project.getUrl()); }
         } else {
             this.setDocumentation(project.getUrl());
         }
 
         if (ebi.getSource() != null) {
             this.setSource(ebi.getSource());
-            if (project.getScm() != null) { m_logger.warn("pom property override:<source> " + project.getScm()); }
+            if (project.getScm() != null) { m_logger.debug("pom property override:<source> " + project.getScm()); }
         } else {
             String src = null;
             if (project.getScm() != null) { src = project.getScm().getUrl(); }
@@ -363,7 +363,7 @@ public class ResourcesBundle {
             Iterator it = l.iterator();
             while (it.hasNext()) {
                 if (it.next() != null) {
-                    m_logger.warn("pom property override:<source> " + lic);
+                    m_logger.debug("pom property override:<license> " + lic);
                     break;
                 }
             }
