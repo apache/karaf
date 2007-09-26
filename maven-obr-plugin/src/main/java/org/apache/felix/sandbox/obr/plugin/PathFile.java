@@ -255,8 +255,8 @@ public class PathFile {
         if (!this.isValid()) { return null; }
         String path = PathFile.uniformSeparator(getAbsoluteFilename());
         if (File.separatorChar == '\\') { 
-        	path = path.replace("\\", "/");
-        	path = path.replace(" ", "%20");
+        	path = path.replace('\\', '/');
+        	path = path.replaceAll(" ", "%20");
         }
 
         URI uri = null;
@@ -467,6 +467,8 @@ public class PathFile {
 
     }
 
+    private static final String REGEXP_BACKSLASH = "\\\\";
+
     /**
      * replace all '\' by '\\' in the given string.
      * @param path string where replace the search pattern
@@ -475,7 +477,7 @@ public class PathFile {
     public static String doubleSeparator(String path) {
         // double the '\' in the path
         if (path != null && File.separatorChar == '\\') {
-            return path.replace("\\", "\\\\");
+            return path.replaceAll(REGEXP_BACKSLASH, REGEXP_BACKSLASH + REGEXP_BACKSLASH);
         } else {
             return null;
         }

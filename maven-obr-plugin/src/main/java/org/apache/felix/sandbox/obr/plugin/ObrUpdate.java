@@ -337,7 +337,7 @@ public class ObrUpdate {
                 m_logger.error("the obr.xml file seems to be invalid in a \"require\" tag (one or more attributes are missing)");
                 // e.printStackTrace();
             }
-            newRequireNode.setValue(node.getTextContent());
+            newRequireNode.setValue(XmlHelper.getTextContent(node));
             m_resourceBundle.addRequire(newRequireNode);
         } else if (node.getNodeName().compareTo("capability") == 0) {
             Capability newCapability = new Capability();

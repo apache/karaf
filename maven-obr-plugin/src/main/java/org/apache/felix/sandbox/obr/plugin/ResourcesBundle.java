@@ -265,24 +265,24 @@ public class ResourcesBundle {
         resource.setAttribute("uri", this.getUri());
         resource.setAttribute("version", this.getVersion());
 
-        description.setTextContent(this.getDescription());
+        XmlHelper.setTextContent(description,this.getDescription());
         resource.appendChild(description);
 
-        size.setTextContent(this.getSize());
+        XmlHelper.setTextContent(size,this.getSize());
         resource.appendChild(size);
 
         if (this.getDocumentation() != null) {
-            documentation.setTextContent(this.getDocumentation());
+            XmlHelper.setTextContent(documentation,this.getDocumentation());
             resource.appendChild(documentation);
         }
 
         if (this.getSource() != null) {
-            source.setTextContent(this.getSource());
+            XmlHelper.setTextContent(source,this.getSource());
             resource.appendChild(source);
         }
 
         if (this.getLicense() != null) {
-            license.setTextContent(this.getLicense());
+            XmlHelper.setTextContent(license, this.getLicense());
             resource.appendChild(license);
         }
 

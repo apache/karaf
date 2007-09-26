@@ -167,7 +167,7 @@ public class Require {
         require.setAttribute("extend", this.getExtend());
         require.setAttribute("multiple", this.getMultiple());
         require.setAttribute("optional", this.getOptional());
-        require.setTextContent(this.getValue());
+        XmlHelper.setTextContent(require,this.getValue());
 
         return require;
     }
