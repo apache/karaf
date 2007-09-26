@@ -43,10 +43,10 @@ class ImmediateComponentManager extends AbstractComponentManager
     private long m_componentId;
 
     // The object that implements the service and that is bound to other services
-    private Object m_implementationObject = null;
+    private Object m_implementationObject;
 
     // The context that will be passed to the implementationObject
-    private ComponentContext m_componentContext = null;
+    private ComponentContext m_componentContext;
 
     // optional properties provided in the ComponentFactory.newInstance method
     private Dictionary m_factoryProperties;
