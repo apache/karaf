@@ -18,6 +18,8 @@
  */
 package org.apache.felix.ipojo.manipulation;
 
+import java.util.Set;
+
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -40,6 +42,11 @@ public class MethodCodeAdapter extends AdviceAdapter implements Opcodes {
      * Name of the method.
      */
     private String m_name;
+    
+    /**
+     * Contained fields.
+     */
+    private Set m_fields;
 
     /**
      * MethodCodeAdapter constructor. 
@@ -48,11 +55,13 @@ public class MethodCodeAdapter extends AdviceAdapter implements Opcodes {
      * @param access : Method access
      * @param name : Method name
      * @param desc : Method descriptor
+     * @param fields : Contained fields
      */
-    public MethodCodeAdapter(final MethodVisitor mv, final String owner, int access, String name, String desc) {
+    public MethodCodeAdapter(final MethodVisitor mv, final String owner, int access, String name, String desc, Set fields) {
         super(mv, access, name, desc);
         m_owner = owner;
         m_name = name;
+        m_fields = fields;
     }
 
     /**
@@ -64,7 +73,7 @@ public class MethodCodeAdapter extends AdviceAdapter implements Opcodes {
      * @param desc : descriptor of the field
      */
     public void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
-        if (owner.equals(m_owner)) {
+        if (owner.equals(m_owner) && m_fields.contains(name)) {
             if (opcode == GETFIELD) {
                 String gDesc = "()" + desc;
                 visitMethodInsn(INVOKEVIRTUAL, owner, "_get" + name, gDesc);

@@ -18,6 +18,8 @@
  */
 package org.apache.felix.ipojo.manipulation;
 
+import java.util.Set;
+
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.MethodVisitor;
@@ -40,17 +42,24 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
      * Is the super call detected ?
      */
     private boolean m_superDetected;
+    
+    /**
+     * Set of contained fields.
+     */
+    private Set m_fields;
 
     /** 
      * PropertyCodeAdapter constructor.
      * A new FiledCodeAdapter should be create for each method visit.
      * @param mv MethodVisitor
      * @param owner Name of the class
+     * @param fields List of contained fields
      */
-    public ConstructorCodeAdapter(final MethodVisitor mv, final String owner) {
+    public ConstructorCodeAdapter(final MethodVisitor mv, final String owner, Set fields) {
         super(mv);
         m_owner = owner;
         m_superDetected = false;
+        m_fields = fields;
     }
 
 
@@ -67,7 +76,7 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
             final String owner,
             final String name,
             final String desc) {
-        if (owner.equals(m_owner)) {
+        if (m_fields.contains(name) && m_owner.equals(owner)) {
             if (opcode == GETFIELD) {
                 String gDesc = "()" + desc;
                 visitMethodInsn(INVOKEVIRTUAL, owner, "_get" + name, gDesc);

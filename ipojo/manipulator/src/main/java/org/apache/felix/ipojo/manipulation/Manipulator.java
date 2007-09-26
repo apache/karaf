@@ -92,7 +92,7 @@ public class Manipulator {
         ckReader.accept(ck, ClassReader.SKIP_FRAMES);
         is1.close();
 
-        m_fields = ck.getFields();
+        m_fields = ck.getFields(); // GEt visited fields (contains only POJO fields)
 
         // Get interface and remove POJO interface is presents
         String[] its = ck.getInterfaces();
@@ -128,7 +128,7 @@ public class Manipulator {
             InputStream is2 = url.openStream();
             ClassReader cr0 = new ClassReader(is2);
             ClassWriter cw0 = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-            PojoAdapter preprocess = new PojoAdapter(cw0);
+            PojoAdapter preprocess = new PojoAdapter(cw0, m_fields);
             cr0.accept(preprocess, ClassReader.SKIP_FRAMES);
             is2.close();
 
@@ -196,7 +196,7 @@ public class Manipulator {
             InputStream is2 = new ByteArrayInputStream(origin);
             ClassReader cr0 = new ClassReader(is2);
             ClassWriter cw0 = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-            PojoAdapter preprocess = new PojoAdapter(cw0);
+            PojoAdapter preprocess = new PojoAdapter(cw0, m_fields);
             cr0.accept(preprocess, ClassReader.SKIP_FRAMES);
             is2.close();
             finalWriter = cw0;

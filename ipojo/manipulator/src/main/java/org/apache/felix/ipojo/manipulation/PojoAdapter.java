@@ -19,7 +19,10 @@
 package org.apache.felix.ipojo.manipulation;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
@@ -50,7 +53,8 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
     /**
      * Field list.
      */
-    private List m_fields = new ArrayList();
+    private Set m_fields;
+    
 
     /**
      * Method list.
@@ -65,9 +69,12 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
     /**
      * Constructor.
      * @param arg0 : class adapter on which delegate.
+     * @param fields : map of contained fields.
+     * @param m_fields2 
      */
-    public PojoAdapter(ClassVisitor arg0) {
+    public PojoAdapter(ClassVisitor arg0, Map fields) {
         super(arg0);
+        m_fields = fields.keySet();
     }
 
     /**
@@ -121,7 +128,6 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
         createGetComponentInstanceMethod();
 
         m_methods.clear();
-        m_fields.clear();
 
         cv.visitEnd();
     }
@@ -140,7 +146,6 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
         // Add the field to the list.
         if ((access & ACC_STATIC) == 0) {
-            m_fields.add(name);
             addFlagField(name);
             m_getterSetterCreator.visitField(access, name, desc, signature, value);
         }
@@ -187,7 +192,7 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
                 return null;
             } else {
                 // return new ConstructorCodeAdapter(mv, access, desc, m_owner);
-                return new ConstructorCodeAdapter(mv, m_owner);
+                return new ConstructorCodeAdapter(mv, m_owner, m_fields);
             }
         } else { // "Normal methods"
             // avoid manipulating static methods.
@@ -213,7 +218,7 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
             }
 
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-            return new MethodCodeAdapter(mv, m_owner, access, name, desc);
+            return new MethodCodeAdapter(mv, m_owner, access, name, desc, m_fields);
         }
     }
 
@@ -300,8 +305,9 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
         mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getRegistredFields", "()Ljava/util/Set;");
         mv.visitVarInsn(ASTORE, 2);
 
-        for (int i = 0; i < m_fields.size(); i++) {
-            String field = (String) m_fields.get(i);
+        Iterator it = m_fields.iterator();
+        while (it.hasNext()) {
+            String field = (String) it.next();
             mv.visitVarInsn(ALOAD, 2);
             mv.visitLdcInsn(field);
             mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Set", "contains", "(Ljava/lang/Object;)Z");
