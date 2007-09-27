@@ -33,7 +33,7 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
     /**
      * Collected element.
      */
-    private Element m_element;
+    private MetadataCollector m_collector;
     
     /**
      * Field name. 
@@ -43,10 +43,10 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
     /**
      * Constructor.
      * @param fieldName : field name
-     * @param elem : element on which append the collected metadata.
+     * @param collector : metadata collector.
      */
-    public FieldCollector(String fieldName, Element elem) {
-        m_element = elem;
+    public FieldCollector(String fieldName, MetadataCollector collector) {
+        m_collector = collector;
         m_field = fieldName;
     }
 
@@ -61,23 +61,41 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
         if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Requires;")) {
             return new RequiresAnnotationParser(m_field);
         }
+        if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Controller;")) {
+            Element elem = new Element("controller", "");
+            elem.addAttribute(new Attribute("field", m_field));
+            m_collector.getElements().put(elem, null);
+            return null;
+        }
         if (arg0.equals("Lorg/apache/felix/ipojo/annotations/ServiceProperty;")) {
-            if (m_element.getElements("Provides", "").length == 0) {
+            if (! m_collector.getIds().containsKey("provides")) { // The provides annotation is already computed.
                 System.err.println("The component does not provide services, skip ServiceProperty for " + m_field);
                 return null;
+            } else {
+                // Get the provides element
+                Element parent = (Element) m_collector.getIds().get("provides");
+                return new PropertyAnnotationParser(m_field, parent);
             }
-            Element provides = m_element.getElements("Provides", "")[0];
-            return new PropertyAnnotationParser(provides, m_field);
+            
         }
         if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Property;")) {
             Element parent = null;
-            if (m_element.getElements("Properties", "").length == 0) {
+            if (! m_collector.getIds().containsKey("properties")) {
                 parent = new Element("Properties", "");
-                m_element.addElement(parent);
+                m_collector.getIds().put("properties", parent);
+                m_collector.getElements().put(parent, null);
+            } else {
+                parent = (Element) m_collector.getIds().get("properties");
             }
-            parent = m_element.getElements("Properties", "")[0];
-            return new PropertyAnnotationParser(parent, m_field);
+            return new PropertyAnnotationParser(m_field, parent);
         }
+        
+        if (CustomAnnotationVisitor.isCustomAnnotation(arg0)) {
+            Element elem = CustomAnnotationVisitor.buildElement(arg0);
+            elem.addAttribute(new Attribute("field", m_field)); // Add a field attribute
+            return new CustomAnnotationVisitor(elem, m_collector, true);
+        }
+        
         return null;
        
     }
@@ -155,20 +173,18 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
          * Create a "requires" element
          * @see org.objectweb.asm.AnnotationVisitor#visitEnd()
          */
-        public void visitEnd() { 
-         // Check if it is a full-determined requirement
+        public void visitEnd() {
             Element req = null;
-            Element[] reqs = m_element.getElements("requires");
-            for (int i = 0; i < reqs.length; i++) {
-                if (reqs[i].containsAttribute("id") && (reqs[i].getAttribute("id").equals(m_id) || reqs[i].getAttribute("id").equals(m_field))) {
-                    req = reqs[i];
-                    break;
-                }
+            if (m_id == null) {
+                req = (Element) m_collector.getIds().get(m_field);
+            } else {
+                req = (Element) m_collector.getIds().get(m_id);
             }
+
             if (req == null) {
-                // Add the complete requires
                 req = new Element("requires", "");
             }
+
             req.addAttribute(new Attribute("field", m_field));
             if (m_specification != null) {
                 req.addAttribute(new Attribute("interface", m_specification));
@@ -185,7 +201,15 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
             if (m_id != null) {
                 req.addAttribute(new Attribute("id", m_id));
             }
-            m_element.addElement(req);
+            
+            if (m_id != null) { 
+                m_collector.getIds().put(m_id, req);
+            } else {
+                m_collector.getIds().put(m_field, req);
+            }
+            
+            m_collector.getElements().put(req, null);
+                
             return;
         }
     }
@@ -196,7 +220,7 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
     private final class PropertyAnnotationParser extends EmptyVisitor implements AnnotationVisitor {
         
         /**
-         * Parent element (element on which append collected metadata).
+         * Parent element element.
          */
         private Element m_parent;
         
@@ -221,7 +245,7 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
          * @param parent : parent element.
          * @param field : field name.
          */
-        private PropertyAnnotationParser(Element parent, String field) {
+        private PropertyAnnotationParser(String field, Element parent) {
             m_parent = parent;
             m_field = field;
         }

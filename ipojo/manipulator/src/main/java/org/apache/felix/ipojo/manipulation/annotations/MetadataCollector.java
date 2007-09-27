@@ -18,12 +18,18 @@
  */
 package org.apache.felix.ipojo.manipulation.annotations;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 /**
@@ -48,6 +54,19 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
      */
     private boolean m_containsAnnotation = false;
     
+    /**
+     * Map of [element ids, element].
+     * This map is used to easily get an already created element. 
+     */
+    private Map m_ids = new HashMap();
+    
+    /**
+     * Map of [element, referto].
+     * This map is used to recreate the element hierarchie.
+     * Stored element are added under referred element. 
+     */
+    private Map m_elements = new HashMap();
+    
     public Element getElem() {
         return m_elem;
     }
@@ -55,6 +74,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
     public boolean isAnnotated() {
         return m_containsAnnotation;
     }
+    
 
     /**
      * Start visiting a class.
@@ -68,6 +88,8 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
      * @see org.objectweb.asm.ClassAdapter#visit(int, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
      */
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        m_ids = new HashMap();
+        m_elements = new HashMap();
         m_className = name;
     }
 
@@ -94,13 +116,15 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
             return new ProvidesVisitor();
         }
         
-        //@Element
-        if (desc.equals("Lorg/apache/felix/ipojo/annotations/Element;")) {
-            return new ElementVisitor(m_elem);
+        if (CustomAnnotationVisitor.isCustomAnnotation(desc)) {
+            Element elem = CustomAnnotationVisitor.buildElement(desc);
+            return new CustomAnnotationVisitor(elem, this, true);
         }
         
         return null;
     }
+    
+
 
     /**
      * Visit a field.
@@ -114,7 +138,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
      * @see org.objectweb.asm.ClassAdapter#visitField(int, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
      */
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-        return new FieldCollector(name, m_elem);
+        return new FieldCollector(name, this);
     }
 
     /**
@@ -129,9 +153,41 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
      * @see org.objectweb.asm.ClassAdapter#visitMethod(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
      */
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        return new MethodCollector(name, m_elem);
+        return new MethodCollector(name, this);
     }
     
+    /**
+     * End of the visit : compute final elements.
+     * @see org.objectweb.asm.commons.EmptyVisitor#visitEnd()
+     */
+    public void visitEnd() {
+        // Recompute the tree
+        Set elems = getElements().keySet();
+        Iterator it = elems.iterator();
+        while (it.hasNext()) {
+            Element current = (Element) it.next();
+            String reference = (String) getElements().get(current);
+            if (reference == null) {
+                m_elem.addElement(current);
+            } else {
+                Element ref = (Element) getIds().get(reference);
+                if (ref == null) {
+                    System.err.println("The element " + reference + " is not declared - skip the element " + current.toXMLString());
+                } else {
+                    ref.addElement(current);
+                }
+            }
+        }
+    }
+
+    protected Map getIds() {
+        return m_ids;
+    }
+
+    protected Map getElements() {
+        return m_elements;
+    }
+
     /**
      * Parse the @provides annotation.
      */
@@ -148,11 +204,22 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
          * @see org.objectweb.asm.commons.EmptyVisitor#visit(java.lang.String, java.lang.Object)
          */
         public void visit(String arg0, Object arg1) {
-            if (arg0.equals("specifications")) {
-                m_prov.addAttribute(new Attribute("interface", arg1.toString()));
-            }
             if (arg0.equals("factory")) {
                 m_prov.addAttribute(new Attribute("factory", arg1.toString()));
+            }
+        }
+        
+        /**
+         * Visit specifications array.
+         * @param arg0 : attribute name
+         * @return a visitor visiting each element of the array.
+         * @see org.objectweb.asm.commons.EmptyVisitor#visitArray(java.lang.String)
+         */
+        public AnnotationVisitor visitArray(String arg0) {
+            if (arg0.equals("specifications")) {
+                return new InterfaceArrayVisitor();
+            } else {
+                return null;
             }
         }
         
@@ -162,7 +229,39 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
          * @see org.objectweb.asm.commons.EmptyVisitor#visitEnd()
          */
         public void visitEnd() {
-            m_elem.addElement(m_prov);            
+            getIds().put("provides", m_prov);
+            getElements().put(m_prov, null);
+        }
+        
+        private class InterfaceArrayVisitor extends EmptyVisitor {
+            /**
+             * List of parsed interface.
+             */
+            private String m_itfs;
+            
+            /**
+             * Visit one element of the array.
+             * @param arg0 : null
+             * @param arg1 : element value.
+             * @see org.objectweb.asm.commons.EmptyVisitor#visit(java.lang.String, java.lang.Object)
+             */
+            public void visit(String arg0, Object arg1) {
+                if (m_itfs == null) {
+                    m_itfs = "{" + ((Type) arg1).getClassName();
+                } else {
+                    m_itfs += "," + ((Type) arg1).getClassName();
+                }
+            }
+            
+            /**
+             * End of the array visit.
+             * Add the attribute to 'provides' element.
+             * @see org.objectweb.asm.commons.EmptyVisitor#visitEnd()
+             */
+            public void visitEnd() {
+                m_prov.addAttribute(new Attribute("interface", m_itfs + "}"));
+            }
+            
         }
         
     }
@@ -250,164 +349,9 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
             if (m_propagation != null) {
                 Element props = new Element("properties", "");
                 props.addAttribute(new Attribute("propagation", m_propagation));
-                m_elem.addElement(props);
+                getIds().put("properties", props);
+                getElements().put(props, null);
             }
-        }        
-    }
-
-    /**
-     * Parse the @Element & @SubElement annotations. 
-     */
-    private class ElementVisitor extends EmptyVisitor implements AnnotationVisitor {
-        
-        /**
-         * Element name.
-         */
-        private String m_name;
-        
-        /**
-         * Element namespace. 
-         */
-        private String m_namespace;
-        
-        /**
-         * Parent Element. 
-         */
-        private Element m_parent;
-        
-        /**
-         * Accumulator element to store temporary attributes and sub-elements.
-         */
-        private Element m_accu = new Element("accu", "");
-        
-        /**
-         * Constructor.
-         * @param parent : parent element.
-         */
-        public ElementVisitor(Element parent) {
-            m_parent = parent;
-        }
-
-        /**
-         * Visit annotation attribute.
-         * @param arg0 : name of the attribute
-         * @param arg1 : value of the attribute
-         * @see org.objectweb.asm.AnnotationVisitor#visit(java.lang.String, java.lang.Object)
-         */
-        public void visit(String arg0, Object arg1) {
-            if (arg0.equals("name")) {
-                m_name = arg1.toString();
-            }
-            if (arg0.equals("namespace")) {
-                m_namespace = arg1.toString();
-            }
-        }
-
-        
-        /**
-         * Visit array annotation attribute (attributes & elements).
-         * @param arg0 : attribute name
-         * @return the annotation visitor which will visit the content of the array
-         * @see org.objectweb.asm.AnnotationVisitor#visitArray(java.lang.String)
-         */
-        public AnnotationVisitor visitArray(String arg0) {
-            if (arg0.equals("attributes")) {
-                return new EmptyVisitor() {
-                    public AnnotationVisitor visitAnnotation(String arg0, String arg1) {
-                        return new AttributeVisitor(m_accu);
-                    }
-                    
-                };
-            }
-            if (arg0.equals("elements")) {
-                return new EmptyVisitor() {
-                    public AnnotationVisitor visitAnnotation(String arg0, String arg1) {
-                        return new ElementVisitor(m_accu);
-                    }
-                    
-                };
-            }
-            return null;
-        }
-
-        /**
-         * End of the visit.
-         * Append computed element to the parent element.
-         * @see org.objectweb.asm.AnnotationVisitor#visitEnd()
-         */
-        public void visitEnd() {
-            Element elem = null;
-            if (m_namespace != null) {
-                elem = new Element(m_name, m_namespace);
-            } else {
-                elem = new Element(m_name, "");
-            }
-
-            Attribute[] atts = m_accu.getAttributes();
-            for (int i = 0; i < atts.length; i++) {
-                elem.addAttribute(atts[i]);
-            }
-
-            Element[] elems = m_accu.getElements();
-            for (int i = 0; i < elems.length; i++) {
-                elem.addElement(elems[i]);
-            }
-
-            m_parent.addElement(elem);
-        }
-        
-    }
-    
-    /**
-     * Parse an @attribute annotation.
-     */
-    private class AttributeVisitor extends EmptyVisitor implements AnnotationVisitor {
-        /**
-         * Parent element.
-         */
-        private Element m_parent;
-
-        /**
-         * Attribute name.
-         */
-        private String m_name;
-        
-        /**
-         * Attribute value. 
-         */
-        private String m_value;
-        
-        /**
-         * Constructor.
-         * @param parent : parent element.
-         */
-        public AttributeVisitor(Element parent) {
-            m_parent = parent;
-        }
-
-        /**
-         * Visit attributes. 
-         * @param arg0 : attribute name
-         * @param arg1 : attribute value
-         * @see org.objectweb.asm.commons.EmptyVisitor#visit(java.lang.String, java.lang.Object)
-         */
-        public void visit(String arg0, Object arg1) {
-            if (arg0.equals("name")) {
-                m_name = arg1.toString();
-                return;
-            }
-            if (arg0.equals("value")) {
-                m_value = arg1.toString();
-            }
-        }
-
-        /**
-         * End of the visit.
-         * Append this current attribute to the parent element.
-         * @see org.objectweb.asm.commons.EmptyVisitor#visitEnd()
-         */
-        public void visitEnd() {
-            m_parent.addAttribute(new Attribute(m_name, m_value));
         }        
     }
 }

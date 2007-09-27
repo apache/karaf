@@ -30,9 +30,9 @@ import org.objectweb.asm.commons.EmptyVisitor;
 public class MethodCollector extends EmptyVisitor {
 
     /**
-     * Parent element (component).
+     * Parent collector.
      */
-    private Element m_element;
+    private MetadataCollector m_collector;
     
     /**
      * Method name. 
@@ -42,10 +42,10 @@ public class MethodCollector extends EmptyVisitor {
     /**
      * Constructor.
      * @param name : name of the method.
-     * @param element : parent element.
+     * @param collector : parent collector.
      */
-    public MethodCollector(String name, Element element) {
-        m_element = element;
+    public MethodCollector(String name, MetadataCollector collector) {
+        m_collector = collector;
         m_name = name;
     }
 
@@ -75,6 +75,13 @@ public class MethodCollector extends EmptyVisitor {
         if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Unbind;")) {
             return processBind("unbind");
         }
+        
+        if (CustomAnnotationVisitor.isCustomAnnotation(arg0)) {
+            Element elem = CustomAnnotationVisitor.buildElement(arg0);
+            elem.addAttribute(new Attribute("method", m_name));
+            return new CustomAnnotationVisitor(elem, m_collector, true);
+        }
+        
         return null;
     }
 
@@ -95,7 +102,7 @@ public class MethodCollector extends EmptyVisitor {
         Element cb = new Element("callback", "");
         cb.addAttribute(new org.apache.felix.ipojo.metadata.Attribute("transition", "validate"));
         cb.addAttribute(new org.apache.felix.ipojo.metadata.Attribute("method", m_name));
-        m_element.addElement(cb);
+        m_collector.getElements().put(cb, null);
         return null;
     }
 
@@ -107,7 +114,7 @@ public class MethodCollector extends EmptyVisitor {
         Element cb = new Element("callback", "");
         cb.addAttribute(new org.apache.felix.ipojo.metadata.Attribute("transition", "invalidate"));
         cb.addAttribute(new org.apache.felix.ipojo.metadata.Attribute("method", m_name));
-        m_element.addElement(cb);
+        m_collector.getElements().put(cb, null);
         return null;
     }
 
@@ -116,12 +123,13 @@ public class MethodCollector extends EmptyVisitor {
      * @return the visitor parsing the visited annotation.
      */
     private AnnotationVisitor processServiceProperty() {
-        if (m_element.getElements("Provides", "").length == 0) {
+        if (! m_collector.getIds().containsKey("provides")) {
             System.err.println("the component does not provide services, skip ServiceProperty for " + m_name);
             return null;
+        } else {
+            Element provides = (Element) m_collector.getIds().get("provides");
+            return new PropertyAnnotationParser(provides, m_name);
         }
-        Element provides = m_element.getElements("Provides", "")[0];
-        return new PropertyAnnotationParser(provides, m_name);
     }
 
     /**
@@ -129,11 +137,15 @@ public class MethodCollector extends EmptyVisitor {
      * @return the visitor parsing the visited annotation.
      */
     private AnnotationVisitor processProperty() {
-        if (m_element.getElements("Properties", "").length == 0) {
-            m_element.addElement(new Element("Properties", ""));
+        Element prop = null;
+        if (! m_collector.getIds().containsKey("properties")) {
+            prop = new Element("Properties", "");
+            m_collector.getIds().put("properties", prop);
+            m_collector.getElements().put(prop, null);
+        } else {
+            prop = (Element) m_collector.getIds().get("properties");
         }
-        Element props = m_element.getElements("Properties", "")[0];
-        return new PropertyAnnotationParser(props, m_name);
+        return new PropertyAnnotationParser(prop, m_name);
     }
 
     /**
@@ -232,18 +244,7 @@ public class MethodCollector extends EmptyVisitor {
                 }
             }
             // Check if it is a full-determined requirement
-            Element req = null;
-            Element[] reqs = m_element.getElements("requires");
-            for (int i = 0; i < reqs.length; i++) {
-                if (reqs[i].containsAttribute("id") && reqs[i].getAttribute("id").equals(m_id)) {
-                    req = reqs[i];
-                    break;
-                }
-                if (reqs[i].containsAttribute("field") && reqs[i].getAttribute("field").equals(m_id)) {
-                    req = reqs[i];
-                    break;
-                }
-            }
+            Element req = (Element) m_collector.getIds().get(m_id);
             if (req == null) {
                 // Add the complete requires
                 req = new Element("requires", "");
@@ -267,7 +268,8 @@ public class MethodCollector extends EmptyVisitor {
             method.addAttribute(new Attribute("method", m_name));
             method.addAttribute(new Attribute("type", m_type));
             req.addElement(method);
-            m_element.addElement(req);
+            m_collector.getIds().put(m_id, req);
+            m_collector.getElements().put(req, null);
             return;
         }
     }

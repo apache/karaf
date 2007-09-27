@@ -32,7 +32,7 @@ public @interface Provides {
      * Set the provided specifications.
      * Default : all implemented interfaces
      */
-    String specification() default "";
+    Class[] specifications() default { };
     
     /**
      * Set the service object creation policy.
