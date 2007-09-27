@@ -78,21 +78,29 @@ public class OBRInstall extends AbstractMojo
         }
 
         Log log = getLog();
+        ObrUpdate update;
 
-        String localRepoPath = localRepository.getBasedir();
-        String artifactPath = localRepository.pathOf( project.getArtifact() );
-        String bundlePath = localRepoPath + File.separator + artifactPath;
-        bundlePath = bundlePath.replace( '\\', '/' );
+        try
+        {
+            String localRepoPath = localRepository.getBasedir();
+            String artifactPath = localRepository.pathOf( project.getArtifact() );
+            String bundlePath = localRepoPath + File.separator + artifactPath;
+            bundlePath = bundlePath.replace( '\\', '/' );
 
-        PathFile repositoryXml = normalizeRepositoryPath( obrRepository, localRepoPath );
-        String extensionXml = findOBRExtensions( project.getResources() );
+            PathFile repositoryXml = normalizeRepositoryPath( obrRepository, localRepoPath );
+            String extensionXml = findOBRExtensions( project.getResources() );
 
-        Config user = new Config();
+            Config user = new Config();
 
-        ObrUpdate update = new ObrUpdate( repositoryXml, extensionXml, project, bundlePath, localRepoPath, user, log );
+            update = new ObrUpdate( repositoryXml, extensionXml, project, bundlePath, localRepoPath, user, log );
 
-        repositoryXml.createPath();
-        update.updateRepository();
+            repositoryXml.createPath();
+            update.updateRepository();
+        }
+        catch( Exception e )
+        {
+            log.warn( "Exception while updating OBR: " + e.getLocalizedMessage(), e );
+        }
     }
 
     private static PathFile normalizeRepositoryPath( String obrPath, String mavenPath )
