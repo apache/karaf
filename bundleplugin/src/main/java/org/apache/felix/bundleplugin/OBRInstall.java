@@ -81,7 +81,8 @@ public class OBRInstall extends AbstractMojo
 
         String localRepoPath = localRepository.getBasedir();
         String artifactPath = localRepository.pathOf( project.getArtifact() );
-        String bundlePath = localRepoPath + File.separatorChar + artifactPath;
+        String bundlePath = localRepoPath + File.separator + artifactPath;
+        bundlePath = bundlePath.replace( '\\', '/' );
 
         PathFile repositoryXml = normalizeRepositoryPath( obrRepository, localRepoPath );
         String extensionXml = findOBRExtensions( project.getResources() );

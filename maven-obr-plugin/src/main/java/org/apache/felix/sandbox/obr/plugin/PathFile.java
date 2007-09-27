@@ -145,17 +145,17 @@ public class PathFile {
     }
 
     /**
-     * get only the name from the filname.
+     * get only the name from the filename.
      * @param fullFilename full filename
      * @return the name of the file or folder
      */
     private String extractFileName(String fullFilename) {
-        int index = fullFilename.lastIndexOf(File.separator);
+        int index = fullFilename.lastIndexOf('/'); // Given path 
         return fullFilename.substring(index + 1, fullFilename.length());
     }
 
     /**
-     * get the path form the filename.
+     * get the path from the filename.
      * @param fullFilename full filename
      * @return the path of the file
      */
