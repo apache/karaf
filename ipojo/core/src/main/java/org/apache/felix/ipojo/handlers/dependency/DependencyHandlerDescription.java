@@ -25,6 +25,7 @@ import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -112,7 +113,7 @@ public class DependencyHandlerDescription extends HandlerDescription {
             while (it.hasNext()) {
                 Element use = new Element("Uses", "");
                 ServiceReference ref = (ServiceReference) it.next();
-                use.addAttribute(new Attribute("instance.name", ref.getProperty("instance.name").toString()));
+                use.addAttribute(new Attribute("service.id", ref.getProperty(Constants.SERVICE_ID).toString()));                
                 String in = (String) ref.getProperty("instance.name");
                 if (in != null) {
                     use.addAttribute(new Attribute("instance.name", in));
