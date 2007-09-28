@@ -186,7 +186,7 @@ public class Callback {
     
     /**
      * Search the method object in the POJO by analyzing present method.
-     * The name of the maethod and the argument type are checked.
+     * The name of the method and the argument type are checked.
      */
     private void searchMethod() {
         Method[] methods = m_manager.getClazz().getDeclaredMethods();
@@ -249,26 +249,7 @@ public class Callback {
      * @throws IllegalAccessException : The method can not be invoked
      */
     public Object call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        if (m_methodObj == null) {
-            searchMethod();
-        }
-
-        if (m_isStatic) {
-            return m_methodObj.invoke(null, new Object[] {});
-        } else {
-            // Two cases :
-            // - if instances already exists : call on each instances
-            // - if no instance exists : create an instance
-            if (m_manager.getPojoObjects().length == 0) {
-                return m_methodObj.invoke(m_manager.getPojoObject(), new Object[] {});
-            } else {
-                Object r = null;
-                for (int i = 0; i < m_manager.getPojoObjects().length; i++) {
-                    r = m_methodObj.invoke(m_manager.getPojoObjects()[i], new Object[] {});
-                }
-                return r;
-            }
-        }
+        return call(new Object[0]);
     }
 
     /**
@@ -277,14 +258,11 @@ public class Callback {
      * @param instance : instance on which call the callback
      * @return the result of the invocation, null for void method
      * @throws NoSuchMethodException : the method was not found
-     * @throws IllegalAccessException : the method cannont be called
+     * @throws IllegalAccessException : the method cannot be called
      * @throws InvocationTargetException : an error happens in the method
      */
     public Object call(Object instance) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        if (m_methodObj == null) {
-            searchMethod();
-        }
-        return m_methodObj.invoke(instance, new Object[] {});
+        return call(instance, new Object[0]);
     }
 
     /**
@@ -328,7 +306,7 @@ public class Callback {
      * @param arg : the argument array
      * @return the result of the invocation, null for void method
      * @throws NoSuchMethodException : the callback method is not found
-     * @throws IllegalAccessException : the callbback method cannot be called
+     * @throws IllegalAccessException : the callback method cannot be called
      * @throws InvocationTargetException : an error occurs inside the called
      * method
      */

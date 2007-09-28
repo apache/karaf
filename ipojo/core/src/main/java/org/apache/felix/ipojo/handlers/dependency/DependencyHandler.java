@@ -147,17 +147,15 @@ public class DependencyHandler extends PrimitiveHandler {
         for (int i = 0; i < callbacks.length; i++) {
             MethodMetadata[] mets = manipulation.getMethods(callbacks[i].getMethodName());
             if (mets.length == 0) {
-                getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "A requirement callback " + callbacks[i].getMethodName() + " does not exist in the implementation");
+                log(Logger.ERROR, "A requirement callback " + callbacks[i].getMethodName() + " does not exist in the implementation");
                 throw new ConfigurationException("Requirement Callback : A requirement callback " + callbacks[i].getMethodName() + " does not exist in the implementation", getInstanceManager().getFactory().getName());
             }
-            if (mets[0].getMethodArguments().length > 1) {
-                getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "A requirement callback " + callbacks[i].getMethodName() + " must have 0 or 1 argument");
-                throw new ConfigurationException("Requirement Callback : A requirement callback " + callbacks[i].getMethodName() + " must have 0 or 1 argument", getInstanceManager().getFactory().getName());
+            if (mets[0].getMethodArguments().length > 2) {
+                log(Logger.ERROR, "A requirement callback " + callbacks[i].getMethodName() + " must have 0 or 1 or 2 arguments");
+                throw new ConfigurationException("Requirement Callback : A requirement callback " + callbacks[i].getMethodName() + " must have 0 or 1 or 2 arguments", getInstanceManager().getFactory().getName());
             }
-            if (mets[0].getMethodArguments().length == 0) {
-                callbacks[i].setArgument("EMPTY");
-            } else {
-                callbacks[i].setArgument(mets[0].getMethodArguments()[0]);
+            callbacks[i].setArgument(mets[0].getMethodArguments());
+            if (mets[0].getMethodArguments().length == 1) {
                 if (!mets[0].getMethodArguments()[0].equals(ServiceReference.class.getName())) {
                     if (dep.getSpecification() == null) {
                         dep.setSpecification(mets[0].getMethodArguments()[0]);
@@ -168,13 +166,31 @@ public class DependencyHandler extends PrimitiveHandler {
                         dep.setSpecification(mets[0].getMethodArguments()[0]);
                     }
                 }
+            } else if (mets[0].getMethodArguments().length == 2) {
+                // Check that the second arguments is a service reference
+                if (!mets[0].getMethodArguments()[1].equals(ServiceReference.class.getName())) {
+                    String message = "The requirement callback " + callbacks[i].getMethodName() + " must have a ServiceReference as the second arguments";
+                    log(Logger.ERROR, message);
+                    throw new ConfigurationException(message, getInstanceManager().getFactory().getName());
+                }
+                if (dep.getSpecification() == null) {
+                    dep.setSpecification(mets[0].getMethodArguments()[0]);
+                } else {
+                    if (!dep.getSpecification().equals(mets[0].getMethodArguments()[0])) {
+                        log(Logger.WARNING, "[DependencyHandler on " + getInstanceManager().getInstanceName() + "] The field type [" + mets[0].getMethodArguments()[0] + "] and the needed service interface [" + dep.getSpecification()
+                                + "] are not the same");
+                        dep.setSpecification(mets[0].getMethodArguments()[0]);
+                    }
+                }
+                
             }
+            
         }
 
         if (field != null) {
             FieldMetadata fm = manipulation.getField(field);
             if (fm == null) {
-                getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "A requirement field " + field + " does not exist in the implementation class");
+                log(Logger.ERROR, "A requirement field " + field + " does not exist in the implementation class");
                 throw new ConfigurationException("Requirement Callback : A requirement field " + field + " does not exist in the implementation class", getInstanceManager().getFactory().getName());
             }
             String type = fm.getFieldType();

@@ -848,6 +848,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
         props.put("component.class", m_componentClassName);
        
         props.put("factory.name", m_factoryName);
+        props.put(Constants.SERVICE_PID, m_factoryName); // Service PID is required for the integration in the configuration admin.
         if (m_typeName != null) {
             props.put("component.type", m_typeName);
         }

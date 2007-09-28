@@ -49,9 +49,9 @@ public class DependencyCallback {
     private int m_methodType;
     
     /**
-     * Argument of the callback.
+     * Arguments of the callback.
      */
-    private String m_argument;
+    private String[] m_argument;
 
     /**
      * Callback method name.
@@ -71,7 +71,7 @@ public class DependencyCallback {
     /**
      * Constructor.
      * 
-     * @param dep : the dependency attached to this depednency callback
+     * @param dep : the dependency attached to this dependency callback
      * @param method : the method to call
      * @param methodType : is the method to call a bind method or an unbind
      * method
@@ -95,29 +95,13 @@ public class DependencyCallback {
      * Set the argument type (Empty or the class name).
      * @param arg : the type name or EMPTY
      */
-    public void setArgument(String arg) {
+    public void setArgument(String[] arg) {
         m_argument = arg;
-        if ("EMPTY".equals(arg)) {
-            m_callback = new Callback(m_method, new String[0], false, m_manager);
-        } else {
-            m_callback = new Callback(m_method, new String[] {arg}, false, m_manager);
-        }
-        
+        m_callback = new Callback(m_method, arg, false, m_manager);        
     }
     
-    public String getArgument() {
+    public String[] getArgument() {
         return m_argument;
-    }
-
-    /**
-     * Call the callback method.
-     * 
-     * @throws NoSuchMethodException : Method is not found in the class
-     * @throws InvocationTargetException : The method is not static
-     * @throws IllegalAccessException : The method can not be invoked
-     */
-    protected void call() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        m_callback.call();
     }
 
     /**
@@ -130,14 +114,22 @@ public class DependencyCallback {
      * @throws IllegalAccessException : The method can not be invoked
      */
     protected void call(ServiceReference ref, Object obj) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        if ("EMPTY".equals(m_argument)) {
-            m_callback.call(new Object[] {});
-        } else {
-            if (m_argument.equals(ServiceReference.class.getName())) {
-                m_callback.call(new Object[] {ref});
-            } else {
-                m_callback.call(new Object[] {obj});
-            }
+        switch (m_argument.length) {
+            case 0 :
+                m_callback.call(new Object[0]);
+                break;
+            case 1 : 
+                if (m_argument[0].equals(ServiceReference.class.getName())) {
+                    m_callback.call(new Object[] {ref});
+                } else {
+                    m_callback.call(new Object[] {obj});
+                }
+                break;
+            case 2 :
+                m_callback.call(new Object[] {obj, ref});
+                break;
+            default : 
+                break;
         }
     }
 
@@ -153,28 +145,22 @@ public class DependencyCallback {
      * @throws InvocationTargetException
      */
     protected void callOnInstance(Object instance, ServiceReference ref, Object obj) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        if ("EMPTY".equals(m_argument)) {
-            m_callback.call(instance, new Object[] {});
-            return;
+        switch (m_argument.length) {
+            case 0 :
+                m_callback.call(instance, new Object[0]);
+                break;
+            case 1 : 
+                if (m_argument[0].equals(ServiceReference.class.getName())) {
+                    m_callback.call(instance, new Object[] {ref});
+                } else {
+                    m_callback.call(instance, new Object[] {obj});
+                }
+                break;
+            case 2 :
+                m_callback.call(instance, new Object[] {obj, ref});
+                break;
+            default : 
+                break;
         }
-        if (m_argument.equals(ServiceReference.class.getName())) {
-            m_callback.call(instance, new Object[] {ref});
-        } else {
-            m_callback.call(instance, new Object[] {obj});
-        }
-    }
-
-    /**
-     * Call the callback on the given instance with the given argument.
-     * 
-     * @param instance : the instance on which call the callback
-     * @param o : the service object to send to the callback
-     * @throws NoSuchMethodException : the method is not found
-     * @throws IllegalAccessException : the method could not be called
-     * @throws InvocationTargetException : an error happens in the called method
-     * @throws InvocationTargetException
-     */
-    protected void callOnInstance(Object instance, Object o) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        m_callback.call(instance, new Object[] {o});
     }
 }
