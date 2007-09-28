@@ -15,8 +15,8 @@
 package org.apache.felix.http.jetty;
 
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -178,25 +178,40 @@ public class ServletContextGroup implements ServletContext
 
     public String getRealPath( String path )
     {
-        return m_hdlr.getServletContext().getRealPath( path );
+        // resources are contained in the bundle and thus are not
+        // available as normal files in the platform filesystem
+        return null;
+    }
+
+
+    public URL getResource( String path )
+    {
+        return m_osgiHttpContext.getResource( path );
+    }
+
+
+    public InputStream getResourceAsStream( String path )
+    {
+        URL res = getResource( path );
+        if ( res != null )
+        {
+            try
+            {
+                return res.openStream();
+            }
+            catch ( IOException ignore )
+            {
+                // might want to log, but actually don't care here
+            }
+        }
+
+        return null;
     }
 
 
     public RequestDispatcher getRequestDispatcher( String uri )
     {
         return m_hdlr.getServletContext().getRequestDispatcher( uri );
-    }
-
-
-    public URL getResource( String path ) throws MalformedURLException
-    {
-        return m_hdlr.getServletContext().getResource( path );
-    }
-
-
-    public InputStream getResourceAsStream( String path )
-    {
-        return m_hdlr.getServletContext().getResourceAsStream( path );
     }
 
 
