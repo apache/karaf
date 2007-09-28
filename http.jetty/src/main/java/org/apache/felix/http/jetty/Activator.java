@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,17 +18,25 @@
  */
 package org.apache.felix.http.jetty;
 
+
 import java.lang.reflect.Constructor;
 
 import org.mortbay.http.HashUserRealm;
 import org.mortbay.http.HttpServer;
+import org.mortbay.http.JsseListener;
 import org.mortbay.http.SocketListener;
+import org.mortbay.jetty.servlet.OsgiServletHandler;
+import org.mortbay.jetty.servlet.ServletHttpContext;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-import org.mortbay.http.SunJsseListener;
-import org.mortbay.http.JsseListener;
+
 
 /**
  *  Basic implementation of OSGi HTTP service 1.1.
@@ -58,37 +66,34 @@ public class Activator implements BundleActivator
 
     private BundleContext m_bundleContext = null;
     private ServiceRegistration m_svcReg = null;
-    private HttpServiceFactory  m_httpServ = null;
+    private HttpServiceFactory m_httpServ = null;
     private HttpServer m_server = null;
+    private OsgiServletHandler m_hdlr = null;
 
     private int m_httpPort;
     private int m_httpsPort;
 
 
-    public void start(BundleContext bundleContext)
-        throws BundleException
+    public void start( BundleContext bundleContext ) throws BundleException
     {
         m_bundleContext = bundleContext;
 
         // org.mortbay.util.Loader needs this (used for JDK 1.4 log classes)
-        Thread.currentThread().setContextClassLoader(
-                this.getClass().getClassLoader());
-        
-        String optDebug =
-            m_bundleContext.getProperty("org.apache.felix.http.jetty.debug");
-        if (optDebug != null && optDebug.toLowerCase().equals("true"))
+        Thread.currentThread().setContextClassLoader( this.getClass().getClassLoader() );
+
+        String optDebug = m_bundleContext.getProperty( "org.apache.felix.http.jetty.debug" );
+        if ( optDebug != null && optDebug.toLowerCase().equals( "true" ) )
         {
-            Code.setDebug(true);
+            Code.setDebug( true );
             debug = true;
         }
 
         // get default HTTP and HTTPS ports as per the OSGi spec
         try
         {
-            m_httpPort = Integer.parseInt(m_bundleContext.getProperty(
-                    "org.osgi.service.http.port"));
+            m_httpPort = Integer.parseInt( m_bundleContext.getProperty( "org.osgi.service.http.port" ) );
         }
-        catch (Exception e)
+        catch ( Exception e )
         {
             // maybe log a message saying using default?
             m_httpPort = 80;
@@ -97,10 +102,9 @@ public class Activator implements BundleActivator
         try
         {
             // TODO: work out how/when we should use the HTTPS port
-            m_httpsPort = Integer.parseInt(m_bundleContext.getProperty(
-                    "org.osgi.service.http.port.secure"));
+            m_httpsPort = Integer.parseInt( m_bundleContext.getProperty( "org.osgi.service.http.port.secure" ) );
         }
-        catch (Exception e)
+        catch ( Exception e )
         {
             // maybe log a message saying using default?
             m_httpsPort = 443;
@@ -110,24 +114,24 @@ public class Activator implements BundleActivator
         {
             initializeJetty();
 
-        } catch (Exception ex) {
+        }
+        catch ( Exception ex )
+        {
             //TODO: maybe throw a bundle exception in here?
-            System.out.println("Http2: " + ex);
+            System.out.println( "Http2: " + ex );
             return;
         }
 
         m_httpServ = new HttpServiceFactory();
-        m_svcReg = m_bundleContext.registerService(
-            HttpService.class.getName(), m_httpServ, null);
+        m_svcReg = m_bundleContext.registerService( HttpService.class.getName(), m_httpServ, null );
     }
 
-    
-    public void stop(BundleContext bundleContext)
-        throws BundleException
+
+    public void stop( BundleContext bundleContext ) throws BundleException
     {
         //TODO: wonder if we need to closedown service factory ???
 
-        if (m_svcReg != null)
+        if ( m_svcReg != null )
         {
             m_svcReg.unregister();
         }
@@ -136,89 +140,113 @@ public class Activator implements BundleActivator
         {
             m_server.stop();
         }
-        catch (Exception e)
+        catch ( Exception e )
         {
             //TODO: log some form of error
         }
     }
 
-    protected void initializeJetty()
-        throws Exception
+
+    protected void initializeJetty() throws Exception
     {
         //TODO: Maybe create a separate "JettyServer" object here?
         // Realm
-        HashUserRealm realm =
-            new HashUserRealm("OSGi HTTP Service Realm");
+        HashUserRealm realm = new HashUserRealm( "OSGi HTTP Service Realm" );
 
         // Create server
         m_server = new HttpServer();
-        m_server.addRealm(realm);
+        m_server.addRealm( realm );
 
         // Add a regular HTTP listener
         SocketListener listener = null;
-        listener = (SocketListener)
-            m_server.addListener(new InetAddrPort(m_httpPort));        
-        listener.setMaxIdleTimeMs(60000);
-        
+        listener = ( SocketListener ) m_server.addListener( new InetAddrPort( m_httpPort ) );
+        listener.setMaxIdleTimeMs( 60000 );
+
         // See if we need to add an HTTPS listener
-        String enableHTTPS = m_bundleContext.getProperty("org.ungoverned.osgi.bundle.https.enable");
-        if (enableHTTPS != null && enableHTTPS.toLowerCase().equals("true"))
+        String enableHTTPS = m_bundleContext.getProperty( "org.ungoverned.osgi.bundle.https.enable" );
+        if ( enableHTTPS != null && enableHTTPS.toLowerCase().equals( "true" ) )
         {
             initializeHTTPS();
         }
-        
+
         m_server.start();
+
+        // setup the Jetty web application context shared by all Http services
+        ServletHttpContext hdlrContext = new ServletHttpContext();
+        hdlrContext.setContextPath( "/" );
+        //TODO: was in original code, but seems we shouldn't serve
+        //      resources in servlet context
+        //hdlrContext.setServingResources(true);
+        hdlrContext.setClassLoader( getClass().getClassLoader() );
+        debug( " adding handler context : " + hdlrContext );
+        m_server.addContext( hdlrContext );
+
+        m_hdlr = new OsgiServletHandler();
+        hdlrContext.addHandler( m_hdlr );
+
+        try
+        {
+            hdlrContext.start();
+        }
+        catch ( Exception e )
+        {
+            // make sure we unwind the adding process
+            System.err.println( "Exception Starting Jetty Handler Context: " + e );
+            e.printStackTrace( System.err );
+        }
     }
 
+
     //TODO: Just a basic implementation to give us a working HTTPS port. A better
-    //      long-term solution may be to separate out the SSL provider handling, 
+    //      long-term solution may be to separate out the SSL provider handling,
     //      keystore, passwords etc. into it's own pluggable service
-    protected void initializeHTTPS()
-        throws Exception
+    protected void initializeHTTPS() throws Exception
     {
-        String sslProvider = m_bundleContext.getProperty("org.ungoverned.osgi.bundle.https.provider");
-        if (sslProvider == null)
+        String sslProvider = m_bundleContext.getProperty( "org.ungoverned.osgi.bundle.https.provider" );
+        if ( sslProvider == null )
         {
             sslProvider = "org.mortbay.http.SunJsseListener";
         }
 
-        // Set default jetty properties for supplied values. For any not set, 
+        // Set default jetty properties for supplied values. For any not set,
         // Jetty will fallback to checking system properties.
-        String keystore = m_bundleContext.getProperty("org.ungoverned.osgi.bundle.https.keystore");
-        if (keystore != null)
+        String keystore = m_bundleContext.getProperty( "org.ungoverned.osgi.bundle.https.keystore" );
+        if ( keystore != null )
         {
-            System.setProperty(JsseListener.KEYSTORE_PROPERTY, keystore);
+            System.setProperty( JsseListener.KEYSTORE_PROPERTY, keystore );
         }
 
-        String passwd = m_bundleContext.getProperty("org.ungoverned.osgi.bundle.https.password");
-        if (passwd != null)
+        String passwd = m_bundleContext.getProperty( "org.ungoverned.osgi.bundle.https.password" );
+        if ( passwd != null )
         {
-            System.setProperty(JsseListener.PASSWORD_PROPERTY, passwd);
+            System.setProperty( JsseListener.PASSWORD_PROPERTY, passwd );
         }
-        
-        String keyPasswd = m_bundleContext.getProperty("org.ungoverned.osgi.bundle.https.key.password");
-        if (keyPasswd != null)
+
+        String keyPasswd = m_bundleContext.getProperty( "org.ungoverned.osgi.bundle.https.key.password" );
+        if ( keyPasswd != null )
         {
-            System.setProperty(JsseListener.KEYPASSWORD_PROPERTY, keyPasswd);
+            System.setProperty( JsseListener.KEYPASSWORD_PROPERTY, keyPasswd );
         }
 
         //SunJsseListener s_listener = new SunJsseListener(new InetAddrPort(m_httpsPort));
-        Object args[] = { new InetAddrPort(m_httpsPort) };
-        Class argTypes[] = { args[0].getClass() };
-        Class clazz = Class.forName(sslProvider);
-        Constructor cstruct = clazz.getDeclaredConstructor(argTypes);
-        JsseListener s_listener = (JsseListener) cstruct.newInstance(args);
+        Object args[] =
+            { new InetAddrPort( m_httpsPort ) };
+        Class argTypes[] =
+            { args[0].getClass() };
+        Class clazz = Class.forName( sslProvider );
+        Constructor cstruct = clazz.getDeclaredConstructor( argTypes );
+        JsseListener s_listener = ( JsseListener ) cstruct.newInstance( args );
 
-        m_server.addListener(s_listener);        
-        s_listener.setMaxIdleTimeMs(60000);
+        m_server.addListener( s_listener );
+        s_listener.setMaxIdleTimeMs( 60000 );
     }
 
-    
-    protected static void debug(String txt)
+
+    protected static void debug( String txt )
     {
-        if (debug)
+        if ( debug )
         {
-            System.err.println(">>Oscar HTTP: " + txt);
+            System.err.println( ">>Oscar HTTP: " + txt );
         }
     }
 
@@ -232,21 +260,20 @@ public class Activator implements BundleActivator
             HttpServiceImpl.initializeStatics();
         }
 
-        public Object getService(Bundle bundle,
-                ServiceRegistration registration)
+
+        public Object getService( Bundle bundle, ServiceRegistration registration )
         {
-            Object srv = new HttpServiceImpl(bundle, m_server); 
-            debug("** http service get:" + bundle + ", service: " + srv);
+            Object srv = new HttpServiceImpl( bundle, m_server, m_hdlr );
+            debug( "** http service get:" + bundle + ", service: " + srv );
             return srv;
         }
 
-        public void ungetService(Bundle bundle,
-                ServiceRegistration registration, Object service)
+
+        public void ungetService( Bundle bundle, ServiceRegistration registration, Object service )
         {
-            debug("** http service unget:" + bundle + ", service: " 
-            + service);
-            ((HttpServiceImpl) service).unregisterAll();
+            debug( "** http service unget:" + bundle + ", service: " + service );
+            ( ( HttpServiceImpl ) service ).unregisterAll();
         }
     }
-    
+
 }

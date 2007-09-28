@@ -18,17 +18,15 @@
  */
 package org.mortbay.jetty.servlet;
 
+
 import org.mortbay.http.HttpResponse;
 
-public class DummyServletHttpResponse
-        extends
-                ServletHttpResponse
+
+public class DummyServletHttpResponse extends ServletHttpResponse
 {
-    public DummyServletHttpResponse(ServletHttpRequest request,
-            HttpResponse response)
+    public DummyServletHttpResponse( ServletHttpRequest request, HttpResponse response )
     {
-        super(request, response);
+        super( request, response );
     }
 
 }
-

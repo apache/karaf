@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,10 +18,9 @@
  */
 package org.mortbay.jetty.servlet;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
+import java.io.IOException;
+import java.net.URL;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
@@ -31,35 +30,23 @@ import org.mortbay.http.PathMap;
 import org.mortbay.util.Code;
 
 
-public class OsgiServletHandler
-        extends ServletHandler
+public class OsgiServletHandler extends ServletHandler
 {
-    protected org.osgi.service.http.HttpContext     m_osgiHttpContext;
-
-
-    public OsgiServletHandler(
-            org.osgi.service.http.HttpContext osgiHttpContext)
-    {
-        m_osgiHttpContext = osgiHttpContext;
-    }
-
-
     // allow external adding of osgi servlet holder
-    public void addOsgiServletHolder(String pathSpec, ServletHolder holder)
+    public void addOsgiServletHolder( String pathSpec, ServletHolder holder )
     {
-        super.addServletHolder(pathSpec, holder);
+        super.addServletHolder( pathSpec, holder );
     }
 
 
-    public OsgiServletHolder removeOsgiServletHolder(String pathSpec)
+    public OsgiServletHolder removeOsgiServletHolder( String pathSpec )
     {
-        OsgiServletHolder holder = (OsgiServletHolder)
-                super.getServletHolder(pathSpec);
+        OsgiServletHolder holder = ( OsgiServletHolder ) super.getServletHolder( pathSpec );
         PathMap map = super.getServletMap();
-        map.remove(pathSpec);
+        map.remove( pathSpec );
 
         // Remove holder from handler name map to allow re-registration.
-        super._nameMap.remove(holder.getName());
+        super._nameMap.remove( holder.getName() );
 
         return holder;
     }
@@ -67,44 +54,18 @@ public class OsgiServletHandler
 
     // override standard handler behaviour to return resource from OSGi
     // HttpContext
-    public URL getResource(String uriInContext)
-                         throws MalformedURLException
+    public URL getResource( String uriInContext )
     {
-        Code.debug("OSGI ServletHandler getResource:" + uriInContext);
-        return m_osgiHttpContext.getResource(uriInContext);
+        Code.debug( "OSGI ServletHandler getResource:" + uriInContext );
+        return null;
     }
+
 
     // override standard behaviour to check context first
-    protected void dispatch(String pathInContext,
-                  HttpServletRequest request,
-                  HttpServletResponse response,
-                  ServletHolder servletHolder)
-        throws ServletException,
-               UnavailableException,
-               IOException
+    protected void dispatch( String pathInContext, HttpServletRequest request, HttpServletResponse response,
+        ServletHolder servletHolder ) throws ServletException, UnavailableException, IOException
     {
-        Code.debug("dispatch path = " + pathInContext);
-        if (m_osgiHttpContext.handleSecurity(request, response))
-        {
-            // service request
-            servletHolder.handle(request,response);
-        }
-        else
-        {
-            //TODO: any other error/auth handling we should do in here?
-            
-            // response.flushBuffer() if available
-            try
-            {
-                response.getClass().getDeclaredMethod("flushBuffer", null).invoke(response, null);
-            } 
-            catch (Exception ex)
-            {
-                // else ignore
-                ex.printStackTrace();
-            }
-        }
+        Code.debug( "dispatch path = " + pathInContext );
+        super.dispatch( pathInContext, request, response, servletHolder );
     }
 }
-
-

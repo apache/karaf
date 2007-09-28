@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,45 +19,56 @@
 package org.mortbay.jetty.servlet;
 
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-public class OsgiServletHolder
-        extends
-                ServletHolder
+import org.apache.felix.http.jetty.ServletContextGroup;
+
+
+public class OsgiServletHolder extends ServletHolder
 {
     private Servlet m_servlet;
+    private ServletContextGroup m_servletContextGroup;
     private ServletConfig m_config;
 
 
-    public OsgiServletHolder(ServletHandler handler, Servlet servlet,
-            String name, Dictionary params)
+    public OsgiServletHolder( ServletHandler handler, Servlet servlet, String name,
+        ServletContextGroup servletContextGroup, Dictionary params )
     {
-        super(handler,name,servlet.getClass().getName());
+        super( handler, name, servlet.getClass().getName() );
         m_servlet = servlet;
+        m_servletContextGroup = servletContextGroup;
 
         // Seemed safer to copy params into parent holder, rather than override
         // the getInitxxx methods.
-        if (params != null)
+        if ( params != null )
         {
             Enumeration e = params.keys();
-            while (e.hasMoreElements())
+            while ( e.hasMoreElements() )
             {
                 Object key = e.nextElement();
-                super.put(key, params.get(key));
+                super.put( key, params.get( key ) );
             }
         }
     }
 
+
     public synchronized Servlet getServlet()
-        throws UnavailableException
     {
-        return m_servlet;        
+        return m_servlet;
     }
+
 
     public Servlet getOsgiServlet()
     {
@@ -67,22 +78,55 @@ public class OsgiServletHolder
 
     // override "Holder" method to prevent instantiation
     public synchronized Object newInstance()
-        throws InstantiationException,
-               IllegalAccessException
     {
         return getOsgiServlet();
     }
 
+
+    public void handle( ServletRequest request, ServletResponse response ) throws ServletException,
+        UnavailableException, IOException
+    {
+        if ( m_servletContextGroup.getOsgiHttpContext().handleSecurity( ( HttpServletRequest ) request,
+            ( HttpServletResponse ) response ) )
+        {
+            // service request
+            super.handle( request, response );
+        }
+        else
+        {
+            //TODO: any other error/auth handling we should do in here?
+
+            // response.flushBuffer() if available
+            try
+            {
+                response.getClass().getDeclaredMethod( "flushBuffer", null ).invoke( response, null );
+            }
+            catch ( Exception ex )
+            {
+                // else ignore
+                ex.printStackTrace();
+            }
+        }
+    }
+
+
     // override "Holder" method to prevent attempt to load
     // the servlet class.
-    public void start()
-        throws Exception
+    public void start() throws Exception
     {
-        _class=m_servlet.getClass();
-        
-        m_config=new Config();
-        m_servlet.init(m_config);        
+        _class = m_servlet.getClass();
+
+        m_config = new Config()
+        {
+            public ServletContext getServletContext()
+            {
+                return m_servletContextGroup;
+            }
+        };
+
+        m_servlet.init( m_config );
     }
+
 
     // override "Holder" method to prevent destroy, which is only called
     // when a bundle manually unregisters
@@ -90,4 +134,3 @@ public class OsgiServletHolder
     {
     }
 }
-

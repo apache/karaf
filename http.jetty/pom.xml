@@ -21,7 +21,6 @@
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.compendium</artifactId>
       <version>0.9.0-SNAPSHOT</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
@@ -54,7 +53,7 @@
             <DynamicImport-Package>javax.net.ssl</DynamicImport-Package>
             <Export-Package>org.osgi.service.http; version=1.1</Export-Package>
             <Import-Package>!com.sun.net.ssl.internal.ssl,!com.sun.net.ssl,!org.xml.sax,!org.xml.sax.helpers,!javax.xml.parsers,!javax.security.cert,javax.servlet;version=1.1, javax.servlet.http;version=1.1,*</Import-Package>
-	    <Private-Package>org.apache.felix.http.jetty, org.mortbay.*</Private-Package>
+	        <Private-Package>org.apache.felix.http.jetty, org.mortbay.*;-split-package:=merge-first</Private-Package>
             <Export-Service>org.osgi.service.http.HttpService</Export-Service>
           </instructions>
         </configuration>

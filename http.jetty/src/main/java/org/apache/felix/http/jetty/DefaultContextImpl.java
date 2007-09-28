@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,6 +18,7 @@
  */
 package org.apache.felix.http.jetty;
 
+
 import java.net.URL;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
+
 
 /**
  * Implementation of default HttpContext as per OSGi specification.
@@ -40,35 +42,38 @@ public class DefaultContextImpl implements HttpContext
 {
     private Bundle m_bundle;
 
-    public DefaultContextImpl(Bundle bundle)
+
+    public DefaultContextImpl( Bundle bundle )
     {
         m_bundle = bundle;
     }
 
-    public String getMimeType(String name)
+
+    public String getMimeType( String name )
     {
         return null;
     }
 
-    public URL getResource(String name)
+
+    public URL getResource( String name )
     {
         //TODO: need to grant "org.osgi.framework.AdminPermission" when
         //      permissions are included.
-        Activator.debug("getResource for:" + name);
+        Activator.debug( "getResource for:" + name );
 
         //TODO: temp measure for name. Bundle classloading doesn't seem to find
         // resources which have a leading "/". This code should be removed
         // if the bundle classloader is changed to allow a leading "/"
-        if (name.startsWith("/"))
+        if ( name.startsWith( "/" ) )
         {
-            name = name.substring(1);
+            name = name.substring( 1 );
         }
 
-        return m_bundle.getResource(name);
+        return m_bundle.getResource( name );
     }
 
-    public boolean handleSecurity(HttpServletRequest request,
-        HttpServletResponse response)
+
+    public boolean handleSecurity( HttpServletRequest request, HttpServletResponse response )
     {
         //TODO: need to look into what's appropriate for default security
         //      handling. Default to all requests to be serviced for now.

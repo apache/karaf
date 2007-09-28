@@ -18,17 +18,15 @@
  */
 package org.mortbay.jetty.servlet;
 
+
 import org.mortbay.http.HttpRequest;
 
-public class DummyServletHttpRequest
-        extends
-                ServletHttpRequest
+
+public class DummyServletHttpRequest extends ServletHttpRequest
 {
-    public DummyServletHttpRequest(ServletHandler servletHandler,
-                       String pathInContext,
-                       HttpRequest request)
+    public DummyServletHttpRequest( ServletHandler servletHandler, String pathInContext, HttpRequest request )
     {
-        super(servletHandler, pathInContext, request);
+        super( servletHandler, pathInContext, request );
     }
 
 }
