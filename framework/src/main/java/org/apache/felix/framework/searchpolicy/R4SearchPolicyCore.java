@@ -125,13 +125,23 @@ public class R4SearchPolicyCore implements ModuleListener
         }
     }
 
-    protected synchronized boolean isResolved(IModule module)
+    /**
+     * Private utility method to check module resolved state.
+     * CONCURRENCY NOTE: This method must be called while holding
+     * a lock on m_factory.
+    **/
+    private boolean isResolved(IModule module)
     {
         ModuleData data = (ModuleData) m_moduleDataMap.get(module);
         return (data == null) ? false : data.m_resolved;
     }
 
-    protected synchronized void setResolved(IModule module, boolean resolved)
+    /**
+     * Private utility method to set module resolved state.
+     * CONCURRENCY NOTE: This method must be called while holding
+     * a lock on m_factory.
+    **/
+    private void setResolved(IModule module, boolean resolved)
     {
         ModuleData data = (ModuleData) m_moduleDataMap.get(module);
         if (data == null)
@@ -904,19 +914,6 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
     public void resolve(IModule rootModule)
         throws ResolveException
     {
-        // If the module is already resolved, then we can just return.
-        if (isResolved(rootModule))
-        {
-            return;
-        }
-
-        // This variable maps an unresolved module to a list of candidate
-        // sets, where there is one candidate set for each requirement that
-        // must be resolved. A candidate set contains the potential canidates
-        // available to resolve the requirement and the currently selected
-        // candidate index.
-        Map candidatesMap = new HashMap();
-
         // This map will be used to hold the final wires for all
         // resolved modules, which can then be used to fire resolved
         // events outside of the synchronized block.
@@ -927,6 +924,19 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         // middle of this operation.
         synchronized (m_factory)
         {
+            // If the module is already resolved, then we can just return.
+            if (isResolved(rootModule))
+            {
+                return;
+            }
+
+            // This variable maps an unresolved module to a list of candidate
+            // sets, where there is one candidate set for each requirement that
+            // must be resolved. A candidate set contains the potential canidates
+            // available to resolve the requirement and the currently selected
+            // candidate index.
+            Map candidatesMap = new HashMap();
+
             // The first step is to populate the candidates map. This
             // will use the target module to populate the candidates map
             // with all potential modules that need to be resolved as a

@@ -623,8 +623,17 @@ public class Felix extends FelixBundle
                             acquireBundleLock(bundle);
                             if (bundle.getInfo().getCurrentModule() == event.getModule())
                             {
-                                bundle.getInfo().setState(Bundle.RESOLVED);
-                                fireBundleEvent(BundleEvent.RESOLVED, bundle);
+                                if (bundle.getInfo().getState() != Bundle.INSTALLED)
+                                {
+                                    m_logger.log(
+                                        Logger.LOG_WARNING,
+                                        "Received a resolve event for a bundle that has already been resolved.");
+                                }
+                                else
+                                {
+                                    bundle.getInfo().setState(Bundle.RESOLVED);
+                                    fireBundleEvent(BundleEvent.RESOLVED, bundle);
+                                }
                             }
                         }
                         finally
