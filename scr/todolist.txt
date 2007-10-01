@@ -6,7 +6,7 @@ Component Description
 [ OK ] Log error with log service in case header cannot be located
 
 112.4.2 XML Document
-[    ] Use document namespace
+[ OK ] Use document namespace
 
 112.4.3 Component Element
 [ ok ] Verify that the name of a component is globally unique
@@ -20,8 +20,8 @@ Component Description
 112.4.5 Properties and Property Elements
 [ OK ] Support property
 [ OK ] Support Configuration Admin's service
-[    ] Element body with multiple lines
-[    ] Support properties (file)
+[ OK ] Element body with multiple lines
+[ OK ] Support properties (file)
 
 112.4.6 Service Element
 [ OK ] Support for optional declaration
@@ -53,7 +53,7 @@ Component Lifecycle
 [ OK ] 112.5.13 Unbinding
 
 [ OK ] 112.6 Component Properties
-[    ] 112.7 Deployment
+[ OK ] 112.7 Deployment
 
 Service Component Runtime
 
