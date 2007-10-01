@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -77,7 +77,7 @@ class BundleComponentActivator
      *      register components with to ensure uniqueness of component names
      *      and to ensure configuration updates.
      * @param   context  The bundle context owning the components
-     * 
+     *
      * @throws ComponentException if any error occurrs initializing this class
      */
     BundleComponentActivator( ComponentRegistry componentRegistry, ComponentActorThread componentActor,
@@ -114,16 +114,16 @@ class BundleComponentActivator
     /**
      * Gets the MetaData location, parses the meta data and requests the processing
      * of binder instances
-     * 
+     *
      * @param descriptorLocations A comma separated list of locations of
      *      component descriptors. This must not be <code>null</code>.
-     *      
+     *
      * @throws IllegalStateException If the bundle has already been uninstalled.
      */
     private void initialize( String descriptorLocations )
     {
 
-        // 112.4.1: The value of the the header is a comma separated list of XML entries within the Bundle 
+        // 112.4.1: The value of the the header is a comma separated list of XML entries within the Bundle
         StringTokenizer st = new StringTokenizer( descriptorLocations, ", " );
 
         while ( st.hasMoreTokens() )
@@ -146,7 +146,7 @@ class BundleComponentActivator
                 stream = descriptorURL.openStream();
 
                 BufferedReader in = new BufferedReader( new InputStreamReader( stream ) );
-                XmlHandler handler = new XmlHandler();
+                XmlHandler handler = new XmlHandler( m_context.getBundle() );
                 KXml2SAXParser parser;
 
                 parser = new KXml2SAXParser( in );
@@ -334,8 +334,8 @@ class BundleComponentActivator
      * then starting a thread to actually enable all components found.
      * <p>
      * If no component matching the given name is found the thread is not
-     * started and the method does nothing. 
-     * 
+     * started and the method does nothing.
+     *
      * @param name The name of the component to enable or <code>null</code> to
      *      enable all components.
      */
@@ -367,8 +367,8 @@ class BundleComponentActivator
      * then starting a thread to actually disable all components found.
      * <p>
      * If no component matching the given name is found the thread is not
-     * started and the method does nothing. 
-     * 
+     * started and the method does nothing.
+     *
      * @param name The name of the component to disable or <code>null</code> to
      *      disable all components.
      */
@@ -401,10 +401,10 @@ class BundleComponentActivator
      * an array containing a single component manager matching the name is
      * returned if one is registered. Finally, if no component manager with the
      * given name is registered, <code>null</code> is returned.
-     *  
+     *
      * @param name The name of the component manager to return or
      *      <code>null</code> to return an array of all component managers.
-     *      
+     *
      * @return An array containing one or more component managers according
      *      to the <code>name</code> parameter or <code>null</code> if no
      *      component manager with the given name is currently registered.
@@ -443,7 +443,7 @@ class BundleComponentActivator
      * Schedules the given <code>task</code> for asynchrounous execution or
      * synchronously runs the task if the thread is not running. If this instance
      * is {@link #isActive() not active}, the task is not executed.
-     * 
+     *
      * @param task The component task to execute
      */
     void schedule( Runnable task )
@@ -482,7 +482,7 @@ class BundleComponentActivator
      * Method to actually emit the log message. If the LogService is available,
      * the message will be logged through the LogService. Otherwise the message
      * is logged to stdout (or stderr in case of LOG_ERROR level messages),
-     * 
+     *
      * @param level The log level to log the message at
      * @param message The message to log
      * @param ex An optional <code>Throwable</code> whose stack trace is written,

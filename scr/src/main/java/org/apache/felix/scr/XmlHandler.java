@@ -19,12 +19,18 @@
 package org.apache.felix.scr;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.felix.scr.parser.KXml2SAXHandler;
 import org.apache.felix.scr.parser.ParseException;
+import org.osgi.framework.Bundle;
 
 
 /**
@@ -35,6 +41,9 @@ public class XmlHandler implements KXml2SAXHandler
 {
 
     public static final String NAMESPACE_URI = "http://www.osgi.org/xmlns/scr/v1.0.0";
+
+    // the bundle containing the XML resource being parsed
+    private Bundle m_bundle;
 
     // A reference to the current component
     private ComponentMetadata m_currentComponent;
@@ -53,6 +62,14 @@ public class XmlHandler implements KXml2SAXHandler
 
     /** Override namespace. */
     protected String overrideNamespace;
+
+
+    // creates an instance with the bundle owning the component descriptor
+    // file parsed by this instance
+    XmlHandler( Bundle bundle )
+    {
+        m_bundle = bundle;
+    }
 
 
     /**
@@ -124,7 +141,7 @@ public class XmlHandler implements KXml2SAXHandler
                     // Set the implementation class name (mandatory)
                     m_currentComponent.setImplementationClassName( attrib.getProperty( "class" ) );
                 }
-                // 112.4.5 Properties and Property Elements
+                // 112.4.5 [...] Property Elements
                 else if ( localName.equals( "property" ) )
                 {
                     PropertyMetadata prop = new PropertyMetadata();
@@ -149,11 +166,11 @@ public class XmlHandler implements KXml2SAXHandler
                         // hold the metadata pending
                         m_pendingProperty = prop;
                     }
-                    // TODO: treat the case where a properties file name is provided (p. 292)
                 }
+                // 112.4.5 Properties [...] Elements
                 else if ( localName.equals( "properties" ) )
                 {
-                    // TODO: implement the properties tag
+                    readPropertiesEntry( attrib.getProperty( "entry" ) );
                 }
                 // 112.4.6 Service Element
                 else if ( localName.equals( "service" ) )
@@ -292,5 +309,68 @@ public class XmlHandler implements KXml2SAXHandler
     public void setColumnNumber( int columnNumber )
     {
         // Not used
+    }
+
+
+    /**
+     * Reads the name property file from the bundle owning this descriptor. All
+     * properties read from the properties file are added to the current
+     * component's property meta data list.
+     *
+     * @param entryName The name of the bundle entry containing the propertes
+     *      to be added. This must not be <code>null</code>.
+     *
+     * @throws ParseException If the entry name is <code>null</code> or no
+     *      entry with the given name exists in the bundle or an error occurrs
+     *      reading the properties file.
+     */
+    private void readPropertiesEntry( String entryName ) throws ParseException
+    {
+        if ( entryName == null )
+        {
+            throw new ParseException( "Missing entry attribute of properties element", null );
+        }
+
+        URL entryURL = m_bundle.getEntry( entryName );
+        if ( entryURL == null )
+        {
+            throw new ParseException( "Missing bundle entry " + entryName, null );
+        }
+
+        Properties props = new Properties();
+        InputStream entryStream = null;
+        try
+        {
+            entryStream = entryURL.openStream();
+            props.load( entryStream );
+        }
+        catch ( IOException ioe )
+        {
+            throw new ParseException( "Failed to read properties entry " + entryName, ioe );
+        }
+        finally
+        {
+            if ( entryStream != null )
+            {
+                try
+                {
+                    entryStream.close();
+                }
+                catch ( IOException ignore )
+                {
+                    // don't care
+                }
+            }
+        }
+
+        // create PropertyMetadata for the properties from the file
+        for ( Iterator pi = props.entrySet().iterator(); pi.hasNext(); )
+        {
+            Map.Entry pEntry = ( Map.Entry ) pi.next();
+            PropertyMetadata prop = new PropertyMetadata();
+            prop.setName( String.valueOf( pEntry.getKey() ) );
+            prop.setValue( String.valueOf( pEntry.getValue() ) );
+            m_currentComponent.addProperty( prop );
+        }
     }
 }
