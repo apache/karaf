@@ -299,75 +299,90 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      *   4. Call the activate method, if present
      *   [5. Register provided services]
      */
-    private synchronized void activateInternal()
+    private void activateInternal()
     {
-        // CONCURRENCY NOTE: This method is only called from within the
-        //     ComponentActorThread to enable, activate or reactivate the
-        //     component. Still we use the setStateConditional to not create
-        //     a race condition with the deactivateInternal method
-        if ( !setStateConditional( STATE_ENABLED | STATE_UNSATISFIED, STATE_ACTIVATING ) )
-        {
-            return;
-        }
-
-        // we cannot activate if the component activator is shutting down
-        if ( !isActive() )
-        {
-            getActivator().log( LogService.LOG_DEBUG,
-                "Component cannot be activated because the Activator is being disposed", m_componentMetadata, null );
-            setState( STATE_UNSATISFIED );
-            return;
-        }
-
-        getActivator().log( LogService.LOG_DEBUG, "Activating component", m_componentMetadata, null );
-
-        // Before creating the implementation object, we are going to
-        // test if all the mandatory dependencies are satisfied
-        Iterator it = m_dependencyManagers.iterator();
-        while ( it.hasNext() )
-        {
-            DependencyManager dm = ( DependencyManager ) it.next();
-            if ( !dm.isSatisfied() )
-            {
-                // at least one dependency is not satisfied
-                getActivator().log( LogService.LOG_INFO, "Dependency not satisfied: " + dm.getName(),
-                    m_componentMetadata, null );
-                setState( STATE_UNSATISFIED );
-            }
-            
-            // if at least one dependency is missing, we cannot continue and
-            // have to return
-            if (getState() == STATE_UNSATISFIED)
+        synchronized (this) {
+            // CONCURRENCY NOTE: This method is only called from within the
+            //     ComponentActorThread to enable, activate or reactivate the
+            //     component. Still we use the setStateConditional to not create
+            //     a race condition with the deactivateInternal method
+            if ( !setStateConditional( STATE_ENABLED | STATE_UNSATISFIED, STATE_ACTIVATING ) )
             {
                 return;
             }
+
+            // we cannot activate if the component activator is shutting down
+            if ( !isActive() )
+            {
+                getActivator().log( LogService.LOG_DEBUG,
+                    "Component cannot be activated because the Activator is being disposed", m_componentMetadata, null );
+                setState( STATE_UNSATISFIED );
+                return;
+            }
+
+            getActivator().log( LogService.LOG_DEBUG, "Activating component", m_componentMetadata, null );
+
+            // Before creating the implementation object, we are going to
+            // test if all the mandatory dependencies are satisfied
+            Iterator it = m_dependencyManagers.iterator();
+            while ( it.hasNext() )
+            {
+                DependencyManager dm = ( DependencyManager ) it.next();
+                if ( !dm.isSatisfied() )
+                {
+                    // at least one dependency is not satisfied
+                    getActivator().log( LogService.LOG_INFO, "Dependency not satisfied: " + dm.getName(),
+                        m_componentMetadata, null );
+                    setState( STATE_UNSATISFIED );
+                }
+
+                // if at least one dependency is missing, we cannot continue and
+                // have to return
+                if (getState() == STATE_UNSATISFIED)
+                {
+                    return;
+                }
+            }
+
+            // 1. Load the component implementation class
+            // 2. Create the component instance and component context
+            // 3. Bind the target services
+            // 4. Call the activate method, if present
+            if ( !createComponent() )
+            {
+                // component creation failed, not active now
+                getActivator().log( LogService.LOG_ERROR, "Component instance could not be created, activation failed",
+                    m_componentMetadata, null );
+
+                // set state to unsatisfied
+                setState( STATE_UNSATISFIED );
+
+                return;
+            }
+
+            // Validation occurs before the services are provided, otherwhise the
+            // service provider's service may be called by a service requester
+            // while it is still ACTIVATING
+            setState( getSatisfiedState() );
         }
-
-        // 1. Load the component implementation class
-        // 2. Create the component instance and component context
-        // 3. Bind the target services
-        // 4. Call the activate method, if present
-        if ( !createComponent() )
-        {
-            // component creation failed, not active now
-            getActivator().log( LogService.LOG_ERROR, "Component instance could not be created, activation failed",
-                m_componentMetadata, null );
-
-            // set state to unsatisfied
-            setState( STATE_UNSATISFIED );
-
-            return;
-        }
-
-        // Validation occurs before the services are provided, otherwhise the
-        // service provider's service may be called by a service requester
-        // while it is still ACTIVATING
-        setState( getSatisfiedState() );
 
         // 5. Register provided services
-        m_serviceRegistration = registerComponentService();
+        // call this outside of the synchronization to prevent a possible
+        // deadlock if service registration tries to lock the framework or
+        // owning bundle during registration (see FELIX-384)
+        try
+        {
+            m_serviceRegistration = registerComponentService();
+            getActivator().log( LogService.LOG_DEBUG, "Component activated", m_componentMetadata, null );
+        }
+        catch ( IllegalStateException ise )
+        {
+            // thrown by service registration if the bundle is stopping
+            // we just log this at debug level but ignore it
+            getActivator().log( LogService.LOG_DEBUG, "Component activation failed while registering the service",
+                m_componentMetadata, ise );
+        }
 
-        getActivator().log( LogService.LOG_DEBUG, "Component activated", m_componentMetadata, null );
     }
 
 
@@ -466,7 +481,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     * Method is called by {@link #activate()} in STATE_ACTIVATING or by
     * {@link DelayedComponentManager#getService(Bundle, ServiceRegistration)}
     * in STATE_REGISTERED.
-    * 
+    *
     * @return <code>true</code> if creation of the component succeeded. If
     *       <code>false</code> is returned, the cause should have been logged.
     */
@@ -679,7 +694,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      * Otherwise the state is not changed and <code>false</code> is returned.
      * <p>
      * This method atomically checks the current state and sets the new state.
-     * 
+     *
      * @param requiredStates The set of states required for the state change to
      *          happen.
      * @param newState The new state to go into.
