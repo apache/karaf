@@ -19,16 +19,11 @@
 package org.apache.felix.scr;
 
 
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.ConfigurationEvent;
-import org.osgi.service.cm.ConfigurationListener;
 import org.osgi.service.component.ComponentException;
 
 
@@ -37,7 +32,7 @@ import org.osgi.service.component.ComponentException;
  *
  * @author fmeschbe
  */
-public class ComponentRegistry implements ConfigurationListener
+public class ComponentRegistry
 {
 
     // Known and registered ComponentManager instances
@@ -54,11 +49,6 @@ public class ComponentRegistry implements ConfigurationListener
     {
         m_componentNames = new HashMap();
         m_componentCounter = -1;
-
-        Dictionary props = new Hashtable();
-        props.put( Constants.SERVICE_DESCRIPTION, "Service Component Configuration Support" );
-        props.put( Constants.SERVICE_VENDOR, "Apache Software Foundation" );
-        registration = context.registerService( ConfigurationListener.class.getName(), this, props );
     }
 
 
@@ -68,19 +58,6 @@ public class ComponentRegistry implements ConfigurationListener
         {
             registration.unregister();
             registration = null;
-        }
-    }
-
-
-    //---------- ConfigurationListener ----------------------------------------
-
-    public void configurationEvent( ConfigurationEvent configEvent )
-    {
-        String pid = configEvent.getPid();
-        ComponentManager cm = getComponent( pid );
-        if ( cm != null )
-        {
-            cm.reconfigure();
         }
     }
 

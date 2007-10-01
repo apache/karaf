@@ -115,6 +115,11 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         // also register with the factory PID
         props.put( Constants.SERVICE_PID, getComponentMetadata().getName() );
 
+        // descriptive service properties
+        props.put( Constants.SERVICE_DESCRIPTION, "ManagedServiceFactory for Factory Component"
+            + getComponentMetadata().getName() );
+        props.put( Constants.SERVICE_VENDOR, "Apache Software Foundation" );
+
         return props;
     }
 
@@ -148,16 +153,10 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
             // keep a reference for future updates
             m_configuredServices.put( pid, cm );
         }
-        else
+        else if ( cm instanceof ImmediateComponentManager )
         {
-            if ( cm instanceof ImmediateComponentManager )
-            {
-                // inject current configuration before cycling
-                ( ( ImmediateComponentManager ) cm ).setFactoryProperties( configuration );
-            }
-
-            // reconfigure the component
-            cm.reconfigure();
+            // update the configuration as if called as ManagedService
+            ( ( ImmediateComponentManager ) cm ).updated( configuration );
         }
     }
 

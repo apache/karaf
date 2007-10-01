@@ -19,14 +19,15 @@
 package org.apache.felix.scr;
 
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
 
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.log.LogService;
@@ -37,7 +38,7 @@ import org.osgi.service.log.LogService;
  * implementation object's lifecycle.
  *
  */
-class ImmediateComponentManager extends AbstractComponentManager
+class ImmediateComponentManager extends AbstractComponentManager implements ManagedService
 {
     // the component ID
     private long m_componentId;
@@ -54,6 +55,15 @@ class ImmediateComponentManager extends AbstractComponentManager
     // the component properties, also used as service properties
     private Dictionary m_properties;
 
+    // the managed service registration object created in the constructor
+    // to receive configuration from the Configuration Admin Service
+    // null, if this is a component created by a component factory
+    private ServiceRegistration m_managedServiceRegistration;
+
+    // the component properties from the Configuration Admin Service
+    // this is null, if none exist or none are provided
+    private Dictionary m_configurationProperties;
+
 
     /**
      * The constructor receives both the activator and the metadata
@@ -66,6 +76,44 @@ class ImmediateComponentManager extends AbstractComponentManager
         super( activator, metadata );
 
         m_componentId = componentId;
+
+        // only register as ManagedService if not created by a Component Factory
+        if ( !getComponentMetadata().isFactory() )
+        {
+            Dictionary props = new Hashtable();
+            props.put( Constants.SERVICE_PID, getComponentMetadata().getName() );
+            props.put( Constants.SERVICE_DESCRIPTION, "ManagedService for Component "
+                + getComponentMetadata().getName() );
+            props.put( Constants.SERVICE_VENDOR, "Apache Software Foundation" );
+
+            m_managedServiceRegistration = activator.getBundleContext().registerService(
+                ManagedService.class.getName(), this, props );
+        }
+    }
+
+
+    /**
+     * Before doing real disposal, we also have to unregister the managed
+     * service which was registered when the instance was created.
+     */
+    public void dispose()
+    {
+        if ( m_managedServiceRegistration != null )
+        {
+            try
+            {
+                m_managedServiceRegistration.unregister();
+                m_managedServiceRegistration = null;
+            }
+            catch ( Throwable t )
+            {
+                getActivator().log( LogService.LOG_INFO, "Unexpected problem unregistering ManagedService",
+                    getComponentMetadata(), t );
+            }
+        }
+
+        // really dispose off this manager instance
+        super.dispose();
     }
 
 
@@ -295,23 +343,7 @@ class ImmediateComponentManager extends AbstractComponentManager
             Dictionary props = copyTo( null, getComponentMetadata().getProperties() );
 
             // 2. overlay with Configuration Admin properties
-            ConfigurationAdmin ca = getActivator().getConfigurationAdmin();
-            if ( ca != null )
-            {
-                try
-                {
-                    Configuration cfg = ca.getConfiguration( getComponentMetadata().getName() );
-                    if ( cfg != null )
-                    {
-                        copyTo( props, cfg.getProperties() );
-                    }
-                }
-                catch ( IOException ioe )
-                {
-                    getActivator().log( LogService.LOG_ERROR, "Problem getting Configuration", getComponentMetadata(),
-                        ioe );
-                }
-            }
+            copyTo( props, m_configurationProperties );
 
             // 3. copy any component factory properties, not supported yet
             copyTo( props, m_factoryProperties );
@@ -326,4 +358,27 @@ class ImmediateComponentManager extends AbstractComponentManager
         return m_properties;
     }
 
+
+    //---------- ManagedService interface
+
+    /**
+     * Called by the Configuration Admin Service to update the component with
+     * Configuration properties.
+     *
+     * @param configuration The configuration properties for the component from
+     *      the Configuration Admin Service or <code>null</code> if there is
+     *      no configuration or if the configuration has just been deleted.
+     */
+    public void updated( Dictionary configuration )
+    {
+        // store the properties
+        m_configurationProperties = configuration;
+
+        // reactivate the component to ensure it is provided with the
+        // configuration data
+        if ( ( getState() & ( STATE_ACTIVE | STATE_FACTORY | STATE_REGISTERED ) ) != 0 )
+        {
+            reactivate();
+        }
+    }
 }

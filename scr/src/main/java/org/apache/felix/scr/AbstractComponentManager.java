@@ -221,7 +221,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      * method has to actually complete before other actions like bundle stopping
      * may continue.
      */
-    public final void dispose()
+    public void dispose()
     {
         disposeInternal();
     }
