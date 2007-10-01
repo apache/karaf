@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -342,13 +343,25 @@ class ImmediateComponentManager extends AbstractComponentManager implements Mana
             // 1. the properties from the component descriptor
             Dictionary props = copyTo( null, getComponentMetadata().getProperties() );
 
-            // 2. overlay with Configuration Admin properties
+            // 2. add target properties of references
+            // 112.6 Component Properties, target properties (p. 302)
+            List depMetaData = getComponentMetadata().getDependencies();
+            for ( Iterator di = depMetaData.iterator(); di.hasNext(); )
+            {
+                ReferenceMetadata rm = ( ReferenceMetadata ) di.next();
+                if ( rm.getTarget() != null )
+                {
+                    props.put( rm.getTargetPropertyName(), rm.getTarget() );
+                }
+            }
+
+            // 3. overlay with Configuration Admin properties
             copyTo( props, m_configurationProperties );
 
-            // 3. copy any component factory properties, not supported yet
+            // 4. copy any component factory properties, not supported yet
             copyTo( props, m_factoryProperties );
 
-            // 4. set component.name and component.id
+            // 5. set component.name and component.id
             props.put( ComponentConstants.COMPONENT_NAME, getComponentMetadata().getName() );
             props.put( ComponentConstants.COMPONENT_ID, new Long( m_componentId ) );
 
@@ -373,6 +386,9 @@ class ImmediateComponentManager extends AbstractComponentManager implements Mana
     {
         // store the properties
         m_configurationProperties = configuration;
+
+        // clear the current properties to force using the configuration data
+        m_properties = null;
 
         // reactivate the component to ensure it is provided with the
         // configuration data

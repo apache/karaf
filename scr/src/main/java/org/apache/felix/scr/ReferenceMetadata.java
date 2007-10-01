@@ -161,7 +161,7 @@ public class ReferenceMetadata
             return;
         }
 
-        m_target = target;
+        m_target = ( target == null || target.length() == 0 ) ? null : target;
     }
 
 
@@ -310,6 +310,19 @@ public class ReferenceMetadata
     public boolean isMultiple()
     {
         return m_isMultiple;
+    }
+
+
+    /**
+     * Returns the name of the component property referring to the {@link #getTarget() target}
+     * property of this reference.
+     *
+     * @return the name of the target property which is the name of this referene
+     *      suffixed with the string ".target".
+     */
+    public String getTargetPropertyName()
+    {
+        return getName() + ".target";
     }
 
 

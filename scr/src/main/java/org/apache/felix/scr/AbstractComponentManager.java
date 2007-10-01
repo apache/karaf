@@ -324,10 +324,16 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
             // Before creating the implementation object, we are going to
             // test if all the mandatory dependencies are satisfied
+            Dictionary properties = getProperties();
             Iterator it = m_dependencyManagers.iterator();
             while ( it.hasNext() )
             {
                 DependencyManager dm = ( DependencyManager ) it.next();
+
+                // ensure the target filter is correctly set
+                dm.setTargetFilter( properties );
+
+                // check whether the service is satisfied
                 if ( !dm.isSatisfied() )
                 {
                     // at least one dependency is not satisfied

@@ -24,12 +24,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -48,10 +50,10 @@ class DependencyManager implements ServiceListener
     private static final int STATE_MASK = AbstractComponentManager.STATE_UNSATISFIED
         | AbstractComponentManager.STATE_ACTIVATING | AbstractComponentManager.STATE_ACTIVE
         | AbstractComponentManager.STATE_REGISTERED | AbstractComponentManager.STATE_FACTORY;
-    
+
     // the ServiceReference class instance
     private static final Class SERVICE_REFERENCE_CLASS = ServiceReference.class;
-    
+
     // pseudo service to mark a bound service without actual service instance
     private static final Object BOUND_SERVICE_SENTINEL = new Object();
 
@@ -63,21 +65,28 @@ class DependencyManager implements ServiceListener
 
     // The map of bound services indexed by their ServiceReference
     private Map m_bound;
-    
+
     // the number of matching services registered in the system
     private int m_size;
 
     // the bind method
     private Method m_bind;
-    
+
     // whether the bind method takes a service reference
     private boolean m_bindUsesReference;
-    
+
     // the unbind method
     private Method m_unbind;
-    
+
     // whether the unbind method takes a service reference
     private boolean m_unbindUsesReference;
+
+    // the target service filter string
+    private String m_target;
+
+    // the target service filter
+    private Filter m_targetFilter;
+
 
     /**
      * Constructor that receives several parameters.
@@ -91,17 +100,16 @@ class DependencyManager implements ServiceListener
         m_dependencyMetadata = dependency;
         m_bound = Collections.synchronizedMap( new HashMap() );
 
+        // setup the target filter from component descriptor
+        setTargetFilter( m_dependencyMetadata.getTarget() );
+
         // register the service listener
         String filterString = "(" + Constants.OBJECTCLASS + "=" + dependency.getInterface() + ")";
-        if ( dependency.getTarget() != null )
-        {
-            filterString = "(&" + filterString + dependency.getTarget() + ")";
-        }
         componentManager.getActivator().getBundleContext().addServiceListener( this, filterString );
 
         // get the current number of registered services available
         ServiceReference refs[] = getServiceReferences();
-        m_size = (refs == null) ? 0 : refs.length;
+        m_size = ( refs == null ) ? 0 : refs.length;
     }
 
 
@@ -116,15 +124,15 @@ class DependencyManager implements ServiceListener
         switch ( event.getType() )
         {
             case ServiceEvent.REGISTERED:
-                m_size++;
                 serviceAdded( event.getServiceReference() );
                 break;
+
             case ServiceEvent.MODIFIED:
                 serviceRemoved( event.getServiceReference() );
                 serviceAdded( event.getServiceReference() );
                 break;
+
             case ServiceEvent.UNREGISTERING:
-                m_size--;
                 serviceRemoved( event.getServiceReference() );
                 break;
         }
@@ -138,12 +146,24 @@ class DependencyManager implements ServiceListener
      * <p>
      * Depending on the component state and dependency configuration, the
      * component may be activated, re-activated or the service just be provided.
-     * 
+     *
      * @param reference The reference to the service newly registered or
      *      modified.
      */
     private void serviceAdded( ServiceReference reference )
     {
+        // ignore the service, if it does not match the target filter
+        if ( targetFilterMatch( reference ) )
+        {
+            m_componentManager.getActivator().log( LogService.LOG_DEBUG,
+                "Dependency Manager: Ignoring added Service for " + m_dependencyMetadata.getName() + " : does not match target filter " + getTarget(),
+                m_componentManager.getComponentMetadata(), null );
+            return;
+        }
+
+        // increment the number of services
+        m_size++;
+
         // if the component is currently unsatisfied, it may become satisfied
         // by adding this service, try to activate
         if ( m_componentManager.getState() == AbstractComponentManager.STATE_UNSATISFIED )
@@ -189,7 +209,7 @@ class DependencyManager implements ServiceListener
      * Depending on the component state and dependency configuration, the
      * component may be deactivated, re-activated, the service just be unbound
      * with or without a replacement service.
-     * 
+     *
      * @param reference The reference to the service unregistering or being
      *      modified.
      */
@@ -201,10 +221,13 @@ class DependencyManager implements ServiceListener
             return;
         }
 
+        // decrement the number of services
+        m_size--;
+
         if ( handleServiceEvent() )
         {
             // if the dependency is not satisfied anymore, we have to
-            // deactivate the component 
+            // deactivate the component
             if ( !isSatisfied() )
             {
                 m_componentManager.getActivator()
@@ -259,7 +282,7 @@ class DependencyManager implements ServiceListener
                                 + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
                                 + " not satisfied", m_componentManager.getComponentMetadata(), null );
                         m_componentManager.deactivate();
-                        
+
                         // abort here we do not need to do more
                         return;
                     }
@@ -283,6 +306,7 @@ class DependencyManager implements ServiceListener
         //            && state != AbstractComponentManager.INSTANCE_CREATING
         //            && state != AbstractComponentManager.INSTANCE_CREATED;
     }
+
 
     //---------- Service tracking support -------------------------------------
 
@@ -308,7 +332,7 @@ class DependencyManager implements ServiceListener
                 ungetService( boundRefs[i] );
             }
         }
-        
+
         // drop the method references (to help GC)
         m_bind = null;
         m_unbind = null;
@@ -322,7 +346,7 @@ class DependencyManager implements ServiceListener
      * no correlation to the number of services bound to this dependency
      * manager. It is actually the maximum number of services which may be
      * bound to this dependency manager.
-     * 
+     *
      * @see #isValid()
      */
     int size()
@@ -334,7 +358,7 @@ class DependencyManager implements ServiceListener
     /**
      * Returns the first service reference returned by the
      * {@link #getServiceReferences()} method or <code>null</code> if no
-     * matching service can be found. 
+     * matching service can be found.
      */
     ServiceReference getServiceReference()
     {
@@ -359,12 +383,12 @@ class DependencyManager implements ServiceListener
         try
         {
             return m_componentManager.getActivator().getBundleContext().getServiceReferences(
-                m_dependencyMetadata.getInterface(), m_dependencyMetadata.getTarget() );
+                m_dependencyMetadata.getInterface(), getTarget() );
         }
         catch ( InvalidSyntaxException ise )
         {
             m_componentManager.getActivator().log( LogService.LOG_ERROR,
-                "Unexpected problem with filter '" + m_dependencyMetadata.getTarget() + "'",
+                "Unexpected problem with filter '" + getTarget() + "'",
                 m_componentManager.getComponentMetadata(), ise );
             return null;
         }
@@ -412,7 +436,7 @@ class DependencyManager implements ServiceListener
         return ( services.size() > 0 ) ? services.toArray() : null;
     }
 
-    
+
     //---------- bound services maintenance -----------------------------------
 
     /**
@@ -444,7 +468,7 @@ class DependencyManager implements ServiceListener
      * We have to keep track of all services for which we called the bind
      * method to be able to call the unbind method in case the service is
      * unregistered.
-     * 
+     *
      * @param serviceReference The reference to the service being marked as
      *      bound.
      */
@@ -458,9 +482,9 @@ class DependencyManager implements ServiceListener
      * Returns the bound service represented by the given service reference
      * or <code>null</code> if this is instance is not currently bound to that
      * service.
-     * 
+     *
      * @param serviceReference The reference to the bound service
-     * 
+     *
      * @return the service for the reference or the {@link #BOUND_SERVICE_SENTINEL}
      *      if the service is bound or <code>null</code> if the service is not
      *      bound.
@@ -476,9 +500,9 @@ class DependencyManager implements ServiceListener
      * is already bound the given service, that bound service instance is
      * returned. Otherwise the service retrieved from the service registry
      * and kept as a bound service for future use.
-     * 
+     *
      * @param serviceReference The reference to the service to be returned
-     * 
+     *
      * @return The requested service or <code>null</code> if no service is
      *      registered for the service reference (any more).
      */
@@ -572,13 +596,13 @@ class DependencyManager implements ServiceListener
         {
             return true;
         }
-        
+
         // assume success to begin with: if the dependency is optional,
         // we don't care, whether we can bind a service. Otherwise, we
         // require at least one service to be bound, thus we require
         // flag being set in the loop below
         boolean success = m_dependencyMetadata.isOptional();
-        
+
         // number of services to bind
         for ( int index = 0; index < refs.length; index++ )
         {
@@ -754,7 +778,8 @@ class DependencyManager implements ServiceListener
                 // Get the bind method
                 m_componentManager.getActivator().log( LogService.LOG_DEBUG,
                     "getting bind: " + m_dependencyMetadata.getBind(), m_componentManager.getComponentMetadata(), null );
-                if (m_bind == null) {
+                if ( m_bind == null )
+                {
                     m_bind = getBindingMethod( m_dependencyMetadata.getBind(), implementationObject.getClass(),
                         m_dependencyMetadata.getInterface() );
 
@@ -767,7 +792,7 @@ class DependencyManager implements ServiceListener
                             m_componentManager.getComponentMetadata(), null );
                         return true;
                     }
-                    
+
                     // cache whether the bind method takes a reference
                     m_bindUsesReference = SERVICE_REFERENCE_CLASS.equals( m_bind.getParameterTypes()[0] );
                 }
@@ -777,7 +802,7 @@ class DependencyManager implements ServiceListener
                 if ( m_bindUsesReference )
                 {
                     parameter = ref;
-                    
+
                     // mark this service as bound using the special sentinel
                     bindService( ref );
                 }
@@ -941,4 +966,117 @@ class DependencyManager implements ServiceListener
         }
     }
 
+
+    //------------- Service target filter support -----------------------------
+
+    /**
+     * Sets the target filter from target filter property contained in the
+     * properties. The filter is taken from a property whose name is derived
+     * from the dependency name and the suffix <code>.target</code> as defined
+     * for target properties on page 302 of the Declarative Services
+     * Specification, section 112.6.
+     *
+     * @param properties The properties containing the optional target service
+     *      filter property
+     */
+    void setTargetFilter( Dictionary properties )
+    {
+        setTargetFilter( ( String ) properties.get( m_dependencyMetadata.getTargetPropertyName() ) );
+    }
+
+
+    /**
+     * Sets the target filter of this dependency to the new filter value. If the
+     * new target filter is the same as the old target filter, this method has
+     * not effect. Otherwise any services currently bound but not matching the
+     * new filter are unbound. Likewise any registered services not currently
+     * bound but matching the new filter are bound.
+     *
+     * @param target The new target filter to be set. This may be
+     *      <code>null</code> if no target filtering is to be used.
+     */
+    private void setTargetFilter( String target )
+    {
+        // do nothing if target filter does not change
+        if ( ( m_target == null && target == null ) || ( m_target != null && m_target.equals( target ) ) )
+        {
+            return;
+        }
+
+        m_target = target;
+        if ( target != null )
+        {
+            try
+            {
+                m_targetFilter = m_componentManager.getActivator().getBundleContext().createFilter( target );
+            }
+            catch ( InvalidSyntaxException ise )
+            {
+                // log
+                m_targetFilter = null;
+            }
+        }
+        else
+        {
+            m_targetFilter = null;
+        }
+
+        // check for services to be removed
+        if ( m_targetFilter != null )
+        {
+            ServiceReference[] refs = getBoundServiceReferences();
+            if ( refs != null )
+            {
+                for ( int i = 0; i < refs.length; i++ )
+                {
+                    if ( !m_targetFilter.match( refs[i] ) )
+                    {
+                        // might want to do this asynchronously ??
+                        serviceRemoved( refs[i] );
+                    }
+                }
+            }
+        }
+
+        // check for new services to be added
+        ServiceReference[] refs = getServiceReferences();
+        if ( refs != null )
+        {
+            for ( int i = 0; i < refs.length; i++ )
+            {
+                if ( getBoundService( refs[i] ) == null )
+                {
+                    // might want to do this asynchronously ??
+                    serviceAdded( refs[i] );
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Returns the target filter of this dependency as a string or
+     * <code>null</code> if this dependency has no target filter set.
+     *
+     * @return The target filter of this dependency or <code>null</code> if
+     *      none is set.
+     */
+    private String getTarget()
+    {
+        return m_target;
+    }
+
+
+    /**
+     * Checks whether the service references matches the target filter of this
+     * dependency.
+     *
+     * @param ref The service reference to check
+     * @return <code>true</code> if this dependency has no target filter or if
+     *      the target filter matches the service reference.
+     */
+    private boolean targetFilterMatch( ServiceReference ref )
+    {
+        return m_targetFilter == null || m_targetFilter.match( ref );
+    }
 }
