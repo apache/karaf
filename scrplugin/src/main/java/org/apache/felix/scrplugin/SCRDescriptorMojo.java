@@ -20,6 +20,7 @@ package org.apache.felix.scrplugin;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -209,7 +210,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
             resource.setDirectory(this.outputDirectory.getAbsolutePath());
             this.project.addResource(resource);
         }
-        
+
         // and set include accordingly
         String svcComp = project.getProperties().getProperty("Service-Component");
         svcComp= (svcComp == null) ? "OSGI-INF/" + finalName : svcComp + ", " + "OSGI-INF/" + finalName;
@@ -235,29 +236,30 @@ public class SCRDescriptorMojo extends AbstractMojo {
         boolean inherited = this.getBoolean(componentTag, Constants.COMPONENT_INHERIT, false);
         this.doServices(description.getTagsByName(Constants.SERVICE, inherited), component, description);
 
-        // properties
-        final JavaTag[] properties = description.getTagsByName(Constants.PROPERTY, inherited);
-        if (properties != null && properties.length > 0) {
-            for (int i=0; i < properties.length; i++) {
-                this.doProperty(properties[i], null, component, ocd);
-            }
-        }
+        // collect properties and references from class tags and fields
+        final Map properties = new HashMap();
+        final Map references = new HashMap();
 
-        // references
-        final JavaTag[] references = description.getTagsByName(Constants.REFERENCE, inherited);
-        if (references != null || references.length > 0) {
-            for (int i=0; i < references.length; i++) {
-                this.doReference(references[i], null, component);
-            }
-        }
-
-        // fields
+        JavaClassDescription currentDescription = description;
         do {
+            // properties
+            final JavaTag[] props = currentDescription.getTagsByName(Constants.PROPERTY, false);
+            for (int i=0; i < props.length; i++) {
+                this.testProperty(properties, props[i], null, description == currentDescription);
+            }
+
+            // references
+            final JavaTag[] refs = description.getTagsByName(Constants.REFERENCE, inherited);
+            for (int i=0; i < refs.length; i++) {
+                this.testReference(references, refs[i], null, description == currentDescription);
+            }
+
+            // fields
             final JavaField[] fields = description.getFields();
-            for (int i=0; fields != null && i < fields.length; i++) {
+            for (int i=0; i < fields.length; i++) {
                 JavaTag tag = fields[i].getTagByName(Constants.REFERENCE);
                 if (tag != null) {
-                    this.doReference(tag, fields[i].getName(), component);
+                    this.testReference(references, tag, fields[i].getName(), description == currentDescription);
                 }
 
                 tag = fields[i].getTagByName(Constants.PROPERTY);
@@ -271,12 +273,30 @@ public class SCRDescriptorMojo extends AbstractMojo {
                             defaultName = defaultName.substring(0, defaultName.lastIndexOf("\""));
                         }
                     }
-                    this.doProperty(tag, defaultName, component, ocd);
+                    this.testProperty(properties, tag, defaultName, description == currentDescription);
                 }
             }
 
-            description = description.getSuperClass();
-        } while (inherited && description != null);
+            currentDescription = currentDescription.getSuperClass();
+        } while (inherited && currentDescription != null);
+
+        // process properties
+        final Iterator propIter = properties.entrySet().iterator();
+        while ( propIter.hasNext() ) {
+            final Map.Entry entry = (Map.Entry)propIter.next();
+            final String propName = entry.getKey().toString();
+            final JavaTag tag = (JavaTag)entry.getValue();
+            this.doProperty(tag, propName, component, ocd);
+        }
+
+        // process references
+        final Iterator refIter = references.entrySet().iterator();
+        while ( refIter.hasNext() ) {
+            final Map.Entry entry = (Map.Entry)refIter.next();
+            final String refName = entry.getKey().toString();
+            final JavaTag tag = (JavaTag)entry.getValue();
+            this.doReference(tag, refName, component);
+        }
 
         // pid handling
         final boolean createPid = this.getBoolean(componentTag, Constants.COMPONENT_CREATE_PID, true);
@@ -413,105 +433,156 @@ public class SCRDescriptorMojo extends AbstractMojo {
      * @param defaultName
      * @param component
      */
-    protected void doProperty(JavaTag property, String defaultName, Component component, OCD ocd) {
+    protected void doProperty(JavaTag property, String name, Component component, OCD ocd) {
+        final Property prop = new Property(property);
+        prop.setName(name);
+        prop.setType(property.getNamedParameter(Constants.PROPERTY_TYPE));
+        final String value = property.getNamedParameter(Constants.PROPERTY_VALUE);
+        if ( value != null ) {
+            prop.setValue(value);
+        } else {
+            // check for multivalue
+            final List values = new ArrayList();
+            final Map valueMap = property.getNamedParameterMap();
+            for (Iterator vi = valueMap.entrySet().iterator(); vi.hasNext();) {
+                final Map.Entry entry = (Map.Entry) vi.next();
+                final String key = (String) entry.getKey();
+                if (key.startsWith("values")) {
+                    values.add(entry.getValue());
+                }
+            }
+            if ( values.size() > 0 ) {
+                prop.setMultiValue((String[])values.toArray(new String[values.size()]));
+            }
+        }
+
+        // property is private if explicitly marked or a well known
+        // service property such as service.pid
+        final boolean isPrivate = getBoolean(property,
+            Constants.PROPERTY_PRIVATE, false)
+            || name.equals(org.osgi.framework.Constants.SERVICE_PID)
+            || name.equals(org.osgi.framework.Constants.SERVICE_DESCRIPTION)
+            || name.equals(org.osgi.framework.Constants.SERVICE_ID)
+            || name.equals(org.osgi.framework.Constants.SERVICE_RANKING)
+            || name.equals(org.osgi.framework.Constants.SERVICE_VENDOR)
+            || name.equals(ConfigurationAdmin.SERVICE_BUNDLELOCATION)
+            || name.equals(ConfigurationAdmin.SERVICE_FACTORYPID);
+
+        // if this is a public property and the component is generating metatype info
+        // store the information!
+        if ( !isPrivate && ocd != null ) {
+            final AttributeDefinition ad = new AttributeDefinition();
+            ocd.getProperties().add(ad);
+            ad.setId(prop.getName());
+            ad.setType(prop.getType());
+
+            String adName = property.getNamedParameter(Constants.PROPERTY_LABEL);
+            if ( adName == null ) {
+                adName = "%" + prop.getName() + ".name";
+            }
+            ad.setName(adName);
+            String adDesc = property.getNamedParameter(Constants.PROPERTY_DESCRIPTION);
+            if ( adDesc == null ) {
+                adDesc = "%" + prop.getName() + ".description";
+            }
+            ad.setDescription(adDesc);
+            // set optional multivalues, cardinality might be overwritten by setValues !!
+            final String cValue = property.getNamedParameter(Constants.PROPERTY_CARDINALITY);
+            if (cValue != null) {
+                if ("-".equals(cValue)) {
+                    // unlimited vector
+                    ad.setCardinality(new Integer(Integer.MIN_VALUE));
+                } else if ("+".equals(cValue)) {
+                   // unlimited array
+                    ad.setCardinality(new Integer(Integer.MAX_VALUE));
+                } else {
+                    try {
+                        ad.setCardinality(Integer.valueOf(cValue));
+                    } catch (NumberFormatException nfe) {
+                        // default to scalar in case of conversion problem
+                    }
+                }
+            }
+            ad.setDefaultValue(prop.getValue());
+            ad.setDefaultMultiValue(prop.getMultiValue());
+
+            // check options
+            String[] parameters = property.getParameters();
+            Map options = null;
+            for (int j=0; j < parameters.length; j++) {
+                if (Constants.PROPERTY_OPTIONS.equals(parameters[j])) {
+                    options = new LinkedHashMap();
+                } else if (options != null) {
+                    String optionLabel = parameters[j];
+                    String optionValue = (j < parameters.length-2) ? parameters[j+2] : null;
+                    if (optionValue != null) {
+                        options.put(optionLabel, optionValue);
+                    }
+                    j += 2;
+                }
+            }
+            ad.setOptions(options);
+        }
+
+        component.addProperty(prop);
+    }
+
+    protected String getPropertyName(JavaTag property, String defaultName) {
         String name = property.getNamedParameter(Constants.PROPERTY_NAME);
         if (StringUtils.isEmpty(name) && defaultName != null) {
             name = defaultName;
         }
 
         if (!StringUtils.isEmpty(name)) {
-            final Property prop = new Property(property);
-            prop.setName(name);
-            prop.setType(property.getNamedParameter(Constants.PROPERTY_TYPE));
-            final String value = property.getNamedParameter(Constants.PROPERTY_VALUE);
-            if ( value != null ) {
-                prop.setValue(value);
-            } else {
-                // check for multivalue
-                final List values = new ArrayList();
-                final Map valueMap = property.getNamedParameterMap();
-                for (Iterator vi = valueMap.entrySet().iterator(); vi.hasNext();) {
-                    final Map.Entry entry = (Map.Entry) vi.next();
-                    final String key = (String) entry.getKey();
-                    if (key.startsWith("values")) {
-                        values.add(entry.getValue());
-                    }
-                }
-                if ( values.size() > 0 ) {
-                    prop.setMultiValue((String[])values.toArray(new String[values.size()]));
-                }
-            }
-
-            // property is private if explicitly marked or a well known
-            // service property such as service.pid
-            final boolean isPrivate = getBoolean(property,
-                Constants.PROPERTY_PRIVATE, false)
-                || name.equals(org.osgi.framework.Constants.SERVICE_PID)
-                || name.equals(org.osgi.framework.Constants.SERVICE_DESCRIPTION)
-                || name.equals(org.osgi.framework.Constants.SERVICE_ID)
-                || name.equals(org.osgi.framework.Constants.SERVICE_RANKING)
-                || name.equals(org.osgi.framework.Constants.SERVICE_VENDOR)
-                || name.equals(ConfigurationAdmin.SERVICE_BUNDLELOCATION)
-                || name.equals(ConfigurationAdmin.SERVICE_FACTORYPID);
-
-            // if this is a public property and the component is generating metatype info
-            // store the information!
-            if ( !isPrivate && ocd != null ) {
-                final AttributeDefinition ad = new AttributeDefinition();
-                ocd.getProperties().add(ad);
-                ad.setId(prop.getName());
-                ad.setType(prop.getType());
-
-                String adName = property.getNamedParameter(Constants.PROPERTY_LABEL);
-                if ( adName == null ) {
-                    adName = "%" + prop.getName() + ".name";
-                }
-                ad.setName(adName);
-                String adDesc = property.getNamedParameter(Constants.PROPERTY_DESCRIPTION);
-                if ( adDesc == null ) {
-                    adDesc = "%" + prop.getName() + ".description";
-                }
-                ad.setDescription(adDesc);
-                // set optional multivalues, cardinality might be overwritten by setValues !!
-                final String cValue = property.getNamedParameter(Constants.PROPERTY_CARDINALITY);
-                if (cValue != null) {
-                    if ("-".equals(cValue)) {
-                        // unlimited vector
-                        ad.setCardinality(new Integer(Integer.MIN_VALUE));
-                    } else if ("+".equals(cValue)) {
-                       // unlimited array
-                        ad.setCardinality(new Integer(Integer.MAX_VALUE));
-                    } else {
-                        try {
-                            ad.setCardinality(Integer.valueOf(cValue));
-                        } catch (NumberFormatException nfe) {
-                            // default to scalar in case of conversion problem
-                        }
-                    }
-                }
-                ad.setDefaultValue(prop.getValue());
-                ad.setDefaultMultiValue(prop.getMultiValue());
-
-                // check options
-                String[] parameters = property.getParameters();
-                Map options = null;
-                for (int j=0; j < parameters.length; j++) {
-                    if (Constants.PROPERTY_OPTIONS.equals(parameters[j])) {
-                        options = new LinkedHashMap();
-                    } else if (options != null) {
-                        String optionLabel = parameters[j];
-                        String optionValue = (j < parameters.length-2) ? parameters[j+2] : null;
-                        if (optionValue != null) {
-                            options.put(optionLabel, optionValue);
-                        }
-                        j += 2;
-                    }
-                }
-                ad.setOptions(options);
-            }
-
-            component.addProperty(prop);
+            return name;
         }
+        return null;
+    }
+
+    protected void testProperty(Map properties, JavaTag property, String defaultName, boolean isInspectedClass)
+    throws MojoExecutionException {
+        final String propName = this.getPropertyName(property, defaultName);
+
+        if ( propName != null ) {
+            if ( properties.containsKey(propName) ) {
+                // if the current class is the class we are currently inspecting, we
+                // have found a duplicate definition
+                if ( isInspectedClass ) {
+                    throw new MojoExecutionException("Duplicate definition for property " + propName + " in class " + property.getJavaClassDescription().getName());
+                }
+            } else {
+                properties.put(propName, property);
+            }
+        }
+    }
+
+    protected void testReference(Map references, JavaTag reference, String defaultName, boolean isInspectedClass)
+    throws MojoExecutionException {
+        final String refName = this.getReferenceName(reference, defaultName);
+
+        if ( refName != null ) {
+            if ( references.containsKey(refName) ) {
+                // if the current class is the class we are currently inspecting, we
+                // have found a duplicate definition
+                if ( isInspectedClass ) {
+                    throw new MojoExecutionException("Duplicate definition for reference " + refName + " in class " + reference.getJavaClassDescription().getName());
+                }
+            } else {
+                references.put(refName, reference);
+            }
+        }
+    }
+
+    protected String getReferenceName(JavaTag reference, String defaultName) {
+        String name = reference.getNamedParameter(Constants.REFERENCE_NAME);
+        if (StringUtils.isEmpty(name)) {
+            name = defaultName;
+        }
+
+        if (!StringUtils.isEmpty(name)) {
+            return name;
+        }
+        return null;
     }
 
     /**
@@ -519,13 +590,8 @@ public class SCRDescriptorMojo extends AbstractMojo {
      * @param defaultName
      * @param component
      */
-    protected void doReference(JavaTag reference, String defaultName, Component component)
+    protected void doReference(JavaTag reference, String name, Component component)
     throws MojoExecutionException {
-        String name = reference.getNamedParameter(Constants.REFERENCE_NAME);
-        if (StringUtils.isEmpty(name)) {
-            name = defaultName;
-        }
-
         // ensure interface
         String type = reference.getNamedParameter(Constants.REFERENCE_INTERFACE);
         if (StringUtils.isEmpty(type)) {
@@ -534,52 +600,50 @@ public class SCRDescriptorMojo extends AbstractMojo {
             }
         }
 
-        if (!StringUtils.isEmpty(name)) {
-            final Reference ref = new Reference(reference, component.getJavaClassDescription());
-            ref.setName(name);
-            ref.setInterfacename(type);
-            ref.setCardinality(reference.getNamedParameter(Constants.REFERENCE_CARDINALITY));
-            if ( ref.getCardinality() == null ) {
-                ref.setCardinality("1..1");
-            }
-            ref.setPolicy(reference.getNamedParameter(Constants.REFERENCE_POLICY));
-            if ( ref.getPolicy() == null ) {
-                ref.setPolicy("static");
-            }
-            ref.setTarget(reference.getNamedParameter(Constants.REFERENCE_TARGET));
-            final String bindValue = reference.getNamedParameter(Constants.REFERENCE_BIND);
-            if ( bindValue != null ) {
-                ref.setBind(bindValue);
-            }
-            final String unbindValue = reference.getNamedParameter(Constants.REFERENCE_UNDBIND);
-            if ( unbindValue != null ) {
-                ref.setUnbind(unbindValue);
-            }
-            // if this is a field with a single cardinality,
-            // we look for the bind/unbind methods
-            // and create them if they are not availabe and the component is not abstract
-            if ( !component.isAbstract() && this.generateAccessors ) {
-                if ( reference.getField() != null && component.getJavaClassDescription() instanceof ModifiableJavaClassDescription ) {
-                    if ( ref.getCardinality().equals("0..1") || ref.getCardinality().equals("1..1") ) {
-                        boolean createBind = false;
-                        boolean createUnbind = false;
-                        // Only create method if no bind name has been specified
-                        if ( bindValue == null && ref.findMethod(ref.getBind()) == null ) {
-                            // create bind method
-                            createBind = true;
-                        }
-                        if ( unbindValue == null && ref.findMethod(ref.getUnbind()) == null ) {
-                            // create unbind method
-                            createUnbind = true;
-                        }
-                        if ( createBind || createUnbind ) {
-                            ((ModifiableJavaClassDescription)component.getJavaClassDescription()).addMethods(name, type, createBind, createUnbind);
-                        }
+        final Reference ref = new Reference(reference, component.getJavaClassDescription());
+        ref.setName(name);
+        ref.setInterfacename(type);
+        ref.setCardinality(reference.getNamedParameter(Constants.REFERENCE_CARDINALITY));
+        if ( ref.getCardinality() == null ) {
+            ref.setCardinality("1..1");
+        }
+        ref.setPolicy(reference.getNamedParameter(Constants.REFERENCE_POLICY));
+        if ( ref.getPolicy() == null ) {
+            ref.setPolicy("static");
+        }
+        ref.setTarget(reference.getNamedParameter(Constants.REFERENCE_TARGET));
+        final String bindValue = reference.getNamedParameter(Constants.REFERENCE_BIND);
+        if ( bindValue != null ) {
+            ref.setBind(bindValue);
+        }
+        final String unbindValue = reference.getNamedParameter(Constants.REFERENCE_UNDBIND);
+        if ( unbindValue != null ) {
+            ref.setUnbind(unbindValue);
+        }
+        // if this is a field with a single cardinality,
+        // we look for the bind/unbind methods
+        // and create them if they are not availabe and the component is not abstract
+        if ( !component.isAbstract() && this.generateAccessors ) {
+            if ( reference.getField() != null && component.getJavaClassDescription() instanceof ModifiableJavaClassDescription ) {
+                if ( ref.getCardinality().equals("0..1") || ref.getCardinality().equals("1..1") ) {
+                    boolean createBind = false;
+                    boolean createUnbind = false;
+                    // Only create method if no bind name has been specified
+                    if ( bindValue == null && ref.findMethod(ref.getBind()) == null ) {
+                        // create bind method
+                        createBind = true;
+                    }
+                    if ( unbindValue == null && ref.findMethod(ref.getUnbind()) == null ) {
+                        // create unbind method
+                        createUnbind = true;
+                    }
+                    if ( createBind || createUnbind ) {
+                        ((ModifiableJavaClassDescription)component.getJavaClassDescription()).addMethods(name, type, createBind, createUnbind);
                     }
                 }
             }
-            component.addReference(ref);
         }
+        component.addReference(ref);
     }
 
     protected boolean getBoolean(JavaTag tag, String name, boolean defaultValue) {
