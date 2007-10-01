@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,17 +18,20 @@
  */
 package org.apache.felix.scr;
 
+
 import org.osgi.service.component.ComponentException;
+
 
 /**
  * Information associated to a dependency
  *
  */
-public class ReferenceMetadata {
-	// Name for the reference (required)
-	private String m_name = null;
+public class ReferenceMetadata
+{
+    // Name for the reference (required)
+    private String m_name = null;
 
-	// Interface name (required)
+    // Interface name (required)
     private String m_interface = null;
 
     // Cardinality (optional, default="1..1")
@@ -54,6 +57,7 @@ public class ReferenceMetadata {
     private boolean m_isOptional = false;
     private boolean m_isMultiple = false;
 
+
     /////////////////////////////////////////////// setters ///////////////////////////////////
 
     /**
@@ -61,115 +65,135 @@ public class ReferenceMetadata {
      *
      * @param name
      */
-    public void setName(String name) {
-    	if(m_validated) {
-    		return;
-    	}
+    public void setName( String name )
+    {
+        if ( m_validated )
+        {
+            return;
+        }
 
-    	m_name = name;
+        m_name = name;
     }
+
 
     /**
      * Setter for the interfaceName attribute
      *
      * @param interfaceName
      */
-    public void setInterface(String interfaceName) {
-    	if(m_validated) {
-    		return;
-    	}
+    public void setInterface( String interfaceName )
+    {
+        if ( m_validated )
+        {
+            return;
+        }
 
-    	m_interface = interfaceName;
+        m_interface = interfaceName;
 
     }
+
 
     /**
      * Setter for the cardinality attribute
      *
      * @param cardinality
      */
-    public void setCardinality(String cardinality) {
-    	if(m_validated) {
-    		return;
-    	}
+    public void setCardinality( String cardinality )
+    {
+        if ( m_validated )
+        {
+            return;
+        }
 
-    	m_cardinality = cardinality;
+        m_cardinality = cardinality;
 
-    	if(!m_cardinality.equals("0..1") && !m_cardinality.equals("0..n") && !m_cardinality.equals("1..1") && !m_cardinality.equals("1..n")) {
-    		throw new IllegalArgumentException ("Cardinality should take one of the following values: 0..1, 0..n, 1..1, 1..n");
-    	}
-    	if(m_cardinality.equals("0..1") || m_cardinality.equals("0..n")) {
+        if ( !m_cardinality.equals( "0..1" ) && !m_cardinality.equals( "0..n" ) && !m_cardinality.equals( "1..1" )
+            && !m_cardinality.equals( "1..n" ) )
+        {
+            throw new IllegalArgumentException(
+                "Cardinality should take one of the following values: 0..1, 0..n, 1..1, 1..n" );
+        }
+        if ( m_cardinality.equals( "0..1" ) || m_cardinality.equals( "0..n" ) )
+        {
             m_isOptional = true;
         }
-        if(m_cardinality.equals("0..n") || m_cardinality.equals("1..n")) {
+        if ( m_cardinality.equals( "0..n" ) || m_cardinality.equals( "1..n" ) )
+        {
             m_isMultiple = true;
         }
     }
+
 
     /**
      *	Setter for the policy attribute
      *
      * @param policy
      */
-    public void setPolicy(String policy) {
-    	if(m_validated) {
-    		return;
-    	}
+    public void setPolicy( String policy )
+    {
+        if ( m_validated )
+        {
+            return;
+        }
 
-    	if(!m_policy.equals("static") && !m_policy.equals("dynamic")) {
-    		throw new IllegalArgumentException ("Policy must be either 'static' or 'dynamic'");
-    	}
-    	if(policy.equals("static") == false) {
+        if ( !m_policy.equals( "static" ) && !m_policy.equals( "dynamic" ) )
+        {
+            throw new IllegalArgumentException( "Policy must be either 'static' or 'dynamic'" );
+        }
+        if ( policy.equals( "static" ) == false )
+        {
             m_isStatic = false;
         }
 
-       	m_policy = policy;
+        m_policy = policy;
     }
+
 
     /**
      * Setter for the target attribute (filter)
      *
      * @param target
      */
-    public void setTarget(String target) {
-    	if(m_validated) {
-    		return;
-    	}
+    public void setTarget( String target )
+    {
+        if ( m_validated )
+        {
+            return;
+        }
 
-    	//TODO: check if we really need to extend the filter to limit seaches to a particular interface
-        String classnamefilter = "(objectClass="+m_interface+")";
-        if(target != null) {
-            m_target = "(&"+classnamefilter+target+")";
-        }
-        else {
-            m_target = classnamefilter;
-        }
+        m_target = target;
     }
+
 
     /**
      * Setter for the bind method attribute
      *
      * @param bind
      */
-    public void setBind(String bind) {
-    	if(m_validated) {
-    		return;
-    	}
+    public void setBind( String bind )
+    {
+        if ( m_validated )
+        {
+            return;
+        }
 
-    	m_bind = bind;
+        m_bind = bind;
     }
+
 
     /**
      * Setter for the unbind method attribute
      *
      * @param bind
      */
-    public void setUnbind(String unbind) {
-    	if(m_validated) {
-    		return;
-    	}
+    public void setUnbind( String unbind )
+    {
+        if ( m_validated )
+        {
+            return;
+        }
 
-    	m_unbind = unbind;
+        m_unbind = unbind;
     }
 
 
@@ -180,45 +204,55 @@ public class ReferenceMetadata {
      *
      * @return A string containing the reference's name
     **/
-    public String getName() {
+    public String getName()
+    {
         return m_name;
     }
+
 
     /**
      * Returns the fully qualified name of the class that is used by the component to access the service
      *
      * @return A string containing a fully qualified name
     **/
-    public String getInterface() {
+    public String getInterface()
+    {
         return m_interface;
     }
+
 
     /**
      * Get the cardinality as a string
      *
      * @return A string with the cardinality
     **/
-    public String getCardinality() {
+    public String getCardinality()
+    {
         return m_cardinality;
     }
+
 
     /**
      * Get the policy as a string
      *
      * @return A string with the policy
     **/
-    public String getPolicy() {
+    public String getPolicy()
+    {
         return m_policy;
     }
+
 
     /**
      * Returns the filter expression that further constrains the set of target services
      *
      * @return A string with a filter
     **/
-    public String getTarget() {
+    public String getTarget()
+    {
         return m_target;
     }
+
 
     /**
      * Get the name of a method in the component implementation class that is used to notify that
@@ -226,9 +260,11 @@ public class ReferenceMetadata {
      *
      * @return a String with the name of the bind method
     **/
-    public String getBind() {
+    public String getBind()
+    {
         return m_bind;
     }
+
 
     /**
      * Get the name of a method in the component implementation class that is used to notify that
@@ -236,9 +272,11 @@ public class ReferenceMetadata {
      *
      * @return a String with the name of the unbind method
     **/
-    public String getUnbind() {
+    public String getUnbind()
+    {
         return m_unbind;
     }
+
 
     // Getters for boolean values that determine both policy and cardinality
 
@@ -247,41 +285,49 @@ public class ReferenceMetadata {
      *
      * @return true if static
     **/
-    public boolean isStatic() {
+    public boolean isStatic()
+    {
         return m_isStatic;
     }
+
 
     /**
      * Test if dependency is optional (0..1 or 0..n)
      *
      * @return true if the dependency is optional
     **/
-    public boolean isOptional() {
+    public boolean isOptional()
+    {
         return m_isOptional;
     }
+
 
     /**
      * Test if dependency is multiple (0..n or 1..n)
      *
      * @return true if the dependency is multiple
     **/
-    public boolean isMultiple() {
+    public boolean isMultiple()
+    {
         return m_isMultiple;
     }
+
 
     /**
      *  Method used to verify if the semantics of this metadata are correct
      *
      */
-    void validate() {
-    	if (m_name == null) {
-    		throw new ComponentException("the name for the reference must be set");
-    	}
+    void validate()
+    {
+        if ( m_name == null )
+        {
+            throw new ComponentException( "the name for the reference must be set" );
+        }
 
-    	if (m_interface == null) {
-    		throw new ComponentException("the interface for the reference must be set");
-    	}
+        if ( m_interface == null )
+        {
+            throw new ComponentException( "the interface for the reference must be set" );
+        }
     }
-
 
 }
