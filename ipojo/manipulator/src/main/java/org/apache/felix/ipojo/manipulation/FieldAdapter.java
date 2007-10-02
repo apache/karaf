@@ -185,17 +185,17 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
         mv.visitJumpInsn(IFNULL, l4a);
         mv.visitVarInsn(ALOAD, 1);
         mv.visitVarInsn(ALOAD, 3);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "equals", "(Ljava/lang/Object;)Z");
-
         Label l5a = new Label();
-        mv.visitJumpInsn(IFNE, l5a);
-        mv.visitLabel(l4a);
-
+        mv.visitJumpInsn(IF_ACMPEQ, l5a); // Test equality on object.
+        
+        // Invoke the _set method
+        mv.visitLabel(l4a);        
         mv.visitVarInsn(ALOAD, 0);
         mv.visitVarInsn(ALOAD, 3);
         mv.visitMethodInsn(INVOKEVIRTUAL, m_owner, "_set" + name, "(" + internalType + ")V");
+        
+        // End of the method
         mv.visitLabel(l5a);
-
         mv.visitVarInsn(ALOAD, 3);
         mv.visitInsn(ARETURN);
 
@@ -504,17 +504,17 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 mv.visitJumpInsn(IFNULL, l4b);
                 mv.visitVarInsn(ALOAD, 1);
                 mv.visitVarInsn(ALOAD, 3);
-                mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "equals", "(Ljava/lang/Object;)Z");
-
+                
                 Label l5b = new Label();
-                mv.visitJumpInsn(IFNE, l5b);
+                mv.visitJumpInsn(IF_ACMPEQ, l5b); // Test equality on object.
+                
                 mv.visitLabel(l4b);
-
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitVarInsn(ALOAD, 3);
                 mv.visitMethodInsn(INVOKEVIRTUAL, m_owner, "_set" + name, "(L" + type.getInternalName() + ";)V");
+                
+                // End of the getter method, return the object
                 mv.visitLabel(l5b);
-
                 mv.visitVarInsn(ALOAD, 3);
                 mv.visitInsn(ARETURN);
 

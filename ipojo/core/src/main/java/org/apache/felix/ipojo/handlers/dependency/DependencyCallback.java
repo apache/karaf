@@ -19,9 +19,10 @@
 package org.apache.felix.ipojo.handlers.dependency;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
-import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.util.Callback;
+import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -30,7 +31,7 @@ import org.osgi.framework.ServiceReference;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class DependencyCallback {
+public class DependencyCallback extends Callback {
 
     /**
      * Bind method (called when a service arrives).
@@ -57,16 +58,11 @@ public class DependencyCallback {
      * Callback method name.
      */
     private String m_method;
-
+    
     /**
-     * Is the callback a static callback.
+     * Service Dependency. 
      */
-    private Callback m_callback;
-
-    /**
-     * The instance manager.
-     */
-    private InstanceManager m_manager;
+    private Dependency m_dependency;
 
     /**
      * Constructor.
@@ -77,9 +73,10 @@ public class DependencyCallback {
      * method
      */
     public DependencyCallback(Dependency dep, String method, int methodType) {
+        super(method, (String[]) null, false, dep.getDependencyHandler().getInstanceManager());
         m_methodType = methodType;
+        m_dependency = dep;
         m_method = method;
-        m_manager = dep.getDependencyHandler().getInstanceManager();
     }
 
 
@@ -93,15 +90,87 @@ public class DependencyCallback {
     
     /**
      * Set the argument type (Empty or the class name).
-     * @param arg : the type name or EMPTY
+     * @param arg : the array of argument types.
      */
     public void setArgument(String[] arg) {
         m_argument = arg;
-        m_callback = new Callback(m_method, arg, false, m_manager);        
     }
     
-    public String[] getArgument() {
-        return m_argument;
+    /**
+     * Search the method object in the POJO by analyzing present method.
+     * If not found in the pojo it tests the parent classes.
+     * The name of the method and the argument type are checked.
+     */
+    protected void searchMethod() {
+        if (m_argument != null) {
+            Method[] methods = m_dependency.getDependencyHandler().getInstanceManager().getClazz().getDeclaredMethods();
+            for (int i = 0; m_methodObj == null && i < methods.length; i++) {
+                // First check the method name
+                if (methods[i].getName().equals(m_method)) {
+                    // Check arguments
+                    Class[] clazzes = methods[i].getParameterTypes();
+                    if (clazzes.length == m_argument.length) { // Test size to avoid useless loop
+                        boolean ok = true;
+                        for (int j = 0; ok && j < m_argument.length; j++) {
+                            if (!m_argument[j].equals(clazzes[j].getName())) {
+                                ok = false;
+                            }
+                        }
+                        if (ok) {
+                            m_methodObj = methods[i]; // It is the looked method.
+                        }
+                    }
+
+                }
+            }
+        }
+        
+        if (m_methodObj == null) { //look at parent classes
+            Method[] methods = m_dependency.getDependencyHandler().getInstanceManager().getClazz().getMethods();
+            for (int i = 0; m_methodObj == null && i < methods.length; i++) {
+                // First check the method name
+                if (methods[i].getName().equals(m_method)) {
+                    // Check arguments
+                    Class[] clazzes = methods[i].getParameterTypes();
+                    switch(clazzes.length) {
+                        case 0 : 
+                            // Callback with no arguments.
+                            m_methodObj = methods[i];
+                            m_argument = new String[0];
+                            break;
+                        case 1 :
+                            if (clazzes[0].getName().equals(ServiceReference.class.getName())) {
+                                // Callback with a service reference.
+                                m_methodObj = methods[i];
+                                m_argument = new String[] {ServiceReference.class.getName()};
+                                break;
+                            }
+                            if (clazzes[0].getName().equals(m_dependency.getSpecification())) {
+                                // Callback with the service object.
+                                m_methodObj = methods[i];
+                                m_argument = new String[] {m_dependency.getSpecification()};
+                                break;
+                            }
+                        case 2 : 
+                            if (clazzes[0].getName().equals(m_dependency.getSpecification())  && clazzes[1].getName().equals(ServiceReference.class.getName())) {
+                                // Callback with two arguments.
+                                m_methodObj = methods[i];
+                                m_argument = new String[] {m_dependency.getSpecification(), ServiceReference.class.getName()};
+                            }
+                            break;
+                        default :
+                            break;
+                    }
+                }
+            }
+        }
+        
+        if (m_methodObj == null) {
+            m_dependency.getDependencyHandler().log(Logger.ERROR, "The method " + m_method + " cannot be called : method not found");
+            return;
+        } else {
+            m_methodObj.setAccessible(true);
+        }
     }
 
     /**
@@ -114,19 +183,22 @@ public class DependencyCallback {
      * @throws IllegalAccessException : The method can not be invoked
      */
     protected void call(ServiceReference ref, Object obj) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        if (m_methodObj == null) {
+            searchMethod();
+        }
         switch (m_argument.length) {
             case 0 :
-                m_callback.call(new Object[0]);
+                call(new Object[0]);
                 break;
             case 1 : 
                 if (m_argument[0].equals(ServiceReference.class.getName())) {
-                    m_callback.call(new Object[] {ref});
+                    call(new Object[] {ref});
                 } else {
-                    m_callback.call(new Object[] {obj});
+                    call(new Object[] {obj});
                 }
                 break;
             case 2 :
-                m_callback.call(new Object[] {obj, ref});
+                call(new Object[] {obj, ref});
                 break;
             default : 
                 break;
@@ -145,19 +217,22 @@ public class DependencyCallback {
      * @throws InvocationTargetException
      */
     protected void callOnInstance(Object instance, ServiceReference ref, Object obj) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        if (m_methodObj == null) {
+            searchMethod();
+        }
         switch (m_argument.length) {
             case 0 :
-                m_callback.call(instance, new Object[0]);
+                call(instance, new Object[0]);
                 break;
             case 1 : 
                 if (m_argument[0].equals(ServiceReference.class.getName())) {
-                    m_callback.call(instance, new Object[] {ref});
+                    call(instance, new Object[] {ref});
                 } else {
-                    m_callback.call(instance, new Object[] {obj});
+                    call(instance, new Object[] {obj});
                 }
                 break;
             case 2 :
-                m_callback.call(instance, new Object[] {obj, ref});
+                call(instance, new Object[] {obj, ref});
                 break;
             default : 
                 break;

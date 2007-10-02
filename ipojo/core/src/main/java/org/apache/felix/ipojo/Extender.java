@@ -71,7 +71,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      * @param event : the bundle event.
      * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.BundleEvent)
      */
-    public void bundleChanged(BundleEvent event) {
+    public synchronized void bundleChanged(BundleEvent event) {
         if (event.getBundle().getBundleId() == m_bundleId) {
             return;
         }
@@ -147,7 +147,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
         start(bundle, parser.getInstances());
     }
 
-    /** 
+    /**
      * iPOJO Starting method.
      * @param bc : iPOJO bundle context.
      * @throws Exception : the start method failed.
@@ -158,22 +158,20 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
         m_bundleId = bc.getBundle().getBundleId();
         m_components = new Hashtable();
         m_creators = new Hashtable();
-        
+
         // Begin by initializing core handlers
         startManagementFor(bc.getBundle());
-        
-        synchronized (m_components) {
-            synchronized (m_creators) {
-                for (int i = 0; i < bc.getBundles().length; i++) {
-                    if (bc.getBundles()[i].getState() == Bundle.ACTIVE) {
-                        startManagementFor(bc.getBundles()[i]);
-                    }
+
+        synchronized (this) {
+            // listen to any changes in bundles.
+            m_context.addBundleListener(this);
+            // compute already started bundles.
+            for (int i = 0; i < bc.getBundles().length; i++) {
+                if (bc.getBundles()[i].getState() == Bundle.ACTIVE) {
+                    startManagementFor(bc.getBundles()[i]);
                 }
             }
         }
-
-        // listen to any changes in bundles
-        m_context.addBundleListener(this);
     }
 
     /**

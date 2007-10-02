@@ -75,6 +75,12 @@ public class ImportHandler extends CompositeHandler {
         m_scope = getCompositeManager().getServiceContext();
 
         Element[] imp = metadata.getElements("requires");
+        
+        // Get instance filters
+        Dictionary filtersConfiguration = null;
+        if (conf.get("requires.filters") != null) {
+            filtersConfiguration = (Dictionary) conf.get("requires.filters");
+        }
 
         for (int i = 0; i < imp.length; i++) {
             boolean optional = false;
@@ -111,6 +117,12 @@ public class ImportHandler extends CompositeHandler {
                         scopePolicy = PolicyServiceContext.LOCAL_AND_GLOBAL;
                     }                
                 }
+                
+                // Configure instance filter if available
+                if (filtersConfiguration != null && id != null && filtersConfiguration.get(id) != null) {
+                    filter = (String) filtersConfiguration.get(id);
+                }
+                
                 ServiceImporter si = new ServiceImporter(specification, filter, aggregate, optional, m_context, m_scope, scopePolicy, id, this);
                 m_importers.add(si);
             } else { // Malformed import

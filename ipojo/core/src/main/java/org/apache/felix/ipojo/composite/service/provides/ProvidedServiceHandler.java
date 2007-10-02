@@ -22,6 +22,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.CompositeHandler;
@@ -219,7 +220,7 @@ public class ProvidedServiceHandler extends CompositeHandler {
      */
     private void checkServiceSpecification(ProvidedService ps) throws CompositionException {
         try {
-            Class spec = getCompositeManager().getFactory().loadClass(ps.getSpecification());
+            Class spec = m_context.getBundle().loadClass(ps.getSpecification());
             Field specField = spec.getField("specification");
             Object o = specField.get(null);
             if (o instanceof String) {
@@ -313,7 +314,7 @@ public class ProvidedServiceHandler extends CompositeHandler {
                 }
                 // Add the required handler 
                 try {
-                    ci.init(getCompositeManager(), new Element("composite", ""), null);
+                    ci.init(getCompositeManager(), new Element("composite", ""), new Properties());
                 } catch (ConfigurationException e) {
                     log(Logger.ERROR, "Internal error : cannot configure the Import Handler : " + e.getMessage());
                     throw new CompositionException("Internal error : cannot configure the Import Handler : " + e.getMessage());

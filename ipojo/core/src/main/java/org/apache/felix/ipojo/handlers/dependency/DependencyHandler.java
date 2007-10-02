@@ -146,45 +146,45 @@ public class DependencyHandler extends PrimitiveHandler {
 
         for (int i = 0; i < callbacks.length; i++) {
             MethodMetadata[] mets = manipulation.getMethods(callbacks[i].getMethodName());
-            if (mets.length == 0) {
-                log(Logger.ERROR, "A requirement callback " + callbacks[i].getMethodName() + " does not exist in the implementation");
-                throw new ConfigurationException("Requirement Callback : A requirement callback " + callbacks[i].getMethodName() + " does not exist in the implementation", getInstanceManager().getFactory().getName());
-            }
-            if (mets[0].getMethodArguments().length > 2) {
-                log(Logger.ERROR, "A requirement callback " + callbacks[i].getMethodName() + " must have 0 or 1 or 2 arguments");
-                throw new ConfigurationException("Requirement Callback : A requirement callback " + callbacks[i].getMethodName() + " must have 0 or 1 or 2 arguments", getInstanceManager().getFactory().getName());
-            }
-            callbacks[i].setArgument(mets[0].getMethodArguments());
-            if (mets[0].getMethodArguments().length == 1) {
-                if (!mets[0].getMethodArguments()[0].equals(ServiceReference.class.getName())) {
-                    if (dep.getSpecification() == null) {
-                        dep.setSpecification(mets[0].getMethodArguments()[0]);
-                    }
-                    if (!dep.getSpecification().equals(mets[0].getMethodArguments()[0])) {
-                        log(Logger.WARNING, "[DependencyHandler on " + getInstanceManager().getInstanceName() + "] The field type [" + mets[0].getMethodArguments()[0] + "] and the needed service interface [" + dep.getSpecification()
-                                + "] are not the same");
-                        dep.setSpecification(mets[0].getMethodArguments()[0]);
-                    }
-                }
-            } else if (mets[0].getMethodArguments().length == 2) {
-                // Check that the second arguments is a service reference
-                if (!mets[0].getMethodArguments()[1].equals(ServiceReference.class.getName())) {
-                    String message = "The requirement callback " + callbacks[i].getMethodName() + " must have a ServiceReference as the second arguments";
-                    log(Logger.ERROR, message);
-                    throw new ConfigurationException(message, getInstanceManager().getFactory().getName());
-                }
-                if (dep.getSpecification() == null) {
-                    dep.setSpecification(mets[0].getMethodArguments()[0]);
-                } else {
-                    if (!dep.getSpecification().equals(mets[0].getMethodArguments()[0])) {
-                        log(Logger.WARNING, "[DependencyHandler on " + getInstanceManager().getInstanceName() + "] The field type [" + mets[0].getMethodArguments()[0] + "] and the needed service interface [" + dep.getSpecification()
-                                + "] are not the same");
-                        dep.setSpecification(mets[0].getMethodArguments()[0]);
-                    }
+            if (mets.length != 0) {
+                if (mets[0].getMethodArguments().length > 2) {
+                    log(Logger.ERROR, "A requirement callback " + callbacks[i].getMethodName() + " must have 0 or 1 or 2 arguments");
+                    throw new ConfigurationException("Requirement Callback : A requirement callback " + callbacks[i].getMethodName() + " must have 0 or 1 or 2 arguments", getInstanceManager().getFactory().getName());
                 }
                 
+                callbacks[i].setArgument(mets[0].getMethodArguments());
+                if (mets[0].getMethodArguments().length == 1) {
+                    if (!mets[0].getMethodArguments()[0].equals(ServiceReference.class.getName())) {
+                        if (dep.getSpecification() == null) {
+                            dep.setSpecification(mets[0].getMethodArguments()[0]);
+                        }
+                        if (!dep.getSpecification().equals(mets[0].getMethodArguments()[0])) {
+                            log(Logger.WARNING, "[DependencyHandler on " + getInstanceManager().getInstanceName() + "] The field type [" + mets[0].getMethodArguments()[0] + "] and the needed service interface [" + dep.getSpecification()
+                                    + "] are not the same");
+                            dep.setSpecification(mets[0].getMethodArguments()[0]);
+                        }
+                    }
+                } else if (mets[0].getMethodArguments().length == 2) {
+                    // Check that the second arguments is a service reference
+                    if (!mets[0].getMethodArguments()[1].equals(ServiceReference.class.getName())) {
+                        String message = "The requirement callback " + callbacks[i].getMethodName() + " must have a ServiceReference as the second arguments";
+                        log(Logger.ERROR, message);
+                        throw new ConfigurationException(message, getInstanceManager().getFactory().getName());
+                    }
+                    if (dep.getSpecification() == null) {
+                        dep.setSpecification(mets[0].getMethodArguments()[0]);
+                    } else {
+                        if (!dep.getSpecification().equals(mets[0].getMethodArguments()[0])) {
+                            log(Logger.WARNING, "[DependencyHandler on " + getInstanceManager().getInstanceName() + "] The field type [" + mets[0].getMethodArguments()[0] + "] and the needed service interface [" + dep.getSpecification()
+                                    + "] are not the same");
+                            dep.setSpecification(mets[0].getMethodArguments()[0]);
+                        }
+                    }
+                }
+            } else {
+                log(Logger.INFO, "A requirement callback " + callbacks[i].getMethodName() + " does not exist in the implementation, try the super classes");
             }
-            
+
         }
 
         if (field != null) {
@@ -240,6 +240,12 @@ public class DependencyHandler extends PrimitiveHandler {
         }
         // END OF DEPRECATED BLOCK
 
+        // Get instance filters.
+        Dictionary filtersConfiguration = null;
+        if (configuration.get("requires.filters") != null) {
+            filtersConfiguration = (Dictionary) configuration.get("requires.filters");
+        }
+        
         for (int i = 0; i < deps.length; i++) {
             // Create the dependency metadata
             String field = null;
@@ -279,6 +285,11 @@ public class DependencyHandler extends PrimitiveHandler {
                 }
             }
 
+            // Get instance filter if available
+            if (filtersConfiguration != null && id != null && filtersConfiguration.get(id) != null) {
+                filter = (String) filtersConfiguration.get(id);
+            }
+            
             Dependency dep = new Dependency(this, field, serviceSpecification, filter, optional, aggregate, id, scopePolicy);
 
             // Look for dependency callback :
@@ -328,15 +339,24 @@ public class DependencyHandler extends PrimitiveHandler {
         // dep.getMetadata().getServiceSpecification().split("[.]");
         // String className = "org/apache/felix/ipojo/" + segment[segment.length
         // - 1] + "Nullable";
-        String className = dep.getSpecification() + "Nullable";
+        final String className = dep.getSpecification() + "Nullable";
         String resource = dep.getSpecification().replace('.', '/') + ".class";
         URL url = getInstanceManager().getContext().getBundle().getResource(resource);
 
         try {
-            byte[] b = NullableObjectWriter.dump(url, dep.getSpecification());
+            final byte[] b = NullableObjectWriter.dump(url, dep.getSpecification());
             Class c = null;
             try {
-                c = getInstanceManager().getFactory().defineClass(className, b, null);
+                ClassLoader cl = new ClassLoader() {
+                    public Class loadClass(String name) throws ClassNotFoundException {
+                        if (name.equals(className)) {
+                            return defineClass(name, b, 0, b.length, null);
+                        } else {
+                            return getInstanceManager().getContext().getBundle().loadClass(name);
+                        }
+                    }
+                };
+                c = cl.loadClass(className); 
             } catch (Exception e) {
                 log(Logger.ERROR, "Cannot define the nullable class : " + e.getMessage());
                 e.printStackTrace();

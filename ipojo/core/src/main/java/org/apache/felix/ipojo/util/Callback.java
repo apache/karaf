@@ -30,6 +30,11 @@ import org.apache.felix.ipojo.parser.MethodMetadata;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Callback {
+    
+    /**
+     * Method object.
+     */
+    protected Method m_methodObj;
 
     /**
      * Name of the method to call.
@@ -45,11 +50,6 @@ public class Callback {
      * Reference on the instance manager.
      */
     private InstanceManager m_manager;
-    
-    /**
-     * Method object.
-     */
-    private Method m_methodObj;
     
     /**
      * Argument classes.
@@ -68,32 +68,34 @@ public class Callback {
         m_method = method;
         m_isStatic = isStatic;
         m_manager = im;
-        m_args = new String[args.length];
-        for (int i = 0; i < args.length; i++) {
-            // Primitive Array 
-            if (args[i].endsWith("[]") && args[i].indexOf(".") == -1) {
-                String arr = "";
-                for (int j = 0; j < args[i].length(); j++) {
-                    if (args[i].charAt(j) == '[') { arr += '['; }
+        if (args != null) {
+            m_args = new String[args.length];
+            for (int i = 0; i < args.length; i++) {
+                // Primitive Array 
+                if (args[i].endsWith("[]") && args[i].indexOf(".") == -1) {
+                    String arr = "";
+                    for (int j = 0; j < args[i].length(); j++) {
+                        if (args[i].charAt(j) == '[') { arr += '['; }
+                    }
+                    int index = args[i].indexOf('[');
+                    m_args[i] = arr + getInternalPrimitiveType(args[i].substring(0, index));
                 }
-                int index = args[i].indexOf('[');
-                m_args[i] = arr + getInternalPrimitiveType(args[i].substring(0, index));
-            }
-            // Non-Primitive Array 
-            if (args[i].endsWith("[]") && args[i].indexOf(".") != -1) {
-                String arr = "";
-                for (int j = 0; j < args[i].length(); j++) {
-                    if (args[i].charAt(j) == '[') { arr += '['; }
+                // Non-Primitive Array 
+                if (args[i].endsWith("[]") && args[i].indexOf(".") != -1) {
+                    String arr = "";
+                    for (int j = 0; j < args[i].length(); j++) {
+                        if (args[i].charAt(j) == '[') { arr += '['; }
+                    }
+                    int index = args[i].indexOf('[');
+                    m_args[i] = arr + "L" + args[i].substring(0, index) + ";";
                 }
-                int index = args[i].indexOf('[');
-                m_args[i] = arr + "L" + args[i].substring(0, index) + ";";
+                // Simple type 
+                if (!args[i].endsWith("[]")) {
+                    m_args[i] = args[i];
+                }
             }
-            // Simple type 
-            if (!args[i].endsWith("[]")) {
-                m_args[i] = args[i];
-            }
-            
         }
+        
     }
     
     /**
@@ -188,7 +190,7 @@ public class Callback {
      * Search the method object in the POJO by analyzing present method.
      * The name of the method and the argument type are checked.
      */
-    private void searchMethod() {
+    protected void searchMethod() {
         Method[] methods = m_manager.getClazz().getDeclaredMethods();
         for (int i = 0; m_methodObj == null && i < methods.length; i++) {
             // First check the method name

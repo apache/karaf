@@ -19,7 +19,6 @@
 package org.apache.felix.ipojo;
 
 import java.net.URL;
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
@@ -113,11 +112,6 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      * Component Type Name.
      */
     protected String m_typeName = null;
-
-    /**
-     * Class loader to delegate loading.
-     */
-    private FactoryClassloader m_classLoader = null;
     
     /**
      * Component Implementation class.
@@ -303,21 +297,6 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
         instance.start();
         return instance;
     }
-
-    /**
-     * Define a class.
-     * @param name : qualified name of the class
-     * @param b : byte array of the class
-     * @param domain : protection domain of the class
-     * @return the defined class object
-     * @throws Exception : an exception occur during the definition
-     */
-    public Class defineClass(String name, byte[] b, ProtectionDomain domain) throws Exception {
-        if (m_classLoader == null) {
-            m_classLoader = new FactoryClassloader();
-        }
-        return m_classLoader.defineClass(name, b, domain);
-    }
     
     /**
      * Delete an instance.
@@ -437,20 +416,22 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      * Load a class.
      * @param className : name of the class to load
      * @return the resulting Class object
+     * @throws ClassNotFoundException 
      * @throws ClassNotFoundException : happen when the class is not found
      */
     public Class loadClass(String className) throws ClassNotFoundException {
-        if (m_clazz != null && className.equals(m_componentClassName)) {
-            // Used the factory classloader to load the component implementation
-            // class
-            if (m_classLoader == null) {
-                m_classLoader = new FactoryClassloader();
-            }
-            try {
-                return m_classLoader.defineClass(m_componentClassName, m_clazz, null);
-            } catch (Exception e) {
-                throw new ClassNotFoundException("[Bundle " + m_context.getBundle().getBundleId() + "] Cannot define the class : " + className, e);
-            }
+        if (m_clazz != null) {
+            // Used the factory classloader to load the component implementation class
+            ClassLoader cl = new ClassLoader() {
+                public Class loadClass(String name) throws ClassNotFoundException {
+                    if (name.equals(m_componentClassName)) {
+                        return defineClass(name, m_clazz, 0, m_clazz.length, null);
+                    } else {
+                        return m_context.getBundle().loadClass(name);
+                    }
+                }
+            };
+            return cl.loadClass(m_componentClassName);
         }
         return m_context.getBundle().loadClass(className);
     }
@@ -585,7 +566,6 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
         
         m_tracker = null;
         m_componentDesc = null;
-        m_classLoader = null;
         m_clazz = null;
         m_state = INVALID;
     }
@@ -1005,55 +985,21 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
         }
     }
 
-    /**
-     * FactoryClassloader.
-     */
-    private class FactoryClassloader extends ClassLoader {
-
-        /**
-         * Map of defined classes [Name, Class Object].
-         */
-        private Map m_definedClasses = new HashMap();
-
-        /**
-         * The defineClass method.
-         * 
-         * @param name : name of the class
-         * @param b : the byte array of the class
-         * @param domain : the protection domain
-         * @return : the defined class.
-         * @throws Exception : if a problem is detected during the loading
-         */
-        public Class defineClass(String name, byte[] b, ProtectionDomain domain) throws Exception {
-            if (m_definedClasses.containsKey(name)) {
-                return (Class) m_definedClasses.get(name);
-            }
-            final Class c = super.defineClass(name, b, 0, b.length, domain);
-            m_definedClasses.put(name, c);
-            return c;
-        }
-
-        /**
-         * Return the URL of the asked resource.
-         * 
-         * @param arg : the name of the resource to find.
-         * @return the URL of the resource.
-         * @see java.lang.ClassLoader#getResource(java.lang.String)
-         */
-        public URL getResource(String arg) {
-            return m_context.getBundle().getResource(arg);
-        }
-
-        /**
-         * Load the class.
-         * @see java.lang.ClassLoader#loadClass(java.lang.String, boolean)
-         * @param name : the name of the class
-         * @param resolve : should be the class resolve now ?
-         * @return : the loaded class
-         * @throws ClassNotFoundException : the class to load is not found
-         */
-        protected Class loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
-            return m_context.getBundle().loadClass(name);
-        }
-    }
+//    /**
+//     * FactoryClassloader.
+//     */
+//    private class FactoryClassloader extends ClassLoader {
+//        /**
+//         * The defineClass method.
+//         * 
+//         * @param name : name of the class
+//         * @param b : the byte array of the class
+//         * @param domain : the protection domain
+//         * @return : the defined class.
+//         * @throws Exception : if a problem is detected during the loading
+//         */
+//        public Class defineClass(String name, byte[] b, ProtectionDomain domain) throws Exception {
+//            return  super.defineClass(name, b, 0, b.length, domain);
+//        }
+//    }
 }

@@ -389,14 +389,6 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Is the implementation class loaded?
-     * @return true if the class is loaded
-     */
-    private boolean isLoaded() {
-        return m_clazz != null;
-    }
-
-    /**
      * Add an instance to the created instance list.
      * @param o : the instance to add
      */
@@ -462,7 +454,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      */
     public Object createPojoObject() {
 
-        if (!isLoaded()) {
+        if (m_clazz == null) {
             load();
         }
         Object instance = null;
@@ -528,7 +520,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @return the manipulated class
      */
     public Class getClazz() {
-        if (!isLoaded()) {
+        if (m_clazz == null) {
             load();
         }
         return m_clazz;
