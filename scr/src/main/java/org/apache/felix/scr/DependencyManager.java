@@ -153,11 +153,12 @@ class DependencyManager implements ServiceListener
     private void serviceAdded( ServiceReference reference )
     {
         // ignore the service, if it does not match the target filter
-        if ( targetFilterMatch( reference ) )
+        if ( !targetFilterMatch( reference ) )
         {
             m_componentManager.getActivator().log( LogService.LOG_DEBUG,
-                "Dependency Manager: Ignoring added Service for " + m_dependencyMetadata.getName() + " : does not match target filter " + getTarget(),
-                m_componentManager.getComponentMetadata(), null );
+                    "Dependency Manager: Ignoring added Service for " + m_dependencyMetadata.getName()
+                        + " : does not match target filter " + getTarget(), m_componentManager.getComponentMetadata(),
+                    null );
             return;
         }
 
