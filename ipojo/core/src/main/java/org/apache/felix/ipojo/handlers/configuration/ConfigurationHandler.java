@@ -337,7 +337,7 @@ public class ConfigurationHandler extends PrimitiveHandler {
     public Object getterCallback(String fieldName, Object value) {
         // Check if the field is a configurable property
         for (int i = 0; i < m_configurableProperties.length; i++) {
-            if (m_configurableProperties[i].getField().equals(fieldName)) { return m_configurableProperties[i].getValue(); }
+            if (m_configurableProperties[i].hasField() && m_configurableProperties[i].getField().equals(fieldName)) { return m_configurableProperties[i].getValue(); }
         }
         return value;
     }

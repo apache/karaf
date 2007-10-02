@@ -339,24 +339,15 @@ public class DependencyHandler extends PrimitiveHandler {
         // dep.getMetadata().getServiceSpecification().split("[.]");
         // String className = "org/apache/felix/ipojo/" + segment[segment.length
         // - 1] + "Nullable";
-        final String className = dep.getSpecification() + "Nullable";
+        String className = dep.getSpecification() + "Nullable";
         String resource = dep.getSpecification().replace('.', '/') + ".class";
         URL url = getInstanceManager().getContext().getBundle().getResource(resource);
 
         try {
-            final byte[] b = NullableObjectWriter.dump(url, dep.getSpecification());
+            byte[] b = NullableObjectWriter.dump(url, dep.getSpecification());
             Class c = null;
             try {
-                ClassLoader cl = new ClassLoader() {
-                    public Class loadClass(String name) throws ClassNotFoundException {
-                        if (name.equals(className)) {
-                            return defineClass(name, b, 0, b.length, null);
-                        } else {
-                            return getInstanceManager().getContext().getBundle().loadClass(name);
-                        }
-                    }
-                };
-                c = cl.loadClass(className); 
+                c = getInstanceManager().getFactory().defineClass(className, b, null);
             } catch (Exception e) {
                 log(Logger.ERROR, "Cannot define the nullable class : " + e.getMessage());
                 e.printStackTrace();
