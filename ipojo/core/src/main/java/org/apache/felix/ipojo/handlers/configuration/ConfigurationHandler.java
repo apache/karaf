@@ -315,7 +315,7 @@ public class ConfigurationHandler extends PrimitiveHandler {
         // Verify that the field name correspond to a configurable property
         for (int i = 0; i < m_configurableProperties.length; i++) {
             ConfigurableProperty cp = m_configurableProperties[i];
-            if (cp.getField().equals(fieldName)) {
+            if (cp.hasField() && cp.getField().equals(fieldName)) {
                 // Check if the value has changed
                 if (cp.getValue() == null || !cp.getValue().equals(value)) {
                     cp.setValue(value); // Change the value
