@@ -39,7 +39,7 @@ import org.osgi.service.log.LogService;
  * implementation object's lifecycle.
  *
  */
-class ImmediateComponentManager extends AbstractComponentManager implements ManagedService
+class ImmediateComponentManager extends AbstractComponentManager
 {
     // the component ID
     private long m_componentId;
@@ -87,8 +87,17 @@ class ImmediateComponentManager extends AbstractComponentManager implements Mana
                 + getComponentMetadata().getName() );
             props.put( Constants.SERVICE_VENDOR, "Apache Software Foundation" );
 
+            // register an anonymous managed service instance
+            ManagedService ms = new ManagedService()
+            {
+                public void updated( Dictionary properties )
+                {
+                    reconfigure( properties );
+                }
+            };
+
             m_managedServiceRegistration = activator.getBundleContext().registerService(
-                ManagedService.class.getName(), this, props );
+                ManagedService.class.getName(), ms, props );
         }
     }
 
@@ -372,8 +381,6 @@ class ImmediateComponentManager extends AbstractComponentManager implements Mana
     }
 
 
-    //---------- ManagedService interface
-
     /**
      * Called by the Configuration Admin Service to update the component with
      * Configuration properties.
@@ -382,7 +389,7 @@ class ImmediateComponentManager extends AbstractComponentManager implements Mana
      *      the Configuration Admin Service or <code>null</code> if there is
      *      no configuration or if the configuration has just been deleted.
      */
-    public void updated( Dictionary configuration )
+    public void reconfigure( Dictionary configuration )
     {
         // store the properties
         m_configurationProperties = configuration;

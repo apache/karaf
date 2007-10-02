@@ -156,7 +156,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         else if ( cm instanceof ImmediateComponentManager )
         {
             // update the configuration as if called as ManagedService
-            ( ( ImmediateComponentManager ) cm ).updated( configuration );
+            ( ( ImmediateComponentManager ) cm ).reconfigure( configuration );
         }
     }
 
