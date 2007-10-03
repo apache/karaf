@@ -58,6 +58,10 @@ public class Main
      * The default name used for the configuration properties file.
     **/
     public static final String CONFIG_PROPERTIES_FILE_VALUE = "config.properties";
+    /**
+     * The default name used for the default configuration properties file.
+    **/
+    public static final String DEFAULT_PROPERTIES_FILE_VALUE = "default.properties";
 
     private static Felix m_felix = null;
 
@@ -95,7 +99,10 @@ public class Main
      *       to use a different location for the property file by specifying
      *       the desired URL using the <tt>felix.config.properties</tt>
      *       system property; this should be set using the <tt>-D</tt> syntax
-     *       when executing the JVM. Refer to the
+     *       when executing the JVM. If the <tt>config.properties</tt> file
+     *       cannot be found, then the bare-bones <tt>default.properties</tt>
+     *       configuration file will be used to set the configuration properties;
+     *       this file is embedded in the launcher JAR file. Refer to the
      *       <a href="Felix.html#Felix(java.util.Map, java.util.List)">
      *       <tt>Felix</tt></a> constructor documentation for more
      *       information on the framework configuration options.
@@ -125,12 +132,13 @@ public class Main
      * <p>
      * It should be noted that simply starting an instance of the framework is not enough
      * to create an interactive session with it. It is necessary to install
-     * and start bundles that provide an interactive impl; this is generally
-     * done by specifying an "auto-start" property in the framework configuration
-     * property file. If no interactive impl bundles are installed or if
-     * the configuration property file cannot be found, the framework will appear to
-     * be hung or deadlocked. This is not the case, it is executing correctly,
-     * there is just no way to interact with it. Refer to the
+     * and start bundles that provide a some means to interact with the framework;
+     * this is generally done by specifying an "auto-start" property in the
+     * framework configuration property file. If no bundles providing a means to
+     * interact with the framework are installed or if the configuration property
+     * file cannot be found, the framework will appear to be hung or deadlocked.
+     * This is not the case, it is executing correctly, there is just no way to
+     * interact with it. Refer to the
      * <a href="Felix.html#Felix(java.util.Map, java.util.List)">
      * <tt>Felix</tt></a> constructor documentation for more information on
      * framework configuration options.
@@ -388,19 +396,14 @@ public class Main
         InputStream is = null;
         try
         {
+            // Try to load config.properties.
             is = propURL.openConnection().getInputStream();
             props.load(is);
             is.close();
         }
-        catch (FileNotFoundException ex)
-        {
-            // Ignore file not found.
-        }
         catch (Exception ex)
         {
-            System.err.println(
-                "Error loading config properties from " + propURL);
-            System.err.println("Main: " + ex);
+            // Try to close input stream if we have one.
             try
             {
                 if (is != null) is.close();
@@ -409,7 +412,31 @@ public class Main
             {
                 // Nothing we can do.
             }
-            return null;
+
+            // If we cannot the configuration properties for any reason, then just
+            // attempt to load resource default.properties instead.
+            propURL = Main.class.getClassLoader().getResource(DEFAULT_PROPERTIES_FILE_VALUE);
+            try
+            {
+                is = propURL.openConnection().getInputStream();
+                props.load(is);
+                is.close();
+                System.err.println("\nUsing default configuration properties.");
+            }
+            catch (Exception ex2)
+            {
+                // Try to close input stream if we have one.
+                try
+                {
+                    if (is != null) is.close();
+                }
+                catch (IOException ex3)
+                {
+                    // Nothing we can do.
+                }
+                System.err.println("\nUnable to load any configuration properties.");
+                return null;
+            }
         }
 
         // Perform variable substitution for system properties.
