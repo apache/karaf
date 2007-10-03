@@ -26,6 +26,8 @@ public class VersionRange
     private boolean m_isLowInclusive = false;
     private Version m_high = null;
     private boolean m_isHighInclusive = false;
+    private String m_toString = null;
+    public static final VersionRange infiniteRange = new VersionRange(Version.emptyVersion, true, null, true);
 
     public VersionRange(Version low, boolean isLowInclusive,
         Version high, boolean isHighInclusive)
@@ -84,8 +86,8 @@ public class VersionRange
         if (range.indexOf(',') >= 0)
         {
             String s = range.substring(1, range.length() - 1);
-            String vlo = s.substring(0, s.indexOf(','));
-            String vhi = s.substring(s.indexOf(',') + 1, s.length());
+            String vlo = s.substring(0, s.indexOf(',')).trim();
+            String vhi = s.substring(s.indexOf(',') + 1, s.length()).trim();
             return new VersionRange (
                 new Version(vlo), (range.charAt(0) == '['),
                 new Version(vhi), (range.charAt(range.length() - 1) == ']'));
@@ -94,5 +96,27 @@ public class VersionRange
         {
             return new VersionRange(new Version(range), true, null, false);
         }
+    }
+
+    public String toString()
+    {
+        if (m_toString == null)
+        {
+            if (m_high != null)
+            {
+                StringBuffer sb = new StringBuffer();
+                sb.append(m_isLowInclusive ? '[' : '(');
+                sb.append(m_low.toString());
+                sb.append(',');
+                sb.append(m_high.toString());
+                sb.append(m_isHighInclusive ? ']' : ')');
+                m_toString = sb.toString();
+            }
+            else
+            {
+                m_toString = m_low.toString();
+            }
+        }
+        return m_toString;
     }
 }
