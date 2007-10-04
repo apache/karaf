@@ -533,12 +533,22 @@ public class BundlePlugin extends AbstractMojo {
     protected Properties getDefaultProperties(MavenProject project)
     {
         Properties properties = new Properties();
+
+        String bsn;
+        try
+        {
+            bsn = maven2OsgiConverter.getBundleSymbolicName( project.getArtifact() );
+        }
+        catch (Exception e)
+        {
+            bsn = project.getGroupId() + "." + project.getArtifactId();
+        }
+
         // Setup defaults
-        String bsn = maven2OsgiConverter.getBundleSymbolicName( project.getArtifact() );
         properties.put(Analyzer.BUNDLE_SYMBOLICNAME, bsn);
         properties.put(Analyzer.IMPORT_PACKAGE, "*");
-
         properties.put(Analyzer.BUNDLE_VERSION, project.getVersion());
+
         this.header(properties, Analyzer.BUNDLE_DESCRIPTION, project
            .getDescription());
         StringBuffer licenseText = this.printLicenses(project.getLicenses());
