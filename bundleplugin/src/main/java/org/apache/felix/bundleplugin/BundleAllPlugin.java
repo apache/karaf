@@ -48,7 +48,6 @@ import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
-import org.apache.maven.shared.dependency.tree.DependencyTree;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
 
@@ -174,12 +173,12 @@ public class BundleAllPlugin
         }
         artifactsBeingProcessed.add( project.getArtifact() );
 
-        DependencyTree dependencyTree;
+        DependencyNode dependencyTree;
 
         try
         {
             dependencyTree = dependencyTreeBuilder.buildDependencyTree( project, localRepository, factory,
-                                                                        artifactMetadataSource, collector );
+                                                                        artifactMetadataSource, null, collector );
         }
         catch ( DependencyTreeBuilderException e )
         {
@@ -187,6 +186,12 @@ public class BundleAllPlugin
         }
 
         BundleInfo bundleInfo = new BundleInfo();
+
+        if ( !dependencyTree.hasChildren() )
+        {
+            /* no need to traverse the tree */
+            return bundleRoot( project, bundleInfo );
+        }
 
         getLog().debug( "Will bundle the following dependency tree" + LS + dependencyTree );
 
@@ -197,6 +202,11 @@ public class BundleAllPlugin
             {
                 /* this is the root, current project */
                 break;
+            }
+
+            if ( node.getState() != DependencyNode.INCLUDED )
+            {
+                continue;
             }
 
             if ( Artifact.SCOPE_SYSTEM.equals( node.getArtifact().getScope() ) )

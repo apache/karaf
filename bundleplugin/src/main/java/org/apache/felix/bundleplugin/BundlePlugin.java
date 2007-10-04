@@ -534,7 +534,7 @@ public class BundlePlugin extends AbstractMojo {
     {
         Properties properties = new Properties();
         // Setup defaults
-        String bsn = project.getGroupId() + "." + project.getArtifactId();
+        String bsn = maven2OsgiConverter.getBundleSymbolicName( project.getArtifact() );
         properties.put(Analyzer.BUNDLE_SYMBOLICNAME, bsn);
         properties.put(Analyzer.IMPORT_PACKAGE, "*");
 

@@ -69,10 +69,10 @@ public class BundlePluginTest
         assertEquals( "2.0.0.SNAPSHOT", osgiVersion );
 
         osgiVersion = plugin.convertVersionToOsgi( "2" );
-        assertEquals( "2", osgiVersion );
+        assertEquals( "2.0.0", osgiVersion );
 
         osgiVersion = plugin.convertVersionToOsgi( "2.1" );
-        assertEquals( "2.1", osgiVersion );
+        assertEquals( "2.1.0", osgiVersion );
 
         osgiVersion = plugin.convertVersionToOsgi( "2.1.3" );
         assertEquals( "2.1.3", osgiVersion );
