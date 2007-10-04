@@ -79,14 +79,15 @@ public class GeneralActionListener implements ServiceListener,ActionListener {
 		
 		UPnPAction osgiAct = osgiServ.getAction(upnpAct.getName());
 		Properties inArgs = null;
-		ArgumentList al = upnpAct.getArgumentList();
+		ArgumentList alIn = upnpAct.getInputArgumentList();
+		ArgumentList alOut = upnpAct.getOutputArgumentList();
 		String[] inArg = osgiAct.getInputArgumentNames();
 		boolean invalidAction=false;
 		if(inArg!=null){
 			inArgs = new Properties();
 			Argument arg;
 			for (int j = 0; j < inArg.length; j++) {
-				arg=al.getArgument(inArg[j]);
+				arg=alIn.getArgument(inArg[j]);
 				try {
 					inArgs.put(
 							inArg[j],
@@ -120,7 +121,7 @@ public class GeneralActionListener implements ServiceListener,ActionListener {
 		if(outArg!=null){
 			Argument arg;
 			for (int j = 0; j < outArg.length; j++) {
-				arg = al.getArgument(outArg[j]);								
+				arg = alOut.getArgument(outArg[j]);								
 				try {
 					arg.setValue(
 						Converter.toString(
