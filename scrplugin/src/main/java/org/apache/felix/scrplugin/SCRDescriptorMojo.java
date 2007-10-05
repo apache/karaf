@@ -249,13 +249,13 @@ public class SCRDescriptorMojo extends AbstractMojo {
             }
 
             // references
-            final JavaTag[] refs = description.getTagsByName(Constants.REFERENCE, inherited);
+            final JavaTag[] refs = currentDescription.getTagsByName(Constants.REFERENCE, inherited);
             for (int i=0; i < refs.length; i++) {
                 this.testReference(references, refs[i], null, description == currentDescription);
             }
 
             // fields
-            final JavaField[] fields = description.getFields();
+            final JavaField[] fields = currentDescription.getFields();
             for (int i=0; i < fields.length; i++) {
                 JavaTag tag = fields[i].getTagByName(Constants.REFERENCE);
                 if (tag != null) {
