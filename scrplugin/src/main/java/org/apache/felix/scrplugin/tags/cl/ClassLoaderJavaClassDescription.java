@@ -56,7 +56,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
 
     public JavaField[] getFields() {
         // TODO Auto-generated method stub
-        return null;
+        return new JavaField[0];
     }
 
     public JavaClassDescription[] getImplementedInterfaces() throws MojoExecutionException {
@@ -64,7 +64,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
         if (implemented == null || implemented.length == 0) {
             return null;
         }
-        
+
         JavaClassDescription[] jcd = new JavaClassDescription[implemented.length];
         for (int i=0; i < jcd.length; i++) {
             jcd[i] = manager.getJavaClassDescription(implemented[i].getName());
