@@ -19,6 +19,7 @@
 package org.apache.felix.scr;
 
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -765,8 +766,11 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      *
      * @throws NoSuchMethodException If no public or protected method with
      *      the given name can be found in the class or any of its super classes.
+     * @throws InvocationTargetException If an unexpected Throwable is caught
+     *      trying to access the desired method.
      */
-    static Method getMethod( Class clazz, String name, Class[] parameterTypes, boolean only ) throws NoSuchMethodException
+    static Method getMethod( Class clazz, String name, Class[] parameterTypes, boolean only )
+        throws NoSuchMethodException, InvocationTargetException
     {
         for ( ; clazz != null; clazz = clazz.getSuperclass() )
         {
@@ -791,6 +795,12 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             catch ( NoSuchMethodException nsme )
             {
                 // ignore for now
+            }
+            catch ( Throwable throwable )
+            {
+                // unexpected problem accessing the method, don't let everything
+                // blow up in this situation, just throw a declared exception
+                throw new InvocationTargetException( throwable, "Unexpected problem trying to get method " + name );
             }
         }
 

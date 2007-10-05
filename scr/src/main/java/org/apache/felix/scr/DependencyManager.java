@@ -663,9 +663,13 @@ class DependencyManager implements ServiceListener
      * @param parameterClassName the name of the class of the parameter that is
      *            passed to the method
      * @return the method or null
-     * @throws java.lang.ClassNotFoundException if the class was not found
+     * @throws ClassNotFoundException if the class for parameterClassName cannot
+     *      be found.
+     * @throws InvocationTargetException If an unexpected error occurrs trying
+     *      to get the method from the targetClass.
      */
     private Method getBindingMethod( String methodname, Class targetClass, String parameterClassName )
+        throws InvocationTargetException
     {
         Class parameterClass = null;
 
