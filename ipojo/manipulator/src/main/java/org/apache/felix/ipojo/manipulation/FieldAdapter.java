@@ -113,16 +113,16 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
         String internalType = desc.substring(1);
         internalType = internalType.substring(0, internalType.length() - 2);
 
-        mv.visitVarInsn(ALOAD, 0);
-        mv.visitVarInsn(ALOAD, 1);
-        mv.visitFieldInsn(PUTFIELD, m_owner, name, internalType);
-
         Label l1 = new Label();
         mv.visitLabel(l1);
         mv.visitVarInsn(ALOAD, 0);
         mv.visitFieldInsn(GETFIELD, m_owner, "_F" + name, "Z");
         Label l2 = new Label();
         mv.visitJumpInsn(IFNE, l2);
+        //TODO move in
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitVarInsn(ALOAD, 1);
+        mv.visitFieldInsn(PUTFIELD, m_owner, name, internalType);
         mv.visitInsn(RETURN);
         mv.visitLabel(l2);
 
@@ -548,9 +548,6 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 String internalName = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][0];
                 String boxingType = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][1];
 
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitVarInsn(type.getOpcode(ILOAD), 1);
-                mv.visitFieldInsn(PUTFIELD, m_owner, name, internalName);
                 Label l1 = new Label();
                 mv.visitLabel(l1);
 
@@ -558,6 +555,10 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 mv.visitFieldInsn(GETFIELD, m_owner, "_F" + name, "Z");
                 Label l22 = new Label();
                 mv.visitJumpInsn(IFNE, l22);
+                //TODO move in
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitVarInsn(type.getOpcode(ILOAD), 1);
+                mv.visitFieldInsn(PUTFIELD, m_owner, name, internalName);
                 mv.visitInsn(RETURN);
                 mv.visitLabel(l22);
 
@@ -585,9 +586,6 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 internalName = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][0];
                 boxingType = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][1];
 
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitVarInsn(type.getOpcode(ILOAD), 1);
-                mv.visitFieldInsn(PUTFIELD, m_owner, name, internalName);
                 l1 = new Label();
                 mv.visitLabel(l1);
 
@@ -595,6 +593,10 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 mv.visitFieldInsn(GETFIELD, m_owner, "_F" + name, "Z");
                 Label l23 = new Label();
                 mv.visitJumpInsn(IFNE, l23);
+                //TODO move in
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitVarInsn(type.getOpcode(ILOAD), 1);
+                mv.visitFieldInsn(PUTFIELD, m_owner, name, internalName);
                 mv.visitInsn(RETURN);
                 mv.visitLabel(l23);
 
@@ -619,13 +621,13 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
 
             case Type.OBJECT:
                 mv.visitVarInsn(ALOAD, 0);
-                mv.visitVarInsn(ALOAD, 1);
-                mv.visitFieldInsn(PUTFIELD, m_owner, name, "L" + type.getInternalName() + ";");
-
-                mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, "_F" + name, "Z");
                 Label l24 = new Label();
                 mv.visitJumpInsn(IFNE, l24);
+                //TODO move in
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitFieldInsn(PUTFIELD, m_owner, name, "L" + type.getInternalName() + ";");
                 mv.visitInsn(RETURN);
                 mv.visitLabel(l24);
 

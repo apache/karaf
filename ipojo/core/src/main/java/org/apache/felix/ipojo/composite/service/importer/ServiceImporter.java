@@ -305,13 +305,24 @@ public class ServiceImporter implements TrackerCustomizer {
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
     public boolean addingService(ServiceReference reference) {
-        // Else add it to the record list
+        for (int i = 0; i < m_records.size(); i++) {
+            Record rec = (Record) m_records.get(i);
+            if (rec.m_ref == reference) {
+                return false; // Already contained
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * The given service reference was added inside the tracker list.
+     * Register the internal service.
+     * @param reference : added reference
+     * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
+     */
+    public void addedService(ServiceReference reference) {
         Record rec = new Record();
         rec.m_ref = reference;
-        if (m_records.contains(rec)) {
-            return false;
-        }
-        
         m_records.add(rec);
         // Publishing ?
         if (m_records.size() == 1 || m_aggregate) { // If the service is the first one, or if it is a multiple imports
@@ -323,7 +334,6 @@ public class ServiceImporter implements TrackerCustomizer {
             m_isValid = true;
             m_handler.validating(this);
         }
-        return true;
     }
 
     /**

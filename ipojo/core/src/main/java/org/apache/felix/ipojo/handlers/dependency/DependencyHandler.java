@@ -465,13 +465,13 @@ public class DependencyHandler extends PrimitiveHandler {
      * @return true if all dependencies are resolved.
      */
     private boolean validateComponentDependencies() {
-        boolean valide = true;
+        boolean valid = true;
         for (int i = 0; i < m_dependencies.length; i++) {
             Dependency dep = m_dependencies[i];
-            valide = valide & dep.getState() == Dependency.RESOLVED;
-            if (!valide) { return false; }
+            valid = valid & dep.getState() == Dependency.RESOLVED;
+            if (!valid) { return false; }
         }
-        return valide;
+        return valid;
     }
 
     /**

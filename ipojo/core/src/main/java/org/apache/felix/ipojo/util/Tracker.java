@@ -34,10 +34,10 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
 /**
-* Utility class close to the OSGi Service Tracker.
-* 
-* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
-*/
+ * Utility class close to the OSGi Service Tracker.
+ * This class is used when tracking dynamic services is required.
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ */
 public class Tracker implements TrackerCustomizer {
 
     /**
@@ -219,7 +219,7 @@ public class Tracker implements TrackerCustomizer {
         m_tracked.close();
         ServiceReference[] references = getServiceReferences();
         Tracked outgoing = m_tracked;
-        m_tracked = null;
+
         try {
             m_context.removeServiceListener(outgoing);
         } catch (IllegalStateException e) {
@@ -231,6 +231,7 @@ public class Tracker implements TrackerCustomizer {
                 outgoing.untrack(references[i]);
             }
         }
+        m_tracked = null;
 
     }
 
@@ -247,6 +248,15 @@ public class Tracker implements TrackerCustomizer {
      */
     public boolean addingService(ServiceReference reference) {
         return true;
+    }
+
+    /**
+     * Default implementation of the TrackerCustomizer.addedService method.  
+     * @param reference added reference.
+     * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
+     */
+    public void addedService(ServiceReference reference) {
+
     }
 
     /**
@@ -323,12 +333,12 @@ public class Tracker implements TrackerCustomizer {
             return references;
         }
     }
-    
+
     /**
      * Get the list of stored service reference.
      * @return the list containing used service reference
      */
-    public List/*<ServiceReference>*/ getServiceReferencesList() {
+    public List/*<ServiceReference>*/getServiceReferencesList() {
         Tracked tracked = this.m_tracked; // use local var since we are not synchronized
         if (tracked == null) { // if Tracker is not open
             return null;
@@ -379,7 +389,7 @@ public class Tracker implements TrackerCustomizer {
         }
         Object object = null;
         synchronized (tracked) {
-            object =  tracked.get(reference);
+            object = tracked.get(reference);
             if (object != null) { // The object was already get.
                 return object;
             } else if (tracked.containsKey(reference)) { // Not already get
@@ -387,11 +397,11 @@ public class Tracker implements TrackerCustomizer {
                 tracked.put(reference, object);
                 return object;
             }
+            // Not already tracked.
+            return m_context.getService(reference);
         }
-        // Not already tracked.
-        return m_context.getService(reference);
     }
-    
+
     /**
      * Unget the given service reference.
      * @param reference : service reference to unget.
@@ -405,7 +415,9 @@ public class Tracker implements TrackerCustomizer {
         synchronized (tracked) {
             object = tracked.get(reference);
         }
-        if (object != null) { m_context.ungetService(reference); }
+        if (object != null) {
+            m_context.ungetService(reference);
+        }
     }
 
     /**
@@ -423,7 +435,7 @@ public class Tracker implements TrackerCustomizer {
             if (references != null) {
                 length = references.length;
             } else {
-                return null; 
+                return null;
             }
             Object[] objects = new Object[length];
             for (int i = 0; i < length; i++) {
@@ -482,36 +494,37 @@ public class Tracker implements TrackerCustomizer {
          * UID.
          */
         static final long serialVersionUID = -7420065199791006079L;
-    
+
         /**
          * List of ServiceReferences in the process of being added. This is used to deal with nesting of ServiceEvents. Since ServiceEvents are synchronously delivered, ServiceEvents can be nested. For example, when processing the adding of a service
          * and the customizer causes the service to be unregistered, notification to the nested call to untrack that the service was unregistered can be made to the track method. Since the ArrayList implementation is not synchronized, all access to
          * this list must be protected by the same synchronized object for thread safety.
          */
         private List m_adding;
-    
+
         /**
          * true if the tracked object is closed. This field is volatile because it is set by one thread and read by another.
          */
         private volatile boolean m_closed;
-    
+
         /**
          * Initial list of ServiceReferences for the tracker. This is used to correctly process the initial services which could become unregistered before they are tracked. This is necessary since the initial set of tracked services are not
          * "announced" by ServiceEvents and therefore the ServiceEvent for unregistration could be delivered before we track the service. A service must not be in both the initial and adding lists at the same time. A service must be moved from the
          * initial list to the adding list "atomically" before we begin tracking it. Since the LinkedList implementation is not synchronized, all access to this list must be protected by the same synchronized object for thread safety.
          */
         private List m_initial;
-    
+
         /**
          * Tracked constructor.
          */
         protected Tracked() {
+            //TODO : set the comparator according to the binding policy.
             super(new ReferenceComparator());
             m_closed = false;
             m_adding = new ArrayList(6);
             m_initial = new LinkedList();
         }
-    
+
         /**
          * Set initial list of services into tracker before ServiceEvents begin to be received. This method must be called from Tracker.open while synchronized on this object in the same synchronized block as the addServiceListener call.
          * @param references The initial list of services to be tracked.
@@ -523,7 +536,7 @@ public class Tracker implements TrackerCustomizer {
                 m_initial.add(references[i]);
             }
         }
-    
+
         /**
          * Track the initial list of services. This is called after ServiceEvents can begin to be received. This method must be called from Tracker.open while not synchronized on this object after the addServiceListener call.
          */
@@ -534,7 +547,7 @@ public class Tracker implements TrackerCustomizer {
                     if (m_initial.size() == 0) { //  if there are no more inital services
                         return; // we are done
                     }
-    
+
                     // move the first service from the initial list to the adding list within this synchronized block.
                     reference = (ServiceReference) ((LinkedList) m_initial).removeFirst();
                     if (this.containsKey(reference)) { //Check if the reference is already tracked.
@@ -550,14 +563,14 @@ public class Tracker implements TrackerCustomizer {
                 trackAdding(reference); // Begin tracking it. We call trackAdding since we have already put the reference in the adding list.
             }
         }
-    
+
         /**
          * Called by the owning Tracker object when it is closed.
          */
         protected void close() {
             m_closed = true;
         }
-    
+
         /**
          * ServiceListener method for the Tracker class. This method must NOT be synchronized to avoid deadlock potential.
          * @param event ServiceEvent object from the framework.
@@ -566,7 +579,7 @@ public class Tracker implements TrackerCustomizer {
             //Check if we had a delayed call (which could happen when we close).
             if (m_closed) { return; }
             ServiceReference reference = event.getServiceReference();
-    
+
             switch (event.getType()) {
                 case ServiceEvent.REGISTERED:
                 case ServiceEvent.MODIFIED:
@@ -587,7 +600,7 @@ public class Tracker implements TrackerCustomizer {
                     break;
             }
         }
-    
+
         /**
          * Begin to track the referenced service.
          * @param reference Reference to a service to be tracked.
@@ -615,10 +628,10 @@ public class Tracker implements TrackerCustomizer {
                 }
                 m_adding.add(reference); // mark this service is being added
             }
-    
+
             trackAdding(reference); // call trackAdding now that we have put the reference in the adding list
         }
-    
+
         /**
          * Common logic to add a service to the tracker used by track and trackInitialServices. The specified reference must have been placed in the adding list before calling this method.
          * @param reference Reference to a service to be tracked.
@@ -626,6 +639,7 @@ public class Tracker implements TrackerCustomizer {
         private void trackAdding(ServiceReference reference) {
             boolean mustBeTracked = false;
             boolean becameUntracked = false;
+            boolean mustCallAdded = false;
             //Call customizer outside of synchronized region
             try {
                 mustBeTracked = m_customizer.addingService(reference);
@@ -634,23 +648,30 @@ public class Tracker implements TrackerCustomizer {
                     if (m_adding.remove(reference)) { // if the service was not untracked during the customizer callback
                         if (mustBeTracked) {
                             this.put(reference, null);
-                            modified();
+                            modified(); 
+                            mustCallAdded = true;
                             notifyAll(); // notify any waiters in waitForService
                         }
                     } else {
                         becameUntracked = true;
+                        // If already get during the customizer callback
+                        ungetService(reference);
+                        modified();
                     }
                 }
             }
-            /*
-             * The service became untracked during the customizer callback.
-             */
+
+            // Call customizer outside of synchronized region
             if (becameUntracked) {
-                /* Call customizer outside of synchronized region */
+                // The service became untracked during the customizer callback.
                 m_customizer.removedService(reference, null);
+            } else {
+                if (mustCallAdded) {
+                    m_customizer.addedService(reference);
+                }
             }
         }
-    
+
         /**
          * Discontinue tracking the referenced service.
          * @param reference Reference to the tracked service.
@@ -661,15 +682,15 @@ public class Tracker implements TrackerCustomizer {
                 if (m_initial.remove(reference)) { // if this service is already in the list of initial references to process
                     return; // we have removed it from the list and it will not be processed
                 }
-    
+
                 if (m_adding.remove(reference)) { // if the service is in the process of being added
                     return; // in case the service is untracked while in the process of adding
                 }
-                
+
                 boolean isTraked = this.containsKey(reference); // Check if we was tracking the reference 
                 object = this.remove(reference); // must remove from tracker before calling customizer callback
-                 
-                if (! isTraked) { return; }
+
+                if (!isTraked) { return; }
                 modified();
             }
             // Call customizer outside of synchronized region
@@ -685,11 +706,11 @@ public class Tracker implements TrackerCustomizer {
             m_cachedReference = null; /* clear cached value */
             m_cachedService = null; /* clear cached value */
         }
-        
+
     }
 
     /**
-     *Service Reference Comparator.
+     * Service Reference Comparator.
      */
     private class ReferenceComparator implements Comparator {
 
@@ -701,27 +722,29 @@ public class Tracker implements TrackerCustomizer {
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
         public int compare(Object ref1, Object ref2) {
-            if (ref1.equals(ref2)) {
-                return 0;
-            }
-            
-            if (ref1 instanceof ServiceReference && ref2 instanceof ServiceReference) {                
+            if (ref1.equals(ref2)) { return 0; }
+
+            if (ref1 instanceof ServiceReference && ref2 instanceof ServiceReference) {
                 Object property1 = ((ServiceReference) ref1).getProperty(Constants.SERVICE_RANKING);
                 Object property2 = ((ServiceReference) ref2).getProperty(Constants.SERVICE_RANKING);
-                
+
                 int rank1 = 0;
                 int rank2 = 0;
-                if (property1 instanceof Integer) { rank1 = ((Integer) property1).intValue(); }
-                if (property2 instanceof Integer) { rank2 = ((Integer) property2).intValue(); }
-                
+                if (property1 instanceof Integer) {
+                    rank1 = ((Integer) property1).intValue();
+                }
+                if (property2 instanceof Integer) {
+                    rank2 = ((Integer) property2).intValue();
+                }
+
                 if (rank1 == rank2) {
                     // Check service.id
                     Object sid1 = ((ServiceReference) ref1).getProperty(Constants.SERVICE_ID);
                     Object sid2 = ((ServiceReference) ref2).getProperty(Constants.SERVICE_ID);
-                    
+
                     long rankId1 = ((Long) sid1).longValue();
                     long rankId2 = ((Long) sid2).longValue();
-                    
+
                     if (rankId1 == rankId2) {
                         return 0;
                     } else if (rankId1 < rankId2) {
@@ -729,13 +752,13 @@ public class Tracker implements TrackerCustomizer {
                     } else {
                         return 1;
                     }
-                    
+
                 } else if (rank1 > rank2) {
                     return 1;
                 } else {
                     return -1;
                 }
-                
+
             } else {
                 return 0;
             }

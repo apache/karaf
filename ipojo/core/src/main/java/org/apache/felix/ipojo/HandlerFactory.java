@@ -57,6 +57,13 @@ public class HandlerFactory extends ComponentFactory implements Factory {
     private String m_namespace = IPojoConfiguration.IPOJO_NAMESPACE;
 
     /**
+     * Get the handler start level.
+     * Lower level are priority are configured and started before higher level, and are stopped after.
+     * 
+     */
+    private int m_level = Integer.MAX_VALUE;
+
+    /**
      * Create a composite factory.
      * @param bc : bundle context
      * @param cm : metadata of the component to create
@@ -66,7 +73,7 @@ public class HandlerFactory extends ComponentFactory implements Factory {
         
         // Get the name
         if (cm.containsAttribute("name")) {
-            m_typeName = cm.getAttribute("name").toLowerCase();
+            m_factoryName = cm.getAttribute("name").toLowerCase();
         } else {
             System.err.println("An Handler needs a name");
             return;
@@ -75,6 +82,10 @@ public class HandlerFactory extends ComponentFactory implements Factory {
         // Get the type
         if (cm.containsAttribute("type")) {
             m_type = cm.getAttribute("type");
+        }
+        
+        if (cm.containsAttribute("level")) {
+            m_level = new Integer(cm.getAttribute("level")).intValue();
         }
         
         // Get the namespace
@@ -93,6 +104,10 @@ public class HandlerFactory extends ComponentFactory implements Factory {
     
     public String getType() {
         return m_type;
+    }
+    
+    public int getStartLevel() {
+        return m_level;
     }
 
     /**
@@ -118,9 +133,6 @@ public class HandlerFactory extends ComponentFactory implements Factory {
         }
                 
         computeFactoryState();
-        
-        // Check if the factory should be exposed
-        if (m_factoryName == null) { return; }
         
         // Exposition of the factory service
         m_sr = m_context.registerService(new String[] { Factory.class.getName()}, this, getProperties());
@@ -164,9 +176,12 @@ public class HandlerFactory extends ComponentFactory implements Factory {
     protected Properties getProperties() {
         final Properties props = super.getProperties();
 
-        props.put(Handler.HANDLER_NAME_PROPERTY, m_typeName);
+        props.put(Handler.HANDLER_NAME_PROPERTY, m_factoryName);
         props.put(Handler.HANDLER_NAMESPACE_PROPERTY, m_namespace);
         props.put(Handler.HANDLER_TYPE_PROPERTY, m_type);
+        if (m_level != Integer.MAX_VALUE) {
+            props.put(Handler.HANDLER_LEVEL_PROPERTY, new Integer(m_level));
+        }
         
         return props;
     }
@@ -183,7 +198,7 @@ public class HandlerFactory extends ComponentFactory implements Factory {
      * @throws org.apache.felix.ipojo.ConfigurationException : when the instance configuration failed.
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
-    public ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration, MissingHandlerException, org.apache.felix.ipojo.ConfigurationException {
+    public synchronized ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration, MissingHandlerException, org.apache.felix.ipojo.ConfigurationException {
         if (m_state == INVALID) {
             throw new MissingHandlerException(getMissingHandlers());
         }
@@ -225,7 +240,8 @@ public class HandlerFactory extends ComponentFactory implements Factory {
             HandlerIdentifier hi = (HandlerIdentifier) m_handlerIdentifiers.get(i);
             handlers.add(getHandlerInstance(hi, serviceContext));
         }
-        HandlerManager instance = new HandlerManager(this, context, (HandlerManager[]) handlers.toArray(new HandlerManager[0]));
+        
+        HandlerManager instance = new HandlerManager(this, context, (HandlerManager[]) handlers.toArray(new HandlerManager[handlers.size()]));
         instance.configure(m_componentMetadata, configuration);
 
         m_componentInstances.put(in, instance);

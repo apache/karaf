@@ -232,6 +232,15 @@ public class ServiceExporter implements TrackerCustomizer {
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
     public boolean addingService(ServiceReference reference) {
+        return true;
+    }
+    
+    /**
+     * A service has been added in the tracker. Can now thest the validity of the exporter.
+     * @param reference : the new reference.
+     * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
+     */
+    public void addedService(ServiceReference reference) {
         Record rec = new Record();
         rec.m_ref = reference;
         m_records.add(rec);
@@ -245,8 +254,6 @@ public class ServiceExporter implements TrackerCustomizer {
             m_isValid = true;
             m_handler.validating(this);
         }
-        
-        return true;
     }
 
     /**

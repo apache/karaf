@@ -46,6 +46,11 @@ public abstract class Handler {
      * Handler type property. 
      */
     public static final String HANDLER_TYPE_PROPERTY = "handler.type";
+
+    /**
+     * Handler priority.
+     */
+    public static final String HANDLER_LEVEL_PROPERTY = "handler.level";
     
     /**
      * Log method.
@@ -86,7 +91,7 @@ public abstract class Handler {
      */
     public final boolean isValid() {
         if (this instanceof Pojo) {
-            return getInstance().getState() == ComponentInstance.VALID;
+            return ((Pojo) this).getComponentInstance().getState() == ComponentInstance.VALID;
         } else {
             log(Logger.ERROR, "The handler is not a POJO : " + this.getClass().getName());
             return false;

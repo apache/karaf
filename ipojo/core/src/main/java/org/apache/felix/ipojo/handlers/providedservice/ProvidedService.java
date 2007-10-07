@@ -229,8 +229,9 @@ public class ProvidedService implements ServiceFactory {
             }
             // Build the service properties list
             Properties serviceProperties = getServiceProperties();
-
+           
             m_serviceRegistration = m_handler.getInstanceManager().getContext().registerService(m_serviceSpecification, this, serviceProperties);
+           
         }
     }
 

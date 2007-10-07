@@ -272,6 +272,14 @@ public class InstanceCreator implements TrackerCustomizer, FactoryStateListener 
         }
         return used;
     }
+    
+    /**
+     * A matching service has been added to the tracker.
+     * Nothing to do, as all action are computed in the adding method.
+     * @param ref : added reference.
+     * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
+     */
+    public void addedService(ServiceReference ref) { }
 
     /**
      * A used factory is modified.
@@ -279,9 +287,7 @@ public class InstanceCreator implements TrackerCustomizer, FactoryStateListener 
      * @param obj : factory object.
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
-    public void modifiedService(ServiceReference ref, Object obj) {
-        // Nothing to do.
-    }
+    public void modifiedService(ServiceReference ref, Object obj) { }
 
     /**
      * A used factory disappears.
@@ -291,10 +297,14 @@ public class InstanceCreator implements TrackerCustomizer, FactoryStateListener 
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     public void removedService(ServiceReference ref, Object obj) {
-        Factory fact = (Factory) obj;
+        String name = (String) ref.getProperty("factory.name");
+        if (name == null) { return; }
         for (int i = 0; i < m_configurations.length; i++) {
-            if (m_configurations[i].getInstance() != null && m_configurations[i].getFactory().equals(fact.getName())) {
-                m_configurations[i].setInstance(null);
+            if (m_configurations[i].getFactory() != null && m_configurations[i].getFactory().equals(name)) {
+                if (m_configurations[i].getInstance() != null) {
+                    m_configurations[i].getInstance().dispose();
+                    m_configurations[i].setInstance(null);
+                }
                 m_configurations[i].setFactory(null);
             }
         }

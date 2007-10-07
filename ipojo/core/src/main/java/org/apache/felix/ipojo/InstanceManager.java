@@ -151,7 +151,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
 
         String[] objects = new String[getPojoObjects().length];
         for (int i = 0; i < getPojoObjects().length; i++) {
-            objects[i] = getPojoObjects()[i].toString();
+            objects[i] = "" + getPojoObjects()[i];
         }
         instanceDescription.setCreatedObjects(objects);
 
@@ -194,9 +194,9 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * Start the instance manager.
      */
     public synchronized void start() {
-        if (m_state != STOPPED) {
+        if (m_state != STOPPED) { // Instance already started
             return;
-        } // Instance already started
+        } 
         
         for (int i = 0; i < m_handlers.length; i++) {
             m_handlers[i].addInstanceStateListener(this);
@@ -204,6 +204,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         }
         
         for (int i = 0; i < m_handlers.length; i++) {
+            
             if (m_handlers[i].getState() != VALID) {
                 setState(INVALID);
                 return;
@@ -253,7 +254,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         
         m_factory.disposed(this);
         
-        for (int i = 0; i < m_handlers.length; i++) {
+        for (int i = m_handlers.length - 1; i > -1; i--) {
             m_handlers[i].dispose();
         }
         
@@ -300,7 +301,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * the second call is stored and executed after the first one is finished.
      * @param state : the new state
      */
-    public void setState(int state) {
+    public synchronized void setState(int state) {
         if (m_inTransition) {
             m_stateQueue.add(new Integer(state)); 
             return;
@@ -309,10 +310,18 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         if (m_state != state) {
             m_inTransition = true;
 
-            // The state changed call the handler stateChange method
-            m_state = state;
-            for (int i = m_handlers.length - 1; i > -1; i--) {
-                m_handlers[i].getHandler().stateChanged(state);
+            if (state > m_state) {
+                // The state increases (Stopped = > IV, IV => V) => invoke handlers from the higher priority to the lower
+                m_state = state;
+                for (int i = 0; i < m_handlers.length; i++) {
+                    m_handlers[i].getHandler().stateChanged(state);
+                }
+            } else {
+                // The state decreases (V => IV, IV = > Stopped, Stopped => Disposed)
+                m_state = state;
+                for (int i = m_handlers.length - 1; i > -1; i--) {
+                    m_handlers[i].getHandler().stateChanged(state);
+                }
             }
             
             for (int i = 0; i < m_instanceListeners.size(); i++) {

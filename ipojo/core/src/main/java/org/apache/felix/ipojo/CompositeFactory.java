@@ -67,7 +67,7 @@ public class CompositeFactory extends ComponentFactory implements Factory {
     public boolean check(Element cm) {
      // Get the name
         if (cm.containsAttribute("name")) {
-            m_typeName = cm.getAttribute("name");
+            m_factoryName = cm.getAttribute("name");
             return true;
         } else {
             System.err.println("A composite needs a name");
@@ -165,10 +165,10 @@ public class CompositeFactory extends ComponentFactory implements Factory {
         computeFactoryState();
         
         // Check if the factory should be exposed
-        if (m_factoryName == null) { return; }
-        
-        // Exposition of the factory service
-        m_sr = m_context.registerService(new String[] { Factory.class.getName() }, this, getProperties());
+        if (m_isPublic) {
+            // Exposition of the factory service
+            m_sr = m_context.registerService(new String[] { Factory.class.getName() }, this, getProperties());
+        }
     }
     
     
@@ -191,7 +191,6 @@ public class CompositeFactory extends ComponentFactory implements Factory {
         props.put("factory.state", "" + m_state);
         
         props.put("factory.name", m_factoryName);
-        props.put("component.type", m_typeName);
         
         return props;
     }

@@ -34,6 +34,13 @@ public interface TrackerCustomizer {
      * @return The service object to be tracked for the ServiceReference object or null if the ServiceReference object should not be tracked.
      */
     boolean addingService(ServiceReference reference);
+    
+    /**
+     * A service tracked by the Tracker object has been added in the list.
+     * This method is called when a service has been added in the managed list (after addingService) and if the service has not disappeared before during the callback.
+     * @param reference the added reference.
+     */
+    void addedService(ServiceReference reference);
 
     /**
      * A service tracked by the Tracker object has been modified.

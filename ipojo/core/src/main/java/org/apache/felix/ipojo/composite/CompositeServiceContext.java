@@ -439,10 +439,18 @@ public class CompositeServiceContext implements ServiceContext, TrackerCustomize
      */
     public boolean addingService(ServiceReference reference) {
         if (!containsRef(reference)) {
-            importFactory(reference);
             return true;
         }
         return false;
+    }
+    
+    /**
+     * A matching reference has been added. The import factory can now be imported.
+     * @param reference : the added reference.
+     * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
+     */
+    public void addedService(ServiceReference reference) {
+        importFactory(reference);
     }
 
     /**

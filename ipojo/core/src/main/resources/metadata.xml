@@ -1,12 +1,12 @@
 <ipojo>
 <!-- Primitives handler -->
 <handler classname="org.apache.felix.ipojo.handlers.lifecycle.controller.ControllerHandler" name="controller"/>
-<handler classname="org.apache.felix.ipojo.handlers.lifecycle.callback.LifecycleCallbackHandler" name="callback"/>
-<handler classname="org.apache.felix.ipojo.handlers.dependency.DependencyHandler" name="requires">
+<handler classname="org.apache.felix.ipojo.handlers.lifecycle.callback.LifecycleCallbackHandler" name="callback" level="1"/>
+<handler classname="org.apache.felix.ipojo.handlers.dependency.DependencyHandler" name="requires" level="0">
 	<controller field="m_state"/>
 </handler>
-<handler classname="org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler" name="provides"/>
-<handler classname="org.apache.felix.ipojo.handlers.configuration.ConfigurationHandler" name="properties"/>
+<handler classname="org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler" name="provides" level="3"/>
+<handler classname="org.apache.felix.ipojo.handlers.configuration.ConfigurationHandler" name="properties" level="1"/>
 <handler classname="org.apache.felix.ipojo.handlers.architecture.ArchitectureHandler" name="architecture">
 	<provides>
 		<property field="m_name" name="instance.name" value=""/>

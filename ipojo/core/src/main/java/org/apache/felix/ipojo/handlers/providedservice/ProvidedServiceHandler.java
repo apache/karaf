@@ -414,8 +414,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
 
     /**
      * Add properties to all provided services.
-     * 
-     * @param dict : dictionary fo properties to add
+     * @param dict : dictionary of properties to add
      */
     public void addProperties(Dictionary dict) {
         for (int i = 0; i < m_providedServices.length; i++) {

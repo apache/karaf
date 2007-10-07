@@ -227,12 +227,12 @@ public class SvcInstance implements TrackerCustomizer {
     }
 
     /**
-     * Does the service instance match with the given factory.
-     * 
+     * Does the service instance match with the given factory ?
      * @param fact : the factory to test.
      * @return true if the factory match, false otherwise.
      */
     private boolean match(Factory fact) {
+        //TODO : use the service reference instead of the factory object to avoid to get the factory.
         // Check if the factory can provide the specification
         Element[] provides = fact.getDescription().getElements("provides");
         for (int i = 0; i < provides.length; i++) {
@@ -316,23 +316,6 @@ public class SvcInstance implements TrackerCustomizer {
     public boolean addingService(ServiceReference reference) {
         Factory fact = (Factory) m_tracker.getService(reference);
         if (match(fact)) {
-            if (m_isAggregate) { // Create an instance for the new factory
-                m_usedRef.put(reference, createInstance(fact));
-                if (!m_isValid) {
-                    m_isValid = true;
-                    m_handler.validate();
-                }
-            } else {
-                if (!isAnInstanceCreated()) {
-                    m_usedRef.put(reference, createInstance(fact));
-                } else {
-                    m_usedRef.put(reference, null); // Store the reference
-                }
-                if (!m_isValid) {
-                    m_isValid = true;
-                    m_handler.validate();
-                }
-            }
             m_tracker.ungetService(reference);
             return true;
         } else {
@@ -340,6 +323,33 @@ public class SvcInstance implements TrackerCustomizer {
             return false;
         }
         
+    }
+    
+    /**
+     * A matching service reference has been added in the tracker. 
+     * @param reference : added reference.
+     * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
+     */
+    public void addedService(ServiceReference reference) {
+        Factory fact = (Factory) m_tracker.getService(reference);
+        if (m_isAggregate) { // Create an instance for the new factory
+            m_usedRef.put(reference, createInstance(fact));
+            if (!m_isValid) {
+                m_isValid = true;
+                m_handler.validate();
+            }
+        } else {
+            if (!isAnInstanceCreated()) {
+                m_usedRef.put(reference, createInstance(fact));
+            } else {
+                m_usedRef.put(reference, null); // Store the reference
+            }
+            if (!m_isValid) {
+                m_isValid = true;
+                m_handler.validate();
+            }
+        }
+        m_tracker.ungetService(reference);
     }
 
     /**

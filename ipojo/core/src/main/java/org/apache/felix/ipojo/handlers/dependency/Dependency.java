@@ -172,6 +172,8 @@ public class Dependency implements TrackerCustomizer {
         if (policy != -1) {
             m_policy = policy;
         }
+        // TODO : Add binding policy too
+        
         // Fix the policy according to the level
         if ((m_policy == PolicyServiceContext.LOCAL_AND_GLOBAL || m_policy == PolicyServiceContext.LOCAL) && ! ((((IPojoContext) m_handler.getInstanceManager().getContext()).getServiceContext()) instanceof CompositeServiceContext)) {
             // We are not in a composite : BOTH | STRICT => GLOBAL
@@ -254,15 +256,6 @@ public class Dependency implements TrackerCustomizer {
         return set;
     }
 
-//    /**
-//     * A dependency is satisfied if it is optional or there is useful references.
-//     * 
-//     * @return true is the dependency is satisfied
-//     */
-//    protected boolean isSatisfied() {
-//        return m_isOptional || m_tracker.size() != 0;
-//    }
-
     /**
      * This method is called by the replaced code in the component
      * implementation class. Construct the service object list is necessary.
@@ -270,7 +263,9 @@ public class Dependency implements TrackerCustomizer {
      * @return null or a service object or a list of service object according to
      * the dependency.
      */
-    protected Object get() {
+    Object get() {
+        //TODO in static policy, the set of used service is frozen.
+        
         // Initialize the thread local object is not already touched.
         if (m_usage.getObjects().isEmpty()) {
             if (isAggregate()) {
@@ -282,7 +277,7 @@ public class Dependency implements TrackerCustomizer {
                     }
                 }
             } else {
-                if (m_tracker.size() == 0) {
+                if (m_tracker.getServiceReferences() == null) {
                     // Load the nullable class
                     String className = m_specification + "Nullable";
                     Class nullableClazz = m_handler.getNullableClass(className);
@@ -326,7 +321,7 @@ public class Dependency implements TrackerCustomizer {
         }
 
         if (m_isAggregate) { // Multiple dependency
-            return (Object[]) m_usage.getObjects().toArray((Object[]) Array.newInstance(m_clazz, 0));
+            return (Object[]) m_usage.getObjects().toArray((Object[]) Array.newInstance(m_clazz, m_usage.getObjects().size()));
         } else {
             return m_usage.getObjects().get(0);
         }
@@ -365,7 +360,7 @@ public class Dependency implements TrackerCustomizer {
      * @param ref : service reference
      * @return the service object
      */
-    private Object getService(ServiceReference ref) {
+    private synchronized Object getService(ServiceReference ref) {
         if (!m_usedReferences.contains(ref)) {
             m_usedReferences.add(ref);
         }
@@ -377,41 +372,34 @@ public class Dependency implements TrackerCustomizer {
      * @param ref : service reference to unget
      */
     private void ungetService(ServiceReference ref) {
-        m_serviceContext.ungetService(ref);
+        m_tracker.ungetService(ref);
     }
 
     /**
      * Call the bind method.
      * @param instance : instance on which calling the bind method.
      */
-    protected void callBindMethod(Object instance) {
+    protected synchronized void callBindMethod(Object instance) {
         if (m_tracker == null) { return; }
         // Check optional case : nullable object case : do not call bind on nullable object
-        if (m_isOptional && m_tracker.size() == 0) {
-            return;
-        }
+        if (m_isOptional && m_tracker.getServiceReferences() == null) { return; }
 
         if (m_isAggregate) {
-            synchronized (m_tracker) {
-                ServiceReference[] refs = m_tracker.getServiceReferences();
-                for (int i = 0; i < refs.length; i++) {
-                    for (int j = 0; j < m_callbacks.length; j++) {
-                        if (m_callbacks[j].getMethodType() == DependencyCallback.BIND) {
-                            try {
-                                m_callbacks[j].callOnInstance(instance, refs[i], getService(refs[i]));
-                            } catch (NoSuchMethodException e) {
-                                m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " does not exist in the class "
-                                                + m_handler.getInstanceManager().getClassName());
-                                return;
-                            } catch (IllegalAccessException e) {
-                                m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " is not accessible in the class "
-                                                + m_handler.getInstanceManager().getClassName());
-                                return;
-                            } catch (InvocationTargetException e) {
-                                m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName()
-                                                + "thorws an exception : " + e.getMessage());
-                                return;
-                            }
+            ServiceReference[] refs = m_tracker.getServiceReferences();
+            for (int i = 0; refs != null && i < refs.length; i++) {
+                for (int j = 0; j < m_callbacks.length; j++) {
+                    if (m_callbacks[j].getMethodType() == DependencyCallback.BIND) {
+                        try {
+                            m_callbacks[j].callOnInstance(instance, refs[i], getService(refs[i]));
+                        } catch (NoSuchMethodException e) {
+                            m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
+                            return;
+                        } catch (IllegalAccessException e) {
+                            m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
+                            return;
+                        } catch (InvocationTargetException e) {
+                            m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "thorws an exception : " + e.getMessage());
+                            return;
                         }
                     }
                 }
@@ -421,18 +409,17 @@ public class Dependency implements TrackerCustomizer {
                 if (m_callbacks[j].getMethodType() == DependencyCallback.BIND) {
                     try {
                         ServiceReference ref = m_tracker.getServiceReference();
-                        m_callbacks[j].callOnInstance(instance, ref, getService(ref));
+                        if (ref != null) {
+                            m_callbacks[j].callOnInstance(instance, ref, getService(ref));
+                        }
                     } catch (NoSuchMethodException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " does not exist in the class "
-                                        + m_handler.getInstanceManager().getClassName());
+                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
                         return;
                     } catch (IllegalAccessException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " is not accessible in the class "
-                                        + m_handler.getInstanceManager().getClassName());
+                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
                         return;
                     } catch (InvocationTargetException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName()
-                                        + "throws an exception : " + e.getMessage());
+                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getMessage());
                         return;
                     }
                 }
@@ -446,23 +433,21 @@ public class Dependency implements TrackerCustomizer {
      */
     private void callBindMethod(ServiceReference ref) {
         // call bind method :
-       // if (m_handler.getInstanceManager().getState() == InstanceManager.VALID) {
+        // if (m_handler.getInstanceManager().getState() == InstanceManager.VALID) {
         if (m_handler.getInstanceManager().getState() > InstanceManager.STOPPED && m_handler.getInstanceManager().getPojoObjects().length > 0) {
             for (int i = 0; i < m_callbacks.length; i++) {
                 if (m_callbacks[i].getMethodType() == DependencyCallback.BIND) {
                     try {
                         m_callbacks[i].call(ref, getService(ref));
+                        ungetService(ref);
                     } catch (NoSuchMethodException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " does not exist in the class "
-                                        + m_handler.getInstanceManager().getClassName());
+                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
                         return;
                     } catch (IllegalAccessException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " is not accessible in the class "
-                                        + m_handler.getInstanceManager().getClassName());
+                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
                         return;
                     } catch (InvocationTargetException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName()
-                                        + "throws an exception : " + e.getMessage());
+                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getMessage());
                         return;
                     }
                 }
@@ -501,7 +486,7 @@ public class Dependency implements TrackerCustomizer {
             m_handler.log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] A filter is malformed : " + filter + " - " + e1.getMessage());
             return;
         }
-        
+        //TODO : Add binding (dynamic priority against normal) policy, i.e. comparator.  
         m_tracker = new Tracker(m_serviceContext, m_filter, this);
         m_tracker.open();
         if (m_tracker.size() == 0 && !m_isOptional) {
@@ -516,17 +501,11 @@ public class Dependency implements TrackerCustomizer {
      */
     public void stop() {
         if (m_tracker != null) {
-            m_tracker.close();
+            m_tracker.close(); // Will unget all used reference.
             m_tracker = null;
         }
-        
         m_handler.log(Logger.INFO, "[" + m_handler.getInstanceManager().getInstanceName() + "] Stop a dependency on : " + m_specification + " with " + m_strFilter + " (" + m_handler.getInstanceManager() + ")");
         m_state = UNRESOLVED;
-
-        // Unget all services references
-        for (int i = 0; i < m_usedReferences.size(); i++) {
-            ungetService((ServiceReference) m_usedReferences.get(i));
-        }
 
         m_usedReferences.clear();
         m_clazz = null;
@@ -615,16 +594,26 @@ public class Dependency implements TrackerCustomizer {
     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
     */
     public boolean addingService(ServiceReference ref) {
+        //TODO : according to the policy, do not add the new reference. Indeed in static policy is references are already used, new ones are ignored
         if (m_filter.match(ref)) {
-            m_state = RESOLVED;
-            if (m_isAggregate || m_tracker.size() == 0) {
-                callBindMethod(ref);
-            }
-            
-            m_handler.checkContext();
             return true;
         }
         return false;
+    }
+    
+    /**
+     * A new service reference has been added in the tracker.
+     * Call the bind method if needed, and check the dependency context.
+     * @param reference : added reference.
+     * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
+     */
+    public void addedService(ServiceReference reference) {
+        m_state = RESOLVED;
+        if (m_isAggregate || m_tracker.getServiceReferences() != null) {
+            callBindMethod(reference);
+        }
+        
+        m_handler.checkContext();
     }
 
     /**
@@ -650,10 +639,11 @@ public class Dependency implements TrackerCustomizer {
             ungetService(ref);
             m_usedReferences.remove(ref);
             hasChanged = true;
+            //TODO in static policy, invalidate the instance, and close the tracking
         }
 
         // Is the state valid or invalid, the reference is already removed
-        if (m_tracker.size() == 0 && !m_isOptional) {
+        if (m_tracker.getServiceReferences() == null && !m_isOptional) {
             m_state = UNRESOLVED;
         } else {
             m_state = RESOLVED;

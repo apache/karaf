@@ -147,7 +147,7 @@ public class CompositeManager implements ComponentInstance, InstanceStateListene
 
         // Cleaning
         m_state = DISPOSED;
-        for (int i = 0; i < m_handlers.length; i++) {
+        for (int i = m_handlers.length - 1; i > -1; i--) {
             m_handlers[i].dispose();
         }
         m_handlers = new HandlerManager[0];
@@ -310,11 +310,18 @@ public class CompositeManager implements ComponentInstance, InstanceStateListene
      */
     public void setState(int state) {
         if (m_state != state) {
-
-            // The state changed call the handler stateChange method
-            m_state = state;
-            for (int i = m_handlers.length - 1; i > -1; i--) {
-                m_handlers[i].getHandler().stateChanged(state);
+            if (state > m_state) {
+                // The state increases (Stopped = > IV, IV => V) => invoke handlers from the higher priority to the lower
+                m_state = state;
+                for (int i = 0; i < m_handlers.length; i++) {
+                    m_handlers[i].getHandler().stateChanged(state);
+                }
+            } else {
+                // The state decreases (V => IV, IV = > Stopped, Stopped => Disposed)
+                m_state = state;
+                for (int i = m_handlers.length - 1; i > -1; i--) {
+                    m_handlers[i].getHandler().stateChanged(state);
+                }
             }
             
             for (int i = 0; i < m_instanceListeners.size(); i++) {
@@ -419,7 +426,7 @@ public class CompositeManager implements ComponentInstance, InstanceStateListene
         // Cleaning
         m_state = DISPOSED;
         
-        for (int i = 0; i < m_handlers.length; i++) {
+        for (int i = m_handlers.length - 1; i > -1; i--) {
             m_handlers[i].dispose();
         }
         m_handlers = new HandlerManager[0];
