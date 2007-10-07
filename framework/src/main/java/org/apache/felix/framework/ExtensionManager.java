@@ -19,6 +19,7 @@
 package org.apache.felix.framework;
 
 import java.io.IOException;
+import java.net.InetAddress; 
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -524,6 +525,12 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         }
 
         throw new IOException("Resource not provided by any extension!");
+    }
+
+    protected InetAddress getHostAddress(URL u) 
+    { 
+        // the extension URLs do not address real hosts 
+        return null; 
     }
 
     private synchronized void addExtension(Object source, Bundle extension)
