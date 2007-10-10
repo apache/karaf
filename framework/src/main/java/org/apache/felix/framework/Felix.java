@@ -3604,9 +3604,19 @@ ex.printStackTrace();
         for (Iterator i = m_configMap.keySet().iterator(); i.hasNext(); )
         {
             String key = (String) i.next();
-            if (key.startsWith(FelixConstants.AUTO_INSTALL_PROP))
+
+            // Ignore all keys that are not the auto-install property.
+            if (!key.startsWith(FelixConstants.AUTO_INSTALL_PROP))
             {
-                int startLevel = 1;
+                continue;
+            }
+
+            // If the auto-install property does not have a start level,
+            // then assume it is the default bundle start level, otherwise
+            // parse the specified start level.
+            int startLevel = getInitialBundleStartLevel();
+            if (!key.equals(FelixConstants.AUTO_INSTALL_PROP))
+            {
                 try
                 {
                     startLevel = Integer.parseInt(key.substring(key.lastIndexOf('.') + 1));
@@ -3615,29 +3625,30 @@ ex.printStackTrace();
                 {
                     m_logger.log(Logger.LOG_ERROR, "Invalid property: " + key);
                 }
-                StringTokenizer st = new StringTokenizer((String) m_configMap.get(key), "\" ",true);
-                if (st.countTokens() > 0)
+            }
+
+            StringTokenizer st = new StringTokenizer((String) m_configMap.get(key), "\" ",true);
+            if (st.countTokens() > 0)
+            {
+                String location = null;
+                do
                 {
-                    String location = null;
-                    do
+                    location = nextLocation(st);
+                    if (location != null)
                     {
-                        location = nextLocation(st);
-                        if (location != null)
+                        try
                         {
-                            try
-                            {
-                                FelixBundle b = (FelixBundle) installBundle(location, null);
-                                b.getInfo().setStartLevel(startLevel);
-                            }
-                            catch (Exception ex)
-                            {
-                                m_logger.log(
-                                    Logger.LOG_ERROR, "Auto-properties install.", ex);
-                            }
+                            FelixBundle b = (FelixBundle) installBundle(location, null);
+                            b.getInfo().setStartLevel(startLevel);
+                        }
+                        catch (Exception ex)
+                        {
+                            m_logger.log(
+                                Logger.LOG_ERROR, "Auto-properties install.", ex);
                         }
                     }
-                    while (location != null);
                 }
+                while (location != null);
             }
         }
 
@@ -3651,9 +3662,19 @@ ex.printStackTrace();
         for (Iterator i = m_configMap.keySet().iterator(); i.hasNext(); )
         {
             String key = (String) i.next();
-            if (key.startsWith(FelixConstants.AUTO_START_PROP))
+
+            // Ignore all keys that are not the auto-start property.
+            if (!key.startsWith(FelixConstants.AUTO_START_PROP))
             {
-                int startLevel = 1;
+                continue;
+            }
+
+            // If the auto-start property does not have a start level,
+            // then assume it is the default bundle start level, otherwise
+            // parse the specified start level.
+            int startLevel = getInitialBundleStartLevel();
+            if (!key.equals(FelixConstants.AUTO_START_PROP))
+            {
                 try
                 {
                     startLevel = Integer.parseInt(key.substring(key.lastIndexOf('.') + 1));
@@ -3662,28 +3683,29 @@ ex.printStackTrace();
                 {
                     m_logger.log(Logger.LOG_ERROR, "Invalid property: " + key);
                 }
-                StringTokenizer st = new StringTokenizer((String) m_configMap.get(key), "\" ",true);
-                if (st.countTokens() > 0)
+            }
+
+            StringTokenizer st = new StringTokenizer((String) m_configMap.get(key), "\" ",true);
+            if (st.countTokens() > 0)
+            {
+                String location = null;
+                do
                 {
-                    String location = null;
-                    do
+                    location = nextLocation(st);
+                    if (location != null)
                     {
-                        location = nextLocation(st);
-                        if (location != null)
+                        try
                         {
-                            try
-                            {
-                                FelixBundle b = (FelixBundle) installBundle(location, null);
-                                b.getInfo().setStartLevel(startLevel);
-                            }
-                            catch (Exception ex)
-                            {
-                                m_logger.log(Logger.LOG_ERROR, "Auto-properties install.", ex);
-                            }
+                            FelixBundle b = (FelixBundle) installBundle(location, null);
+                            b.getInfo().setStartLevel(startLevel);
+                        }
+                        catch (Exception ex)
+                        {
+                            m_logger.log(Logger.LOG_ERROR, "Auto-properties install.", ex);
                         }
                     }
-                    while (location != null);
                 }
+                while (location != null);
             }
         }
 
