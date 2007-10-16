@@ -30,6 +30,8 @@ import org.apache.felix.moduleloader.IModule;
 class URLHandlersBundleURLConnection extends URLConnection
 {
     private Felix m_framework;
+    private IModule m_targetModule;
+    private int m_classPathIdx = -1;
     private int m_contentLength;
     private long m_contentTime;
     private String m_contentType;
@@ -65,10 +67,28 @@ class URLHandlersBundleURLConnection extends URLConnection
         }
         int revision = Util.getModuleRevisionFromModuleId(url.getHost());
         IModule[] modules = bundle.getInfo().getModules();
-        if ((modules == null) || (revision < 0) || (revision >= modules.length) ||
-            !modules[revision].getContentLoader().hasInputStream(url.getPort(), url.getPath()))
+        if ((modules == null) || (revision < 0) || (revision >= modules.length))
         {
             throw new IOException("Resource does not exist: " + url);
+        }
+
+        // If the resource cannot be found at the current class path index,
+        // then search them all in order to see if it can be found. This is
+        // necessary since the user might create a resource URL from another
+        // resource URL and not realize they have the wrong class path entry.
+        // Of course, this approach won't work in cases where there are multiple
+        // resources with the same path, since it will always find the first
+        // one on the class path.
+        m_targetModule = modules[revision];
+        m_classPathIdx = url.getPort();
+        if (!modules[revision].getContentLoader().hasInputStream(m_classPathIdx, url.getPath()))
+        {
+            URL newurl = modules[revision].getContentLoader().getResource(url.getPath());
+            if (newurl == null)
+            {
+                throw new IOException("Resource does not exist: " + url);
+            }
+            m_classPathIdx = newurl.getPort();
         }
     }
 
@@ -76,23 +96,12 @@ class URLHandlersBundleURLConnection extends URLConnection
     {
         if (!connected)
         {
-            // The URL is constructed like this:
-        //     bundle://<module-id>:<module-classpath-index>/<resource-path>
-            // Where <module-id> = <bundle-id>.<revision>
-            long bundleId = Util.getBundleIdFromModuleId(url.getHost());
-            FelixBundle bundle = (FelixBundle) m_framework.getBundle(bundleId);
-            if (bundle == null)
-            {
-                throw new IOException("No bundle associated with resource: " + url);
-            }
-            int revision = Util.getModuleRevisionFromModuleId(url.getHost());
-            IModule[] modules = bundle.getInfo().getModules();
-            if ((modules == null) || (revision < 0) || (revision >= modules.length))
+            if ((m_targetModule == null) || (m_classPathIdx < 0))
             {
                 throw new IOException("Resource does not exist: " + url);
             }
-            m_is = bundle.getInfo().getModules()[revision]
-                .getContentLoader().getInputStream(url.getPort(), url.getPath());
+            m_is = m_targetModule.getContentLoader()
+                .getInputStream(m_classPathIdx, url.getPath());
             m_contentLength = (m_is == null) ? 0 : m_is.available();
             m_contentTime = 0L;
             m_contentType = URLConnection.guessContentTypeFromName(url.getFile());
