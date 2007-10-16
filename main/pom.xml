@@ -103,6 +103,12 @@
             <Private-Package>org.apache.felix.main.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.startlevel,org.osgi.service.url,org.osgi.util.tracker</Private-Package>
             <Import-Package>!*</Import-Package>
             <Include-Resource>{src/main/resources/}</Include-Resource>
+            <!-- Include these properties here because we want them
+                 substituted in the default.properties resource file
+                 so that we only have to maintain one set of properties
+                 and only for that reason. --!>
+            <_include>src/main/resources/config.properties</_include>
+            <dollar>$</dollar>
           </instructions>
         </configuration>
       </plugin>
