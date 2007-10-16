@@ -500,7 +500,7 @@ public class BundlePlugin extends AbstractMojo {
         return project.getBuild().getFinalName() + ".jar";
     }
 
-    public String getBuildDirectory()
+    protected String getBuildDirectory()
     {
         return this.buildDirectory;
     }
@@ -508,26 +508,6 @@ public class BundlePlugin extends AbstractMojo {
     void setBuildDirectory(String buildirectory)
     {
         this.buildDirectory = buildirectory;
-    }
-
-    /**
-     * Get a list of packages inside a Jar
-     *
-     * @param jar
-     * @return list of package names
-     */
-    public List getPackages(Jar jar)
-    {
-        List packages = new ArrayList();
-        for (Iterator p = jar.getDirectories().entrySet().iterator(); p.hasNext();)
-        {
-            Map.Entry directory = (Map.Entry) p.next();
-            String path = (String) directory.getKey();
-
-            String pack = path.replace('/', '.');
-            packages.add(pack);
-        }
-        return packages;
     }
 
     protected Properties getDefaultProperties(MavenProject project)

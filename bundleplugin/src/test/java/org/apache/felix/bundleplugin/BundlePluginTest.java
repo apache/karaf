@@ -19,18 +19,13 @@ package org.apache.felix.bundleplugin;
  * under the License.
  */
 
-import org.apache.felix.bundleplugin.PackageVersionAnalyzer;
 import java.io.File;
-import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.osgi.DefaultMaven2OsgiConverter;
-import org.codehaus.plexus.archiver.ArchiverException;
-import org.codehaus.plexus.archiver.jar.JarArchiver;
 
 import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Jar;
@@ -120,38 +115,6 @@ public class BundlePluginTest
         analyzer.calcManifest();
 
         assertEquals( 3, analyzer.getExports().size() );
-    }
-
-    public void testGetPackages()
-        throws Exception
-    {
-        File jarFile = getTestFile( "target/test-jar.jar" );
-
-        createTestJar( jarFile );
-
-        Jar jar = new Jar( "testJar", jarFile );
-        List packages = plugin.getPackages( jar );
-
-        assertEquals( 4, packages.size() );
-        int i = 0;
-        assertEquals( "META-INF", packages.get( i++ ) );
-        assertEquals( "META-INF.maven.org.apache.maven.plugins.maven-bundle-plugin", packages.get( i++ ) );
-        assertEquals( "org.apache.maven.test", packages.get( i++ ) );
-        assertEquals( "org.apache.maven.test.resources", packages.get( i++ ) );
-    }
-
-    private void createTestJar( File jarFile )
-        throws ArchiverException, IOException
-    {
-        JarArchiver archiver = new JarArchiver();
-        archiver
-            .addFile( getTestFile( "target/classes/" + BundlePlugin.class.getName().replace( '.', '/' ) + ".class" ),
-                      "org/apache/maven/test/BundlePlugin.class" );
-        archiver.addFile( getTestFile( "pom.xml" ),
-                          "META-INF/maven/org.apache.maven.plugins/maven-bundle-plugin/pom.xml" );
-        archiver.addFile( getTestFile( "pom.xml" ), "org/apache/maven/test/resources/someresource" );
-        archiver.setDestFile( jarFile );
-        archiver.createArchive();
     }
 
     public void testTransformDirectives()

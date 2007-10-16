@@ -30,7 +30,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Instruction;
-import aQute.lib.osgi.header.OSGiHeader;
+import aQute.lib.header.OSGiHeader;
 
 /**
  * Add BND directives to embed selected dependencies inside a bundle
