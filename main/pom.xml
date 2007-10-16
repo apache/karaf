@@ -106,7 +106,7 @@
             <!-- Include these properties here because we want them
                  substituted in the default.properties resource file
                  so that we only have to maintain one set of properties
-                 and only for that reason. --!>
+                 and only for that reason. -->
             <_include>src/main/resources/config.properties</_include>
             <dollar>$</dollar>
           </instructions>
