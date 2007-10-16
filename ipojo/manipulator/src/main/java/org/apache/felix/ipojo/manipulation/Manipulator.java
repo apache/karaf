@@ -24,8 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,17 +42,22 @@ public class Manipulator {
     /**
      * Store the visited fields : [name of the field, type of the field].
      */
-    private Map m_fields = new HashMap();
+    private Map m_fields;
 
     /**
      * Store the interface implemented by the class.
      */
-    private String[] m_interfaces = new String[0];
+    private List m_interfaces;
 
     /**
      * Store the methods list.
      */
-    private List m_methods = new ArrayList();
+    private List m_methods;
+    
+    /**
+     * Pojo super class.
+     */
+    private String m_superClass;
 
     /**
      * Manipulate the class.
@@ -65,12 +68,6 @@ public class Manipulator {
      * @throws Exception : occurs if the manipulation failed.
      */
     public boolean manipulate(String name, File outputDirectory) throws Exception {
-
-        // Initialize fields, interfaces and methods
-        m_fields = new HashMap();
-        m_interfaces = new String[0];
-        m_methods = new ArrayList();
-
         // gets an input stream to read the byte code of the class
         String path = outputDirectory + "/" + name.replace('.', '/') + ".class";
         File clazz = new File(path);
@@ -92,33 +89,14 @@ public class Manipulator {
         ckReader.accept(ck, ClassReader.SKIP_FRAMES);
         is1.close();
 
-        m_fields = ck.getFields(); // GEt visited fields (contains only POJO fields)
+        m_fields = ck.getFields(); // Get visited fields (contains only POJO fields)
 
-        // Get interface and remove POJO interface is presents
-        String[] its = ck.getInterfaces();
-        List l = new ArrayList();
-        for (int i = 0; i < its.length; i++) {
-            l.add(its[i]);
-        }
-        l.remove("org/apache/felix/ipojo/Pojo");
+        // Get interfaces and super class.
+        m_interfaces = ck.getInterfaces();
+        m_superClass = ck.getSuperClass();
 
-        m_interfaces = new String[l.size()];
-        for (int i = 0; i < m_interfaces.length; i++) {
-            m_interfaces[i] = ((String) l.get(i)).replace('/', '.');
-        }
-
-        // Get the method list
-        // Remove iPOJO methods
-        for (int i = 0; i < ck.getMethods().size(); i++) {
-            MethodDescriptor method = (MethodDescriptor) ck.getMethods().get(i);
-            if (!(method.getName().startsWith("_get") || // Avoid getter method
-                    method.getName().startsWith("_set") || // Avoid setter method
-                    method.getName().equals("_setComponentManager") || // Avoid the set method
-                    method.getName().equals("getComponentInstance"))) { // Avoid the getComponentInstance method
-                System.err.println(" Add the method : " + method);
-                m_methods.add(method);
-            }
-        }
+        // Get the methods list
+        m_methods = ck.getMethods();
 
         if (!ck.isalreadyManipulated()) {
 
@@ -163,30 +141,14 @@ public class Manipulator {
         ckReader.accept(ck, ClassReader.SKIP_FRAMES);
         is1.close();
 
-        m_fields = ck.getFields();
+        m_fields = ck.getFields(); // Get visited fields (contains only POJO fields)
 
-        // Get interface and remove POJO interface is presents
-        String[] its = ck.getInterfaces();
-        List l = new ArrayList();
-        for (int i = 0; i < its.length; i++) {
-            l.add(its[i]);
-        }
-        l.remove("org/apache/felix/ipojo/Pojo");
+        // Get interfaces and super class.
+        m_interfaces = ck.getInterfaces();
+        m_superClass = ck.getSuperClass();
 
-        m_interfaces = new String[l.size()];
-        for (int i = 0; i < m_interfaces.length; i++) {
-            m_interfaces[i] = ((String) l.get(i)).replace('/', '.');
-        }
-
-        for (int i = 0; i < ck.getMethods().size(); i++) {
-            MethodDescriptor method = (MethodDescriptor) ck.getMethods().get(i);
-            if (!(method.getName().startsWith("_get") || // Avoid getter method
-                    method.getName().startsWith("_set") || // Avoid setter method
-                    method.getName().equals("_setComponentManager") || // Avoid the set method
-                    method.getName().equals("getComponentInstance"))) { // Avoid the getComponentInstance method
-                m_methods.add(method);
-            }
-        }
+        // Get the methods list
+        m_methods = ck.getMethods();
 
         ClassWriter finalWriter = null;
         if (!ck.isalreadyManipulated()) {
@@ -215,12 +177,18 @@ public class Manipulator {
      */
     public Element getManipulationMetadata() {
         Element elem = new Element("Manipulation", "");
-        for (int j = 0; j < m_interfaces.length; j++) {
+        
+        if (m_superClass != null) {
+            elem.addAttribute(new Attribute("super", m_superClass));
+        }
+        
+        for (int j = 0; j < m_interfaces.size(); j++) {
             Element itf = new Element("Interface", "");
-            Attribute att = new Attribute("name", m_interfaces[j]);
+            Attribute att = new Attribute("name", m_interfaces.get(j).toString());
             itf.addAttribute(att);
             elem.addElement(itf);
         }
+        
         for (Iterator it = m_fields.keySet().iterator(); it.hasNext();) {
             Element field = new Element("Field", "");
             String name = (String) it.next();

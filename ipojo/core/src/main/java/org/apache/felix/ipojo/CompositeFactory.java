@@ -65,13 +65,12 @@ public class CompositeFactory extends ComponentFactory implements Factory {
      * @see org.apache.felix.ipojo.ComponentFactory#check(org.apache.felix.ipojo.metadata.Element)
      */
     public boolean check(Element cm) {
-     // Get the name
-        if (cm.containsAttribute("name")) {
-            m_factoryName = cm.getAttribute("name");
-            return true;
-        } else {
+        m_factoryName = cm.getAttribute("name");
+        if (m_factoryName == null) {
             System.err.println("A composite needs a name");
             return false;
+        } else {
+            return true;
         }
     }
     
@@ -89,13 +88,14 @@ public class CompositeFactory extends ComponentFactory implements Factory {
         
         if ("composite".equals(type)) {
             if (IPojoConfiguration.IPOJO_NAMESPACE.equals(ns)) {
-                ns = "";
+                return name.equals(hi.getName()) && hi.getNamespace() == null;
             }
             return name.equals(hi.getName()) && ns.equals(hi.getNamespace()); 
         } else {
             return false;
         }
     }
+        
     
     /**
      * Compute required handlers.
@@ -108,9 +108,10 @@ public class CompositeFactory extends ComponentFactory implements Factory {
             if (! m_handlerIdentifiers.contains(hi)) { m_handlerIdentifiers.add(hi); }
         }
         
-        // Add architecture if needed
-        if (m_componentMetadata.containsAttribute("architecture") && m_componentMetadata.getAttribute("architecture").equalsIgnoreCase("true")) {
-            HandlerIdentifier hi = new HandlerIdentifier("architecture", "");
+        // Add architecture if architecture != 'false'
+        String arch = m_componentMetadata.getAttribute("architecture");
+        if (arch == null || arch.equalsIgnoreCase("true")) {
+            HandlerIdentifier hi = new HandlerIdentifier("architecture", null);
             if (! m_handlerIdentifiers.contains(hi)) { m_handlerIdentifiers.add(hi); }
         }
     }
@@ -119,7 +120,9 @@ public class CompositeFactory extends ComponentFactory implements Factory {
      * Stop all the instance managers.
      */
     public synchronized void stop() {
-        m_tracker.close();
+        if (m_tracker != null) {
+            m_tracker.close();
+        }
         
         final Collection col = m_componentInstances.values();
         final Iterator it = col.iterator();
@@ -148,21 +151,28 @@ public class CompositeFactory extends ComponentFactory implements Factory {
         if (m_componentDesc != null) { // Already started.
             return;
         } 
-        try {
-            String filter = "(&(" + Constants.OBJECTCLASS + "=" + Factory.class.getName() + ")"
-                    + "(" + Handler.HANDLER_NAME_PROPERTY + "=*)" + "(" + Handler.HANDLER_NAMESPACE_PROPERTY + "=*)" /* Look only for handlers */
+        if (m_handlerIdentifiers.size() != 0) {
+            try {
+                String filter = "(&(" + Constants.OBJECTCLASS + "=" + Factory.class.getName() + ")"
                     + "(" + Handler.HANDLER_TYPE_PROPERTY + "=" + CompositeHandler.HANDLER_TYPE + ")" 
                     + "(factory.state=1)"
                     + ")";
-            m_tracker = new Tracker(m_context, m_context.createFilter(filter), this);
-            m_tracker.open();
-            
-        } catch (InvalidSyntaxException e) {
-            m_logger.log(Logger.ERROR, "A factory filter is not valid: " + e.getMessage());
+                m_tracker = new Tracker(m_context, m_context.createFilter(filter), this);
+                m_tracker.open();
+            } catch (InvalidSyntaxException e) {
+                m_logger.log(Logger.ERROR, "A factory filter is not valid: " + e.getMessage());
+                stop();
+                return;
+            }
+        }
+
+        try {
+            computeFactoryState();
+        } catch (ConfigurationException e) {
+            m_logger.log(Logger.ERROR, "The component type metadata are not correct : " + e.getMessage());
+            stop();
             return;
         }
-        
-        computeFactoryState();
         
         // Check if the factory should be exposed
         if (m_isPublic) {
@@ -184,7 +194,6 @@ public class CompositeFactory extends ComponentFactory implements Factory {
             props.put("component.providedServiceSpecifications", m_componentDesc.getprovidedServiceSpecification());
             props.put("component.properties", m_componentDesc.getProperties());
             props.put("component.description", m_componentDesc);
-            props.put("component.desc", m_componentDesc.toString());
         }
         
         // Add factory state
@@ -193,6 +202,10 @@ public class CompositeFactory extends ComponentFactory implements Factory {
         props.put("factory.name", m_factoryName);
         
         return props;
+    }
+    
+    public String getClassName() {
+        return "composite";
     }
 
 
@@ -224,10 +237,6 @@ public class CompositeFactory extends ComponentFactory implements Factory {
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
     public synchronized ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException {
-        if (m_state == INVALID) {
-            throw new MissingHandlerException(getMissingHandlers());
-        }
-        
         if (configuration == null) {
             configuration = new Properties();
         }
@@ -301,8 +310,9 @@ public class CompositeFactory extends ComponentFactory implements Factory {
     
     /**
      * Compute factory state.
+     * @throws ConfigurationException : occurs if the component type cannot be initialized correctly.
      */
-    protected void computeFactoryState() {
+    protected void computeFactoryState() throws ConfigurationException {
         boolean isValid = true;
         for (int i = 0; isValid && i < m_handlerIdentifiers.size(); i++) {
             HandlerIdentifier hi = (HandlerIdentifier) m_handlerIdentifiers.get(i);
@@ -310,13 +320,7 @@ public class CompositeFactory extends ComponentFactory implements Factory {
         }
 
         if (isValid && m_componentDesc == null) {
-            try {
-                computeDescription();
-            } catch (org.apache.felix.ipojo.ConfigurationException e) {
-                m_logger.log(Logger.ERROR, "The component type metadata are not correct : " + e.getMessage());
-                stop();
-                return;
-            }
+            computeDescription();
         }
 
         if (isValid && m_state == INVALID) {
@@ -367,7 +371,7 @@ public class CompositeFactory extends ComponentFactory implements Factory {
             l.add(hi.getFullName());
         }
         
-        m_componentDesc = new ComponentDescription(getName(), "composite", m_state, l, getMissingHandlers(), m_context.getBundle().getBundleId());
+        m_componentDesc = new ComponentDescription(this);
        
         for (int i = 0; i < m_handlerIdentifiers.size(); i++) {
             HandlerIdentifier hi = (HandlerIdentifier) m_handlerIdentifiers.get(i);
@@ -391,12 +395,15 @@ public class CompositeFactory extends ComponentFactory implements Factory {
             return (HandlerManager) factory.createComponentInstance(null, sc);
         } catch (MissingHandlerException e) {
             m_logger.log(Logger.ERROR, "The creation of the composite handler " + handler.getFullName() + " has failed: " + e.getMessage());
+            stop();
             return null;
         } catch (UnacceptableConfiguration e) {
             m_logger.log(Logger.ERROR, "The creation of the composite handler " + handler.getFullName() + " has failed (UnacceptableConfiguration): " + e.getMessage());
+            stop();
             return null;
         } catch (ConfigurationException e) {
             m_logger.log(Logger.ERROR, "The creation of the composite handler " + handler.getFullName() + " has failed (ConfigurationException): " + e.getMessage());
+            stop();
             return null;
         }
     }

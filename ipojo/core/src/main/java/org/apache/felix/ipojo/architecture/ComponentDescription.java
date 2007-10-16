@@ -18,11 +18,14 @@
  */
 package org.apache.felix.ipojo.architecture;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.felix.ipojo.ComponentFactory;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
+import org.osgi.framework.BundleContext;
 
 /**
  * Component Type description.
@@ -36,56 +39,32 @@ public class ComponentDescription {
     private String[] m_providedServiceSpecification = new String[0];
 
     /**
-     * Component Type implementation class.
-     */
-    private String m_className;
-
-    /**
      * Configuration Properties accepted by the component type.
      */
     private PropertyDescription[] m_properties = new PropertyDescription[0];
+    
+    /**
+     * List of required properties.
+     * This list contains only property which does not have a default value.
+     */
+    private List m_requiredProperties = new ArrayList();
+
 
     /**
-     * Get the name of this component type.
+     * Represented factory.
      */
-    private String m_name;
-
-    /**
-     * Bundle Id of the bundle containing this type.
-     */
-    private long m_bundleId;
-
-    /**
-     * State of the factory.
-     */
-    private int m_state;
-
-    /**
-     * Required handler list.
-     */
-    private List m_rh;
-
-    /**
-     * Missing handler list.
-     */
-    private List m_mh;
-
+    private Factory m_factory;
+    
     /**
      * Constructor.
-     * @param name : name.
-     * @param className : implementation class or "composite"
-     * @param state : state of the type (valid or invalid)
-     * @param rh : required handler list
-     * @param mh : missing handler list
-     * @param bundle : bundle containing the type
+     * @param factory : represented factory.
      */
-    public ComponentDescription(String name, String className, int state, List rh, List mh, long bundle) {
-        m_name = name;
-        m_className = className;
-        m_bundleId = bundle;
-        m_state = state;
-        m_rh = rh;
-        m_mh = mh;
+    public ComponentDescription(Factory factory) {
+        m_factory = factory;
+    }
+    
+    public List getRequiredProperties() {
+        return m_requiredProperties;
     }
 
     /**
@@ -102,7 +81,7 @@ public class ComponentDescription {
      * @return the component type implementation class name.
      */
     public String getClassName() {
-        return m_className;
+        return m_factory.getClassName();
     }
 
     /**
@@ -128,18 +107,27 @@ public class ComponentDescription {
      * @param pd : the property to add
      */
     public void addProperty(PropertyDescription pd) {
-        if ("name".equals(pd.getName())) {
-            pd = new PropertyDescription(pd.getName(), pd.getType(), null); // Erase the instance name
+        String n = pd.getName();
+        if ("name".equals(n)) {
+            pd = new PropertyDescription(n, pd.getType(), null); // Instance name case.
         }
-
+        
+        // Check if the property is not already in the array
         for (int i = 0; i < m_properties.length; i++) {
-            if (m_properties[i].getName().equals(pd.getName())) { return; }
+            PropertyDescription desc = m_properties[i];
+            if (desc.getName().equals(n)) {
+                return;
+            }
         }
 
         PropertyDescription[] newProps = new PropertyDescription[m_properties.length + 1];
         System.arraycopy(m_properties, 0, newProps, 0, m_properties.length);
         newProps[m_properties.length] = pd;
         m_properties = newProps;
+        
+        if (pd.getValue() == null) {
+            m_requiredProperties.add(n);
+        }
     }
 
     /**
@@ -166,7 +154,7 @@ public class ComponentDescription {
      * @return the name of this component type
      */
     public String getName() {
-        return m_name;
+        return m_factory.getName();
     }
 
     /**
@@ -176,26 +164,27 @@ public class ComponentDescription {
     public Element getDescription() {
         Element desc = new Element("Factory", "");
 
-        desc.addAttribute(new Attribute("name", m_name));
-        desc.addAttribute(new Attribute("bundle", "" + m_bundleId));
+        desc.addAttribute(new Attribute("name", m_factory.getName()));
+        desc.addAttribute(new Attribute("bundle", "" + ((ComponentFactory) m_factory).getBundleContext().getBundle().getBundleId()));
 
-        if (m_className != null) {
-            desc.addAttribute(new Attribute("Implementation-Class", m_className));
-        } else {
+        String cn = getClassName();
+        if (cn == null) {
             desc.addAttribute(new Attribute("Composite", "true"));
+        } else {
+            desc.addAttribute(new Attribute("Implementation-Class", getClassName()));
         }
 
         String state = "valid";
-        if (m_state == Factory.INVALID) {
+        if (m_factory.getState() == Factory.INVALID) {
             state = "invalid";
         }
         desc.addAttribute(new Attribute("state", state));
 
         // Display required & missing handlers
         Element rh = new Element("RequiredHandlers", "");
-        rh.addAttribute(new Attribute("list", m_rh.toString()));
+        rh.addAttribute(new Attribute("list", m_factory.getRequiredHandlers().toString()));
         Element mh = new Element("MissingHandlers", "");
-        mh.addAttribute(new Attribute("list", m_mh.toString()));
+        mh.addAttribute(new Attribute("list", m_factory.getMissingHandlers().toString()));
         desc.addElement(rh);
         desc.addElement(mh);
 
@@ -218,6 +207,10 @@ public class ComponentDescription {
         }
 
         return desc;
+    }
+
+    public BundleContext getBundleContext() {
+        return m_factory.getBundleContext();
     }
 
 }

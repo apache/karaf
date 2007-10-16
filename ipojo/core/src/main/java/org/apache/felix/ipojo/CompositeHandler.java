@@ -42,31 +42,13 @@ public abstract class CompositeHandler extends Handler {
      * This method me be called only once time.
      * @param cm : the composite manager.
      */
-    public final void attach(ComponentInstance cm) {
+    protected final void attach(ComponentInstance cm) {
         m_manager = (CompositeManager) cm;
+        setLogger(m_manager.getFactory().getLogger());
     }
     
     public final CompositeManager getCompositeManager() {
         return m_manager;
-    }
-        
-    /**
-     * Log method.
-     * @param level : message level (Logger class constant)
-     * @param message : message to log
-     */
-    public void log(int level, String message) {
-        m_manager.getFactory().getLogger().log(level, message);
-    }
-    
-    /**
-     * Log method.
-     * @param level : message level (Logger class constant)
-     * @param message : message to log
-     * @param ex : exception to attach to the message
-     */
-    public void log(int level, String message, Throwable ex) {
-        m_manager.getFactory().getLogger().log(level, message, ex);
     }
     
     /**

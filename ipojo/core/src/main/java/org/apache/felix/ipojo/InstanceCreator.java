@@ -188,10 +188,13 @@ public class InstanceCreator implements TrackerCustomizer, FactoryStateListener 
             config.setFactory(fact.getName());
         } catch (UnacceptableConfiguration e) {
             m_logger.log(Logger.ERROR, "A factory is available for the configuration but the configuration is not acceptable", e);
+            stop();
         } catch (MissingHandlerException e) {
             m_logger.log(Logger.ERROR, "The instance creation has failed, at least one handler is missing", e);
+            stop();
         } catch (ConfigurationException e) {
             m_logger.log(Logger.ERROR, "The instance creation has failed, an error during the configuration has occured", e);
+            stop();
         }
     }
 

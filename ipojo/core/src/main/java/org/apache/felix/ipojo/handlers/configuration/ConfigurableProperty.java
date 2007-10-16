@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Callback;
 import org.apache.felix.ipojo.util.Logger;
@@ -73,8 +74,9 @@ public class ConfigurableProperty {
      * @param value : initial value of the property (optional)
      * @param type : the type of the property
      * @param ch : configuration handler managing this configurable property
+     * @throws ConfigurationException : occurs when the property value cannot be set.
      */
-    public ConfigurableProperty(String name, String field, String method, String value, String type, ConfigurationHandler ch) {
+    public ConfigurableProperty(String name, String field, String method, String value, String type, ConfigurationHandler ch) throws ConfigurationException {
         m_handler = ch;
 
         m_field = field;
@@ -104,8 +106,9 @@ public class ConfigurableProperty {
      * Set the value of the property.
      * @param strValue : value of the property (String)
      * @param type : type of the property
+     * @throws ConfigurationException  : occurs when the property value cannot be initialized.
      */
-    private void setValue(String strValue, String type) {
+    private void setValue(String strValue, String type) throws ConfigurationException {
         Object value = null;
 
         // Syntactic sugar to avoid writing java.lang.String
@@ -161,26 +164,19 @@ public class ConfigurableProperty {
                 Constructor cst = m_type.getConstructor(new Class[] { String.class });
                 value = cst.newInstance(new Object[] { strValue });
             } catch (ClassNotFoundException e) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Class not found exception in setValue on " + type + " : " + e.getMessage());
-                return;
+                throw new ConfigurationException("Class not found exception in setValue on " + type + " : " + e.getMessage());
             } catch (SecurityException e) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Security excption in setValue on " + type + " : " + e.getMessage());
-                return;
+                throw new ConfigurationException("Security excption in setValue on " + type + " : " + e.getMessage());
             } catch (NoSuchMethodException e) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Constructor not found exeption in setValue on " + type + " : " + e.getMessage());
-                return;
+                throw new ConfigurationException("Constructor not found exeption in setValue on " + type + " : " + e.getMessage());
             } catch (IllegalArgumentException e) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Argument problem to call the constructor of the type " + type);
-                return;
+                throw new ConfigurationException("Argument problem to call the constructor of the type " + type);
             } catch (InstantiationException e) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Instantiation problem  " + type);
-                return;
+                throw new ConfigurationException("Instantiation problem  " + type);
             } catch (IllegalAccessException e) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Illegal Access " + type);
-                return;
+                throw new ConfigurationException("Illegal Access " + type);
             } catch (InvocationTargetException e) {
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Invocation problem " + type);
-                return;
+                throw new ConfigurationException("Invocation problem " + type);
             }
         }
 
@@ -193,8 +189,9 @@ public class ConfigurableProperty {
      * 
      * @param internalType : type of the property
      * @param values : new property value
+     * @throws ConfigurationException occurs when the array cannot be initialized
      */
-    private void setArrayValue(String internalType, String[] values) {
+    private void setArrayValue(String internalType, String[] values) throws ConfigurationException {
         if ("string".equals(internalType) || "String".equals(internalType)) {
             String[] str = new String[values.length];
             for (int i = 0; i < values.length; i++) {
@@ -290,19 +287,19 @@ public class ConfigurableProperty {
             m_type = ob.getClass();
             return;
         } catch (ClassNotFoundException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Class not found exception in setValue on " + internalType);
+            throw new ConfigurationException("Class not found exception in setValue on " + internalType);
         } catch (SecurityException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Secutiry Exception in setValue on " + internalType);
+            throw new ConfigurationException("Secutiry Exception in setValue on " + internalType);
         } catch (NoSuchMethodException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Constructor not found exception in setValue on " + internalType);
+            throw new ConfigurationException("Constructor not found exception in setValue on " + internalType);
         } catch (IllegalArgumentException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Argument problem to call the constructor of the type " + internalType);
+            throw new ConfigurationException("Argument problem to call the constructor of the type " + internalType);
         } catch (InstantiationException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Instantiation problem  " + internalType);
+            throw new ConfigurationException("Instantiation problem  " + internalType);
         } catch (IllegalAccessException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Illegal Access Exception in  " + internalType);
+            throw new ConfigurationException("Illegal Access Exception in  " + internalType);
         } catch (InvocationTargetException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Invocation problem " + internalType);
+            throw new ConfigurationException("Invocation problem " + internalType);
         }
     }
 
@@ -354,24 +351,26 @@ public class ConfigurableProperty {
 
     /**
      * Invoke the method (if specified).
+     * If the invocation failed, the instance is stopped.
      */
     public void invoke() {
         try {
             m_method.call(new Object[] { m_value });
         } catch (NoSuchMethodException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
-            return;
+            m_handler.log(Logger.ERROR, "The method " + m_method + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
+            m_handler.getInstanceManager().stop();
         } catch (IllegalAccessException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
-            return;
+            m_handler.log(Logger.ERROR, "The method " + m_method + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
+            m_handler.getInstanceManager().stop();
         } catch (InvocationTargetException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " in the class " + m_handler.getInstanceManager().getClassName() + "thorws an exception : " + e.getMessage());
-            return;
+            m_handler.log(Logger.ERROR, "The method " + m_method + " in the class " + m_handler.getInstanceManager().getClassName() + "thorws an exception : " + e.getMessage());
+            m_handler.getInstanceManager().stop();
         }
     }
 
     /**
-     * Handler createInstance method. This method is overided to allow delayed callback invocation.
+     * Handler createInstance method. This method is override to allow delayed callback invocation.
+     * If the invocation failed, the instance is stopped.
      * @param instance : the created object
      * @see org.apache.felix.ipojo.Handler#objectCreated(java.lang.Object)
      */
@@ -380,13 +379,13 @@ public class ConfigurableProperty {
             m_method.call(instance, new Object[] { m_value });
         } catch (NoSuchMethodException e) {
             m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
-            return;
+            m_handler.getInstanceManager().stop();
         } catch (IllegalAccessException e) {
             m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
-            return;
+            m_handler.getInstanceManager().stop();
         } catch (InvocationTargetException e) {
             m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getMessage());
-            return;
+            m_handler.getInstanceManager().stop();
         }
     }
 }

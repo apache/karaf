@@ -19,11 +19,10 @@
 package org.apache.felix.ipojo.util;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TreeMap;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -116,7 +115,7 @@ public class Tracker implements TrackerCustomizer {
      * @param context BundleContext object against which the tracking is done.
      * @param clazz Class name of the services to be tracked.
      * @param customizer The customizer object to call when services are added, modified, or removed in this Tracker object. If customizer is null, then this Tracker object will be used as
-     *            the TrackerCustomizer object and the Tracker object will call the TrackerCustomizer methods on itself.
+     *            the TrackerCustomizer object and the Tracker object will call the TrackerCustomizer methods on itself.    
      */
     public Tracker(BundleContext context, String clazz, TrackerCustomizer customizer) {
         this.m_context = context;
@@ -144,8 +143,7 @@ public class Tracker implements TrackerCustomizer {
      * @param context BundleContext object against which the tracking is done.
      * @param filter Filter object to select the services to be tracked.
      * @param customizer The customizer object to call when services are added, modified, or removed in this Tracker object. If customizer is null, then this Tracker object will be used as the
-     *            TrackerCustomizer object and the Tracker object will call the TrackerCustomizer methods on itself.
-     * @since 1.1
+     *            TrackerCustomizer object and the Tracker object will call the TrackerCustomizer methods on itself.   
      */
     public Tracker(BundleContext context, Filter filter, TrackerCustomizer customizer) {
         this.m_context = context;
@@ -489,7 +487,7 @@ public class Tracker implements TrackerCustomizer {
      * class is the ServiceListener object for the tracker. This class is used to synchronize access to the tracked services. This is not a public class. It is only for use by the implementation of the Tracker
      * class.
      */
-    class Tracked extends TreeMap implements ServiceListener {
+    class Tracked extends HashMap implements ServiceListener {
         /**
          * UID.
          */
@@ -518,8 +516,7 @@ public class Tracker implements TrackerCustomizer {
          * Tracked constructor.
          */
         protected Tracked() {
-            //TODO : set the comparator according to the binding policy.
-            super(new ReferenceComparator());
+            super();
             m_closed = false;
             m_adding = new ArrayList(6);
             m_initial = new LinkedList();
@@ -706,63 +703,5 @@ public class Tracker implements TrackerCustomizer {
             m_cachedReference = null; /* clear cached value */
             m_cachedService = null; /* clear cached value */
         }
-
     }
-
-    /**
-     * Service Reference Comparator.
-     */
-    private class ReferenceComparator implements Comparator {
-
-        /**
-         * Compare two service reference.
-         * @param ref1 : reference 1
-         * @param ref2 : reference 2
-         * @return -1 if the reference 1 is 'higher' than the reference 2, 1 otherwise. (higher is term of ranking means a lower index)
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
-        public int compare(Object ref1, Object ref2) {
-            if (ref1.equals(ref2)) { return 0; }
-
-            if (ref1 instanceof ServiceReference && ref2 instanceof ServiceReference) {
-                Object property1 = ((ServiceReference) ref1).getProperty(Constants.SERVICE_RANKING);
-                Object property2 = ((ServiceReference) ref2).getProperty(Constants.SERVICE_RANKING);
-
-                int rank1 = 0;
-                int rank2 = 0;
-                if (property1 instanceof Integer) {
-                    rank1 = ((Integer) property1).intValue();
-                }
-                if (property2 instanceof Integer) {
-                    rank2 = ((Integer) property2).intValue();
-                }
-
-                if (rank1 == rank2) {
-                    // Check service.id
-                    Object sid1 = ((ServiceReference) ref1).getProperty(Constants.SERVICE_ID);
-                    Object sid2 = ((ServiceReference) ref2).getProperty(Constants.SERVICE_ID);
-
-                    long rankId1 = ((Long) sid1).longValue();
-                    long rankId2 = ((Long) sid2).longValue();
-
-                    if (rankId1 == rankId2) {
-                        return 0;
-                    } else if (rankId1 < rankId2) {
-                        return -1;
-                    } else {
-                        return 1;
-                    }
-
-                } else if (rank1 > rank2) {
-                    return 1;
-                } else {
-                    return -1;
-                }
-
-            } else {
-                return 0;
-            }
-        }
-    }
-
 }

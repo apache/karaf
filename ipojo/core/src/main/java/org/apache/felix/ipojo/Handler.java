@@ -53,11 +53,26 @@ public abstract class Handler {
     public static final String HANDLER_LEVEL_PROPERTY = "handler.level";
     
     /**
+     * Handler logger.
+     */
+    private Logger m_logger;
+    
+    /**
+     * Set the logger use by this handler.
+     * @param logger : the logger object to use.
+     */
+    final void setLogger(Logger logger) {
+        m_logger = logger;
+    }
+    
+    /**
      * Log method.
      * @param level : message level (Logger class constant)
      * @param message : message to log
      */
-    public abstract void log(int level, String message);
+    public final void log(int level, String message) {
+        m_logger.log(level, message);
+    }
     
     /**
      * Log method.
@@ -65,7 +80,9 @@ public abstract class Handler {
      * @param message : message to log
      * @param ex : exception to attach to the message
      */
-    public abstract void log(int level, String message, Throwable ex);
+    public final void log(int level, String message, Throwable ex) {
+        m_logger.log(level, message, ex);
+    }
     
     /**
      * Get a plugged handler of the same container.
@@ -90,12 +107,7 @@ public abstract class Handler {
      * @return true if the handler is valid.
      */
     public final boolean isValid() {
-        if (this instanceof Pojo) {
-            return ((Pojo) this).getComponentInstance().getState() == ComponentInstance.VALID;
-        } else {
-            log(Logger.ERROR, "The handler is not a POJO : " + this.getClass().getName());
-            return false;
-        }
+        return ((Pojo) this).getComponentInstance().getState() == ComponentInstance.VALID;
     }
     
     
@@ -104,12 +116,7 @@ public abstract class Handler {
      * @return : the component instance.
      */
     public final ComponentInstance getInstance() {
-        if (this instanceof Pojo) {
-            return ((Pojo) this).getComponentInstance();
-        } else {
-            log(Logger.ERROR, "The handler is not a POJO : " + this.getClass().getName());
-            return null;
-        }
+        return ((Pojo) this).getComponentInstance();
     }
     
     /**

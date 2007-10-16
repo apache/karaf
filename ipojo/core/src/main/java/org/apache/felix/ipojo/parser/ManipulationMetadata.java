@@ -42,6 +42,11 @@ public class ManipulationMetadata {
      * List of methods. 
      */
     private MethodMetadata[] m_methods = new MethodMetadata[0];
+
+    /**
+     * Super class (if not java.lang.object).
+     */
+    private String m_super;
     
     
     /**
@@ -52,6 +57,7 @@ public class ManipulationMetadata {
      */
     public ManipulationMetadata(Element metadata) {
         Element manip = metadata.getElements("manipulation", "")[0];
+        m_super = manip.getAttribute("super");
         Element[] fields = manip.getElements("field");
         for (int i = 0; i < fields.length; i++) {
             FieldMetadata fm = new FieldMetadata(fields[i]);
@@ -234,6 +240,10 @@ public class ManipulationMetadata {
         } else {
             m_interfaces = new String[] { mm };
         }
+    }
+
+    public String getSuperClass() {
+        return m_super;
     }
 
 }

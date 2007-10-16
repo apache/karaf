@@ -24,6 +24,7 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.PrimitiveHandler;
+import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.FieldMetadata;
 import org.apache.felix.ipojo.parser.ManipulationMetadata;
@@ -50,33 +51,9 @@ public class ControllerHandler extends PrimitiveHandler {
      * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager, org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
     public void configure(Element metadata, Dictionary configuration) throws ConfigurationException {
-        String field = null;
         Element[] lc = metadata.getElements("controller");
-        if (lc.length > 0) {
-            // Use only the first controller
-            if (lc[0].containsAttribute("field")) {
-                field = lc[0].getAttribute("field");
-            } else {
-                log(Logger.ERROR, "A lifecycle controler needs to contain a field attribute");
-                throw new ConfigurationException("Lifecycle controller : the controller element needs to have a field attribute", getInstanceManager().getFactory().getName());
-            }
-        } else {
-            return;
-        }
-        
-        ManipulationMetadata mm = new ManipulationMetadata(metadata);
-        FieldMetadata fm = mm.getField(field);
-        if (fm == null) {
-            log(Logger.ERROR, "The field " + field + " does not exist in the class");
-            throw new ConfigurationException("Lifecycle controller : The field " + field + " does not exist in the class", getInstanceManager().getFactory().getName());
-        }
-        
-        if (!fm.getFieldType().equalsIgnoreCase("boolean")) {
-            log(Logger.ERROR, "The field " + field + " must be a boolean (" + fm.getFieldType() + " found)");
-            throw new ConfigurationException("Lifecycle controller : The field " + field + " must be a boolean (" + fm.getFieldType() + " found)", getInstanceManager().getFactory().getName());
-        }
-        
-        getInstanceManager().register(this, new FieldMetadata[] {fm}, null);
+        String field = lc[0].getAttribute("field");   
+        getInstanceManager().register(this, new FieldMetadata[] {new FieldMetadata(field, "boolean")}, null);
     }
 
     /**
@@ -124,7 +101,36 @@ public class ControllerHandler extends PrimitiveHandler {
                 }
             }
         } else {
-            log(Logger.ERROR, "Boolean expected");
+            log(Logger.ERROR, "Boolean expected for the lifecycle controller");
+            getInstanceManager().stop();
+        }
+    }
+    
+    /**
+     * Initialize the component factory.
+     * The controller field is checked to avoid configure check.
+     * @param cd : component description
+     * @param metadata : component type metadata
+     * @throws ConfigurationException : occurs if the controller field is not in the POJO class or is not a boolean.
+     * @see org.apache.felix.ipojo.Handler#initializeComponentFactory(org.apache.felix.ipojo.architecture.ComponentDescription, org.apache.felix.ipojo.metadata.Element)
+     */
+    public void initializeComponentFactory(ComponentDescription cd, Element metadata) throws ConfigurationException {
+        String field = null;
+        Element[] lc = metadata.getElements("controller");
+        // Use only the first controller
+        field = lc[0].getAttribute("field");
+        if (field == null) {
+            throw new ConfigurationException("Lifecycle controller : the controller element needs to have a field attribute");
+        }
+        
+        ManipulationMetadata mm = new ManipulationMetadata(metadata);
+        FieldMetadata fm = mm.getField(field);
+        if (fm == null) {
+            throw new ConfigurationException("Lifecycle controller : The field " + field + " does not exist in the class");
+        }
+        
+        if (!fm.getFieldType().equalsIgnoreCase("boolean")) {
+            throw new ConfigurationException("Lifecycle controller : The field " + field + " must be a boolean (" + fm.getFieldType() + " found)");
         }
     }
 

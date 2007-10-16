@@ -31,11 +31,11 @@ import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
+import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.FieldMetadata;
 import org.apache.felix.ipojo.parser.ManipulationMetadata;
 import org.apache.felix.ipojo.parser.MethodMetadata;
-import org.apache.felix.ipojo.util.Logger;
 
 /**
  * Handler managing the Configuration Admin.
@@ -81,69 +81,55 @@ public class ConfigurationHandler extends PrimitiveHandler {
         if (confs.length == 0) { return; }
         Element[] configurables = confs[0].getElements("Property");
         for (int i = 0; i < configurables.length; i++) {
-            String fieldName = null;
-            String methodName = null;
-
-            if (configurables[i].containsAttribute("field")) {
-                fieldName = configurables[i].getAttribute("field");
-            }
-            if (configurables[i].containsAttribute("method")) {
-                methodName = configurables[i].getAttribute("method");
+            String fieldName = configurables[i].getAttribute("field");
+            String methodName = configurables[i].getAttribute("method");
+            
+            if (fieldName == null && methodName == null) {
+                throw new ConfigurationException("Malformed property : The property need to contain at least a field or a method");
             }
 
-            if (fieldName != null || methodName != null) {
-                String name = null;
-                if (configurables[i].containsAttribute("name")) {
-                    name = configurables[i].getAttribute("name");
-                } else {
-                    if (fieldName != null) {
-                        name = fieldName;
-                    } else {
-                        name = methodName;
-                    }
-                }
-                String value = null;
-                if (configurables[i].containsAttribute("value")) {
-                    value = configurables[i].getAttribute("value");
-                }
-
-                // Detect the type of the property
-                ManipulationMetadata manipulation = new ManipulationMetadata(metadata);
-                String type = null;
+            String name = configurables[i].getAttribute("name");
+            if (name == null) {
                 if (fieldName != null) {
-                    FieldMetadata fm = manipulation.getField(fieldName);
-                    if (fm == null) { throw new ConfigurationException("Malformed property : The field " + fieldName + " does not exist in the implementation", getInstanceManager().getFactory().getName()); }
-                    type = fm.getFieldType();
+                    name = fieldName;
                 } else {
-                    MethodMetadata[] mm = manipulation.getMethods(methodName);
-                    if (mm.length != 0) {
-                        if (mm[0].getMethodArguments().length != 1) {
-                            log(Logger.ERROR, "[" + getInstanceManager().getClassName() + "] The method " + methodName + " does not have one argument");
-                            throw new ConfigurationException("Malformed property :  The method " + methodName + " does not have one argument", getInstanceManager().getFactory().getName());
-                        }
-                        if (type != null && !type.equals(mm[0].getMethodArguments()[0])) {
-                            log(Logger.ERROR, "[" + getInstanceManager().getClassName() + "] The field type (" + type + ") and the method type (" + mm[0].getMethodArguments()[0] + ") are not the same.");
-                            throw new ConfigurationException("Malformed property :   The field type (" + type + ") and the method type (" + mm[0].getMethodArguments()[0] + ") are not the same.", getInstanceManager().getFactory().getName());
-                        }
-                        type = mm[0].getMethodArguments()[0];
-                    } else {
-                        // Else, the method is in a super class, look for the type attribute to get the type (if not already discovered)
-                        if (type == null && configurables[i].containsAttribute("type")) {
-                            type = configurables[i].getAttribute("type");
-                        } else {
-                            log(Logger.ERROR, "The type of the property cannot be discovered, please add a 'type' attribute");
-                            return;
-                        }
+                    name = methodName;
+                }
+                configurables[i].addAttribute(new Attribute("name", name)); // Add the type to avoid configure checking
+            }
+            
+            String value = configurables[i].getAttribute("value");
+
+            // Detect the type of the property
+            ManipulationMetadata manipulation = new ManipulationMetadata(metadata);
+            String type = null;
+            if (fieldName != null) {
+                FieldMetadata fm = manipulation.getField(fieldName);
+                if (fm == null) { throw new ConfigurationException("Malformed property : The field " + fieldName + " does not exist in the implementation"); }
+                type = fm.getFieldType();
+                configurables[i].addAttribute(new Attribute("type", type)); // Add the type to avoid configure checking
+            } else {
+                MethodMetadata[] mm = manipulation.getMethods(methodName);
+                if (mm.length != 0) {
+                    if (mm[0].getMethodArguments().length != 1) {
+                        throw new ConfigurationException("Malformed property :  The method " + methodName + " does not have one argument");
+                    }
+                    if (type != null && !type.equals(mm[0].getMethodArguments()[0])) {
+                        throw new ConfigurationException("Malformed property :   The field type (" + type + ") and the method type (" + mm[0].getMethodArguments()[0] + ") are not the same.");
+                    }
+                    type = mm[0].getMethodArguments()[0];
+                    configurables[i].addAttribute(new Attribute("type", type)); // Add the type to avoid configure checking
+                } else {
+                    type = configurables[i].getAttribute("type");
+                    if (type == null) {
+                        throw new ConfigurationException("Malformed property : The type of the property cannot be discovered, please add a 'type' attribute");
                     }
                 }
-
-                if (value != null) {
-                    cd.addProperty(new PropertyDescription(name, type, value));
-                } else {
-                    cd.addProperty(new PropertyDescription(name, type, null));
-                }
+            }
+            if (value != null) {
+                cd.addProperty(new PropertyDescription(name, type, value));
             } else {
-                throw new ConfigurationException("Malformed property : The property need to contain at least a field or a method", getInstanceManager().getFactory().getName());
+                cd.addProperty(new PropertyDescription(name, type, null));
             }
         }
     }
@@ -163,58 +149,27 @@ public class ConfigurationHandler extends PrimitiveHandler {
 
         // Build the map
         Element[] confs = metadata.getElements("Properties", "");
-        if (confs.length == 0) { return; }
+        Element[] configurables = confs[0].getElements("Property");
 
         // Check if the component is dynamically configurable
         m_isConfigurable = false;
-        // DEPRECATED BLOCK
-        if (confs[0].containsAttribute("configurable") && confs[0].getAttribute("configurable").equalsIgnoreCase("true")) {
-            log(Logger.WARNING, "The configurable attribute is deprecated, please use the propagation attribute");
+       
+        String propa = confs[0].getAttribute("propagation");
+        if (propa != null && propa.equalsIgnoreCase("true")) {
             m_isConfigurable = true;
             m_toPropagate = configuration;
         }
-        // END
-        if (confs[0].containsAttribute("propagation") && confs[0].getAttribute("propagation").equalsIgnoreCase("true")) {
-            m_isConfigurable = true;
-            m_toPropagate = configuration;
-        }
-
-        Element[] configurables = confs[0].getElements("Property");
 
         List ff = new ArrayList();
 
         for (int i = 0; i < configurables.length; i++) {
-            String fieldName = null;
-            String methodName = null;
+            String fieldName = configurables[i].getAttribute("field");
+            String methodName = configurables[i].getAttribute("method");
 
-            if (configurables[i].containsAttribute("field")) {
-                fieldName = configurables[i].getAttribute("field");
-            }
-            if (configurables[i].containsAttribute("method")) {
-                methodName = configurables[i].getAttribute("method");
-            }
+            String name = configurables[i].getAttribute("name"); // The initialize method has fixed the property name.
+            String value = configurables[i].getAttribute("value");
 
-            if (fieldName == null && methodName == null) {
-                log(Logger.ERROR, "A configurable property need to have at least a field or a method");
-                throw new ConfigurationException("Malformed property : The property need to contain at least a field or a method", getInstanceManager().getFactory().getName());
-            }
-
-            String name = null;
-            if (configurables[i].containsAttribute("name")) {
-                name = configurables[i].getAttribute("name");
-            } else {
-                if (fieldName != null) {
-                    name = fieldName;
-                } else {
-                    name = methodName;
-                }
-            }
-            String value = null;
-            if (configurables[i].containsAttribute("value")) {
-                value = configurables[i].getAttribute("value");
-            }
-
-            if (name != null && configuration.get(name) != null && configuration.get(name) instanceof String) {
+            if (configuration.get(name) != null && configuration.get(name) instanceof String) {
                 value = (String) configuration.get(name);
             } else {
                 if (fieldName != null && configuration.get(fieldName) != null && configuration.get(fieldName) instanceof String) {
@@ -222,60 +177,26 @@ public class ConfigurationHandler extends PrimitiveHandler {
                 }
             }
 
-            // Detect the type of the property
-            ManipulationMetadata manipulation = new ManipulationMetadata(metadata);
-            String type = null;
+            String type = configurables[i].getAttribute("type"); // The initialize method has fixed the property name.
+            
             if (fieldName != null) {
-                FieldMetadata fm = manipulation.getField(fieldName);
-                if (fm == null) {
-                    log(Logger.ERROR, "[" + getInstanceManager().getClassName() + "] The field " + fieldName + " does not exist in the implementation");
-                    throw new ConfigurationException("Malformed property : The field " + fieldName + " does not exist in the implementation", getInstanceManager().getFactory().getName());
-                }
-                type = fm.getFieldType();
+                FieldMetadata fm = new FieldMetadata(fieldName, type);
                 ff.add(fm);
-            } else {
-                MethodMetadata[] mm = manipulation.getMethods(methodName);
-                if (mm.length != 0) {
-                    if (mm[0].getMethodArguments().length != 1) {
-                        log(Logger.ERROR, "[" + getInstanceManager().getClassName() + "] The method " + methodName + " does not have one argument");
-                        throw new ConfigurationException("Malformed property :  The method " + methodName + " does not have one argument", getInstanceManager().getFactory().getName());
-                    }
-                    if (type != null && !type.equals(mm[0].getMethodArguments()[0])) {
-                        log(Logger.ERROR, "[" + getInstanceManager().getClassName() + "] The field type (" + type + ") and the method type (" + mm[0].getMethodArguments()[0] + ") are not the same.");
-                        throw new ConfigurationException("Malformed property :   The field type (" + type + ") and the method type (" + mm[0].getMethodArguments()[0] + ") are not the same.", getInstanceManager().getFactory().getName());
-                    }
-                    type = mm[0].getMethodArguments()[0];
-                } else {
-                    // Else, the method is in a super class, look for the type attribute to get the type (if not already discovered)
-                    if (type == null && configurables[i].containsAttribute("type")) {
-                        type = configurables[i].getAttribute("type");
-                    } else {
-                        log(Logger.ERROR, "The type of the property cannot be discovered, please add a 'type' attribute");
-                        return;
-                    }
-                }
             }
-
+            
             ConfigurableProperty cp = new ConfigurableProperty(name, fieldName, methodName, value, type, this);
             addProperty(cp);
-        }
 
-        if (configurables.length > 0) {
-            for (int k = 0; k < m_configurableProperties.length; k++) {
-                // Check if the instance configuration contains value for the
-                // current property :
-                String name = m_configurableProperties[k].getName();
-                String fieldName = m_configurableProperties[k].getField();
-                if (name != null && configuration.get(name) != null && !(configuration.get(name) instanceof String)) {
-                    m_configurableProperties[k].setValue(configuration.get(name));
-                } else {
-                    if (fieldName != null && configuration.get(fieldName) != null && !(configuration.get(fieldName) instanceof String)) {
-                        m_configurableProperties[k].setValue(configuration.get(fieldName));
-                    }
+            // Check if the instance configuration contains value for the current property :
+            if (configuration.get(name) != null && !(configuration.get(name) instanceof String)) {
+                cp.setValue(configuration.get(name));
+            } else {
+                if (fieldName != null && configuration.get(fieldName) != null && !(configuration.get(fieldName) instanceof String)) {
+                    cp.setValue(configuration.get(fieldName));
                 }
             }
-            getInstanceManager().register(this, (FieldMetadata[]) ff.toArray(new FieldMetadata[0]), null);
         }
+        getInstanceManager().register(this, (FieldMetadata[]) ff.toArray(new FieldMetadata[ff.size()]), null);
     }
 
     /**
@@ -337,7 +258,9 @@ public class ConfigurationHandler extends PrimitiveHandler {
     public Object getterCallback(String fieldName, Object value) {
         // Check if the field is a configurable property
         for (int i = 0; i < m_configurableProperties.length; i++) {
-            if (m_configurableProperties[i].hasField() && m_configurableProperties[i].getField().equals(fieldName)) { return m_configurableProperties[i].getValue(); }
+            if (fieldName.equals(m_configurableProperties[i].getField())) { 
+                return m_configurableProperties[i].getValue(); 
+            }
         }
         return value;
     }

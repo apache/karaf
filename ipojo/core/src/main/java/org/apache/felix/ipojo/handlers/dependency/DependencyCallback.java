@@ -73,7 +73,7 @@ public class DependencyCallback extends Callback {
      * method
      */
     public DependencyCallback(Dependency dep, String method, int methodType) {
-        super(method, (String[]) null, false, dep.getDependencyHandler().getInstanceManager());
+        super(method, (String[]) null, false, dep.getHandler().getInstanceManager());
         m_methodType = methodType;
         m_dependency = dep;
         m_method = method;
@@ -103,7 +103,7 @@ public class DependencyCallback extends Callback {
      */
     protected void searchMethod() {
         if (m_argument != null) {
-            Method[] methods = m_dependency.getDependencyHandler().getInstanceManager().getClazz().getDeclaredMethods();
+            Method[] methods = m_dependency.getHandler().getInstanceManager().getClazz().getDeclaredMethods();
             for (int i = 0; m_methodObj == null && i < methods.length; i++) {
                 // First check the method name
                 if (methods[i].getName().equals(m_method)) {
@@ -126,7 +126,7 @@ public class DependencyCallback extends Callback {
         }
         
         if (m_methodObj == null) { //look at parent classes
-            Method[] methods = m_dependency.getDependencyHandler().getInstanceManager().getClazz().getMethods();
+            Method[] methods = m_dependency.getHandler().getInstanceManager().getClazz().getMethods();
             for (int i = 0; m_methodObj == null && i < methods.length; i++) {
                 // First check the method name
                 if (methods[i].getName().equals(m_method)) {
@@ -166,8 +166,8 @@ public class DependencyCallback extends Callback {
         }
         
         if (m_methodObj == null) {
-            m_dependency.getDependencyHandler().log(Logger.ERROR, "The method " + m_method + " cannot be called : method not found");
-            return;
+            m_dependency.getHandler().log(Logger.ERROR, "The method " + m_method + " cannot be called : method not found");
+            m_dependency.getHandler().getInstanceManager().stop();
         } else {
             m_methodObj.setAccessible(true);
         }

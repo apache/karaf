@@ -90,19 +90,22 @@ public class ManifestMetadataParser {
      */
     private Dictionary parseInstance(Element instance) throws ParseException {
         Dictionary dict = new Properties();
-        if (instance.containsAttribute("name")) {
+        String name = instance.getAttribute("name");
+        String comp = instance.getAttribute("component");
+        if (name != null) {
             dict.put("name", instance.getAttribute("name"));
         }
-        if (!instance.containsAttribute("component")) {
+        
+        if (comp == null) {
             throw new ParseException("An instance does not have the 'component' attribute");
         }
         
-        dict.put("component", instance.getAttribute("component"));
+        dict.put("component", comp);
 
         for (int i = 0; i < instance.getElements("property").length; i++) {
             parseProperty(instance.getElements("property")[i], dict);
         }
-
+        
         return dict;
     }
 
@@ -114,11 +117,13 @@ public class ManifestMetadataParser {
      */
     private void parseProperty(Element prop, Dictionary dict) throws ParseException {
         // Check that the property has a name
-        if (!prop.containsAttribute("name")) {
+        String name = prop.getAttribute("name");
+        String value = prop.getAttribute("value");
+        if (name == null) {
             throw new ParseException("A property does not have the 'name' attribute");
         }
         // Final case : the property element has a 'value' attribute
-        if (prop.containsAttribute("value")) {
+        if (value != null) {
             dict.put(prop.getAttribute("name"), prop.getAttribute("value"));
         } else {
             // Recursive case
@@ -130,7 +135,7 @@ public class ManifestMetadataParser {
             Dictionary dict2 = new Properties();
             for (int i = 0; i < subProps.length; i++) {
                 parseProperty(subProps[i], dict2);
-                dict.put(prop.getAttribute("name"), dict2);
+                dict.put(name, dict2);
             }
         }
     }

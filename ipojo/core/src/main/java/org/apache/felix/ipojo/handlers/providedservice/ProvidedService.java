@@ -94,7 +94,7 @@ public class ProvidedService implements ServiceFactory {
 
         m_serviceSpecification = specification;
         m_factoryPolicy = factoryPolicy;
-
+        
         // Add instance name & factory name
         addProperty(new Property(this, "instance.name", handler.getInstanceManager().getInstanceName()));       
         addProperty(new Property(this, "factory.name", handler.getInstanceManager().getFactory().getName()));
@@ -175,32 +175,25 @@ public class ProvidedService implements ServiceFactory {
 
     /**
      * Return a service object for the dependency.
-     * 
-     * @see org.osgi.framework.ServiceFactory#getService(org.osgi.framework.Bundle,
-     * org.osgi.framework.ServiceRegistration)
+     * @see org.osgi.framework.ServiceFactory#getService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration)
      * @param bundle : the bundle
      * @param registration : the service registration of the registred service
-     * @return : a new service object or a already created service object (in
-     * the case of singleton)
+     * @return : a new service object or a already created service object (in the case of singleton)
      */
     public Object getService(Bundle bundle, ServiceRegistration registration) {
-
+        Object svc = null;
         switch (m_factoryPolicy) {
-
             case SINGLETON_FACTORY:
-                return m_handler.getInstanceManager().getPojoObject();
-
+                svc = m_handler.getInstanceManager().getPojoObject();
+                break;
             case SERVICE_FACTORY:
-                return m_handler.getInstanceManager().createPojoObject();
-
+                svc = m_handler.getInstanceManager().createPojoObject();
+                break;
             default:
-                m_handler.getInstanceManager().getFactory().getLogger().log(
-                        Logger.ERROR,
-                        "[" + m_handler.getInstanceManager().getClassName() + "] Unknown factory policy for " + m_serviceSpecification + " : "
-                                + m_factoryPolicy);
-                return null;
+                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] Unknown factory policy for " + m_serviceSpecification + " : " + m_factoryPolicy);
+                getInstanceManager().stop();
         }
-
+        return svc;
     }
 
     /**
@@ -296,6 +289,8 @@ public class ProvidedService implements ServiceFactory {
 
         if (serviceProperties == null) {
             m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Cannot get the properties of the provided service");
+            getInstanceManager().stop();
+            return;
         }
 
         // Update the service registration

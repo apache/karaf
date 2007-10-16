@@ -49,11 +49,13 @@ public class MethodMetadata {
      */
     MethodMetadata(Element metadata) {
         m_name = metadata.getAttribute("name");
-        if (metadata.containsAttribute("arguments")) {
-            m_arguments = ParseUtils.parseArrays(metadata.getAttribute("arguments"));
+        String arg = metadata.getAttribute("arguments");
+        String rt = metadata.getAttribute("return");
+        if (arg != null) {
+            m_arguments = ParseUtils.parseArrays(arg);
         }
-        if (metadata.containsAttribute("return")) {
-            m_return = metadata.getAttribute("return");
+        if (rt != null) {
+            m_return = rt;
         }
     }
     

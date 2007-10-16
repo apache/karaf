@@ -19,8 +19,13 @@
 package org.apache.felix.ipojo.handlers.providedservice;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.IPojoConfiguration;
@@ -31,13 +36,14 @@ import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.handlers.dependency.Dependency;
 import org.apache.felix.ipojo.handlers.dependency.DependencyHandler;
+import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.FieldMetadata;
 import org.apache.felix.ipojo.parser.ManifestMetadataParser;
 import org.apache.felix.ipojo.parser.ManipulationMetadata;
 import org.apache.felix.ipojo.parser.ParseException;
 import org.apache.felix.ipojo.parser.ParseUtils;
-import org.apache.felix.ipojo.util.Logger;
+import org.osgi.framework.Bundle;
 
 /**
  * Composite Provided Service Handler.
@@ -88,56 +94,30 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager, org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
     public void configure(Element componentMetadata, Dictionary configuration) throws ConfigurationException {
-
-        ManipulationMetadata manipulation = new ManipulationMetadata(componentMetadata);
-
         m_providedServices = new ProvidedService[0];
         // Create the dependency according to the component metadata
         Element[] providedServices = componentMetadata.getElements("Provides");
+        List fields = new ArrayList();
         for (int i = 0; i < providedServices.length; i++) {
-            // Create a ProvidedServiceMetadata object
-
-            // First : create the serviceSpecification array
-            String[] serviceSpecification = new String[0];
-            if (providedServices[i].containsAttribute("interface")) {
-                String serviceSpecificationStr = providedServices[i].getAttribute("interface");
-                serviceSpecification = ParseUtils.parseArrays(serviceSpecificationStr);
-            } else {
-                serviceSpecification = manipulation.getInterfaces();
-            }
-            if (serviceSpecification.length == 0) {
-                log(Logger.ERROR, "Cannot instantiate a provided service : no specifications found (no interfaces implemented by the pojo)");
-                throw new ConfigurationException("Provides  : Cannot instantiate a provided service : no specifications found (no interfaces implemented by the pojo)", getInstanceManager().getFactory().getName());
-            }
-
+            String[] serviceSpecifications = ParseUtils.parseArrays(providedServices[i].getAttribute("interface")); // Set by the initialize component factory.
+            
             // Get the factory policy
             int factory = ProvidedService.SINGLETON_FACTORY;
-            if (providedServices[i].containsAttribute("factory") && "service".equals(providedServices[i].getAttribute("factory"))) {
+            String fact = providedServices[i].getAttribute("factory");
+            if (fact != null && "service".equalsIgnoreCase(fact)) {
                 factory = ProvidedService.SERVICE_FACTORY;
             }
 
             // Then create the provided service
-            ProvidedService ps = new ProvidedService(this, serviceSpecification, factory);
+            ProvidedService ps = new ProvidedService(this, serviceSpecifications, factory);
 
             Element[] props = providedServices[i].getElements("Property");
             Property[] properties = new Property[props.length];
             for (int j = 0; j < props.length; j++) {
-                String name = null;
-                if (props[j].containsAttribute("name")) {
-                    name = props[j].getAttribute("name");
-                }
-                String value = null;
-                if (props[j].containsAttribute("value")) {
-                    value = props[j].getAttribute("value");
-                }
-                String type = null;
-                if (props[j].containsAttribute("type")) {
-                    type = props[j].getAttribute("type");
-                }
-                String field = null;
-                if (props[j].containsAttribute("field")) {
-                    field = props[j].getAttribute("field");
-                }
+                String name = props[j].getAttribute("name");
+                String value = props[j].getAttribute("value");
+                String type = props[j].getAttribute("type");
+                String field = props[j].getAttribute("field");
 
                 if (name != null && configuration.get(name) != null && configuration.get(name) instanceof String) {
                     value = (String) configuration.get(name);
@@ -147,75 +127,120 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                     }
                 }
 
-                Property prop = new Property(ps, name, field, type, value, manipulation);
+                Property prop = new Property(ps, name, field, type, value);
                 properties[j] = prop;
+                
+                // Check if the instance configuration has a value for this property
+                Object o = configuration.get(prop.getName()); 
+                if (o != null && ! (o instanceof String)) {
+                    prop.set(o);
+                } else {
+                    if (field != null) {
+                        o = configuration.get(field);
+                        if (o != null && !(o instanceof String)) {
+                            prop.set(configuration.get(field));
+                        }
+                    }
+                }
+                
+                if (field != null) {
+                    fields.add(new FieldMetadata(field, type));
+                }
             }
 
             // Attached to properties to the provided service
             ps.setProperties(properties);
 
-            if (checkProvidedService(ps, manipulation)) {
+            if (checkProvidedService(ps)) {
                 addProvidedService(ps);
             } else {
                 String itfs = "";
-                for (int j = 0; j < serviceSpecification.length; j++) {
-                    itfs = itfs + " " + serviceSpecification[j];
+                for (int j = 0; j < serviceSpecifications.length; j++) {
+                    itfs = itfs + " " + serviceSpecifications[j];
                 }
-                log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The provided service" + itfs + " is not valid");
-                return;
+                throw new ConfigurationException("[" + getInstanceManager().getInstanceName() + "] The provided service" + itfs + " is not valid");                
             }
 
         }
+        getInstanceManager().register(this, (FieldMetadata[]) fields.toArray(new FieldMetadata[fields.size()]), null);
+    }
+    
+    /**
+     * Collect interfaces implemented by the POJO.
+     * @param specs : implemented interfaces.
+     * @param parent : parent class.
+     * @param bundle : Bundle object.
+     * @return the set of implemented interfaces.
+     * @throws ClassNotFoundException : occurs when an interface cannot be loaded.
+     */
+    private Set computeInterfaces(String[] specs, String parent, Bundle bundle) throws ClassNotFoundException {
+        Set result = new HashSet();
+        // First iterate on found specification in manipulation metadata
+        for (int i = 0; i < specs.length; i++) {
+            result.add(specs[i]);
+            // Iterate on interfaces implemented by the current interface
+            Class clazz = bundle.loadClass(specs[i]);
+            collectInterfaces(clazz, result, bundle);
+        }
 
-        if (providedServices.length > 0) {
-            FieldMetadata[] fields = new FieldMetadata[0];
-            for (int i = 0; i < m_providedServices.length; i++) {
-                ProvidedService ps = m_providedServices[i];
-                for (int j = 0; j < ps.getProperties().length; j++) {
-                    Property prop = ps.getProperties()[j];
+        // Look for parent class.
+        if (parent != null) {
+            Class cl = bundle.loadClass(parent);
+            collectInterfacesFromClass(cl, result, bundle);
+        }
 
-                    // Check if the instance configuration has a value for this
-                    // property
-                    if (prop.getName() != null && configuration.get(prop.getName()) != null && !(configuration.get(prop.getName()) instanceof String)) {
-                        prop.set(configuration.get(prop.getName()));
-                    } else {
-                        if (prop.getField() != null && configuration.get(prop.getField()) != null && !(configuration.get(prop.getField()) instanceof String)) {
-                            prop.set(configuration.get(prop.getField()));
-                        }
-                    }
-                    if (prop.getField() != null) {
-                        FieldMetadata[] newFields = new FieldMetadata[fields.length + 1];
-                        System.arraycopy(fields, 0, newFields, 0, fields.length);
-                        newFields[fields.length] = manipulation.getField(prop.getField());
-                        fields = newFields;
-                    }
-                }
-            }
-            getInstanceManager().register(this, fields, null);
+        return result;
+    }
+    
+    /**
+     * Look for inherited interfaces.
+     * @param clazz : interface name to explore (class object)
+     * @param l : set (accumulator)
+     * @param b : bundle
+     * @throws ClassNotFoundException : occurs when an interface cannot be loaded.
+     */
+    private void collectInterfaces(Class clazz, Set l, Bundle b) throws ClassNotFoundException {
+        Class[] clazzes = clazz.getInterfaces();
+        for (int i = 0; i < clazzes.length; i++) {
+            l.add(clazzes[i].getName());
+            collectInterfaces(clazzes[i], l, b);
+        }
+    }
+    
+    /**
+     * Collect interfaces for the given class.
+     * This method explores super class to.
+     * @param cl : class object.
+     * @param l : set of implemented interface (accumulator)
+     * @param b : bundle.
+     * @throws ClassNotFoundException : occurs if an interface cannot be load.
+     */
+    private void collectInterfacesFromClass(Class cl, Set l, Bundle b) throws ClassNotFoundException {
+        Class[] clazzes = cl.getInterfaces();
+        for (int i = 0; i < clazzes.length; i++) {
+            l.add(clazzes[i].getName());
+            collectInterfaces(clazzes[i], l, b);
+        }
+        // Iterate on parent classes
+        Class sup = cl.getSuperclass();
+        if (sup != null) {
+            collectInterfacesFromClass(sup, l, b);
         }
     }
 
     /**
-     * Check the provided service given in argument in the sense that the
-     * metadata are consistent.
-     * 
+     * Check the provided service given in argument in the sense that the metadata are consistent.
      * @param ps : the provided service to check.
-     * @param manipulation : component-type manipulation metadata.
      * @return true if the provided service is correct
      * @throws ConfigurationException : the checked provided service is not correct.
      */
-    private boolean checkProvidedService(ProvidedService ps, ManipulationMetadata manipulation) throws ConfigurationException {
+    private boolean checkProvidedService(ProvidedService ps) throws ConfigurationException {        
         for (int i = 0; i < ps.getServiceSpecification().length; i++) {
-            // Check the implementation of the specification
-            if (!manipulation.isInterfaceImplemented(ps.getServiceSpecification()[i])) {
-                log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The service specification " + ps.getServiceSpecification()[i] + " is not implemented by the component class");
-                throw new ConfigurationException("Provides  : The service specification " + ps.getServiceSpecification()[i] + " is not implemented by the component class", getInstanceManager().getFactory().getName());
-
-            }
-
+            String specName = ps.getServiceSpecification()[i];
+            
             // Check service level dependencies
             try {
-                Class spec = getInstanceManager().getFactory().loadClass(ps.getServiceSpecification()[i]);
+                Class spec = getInstanceManager().getFactory().loadClass(specName);
                 Field specField = spec.getField("specification");
                 Object o = specField.get(null);
                 if (o instanceof String) {
@@ -230,24 +255,18 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                         isDependencyCorrect(d, deps[j]);
                     }
                 } else {
-                    log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The specification field of the service specification " + ps.getServiceSpecification()[i] + " need to be a String");
-                    throw new ConfigurationException("Provides  : The specification field of the service specification " + ps.getServiceSpecification()[i] + " need to be a String", getInstanceManager().getFactory().getName());
+                    throw new ConfigurationException("Provides  : The specification field of the service specification " + ps.getServiceSpecification()[i] + " need to be a String");
                 }
             } catch (NoSuchFieldException e) {
                 return true; // No specification field
             } catch (ClassNotFoundException e) {
-                log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The service specification " + ps.getServiceSpecification()[i] + " cannot be load");
-                throw new ConfigurationException("Provides  : The service specification " + ps.getServiceSpecification()[i] + " cannot be load", getInstanceManager().getFactory().getName());
+                throw new ConfigurationException("Provides  : The service specification " + ps.getServiceSpecification()[i] + " cannot be load");
             } catch (IllegalArgumentException e) {
-                log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
-                throw new ConfigurationException("Provides  : The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " is not accessible : " + e.getMessage(), getInstanceManager().getFactory().getName());
+                throw new ConfigurationException("Provides  : The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
             } catch (IllegalAccessException e) {
-                log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
-                throw new ConfigurationException("Provides  : The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " is not accessible : " + e.getMessage(), getInstanceManager().getFactory().getName());
+                throw new ConfigurationException("Provides  : The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
             } catch (ParseException e) {
-                log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " does not contain a valid String : " + e.getMessage());
-                throw new ConfigurationException("Provides  :  The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " does not contain a valid String : " + e.getMessage(), getInstanceManager().getFactory()
-                        .getName());
+                throw new ConfigurationException("Provides  :  The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " does not contain a valid String : " + e.getMessage());
             }
         }
 
@@ -263,14 +282,13 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
         DependencyHandler dh = (DependencyHandler) getHandler(IPojoConfiguration.IPOJO_NAMESPACE + ":requires");
         if (dh == null) { return null; }
 
-        if (element.containsAttribute("id")) {
+        String id = element.getAttribute("id");
+        if (id != null) {
             // Look for dependency Id
-            String id = element.getAttribute("id");
             for (int i = 0; i < dh.getDependencies().length; i++) {
                 if (dh.getDependencies()[i].getId().equals(id)) { return dh.getDependencies()[i]; }
             }
         }
-
         // If not found or no id, look for a dependency with the same specification
         String requirement = element.getAttribute("specification");
         for (int i = 0; i < dh.getDependencies().length; i++) {
@@ -287,34 +305,25 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * @throws ConfigurationException  : the service level dependency and the implementation dependency does not match.
      */
     private void isDependencyCorrect(Dependency dep, Element elem) throws ConfigurationException {
-        boolean opt = false;
-        if (elem.containsAttribute("optional") && elem.getAttribute("optional").equalsIgnoreCase("true")) {
-            opt = true;
-        }
+        String optional = elem.getAttribute("optional");
+        boolean opt = optional != null && optional.equalsIgnoreCase("true");
 
-        boolean agg = false;
-        if (elem.containsAttribute("aggregate") && elem.getAttribute("aggregate").equalsIgnoreCase("true")) {
-            agg = true;
-        }
+        String aggregate = elem.getAttribute("aggregate");
+        boolean agg = aggregate != null && aggregate.equalsIgnoreCase("true");
 
         if (dep == null && !opt) {
-            log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The requirement " + elem.getAttribute("specification") + " is not present in the implementation and is declared as a mandatory service-level requirement");
-            throw new ConfigurationException("Provides  :  The requirement " + elem.getAttribute("specification") + " is not present in the implementation and is declared as a mandatory service-level requirement", getInstanceManager().getFactory()
-                    .getName());
+            throw new ConfigurationException("Provides  :  The requirement " + elem.getAttribute("specification") + " is not present in the implementation and is declared as a mandatory service-level requirement");
         }
 
         if (dep != null && dep.isAggregate() && !agg) {
-            log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The requirement " + elem.getAttribute("specification") + " is aggregate in the implementation and is declared as a simple service-level requirement");
-            throw new ConfigurationException("Provides  :  The requirement " + elem.getAttribute("specification") + " is aggregate in the implementation and is declared as a simple service-level requirement", getInstanceManager().getFactory()
-                    .getName());
+            throw new ConfigurationException("Provides  :  The requirement " + elem.getAttribute("specification") + " is aggregate in the implementation and is declared as a simple service-level requirement");
         }
 
-        if (dep != null && elem.containsAttribute("filter")) {
-            String filter = elem.getAttribute("filter");
+        String filter = elem.getAttribute("filter");
+        if (dep != null && filter != null) {
             String filter2 = dep.getFilter();
             if (filter2 == null || !filter2.equalsIgnoreCase(filter)) {
-                log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The specification requirement " + elem.getAttribute("specification") + " as not the same filter as declared in the service-level requirement");
-                throw new ConfigurationException("Provides  :  The specification requirement " + elem.getAttribute("specification") + " as not the same filter as declared in the service-level requirement", getInstanceManager().getFactory().getName());
+                throw new ConfigurationException("Provides  :  The specification requirement " + elem.getAttribute("specification") + " as not the same filter as declared in the service-level requirement");
             }
         }
     }
@@ -332,8 +341,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * 
      * @see org.apache.felix.ipojo.Handler#start()
      */
-    public void start() {
-    }
+    public void start() { }
 
     /**
      * Setter Callback Method.
@@ -490,48 +498,63 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * Initialize the component type.
      * @param cd : component type description to populate.
      * @param metadata : component type metadata.
+     * @throws ConfigurationException : occurs when the POJO does not implement any interfaces.
      * @see org.apache.felix.ipojo.Handler#initializeComponentFactory(org.apache.felix.ipojo.architecture.ComponentDescription, org.apache.felix.ipojo.metadata.Element)
      */
-    public void initializeComponentFactory(ComponentDescription cd, Element metadata) {
+    public void initializeComponentFactory(ComponentDescription cd, Element metadata) throws ConfigurationException {
         // Change ComponentInfo
         Element[] provides = metadata.getElements("provides");
-        ManipulationMetadata mm = new ManipulationMetadata(metadata);
+        ManipulationMetadata manipulation = new ManipulationMetadata(metadata);
 
         for (int i = 0; i < provides.length; i++) {
-            String[] serviceSpecification = new String[0];
-            if (provides[i].containsAttribute("interface")) {
-                String serviceSpecificationStr = provides[i].getAttribute("interface");
-                serviceSpecification = ParseUtils.parseArrays(serviceSpecificationStr);
-            } else {
-                serviceSpecification = mm.getInterfaces();
+         // First : create the serviceSpecification list
+            String[] serviceSpecification = manipulation.getInterfaces();
+            String parent = manipulation.getSuperClass();
+            Set all = null;
+            try {
+                all = computeInterfaces(serviceSpecification, parent, cd.getBundleContext().getBundle());
+            } catch (ClassNotFoundException e) {
+                throw new ConfigurationException("A interface cannot be loaded : " + e.getMessage());
             }
-            if (serviceSpecification.length == 0) {
-                log(Logger.ERROR, "Cannot instantiate a provided service : no specifications found (no interfaces implemented by the pojo)");
-                return;
+            
+            String serviceSpecificationStr = provides[i].getAttribute("interface");
+            if (serviceSpecificationStr != null) {
+                List itfs = ParseUtils.parseArraysAsList(serviceSpecificationStr);
+                for (int j = 0; j < itfs.size(); j++) {
+                    if (! all.contains(itfs.get(j))) {
+                        throw new ConfigurationException("The specification " + itfs.get(j) + " is not implemented by " + cd.getClassName());
+                    }
+                }
+                all = new HashSet(itfs);
+            }
+            
+            if (all.size() == 0) {
+                throw new ConfigurationException("Provides  : Cannot instantiate a provided service : no specifications found (no interfaces implemented by the pojo)");
             }
 
-            for (int j = 0; j < serviceSpecification.length; j++) {
-                cd.addProvidedServiceSpecification(serviceSpecification[j]);
+            String specs = null;
+            Set set = new HashSet(all);
+            Iterator it = set.iterator(); 
+            while (it.hasNext()) {
+                String sp = (String) it.next();
+                cd.addProvidedServiceSpecification(sp);
+                if (specs == null) {
+                    specs = "{" + sp;
+                } else {
+                    specs += "," + sp;
+                }
             }
+            
+            specs += "}";
+            
+            provides[i].addAttribute(new Attribute("interface", specs)); // Add interface attribute to avoid checking in the configure method
 
             Element[] props = provides[i].getElements("property");
             for (int j = 0; j < props.length; j++) {
-                String name = null;
-                if (props[j].containsAttribute("name")) {
-                    name = props[j].getAttribute("name");
-                }
-                String value = null;
-                if (props[j].containsAttribute("value")) {
-                    value = props[j].getAttribute("value");
-                }
-                String type = null;
-                if (props[j].containsAttribute("type")) {
-                    type = props[j].getAttribute("type");
-                }
-                String field = null;
-                if (props[j].containsAttribute("field")) {
-                    field = props[j].getAttribute("field");
-                }
+                String name = props[j].getAttribute("name");
+                String value = props[j].getAttribute("value");
+                String type = props[j].getAttribute("type");
+                String field = props[j].getAttribute("field");
 
                 // Get property name :
                 if (field != null && name == null) {
@@ -541,15 +564,14 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                 // Check type if not already set
                 if (type == null) {
                     if (field == null) {
-                        System.err.println("The property " + name + " has neither type neither field.");
-                        return;
+                        throw new ConfigurationException("The property " + name + " has neither type neither field.");
                     }
-                    FieldMetadata fm = mm.getField(field);
+                    FieldMetadata fm = manipulation.getField(field);
                     if (fm == null) {
-                        System.err.println("A declared property was not found in the class : " + field);
-                        return;
+                        throw new ConfigurationException("A declared property was not found in the class : " + field);
                     }
                     type = fm.getFieldType();
+                    props[j].addAttribute(new Attribute("type", type));
                 }
 
                 cd.addProperty(new PropertyDescription(name, type, value));

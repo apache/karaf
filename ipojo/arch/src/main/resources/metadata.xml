@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <iPOJO>
-	<Component className="org.apache.felix.ipojo.arch.ArchCommandImpl">
+	<Component className="org.apache.felix.ipojo.arch.ArchCommandImpl" factory="false">
 		  <Provides/>
 		  <Requires field="m_archs" optional="true"/>
 		  <Requires field="m_factories" optional="true" filter="(!(handler.name=*))"/>

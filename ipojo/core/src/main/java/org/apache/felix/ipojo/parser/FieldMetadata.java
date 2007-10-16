@@ -47,6 +47,16 @@ public class FieldMetadata {
         m_type = metadata.getAttribute("type");
     }
     
+    /**
+     * Constructor.
+     * @param field : field name.
+     * @param type : type of the field.
+     */
+    public FieldMetadata(String field, String type) {
+        m_name = field;
+        m_type = type;
+    }
+    
     public String getFieldName() { return m_name; }
     
     public String getFieldType() { return m_type; }

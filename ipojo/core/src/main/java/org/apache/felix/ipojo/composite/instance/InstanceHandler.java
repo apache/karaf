@@ -241,7 +241,7 @@ public class InstanceHandler extends CompositeHandler implements InstanceStateLi
                 conf = parseInstance(instances[i]);
             } catch (ParseException e) {
                 log(Logger.ERROR, "An instance cannot be parsed correctly", e);
-                throw new ConfigurationException("An instance cannot be parsed correctly : " + e.getMessage(), getCompositeManager().getFactory().getName());
+                throw new ConfigurationException("An instance cannot be parsed correctly : " + e.getMessage());
             }
             m_configurations[i] = new ManagedConfiguration(conf);
         }
@@ -255,12 +255,17 @@ public class InstanceHandler extends CompositeHandler implements InstanceStateLi
      */
     private Dictionary parseInstance(Element instance) throws ParseException {
         Dictionary dict = new Properties();
-        if (instance.containsAttribute("name")) {
-            dict.put("name", instance.getAttribute("name"));
+        String name = instance.getAttribute("name");
+        if (name != null) {
+            dict.put("name", name);
         }
-        if (!instance.containsAttribute("component")) { throw new ParseException("An instance does not have the 'component' attribute"); }
-
-        dict.put("component", instance.getAttribute("component"));
+        
+        String comp = instance.getAttribute("component");
+        if (comp == null) { 
+            throw new ParseException("An instance does not have the 'component' attribute"); 
+        } else {
+            dict.put("component", comp);
+        }
 
         for (int i = 0; i < instance.getElements("property").length; i++) {
             parseProperty(instance.getElements("property")[i], dict);
@@ -277,10 +282,12 @@ public class InstanceHandler extends CompositeHandler implements InstanceStateLi
      */
     private void parseProperty(Element prop, Dictionary dict) throws ParseException {
         // Check that the property has a name
-        if (!prop.containsAttribute("name")) { throw new ParseException("A property does not have the 'name' attribute"); }
+        String name = prop.getAttribute("name");
+        String value = prop.getAttribute("value");
+        if (name == null) { throw new ParseException("A property does not have the 'name' attribute"); }
         // Final case : the property element has a 'value' attribute
-        if (prop.containsAttribute("value")) {
-            dict.put(prop.getAttribute("name"), prop.getAttribute("value"));
+        if (value != null) {
+            dict.put(name, value);
         } else {
             // Recursive case
             // Check if there is 'property' element
@@ -301,7 +308,7 @@ public class InstanceHandler extends CompositeHandler implements InstanceStateLi
     public void start() { 
         for (int j = 0; j < m_factories.length; j++) {
             String factName = m_factories[j].getName();
-            String className = m_factories[j].getComponentDescription().getClassName(); 
+            String className = m_factories[j].getClassName(); 
             for (int i = 0; i < m_configurations.length; i++) {
                 if (m_configurations[i].getInstance() == null && (m_configurations[i].getNeededFactoryName().equals(factName) || m_configurations[i].getNeededFactoryName().equals(className))) {
                     createInstance(m_factories[j], m_configurations[i]);

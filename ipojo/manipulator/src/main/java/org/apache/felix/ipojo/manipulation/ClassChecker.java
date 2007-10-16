@@ -45,7 +45,7 @@ public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes 
     /**
      * Interfaces implemented by the component.
      */
-    private String[] m_itfs = new String[0];
+    private List m_itfs = new ArrayList();
 
     /**
      * Field map [field name, type] discovered in the component class.
@@ -56,6 +56,11 @@ public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes 
      * Method List of method descriptor discovered in the component class.
      */
     private List m_methods = new ArrayList()/* <MethodDesciptor> */;
+    
+    /**
+     * Super class if not java.lang.Object.
+     */
+    private String m_superClass;
 
     /**
      * Check if the _cm field already exists.
@@ -115,8 +120,16 @@ public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes 
      */
     public void visit(int version, int access, String name, String signature,
             String superName, String[] interfaces) {
-        // Store the interfaces :
-        m_itfs = interfaces;
+        
+        if (! superName.equals("java/lang/Object")) {
+            m_superClass = superName.replace('/', '.');
+        }
+        
+        for (int i = 0; i < interfaces.length; i++) {
+            if (! interfaces[i].equals("org/apache/felix/ipojo/Pojo")) {
+                m_itfs.add(interfaces[i].replace('/', '.'));
+            }
+        }
     }
 
     /**
@@ -132,8 +145,20 @@ public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes 
      */
     public MethodVisitor visitMethod(int access, String name, String desc,
             String signature, String[] exceptions) {
-        if (!name.equals("<init>") && !name.equals("<clinit>")) {
-            m_methods.add(new MethodDescriptor(name, desc));
+        if (!name.equals("<clinit>")) { 
+            
+            if (name.equals("<init>")) {
+                m_methods.add(new MethodDescriptor("$init", desc));
+            } else {
+                // Avoid constructors.
+                if (!(name.startsWith("_get") || // Avoid getter method
+                        name.startsWith("_set") || // Avoid setter method
+                        name.equals("_setComponentManager") || // Avoid the set method
+                        name.equals("getComponentInstance"))) { // Avoid the getComponentInstance method
+                    m_methods.add(new MethodDescriptor(name, desc));
+                }
+            }
+            
         }
         return null;
     }
@@ -142,7 +167,7 @@ public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes 
      * Get collected interfaces.
      * @return the interfaces implemented by the component class.
      */
-    public String[] getInterfaces() {
+    public List getInterfaces() {
         return m_itfs;
     }
 
@@ -160,6 +185,10 @@ public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes 
      */
     public List getMethods() {
         return m_methods;
+    }
+    
+    public String getSuperClass() {
+        return m_superClass;
     }
 
 }

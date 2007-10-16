@@ -64,7 +64,9 @@ public class Element {
      */
     public Element(String name, String ns) {
         m_name = name.toLowerCase();
-        m_nameSpace = ns.toLowerCase();
+        if (ns != null && ns.length() > 0) {
+            m_nameSpace = ns.toLowerCase();
+        }
     }
 
     /**
@@ -139,7 +141,7 @@ public class Element {
      * @return the qualified name of the current element.
      */
     private String getQualifiedName() {
-        if (m_nameSpace.equals("")) {
+        if (m_nameSpace == null) {
             return m_name;
         } else {
             return m_nameSpace + ":" + m_name;
@@ -200,7 +202,7 @@ public class Element {
      */
     public void addAttribute(Attribute att) {
         String name = att.getName().toLowerCase();
-        if (!att.getNameSpace().equals("")) {
+        if (att.getNameSpace() != null) {
             name = att.getNameSpace().toLowerCase() + ":" + name;
         }
         m_attributes.put(name, att);
@@ -212,7 +214,7 @@ public class Element {
      */
     public void removeAttribute(Attribute att) {
         String name = att.getName();
-        if (!att.getNameSpace().equals("")) {
+        if (att.getNameSpace() != null) {
             name = att.getNameSpace() + ":" + name;
         }
         m_attributes.remove(name);
@@ -224,8 +226,7 @@ public class Element {
      * @return the resulting element array (empty if the search failed)
      */
     public Element[] getElements(String name) {
-        name = name.toLowerCase();
-        Element[] elems = (Element[]) m_elements.get(name);
+        Element[] elems = (Element[]) m_elements.get(name.toLowerCase());
         if (elems == null) {
             return new Element[0];
         } else {
@@ -300,7 +301,7 @@ public class Element {
             tabs += "\t";
         }
 
-        if ("".equals(m_nameSpace)) {
+        if (m_nameSpace == null) {
             xml = tabs + "<" + m_name;
         } else {
             xml = tabs + "<" + m_nameSpace + ":" + m_name;
@@ -310,7 +311,7 @@ public class Element {
         Iterator it = keys.iterator();
         while (it.hasNext()) {
             Attribute current = (Attribute) m_attributes.get(it.next());
-            if ("".equals(current.getNameSpace())) {
+            if (current.getNameSpace() == null) {
                 xml += " " + current.getName() + "=\"" + current.getValue() + "\"";
             } else {
                 xml += " " + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue() + "\"";
@@ -358,7 +359,7 @@ public class Element {
             tabs += "\t";
         }
 
-        if ("".equals(m_nameSpace)) {
+        if (m_nameSpace == null) {
             xml = tabs + m_name;
         } else {
             xml = tabs + m_nameSpace + ":" + m_name;
@@ -368,7 +369,7 @@ public class Element {
         Iterator it = keys.iterator();
         while (it.hasNext()) {
             Attribute current = (Attribute) m_attributes.get(it.next());
-            if ("".equals(current.getNameSpace())) {
+            if (current.getNameSpace() == null) {
                 xml += " " + current.getName() + "=\"" + current.getValue() + "\"";
             } else {
                 xml += " " + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue() + "\"";

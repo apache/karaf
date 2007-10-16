@@ -119,7 +119,7 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
         mv.visitFieldInsn(GETFIELD, m_owner, "_F" + name, "Z");
         Label l2 = new Label();
         mv.visitJumpInsn(IFNE, l2);
-        //TODO move in
+
         mv.visitVarInsn(ALOAD, 0);
         mv.visitVarInsn(ALOAD, 1);
         mv.visitFieldInsn(PUTFIELD, m_owner, name, internalType);
@@ -162,41 +162,10 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
         mv.visitLabel(l1);
 
         mv.visitVarInsn(ALOAD, 0);
-        // mv.visitFieldInsn(GETFIELD, m_owner, name, "["+type.getInternalName()+";");
-        mv.visitFieldInsn(GETFIELD, m_owner, name, internalType);
-        mv.visitVarInsn(ASTORE, 1);
-
-        mv.visitVarInsn(ALOAD, 0);
         mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
         mv.visitLdcInsn(name);
-        mv.visitVarInsn(ALOAD, 1);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
-        mv.visitVarInsn(ASTORE, 2);
-
-        mv.visitVarInsn(ALOAD, 2);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;)Ljava/lang/Object;");
         mv.visitTypeInsn(CHECKCAST, internalType);
-        mv.visitVarInsn(ASTORE, 3);
-
-        Label l3a = new Label();
-        mv.visitLabel(l3a);
-
-        mv.visitVarInsn(ALOAD, 1);
-        Label l4a = new Label();
-        mv.visitJumpInsn(IFNULL, l4a);
-        mv.visitVarInsn(ALOAD, 1);
-        mv.visitVarInsn(ALOAD, 3);
-        Label l5a = new Label();
-        mv.visitJumpInsn(IF_ACMPEQ, l5a); // Test equality on object.
-        
-        // Invoke the _set method
-        mv.visitLabel(l4a);        
-        mv.visitVarInsn(ALOAD, 0);
-        mv.visitVarInsn(ALOAD, 3);
-        mv.visitMethodInsn(INVOKEVIRTUAL, m_owner, "_set" + name, "(" + internalType + ")V");
-        
-        // End of the method
-        mv.visitLabel(l5a);
-        mv.visitVarInsn(ALOAD, 3);
         mv.visitInsn(ARETURN);
 
         // End
@@ -240,46 +209,17 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 mv.visitLabel(l1);
 
                 mv.visitVarInsn(ALOAD, 0);
-                mv.visitFieldInsn(GETFIELD, m_owner, name, internalName);
-                mv.visitVarInsn(type.getOpcode(ISTORE), 1);
-
-                mv.visitTypeInsn(NEW, boxingType);
-                mv.visitInsn(DUP);
-                mv.visitVarInsn(type.getOpcode(ILOAD), 1);
-                mv.visitMethodInsn(INVOKESPECIAL, boxingType, "<init>", "(" + internalName + ")V");
-                mv.visitVarInsn(ASTORE, 2);
-
-                mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
                 mv.visitLdcInsn(name);
-                mv.visitVarInsn(ALOAD, 2);
-                mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
-                mv.visitVarInsn(ASTORE, 3);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;)Ljava/lang/Object;");
+                mv.visitVarInsn(ASTORE, 1);
 
-                mv.visitVarInsn(ALOAD, 3);
+                mv.visitVarInsn(ALOAD, 1);
                 mv.visitTypeInsn(CHECKCAST, boxingType);
-                mv.visitVarInsn(ASTORE, 4);
+                mv.visitVarInsn(ASTORE, 2);
 
-                mv.visitVarInsn(ALOAD, 4);
+                mv.visitVarInsn(ALOAD, 2);
                 mv.visitMethodInsn(INVOKEVIRTUAL, boxingType, unboxingMethod, "()" + internalName);
-                mv.visitVarInsn(type.getOpcode(ISTORE), 5);
-
-                Label l5 = new Label();
-                mv.visitLabel(l5);
-
-                mv.visitVarInsn(type.getOpcode(ILOAD), 1);
-                mv.visitVarInsn(type.getOpcode(ILOAD), 5);
-                Label l6 = new Label();
-                mv.visitJumpInsn(type.getOpcode(IF_ICMPEQ), l6);
-
-                Label l7 = new Label();
-                mv.visitLabel(l7);
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitVarInsn(type.getOpcode(ILOAD), 5);
-                mv.visitMethodInsn(INVOKEVIRTUAL, m_owner, "_set" + name, "(" + internalName + ")V");
-                mv.visitLabel(l6);
-
-                mv.visitVarInsn(type.getOpcode(ILOAD), 5);
                 mv.visitInsn(type.getOpcode(IRETURN));
                 break;
 
@@ -288,59 +228,29 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 boxingType = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][1];
                 unboxingMethod = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][2];
 
-                Label l00 = new Label();
-                mv.visitLabel(l00);
+                l0 = new Label();
+                mv.visitLabel(l0);
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, "_F" + name, "Z");
-                Label l10 = new Label();
-                mv.visitJumpInsn(IFNE, l10);
+                l1 = new Label();
+                mv.visitJumpInsn(IFNE, l1);
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, name, internalName);
                 mv.visitInsn(LRETURN);
-                mv.visitLabel(l10);
-
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitFieldInsn(GETFIELD, m_owner, name, internalName);
-                mv.visitVarInsn(LSTORE, 1);
-
-                mv.visitTypeInsn(NEW, boxingType);
-                mv.visitInsn(DUP);
-                mv.visitVarInsn(LLOAD, 1);
-                mv.visitMethodInsn(INVOKESPECIAL, boxingType, "<init>", "(" + internalName + ")V");
-                mv.visitVarInsn(ASTORE, 3); // Double Space
+                mv.visitLabel(l1);
 
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
                 mv.visitLdcInsn(name);
-                mv.visitVarInsn(ALOAD, 3);
-                mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
-                mv.visitVarInsn(ASTORE, 4);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;)Ljava/lang/Object;");
+                mv.visitVarInsn(ASTORE, 1);
 
-                mv.visitVarInsn(ALOAD, 4);
+                mv.visitVarInsn(ALOAD, 1);
                 mv.visitTypeInsn(CHECKCAST, boxingType);
-                mv.visitVarInsn(ASTORE, 5);
+                mv.visitVarInsn(ASTORE, 2);
 
-                mv.visitVarInsn(ALOAD, 5);
+                mv.visitVarInsn(ALOAD, 2);
                 mv.visitMethodInsn(INVOKEVIRTUAL, boxingType, unboxingMethod, "()" + internalName);
-                mv.visitVarInsn(LSTORE, 6);
-
-                l5 = new Label();
-                mv.visitLabel(l5);
-
-                mv.visitVarInsn(LLOAD, 1);
-                mv.visitVarInsn(LLOAD, 6);
-                mv.visitInsn(LCMP);
-                l6 = new Label();
-                mv.visitJumpInsn(IFEQ, l6);
-
-                l7 = new Label();
-                mv.visitLabel(l7);
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitVarInsn(LLOAD, 6);
-                mv.visitMethodInsn(INVOKEVIRTUAL, m_owner, "_set" + name, "(" + internalName + ")V");
-                mv.visitLabel(l6);
-
-                mv.visitVarInsn(LLOAD, 6);
                 mv.visitInsn(LRETURN);
 
                 break;
@@ -350,59 +260,29 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 boxingType = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][1];
                 unboxingMethod = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][2];
 
-                Label l01 = new Label();
-                mv.visitLabel(l01);
+                l0 = new Label();
+                mv.visitLabel(l0);
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, "_F" + name, "Z");
-                Label l11 = new Label();
-                mv.visitJumpInsn(IFNE, l11);
+                l1 = new Label();
+                mv.visitJumpInsn(IFNE, l1);
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, name, internalName);
                 mv.visitInsn(DRETURN);
-                mv.visitLabel(l11);
-
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitFieldInsn(GETFIELD, m_owner, name, internalName);
-                mv.visitVarInsn(DSTORE, 1);
-
-                mv.visitTypeInsn(NEW, boxingType);
-                mv.visitInsn(DUP);
-                mv.visitVarInsn(DLOAD, 1);
-                mv.visitMethodInsn(INVOKESPECIAL, boxingType, "<init>", "(" + internalName + ")V");
-                mv.visitVarInsn(ASTORE, 3); // Double Space
+                mv.visitLabel(l1);
 
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
                 mv.visitLdcInsn(name);
-                mv.visitVarInsn(ALOAD, 3);
-                mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
-                mv.visitVarInsn(ASTORE, 4);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;)Ljava/lang/Object;");
+                mv.visitVarInsn(ASTORE, 1);
 
-                mv.visitVarInsn(ALOAD, 4);
+                mv.visitVarInsn(ALOAD, 1);
                 mv.visitTypeInsn(CHECKCAST, boxingType);
-                mv.visitVarInsn(ASTORE, 5);
+                mv.visitVarInsn(ASTORE, 2);
 
-                mv.visitVarInsn(ALOAD, 5);
+                mv.visitVarInsn(ALOAD, 2);
                 mv.visitMethodInsn(INVOKEVIRTUAL, boxingType, unboxingMethod, "()" + internalName);
-                mv.visitVarInsn(DSTORE, 6);
-
-                l5 = new Label();
-                mv.visitLabel(l5);
-
-                mv.visitVarInsn(DLOAD, 1);
-                mv.visitVarInsn(DLOAD, 6);
-                mv.visitInsn(DCMPL);
-                l6 = new Label();
-                mv.visitJumpInsn(IFEQ, l6);
-
-                l7 = new Label();
-                mv.visitLabel(l7);
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitVarInsn(DLOAD, 6);
-                mv.visitMethodInsn(INVOKEVIRTUAL, m_owner, "_set" + name, "(" + internalName + ")V");
-                mv.visitLabel(l6);
-
-                mv.visitVarInsn(DLOAD, 6);
                 mv.visitInsn(DRETURN);
 
                 break;
@@ -412,110 +292,50 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 boxingType = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][1];
                 unboxingMethod = ManipulationProperty.PRIMITIVE_BOXING_INFORMATION[type.getSort()][2];
 
-                Label l02 = new Label();
-                mv.visitLabel(l02);
+                l0 = new Label();
+                mv.visitLabel(l0);
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, "_F" + name, "Z");
-                Label l12 = new Label();
-                mv.visitJumpInsn(IFNE, l12);
+                l1 = new Label();
+                mv.visitJumpInsn(IFNE, l1);
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, name, internalName);
                 mv.visitInsn(FRETURN);
-                mv.visitLabel(l12);
-
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitFieldInsn(GETFIELD, m_owner, name, internalName);
-                mv.visitVarInsn(FSTORE, 1);
-
-                mv.visitTypeInsn(NEW, boxingType);
-                mv.visitInsn(DUP);
-                mv.visitVarInsn(FLOAD, 1);
-                mv.visitMethodInsn(INVOKESPECIAL, boxingType, "<init>", "(" + internalName + ")V");
-                mv.visitVarInsn(ASTORE, 2); // One Space
+                mv.visitLabel(l1);
 
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
                 mv.visitLdcInsn(name);
-                mv.visitVarInsn(ALOAD, 2);
-                mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
-                mv.visitVarInsn(ASTORE, 3);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;)Ljava/lang/Object;");
+                mv.visitVarInsn(ASTORE, 1);
 
-                mv.visitVarInsn(ALOAD, 3);
+                mv.visitVarInsn(ALOAD, 1);
                 mv.visitTypeInsn(CHECKCAST, boxingType);
-                mv.visitVarInsn(ASTORE, 4);
+                mv.visitVarInsn(ASTORE, 2);
 
-                mv.visitVarInsn(ALOAD, 4);
+                mv.visitVarInsn(ALOAD, 2);
                 mv.visitMethodInsn(INVOKEVIRTUAL, boxingType, unboxingMethod, "()" + internalName);
-                mv.visitVarInsn(FSTORE, 5);
-
-                l5 = new Label();
-                mv.visitLabel(l5);
-
-                mv.visitVarInsn(FLOAD, 1);
-                mv.visitVarInsn(FLOAD, 5);
-                mv.visitInsn(FCMPL);
-                l6 = new Label();
-                mv.visitJumpInsn(IFEQ, l6);
-
-                l7 = new Label();
-                mv.visitLabel(l7);
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitVarInsn(FLOAD, 5);
-                mv.visitMethodInsn(INVOKEVIRTUAL, m_owner, "_set" + name, "(" + internalName + ")V");
-                mv.visitLabel(l6);
-
-                mv.visitVarInsn(FLOAD, 5);
                 mv.visitInsn(FRETURN);
 
                 break;
 
             case Type.OBJECT:
-                Label l03 = new Label();
-                mv.visitLabel(l03);
+                l0 = new Label();
+                mv.visitLabel(l0);
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, "_F" + name, "Z");
-                Label l13 = new Label();
-                mv.visitJumpInsn(IFNE, l13);
+                l1 = new Label();
+                mv.visitJumpInsn(IFNE, l1);
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, name, "L" + type.getInternalName() + ";");
                 mv.visitInsn(ARETURN);
-                mv.visitLabel(l13);
-
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitFieldInsn(GETFIELD, m_owner, name, "L" + type.getInternalName() + ";");
-                mv.visitVarInsn(ASTORE, 1);
+                mv.visitLabel(l1);
 
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
                 mv.visitLdcInsn(name);
-                mv.visitVarInsn(ALOAD, 1);
-                mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;");
-                mv.visitVarInsn(ASTORE, 2);
-
-                mv.visitVarInsn(ALOAD, 2);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getterCallback", "(Ljava/lang/String;)Ljava/lang/Object;");
                 mv.visitTypeInsn(CHECKCAST, type.getInternalName());
-                mv.visitVarInsn(ASTORE, 3);
-
-                Label l3b = new Label();
-                mv.visitLabel(l3b);
-
-                mv.visitVarInsn(ALOAD, 1);
-                Label l4b = new Label();
-                mv.visitJumpInsn(IFNULL, l4b);
-                mv.visitVarInsn(ALOAD, 1);
-                mv.visitVarInsn(ALOAD, 3);
-                
-                Label l5b = new Label();
-                mv.visitJumpInsn(IF_ACMPEQ, l5b); // Test equality on object.
-                
-                mv.visitLabel(l4b);
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitVarInsn(ALOAD, 3);
-                mv.visitMethodInsn(INVOKEVIRTUAL, m_owner, "_set" + name, "(L" + type.getInternalName() + ";)V");
-                
-                // End of the getter method, return the object
-                mv.visitLabel(l5b);
-                mv.visitVarInsn(ALOAD, 3);
                 mv.visitInsn(ARETURN);
 
                 break;
@@ -555,7 +375,7 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 mv.visitFieldInsn(GETFIELD, m_owner, "_F" + name, "Z");
                 Label l22 = new Label();
                 mv.visitJumpInsn(IFNE, l22);
-                //TODO move in
+                
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitVarInsn(type.getOpcode(ILOAD), 1);
                 mv.visitFieldInsn(PUTFIELD, m_owner, name, internalName);
@@ -593,7 +413,7 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 mv.visitFieldInsn(GETFIELD, m_owner, "_F" + name, "Z");
                 Label l23 = new Label();
                 mv.visitJumpInsn(IFNE, l23);
-                //TODO move in
+           
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitVarInsn(type.getOpcode(ILOAD), 1);
                 mv.visitFieldInsn(PUTFIELD, m_owner, name, internalName);
@@ -624,7 +444,7 @@ public class FieldAdapter extends ClassAdapter implements Opcodes {
                 mv.visitFieldInsn(GETFIELD, m_owner, "_F" + name, "Z");
                 Label l24 = new Label();
                 mv.visitJumpInsn(IFNE, l24);
-                //TODO move in
+           
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitVarInsn(ALOAD, 1);
                 mv.visitFieldInsn(PUTFIELD, m_owner, name, "L" + type.getInternalName() + ";");

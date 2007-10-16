@@ -12,11 +12,11 @@
   <version>0.7.5-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
-	<module>../ipojo/metadata</module>
-    <module>../ipojo/manipulator</module>
-	<module>../ipojo/plugin</module>
-    <module>../ipojo/core</module>
-    <module>../ipojo/arch</module>
-	<module>../ipojo/ant</module>
+	<module>metadata</module>
+    <module>manipulator</module>
+	<module>plugin</module>
+    <module>core</module>
+    <module>arch</module>
+	<module>ant</module>
   </modules>
 </project>

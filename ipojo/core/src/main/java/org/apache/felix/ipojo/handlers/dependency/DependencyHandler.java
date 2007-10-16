@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 
+import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.PolicyServiceContext;
 import org.apache.felix.ipojo.PrimitiveHandler;
@@ -58,12 +59,17 @@ public class DependencyHandler extends PrimitiveHandler {
     private boolean m_state;
 
     /**
+     * Is the handler started.
+     */
+    private boolean m_started;
+
+    /**
      * Add a dependency.
      * 
      * @param dep : the dependency to add
      */
     private void addDependency(Dependency dep) {
-        for (int i = 0; (m_dependencies != null) && (i < m_dependencies.length); i++) {
+        for (int i = 0; i < m_dependencies.length; i++) {
             if (m_dependencies[i] == dep) { return; }
         }
         if (m_dependencies.length > 0) {
@@ -107,12 +113,22 @@ public class DependencyHandler extends PrimitiveHandler {
      * Check the validity of the dependencies.
      */
     protected void checkContext() {
+        if (! m_started) { return; }
         synchronized (m_dependencies) {
             // Store the initial state
             boolean initialState = m_state;
 
+            boolean valid = true;
+            for (int i = 0; i < m_dependencies.length; i++) {
+                Dependency dep = m_dependencies[i];
+                if (dep.getState() > Dependency.RESOLVED) { 
+                    valid = false;
+                    break;
+                }
+            }
+            
             // Check the component dependencies
-            if (validateComponentDependencies()) {
+            if (valid) {
                 // The dependencies are valid
                 if (!initialState) {
                     // There is a state change
@@ -148,8 +164,7 @@ public class DependencyHandler extends PrimitiveHandler {
             MethodMetadata[] mets = manipulation.getMethods(callbacks[i].getMethodName());
             if (mets.length != 0) {
                 if (mets[0].getMethodArguments().length > 2) {
-                    log(Logger.ERROR, "A requirement callback " + callbacks[i].getMethodName() + " must have 0 or 1 or 2 arguments");
-                    throw new ConfigurationException("Requirement Callback : A requirement callback " + callbacks[i].getMethodName() + " must have 0 or 1 or 2 arguments", getInstanceManager().getFactory().getName());
+                    throw new ConfigurationException("Requirement Callback : A requirement callback " + callbacks[i].getMethodName() + " must have 0 or 1 or 2 arguments");
                 }
                 
                 callbacks[i].setArgument(mets[0].getMethodArguments());
@@ -159,8 +174,7 @@ public class DependencyHandler extends PrimitiveHandler {
                             dep.setSpecification(mets[0].getMethodArguments()[0]);
                         }
                         if (!dep.getSpecification().equals(mets[0].getMethodArguments()[0])) {
-                            log(Logger.WARNING, "[DependencyHandler on " + getInstanceManager().getInstanceName() + "] The field type [" + mets[0].getMethodArguments()[0] + "] and the needed service interface [" + dep.getSpecification()
-                                    + "] are not the same");
+                            log(Logger.WARNING, "[DependencyHandler on " + getInstanceManager().getInstanceName() + "] The field type [" + mets[0].getMethodArguments()[0] + "] and the needed service interface [" + dep.getSpecification() + "] are not the same");
                             dep.setSpecification(mets[0].getMethodArguments()[0]);
                         }
                     }
@@ -168,15 +182,13 @@ public class DependencyHandler extends PrimitiveHandler {
                     // Check that the second arguments is a service reference
                     if (!mets[0].getMethodArguments()[1].equals(ServiceReference.class.getName())) {
                         String message = "The requirement callback " + callbacks[i].getMethodName() + " must have a ServiceReference as the second arguments";
-                        log(Logger.ERROR, message);
-                        throw new ConfigurationException(message, getInstanceManager().getFactory().getName());
+                        throw new ConfigurationException(message);
                     }
                     if (dep.getSpecification() == null) {
                         dep.setSpecification(mets[0].getMethodArguments()[0]);
                     } else {
                         if (!dep.getSpecification().equals(mets[0].getMethodArguments()[0])) {
-                            log(Logger.WARNING, "[DependencyHandler on " + getInstanceManager().getInstanceName() + "] The field type [" + mets[0].getMethodArguments()[0] + "] and the needed service interface [" + dep.getSpecification()
-                                    + "] are not the same");
+                            log(Logger.WARNING, "[DependencyHandler on " + getInstanceManager().getInstanceName() + "] The field type [" + mets[0].getMethodArguments()[0] + "] and the needed service interface [" + dep.getSpecification() + "] are not the same");
                             dep.setSpecification(mets[0].getMethodArguments()[0]);
                         }
                     }
@@ -190,8 +202,7 @@ public class DependencyHandler extends PrimitiveHandler {
         if (field != null) {
             FieldMetadata fm = manipulation.getField(field);
             if (fm == null) {
-                log(Logger.ERROR, "A requirement field " + field + " does not exist in the implementation class");
-                throw new ConfigurationException("Requirement Callback : A requirement field " + field + " does not exist in the implementation class", getInstanceManager().getFactory().getName());
+                throw new ConfigurationException("Requirement Callback : A requirement field " + field + " does not exist in the implementation class");
             }
             String type = fm.getFieldType();
             if (type.endsWith("[]")) {
@@ -231,56 +242,28 @@ public class DependencyHandler extends PrimitiveHandler {
         // Create the dependency according to the component metadata
         Element[] deps = componentMetadata.getElements("Requires");
 
-        // DEPRECATED BLOCK :
-        if (deps.length == 0) {
-            deps = componentMetadata.getElements("Dependency");
-            if (deps.length != 0) {
-                log(Logger.WARNING, "Dependency is deprecated, please use 'requires' instead of 'dependency'");
-            }
-        }
-        // END OF DEPRECATED BLOCK
-
         // Get instance filters.
-        Dictionary filtersConfiguration = null;
-        if (configuration.get("requires.filters") != null) {
-            filtersConfiguration = (Dictionary) configuration.get("requires.filters");
-        }
+        Dictionary filtersConfiguration = (Dictionary) configuration.get("requires.filters");
         
         for (int i = 0; i < deps.length; i++) {
             // Create the dependency metadata
-            String field = null;
-            if (deps[i].containsAttribute("field")) {
-                field = deps[i].getAttribute("field");
-            }
-            String serviceSpecification = null;
-            if (deps[i].containsAttribute("interface")) {
-                serviceSpecification = deps[i].getAttribute("interface");
-            }
-            String filter = "";
-            if (deps[i].containsAttribute("filter")) {
-                filter = deps[i].getAttribute("filter");
-            }
-            boolean optional = false;
-            if (deps[i].containsAttribute("optional") && "true".equals(deps[i].getAttribute("optional"))) {
-                optional = true;
-            }
-            boolean aggregate = false;
-            if (deps[i].containsAttribute("aggregate") && "true".equals(deps[i].getAttribute("aggregate"))) {
-                aggregate = true;
-            }
-
-            String id = null;
-            if (deps[i].containsAttribute("id")) {
-                id = deps[i].getAttribute("id");
-            }
+            String field = deps[i].getAttribute("field");
+            String serviceSpecification = deps[i].getAttribute("interface");
+            String filter = deps[i].getAttribute("filter");
+            String opt = deps[i].getAttribute("optional");
+            boolean optional = opt != null && opt.equalsIgnoreCase("true");
+            String agg = deps[i].getAttribute("aggregate");
+            boolean aggregate = agg != null && agg.equalsIgnoreCase("true");
+            String id = deps[i].getAttribute("id");
 
             int scopePolicy = -1;
-            if (deps[i].containsAttribute("scope")) {
-                if (deps[i].getAttribute("scope").equalsIgnoreCase("global")) {
+            String scope = deps[i].getAttribute("scope"); 
+            if (scope != null) {
+                if (scope.equalsIgnoreCase("global")) {
                     scopePolicy = PolicyServiceContext.GLOBAL;
-                } else if (deps[i].getAttribute("scope").equalsIgnoreCase("composite")) {
+                } else if (scope.equalsIgnoreCase("composite")) {
                     scopePolicy = PolicyServiceContext.LOCAL;
-                } else if (deps[i].getAttribute("scope").equalsIgnoreCase("composite+global")) {
+                } else if (scope.equalsIgnoreCase("composite+global")) {
                     scopePolicy = PolicyServiceContext.LOCAL_AND_GLOBAL;
                 }
             }
@@ -290,12 +273,26 @@ public class DependencyHandler extends PrimitiveHandler {
                 filter = (String) filtersConfiguration.get(id);
             }
             
-            Dependency dep = new Dependency(this, field, serviceSpecification, filter, optional, aggregate, id, scopePolicy);
+            
+            // Parse binding policy
+            int bindingPolicy = Dependency.DYNAMIC_POLICY;
+            String policy = deps[i].getAttribute("policy"); 
+            if (policy != null) {
+                if (policy.equalsIgnoreCase("static")) {
+                    bindingPolicy = Dependency.STATIC_POLICY;
+                } else if (policy.equalsIgnoreCase("dynamic")) {
+                    bindingPolicy = Dependency.DYNAMIC_POLICY;
+                } else if (policy.equalsIgnoreCase("dynamic-priority")) {
+                    bindingPolicy = Dependency.DYNAMIC_PRIORITY_POLICY;
+                }
+            }
+            
+            Dependency dep = new Dependency(this, field, serviceSpecification, filter, optional, aggregate, id, scopePolicy, bindingPolicy);
 
             // Look for dependency callback :
             for (int j = 0; j < (deps[i].getElements("Callback", "")).length; j++) {
                 if (!(deps[i].getElements("Callback", "")[j].containsAttribute("method") && deps[i].getElements("Callback", "")[j].containsAttribute("type"))) { 
-                    throw new ConfigurationException("Requirement Callback : a dependency callback must contain a method and a type attribute", getInstanceManager().getFactory().getName()); 
+                    throw new ConfigurationException("Requirement Callback : a dependency callback must contain a method and a type attribute"); 
                 }
                 String method = deps[i].getElements("Callback", "")[j].getAttribute("method");
                 String type = deps[i].getElements("Callback", "")[j].getAttribute("type");
@@ -316,56 +313,36 @@ public class DependencyHandler extends PrimitiveHandler {
                 if (dep.getField() != null) {
                     fl.add(manipulation.getField(dep.getField()));
                 }
-            } else {
-                log(Logger.ERROR, "[DependencyHandler on " + getInstanceManager().getInstanceName() + "] The dependency on " + dep.getField() + " is not valid");
             }
 
         }
 
         if (deps.length > 0) {
             getInstanceManager().register(this, (FieldMetadata[]) fl.toArray(new FieldMetadata[0]), manipulation.getMethods());
+        } else {
+            throw new ConfigurationException("No dependencies found in " + getInstanceManager().getInstanceName());
         }
     }
 
     /**
      * Create a nullable class for the given dependency.
-     * 
      * @param dep : the dependency
      */
     private void createNullableClass(Dependency dep) {
-        log(Logger.INFO, "[DependencyHandler on " + getInstanceManager().getInstanceName() + "] Try to load the nullable class for " + dep.getSpecification());
 
-        // String[] segment =
-        // dep.getMetadata().getServiceSpecification().split("[.]");
-        // String className = "org/apache/felix/ipojo/" + segment[segment.length
-        // - 1] + "Nullable";
         String className = dep.getSpecification() + "Nullable";
         String resource = dep.getSpecification().replace('.', '/') + ".class";
         URL url = getInstanceManager().getContext().getBundle().getResource(resource);
 
-        try {
-            byte[] b = NullableObjectWriter.dump(url, dep.getSpecification());
-            Class c = null;
-            try {
-                c = getInstanceManager().getFactory().defineClass(className, b, null);
-            } catch (Exception e) {
-                log(Logger.ERROR, "Cannot define the nullable class : " + e.getMessage());
-                e.printStackTrace();
-                return;
-            }
-            addNullableClass(c);
-            log(Logger.INFO, "[DependencyHandler on " + getInstanceManager().getInstanceName() + "] Nullable class created for " + dep.getSpecification());
-        } catch (Exception e2) {
-            log(Logger.ERROR, "[DependencyHandler on " + getInstanceManager().getInstanceName() + "] Cannot load the nullable class for  " + dep.getSpecification(), e2);
-        }
+        byte[] b = NullableObjectWriter.dump(url, dep.getSpecification());
+        Class c = getInstanceManager().getFactory().defineClass(className, b, null);
+        addNullableClass(c);
     }
 
     /**
      * Return the nullable class corresponding to the given name.
-     * 
      * @param name the needed type
-     * @return the class correspondig to the name, or null if the class does not
-     * exist.
+     * @return the class correspondig to the name, or null if the class does not exist.
      */
     protected Class getNullableClass(String name) {
         for (int i = 0; i < m_nullableClasses.length; i++) {
@@ -385,7 +362,8 @@ public class DependencyHandler extends PrimitiveHandler {
     public Object getterCallback(String fieldName, Object value) {
         for (int i = 0; i < m_dependencies.length; i++) {
             Dependency dep = m_dependencies[i];
-            if (dep.getField().equals(fieldName)) {
+            String field = dep.getField();
+            if (field != null && field.equals(fieldName)) {
                 // The field name is a dependency, return the get
                 return dep.get();
             }
@@ -402,7 +380,9 @@ public class DependencyHandler extends PrimitiveHandler {
     public void entryCallback(String methodId) {
         for (int i = 0; i < m_dependencies.length; i++) {
             Dependency dep = m_dependencies[i];
-            dep.entry(methodId);
+            if (dep.getField() != null) {
+                dep.entry(methodId);
+            }
         }
     }
 
@@ -415,7 +395,9 @@ public class DependencyHandler extends PrimitiveHandler {
     public void exitCallback(String methodId, Object returnedObj) {
         for (int i = 0; i < m_dependencies.length; i++) {
             Dependency dep = m_dependencies[i];
-            dep.exit(methodId);
+            if (dep.getField() != null) {
+                dep.exit(methodId);
+            }
         }
     }
 
@@ -434,6 +416,7 @@ public class DependencyHandler extends PrimitiveHandler {
             dep.start();
         }
         // Check the state
+        m_started = true;
         checkContext();
     }
 
@@ -442,15 +425,15 @@ public class DependencyHandler extends PrimitiveHandler {
      * @see org.apache.felix.ipojo.Handler#stop()
      */
     public void stop() {
+        m_started = false;
         for (int i = 0; i < m_dependencies.length; i++) {
             m_dependencies[i].stop();
         }
-        m_nullableClasses = new Class[0];
     }
 
     /**
      * Handler createInstance method.
-     * This method is overided to allow delayed callback invocation.
+     * This method is override to allow delayed callback invocation.
      * @param instance : the created object
      * @see org.apache.felix.ipojo.Handler#objectCreated(java.lang.Object)
      */
@@ -459,19 +442,18 @@ public class DependencyHandler extends PrimitiveHandler {
             m_dependencies[i].callBindMethod(instance);
         }
     }
-
+    
     /**
-     * Check if dependencies are resolved.
-     * @return true if all dependencies are resolved.
+     * The instance state changes. If the new state is valid, we need to activate dependencies.
+     * @param state : the new state
+     * @see org.apache.felix.ipojo.Handler#stateChanged(int)
      */
-    private boolean validateComponentDependencies() {
-        boolean valid = true;
-        for (int i = 0; i < m_dependencies.length; i++) {
-            Dependency dep = m_dependencies[i];
-            valid = valid & dep.getState() == Dependency.RESOLVED;
-            if (!valid) { return false; }
+    public void stateChanged(int state) {
+        if (state == ComponentInstance.VALID) {
+            for (int i = 0; i < m_dependencies.length; i++) {
+                m_dependencies[i].activate();
+            }
         }
-        return valid;
     }
 
     /**

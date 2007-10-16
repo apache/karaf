@@ -88,6 +88,9 @@ public class DependencyHandlerDescription extends HandlerDescription {
             if (m_dependencies[i].getState() == 2) {
                 state = "unresolved";
             }
+            if (m_dependencies[i].getState() == 3) {
+                state = "broken";
+            }
             Element dep = new Element("Requires", "");
             dep.addAttribute(new Attribute("Specification", m_dependencies[i].getInterface()));
             

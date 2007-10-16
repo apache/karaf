@@ -22,8 +22,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.felix.ipojo.parser.FieldMetadata;
-import org.apache.felix.ipojo.parser.ManipulationMetadata;
 import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Logger;
 
@@ -75,9 +73,8 @@ public class Property {
      * @param field : name of the field (if a field is attached to the property)
      * @param type : type of the property
      * @param value : initial value of the property
-     * @param manipulation : manipulation metadata
      */
-    public Property(ProvidedService ps, String name, String field, String type, String value, ManipulationMetadata manipulation) {
+    public Property(ProvidedService ps, String name, String field, String type, String value) {
         m_providedService = ps;
         m_name = name;
         m_field = field;
@@ -85,25 +82,8 @@ public class Property {
         m_initialValue = value;
 
         // Dynamic property case :
-        if (m_field != null) {
-            if (m_name == null) {
-                m_name = m_field;
-            }
-        }
-
-        // Check type if not already set
-        if (m_type == null) {
-            if (field == null) {
-                ps.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The property " + m_name + " has neither type neither field.");
-                return;
-            }
-            FieldMetadata fm = manipulation.getField(field);
-            if (fm == null) {
-                m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                        "[" + ps.getInstanceManager().getClassName() + "] A declared property was not found in the class : " + m_field);
-                return;
-            }
-            m_type = fm.getFieldType();
+        if (m_field != null && m_name == null) {
+            m_name = m_field;
         }
 
         if (m_initialValue != null) {
@@ -221,18 +201,25 @@ public class Property {
             m_value = cst.newInstance(new Object[] { value });
         } catch (ClassNotFoundException e) {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Class not found exception in setValue on " + m_type);
+            m_providedService.getInstanceManager().stop();
         } catch (SecurityException e) {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Security Exception in setValue on " + m_type);
+            m_providedService.getInstanceManager().stop();
         } catch (NoSuchMethodException e) {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Constructor not found exeption in setValue on " + m_type);
+            m_providedService.getInstanceManager().stop();
         } catch (IllegalArgumentException e) {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Argument problem to call the constructor of the type " + m_type);
+            m_providedService.getInstanceManager().stop();
         } catch (InstantiationException e) {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Instantiation problem  " + m_type);
+            m_providedService.getInstanceManager().stop();
         } catch (IllegalAccessException e) {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Illegal Access Exception in setValue on " + m_type);
+            m_providedService.getInstanceManager().stop();
         } catch (InvocationTargetException e) {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Invocation problem " + m_type);
+            m_providedService.getInstanceManager().stop();
         }
     }
 
@@ -317,20 +304,25 @@ public class Property {
             return;
         } catch (ClassNotFoundException e) {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Class not found exception in setArrayValue on " + internalType);
+            m_providedService.getInstanceManager().stop();
         } catch (SecurityException e) {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Security Exception in setArrayValue on " + internalType);
+            m_providedService.getInstanceManager().stop();
         } catch (NoSuchMethodException e) {
-            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                    "Constructor not found exception in setArrayValue on " + internalType);
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Constructor not found exception in setArrayValue on " + internalType);
+            m_providedService.getInstanceManager().stop();
         } catch (IllegalArgumentException e) {
-            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR,
-                    "Argument problem to call the constructor of the type " + internalType);
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Argument problem to call the constructor of the type " + internalType);
+            m_providedService.getInstanceManager().stop();
         } catch (InstantiationException e) {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Instantiation problem  " + internalType);
+            m_providedService.getInstanceManager().stop();
         } catch (IllegalAccessException e) {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Illegal Access Exception in setArrayValue on " + internalType);
+            m_providedService.getInstanceManager().stop();
         } catch (InvocationTargetException e) {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Invocation problem " + internalType);
+            m_providedService.getInstanceManager().stop();
         }
     }
 

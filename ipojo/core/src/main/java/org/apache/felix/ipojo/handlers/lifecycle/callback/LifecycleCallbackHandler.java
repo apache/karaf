@@ -84,54 +84,39 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
     public void configure(Element metadata, Dictionary configuration) throws ConfigurationException {
         m_callbacks = new LifecycleCallback[0];
 
-        if (metadata.containsAttribute("immediate") && metadata.getAttribute("immediate").equalsIgnoreCase("true")) {
-            m_immediate = true;
-        }
+        String imm = metadata.getAttribute("immediate");
+        m_immediate = imm != null && imm.equalsIgnoreCase("true");
         
         ManipulationMetadata mm = new ManipulationMetadata(metadata);
 
         Element[] hooksMetadata = metadata.getElements("callback");
         for (int i = 0; i < hooksMetadata.length; i++) {
-            if (! hooksMetadata[i].containsAttribute("method")) {
-                throw new ConfigurationException("Lifecycle callback : A callback needs to contains a method attribute", getInstanceManager().getFactory().getName());
+            String method = hooksMetadata[i].getAttribute("method");
+            if (method == null) {
+                throw new ConfigurationException("Lifecycle callback : A callback needs to contains a method attribute");
             }
-            String methodName = hooksMetadata[i].getAttribute("method");
             
-            MethodMetadata met = mm.getMethod(methodName, new String[0]);
+            MethodMetadata met = mm.getMethod(method, new String[0]);
             
             int transition = -1;
-            if (hooksMetadata[i].containsAttribute("transition")) {
-                if (hooksMetadata[i].getAttribute("transition").equalsIgnoreCase("validate")) {
+            String trans = hooksMetadata[i].getAttribute("transition");
+            if (trans != null) {
+                if (trans.equalsIgnoreCase("validate")) {
                     transition = LifecycleCallback.VALIDATE;
-                }
-                if (hooksMetadata[i].getAttribute("transition").equalsIgnoreCase("invalidate")) {
+                } else if (trans.equalsIgnoreCase("invalidate")) {
                     transition = LifecycleCallback.INVALIDATE; 
+                } else {
+                    throw new ConfigurationException("Lifecycle callback : Unknown or malformed transition : " + transition);
                 }
-            }
-            
-            //DEPRECATED BLOCK
-            if (hooksMetadata[i].containsAttribute("initial")) {
-                log(Logger.WARNING, "initial & final are deprecated, please use 'transition=validate|invalidate' instead.");
-                if (hooksMetadata[i].containsAttribute("final")) {
-                    if (hooksMetadata[i].getAttribute("initial").equalsIgnoreCase("valid") && hooksMetadata[i].getAttribute("final").equalsIgnoreCase("invalid")) {
-                        transition = LifecycleCallback.INVALIDATE;
-                    } else {
-                        transition = LifecycleCallback.VALIDATE;
-                    }
-                } 
-            }
-            //END OF DEPRECATED BLOCK
-            
-            if (transition == -1) {
-                log(Logger.ERROR, "Unknown or malformed transition");
-                throw new ConfigurationException("Lifecycle callback : Unknown or malformed transition", getInstanceManager().getFactory().getName());
+            } else {
+                throw new ConfigurationException("Lifecycle callback : Unknown or malformed transition");
             }
             
             LifecycleCallback hk = null;
             if (met != null) { 
                 hk = new LifecycleCallback(this, transition, met);
             } else {
-                hk = new LifecycleCallback(this, transition, methodName);
+                hk = new LifecycleCallback(this, transition, method);
             }
             addCallback(hk);
         }
@@ -177,16 +162,14 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
                 try {
                     m_callbacks[i].call();
                 } catch (NoSuchMethodException e) {
-                    log(Logger.ERROR,
-                            "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " is not found", e);
+                    log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " is not found", e);
+                    getInstanceManager().stop();
                 } catch (IllegalAccessException e) {
-                    log(Logger.ERROR,
-                            "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " is not accessible", e);
+                    log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " is not accessible", e);
+                    getInstanceManager().stop();
                 } catch (InvocationTargetException e) {
-                    log(
-                            Logger.ERROR,
-                            "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " has throws an exception : "
-                                    + e.getMessage());
+                    log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " has throws an exception : " + e.getMessage());
+                    getInstanceManager().stop();
                 }
             }
         }

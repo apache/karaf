@@ -28,7 +28,6 @@ import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -64,15 +63,19 @@ public class ExportHandler extends CompositeHandler {
      * Initialize the component type.
      * @param cd : component type description to populate.
      * @param metadata : component type metadata.
+     * @throws ConfigurationException : occurs when the 'specification' attribute is missing
      * @see org.apache.felix.ipojo.Handler#initializeComponentFactory(org.apache.felix.ipojo.architecture.ComponentDescription, org.apache.felix.ipojo.metadata.Element)
      */
-    public void initializeComponentFactory(ComponentDescription cd, Element metadata) {
+    public void initializeComponentFactory(ComponentDescription cd, Element metadata) throws ConfigurationException {
         // Update the component type description
         Element[] exp = metadata.getElements("exports");
         for (int i = 0; i < exp.length; i++) {
-            if (exp[i].containsAttribute("specification")) { // Malformed exports
-                String specification = exp[i].getAttribute("specification");
-                cd.addProvidedServiceSpecification(specification);
+            String spec = exp[i].getAttribute("specification");
+            if (spec != null) { 
+                cd.addProvidedServiceSpecification(spec);
+            } else {
+                // Malformed exports
+                throw new ConfigurationException("Malformed exports - Missing the specification attribute");
             }
         }
     }
@@ -94,32 +97,21 @@ public class ExportHandler extends CompositeHandler {
         for (int i = 0; i < exp.length; i++) {
             boolean optional = false;
             boolean aggregate = false;
-            String specification = null;
+            String specification = exp[i].getAttribute("specification");
+            String filter = "(objectClass=" + specification + ")";
+                
+            String opt = exp[i].getAttribute("optional");
+            optional =  opt != null && opt.equalsIgnoreCase("true");
+                
+            String agg = exp[i].getAttribute("aggregate");
+            aggregate = agg != null && agg.equalsIgnoreCase("true");
 
-            if (exp[i].containsAttribute("specification")) {
-                specification = exp[i].getAttribute("specification");
-                String filter = "(objectClass=" + specification + ")";
-                if (exp[i].containsAttribute("optional") && exp[i].getAttribute("optional").equalsIgnoreCase("true")) {
-                    optional = true;
-                }
-                if (exp[i].containsAttribute("aggregate") && exp[i].getAttribute("aggregate").equalsIgnoreCase("true")) {
-                    aggregate = true;
-                }
-                if (exp[i].containsAttribute("filter")) {
-                    String classnamefilter = "(objectClass=" + specification + ")";
-                    filter = null;
-                    if ("".equals(exp[i].getAttribute("filter"))) {
-                        filter = classnamefilter;
-                    } else {
-                        filter = "(&" + classnamefilter + exp[i].getAttribute("filter") + ")";
-                    }
-                }
-                ServiceExporter si = new ServiceExporter(specification, filter, aggregate, optional, m_scope, m_context, this);
-                m_exporters.add(si);
-            } else { // Malformed exports
-                log(Logger.ERROR, "Malformed exports : the specification attribute is mandatory");
-                throw new ConfigurationException("Malformed exports : the specification attribute is mandatory", getCompositeManager().getFactory().getName());
+            String f = exp[i].getAttribute("filter");
+            if (f != null) {
+                filter = "(&" + filter + f + ")";
             }
+            ServiceExporter si = new ServiceExporter(specification, filter, aggregate, optional, m_scope, m_context, this);
+            m_exporters.add(si);
         }
     }
 

@@ -151,9 +151,4 @@ public class HandlerManager extends InstanceManager {
         m_handler = null;
     }
 
-    
-    
-    
-   
-
 }

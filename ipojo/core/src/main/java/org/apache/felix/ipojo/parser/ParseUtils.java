@@ -18,6 +18,8 @@
  */
 package org.apache.felix.ipojo.parser;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 /**
@@ -49,6 +51,33 @@ public class ParseUtils {
             return values;
         } else {
             return new String[] { str };
+        }
+    }
+    
+    /**
+     * Parse the string form of an array as {a, b, c}.
+     * 
+     * @param str : the string form
+     * @return the resulting string array
+     */
+    public static List parseArraysAsList(String str) {
+        List result = new ArrayList();
+        // Remove { and }
+        if (str.startsWith("{") && str.endsWith("}")) {
+            String m = str.substring(1, str.length() - 1);
+            // Check empty array
+            m = m.trim();
+            if (m.length() == 0) {
+                return result;
+            }
+            String[] values = split(m, ",");
+            for (int i = 0; i < values.length; i++) {
+                result.add(values[i].trim());
+            }
+            return result;
+        } else {
+            result.add(str);
+            return result;
         }
     }
     

@@ -236,7 +236,7 @@ public class Callback {
         
         if (m_methodObj == null) {
             m_manager.getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " cannot be called : method not found");
-            return;
+            m_manager.stop();
         } else {
             m_methodObj.setAccessible(true);
         }

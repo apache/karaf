@@ -21,16 +21,17 @@ package org.apache.felix.ipojo.manipulation;
 import java.util.Set;
 
 import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.GeneratorAdapter;
 
 
 /**
  * Constructor Adapter : add a component manager argument inside a constructor.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
+public class ConstructorCodeAdapter extends GeneratorAdapter implements Opcodes {
 
     /** 
      * The class containing the field.
@@ -47,6 +48,11 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
      * Set of contained fields.
      */
     private Set m_fields;
+    
+    /**
+     * Constructor description.
+     */
+    private String m_desc;
 
     /** 
      * PropertyCodeAdapter constructor.
@@ -54,12 +60,16 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
      * @param mv MethodVisitor
      * @param owner Name of the class
      * @param fields List of contained fields
+     * @param access Access
+     * @param desc : constructor descriptor
+     * @param name : name
      */
-    public ConstructorCodeAdapter(final MethodVisitor mv, final String owner, Set fields) {
-        super(mv);
+    public ConstructorCodeAdapter(final MethodVisitor mv, final String owner, Set fields, int access, String name, String desc) {
+        super(mv, access, name, desc);
         m_owner = owner;
         m_superDetected = false;
         m_fields = fields;
+        m_desc = desc;
     }
 
 
@@ -115,6 +125,10 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
             mv.visitVarInsn(ALOAD, 1);  // CM is always the first argument
             // 3) Initialize the field 
             mv.visitMethodInsn(INVOKESPECIAL, m_owner, "_setComponentManager", "(Lorg/apache/felix/ipojo/InstanceManager;)V");
+            
+            // Add the entry callback call.
+            methodEntry();
+            
             // insertion finished   
         } else { 
             mv.visitMethodInsn(opcode, owner, name, desc); 
@@ -181,8 +195,104 @@ public class ConstructorCodeAdapter extends MethodAdapter implements Opcodes {
      * @see org.objectweb.asm.MethodAdapter#visitMaxs(int, int)
      */
     public void visitMaxs(int maxStack, int maxLocals) {
-        mv.visitMaxs(maxStack, maxLocals + 1);
+        mv.visitMaxs(maxStack + 1, maxLocals + 2);
     }
+    
+    /**
+     * Visit zero argument instruction.
+     * This allow to catch RETURN instruction in order to insert the invocation to exit callback.
+     * @param opcode : instruction code
+     * @see org.objectweb.asm.MethodAdapter#visitInsn(int)
+     */
+    public void visitInsn(int opcode) {
+        switch(opcode) {
+            case RETURN:
+                onMethodExit(opcode);
+                break;
+            default :
+                break;
+        }
+        super.visitInsn(opcode);
+    }
+    
+    /**
+     * Method injecting call at the entry of each method.
+     */
+    private void methodEntry() {
+        Type[] args = Type.getArgumentTypes(m_desc);
+        String name = "$init";
+        
+        for (int i = 0; i < args.length; i++) {
+            String cn = args[i].getClassName();
+            if (cn.endsWith("[]")) {
+                cn = cn.replace('[', '$');
+                cn = cn.substring(0, cn.length() - 1);
+            }
+            cn = cn.replace('.', '_');
+            name += cn;
+        }
+
+        String flag = "_M" + name;
+
+        Label l0 = new Label();
+        mv.visitLabel(l0);
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitFieldInsn(GETFIELD, m_owner, flag, "Z");
+        Label l1 = new Label();
+        mv.visitJumpInsn(IFEQ, l1);
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
+        mv.visitLdcInsn(name);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "entryCallback", "(Ljava/lang/String;)V");
+        mv.visitLabel(l1);
+    }
+
+    /**
+     * Method injecting call at the exit of each method.
+     * @param opcode : returned opcode (ARETURN, IRETURN, ATHROW ...)
+     * @see org.objectweb.asm.commons.AdviceAdapter#onMethodExit(int)
+     */
+    protected void onMethodExit(int opcode) {        
+        Type[] args = Type.getArgumentTypes(m_desc);
+        String name = "$init";
+       
+        for (int i = 0; i < args.length; i++) {
+            String cn = args[i].getClassName();
+            if (cn.endsWith("[]")) {
+                cn = cn.replace('[', '$');
+                cn = cn.substring(0, cn.length() - 1);
+            }
+            cn = cn.replace('.', '_');
+            name += cn;
+        }
+
+        String flag = "_M" + name;
+
+        int local = newLocal(Type.getType(Object.class));
+        local++;
+        visitInsn(ACONST_NULL);
+        
+        mv.visitVarInsn(ASTORE, local);
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitFieldInsn(GETFIELD, m_owner, flag, "Z");
+        Label l5 = new Label();
+        mv.visitJumpInsn(IFEQ, l5);
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
+        mv.visitLdcInsn(name);
+        mv.visitVarInsn(ALOAD, local);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "exitCallback", "(Ljava/lang/String;Ljava/lang/Object;)V");
+
+        mv.visitLabel(l5);
+    }
+
+
+    /**
+     * Do nothing.
+     * @see org.objectweb.asm.commons.AdviceAdapter#onMethodEnter()
+     */
+    protected void onMethodEnter() { }
+
 }
 
 

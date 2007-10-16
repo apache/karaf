@@ -145,7 +145,7 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
      */
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
         // Add the field to the list.
-        if ((access & ACC_STATIC) == 0) {
+        if (((access & ACC_STATIC) == 0) && (!name.startsWith("class$"))) {
             addFlagField(name);
             m_getterSetterCreator.visitField(access, name, desc, signature, value);
         }
@@ -179,24 +179,45 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         // Avoid manipulating special method
         if (name.equals("<clinit>") || name.equals("class$")) { return super.visitMethod(access, name, desc, signature, exceptions); }
-        // The constructor is manipulated separatly
-        if (name.equals("<init>")) {
+        // The constructor is manipulated separately
+        if (name.equals("<init>")) {      
+            
             // 1) change the constructor descriptor (add a component manager arg as first argument)
             String newDesc = desc.substring(1);
             newDesc = "(Lorg/apache/felix/ipojo/InstanceManager;" + newDesc;
 
             // Insert the new constructor
             MethodVisitor mv = super.visitMethod(ACC_PUBLIC, "<init>", newDesc, null, null);
+            
+            Type[] args = Type.getArgumentTypes(newDesc);
+            String id = "$init";
+            for (int i = 0; i < args.length; i++) {
+                String cn = args[i].getClassName();
+                if (cn.endsWith("[]")) {
+                    cn = cn.replace('[', '$');
+                    cn = cn.substring(0, cn.length() - 1);
+                }
+                cn = cn.replace('.', '_');
+                id += cn;
+            }
+
+            String flag = "_M" + id;
+            m_methods.add(id);
+
+            FieldVisitor flagField = cv.visitField(Opcodes.ACC_PRIVATE, flag, "Z", null, null);
+            if (flagField != null) {
+                flagField.visitEnd();
+            }
 
             if (mv == null) {
                 return null;
             } else {
-                // return new ConstructorCodeAdapter(mv, access, desc, m_owner);
-                return new ConstructorCodeAdapter(mv, m_owner, m_fields);
+                return new ConstructorCodeAdapter(mv, m_owner, m_fields, access, name, newDesc);
             }
         } else { // "Normal methods"
             // avoid manipulating static methods.
             if ((access & ACC_STATIC) == ACC_STATIC) { return super.visitMethod(access, name, desc, signature, exceptions); }
+            
             Type[] args = Type.getArgumentTypes(desc);
             String id = name;
             for (int i = 0; i < args.length; i++) {

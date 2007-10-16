@@ -45,8 +45,16 @@ public class ConfigurationException extends Exception {
      * @param mes : message
      * @param typ : component type
      */
-    public ConfigurationException(String mes, String typ) {
+    ConfigurationException(String mes, String typ) {
         m_type = typ;
+        m_message = mes;
+    }
+    
+    /**
+     * Constructor.
+     * @param mes : message
+     */
+    public ConfigurationException(String mes) {
         m_message = mes;
     }
     
@@ -56,7 +64,11 @@ public class ConfigurationException extends Exception {
      * @see java.lang.Throwable#getMessage()
      */
     public String getMessage() {
-        return "The configuration is not correct for the type " + m_type + " : " + m_message;
+        if (m_type != null) {
+            return "The configuration is not correct for the type " + m_type + " : " + m_message;
+        } else {
+            return m_message;
+        }
     }
 
 }

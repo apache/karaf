@@ -106,6 +106,11 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * Queue of stored state changed. 
      */
     private List m_stateQueue = new ArrayList();
+    
+    /**
+     * Map of [field, value], storing POJO field value.
+     */
+    private Map m_map = new HashMap();
 
     /**
      * Construct a new Component Manager.
@@ -258,6 +263,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
             m_handlers[i].dispose();
         }
         
+        m_map.clear();
         m_handlers = new HandlerManager[0];
         m_fieldRegistration = new HashMap();
         m_methodRegistration = new HashMap();
@@ -286,6 +292,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
             m_handlers[i].dispose();
         }
         
+        m_map.clear();
         m_handlers = new HandlerManager[0];
         m_fieldRegistration = new HashMap();
         m_methodRegistration = new HashMap();
@@ -393,6 +400,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
             m_clazz = m_factory.loadClass(m_className);
         } catch (ClassNotFoundException e) {
             m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] Class not found during the loading phase : " + e.getMessage());
+            stop();
             return;
         }
     }
@@ -488,19 +496,24 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
 
         } catch (InstantiationException e) {
             m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> The Component Instance cannot be instancied : " + e.getMessage());
+            stop();
         } catch (IllegalAccessException e) {
             m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> The Component Instance is not accessible : " + e.getMessage());
+            stop();
         } catch (SecurityException e) {
-            m_factory.getLogger().log(Logger.ERROR,
-                    "[" + m_name + "] createInstance -> The Component Instance is not accessible (security reason) : " + e.getMessage());
+            m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> The Component Instance is not accessible (security reason) : " + e.getMessage());
+            stop();
         } catch (InvocationTargetException e) {
             m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the constructor method (illegal target) : " + e.getMessage());
             e.printStackTrace();
+            stop();
         } catch (NoSuchMethodException e) {
             m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the constructor (method not found) : " + e.getMessage());
+            stop();
         }
         if (instance == null) {
             m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot create the instance");
+            stop();
         }
 
         // Register the new instance
@@ -661,26 +674,37 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * 
      * @param fieldName : the field name on which the GETFIELD instruction is
      * called
-     * @param initialValue : the value of the field in the code
      * @return the value decided by the last asked handler (throw a warning if
      * two fields decide two different values)
      */
-    public synchronized Object getterCallback(String fieldName, Object initialValue) {
-        Object result = null;
+    public synchronized Object getterCallback(String fieldName) {
+        Object initialValue = m_map.get(fieldName);
+        Object result = initialValue;
         // Get the list of registered handlers
         PrimitiveHandler[] list = (PrimitiveHandler[]) m_fieldRegistration.get(fieldName);
         for (int i = 0; list != null && i < list.length; i++) {
             Object handlerResult = list[i].getterCallback(fieldName, initialValue);
-            if (handlerResult != initialValue) {
+            if (handlerResult == initialValue) {
+                continue; // Non-binding case (default implementation).
+            } else {
+                if (result != initialValue) {
+                    if ((handlerResult != null && ! handlerResult.equals(result)) || (result != null && handlerResult == null)) {
+                        m_factory.getLogger().log(Logger.WARNING, "A conflict was detected on the injection of " + fieldName + " - return the last value from " + list[i].getInstance().getInstanceName());
+                    }
+                }
                 result = handlerResult;
             }
         }
-
-        if (result != null) {
-            return result;
-        } else {
-            return initialValue;
+        
+        if ((result != null && ! result.equals(initialValue)) || (result == null && initialValue != null)) {
+            // A change occurs => notify the change
+            m_map.put(fieldName, result);
+            for (int i = 0; list != null && i < list.length; i++) {
+                list[i].setterCallback(fieldName, result);
+            }
         }
+        
+        return result;        
     }
     
     /**
@@ -717,11 +741,13 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @param objectValue : the value of the field
      */
     public synchronized void setterCallback(String fieldName, Object objectValue) {
-        // Get the list of registered handlers
-        PrimitiveHandler[] list = (PrimitiveHandler[]) m_fieldRegistration.get(fieldName);
-
-        for (int i = 0; list != null && i < list.length; i++) {
-            list[i].setterCallback(fieldName, objectValue);
+        Object o = m_map.get(fieldName);
+        if ((o != null && ! o.equals(objectValue)) || (o == null && objectValue != null)) {
+            m_map.put(fieldName, objectValue);
+            PrimitiveHandler[] list = (PrimitiveHandler[]) m_fieldRegistration.get(fieldName);
+            for (int i = 0; list != null && i < list.length; i++) {
+                list[i].setterCallback(fieldName, objectValue);
+            }
         }
     }
 
@@ -793,11 +819,6 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
             }
             setState(VALID);
             return;
-        }
-        
-        if (newState == DISPOSED) {
-            dispose();
-        }
-        
+        }        
     }
 }

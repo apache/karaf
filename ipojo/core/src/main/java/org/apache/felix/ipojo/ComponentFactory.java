@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.architecture.ComponentDescription;
-import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.Logger;
 import org.apache.felix.ipojo.util.Tracker;
@@ -168,10 +167,8 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
         computeFactoryName();        
         m_logger = new Logger(m_context, m_factoryName, Logger.WARNING);
         
-        m_isPublic = true;
-        if (cm.containsAttribute("factory") && cm.getAttribute("factory").equals("false")) {
-            m_isPublic = false;
-        }
+        String fac = cm.getAttribute("factory");
+        m_isPublic = fac == null || ! fac.equalsIgnoreCase("false");
         
         computeRequiredHandlers();
         
@@ -200,10 +197,10 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
         for (int i = 0; i < m_handlerIdentifiers.size(); i++) {
             HandlerIdentifier hi = (HandlerIdentifier) m_handlerIdentifiers.get(i);
             if (hi.m_reference == null && match(hi, reference)) {
-                int oldP = hi.getPriority();
+                int oldP = hi.m_level;
                 hi.setReference(reference);
                 // If the priority has changed, sort the list.
-                if (oldP != hi.getPriority()) {
+                if (oldP != hi.m_level) {
                     Collections.sort(m_handlerIdentifiers);
                 }
                 return true;
@@ -218,7 +215,14 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
      */
     public void addedService(ServiceReference reference) {
-        computeFactoryState();
+        if (m_state == INVALID) {
+            try {
+                computeFactoryState();
+            } catch (org.apache.felix.ipojo.ConfigurationException e) {
+                m_logger.log(Logger.ERROR, "The component type metadata are not correct : " + e.getMessage());
+                stop();
+            }
+        }
     }
 
     /**
@@ -228,12 +232,12 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      * @return true if the metadata are correct
      */
     public boolean check(Element cm) {
-        if (cm.containsAttribute("className")) {
-            m_componentClassName = cm.getAttribute("className");
-            return true;
-        } else {
+        m_componentClassName = cm.getAttribute("className");
+        if (m_componentClassName == null) {
             System.err.println("A component needs a class name : " + cm);
             return false;
+        } else {
+            return true;
         }
     }
 
@@ -264,11 +268,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      * @throws org.apache.felix.ipojo.ConfigurationException : when the instance configuration failed.
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
-    public synchronized ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration, MissingHandlerException, org.apache.felix.ipojo.ConfigurationException {
-        if (m_state == INVALID) {
-            throw new MissingHandlerException(getMissingHandlers());
-        }
-        
+    public synchronized ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration, MissingHandlerException, org.apache.felix.ipojo.ConfigurationException {        
         if (configuration == null) {
             configuration = new Properties();
         }
@@ -284,16 +284,14 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
         String n = null;
         if (configuration.get("name") != null) {
             n = (String) configuration.get("name");
+            if (m_instancesName.contains(n)) {
+                throw new UnacceptableConfiguration("Name already used : " + n);
+            }
         } else {
             n = generateName();
             configuration.put("name", n);
         }
-        
-        if (m_instancesName.contains(n)) {
-            throw new UnacceptableConfiguration("Name already used : " + n);
-        } else {
-            m_instancesName.add(n);
-        }
+        m_instancesName.add(n);
 
         BundleContext context = null;
         if (serviceContext == null) {
@@ -301,14 +299,19 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
         } else {
             context = new IPojoContext(m_context, serviceContext);
         }
+        
         List handlers = new ArrayList();
         for (int i = 0; i < m_handlerIdentifiers.size(); i++) {
             HandlerIdentifier hi = (HandlerIdentifier) m_handlerIdentifiers.get(i);
             handlers.add(getHandlerInstance(hi, serviceContext));
         }
         
-        InstanceManager instance = new InstanceManager(this, context, (HandlerManager[]) handlers.toArray(new HandlerManager[0]));
-        instance.configure(m_componentMetadata, configuration);
+        InstanceManager instance = new InstanceManager(this, context, (HandlerManager[]) handlers.toArray(new HandlerManager[m_handlerIdentifiers.size()]));
+        try {
+            instance.configure(m_componentMetadata, configuration);
+        } catch (org.apache.felix.ipojo.ConfigurationException e) {
+            throw new org.apache.felix.ipojo.ConfigurationException(e.getMessage(), m_factoryName);
+        }
 
         m_componentInstances.put(n, instance);
         instance.start();
@@ -322,9 +325,8 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      * @param b : byte array of the class
      * @param domain : protection domain of the class
      * @return the defined class object
-     * @throws Exception : an exception occur during the definition
      */
-    public Class defineClass(String name, byte[] b, ProtectionDomain domain) throws Exception {
+    public Class defineClass(String name, byte[] b, ProtectionDomain domain) {
         if (m_classLoader == null) {
             m_classLoader = new FactoryClassloader();
         }
@@ -360,7 +362,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      * @see org.apache.felix.ipojo.Factory#getDescription()
      */
     public Element getDescription() {
-        if (m_componentDesc == null) { return new Element("No description available for " + getName(), ""); }
+        if (m_componentDesc == null) { return new Element("No description available for " + m_factoryName, ""); }
         return m_componentDesc.getDescription();
     }
     
@@ -410,6 +412,14 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
             l.add(hi.getFullName());
         }
         return l;
+    }
+    
+    public String getClassName() {
+        return m_componentClassName;
+    }
+
+    public int getState() {
+        return m_state;
     }
     
     /**
@@ -491,8 +501,8 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
             return; // The instance does not exist.
         } else {
             checkAcceptability(properties); // Test if the configuration is acceptable
+            cm.reconfigure(properties); // re-configure the component
         }
-        cm.reconfigure(properties); // re-configure the component
     }
 
     /**
@@ -503,15 +513,19 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      */
     public void removedService(ServiceReference reference, Object service) {
         // Look for the implied reference and invalid the handler identifier
-        boolean touched = false;
         for (int i = 0; i < m_handlerIdentifiers.size(); i++) {
             HandlerIdentifier hi = (HandlerIdentifier) m_handlerIdentifiers.get(i);
             if (reference.equals(hi.getReference())) {
-                hi.setReference(null); // This method will unget the service.
-                touched = true;
+                hi.unRef(); // This method will unget the service.
+                try {
+                    computeFactoryState();
+                } catch (org.apache.felix.ipojo.ConfigurationException e) {
+                    m_logger.log(Logger.ERROR, "The component type metadata are not correct : " + e.getMessage());
+                    stop();
+                }
+                return; // The factory can be used only once.
             }
         }
-        if (touched) { computeFactoryState(); }
     }
 
     /**
@@ -533,21 +547,28 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
             return;
         } 
         
-        try {
-            String filter = "(&(" + Constants.OBJECTCLASS + "=" + Factory.class.getName() + ")"
-                    + "(" + Handler.HANDLER_NAME_PROPERTY + "=*)" + "(" + Handler.HANDLER_NAMESPACE_PROPERTY + "=*)" /* Look only for handlers */
-                    + "(" + Handler.HANDLER_TYPE_PROPERTY + "=" + PrimitiveHandler.HANDLER_TYPE + ")" 
-                    + "(factory.state=1)"
-                    + ")";
-            m_tracker = new Tracker(m_context, m_context.createFilter(filter), this);
-            m_tracker.open();
+        if (m_handlerIdentifiers.size() != 0) {
+            try {
+                String filter = "(&(" + Constants.OBJECTCLASS + "=" + Factory.class.getName() + ")"
+                        + "(" + Handler.HANDLER_TYPE_PROPERTY + "=" + PrimitiveHandler.HANDLER_TYPE + ")" 
+                        + "(factory.state=1)"
+                        + ")";
+                m_tracker = new Tracker(m_context, m_context.createFilter(filter), this);
+                m_tracker.open();
+            } catch (InvalidSyntaxException e) {
+                m_logger.log(Logger.ERROR, "A factory filter is not valid: " + e.getMessage());
+                stop();
+                return;
+            }
+        }
             
-        } catch (InvalidSyntaxException e) {
-            m_logger.log(Logger.ERROR, "A factory filter is not valid: " + e.getMessage());
+        try {
+            computeFactoryState();
+        } catch (org.apache.felix.ipojo.ConfigurationException e) {
+            m_logger.log(Logger.ERROR, "The component type metadata are not correct : " + e.getMessage());
+            stop();
             return;
         }
-        
-        computeFactoryState();
 
         if (m_isPublic) {        
             // Exposition of the factory service
@@ -582,10 +603,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
         
         // Release each handler
         for (int i = 0; i < m_handlerIdentifiers.size(); i++) {
-            HandlerIdentifier hi = (HandlerIdentifier) m_handlerIdentifiers.get(i);
-            if (hi.getReference() != null) {
-                hi.setReference(null);
-            }
+            ((HandlerIdentifier) m_handlerIdentifiers.get(i)).unRef();
         }
         
         m_tracker = null;
@@ -641,18 +659,15 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      * @throws MissingHandlerException : the factory is not valid.
      */
     protected void checkAcceptability(Dictionary conf) throws UnacceptableConfiguration, MissingHandlerException {
-        computeFactoryState();
-        
         if (m_state == Factory.INVALID) {
             throw new MissingHandlerException(getMissingHandlers());
         }
         
-        final PropertyDescription[] props = m_componentDesc.getProperties();
-        for (int i = 0; i < props.length; i++) {
-            final PropertyDescription pd = props[i];
+        List props = m_componentDesc.getRequiredProperties();
+        for (int i = 0; i < props.size(); i++) {
             // Failed if the props has no default value and the configuration does not push a value
-            if (pd.getValue() == null && conf.get(pd.getName()) == null) {
-                throw new UnacceptableConfiguration("The configuration does not contains the \"" + pd.getName() + "\" property");
+            if (conf.get(props.get(i)) == null) {
+                throw new UnacceptableConfiguration("The configuration does not contains the \"" + props.get(i) + "\" property");
             }
         }
     }
@@ -663,21 +678,20 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      * @throws org.apache.felix.ipojo.ConfigurationException if one handler has rejected the configuration.
      */
     protected void computeDescription() throws org.apache.felix.ipojo.ConfigurationException {
-        List l = new ArrayList();
-        for (int i = 0; i < m_handlerIdentifiers.size(); i++) {
-            HandlerIdentifier hi = (HandlerIdentifier) m_handlerIdentifiers.get(i);
-            l.add(hi.getFullName());
-        }
-
-        m_componentDesc = new ComponentDescription(getName(), m_componentClassName, m_state, l, getMissingHandlers(), m_context.getBundle().getBundleId());
+        m_componentDesc = new ComponentDescription(this);
          
         for (int i = 0; i < m_handlerIdentifiers.size(); i++) {
             HandlerIdentifier hi = (HandlerIdentifier) m_handlerIdentifiers.get(i);
             HandlerManager hm = getHandlerInstance(hi, null);
-            hm.getHandler();
             Handler ch =  hm.getHandler();
-            ch.initializeComponentFactory(m_componentDesc, m_componentMetadata);
-            ((Pojo) ch).getComponentInstance().dispose();
+            try {
+                ch.setLogger(getLogger());
+                ch.initializeComponentFactory(m_componentDesc, m_componentMetadata);
+                ((Pojo) ch).getComponentInstance().dispose();
+            } catch (org.apache.felix.ipojo.ConfigurationException e) {
+                ((Pojo) ch).getComponentInstance().dispose();
+                throw new org.apache.felix.ipojo.ConfigurationException(e.getMessage(), m_factoryName);
+            }
         }
     }
 
@@ -685,69 +699,71 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      * Compute the factory name.
      */
     protected void computeFactoryName() {
-        if (m_componentMetadata.containsAttribute("name")) {
-            m_factoryName = m_componentMetadata.getAttribute("name");
-        } else if (m_componentMetadata.containsAttribute("factory") && ! m_componentMetadata.getAttribute("factory").equalsIgnoreCase("false")) {
+        m_factoryName = m_componentMetadata.getAttribute("name");
+        if (m_factoryName == null) { // No factory name, try with factory attribute
             m_factoryName = m_componentMetadata.getAttribute("factory");
-        } else {
-            m_factoryName = m_componentMetadata.getAttribute("className");
+            if (m_factoryName == null || m_factoryName.equalsIgnoreCase("true") || m_factoryName.equalsIgnoreCase("false")) { // Avoid boolean case
+                m_factoryName = m_componentMetadata.getAttribute("className");
+            }
         }
     }
     
     /**
      * Compute factory state.
+     * @throws org.apache.felix.ipojo.ConfigurationException : occurs when the component type cannot be initialize.
      */
-    protected void computeFactoryState() {
+    protected void computeFactoryState() throws org.apache.felix.ipojo.ConfigurationException {
         boolean isValid = true;
         for (int i = 0; isValid && i < m_handlerIdentifiers.size(); i++) {
             HandlerIdentifier hi = (HandlerIdentifier) m_handlerIdentifiers.get(i);
             isValid = hi.m_reference != null;
         }
-
-        if (isValid && m_componentDesc == null) {
-            try {
-                computeDescription();
-            } catch (org.apache.felix.ipojo.ConfigurationException e) {
-                m_logger.log(Logger.ERROR, "The component type metadata are not correct : " + e.getMessage());
-                stop();
+        
+        if (isValid) {
+            if (m_state == INVALID) {
+                
+                if (m_componentDesc == null) {
+                    computeDescription();
+                }
+                
+                m_state = VALID;
+                if (m_sr != null) {
+                    m_sr.setProperties(getProperties());
+                }
+                for (int i = 0; i < m_listeners.size(); i++) {
+                    ((FactoryStateListener) m_listeners.get(i)).stateChanged(this, VALID);
+                }
                 return;
             }
-        }
-
-        if (isValid && m_state == INVALID) {
-            m_state = VALID;
-            if (m_sr != null) {
-                m_sr.setProperties(getProperties());
-            }
-            for (int i = 0; i < m_listeners.size(); i++) {
-                ((FactoryStateListener) m_listeners.get(i)).stateChanged(this, VALID);
-            }
-            return;
-        }
-
-        if (!isValid && m_state == VALID) {
-            m_state = INVALID;
-
-            final Collection col = m_componentInstances.values();
-            final Iterator it = col.iterator();
-            while (it.hasNext()) {
-                InstanceManager ci = (InstanceManager) it.next();
-                if (ci.getState() != ComponentInstance.DISPOSED) {
-                    ci.kill();
+        } else {
+            if (m_state == VALID) {
+                m_state = INVALID;
+                
+                // Notify listeners.
+                for (int i = 0; i < m_listeners.size(); i++) {
+                    ((FactoryStateListener) m_listeners.get(i)).stateChanged(this, INVALID);
                 }
-                m_instancesName.remove(ci.getInstanceName());
-            }
 
-            m_componentInstances.clear();
+                // Dispose created instances.
+                final Collection col = m_componentInstances.values();
+                final Iterator it = col.iterator();
+                while (it.hasNext()) {
+                    InstanceManager ci = (InstanceManager) it.next();
+                    if (ci.getState() != ComponentInstance.DISPOSED) {
+                        ci.kill();
+                    }
+                    m_instancesName.remove(ci.m_name);
+                }
 
-            if (m_sr != null) {
-                m_sr.setProperties(getProperties());
-            }
+                m_componentInstances.clear();
 
-            for (int i = 0; i < m_listeners.size(); i++) {
-                ((FactoryStateListener) m_listeners.get(i)).stateChanged(this, INVALID);
+                // Update service properties TODO : really useful ?
+                if (m_sr != null) {
+                    m_sr.setProperties(getProperties());
+                }
+                
+                return;
             }
-            return;
         }
     }
     
@@ -763,15 +779,17 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
             if (! m_handlerIdentifiers.contains(hi)) { m_handlerIdentifiers.add(hi); }
         }
         
-        // Add architecture if needed
-        HandlerIdentifier hi = new HandlerIdentifier("architecture", "");
-        if (! m_handlerIdentifiers.contains(hi) && m_componentMetadata.containsAttribute("architecture") && m_componentMetadata.getAttribute("architecture").equalsIgnoreCase("true")) {
+        // Add architecture if architecture != 'false'
+        HandlerIdentifier hi = new HandlerIdentifier("architecture", null);
+        String arch = m_componentMetadata.getAttribute("architecture");
+        if (arch == null || arch.equalsIgnoreCase("true")) {
             m_handlerIdentifiers.add(hi);
         }
         
         // Add lifecycle callback if immediate = true
-        HandlerIdentifier hi2 = new HandlerIdentifier("callback", "");
-        if (! m_handlerIdentifiers.contains(hi2) && m_componentMetadata.containsAttribute("immediate") && m_componentMetadata.getAttribute("immediate").equalsIgnoreCase("true")) {
+        HandlerIdentifier hi2 = new HandlerIdentifier("callback", null);
+        String imm = m_componentMetadata.getAttribute("immediate");
+        if (! m_handlerIdentifiers.contains(hi2) && imm != null && imm.equalsIgnoreCase("true")) {
             m_handlerIdentifiers.add(hi2);
         }
     }
@@ -781,8 +799,9 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      * @param ci : the destroyed instance
      */
     protected void disposed(ComponentInstance ci) {
-        m_instancesName.remove(ci.getInstanceName());
-        m_componentInstances.remove(ci.getInstanceName());
+        String name = ci.getInstanceName();
+        m_instancesName.remove(name);
+        m_componentInstances.remove(name);
     }
     
     /**
@@ -790,10 +809,10 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      * @return an non already used name
      */
     protected synchronized String generateName() {
-        String name = getName() + "-" + m_index;
+        String name = m_factoryName + "-" + m_index;
         while (m_instancesName.contains(name)) {
             m_index = m_index + 1;
-            name = getName() + "-" + m_index;
+            name = m_factoryName + "-" + m_index;
         }
         return name;
     }
@@ -802,7 +821,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
      * Return the bundle context.
      * @return the Bundle Context.
      */
-    protected BundleContext getBundleContext() {
+    public BundleContext getBundleContext() {
         return m_context;
     }
 
@@ -831,7 +850,6 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
             props.put("component.providedServiceSpecifications", m_componentDesc.getprovidedServiceSpecification());
             props.put("component.properties", m_componentDesc.getProperties());
             props.put("component.description", m_componentDesc);
-            props.put("component.desc", m_componentDesc.toString());
         }
         
         // Add factory state
@@ -850,30 +868,31 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
         String name = (String) ref.getProperty(Handler.HANDLER_NAME_PROPERTY);
         String ns = (String) ref.getProperty(Handler.HANDLER_NAMESPACE_PROPERTY);
         if (IPojoConfiguration.IPOJO_NAMESPACE.equals(ns)) {
-            ns = "";
+            return name.equals(hi.m_name) && hi.m_namespace == null;
         }
         return name.equals(hi.m_name) && ns.equals(hi.m_namespace); 
     }
 
     /**
      * Return an handler object.
-     * 
      * @param hi : handler to create.
      * @param sc : service context in which create the handler (instance context).
      * @return the Handler object.
      */
     private HandlerManager getHandlerInstance(HandlerIdentifier hi, ServiceContext sc) {
-        Factory factory = hi.getFactory();
         try {
-            return (HandlerManager) factory.createComponentInstance(null, sc);
+            return (HandlerManager) hi.getFactory().createComponentInstance(null, sc);
         } catch (MissingHandlerException e) {
             m_logger.log(Logger.ERROR, "The creation of the handler " + hi.getFullName() + " has failed: " + e.getMessage());
+            stop();
             return null;
         } catch (UnacceptableConfiguration e) {
             m_logger.log(Logger.ERROR, "The creation of the handler " + hi.getFullName() + " has failed (UnacceptableConfiguration): " + e.getMessage());
+            stop();
             return null;
         } catch (org.apache.felix.ipojo.ConfigurationException e) {
             m_logger.log(Logger.ERROR, "The configuration of the handler " + hi.getFullName() + " has failed (ConfigurationException): " + e.getMessage());
+            stop();
             return null;
         }
     }
@@ -925,10 +944,11 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
          * @see java.lang.Object#equals(java.lang.Object)
          */
         public boolean equals(Object o) {
-            if (o instanceof HandlerIdentifier) {
-                return ((HandlerIdentifier) o).getName().equalsIgnoreCase(m_name) && ((HandlerIdentifier) o).getNamespace().equalsIgnoreCase(m_namespace);
-            } 
-            return false;
+            if (m_namespace == null) {
+                return ((HandlerIdentifier) o).m_name.equalsIgnoreCase(m_name) && ((HandlerIdentifier) o).m_namespace == null;
+            } else {
+                return ((HandlerIdentifier) o).m_name.equalsIgnoreCase(m_name) && m_namespace.equalsIgnoreCase(((HandlerIdentifier) o).m_namespace);
+            }
         }
         
         /**
@@ -951,7 +971,7 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
          * @return the handler full name
          */
         public String getFullName() {
-            if ("".equals(m_namespace)) {
+            if (m_namespace == null) {
                 return IPojoConfiguration.IPOJO_NAMESPACE + ":" + m_name;
             } else {
                 return m_namespace + ":" + m_name;
@@ -970,8 +990,19 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
             return m_reference;
         }
         
-        public int getPriority() {
+        public int getLevel() {
             return m_level;
+        }
+        
+        /**
+         * Release the reference of the used factory.
+         */
+        public void unRef() {
+            if (m_reference != null) {
+                m_tracker.ungetService(m_reference);
+                m_factory = null;
+                m_reference = null;
+            }
         }
         
         /**
@@ -979,23 +1010,12 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
          * If the new service reference is null, it unget the used factory (if already get).
          * @param ref : new service reference.
          */
-        public void setReference(ServiceReference ref) {
-            // First release the previous reference
-            if (m_reference != null) {
-                m_tracker.ungetService(m_reference);
-                m_factory = null;
-                m_level = Integer.MAX_VALUE; // Reset the reference to 
-            }
-            
+        public void setReference(ServiceReference ref) {            
             m_reference = ref;
-            // If the given reference is not null, set the priority.
-            if (m_reference != null) {
-                Integer p = (Integer) m_reference.getProperty(Handler.HANDLER_LEVEL_PROPERTY);
-                if (p != null) {
-                    m_level = p.intValue();
-                }
+            Integer p = (Integer) m_reference.getProperty(Handler.HANDLER_LEVEL_PROPERTY);
+            if (p != null) {
+                m_level = p.intValue();
             }
-            
         }
 
         /**
@@ -1032,14 +1052,12 @@ public class ComponentFactory implements Factory, ManagedServiceFactory, Tracker
 
         /**
          * The defineClass method.
-         * 
          * @param name : name of the class
          * @param b : the byte array of the class
          * @param domain : the protection domain
          * @return : the defined class.
-         * @throws Exception : if a problem is detected during the loading
          */
-        public Class defineClass(String name, byte[] b, ProtectionDomain domain) throws Exception {
+        public Class defineClass(String name, byte[] b, ProtectionDomain domain) {
             if (m_definedClasses.containsKey(name)) {
                 return (Class) m_definedClasses.get(name);
             }

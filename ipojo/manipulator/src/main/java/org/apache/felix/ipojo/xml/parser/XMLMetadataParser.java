@@ -224,7 +224,6 @@ public class XMLMetadataParser implements ContentHandler {
      */
     public void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws SAXException {
         Element elem = new Element(localName, namespaceURI);
-
         for (int i = 0; i < atts.getLength(); i++) {
             String name = (String) atts.getLocalName(i);
             String ns = (String) atts.getURI(i);

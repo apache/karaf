@@ -25,7 +25,6 @@ import java.util.Properties;
 
 import org.apache.felix.ipojo.CompositeHandler;
 import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Element;
 
@@ -60,19 +59,14 @@ public class ServiceInstantiatorHandler extends CompositeHandler {
     public void configure(Element metadata, Dictionary conf) throws ConfigurationException {
         Element[] services = metadata.getElements("service");
         for (int i = 0; i < services.length; i++) {
-            if (!services[i].containsAttribute("specification")) {
-                throw new ConfigurationException("Malformed service : the specification attribute is mandatory", getCompositeManager().getFactory().getName());
-            }
             String spec = services[i].getAttribute("specification");
-            String filter = "(&(objectClass=" + Factory.class.getName() + ")(!(factory.name=" + getCompositeManager().getFactory().getComponentDescription().getName() + "))(factory.state=1))"; // Cannot reinstantiate yourself
-            if (services[i].containsAttribute("filter")) {
-                String classnamefilter = "(&(objectClass=" + Factory.class.getName() + ")(!(factory.name=" + getCompositeManager().getFactory().getComponentDescription().getName() + "))(factory.state=1))"; // Cannot reinstantiate yourself
-                filter = null;
-                if ("".equals(services[i].getAttribute("filter"))) {
-                    filter = classnamefilter;
-                } else {
-                    filter = "(&" + classnamefilter + services[i].getAttribute("filter") + ")";
-                }
+            if (spec == null) {
+                throw new ConfigurationException("Malformed service : the specification attribute is mandatory");
+            }
+            String filter = "(&(!(factory.name=" + getCompositeManager().getFactory().getComponentDescription().getName() + "))(factory.state=1))"; // Cannot reinstantiate yourself
+            String f = services[i].getAttribute("filter");
+            if (f != null) {
+                filter = "(&" + filter + f + ")";
             }
             Properties prop = new Properties();
             for (int k = 0; k < services[i].getElements("property").length; k++) {
@@ -80,14 +74,12 @@ public class ServiceInstantiatorHandler extends CompositeHandler {
                 String value = services[i].getElements("property")[k].getAttribute("value");
                 prop.put(key, value);
             }
-            boolean agg = false;
-            if (services[i].containsAttribute("aggregate") && services[i].getAttribute("aggregate").equalsIgnoreCase("true")) {
-                agg = true;
-            }
-            boolean opt = false;
-            if (services[i].containsAttribute("optional") && services[i].getAttribute("optional").equalsIgnoreCase("true")) {
-                opt = true;
-            }
+            String ag = services[i].getAttribute("aggregate");
+            boolean agg = ag != null && ag.equalsIgnoreCase("true");
+            
+            String op = services[i].getAttribute("optional");
+            boolean opt = op != null && op.equalsIgnoreCase("true");
+            
             SvcInstance inst = new SvcInstance(this, spec, prop, agg, opt, filter);
             m_instances.add(inst);
         }

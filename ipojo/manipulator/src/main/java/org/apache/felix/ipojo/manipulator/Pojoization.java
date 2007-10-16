@@ -349,14 +349,8 @@ public class Pojoization {
     private List getDeclaredComponents(Element[] meta) {
         List componentClazzes = new ArrayList();
         for (int i = 0; i < meta.length; i++) {
-            if (meta[i].getName().equalsIgnoreCase("component") && meta[i].containsAttribute("className")) {
-                String name = meta[i].getAttribute("classname");
-                name = name.replace('.', '/');
-                name += ".class";
-                componentClazzes.add(new ComponentInfo(name, meta[i]));
-            }
-            if (meta[i].getName().equalsIgnoreCase("handler") && meta[i].containsAttribute("className")) {
-                String name = meta[i].getAttribute("classname");
+            String name = meta[i].getAttribute("classname");
+            if (name != null) { // Only handler and component have a classname attribute 
                 name = name.replace('.', '/');
                 name += ".class";
                 componentClazzes.add(new ComponentInfo(name, meta[i]));
@@ -626,7 +620,7 @@ public class Pojoization {
      */
     private String buildManifestMetadata(Element element, String actual) {
         String result = "";
-        if (element.getNameSpace().equals("")) {
+        if (element.getNameSpace() == null) {
             result = actual + element.getName() + " { ";
         } else {
             result = actual + element.getNameSpace() + ":" + element.getName() + " { ";
@@ -635,7 +629,7 @@ public class Pojoization {
         Attribute[] atts = element.getAttributes();
         for (int i = 0; i < atts.length; i++) {
             Attribute current = (Attribute) atts[i];
-            if (current.getNameSpace().equals("")) {
+            if (current.getNameSpace() == null) {
                 result = result + "$" + current.getName() + "=\"" + current.getValue() + "\" ";
             } else {
                 result = result + "$" + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue() + "\" ";

@@ -30,6 +30,7 @@ import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.UnacceptableConfiguration;
 import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.metadata.Element;
+import org.osgi.framework.BundleContext;
 
 /**
  * Bridge representing a Factory inside a composition.
@@ -159,6 +160,18 @@ public class FactoryProxy implements Factory {
 
     public ComponentDescription getComponentDescription() {
         return m_delegate.getComponentDescription();
+    }
+
+    public String getClassName() {
+        return m_delegate.getClassName();
+    }
+
+    public int getState() {
+        return m_delegate.getState();
+    }
+
+    public BundleContext getBundleContext() {
+        return m_delegate.getBundleContext();
     }
 
 }

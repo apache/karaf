@@ -73,7 +73,6 @@ public class ImportHandler extends CompositeHandler {
     public void configure(Element metadata, Dictionary conf) throws ConfigurationException {
         m_context = getCompositeManager().getContext();
         m_scope = getCompositeManager().getServiceContext();
-
         Element[] imp = metadata.getElements("requires");
         
         // Get instance filters
@@ -85,35 +84,31 @@ public class ImportHandler extends CompositeHandler {
         for (int i = 0; i < imp.length; i++) {
             boolean optional = false;
             boolean aggregate = false;
-            String specification = null;
+            String specification = imp[i].getAttribute("specification");
 
-            if (imp[i].containsAttribute("specification")) {
-                specification = imp[i].getAttribute("specification");
+            if (specification != null) {                
+                String opt = imp[i].getAttribute("optional");
+                optional = opt != null && opt.equalsIgnoreCase("true");
+
+                String agg = imp[i].getAttribute("aggregate");
+                aggregate = agg != null && agg.equalsIgnoreCase("true");
+
                 String filter = "(&(objectClass=" + specification + ")(!(instance.name=" + getCompositeManager().getInstanceName() + ")))"; // Cannot import yourself
-                if (imp[i].containsAttribute("optional") && imp[i].getAttribute("optional").equalsIgnoreCase("true")) {
-                    optional = true;
-                }
-                if (imp[i].containsAttribute("aggregate") && imp[i].getAttribute("aggregate").equalsIgnoreCase("true")) {
-                    aggregate = true;
-                }
-                if (imp[i].containsAttribute("filter")) {
-                    if (!"".equals(imp[i].getAttribute("filter"))) {
-                        filter = "(&" + filter + imp[i].getAttribute("filter") + ")";
-                    }
+                String f = imp[i].getAttribute("filter");
+                if (f != null) {
+                    filter = "(&" + filter + f + ")";
                 }
                 
-                String id = null;
-                if (imp[i].containsAttribute("id")) {
-                    id = imp[i].getAttribute("id");
-                }
+                String id = imp[i].getAttribute("id");
                 
                 int scopePolicy = -1;
-                if (imp[i].containsAttribute("scope")) {
-                    if (imp[i].getAttribute("scope").equalsIgnoreCase("global")) {
+                String scope = imp[i].getAttribute("scope");
+                if (scope != null) {
+                    if (scope.equalsIgnoreCase("global")) {
                         scopePolicy = PolicyServiceContext.GLOBAL;
-                    } else if (imp[i].getAttribute("scope").equalsIgnoreCase("composite")) {
+                    } else if (scope.equalsIgnoreCase("composite")) {
                         scopePolicy = PolicyServiceContext.LOCAL;
-                    } else if (imp[i].getAttribute("scope").equalsIgnoreCase("composite+global")) {
+                    } else if (scope.equalsIgnoreCase("composite+global")) {
                         scopePolicy = PolicyServiceContext.LOCAL_AND_GLOBAL;
                     }                
                 }
@@ -127,7 +122,7 @@ public class ImportHandler extends CompositeHandler {
                 m_importers.add(si);
             } else { // Malformed import
                 log(Logger.ERROR, "Malformed imports : the specification attribute is mandatory");
-                throw new ConfigurationException("Malformed imports : the specification attribute is mandatory", getCompositeManager().getFactory().getName());
+                throw new ConfigurationException("Malformed imports : the specification attribute is mandatory");
             }
         }
     }

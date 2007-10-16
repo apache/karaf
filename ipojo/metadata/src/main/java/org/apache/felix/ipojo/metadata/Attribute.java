@@ -48,7 +48,6 @@ public class Attribute {
     public Attribute(String name, String value) {
         m_name = name.toLowerCase();
         m_value = value;
-        m_nameSpace = "";
     }
 
     /**
@@ -60,7 +59,9 @@ public class Attribute {
     public Attribute(String name, String ns, String value) {
         m_name = name.toLowerCase();
         m_value = value;
-        m_nameSpace = ns;
+        if (ns != null && ns.length() > 0) {
+            m_nameSpace = ns;
+        }
     }
 
     /**

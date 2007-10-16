@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.felix.ipojo.architecture.ComponentDescription;
 import org.apache.felix.ipojo.metadata.Element;
+import org.osgi.framework.BundleContext;
 
 /**
  * Component Type Factory Service. This service is exposed by a instance manager factory, and allows the dynamic creation of component instance.
@@ -117,5 +118,24 @@ public interface Factory {
      * @return the list containing the name of required handlers (Name : namespace:name)
      */
     List getRequiredHandlers();
+
+    /**
+     * Return the classname of the component type.
+     * For factories which does not contains a class, return "composite"
+     * @return the class name of the component type or "composite"
+     */
+    String getClassName();
+
+    /**
+     * Return the state of the factory.
+     * @return the state of the factory
+     */
+    int getState();
+
+    /**
+     * Get the bundle context of the factory.
+     * @return the bundle context of the factory.
+     */
+    BundleContext getBundleContext();
 
 }

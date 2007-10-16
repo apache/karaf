@@ -18,6 +18,8 @@
  */
 package org.apache.felix.ipojo;
 
+
+
 /**
 * Abstract class to extends for primitive handler.
 * 
@@ -42,29 +44,11 @@ public abstract class PrimitiveHandler extends Handler {
      */
     protected final void attach(ComponentInstance im) {
         m_manager = (InstanceManager) im;
+        setLogger(m_manager.getFactory().getLogger());
     }
     
     public InstanceManager getInstanceManager() {
         return m_manager;
-    }
-    
-    /**
-     * Log method.
-     * @param level : message level (Logger class constant)
-     * @param message : message to log
-     */
-    public void log(int level, String message) {
-        m_manager.getFactory().getLogger().log(level, message);
-    }
-    
-    /**
-     * Log method.
-     * @param level : message level (Logger class constant)
-     * @param message : message to log
-     * @param ex : exception to attach to the message
-     */
-    public void log(int level, String message, Throwable ex) {
-        m_manager.getFactory().getLogger().log(level, message, ex);
     }
     
     /**
@@ -84,12 +68,14 @@ public abstract class PrimitiveHandler extends Handler {
      * @param fieldName : the field name
      * @param value : the value passed to the field
      */
-    public void setterCallback(String fieldName, Object value) { }
+    public void setterCallback(String fieldName, Object value) {
+        return;
+    }
 
     /**
      * This method is called when a GETFIELD operation is detected.
      * @param fieldName : the field name
-     * @param value : the value passed to the field (by the previous handler)
+     * @param value : the value passed to the field (by the previous call)
      * @return : the managed value of the field
      */
     public Object getterCallback(String fieldName, Object value) {

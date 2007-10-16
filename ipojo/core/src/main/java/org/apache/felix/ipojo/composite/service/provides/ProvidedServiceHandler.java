@@ -87,11 +87,11 @@ public class ProvidedServiceHandler extends CompositeHandler {
     public void initializeComponentFactory(ComponentDescription cd, Element metadata) throws ConfigurationException {
         Element[] provides = metadata.getElements("provides", "");
         for (int i = 0; i < provides.length; i++) {
-            if (provides[i].containsAttribute("specification")) {
-                String spec = provides[i].getAttribute("specification");
+            String spec = provides[i].getAttribute("specification");
+            if (spec != null) {
                 cd.addProvidedServiceSpecification(spec);
             } else {
-                throw new ConfigurationException("Malformed provides : the specification attribute is mandatory", getCompositeManager().getFactory().getName());
+                throw new ConfigurationException("Malformed provides : the specification attribute is mandatory");
             }
         }
     }
@@ -264,9 +264,9 @@ public class ProvidedServiceHandler extends CompositeHandler {
         ImportHandler ih = (ImportHandler) getHandler(IPojoConfiguration.IPOJO_NAMESPACE + ":requires");
         if (ih == null) { return null; }
 
-        if (element.containsAttribute("id")) {
+        String id = element.getAttribute("id");
+        if (id != null) {
             // Look for dependency Id
-            String id = element.getAttribute("id");
             for (int i = 0; i < ih.getRequirements().size(); i++) {
                 ServiceImporter imp = (ServiceImporter) ih.getRequirements().get(i);
                 if (imp.getId().equals(id)) { return imp; }
@@ -289,15 +289,11 @@ public class ProvidedServiceHandler extends CompositeHandler {
      * @throws CompositionException : occurs if the requirement does not match with service-level specification requirement
      */
     private void checkRequirement(ServiceImporter imp, Element elem) throws CompositionException {
-        boolean opt = false;
-        if (elem.containsAttribute("optional") && elem.getAttribute("optional").equalsIgnoreCase("true")) {
-            opt = true;
-        }
+        String op = elem.getAttribute("optional");
+        boolean opt = op != null && op.equalsIgnoreCase("true");
 
-        boolean agg = false;
-        if (elem.containsAttribute("aggregate") && elem.getAttribute("aggregate").equalsIgnoreCase("true")) {
-            agg = true;
-        }
+        String ag = elem.getAttribute("aggregate");
+        boolean agg = ag != null && ag.equalsIgnoreCase("true");
 
         if (imp == null) {
             // Add the missing requirement
@@ -324,10 +320,9 @@ public class ProvidedServiceHandler extends CompositeHandler {
             }
             String spec = elem.getAttribute("specification");
             String filter = "(&(objectClass=" + spec + ")(!(instance.name=" + getCompositeManager().getInstanceName() + ")))"; // Cannot import yourself
-            if (elem.containsAttribute("filter")) {
-                if (!"".equals(elem.getAttribute("filter"))) {
-                    filter = "(&" + filter + elem.getAttribute("filter") + ")";
-                }
+            String f = elem.getAttribute("filter");
+            if (f != null) {
+                filter = "(&" + filter + f + ")";
             }
             
             ServiceImporter si = new ServiceImporter(spec, filter, agg, opt, getCompositeManager().getContext(), getCompositeManager().getServiceContext(), PolicyServiceContext.LOCAL, null, ih);
@@ -342,8 +337,8 @@ public class ProvidedServiceHandler extends CompositeHandler {
             throw new CompositionException("The requirement " + elem.getAttribute("specification") + " is aggregate in the implementation and is declared as a simple service-level requirement");
         }
 
-        if (elem.containsAttribute("filter")) {
-            String filter = elem.getAttribute("filter");
+        String filter = elem.getAttribute("filter");
+        if (filter != null) {
             String filter2 = imp.getFilter();
             if (filter2 == null || !filter2.equalsIgnoreCase(filter)) {
                 log(Logger.ERROR, "[" + getCompositeManager().getInstanceName() + "] The specification requirement " + elem.getAttribute("specification") + " as not the same filter as declared in the service-level requirement");
