@@ -90,6 +90,7 @@
                </goals>
             <configuration>
    				<metadata>metadata.xml</metadata>
+   				<ignoreAnnotations>true</ignoreAnnotations>
             </configuration>
           </execution>
         </executions>

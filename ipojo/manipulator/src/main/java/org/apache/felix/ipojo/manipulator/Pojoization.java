@@ -86,6 +86,11 @@ public class Pojoization {
     private List m_referredPackages;
 
     /**
+     * Flag describing if we need of not compute annotations.
+     */
+    private boolean m_ignoreAnnotations;
+
+    /**
      * Add an error in the error list.
      * @param mes : error message.
      */
@@ -103,6 +108,13 @@ public class Pojoization {
 
     public List getErrors() {
         return m_errors;
+    }
+    
+    /**
+     * Activate annotation processing.
+     */
+    public void setAnnotationProcessing() {
+        m_ignoreAnnotations = false;
     }
 
     /**
@@ -283,7 +295,9 @@ public class Pojoization {
                         in = in2;
                     }
                     currIn.close();
-                    computeAnnotations(in);
+                    if (! m_ignoreAnnotations) {
+                        computeAnnotations(in);
+                    }
                     // Check if we need to manipulate the class
                     for (int i = 0; i < m_components.size(); i++) {
                         ComponentInfo ci = (ComponentInfo) m_components.get(i);

@@ -19,11 +19,14 @@
 package org.apache.felix.ipojo.plugin;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.felix.ipojo.manipulator.Pojoization;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
 
 /**
  * Package an OSGi jar "bundle" as an "iPOJO bundle".
@@ -64,9 +67,34 @@ public class ManipulatorMojo extends AbstractMojo {
     
     /**
      * Metadata file location.
-     * @parameter expression="${metadata}" default-value="metadata.xml"
+     * @parameter alias="metadata" default-value="metadata.xml"
      */
     private String m_metadata;
+
+    /**
+     * The Maven project.
+     *
+     * @parameter expression="${project}"
+     * @required
+     * @readonly
+     */
+    private MavenProject m_project;
+
+    /**
+     * Project types which this plugin supports.
+     * @parameter
+     */
+    private List m_supportedProjectTypes = Arrays.asList(new String[]{"bundle"});
+
+    /**
+     * Ignore annotations parameter.
+     * @parameter alias="ignoreAnnotations" default-value="false"
+     */
+    private boolean m_ignoreAnnotations;
+
+    protected MavenProject getProject() {
+        return this.m_project;
+    }
 
     /**
      * Execute method : launch the pojoization.
@@ -75,13 +103,25 @@ public class ManipulatorMojo extends AbstractMojo {
      * @see org.apache.maven.plugin.AbstractMojo#execute()
      */
     public void execute() throws MojoExecutionException, MojoFailureException {
+        // ignore project types not supported, useful when the plugin is configured in the parent pom
+        if (!this.m_supportedProjectTypes.contains(this.getProject().getArtifact().getType())) {
+            this.getLog().debug("Ignoring project " + this.getProject().getArtifact() + " : type " + this.getProject().getArtifact().getType() + " is not supported by ipojo plugin, supported types are " + this.m_supportedProjectTypes);
+            return;
+        }
+
         getLog().info("Start bundle manipulation");
         // Get metadata file
         File meta = new File(m_outputDirectory + "/" + m_metadata);
         getLog().info("Metadata File : " + meta.getAbsolutePath());
         if (!meta.exists()) {
-            getLog().info("No metadata file found - try to use only annotations");
-            meta = null;
+            // Verify if annotations are ignored
+            if (m_ignoreAnnotations) {
+                getLog().info("No metadata file found - ignore annotations");
+                return;
+            } else {
+                getLog().info("No metadata file found - try to use only annotations");
+                meta = null;
+            }
         }
 
         // Get input bundle
@@ -94,6 +134,7 @@ public class ManipulatorMojo extends AbstractMojo {
         File out = new File(m_buildDirectory + "/_out.jar");
         
         Pojoization pojo = new Pojoization();
+        if (!m_ignoreAnnotations) { pojo.setAnnotationProcessing(); }
         pojo.pojoization(in, out, meta);
         for (int i = 0; i < pojo.getWarnings().size(); i++) {
             getLog().warn((String) pojo.getWarnings().get(i));

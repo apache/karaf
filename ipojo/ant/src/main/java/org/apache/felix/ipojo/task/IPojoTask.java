@@ -45,6 +45,11 @@ public class IPojoTask extends Task {
      * Output bundle.
      */
     private File m_output;
+
+    /**
+     * Flag describing if we need to ignore annotation of not.
+     */
+    private boolean m_ignoreAnnotations = false;
     
     /**
      * Set the metadata file.
@@ -71,6 +76,14 @@ public class IPojoTask extends Task {
     }
     
     /**
+     * Set if we need to ignore annotations or not.
+     * @param flag : true if we need to ignore annotations.
+     */
+    public void setIgnoreAnnotations(boolean flag) {
+        m_ignoreAnnotations = flag;
+    }
+    
+    /**
      * Execute the Ant Task.
      * @see org.apache.tools.ant.Task#execute()
      */
@@ -89,8 +102,14 @@ public class IPojoTask extends Task {
         if (m_metadata == null) {
             m_metadata = new File("./metadata.xml");
             if (!m_metadata.exists()) {
-                System.out.println("No metadata file found - try to use only annotations");
-                m_metadata = null;
+             // Verify if annotations are ignored
+                if (m_ignoreAnnotations) {
+                    System.out.println("No metadata file found - ignore annotations");
+                    return;
+                } else {
+                    System.out.println("No metadata file found - try to use only annotations");
+                    m_metadata = null;
+                }
             } else {
                 System.out.println("Metadata File : " + m_metadata.getAbsolutePath());
             }
@@ -115,6 +134,9 @@ public class IPojoTask extends Task {
         }
         
         Pojoization pojo = new Pojoization();
+        if (! m_ignoreAnnotations) {
+            pojo.setAnnotationProcessing();
+        }
         pojo.pojoization(m_input, m_output, m_metadata);
         for (int i = 0; i < pojo.getWarnings().size(); i++) {
             System.out.println((String) pojo.getWarnings().get(i));
