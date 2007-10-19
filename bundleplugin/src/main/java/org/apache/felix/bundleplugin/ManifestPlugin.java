@@ -60,7 +60,7 @@ public class ManifestPlugin
             throw new MojoExecutionException( "Error trying to generate Manifest", e );
         }
 
-        File outputFile = new File( this.manifestLocation + "/MANIFEST.MF" );
+        File outputFile = new File( this.manifestLocation, "MANIFEST.MF" );
 
         try
         {

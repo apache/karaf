@@ -65,7 +65,7 @@ public class BundlePlugin extends AbstractMojo {
      *
      * @parameter expression="${manifestLocation}" default-value="${project.build.outputDirectory}/META-INF"
      */
-    protected String manifestLocation;
+    protected File manifestLocation;
 
     /**
      * @component
@@ -305,7 +305,7 @@ public class BundlePlugin extends AbstractMojo {
             Artifact bundleArtifact = project.getArtifact();
             bundleArtifact.setFile(jarFile);
 
-            if (manifestLocation != null && manifestLocation.length() > 0)
+            if (manifestLocation != null)
             {
                 File outputFile = new File( manifestLocation, "MANIFEST.MF" );
 
