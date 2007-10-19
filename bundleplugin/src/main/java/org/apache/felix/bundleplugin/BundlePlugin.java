@@ -595,7 +595,14 @@ public class BundlePlugin extends AbstractMojo {
                 // make relative to basedir
                 if (path.startsWith(basePath))
                 {
-                    path = path.substring(basePath.length() + 1);
+                    if ( path.length() == basePath.length() )
+                    {
+                        path = ".";
+                    }
+                    else
+                    {
+                        path = path.substring( basePath.length() + 1 );
+                    }
                 }
                 // replace windows backslash with a slash
                 // this is a workaround for a problem with bnd 0.0.189
