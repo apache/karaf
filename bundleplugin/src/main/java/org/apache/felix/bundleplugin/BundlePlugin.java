@@ -478,7 +478,7 @@ public class BundlePlugin extends AbstractMojo {
         if (value instanceof Collection && ((Collection) value).isEmpty())
             return;
 
-        properties.put(key, value.toString().replaceAll("[\r\n]", " "));
+        properties.put(key, value.toString().replaceAll("[\r\n]", ""));
     }
 
     /**
