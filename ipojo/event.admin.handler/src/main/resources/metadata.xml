@@ -1,0 +1,8 @@
+<ipojo>
+<!-- Primitives handler -->
+<handler classname="org.apache.felix.ipojo.handler.event.EventAdminSubscriberHandler" name="subscriber" namespace="org.apache.felix.ipojo.handler.event.EventAdminSubscriberHandler">
+	<provides>
+		<property field="m_topics" name="event.topics" value=""/>
+	</provides>
+</handler>
+</ipojo>

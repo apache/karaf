@@ -1,0 +1,65 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>bundle</packaging>
+  <name>iPOJO Event Admin Handler</name>
+  <groupId>org.apache.felix</groupId>
+  <version>0.7.5-SNAPSHOT</version>
+  <artifactId>org.apache.felix.ipojo.handler.event</artifactId>
+	  
+  <dependencies>
+	  <dependency>
+  			<groupId>org.apache.felix</groupId>
+      		<artifactId>org.apache.felix.ipojo</artifactId>
+	        <version>0.7.5-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+  			<groupId>org.apache.felix</groupId>
+      		<artifactId>org.apache.felix.ipojo.metadata</artifactId>
+	      	<version>0.7.5-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+  			<groupId>org.apache.felix</groupId>
+      		<artifactId>org.osgi.core</artifactId>
+      		<version>1.1.0-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+	     <groupId>org.apache.felix</groupId>
+  		 <artifactId>org.osgi.compendium</artifactId>
+         <version>0.9.0-SNAPSHOT</version>
+	</dependency>
+  </dependencies>
+  
+
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Private-Package>org.apache.felix.ipojo.handler.event</Private-Package>
+            <Bundle-Name>${pom.name}</Bundle-Name>
+            <Bundle-SymbolicName>ipojo.event.admin.handler</Bundle-SymbolicName>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+	      <groupId>org.apache.felix</groupId>
+	      <artifactId>maven-ipojo-plugin</artifactId>
+          <version>${pom.version}</version>
+		  <executions>
+          	<execution>
+            	<goals>
+	              <goal>ipojo-bundle</goal>
+               </goals>
+            <configuration>
+   				<metadata>metadata.xml</metadata>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
