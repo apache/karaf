@@ -185,7 +185,7 @@ public class Component extends AbstractObject {
             if ( !this.isAbstract ) {
                 // ensure non-abstract, public class
                 if (!javaClass.isPublic()) {
-                    issues.add(this.getMessage("Class must be pubic: " + javaClass.getName()));
+                    issues.add(this.getMessage("Class must be public: " + javaClass.getName()));
                 }
                 if (javaClass.isAbstract() || javaClass.isInterface()) {
                     issues.add(this.getMessage("Class must be concrete class (not abstract or interface) : " + javaClass.getName()));
