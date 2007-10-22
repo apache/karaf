@@ -109,7 +109,7 @@ public class OBRInstall extends AbstractMojo
         {
             obrPath = mavenPath + File.separatorChar + "repository.xml";
         }
-        else if( !obrPath.endsWith( "repository.xml" ) )
+        else if( !obrPath.endsWith( ".xml" ) )
         {
             obrPath = obrPath + File.separatorChar + "repository.xml";
         }
