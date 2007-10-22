@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.apache.felix.framework.util.FelixConstants;
@@ -78,7 +79,7 @@ import org.osgi.framework.Constants;
 // with the parent classloader and one instance per framework instance that
 // keeps track of extension bundles and systembundle exports for that framework
 // instance.
-class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IContentLoader
+class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IContentLoader, IContent
 {
     // The private instance that is added to Felix.class.getClassLoader() -
     // will be null if extension bundles are not supported (i.e., we are not 
@@ -414,7 +415,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
 
     public IContent getContent()
     {
-        return null;
+        return this;
     }
 
     public ISearchPolicy getSearchPolicy()
@@ -572,5 +573,35 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
             m_names.add(name);
             m_extensions.add(extension);
         }
+    }
+
+    public Enumeration getEntries() 
+    {
+        return new Enumeration()
+        {
+            public boolean hasMoreElements() 
+            {
+                return false;
+            }
+
+            public Object nextElement() throws NoSuchElementException 
+            {
+                throw new NoSuchElementException();
+            }
+        };
+    }
+
+    public byte[] getEntry(String name) 
+    {
+        return null;
+    }
+
+    public InputStream getEntryAsStream(String name) throws IOException 
+    {
+        return null;
+    }
+
+    public boolean hasEntry(String name) {
+        return false;
     }
 }
