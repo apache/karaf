@@ -327,8 +327,16 @@ public class DependencyEmbedder
                 targetFile = new File(embedDirectory, sourceFile.getName());
             }
 
-            bundleClassPath += targetFile;
-            includeResource += targetFile + "=" + sourceFile;
+            String targetFilePath = targetFile.getPath();
+
+            // replace windows backslash with a slash
+            if ( File.separatorChar != '/' )
+            {
+                targetFilePath = targetFilePath.replace(File.separatorChar, '/');
+            }
+
+            bundleClassPath += targetFilePath;
+            includeResource += targetFilePath + "=" + sourceFile;
 
             properties.setProperty(Analyzer.BUNDLE_CLASSPATH, bundleClassPath);
             properties.setProperty(Analyzer.INCLUDE_RESOURCE, includeResource);
