@@ -318,40 +318,14 @@ public class Dependency implements TrackerCustomizer {
                 }
             } else {
                 if (m_references.size() == 0) {
-                    // Load the nullable class
-                    String className = m_specification + "Nullable";
-                    Class nullableClazz = m_handler.getNullableClass(className);
+                    Object nullable = m_handler.getNullableObject(this);
 
-                    if (nullableClazz == null) {
+                    if (nullable == null) {
                         m_handler.log(Logger.WARNING, "[" + m_handler.getInstanceManager().getClassName() + "] Cannot load the nullable class to return a dependency object for " + m_field + " -> " + m_specification);
                         return null;
                     }
 
-                    // The nullable class is loaded, create the object and add it
-                    Object instance = null;
-                    try {
-                        instance = nullableClazz.newInstance();
-                    } catch (IllegalAccessException e) {
-                        // There is a problem in the dependency resolving (like in stopping method)
-                        if (m_isAggregate) {
-                            m_handler.log(Logger.ERROR, "[" + m_handler.getInstanceManager().getInstanceName() + "] Return an empty array, an exception was throwed in the get method", e);
-                            return Array.newInstance(m_clazz, 0);
-                        } else {
-                            m_handler.log(Logger.ERROR, "[" + m_handler.getInstanceManager().getInstanceName() + "] Return null, an exception was throwed in the get method", e);
-                            return null;
-                        }
-                    } catch (InstantiationException e) {
-                        // There is a problem in the dependency resolving (like in stopping
-                        // method)
-                        if (m_isAggregate) {
-                            m_handler.log(Logger.ERROR, "[" + m_handler.getInstanceManager().getInstanceName() + "] Return an empty array, an exception was throwed in the get method", e);
-                            return Array.newInstance(m_clazz, 0);
-                        } else {
-                            m_handler.log(Logger.ERROR, "[" + m_handler.getInstanceManager().getInstanceName() + "] Return null, an exception was throwed in the get method", e);
-                            return null;
-                        }
-                    }
-                    m_usage.getObjects().add(instance);
+                    m_usage.getObjects().add(nullable);
                 } else {
                     ServiceReference ref = (ServiceReference) m_references.get(0);
                     m_usage.getReferences().add(ref); // Get the first one
