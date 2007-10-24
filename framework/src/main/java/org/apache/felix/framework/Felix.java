@@ -765,10 +765,8 @@ public class Felix extends FelixBundle
             }
             catch (Exception ex)
             {
-// TODO: RB - Should this be system bundle, since bundle could be null?
-//                fireFrameworkEvent(FrameworkEvent.ERROR, systembundle, ex);
 ex.printStackTrace();
-                fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
+                fireFrameworkEvent(FrameworkEvent.ERROR, this, ex);
                 try
                 {
                     m_logger.log(
@@ -875,7 +873,7 @@ ex.printStackTrace();
                 }
                 catch (BundleException ex)
                 {
-                    fireFrameworkEvent(FrameworkEvent.ERROR, getBundle(0), ex);
+                    fireFrameworkEvent(FrameworkEvent.ERROR, this, ex);
                     m_logger.log(
                         Logger.LOG_ERROR,
                         "Error stopping system bundle.",
@@ -1107,7 +1105,7 @@ ex.printStackTrace();
 
         if (m_systemBundleInfo.getState() == Bundle.ACTIVE)
         {
-            fireFrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, getBundle(0), null);
+            fireFrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, this, null);
         }
     }
 
@@ -3230,7 +3228,7 @@ ex.printStackTrace();
             releaseBundleLocks(bundles);
         }
 
-        fireFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, getBundle(0), null);
+        fireFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, this, null);
     }
 
     private void populateImportGraph(FelixBundle exporter, Map map)
