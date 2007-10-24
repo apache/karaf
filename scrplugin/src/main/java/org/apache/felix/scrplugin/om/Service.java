@@ -48,7 +48,7 @@ public class Service {
     public void setServicefactory(String servicefactory) {
         this.servicefactory = servicefactory;
     }
-    
+
     public void setServicefactory(boolean servicefactory) {
         this.servicefactory = String.valueOf(servicefactory);
     }

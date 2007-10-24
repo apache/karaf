@@ -226,6 +226,9 @@ public class Component extends AbstractObject {
                     // verify service
                     boolean isServiceFactory = false;
                     if (this.getService() != null) {
+                        if ( this.getService().getInterfaces().size() == 0 ) {
+                            issues.add(this.getMessage("Service interface information is missing for @scr.service tag"));
+                        }
                         this.getService().validate(issues, warnings);
                         isServiceFactory = Boolean.valueOf(this.getService().getServicefactory()).booleanValue();
                     }
