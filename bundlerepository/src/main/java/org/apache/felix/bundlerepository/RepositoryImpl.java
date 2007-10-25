@@ -24,6 +24,8 @@ import java.net.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.felix.bundlerepository.metadataparser.XmlCommonHandler;
 import org.apache.felix.bundlerepository.metadataparser.kxmlsax.KXml2SAXParser;
@@ -143,38 +145,64 @@ public class RepositoryImpl implements Repository
                         "Proxy-Authorization", "Basic " + base64);
                 }
             }
-            is = conn.getInputStream();
 
-            // Create the parser Kxml
-            XmlCommonHandler handler = new XmlCommonHandler();
-            Object factory = new Object() {
-                public RepositoryImpl newInstance()
+            if (m_url.getPath().endsWith(".zip"))
+            {
+                ZipInputStream zin = new ZipInputStream(conn.getInputStream());
+                ZipEntry entry = zin.getNextEntry();
+                while (entry != null)
                 {
-                    return RepositoryImpl.this;
+                    if (entry.getName().equals("repository.xml"))
+                    {
+                        is = zin;
+                        break;
+                    }
+                    entry = zin.getNextEntry();
                 }
-            };
+            }
+            else
+            {
+                is = conn.getInputStream();
+            } 
 
-            // Get default setter method for Repository.
-            Method repoSetter = RepositoryImpl.class.getDeclaredMethod(
-                "put", new Class[] { Object.class, Object.class });
+            if (is != null)
+            {
+                // Create the parser Kxml
+                XmlCommonHandler handler = new XmlCommonHandler();
+                Object factory = new Object() {
+                    public RepositoryImpl newInstance()
+                    {
+                        return RepositoryImpl.this;
+                    }
+                };
 
-            // Get default setter method for Resource.
-            Method resSetter = ResourceImpl.class.getDeclaredMethod(
-                "put", new Class[] { Object.class, Object.class });
+                // Get default setter method for Repository.
+                Method repoSetter = RepositoryImpl.class.getDeclaredMethod(
+                    "put", new Class[] { Object.class, Object.class });
 
-            // Map XML tags to types.
-            handler.addType("repository", factory, Repository.class, repoSetter);
-            handler.addType("resource", ResourceImpl.class, Resource.class, resSetter);
-            handler.addType("category", CategoryImpl.class, null, null);
-            handler.addType("require", RequirementImpl.class, Requirement.class, null);
-            handler.addType("capability", CapabilityImpl.class, Capability.class, null);
-            handler.addType("p", PropertyImpl.class, null, null);
-            handler.setDefaultType(String.class, null, null);
+                // Get default setter method for Resource.
+                Method resSetter = ResourceImpl.class.getDeclaredMethod(
+                    "put", new Class[] { Object.class, Object.class });
 
-            br = new BufferedReader(new InputStreamReader(is));
-            KXml2SAXParser parser;
-            parser = new KXml2SAXParser(br);
-            parser.parseXML(handler);
+                // Map XML tags to types.
+                handler.addType("repository", factory, Repository.class, repoSetter);
+                handler.addType("resource", ResourceImpl.class, Resource.class, resSetter);
+                handler.addType("category", CategoryImpl.class, null, null);
+                handler.addType("require", RequirementImpl.class, Requirement.class, null);
+                handler.addType("capability", CapabilityImpl.class, Capability.class, null);
+                handler.addType("p", PropertyImpl.class, null, null);
+                handler.setDefaultType(String.class, null, null);
+
+                br = new BufferedReader(new InputStreamReader(is));
+                KXml2SAXParser parser;
+                parser = new KXml2SAXParser(br);
+                parser.parseXML(handler);
+            }
+            else
+            {
+                // This should not happen.
+                throw new Exception("Unable to get input stream for repository.");
+            }
         }
         finally
         {
