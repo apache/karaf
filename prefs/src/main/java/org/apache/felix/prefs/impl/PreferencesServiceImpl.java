@@ -60,7 +60,7 @@ public class PreferencesServiceImpl implements PreferencesService {
                 if ( prefs[i].getDescription().getIdentifier() == null ) {
                     this.systemTree = prefs[i];
                 } else {
-                    this.trees.put(prefs[i].getDescription().getIdentifier(), prefs);
+                    this.trees.put(prefs[i].getDescription().getIdentifier(), prefs[i]);
                 }
             }
         } catch (BackingStoreException e) {
