@@ -296,7 +296,7 @@ public class BundlePlugin extends AbstractMojo {
                 {
                     jarFile.delete();
 
-                    throw new MojoFailureException("Found errors, see log");
+                    throw new MojoFailureException("Error(s) found in bundle configuration");
                 }
             }
 
@@ -323,9 +323,15 @@ public class BundlePlugin extends AbstractMojo {
             // workaround for MNG-1682: force maven to install artifact using the "jar" handler
             bundleArtifact.setArtifactHandler( artifactHandlerManager.getArtifactHandler( "jar" ) );
         }
+        catch (MojoFailureException e)
+        {
+            getLog().error( e.getLocalizedMessage() );
+            throw new MojoExecutionException( "Error(s) found in bundle configuration", e );
+        }
         catch (Exception e)
         {
-            throw new MojoExecutionException("Unknown error occurred", e);
+            getLog().error( "An internal error occurred", e );
+            throw new MojoExecutionException( "Internal error in maven-bundle-plugin", e );
         }
     }
 
