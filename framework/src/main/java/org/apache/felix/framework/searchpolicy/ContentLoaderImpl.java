@@ -130,8 +130,15 @@ public class ContentLoaderImpl implements IContentLoader
     {
         URL url = null;
 
-        // Remove leading slash, if present.
-        if (name.startsWith("/"))
+        // Remove leading slash, if present, but special case
+        // "/" so that it returns a root URL...this isn't very
+        // clean or meaninful, but the Spring guys want it.
+        if (name.equals("/"))
+        {
+            // Just pick a class path index since it doesn't really matter.
+            url = getURLPolicy().createURL(1, name);
+        }
+        else if (name.startsWith("/"))
         {
             name = name.substring(1);
         }
@@ -154,22 +161,35 @@ public class ContentLoaderImpl implements IContentLoader
     {
         Vector v = new Vector();
 
-        // Remove leading slash, if present.
-        if (name.startsWith("/"))
+        // Special case "/" so that it returns a root URLs for
+        // each bundle class path entry...this isn't very
+        // clean or meaninful, but the Spring guys want it.
+        if (name.equals("/"))
         {
-            name = name.substring(1);
-        }
-
-        // Check the module class path.
-        for (int i = 0; i < getClassPath().length; i++)
-        {
-            if (getClassPath()[i].hasEntry(name))
+            for (int i = 0; i < getClassPath().length; i++)
             {
-                // Use the class path index + 1 for creating the path so
-                // that we can differentiate between module content URLs
-                // (where the path will start with 0) and module class
-                // path URLs.
                 v.addElement(getURLPolicy().createURL(i + 1, name));
+            }
+        }
+        else
+        {
+            // Remove leading slash, if present.
+            if (name.startsWith("/"))
+            {
+                name = name.substring(1);
+            }
+
+            // Check the module class path.
+            for (int i = 0; i < getClassPath().length; i++)
+            {
+                if (getClassPath()[i].hasEntry(name))
+                {
+                    // Use the class path index + 1 for creating the path so
+                    // that we can differentiate between module content URLs
+                    // (where the path will start with 0) and module class
+                    // path URLs.
+                    v.addElement(getURLPolicy().createURL(i + 1, name));
+                }
             }
         }
 
