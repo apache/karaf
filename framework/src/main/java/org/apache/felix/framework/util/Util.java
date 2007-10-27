@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -152,7 +152,7 @@ public class Util
     public static Class loadClassUsingClass(Class clazz, String name)
     {
         Class loadedClass = null;
-    
+
         while (clazz != null)
         {
             // Get the class loader of the current class object.
@@ -167,7 +167,7 @@ public class Util
             {
                 // Ignore and try interface class loaders.
             }
-    
+
             // Try to see if we can load the class from
             // one of the class's implemented interface
             // class loaders.
@@ -180,12 +180,12 @@ public class Util
                     return loadedClass;
                 }
             }
-    
+
             // Try to see if we can load the class from
             // the super class class loader.
             clazz = clazz.getSuperclass();
         }
-    
+
         return null;
     }
 
@@ -271,7 +271,7 @@ public class Util
 
     /**
      * Encode a raw byte array to a Base64 String.
-     * 
+     *
      * @param in Byte array to encode.
      * @param len Length of Base64 lines. 0 means no line breaks.
     **/
