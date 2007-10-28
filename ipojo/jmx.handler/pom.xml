@@ -53,6 +53,21 @@
 					<target>1.5</target>
 				</configuration>
 			</plugin>
+			<plugin>
+		      <groupId>org.apache.felix</groupId>
+		      <artifactId>maven-ipojo-plugin</artifactId>
+	          	<version>${pom.version}</version>
+		  		<executions>
+	      			<execution>
+	        			<goals>
+	              			<goal>ipojo-bundle</goal>
+	           			</goals>
+	        			<configuration>
+							<metadata>metadata.xml</metadata>
+	        			</configuration>
+	      			</execution>
+	    		</executions>
+      		</plugin>
 		</plugins>
 	</build>
 </project>
