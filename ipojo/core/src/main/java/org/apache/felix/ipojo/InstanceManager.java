@@ -504,7 +504,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
             m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> The Component Instance is not accessible (security reason) : " + e.getMessage());
             stop();
         } catch (InvocationTargetException e) {
-            m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the constructor method (illegal target) : " + e.getMessage());
+            m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the constructor method (illegal target) : " + e.getTargetException().getMessage());
             e.printStackTrace();
             stop();
         } catch (NoSuchMethodException e) {
@@ -785,6 +785,15 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     public void reconfigure(Dictionary configuration) {
         for (int i = 0; i < m_handlers.length; i++) {
             m_handlers[i].getHandler().reconfigure(configuration);
+        }
+        if (m_state == INVALID) {
+            // Try to revalidate the instance ofter reconfiguration
+            for (int i = 0; i < m_handlers.length; i++) {
+                if (m_handlers[i].getState() != VALID) {
+                    return;
+                }
+            }
+            setState(VALID);
         }
     }
 

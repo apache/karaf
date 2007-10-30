@@ -330,10 +330,10 @@ public class DependencyHandler extends PrimitiveHandler {
             m_nullableObjects.put(dep, o);
         } catch (InstantiationException e) {
             log(Logger.ERROR, "The nullable object for " + dep.getSpecification() + " cannot be instantiate : " + e.getMessage());
-            getInstanceManager().stop(); 
+            getInstanceManager().setState(ComponentInstance.INVALID); 
         } catch (IllegalAccessException e) {
             log(Logger.ERROR, "The nullable object for " + dep.getSpecification() + " cannot be instantiate : " + e.getMessage());
-            getInstanceManager().stop();
+            getInstanceManager().setState(ComponentInstance.INVALID);
         }
     }
 
@@ -354,14 +354,14 @@ public class DependencyHandler extends PrimitiveHandler {
             } catch (ClassNotFoundException e) {
                 // A default-implementation class cannot be loaded
                 log(Logger.ERROR, "The default-implementation class " + obj + " cannot be loaded : " + e.getMessage());
-                getInstanceManager().stop();
+                getInstanceManager().setState(ComponentInstance.INVALID);
                 return null;
             } catch (InstantiationException e) {
                 log(Logger.ERROR, "The default-implementation class " + obj + " cannot be instantiated : " + e.getMessage());
-                getInstanceManager().stop();
+                getInstanceManager().setState(ComponentInstance.INVALID);
             } catch (IllegalAccessException e) {
                 log(Logger.ERROR, "The default-implementation class " + obj + " cannot be instantiated : " + e.getMessage());
-                getInstanceManager().stop();
+                getInstanceManager().setState(ComponentInstance.INVALID);
             }
             return null;
         } else {

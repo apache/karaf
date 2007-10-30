@@ -214,7 +214,6 @@ public class DependencyCallback extends Callback {
      * @throws NoSuchMethodException : the method is not found
      * @throws IllegalAccessException : the method could not be called
      * @throws InvocationTargetException : an error happens in the called method
-     * @throws InvocationTargetException
      */
     protected void callOnInstance(Object instance, ServiceReference ref, Object obj) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (m_methodObj == null) {

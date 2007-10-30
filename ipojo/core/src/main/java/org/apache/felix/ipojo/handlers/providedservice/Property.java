@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Logger;
 
@@ -218,8 +219,8 @@ public class Property {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Illegal Access Exception in setValue on " + m_type);
             m_providedService.getInstanceManager().stop();
         } catch (InvocationTargetException e) {
-            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Invocation problem " + m_type);
-            m_providedService.getInstanceManager().stop();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Invocation problem " + m_type + " : " + e.getTargetException().getMessage());
+            m_providedService.getInstanceManager().setState(ComponentInstance.INVALID);
         }
     }
 
@@ -321,8 +322,8 @@ public class Property {
             m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Illegal Access Exception in setArrayValue on " + internalType);
             m_providedService.getInstanceManager().stop();
         } catch (InvocationTargetException e) {
-            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Invocation problem " + internalType);
-            m_providedService.getInstanceManager().stop();
+            m_providedService.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Invocation problem " + internalType + " : " + e.getTargetException().getMessage());
+            m_providedService.getInstanceManager().setState(ComponentInstance.INVALID);
         }
     }
 

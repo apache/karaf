@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Callback;
@@ -94,6 +95,8 @@ public class ConfigurableProperty {
 
         if (value != null) {
             setValue(value, type);
+        } else {
+            setType(type);
         }
 
         if (method != null) {
@@ -101,12 +104,123 @@ public class ConfigurableProperty {
         }
 
     }
+    
+    /**
+     * The set type method fix the property type according to the given type name.
+     * @param type : the type name
+     * @throws ConfigurationException if an error occurs when loading the type class for non-primitive types.
+     */
+    private void setType(String type) throws ConfigurationException {
+     // Syntactic sugar to avoid writing java.lang.String
+        if ("string".equals(type) || "String".equals(type)) {
+            m_type = java.lang.String.class;
+            return;
+        }
+        if (type.equals("boolean")) {
+            m_type = Boolean.TYPE;
+            return;
+        }
+        if ("byte".equals(type)) {
+            m_type = Byte.TYPE;
+            return;
+        }
+        if ("short".equals(type)) {
+            m_type = Short.TYPE;
+            return;
+        }
+        if ("int".equals(type)) {
+            m_type = Integer.TYPE;
+            return;
+        }
+        if ("long".equals(type)) {
+            m_type = Long.TYPE;
+            return;
+        }
+        if ("float".equals(type)) {
+            m_type = Float.TYPE;
+            return;
+        }
+        if ("double".equals(type)) {
+            m_type = Double.TYPE;
+            return;
+        }
+        if ("char".equals(type)) {
+            m_type = Character.TYPE;
+            return;
+        }
+
+        // Array :
+        if (type.endsWith("[]")) {
+            String internalType = type.substring(0, type.length() - 2);
+            if ("string".equals(internalType) || "String".equals(internalType)) {
+                m_type = new String[0].getClass();
+                return;
+            }
+            if ("boolean".equals(internalType)) {
+                m_type = new boolean[0].getClass();
+                return;
+            }
+            if ("byte".equals(internalType)) {
+                m_type = new byte[0].getClass();
+                return;
+            }
+            if ("short".equals(internalType)) {
+                m_type = new short[0].getClass();
+                return;
+            }
+            if ("int".equals(internalType)) {
+                m_type = new int[0].getClass();
+                return;
+            }
+            if ("long".equals(internalType)) {
+                m_type = new long[0].getClass();
+                return;
+            }
+            if ("float".equals(internalType)) {
+                m_type = new float[0].getClass();
+                return;
+            }
+            if ("double".equals(internalType)) {
+                m_type = new double[0].getClass();
+                return;
+            }
+            if ("char".equals(internalType)) {
+                m_type = new char[0].getClass();
+                return;
+            }
+
+            // Complex array type.
+            try {
+                Class c = m_handler.getInstanceManager().getContext().getBundle().loadClass(internalType);
+                Object[] ob = (Object[]) Array.newInstance(c, 0);
+                m_type = ob.getClass();
+                return;
+            } catch (ClassNotFoundException e) {
+                throw new ConfigurationException("Class not found exception in setValue on " + internalType);
+            } catch (SecurityException e) {
+                throw new ConfigurationException("Secutiry Exception in setValue on " + internalType);
+            } catch (IllegalArgumentException e) {
+                throw new ConfigurationException("Argument problem to call the constructor of the type " + internalType);
+            }
+        }
+        
+        // Non array, complex type.
+        try {
+            m_type = m_handler.getInstanceManager().getContext().getBundle().loadClass(type);
+        } catch (ClassNotFoundException e) {
+            throw new ConfigurationException("Class not found exception in setValue on " + type + " : " + e.getMessage());
+        } catch (SecurityException e) {
+            throw new ConfigurationException("Security excption in setValue on " + type + " : " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new ConfigurationException("Argument problem to call the constructor of the type " + type);
+        }
+    }
 
     /**
      * Set the value of the property.
      * @param strValue : value of the property (String)
      * @param type : type of the property
-     * @throws ConfigurationException  : occurs when the property value cannot be initialized.
+     * @throws ConfigurationException : occurs when the property value cannot be initialized.
      */
     private void setValue(String strValue, String type) throws ConfigurationException {
         Object value = null;
@@ -176,7 +290,7 @@ public class ConfigurableProperty {
             } catch (IllegalAccessException e) {
                 throw new ConfigurationException("Illegal Access " + type);
             } catch (InvocationTargetException e) {
-                throw new ConfigurationException("Invocation problem " + type);
+                throw new ConfigurationException("Invocation problem " + type + " : " + e.getTargetException().getMessage());
             }
         }
 
@@ -299,7 +413,7 @@ public class ConfigurableProperty {
         } catch (IllegalAccessException e) {
             throw new ConfigurationException("Illegal Access Exception in  " + internalType);
         } catch (InvocationTargetException e) {
-            throw new ConfigurationException("Invocation problem " + internalType);
+            throw new ConfigurationException("Invocation problem " + internalType + " : " + e.getTargetException().getMessage());
         }
     }
 
@@ -342,7 +456,6 @@ public class ConfigurableProperty {
 
     /**
      * Fix the value of the property.
-     * 
      * @param value : the new value.
      */
     public void setValue(Object value) {
@@ -363,8 +476,8 @@ public class ConfigurableProperty {
             m_handler.log(Logger.ERROR, "The method " + m_method + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
             m_handler.getInstanceManager().stop();
         } catch (InvocationTargetException e) {
-            m_handler.log(Logger.ERROR, "The method " + m_method + " in the class " + m_handler.getInstanceManager().getClassName() + "thorws an exception : " + e.getMessage());
-            m_handler.getInstanceManager().stop();
+            m_handler.log(Logger.ERROR, "The method " + m_method + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getTargetException().getMessage());
+            m_handler.getInstanceManager().setState(ComponentInstance.INVALID);
         }
     }
 
@@ -384,8 +497,8 @@ public class ConfigurableProperty {
             m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
             m_handler.getInstanceManager().stop();
         } catch (InvocationTargetException e) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getMessage());
-            m_handler.getInstanceManager().stop();
+            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "The method " + m_method + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getTargetException().getMessage());
+            m_handler.getInstanceManager().setState(ComponentInstance.INVALID);
         }
     }
 }

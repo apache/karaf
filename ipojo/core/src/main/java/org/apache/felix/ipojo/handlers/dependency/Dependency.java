@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.IPojoContext;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.PolicyServiceContext;
@@ -359,7 +360,7 @@ public class Dependency implements TrackerCustomizer {
                         m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
                         m_handler.getInstanceManager().stop();
                     } catch (InvocationTargetException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getMessage());
+                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getTargetException().getMessage());
                         m_handler.getInstanceManager().stop();
                     }
                 }
@@ -410,8 +411,8 @@ public class Dependency implements TrackerCustomizer {
                             m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
                             m_handler.getInstanceManager().stop();
                         } catch (InvocationTargetException e) {
-                            m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "thorws an exception : " + e.getMessage());
-                            m_handler.getInstanceManager().stop();
+                            m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getTargetException().getMessage());
+                            m_handler.getInstanceManager().setState(ComponentInstance.INVALID);
                         }
                     }
                 }
@@ -431,8 +432,8 @@ public class Dependency implements TrackerCustomizer {
                         m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
                         m_handler.getInstanceManager().stop();
                     } catch (InvocationTargetException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getMessage());
-                        m_handler.getInstanceManager().stop();
+                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getTargetException().getMessage());
+                        m_handler.getInstanceManager().setState(ComponentInstance.INVALID);
                     }
                 }
             }
@@ -459,8 +460,8 @@ public class Dependency implements TrackerCustomizer {
                         m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
                         m_handler.getInstanceManager().stop();
                     } catch (InvocationTargetException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getMessage());
-                        m_handler.getInstanceManager().stop();
+                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getTargetException().getMessage());
+                        m_handler.getInstanceManager().setState(ComponentInstance.INVALID);
                     }
                 }
             }
@@ -594,7 +595,7 @@ public class Dependency implements TrackerCustomizer {
     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
     */
     public boolean addingService(ServiceReference ref) {
-        if (! m_activated && m_filter.match(ref)) {
+        if (! m_activated) {
             return true;
         }
         return false;

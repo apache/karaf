@@ -168,8 +168,8 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
                     log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " is not accessible", e);
                     getInstanceManager().stop();
                 } catch (InvocationTargetException e) {
-                    log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " has throws an exception : " + e.getMessage());
-                    getInstanceManager().stop();
+                    log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " has throws an exception : " + e.getTargetException().getMessage());
+                    getInstanceManager().setState(ComponentInstance.INVALID);
                 }
             }
         }

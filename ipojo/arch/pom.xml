@@ -36,6 +36,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+          	<Bundle-Name>iPOJO Arch Command</Bundle-Name>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Private-Package>org.apache.felix.ipojo.arch</Private-Package>
           </instructions>
