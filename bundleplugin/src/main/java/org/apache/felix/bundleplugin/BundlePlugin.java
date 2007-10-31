@@ -221,7 +221,7 @@ public class BundlePlugin extends AbstractMojo {
             properties.putAll(this.transformDirectives(instructions));
 
             // pass maven resource paths onto BND analyzer
-            final String mavenResourcePaths = this.getMavenResourcePaths();
+            final String mavenResourcePaths = this.getMavenResourcePaths(project);
             final String includeResource = (String)properties.get(Analyzer.INCLUDE_RESOURCE);
             if (includeResource != null)
             {
@@ -259,11 +259,11 @@ public class BundlePlugin extends AbstractMojo {
             }
 
             Builder builder = new Builder();
-            builder.setBase(this.baseDir);
+            builder.setBase(project.getBasedir());
             builder.setProperties(properties);
             builder.setClasspath(classpath);
 
-            Collection embeddableArtifacts = getEmbeddableArtifacts(properties);
+            Collection embeddableArtifacts = getEmbeddableArtifacts(project, properties);
             if (embeddableArtifacts.size() > 0)
             {
                 // add BND instructions to embed selected dependencies
@@ -581,12 +581,12 @@ public class BundlePlugin extends AbstractMojo {
         this.outputDirectory = outputDirectory;
     }
 
-    String getMavenResourcePaths()
+    String getMavenResourcePaths(MavenProject project)
     {
-        final String basePath = this.baseDir.getAbsolutePath();
+        final String basePath = project.getBasedir().getAbsolutePath();
 
         StringBuffer resourcePaths = new StringBuffer();
-        for (Iterator i = this.project.getResources().iterator(); i.hasNext();)
+        for (Iterator i = project.getResources().iterator(); i.hasNext();)
         {
             org.apache.maven.model.Resource resource = (org.apache.maven.model.Resource)i.next();
 
@@ -598,7 +598,7 @@ public class BundlePlugin extends AbstractMojo {
             {
                 String path = sourcePath;
 
-                // make relative to basedir
+                // make relative to project
                 if (path.startsWith(basePath))
                 {
                     if ( path.length() == basePath.length() )
@@ -643,7 +643,7 @@ public class BundlePlugin extends AbstractMojo {
         return resourcePaths.toString();
     }
 
-    Collection getEmbeddableArtifacts(Properties properties)
+    Collection getEmbeddableArtifacts(MavenProject project, Properties properties)
     {
         String embedTransitive = properties.getProperty(DependencyEmbedder.EMBED_TRANSITIVE);
         if (Boolean.valueOf(embedTransitive).booleanValue())
