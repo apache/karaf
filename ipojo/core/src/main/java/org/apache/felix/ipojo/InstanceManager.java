@@ -677,7 +677,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @return the value decided by the last asked handler (throw a warning if
      * two fields decide two different values)
      */
-    public synchronized Object getterCallback(String fieldName) {
+    public Object getterCallback(String fieldName) {
         Object initialValue = m_map.get(fieldName);
         Object result = initialValue;
         // Get the list of registered handlers
@@ -711,7 +711,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * Dispatch entry method event on registered handler.
      * @param methodId : method id
      */
-    public synchronized void entryCallback(String methodId) {
+    public void entryCallback(String methodId) {
         PrimitiveHandler[] list = (PrimitiveHandler[]) m_methodRegistration.get(methodId);
         for (int i = 0; list != null && i < list.length; i++) {
             list[i].entryCallback(methodId);
@@ -725,7 +725,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @param methodId : method id
      * @param e : returned object.
      */
-    public synchronized void exitCallback(String methodId, Object e) {
+    public void exitCallback(String methodId, Object e) {
         PrimitiveHandler[] list = (PrimitiveHandler[]) m_methodRegistration.get(methodId);
         for (int i = 0; list != null && i < list.length; i++) {
             list[i].exitCallback(methodId, e);
@@ -740,7 +740,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * called
      * @param objectValue : the value of the field
      */
-    public synchronized void setterCallback(String fieldName, Object objectValue) {
+    public void setterCallback(String fieldName, Object objectValue) {
         Object o = m_map.get(fieldName);
         if ((o != null && ! o.equals(objectValue)) || (o == null && objectValue != null)) {
             m_map.put(fieldName, objectValue);
