@@ -296,7 +296,7 @@ public class DependencyEmbedder
             }
 
             String embedDirectory    = properties.getProperty(EMBED_DIRECTORY);
-            String embedStripGroup   = properties.getProperty(EMBED_STRIP_GROUP);
+            String embedStripGroup   = properties.getProperty(EMBED_STRIP_GROUP, "true");
             String embedStripVersion = properties.getProperty(EMBED_STRIP_VERSION);
 
             if ("".equals(embedDirectory) || ".".equals(embedDirectory))
