@@ -216,7 +216,7 @@ public class ObrUpdate {
 
         if (!walkOnTree(m_root)) {
             // the correct resource node was not found, we must create it
-            // we calcul the new id
+            // we compute the new id
             int id = -1;
             for (int i = 1; i < m_idTab.length; i++) {
                 if (!m_idTab[i]) {
@@ -252,7 +252,7 @@ public class ObrUpdate {
     }
 
     /**
-     * Parse the reporitory descriptor file.
+     * Parse the repository descriptor file.
      * 
      * @return 0 if the bundle is already in the descriptor, else -1
      * @throws MojoExecutionException if the plugin failed
@@ -293,7 +293,6 @@ public class ObrUpdate {
 
         m_root = (Element) m_repoDoc.getDocumentElement();
         return 0;
-
     }
 
     /**
