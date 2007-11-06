@@ -219,7 +219,7 @@ public class Felix extends FelixBundle
         // Initialize member variables.
         m_configMutableMap = (configMutableMap == null)
             ? new StringMap(false) : configMutableMap;
-        m_configMap = Collections.unmodifiableMap(m_configMutableMap);
+        m_configMap = createUnmodifiableMap(m_configMutableMap); 
         m_activatorList = activatorList;
 
         // Create logger with appropriate log level. Even though the
@@ -269,6 +269,26 @@ public class Felix extends FelixBundle
             new ExtensionManager(m_logger, m_configMap, m_systemBundleInfo);
         m_systemBundleInfo.addModule(
             m_factory.createModule("0", m_extensionManager));
+    }
+
+    private Map createUnmodifiableMap(Map mutableMap) 
+    {
+        Map result = Collections.unmodifiableMap(mutableMap);
+
+        // Work around a bug in certain version of J9 where a call to 
+        // Collections.unmodifiableMap().keySet().iterator() throws 
+        // a NoClassDefFoundError. We try to detect this and return 
+        // the given mutableMap instead.
+        try 
+        {
+            result.keySet().iterator();
+        }
+        catch (NoClassDefFoundError ex)
+        {
+            return mutableMap;
+        }
+
+        return result;
     }
 
     //
