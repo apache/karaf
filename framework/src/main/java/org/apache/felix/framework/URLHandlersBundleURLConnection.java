@@ -37,6 +37,11 @@ class URLHandlersBundleURLConnection extends URLConnection
     private String m_contentType;
     private InputStream m_is;
 
+    public URLHandlersBundleURLConnection(URL url)
+    {
+        super(url);
+    }
+
     public URLHandlersBundleURLConnection(URL url, Felix framework)
         throws IOException
     {
@@ -92,7 +97,7 @@ class URLHandlersBundleURLConnection extends URLConnection
         }
     }
 
-    public void connect() throws IOException
+    public synchronized void connect() throws IOException
     {
         if (!connected)
         {
@@ -112,42 +117,36 @@ class URLHandlersBundleURLConnection extends URLConnection
     public InputStream getInputStream()
         throws IOException
     {
-        if (!connected)
-        {
-            connect();
-        }
+        connect();
+
         return m_is;
     }
 
     public int getContentLength()
     {
-        if (!connected)
+        try
         {
-            try
-            {
-                connect();
-            }
-            catch(IOException ex)
-            {
-                return -1;
-            }
+            connect();
         }
+        catch(IOException ex)
+        {
+            return -1;
+        }
+
         return m_contentLength;
     }
 
     public long getLastModified()
     {
-        if (!connected)
+        try
         {
-            try
-            {
-                connect();
-            }
-            catch(IOException ex)
-            {
-                return 0;
-            }
+            connect();
         }
+        catch(IOException ex)
+        {
+            return 0;
+        }
+
         if (m_contentTime != -1L)
         {
             return m_contentTime;
@@ -160,17 +159,15 @@ class URLHandlersBundleURLConnection extends URLConnection
 
     public String getContentType()
     {
-        if (!connected)
+        try
         {
-            try
-            {
-                connect();
-            }
-            catch (IOException ex)
-            {
-                return null;
-            }
+            connect();
         }
+        catch (IOException ex)
+        {
+            return null;
+        }
+
         return m_contentType;
     }
 

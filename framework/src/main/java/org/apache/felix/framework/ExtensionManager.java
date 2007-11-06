@@ -512,13 +512,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
 
         if (path.trim().equals("/"))
         {
-            return new URLConnection(url) 
-            {
-                public void connect() throws IOException 
-                {
-                    throw new IOException("Resource not provided by any extension!");
-                }
-            };
+            return new URLHandlersBundleURLConnection(url);
         }
 
         for (Iterator iter = m_extensions.iterator(); iter.hasNext();)
