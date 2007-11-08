@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -197,11 +197,14 @@ public class ServiceRegistry
 
     public synchronized Object getService(Bundle bundle, ServiceReference ref)
     {
-        // Get usage counts for specified bundle.
-        UsageCount[] usages = (UsageCount[]) m_inUseMap.get(bundle);
+        // Variable for service object.
+        Object svcObj = null;
+
+        // Get the service registration.
+        ServiceRegistrationImpl reg = ((ServiceReferenceImpl) ref).getServiceRegistration();
 
         // Make sure the service registration is still valid.
-        if (!((ServiceReferenceImpl) ref).getServiceRegistration().isValid())
+        if (!reg.isValid())
         {
             // If the service registration is not valid, then this means
             // that the service provider unregistered the service. The spec
@@ -209,39 +212,36 @@ public class ServiceRegistry
             // return null (assumption: even if it is currently cached
             // by the bundle). So in this case, flush the service reference
             // from the cache and return null.
-            m_inUseMap.put(bundle, removeUsageCount(usages, ref));
+            flushUsageCount(bundle, ref);
 
             // It is not necessary to unget the service object from
             // the providing bundle, since the associated service is
             // unregistered and hence not in the list of registered services
             // of the providing bundle. This is precisely why the service
             // registration was not found above in the first place.
-            return null;
-        }
-
-        // Get the service registration.
-        ServiceRegistrationImpl reg = ((ServiceReferenceImpl) ref).getServiceRegistration();
-
-        // Get the usage count, if any.
-        UsageCount usage = getUsageCount(usages, ref);
-       
-        // If the service object is cached, then increase the usage
-        // count and return the cached service object.
-        Object svcObj = null;
-        if (usage != null)
-        {
-            usage.m_count++;
-            svcObj = usage.m_svcObj;
         }
         else
         {
-            // Get service object from service registration.
-            svcObj = reg.getService(bundle);
+            // Get the usage count, if any.
+            UsageCount usage = getUsageCount(bundle, ref);
 
-            // Cache the service object.
-            if (svcObj != null)
+            // If the service object is cached, then increase the usage
+            // count and return the cached service object.
+            if (usage != null)
             {
-                m_inUseMap.put(bundle, addUsageCount(usages, ref, svcObj));
+                usage.m_count++;
+                svcObj = usage.m_svcObj;
+            }
+            else
+            {
+                // Get service object from service registration.
+                svcObj = reg.getService(bundle);
+
+                // Cache the service object.
+                if (svcObj != null)
+                {
+                    addUsageCount(bundle, ref, svcObj);
+                }
             }
         }
 
@@ -250,57 +250,49 @@ public class ServiceRegistry
 
     public synchronized boolean ungetService(Bundle bundle, ServiceReference ref)
     {
+        // Result of unget.
+        boolean result = false;
+
         // Get usage count.
-        UsageCount[] usages = (UsageCount[]) m_inUseMap.get(bundle);
-        UsageCount usage = getUsageCount(usages, ref);
+        UsageCount usage = getUsageCount(bundle, ref);
 
         // If no usage count, then return.
-        if (usage == null)
+        if (usage != null)
         {
-            return false;
-        }
-
-        // Make sure the service registration is still valid.
-        if (!((ServiceReferenceImpl) ref).getServiceRegistration().isValid())
-        {
-            // If the service registration is not valid, then this means
-            // that the service provider unregistered the service. The spec
-            // says that calls to get an unregistered service should always
-            // return null (assumption: even if it is currently cached
-            // by the bundle). So in this case, flush the service reference
-            // from the cache and return null.
-            m_inUseMap.put(bundle, removeUsageCount(usages, ref));
-            return false;
-        }
-
-        // Decrement usage count.
-        usage.m_count--;
-
-        // Remove reference when usage count goes to zero
-        // and unget the service object from the exporting
-        // bundle.
-        if (usage.m_count == 0)
-        {
-            // Remove reference from usages array.
-            usages = removeUsageCount(usages, ref);
-            // If there are no more usages in the array, then remove
-            // the bundle from the inUseMap to allow for garbage collection.
-            if (usages.length == 0)
+            // Make sure the service registration is still valid.
+            if (!((ServiceReferenceImpl) ref).getServiceRegistration().isValid())
             {
-                m_inUseMap.remove(bundle);
+                // If the service registration is not valid, then this means
+                // that the service provider unregistered the service. The spec
+                // says that calls to get an unregistered service should always
+                // return null (assumption: even if it is currently cached
+                // by the bundle). So in this case, flush the service reference
+                // from the cache and return null.
+                flushUsageCount(bundle, ref);
             }
             else
             {
-                m_inUseMap.put(bundle, usages);
+                // Decrement usage count.
+                usage.m_count--;
+
+                // Remove reference when usage count goes to zero
+                // and unget the service object from the exporting
+                // bundle.
+                if (usage.m_count == 0)
+                {
+                    // Remove reference from usages array.
+                    flushUsageCount(bundle, ref);
+                    ((ServiceReferenceImpl) ref)
+                        .getServiceRegistration().ungetService(bundle, usage.m_svcObj);
+                    usage.m_svcObj = null;
+                }
+
+                // Return true if the usage count is greater than zero.
+                result = (usage.m_count > 0);
             }
-            ServiceRegistrationImpl reg =
-                ((ServiceReferenceImpl) ref).getServiceRegistration();
-            reg.ungetService(bundle, usage.m_svcObj);
-            usage.m_svcObj = null;
         }
 
-        // Return true if the usage count is greater than zero.
-        return (usage.m_count > 0);
+        return result;
     }
 
 
@@ -411,7 +403,7 @@ public class ServiceRegistry
                     regs = newRegs;
                 }
             }
-        }      
+        }
         return regs;
     }
 
@@ -440,18 +432,18 @@ public class ServiceRegistry
     {
         protected ServiceListener m_a = null, m_b = null;
 
-        protected ServiceListenerMulticaster(ServiceListener a, ServiceListener b)    
-        {        
-            m_a = a;        
-            m_b = b;    
-        }    
-    
-        public void serviceChanged(ServiceEvent e)    
+        protected ServiceListenerMulticaster(ServiceListener a, ServiceListener b)
+        {
+            m_a = a;
+            m_b = b;
+        }
+
+        public void serviceChanged(ServiceEvent e)
         {
             m_a.serviceChanged(e);
             m_b.serviceChanged(e);
         }
-    
+
         public static ServiceListener add(ServiceListener a, ServiceListener b)
         {
             if (a == null)
@@ -467,7 +459,7 @@ public class ServiceRegistry
                 return new ServiceListenerMulticaster(a, b);
             }
         }
-    
+
         public static ServiceListener remove(ServiceListener a, ServiceListener b)
         {
             if ((a == null) || (a == b))
@@ -487,8 +479,9 @@ public class ServiceRegistry
         }
     }
 
-    private static UsageCount getUsageCount(UsageCount[] usages, ServiceReference ref)
+    private UsageCount getUsageCount(Bundle bundle, ServiceReference ref)
     {
+        UsageCount[] usages = (UsageCount[]) m_inUseMap.get(bundle);
         for (int i = 0; (usages != null) && (i < usages.length); i++)
         {
             if (usages[i].m_ref.equals(ref))
@@ -499,8 +492,17 @@ public class ServiceRegistry
         return null;
     }
 
-    private static UsageCount[] addUsageCount(UsageCount[] usages, ServiceReference ref, Object svcObj)
+    /**
+     * Utility method to update the specified bundle's usage count array to
+     * include the specified service.
+     * @param bundle The bundle acquiring the service.
+     * @param ref The service reference of the acquired service.
+     * @param svcObj The service object of the acquired service.
+     */
+    private void addUsageCount(Bundle bundle, ServiceReference ref, Object svcObj)
     {
+        UsageCount[] usages = (UsageCount[]) m_inUseMap.get(bundle);
+
         UsageCount usage = new UsageCount();
         usage.m_ref = ref;
         usage.m_svcObj = svcObj;
@@ -517,11 +519,13 @@ public class ServiceRegistry
             newUsages[usages.length] = usage;
             usages = newUsages;
         }
-        return usages;
+
+        m_inUseMap.put(bundle, usages);
     }
 
-    private static UsageCount[] removeUsageCount(UsageCount[] usages, ServiceReference ref)
+    private void flushUsageCount(Bundle bundle, ServiceReference ref)
     {
+        UsageCount[] usages = (UsageCount[]) m_inUseMap.get(bundle);
         for (int i = 0; (usages != null) && (i < usages.length); i++)
         {
             if (usages[i].m_ref.equals(ref))
@@ -529,12 +533,12 @@ public class ServiceRegistry
                 // If this is the only usage, then point to empty list.
                 if ((usages.length - 1) == 0)
                 {
-                    usages = new UsageCount[0];
+                    usages = null;
                 }
                 // Otherwise, we need to do some array copying.
                 else
                 {
-                    UsageCount[] newUsages= new UsageCount[usages.length - 1];
+                    UsageCount[] newUsages = new UsageCount[usages.length - 1];
                     System.arraycopy(usages, 0, newUsages, 0, i);
                     if (i < newUsages.length)
                     {
@@ -545,8 +549,15 @@ public class ServiceRegistry
                 }
             }
         }
-        
-        return usages;
+
+        if (usages != null)
+        {
+            m_inUseMap.put(bundle, usages);
+        }
+        else
+        {
+            m_inUseMap.remove(bundle);
+        }
     }
 
     private static class UsageCount
