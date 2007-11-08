@@ -479,6 +479,13 @@ public class ServiceRegistry
         }
     }
 
+    /**
+     * Utility method to retrieve the specified bundle's usage count for the
+     * specified service reference.
+     * @param bundle The bundle whose usage counts are being searched.
+     * @param ref The service reference to find in the bundle's usage counts.
+     * @return The associated usage count or null if not found.
+    **/
     private UsageCount getUsageCount(Bundle bundle, ServiceReference ref)
     {
         UsageCount[] usages = (UsageCount[]) m_inUseMap.get(bundle);
@@ -494,11 +501,14 @@ public class ServiceRegistry
 
     /**
      * Utility method to update the specified bundle's usage count array to
-     * include the specified service.
+     * include the specified service. This method should only be called
+     * to add a usage count for a previously unreferenced service. If the
+     * service already has a usage count, then the existing usage count
+     * counter simply needs to be incremented.
      * @param bundle The bundle acquiring the service.
      * @param ref The service reference of the acquired service.
      * @param svcObj The service object of the acquired service.
-     */
+    **/
     private void addUsageCount(Bundle bundle, ServiceReference ref, Object svcObj)
     {
         UsageCount[] usages = (UsageCount[]) m_inUseMap.get(bundle);
@@ -523,6 +533,18 @@ public class ServiceRegistry
         m_inUseMap.put(bundle, usages);
     }
 
+    /**
+     * Utility method to flush the specified bundle's usage count for the
+     * specified service reference. This should be called to completely
+     * remove the associated usage count object for the specified service
+     * reference. If the goal is to simply decrement the usage, then get
+     * the usage count and decrement its counter. This method will also
+     * remove the specified bundle from the "in use" map if it has no more
+     * usage counts after removing the usage count for the specified service
+     * reference.
+     * @param bundle The bundle whose usage count should be removed.
+     * @param ref The service reference whose usage count should be removed.
+    **/
     private void flushUsageCount(Bundle bundle, ServiceReference ref)
     {
         UsageCount[] usages = (UsageCount[]) m_inUseMap.get(bundle);
