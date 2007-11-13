@@ -126,7 +126,9 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 this.getLog().debug("Processing service class " + javaSources[i].getName());
                 final Component comp = this.createComponent(javaSources[i], tag, metaData);
                 if (comp != null) {
-                    if ( comp.isAbstract() ) {
+                    if ( !comp.isDs() ) {
+                        getLog().debug("Not adding descriptor " + comp);
+                    } else if ( comp.isAbstract() ) {
                         this.getLog().debug("Adding abstract descriptor " + comp);
                         abstractComponents.addComponent(comp);
                     } else {
@@ -142,6 +144,26 @@ public class SCRDescriptorMojo extends AbstractMojo {
         // after checking all classes, throw if there were any failures
         if (hasFailures) {
             throw new MojoFailureException("SCR Descriptor parsing had failures (see log)");
+        }
+
+        // write meta type info if there is a file
+        if (!StringUtils.isEmpty(this.metaTypeName)) {
+
+            File mtFile = new File(this.outputDirectory, "OSGI-INF" + File.separator + "metatype" + File.separator + this.metaTypeName);
+            if ( metaData.getDescriptors().size() > 0 ) {
+                this.getLog().info("Generating "
+                    + metaData.getDescriptors().size()
+                    + " MetaType Descriptors to " + mtFile);
+                mtFile.getParentFile().mkdirs();
+                MetaTypeIO.write(metaData, mtFile);
+            } else {
+                if ( mtFile.exists() ) {
+                    mtFile.delete();
+                }
+            }
+
+        } else {
+            this.getLog().info("Have no meta type file name, not writing metatype info");
         }
 
         // if we have abstract descriptors, write them
@@ -180,22 +202,6 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
         ComponentDescriptorIO.write(components, descriptorFile);
 
-        // check file name
-        if (StringUtils.isEmpty(this.metaTypeName)) {
-            this.getLog().error("Meta type file name must not be empty.");
-            return;
-        }
-
-        // create metatype information
-        File mtFile = new File(this.outputDirectory, "OSGI-INF" + File.separator + "metatype" + File.separator + this.metaTypeName);
-        if ( metaData.getDescriptors().size() > 0 ) {
-            mtFile.getParentFile().mkdirs();
-            MetaTypeIO.write(metaData, mtFile);
-        } else {
-            if ( mtFile.exists() ) {
-                mtFile.delete();
-            }
-        }
 
         // now add the descriptor file to the maven resources
         final String ourRsrcPath = this.outputDirectory.getAbsolutePath();
@@ -315,6 +321,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 pid.setValue(component.getName());
             }
         }
+
         final List issues = new ArrayList();
         final List warnings = new ArrayList();
         component.validate(issues, warnings);
@@ -343,6 +350,10 @@ public class SCRDescriptorMojo extends AbstractMojo {
         // check if this is an abstract definition
         final String abstractType = tag.getNamedParameter(Constants.COMPONENT_ABSTRACT);
         component.setAbstract((abstractType == null ? false : "yes".equalsIgnoreCase(abstractType) || "true".equalsIgnoreCase(abstractType)));
+
+        // check if this is a definition to ignore
+        final String ds = tag.getNamedParameter(Constants.COMPONENT_DS);
+        component.setDs((ds == null) ? true : ("yes".equalsIgnoreCase(ds) || "true".equalsIgnoreCase(ds)));
 
         String name = tag.getNamedParameter(Constants.COMPONENT_NAME);
         component.setName(StringUtils.isEmpty(name) ? component.getImplementation().getClassame() : name);

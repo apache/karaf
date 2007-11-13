@@ -45,6 +45,8 @@ public class Constants {
 
     public static final String COMPONENT_ABSTRACT = "abstract";
 
+    public static final String COMPONENT_DS = "ds";
+
     public static final String COMPONENT_CREATE_PID = "create-pid";
 
     public static final String PROPERTY = "scr.property";

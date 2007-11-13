@@ -62,6 +62,9 @@ public class Component extends AbstractObject {
     /** Is this an abstract description? */
     protected boolean isAbstract;
 
+    /** Is this a descriptor to be ignored ? */
+    protected boolean isDs;
+
     /**
      * Default constructor.
      */
@@ -169,6 +172,14 @@ public class Component extends AbstractObject {
         this.isAbstract = isAbstract;
     }
 
+    public boolean isDs() {
+        return isDs;
+    }
+
+    public void setDs(boolean isDs) {
+        this.isDs = isDs;
+    }
+
     /**
      * Validate the component description.
      * If errors occur a message is added to the issues list,
@@ -176,6 +187,12 @@ public class Component extends AbstractObject {
      */
     public void validate(List issues, List warnings)
     throws MojoExecutionException {
+
+        // nothing to check if this is ignored
+        if (!isDs()) {
+            return;
+        }
+
         final JavaClassDescription javaClass = this.tag.getJavaClassDescription();
         if (javaClass == null) {
             issues.add(this.getMessage("Tag not declared in a Java Class"));
