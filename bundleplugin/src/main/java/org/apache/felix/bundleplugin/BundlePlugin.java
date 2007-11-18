@@ -623,7 +623,8 @@ public class BundlePlugin extends AbstractMojo {
 
                 for ( Iterator j = includedFiles.iterator(); j.hasNext(); )
                 {
-                    String path = sourcePath + '/' + j.next();
+                    String name = (String) j.next();
+                    String path = sourcePath + '/' + name;
 
                     // make relative to project
                     if (path.startsWith(basePath))
@@ -645,9 +646,11 @@ public class BundlePlugin extends AbstractMojo {
                         path = path.replace(File.separatorChar, '/');
                     }
 
+                    // copy to correct place
+                    path = name + '=' + path;
                     if (targetPath != null)
                     {
-                        path = targetPath + '=' + path;
+                        path = targetPath + '/' + path;
                     }
 
                     if (resourcePaths.length() > 0)
