@@ -43,6 +43,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.osgi.Maven2OsgiConverter;
+import org.codehaus.plexus.util.DirectoryScanner;
 
 import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Builder;
@@ -126,6 +127,8 @@ public class BundlePlugin extends AbstractMojo {
 
     private static final String MAVEN_RESOURCES = "{maven-resources}";
     private static final String MAVEN_RESOURCES_REGEX = "\\{maven-resources\\}";
+    private static final String[] EMPTY_STRING_ARRAY = {};
+    private static final String[] DEFAULT_INCLUDES = {"**/**"};
 
 
     protected Maven2OsgiConverter getMaven2OsgiConverter()
@@ -596,47 +599,73 @@ public class BundlePlugin extends AbstractMojo {
             // ignore empty or non-local resources
             if (new File(sourcePath).exists() && ((targetPath == null) || (targetPath.indexOf("..") < 0)))
             {
-                String path = sourcePath;
+                DirectoryScanner scanner = new DirectoryScanner();
 
-                // make relative to project
-                if (path.startsWith(basePath))
+                scanner.setBasedir( resource.getDirectory() );
+                if ( resource.getIncludes() != null && !resource.getIncludes().isEmpty() )
                 {
-                    if ( path.length() == basePath.length() )
-                    {
-                        path = ".";
-                    }
-                    else
-                    {
-                        path = path.substring( basePath.length() + 1 );
-                    }
-                }
-                // replace windows backslash with a slash
-                // this is a workaround for a problem with bnd 0.0.189
-                if ( File.separatorChar != '/' )
-                {
-                    path = path.replace(File.separatorChar, '/');
-                }
-
-                if (targetPath != null)
-                {
-                    path = targetPath + '=' + path;
-                }
-
-                if (resourcePaths.length() > 0)
-                {
-                    resourcePaths.append(',');
-                }
-
-                if (resource.isFiltering())
-                {
-                    resourcePaths.append('{');
-                    resourcePaths.append(path);
-                    resourcePaths.append('}');
+                    scanner.setIncludes( (String[]) resource.getIncludes().toArray( EMPTY_STRING_ARRAY ) );
                 }
                 else
                 {
-                    resourcePaths.append(path);
+                    scanner.setIncludes( DEFAULT_INCLUDES );
                 }
+
+                if ( resource.getExcludes() != null && !resource.getExcludes().isEmpty() )
+                {
+                    scanner.setExcludes( (String[]) resource.getExcludes().toArray( EMPTY_STRING_ARRAY ) );
+                }
+
+                scanner.addDefaultExcludes();
+                scanner.scan();
+
+                List includedFiles = Arrays.asList( scanner.getIncludedFiles() );
+
+                for ( Iterator j = includedFiles.iterator(); j.hasNext(); )
+                {
+                    String path = sourcePath + '/' + j.next();
+
+                    // make relative to project
+                    if (path.startsWith(basePath))
+                    {
+                        if ( path.length() == basePath.length() )
+                        {
+                            path = ".";
+                        }
+                        else
+                        {
+                            path = path.substring( basePath.length() + 1 );
+                        }
+                    }
+
+                    // replace windows backslash with a slash
+                    // this is a workaround for a problem with bnd 0.0.189
+                    if ( File.separatorChar != '/' )
+                    {
+                        path = path.replace(File.separatorChar, '/');
+                    }
+
+                    if (targetPath != null)
+                    {
+                        path = targetPath + '=' + path;
+                    }
+
+                    if (resourcePaths.length() > 0)
+                    {
+                        resourcePaths.append(',');
+                    }
+
+                    if (resource.isFiltering())
+                    {
+                        resourcePaths.append('{');
+                        resourcePaths.append(path);
+                        resourcePaths.append('}');
+                    }
+                    else
+                    {
+                        resourcePaths.append(path);
+                    }
+                }                
             }
         }
 
