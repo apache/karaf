@@ -256,8 +256,9 @@ public class PathFile {
         String path = PathFile.uniformSeparator(getAbsoluteFilename());
         if (File.separatorChar == '\\') { 
         	path = path.replace('\\', '/');
-        	path = path.replaceAll(" ", "%20");
         }
+
+        path = path.replaceAll(" ", "%20");
 
         URI uri = null;
         try {
@@ -300,7 +301,7 @@ public class PathFile {
                     return "." + File.separator + m_pathFile.substring(m_baseDir.length());
                 }
             }
-            return null;
+            return m_pathFile;
         }
     }
 
