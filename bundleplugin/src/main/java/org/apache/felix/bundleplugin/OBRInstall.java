@@ -135,7 +135,8 @@ public class OBRInstall extends AbstractMojo
             uri = file.toURI();
         }
 
-        return new PathFile( uri.toASCIIString() );
+        // PathFile workaround: for now provide decoded strings to maven-obr-plugin
+        return new PathFile( uri.getScheme() + ':' + uri.getSchemeSpecificPart() );
     }
 
     private static String findOBRExtensions( List resources )
