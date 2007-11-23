@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr;
+package org.apache.felix.scr.impl;
 
 
 import java.lang.reflect.InvocationTargetException;
@@ -41,9 +41,6 @@ import org.osgi.service.log.LogService;
  */
 class ImmediateComponentManager extends AbstractComponentManager
 {
-    // the component ID
-    private long m_componentId;
-
     // The object that implements the service and that is bound to other services
     private Object m_implementationObject;
 
@@ -74,9 +71,7 @@ class ImmediateComponentManager extends AbstractComponentManager
      */
     ImmediateComponentManager( BundleComponentActivator activator, ComponentMetadata metadata, long componentId )
     {
-        super( activator, metadata );
-
-        m_componentId = componentId;
+        super( activator, metadata, componentId );
 
         // only register as ManagedService if not created by a Component Factory
         if ( !getComponentMetadata().isFactory() )
@@ -341,7 +336,7 @@ class ImmediateComponentManager extends AbstractComponentManager
      *
      * @return a private Hashtable of component properties
      */
-    protected Dictionary getProperties()
+    public Dictionary getProperties()
     {
 
         // TODO: Currently on ManagedService style configuration is supported, ManagedServiceFactory style is missing
@@ -372,7 +367,7 @@ class ImmediateComponentManager extends AbstractComponentManager
 
             // 5. set component.name and component.id
             props.put( ComponentConstants.COMPONENT_NAME, getComponentMetadata().getName() );
-            props.put( ComponentConstants.COMPONENT_ID, new Long( m_componentId ) );
+            props.put( ComponentConstants.COMPONENT_ID, new Long( getId() ) );
 
             m_properties = props;
         }

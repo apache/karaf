@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr;
+package org.apache.felix.scr.impl;
 
 
 import java.util.Dictionary;
@@ -44,7 +44,7 @@ class ComponentContextImpl implements ComponentContext
         m_componentManager = componentManager;
     }
 
-    
+
     protected AbstractComponentManager getComponentManager()
     {
         return m_componentManager;
@@ -73,12 +73,12 @@ class ComponentContextImpl implements ComponentContext
         }
         else
         {
-            // is it correct to assume an ordered bound services set ? 
+            // is it correct to assume an ordered bound services set ?
             int maxRanking = Integer.MIN_VALUE;
             long minId = Long.MAX_VALUE;
             selectedRef = null;
 
-            ServiceReference[] refs = dm.getServiceReferences();
+            ServiceReference[] refs = dm.getFrameworkServiceReferences();
             for ( int i = 0; refs != null && i < refs.length; i++ )
             {
                 ServiceReference ref = refs[i];

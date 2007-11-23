@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr;
+package org.apache.felix.scr.impl;
 
 
 import java.io.IOException;
@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.felix.scr.parser.KXml2SAXHandler;
-import org.apache.felix.scr.parser.ParseException;
+import org.apache.felix.scr.impl.parser.KXml2SAXHandler;
+import org.apache.felix.scr.impl.parser.ParseException;
 import org.osgi.framework.Bundle;
 
 
@@ -271,7 +271,7 @@ public class XmlHandler implements KXml2SAXHandler
 
 
     /**
-     * @see org.apache.felix.scr.parser.KXml2SAXHandler#characters(java.lang.String)
+     * @see org.apache.felix.scr.impl.parser.KXml2SAXHandler#characters(java.lang.String)
      */
     public void characters( String text )
     {
@@ -286,7 +286,7 @@ public class XmlHandler implements KXml2SAXHandler
 
 
     /**
-     * @see org.apache.felix.scr.parser.KXml2SAXHandler#processingInstruction(java.lang.String, java.lang.String)
+     * @see org.apache.felix.scr.impl.parser.KXml2SAXHandler#processingInstruction(java.lang.String, java.lang.String)
      */
     public void processingInstruction( String target, String data )
     {
@@ -295,7 +295,7 @@ public class XmlHandler implements KXml2SAXHandler
 
 
     /**
-     * @see org.apache.felix.scr.parser.KXml2SAXHandler#setLineNumber(int)
+     * @see org.apache.felix.scr.impl.parser.KXml2SAXHandler#setLineNumber(int)
      */
     public void setLineNumber( int lineNumber )
     {
@@ -304,7 +304,7 @@ public class XmlHandler implements KXml2SAXHandler
 
 
     /**
-     * @see org.apache.felix.scr.parser.KXml2SAXHandler#setColumnNumber(int)
+     * @see org.apache.felix.scr.impl.parser.KXml2SAXHandler#setColumnNumber(int)
      */
     public void setColumnNumber( int columnNumber )
     {

@@ -25,6 +25,11 @@
             <version>0.9.0-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>org.apache.felix.shell</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>net.sf.kxml</groupId>
             <artifactId>kxml2</artifactId>
             <version>2.2.2</version>
@@ -46,16 +51,20 @@
                             Apache Software Foundation
                         </Bundle-Vendor>
                         <Bundle-Activator>
-                            org.apache.felix.scr.Activator
+                            org.apache.felix.scr.impl.Activator
                         </Bundle-Activator>
                         <Export-Package>
+                            org.apache.felix.scr;version=${pom.version},
                             org.osgi.service.cm,
                             org.osgi.service.component
                         </Export-Package>
                         <Private-Package>
-                            org.apache.felix.scr.*, org.kxml2.io,
+                            org.apache.felix.scr.impl.*, org.kxml2.io,
                             org.osgi.util.tracker, org.xmlpull.v1
                         </Private-Package>
+                        <Import-Package>
+                            org.apache.felix.shell;resolution:=optional,*
+                        </Import-Package>
                         <DynamicImport-Package>
                             org.osgi.service.log
                         </DynamicImport-Package>

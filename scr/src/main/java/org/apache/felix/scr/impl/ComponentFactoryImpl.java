@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr;
+package org.apache.felix.scr.impl;
 
 
 import java.util.Dictionary;
@@ -25,6 +25,7 @@ import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.apache.felix.scr.Reference;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedServiceFactory;
@@ -58,7 +59,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     ComponentFactoryImpl( BundleComponentActivator activator, ComponentMetadata metadata,
         ComponentRegistry componentRegistry )
     {
-        super( activator, metadata );
+        super( activator, metadata, componentRegistry.createComponentId() );
         m_componentRegistry = componentRegistry;
         m_createdComponents = new IdentityHashMap();
     }
@@ -104,7 +105,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     }
 
 
-    protected Dictionary getProperties()
+    public Dictionary getProperties()
     {
         Dictionary props = new Hashtable();
 
@@ -131,6 +132,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
 
 
     //---------- ManagedServiceFactory interface ------------------------------
+
 
     public void updated( String pid, Dictionary configuration )
     {

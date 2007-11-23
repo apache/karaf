@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr;
+package org.apache.felix.scr.impl;
+
+import org.apache.felix.scr.Component;
 
 
 /**
@@ -24,7 +26,7 @@ package org.apache.felix.scr;
  * managers that are responsible for managing component's lifecycle.
  *
  */
-public interface ComponentManager {
+public interface ComponentManager extends Component {
 
 	/**
 	 * Enable the component

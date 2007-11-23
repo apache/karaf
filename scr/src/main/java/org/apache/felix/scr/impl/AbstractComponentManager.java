@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr;
+package org.apache.felix.scr.impl;
 
 
 import java.lang.reflect.InvocationTargetException;
@@ -29,6 +29,8 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.felix.scr.Reference;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentInstance;
@@ -42,32 +44,8 @@ import org.osgi.service.log.LogService;
  */
 abstract class AbstractComponentManager implements ComponentManager, ComponentInstance
 {
-    // manager has been newly created or disabled
-    static final int STATE_DISABLED = 1;
-
-    // manager has just been enabled and is going to be activated
-    static final int STATE_ENABLED = 2;
-
-    // manager has been enabled but not satisfied
-    static final int STATE_UNSATISFIED = 4;
-
-    // manager is currently activating
-    static final int STATE_ACTIVATING = 8;
-
-    // manager is now active
-    static final int STATE_ACTIVE = 16;
-
-    // manager for a delayed component has been registered (not active yet)
-    static final int STATE_REGISTERED = 32;
-
-    // manager for a component factory has been registered
-    static final int STATE_FACTORY = 64;
-
-    // manager is current deactivating
-    static final int STATE_DEACTIVATING = 128;
-
-    // manager has been destroyed and may not be used anymore
-    static final int STATE_DESTROYED = 256;
+    // the ID of this component
+    private long m_componentId;
 
     // The state of this instance manager
     private int m_state;
@@ -91,10 +69,11 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      * @param activator
      * @param metadata
      */
-    protected AbstractComponentManager( BundleComponentActivator activator, ComponentMetadata metadata )
+    protected AbstractComponentManager( BundleComponentActivator activator, ComponentMetadata metadata, long componentId )
     {
         m_activator = activator;
         m_componentMetadata = metadata;
+        m_componentId = componentId;
 
         m_state = STATE_DISABLED;
         m_dependencyManagers = new ArrayList();
@@ -228,6 +207,80 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     }
 
 
+    //---------- Component interface ------------------------------------------
+
+    public long getId()
+    {
+        return m_componentId;
+    }
+
+
+    public String getName()
+    {
+        return m_componentMetadata.getName();
+    }
+
+
+    public Bundle getBundle()
+    {
+        return getActivator().getBundleContext().getBundle();
+    }
+
+
+    public String getClassName()
+    {
+        return m_componentMetadata.getImplementationClassName();
+    }
+
+
+    public String getFactory()
+    {
+        return m_componentMetadata.getFactoryIdentifier();
+    }
+
+
+    public Reference[] getReferences()
+    {
+        if ( m_dependencyManagers != null && m_dependencyManagers.size() > 0 )
+        {
+            return (org.apache.felix.scr.Reference[] ) m_dependencyManagers.toArray( new Reference[m_dependencyManagers.size()] );
+        }
+
+        return null;
+    }
+
+
+    public boolean isImmediate()
+    {
+        return m_componentMetadata.isImmediate();
+
+    }
+
+
+    public boolean isDefaultEnabled()
+    {
+        return m_componentMetadata.isEnabled();
+    }
+
+
+    public boolean isServiceFactory()
+    {
+        return m_componentMetadata.getServiceMetadata() != null
+            && m_componentMetadata.getServiceMetadata().isServiceFactory();
+    }
+
+
+    public String[] getServices()
+    {
+        if ( m_componentMetadata.getServiceMetadata() != null )
+        {
+            return m_componentMetadata.getServiceMetadata().getProvides();
+        }
+
+        return null;
+    }
+
+
     //---------- internal immediate state change methods ----------------------
     // these methods must only be called from a separate thread by calling
     // the respective asynchronous (public) method
@@ -302,7 +355,8 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      */
     private void activateInternal()
     {
-        synchronized (this) {
+        synchronized ( this )
+        {
             // CONCURRENCY NOTE: This method is only called from within the
             //     ComponentActorThread to enable, activate or reactivate the
             //     component. Still we use the setStateConditional to not create
@@ -345,7 +399,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
                 // if at least one dependency is missing, we cannot continue and
                 // have to return
-                if (getState() == STATE_UNSATISFIED)
+                if ( getState() == STATE_UNSATISFIED )
                 {
                     return;
                 }
@@ -624,7 +678,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     public abstract Object getInstance();
 
 
-    protected abstract Dictionary getProperties();
+    public abstract Dictionary getProperties();
 
 
     /**
@@ -676,7 +730,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     }
 
 
-    int getState()
+    public int getState()
     {
         return m_state;
     }

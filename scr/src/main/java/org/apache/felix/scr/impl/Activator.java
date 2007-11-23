@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr;
+package org.apache.felix.scr.impl;
 
 
 import java.io.PrintStream;
@@ -39,7 +39,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * This activator is used to cover requirement described in section 112.8.1 @@ -27,14
  * 37,202 @@ in active bundles.
- * 
+ *
  */
 public class Activator implements BundleActivator, SynchronousBundleListener
 {
@@ -69,7 +69,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
     /**
      * Registers this instance as a (synchronous) bundle listener and loads the
      * components of already registered bundles.
-     * 
+     *
      * @param context The <code>BundleContext</code> of the SCR implementation
      *      bundle.
      */
@@ -91,7 +91,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
                 + context.getBundle().getHeaders().get( Constants.BUNDLE_VERSION ), null );
         }
 
-        // create and start the component actor 
+        // create and start the component actor
         m_componentActor = new ComponentActorThread();
         m_componentActor.start();
 
@@ -100,6 +100,21 @@ public class Activator implements BundleActivator, SynchronousBundleListener
 
         // 112.8.2 load all components of active bundles
         loadAllComponents( context );
+
+        // We dynamically import the impl service API, so it
+        // might not actually be available, so be ready to catch
+        // the exception when we try to register the command service.
+        try
+        {
+            // Register "scr" impl command service as a
+            // wrapper for the bundle repository service.
+            context.registerService( org.apache.felix.shell.Command.class.getName(), new ScrCommand( m_context,
+                m_componentRegistry ), null );
+        }
+        catch ( Throwable th )
+        {
+            // Ignore.
+        }
     }
 
 
@@ -107,7 +122,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
      * Unregisters this instance as a bundle listener and unloads all components
      * which have been registered during the active life time of the SCR
      * implementation bundle.
-     * 
+     *
      * @param context The <code>BundleContext</code> of the SCR implementation
      *      bundle.
      */
@@ -147,7 +162,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
      * Loads and unloads any components provided by the bundle whose state
      * changed. If the bundle has been started, the components are loaded. If
      * the bundle is about to stop, the components are unloaded.
-     * 
+     *
      * @param event The <code>BundleEvent</code> representing the bundle state
      *      change.
      */
@@ -270,9 +285,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener
      * This method assumes a <code>getContext</code> method returning a
      * <code>BundleContext</code> instance to be present in the class of the
      * bundle or any of its parent classes.
-     * 
+     *
      * @param bundle The <code>Bundle</code> whose context is to be returned.
-     * 
+     *
      * @return The <code>BundleContext</code> of the bundle or
      *         <code>null</code> if no <code>getContext</code> method
      *         returning a <code>BundleContext</code> can be found.
@@ -391,7 +406,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
      * Method to actually emit the log message. If the LogService is available,
      * the message will be logged through the LogService. Otherwise the message
      * is logged to stdout (or stderr in case of LOG_ERROR level messages),
-     * 
+     *
      * @param level The log level to log the message at
      * @param message The message to log
      * @param ex An optional <code>Throwable</code> whose stack trace is written,

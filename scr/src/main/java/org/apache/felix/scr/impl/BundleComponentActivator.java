@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr;
+package org.apache.felix.scr.impl;
 
 
 import java.io.BufferedReader;
@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.apache.felix.scr.parser.KXml2SAXParser;
+import org.apache.felix.scr.impl.parser.KXml2SAXParser;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentException;
@@ -414,7 +414,7 @@ class BundleComponentActivator
         // if all components are selected
         if ( name == null )
         {
-            return ( ComponentManager[] ) m_managers.toArray( new ComponentManager[m_managers.size()] );
+            return (org.apache.felix.scr.impl.ComponentManager[] ) m_managers.toArray( new ComponentManager[m_managers.size()] );
         }
 
         if ( m_componentRegistry.getComponent( name ) != null )

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr;
+package org.apache.felix.scr.impl;
 
 
 import java.lang.reflect.InvocationTargetException;
@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.felix.scr.Reference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -44,7 +45,7 @@ import org.osgi.service.log.LogService;
  * declared by a single <code>&lt;reference&gt;</code element in component
  * descriptor.
  */
-class DependencyManager implements ServiceListener
+class DependencyManager implements ServiceListener, Reference
 {
     // mask of states ok to send events
     private static final int STATE_MASK = AbstractComponentManager.STATE_UNSATISFIED
@@ -108,7 +109,7 @@ class DependencyManager implements ServiceListener
         componentManager.getActivator().getBundleContext().addServiceListener( this, filterString );
 
         // get the current number of registered services available
-        ServiceReference refs[] = getServiceReferences();
+        ServiceReference refs[] = getFrameworkServiceReferences();
         m_size = ( refs == null ) ? 0 : refs.length;
     }
 
@@ -309,6 +310,52 @@ class DependencyManager implements ServiceListener
     }
 
 
+    //---------- Reference interface ------------------------------------------
+
+
+    public String getServiceName()
+    {
+        return m_dependencyMetadata.getInterface();
+    }
+
+
+    public ServiceReference[] getServiceReferences()
+    {
+        return getBoundServiceReferences();
+    }
+
+
+    public boolean isOptional()
+    {
+        return m_dependencyMetadata.isOptional();
+    }
+
+
+    public boolean isMultiple()
+    {
+        return m_dependencyMetadata.isMultiple();
+    }
+
+
+    public boolean isStatic()
+    {
+        return m_dependencyMetadata.isStatic();
+    }
+
+
+    public String getBindMethodName()
+    {
+        return m_dependencyMetadata.getBind();
+    }
+
+
+    public String getUnbindMethodName()
+    {
+        return m_dependencyMetadata.getUnbind();
+    }
+
+
+
     //---------- Service tracking support -------------------------------------
 
     /**
@@ -358,12 +405,12 @@ class DependencyManager implements ServiceListener
 
     /**
      * Returns the first service reference returned by the
-     * {@link #getServiceReferences()} method or <code>null</code> if no
+     * {@link #getFrameworkServiceReferences()} method or <code>null</code> if no
      * matching service can be found.
      */
     ServiceReference getServiceReference()
     {
-        ServiceReference[] sr = getServiceReferences();
+        ServiceReference[] sr = getFrameworkServiceReferences();
         return ( sr != null && sr.length > 0 ) ? sr[0] : null;
     }
 
@@ -379,7 +426,7 @@ class DependencyManager implements ServiceListener
      * This method always directly accesses the framework's service registry
      * and ignores the services bound by this dependency manager.
      */
-    ServiceReference[] getServiceReferences()
+    ServiceReference[] getFrameworkServiceReferences()
     {
         try
         {
@@ -411,14 +458,14 @@ class DependencyManager implements ServiceListener
 
     /**
      * Returns an array of service instances for the service references returned
-     * by the {@link #getServiceReference()} method. If no services match the
+     * by the {@link #getFrameworkServiceReferences()} method. If no services match the
      * criteria configured for this dependency <code>null</code> is returned.
      * All services returned by this method will be considered bound after this
      * method returns.
      */
     Object[] getServices()
     {
-        ServiceReference[] sr = getServiceReferences();
+        ServiceReference[] sr = getFrameworkServiceReferences();
         if ( sr == null || sr.length == 0 )
         {
             return null;
@@ -548,7 +595,7 @@ class DependencyManager implements ServiceListener
     /**
      * Returns the name of the service reference.
      */
-    String getName()
+    public String getName()
     {
         return m_dependencyMetadata.getName();
     }
@@ -560,7 +607,7 @@ class DependencyManager implements ServiceListener
      * registered in the framework and available to this dependency manager is
      * not zero.
      */
-    boolean isSatisfied()
+    public boolean isSatisfied()
     {
         return size() > 0 || m_dependencyMetadata.isOptional();
     }
@@ -590,7 +637,7 @@ class DependencyManager implements ServiceListener
         }
 
         // Get service references
-        ServiceReference refs[] = getServiceReferences();
+        ServiceReference refs[] = getFrameworkServiceReferences();
 
         // refs can be null if the dependency is optional
         if ( refs == null )
@@ -1044,7 +1091,7 @@ class DependencyManager implements ServiceListener
         }
 
         // check for new services to be added
-        ServiceReference[] refs = getServiceReferences();
+        ServiceReference[] refs = getFrameworkServiceReferences();
         if ( refs != null )
         {
             for ( int i = 0; i < refs.length; i++ )
@@ -1066,7 +1113,7 @@ class DependencyManager implements ServiceListener
      * @return The target filter of this dependency or <code>null</code> if
      *      none is set.
      */
-    private String getTarget()
+    public String getTarget()
     {
         return m_target;
     }
