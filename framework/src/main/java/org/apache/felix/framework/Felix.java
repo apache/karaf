@@ -3590,13 +3590,16 @@ ex.printStackTrace();
         // The framework version property.
         Properties props = new Properties();
         InputStream in = Felix.class.getResourceAsStream("Felix.properties");
-        try
+        if (in != null)
         {
-            props.load(in);
-        }
-        catch (IOException ex)
-        {
-            ex.printStackTrace();
+            try
+            {
+                props.load(in);
+            }
+            catch (IOException ex)
+            {
+                ex.printStackTrace();
+            }
         }
 
         // Maven uses a '-' to separate the version qualifier,
@@ -3604,7 +3607,7 @@ ex.printStackTrace();
         StringBuffer sb =
             new StringBuffer(
                 props.getProperty(
-                    FelixConstants.FELIX_VERSION_PROPERTY, "unknown"));
+                    FelixConstants.FELIX_VERSION_PROPERTY, "0.0.0"));
         if (sb.toString().indexOf("-") >= 0)
         {
             sb.setCharAt(sb.toString().indexOf("-"), '.');
