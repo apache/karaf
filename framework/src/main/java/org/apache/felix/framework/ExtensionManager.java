@@ -112,15 +112,17 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
     private Set m_exportNames = null;
     private ISearchPolicy m_searchPolicy = null;
     private IURLPolicy m_urlPolicy = null;
-    private final List m_extensions = new ArrayList();
-    private final Set m_names = new HashSet();
-    private final Map m_sourceToExtensions = new HashMap();
+    private final List m_extensions;
+    private final Set m_names;
+    private final Map m_sourceToExtensions;
     
     // This constructor is only used for the private instance added to the parent
     // classloader.
     private ExtensionManager()
     {
-        
+        m_extensions = new ArrayList();
+        m_names = new HashSet();
+        m_sourceToExtensions = new HashMap();
     }
     
     /**
@@ -136,6 +138,9 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
      */
     ExtensionManager(Logger logger, Map configMap, BundleInfo systemBundleInfo)
     {
+        m_extensions = null;
+        m_names = null;
+        m_sourceToExtensions = null;
         m_logger = logger;
         m_systemBundleInfo = systemBundleInfo;
 
@@ -262,7 +267,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
             }
         
             // Add the bundle as extension if we support extensions
-            if (this != null) 
+            if (m_extensionManager != null) 
             {
                 // This needs to be the private instance.
                 m_extensionManager.addExtension(felix, bundle);
@@ -339,7 +344,10 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
      */
     void removeExtensions(Felix felix) 
     {
-        m_extensionManager._removeExtensions(felix);
+        if (m_extensionManager != null)
+        {
+            m_extensionManager._removeExtensions(felix);
+        }
     }
 
     //
