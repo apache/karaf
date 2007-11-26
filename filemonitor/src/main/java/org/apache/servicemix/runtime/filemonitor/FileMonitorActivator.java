@@ -33,6 +33,8 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
+ * Inspired by <a href="http://www.aqute.biz/Code/FileInstall">FileInstall</a> by Peter Kriens.
+ * 
  * @version $Revision: 1.1 $
  */
 public class FileMonitorActivator implements BundleActivator, ManagedServiceFactory {
