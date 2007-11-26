@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<assembly>
+    <id>windows-bin</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <fileSets>
+
+        <!-- Copy license and other files from root -->
+        <fileSet>
+            <directory>..</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>*.txt</include>
+            </includes>
+        </fileSet>
+
+        <!-- Copy over everything that needs to get unix line endings -->
+        <fileSet>
+            <directory>src/main/release</directory>
+            <outputDirectory>/</outputDirectory>
+            <excludes>
+                <exclude>bin/**</exclude>
+            </excludes>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/release</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>bin/macosx/wrapper.conf</include>
+                <include>bin/linux/wrapper.conf</include>
+                <include>bin/win32/wrapper.conf</include>
+                <include>bin/win32/*.bat</include>
+            </includes>
+            <lineEnding>dos</lineEnding>
+        </fileSet>
+
+        <!-- Copy over files that should not get the line endings converted -->
+        <fileSet>
+            <directory>src/main/release</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>bin/*.jar</include>
+                <include>bin/win32/wrapper.dll</include>
+                <include>bin/win32/wrapper.exe</include>
+            </includes>
+        </fileSet>
+
+        <!-- Copy over the files that should not get the line endings converted but need to be chmod to 755 -->
+        <fileSet>
+            <directory>src/main/release</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>bin/linux/wrapper</include>
+                <include>bin/linux/libwrapper.so</include>
+                <include>bin/macosx/wrapper</include>
+                <include>bin/macosx/libwrapper.jnilib</include>
+            </includes>
+            <fileMode>0755</fileMode>
+        </fileSet>
+
+        <!-- Copy over the files that need unix line endings and also chmod to 755 -->
+        <fileSet>
+            <directory>src/main/release</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>bin/servicemix.sh</include>
+                <include>bin/macosx/servicemix.sh</include>
+                <include>bin/linux/servicemix.sh</include>
+            </includes>
+            <fileMode>0755</fileMode>
+            <lineEnding>dos</lineEnding>
+        </fileSet>
+
+        <!-- Copy over jar files -->
+        <fileSet>
+            <directory>target/dependencies</directory>
+            <outputDirectory>/bin/</outputDirectory>
+        </fileSet>
+
+    </fileSets>
+
+    <dependencySets>
+
+        <!-- Mandatory bundles for everything -->
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <scope>runtime</scope>
+            <includes>
+                <!-- Compendium -->
+                <include>org.apache.felix:org.osgi.compendium</include>
+                <include>org.apache.geronimo.specs:geronimo-servlet_2.5_spec</include>
+
+                <!-- PAX Logging -->
+                <include>org.ops4j.pax.logging:pax-logging-api</include>
+                <include>org.ops4j.pax.logging:pax-logging-service</include>
+
+                <!-- PAX config -->
+                <include>org.apache.felix:org.apache.felix.configadmin</include>
+                <include>org.ops4j.pax.confman:pax-confman-propsloader</include>
+
+                <!-- Spring OSGi -->
+                <include>org.springframework:spring-aop</include>
+                <include>org.springframework:spring-beans</include>
+                <include>org.springframework:spring-context</include>
+                <include>org.springframework:spring-core</include>
+                <include>org.springframework.osgi:spring-osgi-core</include>
+                <include>org.springframework.osgi:spring-osgi-extender</include>
+                <include>org.springframework.osgi:spring-osgi-io</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.aopalliance</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.cglib</include>
+
+            </includes>
+        </dependencySet>
+
+        <!-- GShell -->
+<!--
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <scope>runtime</scope>
+            <includes>
+              <include>org.apache.servicemix.gshell:org.apache.servicemix.gshell.core</include>
+              <include>org.apache.servicemix.gshell:org.apache.servicemix.gshell.osgi</include>
+              <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.xstream</include>
+              <include>org.apache.geronimo.specs:geronimo-stax-api_1.0_spec</include>
+            </includes>
+        </dependencySet>
+-->
+
+        <!-- FileMonitor -->
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <scope>runtime</scope>
+            <includes>
+              <include>org.apache.servicemix:org.apache.servicemix.runtime.filemonitor</include>
+              <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.ant</include>
+            </includes>
+        </dependencySet>
+
+    </dependencySets>
+
+</assembly>

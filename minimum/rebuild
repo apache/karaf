@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+mvn clean install
+cd target
+gunzip *SNAPSHOT.tar.gz
+tar xf *SNAPSHOT.tar
+
+
