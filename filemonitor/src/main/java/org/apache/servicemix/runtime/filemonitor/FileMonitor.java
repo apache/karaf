@@ -201,6 +201,15 @@ public class FileMonitor {
                         deleteConfiguration(file);
                     }
                 }
+                else if (name.equals("MANIFEST.MF")) {
+                    File parentFile = file.getParentFile();
+                    if (parentFile.getName().equals("META-INF")) {
+                        File bundleDir = parentFile.getParentFile();
+                        if (isValidBundleSourceDirectory(bundleDir)) {
+                            undeployBundle(bundleDir);
+                        }
+                    }
+                }
             }
             catch (Exception e) {
                 warn("Failed to process: " + file + ". Reason: " + e);
@@ -238,7 +247,9 @@ public class FileMonitor {
 
     protected void undeployBundle(File file) throws BundleException {
         changedBundles = true;
+        log("Uneloying: " + file.getAbsolutePath());
         Bundle bundle = getBundleForJarFile(file);
+
         if (bundle == null) {
             warn("Could not find Bundle for file: " + file.getAbsolutePath());
         }
@@ -383,8 +394,8 @@ public class FileMonitor {
      */
     protected File getExpandedBundleRootDirectory(File file) throws IOException {
         File parent = file.getParentFile();
-        String rootPath = deployDir.getCanonicalPath();
         if (file.isDirectory()) {
+            String rootPath = deployDir.getCanonicalPath();
             if (file.getCanonicalPath().equals(rootPath)) {
                 return null;
             }
@@ -392,11 +403,24 @@ public class FileMonitor {
                 return file;
             }
         }
-        String parentPath = parent.getCanonicalPath();
-        if (parent != null && !parentPath.equals(rootPath) && parentPath.startsWith(rootPath)) {
+        if (isValidBundleSourceDirectory(parent)) {
             return getExpandedBundleRootDirectory(parent);
         }
         return null;
+    }
+
+    /**
+     * Returns true if the given directory is a valid child directory within the {@link #deployDir}
+     */
+    protected boolean isValidBundleSourceDirectory(File dir) throws IOException {
+        if (dir != null) {
+            String parentPath = dir.getCanonicalPath();
+            String rootPath = deployDir.getCanonicalPath();
+            return !parentPath.equals(rootPath) && parentPath.startsWith(rootPath);
+        }
+        else {
+            return false;
+        }
     }
 
     /**
