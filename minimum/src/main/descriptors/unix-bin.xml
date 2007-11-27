@@ -81,9 +81,11 @@
             <directory>src/main/release</directory>
             <outputDirectory></outputDirectory>
             <includes>
+                <include>bin/servicemix.bat</include>
                 <include>bin/servicemix.sh</include>
-                <include>bin/macosx/servicemix.sh</include>
                 <include>bin/linux/servicemix.sh</include>
+                <include>bin/macosx/servicemix.sh</include>
+                <include>bin/win32/servicemix.bat</include>
             </includes>
             <fileMode>0755</fileMode>
             <lineEnding>unix</lineEnding>
