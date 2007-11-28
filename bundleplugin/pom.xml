@@ -51,7 +51,7 @@
   <dependency>
    <groupId>biz.aQute</groupId>
    <artifactId>bndlib</artifactId>
-   <version>0.0.212</version>
+   <version>0.0.213</version>
   </dependency>
   <dependency>
    <groupId>org.apache.maven</groupId>
