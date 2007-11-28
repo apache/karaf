@@ -217,14 +217,24 @@ class DependencyManager implements ServiceListener, Reference
      */
     private void serviceRemoved( ServiceReference reference )
     {
-        // check whether we are bound to that service, do nothing if not
-        if ( getBoundService( reference ) == null )
+        // ignore the service, if it does not match the target filter
+        if ( !targetFilterMatch( reference ) )
         {
+            m_componentManager.getActivator().log( LogService.LOG_DEBUG,
+                    "Dependency Manager: Ignoring removed Service for " + m_dependencyMetadata.getName()
+                        + " : does not match target filter " + getTarget(), m_componentManager.getComponentMetadata(),
+                    null );
             return;
         }
 
         // decrement the number of services
         m_size--;
+
+        // check whether we are bound to that service, do nothing if not
+        if ( getBoundService( reference ) == null )
+        {
+            return;
+        }
 
         if ( handleServiceEvent() )
         {
