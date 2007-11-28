@@ -204,8 +204,8 @@ public class FileMonitor {
                 if (jardir != null) {
                     if (file.exists() && !bundleJarsCreated.contains(jardir)) {
                         bundleJarsCreated.add(jardir);
-                        createBundleJar(jardir);
-                        deployBundle(jardir);
+                        File newBundle = createBundleJar(jardir);
+                        deployBundle(newBundle);
                     }
                 }
                 else if (name.endsWith(".jar")) {
@@ -235,7 +235,7 @@ public class FileMonitor {
                 }
             }
             catch (Exception e) {
-                warn("Failed to process: " + file + ". Reason: " + e);
+                warn("Failed to process: " + file + ". Reason: " + e, e);
             }
         }
         if (changedBundles) {
@@ -243,9 +243,9 @@ public class FileMonitor {
         }
     }
 
-    protected void deployBundle(File file) throws FileNotFoundException, BundleException {
+    protected void deployBundle(File file) throws IOException, BundleException {
         changedBundles = true;
-        log("Deloying: " + file.getAbsolutePath());
+        log("Deloying: " + file.getCanonicalPath());
 
         InputStream in = new FileInputStream(file);
 
@@ -253,14 +253,14 @@ public class FileMonitor {
             Bundle bundle = getBundleForJarFile(file);
             if (bundle != null) {
                 bundle.update(in);
-                log("Updated: " + file.getAbsolutePath());
+                log("Updated: " + file.getCanonicalPath());
             }
             else {
-                bundle = getContext().installBundle(file.getAbsolutePath(), in);
+                bundle = getContext().installBundle(file.getCanonicalPath(), in);
                 if (!isBundleFragment(bundle)) {
                     bundle.start();
                 }
-                log("Installed: " + file.getAbsolutePath());
+                log("Installed: " + file.getCanonicalPath());
             }
         }
         finally {
@@ -268,13 +268,13 @@ public class FileMonitor {
         }
     }
 
-    protected void undeployBundle(File file) throws BundleException {
+    protected void undeployBundle(File file) throws BundleException, IOException {
         changedBundles = true;
-        log("Uneloying: " + file.getAbsolutePath());
+        log("Undeloying: " + file.getCanonicalPath());
         Bundle bundle = getBundleForJarFile(file);
 
         if (bundle == null) {
-            warn("Could not find Bundle for file: " + file.getAbsolutePath());
+            warn("Could not find Bundle for file: " + file.getCanonicalPath());
         }
         else {
             bundle.stop();
@@ -282,14 +282,14 @@ public class FileMonitor {
         }
     }
 
-    protected Bundle getBundleForJarFile(File file) {
-        String absoluteFilePath = file.getAbsolutePath();
+    protected Bundle getBundleForJarFile(File file) throws IOException {
+        String absoluteFilePath = file.getCanonicalPath();
         Bundle bundles[] = getContext().getBundles();
         for (int i = 0; i < bundles.length; i++) {
             Bundle bundle = bundles[i];
             String location = bundle.getLocation();
             File locationFile = new File(location);
-            String absoluteLocation = locationFile.getAbsolutePath();
+            String absoluteLocation = locationFile.getCanonicalPath();
             if (absoluteFilePath.equals(absoluteLocation)) {
                 return bundle;
             }
@@ -394,7 +394,7 @@ public class FileMonitor {
         }
     }
 
-    protected void createBundleJar(File dir) throws BundleException {
+    protected File createBundleJar(File dir) throws BundleException, IOException {
         Jar jar = new Jar();
         jar.setProject(project);
         File destFile = new File(generateDir, dir.getName() + ".jar");
@@ -409,6 +409,7 @@ public class FileMonitor {
 
         jar.init();
         jar.perform();
+        return destFile;
     }
 
     /**
@@ -485,7 +486,7 @@ public class FileMonitor {
             in.close();
         }
         catch (IOException e) {
-            warn("Failed to close stream. " + e);
+            warn("Failed to close stream. " + e, e);
         }
     }
 
@@ -502,4 +503,10 @@ public class FileMonitor {
     protected void warn(String message) {
         System.out.println("WARN: " + message);
     }
+
+    protected void warn(String message, Throwable e) {
+        warn(message);
+        e.printStackTrace();
+    }
+
 }
