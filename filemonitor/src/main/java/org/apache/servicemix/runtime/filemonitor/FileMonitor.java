@@ -49,11 +49,13 @@ import org.osgi.util.tracker.ServiceTracker;
  * @version $Revision: 1.1 $
  */
 public class FileMonitor {
+    public final static String CONFIG_DIR = "org.apache.servicemix.filemonitor.configDir";
     public final static String DEPLOY_DIR = "org.apache.servicemix.filemonitor.monitorDir";
     public final static String GENERATED_JAR_DIR = "org.apache.servicemix.filemonitor.generatedJarDir";
     public final static String SCAN_INTERVAL = "org.apache.servicemix.filemonitor.scanInterval";
     protected static final String ALIAS_KEY = "_alias_factory_pid";
     private FileMonitorActivator activator;
+    private File configDir = new File("./conf");
     private File deployDir = new File("./deploy");
     private File generateDir = new File("./data/generated-bundles");
     private Scanner scanner = new Scanner();
@@ -69,7 +71,11 @@ public class FileMonitor {
     public FileMonitor(FileMonitorActivator activator, Dictionary properties) {
         this.activator = activator;
 
-        File value = getFileValue(properties, DEPLOY_DIR);
+        File value = getFileValue(properties, CONFIG_DIR);
+        if (value != null) {
+            configDir = value;
+        }
+        value = getFileValue(properties, DEPLOY_DIR);
         if (value != null) {
             deployDir = value;
         }
@@ -84,10 +90,16 @@ public class FileMonitor {
     }
 
     public void start() {
+        if (configDir != null) {
+            configDir.mkdirs();
+        }
         deployDir.mkdirs();
         generateDir.mkdirs();
 
         List dirs = new ArrayList();
+        if (configDir != null) {
+            dirs.add(configDir);
+        }
         dirs.add(deployDir);
         scanner.setScanDirs(dirs);
         scanner.setScanInterval(scanInterval);
@@ -99,6 +111,9 @@ public class FileMonitor {
         });
 
         log("Starting to monitor the deploy directory: " + deployDir + " every " + scanInterval + " millis");
+        if (configDir != null) {
+            log("Config directory is at: " + configDir);
+        }
         log("Will generate bundles from expanded source directories to: " + generateDir);
 
         scanner.start();
@@ -121,6 +136,14 @@ public class FileMonitor {
 
     public void setActivator(FileMonitorActivator activator) {
         this.activator = activator;
+    }
+
+    public File getConfigDir() {
+        return configDir;
+    }
+
+    public void setConfigDir(File configDir) {
+        this.configDir = configDir;
     }
 
     public File getDeployDir() {

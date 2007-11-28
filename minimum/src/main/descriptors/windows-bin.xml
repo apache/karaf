@@ -117,7 +117,8 @@
 
                 <!-- PAX config -->
                 <include>org.apache.felix:org.apache.felix.configadmin</include>
-                <include>org.ops4j.pax.confman:pax-confman-propsloader</include>
+                <include>org.apache.servicemix:org.apache.servicemix.runtime.filemonitor</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.ant</include>
 
                 <!-- Spring OSGi -->
                 <include>org.springframework:spring-aop</include>
@@ -147,17 +148,6 @@
             </includes>
         </dependencySet>
 -->
-
-        <!-- FileMonitor -->
-        <dependencySet>
-            <outputDirectory>/system</outputDirectory>
-            <unpack>false</unpack>
-            <scope>runtime</scope>
-            <includes>
-              <include>org.apache.servicemix:org.apache.servicemix.runtime.filemonitor</include>
-              <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.ant</include>
-            </includes>
-        </dependencySet>
 
     </dependencySets>
 
