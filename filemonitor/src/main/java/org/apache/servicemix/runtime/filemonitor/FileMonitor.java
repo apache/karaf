@@ -20,7 +20,6 @@ package org.apache.servicemix.runtime.filemonitor;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -64,6 +63,8 @@ public class FileMonitor {
     private boolean loggedConfigAdminWarning;
     private boolean debug;
     private List<Bundle> changedBundles = new ArrayList<Bundle>();
+    private List<Bundle> bundlesToStart = new ArrayList<Bundle>();
+    private List<Bundle> bundlesToUpdate = new ArrayList<Bundle>();
 
     public FileMonitor() {
     }
@@ -191,6 +192,8 @@ public class FileMonitor {
 
     protected void onFilesChanged(List filenames) {
         changedBundles.clear();
+        bundlesToStart.clear();
+        bundlesToUpdate.clear();
         Set<File> bundleJarsCreated = new HashSet<File>();
 
         for (Object filename : filenames) {
@@ -238,7 +241,7 @@ public class FileMonitor {
                 warn("Failed to process: " + file + ". Reason: " + e, e);
             }
         }
-            refreshPackages();
+        refreshPackagesAndStartOrUpdateBundles();
     }
 
     protected void deployBundle(File file) throws IOException, BundleException {
@@ -250,15 +253,13 @@ public class FileMonitor {
             Bundle bundle = getBundleForJarFile(file);
             if (bundle != null) {
                 changedBundles.add(bundle);
-                bundle.update(in);
-                log("Updated: " + file.getCanonicalPath());
+                bundlesToUpdate.add(bundle);
             }
             else {
                 bundle = getContext().installBundle(file.getCanonicalPath(), in);
                 if (!isBundleFragment(bundle)) {
-                    bundle.start();
+                    bundlesToStart.add(bundle);
                 }
-                log("Installed: " + file.getCanonicalPath());
             }
         }
         finally {
@@ -385,7 +386,7 @@ public class FileMonitor {
         return false;
     }
 
-    protected void refreshPackages() {
+    protected void refreshPackagesAndStartOrUpdateBundles() {
         PackageAdmin packageAdmin = getPackageAdmin();
         if (packageAdmin != null) {
             Bundle[] bundles = new Bundle[changedBundles.size()];
@@ -393,6 +394,26 @@ public class FileMonitor {
             packageAdmin.refreshPackages(bundles);
         }
         changedBundles.clear();
+
+        for (Bundle bundle : bundlesToUpdate) {
+            try {
+                bundle.update();
+                log("Updated: " + bundle);
+
+            }
+            catch (BundleException e) {
+                warn("Failed to update bundle: " + bundle + ". Reason: " + e, e);
+            }
+        }
+        for (Bundle bundle : bundlesToStart) {
+            try {
+                bundle.start();
+                log("Started: " + bundle);
+            }
+            catch (BundleException e) {
+                warn("Failed to start bundle: " + bundle + ". Reason: " + e, e);
+            }
+        }
     }
 
     protected File createBundleJar(File dir) throws BundleException, IOException {
@@ -509,5 +530,4 @@ public class FileMonitor {
         warn(message);
         e.printStackTrace();
     }
-
 }
