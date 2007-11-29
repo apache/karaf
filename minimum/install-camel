@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+export VERSION=4.0-SNAPSHOT
+export DESTDIR=target/org.apache.servicemix.runtime.minimum-$VERSION/deploy
+
+export JAR=~/.m2/repository/org/apache/servicemix/features/org.apache.servicemix.features.camel/$VERSION/org.apache.servicemix.features.camel-$VERSION.zip
+
+echo "Expanding $JAR"
+jar xf $JAR
+
+mv org.apache.* $DESTDIR
+

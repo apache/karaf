@@ -29,16 +29,13 @@
   </parent>
 
   <groupId>org.apache.servicemix.runtime</groupId>
-  <artifactId>runtime</artifactId>
+  <artifactId>features</artifactId>
   <packaging>pom</packaging>
   <version>4.0-SNAPSHOT</version>
-  <name>ServiceMix Runtime</name>
+  <name>ServiceMix Features</name>
 
   <modules>
-    <module>main</module>
-    <module>filemonitor</module>
-    <module>features</module>
-    <module>minimum</module>
+    <module>camel-feature</module>
   </modules>
 
 </project>

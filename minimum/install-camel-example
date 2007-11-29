@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+export DESTDIR=target/org.apache.servicemix.runtime.minimum-4.0-SNAPSHOT/deploy
+export CAMEL_VERSION=1.3-SNAPSHOT
+
+ARGV=( $@ )
+
+export JAR=~/.m2/repository/org/apache/camel/camel-example-osgi/$CAMEL_VERSION/camel-example-osgi-$CAMEL_VERSION.jar
+echo "Deploying $JAR"
+
+cp $JAR $DESTDIR
+
+
+#export JAR=~/.m2/repository/org/apache/camel/camel-core/$CAMEL_VERSION/camel-core-$CAMEL_VERSION.jar
+#echo "Deploying $JAR"
+#cp $JAR $DESTDIR
+
+#export JAR=~/.m2/repository/org/apache/camel/camel-spring/$CAMEL_VERSION/camel-spring-$CAMEL_VERSION.jar
+#echo "Deploying $JAR"
+#cp $JAR $DESTDIR
+
+
