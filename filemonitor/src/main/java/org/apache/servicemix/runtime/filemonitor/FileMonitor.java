@@ -62,8 +62,8 @@ public class FileMonitor {
     private Project project = new Project();
     private long scanInterval = 500L;
     private boolean loggedConfigAdminWarning;
-    private boolean changedBundles;
     private boolean debug;
+    private List<Bundle> changedBundles = new ArrayList<Bundle>();
 
     public FileMonitor() {
     }
@@ -190,7 +190,7 @@ public class FileMonitor {
     //-------------------------------------------------------------------------
 
     protected void onFilesChanged(List filenames) {
-        changedBundles = false;
+        changedBundles.clear();
         Set<File> bundleJarsCreated = new HashSet<File>();
 
         for (Object filename : filenames) {
@@ -238,13 +238,10 @@ public class FileMonitor {
                 warn("Failed to process: " + file + ". Reason: " + e, e);
             }
         }
-        if (changedBundles) {
             refreshPackages();
-        }
     }
 
     protected void deployBundle(File file) throws IOException, BundleException {
-        changedBundles = true;
         log("Deloying: " + file.getCanonicalPath());
 
         InputStream in = new FileInputStream(file);
@@ -252,6 +249,7 @@ public class FileMonitor {
         try {
             Bundle bundle = getBundleForJarFile(file);
             if (bundle != null) {
+                changedBundles.add(bundle);
                 bundle.update(in);
                 log("Updated: " + file.getCanonicalPath());
             }
@@ -269,7 +267,6 @@ public class FileMonitor {
     }
 
     protected void undeployBundle(File file) throws BundleException, IOException {
-        changedBundles = true;
         log("Undeloying: " + file.getCanonicalPath());
         Bundle bundle = getBundleForJarFile(file);
 
@@ -277,6 +274,7 @@ public class FileMonitor {
             warn("Could not find Bundle for file: " + file.getCanonicalPath());
         }
         else {
+            changedBundles.add(bundle);
             bundle.stop();
             bundle.uninstall();
         }
@@ -390,8 +388,11 @@ public class FileMonitor {
     protected void refreshPackages() {
         PackageAdmin packageAdmin = getPackageAdmin();
         if (packageAdmin != null) {
-            packageAdmin.refreshPackages(null);
+            Bundle[] bundles = new Bundle[changedBundles.size()];
+            changedBundles.toArray(bundles);
+            packageAdmin.refreshPackages(bundles);
         }
+        changedBundles.clear();
     }
 
     protected File createBundleJar(File dir) throws BundleException, IOException {
