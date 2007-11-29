@@ -106,6 +106,7 @@
             <version>${spring.version}</version>
         </dependency>
 
+      <!--
       <dependency>
           <groupId>org.apache.servicemix.gshell</groupId>
           <artifactId>org.apache.servicemix.gshell.core</artifactId>
@@ -118,6 +119,7 @@
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.xstream</artifactId>
       </dependency>
+      -->
 
       <dependency>
           <groupId>org.apache.felix</groupId>
