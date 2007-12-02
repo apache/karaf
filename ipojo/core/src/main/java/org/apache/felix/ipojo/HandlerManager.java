@@ -119,7 +119,9 @@ public class HandlerManager extends InstanceManager {
 
         setState(INVALID);
         
-        m_handler.stop();
+        if (m_handler != null) {
+            m_handler.stop();
+        }
         
         // Stop all the handlers
         for (int i = m_handlers.length - 1; i > -1; i--) {
@@ -128,8 +130,10 @@ public class HandlerManager extends InstanceManager {
         }
 
         m_state = STOPPED;
-        for (int i = 0; i < m_instanceListeners.size(); i++) {
-            ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, STOPPED);
+        if (m_instanceListeners != null) {
+            for (int i = 0; i < m_instanceListeners.size(); i++) {
+                ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, STOPPED);
+            }
         }
     }
     

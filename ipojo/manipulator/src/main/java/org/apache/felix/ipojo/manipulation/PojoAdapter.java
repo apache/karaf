@@ -326,6 +326,9 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
         mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getRegistredFields", "()Ljava/util/Set;");
         mv.visitVarInsn(ASTORE, 2);
 
+        mv.visitVarInsn(ALOAD, 2);
+        Label endif = new Label();
+        mv.visitJumpInsn(IFNULL, endif);
         Iterator it = m_fields.iterator();
         while (it.hasNext()) {
             String field = (String) it.next();
@@ -339,11 +342,16 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
             mv.visitFieldInsn(PUTFIELD, m_owner, "_F" + field, "Z");
             mv.visitLabel(l3);
         }
-
+        mv.visitLabel(endif);
+        
         mv.visitVarInsn(ALOAD, 0);
         mv.visitFieldInsn(GETFIELD, m_owner, "_cm", "Lorg/apache/felix/ipojo/InstanceManager;");
         mv.visitMethodInsn(INVOKEVIRTUAL, "org/apache/felix/ipojo/InstanceManager", "getRegistredMethods", "()Ljava/util/Set;");
         mv.visitVarInsn(ASTORE, 2);
+        
+        mv.visitVarInsn(ALOAD, 2);
+        Label endif2 = new Label();
+        mv.visitJumpInsn(IFNULL, endif2);
 
         for (int i = 0; i < m_methods.size(); i++) {
             String methodId = (String) m_methods.get(i);
@@ -357,6 +365,8 @@ public class PojoAdapter extends ClassAdapter implements Opcodes {
             mv.visitFieldInsn(PUTFIELD, m_owner, "_M" + methodId, "Z");
             mv.visitLabel(l3);
         }
+        
+        mv.visitLabel(endif2);
 
         mv.visitInsn(RETURN);
 

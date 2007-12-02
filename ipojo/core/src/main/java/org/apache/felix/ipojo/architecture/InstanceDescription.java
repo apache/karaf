@@ -149,7 +149,7 @@ public class InstanceDescription {
     public void addInstance(InstanceDescription inst) {
         // Verify that the dependency description is not already in the array.
         for (int i = 0; i < m_containedInstances.length; i++) {
-            if (m_containedInstances[i] == inst) {
+            if (m_containedInstances[i].getName().equals(inst.getName())) {
                 return; // NOTHING TO DO, the description is already in the array
             }
         }

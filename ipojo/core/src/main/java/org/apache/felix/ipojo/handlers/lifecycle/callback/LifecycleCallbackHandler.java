@@ -153,7 +153,7 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
         }
         
         // Manage immediate component
-        if (m_immediate && transition == LifecycleCallback.VALIDATE && getInstanceManager().getPojoObjects().length == 0) {
+        if (m_immediate && transition == LifecycleCallback.VALIDATE && getInstanceManager().getPojoObjects() == null) {
             getInstanceManager().getPojoObject();
         }
 

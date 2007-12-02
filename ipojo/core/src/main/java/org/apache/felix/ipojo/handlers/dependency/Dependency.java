@@ -20,6 +20,7 @@ package org.apache.felix.ipojo.handlers.dependency;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.List;
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.IPojoContext;
 import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.Nullable;
 import org.apache.felix.ipojo.PolicyServiceContext;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.composite.CompositeServiceContext;
@@ -40,7 +42,6 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * Represent a service dependency of the component instance.
- * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Dependency implements TrackerCustomizer {
@@ -175,9 +176,14 @@ public class Dependency implements TrackerCustomizer {
     private boolean m_activated = false;
     
     /**
-     * Biding Policy.
+     * Binding Policy.
      */
     private int m_bindingPolicy;
+    
+    /**
+     * Nullable object.
+     */
+    private Object m_nullable;
 
     /**
      * Dependency constructor. After the creation the dependency is not started.
@@ -191,12 +197,29 @@ public class Dependency implements TrackerCustomizer {
      * @param id : id of the dependency, may be null
      * @param policy : resolution policy
      * @param bindingPolicy : binding policy
+     * @param di : default-implementation class
      */
-    public Dependency(DependencyHandler dh, String field, String spec, String filter, boolean isOptional, boolean isAggregate, String id, int policy, int bindingPolicy) {
+    public Dependency(DependencyHandler dh, String field, String spec, String filter, boolean isOptional, boolean isAggregate, String id, int policy, int bindingPolicy, String di) {
         m_handler = dh;
         m_field = field;
         m_specification = spec;
         m_isOptional = isOptional;
+        if (m_isOptional) {
+            if (di != null) {
+                try {
+                    Class c = getHandler().getInstanceManager().getContext().getBundle().loadClass(di);
+                    m_nullable = c.newInstance();
+                } catch (IllegalAccessException e) {
+                    m_handler.log(Logger.ERROR, "Cannot load the default-implementation " + di + " : " + e.getMessage());
+                } catch (InstantiationException e) {
+                    m_handler.log(Logger.ERROR, "Cannot load the default-implementation " + di + " : " + e.getMessage());
+                } catch (ClassNotFoundException e) {
+                    m_handler.log(Logger.ERROR, "Cannot load the default-implementation " + di + " : " + e.getMessage());
+                }
+            } else {
+                m_nullable = Proxy.newProxyInstance(getHandler().getInstanceManager().getClazz().getClassLoader(), new Class[] {m_clazz, Nullable.class}, new NullableObject());
+            }
+        }
         m_strFilter = filter;
         m_isAggregate = isAggregate;
         if (m_id == null) {
@@ -319,14 +342,11 @@ public class Dependency implements TrackerCustomizer {
                 }
             } else {
                 if (m_references.size() == 0) {
-                    Object nullable = m_handler.getNullableObject(this);
-
-                    if (nullable == null) {
-                        m_handler.log(Logger.WARNING, "[" + m_handler.getInstanceManager().getClassName() + "] Cannot load the nullable class to return a dependency object for " + m_field + " -> " + m_specification);
+                    if (m_nullable == null) {
+                        m_handler.log(Logger.WARNING, "[" + m_handler.getInstanceManager().getInstanceName() + "] The dependency is not optional, however no service object can be injected in " + m_field + " -> " + m_specification);
                         return null;
                     }
-
-                    m_usage.getObjects().add(nullable);
+                    m_usage.getObjects().add(m_nullable);
                 } else {
                     ServiceReference ref = (ServiceReference) m_references.get(0);
                     m_usage.getReferences().add(ref); // Get the first one
@@ -348,7 +368,7 @@ public class Dependency implements TrackerCustomizer {
      * @param ref : reference to send (if accepted) to the method
      */
     private void callUnbindMethod(ServiceReference ref) {
-        if (m_handler.getInstanceManager().getState() > InstanceManager.STOPPED && m_handler.getInstanceManager().getPojoObjects().length > 0) {
+        if (m_handler.getInstanceManager().getState() > InstanceManager.STOPPED && m_handler.getInstanceManager().getPojoObjects() != null) {
             for (int i = 0; i < m_callbacks.length; i++) {
                 if (m_callbacks[i].getMethodType() == DependencyCallback.UNBIND) {
                     try {
@@ -447,7 +467,7 @@ public class Dependency implements TrackerCustomizer {
     private void callBindMethod(ServiceReference ref) {
         // call bind method :
         // if (m_handler.getInstanceManager().getState() == InstanceManager.VALID) {
-        if (m_handler.getInstanceManager().getState() > InstanceManager.STOPPED && m_handler.getInstanceManager().getPojoObjects().length > 0) {
+        if (m_handler.getInstanceManager().getState() > InstanceManager.STOPPED && m_handler.getInstanceManager().getPojoObjects() != null) {
             for (int i = 0; i < m_callbacks.length; i++) {
                 if (m_callbacks[i].getMethodType() == DependencyCallback.BIND) {
                     try {

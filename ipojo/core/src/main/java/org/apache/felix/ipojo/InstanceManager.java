@@ -55,7 +55,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     /**
      * Handler list.
      */
-    protected HandlerManager[] m_handlers = new HandlerManager[0];
+    protected HandlerManager[] m_handlers = null;
 
     /**
      * Component state (STOPPED at the beginning).
@@ -65,7 +65,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     /**
      * Instance State Listener List.
      */
-    protected List m_instanceListeners = new ArrayList();
+    protected List m_instanceListeners = null;
     
     /**
      * Parent factory (ComponentFactory).
@@ -85,7 +85,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     /**
      * Map [method identifier, handler list] storing handlers interested by the method.
      */
-    private Map m_methodRegistration = new HashMap();
+    private Map m_methodRegistration;
 
     /**
      * Manipulated class.
@@ -95,7 +95,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     /**
      * Instances of the components.
      */
-    private Object[] m_pojoObjects = new Object[0];
+    private Object[] m_pojoObjects = null;
 
    /**
     * Is the component instance state changing?
@@ -154,11 +154,13 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         int componentState = getState();
         InstanceDescription instanceDescription = new InstanceDescription(m_name, componentState, getContext().getBundle().getBundleId(), m_factory.getComponentDescription());
 
-        String[] objects = new String[getPojoObjects().length];
-        for (int i = 0; i < getPojoObjects().length; i++) {
-            objects[i] = "" + getPojoObjects()[i];
+        if (m_pojoObjects != null) {
+            String[] objects = new String[m_pojoObjects.length];
+            for (int i = 0; i < m_pojoObjects.length; i++) {
+                objects[i] = m_pojoObjects[i].toString();
+            }
+            instanceDescription.setCreatedObjects(objects);
         }
-        instanceDescription.setCreatedObjects(objects);
 
         Handler[] handlers = getRegistredHandlers();
         for (int i = 0; i < handlers.length; i++) {
@@ -234,11 +236,13 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
             m_handlers[i].stop();
         }
         
-        m_pojoObjects = new Object[0];
+        m_pojoObjects = null;
 
         m_state = STOPPED;
-        for (int i = 0; i < m_instanceListeners.size(); i++) {
-            ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, STOPPED);
+        if (m_instanceListeners != null) {
+            for (int i = 0; i < m_instanceListeners.size(); i++) {
+                ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, STOPPED);
+            }
         }
     }
     
@@ -253,8 +257,11 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         
         m_state = DISPOSED;
         
-        for (int i = 0; i < m_instanceListeners.size(); i++) {
-            ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, DISPOSED);
+        if (m_instanceListeners != null) {
+            for (int i = 0; i < m_instanceListeners.size(); i++) {
+                ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, DISPOSED);
+            }
+            m_instanceListeners = null;
         }
         
         m_factory.disposed(this);
@@ -269,7 +276,6 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         m_methodRegistration = new HashMap();
         m_clazz = null;
         m_inTransition = false;
-        m_instanceListeners.clear();
     }
     
     /**
@@ -280,9 +286,11 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         if (m_state > STOPPED) {
             stop();
         }
-        
-        for (int i = 0; i < m_instanceListeners.size(); i++) {
-            ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, DISPOSED);
+        if (m_instanceListeners != null) {
+            for (int i = 0; i < m_instanceListeners.size(); i++) {
+                ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, DISPOSED);
+            }
+            m_instanceListeners = null;
         }
 
         // Cleaning
@@ -298,7 +306,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         m_methodRegistration = new HashMap();
         m_clazz = null;
         m_inTransition = false;
-        m_instanceListeners.clear();
+        
     }
     
     /**
@@ -331,8 +339,10 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                 }
             }
             
-            for (int i = 0; i < m_instanceListeners.size(); i++) {
-                ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, state);
+            if (m_instanceListeners != null) {
+                for (int i = 0; i < m_instanceListeners.size(); i++) {
+                    ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, state);
+                }
             }
         }
         
@@ -367,6 +377,9 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @see org.apache.felix.ipojo.ComponentInstance#addInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
      */
     public void addInstanceStateListener(InstanceStateListener listener) {
+        if (m_instanceListeners == null) {
+            m_instanceListeners = new ArrayList();
+        }
         synchronized (m_instanceListeners) {
             m_instanceListeners.add(listener);
         }
@@ -378,8 +391,13 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @see org.apache.felix.ipojo.ComponentInstance#removeInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
      */
     public void removeInstanceStateListener(InstanceStateListener listener) {
-        synchronized (m_instanceListeners) {
-            m_instanceListeners.remove(listener);
+        if (m_instanceListeners != null) {
+            synchronized (m_instanceListeners) {
+                m_instanceListeners.remove(listener);
+                if (m_instanceListeners.size() == 0) {
+                    m_instanceListeners = null;
+                }
+            }
         }
     }
 
@@ -410,13 +428,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @param o : the instance to add
      */
     private synchronized void addInstance(Object o) {
-        for (int i = 0; (m_pojoObjects != null) && (i < m_pojoObjects.length); i++) {
-            if (m_pojoObjects[i] == o) {
-                return;
-            }
-        }
-
-        if (m_pojoObjects.length > 0) {
+        if (m_pojoObjects != null) {
             Object[] newInstances = new Object[m_pojoObjects.length + 1];
             System.arraycopy(m_pojoObjects, 0, newInstances, 0, m_pojoObjects.length);
             newInstances[m_pojoObjects.length] = o;
@@ -451,7 +463,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
 
         if (idx >= 0) {
             if ((m_pojoObjects.length - 1) == 0) {
-                m_pojoObjects = new Object[0];
+                m_pojoObjects = null;
             } else {
                 Object[] newInstances = new Object[m_pojoObjects.length - 1];
                 System.arraycopy(m_pojoObjects, 0, newInstances, 0, idx);
@@ -531,7 +543,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @return the instance of the component instance to use for singleton component
      */
     public synchronized Object getPojoObject() {
-        if (m_pojoObjects.length == 0) {
+        if (m_pojoObjects == null) {
             createPojoObject();
         }
         return m_pojoObjects[0];
@@ -574,97 +586,27 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
             }
         }
         for (int i = 0; methods != null && i < methods.length; i++) {
-            if (m_methodRegistration.get(methods[i].getMethodIdentifier()) == null) {
+            if (m_methodRegistration == null) { 
+                m_methodRegistration = new HashMap();
                 m_methodRegistration.put(methods[i].getMethodIdentifier(), new PrimitiveHandler[] { h });
-            } else {
+            } else { 
                 PrimitiveHandler[] list = (PrimitiveHandler[]) m_methodRegistration.get(methods[i].getMethodIdentifier());
-                for (int j = 0; j < list.length; j++) {
-                    if (list[j] == h) {
-                        return;
+                if (list == null) {
+                    m_methodRegistration.put(methods[i].getMethodIdentifier(), new PrimitiveHandler[] { h });
+                } else {
+                    for (int j = 0; j < list.length; j++) {
+                        if (list[j] == h) {
+                            return;
+                        }
                     }
+                    PrimitiveHandler[] newList = new PrimitiveHandler[list.length + 1];
+                    System.arraycopy(list, 0, newList, 0, list.length);
+                    newList[list.length] = h;
+                    m_methodRegistration.put(methods[i].getMethodIdentifier(), newList);
                 }
-                PrimitiveHandler[] newList = new PrimitiveHandler[list.length + 1];
-                System.arraycopy(list, 0, newList, 0, list.length);
-                newList[list.length] = h;
-                m_methodRegistration.put(methods[i].getMethodIdentifier(), newList);
             }
         }
         
-    }
-
-    /**
-     * Unregister an handler for the field list. The handler will not be
-     * notified of field access but is always register on the instance manager.
-     * 
-     * @param h : the handler to unregister.
-     * @param fields : the field metadata list
-     * @param methods : the method metadata list
-     */
-    public void unregister(PrimitiveHandler h, FieldMetadata[] fields, MethodMetadata[] methods) {
-        for (int i = 0; i < fields.length; i++) {
-            if (m_fieldRegistration.get(fields[i].getFieldName()) == null) {
-                break;
-            } else {
-                PrimitiveHandler[] list = (PrimitiveHandler[]) m_fieldRegistration.get(fields[i].getFieldName());
-                int idx = -1;
-                for (int j = 0; j < list.length; j++) {
-                    if (list[j] == h) {
-                        idx = j;
-                        break;
-                    }
-                }
-
-                if (idx >= 0) {
-                    if ((list.length - 1) == 0) {
-                        list = new PrimitiveHandler[0];
-                    } else {
-                        PrimitiveHandler[] newList = new PrimitiveHandler[list.length - 1];
-                        System.arraycopy(list, 0, newList, 0, idx);
-                        if (idx < newList.length) {
-                            System.arraycopy(list, idx + 1, newList, idx, newList.length - idx);
-                        }
-                        list = newList;
-                    }
-                    m_fieldRegistration.put(fields[i].getFieldName(), list);
-                }
-            }
-        }
-        for (int i = 0; i < methods.length; i++) {
-            if (m_methodRegistration.get(methods[i].getMethodIdentifier()) == null) {
-                break;
-            } else {
-                PrimitiveHandler[] list = (PrimitiveHandler[]) m_methodRegistration.get(methods[i].getMethodIdentifier());
-                int idx = -1;
-                for (int j = 0; j < list.length; j++) {
-                    if (list[j] == h) {
-                        idx = j;
-                        break;
-                    }
-                }
-
-                if (idx >= 0) {
-                    if ((list.length - 1) == 0) {
-                        list = new PrimitiveHandler[0];
-                    } else {
-                        PrimitiveHandler[] newList = new PrimitiveHandler[list.length - 1];
-                        System.arraycopy(list, 0, newList, 0, idx);
-                        if (idx < newList.length) {
-                            System.arraycopy(list, idx + 1, newList, idx, newList.length - idx);
-                        }
-                        list = newList;
-                    }
-                    m_methodRegistration.put(methods[i].getMethodIdentifier(), list);
-                }
-            }
-        }
-    }
-    
-    public Set getRegistredFields() {
-        return m_fieldRegistration.keySet();
-    }
-    
-    public Set getRegistredMethods() {
-        return m_methodRegistration.keySet();
     }
 
     /**
@@ -829,5 +771,31 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
             setState(VALID);
             return;
         }        
+    }
+    
+    /**
+     * Get the list of registered fields.
+     * This method is invoked by the POJO itself.
+     * @return the set of registered fields.
+     */
+    public Set getRegistredFields() {
+        if (m_fieldRegistration != null) {
+            return m_fieldRegistration.keySet();
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * Get the list of registered methods.
+     * This method is invoked by the POJO itself.
+     * @return the set of registered methods.
+     */
+    public Set getRegistredMethods() {
+        if (m_methodRegistration != null) {
+            return m_methodRegistration.keySet();
+        } else {
+            return null;
+        }
     }
 }

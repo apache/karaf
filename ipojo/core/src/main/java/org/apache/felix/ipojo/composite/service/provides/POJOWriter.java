@@ -18,14 +18,9 @@
  */
 package org.apache.felix.ipojo.composite.service.provides;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import java.lang.reflect.Method;
 import java.util.List;
 
-import org.apache.felix.ipojo.handlers.dependency.nullable.MethodSignature;
-import org.apache.felix.ipojo.handlers.dependency.nullable.MethodSignatureVisitor;
-import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -76,72 +71,53 @@ public class POJOWriter implements Opcodes {
 
     /**
      * Return the proxy 'classname' for the contract 'contractname' by delegating on available service.
-     * @param url URL of the needed contract
-     * @param contractName : The interface to implement
+     * @param clazz : Specification class
      * @param className : The class name to create
      * @param fields : the list of fields on which delegate
      * @param methods : the list of method on which delegate
      * @return byte[] : the build class
      */
-    public static byte[] dump(URL url, String contractName, String className, List fields, List methods) {
+    public static byte[] dump(Class clazz, String className, List fields, List methods) {
+        Method[] itfmethods = clazz.getMethods();
 
-        ClassReader cr = null;
-        InputStream is = null;
-        byte[] b = null;
-        try {
-            is = url.openStream();
-            cr = new ClassReader(is);
-            MethodSignatureVisitor msv = new MethodSignatureVisitor();
-            cr.accept(msv, ClassReader.SKIP_FRAMES);
-            is.close();
+        // Create the class
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        className = className.replace('.', '/');
+        createClass(cw, className, clazz.getName());
 
-            MethodSignature[] methodsSign = msv.getMethods();
+        // Inject fields inside the POJO
+        injectFields(cw, fields);
 
-            ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        // Inject a constructor <INIT>()V
+        MethodVisitor cst = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
+        cst.visitVarInsn(ALOAD, 0);
+        cst.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V");
+        cst.visitInsn(RETURN);
+        cst.visitMaxs(0, 0);
+        cst.visitEnd();
 
-            // Create the class
-            className = className.replace('.', '/');
-            createClass(cw, className, contractName);
+        for (int i = 0; i < itfmethods.length; ++i) {
+            Method method = itfmethods[i];
 
-            // Inject fields inside the POJO
-            injectFields(cw, fields);
-
-            // Inject a constructor <INIT>()V
-            MethodVisitor cst = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
-            cst.visitVarInsn(ALOAD, 0);
-            cst.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V");
-            cst.visitInsn(RETURN);
-            cst.visitMaxs(0, 0);
-            cst.visitEnd();
-
-            for (int i = 0; i < methodsSign.length; ++i) {
-                MethodSignature method = methodsSign[i];
-
-                // Get the field for this method
-                // 1) find the MethodMetadata
-                FieldMetadata delegator = null; // field to delegate
-                MethodMetadata methodDelegator = null; // field to delegate
-                for (int j = 0; j < methods.size(); j++) {
-                    MethodMetadata methodMeta = (MethodMetadata) methods.get(j);
-                    if (methodMeta.equals(method)) {
-                        delegator = methodMeta.getDelegation();
-                        methodDelegator = methodMeta;
-                    }
+            // Get the field for this method
+            // 1) find the MethodMetadata
+            FieldMetadata delegator = null; // field to delegate
+            MethodMetadata methodDelegator = null; // field to delegate
+            for (int j = 0; j < methods.size(); j++) {
+                MethodMetadata methodMeta = (MethodMetadata) methods.get(j);
+                if (methodMeta.equals(method)) {
+                    delegator = methodMeta.getDelegation();
+                    methodDelegator = methodMeta;
                 }
-
-                generateOneMethod(cw, className, methodDelegator, method, delegator);
-
             }
 
-            // End process
-            cw.visitEnd();
-            b = cw.toByteArray();
+            generateOneMethod(cw, className, methodDelegator, method, delegator);
 
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
-        return b;
+        // End process
+        cw.visitEnd();
+        return cw.toByteArray();
     }
 
     /**
@@ -152,13 +128,15 @@ public class POJOWriter implements Opcodes {
      * @param sign : method signature to generate
      * @param delegator : the field on which delegate
      */
-    private static void generateOneMethod(ClassWriter cw, String className, MethodMetadata method, MethodSignature sign, FieldMetadata delegator) {
-        String desc = sign.getDesc();
+    private static void generateOneMethod(ClassWriter cw, String className, MethodMetadata method, Method sign, FieldMetadata delegator) {
+        String desc = Type.getMethodDescriptor(sign);
         String name = sign.getName();
-        String signa = sign.getSignature();
-        String[] exc = sign.getException();
+        String[] exc = new String[sign.getExceptionTypes().length];
+        for (int i = 0; i < sign.getExceptionTypes().length; i++) {
+            exc[i] = Type.getType(sign.getExceptionTypes()[i]).getInternalName();
+        }
 
-        MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, name, desc, signa, exc);
+        MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, name, desc, null, exc);
 
         if (delegator.isOptional()) {
             if (!delegator.isAggregate()) {

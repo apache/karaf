@@ -18,10 +18,7 @@
  */
 package org.apache.felix.ipojo.composite.service.provides;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.felix.ipojo.handlers.dependency.nullable.MethodSignature;
+import java.lang.reflect.Method;
 
 /**
  * Information on Method for the composition.
@@ -40,24 +37,9 @@ public class MethodMetadata {
     public static final int ALL_POLICY = 2;
 
     /**
-     * Method Name.
+     * Method Object.
      */
-    private String m_methodName;
-
-    /**
-     * Internal Descriptor.
-     */
-    private String m_descriptor;
-
-    /**
-     * List of arguments. 
-     */
-    private List/* <String> */m_arguments = new ArrayList/* <String> */();
-
-    /**
-     * List of exceptions.
-     */
-    private List/* <String> */m_exceptions = new ArrayList/* <String> */();
+    private Method m_method;
     
     /**
      * Delegation field.
@@ -71,40 +53,14 @@ public class MethodMetadata {
 
     /**
      * Constructor.
-     * @param name : name of the method.
-     * @param desc : description of the method.
+     * @param method : method object.
      */
-    public MethodMetadata(String name, String desc) {
-        m_methodName = name;
-        m_descriptor = desc;
+    public MethodMetadata(Method method) {
+        m_method = method;
     }
 
-    /**
-     * Add an argument.
-     * @param type : type of the argument.
-     */
-    public void addArgument(String type) {
-        m_arguments.add(type);
-    }
-
-    /**
-     * Add an exception.
-     * @param exception : name of the exception.
-     */
-    public void addException(String exception) {
-        m_exceptions.add(exception);
-    }
-
-    public List/* <String> */getArguments() {
-        return m_arguments;
-    }
-
-    public List/* <String> */getExceptions() {
-        return m_exceptions;
-    }
-
-    public String getMethodName() {
-        return m_methodName;
+    public Method getMethod() {
+        return m_method;
     }
 
     public void setDelegation(FieldMetadata dm) {
@@ -121,34 +77,26 @@ public class MethodMetadata {
      * @return true if the two method are equals
      */
     public boolean equals(MethodMetadata mm) {
-        // Test if the name are the same, #args and #exception are the same.
-        if (!mm.getMethodName().equals(m_methodName) || mm.getArguments().size() != m_arguments.size()) {
+        Method met = mm.getMethod();
+        return equals(met);
+    }
+
+    /**
+     * Equals method for Method object.
+     * @param met : the method object to compare.
+     * @return true if the given method signature is equals to the current method metadata.
+     */
+    public boolean equals(Method met) {
+        if (! met.getName().equals(m_method.getName()) || met.getParameterTypes().length != m_method.getParameterTypes().length) {
             return false;
         }
 
-        for (int i = 0; i < m_arguments.size(); i++) {
-            if (!m_arguments.get(i).equals(mm.getArguments().get(i))) {
+        for (int i = 0; i < m_method.getParameterTypes().length; i++) {
+            if (!m_method.getParameterTypes()[i].getName().equals(met.getParameterTypes()[i].getName())) {
                 return false;
             }
         }
 
-        return true;
-    }
-
-    /**
-     * Equals method for Method Signature.
-     * @param ms : the method signature to compare.
-     * @return true if the given method signature is equals to the current method metadata.
-     */
-    public boolean equals(MethodSignature ms) {
-        // the method is equals to the method signature if the name and the desc are similar.
-        if (!m_methodName.equals(ms.getName())) {
-            return false;
-        }
-        if (!m_descriptor.equals(ms.getDesc())) {
-            return false;
-        }
-        
         return true;
     }
 
@@ -163,6 +111,17 @@ public class MethodMetadata {
         m_policy = ALL_POLICY;
     }
     
-    public String getDescription() { return m_descriptor; }
+    /**
+     * Check if the method can throw UnsupportedOperationException.
+     * @return true if the method has declared the UnsupportedOperationException.
+     */
+    boolean throwsUnsupportedOperationException() {
+        for (int i = 0; i < m_method.getExceptionTypes().length; i++) {
+            if (m_method.getExceptionTypes()[i].getName().equals(UnsupportedOperationException.class.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

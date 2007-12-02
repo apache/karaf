@@ -19,7 +19,6 @@
 package org.apache.felix.ipojo.composite.service.provides;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -166,7 +165,7 @@ public class CompositionMetadata {
 
     /**
      * Build the delegation mapping.
-     * @throws CompositionException : occurs when the mapping cannot be infers correctly
+     * @throws CompositionException : occurs when the mapping cannot be inferred correctly
      */
     protected void buildMapping() throws CompositionException {
         buildAvailableMappingList();
@@ -214,14 +213,14 @@ public class CompositionMetadata {
                         field.setUseful(true);
                         method.setDelegation(field);
                         // Test optional
-                        if (field.isOptional() && !method.getExceptions().contains("java/lang/UnsupportedOperationException")) {
-                            m_handler.log(Logger.WARNING, "The method " + method.getMethodName() + " could not be provided correctly : the specification " + field.getSpecification().getName() + " is optional");
+                        if (field.isOptional() && !method.throwsUnsupportedOperationException()) {
+                            m_handler.log(Logger.WARNING, "The method " + method.getMethod().getName() + " could not be provided correctly : the specification " + field.getSpecification().getName() + " is optional");
                         }
                     }
                 }
             }
             if (!found) {
-                throw new CompositionException("Inconsistent composition - the method " + method.getMethodName() + " could not be delegated");
+                throw new CompositionException("Inconsistent composition - the method " + method.getMethod() + " could not be delegated");
             }
         }
     }
@@ -231,9 +230,14 @@ public class CompositionMetadata {
      * @return the byte[] of the POJO.
      */
     protected byte[] buildPOJO() {
-        String resource = m_specification.getName().replace('.', '/') + ".class";
-        URL url = getBundleContext().getBundle().getResource(resource);
-        byte[] pojo = POJOWriter.dump(url, m_specification.getName(), m_name, getFieldList(), getMethodList());
+        Class clazz = null;
+        try {
+            clazz = getBundleContext().getBundle().loadClass(m_specification.getName());
+        } catch (ClassNotFoundException e1) {
+            //TODO
+            e1.printStackTrace();
+        }
+        byte[] pojo = POJOWriter.dump(clazz, m_name, getFieldList(), getMethodList());
         Manipulator m = new Manipulator();
         try {
             byte[] ff = m.manipulate(pojo);
@@ -242,7 +246,7 @@ public class CompositionMetadata {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new byte[0];
+        return null;
     }
 
     /**
@@ -257,7 +261,7 @@ public class CompositionMetadata {
         elem.addAttribute(className);
         elem.addAttribute(factory);
         
-        // Add architcture for debug
+        // Add architecture for debug
         elem.addAttribute(new Attribute("architecture", "true"));
 
         // Provides

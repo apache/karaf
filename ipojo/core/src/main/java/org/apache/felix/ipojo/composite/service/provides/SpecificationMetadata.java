@@ -18,18 +18,11 @@
  */
 package org.apache.felix.ipojo.composite.service.provides;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.felix.ipojo.handlers.dependency.nullable.MethodSignature;
-import org.apache.felix.ipojo.handlers.dependency.nullable.MethodSignatureVisitor;
 import org.apache.felix.ipojo.util.Logger;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Type;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -86,37 +79,16 @@ public class SpecificationMetadata {
         m_handler = psd;
     
         // Populate methods :
-        URL url = bc.getBundle().getResource(name.replace('.', '/') + ".class");
-        InputStream is = null;
-        ClassReader cr = null;
-        MethodSignatureVisitor msv = null;
         try {
-            is = url.openStream();
-            cr = new ClassReader(is);
-            msv = new MethodSignatureVisitor();
-            cr.accept(msv, ClassReader.SKIP_FRAMES);
-            is.close();
-        } catch (IOException e) {
+            Class clazz = bc.getBundle().loadClass(name);
+            Method[] methods = clazz.getMethods();
+            for (int i = 0; i < methods.length; i++) {
+                MethodMetadata method = new MethodMetadata(methods[i]);
+                m_methods.add(method);
+            }
+        } catch (ClassNotFoundException e) {
             m_handler.log(Logger.ERROR, "Cannot open " + name + " : " + e.getMessage());
             return;
-        }
-    
-        MethodSignature[] containsMethods = msv.getMethods();
-        for (int i = 0; i < containsMethods.length; i++) {
-            MethodSignature met = containsMethods[i];
-            String desc = met.getDesc();
-            MethodMetadata method = new MethodMetadata(met.getName(), desc);
-    
-            Type[] args = Type.getArgumentTypes(desc);
-            String[] exceptionClasses = met.getException();
-            for (int j = 0; j < args.length; j++) {
-                method.addArgument(args[j].getClassName());
-            }
-            for (int j = 0; j < exceptionClasses.length; j++) {
-                method.addException(exceptionClasses[j]);
-            }
-    
-            addMethod(method);
         }
     
         m_isAggregate = isAggregate;
@@ -137,18 +109,8 @@ public class SpecificationMetadata {
         m_name = c.getName();
         Method[] methods = c.getMethods();
         for (int i = 0; i < methods.length; i++) {
-            String desc = Type.getMethodDescriptor(methods[i]);
-            MethodMetadata method = new MethodMetadata(methods[i].getName(), desc);
-            Type[] args = Type.getArgumentTypes(desc);
-            Class[] exceptionClasses = methods[i].getExceptionTypes();
-            for (int j = 0; j < args.length; j++) {
-                method.addArgument(args[j].getClassName());
-            }
-            for (int j = 0; j < exceptionClasses.length; j++) {
-                method.addException(exceptionClasses[j].getName());
-            }
-    
-            addMethod(method);
+            MethodMetadata method = new MethodMetadata(methods[i]);    
+            m_methods.add(method);
         }
         m_isInterface = false;
     }
@@ -162,14 +124,6 @@ public class SpecificationMetadata {
     }
 
     /**
-     * Add a method metadata to the current specification.
-     * @param mm : the method metadata to add.
-     */
-    public void addMethod(MethodMetadata mm) {
-        m_methods.add(mm);
-    }
-
-    /**
      * Get a method by its name.
      * @param name : method name
      * @return the method metadata contained in the current specification with the given name. Null if the method is not found.
@@ -177,7 +131,7 @@ public class SpecificationMetadata {
     public MethodMetadata getMethodByName(String name) {
         for (int i = 0; i < m_methods.size(); i++) {
             MethodMetadata met = (MethodMetadata) m_methods.get(i);
-            if (met.getMethodName().equals(name)) {
+            if (met.getMethod().getName().equals(name)) {
                 return met;
             }
         }

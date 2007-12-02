@@ -18,19 +18,15 @@
  */
 package org.apache.felix.ipojo.handlers.dependency;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.PolicyServiceContext;
 import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
-import org.apache.felix.ipojo.handlers.dependency.nullable.NullableObjectWriter;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.FieldMetadata;
 import org.apache.felix.ipojo.parser.ManipulationMetadata;
@@ -48,11 +44,6 @@ public class DependencyHandler extends PrimitiveHandler {
      * List of dependencies of the component.
      */
     private Dependency[] m_dependencies = new Dependency[0];
-
-    /**
-     * Map of dependency - nullable objects for optional dependencies.
-     */
-    private Map m_nullableObjects;
 
     /**
      * State of the handler.
@@ -216,7 +207,6 @@ public class DependencyHandler extends PrimitiveHandler {
      */
     public void configure(Element componentMetadata, Dictionary configuration) throws ConfigurationException {
         m_dependencies = new Dependency[0];
-        m_nullableObjects = new HashMap();
 
         ManipulationMetadata manipulation = new ManipulationMetadata(componentMetadata);
         List fl = new ArrayList();
@@ -234,6 +224,7 @@ public class DependencyHandler extends PrimitiveHandler {
             String filter = deps[i].getAttribute("filter");
             String opt = deps[i].getAttribute("optional");
             boolean optional = opt != null && opt.equalsIgnoreCase("true");
+            String di = deps[i].getAttribute("default-implementation");
             
             String agg = deps[i].getAttribute("aggregate");
             boolean aggregate = agg != null && agg.equalsIgnoreCase("true");
@@ -270,7 +261,7 @@ public class DependencyHandler extends PrimitiveHandler {
                 }
             }
             
-            Dependency dep = new Dependency(this, field, serviceSpecification, filter, optional, aggregate, id, scopePolicy, bindingPolicy);
+            Dependency dep = new Dependency(this, field, serviceSpecification, filter, optional, aggregate, id, scopePolicy, bindingPolicy, di);
 
             // Look for dependency callback :
             for (int j = 0; j < (deps[i].getElements("Callback", "")).length; j++) {
@@ -297,75 +288,12 @@ public class DependencyHandler extends PrimitiveHandler {
                     fl.add(manipulation.getField(dep.getField()));
                 }
             }
-            
-            if (optional) {
-                String defaultImpl = deps[i].getAttribute("default-implementation");
-                if (defaultImpl != null) {
-                    m_nullableObjects.put(dep, defaultImpl);
-                }
-            }
         }
 
         if (deps.length > 0) {
             getInstanceManager().register(this, (FieldMetadata[]) fl.toArray(new FieldMetadata[0]), manipulation.getMethods());
         } else {
             throw new ConfigurationException("No dependencies found in " + getInstanceManager().getInstanceName());
-        }
-    }
-
-    /**
-     * Create a nullable class for the given dependency.
-     * @param dep : the service dependency
-     */
-    private void createNullableObject(Dependency  dep) {
-        String spec = dep.getSpecification();
-        String className = spec + "Nullable";
-        String resource = spec.replace('.', '/') + ".class";
-        URL url = getInstanceManager().getContext().getBundle().getResource(resource);
-
-        byte[] b = NullableObjectWriter.dump(url, spec);
-        Class c = getInstanceManager().getFactory().defineClass(className, b, null);
-        try {
-            Object o = c.newInstance();
-            m_nullableObjects.put(dep, o);
-        } catch (InstantiationException e) {
-            log(Logger.ERROR, "The nullable object for " + dep.getSpecification() + " cannot be instantiate : " + e.getMessage());
-            getInstanceManager().setState(ComponentInstance.INVALID); 
-        } catch (IllegalAccessException e) {
-            log(Logger.ERROR, "The nullable object for " + dep.getSpecification() + " cannot be instantiate : " + e.getMessage());
-            getInstanceManager().setState(ComponentInstance.INVALID);
-        }
-    }
-
-    /**
-     * Return the nullable class corresponding to the given name.
-     * @param dep the dependency which require the nullable class.
-     * @return the class corresponding to the name, or null if the class does not exist.
-     */
-    protected Object getNullableObject(Dependency dep) {
-        Object obj = m_nullableObjects.get(dep);
-        if (obj == null) { return null; } // Should not happen
-        if (obj instanceof String) { 
-            try {
-                Class c = getInstanceManager().getContext().getBundle().loadClass((String) obj);
-                obj = c.newInstance();
-                m_nullableObjects.put(dep, obj);
-                return obj;
-            } catch (ClassNotFoundException e) {
-                // A default-implementation class cannot be loaded
-                log(Logger.ERROR, "The default-implementation class " + obj + " cannot be loaded : " + e.getMessage());
-                getInstanceManager().setState(ComponentInstance.INVALID);
-                return null;
-            } catch (InstantiationException e) {
-                log(Logger.ERROR, "The default-implementation class " + obj + " cannot be instantiated : " + e.getMessage());
-                getInstanceManager().setState(ComponentInstance.INVALID);
-            } catch (IllegalAccessException e) {
-                log(Logger.ERROR, "The default-implementation class " + obj + " cannot be instantiated : " + e.getMessage());
-                getInstanceManager().setState(ComponentInstance.INVALID);
-            }
-            return null;
-        } else {
-            return obj;
         }
     }
 
@@ -423,12 +351,9 @@ public class DependencyHandler extends PrimitiveHandler {
      * @see org.apache.felix.ipojo.Handler#start()
      */
     public void start() {
-        // Start the dependencies, for optional dependencies create Nullable class
+        // Start the dependencies
         for (int i = 0; i < m_dependencies.length; i++) {
             Dependency dep = m_dependencies[i];
-            if (dep.isOptional() && !dep.isAggregate() && ! m_nullableObjects.containsKey(dep)) {
-                createNullableObject(dep);
-            }
             dep.start();
         }
         // Check the state

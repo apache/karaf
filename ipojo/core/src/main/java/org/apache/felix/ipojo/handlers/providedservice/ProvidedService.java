@@ -216,15 +216,9 @@ public class ProvidedService implements ServiceFactory {
      */
     protected synchronized void registerService() {
         if (m_serviceRegistration == null) {
-            String spec = "";
-            for (int i = 0; i < m_serviceSpecification.length; i++) {
-                spec = spec + m_serviceSpecification[i] + ", ";
-            }
             // Build the service properties list
             Properties serviceProperties = getServiceProperties();
-           
             m_serviceRegistration = m_handler.getInstanceManager().getContext().registerService(m_serviceSpecification, this, serviceProperties);
-           
         }
     }
 
