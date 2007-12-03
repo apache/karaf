@@ -143,6 +143,45 @@
             </nodes>
         </group>
 
+        <!-- OBR -->
+        <group>
+            <name>obr</name>
+            <nodes>
+                <command>
+                    <name>addUrl</name>
+                    <id>obr:addUrl</id>
+                </command>
+                <command>
+                    <name>deploy</name>
+                    <id>obr:deploy</id>
+                </command>
+                <command>
+                    <name>info</name>
+                    <id>obr:info</id>
+                </command>
+                <command>
+                    <name>list</name>
+                    <id>obr:list</id>
+                </command>
+                <command>
+                    <name>listUrl</name>
+                    <id>obr:listUrl</id>
+                </command>
+                <command>
+                    <name>removeUrl</name>
+                    <id>obr:removeUrl</id>
+                </command>
+                <command>
+                    <name>source</name>
+                    <id>obr:source</id>
+                </command>
+                <command>
+                    <name>start</name>
+                    <id>obr:start</id>
+                </command>
+            </nodes>
+        </group>
+
     </nodes>
 
 </layout>

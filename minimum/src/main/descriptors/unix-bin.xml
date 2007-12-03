@@ -135,19 +135,28 @@
         </dependencySet>
 
         <!-- GShell -->
-<!--
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <scope>runtime</scope>
             <includes>
+                <include>org.apache.geronimo.specs:geronimo-stax-api_1.0_spec</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.xstream</include>
                 <include>org.apache.servicemix.gshell:org.apache.servicemix.gshell.core</include>
                 <include>org.apache.servicemix.gshell:org.apache.servicemix.gshell.osgi</include>
-                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.xstream</include>
-                <include>org.apache.geronimo.specs:geronimo-stax-api_1.0_spec</include>
             </includes>
         </dependencySet>
--->
+
+        <!-- OBR + GShell command -->
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <scope>runtime</scope>
+            <includes>
+                <include>org.apache.felix:org.apache.felix.bundlerepository</include>
+                <include>org.apache.servicemix.gshell:org.apache.servicemix.gshell.obr</include>
+            </includes>
+        </dependencySet>
 
     </dependencySets>
 
