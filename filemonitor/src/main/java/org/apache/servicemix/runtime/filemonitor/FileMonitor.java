@@ -54,7 +54,7 @@ public class FileMonitor {
     public final static String SCAN_INTERVAL = "org.apache.servicemix.filemonitor.scanInterval";
     protected static final String ALIAS_KEY = "_alias_factory_pid";
     private FileMonitorActivator activator;
-    private File configDir = new File("./conf");
+    private File configDir = new File("./etc");
     private File deployDir = new File("./deploy");
     private File generateDir = new File("./data/generated-bundles");
     private Scanner scanner = new Scanner();

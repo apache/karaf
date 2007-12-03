@@ -241,16 +241,11 @@ init() {
 
 run() {
     JAR=$SERVICEMIX_HOME/bin/servicemix.jar
-    CLASSPATH=$SERVICEMIX_HOME/bin/bootstrapper.jar:$SERVICEMIX_HOME/bin/daemon.jar:$SERVICEMIX_HOME/bin/logger.jar:$SERVICEMIX_HOME/bin/servicemix.jar
     if $cygwin; then
         SERVICEMIX_HOME=`cygpath --path --windows "$SERVICEMIX_HOME"`
-        CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
-        CLASSWORLDS_CONF=`cygpath --path --windows "$CLASSWORLDS_CONF"`
-        CYGHOME=`cygpath --windows "$HOME"`
-        JAR=`cygpath --windows "$JAR"`
     fi
     cd "$SERVICEMIX_HOME"
-    exec $JAVA $JAVA_OPTS -Dservicemix.home="$SERVICEMIX_HOME" -Dbundles.configuration.location="$SERVICEMIX_HOME/conf" -jar "$JAR" "$1" 
+    exec $JAVA $JAVA_OPTS -Dservicemix.home="$SERVICEMIX_HOME" -Dbundles.configuration.location="$SERVICEMIX_HOME/etc" -jar "$JAR" "$1" 
 }
 
 main() {

@@ -370,7 +370,7 @@ public class Main
                 // directory of the servicemix.jar directory.
                 confDir = new File(
                     new File(new File(jarLocation).getAbsolutePath()).getParent(),
-                    "conf");
+                    "etc");
                 bundleDir = new File(
                     new File(new File(jarLocation).getAbsolutePath()).getParent(),
                     "system");
