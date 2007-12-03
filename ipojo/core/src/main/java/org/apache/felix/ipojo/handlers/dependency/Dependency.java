@@ -184,6 +184,11 @@ public class Dependency implements TrackerCustomizer {
      * Nullable object.
      */
     private Object m_nullable;
+    
+    /**
+     * Default-Implementation.
+     */
+    private String m_di;
 
     /**
      * Dependency constructor. After the creation the dependency is not started.
@@ -204,22 +209,8 @@ public class Dependency implements TrackerCustomizer {
         m_field = field;
         m_specification = spec;
         m_isOptional = isOptional;
-        if (m_isOptional) {
-            if (di != null) {
-                try {
-                    Class c = getHandler().getInstanceManager().getContext().getBundle().loadClass(di);
-                    m_nullable = c.newInstance();
-                } catch (IllegalAccessException e) {
-                    m_handler.log(Logger.ERROR, "Cannot load the default-implementation " + di + " : " + e.getMessage());
-                } catch (InstantiationException e) {
-                    m_handler.log(Logger.ERROR, "Cannot load the default-implementation " + di + " : " + e.getMessage());
-                } catch (ClassNotFoundException e) {
-                    m_handler.log(Logger.ERROR, "Cannot load the default-implementation " + di + " : " + e.getMessage());
-                }
-            } else {
-                m_nullable = Proxy.newProxyInstance(getHandler().getInstanceManager().getClazz().getClassLoader(), new Class[] {m_clazz, Nullable.class}, new NullableObject());
-            }
-        }
+        m_di = di;
+       
         m_strFilter = filter;
         m_isAggregate = isAggregate;
         if (m_id == null) {
@@ -500,15 +491,31 @@ public class Dependency implements TrackerCustomizer {
         if (m_strFilter != null) {
             filter = "(&" + filter + m_strFilter + ")";
         }
-
-        m_state = UNRESOLVED;
-
+        
         try {
             m_clazz = m_handler.getInstanceManager().getContext().getBundle().loadClass(m_specification);
         } catch (ClassNotFoundException e) {
             m_handler.log(Logger.ERROR, "Cannot load the interface class for the dependency " + m_field + " [" + m_specification + "]");
-            m_handler.getInstanceManager().stop();
         }
+        
+        if (m_isOptional) {
+            if (m_di != null) {
+                try {
+                    Class c = getHandler().getInstanceManager().getContext().getBundle().loadClass(m_di);
+                    m_nullable = c.newInstance();
+                } catch (IllegalAccessException e) {
+                    m_handler.log(Logger.ERROR, "Cannot load the default-implementation " + m_di + " : " + e.getMessage());
+                } catch (InstantiationException e) {
+                    m_handler.log(Logger.ERROR, "Cannot load the default-implementation " + m_di + " : " + e.getMessage());
+                } catch (ClassNotFoundException e) {
+                    m_handler.log(Logger.ERROR, "Cannot load the default-implementation " + m_di + " : " + e.getMessage());
+                }
+            } else {
+                m_nullable = Proxy.newProxyInstance(getHandler().getInstanceManager().getClazz().getClassLoader(), new Class[] {m_clazz, Nullable.class}, new NullableObject());
+            }
+        }
+
+        m_state = UNRESOLVED;
 
         try {
             m_filter = m_handler.getInstanceManager().getContext().createFilter(filter); // Store the filter
