@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+  http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/util
+  http://www.springframework.org/schema/util/spring-util.xsd
+  http://www.springframework.org/schema/osgi
+  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+
+    <bean id="bundle-level" class="org.apache.geronimo.gshell.osgi.BundleLevel" />
+
+    <bean id="headers" class="org.apache.geronimo.gshell.osgi.Headers" />
+
+    <bean id="list-bundles" class="org.apache.geronimo.gshell.osgi.ListBundles" />
+
+    <bean id="list-services" class="org.apache.geronimo.gshell.osgi.ListServices" />
+
+    <bean id="refresh-bundle" class="org.apache.geronimo.gshell.osgi.RefreshBundle" />
+
+    <bean id="resolve-bundle" class="org.apache.geronimo.gshell.osgi.ResolveBundle" />
+
+    <bean id="shutdown" class="org.apache.geronimo.gshell.osgi.Shutdown" />
+
+    <bean id="start-bundle" class="org.apache.geronimo.gshell.osgi.StartBundle" />
+
+    <bean id="start-level" class="org.apache.geronimo.gshell.osgi.StartLevel" />
+
+    <bean id="stop-bundle" class="org.apache.geronimo.gshell.osgi.StopBundle" />
+
+    <bean id="uninstall-bundle" class="org.apache.geronimo.gshell.osgi.UninstallBundle" />
+
+    <osgi:service ref="bundle-level" interface="org.apache.geronimo.gshell.command.Command" />
+
+    <osgi:service ref="headers" interface="org.apache.geronimo.gshell.command.Command" />
+
+    <osgi:service ref="list-bundles" interface="org.apache.geronimo.gshell.command.Command" />
+
+    <osgi:service ref="list-services" interface="org.apache.geronimo.gshell.command.Command" />
+
+    <osgi:service ref="refresh-bundle" interface="org.apache.geronimo.gshell.command.Command" />
+
+    <osgi:service ref="resolve-bundle" interface="org.apache.geronimo.gshell.command.Command" />
+
+    <osgi:service ref="shutdown" interface="org.apache.geronimo.gshell.command.Command" />
+
+    <osgi:service ref="start-bundle" interface="org.apache.geronimo.gshell.command.Command" />
+
+    <osgi:service ref="start-level" interface="org.apache.geronimo.gshell.command.Command" />
+
+    <osgi:service ref="stop-bundle" interface="org.apache.geronimo.gshell.command.Command" />
+
+    <osgi:service ref="uninstall-bundle" interface="org.apache.geronimo.gshell.command.Command" />
+
+</beans>

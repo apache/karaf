@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+  http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/util
+  http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="branding" class="org.apache.geronimo.gshell.branding.ServiceMixBranding">
+        <constructor-arg ref="versionLoader" />
+        <constructor-arg ref="terminal" />
+    </bean>
+
+    <bean id="versionLoader" class="org.apache.geronimo.gshell.branding.PropertiesVersionLoader">
+        <constructor-arg value="servicemix-version.properties" />
+    </bean>
+
+    <bean id="terminal" class="jline.Terminal" factory-method="getTerminal" />
+
+    <bean id="promptReader" class="org.apache.geronimo.gshell.console.PromptReader" init-method="initialize">
+        <constructor-arg ref="terminal" />
+        <constructor-arg ref="io" />
+    </bean>
+
+    <bean id="commandExecutor" class="org.apache.geronimo.gshell.spring.SpringCommandExecutor" init-method="init">
+        <property name="commandLineBuilder" ref="commandLineBuilder" />
+        <property name="commandRegistry" ref="commandRegistry" />
+        <property name="env" ref="environment" />
+        <property name="layoutManager" ref="layoutManager" />
+    </bean>
+
+    <bean id="interactiveShell" class="org.apache.geronimo.gshell.DefaultShell">
+        <constructor-arg ref="shellInfo" />
+        <constructor-arg ref="branding" />
+        <constructor-arg ref="commandExecutor" />
+        <constructor-arg ref="terminal" />
+        <constructor-arg ref="environment" />
+        <constructor-arg ref="io" />
+    </bean>
+
+    <bean id="shellInfo" class="org.apache.geronimo.gshell.DefaultShellInfo" init-method="initialize">
+        <constructor-arg ref="branding" />
+    </bean>
+
+    <bean id="layoutManager" class="org.apache.geronimo.gshell.layout.DefaultLayoutManager" init-method="initialize">
+        <constructor-arg ref="layoutLoader" index="0" type="org.apache.geronimo.gshell.layout.loader.LayoutLoader" />
+        <constructor-arg ref="environment" index="1" />
+    </bean>
+
+    <bean id="layoutLoader" class="org.apache.geronimo.gshell.layout.loader.XMLLayoutLoader" init-method="initialize">
+        <constructor-arg ref="shellInfo" />
+    </bean>
+
+    <bean id="commandRegistry" class="org.apache.geronimo.gshell.spring.SpringCommandRegistry" />
+
+    <bean id="commandLineBuilder" class="org.apache.geronimo.gshell.spring.SpringCommandLineBuilder">
+        <property name="environment" ref="environment" />
+        <property name="executor" ref="commandExecutor" />
+    </bean>
+
+    
+    <bean id="environment" class="org.springframework.aop.framework.ProxyFactoryBean">
+      <property name="targetSource">
+          <bean class="org.apache.geronimo.gshell.spring.EnvironmentTargetSource" />
+      </property>
+    </bean>
+
+    <bean id="io" class="org.springframework.aop.framework.ProxyFactoryBean">
+      <property name="targetSource">
+          <bean class="org.apache.geronimo.gshell.spring.IOTargetSource" />
+      </property>
+    </bean>
+
+</beans>
