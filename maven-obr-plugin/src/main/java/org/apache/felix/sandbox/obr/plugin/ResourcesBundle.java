@@ -332,6 +332,10 @@ public class ResourcesBundle {
         } else {
             this.setVersion(project.getVersion());
         }
+        
+        if (ebi.getId() != null) {
+            this.setId(ebi.getId());
+        }
 
         if (ebi.getDescription() != null) {
             this.setDescription(ebi.getDescription());
@@ -427,7 +431,7 @@ public class ResourcesBundle {
      * @return false if an information is missing, else true
      */
     public boolean isValid() {
-        // we must verify require properties are present
+        // we must verify required properties are present
         return this.getPresentationName() != null 
             && this.getSymbolicName() != null
             && this.getVersion() != null 
@@ -436,18 +440,15 @@ public class ResourcesBundle {
     }
 
     /**
-     * test if this bundle has the same symbolicname, presentationname and version number.
+     * test if this bundle has the same symbolicname, and version number.
      * @param symbolicName symbolicName to compare with current bundle
      * @param presentationName presentationName to compare with current bundlde
      * @param version version to compare with current bundle
      * @return true if the information are the same, else false
      */
-    public boolean isSameBundleResource(String symbolicName, String presentationName, String version) {
+    public boolean isSameBundleResource(String symbolicName, String version) {
         if (this.isValid()) {
-            boolean result;
-            result = (symbolicName.compareTo(this.getSymbolicName()) == 0) && (version.compareTo(this.getVersion()) == 0) && (presentationName.compareTo(this.getPresentationName()) == 0);
-            return result;
-
+            return (symbolicName.compareTo(this.getSymbolicName()) == 0) && (version.compareTo(this.getVersion()) == 0);
         } else {
             return false;
         }

@@ -33,7 +33,7 @@ import org.osgi.impl.bundle.obr.resource.CapabilityImpl;
 import org.osgi.impl.bundle.obr.resource.RepositoryImpl;
 import org.osgi.impl.bundle.obr.resource.RequirementImpl;
 import org.osgi.impl.bundle.obr.resource.ResourceImpl;
-import org.osgi.impl.bundle.obr.resource.VersionImpl;
+import org.osgi.impl.bundle.obr.resource.VersionRange;
 
 /**
  * this class is used to configure bindex and get information built by bindex about targeted bundle.
@@ -121,7 +121,7 @@ public class ExtractBindexInfo {
                         if (value instanceof Number) {
                             type = "number";
                         } else { 
-                            if (value.getClass() == VersionImpl.class) { type = "version"; }
+                            if (value.getClass() == VersionRange.class) { type = "version"; }
                         }
                         if (type != null) {
                             p.setT(type);
@@ -234,6 +234,18 @@ public class ExtractBindexInfo {
     public String getSource() {
         if (m_resource.getSource() != null) {
             return m_resource.getSource().toString();
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * extract source from bindex information.
+     * @return bundle source
+     */
+    public String getId() {
+        if (m_resource.getId() != null) {
+            return m_resource.getId();
         } else {
             return null;
         }

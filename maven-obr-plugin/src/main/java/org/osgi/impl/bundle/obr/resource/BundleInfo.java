@@ -1,3 +1,20 @@
+/*
+ * $Id: BundleInfo.java 44 2007-07-13 20:49:41Z hargrave@us.ibm.com $
+ * 
+ * Copyright (c) OSGi Alliance (2002, 2006, 2007). All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.osgi.impl.bundle.obr.resource;
 
 import java.io.*;
@@ -11,7 +28,7 @@ import org.osgi.service.obr.Resource;
  * Convert a bundle to a generic resource description and store its local
  * dependencies (like for example a license file in the JAR) in a zip file.
  * 
- * @version $Revision: 1.18 $
+ * @version $Revision: 44 $
  */
 public class BundleInfo {
 	Manifest	manifest;
@@ -191,8 +208,8 @@ public class BundleInfo {
 				ri.setComment("Import Service " + entry.getName());
 
 				// TODO the following is arbitrary
-				ri.setOptional(true);
-				ri.setMultiple(false);
+				ri.setOptional(false);
+				ri.setMultiple(true);
 				resource.addRequirement(ri);
 			}
 		}
@@ -326,22 +343,21 @@ public class BundleInfo {
 		filter.append("=");
 		filter.append(pack.getName());
 		filter.append(")");
-		VersionImpl version = pack.getVersion();
+		VersionRange version = pack.getVersion();
 		if (version != null) {
-			VersionRange range = version.getRange();
-			if (range != null) {
+			if ( version.isRange() ) {
 				filter.append("(version");
 				filter.append(">");
-				if (range.getIncludeMinimum())
+				if (version.includeLow())
 					filter.append("=");
-				filter.append(range.getMinimum());
+				filter.append(version.low);
 				filter.append(")");
 
 				filter.append("(version");
 				filter.append("<");
-				if (range.getIncludeMaximum())
+				if (version.includeHigh())
 					filter.append("=");
-				filter.append(range.getMaximum());
+				filter.append(version.high);
 				filter.append(")");
 			}
 			else {

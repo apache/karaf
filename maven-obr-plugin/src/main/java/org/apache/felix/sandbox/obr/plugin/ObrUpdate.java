@@ -100,11 +100,6 @@ public class ObrUpdate {
     private Document m_repoDoc;
 
     /**
-     * used to determine the first free id.
-     */
-    private boolean[] m_idTab;
-
-    /**
      * first Node on repository descriptor tree.
      */
     private Node m_root;
@@ -143,8 +138,6 @@ public class ObrUpdate {
         this.m_logger = log;
 
         this.m_userConfig = userConfig;
-        // init the tab
-        m_idTab = new boolean[0];
 
         m_resourceBundle = new ResourcesBundle(log);
 
@@ -153,7 +146,6 @@ public class ObrUpdate {
         } else {
             this.m_repo = repoFilename;
         }
-        // System.err.println("Construct: "+repoFilename.getAbsoluteFilename());
     }
 
     /**
@@ -217,15 +209,7 @@ public class ObrUpdate {
         if (!walkOnTree(m_root)) {
             // the correct resource node was not found, we must create it
             // we compute the new id
-            int id = -1;
-            for (int i = 1; i < m_idTab.length; i++) {
-                if (!m_idTab[i]) {
-                    id = i;
-                    break;
-                }
-            }
-            if (id == -1) { id = m_idTab.length; }
-
+            String id = m_resourceBundle.getId();
             searchRepository(m_root, id);
         }
 
@@ -263,7 +247,6 @@ public class ObrUpdate {
         if (!fout.exists()) {
             // create the repository.xml
             try {
-
             	fout.createNewFile();
                 m_logger.info("Created "+fout.getAbsolutePath());
             } catch (IOException e) {
@@ -465,12 +448,12 @@ public class ObrUpdate {
      * @param node Node on the xml file
      * @param id id of the bundle ressource
      */
-    private void searchRepository(Node node, int id) {
+    private void searchRepository(Node node, String id) {
         if (node.getNodeName().compareTo("repository") == 0) {
-            m_resourceBundle.setId(String.valueOf(id));
             node.appendChild(m_resourceBundle.getNode(m_repoDoc));
             return;
         } else {
+            System.out.println("Second branch...");
             NodeList list = node.getChildNodes();
             if (list.getLength() > 0) {
                 for (int i = 0; i < list.getLength(); i++) {
@@ -489,25 +472,10 @@ public class ObrUpdate {
     private boolean resource(Node node) {
 
         // this part save all the id free if we need to add resource
-        int id = Integer.parseInt(node.getAttributes().getNamedItem("id").getNodeValue());
-        if (id >= m_idTab.length) {
-            // resize tab
-            boolean[] bt = new boolean[id + 1];
-            for (int i = 0; i < id + 1; i++) {
-                if (m_idTab.length > i && m_idTab[i]) {
-                    bt[i] = true;
-                } else {
-                    bt[i] = false;
-                }
-            }
-
-            m_idTab = bt;
-        }
-        m_idTab[id] = true;
-
+        String id = node.getAttributes().getNamedItem("id").getNodeValue();
         NamedNodeMap map = node.getAttributes();
 
-        if (m_resourceBundle.isSameBundleResource(map.getNamedItem("symbolicname").getNodeValue(), map.getNamedItem("presentationname").getNodeValue(), map.getNamedItem("version").getNodeValue())) {
+        if (m_resourceBundle.isSameBundleResource(map.getNamedItem("symbolicname").getNodeValue(), map.getNamedItem("version").getNodeValue())) {
             m_resourceBundle.setId(String.valueOf(id));
             node.getParentNode().replaceChild(m_resourceBundle.getNode(m_repoDoc), node);
             return true;

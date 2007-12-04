@@ -1,3 +1,20 @@
+/*
+ * $Id: ResourceImpl.java 44 2007-07-13 20:49:41Z hargrave@us.ibm.com $
+ * 
+ * Copyright (c) OSGi Alliance (2002, 2006, 2007). All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.osgi.impl.bundle.obr.resource;
 
 import java.io.File;
@@ -13,7 +30,7 @@ public class ResourceImpl implements Resource {
 	List			requirements	= new ArrayList();
 	URL				url;
 	String			symbolicName;
-	VersionImpl		version;
+	VersionRange		version;
 	List			categories		= new ArrayList();
 	long			size			= -1;
 	String			id;
@@ -23,13 +40,12 @@ public class ResourceImpl implements Resource {
 	String			presentationName;
 	File			file;
 
-	{
-		id = Integer.toString(ID++);
-	}
 
 	public ResourceImpl(RepositoryImpl repository, String name,
-			VersionImpl version) {
+			VersionRange version) {
 		this.version = version;
+		if ( version == null)
+			this.version = new VersionRange("0");
 		this.symbolicName = name;
 		this.repository = repository;
 	}
@@ -49,9 +65,9 @@ public class ResourceImpl implements Resource {
 			map.put(PRESENTATION_NAME, presentationName);
 		String v = parser.getAttributeValue(null, "version");
 		if (v == null)
-			setVersion(new VersionImpl("0"));
+			setVersion(new VersionRange("0"));
 		else
-			setVersion(new VersionImpl(v));
+			setVersion(new VersionRange(v));
 
 		setURL(toURL(parser.getAttributeValue(null, "uri")));
 
@@ -221,13 +237,13 @@ public class ResourceImpl implements Resource {
 
 	public Version getVersion() {
 		if (version == null)
-			version = new VersionImpl("0");
-		return version;
+			version = new VersionRange("0");
+		return version.low;
 	}
 
-	void setVersion(VersionImpl version) {
+	void setVersion(VersionRange version) {
 		if (version == null)
-			this.version = new VersionImpl("0");
+			this.version = new VersionRange("0");
 		else
 			this.version = version;
 	}
@@ -308,7 +324,9 @@ public class ResourceImpl implements Resource {
 		return Collections.unmodifiableMap(map);
 	}
 
-	public String getId() {
+	public synchronized String getId() {
+		if ( id == null )
+			id = symbolicName + "/" + version;
 		return id;
 	}
 

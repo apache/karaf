@@ -1,12 +1,28 @@
+/*
+ * $Id: Manifest.java 44 2007-07-13 20:49:41Z hargrave@us.ibm.com $
+ * 
+ * Copyright (c) OSGi Alliance (2002, 2006, 2007). All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.osgi.impl.bundle.obr.resource;
 
 import java.io.*;
 import java.util.*;
 
-import org.osgi.impl.bundle.obr.resource.VersionImpl;
-
 
 public class Manifest extends Hashtable {
+	static final long	serialVersionUID	= 1L;
 	List				imports;
 	List				exports;
 	ManifestEntry		name;
@@ -18,7 +34,7 @@ public class Manifest extends Hashtable {
 	Vector				duplicates	= new Vector();
 	final static String	wordparts	= "~!@#$%^&*_:/?><.-+";
 	ManifestEntry		bsn;
-	VersionImpl			version;
+	VersionRange			version;
 	ManifestEntry		host;
 	List				require;
 
@@ -91,10 +107,10 @@ public class Manifest extends Hashtable {
 				}
 				if (header.equals("bundle-version")) {
 					try {
-						version = new VersionImpl(value.trim());
+						version = new VersionRange(value.trim());
 					}
 					catch (Exception e) {
-						version = new VersionImpl("0");
+						version = new VersionRange("0");
 						System.err.println("Invalid version attr for: " + bsn
 								+ " value is " + value);
 					}
@@ -295,9 +311,9 @@ public class Manifest extends Hashtable {
 			return null;
 	}
 
-	public VersionImpl getVersion() {
+	public VersionRange getVersion() {
 		if (version == null)
-			return new VersionImpl("0");
+			return new VersionRange("0");
 		return version;
 	}
 
@@ -305,12 +321,10 @@ public class Manifest extends Hashtable {
 		ManifestEntry bsn = getBsn();
 
 		if (bsn == null) {
-			//nox if the symbolic name is not define in manifest fils, we take the 
-			//artefactId from the pom.xml file
-			/*String name = getValue("Bundle-Name");
+			String name = getValue("Bundle-Name");
 			if (name == null)
-				name = "Untitled-" + hashCode();*/
-			return null;
+				name = "Untitled-" + hashCode();
+			return name;
 		}
 		else
 			return bsn.getName();
