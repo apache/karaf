@@ -73,6 +73,11 @@
             <version>4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>spring-osgi-core</artifactId>
+            <version>${spring.osgi.version}</version>
+        </dependency>        
+        <dependency>
             <groupId>org.apache.geronimo.gshell</groupId>
             <artifactId>gshell-core</artifactId>
             <version>${gshell.version}</version>

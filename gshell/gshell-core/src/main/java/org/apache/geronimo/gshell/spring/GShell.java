@@ -21,6 +21,9 @@ import org.apache.geronimo.gshell.command.IO;
 import org.apache.geronimo.gshell.shell.Environment;
 import org.apache.geronimo.gshell.shell.InteractiveShell;
 import org.apache.servicemix.main.spi.MainService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.springframework.osgi.context.BundleContextAware;
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,7 +32,7 @@ import org.apache.servicemix.main.spi.MainService;
  * Time: 10:20:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class GShell implements Runnable {
+public class GShell implements Runnable, BundleContextAware {
 
     private InteractiveShell shell;
     private Thread thread;
@@ -37,6 +40,7 @@ public class GShell implements Runnable {
     private Environment env;
     private boolean start;
     private MainService mainService;
+	private BundleContext bundleContext;
 
     public GShell(InteractiveShell shell) {
         this.shell = shell;
@@ -76,17 +80,34 @@ public class GShell implements Runnable {
 	        // If a command was specified on the command line, then just execute that command.
 			if( args!=null && args.length > 0 ) {
 	        	System.out.println("Executing 1 command:");
-				shell.execute((Object[])args);
-			}
-//			For now we don't know how to shutdown after executing the command so go into a shell loop
-//			else {
+				Object value = shell.execute((Object[])args);
+	        	if( mainService!=null ) {
+	        		if( value instanceof Number ) {
+	        			mainService.setExitCode(((Number)value).intValue());
+	        		} else {
+	        			mainService.setExitCode(value!=null?1:0);
+	        		}
+	        	}
+			} else {
 	        	System.out.println("going int interactive loop:");
 				// Otherwise go into a command shell.
 	            shell.run();
-//			}
+	        	if( mainService!=null ) {
+	        		mainService.setExitCode(0);
+	        	}
+			}
 			
         } catch (Exception e) {
+        	if( mainService!=null ) {
+        		mainService.setExitCode(-1);
+        	}
             e.printStackTrace();
+        } finally {
+        	try {
+				getBundleContext().getBundle(0).stop();
+			} catch (BundleException e) {
+				e.printStackTrace();
+			}
         }
     }
 
@@ -96,6 +117,14 @@ public class GShell implements Runnable {
 
 	public void setMainService(MainService main) {
 		this.mainService = main;
+	}
+
+	public void setBundleContext(BundleContext bundleContext) {
+		this.bundleContext = bundleContext;		
+	}
+
+	public BundleContext getBundleContext() {
+		return bundleContext;
 	}
 
 }

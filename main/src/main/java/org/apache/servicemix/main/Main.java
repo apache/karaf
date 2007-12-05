@@ -22,6 +22,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.cache.BundleCache;
@@ -69,6 +70,7 @@ public class Main implements MainService
 
     private static Felix m_felix = null;
 	private final String[] args;
+	private int exitCode;
 
     public Main(String[] args) {
 		this.args = args;
@@ -202,7 +204,8 @@ public class Main implements MainService
         }
         
         // Register the Main class so that other bundles can inspect the command line args.
-        final MainService main = new Main(argv);        
+        final MainService main = new Main(argv);
+        final CountDownLatch shutdown = new CountDownLatch(1);
         BundleActivator activator = new BundleActivator() {
             private ServiceRegistration registration;
             public void start(BundleContext context)
@@ -213,6 +216,7 @@ public class Main implements MainService
             public void stop(BundleContext context)
             {
             	registration.unregister();
+            	shutdown.countDown();
             }
         };        
     	List<BundleActivator> activations = new ArrayList<BundleActivator>();
@@ -230,6 +234,20 @@ public class Main implements MainService
             System.err.println("Could not create framework: " + ex);
             ex.printStackTrace();
             System.exit(-1);
+        }
+        
+        // Wait for the system to get shutdown.
+        try
+        {
+            shutdown.await();
+            m_felix.stopAndWait();
+        }
+        catch (Exception ex)
+        {
+            System.err.println("Error occured shutting down framework: " + ex);
+            ex.printStackTrace();
+        } finally {
+            System.exit(main.getExitCode());
         }
     }
 
@@ -630,5 +648,13 @@ public class Main implements MainService
 	 */
 	public String[] getArgs() {
 		return args;
+	}
+
+	public int getExitCode() {
+		return exitCode;
+	}
+
+	public void setExitCode(int exitCode) {
+		this.exitCode = exitCode;
 	}
 }

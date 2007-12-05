@@ -21,5 +21,7 @@ package org.apache.servicemix.main.spi;
 public interface MainService {
 
 	public abstract String[] getArgs();
+	public int getExitCode();
+	public void setExitCode(int exitCode);
 
 }
