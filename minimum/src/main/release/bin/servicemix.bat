@@ -73,7 +73,7 @@ if not "%JAVA%" == "" goto :Check_JAVA_END
     if "%JAVA_HOME%" == "" call :warn JAVA_HOME not set; results may vary
     if not "%JAVA_HOME%" == "" set JAVA=%JAVA_HOME%\bin\java
     if not exist "%JAVA_HOME%" (
-        call :warn JAVA_HOME is not valid: %JAVA_HOME%
+        call :warn JAVA_HOME is not valid: "%JAVA_HOME%"
         goto END
     )
 :Check_JAVA_END
@@ -114,7 +114,7 @@ if "%SERVICEMIX_PROFILER%" == "" goto :EXECUTE
 :EXECUTE
     rem Execute the Java Virtual Machine
     cd "%SERVICEMIX_HOME%"
-    "%JAVA%" %JAVA_OPTS% -Dservicemix.home="%SERVICEMIX_HOME%" -Dbundles.configuration.location="%SERVICEMIX_HOME%/conf" -jar "%SERVICEMIX_HOME%\bin\bootstrapper.jar" "%SERVICEMIX_HOME%" start
+    "%JAVA%" %JAVA_OPTS% -Dservicemix.home="%SERVICEMIX_HOME%" -Dbundles.configuration.location="%SERVICEMIX_HOME%/conf" -jar "%SERVICEMIX_HOME%\bin\servicemix.jar" %*
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 

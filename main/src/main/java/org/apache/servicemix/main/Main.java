@@ -26,6 +26,10 @@ import java.util.*;
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.cache.BundleCache;
 import org.apache.felix.framework.util.StringMap;
+import org.apache.servicemix.main.spi.MainService;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * <p>
@@ -38,7 +42,7 @@ import org.apache.felix.framework.util.StringMap;
  * the framework.
  * </p>
 **/
-public class Main
+public class Main implements MainService
 {
     /**
      * The system property name used to specify an URL to the system
@@ -64,8 +68,13 @@ public class Main
     public static final String PROPERTY_AUTO_START = "felix.auto.start";
 
     private static Felix m_felix = null;
+	private final String[] args;
 
-    /**
+    public Main(String[] args) {
+		this.args = args;
+	}
+
+	/**
      * <p>
      * This method performs the main task of constructing an framework instance
      * and starting its execution. The following functions are performed
@@ -191,11 +200,29 @@ public class Main
             System.err.println("You must specify a profile name or directory.");
             System.exit(-1);
         }
+        
+        // Register the Main class so that other bundles can inspect the command line args.
+        final MainService main = new Main(argv);        
+        BundleActivator activator = new BundleActivator() {
+            private ServiceRegistration registration;
+            public void start(BundleContext context)
+            {
+                registration = context.registerService(MainService.class.getName(), main, null);
+            }
 
+            public void stop(BundleContext context)
+            {
+            	registration.unregister();
+            }
+        };        
+    	List<BundleActivator> activations = new ArrayList<BundleActivator>();
+        activations.add(activator);
+        
         try
         {
             // Now create an instance of the framework.
-            m_felix = new Felix(new StringMap(configProps, false), null);
+            
+            m_felix = new Felix(new StringMap(configProps, false), activations);
             m_felix.start();
         }
         catch (Exception ex)
@@ -284,7 +311,7 @@ public class Main
             is = propURL.openConnection().getInputStream();
             props.load(is);
             is.close();
-        }
+        } 	
         catch (FileNotFoundException ex)
         {
             // Ignore file not found.
@@ -499,14 +526,14 @@ public class Main
      *         property placeholder syntax or a recursive variable reference.
     **/
     public static String substVars(String val, String currentKey,
-        Map cycleMap, Properties configProps)
+        Map<String, String> cycleMap, Properties configProps)
         throws IllegalArgumentException
     {
         // If there is currently no cycle map, then create
         // one for detecting cycles for this invocation.
         if (cycleMap == null)
         {
-            cycleMap = new HashMap();
+            cycleMap = new HashMap<String, String>();
         }
 
         // Put the current key in the cycle map.
@@ -597,4 +624,11 @@ public class Main
         // Return the value.
         return val;
     }
+
+	/* (non-Javadoc)
+	 * @see org.apache.servicemix.main.MainService#getArgs()
+	 */
+	public String[] getArgs() {
+		return args;
+	}
 }

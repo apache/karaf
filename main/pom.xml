@@ -81,8 +81,17 @@
                         <Main-Class>org.apache.servicemix.main.Main</Main-Class>
                         <Bundle-Name>Apache ServiceMix</Bundle-Name>
                         <Bundle-Description>OSGi R4 framework.</Bundle-Description>
+                        <Export-Package>org.apache.servicemix.main.spi.*</Export-Package>
                         <Private-Package>
-                            org.apache.servicemix.main.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.startlevel,org.osgi.service.event,org.osgi.service.url,org.osgi.util.tracker
+                            org.apache.servicemix.main,
+                            org.apache.felix.moduleloader.*,
+                            org.apache.felix.framework.*,
+                            org.osgi.framework,
+                            org.osgi.service.packageadmin,
+                            org.osgi.service.startlevel,
+                            org.osgi.service.event,
+                            org.osgi.service.url,
+                            org.osgi.util.tracker
                         </Private-Package>
                         <Import-Package>!*</Import-Package>
                         <Include-Resource>{src/main/resources/}</Include-Resource>

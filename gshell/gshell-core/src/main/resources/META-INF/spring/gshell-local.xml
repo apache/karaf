@@ -20,16 +20,23 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:osgi="http://www.springframework.org/schema/osgi"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
   http://www.springframework.org/schema/util
-  http://www.springframework.org/schema/util/spring-util.xsd">
+  http://www.springframework.org/schema/util/spring-util.xsd
+  http://www.springframework.org/schema/osgi
+  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+
+
+    <osgi:reference id="mainService" interface="org.apache.servicemix.main.spi.MainService" />
 
     <bean id="gshell" class="org.apache.geronimo.gshell.spring.GShell"
                       init-method="start" destroy-method="stop">
         <constructor-arg ref="interactiveShell" />
         <property name="start" value="${startLocalConsole}" />
+        <property name="mainService" ref="mainService" />
     </bean>
     
 
