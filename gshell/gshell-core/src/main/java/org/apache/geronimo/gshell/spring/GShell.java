@@ -16,6 +16,7 @@
  */
 package org.apache.geronimo.gshell.spring;
 
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -88,10 +89,10 @@ public class GShell implements Runnable, BundleContextAware {
 	    	}
 	        
 	        // If a command was specified on the command line, then just execute that command.
-			if( args!=null && args.length > 0 ) {
-	        	System.out.println("Executing 1 command:");
+			if (args != null && args.length > 0 && (args.length > 1 || args[0].length() > 0)) {
+                System.out.println("Executing 1 command: " + Arrays.toString(args));
 				Object value = shell.execute((Object[])args);
-	        	if( mainService!=null ) {
+	        	if (mainService != null) {
 	        		if( value instanceof Number ) {
 	        			mainService.setExitCode(((Number)value).intValue());
 	        		} else {

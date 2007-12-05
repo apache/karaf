@@ -26,12 +26,6 @@
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <bean id="remoteShell" class="org.apache.geronimo.gshell.remote.server.DefaultRemoteShell">
-        <constructor-arg ref="shellInfo" />
-        <constructor-arg ref="commandExecutor" />
-        <constructor-arg ref="environment" />
-    </bean>
-
     <bean id="rshServer" class="org.apache.geronimo.gshell.remote.server.RshServer">
         <constructor-arg ref="timeoutManager" />
         <constructor-arg ref="transportFactoryLocator" />
@@ -43,12 +37,13 @@
                     <constructor-arg ref="timeoutManager" />
                 </bean>
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.EchoHandler" />
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.ExecuteHandler" />
+                <bean class="org.apache.geronimo.gshell.remote.server.handler.SpringExecuteHandler" />
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.LoginHandler">
                     <constructor-arg ref="timeoutManager" />
                 </bean>
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.OpenShellHandler">
-                    <!-- todo: plexus container -->
+                <bean class="org.apache.geronimo.gshell.remote.server.handler.SpringOpenShellHandler">
+                    <constructor-arg ref="shellInfo" />
+                    <constructor-arg ref="commandExecutor" />
                 </bean>
             </list>
         </constructor-arg>
@@ -56,14 +51,35 @@
 
     <bean id="timeoutManager" class="org.apache.geronimo.gshell.remote.server.timeout.DefaultTimeoutManager" />
 
-    <bean id="sslContextFactory" class="org.apache.geronimo.gshell.whisper.ssl.BogusSSLContextFactory" />
-
-    <bean id="sslAddressFactory" class="org.apache.geronimo.gshell.whisper.transport.ssl.SslAddressFactory" />
-
-    <bean id="sslTransport" class="org.apache.geronimo.gshell.whisper.transport.ssl.SslTransport">
-        
+    <bean id="transportFactoryLocator" class="org.apache.geronimo.gshell.whisper.transport.SpringTransportFactoryLocator">
+        <property name="factories">
+            <list>
+                <ref local="tcpTransportFactory" />
+                <ref local="sslTransportFactory" />
+                <ref local="vmTransportFactory" />
+            </list>
+        </property>
     </bean>
 
-    
+    <bean id="sslContextFactory" class="org.apache.geronimo.gshell.whisper.ssl.BogusSSLContextFactory" />
+
+    <bean id="sslTransportFactory" class="org.apache.geronimo.gshell.whisper.transport.ssl.SpringSslTransportFactory">
+        <property name="contextFactory" ref="sslContextFactory" />
+    </bean>
+
+    <bean id="tcpTransportFactory" class="org.apache.geronimo.gshell.whisper.transport.tcp.SpringTcpTransportFactory" />
+
+    <bean id="vmTransportFactory" class="org.apache.geronimo.gshell.whisper.transport.vm.SpringVmTransportFactory" />
+
+    <bean id="cryptoContext" class="org.apache.geronimo.gshell.remote.crypto.CryptoContext">
+        <constructor-arg value="RSA" />
+        <constructor-arg><null /></constructor-arg>
+    </bean>
+
+    <bean id="remoteShell" class="org.apache.geronimo.gshell.spring.SpringRshServer" init-method="start" destroy-method="stop">
+        <property name="server" ref="rshServer" />
+        <property name="start" value="${startRemoteShell}" />
+        <property name="location" value="${remoteShellLocation}" />
+    </bean>
 
 </beans>

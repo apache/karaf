@@ -133,6 +133,7 @@
 
 		        <!-- GShell -->
                 <include>org.apache.geronimo.specs:geronimo-stax-api_1.0_spec</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.mina</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.xstream</include>
                 <include>org.apache.servicemix.gshell:org.apache.servicemix.gshell.core</include>
                 <include>org.apache.servicemix.gshell:org.apache.servicemix.gshell.osgi</include>

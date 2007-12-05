@@ -53,6 +53,8 @@
     <osgix:property-placeholder persistent-id="org.apache.servicemix.shell">
         <osgix:default-properties>
             <prop key="startLocalConsole">true</prop>
+            <prop key="startRemoteShell">true</prop>
+            <prop key="remoteShellLocation">tcp://0.0.0.0:8100/</prop>
         </osgix:default-properties>
     </osgix:property-placeholder>
 
