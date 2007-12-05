@@ -239,7 +239,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
         final OCD ocd = this.doComponent(componentTag, component, metaData);
 
-        boolean inherited = this.getBoolean(componentTag, Constants.COMPONENT_INHERIT, false);
+        boolean inherited = this.getBoolean(componentTag, Constants.COMPONENT_INHERIT, true);
         this.doServices(description.getTagsByName(Constants.SERVICE, inherited), component, description);
 
         // collect properties and references from class tags and fields
@@ -349,7 +349,12 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
         // check if this is an abstract definition
         final String abstractType = tag.getNamedParameter(Constants.COMPONENT_ABSTRACT);
-        component.setAbstract((abstractType == null ? false : "yes".equalsIgnoreCase(abstractType) || "true".equalsIgnoreCase(abstractType)));
+        if (abstractType != null) {
+            component.setAbstract("yes".equalsIgnoreCase(abstractType) || "true".equalsIgnoreCase(abstractType));
+        } else {
+            // default true for abstract classes, false otherwise
+            component.setAbstract(tag.getJavaClassDescription().isAbstract());
+        }
 
         // check if this is a definition to ignore
         final String ds = tag.getNamedParameter(Constants.COMPONENT_DS);
@@ -633,8 +638,8 @@ public class SCRDescriptorMojo extends AbstractMojo {
         }
         // if this is a field with a single cardinality,
         // we look for the bind/unbind methods
-        // and create them if they are not availabe and the component is not abstract
-        if ( !component.isAbstract() && this.generateAccessors ) {
+        // and create them if they are not availabe
+        if ( this.generateAccessors ) {
             if ( reference.getField() != null && component.getJavaClassDescription() instanceof ModifiableJavaClassDescription ) {
                 if ( ref.getCardinality().equals("0..1") || ref.getCardinality().equals("1..1") ) {
                     boolean createBind = false;
