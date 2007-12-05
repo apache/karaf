@@ -16,13 +16,19 @@
  */
 package org.apache.geronimo.gshell.spring;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.geronimo.gshell.DefaultEnvironment;
+import org.apache.geronimo.gshell.ExitNotification;
 import org.apache.geronimo.gshell.command.IO;
 import org.apache.geronimo.gshell.shell.Environment;
 import org.apache.geronimo.gshell.shell.InteractiveShell;
 import org.apache.servicemix.main.spi.MainService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.springframework.osgi.context.BundleContextAware;
 
 /**
@@ -41,7 +47,7 @@ public class GShell implements Runnable, BundleContextAware {
     private boolean start;
     private MainService mainService;
 	private BundleContext bundleContext;
-
+	private CountDownLatch frameworkStarted;
     public GShell(InteractiveShell shell) {
         this.shell = shell;
         this.io = new IO(System.in, System.out, System.err);
@@ -53,6 +59,7 @@ public class GShell implements Runnable, BundleContextAware {
     }
 
     public void start() {
+    	frameworkStarted = new CountDownLatch(1);
         if (start) {
             thread = new Thread(this);
             thread.start();
@@ -61,6 +68,7 @@ public class GShell implements Runnable, BundleContextAware {
 
     public void stop() throws InterruptedException {
         if (thread != null) {
+        	frameworkStarted.countDown();
             thread.interrupt();
             thread.join();
             thread = null;
@@ -68,7 +76,9 @@ public class GShell implements Runnable, BundleContextAware {
     }
 
     public void run() {
-        try {
+        try {        	
+        	waitForFrameworkToStart();
+        	
             IOTargetSource.setIO(io);
             EnvironmentTargetSource.setEnvironment(env);
 	        
@@ -97,6 +107,10 @@ public class GShell implements Runnable, BundleContextAware {
 	        	}
 			}
 			
+        } catch (ExitNotification e) {
+        	if( mainService!=null ) {
+        		mainService.setExitCode(0);
+        	}
         } catch (Exception e) {
         	if( mainService!=null ) {
         		mainService.setExitCode(-1);
@@ -110,6 +124,30 @@ public class GShell implements Runnable, BundleContextAware {
 			}
         }
     }
+
+    /**
+     * Blocks until the framework has finished starting.  We do this so that any installed
+     * bundles for commands get fully registered.
+     * 
+     * @throws InterruptedException
+     */
+	private void waitForFrameworkToStart() throws InterruptedException {
+		System.out.println("Waiting for system to startup...");
+		getBundleContext().addFrameworkListener(new FrameworkListener(){
+			public void frameworkEvent(FrameworkEvent event) {
+				System.out.println("Got event: "+event.getType());
+				if( event.getType() == FrameworkEvent.STARTED ) {
+					frameworkStarted.countDown();
+				}
+			}
+		});
+		
+		if( frameworkStarted.await(5, TimeUnit.SECONDS) ) {
+			System.out.println("System completed startup.");
+		} else {
+			System.out.println("System took too long startup... continuing");
+		}
+	}
 
 	public MainService getMainService() {
 		return mainService;
