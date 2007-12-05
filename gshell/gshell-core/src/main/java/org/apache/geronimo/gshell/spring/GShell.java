@@ -65,7 +65,6 @@ public class GShell implements Runnable {
         IOTargetSource.setIO(io);
         EnvironmentTargetSource.setEnvironment(env);
         try {
-            Thread.sleep(5000);
             shell.run();
         } catch (Exception e) {
             e.printStackTrace();

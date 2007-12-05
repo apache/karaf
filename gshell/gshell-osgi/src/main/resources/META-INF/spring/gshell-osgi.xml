@@ -33,6 +33,8 @@
 
     <bean id="headers" class="org.apache.geronimo.gshell.osgi.Headers" />
 
+    <bean id="install-bundle" class="org.apache.geronimo.gshell.osgi.InstallBundle" />
+
     <bean id="list-bundles" class="org.apache.geronimo.gshell.osgi.ListBundles" />
 
     <bean id="list-services" class="org.apache.geronimo.gshell.osgi.ListServices" />
@@ -54,6 +56,8 @@
     <osgi:service ref="bundle-level" interface="org.apache.geronimo.gshell.command.Command" />
 
     <osgi:service ref="headers" interface="org.apache.geronimo.gshell.command.Command" />
+
+    <osgi:service ref="install-bundle" interface="org.apache.geronimo.gshell.command.Command" />
 
     <osgi:service ref="list-bundles" interface="org.apache.geronimo.gshell.command.Command" />
 

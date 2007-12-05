@@ -29,7 +29,7 @@ import org.osgi.framework.Bundle;
  */
 public abstract class BundleCommand extends OsgiCommandSupport {
 
-    @Argument(required = true)
+    @Argument(required = true, index = 0)
     long id;
 
     protected Object doExecute() throws Exception {

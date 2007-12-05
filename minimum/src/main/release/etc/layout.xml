@@ -93,12 +93,16 @@
                     <id>osgi:headers</id>
                 </command>
                 <command>
+                    <name>install</name>
+                    <id>osgi:install</id>
+                </command>
+                <command>
                     <name>listBundles</name>
                     <id>osgi:listBundles</id>
                 </command>
                 <alias>
                     <name>lb</name>
-                    <command>osgi:listBundles</command>
+                    <command>osgi/listBundles</command>
                 </alias>
                 <command>
                     <name>listBundles</name>
@@ -110,7 +114,7 @@
                 </command>
                 <alias>
                     <name>ls</name>
-                    <command>osgi:listServices</command>
+                    <command>osgi/listServices</command>
                 </alias>
                 <command>
                     <name>refresh</name>
