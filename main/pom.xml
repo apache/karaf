@@ -36,7 +36,6 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
-            <version>${felix.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.felix</groupId>

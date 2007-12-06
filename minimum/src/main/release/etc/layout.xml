@@ -80,6 +80,17 @@
             <id>gshell-builtins:unset</id>
         </command>
 
+        <!-- Remote -->
+        <group>
+            <name>remote</name>
+            <nodes>
+                <command>
+                    <name>rsh</name>
+                    <id>gshell-remote:rsh</id>
+                </command>
+            </nodes>
+       </group>
+
         <!-- OSGi -->
         <group>
             <name>osgi</name>

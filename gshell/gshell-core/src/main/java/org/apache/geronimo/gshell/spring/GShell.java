@@ -89,7 +89,7 @@ public class GShell implements Runnable, BundleContextAware {
 	    	}
 	        
 	        // If a command was specified on the command line, then just execute that command.
-			if (args != null && args.length > 0 && (args.length > 1 || args[0].length() > 0)) {
+			if (args != null && args.length > 0) {
                 System.out.println("Executing 1 command: " + Arrays.toString(args));
 				Object value = shell.execute((Object[])args);
 	        	if (mainService != null) {

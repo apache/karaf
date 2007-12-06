@@ -14,10 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.osgi;
-
-import java.util.List;
-import java.util.ArrayList;
+package org.apache.geronimo.gshell.support;
 
 import org.apache.geronimo.gshell.clp.CommandLineProcessor;
 import org.apache.geronimo.gshell.clp.Option;
@@ -28,7 +25,6 @@ import org.apache.geronimo.gshell.command.IO;
 import org.apache.geronimo.gshell.command.Variables;
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.common.Arguments;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,10 +77,16 @@ public abstract class OsgiCommandSupport implements Command, BundleContextAware 
     }
 
     public Object execute(final CommandContext context, final Object... args) throws Exception {
-        OsgiCommandSupport cmd = getClass().newInstance();
+        ClassLoader cl = getClass().getClassLoader();
+        Thread.currentThread().setContextClassLoader(cl);
+        OsgiCommandSupport cmd = createCommand();
         cmd.setBundleContext(bundleContext);
         cmd.init(context);
         return cmd.doExecute(args);
+    }
+
+    protected OsgiCommandSupport createCommand() throws Exception {
+        return getClass().newInstance();
     }
 
     public void init(final CommandContext context) {

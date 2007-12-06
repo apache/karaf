@@ -129,6 +129,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.remote</groupId>
+            <artifactId>gshell-remote-client</artifactId>
+            <version>${gshell.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.gshell.remote</groupId>
             <artifactId>gshell-remote-common</artifactId>
             <version>${gshell.version}</version>
         </dependency>

@@ -46,9 +46,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.geronimo.gshell</groupId>
-            <artifactId>gshell-command-api</artifactId>
-            <version>${gshell.version}</version>
+            <groupId>org.apache.servicemix.gshell</groupId>
+            <artifactId>org.apache.servicemix.gshell.core</artifactId>
         </dependency>
 
         <dependency>

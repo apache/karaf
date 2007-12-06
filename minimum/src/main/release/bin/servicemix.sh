@@ -245,7 +245,7 @@ run() {
         SERVICEMIX_HOME=`cygpath --path --windows "$SERVICEMIX_HOME"`
     fi
     cd "$SERVICEMIX_HOME"
-    exec $JAVA $JAVA_OPTS -Dservicemix.home="$SERVICEMIX_HOME" -Dbundles.configuration.location="$SERVICEMIX_HOME/etc" -jar "$JAR" "$*" 
+    exec $JAVA $JAVA_OPTS -Dservicemix.home="$SERVICEMIX_HOME" -jar "$JAR" $*
 }
 
 main() {

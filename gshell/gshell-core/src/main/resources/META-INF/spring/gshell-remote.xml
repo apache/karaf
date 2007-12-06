@@ -38,7 +38,7 @@
                 </bean>
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.EchoHandler" />
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.SpringExecuteHandler" />
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.LoginHandler">
+                <bean class="org.apache.geronimo.gshell.remote.server.handler.LoginHandler" init-method="initialize">
                     <constructor-arg ref="timeoutManager" />
                 </bean>
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.SpringOpenShellHandler">
@@ -49,7 +49,7 @@
         </constructor-arg>
     </bean>
 
-    <bean id="timeoutManager" class="org.apache.geronimo.gshell.remote.server.timeout.DefaultTimeoutManager" />
+    <bean id="timeoutManager" class="org.apache.geronimo.gshell.remote.server.timeout.DefaultTimeoutManager" init-method="initialize"/>
 
     <bean id="transportFactoryLocator" class="org.apache.geronimo.gshell.whisper.transport.SpringTransportFactoryLocator">
         <property name="factories">
@@ -80,6 +80,17 @@
         <property name="server" ref="rshServer" />
         <property name="start" value="${startRemoteShell}" />
         <property name="location" value="${remoteShellLocation}" />
+    </bean>
+
+    <bean id="rsh" class="org.apache.geronimo.gshell.remote.client.SpringRshCommand">
+        <constructor-arg ref="terminal" />
+        <constructor-arg ref="cryptoContext" />
+        <constructor-arg ref="transportFactoryLocator" />
+        <constructor-arg>
+            <list>
+                <bean class="org.apache.geronimo.gshell.remote.client.handler.EchoHandler" />
+            </list>
+        </constructor-arg>
     </bean>
 
 </beans>

@@ -2,6 +2,7 @@ package org.apache.geronimo.gshell.obr;
 
 import java.io.PrintWriter;
 
+import org.apache.geronimo.gshell.support.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;

@@ -17,7 +17,7 @@
 package org.apache.geronimo.gshell.osgi;
 
 import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.osgi.OsgiCommandSupport;
+import org.apache.geronimo.gshell.support.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 
 /**

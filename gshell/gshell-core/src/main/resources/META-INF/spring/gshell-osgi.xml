@@ -50,6 +50,8 @@
 
     <osgi:service ref="echo" interface="org.apache.geronimo.gshell.command.Command" />
 
+    <osgi:service ref="rsh" interface="org.apache.geronimo.gshell.command.Command" />
+
     <osgix:property-placeholder persistent-id="org.apache.servicemix.shell">
         <osgix:default-properties>
             <prop key="startLocalConsole">true</prop>

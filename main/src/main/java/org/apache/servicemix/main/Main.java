@@ -302,7 +302,7 @@ public class Main implements MainService
                 // directory of the felix.jar directory.
                 confDir = new File(
                     new File(new File(jarLocation).getAbsolutePath()).getParent(),
-                    "conf");
+                    "etc");
             }
             else
             {
