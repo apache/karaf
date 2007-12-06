@@ -18,6 +18,7 @@
  */
 package org.apache.felix.scrplugin.tags.cl;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -54,11 +55,21 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
         this.component = comp;
     }
 
+    /**
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getFields()
+     */
     public JavaField[] getFields() {
-        // TODO Auto-generated method stub
-        return new JavaField[0];
+        final Field[] fields = this.clazz.getFields();
+        final JavaField[] javaFields = new JavaField[fields.length];
+        for (int i=0; i < fields.length; i++ ) {
+            javaFields[i] = new ClassLoaderJavaField(fields[i], this);
+        }
+        return javaFields;
     }
 
+    /**
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getImplementedInterfaces()
+     */
     public JavaClassDescription[] getImplementedInterfaces() throws MojoExecutionException {
         Class[] implemented = clazz.getInterfaces();
         if (implemented == null || implemented.length == 0) {
