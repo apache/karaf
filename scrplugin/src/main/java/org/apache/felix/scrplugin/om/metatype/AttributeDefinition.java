@@ -23,7 +23,7 @@ import java.util.Map;
 public class AttributeDefinition {
 
     public static final String DEFAULT_TYPE = "String";
-    
+
     protected String id;
 
     protected String type = DEFAULT_TYPE;
@@ -74,7 +74,7 @@ public class AttributeDefinition {
         if (values != null) {
             this.defaultValue = null;
             this.defaultMultiValue = values;
-            if (values != null && values.length > 0 && this.cardinality == null ) {
+            if (values.length > 0 && this.cardinality == null ) {
                 this.cardinality = new Integer(Integer.MAX_VALUE);
             }
         }

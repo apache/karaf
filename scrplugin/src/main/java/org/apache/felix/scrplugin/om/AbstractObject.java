@@ -35,8 +35,7 @@ public abstract class AbstractObject {
     protected String getMessage(String message) {
         if ( this.tag == null ) {
             return message;
-        } else {
-            return "@" + this.tag.getName() + ": " + message + " (" + this.tag.getSourceLocation() + ")";
         }
+        return "@" + this.tag.getName() + ": " + message + " (" + this.tag.getSourceLocation() + ")";
     }
 }

@@ -271,7 +271,7 @@ public class JavaClassDescriptorManager {
 
     /**
      * Return all source descriptions of this project.
-     * @return
+     * @return All contained java class descriptions.
      */
     public JavaClassDescription[] getSourceDescriptions() {
         final JavaClassDescription[] descs = new JavaClassDescription[this.sources.length];
@@ -284,7 +284,7 @@ public class JavaClassDescriptorManager {
     /**
      * Get a java class description for the class.
      * @param className
-     * @return
+     * @return The java class description.
      * @throws MojoExecutionException
      */
     public JavaClassDescription getJavaClassDescription(String className)
@@ -309,9 +309,7 @@ public class JavaClassDescriptorManager {
                     throw new MojoExecutionException("Unable to load class " + className);
                 }
             }
-            if ( result != null ) {
-                this.javaClassDescriptions.put(className, result);
-            }
+            this.javaClassDescriptions.put(className, result);
         }
         return result;
     }

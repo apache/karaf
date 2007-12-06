@@ -90,7 +90,7 @@ public class Component extends AbstractObject {
     }
 
     /**
-     * @return
+     * @return All properties of this component.
      */
     public List getProperties() {
         return this.properties;

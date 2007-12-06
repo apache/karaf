@@ -404,7 +404,6 @@ public class SCRDescriptorMojo extends AbstractMojo {
      * @param services
      * @param component
      * @param description
-     * @return
      * @throws MojoExecutionException
      */
     protected void doServices(JavaTag[] services, Component component, JavaClassDescription description)

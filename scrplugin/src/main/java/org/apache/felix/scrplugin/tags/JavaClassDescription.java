@@ -46,14 +46,15 @@ public interface JavaClassDescription {
 
     /**
      * Get the description for the parent class.
-     * @return
+     * @return The description or <code>null</code> if this class is the
+     *         Object class.
      * @throws MojoExecutionException
      */
     JavaClassDescription getSuperClass() throws MojoExecutionException;
 
     /**
      * Get the name of the described class.
-     * @return
+     * @return The name of the described class.
      */
     String getName();
 
@@ -65,7 +66,7 @@ public interface JavaClassDescription {
      * Search for a method with the given signature.
      * @param name
      * @param parameters
-     * @return
+     * @return A descriptor for the method or <code>null</code>
      * @throws MojoExecutionException
      */
     JavaMethod getMethodBySignature(String name, String[] parameters)
@@ -73,19 +74,19 @@ public interface JavaClassDescription {
 
     /**
      * Is this class public?
-     * @return
+     * @return True if this class is public.
      */
     boolean isPublic();
 
     /**
      * Is this class abstract?
-     * @return
+     * @return True if this class is abstract.
      */
     boolean isAbstract();
 
     /**
      * Is this class an interface?
-     * @return
+     * @return True if this is an interface.
      */
     boolean isInterface();
 
@@ -94,7 +95,7 @@ public interface JavaClassDescription {
     /**
      * Is this class of the type?
      * @param type
-     * @return
+     * @return True if this class is of the type.
      * @throws MojoExecutionException
      */
     boolean isA(String type) throws MojoExecutionException;
