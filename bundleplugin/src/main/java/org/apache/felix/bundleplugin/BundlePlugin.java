@@ -643,6 +643,7 @@ public class BundlePlugin extends AbstractMojo {
                     // this is a workaround for a problem with bnd 0.0.189
                     if ( File.separatorChar != '/' )
                     {
+                        name = name.replace(File.separatorChar, '/');
                         path = path.replace(File.separatorChar, '/');
                     }
 
