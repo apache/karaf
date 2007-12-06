@@ -39,12 +39,15 @@ public class ClassLoaderJavaMethod implements JavaMethod {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaMethod#getName()
+     * @see org.apache.felix.scrplugin.tags.JavaMethod#getName()
      */
     public String getName() {
         return this.method.getName();
     }
 
+    /**
+     * @see org.apache.felix.scrplugin.tags.JavaMethod#getParameters()
+     */
     public JavaParameter[] getParameters() {
         final JavaParameter[] params = new JavaParameter[this.method.getParameterTypes().length];
         for(int i=0; i<this.method.getParameterTypes().length; i++) {
@@ -54,21 +57,21 @@ public class ClassLoaderJavaMethod implements JavaMethod {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaMethod#isConstructor()
+     * @see org.apache.felix.scrplugin.tags.JavaMethod#isConstructor()
      */
     public boolean isConstructor() {
         return this.isConstructor;
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaMethod#isProtected()
+     * @see org.apache.felix.scrplugin.tags.JavaMethod#isProtected()
      */
     public boolean isProtected() {
         return Modifier.isProtected(this.method.getModifiers());
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaMethod#isPublic()
+     * @see org.apache.felix.scrplugin.tags.JavaMethod#isPublic()
      */
     public boolean isPublic() {
         return Modifier.isPublic(this.method.getModifiers());

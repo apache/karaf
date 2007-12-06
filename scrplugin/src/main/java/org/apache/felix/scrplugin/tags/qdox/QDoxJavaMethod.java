@@ -34,14 +34,14 @@ public class QDoxJavaMethod implements JavaMethod {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaMethod#getName()
+     * @see org.apache.felix.scrplugin.tags.JavaMethod#getName()
      */
     public String getName() {
         return this.method.getName();
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaMethod#getParameters()
+     * @see org.apache.felix.scrplugin.tags.JavaMethod#getParameters()
      */
     public JavaParameter[] getParameters() {
         final com.thoughtworks.qdox.model.JavaParameter[] params = this.method.getParameters();
@@ -56,21 +56,21 @@ public class QDoxJavaMethod implements JavaMethod {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaMethod#isConstructor()
+     * @see org.apache.felix.scrplugin.tags.JavaMethod#isConstructor()
      */
     public boolean isConstructor() {
         return this.method.isConstructor();
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaMethod#isProtected()
+     * @see org.apache.felix.scrplugin.tags.JavaMethod#isProtected()
      */
     public boolean isProtected() {
         return this.method.isProtected();
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaMethod#isPublic()
+     * @see org.apache.felix.scrplugin.tags.JavaMethod#isPublic()
      */
     public boolean isPublic() {
         return this.method.isPublic();

@@ -41,20 +41,23 @@ public class ClassLoaderJavaTag implements JavaTag {
         this.description = desc;
     }
 
+    /**
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getField()
+     */
     public JavaField getField() {
         // TODO Auto-generated method stub
         return null;
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaTag#getJavaClassDescription()
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getJavaClassDescription()
      */
     public JavaClassDescription getJavaClassDescription() {
         return this.description;
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaTag#getName()
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getName()
      */
     public String getName() {
         if ( this.reference != null ) {
@@ -64,7 +67,7 @@ public class ClassLoaderJavaTag implements JavaTag {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaTag#getNamedParameter(java.lang.String)
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getNamedParameter(java.lang.String)
      */
     public String getNamedParameter(String name) {
         final Map map = this.getNamedParameterMap();
@@ -75,7 +78,7 @@ public class ClassLoaderJavaTag implements JavaTag {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaTag#getNamedParameterMap()
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getNamedParameterMap()
      */
     public Map getNamedParameterMap() {
         if ( this.reference != null ) {
@@ -93,7 +96,7 @@ public class ClassLoaderJavaTag implements JavaTag {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaTag#getParameters()
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getParameters()
      */
     public String[] getParameters() {
         final Map map = this.getNamedParameterMap();
@@ -104,7 +107,7 @@ public class ClassLoaderJavaTag implements JavaTag {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaTag#getSourceLocation()
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getSourceLocation()
      */
     public String getSourceLocation() {
         return "Compiled class: " + this.description.getName();

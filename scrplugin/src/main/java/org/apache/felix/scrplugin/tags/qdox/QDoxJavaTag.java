@@ -49,49 +49,49 @@ public class QDoxJavaTag implements JavaTag {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaTag#getName()
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getName()
      */
     public String getName() {
         return this.docletTag.getName();
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaTag#getNamedParameter(java.lang.String)
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getNamedParameter(java.lang.String)
      */
     public String getNamedParameter(String arg0) {
         return this.docletTag.getNamedParameter(arg0);
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaTag#getParameters()
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getParameters()
      */
     public String[] getParameters() {
         return this.docletTag.getParameters();
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaTag#getSourceLocation()
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getSourceLocation()
      */
     public String getSourceLocation() {
         return this.docletTag.getContext().getSource().getURL() + ", line " + this.docletTag.getLineNumber();
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaTag#getJavaClassDescription()
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getJavaClassDescription()
      */
     public JavaClassDescription getJavaClassDescription() {
         return this.description;
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaTag#getNamedParameterMap()
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getNamedParameterMap()
      */
     public Map getNamedParameterMap() {
         return this.docletTag.getNamedParameterMap();
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaTag#getField()
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getField()
      */
     public JavaField getField() {
         return this.field;

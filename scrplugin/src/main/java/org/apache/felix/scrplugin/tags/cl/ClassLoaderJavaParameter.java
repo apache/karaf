@@ -33,7 +33,7 @@ public class ClassLoaderJavaParameter implements JavaParameter {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaParameter#getType()
+     * @see org.apache.felix.scrplugin.tags.JavaParameter#getType()
      */
     public String getType() {
         return this.type;

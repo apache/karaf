@@ -40,21 +40,21 @@ public class QDoxJavaField implements JavaField {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaField#getInitializationExpression()
+     * @see org.apache.felix.scrplugin.tags.JavaField#getInitializationExpression()
      */
     public String getInitializationExpression() {
         return this.field.getInitializationExpression();
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaField#getName()
+     * @see org.apache.felix.scrplugin.tags.JavaField#getName()
      */
     public String getName() {
         return this.field.getName();
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaField#getTagByName(java.lang.String)
+     * @see org.apache.felix.scrplugin.tags.JavaField#getTagByName(java.lang.String)
      */
     public JavaTag getTagByName(String name) {
         final DocletTag tag = this.field.getTagByName(name);
@@ -65,7 +65,7 @@ public class QDoxJavaField implements JavaField {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaField#getType()
+     * @see org.apache.felix.scrplugin.tags.JavaField#getType()
      */
     public String getType() {
         return this.field.getType().getValue();

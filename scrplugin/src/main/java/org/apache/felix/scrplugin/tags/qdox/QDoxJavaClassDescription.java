@@ -66,7 +66,7 @@ public class QDoxJavaClassDescription
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#getSuperClass()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getSuperClass()
      */
     public JavaClassDescription getSuperClass() throws MojoExecutionException {
         final JavaClass parent = this.javaClass.getSuperJavaClass();
@@ -77,7 +77,7 @@ public class QDoxJavaClassDescription
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#getTagForName(java.lang.String)
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getTagByName(java.lang.String)
      */
     public JavaTag getTagByName(String name) {
         final DocletTag tag = this.javaClass.getTagByName(name);
@@ -88,14 +88,14 @@ public class QDoxJavaClassDescription
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#getName()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getName()
      */
     public String getName() {
         return this.javaClass.getFullyQualifiedName();
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#getTagsByName(java.lang.String, boolean)
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getTagsByName(java.lang.String, boolean)
      */
     public JavaTag[] getTagsByName(String name, boolean inherited)
     throws MojoExecutionException {
@@ -121,7 +121,7 @@ public class QDoxJavaClassDescription
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#getFields()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getFields()
      */
     public JavaField[] getFields() {
         final com.thoughtworks.qdox.model.JavaField fields[] = this.javaClass.getFields();
@@ -136,7 +136,7 @@ public class QDoxJavaClassDescription
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#getImplementedInterfaces()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getImplementedInterfaces()
      */
     public JavaClassDescription[] getImplementedInterfaces()
     throws MojoExecutionException {
@@ -152,7 +152,7 @@ public class QDoxJavaClassDescription
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#getMethodBySignature(java.lang.String, java.lang.String[])
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getMethodBySignature(java.lang.String, java.lang.String[])
      */
     public JavaMethod getMethodBySignature(String name, String[] parameters)
     throws MojoExecutionException {
@@ -176,7 +176,7 @@ public class QDoxJavaClassDescription
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#getMethods()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getMethods()
      */
     public JavaMethod[] getMethods() {
         final com.thoughtworks.qdox.model.JavaMethod[] methods = this.javaClass.getMethods();
@@ -191,7 +191,7 @@ public class QDoxJavaClassDescription
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#isA(java.lang.String)
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#isA(java.lang.String)
      */
     public boolean isA(String type) throws MojoExecutionException {
         final Type qType = new Type(type);
@@ -213,21 +213,21 @@ public class QDoxJavaClassDescription
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#isAbstract()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#isAbstract()
      */
     public boolean isAbstract() {
         return this.javaClass.isAbstract();
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#isInterface()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#isInterface()
      */
     public boolean isInterface() {
         return this.javaClass.isInterface();
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#isPublic()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#isPublic()
      */
     public boolean isPublic() {
         return this.javaClass.isPublic();

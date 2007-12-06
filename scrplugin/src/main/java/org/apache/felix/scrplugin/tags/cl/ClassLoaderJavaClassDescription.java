@@ -73,7 +73,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#getMethodBySignature(java.lang.String, java.lang.String[])
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getMethodBySignature(java.lang.String, java.lang.String[])
      */
     public JavaMethod getMethodBySignature(String name, String[] parameters) {
         Class[] classParameters = null;
@@ -99,20 +99,23 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
         return null;
     }
 
+    /**
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getMethods()
+     */
     public JavaMethod[] getMethods() {
         // TODO Auto-generated method stub
         return null;
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#getName()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getName()
      */
     public String getName() {
         return this.clazz.getName();
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#getSuperClass()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getSuperClass()
      */
     public JavaClassDescription getSuperClass() throws MojoExecutionException {
         if ( this.clazz.getSuperclass() != null ) {
@@ -122,7 +125,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#getTagByName(java.lang.String)
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getTagByName(java.lang.String)
      */
     public JavaTag getTagByName(String name) {
         // TODO Auto-generated method stub
@@ -130,7 +133,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#getTagsByName(java.lang.String, boolean)
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getTagsByName(java.lang.String, boolean)
      */
     public JavaTag[] getTagsByName(String name, boolean inherited)
     throws MojoExecutionException {
@@ -161,7 +164,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#isA(java.lang.String)
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#isA(java.lang.String)
      */
     public boolean isA(String type) {
         if ( this.clazz.getName().equals(type) ) {
@@ -184,21 +187,21 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#isAbstract()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#isAbstract()
      */
     public boolean isAbstract() {
         return Modifier.isAbstract(this.clazz.getModifiers());
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#isInterface()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#isInterface()
      */
     public boolean isInterface() {
         return Modifier.isInterface(this.clazz.getModifiers());
     }
 
     /**
-     * @see org.apache.felix.sandbox.scrplugin.tags.JavaClassDescription#isPublic()
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#isPublic()
      */
     public boolean isPublic() {
         return Modifier.isPublic(this.clazz.getModifiers());

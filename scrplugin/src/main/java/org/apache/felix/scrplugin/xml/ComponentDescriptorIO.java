@@ -208,7 +208,7 @@ public class ComponentDescriptorIO {
 
     /**
      * Write the xml for a {@link Interface}.
-     * @param interface
+     * @param interf
      * @param contentHandler
      * @throws SAXException
      */
