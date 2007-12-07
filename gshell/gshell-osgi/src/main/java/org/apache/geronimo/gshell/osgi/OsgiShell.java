@@ -23,6 +23,7 @@ import org.apache.geronimo.gshell.ansi.RenderWriter;
 import org.apache.geronimo.gshell.branding.BrandingSupport;
 import org.apache.geronimo.gshell.command.CommandContext;
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
+import org.apache.geronimo.gshell.support.OsgiCommandSupport;
 
 /**
  * Created by IntelliJ IDEA.

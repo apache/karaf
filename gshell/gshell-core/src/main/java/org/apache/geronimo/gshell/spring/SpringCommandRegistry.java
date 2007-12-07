@@ -23,6 +23,7 @@ import org.apache.geronimo.gshell.command.CommandContext;
 import org.apache.geronimo.gshell.common.Arguments;
 import org.apache.geronimo.gshell.layout.LayoutManager;
 import org.apache.geronimo.gshell.layout.NotFoundException;
+import org.apache.geronimo.gshell.layout.model.AliasNode;
 import org.apache.geronimo.gshell.layout.model.CommandNode;
 import org.apache.geronimo.gshell.layout.model.GroupNode;
 import org.apache.geronimo.gshell.layout.model.Layout;
@@ -43,48 +44,54 @@ public class SpringCommandRegistry extends DefaultCommandRegistry implements Lay
 
     public static final String SEPARATOR = ":";
 
+    public static final String ALIAS_PREFIX = "alias:";
+
     private Environment env;
 
-    private Map groupAliases;
     private Layout layout = new Layout();
 
     public SpringCommandRegistry(Environment env) {
         this.env = env;
     }
 
-    public Map getGroupAliases() {
-        return groupAliases;
-    }
-
-    public void setGroupAliases(Map groupAliases) {
-        this.groupAliases = groupAliases;
-    }
-
     public void register(final Command command, Map<String, ?> properties) throws DuplicateRegistrationException {
-        String id = command.getId();
-        String[] s = id.split(SEPARATOR);
+        // Find command name
+        String name = command.getId();
+        if (name.lastIndexOf(':') >= 0) {
+            name = name.substring(name.lastIndexOf(':') + 1);
+        }
+        if (properties.containsKey("name")) {
+            name = (String) properties.get("name");
+        }
+
+        // Find or create the subshell group
         GroupNode gn = layout;
-        for (int i = 0; i < s.length - 1; i++) {
-            if (groupAliases != null && groupAliases.containsKey(s[i])) {
-                s[i] = (String) groupAliases.get(s[i]);
-                if (s[i].length() == 0) {
-                    continue;
-                }
-            }
-            Node n = gn.find(s[i]);
+        String shell = (String) properties.get("shell");
+        String[] aliases = properties.get("alias") != null ? properties.get("alias").toString().split(",") : new String[0];
+        if (shell != null && shell.length() > 0) {
+            Node n = gn.find(shell);
             if (n == null) {
-                GroupNode g = new GroupNode(s[i]);
+                GroupNode g = new GroupNode(shell);
                 gn.add(g);
-                register(new GroupCommand(s[i], g));
+                register(new GroupCommand(shell, g));
                 gn = g;
             } else if (n instanceof GroupNode) {
                 gn = (GroupNode) n;
             } else {
-                throw new IllegalStateException("A command conflicts has been detected when registering " + id);
+                throw new IllegalStateException("A command conflicts has been detected when registering " + command.getId());
             }
         }
-        CommandNode cn = new CommandNode(s[s.length - 1], id);
+
+        CommandNode cn = new CommandNode(name, command.getId());
         gn.add(cn);
+
+        for (int i = 0; i < aliases.length; i++) {
+            if (!name.equals(aliases[i])) {
+                AliasNode an = new AliasNode(aliases[i], ALIAS_PREFIX + command.getId());
+                gn.add(an);
+            }
+        }
+
         register(command);
     }
 
@@ -109,6 +116,15 @@ public class SpringCommandRegistry extends DefaultCommandRegistry implements Lay
 
     public Node findNode(Node node, String s) throws NotFoundException {
         if (node instanceof GroupNode) {
+            if (s.startsWith(ALIAS_PREFIX)) {
+                s = s.substring(ALIAS_PREFIX.length());
+                for (Node n : ((GroupNode) node).nodes()) {
+                    if (n instanceof CommandNode && ((CommandNode) n).getId().equals(s)) {
+                        return n;
+                    }
+                }
+                throw new NotFoundException(s);
+            }
             Node n = ((GroupNode) node).find(s);
             if (n instanceof GroupNode) {
                 return new CommandNode(n.getName(), n.getName());
@@ -140,23 +156,31 @@ public class SpringCommandRegistry extends DefaultCommandRegistry implements Lay
         }
 
         public Object execute(CommandContext commandContext, Object... objects) throws Exception {
+            env.getVariables().set(CURRENT_NODE, gn);
             if (objects.length > 0) {
-                String cmdId = String.valueOf(objects[0]);
-                Node n = gn.find(cmdId);
-                CommandContext ctx = commandContext;
-                Command cmd;
-                if (n instanceof CommandNode) {
-                    cmd = lookup(((CommandNode) n).getId());
-                } else if (n instanceof GroupNode) {
-                    cmd = new GroupCommand(cmdId, (GroupNode) n);
-                } else {
-                    throw new IllegalStateException("Unrecognized node type: " + n.getClass().getName());
+                try {
+                    String cmdId = String.valueOf(objects[0]);
+                    Node n = gn.find(cmdId);
+                    if (n == null) {
+                        n = layout.find(cmdId);
+                    }
+                    CommandContext ctx = commandContext;
+                    Command cmd;
+                    if (n instanceof CommandNode) {
+                        cmd = lookup(((CommandNode) n).getId());
+                    } else if (n instanceof GroupNode) {
+                        cmd = new GroupCommand(cmdId, (GroupNode) n);
+                    } else if (n instanceof AliasNode) {
+                        cmd = lookup(((AliasNode) n).getCommand().substring(ALIAS_PREFIX.length()));
+                    } else {
+                        throw new IllegalStateException("Unrecognized node type: " + n.getClass().getName());
+                    }
+                    return cmd.execute(ctx, Arguments.shift(objects));
+                } finally {
+                    env.getVariables().unset(CURRENT_NODE);
                 }
-                return cmd.execute(ctx, Arguments.shift(objects));
-            } else {
-                env.getVariables().set(CURRENT_NODE, gn);
-                return SUCCESS;
             }
+            return SUCCESS;
         }
     }
 }

@@ -1,6 +1,9 @@
 package org.apache.geronimo.gshell.spring;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.geronimo.gshell.ansi.Code;
 import org.apache.geronimo.gshell.ansi.Renderer;
@@ -74,6 +77,8 @@ public class HelpCommand
                     gn = (GroupNode) n;
                 } else if (n instanceof CommandNode) {
                     cn = (CommandNode) n;
+                } else if (n instanceof AliasNode) {
+                    cn = (CommandNode) layoutManager.findNode(gn, ((AliasNode) n).getCommand());
                 } else {
                     throw new IllegalStateException("Unsupported node type " + n.getParent().getName());
                 }
@@ -81,13 +86,9 @@ public class HelpCommand
         }
 
         if (cn == null) {
-            // TODO: take into account the sub shell
-            if (path == null || path.isEmpty()) {
+            if (gn == layoutManager.getLayout()) {
                 io.out.print(branding.getAbout());
                 io.out.println();
-                io.out.println("Available commands:");
-            } else {
-                io.out.println("Available commands in " + path);
             }
             displayGroupCommands(gn);
         }
@@ -101,8 +102,23 @@ public class HelpCommand
     private void displayGroupCommands(final GroupNode group) throws Exception {
         int maxNameLen = 20; // FIXME: Figure this out dynamically
 
+        boolean hasShells = false;
+
+        if (group == layoutManager.getLayout()) {
+            io.out.println("Available commands:");
+        } else {
+            io.out.println("Available commands in " + Renderer.encode(group.getName(), Code.BOLD) + ":");
+        }
+
+        SortedSet<Node> nodes = new TreeSet<Node>(new Comparator<Node>() {
+            public int compare(Node o1, Node o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        nodes.addAll(group.nodes());
+
         // First display command/aliases nodes
-        for (Node child : group.nodes()) {
+        for (Node child : nodes) {
             if (child instanceof CommandNode) {
                 try {
                     CommandNode node = (CommandNode) child;
@@ -128,31 +144,38 @@ public class HelpCommand
             else if (child instanceof AliasNode) {
                 AliasNode node = (AliasNode) child;
                 String name = StringUtils.rightPad(node.getName(), maxNameLen);
+                String cmd = layoutManager.findNode(group, node.getCommand()).getName();
 
                 io.out.print("  ");
                 io.out.print(renderer.render(Renderer.encode(name, Code.BOLD)));
                 io.out.print("  ");
 
                 io.out.print("Alias to: ");
-                io.out.println(renderer.render(Renderer.encode(node.getCommand(), Code.BOLD)));
+
+                io.out.println(renderer.render(Renderer.encode(cmd, Code.BOLD)));
+            } else if (child instanceof GroupNode) {
+                hasShells = true;
             }
         }
 
         io.out.println();
 
-        // Then groups
-        for (Node child : group.nodes()) {
-            if (child instanceof GroupNode) {
-                GroupNode node = (GroupNode) child;
-
-                io.out.print("  ");
-                io.out.println(renderer.render(Renderer.encode(node.getPath(), Code.BOLD)));
-
-                io.out.println();
-                //displayGroupCommands(node);
-                //io.out.println();
+        if (hasShells) {
+            io.out.println("Available shells:");
+            // Then groups
+            for (Node child : nodes) {
+                if (child instanceof GroupNode) {
+                    GroupNode node = (GroupNode) child;
+                    io.out.print("  ");
+                    io.out.println(renderer.render(Renderer.encode(node.getName(), Code.BOLD)));
+                }
             }
+            io.out.println();
         }
+    }
+
+    private String extractCommandName(String command) {
+        return command.substring(command.lastIndexOf(':') + 1);
     }
 
     private void displayCommandHelp(final String path) throws Exception {
@@ -165,8 +188,10 @@ public class HelpCommand
             io.out.println("Try " + Renderer.encode("help", Code.BOLD) + " for a list of available commands.");
         }
         else {
-            io.out.println("Command " + Renderer.encode(path, Code.BOLD));
+            io.out.println("Command " + Renderer.encode(extractCommandName(path), Code.BOLD));
             io.out.println("   " + cmd.getDescription());
+
+            cmd.execute(context, "--help");
         }
 
         io.out.println();
