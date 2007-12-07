@@ -122,8 +122,8 @@
 
                 <!-- PAX config -->
                 <include>org.apache.felix:org.apache.felix.configadmin</include>
-                <include>org.apache.servicemix:org.apache.servicemix.runtime.filemonitor</include>
-                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.ant</include>
+                <include>org.apache.servicemix.runtime:org.apache.servicemix.runtime.filemonitor</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.ant-${ant.version}</include>
 
                 <!-- Spring OSGi -->
                 <include>org.springframework:spring-aop</include>
@@ -133,19 +133,19 @@
                 <include>org.springframework.osgi:spring-osgi-core</include>
                 <include>org.springframework.osgi:spring-osgi-extender</include>
                 <include>org.springframework.osgi:spring-osgi-io</include>
-                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.aopalliance</include>
-                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.cglib</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.aopalliance-${aopalliance.version}</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.cglib-${cglib.version}</include>
 
 		        <!-- GShell -->
                 <include>org.apache.geronimo.specs:geronimo-stax-api_1.0_spec</include>
-                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.mina</include>
-                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.xstream</include>
-                <include>org.apache.servicemix.gshell:org.apache.servicemix.gshell.core</include>
-                <include>org.apache.servicemix.gshell:org.apache.servicemix.gshell.osgi</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.mina-${mina.version}</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.xstream-${xstream.version}</include>
+                <include>org.apache.servicemix.runtime.gshell:org.apache.servicemix.runtime.gshell.core</include>
+                <include>org.apache.servicemix.runtime.gshell:org.apache.servicemix.runtime.gshell.osgi</include>
 
 		        <!-- OBR + GShell command -->
                 <include>org.apache.felix:org.apache.felix.bundlerepository</include>
-                <include>org.apache.servicemix.gshell:org.apache.servicemix.gshell.obr</include>
+                <include>org.apache.servicemix.runtime.gshell:org.apache.servicemix.runtime.gshell.obr</include>
 
             </includes>
         </dependencySet>

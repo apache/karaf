@@ -23,20 +23,32 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.runtime</groupId>
-        <artifactId>runtime</artifactId>
+        <groupId>org.apache.servicemix.runtime.bundles</groupId>
+        <artifactId>bundles</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.runtime.gshell</groupId>
-    <artifactId>gshell</artifactId>
-    <packaging>pom</packaging>
-    <name>ServiceMix GShell</name>
+    <groupId>org.apache.servicemix.bundles</groupId>
+    <artifactId>${pom.groupId}.${pkgArtifactId}-${pkgVersion}</artifactId>
+    <packaging>bundle</packaging>
+    <name>ServiceMix OSGI Common Bundles: ${pkgArtifactId}</name>
+    <description>
+        This bundle simply wraps ${pkgArtifactId}-${pkgVersion}.jar.
+    </description>
 
-    <modules>
-        <module>gshell-core</module>
-        <module>gshell-osgi</module>
-        <module>gshell-obr</module>
-    </modules>
+    <properties>
+        <pkgArtifactId>asm</pkgArtifactId>
+        <pkgVersion>${asm.version}</pkgVersion>
+        <servicemix.osgi.export.pkg>org.objectweb.asm</servicemix.osgi.export.pkg>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>asm</groupId>
+            <artifactId>asm-all</artifactId>
+            <version>${pkgVersion}</version>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 
 </project>

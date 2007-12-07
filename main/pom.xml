@@ -23,12 +23,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix</groupId>
-        <artifactId>servicemix</artifactId>
-        <version>4.0-SNAPSHOT</version>
+      <groupId>org.apache.servicemix.runtime</groupId>
+      <artifactId>runtime</artifactId>
+      <version>0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.apache.servicemix.main</artifactId>
+    <artifactId>org.apache.servicemix.runtime.main</artifactId>
     <packaging>bundle</packaging>
     <name>ServiceMix Main</name>
 
@@ -36,6 +36,7 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
+            <version>${felix.framework.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.felix</groupId>
@@ -72,8 +73,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>${felix.version}</version>
-                <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <_donotcopy>(CVS|.svn|config.properties)</_donotcopy>

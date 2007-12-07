@@ -25,45 +25,24 @@
     <parent>
         <groupId>org.apache.servicemix.runtime</groupId>
         <artifactId>runtime</artifactId>
-        <version>4.0-SNAPSHOT</version>
+        <version>0.1-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.servicemix.runtime</groupId>
     <artifactId>org.apache.servicemix.runtime.minimum</artifactId>
     <packaging>pom</packaging>
-    <version>4.0-SNAPSHOT</version>
     <name>ServiceMix Minimum Distribution</name>
 
     <dependencies>
-<!--
         <dependency>
-            <groupId>org.apache.directory.daemon</groupId>
-            <artifactId>daemon-bootstrappers</artifactId>
-            <version>1.1.0</version>
-        </dependency>
--->
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>nlog4j</artifactId>
-            <version>1.2.19</version>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-daemon</groupId>
-            <artifactId>commons-daemon</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.servicemix</groupId>
-            <artifactId>org.apache.servicemix.main</artifactId>
-            <version>${pom.version}</version>
+            <groupId>org.apache.servicemix.runtime</groupId>
+            <artifactId>org.apache.servicemix.runtime.main</artifactId>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix</groupId>
+            <groupId>org.apache.servicemix.runtime</groupId>
             <artifactId>org.apache.servicemix.runtime.filemonitor</artifactId>
-            <version>${pom.version}</version>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.osgi</groupId>
@@ -105,249 +84,91 @@
             <artifactId>spring-tx</artifactId>
             <version>${spring.version}</version>
         </dependency>
-
       <dependency>
           <groupId>org.apache.felix</groupId>
           <artifactId>org.apache.felix.bundlerepository</artifactId>
-          <version>${bundlerepository.version}</version>
+          <version>${felix.bundlerepository.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.apache.servicemix.gshell</groupId>
-          <artifactId>org.apache.servicemix.gshell.core</artifactId>
+          <groupId>org.apache.servicemix.runtime.gshell</groupId>
+          <artifactId>org.apache.servicemix.runtime.gshell.core</artifactId>
+          <version>0.1-SNAPSHOT</version>
       </dependency>
       <dependency>
-          <groupId>org.apache.servicemix.gshell</groupId>
-          <artifactId>org.apache.servicemix.gshell.obr</artifactId>
+          <groupId>org.apache.servicemix.runtime.gshell</groupId>
+          <artifactId>org.apache.servicemix.runtime.gshell.obr</artifactId>
+          <version>0.1-SNAPSHOT</version>
       </dependency>
       <dependency>
-          <groupId>org.apache.servicemix.gshell</groupId>
-          <artifactId>org.apache.servicemix.gshell.osgi</artifactId>
+          <groupId>org.apache.servicemix.runtime.gshell</groupId>
+          <artifactId>org.apache.servicemix.runtime.gshell.osgi</artifactId>
+          <version>0.1-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.mina</artifactId>
+          <artifactId>org.apache.servicemix.bundles.mina-${mina.version}</artifactId>
+          <version>0.1-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.xstream</artifactId>
+          <artifactId>org.apache.servicemix.bundles.xstream-${xstream.version}</artifactId>
+          <version>0.1-SNAPSHOT</version>
       </dependency>
-
+      <dependency>
+          <groupId>org.apache.servicemix.bundles</groupId>
+          <artifactId>org.apache.servicemix.bundles.aopalliance-${aopalliance.version}</artifactId>
+          <version>0.1-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.servicemix.bundles</groupId>
+          <artifactId>org.apache.servicemix.bundles.asm-${asm.version}</artifactId>
+          <version>0.1-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.servicemix.bundles</groupId>
+          <artifactId>org.apache.servicemix.bundles.cglib-${cglib.version}</artifactId>
+          <version>0.1-SNAPSHOT</version>
+      </dependency>
       <dependency>
           <groupId>org.apache.felix</groupId>
           <artifactId>org.osgi.compendium</artifactId>
+          <version>${felix.compendium.version}</version>
+          <exclusions>
+	         <exclusion>
+	              <groupId>org.apache.felix</groupId>
+    	          <artifactId>javax.servlet</artifactId>
+             </exclusion>
+	         <exclusion>
+	              <groupId>org.apache.felix</groupId>
+    	          <artifactId>org.osgi.foundation</artifactId>
+             </exclusion>
+	      </exclusions>
       </dependency>
       <dependency>
           <groupId>org.apache.felix</groupId>
           <artifactId>org.apache.felix.configadmin</artifactId>
+          <version>${felix.configadmin.version}</version>
       </dependency>
       <dependency>
           <groupId>org.ops4j.pax.logging</groupId>
           <artifactId>pax-logging-api</artifactId>
+          <version>${pax.logging.version}</version>
       </dependency>
       <dependency>
           <groupId>org.ops4j.pax.logging</groupId>
           <artifactId>pax-logging-service</artifactId>
+          <version>${pax.logging.version}</version>
       </dependency>
-      <dependency>
-          <groupId>org.ops4j.pax.confman</groupId>
-          <artifactId>pax-confman-propsloader</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>org.ops4j.pax.web</groupId>
-          <artifactId>pax-web-service</artifactId>
-      </dependency>
-
       <dependency>
           <groupId>org.apache.geronimo.specs</groupId>
           <artifactId>geronimo-servlet_2.5_spec</artifactId>
+          <version>${geronimo.servlet.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.geronimo.specs</groupId>
           <artifactId>geronimo-stax-api_1.0_spec</artifactId>
+          <version>${geronimo.stax.version}</version>
       </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.asm</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.cglib</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.jaxb-api</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.jaxb-impl</artifactId>
-      </dependency>
-
-      
-<!--
-        <dependency>
-            <groupId>org.apache.servicemix.nmr</groupId>
-            <artifactId>org.apache.servicemix.nmr.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.nmr</groupId>
-            <artifactId>org.apache.servicemix.nmr.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.nmr</groupId>
-            <artifactId>org.apache.servicemix.nmr.spring</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.nmr</groupId>
-            <artifactId>org.apache.servicemix.nmr.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix</groupId>
-            <artifactId>org.apache.servicemix.transaction</artifactId>
-        </dependency>
-		<dependency>
-            <groupId>org.apache.servicemix</groupId>
-            <artifactId>org.apache.servicemix.activemq</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.management</groupId>
-            <artifactId>org.apache.servicemix.management.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.management</groupId>
-            <artifactId>org.apache.servicemix.management.acegi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.jbi</groupId>
-            <artifactId>org.apache.servicemix.jbi.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.jbi</groupId>
-            <artifactId>org.apache.servicemix.jbi.runtime</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.jbi</groupId>
-            <artifactId>org.apache.servicemix.jbi.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.openejb</groupId>
-            <artifactId>org.apache.servicemix.openejb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-core</artifactId>
-            <version>${camel.version}</version>
-        </dependency>
-		  <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.cxf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.jaxws-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.openejb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.openjpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.wsdl4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jpa_3.0_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-javamail_1.4_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-activation_1.1_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jta_1.1_spec</artifactId>
-        </dependency>
-		<dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jms_1.1_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-saaj_1.1_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jacc_1.1_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-interceptor_3.0_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-ejb_3.0_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-j2ee-management_1.1_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-annotation_1.0_spec</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.xbean</groupId>
-            <artifactId>xbean-naming</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.xbean</groupId>
-            <artifactId>xbean-reflect</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.xbean</groupId>
-            <artifactId>xbean-finder</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-spring</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-jms</artifactId>
-        </dependency>
-      <dependency>
-        <groupId>org.apache.ws.commons.schema</groupId>
-        <artifactId>XmlSchema</artifactId>
-      </dependency>
-        -->
-      
     </dependencies>
     <build>
         <resources>
@@ -386,8 +207,8 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.apache.servicemix</groupId>
-                                    <artifactId>org.apache.servicemix.main</artifactId>
+                                    <groupId>org.apache.servicemix.runtime</groupId>
+                                    <artifactId>org.apache.servicemix.runtime.main</artifactId>
                                     <version>${pom.version}</version>
                                     <outputDirectory>target/dependencies</outputDirectory>
                                     <destFileName>servicemix.jar</destFileName>

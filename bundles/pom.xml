@@ -23,56 +23,56 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.runtime.gshell</groupId>
-        <artifactId>gshell</artifactId>
+        <groupId>org.apache.servicemix.runtime</groupId>
+        <artifactId>runtime</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.runtime.gshell</groupId>
-    <artifactId>org.apache.servicemix.runtime.gshell.osgi</artifactId>
-    <packaging>bundle</packaging>
-    <name>ServiceMix GShell OSGi Commands</name>
+    <groupId>org.apache.servicemix.runtime.bundles</groupId>
+    <artifactId>bundles</artifactId>
+    <packaging>pom</packaging>
+    <name>ServiceMix OSGI Common Bundles</name>
 
-    <description>
-        Provides the OSGi GShell commands
-    </description>
+    <modules>
+        <module>ant</module>
+        <module>aopalliance</module>
+        <module>asm</module>
+        <module>cglib</module>
+        <module>junit</module>
+        <module>mina</module>
+        <module>xstream</module>
+    </modules>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.servicemix.runtime.gshell</groupId>
-            <artifactId>org.apache.servicemix.runtime.gshell.core</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <version>${felix.osgi.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.osgi</groupId>
-            <artifactId>spring-osgi-core</artifactId>
-            <version>${spring.osgi.version}</version>
-        </dependency>
-    </dependencies>
+    <properties>
+        <servicemix.osgi.export>${servicemix.osgi.export.pkg}*;version=${pkgVersion}</servicemix.osgi.export>
+        <servicemix.osgi.export.pkg></servicemix.osgi.export.pkg>
+        <servicemix.osgi.import.pkg></servicemix.osgi.import.pkg>
+        <servicemix.osgi.private.pkg></servicemix.osgi.private.pkg>
+    </properties>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.geronimo.gshell.osgi*;version=${project.version}</Export-Package>
-                        <Import-Package>*</Import-Package>
-                        <Private-Package>!*</Private-Package>
-                        <Spring-Context>*;publish-context:=false</Spring-Context>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>${servicemix.osgi.export}</Export-Package>
+                        <Import-Package>${servicemix.osgi.import.pkg}*</Import-Package>
+                        <Private-Package>${servicemix.osgi.private.pkg}</Private-Package>
                     </instructions>
+                    <unpackBundle>true</unpackBundle>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>
