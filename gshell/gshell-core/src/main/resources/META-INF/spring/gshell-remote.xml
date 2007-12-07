@@ -31,7 +31,7 @@
         <constructor-arg ref="transportFactoryLocator" />
         <constructor-arg>
             <list>
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.CloseShellHandler" />
+                <bean class="org.apache.geronimo.gshell.remote.server.handler.SpringCloseShellHandler" />
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.ConnectHandler">
                     <constructor-arg ref="cryptoContext" />
                     <constructor-arg ref="timeoutManager" />
