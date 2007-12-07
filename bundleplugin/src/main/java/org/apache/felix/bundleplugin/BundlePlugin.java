@@ -43,6 +43,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.osgi.Maven2OsgiConverter;
+import org.codehaus.plexus.archiver.UnArchiver;
+import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.util.DirectoryScanner;
 
 import aQute.lib.osgi.Analyzer;
@@ -67,6 +69,18 @@ public class BundlePlugin extends AbstractMojo {
      * @parameter expression="${manifestLocation}" default-value="${project.build.outputDirectory}/META-INF"
      */
     protected File manifestLocation;
+
+    /**
+     * When true, unpack the bundle contents to the outputDirectory
+     *
+     * @parameter expression="${unpackBundle}"
+     */
+    protected boolean unpackBundle;
+
+    /**
+     * @component
+     */
+    private ArchiverManager archiverManager;
 
     /**
      * @component
@@ -307,6 +321,21 @@ public class BundlePlugin extends AbstractMojo {
             builder.getJar().write(jarFile);
             Artifact bundleArtifact = project.getArtifact();
             bundleArtifact.setFile(jarFile);
+
+            if (unpackBundle)
+            {
+                try
+                {
+                    UnArchiver unArchiver = archiverManager.getUnArchiver( "jar" );
+                    unArchiver.setDestDirectory( getOutputDirectory() );
+                    unArchiver.setSourceFile( jarFile );
+                    unArchiver.extract();
+                }
+                catch ( Exception e )
+                {
+                    getLog().error( "Problem unpacking " + jarFile + " to " + getOutputDirectory(), e );
+                }
+            }
 
             if (manifestLocation != null)
             {
