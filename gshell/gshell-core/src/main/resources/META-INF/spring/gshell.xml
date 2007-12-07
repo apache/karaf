@@ -62,6 +62,10 @@
         <constructor-arg ref="branding" />
     </bean>
 
+    <bean id="layoutManager" class="org.apache.geronimo.gshell.spring.OsgiLayoutManager">
+      <property name="shell" value="smx" />
+    </bean>
+
     <bean id="commandRegistry" class="org.apache.geronimo.gshell.spring.SpringCommandRegistry">
         <constructor-arg ref="environment" />
         <property name="groupAliases">
@@ -87,6 +91,12 @@
       <property name="targetSource">
           <bean class="org.apache.geronimo.gshell.spring.IOTargetSource" />
       </property>
+    </bean>
+    
+    <bean id="subShell" class="org.apache.geronimo.gshell.spring.OsgiSubShell">
+      <property name="commandRegistry" ref="commandRegistry"/>
+      <property name="osgiLayoutManager" ref="layoutManager"/>
+      <property name="terminal" ref="terminal"/>
     </bean>
 
 </beans>

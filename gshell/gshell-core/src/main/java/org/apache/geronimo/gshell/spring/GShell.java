@@ -77,9 +77,7 @@ public class GShell implements Runnable, BundleContextAware {
     }
 
     public void run() {
-        try {        	
-        	waitForFrameworkToStart();
-        	
+        try {        	        	
             IOTargetSource.setIO(io);
             EnvironmentTargetSource.setEnvironment(env);
 	        
@@ -90,7 +88,7 @@ public class GShell implements Runnable, BundleContextAware {
 	        
 	        // If a command was specified on the command line, then just execute that command.
 			if (args != null && args.length > 0) {
-                System.out.println("Executing 1 command: " + Arrays.toString(args));
+	        	waitForFrameworkToStart();
 				Object value = shell.execute((Object[])args);
 	        	if (mainService != null) {
 	        		if( value instanceof Number ) {
@@ -100,7 +98,6 @@ public class GShell implements Runnable, BundleContextAware {
 	        		}
 	        	}
 			} else {
-	        	System.out.println("going int interactive loop:");
 				// Otherwise go into a command shell.
 	            shell.run();
 	        	if( mainService!=null ) {
@@ -116,7 +113,6 @@ public class GShell implements Runnable, BundleContextAware {
         	if( mainService!=null ) {
         		mainService.setExitCode(-1);
         	}
-            e.printStackTrace();
         } finally {
         	try {
 				getBundleContext().getBundle(0).stop();
@@ -133,21 +129,20 @@ public class GShell implements Runnable, BundleContextAware {
      * @throws InterruptedException
      */
 	private void waitForFrameworkToStart() throws InterruptedException {
-		System.out.println("Waiting for system to startup...");
-		getBundleContext().addFrameworkListener(new FrameworkListener(){
-			public void frameworkEvent(FrameworkEvent event) {
-				System.out.println("Got event: "+event.getType());
-				if( event.getType() == FrameworkEvent.STARTED ) {
-					frameworkStarted.countDown();
-				}
-			}
-		});
-		
-		if( frameworkStarted.await(5, TimeUnit.SECONDS) ) {
-			System.out.println("System completed startup.");
-		} else {
-			System.out.println("System took too long startup... continuing");
-		}
+//		getBundleContext().addFrameworkListener(new FrameworkListener(){
+//			public void frameworkEvent(FrameworkEvent event) {
+//				System.out.println("Got event: "+event.getType());
+//				if( event.getType() == FrameworkEvent.STARTED ) {
+//					frameworkStarted.countDown();
+//				}
+//			}
+//		});
+//		
+//		if( frameworkStarted.await(5, TimeUnit.SECONDS) ) {
+//			System.out.println("System completed startup.");
+//		} else {
+//			System.out.println("System took too long startup... continuing");
+//		}
 	}
 
 	public MainService getMainService() {

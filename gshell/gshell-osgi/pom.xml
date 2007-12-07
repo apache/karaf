@@ -55,6 +55,12 @@
             <artifactId>spring-osgi-core</artifactId>
             <version>${spring.osgi.version}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>org.apache.servicemix.gshell</groupId>
+            <artifactId>org.apache.servicemix.gshell.core</artifactId>
+            <version>4.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
