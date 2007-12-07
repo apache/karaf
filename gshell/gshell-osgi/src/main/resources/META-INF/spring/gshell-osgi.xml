@@ -29,15 +29,6 @@
   http://www.springframework.org/schema/osgi
   http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-    <!-- osgi sub shell -->
-    <osgi:reference id="subShell" interface="org.apache.geronimo.gshell.osgi.SubShell"/>
-    <bean id="osgi" class="org.apache.geronimo.gshell.osgi.OsgiShell">
-      <property name="subShell" ref="subShell"/>
-    </bean>
-    <osgi:service ref="osgi" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties><entry key="shell" value="smx"/></osgi:service-properties>
-    </osgi:service>
-
     <!-- osgi commands -->
     <bean id="bundle-level" class="org.apache.geronimo.gshell.osgi.BundleLevel" />
     <bean id="headers" class="org.apache.geronimo.gshell.osgi.Headers" />
@@ -52,126 +43,87 @@
     <bean id="stop-bundle" class="org.apache.geronimo.gshell.osgi.StopBundle" />
     <bean id="uninstall-bundle" class="org.apache.geronimo.gshell.osgi.UninstallBundle" />
     
-    <!-- general commands -->
-    <bean id="clear" class="org.apache.geronimo.gshell.commands.builtins.ClearCommand" />
-    <bean id="echo" class="org.apache.geronimo.gshell.commands.builtins.EchoCommand" />
-    <bean id="exit" class="org.apache.geronimo.gshell.commands.builtins.ExitCommand" />
-    <bean id="help" class="org.apache.geronimo.gshell.spring.SubShellHelpCommand"/>
-    <bean id="set" class="org.apache.geronimo.gshell.commands.builtins.SetCommand" />
-    <bean id="source" class="org.apache.geronimo.gshell.commands.builtins.SourceCommand" />
-    <bean id="unset" class="org.apache.geronimo.gshell.commands.builtins.UnsetCommand" />
-
     <osgi:service ref="bundle-level" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
         <entry key="shell" value="osgi"/>
-      	<entry key="alias" value="bundle-level"/>
+      	<entry key="name" value="bundle-level"/>
       </osgi:service-properties>
     </osgi:service>
 
     <osgi:service ref="headers" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties><entry key="shell" value="osgi"/></osgi:service-properties>
+      <osgi:service-properties>
+          <entry key="shell" value="osgi"/>
+      </osgi:service-properties>
     </osgi:service>
     
     <osgi:service ref="install-bundle" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
         <entry key="shell" value="osgi"/>
-      	<entry key="alias" value="install"/>
+      	<entry key="name" value="install"/>
       </osgi:service-properties>
     </osgi:service>
     
     <osgi:service ref="list-bundles" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
         <entry key="shell" value="osgi"/>
-      	<entry key="alias" value="list"/>
+      	<entry key="name" value="list"/>
       </osgi:service-properties>
     </osgi:service>
     
     <osgi:service ref="list-services" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
-        <entry key="shell" value="osgi"/>
-      	<entry key="alias" value="list-services,ls"/>
+          <entry key="shell" value="osgi"/>
+          <entry key="name" value="list-services"/>
+          <entry key="alias" value="ls"/>
       </osgi:service-properties>
     </osgi:service>
     
     <osgi:service ref="refresh-bundle" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
         <entry key="shell" value="osgi"/>
-      	<entry key="alias" value="refresh"/>
+      	<entry key="name" value="refresh"/>
       </osgi:service-properties>
     </osgi:service>
     
     <osgi:service ref="resolve-bundle" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
         <entry key="shell" value="osgi"/>
-      	<entry key="alias" value="resolve"/>
+      	<entry key="name" value="resolve"/>
       </osgi:service-properties>
     </osgi:service>
     
     <osgi:service ref="shutdown" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties><entry key="shell" value="osgi"/></osgi:service-properties>
+      <osgi:service-properties>
+          <entry key="shell" value="osgi"/>
+      </osgi:service-properties>
     </osgi:service>
     
     <osgi:service ref="start-bundle" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
         <entry key="shell" value="osgi"/>
-      	<entry key="alias" value="start"/>
+      	<entry key="name" value="start"/>
       </osgi:service-properties>
     </osgi:service>
     
     <osgi:service ref="start-level" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
         <entry key="shell" value="osgi"/>
-      	<entry key="alias" value="start-level"/>
+      	<entry key="name" value="start-level"/>
       </osgi:service-properties>
     </osgi:service>
     
     <osgi:service ref="stop-bundle" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
         <entry key="shell" value="osgi"/>
-      	<entry key="alias" value="stop"/>
+      	<entry key="name" value="stop"/>
       </osgi:service-properties>
     </osgi:service>
     
     <osgi:service ref="uninstall-bundle" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
         <entry key="shell" value="osgi"/>
-      	<entry key="alias" value="uninstall"/>
-      </osgi:service-properties>
-    </osgi:service>
-    
-    <osgi:service ref="clear" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties><entry key="shell" value="osgi"/></osgi:service-properties>
-    </osgi:service>
-    
-    <osgi:service ref="help" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-      	<entry key="shell" value="osgi"/>
-      	<entry key="alias" value="help,?"/>
+      	<entry key="name" value="uninstall"/>
       </osgi:service-properties>
     </osgi:service>
 
-    <osgi:service ref="exit" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties><entry key="shell" value="osgi"/></osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="set" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties><entry key="shell" value="osgi"/></osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="unset" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties><entry key="shell" value="osgi"/></osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="source" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-      	<entry key="shell" value="osgi"/>
-      	<entry key="alias" value="source,."/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="echo" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties><entry key="shell" value="osgi"/></osgi:service-properties>
-    </osgi:service>
-    
-    
 </beans>

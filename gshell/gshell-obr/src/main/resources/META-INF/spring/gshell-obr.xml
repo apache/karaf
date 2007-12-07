@@ -45,20 +45,60 @@
 
     <bean id="start" class="org.apache.geronimo.gshell.obr.StartCommand" />
 
-    <osgi:service ref="addUrl" interface="org.apache.geronimo.gshell.command.Command" />
+    <osgi:service ref="addUrl" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="obr"/>
+        <entry key="alias" value="addUrl"/>
+      </osgi:service-properties>
+    </osgi:service>
 
-    <osgi:service ref="deploy" interface="org.apache.geronimo.gshell.command.Command" />
+    <osgi:service ref="deploy" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="obr"/>
+        <entry key="alias" value="deploy"/>
+      </osgi:service-properties>
+    </osgi:service>
 
-    <osgi:service ref="info" interface="org.apache.geronimo.gshell.command.Command" />
+    <osgi:service ref="info" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="obr"/>
+        <entry key="alias" value="info"/>
+      </osgi:service-properties>
+    </osgi:service>
 
-    <osgi:service ref="list" interface="org.apache.geronimo.gshell.command.Command" />
+    <osgi:service ref="list" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="obr"/>
+        <entry key="alias" value="list"/>
+      </osgi:service-properties>
+    </osgi:service>
 
-    <osgi:service ref="listUrl" interface="org.apache.geronimo.gshell.command.Command" />
+    <osgi:service ref="listUrl" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="obr"/>
+        <entry key="alias" value="listUrl"/>
+      </osgi:service-properties>
+    </osgi:service>
 
-    <osgi:service ref="removeUrl" interface="org.apache.geronimo.gshell.command.Command" />
+    <osgi:service ref="removeUrl" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="obr"/>
+        <entry key="alias" value="removeUrl"/>
+      </osgi:service-properties>
+    </osgi:service>
 
-    <osgi:service ref="source" interface="org.apache.geronimo.gshell.command.Command" />
+    <osgi:service ref="source" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="obr"/>
+        <entry key="alias" value="source"/>
+      </osgi:service-properties>
+    </osgi:service>
 
-    <osgi:service ref="start" interface="org.apache.geronimo.gshell.command.Command" />
+    <osgi:service ref="start" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="obr"/>
+        <entry key="alias" value="start"/>
+      </osgi:service-properties>
+    </osgi:service>
 
 </beans>

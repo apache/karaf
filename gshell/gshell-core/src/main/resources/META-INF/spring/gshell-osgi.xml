@@ -36,47 +36,54 @@
         <osgi:listener ref="commandRegistry" bind-method="register" unbind-method="unregister" />
     </osgi:list>
 
-    <osgi:list id="smxCommands" interface="org.apache.geronimo.gshell.command.Command">
-        <osgi:listener ref="layoutManager" bind-method="register" unbind-method="unregister" />
-    </osgi:list>
-
-    <osgi:service ref="subShell" interface="org.apache.geronimo.gshell.osgi.SubShell"/>
-
     <osgi:service ref="clear" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties><entry key="shell" value="smx"/></osgi:service-properties>
+      <osgi:service-properties>
+          <entry key="alias" value="clear"/>
+      </osgi:service-properties>
     </osgi:service>
     
     <osgi:service ref="help" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
-      	<entry key="shell" value="smx"/>
       	<entry key="alias" value="help,?"/>
       </osgi:service-properties>
     </osgi:service>
 
     <osgi:service ref="exit" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties><entry key="shell" value="smx"/></osgi:service-properties>
+        <osgi:service-properties>
+            <entry key="alias" value="exit"/>
+        </osgi:service-properties>
     </osgi:service>
 
     <osgi:service ref="set" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties><entry key="shell" value="smx"/></osgi:service-properties>
+        <osgi:service-properties>
+            <entry key="alias" value="set"/>
+        </osgi:service-properties>
     </osgi:service>
 
     <osgi:service ref="unset" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties><entry key="shell" value="smx"/></osgi:service-properties>
+        <osgi:service-properties>
+            <entry key="alias" value="unset"/>
+        </osgi:service-properties>
     </osgi:service>
 
     <osgi:service ref="source" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
-      	<entry key="shell" value="smx"/>
       	<entry key="alias" value="source,."/>
       </osgi:service-properties>
     </osgi:service>
 
     <osgi:service ref="echo" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties><entry key="shell" value="smx"/></osgi:service-properties>
+        <osgi:service-properties>
+            <entry key="alias" value="echo"/>
+        </osgi:service-properties>
     </osgi:service>
 
-    <osgi:service ref="rsh" interface="org.apache.geronimo.gshell.command.Command" />
+    <osgi:service ref="rsh" interface="org.apache.geronimo.gshell.command.Command">
+        <osgi:service-properties>
+            <entry key="shell" value="remote"/>
+            <entry key="alias" value="rsh"/>
+        </osgi:service-properties>
+    </osgi:service>
 
     <osgix:property-placeholder persistent-id="org.apache.servicemix.shell">
         <osgix:default-properties>

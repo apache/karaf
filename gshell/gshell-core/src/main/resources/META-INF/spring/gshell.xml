@@ -62,17 +62,8 @@
         <constructor-arg ref="branding" />
     </bean>
 
-    <bean id="layoutManager" class="org.apache.geronimo.gshell.spring.OsgiLayoutManager">
-      <property name="shell" value="smx" />
-    </bean>
-
     <bean id="commandRegistry" class="org.apache.geronimo.gshell.spring.SpringCommandRegistry">
         <constructor-arg ref="environment" />
-        <property name="groupAliases">
-            <map>
-                <entry key="gshell-builtins" value="" />
-            </map>
-        </property>
     </bean>
 
     <bean id="commandLineBuilder" class="org.apache.geronimo.gshell.spring.SpringCommandLineBuilder">
@@ -93,10 +84,4 @@
       </property>
     </bean>
     
-    <bean id="subShell" class="org.apache.geronimo.gshell.spring.OsgiSubShell">
-      <property name="commandRegistry" ref="commandRegistry"/>
-      <property name="osgiLayoutManager" ref="layoutManager"/>
-      <property name="terminal" ref="terminal"/>
-    </bean>
-
 </beans>
