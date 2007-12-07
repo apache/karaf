@@ -46,7 +46,7 @@
         <property name="commandLineBuilder" ref="commandLineBuilder" />
         <property name="commandRegistry" ref="commandRegistry" />
         <property name="env" ref="environment" />
-        <property name="layoutManager" ref="layoutManager" />
+        <property name="layoutManager" ref="commandRegistry" />
     </bean>
 
     <bean id="interactiveShell" class="org.apache.geronimo.gshell.DefaultShell">
@@ -62,16 +62,14 @@
         <constructor-arg ref="branding" />
     </bean>
 
-    <bean id="layoutManager" class="org.apache.geronimo.gshell.layout.DefaultLayoutManager" init-method="initialize">
-        <constructor-arg ref="layoutLoader" index="0" type="org.apache.geronimo.gshell.layout.loader.LayoutLoader" />
-        <constructor-arg ref="environment" index="1" />
+    <bean id="commandRegistry" class="org.apache.geronimo.gshell.spring.SpringCommandRegistry">
+        <constructor-arg ref="environment" />
+        <property name="groupAliases">
+            <map>
+                <entry key="gshell-builtins" value="" />
+            </map>
+        </property>
     </bean>
-
-    <bean id="layoutLoader" class="org.apache.geronimo.gshell.layout.loader.XMLLayoutLoader" init-method="initialize">
-        <constructor-arg ref="shellInfo" />
-    </bean>
-
-    <bean id="commandRegistry" class="org.apache.geronimo.gshell.spring.SpringCommandRegistry" />
 
     <bean id="commandLineBuilder" class="org.apache.geronimo.gshell.spring.SpringCommandLineBuilder">
         <property name="environment" ref="environment" />

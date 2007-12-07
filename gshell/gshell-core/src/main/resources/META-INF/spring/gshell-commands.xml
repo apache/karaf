@@ -30,11 +30,11 @@
 
     <bean id="echo" class="org.apache.geronimo.gshell.commands.builtins.EchoCommand" />
 
-    <bean id="exit" class="org.apache.geronimo.gshell.commands.builtins.ExitCommand" />
+    <bean id="exit" class="org.apache.geronimo.gshell.spring.ExitCommand" />
 
-    <bean id="help" class="org.apache.geronimo.gshell.commands.builtins.HelpCommand">
+    <bean id="help" class="org.apache.geronimo.gshell.spring.HelpCommand">
         <constructor-arg ref="commandRegistry" />
-        <constructor-arg ref="layoutManager" />
+        <constructor-arg ref="commandRegistry" />
         <constructor-arg ref="branding" />
     </bean>
 
