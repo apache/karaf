@@ -38,8 +38,13 @@
             <excludes>
                 <exclude>bin/**</exclude>
             </excludes>
-            <lineEnding>unix</lineEnding>
+            <lineEnding>dos</lineEnding>
         </fileSet>
+        <fileSet>
+            <directory>target/classes</directory>
+            <outputDirectory>/</outputDirectory>
+            <lineEnding>dos</lineEnding>
+        </fileSet>        
         <fileSet>
             <directory>src/main/release</directory>
             <outputDirectory>/</outputDirectory>

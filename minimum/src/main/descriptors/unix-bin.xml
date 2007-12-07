@@ -41,6 +41,11 @@
             <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
+            <directory>target/classes</directory>
+            <outputDirectory>/</outputDirectory>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+        <fileSet>
             <directory>src/main/release</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
