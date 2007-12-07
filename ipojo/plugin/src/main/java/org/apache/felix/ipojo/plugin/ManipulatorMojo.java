@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -27,10 +27,11 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 
 /**
  * Package an OSGi jar "bundle" as an "iPOJO bundle".
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  * @version $Rev$, $Date$
  * @goal ipojo-bundle
@@ -42,7 +43,7 @@ public class ManipulatorMojo extends AbstractMojo {
 
     /**
      * The directory for the generated JAR.
-     * 
+     *
      * @parameter expression="${project.build.directory}"
      * @required
      */
@@ -50,7 +51,7 @@ public class ManipulatorMojo extends AbstractMojo {
 
     /**
      * The directory containing generated classes.
-     * 
+     *
      * @parameter expression="${project.build.outputDirectory}"
      * @required
      * @readonly
@@ -59,17 +60,24 @@ public class ManipulatorMojo extends AbstractMojo {
 
     /**
      * The name of the generated JAR file.
-     * 
+     *
      * @parameter alias="jarName" expression="${project.build.finalName}"
      * @required
      */
     private String m_jarName;
-    
+
     /**
      * Metadata file location.
      * @parameter alias="metadata" default-value="metadata.xml"
      */
     private String m_metadata;
+
+    /**
+     * If set, the manipulated jar will be attached to the project as a separate artifact.
+     *
+     * @parameter alias="classifier" expression="${ipojo.classifier}"
+     */
+    private String m_classifier;
 
     /**
      * The Maven project.
@@ -79,6 +87,13 @@ public class ManipulatorMojo extends AbstractMojo {
      * @readonly
      */
     private MavenProject m_project;
+
+    /**
+     * Used for attaching new artifacts.
+     * @component
+     * @required
+     */
+    private MavenProjectHelper m_helper;
 
     /**
      * Project types which this plugin supports.
@@ -111,7 +126,7 @@ public class ManipulatorMojo extends AbstractMojo {
 
         getLog().info("Start bundle manipulation");
         // Get metadata file
-        File meta = new File(m_outputDirectory + "/" + m_metadata);
+        File meta = new File(m_outputDirectory + File.separator + m_metadata);
         getLog().info("Metadata File : " + meta.getAbsolutePath());
         if (!meta.exists()) {
             // Verify if annotations are ignored
@@ -125,14 +140,14 @@ public class ManipulatorMojo extends AbstractMojo {
         }
 
         // Get input bundle
-        File in = new File(m_buildDirectory + "/" + m_jarName + ".jar");
+        File in = new File(m_buildDirectory + File.separator + m_jarName + ".jar");
         getLog().info("Input Bundle File : " + in.getAbsolutePath());
         if (!in.exists()) {
             throw new MojoExecutionException("the specified bundle file does not exists");
         }
-        
-        File out = new File(m_buildDirectory + "/_out.jar");
-        
+
+        File out = new File(m_buildDirectory + File.separator + "_out.jar");
+
         Pojoization pojo = new Pojoization();
         if (!m_ignoreAnnotations) { pojo.setAnnotationProcessing(); }
         pojo.pojoization(in, out, meta);
@@ -140,8 +155,16 @@ public class ManipulatorMojo extends AbstractMojo {
             getLog().warn((String) pojo.getWarnings().get(i));
         }
         if (pojo.getErrors().size() > 0) { throw new MojoExecutionException((String) pojo.getErrors().get(0)); }
-        in.delete();
-        out.renameTo(in);
+
+        if (m_classifier != null) {
+            // The user want to attach the resulting jar
+            // Do not delete in File
+            m_helper.attachArtifact(m_project, "jar", m_classifier, out);
+        } else {
+            // Usual behavior
+            in.delete();
+            out.renameTo(in);
+        }
         getLog().info("Bundle manipulation - SUCCESS");
     }
 
