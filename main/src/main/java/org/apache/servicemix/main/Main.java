@@ -45,7 +45,7 @@ import org.osgi.framework.ServiceRegistration;
 **/
 public class Main implements MainService
 {
-    /**
+    /**listed in startup.properties configuration not found
      * The system property name used to specify an URL to the system
      * property file.
     **/
@@ -63,6 +63,10 @@ public class Main implements MainService
      * The default name used for the configuration properties file.
     **/
     public static final String CONFIG_PROPERTIES_FILE_VALUE = "config.properties";
+    /**
+     * The default name used for the startup properties file.
+    **/
+    public static final String STARTUP_PROPERTIES_FILE_VALUE = "startup.properties";
     /*
      * The property for auto-discovering the bundles 
      */
@@ -385,13 +389,14 @@ public class Main implements MainService
         File bundleDir = null;
 
         // See if the property URL was specified as a property.
-        URL propURL = null;
+        URL configPropURL = null;
+        URL startupPropURL = null;
         String custom = System.getProperty(CONFIG_PROPERTIES_PROP);
         if (custom != null)
         {
             try
             {
-                propURL = new URL(custom);
+                configPropURL = new URL(custom);
             }
             catch (MalformedURLException ex)
             {
@@ -429,7 +434,9 @@ public class Main implements MainService
 
             try
             {
-                propURL = new File(confDir, CONFIG_PROPERTIES_FILE_VALUE).toURL();
+                configPropURL = new File(confDir, CONFIG_PROPERTIES_FILE_VALUE).toURL();
+                startupPropURL = new File(confDir, STARTUP_PROPERTIES_FILE_VALUE).toURL();
+                
             }
             catch (MalformedURLException ex)
             {
@@ -438,13 +445,31 @@ public class Main implements MainService
             }
         }
 
-        // Read the properties file.
-        Properties props = new Properties();
+        Properties configProps = loadPropertiesFile(configPropURL);
+        Properties startupProps = loadPropertiesFile(startupPropURL);
+        
+        // Perform variable substitution for system properties.
+        for (Enumeration e = configProps.propertyNames(); e.hasMoreElements(); )
+        {
+            String name = (String) e.nextElement();
+            configProps.setProperty(name,
+                substVars(configProps.getProperty(name), name, null, configProps));
+        }
+
+        // Mutate properties
+        Main.processConfigurationProperties(configProps, startupProps, bundleDir);
+
+        return configProps;
+    }
+
+	private static Properties loadPropertiesFile(URL configPropURL) {
+		// Read the properties file.
+        Properties configProps = new Properties();
         InputStream is = null;
         try
         {
-            is = propURL.openConnection().getInputStream();
-            props.load(is);
+            is = configPropURL.openConnection().getInputStream();
+            configProps.load(is);
             is.close();
         }
         catch (FileNotFoundException ex)
@@ -454,7 +479,7 @@ public class Main implements MainService
         catch (Exception ex)
         {
             System.err.println(
-                "Error loading config properties from " + propURL);
+                "Error loading config properties from " + configPropURL);
             System.err.println("Main: " + ex);
             try
             {
@@ -466,20 +491,8 @@ public class Main implements MainService
             }
             return null;
         }
-
-        // Perform variable substitution for system properties.
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements(); )
-        {
-            String name = (String) e.nextElement();
-            props.setProperty(name,
-                substVars(props.getProperty(name), name, null, props));
-        }
-
-        // Mutate properties
-        Main.processConfigurationProperties(props, bundleDir);
-
-        return props;
-    }
+		return configProps;
+	}
 
     public static void copySystemProperties(Properties configProps)
     {
@@ -498,9 +511,16 @@ public class Main implements MainService
 
     /**
      * Process properties to customize default felix behavior
+     * @param startupProps 
      */
-    protected static void processConfigurationProperties(Properties props, File bundleDir) {
-        if (Boolean.parseBoolean(props.getProperty(PROPERTY_AUTO_START)) && bundleDir != null) {
+    protected static void processConfigurationProperties(Properties props, Properties startupProps, File bundleDir) {
+        if ( bundleDir == null) {
+        	return;
+        }
+        
+        if( "all".equals( props.getProperty(PROPERTY_AUTO_START,"").trim()) ) {
+            props.remove(PROPERTY_AUTO_START);
+            // We should start all the bundles in the system dir.
             File[] bundles = bundleDir.listFiles(new FileFilter() {
                 public boolean accept(File pathname) {
                     return pathname.toString().endsWith(".jar");
@@ -514,9 +534,42 @@ public class Main implements MainService
                     System.err.print( "Ignoring " + bundles[i].toString() + " (" + e + ")" );
                 }
             }
-            props.setProperty("felix.auto.start.1", sb.toString());
-            props.remove(PROPERTY_AUTO_START);
+            props.setProperty(PROPERTY_AUTO_START, sb.toString());
         }
+        else if( STARTUP_PROPERTIES_FILE_VALUE.equals( props.getProperty(PROPERTY_AUTO_START,"").trim()) ) {
+            props.remove(PROPERTY_AUTO_START);
+            // We should start the bundles in the startup.properties file.
+        	HashMap<Integer, StringBuffer> levels = new HashMap<Integer, StringBuffer>();
+        	for (Iterator iterator = startupProps.keySet().iterator(); iterator.hasNext();) {
+				String name = (String) iterator.next();
+				File file = new File(bundleDir, name);
+				if( file.exists() && !file.isDirectory() ) {
+					Integer level;
+					try {
+						level = new Integer(startupProps.getProperty(name).trim());
+					} catch (NumberFormatException e1) {
+	                    System.err.print( "Ignoring " + file.toString() + " (run level must be an integer)" );
+	                    continue;
+					}
+					StringBuffer sb = levels.get(level);
+					if (sb==null) {
+						sb = new StringBuffer(256);
+						levels.put(level, sb);
+					}
+	                try {
+	                    sb.append("\"").append(file.toURL().toString()).append("\" ");
+	                } catch (MalformedURLException e) {
+	                    System.err.print( "Ignoring " + file.toString() + " (" + e + ")" );
+	                }
+				} else {
+					System.err.println("Bundle listed in "+STARTUP_PROPERTIES_FILE_VALUE+" configuration not found: "+file);
+				}
+			}
+        	for (Map.Entry<Integer, StringBuffer> entry : levels.entrySet()) {
+                props.setProperty(PROPERTY_AUTO_START+"."+entry.getKey(), entry.getValue().toString());
+			}
+        }
+
     }
 
     private static final String DELIM_START = "${";
