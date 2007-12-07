@@ -31,7 +31,7 @@
     <groupId>org.apache.servicemix.runtime.gshell</groupId>
     <artifactId>org.apache.servicemix.runtime.gshell.core</artifactId>
     <packaging>bundle</packaging>
-    <name>ServiceMix GShell Core</name>
+    <name>ServiceMix Runtime :: GShell Core</name>
 
     <description>
         Provides the OSGi GShell integration
@@ -39,7 +39,7 @@
 
     <properties>
         <gshell.osgi.import>
-            org.apache.servicemix.main.spi.*;resolution:=optional,
+            org.apache.servicemix.runtime.main.spi.*;resolution:=optional,
             com.thoughtworks.xstream*;resolution:=optional,
             javax.xml.stream*;resolution:=optional,
             junit.framework*;resolution:=optional,

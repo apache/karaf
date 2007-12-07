@@ -31,7 +31,7 @@
     <groupId>org.apache.servicemix.runtime.gshell</groupId>
     <artifactId>org.apache.servicemix.runtime.gshell.osgi</artifactId>
     <packaging>bundle</packaging>
-    <name>ServiceMix GShell OSGi Commands</name>
+    <name>ServiceMix Runtime :: GShell OSGi Commands</name>
 
     <description>
         Provides the OSGi GShell commands

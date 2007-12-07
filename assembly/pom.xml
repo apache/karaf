@@ -29,9 +29,9 @@
     </parent>
 
     <groupId>org.apache.servicemix.runtime</groupId>
-    <artifactId>org.apache.servicemix.runtime.minimum</artifactId>
+    <artifactId>apache-servicemix-runtime</artifactId>
     <packaging>pom</packaging>
-    <name>ServiceMix Minimum Distribution</name>
+    <name>ServiceMix Runtime :: Assembly</name>
 
     <dependencies>
         <dependency>

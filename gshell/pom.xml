@@ -31,7 +31,7 @@
     <groupId>org.apache.servicemix.runtime.gshell</groupId>
     <artifactId>gshell</artifactId>
     <packaging>pom</packaging>
-    <name>ServiceMix GShell</name>
+    <name>ServiceMix Runtime :: GShell</name>
 
     <modules>
         <module>gshell-core</module>

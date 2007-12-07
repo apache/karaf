@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.servicemix.main.spi;
+package org.apache.servicemix.runtime.main.spi;
 
 public interface MainService {
 

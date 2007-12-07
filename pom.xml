@@ -39,7 +39,7 @@
     <module>main</module>
     <module>gshell</module>
     <module>filemonitor</module>
-    <module>minimum</module>
+    <module>assembly</module>
   </modules>
 
   <properties>

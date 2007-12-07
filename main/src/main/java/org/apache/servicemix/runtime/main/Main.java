@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.servicemix.main;
+package org.apache.servicemix.runtime.main;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -27,7 +27,7 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.cache.BundleCache;
 import org.apache.felix.framework.util.StringMap;
-import org.apache.servicemix.main.spi.MainService;
+import org.apache.servicemix.runtime.main.spi.MainService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;

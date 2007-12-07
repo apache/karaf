@@ -30,7 +30,7 @@
   http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
 
-    <osgi:reference id="mainService" interface="org.apache.servicemix.main.spi.MainService" />
+    <osgi:reference id="mainService" interface="org.apache.servicemix.runtime.main.spi.MainService" />
 
     <bean id="gshell" class="org.apache.geronimo.gshell.spring.GShell"
                       init-method="start" destroy-method="stop">

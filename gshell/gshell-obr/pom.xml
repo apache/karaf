@@ -31,7 +31,7 @@
     <groupId>org.apache.servicemix.runtime.gshell</groupId>
     <artifactId>org.apache.servicemix.runtime.gshell.obr</artifactId>
     <packaging>bundle</packaging>
-    <name>ServiceMix GShell OBR Commands</name>
+    <name>ServiceMix Runtime :: GShell OBR Commands</name>
 
     <description>
         Provides the OBR GShell commands
