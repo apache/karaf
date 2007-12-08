@@ -59,6 +59,8 @@
       <geronimo.stax.version>1.0.1-SNAPSHOT</geronimo.stax.version>
       <gshell.version>1.0-alpha-1-SNAPSHOT</gshell.version>
       <junit.version>4.4</junit.version>
+      <jline.version>0.9.93</jline.version>
+      <log4j.version>1.2.15</log4j.version>
       <mina.version>1.1.6-r602102</mina.version>
       <pax.logging.version>0.9.8-SNAPSHOT</pax.logging.version>
       <spring.osgi.version>1.0-m3</spring.osgi.version>
@@ -184,6 +186,61 @@
           </snapshots>
       </pluginRepository>
   </pluginRepositories>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-aop</artifactId>
+          <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-beans</artifactId>
+          <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-core</artifactId>
+          <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-context</artifactId>
+          <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.mina</groupId>
+          <artifactId>mina-core</artifactId>
+          <version>${mina.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.mina</groupId>
+          <artifactId>mina-filter-ssl</artifactId>
+          <version>${mina.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>${junit.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+          <version>${log4j.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>jline</groupId>
+          <artifactId>jline</artifactId>
+          <version>${jline.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+          <version>${commons.logging.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
       <defaultGoal>install</defaultGoal>
