@@ -324,16 +324,31 @@ public class BundlePlugin extends AbstractMojo {
 
             if (unpackBundle)
             {
+                File outputDir = this.getOutputDirectory();
+                if (null == outputDir)
+                {
+                    outputDir = new File( this.getBuildDirectory(), "classes" );
+                }
+
                 try
                 {
+                    /*
+                     * this directory must exist before unpacking, otherwise the plexus
+                     * unarchiver decides to use the current working directory instead!
+                     */
+                    if (!outputDir.exists())
+                    {
+                        outputDir.mkdirs();
+                    }
+
                     UnArchiver unArchiver = archiverManager.getUnArchiver( "jar" );
-                    unArchiver.setDestDirectory( getOutputDirectory() );
+                    unArchiver.setDestDirectory( outputDir );
                     unArchiver.setSourceFile( jarFile );
                     unArchiver.extract();
                 }
                 catch ( Exception e )
                 {
-                    getLog().error( "Problem unpacking " + jarFile + " to " + getOutputDirectory(), e );
+                    getLog().error( "Problem unpacking " + jarFile + " to " + outputDir, e );
                 }
             }
 
