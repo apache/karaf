@@ -60,9 +60,9 @@
       <gshell.version>1.0-alpha-1-SNAPSHOT</gshell.version>
       <junit.version>4.4</junit.version>
       <jline.version>0.9.93</jline.version>
-      <log4j.version>1.2.15</log4j.version>
+      <log4j.version>1.2.14</log4j.version>
       <mina.version>1.1.6-r602102</mina.version>
-      <pax.logging.version>0.9.8-SNAPSHOT</pax.logging.version>
+      <pax.logging.version>0.9.8</pax.logging.version>
       <spring.osgi.version>1.0-m3</spring.osgi.version>
       <spring.version>2.5</spring.version>
       <xstream.version>1.2.2</xstream.version>
@@ -71,51 +71,9 @@
    <repositories>
        <!-- Default repository -->
        <repository>
-           <id>maven-repo</id>
+           <id>central</id>
            <name>Default maven repo</name>
            <url>http://repo1.maven.org/maven2</url>
-           <releases>
-               <enabled>true</enabled>
-           </releases>
-           <snapshots>
-               <enabled>false</enabled>
-           </snapshots>
-       </repository>
-       <!-- I21 repository -->
-       <repository>
-           <id>i21-s3-maven-repo</id>
-           <name>i21 S3 milestone repo</name>
-           <url>http://s3.amazonaws.com/maven.springframework.org/milestone</url>
-           <releases>
-               <enabled>true</enabled>
-           </releases>
-           <snapshots>
-               <enabled>false</enabled>
-           </snapshots>
-       </repository>
-       <!-- OPS4J repository -->
-       <repository>
-           <id>ops4j-repo</id>
-           <name>OPS4J repo</name>
-           <url>http://repository.ops4j.org/maven2</url>
-           <releases>
-               <enabled>true</enabled>
-           </releases>
-           <snapshots>
-               <enabled>false</enabled>
-           </snapshots>
-       </repository>
-       <!-- Spring external dependencies -->
-       <repository>
-           <id>spring-ext</id>
-           <name>Spring External Dependencies Repository</name>
-           <url>http://springframework.svn.sourceforge.net/svnroot/springframework/repos/repo-ext/</url>
-           <releases>
-               <enabled>true</enabled>
-           </releases>
-           <snapshots>
-               <enabled>false</enabled>
-           </snapshots>
        </repository>
        <!-- Apache snapshot -->
        <repository>
@@ -129,41 +87,11 @@
                <enabled>true</enabled>
            </snapshots>
        </repository>
-       <!-- OPS4J snapshot -->
-       <repository>
-           <id>ops4j-snapshots</id>
-           <name>OPS4J Snapshot repository</name>
-           <url>http://repository.ops4j.org/mvn-snapshots</url>
-           <releases>
-               <enabled>false</enabled>
-           </releases>
-           <snapshots>
-               <enabled>true</enabled>
-           </snapshots>
-       </repository>
-       <!-- Spring snapshots -->
-       <repository>
-           <id>spring-snapshots</id>
-           <name>Springframework Maven SNAPSHOT Repository</name>
-           <url>http://static.springframework.org/maven2-snapshots/</url>
-           <releases>
-               <enabled>false</enabled>
-           </releases>
-           <snapshots>
-               <enabled>true</enabled>
-           </snapshots>
-       </repository>
        <!-- ServiceMix repo -->
        <repository>
            <id>servicemix</id>
            <name>ServiceMix Repository</name>
            <url>http://svn.apache.org/repos/asf/servicemix/m2-repo</url>
-           <releases>
-               <enabled>true</enabled>
-           </releases>
-           <snapshots>
-               <enabled>true</enabled>
-           </snapshots>
        </repository>
        <!-- Apache Incubating repository -->
        <repository>
