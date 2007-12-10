@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -86,7 +86,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * this property is not set the <code>config</code> directory in the current
  * working directory as specified in the <code>user.dir</code> system property
  * is used.
- * 
+ *
  * @author fmeschbe
  */
 public class ConfigurationManager implements BundleActivator, BundleListener
@@ -95,14 +95,14 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     /**
      * The name of the bundle context property defining the location for the
      * configuration files (value is "felix.cm.dir").
-     * 
+     *
      * @see #FilePersistenceManager(BundleContext)
      */
     public static final String CM_CONFIG_DIR = "felix.cm.dir";
 
     // The name of the LogService (not using the class, which might be missing)
     private static final String LOG_SERVICE_NAME = "org.osgi.service.log.LogService";
-    
+
     // random number generator to create configuration PIDs for factory
     // configurations
     private static SecureRandom numberGenerator;
@@ -115,7 +115,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
     // the service registration of the configuration admin
     private ServiceRegistration configurationAdminRegistration;
-    
+
     // the service reference to the ConfigurationAdmin service
     private ServiceReference configurationAdminReference;
 
@@ -221,7 +221,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         // immediately unregister the Configuration Admin before cleaning up
         configurationAdminRegistration.unregister();
         configurationAdminRegistration = null;
-        
+
         // stop handling ManagedService[Factory] services
         managedServiceFactoryTracker.close();
         managedServiceTracker.close();
@@ -312,7 +312,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.osgi.service.cm.ConfigurationAdmin#createFactoryConfiguration(java.lang.String)
      */
     ConfigurationImpl createFactoryConfiguration( ConfigurationAdminImpl configurationAdmin, String factoryPid )
@@ -341,7 +341,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.osgi.service.cm.ConfigurationAdmin#createFactoryConfiguration(java.lang.String,
      *      java.lang.String)
      */
@@ -367,7 +367,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         {
             return config;
         }
-        
+
         PersistenceManager[] pmList = getPersistenceManagers();
         for ( int i = 0; i < pmList.length; i++ )
         {
@@ -378,12 +378,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 return cacheConfiguration( config );
             }
         }
-        
+
         // neither the cache nor any persistence manager has configuration
         return null;
     }
-    
-    
+
+
     ConfigurationImpl getConfiguration( String pid, String bundleLocation ) throws IOException
     {
         // check for existing (cached or persistent) configuration
@@ -652,7 +652,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
      * Calls the registered configuration plugins on the given configuration
      * object unless the configuration has just been created and not been
      * updated yet.
-     * 
+     *
      * @param sr The service reference of the managed service (factory) which
      *            is to be updated with configuration
      * @param cfg The configuration object whose properties have to be passed
@@ -664,7 +664,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     private Dictionary callPlugins( ServiceReference sr, ConfigurationImpl cfg )
     {
         Dictionary props = cfg.getProperties();
-        
+
         // guard against NPE for new configuration never updated
         if (props == null) {
             return null;
@@ -723,7 +723,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
     /**
      * Creates a PID for the given factoryPid
-     * 
+     *
      * @param factoryPid
      * @return
      */
@@ -833,7 +833,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 log( LogService.LOG_ERROR, "Error loading configuration for " + pid, ioe );
                 return;
             }
-            
+
             // this will be set below to be given to the service
             Dictionary dictionary;
 
@@ -1251,7 +1251,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         private int type;
 
         private String pid;
-        
+
         private String factoryPid;
 
 
@@ -1325,15 +1325,19 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         public Object addingService( ServiceReference reference )
         {
-            ManagedService service = ( ManagedService ) super.addingService( reference );
+            Object serviceObject = super.addingService( reference );
 
             // configure the managed service
-            if ( service != null )
+            if ( serviceObject instanceof ManagedService )
             {
-                configure( reference, service );
+                configure( reference, ( ManagedService ) serviceObject );
+            }
+            else
+            {
+                log( LogService.LOG_WARNING, "Service " + serviceObject + " is not a ManagedService", null );
             }
 
-            return service;
+            return serviceObject;
         }
     }
 
@@ -1347,15 +1351,19 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         public Object addingService( ServiceReference reference )
         {
-            ManagedServiceFactory service = ( ManagedServiceFactory ) super.addingService( reference );
+            Object serviceObject = super.addingService( reference );
 
-            // configure the managed service
-            if ( service != null )
+            // configure the managed service factory
+            if ( serviceObject instanceof ManagedServiceFactory )
             {
-                configure( reference, service );
+                configure( reference, ( ManagedServiceFactory ) serviceObject );
+            }
+            else
+            {
+                log( LogService.LOG_WARNING, "Service " + serviceObject + " is not a ManagedServiceFactory", null );
             }
 
-            return service;
+            return serviceObject;
         }
     }
 }
