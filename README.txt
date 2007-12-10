@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-Welcome to Apache ServiceMix 4.0!
-=================================
+Welcome to Apache ServiceMix Runtime 0.1!
+=========================================
 Apache ServiceMix is an open source distributed Enterprise Service Bus (ESB)
 and SOA toolkit built from the ground up on the semantics and APIs of the Java 
 Business Integration (JBI) specification JSR 208 and released under the Apache 

@@ -190,14 +190,6 @@
         </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>codehaus-snapshots</id>
-            <name>Codehaus Snapshot repository</name>
-            <url>http://snapshots.repository.codehaus.org</url>
-        </repository>
-    </repositories>
-
     <build>
         <resources>
             <resource>

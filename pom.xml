@@ -42,6 +42,21 @@
     <module>assembly</module>
   </modules>
 
+  <scm>
+      <connection>scm:svn:http://svn.apache.org/repos/asf/servicemix/smx4/runtime/trunk</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/servicemix/smx4/runtime/trunk</developerConnection>
+      <url>http://svn.apache.org/viewvc/servicemix/smx4/runtime/trunk/</url>
+
+  </scm>
+  <issueManagement>
+      <system>jira</system>
+      <url>http://issues.apache.org/activemq/browse/SM</url>
+  </issueManagement>
+
+  <prerequisites>
+      <maven>2.0.7</maven>
+  </prerequisites>
+
   <properties>
       <ant.version>1.7.0</ant.version>
       <aopalliance.version>1.0</aopalliance.version>
@@ -75,6 +90,12 @@
            <name>Default maven repo</name>
            <url>http://repo1.maven.org/maven2</url>
        </repository>
+       <!-- ServiceMix repo -->
+       <repository>
+           <id>servicemix</id>
+           <name>ServiceMix Repository</name>
+           <url>http://svn.apache.org/repos/asf/servicemix/m2-repo</url>
+       </repository>
        <!-- Apache snapshot -->
        <repository>
            <id>apache-snapshots</id>
@@ -86,17 +107,6 @@
            <snapshots>
                <enabled>true</enabled>
            </snapshots>
-       </repository>
-       <!-- ServiceMix repo -->
-       <repository>
-           <id>servicemix</id>
-           <name>ServiceMix Repository</name>
-           <url>http://svn.apache.org/repos/asf/servicemix/m2-repo</url>
-       </repository>
-       <!-- Apache Incubating repository -->
-       <repository>
-           <id>apache-incubator</id>
-           <url>http://people.apache.org/repo/m2-incubating-repository</url>
        </repository>
    </repositories>
 
@@ -181,6 +191,8 @@
               <version>2.4</version>
               <configuration>
                 <outputDirectory>${basedir}/eclipse-classes</outputDirectory>
+                <downloadSources>true</downloadSources>
+                <downloadJavadocs>true</downloadJavadocs>
               </configuration>
             </plugin>              
               <plugin>
@@ -218,6 +230,7 @@
           <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.3</version>
           </plugin>
           <plugin>
               <groupId>org.apache.maven.plugins</groupId>
@@ -257,6 +270,68 @@
                               <exclude>**/eclipse-classes/**/*</exclude>
                           </excludes>
                       </configuration>
+                  </plugin>
+              </plugins>
+          </build>
+      </profile>
+      <profile>
+          <id>release</id>
+          <build>
+              <plugins>
+                  <!-- We want to deploy the artifact to a staging location for perusal -->
+                  <plugin>
+                      <inherited>true</inherited>
+                      <artifactId>maven-deploy-plugin</artifactId>
+                      <version>2.3</version>
+                      <configuration>
+                          <altDeploymentRepository>${deploy.altRepository}</altDeploymentRepository>
+                          <updateReleaseInfo>true</updateReleaseInfo>
+                      </configuration>
+                  </plugin>
+                  <!-- We want to sign the artifact, the POM, and all attached artifacts -->
+                  <plugin>
+                      <artifactId>maven-gpg-plugin</artifactId>
+                      <version>1.0-alpha-4</version>
+                      <executions>
+                          <execution>
+                              <goals>
+                                  <goal>sign</goal>
+                              </goals>
+                          </execution>
+                      </executions>
+                  </plugin>
+              </plugins>
+          </build>
+      </profile>
+      <profile>
+          <id>deploy</id>
+          <build>
+              <defaultGoal>deploy</defaultGoal>
+              <plugins>
+                  <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-source-plugin</artifactId>
+                      <version>2.0.4</version>
+                      <executions>
+                          <execution>
+                              <id>attach-sources</id>
+                              <goals>
+                                  <goal>jar</goal>
+                              </goals>
+                          </execution>
+                      </executions>
+                  </plugin>
+                  <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-javadoc-plugin</artifactId>
+                      <executions>
+                          <execution>
+                              <id>attach-javadocs</id>
+                              <goals>
+                                  <goal>jar</goal>
+                              </goals>
+                          </execution>
+                      </executions>
                   </plugin>
               </plugins>
           </build>
