@@ -22,85 +22,51 @@
     </formats>
     <fileSets>
 
-        <!-- Copy license and other files from root -->
-        <fileSet>
-            <directory>..</directory>
-            <outputDirectory>/</outputDirectory>
-            <includes>
-                <include>*.txt</include>
-            </includes>
-        </fileSet>
 
-        <!-- Copy over everything that needs to get unix line endings -->
-        <fileSet>
-            <directory>src/main/release</directory>
-            <outputDirectory>/</outputDirectory>
-            <excludes>
-                <exclude>bin/**</exclude>
-            </excludes>
-            <lineEnding>dos</lineEnding>
-        </fileSet>
-        <fileSet>
-            <directory>target/classes</directory>
-            <outputDirectory>/</outputDirectory>
-            <lineEnding>dos</lineEnding>
-        </fileSet>        
-        <fileSet>
-            <directory>src/main/release</directory>
-            <outputDirectory>/</outputDirectory>
-            <includes>
-                <include>bin/macosx/wrapper.conf</include>
-                <include>bin/linux/wrapper.conf</include>
-                <include>bin/win32/wrapper.conf</include>
-                <include>bin/win32/*.bat</include>
-            </includes>
-            <lineEnding>dos</lineEnding>
-        </fileSet>
+      <!-- Copy license and other files from root -->
+      <fileSet>
+          <directory>..</directory>
+          <outputDirectory>/</outputDirectory>
+          <includes>
+              <include>*.txt</include>
+          </includes>
+          <lineEnding>dos</lineEnding>
+      </fileSet>
 
-        <!-- Copy over files that should not get the line endings converted -->
-        <fileSet>
-            <directory>src/main/release</directory>
-            <outputDirectory>/</outputDirectory>
-            <includes>
-                <include>bin/*.jar</include>
-                <include>bin/win32/wrapper.dll</include>
-                <include>bin/win32/wrapper.exe</include>
-            </includes>
-        </fileSet>
+      <!-- Copy over everything that needs to get dos line endings -->
+      <fileSet>
+          <directory>src/main/distribution/text</directory>
+          <outputDirectory>/</outputDirectory>
+          <lineEnding>dos</lineEnding>
+      </fileSet>        
+      <fileSet>
+          <directory>src/main/distribution/windows-text</directory>
+          <outputDirectory>/</outputDirectory>
+          <lineEnding>dos</lineEnding>
+      </fileSet>        
+      <fileSet>
+          <directory>target/classes</directory>
+          <outputDirectory>/</outputDirectory>
+          <lineEnding>dos</lineEnding>
+      </fileSet>
 
-        <!-- Copy over the files that should not get the line endings converted but need to be chmod to 755 -->
-        <fileSet>
-            <directory>src/main/release</directory>
-            <outputDirectory></outputDirectory>
-            <includes>
-                <include>bin/linux/wrapper</include>
-                <include>bin/linux/libwrapper.so</include>
-                <include>bin/macosx/wrapper</include>
-                <include>bin/macosx/libwrapper.jnilib</include>
-            </includes>
-            <fileMode>0755</fileMode>
-        </fileSet>
+      <!-- Copy over files that should not get the line endings converted -->
+      <fileSet>
+          <directory>src/main/distribution/binary</directory>
+          <outputDirectory>/</outputDirectory>
+      </fileSet>
 
-        <!-- Copy over the files that need unix line endings and also chmod to 755 -->
-        <fileSet>
-            <directory>src/main/release</directory>
-            <outputDirectory></outputDirectory>
-            <includes>
-                <include>bin/servicemix.bat</include>
-                <include>bin/servicemix.sh</include>
-                <include>bin/linux/servicemix.sh</include>
-                <include>bin/macosx/servicemix.sh</include>
-                <include>bin/win32/servicemix.bat</include>
-            </includes>
-            <fileMode>0755</fileMode>
-            <lineEnding>dos</lineEnding>
-        </fileSet>
-
-        <!-- Copy over jar files -->
-        <fileSet>
-            <directory>target/dependencies</directory>
-            <outputDirectory>/bin/</outputDirectory>
-        </fileSet>
+      <!-- Copy over the files that should not get the line endings converted but need to be chmod to 755 -->
+      <fileSet>
+          <directory>src/main/distribution/windows-binary</directory>
+          <outputDirectory>/</outputDirectory>
+      </fileSet>
+      
+      <!-- Copy over jar files -->
+      <fileSet>
+          <directory>target/dependencies</directory>
+          <outputDirectory>/bin/</outputDirectory>
+      </fileSet>
 
     </fileSets>
 
