@@ -85,6 +85,12 @@
         </osgi:service-properties>
     </osgi:service>
 
+    <osgi:service ref="create" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+      	<entry key="alias" value="create"/>
+      </osgi:service-properties>
+    </osgi:service>
+
     <osgix:property-placeholder persistent-id="org.apache.servicemix.shell">
         <osgix:default-properties>
             <prop key="startLocalConsole">true</prop>
@@ -92,5 +98,5 @@
             <prop key="remoteShellLocation">tcp://0.0.0.0:8100/</prop>
         </osgix:default-properties>
     </osgix:property-placeholder>
-
+    
 </beans>

@@ -44,4 +44,6 @@
 
     <bean id="unset" class="org.apache.geronimo.gshell.commands.builtins.UnsetCommand" />
 
+    <bean id="create" class="org.apache.geronimo.gshell.spring.CreateCommand" />
+
 </beans>

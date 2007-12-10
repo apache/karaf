@@ -117,7 +117,6 @@ if "%SERVICEMIX_PROFILER%" == "" goto :EXECUTE
 
 :EXECUTE
     rem Execute the Java Virtual Machine
-    cd "%SERVICEMIX_BASE%"
     "%JAVA%" %JAVA_OPTS% -Dservicemix.home="%SERVICEMIX_HOME%" -Dservicemix.base="%SERVICEMIX_BASE%" -jar "%SERVICEMIX_HOME%\bin\servicemix.jar" %*
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
