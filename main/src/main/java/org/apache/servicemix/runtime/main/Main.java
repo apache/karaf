@@ -19,7 +19,9 @@
 package org.apache.servicemix.runtime.main;
 
 import java.io.*;
+import java.net.JarURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -45,33 +47,47 @@ import org.osgi.framework.ServiceRegistration;
 **/
 public class Main implements MainService
 {
-    /**listed in startup.properties configuration not found
-     * The system property name used to specify an URL to the system
-     * property file.
-    **/
-    public static final String SYSTEM_PROPERTIES_PROP = "felix.system.properties";
     /**
      * The default name used for the system properties file.
     **/
-    public static final String SYSTEM_PROPERTIES_FILE_VALUE = "system.properties";
-    /**
-     * The system property name used to specify an URL to the configuration
-     * property file to be used for the created the framework instance.
-    **/
-    public static final String CONFIG_PROPERTIES_PROP = "felix.config.properties";
+    public static final String SYSTEM_PROPERTIES_FILE_NAME = "system.properties";
     /**
      * The default name used for the configuration properties file.
     **/
-    public static final String CONFIG_PROPERTIES_FILE_VALUE = "config.properties";
+    public static final String CONFIG_PROPERTIES_FILE_NAME = "config.properties";
     /**
      * The default name used for the startup properties file.
     **/
-    public static final String STARTUP_PROPERTIES_FILE_VALUE = "startup.properties";
+    public static final String STARTUP_PROPERTIES_FILE_NAME = "startup.properties";
     /*
      * The property for auto-discovering the bundles 
      */
     public static final String PROPERTY_AUTO_START = "felix.auto.start";
+    /*
+     * The system property for specifying the ServiceMix home directory.  The home directory
+     * hold the binary install of ServiceMix.
+     */
+    public static final String PROP_SERVICEMIX_HOME = "servicemix.home";
+    /*
+     * The environment variable for specifying the ServiceMix home directory.  The home directory
+     * hold the binary install of ServiceMix.
+     */
+    public static final String ENV_SERVICEMIX_HOME = "SERVICEMIX_HOME";
+    
+    /*
+     * The system property for specifying the ServiceMix base directory.  The base directory
+     * holds the configuration and data for a ServiceMix instance.
+     */
+    public static final String PROP_SERVICEMIX_BASE = "servicemix.base";
+    /*
+     * The environment variable for specifying the ServiceMix base directory.  The base directory
+     * holds the configuration and data for a ServiceMix instance.
+     */
+    public static final String ENV_SERVICEMIX_BASE = "SERVICEMIX_BASE";
+    
 
+    private File servicemixHome;
+    private File servicemixBase;
     private static Felix m_felix = null;
 	private final String[] args;
 	private int exitCode;
@@ -154,61 +170,42 @@ public class Main implements MainService
      * <tt>Felix</tt></a> constructor documentation for more information on
      * framework configuration options.
      * </p>
-     * @param argv An array of arguments, all of which are ignored.
+     * @param args An array of arguments, all of which are ignored.
      * @throws Exception If an error occurs.
     **/
-    public static void main(String[] argv) throws Exception
+    public static void main(String[] args) throws Exception
     {
+    	
+        final Main main = new Main(args);
+        main.servicemixHome = getServiceMixHome();
+        main.servicemixBase = getServiceMixBase(main.servicemixHome);
+        
+        System.out.println("ServiceMix Home: "+main.servicemixHome.getPath());
+        System.out.println("ServiceMix Base: "+main.servicemixBase.getPath());
+        
+        System.setProperty(PROP_SERVICEMIX_HOME, main.servicemixHome.getPath());
+        System.setProperty(PROP_SERVICEMIX_BASE, main.servicemixBase.getPath());
+        
         // Load system properties.
-        Main.loadSystemProperties();
+        main.loadSystemProperties();
 
         // Read configuration properties.
-        Properties configProps = Main.loadConfigProperties();
+        Properties configProps = main.loadConfigProperties();
 
         // Copy framework properties from the system properties.
         Main.copySystemProperties(configProps);
 
-        // See if the profile name property was specified.
         String profileName = configProps.getProperty(BundleCache.CACHE_PROFILE_PROP);
-
-        // See if the profile directory property was specified.
         String profileDirName = configProps.getProperty(BundleCache.CACHE_PROFILE_DIR_PROP);
-
-        // Print welcome banner.
-        System.out.println("\nWelcome to ServiceMix.");
-        System.out.println("=====================\n");
-
-        // If no profile or profile directory is specified in the
-        // properties, then ask for a profile name.
-        if ((profileName == null) && (profileDirName == null))
-        {
-            System.out.print("Enter profile name: ");
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-            try
-            {
-                profileName = in.readLine();
-            }
-            catch (IOException ex)
-            {
-                System.err.println("Could not read input.");
-                System.exit(-1);
-            }
-            System.out.println("");
-            if (profileName.length() != 0)
-            {
-                configProps.setProperty(BundleCache.CACHE_PROFILE_PROP, profileName);
-            }
-        }
 
         // A profile directory or name must be specified.
         if ((profileDirName == null) && (profileName.length() == 0))
         {
-            System.err.println("You must specify a profile name or directory.");
+            System.err.println("Invalid "+CONFIG_PROPERTIES_FILE_NAME+" configuration.  The profile directory was not specified.");
             System.exit(-1);
         }
         
         // Register the Main class so that other bundles can inspect the command line args.
-        final MainService main = new Main(argv);
         final CountDownLatch shutdown = new CountDownLatch(1);
         BundleActivator activator = new BundleActivator() {
             private ServiceRegistration registration;
@@ -228,8 +225,7 @@ public class Main implements MainService
         
         try
         {
-            // Now create an instance of the framework.
-            
+            // Start up the OSGI framework
             m_felix = new Felix(new StringMap(configProps, false), activations);
             m_felix.start();
         }
@@ -255,7 +251,94 @@ public class Main implements MainService
         }
     }
 
-    /**
+	private static File getServiceMixHome() throws IOException {
+		File rc=null;
+		
+		// Use the system property if specified.
+		String path =System.getProperty(PROP_SERVICEMIX_HOME);
+        if (path!= null) {
+        	rc = validateDirectoryExists(path, "Invalid "+PROP_SERVICEMIX_HOME+" system property");
+        }
+        
+        if (rc == null) {
+        	path = System.getenv(ENV_SERVICEMIX_HOME);
+        	if( path != null ) {
+            	rc = validateDirectoryExists(path, "Invalid "+ENV_SERVICEMIX_HOME+" environment variable");
+        	}
+        }
+        
+        // Try to figure it out using the jar file this class was loaded from. 
+        if( rc == null ) {
+            // guess the home from the location of the jar
+            URL url = Main.class.getClassLoader().getResource(Main.class.getName().replace(".", "/")+".class");
+            if (url != null) {
+                try {
+                    JarURLConnection jarConnection = (JarURLConnection)url.openConnection();
+                    url = jarConnection.getJarFileURL();
+    			    rc = new File(new URI(url.toString())).getCanonicalFile().getParentFile().getParentFile();
+                } catch (Exception ignored) {
+                }
+            }
+    	}
+        
+    	if( rc == null ) {
+    		// Dig into the classpath to guess the location of the jar
+			String classpath = System.getProperty("java.class.path");
+			int index = classpath.toLowerCase().indexOf("servicemix.jar");
+			int start = classpath.lastIndexOf(File.pathSeparator, index) + 1;
+			if (index >= start)
+			{
+			    String jarLocation = classpath.substring(start, index);
+			    rc = new File(jarLocation).getCanonicalFile().getParentFile();
+			}
+        }
+    	if( rc == null ) {
+		    throw new IOException("The ServiceMix install directory could not be determined.  Please set the "+PROP_SERVICEMIX_HOME+" system property or the "+ENV_SERVICEMIX_HOME+" enviorment variable.");
+		}
+    	
+		return rc;
+	}
+
+	private static File validateDirectoryExists(String path, String errPrefix) {
+		File rc;
+		try {
+			rc = new File(path).getCanonicalFile();
+		} catch (IOException e) {
+		    throw new IllegalArgumentException(errPrefix+" '"+path+"' : "+e.getMessage());
+		}
+		if (!rc.exists()) {
+		    throw new IllegalArgumentException(errPrefix+" '"+path+"' : does not exist");
+		}
+		if (!rc.isDirectory()) {
+		    throw new IllegalArgumentException(errPrefix+" '"+path+"' : is not a directory");
+		}
+		return rc;
+	}
+
+	private static File getServiceMixBase(File defaultValue) {
+		File rc=null;
+		
+		String path =System.getProperty(PROP_SERVICEMIX_BASE);
+        if (path!= null) {
+        	rc = validateDirectoryExists(path, "Invalid "+PROP_SERVICEMIX_BASE+" system property");
+        }
+        
+        if (rc == null) {
+        	path = System.getenv(ENV_SERVICEMIX_BASE);
+        	if( path != null ) {
+            	rc = validateDirectoryExists(path, "Invalid "+ENV_SERVICEMIX_BASE+" environment variable");
+        	}
+        }
+
+    	if( rc == null ) {
+		    rc = defaultValue;
+		}
+    	return rc;
+	}
+
+
+
+	/**
      * <p>
      * Loads the properties in the system property file associated with the
      * framework installation into <tt>System.setProperty()</tt>. These properties
@@ -269,7 +352,7 @@ public class Main implements MainService
      * arbitrary URL.
      * </p>
     **/
-    public static void loadSystemProperties()
+    private void loadSystemProperties()
     {
         // The system properties file is either specified by a system
         // property or it is in the same directory as the Felix JAR file.
@@ -277,53 +360,17 @@ public class Main implements MainService
 
         // See if the property URL was specified as a property.
         URL propURL = null;
-        String custom = System.getProperty(SYSTEM_PROPERTIES_PROP);
-        if (custom != null)
+        try
         {
-            try
-            {
-                propURL = new URL(custom);
-            }
-            catch (MalformedURLException ex)
-            {
-                System.err.print("Main: " + ex);
-                return;
-            }
+        	File file = new File(new File(servicemixBase, "etc"), SYSTEM_PROPERTIES_FILE_NAME);
+            propURL = file.toURL();
         }
-        else
+        catch (MalformedURLException ex)
         {
-            // Determine where the configuration directory is by figuring
-            // out where felix.jar is located on the system class path.
-            File confDir = null;
-            String classpath = System.getProperty("java.class.path");
-            int index = classpath.toLowerCase().indexOf("servicemix.jar");
-            int start = classpath.lastIndexOf(File.pathSeparator, index) + 1;
-            if (index >= start)
-            {
-                // Get the path of the felix.jar file.
-                String jarLocation = classpath.substring(start, index);
-                // Calculate the conf directory based on the parent
-                // directory of the felix.jar directory.
-                confDir = new File(
-                    new File(new File(jarLocation).getAbsolutePath()).getParent(),
-                    "etc");
-            }
-            else
-            {
-                // Can't figure it out so use the current directory as default.
-                confDir = new File(System.getProperty("user.dir"));
-            }
-
-            try
-            {
-                propURL = new File(confDir, SYSTEM_PROPERTIES_FILE_VALUE).toURL();
-            }
-            catch (MalformedURLException ex)
-            {
-                System.err.print("Main: " + ex);
-                return;
-            }
+            System.err.print("Main: " + ex);
+            return;
         }
+    		
 
         // Read the properties file.
         Properties props = new Properties();
@@ -379,71 +426,41 @@ public class Main implements MainService
      * </p>
      * @return A <tt>Properties</tt> instance or <tt>null</tt> if there was an error.
     **/
-    public static Properties loadConfigProperties()
+    private Properties loadConfigProperties()
     {
         // The config properties file is either specified by a system
         // property or it is in the conf/ directory of the Felix
         // installation directory.  Try to load it from one of these
         // places.
 
-        File bundleDir = null;
+        ArrayList<File> bundleDirs = new ArrayList<File>();
 
         // See if the property URL was specified as a property.
         URL configPropURL = null;
         URL startupPropURL = null;
-        String custom = System.getProperty(CONFIG_PROPERTIES_PROP);
-        if (custom != null)
-        {
-            try
-            {
-                configPropURL = new URL(custom);
-            }
-            catch (MalformedURLException ex)
-            {
-                System.err.print("Main: " + ex);
-                return null;
-            }
-        }
-        else
-        {
-            // Determine where the configuration directory is by figuring
-            // out where felix.jar is located on the system class path.
-            File confDir = null;
-            String classpath = System.getProperty("java.class.path");
-            int index = classpath.toLowerCase().indexOf("servicemix.jar");
-            int start = classpath.lastIndexOf(File.pathSeparator, index) + 1;
-            if (index >= start)
-            {
-                // Get the path of the felix.jar file.
-                String jarLocation = classpath.substring(start, index);
-                // Calculate the conf directory based on the parent
-                // directory of the servicemix.jar directory.
-                confDir = new File(
-                    new File(new File(jarLocation).getAbsolutePath()).getParent(),
-                    "etc");
-                bundleDir = new File(
-                    new File(new File(jarLocation).getAbsolutePath()).getParent(),
-                    "system");
-            }
-            else
-            {
-                // Can't figure it out so use the current directory as default.
-                confDir = new File(System.getProperty("user.dir"));
-                bundleDir = new File(System.getProperty("user.dir"));
-            }
+        		
+	    try
+	    {
+	    	File file = new File(new File(servicemixBase, "etc"), CONFIG_PROPERTIES_FILE_NAME);
+	    	configPropURL = file.toURL();
+	    	
+	    	file = new File(new File(servicemixBase, "etc"), STARTUP_PROPERTIES_FILE_NAME);
+	    	startupPropURL = file.toURL();
+	    	
+	    	if ( servicemixBase.equals(servicemixHome) ) {
+	            bundleDirs.add(new File(servicemixHome, "system"));
+	    	} else {
+	            bundleDirs.add(new File(servicemixBase, "system"));
+	            bundleDirs.add(new File(servicemixHome, "system"));
+	    	}
 
-            try
-            {
-                configPropURL = new File(confDir, CONFIG_PROPERTIES_FILE_VALUE).toURL();
-                startupPropURL = new File(confDir, STARTUP_PROPERTIES_FILE_VALUE).toURL();
-                
-            }
-            catch (MalformedURLException ex)
-            {
-                System.err.print("Main: " + ex);
-                return null;
-            }
-        }
+	    }
+	    catch (MalformedURLException ex)
+	    {
+	        System.err.print("Main: " + ex);
+	        return null;
+	    }
+        		
 
         Properties configProps = loadPropertiesFile(configPropURL);
         Properties startupProps = loadPropertiesFile(startupPropURL);
@@ -455,9 +472,10 @@ public class Main implements MainService
             configProps.setProperty(name,
                 substVars(configProps.getProperty(name), name, null, configProps));
         }
+        
 
         // Mutate properties
-        Main.processConfigurationProperties(configProps, startupProps, bundleDir);
+        Main.processConfigurationProperties(configProps, startupProps, bundleDirs);
 
         return configProps;
     }
@@ -494,7 +512,7 @@ public class Main implements MainService
 		return configProps;
 	}
 
-    public static void copySystemProperties(Properties configProps)
+    private static void copySystemProperties(Properties configProps)
     {
         for (Enumeration e = System.getProperties().propertyNames();
              e.hasMoreElements(); )
@@ -513,37 +531,39 @@ public class Main implements MainService
      * Process properties to customize default felix behavior
      * @param startupProps 
      */
-    protected static void processConfigurationProperties(Properties props, Properties startupProps, File bundleDir) {
-        if ( bundleDir == null) {
+    private static void processConfigurationProperties(Properties props, Properties startupProps, ArrayList<File> bundleDirs) {
+        if ( bundleDirs == null) {
         	return;
         }
-        
         if( "all".equals( props.getProperty(PROPERTY_AUTO_START,"").trim()) ) {
             props.remove(PROPERTY_AUTO_START);
-            // We should start all the bundles in the system dir.
-            File[] bundles = bundleDir.listFiles(new FileFilter() {
-                public boolean accept(File pathname) {
-                    return pathname.toString().endsWith(".jar");
-                }
-            });
             StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < bundles.length; i++) {
-                try {
-                    sb.append("\"").append(bundles[i].toURL().toString()).append("\" ");
-                } catch (MalformedURLException e) {
-                    System.err.print( "Ignoring " + bundles[i].toString() + " (" + e + ")" );
+            for (File bundleDir : bundleDirs) {
+                // We should start all the bundles in the system dir.
+                File[] bundles = bundleDir.listFiles(new FileFilter() {
+                    public boolean accept(File pathname) {
+                        return pathname.toString().endsWith(".jar");
+                    }
+                });
+                for (int i = 0; i < bundles.length; i++) {
+                    try {
+                        sb.append("\"").append(bundles[i].toURL().toString()).append("\" ");
+                    } catch (MalformedURLException e) {
+                        System.err.print( "Ignoring " + bundles[i].toString() + " (" + e + ")" );
+                    }
                 }
-            }
+			}
             props.setProperty(PROPERTY_AUTO_START, sb.toString());
+        	
         }
-        else if( STARTUP_PROPERTIES_FILE_VALUE.equals( props.getProperty(PROPERTY_AUTO_START,"").trim()) ) {
+        else if( STARTUP_PROPERTIES_FILE_NAME.equals( props.getProperty(PROPERTY_AUTO_START,"").trim()) ) {
             props.remove(PROPERTY_AUTO_START);
             // We should start the bundles in the startup.properties file.
         	HashMap<Integer, StringBuffer> levels = new HashMap<Integer, StringBuffer>();
         	for (Iterator iterator = startupProps.keySet().iterator(); iterator.hasNext();) {
 				String name = (String) iterator.next();
-				File file = new File(bundleDir, name);
-				if( file.exists() && !file.isDirectory() ) {
+				File file = findFile(bundleDirs, name);
+				if( file !=null ) {
 					Integer level;
 					try {
 						level = new Integer(startupProps.getProperty(name).trim());
@@ -562,7 +582,7 @@ public class Main implements MainService
 	                    System.err.print( "Ignoring " + file.toString() + " (" + e + ")" );
 	                }
 				} else {
-					System.err.println("Bundle listed in "+STARTUP_PROPERTIES_FILE_VALUE+" configuration not found: "+file);
+					System.err.println("Bundle listed in "+STARTUP_PROPERTIES_FILE_NAME+" configuration not found: "+file);
 				}
 			}
         	for (Map.Entry<Integer, StringBuffer> entry : levels.entrySet()) {
@@ -571,6 +591,16 @@ public class Main implements MainService
         }
 
     }
+
+	private static File findFile(ArrayList<File> bundleDirs, String name) {
+        for (File bundleDir : bundleDirs) {
+        	File file = new File(bundleDir, name);
+        	if( file.exists() && !file.isDirectory() ) {
+        		return file;
+        	}
+        }
+        return null;
+	}
 
     private static final String DELIM_START = "${";
     private static final String DELIM_STOP  = "}";
@@ -596,7 +626,7 @@ public class Main implements MainService
      * @throws IllegalArgumentException If there was a syntax error in the
      *         property placeholder syntax or a recursive variable reference.
     **/
-    public static String substVars(String val, String currentKey,
+    private static String substVars(String val, String currentKey,
         Map<String, String> cycleMap, Properties configProps)
         throws IllegalArgumentException
     {
@@ -709,5 +739,13 @@ public class Main implements MainService
 
 	public void setExitCode(int exitCode) {
 		this.exitCode = exitCode;
+	}
+
+	public File getServicemixHome() {
+		return servicemixHome;
+	}
+
+	public File getServicemixBase() {
+		return servicemixBase;
 	}
 }

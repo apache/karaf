@@ -116,9 +116,19 @@ locateHome() {
     fi
 }
 
+locateBase() {
+    if [ "x$SERVICEMIX_BASE" != "x" ]; then
+    	if [ ! -d "$SERVICEMIX_BASE" ]; then
+        	die "SERVICEMIX_BASE is not valid: $SERVICEMIX_BASE"
+    	fi
+	else
+	    SERVICEMIX_BASE=$SERVICEMIX_HOME
+    fi
+}
+
 setupNativePath() {
     # Support for loading native libraries
-    LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:$SERVICEMIX_HOME/lib"
+    LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:$SERVICEMIX_BASE/lib:$SERVICEMIX_HOME/lib"
     
     # For Cygwin, set PATH from LD_LIBRARY_PATH
     if $cygwin; then
@@ -202,7 +212,7 @@ setupDefaults() {
     fi
 
     # Add the conf directory so it picks up the Log4J config
-    CLASSPATH="$CLASSPATH:$SERVICEMIX_HOME/conf"
+    CLASSPATH="$CLASSPATH:$SERVICEMIX_BASE/conf"
     DEFAULT_JAVA_DEBUG_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
     
     ##
@@ -221,6 +231,9 @@ init() {
     
     # Locate the ServiceMix home directory
     locateHome
+
+    # Locate the ServiceMix base directory
+    locateBase
     
     # Setup the native library path
     setupNativePath
@@ -243,9 +256,11 @@ run() {
     JAR=$SERVICEMIX_HOME/bin/servicemix.jar
     if $cygwin; then
         SERVICEMIX_HOME=`cygpath --path --windows "$SERVICEMIX_HOME"`
+        SERVICEMIX_BASE=`cygpath --path --windows "$SERVICEMIX_BASE"`
     fi
-    cd "$SERVICEMIX_HOME"
-    exec $JAVA $JAVA_OPTS -Dservicemix.home="$SERVICEMIX_HOME" -jar "$JAR" $*
+    cd "$SERVICEMIX_BASE"
+    echo exec $JAVA $JAVA_OPTS -Dservicemix.home="$SERVICEMIX_HOME" -Dservicemix.base="$SERVICEMIX_BASE" -jar "$JAR" $*
+    exec $JAVA $JAVA_OPTS -Dservicemix.home="$SERVICEMIX_HOME" -Dservicemix.base="$SERVICEMIX_BASE" -jar "$JAR" $*
 }
 
 main() {
