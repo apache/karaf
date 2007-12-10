@@ -293,7 +293,7 @@ public class Main implements MainService
 			}
         }
     	if( rc == null ) {
-		    throw new IOException("The ServiceMix install directory could not be determined.  Please set the "+PROP_SERVICEMIX_HOME+" system property or the "+ENV_SERVICEMIX_HOME+" enviorment variable.");
+		    throw new IOException("The ServiceMix install directory could not be determined.  Please set the "+PROP_SERVICEMIX_HOME+" system property or the "+ENV_SERVICEMIX_HOME+" environment variable.");
 		}
     	
 		return rc;
