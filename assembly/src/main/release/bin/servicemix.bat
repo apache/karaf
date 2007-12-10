@@ -48,16 +48,26 @@ if not exist "%SERVICEMIX_HOME%" (
     goto END
 )
 
+if not "%SERVICEMIX_BASE%" == "" (
+    if not exist "%SERVICEMIX_BASE%" (
+       call :warn SERVICEMIX_BASE is not valid: %SERVICEMIX_BASE%
+       goto END
+    )
+)
+if "%SERVICEMIX_BASE%" == "" (
+  set SERVICEMIX_BASE=%SERVICEMIX_HOME%
+)
+
 set LOCAL_CLASSPATH=%CLASSPATH%
-set DEFAULT_JAVA_OPTS=-server -Xmx512M -Dderby.system.home="%SERVICEMIX_HOME%\var" -Dderby.storage.fileSyncTransactionLog=true -Dcom.sun.management.jmxremote
-set CLASSPATH=%LOCAL_CLASSPATH%;%SERVICEMIX_HOME%\conf
+set DEFAULT_JAVA_OPTS=-server -Xmx512M -Dderby.system.home="%SERVICEMIX_BASE%\data\derby" -Dderby.storage.fileSyncTransactionLog=true -Dcom.sun.management.jmxremote
+set CLASSPATH=%LOCAL_CLASSPATH%;%SERVICEMIX_BASE%\conf
 set DEFAULT_JAVA_DEBUG_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
 
 if "%LOCAL_CLASSPATH%" == "" goto :SERVICEMIX_CLASSPATH_EMPTY
-    set CLASSPATH=%LOCAL_CLASSPATH%;%SERVICEMIX_HOME%\conf
+    set CLASSPATH=%LOCAL_CLASSPATH%;%SERVICEMIX_BASE%\conf
     goto :SERVICEMIX_CLASSPATH_END
 :SERVICEMIX_CLASSPATH_EMPTY
-    set CLASSPATH=%SERVICEMIX_HOME%\conf
+    set CLASSPATH=%SERVICEMIX_BASE%\conf
 :SERVICEMIX_CLASSPATH_END
 
 rem Setup Servicemix Home
@@ -65,7 +75,7 @@ if exist "%SERVICEMIX_HOME%\conf\servicemix-rc.cmd" call %SERVICEMIX_HOME%\conf\
 if exist "%HOME%\servicemix-rc.cmd" call %HOME%\servicemix-rc.cmd
 
 rem Support for loading native libraries
-set PATH=%PATH%;%SERVICEMIX_HOME%\lib
+set PATH=%PATH%;%SERVICEMIX_BASE%\lib;%SERVICEMIX_HOME%\lib
 
 rem Setup the Java Virtual Machine
 if not "%JAVA%" == "" goto :Check_JAVA_END
@@ -99,12 +109,6 @@ if "%SERVICEMIX_PROFILER%" == "" goto :SERVICEMIX_PROFILER_END
 rem Setup the classpath
 set CLASSPATH=%CLASSPATH%;%SERVICEMIX_HOME%\lib\classworlds-1.0.1.jar
 
-rem Setup boot options
-set CLASSWORLDS_CONF=%SERVICEMIX_HOME%\conf\servicemix.conf
-set BOOT_OPTS=%BOOT_OPTS% -Dclassworlds.conf="%CLASSWORLDS_CONF%"
-set BOOT_OPTS=%BOOT_OPTS% -Dservicemix.home="%SERVICEMIX_HOME%"
-set BOOT_OPTS=%BOOT_OPTS% -Djava.endorsed.dirs="%SERVICEMIX_HOME%\lib\endorsed"
-
 rem Execute the JVM or the load the profiler
 if "%SERVICEMIX_PROFILER%" == "" goto :EXECUTE
     rem Execute the profiler if it has been configured
@@ -113,8 +117,8 @@ if "%SERVICEMIX_PROFILER%" == "" goto :EXECUTE
 
 :EXECUTE
     rem Execute the Java Virtual Machine
-    cd "%SERVICEMIX_HOME%"
-    "%JAVA%" %JAVA_OPTS% -Dservicemix.home="%SERVICEMIX_HOME%" -Dbundles.configuration.location="%SERVICEMIX_HOME%/conf" -jar "%SERVICEMIX_HOME%\bin\servicemix.jar" %*
+    cd "%SERVICEMIX_BASE%"
+    "%JAVA%" %JAVA_OPTS% -Dservicemix.home="%SERVICEMIX_HOME%" -Dservicemix.base="%SERVICEMIX_BASE%" -jar "%SERVICEMIX_HOME%\bin\servicemix.jar" %*
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 

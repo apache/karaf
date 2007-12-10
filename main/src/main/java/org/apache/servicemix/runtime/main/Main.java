@@ -544,8 +544,8 @@ public class Main implements MainService
                     public boolean accept(File pathname) {
                         return pathname.toString().endsWith(".jar");
                     }
-                });
-                for (int i = 0; i < bundles.length; i++) {
+                });                
+                for (int i = 0; bundles!=null && i < bundles.length; i++) {
                     try {
                         sb.append("\"").append(bundles[i].toURL().toString()).append("\" ");
                     } catch (MalformedURLException e) {
