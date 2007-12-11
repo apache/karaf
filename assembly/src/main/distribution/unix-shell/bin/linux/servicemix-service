@@ -7,9 +7,9 @@
 # The ASF licenses this file to You under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,6 @@
 # Application
 APP_NAME="ServiceMix"
 APP_LONG_NAME="ServiceMix Server"
-ACTIVEMQ_HOME="../.."
 
 # Wrapper
 WRAPPER_CMD="wrapper"
@@ -244,7 +243,7 @@ else
         fi
     fi
 fi
- 
+
 # Build the nice clause
 if [ "X$PRIORITY" = "X" ]
 then
@@ -287,7 +286,7 @@ checkUser() {
                 exit 1
             fi
         fi
-    
+
         if [ "`$IDEXE -u -n`" = "$RUN_AS_USER" ]
         then
             # Already running as the configured user.  Avoid password prompts by not calling su.
@@ -304,7 +303,7 @@ checkUser() {
         then
             if [ "X$2" != "X" ]
             then
-                # Resolve the primary group 
+                # Resolve the primary group
                 RUN_AS_GROUP=`groups $RUN_AS_USER | awk '{print $3}' | tail -1`
                 if [ "X$RUN_AS_GROUP" = "X" ]
                 then
@@ -350,7 +349,7 @@ getpid() {
                 #  common is during system startup after an unclean shutdown.
                 # The ps statement below looks for the specific wrapper command running as
                 #  the pid.  If it is not found then the pid file is considered to be stale.
-                pidtest=`$PSEXE -p $pid -o args | grep $WRAPPER_CMD | tail -1`
+                pidtest=`$PSEXE -p $pid -o command | grep $WRAPPER_CMD | tail -1`
                 if [ "X$pidtest" = "X" ]
                 then
                     # This is a stale pid file.
@@ -388,12 +387,18 @@ console() {
         exit 1
     fi
 }
- 
+
 start() {
     echo "Starting $APP_LONG_NAME..."
     getpid
     if [ "X$pid" = "X" ]
     then
+        if [ ! -d ../../data ]; then
+            mkdir ../../data
+        fi
+        if [ ! -d ../../data/log ]; then
+            mkdir ../../data/log
+        fi
         COMMAND_LINE="$CMDNICE $WRAPPER_CMD $WRAPPER_CONF wrapper.syslog.ident=$APP_NAME wrapper.pidfile=$PIDFILE wrapper.daemonize=TRUE $ANCHORPROP $IGNOREPROP $LOCKPROP"
         exec $COMMAND_LINE
     else
@@ -401,7 +406,7 @@ start() {
         exit 1
     fi
 }
- 
+
 stopit() {
     echo "Stopping $APP_LONG_NAME..."
     getpid

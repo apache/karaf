@@ -60,6 +60,7 @@ public class FileMonitorActivator implements BundleActivator, ManagedServiceFact
 
         Hashtable initialProperties = new Hashtable();
         setPropertiesFromContext(initialProperties,
+                FileMonitor.CONFIG_DIR,
                 FileMonitor.DEPLOY_DIR,
                 FileMonitor.GENERATED_JAR_DIR,
                 FileMonitor.SCAN_INTERVAL

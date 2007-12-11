@@ -16,30 +16,29 @@
  */
 package org.apache.geronimo.gshell.spring;
 
-import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.geronimo.gshell.DefaultEnvironment;
 import org.apache.geronimo.gshell.ExitNotification;
 import org.apache.geronimo.gshell.command.IO;
+import org.apache.geronimo.gshell.common.Arguments;
 import org.apache.geronimo.gshell.shell.Environment;
 import org.apache.geronimo.gshell.shell.InteractiveShell;
 import org.apache.servicemix.runtime.main.spi.MainService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.osgi.context.BundleContextAware;
 
 /**
- * Created by IntelliJ IDEA.
- * User: gnodet
- * Date: Oct 11, 2007
- * Time: 10:20:37 PM
- * To change this template use File | Settings | File Templates.
+ * This class represents the local shell console and is also used when passing a command to execute on the command line.
+ * Such mechanism is done using the {@link MainService} service registered in the OSGi registry, which contains the
+ * command line arguments and a place holder for the exit code.
  */
 public class GShell implements Runnable, BundleContextAware {
+
+    private static final Logger log = LoggerFactory.getLogger(GShell.class);
 
     private InteractiveShell shell;
     private Thread thread;
@@ -47,8 +46,9 @@ public class GShell implements Runnable, BundleContextAware {
     private Environment env;
     private boolean start;
     private MainService mainService;
-	private BundleContext bundleContext;
-	private CountDownLatch frameworkStarted;
+    private BundleContext bundleContext;
+    private CountDownLatch frameworkStarted;
+
     public GShell(InteractiveShell shell) {
         this.shell = shell;
         this.io = new IO(System.in, System.out, System.err);
@@ -60,7 +60,7 @@ public class GShell implements Runnable, BundleContextAware {
     }
 
     public void start() {
-    	frameworkStarted = new CountDownLatch(1);
+        frameworkStarted = new CountDownLatch(1);
         if (start) {
             thread = new Thread(this);
             thread.start();
@@ -69,66 +69,70 @@ public class GShell implements Runnable, BundleContextAware {
 
     public void stop() throws InterruptedException {
         if (thread != null) {
-        	frameworkStarted.countDown();
+            frameworkStarted.countDown();
             thread.interrupt();
             thread.join();
             thread = null;
         }
+        Thread.dumpStack();
     }
 
     public void run() {
-        try {        	        	
+        try {
             IOTargetSource.setIO(io);
             EnvironmentTargetSource.setEnvironment(env);
-	        
-        	String[] args=null;
-	        if( mainService != null ) {
-	    		args = mainService.getArgs();    		
-	    	}
-	        
-	        // If a command was specified on the command line, then just execute that command.
-			if (args != null && args.length > 0) {
-	        	waitForFrameworkToStart();
-				Object value = shell.execute((Object[])args);
-	        	if (mainService != null) {
-	        		if( value instanceof Number ) {
-	        			mainService.setExitCode(((Number)value).intValue());
-	        		} else {
-	        			mainService.setExitCode(value!=null?1:0);
-	        		}
-	        	}
-			} else {
-				// Otherwise go into a command shell.
-	            shell.run();
-	        	if( mainService!=null ) {
-	        		mainService.setExitCode(0);
-	        	}
-			}
-			
+
+            String[] args = null;
+            if (mainService != null) {
+                args = mainService.getArgs();
+            }
+
+            // If a command was specified on the command line, then just execute that command.
+            if (args != null && args.length > 0) {
+                waitForFrameworkToStart();
+                log.info("Executing Shell with arguments: " + Arguments.asString(args));
+                Object value = shell.execute((Object[]) args);
+                if (mainService != null) {
+                    if (value instanceof Number) {
+                        mainService.setExitCode(((Number) value).intValue());
+                    } else {
+                        mainService.setExitCode(value != null ? 1 : 0);
+                    }
+                }
+            } else {
+                // Otherwise go into a command shell.
+                shell.run();
+                if (mainService != null) {
+                    mainService.setExitCode(0);
+                }
+            }
+
         } catch (ExitNotification e) {
-        	if( mainService!=null ) {
-        		mainService.setExitCode(0);
-        	}
+            if (mainService != null) {
+                mainService.setExitCode(0);
+            }
+            log.info("Exiting shell due received exit notification");
         } catch (Exception e) {
-        	if( mainService!=null ) {
-        		mainService.setExitCode(-1);
-        	}
+            if (mainService != null) {
+                mainService.setExitCode(-1);
+            }
+            log.info("Exiting shell due to caught exception " + e, e);
         } finally {
-        	try {
-				getBundleContext().getBundle(0).stop();
-			} catch (BundleException e) {
-				e.printStackTrace();
-			}
+            try {
+                getBundleContext().getBundle(0).stop();
+            } catch (BundleException e) {
+                log.info("Caught exception while shutting down framework: " + e, e);
+            }
         }
     }
 
     /**
      * Blocks until the framework has finished starting.  We do this so that any installed
      * bundles for commands get fully registered.
-     * 
+     *
      * @throws InterruptedException
      */
-	private void waitForFrameworkToStart() throws InterruptedException {
+    private void waitForFrameworkToStart() throws InterruptedException {
 //		getBundleContext().addFrameworkListener(new FrameworkListener(){
 //			public void frameworkEvent(FrameworkEvent event) {
 //				System.out.println("Got event: "+event.getType());
@@ -143,22 +147,22 @@ public class GShell implements Runnable, BundleContextAware {
 //		} else {
 //			System.out.println("System took too long startup... continuing");
 //		}
-	}
+    }
 
-	public MainService getMainService() {
-		return mainService;
-	}
+    public MainService getMainService() {
+        return mainService;
+    }
 
-	public void setMainService(MainService main) {
-		this.mainService = main;
-	}
+    public void setMainService(MainService main) {
+        this.mainService = main;
+    }
 
-	public void setBundleContext(BundleContext bundleContext) {
-		this.bundleContext = bundleContext;		
-	}
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
 
-	public BundleContext getBundleContext() {
-		return bundleContext;
+    public BundleContext getBundleContext() {
+        return bundleContext;
 	}
 
 }

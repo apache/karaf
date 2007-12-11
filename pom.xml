@@ -304,6 +304,37 @@
           </build>
       </profile>
       <profile>
+          <id>setup.eclipse</id>
+          <modules>
+              <module>assembly</module>
+          </modules>
+          <properties>
+              <eclipse.workspace.dir>${basedir}/../workspace</eclipse.workspace.dir>
+          </properties>
+          <build>
+              <defaultGoal>eclipse:eclipse</defaultGoal>
+              <plugins>
+                  <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-eclipse-plugin</artifactId>
+                      <inherited>false</inherited>
+                      <executions>
+                          <execution>
+                              <id>setup.eclipse.workspace</id>
+                              <phase>process-test-sources</phase>
+                              <goals>
+                                  <goal>add-maven-repo</goal>
+                              </goals>
+                              <configuration>
+                                  <workspace>${eclipse.workspace.dir}</workspace>
+                              </configuration>
+                          </execution>
+                      </executions>
+                  </plugin>
+              </plugins>
+          </build>
+      </profile>
+      <profile>
           <id>deploy</id>
           <build>
               <defaultGoal>deploy</defaultGoal>
