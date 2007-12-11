@@ -37,6 +37,7 @@
         <module>gshell-core</module>
         <module>gshell-osgi</module>
         <module>gshell-obr</module>
+        <module>gshell-wrapper</module>
     </modules>
 
 </project>

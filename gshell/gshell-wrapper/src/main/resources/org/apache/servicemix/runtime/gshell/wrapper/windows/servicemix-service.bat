@@ -19,34 +19,32 @@ REM ------------------------------------------------------------------------
 
 setlocal
 
-rem Java Service Wrapper general NT service install script
+set APP_NAME=${name}
+set APP_LONG_NAME=${displayName}
+set APP_BASE=${servicemix.base}
 
+if ""%1"" == ""run"" goto doRun
+if ""%1"" == ""install"" goto doInstall
+if ""%1"" == ""remove"" goto doRemove
 
-if "%OS%"=="Windows_NT" goto nt
-echo This script only works with NT-based versions of Windows.
-goto :eof
+echo Usage:  catalina ( commands ... )
+echo commands:
+echo   run               Start %APP_NAME% in the current console
+echo   install           Install %APP_NAME% as a Windows service
+echo   remove            Remove the %APP_NAME% Windows service
+goto end
 
-:nt
-rem
-rem Find the application home.
-rem
-rem %~dp0 is location of current script under NT
-set _REALPATH=%~dp0
+:doRun
+"%APP_BASE%\bin\wrapper.exe" -c "%APP_BASE%\etc\wrapper.conf"
+goto end
 
-set SERVICEMIX_HOME=%~dp0..\..
-set SERVICEMIX_BASE=%~dp0..\..
+:doInstall
+"%APP_BASE%\bin\wrapper.exe" -i "%APP_BASE%\etc\wrapper.conf"
+goto end
 
-:conf
-set _WRAPPER_CONF="%SERVICEMIX_HOME%\bin\win32\wrapper.conf"
+:doRemove
+"%APP_BASE%\bin\wrapper.exe" -r "%APP_BASE%\etc\wrapper.conf"
+goto end
 
-set _SERVICEMIX_HOME="set.SERVICEMIX_HOME=%SERVICEMIX_HOME%"
-set _SERVICEMIX_BASE="set.SERVICEMIX_BASE=%SERVICEMIX_BASE%"
-
-rem
-rem Install the Wrapper as an NT service.
-rem
-:startup
-"wrapper.exe" -i %_WRAPPER_CONF% %_SERVICEMIX_HOME% %_SERVICEMIX_BASE%
-if not errorlevel 1 goto :eof
-pause
-
+:end
+if not "%PAUSE%" == "" pause

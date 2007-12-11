@@ -18,19 +18,19 @@
 # ------------------------------------------------------------------------
 
 # Application
-APP_NAME="ServiceMix"
-APP_LONG_NAME="ServiceMix Server"
+APP_NAME="${name}"
+APP_LONG_NAME="${displayName}"
 
 # Wrapper
-WRAPPER_CMD="wrapper"
-WRAPPER_CONF="wrapper.conf"
+WRAPPER_CMD="${servicemix.base}/bin/wrapper"
+WRAPPER_CONF="${servicemix.base}/etc/wrapper.conf"
 
 # Priority at which to run the wrapper.  See "man nice" for valid priorities.
 #  nice is only used if a priority is specified.
 PRIORITY=
 
 # Location of the pid file.
-PIDDIR="."
+PIDDIR="${servicemix.base}/data"
 
 # If uncommented, causes the Wrapper to be shutdown using an anchor file.
 #  When launched with the 'start' command, it will also ignore all INT and
