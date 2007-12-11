@@ -27,7 +27,7 @@ if ""%1"" == ""run"" goto doRun
 if ""%1"" == ""install"" goto doInstall
 if ""%1"" == ""remove"" goto doRemove
 
-echo Usage:  catalina ( commands ... )
+echo Usage:  servicemix-service ( commands ... )
 echo commands:
 echo   run               Start %APP_NAME% in the current console
 echo   install           Install %APP_NAME% as a Windows service
@@ -35,15 +35,15 @@ echo   remove            Remove the %APP_NAME% Windows service
 goto end
 
 :doRun
-"%APP_BASE%\bin\wrapper.exe" -c "%APP_BASE%\etc\wrapper.conf"
+"%APP_BASE%\bin\servicemix-wrapper.exe" -c "%APP_BASE%\etc\servicemix-wrapper.conf"
 goto end
 
 :doInstall
-"%APP_BASE%\bin\wrapper.exe" -i "%APP_BASE%\etc\wrapper.conf"
+"%APP_BASE%\bin\servicemix-wrapper.exe" -i "%APP_BASE%\etc\servicemix-wrapper.conf"
 goto end
 
 :doRemove
-"%APP_BASE%\bin\wrapper.exe" -r "%APP_BASE%\etc\wrapper.conf"
+"%APP_BASE%\bin\servicemix-wrapper.exe" -r "%APP_BASE%\etc\servicemix-wrapper.conf"
 goto end
 
 :end

@@ -70,14 +70,14 @@ public class InstallCommand
 			File serviceFile=null;
 			if( os.startsWith("Win") ) {
 				mkdir(bin);
-				copyResourceToDir(bin, "windows/wrapper.exe", false);
+				copyResourceToDir(bin, "windows/servicemix-wrapper.exe", false);
 				serviceFile = new File(bin,"servicemix-service.bat");
-				copyFilteredResourceTo(serviceFile, "macosx/servicemix-service.bat", props);
+				copyFilteredResourceTo(serviceFile, "windows/servicemix-service.bat", props);
 				mkdir(lib);
 				copyResourceToDir(lib, "windows/wrapper.dll", false);								
 			} else if( os.startsWith("Mac OS X") ) {
 				mkdir(bin);
-				copyResourceToDir(bin, "macosx/wrapper", false);
+				copyResourceToDir(bin, "macosx/servicemix-wrapper", false);
 				serviceFile = new File(bin,"servicemix-service");
 				copyFilteredResourceTo(serviceFile, "unix/servicemix-service", props);
 				mkdir(lib);
@@ -87,9 +87,9 @@ public class InstallCommand
 				// when the machine boots up.
 			} else if( os.startsWith("Linux") ) {
 				mkdir(bin);
+				copyResourceToDir(bin, "linux/servicemix-wrapper", false);
 				serviceFile = new File(bin,"servicemix-service");
 				copyFilteredResourceTo(serviceFile, "unix/servicemix-service", props);
-				copyResourceToDir(bin, "linux/wrapper", false);
 				mkdir(lib);
 				copyResourceToDir(lib, "linux/libwrapper.jnilib", false);
 				
@@ -102,10 +102,10 @@ public class InstallCommand
 
     		// Install the wrapper jar to the lib directory..
 			mkdir(lib);
-			copyResourceToDir(lib, "all/wrapper.jar", false);
+			copyResourceToDir(lib, "all/servicemix-wrapper.jar", false);
 			mkdir(etc);
-			File wrapperConf = new File(etc,"wrapper.conf");
-			copyFilteredResourceTo(wrapperConf, "all/wrapper.conf", props);
+			File wrapperConf = new File(etc,"servicemix-wrapper.conf");
+			copyFilteredResourceTo(wrapperConf, "all/servicemix-wrapper.conf", props);
 
 			io.out.println("Setup complete.  You may want to tweak the JVM properties in the wrapper configuration file: "+wrapperConf.getPath());
 			io.out.println("before installing and starting the service.");
@@ -154,6 +154,7 @@ public class InstallCommand
 						Scanner scanner = new Scanner(is);
 						while (scanner.hasNextLine() ) {
 							String line = scanner.nextLine();
+							io.out.println("writing: "+line);
 							out.println(line);
 						}
 					} finally {
