@@ -28,6 +28,7 @@ import java.util.Scanner;
 
 import org.apache.geronimo.gshell.clp.Option;
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
+import org.apache.geronimo.gshell.common.io.PumpStreamHandler;
 import org.apache.geronimo.gshell.support.OsgiCommandSupport;
 
 /**
@@ -40,8 +41,8 @@ public class InstallCommand
     extends OsgiCommandSupport
 {
 	
-    @Option(name="-n", aliases={"--name"}, description="The service name that will be used when installing the service.  Defaults to the directory name of the instance.")
-    private String name;
+    @Option(name="-n", aliases={"--name"}, description="The service name that will be used when installing the service.")
+    private String name="servicemix";
     @Option(name="-d", aliases={"--display"}, description="The display name of the service.")
     private String displayName;
     @Option(name="-D", aliases={"--description"}, description="The description of the service.")
@@ -77,9 +78,15 @@ public class InstallCommand
 				copyResourceTo(new File(bin, "wrapper.dll"), "windows/wrapper.dll", false);								
 			} else if( os.startsWith("Mac OS X") ) {
 				mkdir(bin);
-				copyResourceTo(new File(bin, name+"-wrapper"), "macosx/servicemix-wrapper", false);
+				
+				File file = new File(bin, name+"-wrapper");
+				copyResourceTo(file, "macosx/servicemix-wrapper", false);
+				chmod(file, "a+x");
+				
 				serviceFile = new File(bin,name+"-service");
 				copyFilteredResourceTo(serviceFile, "unix/servicemix-service", props);
+				chmod(serviceFile, "a+x");
+				
 				mkdir(lib);
 				copyResourceTo(new File(lib, "libwrapper.jnilib"), "macosx/libwrapper.jnilib", false);
 				
@@ -87,9 +94,15 @@ public class InstallCommand
 				// when the machine boots up.
 			} else if( os.startsWith("Linux") ) {
 				mkdir(bin);
-				copyResourceTo(new File(bin, name+"-wrapper"), "linux/servicemix-wrapper", false);
+				
+				File file = new File(bin, name+"-wrapper");
+				copyResourceTo(file, "linux/servicemix-wrapper", false);
+				chmod(file, "a+x");
+
 				serviceFile = new File(bin,name+"-service");
 				copyFilteredResourceTo(serviceFile, "unix/servicemix-service", props);
+				chmod(serviceFile, "a+x");
+				
 				mkdir(lib);
 				copyResourceTo(new File(lib, "libwrapper.so"), "linux/libwrapper.so", false);
 				
@@ -112,6 +125,7 @@ public class InstallCommand
 			io.out.println("before installing and starting the service.");
 			io.out.println("");
 			if( os.startsWith("Win") ) {
+				io.out.println("");
 				io.out.println("To install the service, run: ");
 				io.out.println("  C:> "+serviceFile.getPath()+" install");
 				io.out.println("");
@@ -125,12 +139,65 @@ public class InstallCommand
 				io.out.println("  C:> "+serviceFile.getPath()+" remove");
 				io.out.println("");
 			} else if( os.startsWith("Mac OS X") ) {
-			} else if( os.startsWith("Linux") ) {
-				io.out.println("The way the service is installed depends upon your flavor of Linux. ");
-				io.out.println("On Redhat Systems you run:");
-				io.out.println("  ln -s "+serviceFile.getPath()+" /etc/init.d/");
-				io.out.println("  service add "+serviceFile.getName());
 				io.out.println("");
+				io.out.println("At this time it is not known how to get this service to start when the machine is rebooted.");
+				io.out.println("If you know how to install the following service script so that it gets started");
+				io.out.println("when OS X starts, please email dev@servicemix.apache.org and let us know how so");
+				io.out.println("we can update this message.");
+				io.out.println(" ");
+				io.out.println("  To start the service:");
+				io.out.println("    $ "+serviceFile.getPath()+" start");
+				io.out.println("");
+				io.out.println("  To stop the service:");
+				io.out.println("    $ "+serviceFile.getPath()+" stop");
+				io.out.println("");
+			} else if( os.startsWith("Linux") ) {
+				io.out.println("The way the service is installed depends upon your flavor of Linux.");
+				
+				// TODO: figure out if we can detect the Linux flavor
+				
+				io.out.println("");
+				io.out.println("@|cyan On Redhat/Fedora/CentOS Systems:|");
+				io.out.println("  To install the service:");
+				io.out.println("    $ ln -s "+serviceFile.getPath()+" /etc/init.d/");
+				io.out.println("    $ chkconfig "+serviceFile.getName()+" --add");
+				io.out.println("");
+				io.out.println("  To start the service when the machine is rebooted:");
+				io.out.println("    $ chkconfig "+serviceFile.getName()+" on");
+				io.out.println("");
+				io.out.println("  To disable starting the service when the machine is rebooted:");
+				io.out.println("    $ chkconfig "+serviceFile.getName()+" off");
+				io.out.println("");
+				io.out.println("  To start the service:");
+				io.out.println("    $ service "+serviceFile.getName()+" start");
+				io.out.println("");
+				io.out.println("  To stop the service:");
+				io.out.println("    $ service "+serviceFile.getName()+" stop");
+				io.out.println("");
+				io.out.println("  To uninstall the service :");
+				io.out.println("    $ chkconfig "+serviceFile.getName()+" --del");
+				io.out.println("    $ rm /etc/init.d/"+serviceFile.getName());
+				
+				io.out.println("");
+				io.out.println("@|cyan On Ubuntu/Debian Systems:|");
+				io.out.println("  To install the service:");
+				io.out.println("    $ ln -s "+serviceFile.getPath()+" /etc/init.d/");
+				io.out.println("");
+				io.out.println("  To start the service when the machine is rebooted:");
+				io.out.println("    $ update-rc.d "+serviceFile.getName()+" defaults");
+				io.out.println("");
+				io.out.println("  To disable starting the service when the machine is rebooted:");
+				io.out.println("    $ update-rc.d -f "+serviceFile.getName()+" remove");
+				io.out.println("");
+				io.out.println("  To start the service:");
+				io.out.println("    $ /etc/init.d/"+serviceFile.getName()+" start");
+				io.out.println("");
+				io.out.println("  To stop the service:");
+				io.out.println("    $ /etc/init.d/"+serviceFile.getName()+" stop");
+				io.out.println("");
+				io.out.println("  To uninstall the service :");
+				io.out.println("    $ rm /etc/init.d/"+serviceFile.getName());
+				
 			}
 
 			
@@ -141,6 +208,19 @@ public class InstallCommand
 
         return 0;
     }
+
+	private int chmod(File serviceFile, String mode) throws Exception {
+		ProcessBuilder builder = new ProcessBuilder();
+		builder.command("chmod", mode, serviceFile.getCanonicalPath());
+        Process p = builder.start();
+
+        PumpStreamHandler handler = new PumpStreamHandler(io.inputStream, io.outputStream, io.errorStream);
+        handler.attach(p);
+        handler.start();
+        int status = p.waitFor();
+        handler.stop();
+        return status;
+	}
 
 	private void copyResourceTo(File outFile, String resource, boolean text) throws Exception {
 		if( !outFile.exists() ) {
