@@ -104,6 +104,11 @@
           <artifactId>org.apache.servicemix.runtime.gshell.osgi</artifactId>
           <version>0.1-SNAPSHOT</version>
       </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.runtime.gshell</groupId>
+            <artifactId>org.apache.servicemix.runtime.gshell.features</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.mina-${mina.version}</artifactId>

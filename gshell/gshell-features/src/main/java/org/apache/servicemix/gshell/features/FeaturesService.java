@@ -14,16 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.obr;
+package org.apache.servicemix.gshell.features;
 
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
-import org.osgi.service.obr.RepositoryAdmin;
+import java.net.URL;
 
-@CommandComponent(id="obr:start", description="Start")
-public class StartCommand extends DeployCommand {
+/**
+ * The service managing features repositories.
+ */
+public interface FeaturesService {
 
-    protected void doExecute(RepositoryAdmin admin) throws Exception {
-        doDeploy(admin, bundles, true);
-    }
+    void addRepository(URL url) throws Exception;
 
+    void removeRepository(URL url);
+
+    Repository[] listRepositories();
 }

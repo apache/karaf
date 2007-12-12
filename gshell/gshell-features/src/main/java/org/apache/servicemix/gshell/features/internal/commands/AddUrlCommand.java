@@ -14,16 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.obr;
+package org.apache.servicemix.gshell.features.internal.commands;
 
+import java.util.List;
+import java.net.URL;
+
+import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
-import org.osgi.service.obr.RepositoryAdmin;
+import org.apache.servicemix.gshell.features.FeaturesService;
 
-@CommandComponent(id="obr:start", description="Start")
-public class StartCommand extends DeployCommand {
+@CommandComponent(id="features:addUrl", description="Add a list of repository URLs to the features service")
+public class AddUrlCommand extends FeaturesCommandSupport {
 
-    protected void doExecute(RepositoryAdmin admin) throws Exception {
-        doDeploy(admin, bundles, true);
+    @Argument(required = true, multiValued = true, description = "Repository URLs")
+    List<String> urls;
+
+    protected void doExecute(FeaturesService admin) throws Exception {
+        for (String url : urls) {
+            admin.addRepository(new URL(url));
+        }
     }
-
 }

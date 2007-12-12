@@ -48,7 +48,7 @@ public class SpringCommandRegistry extends DefaultCommandRegistry implements Lay
 
     private Environment env;
 
-    private Layout layout = new Layout();
+    private MutableLayout layout = new MutableLayout();
 
     public SpringCommandRegistry(Environment env) {
         this.env = env;
@@ -64,38 +64,77 @@ public class SpringCommandRegistry extends DefaultCommandRegistry implements Lay
             name = (String) properties.get("name");
         }
 
+        // Find rank
+        int rank = 0;
+        if (properties.containsKey("rank")) {
+            rank = Integer.parseInt((String) properties.get("rank"));
+        }
+
         // Find or create the subshell group
         GroupNode gn = layout;
         String shell = (String) properties.get("shell");
         String[] aliases = properties.get("alias") != null ? properties.get("alias").toString().split(",") : new String[0];
-        if (shell != null && shell.length() > 0) {
+
+        if (name.equals(shell))
+        {
             Node n = gn.find(shell);
-            if (n == null) {
-                GroupNode g = new GroupNode(shell);
-                gn.add(g);
-                register(new GroupCommand(shell, g));
-                gn = g;
-            } else if (n instanceof GroupNode) {
-                gn = (GroupNode) n;
-            } else {
-                throw new IllegalStateException("A command conflicts has been detected when registering " + command.getId());
-            }
+            MutableGroupNode g = new MutableGroupNode(shell);
+            gn.add(g);
+            register(command);
         }
-
-        CommandNode cn = new CommandNode(name, command.getId());
-        gn.add(cn);
-
-        for (int i = 0; i < aliases.length; i++) {
-            if (!name.equals(aliases[i])) {
-                AliasNode an = new AliasNode(aliases[i], ALIAS_PREFIX + command.getId());
-                gn.add(an);
+        else
+        {
+            if (shell != null && shell.length() > 0) {
+                Node n = gn.find(shell);
+                if (n == null) {
+                    MutableGroupNode g = new MutableGroupNode(shell);
+                    gn.add(g);
+                    register(new GroupCommand(shell, g));
+                    gn = g;
+                } else if (n instanceof GroupNode) {
+                    gn = (GroupNode) n;
+                } else {
+                    throw new IllegalStateException("A command conflicts has been detected when registering " + command.getId());
+                }
             }
-        }
 
-        register(command);
+            CommandNode cn = new CommandNode(name, command.getId());
+            gn.add(cn);
+
+            for (int i = 0; i < aliases.length; i++) {
+                if (!name.equals(aliases[i])) {
+                    AliasNode an = new AliasNode(aliases[i], ALIAS_PREFIX + command.getId());
+                    gn.add(an);
+                }
+            }
+
+            register(command);
+        }
     }
 
     public void unregister(final Command command, Map<String, ?> properties) throws NotRegisteredException {
+        // Find command name
+        String name = command.getId();
+        if (name.lastIndexOf(':') >= 0) {
+            name = name.substring(name.lastIndexOf(':') + 1);
+        }
+        if (properties.containsKey("name")) {
+            name = (String) properties.get("name");
+        }
+        String shell = (String) properties.get("shell");
+
+        if (name.equals(shell) || shell == null || shell.length() == 0) {
+            Node n = layout.find(name);
+            layout.removeNode(n);
+        } else {
+            MutableGroupNode gn = (MutableGroupNode) layout.find(shell);
+            Node n = gn.find(name);
+            gn.removeNode(n);
+            if (gn.size() == 0) {
+                layout.removeNode(gn);
+            }
+        }
+
         unregister(command);
     }
 
@@ -182,5 +221,25 @@ public class SpringCommandRegistry extends DefaultCommandRegistry implements Lay
             }
             return SUCCESS;
         }
+    }
+
+    public static class MutableLayout extends Layout {
+
+        public void removeNode(Node n) {
+            nodes.remove(n);
+        }
+
+    }
+
+    public static class MutableGroupNode extends GroupNode {
+
+        public MutableGroupNode(String name) {
+            super(name);
+        }
+
+        public void removeNode(Node n) {
+            nodes.remove(n);
+        }
+
     }
 }

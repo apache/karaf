@@ -14,16 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.obr;
+package org.apache.servicemix.gshell.features.internal.commands;
 
+import org.apache.servicemix.gshell.features.FeaturesService;
+import org.apache.servicemix.gshell.features.Repository;
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
-import org.osgi.service.obr.RepositoryAdmin;
 
-@CommandComponent(id="obr:start", description="Start")
-public class StartCommand extends DeployCommand {
+@CommandComponent(id="features:listUrl", description="Display the repository URLs currently associated with the features service.")
+public class ListUrlCommand extends FeaturesCommandSupport {
 
-    protected void doExecute(RepositoryAdmin admin) throws Exception {
-        doDeploy(admin, bundles, true);
+    protected void doExecute(FeaturesService admin) throws Exception {
+        Repository[] repos = admin.listRepositories();
+        if ((repos != null) && (repos.length > 0)) {
+            for (int i = 0; i < repos.length; i++) {
+                io.out.println(repos[i].getURL());
+            }
+        } else {
+            io.out.println("No repository URLs are set.");
+        }
     }
-
 }

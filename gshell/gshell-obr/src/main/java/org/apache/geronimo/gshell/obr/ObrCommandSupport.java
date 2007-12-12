@@ -17,12 +17,15 @@
 package org.apache.geronimo.gshell.obr;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 import org.apache.geronimo.gshell.support.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 import org.osgi.service.obr.RepositoryAdmin;
+import org.osgi.service.obr.Requirement;
+import org.osgi.service.obr.Resolver;
 import org.osgi.service.obr.Resource;
 
 /**
@@ -134,5 +137,92 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
             out.print('-');
         }
         out.println("");
+    }
+
+    protected void doDeploy(RepositoryAdmin admin, List<String> bundles, boolean start) throws Exception {
+        Resolver resolver = admin.resolver();
+        for (String bundle : bundles) {
+            String[] target = getTarget(bundle);
+            Resource resource = selectNewestVersion(searchRepository(admin, target[0], target[1]));
+            if (resource != null)
+            {
+                resolver.add(resource);
+            }
+            else
+            {
+                io.err.println("Unknown bundle - " + target[0]);
+            }
+        }
+        if ((resolver.getAddedResources() != null) &&
+            (resolver.getAddedResources().length > 0))
+        {
+            if (resolver.resolve())
+            {
+                io.out.println("Target resource(s):");
+                printUnderline(io.out, 19);
+                Resource[] resources = resolver.getAddedResources();
+                for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
+                {
+                    io.out.println("   " + resources[resIdx].getPresentationName()
+                        + " (" + resources[resIdx].getVersion() + ")");
+                }
+                resources = resolver.getRequiredResources();
+                if ((resources != null) && (resources.length > 0))
+                {
+                    io.out.println("\nRequired resource(s):");
+                    printUnderline(io.out, 21);
+                    for (int resIdx = 0; resIdx < resources.length; resIdx++)
+                    {
+                        io.out.println("   " + resources[resIdx].getPresentationName()
+                            + " (" + resources[resIdx].getVersion() + ")");
+                    }
+                }
+                resources = resolver.getOptionalResources();
+                if ((resources != null) && (resources.length > 0))
+                {
+                    io.out.println("\nOptional resource(s):");
+                    printUnderline(io.out, 21);
+                    for (int resIdx = 0; resIdx < resources.length; resIdx++)
+                    {
+                        io.out.println("   " + resources[resIdx].getPresentationName()
+                            + " (" + resources[resIdx].getVersion() + ")");
+                    }
+                }
+
+                try
+                {
+                    io.out.print("\nDeploying...");
+                    resolver.deploy(start);
+                    io.out.println("done.");
+                }
+                catch (IllegalStateException ex)
+                {
+                    io.err.println(ex);
+                }
+            }
+            else
+            {
+                Requirement[] reqs = resolver.getUnsatisfiedRequirements();
+                if ((reqs != null) && (reqs.length > 0))
+                {
+                    io.out.println("Unsatisfied requirement(s):");
+                    printUnderline(io.out, 27);
+                    for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++)
+                    {
+                        io.out.println("   " + reqs[reqIdx].getFilter());
+                        Resource[] resources = resolver.getResources(reqs[reqIdx]);
+                        for (int resIdx = 0; resIdx < resources.length; resIdx++)
+                        {
+                            io.out.println("      " + resources[resIdx].getPresentationName());
+                        }
+                    }
+                }
+                else
+                {
+                    io.out.println("Could not resolve targets.");
+                }
+            }
+        }
+
     }
 }

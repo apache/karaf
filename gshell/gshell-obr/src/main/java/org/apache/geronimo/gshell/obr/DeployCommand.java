@@ -29,97 +29,10 @@ import org.osgi.service.obr.Resource;
 public class DeployCommand extends ObrCommandSupport {
 
     @Argument(required = true, multiValued = true, description = "List of bundles")
-    List<String> bundles;
+    protected List<String> bundles;
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {
-        doDeploy(admin, false);
-    }
-
-    protected void doDeploy(RepositoryAdmin admin, boolean start) throws Exception {
-        Resolver resolver = admin.resolver();
-        for (String bundle : bundles) {
-            String[] target = getTarget(bundle);
-            Resource resource = selectNewestVersion(searchRepository(admin, target[0], target[1]));
-            if (resource != null)
-            {
-                resolver.add(resource);
-            }
-            else
-            {
-                io.err.println("Unknown bundle - " + target[0]);
-            }
-        }
-        if ((resolver.getAddedResources() != null) &&
-            (resolver.getAddedResources().length > 0))
-        {
-            if (resolver.resolve())
-            {
-                io.out.println("Target resource(s):");
-                printUnderline(io.out, 19);
-                Resource[] resources = resolver.getAddedResources();
-                for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
-                {
-                    io.out.println("   " + resources[resIdx].getPresentationName()
-                        + " (" + resources[resIdx].getVersion() + ")");
-                }
-                resources = resolver.getRequiredResources();
-                if ((resources != null) && (resources.length > 0))
-                {
-                    io.out.println("\nRequired resource(s):");
-                    printUnderline(io.out, 21);
-                    for (int resIdx = 0; resIdx < resources.length; resIdx++)
-                    {
-                        io.out.println("   " + resources[resIdx].getPresentationName()
-                            + " (" + resources[resIdx].getVersion() + ")");
-                    }
-                }
-                resources = resolver.getOptionalResources();
-                if ((resources != null) && (resources.length > 0))
-                {
-                    io.out.println("\nOptional resource(s):");
-                    printUnderline(io.out, 21);
-                    for (int resIdx = 0; resIdx < resources.length; resIdx++)
-                    {
-                        io.out.println("   " + resources[resIdx].getPresentationName()
-                            + " (" + resources[resIdx].getVersion() + ")");
-                    }
-                }
-
-                try
-                {
-                    io.out.print("\nDeploying...");
-                    resolver.deploy(start);
-                    io.out.println("done.");
-                }
-                catch (IllegalStateException ex)
-                {
-                    io.err.println(ex);
-                }
-            }
-            else
-            {
-                Requirement[] reqs = resolver.getUnsatisfiedRequirements();
-                if ((reqs != null) && (reqs.length > 0))
-                {
-                    io.out.println("Unsatisfied requirement(s):");
-                    printUnderline(io.out, 27);
-                    for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++)
-                    {
-                        io.out.println("   " + reqs[reqIdx].getFilter());
-                        Resource[] resources = resolver.getResources(reqs[reqIdx]);
-                        for (int resIdx = 0; resIdx < resources.length; resIdx++)
-                        {
-                            io.out.println("      " + resources[resIdx].getPresentationName());
-                        }
-                    }
-                }
-                else
-                {
-                    io.out.println("Could not resolve targets.");
-                }
-            }
-        }
-
+        doDeploy(admin, bundles, false);
     }
 
 }

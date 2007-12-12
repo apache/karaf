@@ -14,16 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.obr;
+package org.apache.servicemix.gshell.features.internal;
 
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
-import org.osgi.service.obr.RepositoryAdmin;
+import java.util.ArrayList;
+import java.util.List;
 
-@CommandComponent(id="obr:start", description="Start")
-public class StartCommand extends DeployCommand {
+import org.apache.servicemix.gshell.features.Feature;
 
-    protected void doExecute(RepositoryAdmin admin) throws Exception {
-        doDeploy(admin, bundles, true);
+/**
+ * A feature
+ */
+public class FeatureImpl implements Feature {
+
+    private String name;
+    private List<String> bundles = new ArrayList<String>();
+
+    public FeatureImpl(String name) {
+        this.name = name;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String[] getBundles() {
+        return bundles.toArray(new String[bundles.size()]);
+    }
+
+    public void addBundle(String bundle) {
+        bundles.add(bundle);
+    }
 }
