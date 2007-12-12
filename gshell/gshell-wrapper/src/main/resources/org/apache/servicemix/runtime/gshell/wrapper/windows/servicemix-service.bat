@@ -35,15 +35,15 @@ echo   remove            Remove the %APP_NAME% Windows service
 goto end
 
 :doRun
-"%APP_BASE%\bin\servicemix-wrapper.exe" -c "%APP_BASE%\etc\servicemix-wrapper.conf"
+"%APP_BASE%\bin\%APP_NAME%-wrapper.exe" -c "%APP_BASE%\etc\%APP_NAME%-wrapper.conf"
 goto end
 
 :doInstall
-"%APP_BASE%\bin\servicemix-wrapper.exe" -i "%APP_BASE%\etc\servicemix-wrapper.conf"
+"%APP_BASE%\bin\%APP_NAME%-wrapper.exe" -i "%APP_BASE%\etc\%APP_NAME%-wrapper.conf"
 goto end
 
 :doRemove
-"%APP_BASE%\bin\servicemix-wrapper.exe" -r "%APP_BASE%\etc\servicemix-wrapper.conf"
+"%APP_BASE%\bin\%APP_NAME%-wrapper.exe" -r "%APP_BASE%\etc\%APP_NAME%-wrapper.conf"
 goto end
 
 :end

@@ -70,28 +70,28 @@ public class InstallCommand
 			File serviceFile=null;
 			if( os.startsWith("Win") ) {
 				mkdir(bin);
-				copyResourceToDir(bin, "windows/servicemix-wrapper.exe", false);
-				serviceFile = new File(bin,"servicemix-service.bat");
+				copyResourceTo(new File(bin, name+"-wrapper.exe"), "windows/servicemix-wrapper.exe", false);
+				serviceFile = new File(bin,name+"-service.bat");
 				copyFilteredResourceTo(serviceFile, "windows/servicemix-service.bat", props);
 				mkdir(lib);
-				copyResourceToDir(lib, "windows/wrapper.dll", false);								
+				copyResourceTo(new File(bin, "wrapper.dll"), "windows/wrapper.dll", false);								
 			} else if( os.startsWith("Mac OS X") ) {
 				mkdir(bin);
-				copyResourceToDir(bin, "macosx/servicemix-wrapper", false);
-				serviceFile = new File(bin,"servicemix-service");
+				copyResourceTo(new File(bin, name+"-wrapper"), "macosx/servicemix-wrapper", false);
+				serviceFile = new File(bin,name+"-service");
 				copyFilteredResourceTo(serviceFile, "unix/servicemix-service", props);
 				mkdir(lib);
-				copyResourceToDir(lib, "macosx/libwrapper.jnilib", false);
+				copyResourceTo(new File(lib, "libwrapper.jnilib"), "macosx/libwrapper.jnilib", false);
 				
 				// TODO: figure out how to hook in the service that it starts up
 				// when the machine boots up.
 			} else if( os.startsWith("Linux") ) {
 				mkdir(bin);
-				copyResourceToDir(bin, "linux/servicemix-wrapper", false);
-				serviceFile = new File(bin,"servicemix-service");
+				copyResourceTo(new File(bin, name+"-wrapper"), "linux/servicemix-wrapper", false);
+				serviceFile = new File(bin,name+"-service");
 				copyFilteredResourceTo(serviceFile, "unix/servicemix-service", props);
 				mkdir(lib);
-				copyResourceToDir(lib, "linux/libwrapper.jnilib", false);
+				copyResourceTo(new File(lib, "libwrapper.so"), "linux/libwrapper.so", false);
 				
 				// TODO: figure out how to hook in the service that it starts up
 				// when the machine boots up.
@@ -102,11 +102,12 @@ public class InstallCommand
 
     		// Install the wrapper jar to the lib directory..
 			mkdir(lib);
-			copyResourceToDir(lib, "all/servicemix-wrapper.jar", false);
+			copyResourceTo(new File(lib, "servicemix-wrapper.jar"), "all/servicemix-wrapper.jar", false);
 			mkdir(etc);
-			File wrapperConf = new File(etc,"servicemix-wrapper.conf");
+			File wrapperConf = new File(etc,name+"-wrapper.conf");
 			copyFilteredResourceTo(wrapperConf, "all/servicemix-wrapper.conf", props);
 
+			io.out.println("");
 			io.out.println("Setup complete.  You may want to tweak the JVM properties in the wrapper configuration file: "+wrapperConf.getPath());
 			io.out.println("before installing and starting the service.");
 			io.out.println("");
@@ -141,10 +142,9 @@ public class InstallCommand
         return 0;
     }
 
-	private void copyResourceToDir(File target, String resource, boolean text) throws Exception {
-		File outFile = new File(target, new File(resource).getName());
+	private void copyResourceTo(File outFile, String resource, boolean text) throws Exception {
 		if( !outFile.exists() ) {
-	        io.out.println("Creating file: "+outFile.getPath()+"");
+	        io.out.println("Creating file: @|green "+outFile.getPath()+"|");
 			InputStream is = InstallCommand.class.getResourceAsStream(resource);
 			try {
 				if( text ) {
@@ -175,12 +175,14 @@ public class InstallCommand
 			} finally {
 				safeClose(is);
 			}
+		} else {
+	        io.out.println("@|red File allready exists|. Move it out of the way if you want it re-created: "+outFile.getPath()+"");
 		}
 	}
 	
 	private void copyFilteredResourceTo(File outFile, String resource, HashMap<String, String> props) throws Exception {
 		if( !outFile.exists() ) {
-	        io.out.println("Creating file: "+outFile.getPath()+"");
+	        io.out.println("Creating file: @|green "+outFile.getPath()+"|");
 			InputStream is = InstallCommand.class.getResourceAsStream(resource);
 			try {
 				// Read it line at a time so that we can use the platform line ending when we write it out.
@@ -198,6 +200,8 @@ public class InstallCommand
 			} finally {
 				safeClose(is);
 			}
+		} else {
+	        io.out.println("@|red File allready exists|. Move it out of the way if you want it re-created: "+outFile.getPath()+"");
 		}
 	}
 
@@ -233,7 +237,7 @@ public class InstallCommand
 
 	private void mkdir(File file) {
 		if( !file.exists() ) {
-	        io.out.println("Creating dir:@|bold "+file.getPath()+"|");
+	        io.out.println("Creating missing directory: @|green "+file.getPath()+"|");
 			file.mkdirs();
 		}
 	}
