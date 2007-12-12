@@ -31,7 +31,7 @@
     <groupId>org.apache.servicemix.bundles</groupId>
     <artifactId>${pom.groupId}.${pkgArtifactId}-${pkgVersion}</artifactId>
     <packaging>bundle</packaging>
-    <name>ServiceMix OSGI Common Bundles: ${pkgArtifactId}</name>
+    <name>ServiceMix OSGI Common Bundles: ${pkgArtifactId}-${pkgVersion}</name>
     <description>
         This bundle simply wraps ${pkgArtifactId}-${pkgVersion}.jar.
     </description>
