@@ -268,7 +268,7 @@ run() {
             ;;
     esac
 
-    JAR=$SERVICEMIX_HOME/bin/servicemix.jar
+    JAR=$SERVICEMIX_HOME/lib/servicemix.jar
     if $cygwin; then
         SERVICEMIX_HOME=`cygpath --path --windows "$SERVICEMIX_HOME"`
         SERVICEMIX_BASE=`cygpath --path --windows "$SERVICEMIX_BASE"`

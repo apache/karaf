@@ -73,7 +73,7 @@
         <!-- Copy over jar files -->
         <fileSet>
             <directory>target/dependencies</directory>
-            <outputDirectory>/bin/</outputDirectory>
+            <outputDirectory>/lib/</outputDirectory>
         </fileSet>
 
     </fileSets>

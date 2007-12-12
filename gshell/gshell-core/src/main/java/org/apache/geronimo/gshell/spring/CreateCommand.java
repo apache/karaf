@@ -28,6 +28,7 @@ import java.util.Scanner;
 
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
+import org.apache.geronimo.gshell.common.io.PumpStreamHandler;
 import org.apache.geronimo.gshell.support.OsgiCommandSupport;
 
 /**
@@ -68,7 +69,7 @@ public class CreateCommand
 			    copyFilteredResourceToDir(serviceMixBase, "bin/servicemix.bat", props);
 			} else {
 			    copyFilteredResourceToDir(serviceMixBase, "bin/servicemix", props);
-			    // TODO: we should chmod a+x the file if we can.
+			    chmod(new File(serviceMixBase, "bin/servicemix"), "a+x");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -176,4 +177,18 @@ public class CreateCommand
 		}
 		
 	}
+	
+	private int chmod(File serviceFile, String mode) throws Exception {
+		ProcessBuilder builder = new ProcessBuilder();
+		builder.command("chmod", mode, serviceFile.getCanonicalPath());
+        Process p = builder.start();
+
+        PumpStreamHandler handler = new PumpStreamHandler(io.inputStream, io.outputStream, io.errorStream);
+        handler.attach(p);
+        handler.start();
+        int status = p.waitFor();
+        handler.stop();
+        return status;
+	}
+
 }
