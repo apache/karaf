@@ -165,6 +165,9 @@ public class SpringCommandRegistry extends DefaultCommandRegistry implements Lay
                 throw new NotFoundException(s);
             }
             Node n = ((GroupNode) node).find(s);
+            if (n == null) {
+                throw new NotFoundException(s);
+            }
             if (n instanceof GroupNode) {
                 return new CommandNode(n.getName(), n.getName());
             }
