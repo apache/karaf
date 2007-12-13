@@ -48,6 +48,15 @@ import org.osgi.util.tracker.ServiceTracker;
  * @version $Revision: 1.1 $
  */
 public class FileMonitor {
+	// Define a few logging levels.
+	public static final int TRACE = 0;
+	public static final int DEBUG = 1;
+	public static final int INFO  = 2;
+	public static final int WARN  = 3;
+	public static final int ERROR = 4;
+	public static final int FATAL = 5;
+	public static final int NONE = 6;
+	
     public final static String CONFIG_DIR = "org.apache.servicemix.filemonitor.configDir";
     public final static String DEPLOY_DIR = "org.apache.servicemix.filemonitor.monitorDir";
     public final static String GENERATED_JAR_DIR = "org.apache.servicemix.filemonitor.generatedJarDir";
@@ -61,10 +70,11 @@ public class FileMonitor {
     private Project project = new Project();
     private long scanInterval = 500L;
     private boolean loggedConfigAdminWarning;
-    private boolean debug;
     private List<Bundle> changedBundles = new ArrayList<Bundle>();
     private List<Bundle> bundlesToStart = new ArrayList<Bundle>();
     private List<Bundle> bundlesToUpdate = new ArrayList<Bundle>();
+    
+    private int logLevel = NONE;
 
     public FileMonitor() {
     }
@@ -177,14 +187,6 @@ public class FileMonitor {
 
     public void setScanInterval(long scanInterval) {
         this.scanInterval = scanInterval;
-    }
-
-    public boolean isDebug() {
-        return debug;
-    }
-
-    public void setDebug(boolean debug) {
-        this.debug = debug;
     }
 
     // Implementation methods
@@ -513,21 +515,27 @@ public class FileMonitor {
     }
 
     protected void debug(String message) {
-        if (debug) {
+        if (logLevel <= DEBUG) {
             System.out.println("DEBUG: " + message);
         }
     }
 
     protected void log(String message) {
-        System.out.println("INFO: " + message);
+        if (logLevel <= INFO) {
+            System.out.println("INFO: " + message);
+        }
     }
 
     protected void warn(String message) {
-        System.out.println("WARN: " + message);
+        if (logLevel <= WARN) {
+            System.out.println("WARN: " + message);
+        }
     }
 
     protected void warn(String message, Throwable e) {
-        warn(message);
-        e.printStackTrace();
+        if (logLevel <= WARN) {
+            System.out.println("WARN: " + message);
+            e.printStackTrace();
+        }
     }
 }
