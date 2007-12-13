@@ -134,6 +134,22 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                 return handler;
             }
 
+            // If this is the framework's "felix:" extension protocol, then
+            // return the ExtensionManager.m_extensionManager handler for 
+            // that immediately - this is a workaround for certain jvms that
+            // do a toString() on the extension url we add to the global
+            // URLClassloader.
+            if (protocol.equals("felix"))
+            {
+                handler = ExtensionManager.m_extensionManager;
+                if (m_streamHandlerCache == null)
+                {
+                    m_streamHandlerCache = new HashMap();
+                }
+                m_streamHandlerCache.put(protocol, handler);
+                return handler;
+            }
+
             // If there is not cached handler, then search for built-in
             // handler or create a new handler proxy.
             if (handler == null)

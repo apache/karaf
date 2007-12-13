@@ -84,7 +84,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
     // The private instance that is added to Felix.class.getClassLoader() -
     // will be null if extension bundles are not supported (i.e., we are not 
     // loaded by an instance of URLClassLoader)
-    private static final ExtensionManager m_extensionManager;
+    static final ExtensionManager m_extensionManager;
     
     static
     {
