@@ -21,9 +21,21 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactCollector;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.resolver.DefaultArtifactCollector;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -36,7 +48,7 @@ import org.apache.maven.project.MavenProject;
  * @version $Id: $
  * @goal generate-depends-file
  * @phase generate-resources
- * @requiresDependencyResolution runtime
+ * @requiresDependencyResolution test
  * @description Generates the dependencies properties file
  */
 public class GenerateDependsFileMojo extends AbstractMojo {
@@ -53,6 +65,13 @@ public class GenerateDependsFileMojo extends AbstractMojo {
     protected MavenProject project;
 
     /**
+     *
+     * @parameter expression='true'
+     * @required
+     */
+    protected boolean recursive;
+
+    /**
      * The file to generate
      *
      * @parameter default-value="${project.build.directory}/classes/META-INF/maven/dependencies.properties"
@@ -60,15 +79,88 @@ public class GenerateDependsFileMojo extends AbstractMojo {
     
     private File outputFile;
 
+    /**
+     * @parameter default-value="${localRepository}"
+     */
+    protected ArtifactRepository localRepo;
+
+    /**
+     * @parameter default-value="${project.remoteArtifactRepositories}"
+     */
+    protected List remoteRepos;
+
+    /**
+     * @component
+     */
+    protected ArtifactMetadataSource artifactMetadataSource;
+
+    /**
+     * @component
+     */
+    protected ArtifactResolver resolver;
+
+    protected ArtifactCollector collector = new DefaultArtifactCollector();
+
+    /**
+     * @component
+     */
+    protected ArtifactFactory factory;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         OutputStream out = null;
         try {
             outputFile.getParentFile().mkdirs();
             out = new FileOutputStream(outputFile);
             PrintStream printer = new PrintStream(out);
-            populateProperties(printer);
-            getLog().info("Created: " + outputFile);
 
+            List<Dependency> dependencies;
+            if (!recursive) {
+                dependencies = project.getDependencies();
+            } else {
+                Set<Artifact> artifacts = project.getArtifacts();
+                dependencies = new ArrayList<Dependency>();
+                for (Artifact a : artifacts) {
+                    Dependency dep = new Dependency();
+                    dep.setGroupId(a.getGroupId());
+                    dep.setArtifactId(a.getArtifactId());
+                    dep.setVersion(a.getVersion());
+                    dep.setClassifier(a.getClassifier());
+                    dep.setType(a.getType());
+                    dep.setScope(a.getScope());
+                    dependencies.add(dep);
+                }
+            }
+            Collections.sort(dependencies, new Comparator<Dependency>() {
+                public int compare(Dependency o1, Dependency o2) {
+                    int result = o1.getGroupId().compareTo( o2.getGroupId() );
+                    if ( result == 0 ) {
+                        result = o1.getArtifactId().compareTo( o2.getArtifactId() );
+                        if ( result == 0 ) {
+                            result = o1.getType().compareTo( o2.getType() );
+                            if ( result == 0 ) {
+                                if ( o1.getClassifier() == null ) {
+                                    if ( o2.getClassifier() != null ) {
+                                        result = 1;
+                                    }
+                                } else {
+                                    if ( o2.getClassifier() != null ) {
+                                        result = o1.getClassifier().compareTo( o2.getClassifier() );
+                                    } else {
+                                        result = -1;
+                                    }
+                                }
+                                if ( result == 0 ) {
+                                    // We don't consider the version range in the comparison, just the resolved version
+                                    result = o1.getVersion().compareTo( o2.getVersion() );
+                                }
+                            }
+                        }
+                    }
+                    return result;
+                }
+            });
+            populateProperties(printer, dependencies);
+            getLog().info("Created: " + outputFile);
         } catch (Exception e) {
             throw new MojoExecutionException(
                     "Unable to create dependencies file: " + e, e);
@@ -83,7 +175,7 @@ public class GenerateDependsFileMojo extends AbstractMojo {
         }
     }
 
-    protected void populateProperties(PrintStream out) {
+    protected void populateProperties(PrintStream out, List<Dependency> dependencies) {
         out.println("# Project dependencies generated by the Apache ServiceMix Maven Plugin");
         out.println("# Generated at: " + new Date());
         out.println();
@@ -96,7 +188,8 @@ public class GenerateDependsFileMojo extends AbstractMojo {
         out.println("# dependencies");
         out.println();
 
-        Iterator iterator = project.getDependencies().iterator();
+        Iterator iterator = dependencies.iterator();
+
         while (iterator.hasNext()) {
             Dependency dependency = (Dependency) iterator.next();
             String prefix = dependency.getGroupId() + SEPARATOR + dependency.getArtifactId() + SEPARATOR;
@@ -112,4 +205,5 @@ public class GenerateDependsFileMojo extends AbstractMojo {
             getLog().debug("Dependency: " + dependency + " classifier: " + classifier + " type: " + dependency.getType());
         }
     }
+
 }

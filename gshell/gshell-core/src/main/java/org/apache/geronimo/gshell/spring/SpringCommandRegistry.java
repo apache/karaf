@@ -40,7 +40,7 @@ import org.apache.geronimo.gshell.shell.Environment;
  * Time: 3:47:24 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SpringCommandRegistry extends DefaultCommandRegistry implements LayoutManager {
+    public class SpringCommandRegistry extends DefaultCommandRegistry implements LayoutManager {
 
     public static final String SEPARATOR = ":";
 

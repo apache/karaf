@@ -34,6 +34,8 @@
     <name>ServiceMix Runtime :: Testing</name>
 
     <modules>
+        <module>depends-maven-plugin</module>
+        <module>support</module>
     </modules>
 
 </project>

@@ -37,9 +37,9 @@
   <modules>
     <module>bundles</module>
     <module>main</module>
-    <module>gshell</module>
     <module>filemonitor</module>
     <module>testing</module>
+    <module>gshell</module>
     <module>assembly</module>
   </modules>
 
@@ -78,7 +78,7 @@
       <jline.version>0.9.93</jline.version>
       <log4j.version>1.2.14</log4j.version>
       <mina.version>1.1.6-r602102</mina.version>
-      <pax.logging.version>0.9.9-SNAPSHOT</pax.logging.version>
+      <pax.logging.version>0.9.8</pax.logging.version>
       <spring.osgi.version>1.0-m3</spring.osgi.version>
       <spring.version>2.5</spring.version>
       <xstream.version>1.2.2</xstream.version>
@@ -146,6 +146,11 @@
       <dependency>
           <groupId>org.springframework</groupId>
           <artifactId>spring-context</artifactId>
+          <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-test</artifactId>
           <version>${spring.version}</version>
       </dependency>
       <dependency>
