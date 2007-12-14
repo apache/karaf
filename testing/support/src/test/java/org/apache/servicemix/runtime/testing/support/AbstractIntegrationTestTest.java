@@ -16,15 +16,19 @@
  */
 package org.apache.servicemix.runtime.testing.support;
 
-import org.junit.Test;import static org.junit.Assert.assertTrue;import static org.junit.Assert.assertFalse;
+import org.junit.Test;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;import static org.junit.Assert.assertEquals;
 
 public class AbstractIntegrationTestTest {
 
     @Test
     public void testSnapshotVersion() {
-        assertTrue(AbstractIntegrationTest.isSnapshot("0.9.0-20070713.230317-1"));
-        assertTrue(AbstractIntegrationTest.isSnapshot("0.9.0-SNAPSHOT"));        
+        assertTrue(AbstractIntegrationTest.isTimestamped("0.9.0-20070713.230317-1"));
+        assertTrue(AbstractIntegrationTest.isSnapshot("0.9.0-SNAPSHOT"));
         assertFalse(AbstractIntegrationTest.isSnapshot("0.9.0"));
+        assertEquals("0.9.0-SNAPSHOT", AbstractIntegrationTest.getSnapshot("0.9.0-20070713.230317-1"));
+        assertEquals("0.9.0", "0.9.0");
     }
 
 }

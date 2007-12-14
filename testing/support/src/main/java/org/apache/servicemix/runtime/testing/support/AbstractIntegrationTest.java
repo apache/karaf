@@ -27,11 +27,15 @@ import org.apache.log4j.PropertyConfigurator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.osgi.internal.util.concurrent.Counter;
 import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
-import org.springframework.osgi.test.platform.Platforms;
+import org.springframework.osgi.test.provisioning.ArtifactLocator;
 import org.springframework.osgi.util.OsgiFilterUtils;
 import org.springframework.osgi.util.OsgiListenerUtils;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTests {
 
@@ -98,6 +102,28 @@ public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTe
         bundle.start();
     }
 
+    protected Resource locateBundle(String bundleId) {
+        Assert.hasText(bundleId, "bundleId should not be empty");
+
+        // parse the String
+        String[] artifactId = StringUtils.commaDelimitedListToStringArray(bundleId);
+
+        Assert.isTrue(artifactId.length >= 3, "the CSV string " + bundleId + " contains too few values");
+        // TODO: add a smarter mechanism which can handle 1 or 2 values CSVs
+        for (int i = 0; i < artifactId.length; i++) {
+            artifactId[i] = StringUtils.trimWhitespace(artifactId[i]);
+        }
+
+        File f;
+        if (artifactId.length == 3) {
+            f = localMavenBundle(artifactId[0], artifactId[1], artifactId[2], null, ArtifactLocator.DEFAULT_ARTIFACT_TYPE);
+        } else {
+            f = localMavenBundle(artifactId[0], artifactId[1], artifactId[2], null, artifactId[3]);
+        }
+        return new FileSystemResource(f);
+    }
+
+
     protected File localMavenBundle(String groupId, String artifact, String version, String classifier, String type) {
         String defaultHome = new File(new File(System.getProperty("user.home")), ".m2/repository").getAbsolutePath();
         File repositoryHome = new File(System.getProperty("localRepository", defaultHome));
@@ -106,14 +132,7 @@ public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTe
         location.append('/');
         location.append(artifact);
         location.append('/');
-        /*
-        if (isSnapshot(version)) {
-            location.append("SNAPSHOT");
-        } else {
-            location.append(version);
-        }
-        */
-        location.append(version);
+        location.append(getSnapshot(version));
         location.append('/');
         location.append(artifact);
         location.append('-');
@@ -128,8 +147,19 @@ public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTe
         return new File(repositoryHome, location.toString());
     }
 
+    protected static String getSnapshot(String version) {
+        if (isTimestamped(version)) {
+            return version.substring(0, version.lastIndexOf('-', version.lastIndexOf('-') - 1)) + "-SNAPSHOT";
+        }
+        return version;
+    }
+
+    protected static boolean isTimestamped(String version) {
+        return version.matches(".+-\\d\\d\\d\\d\\d\\d\\d\\d\\.\\d\\d\\d\\d\\d\\d-\\d+");
+    }
+
     protected static boolean isSnapshot(String version) {
-        return version.matches(".+-(\\d\\d\\d\\d\\d\\d\\d\\d\\.\\d\\d\\d\\d\\d\\d-\\d+|SNAPSHOT)");
+        return version.matches(".+-SNAPSHOT");
     }
 
     public <T> T getOsgiService(Class<T> type) {
