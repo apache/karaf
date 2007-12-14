@@ -63,6 +63,12 @@
           <groupId>org.apache.felix</groupId>
           <artifactId>org.apache.felix.main</artifactId>
           <version>${felix.framework.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.osgi</groupId>
+                  <artifactId>osgi_R4_core</artifactId>
+              </exclusion>
+          </exclusions>
       </dependency>
       <dependency>
           <groupId>org.apache.felix</groupId>

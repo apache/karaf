@@ -27,10 +27,9 @@ import org.apache.log4j.PropertyConfigurator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
-import org.springframework.osgi.internal.test.platform.FelixPlatform;
 import org.springframework.osgi.internal.util.concurrent.Counter;
 import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
-import org.springframework.osgi.test.platform.OsgiPlatform;
+import org.springframework.osgi.test.platform.Platforms;
 import org.springframework.osgi.util.OsgiFilterUtils;
 import org.springframework.osgi.util.OsgiListenerUtils;
 
@@ -45,10 +44,6 @@ public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTe
 
     private Properties dependencies;
 
-
-    protected OsgiPlatform createPlatform() {
-        return new FelixPlatform();
-    }
 
     protected String getBundle(String groupId, String artifactId) {
         return groupId + "," + artifactId + "," + getBundleVersion(groupId, artifactId);
@@ -92,6 +87,7 @@ public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTe
             getBundle("org.springframework.osgi", "spring-osgi-extender"),
             getBundle("org.springframework.osgi", "spring-osgi-test"),
             getBundle("org.springframework.osgi", "spring-osgi-annotation"),
+            getBundle("org.apache.servicemix.runtime.testing", "org.apache.servicemix.runtime.testing.support"),
 		};
     }
 
