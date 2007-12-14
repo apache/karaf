@@ -25,7 +25,12 @@ import java.util.*;
 
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.cache.BundleCache;
+import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.startlevel.StartLevel;
 
 /**
  * <p>
@@ -33,15 +38,13 @@ import org.apache.felix.framework.util.StringMap;
  * intended to be the only way to instantiate and execute the framework; rather, it is
  * one example of how to do so. When embedding the framework in a host application,
  * this class can serve as a simple guide of how to do so. It may even be
- * worthwhile to reuse some of its property handling capabilities. This class
- * is completely static and is only intended to start a single instance of
- * the framework.
+ * worthwhile to reuse some of its property handling capabilities.
  * </p>
 **/
-public class Main
+public class Main implements BundleActivator
 {
     /**
-     * The system property name used to specify an URL to the system
+     * The property name used to specify an URL to the system
      * property file.
     **/
     public static final String SYSTEM_PROPERTIES_PROP = "felix.system.properties";
@@ -50,7 +53,7 @@ public class Main
     **/
     public static final String SYSTEM_PROPERTIES_FILE_VALUE = "system.properties";
     /**
-     * The system property name used to specify an URL to the configuration
+     * The property name used to specify an URL to the configuration
      * property file to be used for the created the framework instance.
     **/
     public static final String CONFIG_PROPERTIES_PROP = "felix.config.properties";
@@ -62,8 +65,37 @@ public class Main
      * The default name used for the default configuration properties file.
     **/
     public static final String DEFAULT_PROPERTIES_FILE_VALUE = "default.properties";
+    /**
+     * The property name prefix for the launcher's auto-install property.
+    **/
+    public static final String AUTO_INSTALL_PROP = "felix.auto.install";
+    /**
+     * The property name prefix for the launcher's auto-start property.
+    **/
+    public static final String AUTO_START_PROP = "felix.auto.start";
 
+    private static Properties m_configProps = null;
     private static Felix m_felix = null;
+
+    /**
+     * Used to instigate auto-install and auto-start configuration
+     * property processing via a custom framework activator during
+     * framework startup.
+     * @param context The system bundle context.
+    **/
+    public void start(BundleContext context)
+    {
+        Main.processAutoProperties(context);
+    }
+
+    /**
+     * Currently does nothing as part of framework shutdown.
+     * @param context The system bundle context.
+    **/
+    public void stop(BundleContext context)
+    {
+        // Do nothing.
+    }
 
     /**
      * <p>
@@ -80,7 +112,8 @@ public class Main
      *       The only properties defined in this file that will impact the framework's
      *       behavior are the those concerning setting HTTP proxies, such as
      *       <tt>http.proxyHost</tt>, <tt>http.proxyPort</tt>, and
-     *       <tt>http.proxyAuth</tt>.
+     *       <tt>http.proxyAuth</tt>. Generally speaking, the framework does
+     *       not use system properties at all.
      *   </li>
      *   <li><i><b>Perform system property variable substitution on system
      *       properties.</b></i> Any system properties in the system property
@@ -122,7 +155,7 @@ public class Main
      *       <a href="cache/DefaultBundleCache.html"><tt>DefaultBundleCache</tt></a>
      *       documentation for more details its configuration options.
      *   </li>
-     *   <li><i><b>Creates and starts a framework instance.</b></i> A 
+     *   <li><i><b>Creates and starts a framework instance.</b></i> A
      *       case insensitive
      *       <a href="util/StringMap.html"><tt>StringMap</tt></a>
      *       is created for the configuration property file and is passed
@@ -138,30 +171,50 @@ public class Main
      * interact with the framework are installed or if the configuration property
      * file cannot be found, the framework will appear to be hung or deadlocked.
      * This is not the case, it is executing correctly, there is just no way to
-     * interact with it. Refer to the
-     * <a href="Felix.html#Felix(java.util.Map, java.util.List)">
-     * <tt>Felix</tt></a> constructor documentation for more information on
-     * framework configuration options.
+     * interact with it. The default launcher provides two configuration properties
+     * to help you automatically install and/or start bundles, which are:
+     * </p>
+     * <ul>
+     *   <li><tt>felix.auto.install.&lt;n&gt;</tt> - Space-delimited list of
+     *       bundle URLs to automatically install into start level <tt>n</tt> when
+     *       the framework is started. Append a specific start level to this
+     *       property name to assign the bundles' start level
+     *       (e.g., <tt>felix.auto.install.2</tt>); otherwise, bundles are
+     *       installed into the default bundle start level.
+     *   </li>
+     *   <li><tt>felix.auto.start.&lt;n&gt;</tt> - Space-delimited list of
+     *       bundle URLs to automatically install and start into start level
+     *       <tt>n</tt> when the framework is started. Append a
+     *       specific start level to this property name to assign the
+     *       bundles' start level(e.g., <tt>felix.auto.start.2</tt>); otherwise,
+     *       bundles are installed into the default bundle start level.
+     *   </li>
+     * </ul>
+     * <p>
+     * These properties should be specified in the <tt>config.properties</tt>
+     * so that they can be processed by the launcher during the framework
+     * startup process.
      * </p>
      * @param argv An array of arguments, all of which are ignored.
      * @throws Exception If an error occurs.
     **/
+
     public static void main(String[] argv) throws Exception
     {
         // Load system properties.
         Main.loadSystemProperties();
 
         // Read configuration properties.
-        Properties configProps = Main.loadConfigProperties();
+        m_configProps = Main.loadConfigProperties();
 
         // Copy framework properties from the system properties.
-        Main.copySystemProperties(configProps);
+        Main.copySystemProperties(m_configProps);
 
         // See if the profile name property was specified.
-        String profileName = configProps.getProperty(BundleCache.CACHE_PROFILE_PROP);
+        String profileName = m_configProps.getProperty(BundleCache.CACHE_PROFILE_PROP);
 
         // See if the profile directory property was specified.
-        String profileDirName = configProps.getProperty(BundleCache.CACHE_PROFILE_DIR_PROP);
+        String profileDirName = m_configProps.getProperty(BundleCache.CACHE_PROFILE_DIR_PROP);
 
         // Print welcome banner.
         System.out.println("\nWelcome to Felix.");
@@ -185,7 +238,7 @@ public class Main
             System.out.println("");
             if (profileName.length() != 0)
             {
-                configProps.setProperty(BundleCache.CACHE_PROFILE_PROP, profileName);
+                m_configProps.setProperty(BundleCache.CACHE_PROFILE_PROP, profileName);
             }
         }
 
@@ -198,8 +251,13 @@ public class Main
 
         try
         {
+            // Create a list for custom framework activators and
+            // add an instance of Main to process auto-properties.
+            List list = new ArrayList();
+            list.add(new Main());
             // Now create an instance of the framework.
-            m_felix = new Felix(new StringMap(configProps, false), null);
+            Map configMap = new StringMap(m_configProps, false);
+            m_felix = new Felix(configMap, list);
             m_felix.start();
         }
         catch (Exception ex)
@@ -208,6 +266,222 @@ public class Main
             ex.printStackTrace();
             System.exit(-1);
         }
+    }
+
+    /**
+     * <p>
+     * Processes the auto-install and auto-start properties from the
+     * specified configuration properties.
+     */
+    private static void processAutoProperties(BundleContext context)
+    {
+        // Retrieve the Start Level service, since it will be needed
+        // to set the start level of the installed bundles.
+        StartLevel sl = (StartLevel) context.getService(
+            context.getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName()));
+
+        // The auto-install property specifies a space-delimited list of
+        // bundle URLs to be automatically installed into each new profile;
+        // the start level to which the bundles are assigned is specified by
+        // appending a ".n" to the auto-install property name, where "n" is
+        // the desired start level for the list of bundles.
+        for (Iterator i = m_configProps.keySet().iterator(); i.hasNext(); )
+        {
+            String key = (String) i.next();
+
+            // Ignore all keys that are not the auto-install property.
+            if (!key.startsWith(AUTO_INSTALL_PROP))
+            {
+                continue;
+            }
+
+            // If the auto-install property does not have a start level,
+            // then assume it is the default bundle start level, otherwise
+            // parse the specified start level.
+            int startLevel = sl.getInitialBundleStartLevel();
+            if (!key.equals(AUTO_INSTALL_PROP))
+            {
+                try
+                {
+                    startLevel = Integer.parseInt(key.substring(key.lastIndexOf('.') + 1));
+                }
+                catch (NumberFormatException ex)
+                {
+                    System.err.println("Invalid property: " + key);
+                }
+            }
+
+            StringTokenizer st = new StringTokenizer(m_configProps.getProperty(key), "\" ",true);
+            if (st.countTokens() > 0)
+            {
+                String location = null;
+                do
+                {
+                    location = nextLocation(st);
+                    if (location != null)
+                    {
+                        try
+                        {
+                            Bundle b = context.installBundle(location, null);
+                            sl.setBundleStartLevel(b, startLevel);
+                        }
+                        catch (Exception ex)
+                        {
+                            System.err.println("Auto-properties install: " + ex);
+                        }
+                    }
+                }
+                while (location != null);
+            }
+        }
+
+        // The auto-start property specifies a space-delimited list of
+        // bundle URLs to be automatically installed and started into each
+        // new profile; the start level to which the bundles are assigned
+        // is specified by appending a ".n" to the auto-start property name,
+        // where "n" is the desired start level for the list of bundles.
+        // The following code starts bundles in two passes, first it installs
+        // them, then it starts them.
+        for (Iterator i = m_configProps.keySet().iterator(); i.hasNext(); )
+        {
+            String key = (String) i.next();
+
+            // Ignore all keys that are not the auto-start property.
+            if (!key.startsWith(AUTO_START_PROP))
+            {
+                continue;
+            }
+
+            // If the auto-start property does not have a start level,
+            // then assume it is the default bundle start level, otherwise
+            // parse the specified start level.
+            int startLevel = sl.getInitialBundleStartLevel();
+            if (!key.equals(AUTO_START_PROP))
+            {
+                try
+                {
+                    startLevel = Integer.parseInt(key.substring(key.lastIndexOf('.') + 1));
+                }
+                catch (NumberFormatException ex)
+                {
+                    System.err.println("Invalid property: " + key);
+                }
+            }
+
+            StringTokenizer st = new StringTokenizer(m_configProps.getProperty(key), "\" ",true);
+            if (st.countTokens() > 0)
+            {
+                String location = null;
+                do
+                {
+                    location = nextLocation(st);
+                    if (location != null)
+                    {
+                        try
+                        {
+                            Bundle b = context.installBundle(location, null);
+                            sl.setBundleStartLevel(b, startLevel);
+                        }
+                        catch (Exception ex)
+                        {
+                            System.err.println("Auto-properties install:" + ex);
+                        }
+                    }
+                }
+                while (location != null);
+            }
+        }
+
+        // Now loop through and start the installed bundles.
+        for (Iterator i = m_configProps.keySet().iterator(); i.hasNext(); )
+        {
+            String key = (String) i.next();
+            if (key.startsWith(AUTO_START_PROP))
+            {
+                StringTokenizer st = new StringTokenizer(m_configProps.getProperty(key), "\" ",true);
+                if (st.countTokens() > 0)
+                {
+                    String location = null;
+                    do
+                    {
+                        location = nextLocation(st);
+                        if (location != null)
+                        {
+                            // Installing twice just returns the same bundle.
+                            try
+                            {
+                                Bundle b = context.installBundle(location, null);
+                                if (b != null)
+                                {
+                                    b.start();
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                System.err.println("Auto-properties start: " + ex);
+                            }
+                        }
+                    }
+                    while (location != null);
+                }
+            }
+        }
+    }
+
+    private static String nextLocation(StringTokenizer st)
+    {
+        String retVal = null;
+
+        if (st.countTokens() > 0)
+        {
+            String tokenList = "\" ";
+            StringBuffer tokBuf = new StringBuffer(10);
+            String tok = null;
+            boolean inQuote = false;
+            boolean tokStarted = false;
+            boolean exit = false;
+            while ((st.hasMoreTokens()) && (!exit))
+            {
+                tok = st.nextToken(tokenList);
+                if (tok.equals("\""))
+                {
+                    inQuote = ! inQuote;
+                    if (inQuote)
+                    {
+                        tokenList = "\"";
+                    }
+                    else
+                    {
+                        tokenList = "\" ";
+                    }
+
+                }
+                else if (tok.equals(" "))
+                {
+                    if (tokStarted)
+                    {
+                        retVal = tokBuf.toString();
+                        tokStarted=false;
+                        tokBuf = new StringBuffer(10);
+                        exit = true;
+                    }
+                }
+                else
+                {
+                    tokStarted = true;
+                    tokBuf.append(tok.trim());
+                }
+            }
+
+            // Handle case where end of token stream and
+            // still got data
+            if ((!exit) && (tokStarted))
+            {
+                retVal = tokBuf.toString();
+            }
+        }
+
+        return retVal;
     }
 
     /**
@@ -455,7 +729,7 @@ public class Main
         for (Enumeration e = System.getProperties().propertyNames();
              e.hasMoreElements(); )
         {
-            String key = (String)e.nextElement();
+            String key = (String) e.nextElement();
             if (key.startsWith("felix.") ||
                 key.equals("org.osgi.framework.system.packages") ||
                 key.equals("org.osgi.framework.bootdelegation"))

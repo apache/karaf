@@ -113,8 +113,8 @@ public class Felix extends FelixBundle
 
     /**
      * <p>
-     * This method starts the framework instance; instances of the framework
-     * are dormant until this method is called. The caller may also provide
+     * This method creates the framework instance; instances of the framework
+     * are not active until they are started. The constructor accepts a
      * <tt>Map</tt> instance that will be used to obtain configuration or
      * framework properties. Configuration properties are used internally by
      * the framework and its extensions to alter its default behavior.
@@ -147,18 +147,6 @@ public class Felix extends FelixBundle
      *       turned off completely. The log levels match those specified in the
      *       OSGi Log Service (i.e., 1 = error, 2 = warning, 3 = information,
      *       and 4 = debug). The default value is 1.
-     *   </li>
-     *   <li><tt>felix.auto.install.&lt;n&gt;</tt> - Space-delimited list of
-     *       bundles to automatically install into start level <tt>n</tt> when
-     *       the framework is started. Append a specific start level to this
-     *       property name to assign the bundles' start level
-     *       (e.g., <tt>felix.auto.install.2</tt>).
-     *   </li>
-     *   <li><tt>felix.auto.start.&lt;n&gt;</tt> - Space-delimited list of
-     *       bundles to automatically install and start into start level
-     *       <tt>n</tt> when the framework is started. Append a
-     *       specific start level to this property name to assign the
-     *       bundles' start level(e.g., <tt>felix.auto.start.2</tt>).
      *   </li>
      *   <li><tt>felix.startlevel.framework</tt> - The initial start level
      *       of the framework once it starts execution; the default
@@ -195,12 +183,6 @@ public class Felix extends FelixBundle
      * API documentation.
      * </p>
      * <p>
-     * Framework properties are somewhat misnamed, since they are not used by
-     * the framework, but by bundles via <tt>BundleContext.getProperty()</tt>.
-     * Please refer to bundle documentation of your specific bundle for any
-     * available properties.
-     * </p>
-     * <p>
      * The <a href="Main.html"><tt>Main</tt></a> class implements some
      * functionality for default property file handling, which makes it
      * possible to specify configuration properties and framework properties
@@ -210,7 +192,7 @@ public class Felix extends FelixBundle
      * class documentation for more information.
      * </p>
      *
-     * @param configMutableMap An map for obtaining configuration properties,
+     * @param configMutableMap A map for obtaining configuration properties,
      *        may be <tt>null</tt>.
      * @param activatorList A list of System Bundle activators.
     **/
@@ -219,7 +201,7 @@ public class Felix extends FelixBundle
         // Initialize member variables.
         m_configMutableMap = (configMutableMap == null)
             ? new StringMap(false) : configMutableMap;
-        m_configMap = createUnmodifiableMap(m_configMutableMap); 
+        m_configMap = createUnmodifiableMap(m_configMutableMap);
         m_activatorList = activatorList;
 
         // Create logger with appropriate log level. Even though the
@@ -271,15 +253,15 @@ public class Felix extends FelixBundle
             m_factory.createModule("0", m_extensionManager));
     }
 
-    private Map createUnmodifiableMap(Map mutableMap) 
+    private Map createUnmodifiableMap(Map mutableMap)
     {
         Map result = Collections.unmodifiableMap(mutableMap);
 
-        // Work around a bug in certain version of J9 where a call to 
-        // Collections.unmodifiableMap().keySet().iterator() throws 
-        // a NoClassDefFoundError. We try to detect this and return 
+        // Work around a bug in certain version of J9 where a call to
+        // Collections.unmodifiableMap().keySet().iterator() throws
+        // a NoClassDefFoundError. We try to detect this and return
         // the given mutableMap instead.
-        try 
+        try
         {
             result.keySet().iterator();
         }
@@ -684,60 +666,10 @@ public class Felix extends FelixBundle
         // Initialize event dispatcher.
         m_dispatcher = EventDispatcher.start(m_logger);
 
-        // Before we reload any cached bundles, let's create a system
-        // bundle that is responsible for providing specific container
-        // related services.
-        try
-        {
-            IContentLoader cl = m_extensionManager;
-            cl.setSearchPolicy(
-                new R4SearchPolicy(
-                    m_policyCore, m_systemBundleInfo.getCurrentModule()));
-            m_factory.setContentLoader(
-                m_systemBundleInfo.getCurrentModule(),
-                cl);
-            m_factory.setSecurityContext(
-                m_systemBundleInfo.getCurrentModule(),
-                getClass().getProtectionDomain());
-
-            m_installedBundleMap.put(
-                m_systemBundleInfo.getLocation(), this);
-
-            // Manually resolve the System Bundle, which will cause its
-            // state to be set to RESOLVED.
-            try
-            {
-                m_policyCore.resolve(m_systemBundleInfo.getCurrentModule());
-            }
-            catch (ResolveException ex)
-            {
-                // This should never happen.
-                throw new BundleException(
-                        "Unresolved package in System Bundle:"
-                        + ex.getRequirement());
-            }
-
-            // Create system bundle activator.
-            m_systemBundleInfo.setActivator(new SystemBundleActivator());
-
-            // Create the bundle context for the system bundle and
-            // then activate it.
-            m_systemBundleInfo.setBundleContext(new BundleContextImpl(m_logger, this, this));
-            Felix.m_secureAction.startActivator(m_systemBundleInfo.getActivator(), m_systemBundleInfo.getBundleContext());
-        }
-        catch (Throwable ex)
-        {
-            m_factory = null;
-            EventDispatcher.shutdown();
-            m_logger.log(Logger.LOG_ERROR, "Unable to start system bundle.", ex);
-            throw new RuntimeException("Unable to start system bundle.");
-        }
-
-        // Now that the system bundle is successfully created we can give
-        // its bundle context to the logger so that it can track log services.
-        m_logger.setSystemBundleContext(m_systemBundleInfo.getBundleContext());
-
-        // Now reload the cached bundles.
+        // Reload the cached bundles bundles before creating and starting
+        // the system bundle, since we want all cached bundles to be reloaded
+        // when we activate the system bundle and any subsequent custom
+        // framework activators passed into the framework constructor.
         BundleArchive[] archives = null;
 
         // First get cached bundle identifiers.
@@ -826,8 +758,58 @@ ex.printStackTrace();
             }
         }
 
-        // Load bundles from auto-install and auto-start properties;
-        processAutoProperties();
+        // Now that the cached bundles are reloaded, create the system
+        // bundle that is responsible for providing specific container
+        // related services and activating all custom framework activators.
+        try
+        {
+            IContentLoader cl = m_extensionManager;
+            cl.setSearchPolicy(
+                new R4SearchPolicy(
+                    m_policyCore, m_systemBundleInfo.getCurrentModule()));
+            m_factory.setContentLoader(
+                m_systemBundleInfo.getCurrentModule(),
+                cl);
+            m_factory.setSecurityContext(
+                m_systemBundleInfo.getCurrentModule(),
+                getClass().getProtectionDomain());
+
+            m_installedBundleMap.put(
+                m_systemBundleInfo.getLocation(), this);
+
+            // Manually resolve the System Bundle, which will cause its
+            // state to be set to RESOLVED.
+            try
+            {
+                m_policyCore.resolve(m_systemBundleInfo.getCurrentModule());
+            }
+            catch (ResolveException ex)
+            {
+                // This should never happen.
+                throw new BundleException(
+                    "Unresolved package in System Bundle:"
+                    + ex.getRequirement());
+            }
+
+            // Create system bundle activator.
+            m_systemBundleInfo.setActivator(new SystemBundleActivator());
+
+            // Create the bundle context for the system bundle and
+            // then activate it.
+            m_systemBundleInfo.setBundleContext(new BundleContextImpl(m_logger, this, this));
+            Felix.m_secureAction.startActivator(m_systemBundleInfo.getActivator(), m_systemBundleInfo.getBundleContext());
+        }
+        catch (Throwable ex)
+        {
+            m_factory = null;
+            EventDispatcher.shutdown();
+            m_logger.log(Logger.LOG_ERROR, "Unable to start system bundle.", ex);
+            throw new RuntimeException("Unable to start system bundle.");
+        }
+
+        // Now that the system bundle is successfully created we can give
+        // its bundle context to the logger so that it can track log services.
+        m_logger.setSystemBundleContext(m_systemBundleInfo.getBundleContext());
 
         // Set the start level using the start level service;
         // this ensures that all start level requests are
@@ -3615,214 +3597,6 @@ ex.printStackTrace();
         return sb.toString();
     }
 
-    private void processAutoProperties()
-    {
-        // The auto-install property specifies a space-delimited list of
-        // bundle URLs to be automatically installed into each new profile;
-        // the start level to which the bundles are assigned is specified by
-        // appending a ".n" to the auto-install property name, where "n" is
-        // the desired start level for the list of bundles.
-        for (Iterator i = m_configMap.keySet().iterator(); i.hasNext(); )
-        {
-            String key = (String) i.next();
-
-            // Ignore all keys that are not the auto-install property.
-            if (!key.startsWith(FelixConstants.AUTO_INSTALL_PROP))
-            {
-                continue;
-            }
-
-            // If the auto-install property does not have a start level,
-            // then assume it is the default bundle start level, otherwise
-            // parse the specified start level.
-            int startLevel = getInitialBundleStartLevel();
-            if (!key.equals(FelixConstants.AUTO_INSTALL_PROP))
-            {
-                try
-                {
-                    startLevel = Integer.parseInt(key.substring(key.lastIndexOf('.') + 1));
-                }
-                catch (NumberFormatException ex)
-                {
-                    m_logger.log(Logger.LOG_ERROR, "Invalid property: " + key);
-                }
-            }
-
-            StringTokenizer st = new StringTokenizer((String) m_configMap.get(key), "\" ",true);
-            if (st.countTokens() > 0)
-            {
-                String location = null;
-                do
-                {
-                    location = nextLocation(st);
-                    if (location != null)
-                    {
-                        try
-                        {
-                            FelixBundle b = (FelixBundle) installBundle(location, null);
-                            b.getInfo().setStartLevel(startLevel);
-                        }
-                        catch (Exception ex)
-                        {
-                            m_logger.log(
-                                Logger.LOG_ERROR, "Auto-properties install.", ex);
-                        }
-                    }
-                }
-                while (location != null);
-            }
-        }
-
-        // The auto-start property specifies a space-delimited list of
-        // bundle URLs to be automatically installed and started into each
-        // new profile; the start level to which the bundles are assigned
-        // is specified by appending a ".n" to the auto-start property name,
-        // where "n" is the desired start level for the list of bundles.
-        // The following code starts bundles in two passes, first it installs
-        // them, then it starts them.
-        for (Iterator i = m_configMap.keySet().iterator(); i.hasNext(); )
-        {
-            String key = (String) i.next();
-
-            // Ignore all keys that are not the auto-start property.
-            if (!key.startsWith(FelixConstants.AUTO_START_PROP))
-            {
-                continue;
-            }
-
-            // If the auto-start property does not have a start level,
-            // then assume it is the default bundle start level, otherwise
-            // parse the specified start level.
-            int startLevel = getInitialBundleStartLevel();
-            if (!key.equals(FelixConstants.AUTO_START_PROP))
-            {
-                try
-                {
-                    startLevel = Integer.parseInt(key.substring(key.lastIndexOf('.') + 1));
-                }
-                catch (NumberFormatException ex)
-                {
-                    m_logger.log(Logger.LOG_ERROR, "Invalid property: " + key);
-                }
-            }
-
-            StringTokenizer st = new StringTokenizer((String) m_configMap.get(key), "\" ",true);
-            if (st.countTokens() > 0)
-            {
-                String location = null;
-                do
-                {
-                    location = nextLocation(st);
-                    if (location != null)
-                    {
-                        try
-                        {
-                            FelixBundle b = (FelixBundle) installBundle(location, null);
-                            b.getInfo().setStartLevel(startLevel);
-                        }
-                        catch (Exception ex)
-                        {
-                            m_logger.log(Logger.LOG_ERROR, "Auto-properties install.", ex);
-                        }
-                    }
-                }
-                while (location != null);
-            }
-        }
-
-        // Now loop through and start the installed bundles.
-        for (Iterator i = m_configMap.keySet().iterator(); i.hasNext(); )
-        {
-            String key = (String) i.next();
-            if (key.startsWith(FelixConstants.AUTO_START_PROP))
-            {
-                StringTokenizer st = new StringTokenizer((String) m_configMap.get(key), "\" ",true);
-                if (st.countTokens() > 0)
-                {
-                    String location = null;
-                    do
-                    {
-                        location = nextLocation(st);
-                        if (location != null)
-                        {
-                            // Installing twice just returns the same bundle.
-                            try
-                            {
-                                FelixBundle bundle = (FelixBundle) installBundle(location, null);
-                                if (bundle != null)
-                                {
-                                    startBundle(bundle, true);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                m_logger.log(
-                                    Logger.LOG_ERROR, "Auto-properties start.", ex);
-                            }
-                        }
-                    }
-                    while (location != null);
-                }
-            }
-        }
-    }
-
-    private String nextLocation(StringTokenizer st)
-    {
-        String retVal = null;
-
-        if (st.countTokens() > 0)
-        {
-            String tokenList = "\" ";
-            StringBuffer tokBuf = new StringBuffer(10);
-            String tok = null;
-            boolean inQuote = false;
-            boolean tokStarted = false;
-            boolean exit = false;
-            while ((st.hasMoreTokens()) && (!exit))
-            {
-                tok = st.nextToken(tokenList);
-                if (tok.equals("\""))
-                {
-                    inQuote = ! inQuote;
-                    if (inQuote)
-                    {
-                        tokenList = "\"";
-                    }
-                    else
-                    {
-                        tokenList = "\" ";
-                    }
-
-                }
-                else if (tok.equals(" "))
-                {
-                    if (tokStarted)
-                    {
-                        retVal = tokBuf.toString();
-                        tokStarted=false;
-                        tokBuf = new StringBuffer(10);
-                        exit = true;
-                    }
-                }
-                else
-                {
-                    tokStarted = true;
-                    tokBuf.append(tok.trim());
-                }
-            }
-
-            // Handle case where end of token stream and
-            // still got data
-            if ((!exit) && (tokStarted))
-            {
-                retVal = tokBuf.toString();
-            }
-        }
-
-        return retVal;
-    }
-
     //
     // Private utility methods.
     //
@@ -3940,11 +3714,11 @@ ex.printStackTrace();
             }
 
             // Add the bundle activator for the package admin service.
-            m_activatorList.add(new PackageAdminActivator(Felix.this));
+            m_activatorList.add(0, new PackageAdminActivator(Felix.this));
             // Add the bundle activator for the start level service.
-            m_activatorList.add(new StartLevelActivator(m_logger, Felix.this));
+            m_activatorList.add(0, new StartLevelActivator(m_logger, Felix.this));
             // Add the bundle activator for the url handler service.
-            m_activatorList.add(new URLHandlersActivator(m_configMap, Felix.this));
+            m_activatorList.add(0, new URLHandlersActivator(m_configMap, Felix.this));
 
             // Start all activators.
             for (int i = 0; i < m_activatorList.size(); i++)
