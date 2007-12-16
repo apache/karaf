@@ -24,9 +24,9 @@ import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.felix.sandbox.obr.plugin.Config;
-import org.apache.felix.sandbox.obr.plugin.ObrUpdate;
-import org.apache.felix.sandbox.obr.plugin.PathFile;
+import org.apache.felix.obr.plugin.Config;
+import org.apache.felix.obr.plugin.ObrUpdate;
+import org.apache.felix.obr.plugin.PathFile;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;

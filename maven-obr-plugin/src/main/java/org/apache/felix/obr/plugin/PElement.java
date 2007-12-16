@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.obr.plugin;
+package org.apache.felix.obr.plugin;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

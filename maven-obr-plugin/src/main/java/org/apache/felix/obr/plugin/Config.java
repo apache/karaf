@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.sandbox.obr.plugin;
+package org.apache.felix.obr.plugin;
 
 /**
  * this class is used to store some user information about configuration of the plugin.
