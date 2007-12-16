@@ -126,8 +126,6 @@
         </property>
       </activation>
       <modules>
-        <module>../bundleplugin</module>
-        <module>../maven-obr-plugin</module>
 
         <module>../upnp/extra</module>
         <module>../upnp/basedriver</module>
