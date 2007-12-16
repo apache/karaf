@@ -1,33 +1,33 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html><head><title>Apache Felix</title>
+<html><head><title>Apache Felix - Maven Bundle Plugin (BND)</title>
 
 
   
     
     <link rel="stylesheet" href="maven-bundle-plugin-bnd_files/site.css" type="text/css" media="all">
-    <link rel="stylesheet" href="maven-bundle-plugin-bnd_files/print.html" type="text/css" media="print">
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"></head><body>
-    <div class="title">
-      <img alt="Logo" src="maven-bundle-plugin-bnd_files/apache-felix-small.png" align="right">
-    </div>
+    <div class="title"><div class="logo"><a href="http://felix.apache.org/site/index.html"><img alt="Apache Felix" src="maven-bundle-plugin-bnd_files/logo.png" border="0"></a></div><div class="header"><a href="http://www.apache.org/"><img alt="Apache" src="maven-bundle-plugin-bnd_files/apache.png" border="0"></a></div></div>
     <div class="menu">
-      <ul>
-        <li><a href="http://cwiki.apache.org/FELIX/index.html">home</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/news.html">news</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/status.html">status</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/license.html">license</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/downloads.html">downloads</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/documentation.html">documentation</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/committers.html">committers</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/mailinglists.html">mailing lists</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/faq.html">faq</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/roadmap.html">roadmap</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/sourcecode.html">source code</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/codingstandards.html">coding standards</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/issuetracking.html">issue tracking</a></li>
-        <li><a href="http://cwiki.apache.org/FELIX/dependencies.html">dependencies</a></li>
-      </ul>
-    </div>
+<ul>
+	<li><a href="http://felix.apache.org/site/index.html" title="Index">home</a></li>
+	<li><a href="http://felix.apache.org/site/news.html" title="news">news</a></li>
+	<li><a href="http://felix.apache.org/site/status.html" title="status">status</a></li>
+	<li><a href="http://felix.apache.org/site/license.html" title="license">license</a></li>
+	<li><span class="nobr"><a href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><a href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</a></li>
+	<li><a href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</a></li>
+	<li><span class="nobr"><a href="http://cwiki.apache.org/confluence/x/O-" title="Visit page outside Confluence" rel="nofollow">wiki<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><a href="http://felix.apache.org/site/committers.html" title="committers">committers</a></li>
+	<li><a href="http://felix.apache.org/site/faq.html" title="faq">faq</a></li>
+	<li><a href="http://felix.apache.org/site/roadmap.html" title="roadmap">roadmap</a></li>
+	<li><a href="http://felix.apache.org/site/sourcecode.html" title="sourcecode">source code</a></li>
+	<li><a href="http://felix.apache.org/site/codingstandards.html" title="codingstandards">coding standards</a></li>
+	<li><a href="http://felix.apache.org/site/issuetracking.html" title="issuetracking">issue tracking</a></li>
+	<li><a href="http://felix.apache.org/site/dependencies.html" title="dependencies">dependencies</a></li>
+	<li><span class="nobr"><a href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">apache software foundation<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+</ul> </div>
     <div class="main">
 <h1><a name="MavenBundlePlugin(BND)-BundlePluginforMaven"></a>Bundle Plugin for Maven</h1>
 
@@ -49,6 +49,7 @@ will first look at a simple example of how to use the plugin to give an
 immediate flavor. A detailed "<a href="#MavenBundlePlugin%2528BND%2529-howto" title="how-to on Maven Bundle Plugin (BND)">how to</a>" will follow.</p>
 
 <p>Assume that we have a simple bundle project that has a pubic API package an several implementation packages, such as:</p>
+
 <div class="preformatted"><div class="preformattedContent">
 <pre>org.foo.myproject.api
 org.foo.myproject.impl1
@@ -56,7 +57,9 @@ org.foo.myproject.impl2
 ...
 </pre>
 </div></div>
+
 <p>If we also assume that we have a bundle activator in one of the implementation packages, then the <tt>&lt;plugins&gt;</tt> section of the POM file for this bundle project would look like this:</p>
+
 <div class="preformatted"><div class="preformattedContent">
 <pre>...
 &lt;plugins&gt;
@@ -76,6 +79,7 @@ org.foo.myproject.impl2
 ...
 </pre>
 </div></div>
+
 <p>The <tt>&lt;Export-Package&gt;</tt> and <tt>&lt;Private-Package&gt;</tt> instructions tell the plugin about the contents of the resulting bundle JAR file. The <tt>&lt;Export-Package&gt;</tt> instruction tells the plugin which of the available packages to copy into the bundle <b>and</b> export, while the <tt>&lt;Private-Package&gt;</tt> instruction indicates which of the available packages to copy into the bundle <b>but not</b>
 export. If the two sets overlap, as they do in the case, then the
 export takes precedence. Since we did not specify any values for any
@@ -90,6 +94,7 @@ That's it.</p>
 <p>The BND library underlying the plugin defines instructions to direct
 its behavior. For this Maven plugin, these instructions are issued in
 the plugin configuration section of the POM file, as was illustrated <a href="#MavenBundlePlugin%2528BND%2529-simpleexample" title="simple-example on Maven Bundle Plugin (BND)">above</a>. BND recognizes three types of instructions:</p>
+
 <ol>
 	<li><em>Manifest headers</em> - Any instruction that starts with
 a capital letter will appear in the resulting bundle's manifest file;
@@ -108,7 +113,6 @@ not copied to the manifest.</li>
 <p><a name="MavenBundlePlugin(BND)-instructions"></a></p>
 
 <h2><a name="MavenBundlePlugin(BND)-Instructions"></a>Instructions</h2>
-
 
 <h3><a name="MavenBundlePlugin(BND)-{{&lt;ExportPackage&gt;}}"></a><tt>&lt;Export-Package&gt;</tt></h3>
 
@@ -144,6 +148,7 @@ and private package headers, then the export takes precedence.</p>
 arbitrary resources that should be copied into the bundle JAR file. The
 specified resources are declared as clauses that can have the following
 forms:</p>
+
 <div class="preformatted"><div class="preformattedContent">
 <pre>clause ::= assignment | inline | simple
 assignment ::= PATH '=' PATH
@@ -151,6 +156,7 @@ simple ::= PATH
 inline ::= '@' PATH
 </pre>
 </div></div>
+
 <p>For the <tt>&lt;Include-Resource&gt;</tt> instruction, actual file paths are relative to the <tt>pom.xml</tt>, while file copy destinations are relative to the root of the resulting bundle JAR file. In the case of <tt>assignment</tt> or <tt>simple</tt> forms, the <tt>PATH</tt> parameter can point to a file or directory. The <tt>simple</tt>
 form will place the resource in the bundle JAR with only the file name,
 i.e., without any path component. For example, including <tt>src/main/resources/a/b.c</tt> will result in a resource <tt>b.c</tt> in the root of the bundle JAR. If the <tt>PATH</tt>
@@ -182,6 +188,7 @@ work in the same way as for <tt>&lt;Export-Package&gt;</tt>, which means they ar
 <p>To use this plugin, very little information is required by BND. As
 part of the Maven integration, the plugin tries to set reasonable
 defaults for various instructions. For example:</p>
+
 <ul>
 	<li><tt>&lt;Bundle-SymbolicName&gt;</tt> is assumed to be "<tt>${groupId}.${artifactId</tt>}".</li>
 	<li><tt>&lt;Export-Package&gt;</tt> is assumed to be "<tt>${groupId}.${artifactId}.*</tt>", unless <tt>&lt;Private-Package&gt;</tt> is specified, then <tt>&lt;Export-Package&gt;</tt> is assumed to be empty.</li>
@@ -221,6 +228,7 @@ the <span class="nobr"><a href="http://maven.apache.org/index.html" title="Visit
 <p>To use the maven-bundle-plugin, you first need to add the plugin and
 some appropriate plugin configuration to your bundle project's POM.
 Below is an example of a simple OSGi bundle POM for Maven2:</p>
+
 <div class="preformatted"><div class="preformattedContent">
 <pre>&lt;project&gt;
   &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
@@ -252,28 +260,14 @@ Below is an example of a simple OSGi bundle POM for Maven2:</p>
       &lt;/plugin&gt;    &lt;!-- (2) END --&gt;
     &lt;/plugins&gt;
   &lt;/build&gt;
-  &lt;repositories&gt;
-    &lt;repository&gt;    &lt;!-- (3) START --&gt;
-      &lt;id&gt;apache.m2.incubator&lt;/id&gt;
-      &lt;name&gt;Apache M2 Incubator Repository&lt;/name&gt;
-      &lt;url&gt;http://people.apache.org/repo/m2-incubating-repository/&lt;/url&gt;
-    &lt;/repository&gt;   &lt;!-- (3) END --&gt;
-  &lt;/repositories&gt;
-  &lt;pluginRepositories&gt;
-    &lt;pluginRepository&gt;    &lt;!-- (4) START --&gt;
-      &lt;id&gt;apache.m2.incubator&lt;/id&gt;
-      &lt;name&gt;Apache M2 Incubator Repository&lt;/name&gt;
-      &lt;url&gt;http://people.apache.org/repo/m2-incubating-repository/&lt;/url&gt;
-    &lt;/pluginRepository&gt;   &lt;!-- (4) END --&gt;
-  &lt;/pluginRepositories&gt;
 &lt;/project&gt;
 </pre>
 </div></div>
-<p>There are four main things to note: (1) the <tt>&lt;packaging&gt;</tt>
-specifier must be "bundle", (2) the plugin and configuration must be
+
+<p>There are two main things to note: (1) the <tt>&lt;packaging&gt;</tt>
+specifier must be "bundle" and (2) the plugin and configuration must be
 specified (the configuration section is where you will issue
-instructions to the plugin), and the snapshot repository to resolve
-dependencies (3) and plugins (4).</p>
+instructions to the plugin).</p>
 
 <h2><a name="MavenBundlePlugin(BND)-RealWorldExample"></a>Real-World Example</h2>
 
@@ -283,6 +277,7 @@ package: <tt>org.apache.felix.log.impl</tt>. It has a dependency on
 the core OSGi interfaces as well as a dependency on the compendium OSGi
 interfaces for the specific log service interfaces. The following is
 its POM file:</p>
+
 <div class="preformatted"><div class="preformattedContent">
 <pre>&lt;project&gt;
   &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
@@ -324,23 +319,10 @@ its POM file:</p>
       &lt;/plugin&gt;
     &lt;/plugins&gt;
   &lt;/build&gt;
-  &lt;repositories&gt;
-    &lt;repository&gt;
-      &lt;id&gt;apache.m2.incubator&lt;/id&gt;
-      &lt;name&gt;Apache M2 Incubator Repository&lt;/name&gt;
-      &lt;url&gt;http://people.apache.org/repo/m2-incubating-repository/&lt;/url&gt;
-    &lt;/repository&gt;
-  &lt;/repositories&gt;
-  &lt;pluginRepositories&gt;
-    &lt;pluginRepository&gt;
-      &lt;id&gt;apache.m2.incubator&lt;/id&gt;
-      &lt;name&gt;Apache M2 Incubator Repository&lt;/name&gt;
-      &lt;url&gt;http://people.apache.org/repo/m2-incubating-repository/&lt;/url&gt;
-    &lt;/pluginRepository&gt;
-  &lt;/pluginRepositories&gt;
 &lt;/project&gt;
 </pre>
 </div></div>
+
 <p>Notice that the <tt>&lt;Export-Package&gt;</tt> instruction
 specifies that the bundle exports the Log Service package, even though
 this package is not contained in the bundle project. By declaring this,
@@ -351,6 +333,7 @@ resulting manifest for the Log Service bundle looks like this (notice
 how the imports/exports automatically have version information
 associated with them, which was obtained from packageinfo files in the
 source packages):</p>
+
 <div class="preformatted"><div class="preformattedContent">
 <pre>Manifest-Version: 1
 Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
@@ -371,8 +354,10 @@ Export-Service: org.osgi.service.log.LogService,org.osgi.service.log.L
 Bundle-SymbolicName: org.apache.felix.log
 </pre>
 </div></div>
+
 <p>The resulting bundle JAR file has the following content (notice how
 the LICENSE and NOTICE files were automatically copied from the <tt>src/main/resources/</tt> directory of the project):</p>
+
 <div class="preformatted"><div class="preformattedContent">
 <pre>META-INF/MANIFEST.MF
 LICENSE
@@ -413,22 +398,331 @@ org/osgi/service/log/packageinfo
 
 <h2><a name="MavenBundlePlugin(BND)-BuildingthePlugin"></a>Building the Plugin</h2>
 
-<p>The plugin is hosted at the Apache Felix incubator project. The
-following steps describe how to build and install the plugin into your
-local Maven2 repository.</p>
+<p>The plugin is hosted at the Apache Felix project. The following
+steps describe how to build and install the plugin into your local
+Maven2 repository.</p>
 
 <p>Using the SVN client of your choice, checkout the maven-bundle-plugin project.</p>
+
 <div class="preformatted"><div class="preformattedContent">
-<pre>$ svn co http://svn.apache.org/repos/asf/felix/trunk/tools/maven2/maven-bundle-plugin
+<pre>$ svn co http://svn.apache.org/repos/asf/felix/trunk/bundleplugin
 </pre>
 </div></div>
+
 <p>Using Maven2, build and install the maven-bundle-plugin by issuing
 the following Maven2 command in the project directory that was created
 as a result of the previous step.</p>
+
 <div class="preformatted"><div class="preformattedContent">
 <pre>$ mvn install
 </pre>
 </div></div>
+
+<h1><a name="MavenBundlePlugin(BND)-Goals"></a>Goals</h1>
+
+<p>The maven-bundle-plugin also provides additional functionality via
+some Maven goals. Command-line execution of a goal is performed as
+follows:</p>
+
+<div class="preformatted"><div class="preformattedContent">
+<pre>mvn org.apache.felix:maven-bundle-plugin:GOAL
+</pre>
+</div></div>
+
+<p>Where GOAL is one of the following:</p>
+
+<ul>
+	<li><tt>bundle</tt> - build an OSGi bundle jar<br>
+configuration options:
+	<ul>
+		<li><tt>manifestLocation</tt> defaults to ${project.build.outputDirectory}/META-INF</li>
+		<li><tt>unpackBundle</tt> unpack bundle contents to output directory, defaults to false</li>
+		<li><tt>supportedProjectTypes</tt> defaults to "jar","bundle"</li>
+	</ul>
+	</li>
+	<li><tt>bundleall</tt> - build an OSGi bundle jar for all transitive dependencies<br>
+configuration options:
+	<ul>
+		<li><tt>supportedProjectTypes</tt> defaults to "jar","bundle"</li>
+	</ul>
+	</li>
+	<li><tt>wrap</tt> - as above, but limited to the first level of dependencies<br>
+configuration options:
+	<ul>
+		<li><tt>supportedProjectTypes</tt> defaults to "jar","bundle"</li>
+	</ul>
+	</li>
+	<li><tt>manifest</tt> - create an OSGi manifest for the current project<br>
+configuration options:
+	<ul>
+		<li><tt>manifestLocation</tt> defaults to ${project.build.outputDirectory}/META-INF</li>
+		<li><tt>supportedProjectTypes</tt> defaults to "jar","bundle"</li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>There are also new instructions available from the underlying BND
+tool, which continues to be improved independently; for the latest see <span class="nobr"><a href="http://aqute.biz/Code/Bnd" title="Visit page outside Confluence" rel="nofollow">BND documentation<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span>.</p>
+
+<p>The default goal <tt>bundle</tt> will be initialized by setting the &lt;packaging&gt; entry to "bundle".</p>
+
+<h1><a name="MavenBundlePlugin(BND)-Embeddingdependencies"></a>Embedding dependencies</h1>
+
+<p>The Maven Bundle Plugin supports embedding project dependencies into the built bundle using the <tt>&lt;Embed-Dependency&gt;</tt> instruction listing all dependencies in standard Bundle manifest header syntax:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;Embed-Dependency&gt;</span>dependencies<span class="code-tag">&lt;/Embed-Dependency&gt;</span></pre>
+</div></div>
+
+<p>where:</p>
+
+<div class="preformatted"><div class="preformattedContent">
+<pre>dependencies ::= clause ( ',' clause ) *
+clause ::= MATCH ( ';' attr '=' MATCH | ';inline=true' )
+attr ::= 'groupId' | 'artifactId' | 'version' | 'scope' | 'type' | 'classifier'
+MATCH ::= &lt;globbed regular expressions&gt;
+</pre>
+</div></div>
+
+<p>some examples:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;Embed-Dependency&gt;</span>*;scope=compile|runtime<span class="code-tag">&lt;/Embed-Dependency&gt;</span>
+
+<span class="code-tag">&lt;Embed-Dependency&gt;</span>junit;scope=test<span class="code-tag">&lt;/Embed-Dependency&gt;</span>
+
+<span class="code-tag">&lt;Embed-Dependency&gt;</span>aopalliance;scope=!test;inline=true<span class="code-tag">&lt;/Embed-Dependency&gt;</span></pre>
+</div></div>
+
+<p>By default matched dependencies are embedded in the bundle under as <tt>artifactId-version.jar</tt>. This behaviour can be modified using the following instructions:</p>
+
+<ul>
+	<li><tt>&lt;Embed-StripVersion&gt;true&lt;/Embed-StripVersion&gt;</tt> - removes the version from the file (ie. <em>artifactId.jar</em>)</li>
+	<li><tt>&lt;Embed-StripGroup&gt;false&lt;/Embed-StripGroup&gt;</tt> - adds the groupId as a subdirectory (ie. <em>groupId/artifactId-version.jar</em>)</li>
+	<li><tt>&lt;Embed-Directory&gt;directory&lt;/Embed-Directory&gt;</tt> - adds a subdirectory (ie. <em>directory/artifactId-version.jar</em>)</li>
+</ul>
+
+
+<p>Normally the plugin only checks direct dependencies, but this can be
+changed to include the complete set of transitive dependencies with the
+following option:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;Embed-Transitive&gt;</span>true<span class="code-tag">&lt;/Embed-Transitive&gt;</span></pre>
+</div></div>
+
+<p>If you want a dependency inlined instead of embedded add the <tt>inline=true</tt>. For example to inline all <em>compile</em> and <em>runtime</em> scoped dependencies use:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;Embed-Dependency&gt;</span>*;scope=compile|runtime;inline=true<span class="code-tag">&lt;/Embed-Dependency&gt;</span></pre>
+</div></div>
+
+
+<h1><a name="MavenBundlePlugin(BND)-OBRintegration"></a>OBR integration</h1>
+
+<p>The latest Maven Bundle Plugin automatically updates the local OBR
+repository.xml file during the install phase, using a default location
+of:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">&lt;LOCAL-MAVEN-REPOSITORY&gt;/repository.xml</pre>
+</div></div>
+
+<p>You can configure the location of the OBR repository by using the command line:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">mvn clean install -DobrRepository=&lt;PATH_TO_OBR&gt;</pre>
+</div></div>
+
+<p>or in the configuration section for the maven-bundle-plugin in your Maven POM:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;groupId&gt;</span>org.apache.felix<span class="code-tag">&lt;/groupId&gt;</span>
+<span class="code-tag">&lt;artifactId&gt;</span>maven-bundle-plugin<span class="code-tag">&lt;/artifactId&gt;</span>
+<span class="code-tag">&lt;extensions&gt;</span>true<span class="code-tag">&lt;/extensions&gt;</span>
+<span class="code-tag">&lt;configuration&gt;</span>
+  <span class="code-tag">&lt;obrRepository&gt;</span>PATH_TO_OBR<span class="code-tag">&lt;/obrRepository&gt;</span>
+  <span class="code-tag">&lt;instructions&gt;</span>
+    <span class="code-tag"><span class="code-comment">&lt;!-- bnd instructions --&gt;</span></span>
+  <span class="code-tag">&lt;/instructions&gt;</span>
+<span class="code-tag">&lt;/configuration&gt;</span></pre>
+</div></div>
+
+<p>to disable OBR installation set the obrRepository to NONE, for example:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;groupId&gt;</span>org.apache.felix<span class="code-tag">&lt;/groupId&gt;</span>
+<span class="code-tag">&lt;artifactId&gt;</span>maven-bundle-plugin<span class="code-tag">&lt;/artifactId&gt;</span>
+<span class="code-tag">&lt;extensions&gt;</span>true<span class="code-tag">&lt;/extensions&gt;</span>
+<span class="code-tag">&lt;configuration&gt;</span>
+  <span class="code-tag">&lt;obrRepository&gt;</span>NONE<span class="code-tag">&lt;/obrRepository&gt;</span>
+  <span class="code-tag">&lt;instructions&gt;</span>
+    <span class="code-tag"><span class="code-comment">&lt;!-- bnd instructions --&gt;</span></span>
+  <span class="code-tag">&lt;/instructions&gt;</span>
+<span class="code-tag">&lt;/configuration&gt;</span></pre>
+</div></div>
+
+
+<h1><a name="MavenBundlePlugin(BND)-Eclipse/PDEintegration"></a>Eclipse/PDE integration</h1>
+
+<p>It is possible to configure the Maven Bundle Plugin to put the
+bundle manifest where Eclipse/PDE expects it, and use the Maven
+Dependency Plugin to arrange for any embedded dependencies to appear in
+a local directory that matches the Bundle-ClassPath entries. Here is an
+example POM that does this:</p>
+
+<div class="preformatted"><div class="preformattedContent">
+<pre>&lt;project&gt;
+
+  &lt;properties&gt;
+    &lt;bundle.symbolicName&gt;org.example&lt;/bundle.symbolicName&gt;
+    &lt;bundle.namespace&gt;org.example&lt;/bundle.namespace&gt;
+  &lt;/properties&gt;
+
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;examples&lt;/groupId&gt;
+  &lt;artifactId&gt;org.example&lt;/artifactId&gt;
+  &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+
+  &lt;name&gt;${bundle.symbolicName} [${bundle.namespace}]&lt;/name&gt;
+
+  &lt;packaging&gt;bundle&lt;/packaging&gt;
+
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.apache.felix&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-bundle-plugin&lt;/artifactId&gt;
+        &lt;version&gt;1.1.0-SNAPSHOT&lt;/version&gt;
+        &lt;extensions&gt;true&lt;/extensions&gt;
+        &lt;!--
+          the following instructions build a simple set of public/private classes into an OSGi bundle
+        --&gt;
+        &lt;configuration&gt;
+          &lt;manifestLocation&gt;META-INF&lt;/manifestLocation&gt;
+          &lt;instructions&gt;
+            &lt;Bundle-SymbolicName&gt;${bundle.symbolicName}&lt;/Bundle-SymbolicName&gt;
+            &lt;Bundle-Version&gt;${pom.version}&lt;/Bundle-Version&gt;
+            &lt;!--
+              assume public classes are in the top package, and private classes are under ".internal"
+            --&gt;
+            &lt;Export-Package&gt;${bundle.namespace};version="${pom.version}"&lt;/Export-Package&gt;
+            &lt;Private-Package&gt;${bundle.namespace}.internal&lt;/Private-Package&gt;
+            &lt;Bundle-Activator&gt;${bundle.namespace}.internal.Activator&lt;/Bundle-Activator&gt;
+            &lt;!--
+              embed compile/runtime dependencies using path that matches the copied dependency folder
+            --&gt;
+            &lt;Embed-Dependency&gt;*;scope=compile|runtime;inline=false&lt;/Embed-Dependency&gt;
+            &lt;Embed-Directory&gt;target/dependency&lt;/Embed-Directory&gt;
+            &lt;Embed-StripGroup&gt;true&lt;/Embed-StripGroup&gt;
+          &lt;/instructions&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;
+      &lt;plugin&gt;
+        &lt;artifactId&gt;maven-dependency-plugin&lt;/artifactId&gt;
+        &lt;executions&gt;
+          &lt;execution&gt;
+            &lt;id&gt;copy-dependencies&lt;/id&gt;
+            &lt;phase&gt;package&lt;/phase&gt;
+            &lt;goals&gt;
+              &lt;goal&gt;copy-dependencies&lt;/goal&gt;
+            &lt;/goals&gt;
+          &lt;/execution&gt;
+        &lt;/executions&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.osgi&lt;/groupId&gt;
+      &lt;artifactId&gt;osgi_R4_core&lt;/artifactId&gt;
+      &lt;version&gt;1.0&lt;/version&gt;
+      &lt;scope&gt;provided&lt;/scope&gt;
+      &lt;optional&gt;true&lt;/optional&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.osgi&lt;/groupId&gt;
+      &lt;artifactId&gt;osgi_R4_compendium&lt;/artifactId&gt;
+      &lt;version&gt;1.0&lt;/version&gt;
+      &lt;scope&gt;provided&lt;/scope&gt;
+      &lt;optional&gt;true&lt;/optional&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;junit&lt;/groupId&gt;
+      &lt;artifactId&gt;junit&lt;/artifactId&gt;
+      &lt;version&gt;3.8.1&lt;/version&gt;
+      &lt;scope&gt;compile&lt;/scope&gt;
+      &lt;optional&gt;true&lt;/optional&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+
+&lt;/project&gt;
+</pre>
+</div></div>
+
+<p>To generate the Eclipse metadata use:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">mvn clean <span class="code-keyword">package</span> eclipse:eclipse -Declipse.pde install</pre>
+</div></div>
+
+<p>and you should now be able to import this as an existing Eclipse project.</p>
+
+<p>FYI: the above POM was generated using the <tt>pax-create-bundle</tt> command from <span class="nobr"><a href="http://www.ops4j.org/projects/pax/construct/index.html" title="Visit page outside Confluence" rel="nofollow">Pax-Construct<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span> and then tweaked to demonstrate using the Maven Dependency Plugin to handle embedded jars in Eclipse.</p>
+
+<p>With the original Pax-Construct generated POM you would simply use:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">mvn clean <span class="code-keyword">package</span> pax:eclipse</pre>
+</div></div>
+
+<p>to create the appropriate Eclipse files and manifest, and also
+handle any embedded entries. The pax:eclipse goal extends
+eclipse:eclipse, and supports the same parameters.</p>
+
+<h1><a name="MavenBundlePlugin(BND)-Unpackingbundlecontentsto'target/classes'"></a>Unpacking bundle contents to 'target/classes'</h1>
+
+<p>Once in a while you may create a bundle which contains additional classes to the ones compiled from <tt>src/main/java</tt>,
+for example when you embed the classes from another jar. This can
+sometimes cause unforeseen problems in Maven, as it will use the output
+directory (<tt>target/classes</tt>) rather than the final bundle, when compiling against projects in the same reactor (ie. the same build).</p>
+
+<p>The easiest way to get around this Maven 'feature' is to unpack the
+contents of the bundle to the output directory after the packaging
+step, so the additional classes will be found where Maven expects them.
+Thankfully there is now an easy option to do this in the bundle-plugin:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">&lt;groupId&gt;org.apache.felix&lt;/groupId&gt;
+&lt;artifactId&gt;maven-bundle-plugin&lt;/artifactId&gt;
+&lt;extensions&gt;<span class="code-keyword">true</span>&lt;/extensions&gt;
+&lt;configuration&gt;
+  &lt;unpackBundle&gt;<span class="code-keyword">true</span>&lt;/unpackBundle&gt;
+  &lt;instructions&gt;
+    &lt;!-- bnd instructions --&gt;
+  &lt;/instructions&gt;
+&lt;/configuration&gt;</pre>
+</div></div>
+
+<h1><a name="MavenBundlePlugin(BND)-UsinganexistingMANIFEST.MFfile"></a>Using an existing MANIFEST.MF file</h1>
+
+<p>If you have an existing manifest, you can add this to the Bnd instructions, like so:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">&lt;_include&gt;src/main/resources/META-INF/MANIFEST.MF&lt;/_include&gt;
+&lt;Export-Package&gt;org.example.*&lt;/Export-Package&gt;</pre>
+</div></div>
+
+<p>Bnd will use it when calculating the bundle contents, and will also
+copy across all manifest attributes starting with a capital letter.<br>
+As shown in the above example, you could use this to include a non-OSGi
+manifest which you then customize with extra OSGi attributes.</p>
+
+<h1><a name="MavenBundlePlugin(BND)-Feedback"></a>Feedback</h1>
+
+<p>Subscribe to the Felix users mailing list by sending a message to <span class="nobr"><a href="mailto:users-subscribe@felix.apache.org" title="Send mail to users-subscribe@felix.apache.org" rel="nofollow">users-subscribe@felix.apache.org<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>; after subscribing, email questions or feedback to <span class="nobr"><a href="mailto:users@felix.apache.org" title="Send mail to users@felix.apache.org" rel="nofollow">users@felix.apache.org<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>.</p>
     </div>
   
 </body></html>
