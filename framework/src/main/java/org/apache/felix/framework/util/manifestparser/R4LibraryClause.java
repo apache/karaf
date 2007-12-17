@@ -134,9 +134,19 @@ public class R4LibraryClause
 
     private boolean checkOSNames(String currentOSName, String[] osnames)
     {
+        boolean win32 = currentOSName.startsWith("win") && 
+            (currentOSName.equals("windows95") ||
+            currentOSName.equals("windows98") ||
+            currentOSName.equals("windowsnt") ||
+            currentOSName.equals("windows2000") ||
+            currentOSName.equals("windowsxp") ||
+            currentOSName.equals("windowsce") ||
+            currentOSName.equals("windowsvista"));
+
         for (int i = 0; (osnames != null) && (i < osnames.length); i++)
         {
-            if (osnames[i].equals(currentOSName))
+            if (osnames[i].equals(currentOSName) || 
+                ("win32".equals(osnames[i]) && win32))
             {
                 return true;
             }
@@ -369,6 +379,10 @@ public class R4LibraryClause
             else if (value.indexOf("ce") >= 0)
             {
                 os = "windowsce";
+            }
+            else if (value.indexOf("vista") >= 0)
+            {
+                os = "windowsvista";
             }
             return os;
         }
