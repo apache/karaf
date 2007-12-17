@@ -233,15 +233,6 @@
           <plugin>
               <artifactId>maven-remote-resources-plugin</artifactId>
               <version>1.0-beta-2</version>
-              <dependencies>
-				  <!--
-                  <dependency>
-                      <groupId>org.apache.cxf</groupId>
-                      <artifactId>cxf-buildtools</artifactId>
-                      <version>${project.version}</version>
-                  </dependency>
-                  -->
-              </dependencies>
               <executions>
                   <execution>
                       <goals>
@@ -249,16 +240,8 @@
                       </goals>
                       <configuration>
                           <resourceBundles>
-	<!--
-                              <resourceBundle>org.apache:apache-incubator-disclaimer-resource-bundle:1.1</resourceBundle>
--->
                               <resourceBundle>org.apache:apache-jar-resource-bundle:1.3</resourceBundle>
                           </resourceBundles>
-<!--
-                          <supplementalModels>
-                              <supplementalModel>notice-supplements.xml</supplementalModel>
-                          </supplementalModels>
--->
                           <properties>
                               <addLicense>true</addLicense>
                               <projectName>Apache ServiceMix</projectName>
@@ -286,6 +269,12 @@
   </reporting>
 
   <profiles>
+      <profile>
+          <id>fastinstall</id>
+          <properties>
+              <maven.test.skip>true</maven.test.skip>
+          </properties>
+      </profile>
       <profile>
           <id>rat</id>
           <build>

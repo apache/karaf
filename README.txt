@@ -17,28 +17,40 @@
 
 Welcome to Apache ServiceMix Runtime 0.1!
 =========================================
-Apache ServiceMix is an open source distributed Enterprise Service Bus (ESB)
-and SOA toolkit built from the ground up on the semantics and APIs of the Java 
-Business Integration (JBI) specification JSR 208 and released under the Apache 
-2.0 license.
+Apache ServiceMix Runtime is a small OSGi based runtime which provides a 
+lightweight container onto which various bundles can be deployed.
 
-Apache ServiceMix is lightweight and easily embeddable, has integrated Spring 
-support and can be run at the edge of the network (inside a client or server),
-as a standalone ESB provider or as a service within another ESB. 
-You can use ServiceMix in Java SE or a Java EE application server.
-
+The following features are included:
+* Hot deployment of OSGi bundles
+* Dynamic reloadable configuration
+* Provisioning through OBR
+* Native OS integration
+* Extensible Shell console
+* Remote access
+* Running multiple instances
 
 Getting Started
 ===============
-To find out how to get started try this
-http://servicemix.apache.org/1-quick-start.html
+For an Apache ServiceMix Runtime source distribution, please read 
+BUILDING.txt for instructions on building Apache ServiceMix Runtime. 
+
+For an Apache ServiceMix Runtime binary distribution, please read 
+RELEASE-NOTES.txt for installation instructions and list of supported 
+and unsupported features.
+
+Alternatively, you can also find out how to get started here:
+    http://cwiki.apache.org/SMX4/1-quick-start.html
 
 If you need more help try talking to us on our mailing lists
-http://servicemix.apache.org/mailing-lists.html
+    http://servicemix.apache.org/mailing-lists.html
 
+If you find any issues with CXF, please submit reports with JIRA here:
+    http://issues.apache.org/activemq/browse/SM
 
-We welcome contributions
-http://servicemix.apache.org/contributing.html
+We welcome contributions, and encourage you to get involved in the CXF
+community. If you'd like to learn more about how you can contribute, please
+see:
+    http://servicemix.apache.org/contributing.html
 
 Many thanks for using Apache ServiceMix.
 

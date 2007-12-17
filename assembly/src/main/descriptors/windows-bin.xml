@@ -70,6 +70,23 @@
 
     </fileSets>
 
+    <files>
+        <file>
+            <source>target/maven-shared-archive-resources/META-INF/LICENSE</source>
+            <outputDirectory>/</outputDirectory>
+            <destName>LICENSE.txt</destName>
+            <fileMode>420</fileMode> <!-- See http://jira.codehaus.org/browse/MASSEMBLY-173 -->
+            <lineEnding>unix</lineEnding>
+        </file>
+        <file>
+            <source>target/maven-shared-archive-resources/META-INF/NOTICE</source>
+            <outputDirectory>/</outputDirectory>
+            <destName>NOTICE.txt</destName>
+            <fileMode>420</fileMode> <!-- See http://jira.codehaus.org/browse/MASSEMBLY-173 -->
+            <lineEnding>unix</lineEnding>
+        </file>
+    </files>
+
     <dependencySets>
 
         <!-- Mandatory bundles for everything -->
