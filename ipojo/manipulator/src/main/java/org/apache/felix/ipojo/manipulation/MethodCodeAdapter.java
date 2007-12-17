@@ -76,7 +76,7 @@ public class MethodCodeAdapter extends AdviceAdapter implements Opcodes {
         if (owner.equals(m_owner) && m_fields.contains(name)) {
             if (opcode == GETFIELD) {
                 String gDesc = "()" + desc;
-                visitMethodInsn(INVOKEVIRTUAL, owner, "_get" + name, gDesc);
+                visitMethodInsn(INVOKESPECIAL, owner, "_get" + name, gDesc);
                 return;
             } else if (opcode == PUTFIELD) {
                 String sDesc = "(" + desc + ")V";

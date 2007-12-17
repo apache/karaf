@@ -89,7 +89,7 @@ public class ConstructorCodeAdapter extends GeneratorAdapter implements Opcodes 
         if (m_fields.contains(name) && m_owner.equals(owner)) {
             if (opcode == GETFIELD) {
                 String gDesc = "()" + desc;
-                visitMethodInsn(INVOKEVIRTUAL, owner, "_get" + name, gDesc);
+                visitMethodInsn(INVOKESPECIAL, owner, "_get" + name, gDesc);
                 return;
             } else
                 if (opcode == PUTFIELD) {
