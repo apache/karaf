@@ -42,16 +42,19 @@
       </osgi:service-properties>
     </osgi:service>
     
+    <osgi:service ref="exit" interface="org.apache.geronimo.gshell.command.Command">
+        <osgi:service-properties>
+            <entry key="alias" value="exit"/>
+        </osgi:service-properties>
+    </osgi:service>
+
     <osgi:service ref="help" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
       	<entry key="alias" value="help,?"/>
       </osgi:service-properties>
     </osgi:service>
 
-    <osgi:service ref="exit" interface="org.apache.geronimo.gshell.command.Command">
-        <osgi:service-properties>
-            <entry key="alias" value="exit"/>
-        </osgi:service-properties>
+    <osgi:service ref="info" interface="org.apache.geronimo.gshell.command.Command">
     </osgi:service>
 
     <osgi:service ref="set" interface="org.apache.geronimo.gshell.command.Command">

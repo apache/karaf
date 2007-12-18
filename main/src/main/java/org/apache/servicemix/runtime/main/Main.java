@@ -206,8 +206,8 @@ public class Main implements MainService, BundleActivator
         main.servicemixHome = getServiceMixHome();
         main.servicemixBase = getServiceMixBase(main.servicemixHome);
         
-        System.out.println("ServiceMix Home: "+main.servicemixHome.getPath());
-        System.out.println("ServiceMix Base: "+main.servicemixBase.getPath());
+        //System.out.println("ServiceMix Home: "+main.servicemixHome.getPath());
+        //System.out.println("ServiceMix Base: "+main.servicemixBase.getPath());
         
         System.setProperty(PROP_SERVICEMIX_HOME, main.servicemixHome.getPath());
         System.setProperty(PROP_SERVICEMIX_BASE, main.servicemixBase.getPath());

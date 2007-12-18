@@ -38,6 +38,10 @@
         <constructor-arg ref="branding" />
     </bean>
 
+    <bean id="info" class="org.apache.geronimo.gshell.commands.builtins.InfoCommand">
+        <constructor-arg ref="branding" />
+    </bean>
+
     <bean id="set" class="org.apache.geronimo.gshell.commands.builtins.SetCommand" />
 
     <bean id="source" class="org.apache.geronimo.gshell.commands.builtins.SourceCommand" />
