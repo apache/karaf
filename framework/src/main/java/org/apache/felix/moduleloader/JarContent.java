@@ -269,6 +269,11 @@ public class JarContent implements IContent
         return "JAR " + m_file.getPath();
     }
 
+    public File getFile()
+    {
+        return m_file;
+    }
+
     private static class EntriesEnumeration implements Enumeration
     {
         private Enumeration m_enumeration = null;

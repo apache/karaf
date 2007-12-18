@@ -18,25 +18,59 @@
  */
 package org.apache.felix.framework.searchpolicy;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.felix.framework.util.Util;
+import org.apache.felix.moduleloader.IContent;
 import org.apache.felix.moduleloader.IContentLoader;
+import org.apache.felix.moduleloader.JarContent;
 import org.apache.felix.moduleloader.ResourceNotFoundException;
 
 public class ContentClassLoader extends SecureClassLoader
 {
+    private static final Constructor m_dexFileClassConstructor;
+    private static final Method m_dexFileClassLoadClass;
+    static
+    {
+        Constructor dexFileClassConstructor = null;
+        Method dexFileClassLoadClass = null;
+        try
+        {
+            Class dexFileClass =  Class.forName("android.dalvik.DexFile");
+            dexFileClassConstructor = dexFileClass.getConstructor(
+                new Class[] { java.io.File.class });
+            dexFileClassLoadClass = dexFileClass.getMethod("loadClass", 
+                new Class[] { String.class, ClassLoader.class });
+        }
+        catch (Exception ex)
+        {
+           dexFileClassConstructor = null;
+           dexFileClassLoadClass = null;
+        }
+        m_dexFileClassConstructor = dexFileClassConstructor;
+        m_dexFileClassLoadClass = dexFileClassLoadClass;
+    }
+
     private ContentLoaderImpl m_contentLoader = null;
     private ProtectionDomain m_protectionDomain = null;
+    private Map m_jarContentToDexFile = null;
 
     public ContentClassLoader(ContentLoaderImpl contentLoader,
         ProtectionDomain protectionDomain)
     {
         m_contentLoader = contentLoader;
         m_protectionDomain = protectionDomain;
+        if (m_dexFileClassConstructor != null)
+        {
+            m_jarContentToDexFile = new HashMap();
+        }
     }
 
     public IContentLoader getContentLoader()
@@ -102,14 +136,17 @@ public class ContentClassLoader extends SecureClassLoader
         if (clazz == null)
         {
             String actual = name.replace('.', '/') + ".class";
-            byte[] bytes = null;
 
+            byte[] bytes = null;
+            
+            IContent content = null;
             // Check the module class path.
             for (int i = 0;
                 (bytes == null) &&
                 (i < m_contentLoader.getClassPath().length); i++)
             {
                 bytes = m_contentLoader.getClassPath()[i].getEntry(actual);
+                content = m_contentLoader.getClassPath()[i];
             }
 
             if (bytes != null)
@@ -154,17 +191,33 @@ public class ContentClassLoader extends SecureClassLoader
                             }
                         }
 
-                        // If we have a security context, then use it to
-                        // define the class with it for security purposes,
-                        // otherwise define the class without a protection domain.
-                        if (m_protectionDomain != null)
+                        // If we can load the class from a dex file do so
+                        if (content instanceof JarContent)
                         {
-                            clazz = defineClass(name, bytes, 0, bytes.length,
-                                m_protectionDomain);
+                            try 
+                            {
+                                clazz = getDexFileClass((JarContent) content, name, this);
+                            }
+                            catch (Exception ex)
+                            {
+                                // Looks like we can't
+                            }
                         }
-                        else
+
+                        if (clazz == null)
                         {
-                            clazz = defineClass(name, bytes, 0, bytes.length);
+                            // If we have a security context, then use it to
+                            // define the class with it for security purposes,
+                            // otherwise define the class without a protection domain.
+                            if (m_protectionDomain != null)
+                            {
+                                clazz = defineClass(name, bytes, 0, bytes.length,
+                                    m_protectionDomain);
+                            }
+                            else
+                            {
+                                clazz = defineClass(name, bytes, 0, bytes.length);
+                            }
                         }
                     }
                 }
@@ -172,6 +225,41 @@ public class ContentClassLoader extends SecureClassLoader
         }
 
         return clazz;
+    }
+
+    private Class getDexFileClass(JarContent content, String name, ClassLoader loader)
+        throws Exception
+    {
+        if (m_jarContentToDexFile == null)
+        {
+            return null;
+        }
+
+        Object dexFile = null;
+
+        if (!m_jarContentToDexFile.containsKey(content)) 
+        {
+            try
+            {
+                dexFile = m_dexFileClassConstructor.newInstance(
+                    new Object[] { content.getFile() });
+            }
+            finally
+            {
+                m_jarContentToDexFile.put(content, dexFile);
+            }
+        }
+        else
+        {
+            dexFile = m_jarContentToDexFile.get(content);
+        }
+        
+        if (dexFile != null)
+        {
+            return (Class) m_dexFileClassLoadClass.invoke(dexFile, 
+                new Object[] { name.replace('.','/'), loader });
+        }
+        return null;
     }
 
     public URL getResourceFromModule(String name)
