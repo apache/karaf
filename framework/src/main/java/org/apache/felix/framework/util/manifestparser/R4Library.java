@@ -36,7 +36,7 @@ public class R4Library
 
     public R4Library(Logger logger, BundleRevision revision,
         String libraryFile, String[] osnames, String[] processors, String[] osversions,
-        String[] languages, String selectionFilter)
+        String[] languages, String selectionFilter) throws Exception
     {
         m_logger = logger;
         m_revision = revision;
@@ -46,6 +46,9 @@ public class R4Library
         m_osversions = osversions;
         m_languages = languages;
         m_selectionFilter = selectionFilter;
+
+        // Make sure we actually have the library in the revision
+        m_revision.findLibrary(m_libraryFile);
     }
 
     public String[] getOSNames()
@@ -84,18 +87,32 @@ public class R4Library
     public String getPath(String name)
     {
         String libname = System.mapLibraryName(name);
-        if (m_libraryFile.indexOf(libname) >= 0)
+
+        try
         {
-            try
+            if (m_libraryFile.equals(libname) || m_libraryFile.endsWith("/" + libname))
             {
                 return m_revision.findLibrary(m_libraryFile);
             }
-            catch (Exception ex)
+            else if (libname.endsWith(".jnilib") && 
+                m_libraryFile.endsWith(".dylib"))
             {
-                m_logger.log(Logger.LOG_ERROR, "R4Library: Finding library '"
-                    + name + "'.", new BundleException(
-                    "Unable to find native library '" + name + "'."));
+                libname = libname.substring(0, libname.length() - 6) + "dylib";
+                if (m_libraryFile.equals(libname) || m_libraryFile.endsWith("/" + libname))
+                {
+                    return m_revision.findLibrary(m_libraryFile);
+                }
             }
+            else if (m_libraryFile.equals(name) || m_libraryFile.endsWith("/" + name))
+            {
+                return m_revision.findLibrary(m_libraryFile);
+            }
+        }
+        catch (Exception ex)
+        {
+            m_logger.log(Logger.LOG_ERROR, "R4Library: Finding library '"
+                + name + "'.", new BundleException(
+                "Unable to find native library '" + name + "'."));
         }
         return null;
     }

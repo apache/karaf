@@ -176,9 +176,16 @@ class DirectoryRevision extends BundleRevision
     }
 
 // TODO: This will need to consider security.
-    public String findLibrary(String libName) throws Exception
+    public String findLibrary(String libName) throws Exception 
     {
-        return BundleCache.getSecureAction().getAbsolutePath(new File(m_refDir, libName));
+        String result = BundleCache.getSecureAction().getAbsolutePath(new File(m_refDir, libName));
+        
+        if (result == null)
+        {
+            throw new IOException("No such file: " + libName);
+        }
+        
+        return result;
     }
 
     public void dispose() throws Exception

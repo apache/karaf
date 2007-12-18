@@ -295,17 +295,51 @@ public class ManifestParser
 
         if (clause != null)
         {
-            R4Library[] libraries = new R4Library[clause.getLibraryFiles().length];
-            for (int i = 0; i < libraries.length; i++)
+            String[] files = clause.getLibraryFiles();
+            R4Library[] libraries = new R4Library[files.length];
+            int current = 0;
+            try
             {
-                libraries[i] = new R4Library(
-                    m_logger, revision, clause.getLibraryFiles()[i],
-                    clause.getOSNames(), clause.getProcessors(), clause.getOSVersions(),
-                    clause.getLanguages(), clause.getSelectionFilter());
+                for (int i = 0; i < libraries.length; i++)
+                {
+                    String name = getName(files[i]);
+                    boolean found = false;
+                    for (int j = 0; !found && (j < current); j++)
+                    {
+                        found = getName(files[j]).equals(name);
+                    }
+                    if (!found)
+                    {
+                        libraries[current++] = new R4Library(
+                            m_logger, revision, clause.getLibraryFiles()[i],
+                            clause.getOSNames(), clause.getProcessors(), clause.getOSVersions(),
+                            clause.getLanguages(), clause.getSelectionFilter());
+                    } 
+                }
+                if (current < libraries.length)
+                {
+                    R4Library[] tmp = new R4Library[current];
+                    System.arraycopy(libraries, 0, tmp, 0, current);
+                    libraries = tmp;
+                }
+                return libraries;
             }
-            return libraries;
+            catch (Exception ex)
+            {
+                throw new BundleException("Unable to create library", ex);
+            }
         }
         return null;
+    }
+
+    private String getName(String path)
+    {
+        int idx = path.lastIndexOf('/');
+        if (idx > -1)
+        {
+            return path.substring(idx);
+        }
+        return path;
     }
 
     private R4LibraryClause getSelectedLibraryClause() throws BundleException
