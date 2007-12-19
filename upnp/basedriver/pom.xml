@@ -11,19 +11,20 @@
   <groupId>org.apache.felix</groupId>
   <name>Apache Felix UPnP Base Driver</name>
   <artifactId>org.apache.felix.upnp.basedriver</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.3.0-SNAPSHOT</version>
   <repositories>
     <!-- For snapshots (no release jars or non-apache jars)           -->
     <repository>
-      <id>domoware.isti.cnr.it</id>
-      <name>Domoware Repository</name>
-      <url>http://domoware.isti.cnr.it/maven2</url>
-      <releases><enabled>false</enabled></releases>
-    </repository>
-    <repository>
-      <id>domoware.isti.cnr.it</id>
+      <id>snap.domoware.isti.cnr.it</id>
       <name>Domoware Snapshot Repository</name>
       <url>http://domoware.isti.cnr.it/maven2-snap</url>
+      <releases><enabled>false</enabled></releases>
+    </repository>
+    <!-- For release (no snapshots jars or non-apache jars)           -->
+    <repository>
+      <id>release.domoware.isti.cnr.it</id>
+      <name>Domoware Release Repository</name>
+      <url>http://domoware.isti.cnr.it/maven2</url>
       <snapshots><enabled>false</enabled></snapshots>
     </repository>
   </repositories>   <!-- <url>http://maven.apache.org</url> -->
