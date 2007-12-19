@@ -112,6 +112,20 @@ public class Felix extends FelixBundle
     private Thread m_shutdownThread = null;
 
     /**
+     * Creates a new Felix framework instance with a default logger.
+     * 
+     * @param configMutableMap An map for obtaining configuration properties,
+     *        may be <tt>null</tt>.
+     * @param activatorList A list of System Bundle activators.
+     * 
+     * @see #Felix(Logger, Map, List)
+     */
+    public Felix(Map configMutableMap, List activatorList)
+    {
+        this(null, configMutableMap, activatorList);
+    }
+
+    /**
      * <p>
      * This method creates the framework instance; instances of the framework
      * are not active until they are started. The constructor accepts a
@@ -192,11 +206,13 @@ public class Felix extends FelixBundle
      * class documentation for more information.
      * </p>
      *
+     * @param logger The logger for use by the framework or <code>null</code>
+     *        use the default logger.
      * @param configMutableMap A map for obtaining configuration properties,
      *        may be <tt>null</tt>.
      * @param activatorList A list of System Bundle activators.
     **/
-    public Felix(Map configMutableMap, List activatorList)
+    public Felix(Logger logger, Map configMutableMap, List activatorList)
     {
         // Initialize member variables.
         m_configMutableMap = (configMutableMap == null)
@@ -208,8 +224,18 @@ public class Felix extends FelixBundle
         // logger needs the system bundle's context for tracking log
         // services, it is created now because it is needed before
         // the system bundle is created. The system bundle's context
-        // will be set below after the system bundle is created.
-        m_logger = new Logger((String) m_configMutableMap.get(FelixConstants.LOG_LEVEL_PROP));
+        // will be set below after the system bundle is created.\
+        m_logger = (logger == null) ? new Logger() : logger;
+        try
+        {
+            m_logger.setLogLevel(
+                Integer.parseInt(
+                    (String) m_configMutableMap.get(FelixConstants.LOG_LEVEL_PROP)));
+        }
+        catch (NumberFormatException ex)
+        {
+            // Ignore and just use the default logging level.
+        }
 
         // Initialize framework properties.
         initializeFrameworkProperties();

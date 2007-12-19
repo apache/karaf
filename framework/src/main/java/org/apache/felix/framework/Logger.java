@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -52,26 +52,22 @@ public class Logger implements ServiceListener
     private BundleContext m_context = null;
 
     private final static int LOGGER_OBJECT_IDX = 0;
-    private final static int LOGGER_METHOD_IDX = 1;    
+    private final static int LOGGER_METHOD_IDX = 1;
     private ServiceReference m_logRef = null;
     private Object[] m_logger = null;
 
-    public Logger(int logLevel)
+    public Logger()
     {
-        m_logLevel = logLevel;
     }
 
-    public Logger(String s)
+    public synchronized void setLogLevel(int i)
     {
-        s = (s == null) ? "1" : s;
-        try
-        {
-            m_logLevel = Integer.parseInt(s);
-        }
-        catch (NumberFormatException ex)
-        {
-            // Default to 1.
-        }
+        m_logLevel = i;
+    }
+
+    public synchronized int getLogLevel()
+    {
+        return m_logLevel;
     }
 
     protected void setSystemBundleContext(BundleContext context)
@@ -80,24 +76,57 @@ public class Logger implements ServiceListener
         startListeningForLogService();
     }
 
-    public void log(int level, String msg)
+    public final void log(int level, String msg)
     {
         _log(null, level, msg, null);
     }
 
-    public void log(int level, String msg, Throwable ex)
+    public final void log(int level, String msg, Throwable throwable)
     {
-        _log(null, level, msg, ex);
+        _log(null, level, msg, throwable);
     }
 
-    public void log(ServiceReference sr, int level, String msg)
+    public final void log(ServiceReference sr, int level, String msg)
     {
         _log(sr, level, msg, null);
     }
 
-    public void log(ServiceReference sr, int level, String msg, Throwable ex)
+    public final void log(ServiceReference sr, int level, String msg, Throwable throwable)
     {
-        _log(sr, level, msg, ex);
+        _log(sr, level, msg, throwable);
+    }
+
+    protected void doLog(ServiceReference sr, int level, String msg, Throwable throwable)
+    {
+        String s = (sr == null) ? null : "SvcRef " + sr;
+        s = (s == null) ? msg : s + " " + msg;
+        s = (throwable == null) ? s : s + " (" + throwable + ")";
+        switch (level)
+        {
+            case LOG_DEBUG:
+                System.out.println("DEBUG: " + s);
+                break;
+            case LOG_ERROR:
+                System.out.println("ERROR: " + s);
+                if (throwable != null)
+                {
+                    if ((throwable instanceof BundleException) &&
+                        (((BundleException) throwable).getNestedException() != null))
+                    {
+                        throwable = ((BundleException) throwable).getNestedException();
+                    }
+                    throwable.printStackTrace();
+                }
+                break;
+            case LOG_INFO:
+                System.out.println("INFO: " + s);
+                break;
+            case LOG_WARNING:
+                System.out.println("WARNING: " + s);
+                break;
+            default:
+                System.out.println("UNKNOWN[" + level + "]: " + s);
+        }
     }
 
     private void _log(ServiceReference sr, int level, String msg, Throwable throwable)
@@ -108,41 +137,15 @@ public class Logger implements ServiceListener
 
         if (m_logLevel >= level)
         {
+            // Use the log service if available.
             if (logger != null)
             {
                 _logReflectively(logger, sr, level, msg, throwable);
             }
+            // Otherwise, default logging action.
             else
             {
-                String s = (sr == null) ? null : "SvcRef " + sr;
-                s = (s == null) ? msg : s + " " + msg;
-                s = (throwable == null) ? s : s + " (" + throwable + ")";
-                switch (level)
-                {
-                    case LOG_DEBUG:
-                        System.out.println("DEBUG: " + s);
-                        break;
-                    case LOG_ERROR:
-                        System.out.println("ERROR: " + s);
-                        if (throwable != null)
-                        {
-                            if ((throwable instanceof BundleException) &&
-                                (((BundleException) throwable).getNestedException() != null))
-                            {
-                                throwable = ((BundleException) throwable).getNestedException();
-                            }
-                            throwable.printStackTrace();
-                        }
-                        break;
-                    case LOG_INFO:
-                        System.out.println("INFO: " + s);
-                        break;
-                    case LOG_WARNING:
-                        System.out.println("WARNING: " + s);
-                        break;
-                    default:
-                        System.out.println("UNKNOWN[" + level + "]: " + s);
-                }
+                doLog(sr, level, msg, throwable);
             }
         }
     }
@@ -207,7 +210,7 @@ public class Logger implements ServiceListener
      * If a higher ranking log service is registered, then this will switch
      * to the higher ranking log service.
     **/
-    public synchronized void serviceChanged(ServiceEvent event)
+    public final synchronized void serviceChanged(ServiceEvent event)
     {
         // If no logger is in use, then grab this one.
         if ((event.getType() == ServiceEvent.REGISTERED) && (m_logRef == null))
@@ -228,7 +231,7 @@ public class Logger implements ServiceListener
                 m_logRef = ref;
                 setLogger(m_context.getService(m_logRef));
             }
-            
+
         }
         // If the current logger is going away, release it and try to
         // find another one.
