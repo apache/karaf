@@ -31,7 +31,7 @@
   <groupId>org.apache.servicemix.runtime</groupId>
   <artifactId>runtime</artifactId>
   <packaging>pom</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>1.0-m1-SNAPSHOT</version>
   <name>Apache ServiceMix Runtime</name>
 
   <modules>
@@ -68,7 +68,7 @@
       <felix.configadmin.version>0.9.0-r605854</felix.configadmin.version>
       <felix.main.version>1.1.0-r605854</felix.main.version>
       <felix.plugin.version>1.1.0-r605854</felix.plugin.version>
-      <felix.framework.version>1.1.0-r605854</felix.framework.version>
+      <felix.framework.version>1.1.0-r605854-patched</felix.framework.version>
       <felix.osgi.version>1.0.0</felix.osgi.version>
       <felix.compendium.version>0.9.0-r605854</felix.compendium.version>
       <felix.bundlerepository.version>1.1.0-r605854</felix.bundlerepository.version>
@@ -98,10 +98,6 @@
            <name>ServiceMix Repository</name>
            <url>http://svn.apache.org/repos/asf/servicemix/m2-repo</url>
        </repository>
-       <repository>
-           <id>ops4j</id>
-           <url>http://repository.ops4j.org/maven2</url>
-       </repository>
        <!-- Apache snapshot -->
        <repository>
            <id>apache-snapshots</id>
@@ -128,6 +124,12 @@
           <snapshots>
               <enabled>true</enabled>
           </snapshots>
+      </pluginRepository>
+      <!-- ServiceMix repo -->
+      <pluginRepository>
+          <id>servicemix</id>
+          <name>ServiceMix Repository</name>
+          <url>http://svn.apache.org/repos/asf/servicemix/m2-repo</url>
       </pluginRepository>
   </pluginRepositories>
 

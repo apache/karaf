@@ -18,13 +18,12 @@ package org.apache.servicemix.gshell.features.internal;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
-import org.apache.geronimo.gshell.command.Command;
 import org.apache.servicemix.gshell.features.Feature;
 import org.apache.servicemix.gshell.features.FeaturesService;
 import org.apache.servicemix.gshell.features.Repository;
@@ -86,7 +85,8 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public Repository[] listRepositories() {
-        return new Repository[0];  //To change body of implemented methods use File | Settings | File Templates.
+        Collection<RepositoryImpl> repos = repositories.values();
+        return repos.toArray(new Repository[repos.size()]);
     }
 
     public void start() throws Exception {

@@ -25,7 +25,7 @@
     <parent>
         <groupId>org.apache.servicemix.runtime.bundles</groupId>
         <artifactId>bundles</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>1.0-m1-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.servicemix.bundles</groupId>
