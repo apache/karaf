@@ -3110,19 +3110,24 @@ ex.printStackTrace();
             IModule[] depModules = ((ModuleImpl) expModules[expIdx]).getDependents();
             for (int depIdx = 0; (depModules != null) && (depIdx < depModules.length); depIdx++)
             {
-                // See if the dependent module has a wire for the specific
-                // package. If so, see if the provider module is from the
-                // exporter and record it if it is.
-                IWire wire = Util.getWire(depModules[depIdx], ep.getName());
-                if ((wire != null) && expModules[expIdx].equals(wire.getExporter()) &&
-                    wire.getRequirement().isSatisfied(
-                    new Capability(ICapability.PACKAGE_NAMESPACE, null, new R4Attribute[] {
-                        new R4Attribute(ICapability.PACKAGE_PROPERTY, ep.getName(), false),
-                        new R4Attribute(ICapability.VERSION_PROPERTY, ep.getVersion(), false)
-                    })))
+                // ExportedPackage.getImportingBundles() does not expect bundles
+                // to depend on themselves, so we will filter that case here.
+                if (!expModules[expIdx].equals(depModules[depIdx]))
                 {
-                    // Add the bundle to the list of importers.
-                    list.add(getBundle(Util.getBundleIdFromModuleId(depModules[depIdx].getId())));
+                    // See if the dependent module has a wire for the specific
+                    // package. If so, see if the provider module is from the
+                    // exporter and record it if it is.
+                    IWire wire = Util.getWire(depModules[depIdx], ep.getName());
+                    if ((wire != null) && expModules[expIdx].equals(wire.getExporter()) &&
+                        wire.getRequirement().isSatisfied(
+                        new Capability(ICapability.PACKAGE_NAMESPACE, null, new R4Attribute[] {
+                            new R4Attribute(ICapability.PACKAGE_PROPERTY, ep.getName(), false),
+                            new R4Attribute(ICapability.VERSION_PROPERTY, ep.getVersion(), false)
+                        })))
+                    {
+                        // Add the bundle to the list of importers.
+                        list.add(getBundle(Util.getBundleIdFromModuleId(depModules[depIdx].getId())));
+                    }
                 }
             }
         }
