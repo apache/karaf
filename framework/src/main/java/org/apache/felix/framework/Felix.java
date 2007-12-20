@@ -1451,18 +1451,28 @@ ex.printStackTrace();
     **/
     protected Class loadBundleClass(FelixBundle bundle, String name) throws ClassNotFoundException
     {
+        if (bundle.getInfo().getState() == Bundle.UNINSTALLED)
+        {
+            throw new IllegalStateException("Bundle is uninstalled");
+        }
+        else if (bundle.getInfo().getState() == Bundle.INSTALLED)
+        {
+            try
+            {
+                _resolveBundle(bundle);
+            }
+            catch (BundleException ex)
+            {
+                // The spec says we must fire a framework error.
+                fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
+                // Then throw a class not found exception.
+                throw new ClassNotFoundException(name);
+            }
+        }
         Class clazz = bundle.getInfo().getCurrentModule().getClass(name);
         if (clazz == null)
         {
-            // Throw exception.
-            ClassNotFoundException ex = new ClassNotFoundException(name);
-
-            // The spec says we must fire a framework error.
-            fireFrameworkEvent(
-                FrameworkEvent.ERROR, bundle,
-                new BundleException(ex.getMessage()));
-
-            throw ex;
+            throw new ClassNotFoundException(name);
         }
         return clazz;
     }
