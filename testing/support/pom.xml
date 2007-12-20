@@ -94,6 +94,10 @@
                   <groupId>org.springframework.osgi</groupId>
                   <artifactId>asm.osgi</artifactId>
               </exclusion>
+              <exclusion>
+                  <groupId>org.springframework.osgi</groupId>
+                  <artifactId>junit.osgi</artifactId>
+              </exclusion>
           </exclusions>
       </dependency>
       <dependency>
