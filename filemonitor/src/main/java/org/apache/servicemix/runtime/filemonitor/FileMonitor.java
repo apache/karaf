@@ -258,7 +258,7 @@ public class FileMonitor {
                 bundlesToUpdate.add(bundle);
             }
             else {
-                bundle = getContext().installBundle(file.getCanonicalPath(), in);
+                bundle = getContext().installBundle(file.getCanonicalFile().toURI().toString(), in);
                 if (!isBundleFragment(bundle)) {
                     bundlesToStart.add(bundle);
                 }
