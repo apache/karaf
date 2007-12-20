@@ -145,9 +145,10 @@ import org.apache.geronimo.gshell.shell.Environment;
     public Node findNode(String s) throws NotFoundException {
         Node start = (Node) env.getVariables().get(CURRENT_NODE);
         if (start != null) {
-            Node n = findNode(start, s);
-            if (n != null) {
-                return n;
+            try {
+                return findNode(start, s);
+            } catch (NotFoundException e) {
+                // Ignore, we need to try at root level
             }
         }
         return findNode(layout, s);
