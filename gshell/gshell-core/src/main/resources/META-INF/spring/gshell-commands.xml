@@ -26,13 +26,15 @@
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <bean id="clear" class="org.apache.geronimo.gshell.commands.builtins.ClearCommand" />
+    <bean id="clear" class="org.apache.geronimo.gshell.commands.builtins.ClearCommand">
+        <constructor-arg ref="terminal" />
+    </bean>
 
     <bean id="echo" class="org.apache.geronimo.gshell.commands.builtins.EchoCommand" />
 
-    <bean id="exit" class="org.apache.geronimo.gshell.spring.ExitCommand" />
+    <bean id="exit" class="org.apache.geronimo.gshell.commands.builtins.ExitCommand" />
 
-    <bean id="help" class="org.apache.geronimo.gshell.spring.HelpCommand">
+    <bean id="help" class="org.apache.geronimo.gshell.commands.builtins.HelpCommand">
         <constructor-arg ref="commandRegistry" />
         <constructor-arg ref="commandRegistry" />
         <constructor-arg ref="branding" />

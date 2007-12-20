@@ -16,8 +16,6 @@
  */
 package org.apache.geronimo.gshell.whisper.transport.vm;
 
-import org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransport;
-import org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransportServer;
 import org.apache.geronimo.gshell.whisper.transport.base.SpringBaseTransportFactory;
 import org.apache.geronimo.gshell.whisper.transport.base.BaseTransport;
 import org.apache.geronimo.gshell.whisper.transport.base.BaseTransportServer;
