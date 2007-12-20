@@ -62,7 +62,7 @@
       <dependency>
           <groupId>org.apache.felix</groupId>
           <artifactId>org.apache.felix.main</artifactId>
-          <version>${felix.framework.version}</version>
+          <version>${felix.main.version}</version>
           <exclusions>
               <exclusion>
                   <groupId>org.osgi</groupId>
