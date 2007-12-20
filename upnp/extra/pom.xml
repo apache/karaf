@@ -11,7 +11,7 @@
   <groupId>org.apache.felix</groupId>
   <name>Apache Felix UPnP Extra </name>
   <artifactId>org.apache.felix.upnp.extra</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.3.0-SNAPSHOT</version>
   <!-- <url>http://maven.apache.org</url> -->
   <dependencies>
     <dependency>

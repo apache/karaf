@@ -16,17 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.felix.upnp.basedriver.importer.util;
 
-package org.apache.felix.upnp.extra.util;
-/* 
+import java.util.ArrayList;
+
+/** 
+* The class is used only for JDK1.3 backporting purpose
+* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+* @since 0.3
 */
-public interface Constants {
-	/**
-	 * If this property is set on a UPnP Device means that the 
-	 * device service is been created by UPnP base Driver. <br>
-	 * The value of the does not carry any mean. <br>
-	 * The name of the property is "UPnP.device.import".
-	 */
-	public static final String UPNP_IMPORT = "UPnP.device.imported"; 
+public class StringSplitter {
+	
+	public static String [] split (String tosplit, char ch){
+		ArrayList result = new ArrayList();
+		int  pos = -1;
+		while ( (pos = tosplit.indexOf(ch)) != -1) {
+			result.add(new String (tosplit.substring(0, pos)));
+			tosplit = tosplit.substring(pos + 1);
+		}
+		if (!tosplit.equals("")) result.add(new String(tosplit));
+		return (String [])result.toArray(new String [0]);
+	}
+
 }

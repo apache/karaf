@@ -19,12 +19,13 @@
 
 package org.apache.felix.upnp.basedriver.importer.util;
 
-/* 
+/** 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public class ParseLocation {
 	public static String getUrlBase(String location){
-		String [] splited=location.split("/");
-		return splited[0]+"/"+"/"+splited[2];
+		String [] splited=StringSplitter.split(location, '/');
+		String value=splited[0]+"/"+"/"+splited[2];
+		return value;		
 	}
 }

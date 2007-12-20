@@ -54,7 +54,6 @@ public class UPnPIconImpl implements UPnPIcon {
 	 * @see org.osgi.service.upnp.UPnPIcon#getWidth()
 	 */
 	public int getWidth() {
-		//TODO what happen if the String is empty? do I get an Exception? I think so
 		String width=icon.getWidth();
 		if(width.length()==0){
 			return -1;
@@ -66,7 +65,6 @@ public class UPnPIconImpl implements UPnPIcon {
 	 * @see org.osgi.service.upnp.UPnPIcon#getHeight()
 	 */
 	public int getHeight() {
-		// TODO Auto-generated method stub
 		String higth=icon.getHeight();
 		if(higth.length()==0){
 			return -1;
@@ -86,7 +84,6 @@ public class UPnPIconImpl implements UPnPIcon {
 	 * @see org.osgi.service.upnp.UPnPIcon#getDepth()
 	 */
 	public int getDepth() {
-		// TODO Auto-generated method stub
 		String depth=icon.getDepth();
 		if(depth.length()==0){
 			return -1;
@@ -98,8 +95,6 @@ public class UPnPIconImpl implements UPnPIcon {
 	 * @see org.osgi.service.upnp.UPnPIcon#getInputStream()
 	 */
 	public InputStream getInputStream() throws IOException {
-		// TODO Auto-generated method stub
-		
 		String urlString=ParseLocation.getUrlBase(cyberdev.getLocation())+icon.getURL();
 		URL url=new URL(urlString);
 		HTTPRequestForIcon requestor=new HTTPRequestForIcon(url);

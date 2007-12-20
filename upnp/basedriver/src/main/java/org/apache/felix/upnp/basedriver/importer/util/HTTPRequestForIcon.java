@@ -22,7 +22,7 @@ package org.apache.felix.upnp.basedriver.importer.util;
 import java.io.*;
 import java.net.*;
 
-/* 
+/** 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public class HTTPRequestForIcon {

@@ -27,7 +27,7 @@ import org.apache.xerces.impl.dv.util.Base64;
 import org.apache.xerces.impl.dv.util.HexBin;
 import org.osgi.service.upnp.*;
 
-/* 
+/** 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public class Converter {
@@ -153,12 +153,11 @@ public class Converter {
 			String[] timeFormats=new String[]{"HH:mm:ssZ","HH:mm:ss"};
 			Date d=getDateValue(value,timeFormats,timeFormats);
 			TimeZone tz = TimeZone.getDefault();			
-			int dst = tz.getDSTSavings();	
 			Calendar c = Calendar.getInstance(tz);
 			c.setTime(d);
 			
-			if(timeFormats[0].equals("HH:mm:ssZ")&&(dst!=0))
-				c.add(Calendar.MILLISECOND,dst);
+			if(timeFormats[0].equals("HH:mm:ssZ")&&(tz.inDaylightTime(d)))
+				c.add(Calendar.MILLISECOND,3600000);
 			return new Long(
 					c.get(Calendar.HOUR_OF_DAY)*3600000
 					+c.get(Calendar.MINUTE)*60000

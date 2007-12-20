@@ -29,7 +29,7 @@ public class ParseUSN {
 	String serviceType;
 	
 	public ParseUSN(String usn) {
-		String [] splited=usn.split(":"); 	
+		String [] splited=StringSplitter.split(usn, ':');
 		if(splited.length==5||splited.length==2){
 			udn="uuid:"+splited[1];
 			device=true;

@@ -211,96 +211,108 @@ public class MyCtrlPoint extends ControlPoint
 		} else if (ssdpPacket.isByeBye()) {
             Activator.logger.DEBUG("[Importer] ssdpPacket.isByeBye");
 
-			if (devices.containsKey(udn)) {
-				if (parseUSN.isDevice()) {
-                    Activator.logger.DEBUG("[Importer] parseUSN.isDevice ...unregistering all the children devices ");
-                    
-					//unregistering all the children devices 
-					UPnPDeviceImpl dev = ((OSGiDeviceInfo) devices.get(udn)).getOSGiDevice();
-					removeOSGiandUPnPDeviceHierarchy(dev);
+            synchronized (devices) {		
 
-				} else if (parseUSN.isService()) {
-                    Activator.logger.DEBUG("[Importer] parseUSN.isService ...registering modified device again ");
-					/* 
-					 * I have to unregister the UPnPDevice and register it again 
-					 * with the updated properties  
-					 */
-					UPnPDeviceImpl device = 
-                        ((OSGiDeviceInfo) devices.get(udn)).getOSGiDevice();
-					ServiceRegistration registar = 
-                        ((OSGiDeviceInfo) devices.get(udn)).getRegistration();
-					String[] oldServicesID = 
-                        (String[]) (device.getDescriptions(null).get(UPnPService.ID));
-					String[] oldServiceType = 
-                        (String[]) (device.getDescriptions(null).get(UPnPService.TYPE));
-                    
-					Device cyberDevice = findDeviceCtrl(this, udn);
-					Vector vec = new Vector();
-					for (int i = 0; i < oldServiceType.length; i++) {
-						Service ser = cyberDevice.getService(oldServicesID[i]);
-						if (!(ser.getServiceType().equals(parseUSN.getServiceType()))) 
-                        {
-							vec.add(oldServicesID[i]);
+				if (devices.containsKey(udn)) {
+					if (parseUSN.isDevice()) {
+	                    Activator.logger.DEBUG("[Importer] parseUSN.isDevice ...unregistering all the children devices ");
+	                    
+						//unregistering all the children devices 
+						UPnPDeviceImpl dev = ((OSGiDeviceInfo) devices.get(udn)).getOSGiDevice();
+						removeOSGiandUPnPDeviceHierarchy(dev);
+	
+					} else if (parseUSN.isService()) {
+	                    Activator.logger.DEBUG("[Importer] parseUSN.isService ...registering modified device again ");
+						/* 
+						 * I have to unregister the UPnPDevice and register it again 
+						 * with the updated properties  
+						 */
+						UPnPDeviceImpl device = 
+	                        ((OSGiDeviceInfo) devices.get(udn)).getOSGiDevice();
+						ServiceRegistration registar = 
+	                        ((OSGiDeviceInfo) devices.get(udn)).getRegistration();
+						String[] oldServicesID = 
+	                        (String[]) (device.getDescriptions(null).get(UPnPService.ID));
+						String[] oldServiceType = 
+	                        (String[]) (device.getDescriptions(null).get(UPnPService.TYPE));
+	                    
+						Device cyberDevice = findDeviceCtrl(this, udn);
+						Vector vec = new Vector();
+						for (int i = 0; i < oldServiceType.length; i++) {
+							Service ser = cyberDevice.getService(oldServicesID[i]);
+							if (!(ser.getServiceType().equals(parseUSN.getServiceType()))) 
+	                        {
+								vec.add(oldServicesID[i]);
+							}
 						}
-					}
-
-                    //new serviceID
-					String[] actualServicesID = new String[vec.size()];
-					actualServicesID = (String[]) vec.toArray(new String[]{});
-
-                    //new serviceType
-					String[] actualServiceType = new String[oldServiceType.length - 1];
-					vec.clear();
-					for (int i = 0; i < oldServiceType.length; i++) {
-						if (!(oldServiceType[i].equals(parseUSN.getServiceType()))) 
-                        {
-							vec.add(oldServiceType[i]);
+	
+	                    //new serviceID
+						String[] actualServicesID = new String[vec.size()];
+						actualServicesID = (String[]) vec.toArray(new String[]{});
+	
+	                    //new serviceType
+						String[] actualServiceType = new String[oldServiceType.length - 1];
+						vec.clear();
+						for (int i = 0; i < oldServiceType.length; i++) {
+							if (!(oldServiceType[i].equals(parseUSN.getServiceType()))) 
+	                        {
+								vec.add(oldServiceType[i]);
+							}
 						}
+						actualServiceType = (String[]) vec.toArray(new String[]{});
+	
+	                    //unrigistering and registering again with the new properties
+						unregisterUPnPDevice(registar);
+						device.setProperty(UPnPService.ID, actualServicesID);
+						device.setProperty(UPnPService.TYPE, actualServiceType);
+						registerUPnPDevice(null, device, device.getDescriptions(null));
+						searchForListener(cyberDevice);
 					}
-					actualServiceType = (String[]) vec.toArray(new String[]{});
-
-                    //unrigistering and registering again with the new properties
-					unregisterUPnPDevice(registar);
-					device.setProperty(UPnPService.ID, actualServicesID);
-					device.setProperty(UPnPService.TYPE, actualServiceType);
-					registerUPnPDevice(null, device, device.getDescriptions(null));
-					searchForListener(cyberDevice);
 				}
-			}
+				
+			}//synchronized(devices)
 		} else {
 			/*
-			 * if it is a service means that it is beend delete when the 
+			 * if it is a service means that it has deleted when the 
 			 * owner was unregister so I can skip this bye-bye
+			 * 
+			 * //TODO Understand the comment
+			 *
 			 */
 		}
 	}
     
-	public synchronized void removeOSGiandUPnPDeviceHierarchy(UPnPDeviceImpl dev) 
+	public synchronized void removeOSGiandUPnPDeviceHierarchy(final UPnPDeviceImpl dev) 
     {
 		/*
 		 * remove all the UPnPDevice from the struct of local device recursively
 		 */
+		final String udn = (String) dev.getDescriptions(null).get(UPnPDevice.UDN);
+		
+		if(devices.containsKey(udn) == false){
+			Activator.logger.INFO("Device "+dev.getDescriptions(null).get(UPnPDevice.FRIENDLY_NAME)+"("+udn+") already removed");
+			return;
+		}		
+		
 		String[] childrenUDN = (String[]) dev.getDescriptions(null).get(
 				UPnPDevice.CHILDREN_UDN);
+
 		if (childrenUDN == null) {
-			//no children
-			unregisterUPnPDevice(((OSGiDeviceInfo) devices.get(dev
-					.getDescriptions(null).get(UPnPDevice.UDN)))
-					.getRegistration());
-			devices.remove(dev.getDescriptions(null).get(UPnPDevice.UDN));
+			//no children			
+			unregisterUPnPDevice(((OSGiDeviceInfo) devices.get(udn)).getRegistration());
+			Activator.logger.INFO("Device "+dev.getDescriptions(null).get(UPnPDevice.FRIENDLY_NAME)+"("+udn+") deleted");
+			devices.remove(udn);
 			return;
-		}
-		for (int i = 0; i < childrenUDN.length; i++) {
-			if (devices.get(childrenUDN[i]) == null) {
-				continue;
-			} else {
-				removeOSGiandUPnPDeviceHierarchy(((OSGiDeviceInfo) devices
-						.get(childrenUDN[i])).getOSGiDevice());
+		} else {
+			for (int i = 0; i < childrenUDN.length; i++) {
+				if (devices.get(childrenUDN[i]) != null) {
+					removeOSGiandUPnPDeviceHierarchy(((OSGiDeviceInfo) devices.get(childrenUDN[i])).getOSGiDevice());
+				}
 			}
+			unregisterUPnPDevice(((OSGiDeviceInfo) devices.get(udn)).getRegistration());
+			Activator.logger.INFO("Device "+dev.getDescriptions(null).get(UPnPDevice.FRIENDLY_NAME)+"("+udn+") deleted");
+			devices.remove(udn);
 		}
-		unregisterUPnPDevice(((OSGiDeviceInfo) devices.get(dev.getDescriptions(
-				null).get(UPnPDevice.UDN))).getRegistration());
-		devices.remove(dev.getDescriptions(null).get(UPnPDevice.UDN));
 	}
 
 	public synchronized void removeOSGiExpireDevice(Device dev) {
@@ -788,6 +800,7 @@ public class MyCtrlPoint extends ControlPoint
             device.setProperty(UPnPServiceImpl.TYPE,currentServicesType);
             
             //registering the service with the updated properties
+            //TODO Check if null to the first paramaters is correct or it requires the reference to the cyberdomo upnp device
             registerUPnPDevice(null, device, device.getDescriptions(null));
             searchForListener(cyberDevice);
         }   
@@ -809,17 +822,21 @@ public class MyCtrlPoint extends ControlPoint
     	doDeviceRegistration(udn);
     }
     
-    public void doDeviceRegistration(String udn){
+    public synchronized void doDeviceRegistration(String udn){
         /*
-         * registering the new device even if it is new root device or
+         * registering the new device either if it is new root device or
          * a new embedded device 
          */
         Device dev = findDeviceCtrl(this, udn);
         if (dev == null) {
-            Activator.logger.WARNING("Cyberlink notified packet from UDN:" +udn+ ", but Device instance doesn't exist in Cyberlink structs !");
-        }        
-        if (dev != null) {
-            Activator.logger.INFO("[Importer] registering UPnPDevice UDN:"+dev.getFriendlyName());
+        	/*
+        	 * In this case the UPnP SDK notifies us that a ssdp:alive has arrived,
+        	 * but,  because the no root device ssdp:alive packet has recieved by the UPnP SDK
+        	 * no Device is present in the UPnP SDK device list. 
+        	 */
+            Activator.logger.INFO("Cyberlink notified packet from UDN:" +udn+ ", but Device instance doesn't exist in Cyberlink structs! It will be Ignored");            
+        }else if(devices.containsKey(udn) == false) {
+            Activator.logger.INFO("[Importer] registering UPnPDevice:"+dev.getFriendlyName()+"("+dev.getUDN()+")" );
             registerUPnPDevice(dev, null, null);
             searchForListener(dev);
             /*
@@ -831,7 +848,9 @@ public class MyCtrlPoint extends ControlPoint
 				Device d = (Device) i.next();
 				doDeviceRegistration(d.getUDN(),true);
 			}
-        }    
+        }else if(devices.containsKey(udn) == true) {
+        	Activator.logger.INFO("[Importer] UPnPDevice UDN::"+dev.getFriendlyName()+"("+dev.getUDN()+") already registered Skipping");
+        }
     }
     
 	public void searchForListener(Device device) {

@@ -33,7 +33,7 @@ import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPService;
 import org.osgi.service.upnp.UPnPStateVariable;
 
-/* 
+/** 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public class UPnPServiceImpl implements UPnPService {
@@ -87,9 +87,10 @@ public class UPnPServiceImpl implements UPnPService {
 	 * @see org.osgi.service.upnp.UPnPService#getVersion()
 	 */
 	public String getVersion() {
-		//TODO to check can I speed up this? May be using lastIndexOf
-		String [] splited=service.getServiceType().split(":"); 
-		return splited[splited.length-1];
+		String serviceType = service.getServiceType();
+		int start = serviceType.lastIndexOf(':');
+		String version = serviceType.substring(start+1);
+		return version;
 	} 
 	/*
 	   * (non-Javadoc)
