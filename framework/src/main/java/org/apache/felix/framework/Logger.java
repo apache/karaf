@@ -60,12 +60,12 @@ public class Logger implements ServiceListener
     {
     }
 
-    public synchronized void setLogLevel(int i)
+    public final synchronized void setLogLevel(int i)
     {
         m_logLevel = i;
     }
 
-    public synchronized int getLogLevel()
+    public final synchronized int getLogLevel()
     {
         return m_logLevel;
     }
