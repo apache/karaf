@@ -165,6 +165,11 @@
           <version>${pax.logging.version}</version>
       </dependency>
       <dependency>
+          <groupId>org.ops4j.pax.runner</groupId>
+          <artifactId>pax-runner-handler-mvn</artifactId>
+          <version>${pax.runner.version}</version>
+      </dependency>
+      <dependency>
           <groupId>org.apache.geronimo.specs</groupId>
           <artifactId>geronimo-servlet_2.5_spec</artifactId>
           <version>${geronimo.servlet.version}</version>
