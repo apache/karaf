@@ -138,7 +138,7 @@ public class GShell implements Runnable, BundleContextAware {
     private void waitForFrameworkToStart() throws InterruptedException {
 		getBundleContext().addFrameworkListener(new FrameworkListener(){
 			public void frameworkEvent(FrameworkEvent event) {
-				System.out.println("Got event: "+event.getType());
+				log.debug("Got event: " + event.getType());
 				if( event.getType() == FrameworkEvent.STARTED ) {
 					frameworkStarted.countDown();
 				}
@@ -146,9 +146,9 @@ public class GShell implements Runnable, BundleContextAware {
 		});
 
 		if( frameworkStarted.await(5, TimeUnit.SECONDS) ) {
-			System.out.println("System completed startup.");
+			log.info("System completed startup.");
 		} else {
-			System.out.println("System took too long startup... continuing");
+			log.warn("System took too long startup... continuing");
 		}
     }
 
