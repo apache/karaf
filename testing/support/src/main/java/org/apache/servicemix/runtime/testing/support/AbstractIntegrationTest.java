@@ -29,8 +29,8 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.osgi.extender.internal.util.concurrent.Counter;
 import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
+import org.springframework.osgi.test.platform.Platforms;
 import org.springframework.osgi.test.provisioning.ArtifactLocator;
 import org.springframework.osgi.util.OsgiFilterUtils;
 import org.springframework.osgi.util.OsgiListenerUtils;
@@ -48,6 +48,14 @@ public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTe
 
     private Properties dependencies;
 
+    @Override
+    protected String getPlatformName() {
+        String systemProperty = System.getProperty(OSGI_FRAMEWORK_SELECTOR);
+        if (logger.isTraceEnabled())
+            logger.trace("system property [" + OSGI_FRAMEWORK_SELECTOR + "] has value=" + systemProperty);
+
+        return (systemProperty == null ? Platforms.FELIX : systemProperty);
+    }
 
     protected String getBundle(String groupId, String artifactId) {
         return groupId + "," + artifactId + "," + getBundleVersion(groupId, artifactId);
