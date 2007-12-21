@@ -17,6 +17,7 @@
 package org.apache.geronimo.gshell.spring;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.geronimo.gshell.DefaultEnvironment;
 import org.apache.geronimo.gshell.ExitNotification;
@@ -27,6 +28,8 @@ import org.apache.geronimo.gshell.shell.InteractiveShell;
 import org.apache.servicemix.runtime.main.spi.MainService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.osgi.context.BundleContextAware;
@@ -133,20 +136,20 @@ public class GShell implements Runnable, BundleContextAware {
      * @throws InterruptedException
      */
     private void waitForFrameworkToStart() throws InterruptedException {
-//		getBundleContext().addFrameworkListener(new FrameworkListener(){
-//			public void frameworkEvent(FrameworkEvent event) {
-//				System.out.println("Got event: "+event.getType());
-//				if( event.getType() == FrameworkEvent.STARTED ) {
-//					frameworkStarted.countDown();
-//				}
-//			}
-//		});
-//		
-//		if( frameworkStarted.await(5, TimeUnit.SECONDS) ) {
-//			System.out.println("System completed startup.");
-//		} else {
-//			System.out.println("System took too long startup... continuing");
-//		}
+		getBundleContext().addFrameworkListener(new FrameworkListener(){
+			public void frameworkEvent(FrameworkEvent event) {
+				System.out.println("Got event: "+event.getType());
+				if( event.getType() == FrameworkEvent.STARTED ) {
+					frameworkStarted.countDown();
+				}
+			}
+		});
+
+		if( frameworkStarted.await(5, TimeUnit.SECONDS) ) {
+			System.out.println("System completed startup.");
+		} else {
+			System.out.println("System took too long startup... continuing");
+		}
     }
 
     public MainService getMainService() {

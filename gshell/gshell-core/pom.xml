@@ -219,7 +219,7 @@
                         <DynamicImport-Package>sun.misc.*</DynamicImport-Package>
                         <Export-Package>${gshell.osgi.export}</Export-Package>
                         <Private-Package>${gshell.osgi.private}</Private-Package>
-                        <Spring-Context>*;publish-context:=false</Spring-Context>
+                        <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>
                 </configuration>
             </plugin>

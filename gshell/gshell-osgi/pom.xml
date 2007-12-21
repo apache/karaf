@@ -69,7 +69,7 @@
                         <Export-Package>org.apache.geronimo.gshell.osgi*;version=${project.version}</Export-Package>
                         <Import-Package>*</Import-Package>
                         <Private-Package>!*</Private-Package>
-                        <Spring-Context>*;publish-context:=false</Spring-Context>
+                        <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>
                 </configuration>
             </plugin>
