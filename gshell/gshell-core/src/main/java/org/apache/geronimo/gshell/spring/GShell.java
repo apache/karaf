@@ -64,6 +64,14 @@ public class GShell implements Runnable, BundleContextAware {
 
     public void start() {
         frameworkStarted = new CountDownLatch(1);
+		getBundleContext().addFrameworkListener(new FrameworkListener(){
+			public void frameworkEvent(FrameworkEvent event) {
+				log.debug("Got event: " + event.getType());
+				if( event.getType() == FrameworkEvent.STARTED ) {
+					frameworkStarted.countDown();
+				}
+			}
+		});
         if (start) {
             thread = new Thread(this);
             thread.start();
@@ -136,15 +144,6 @@ public class GShell implements Runnable, BundleContextAware {
      * @throws InterruptedException
      */
     private void waitForFrameworkToStart() throws InterruptedException {
-		getBundleContext().addFrameworkListener(new FrameworkListener(){
-			public void frameworkEvent(FrameworkEvent event) {
-				log.debug("Got event: " + event.getType());
-				if( event.getType() == FrameworkEvent.STARTED ) {
-					frameworkStarted.countDown();
-				}
-			}
-		});
-
 		if( frameworkStarted.await(5, TimeUnit.SECONDS) ) {
 			log.info("System completed startup.");
 		} else {
