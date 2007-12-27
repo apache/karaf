@@ -21,37 +21,12 @@ package org.apache.felix.cm.impl;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.apache.felix.cm.PersistenceManager;
 import org.apache.felix.cm.file.FilePersistenceManager;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleListener;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationEvent;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ConfigurationListener;
-import org.osgi.service.cm.ConfigurationPlugin;
-import org.osgi.service.cm.ManagedService;
-import org.osgi.service.cm.ManagedServiceFactory;
+import org.osgi.framework.*;
+import org.osgi.service.cm.*;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -210,8 +185,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         configurationAdminRegistration = bundleContext.registerService( ConfigurationAdmin.class.getName(), caf, props );
 
         // start handling ManagedService[Factory] services
-        managedServiceTracker = new ManagedServiceTracker();
-        managedServiceFactoryTracker = new ManagedServiceFactoryTracker();
+        managedServiceTracker = new ManagedServiceTracker(this);
+        managedServiceFactoryTracker = new ManagedServiceFactoryTracker(this);
     }
 
 
@@ -1289,11 +1264,14 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         }
     }
 
-    private abstract class AbstractManagedServiceTracker extends ServiceTracker
+    private static abstract class AbstractManagedServiceTracker extends ServiceTracker
     {
-        AbstractManagedServiceTracker( String className )
+        protected final ConfigurationManager cm;
+
+        AbstractManagedServiceTracker( ConfigurationManager cm, String className )
         {
-            super( bundleContext, className, null );
+            super( cm.bundleContext, className, null );
+            this.cm = cm;
             open();
         }
 
@@ -1304,7 +1282,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             String pid = ( String ) reference.getProperty( Constants.SERVICE_PID );
             if ( pid != null )
             {
-                ConfigurationImpl cfg = getCachedConfiguration( pid );
+                ConfigurationImpl cfg = cm.getCachedConfiguration( pid );
                 if ( cfg != null && reference.equals( cfg.getServiceReference() ) )
                 {
                     cfg.setServiceReference( null );
@@ -1315,11 +1293,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         }
     }
 
-    private class ManagedServiceTracker extends AbstractManagedServiceTracker
+    private static class ManagedServiceTracker extends AbstractManagedServiceTracker
     {
-        ManagedServiceTracker()
+
+        ManagedServiceTracker(ConfigurationManager cm)
         {
-            super( ManagedService.class.getName() );
+            super( cm, ManagedService.class.getName() );
         }
 
 
@@ -1330,22 +1309,22 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             // configure the managed service
             if ( serviceObject instanceof ManagedService )
             {
-                configure( reference, ( ManagedService ) serviceObject );
+                cm.configure(reference, ( ManagedService ) serviceObject);
             }
             else
             {
-                log( LogService.LOG_WARNING, "Service " + serviceObject + " is not a ManagedService", null );
+                cm.log( LogService.LOG_WARNING, "Service " + serviceObject + " is not a ManagedService", null );
             }
 
             return serviceObject;
         }
     }
 
-    private class ManagedServiceFactoryTracker extends AbstractManagedServiceTracker
+    private static class ManagedServiceFactoryTracker extends AbstractManagedServiceTracker
     {
-        ManagedServiceFactoryTracker()
+        ManagedServiceFactoryTracker(ConfigurationManager cm)
         {
-            super( ManagedServiceFactory.class.getName() );
+            super( cm, ManagedServiceFactory.class.getName() );
         }
 
 
@@ -1356,11 +1335,11 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             // configure the managed service factory
             if ( serviceObject instanceof ManagedServiceFactory )
             {
-                configure( reference, ( ManagedServiceFactory ) serviceObject );
+                cm.configure( reference, ( ManagedServiceFactory ) serviceObject );
             }
             else
             {
-                log( LogService.LOG_WARNING, "Service " + serviceObject + " is not a ManagedServiceFactory", null );
+                cm.log( LogService.LOG_WARNING, "Service " + serviceObject + " is not a ManagedServiceFactory", null );
             }
 
             return serviceObject;
