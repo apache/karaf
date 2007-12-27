@@ -34,6 +34,8 @@ import java.util.Set;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
+import org.apache.maven.archiver.MavenArchiveConfiguration;
+import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.License;
@@ -46,6 +48,7 @@ import org.apache.maven.shared.osgi.Maven2OsgiConverter;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.util.DirectoryScanner;
+import org.codehaus.plexus.util.StringInputStream;
 
 import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Builder;
@@ -317,6 +320,32 @@ public class BundlePlugin extends AbstractMojo {
                 }
             }
 
+            try
+            {
+                /*
+                 * Grab customized manifest entries from the maven-jar-plugin configuration
+                 */
+                MavenArchiveConfiguration archiveConfig = JarPluginConfiguration.getArchiveConfiguration( project );
+                String mavenManifestText = new MavenArchiver().getManifest( project, archiveConfig ).toString();
+
+                Manifest mavenManifest = new Manifest();
+                mavenManifest.read( new StringInputStream( mavenManifestText ) );
+                Manifest bundleManifest = jar.getManifest();
+
+                /*
+                 * Overlay customized Maven manifest with the generated bundle manifest
+                 */
+                mavenManifest.getMainAttributes().putAll( bundleManifest.getMainAttributes() );
+                mavenManifest.getMainAttributes().putValue( "Created-By", "Apache Maven Bundle Plugin" );
+                mavenManifest.getEntries().putAll( bundleManifest.getEntries() );
+
+                jar.setManifest( mavenManifest );
+            }
+            catch (Exception e)
+            {
+                getLog().warn( "Unable to merge Maven manifest" );
+            }
+            
             jarFile.getParentFile().mkdirs();
             builder.getJar().write(jarFile);
             Artifact bundleArtifact = project.getArtifact();
