@@ -1,0 +1,30 @@
+<project>
+  <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+    <relativePath>../../pom/pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>pom</packaging>
+  <name>Apache Felix UPnP Examples: Build</name>
+  <artifactId>upnp.examples.build</artifactId>
+  <version>0.9.0-SNAPSHOT</version>
+
+  <profiles>
+    <profile>
+      <id>packaging-bundle</id>
+      <activation>
+        <property>
+          <name>packaging</name>
+          <value>bundle</value>
+        </property>
+      </activation>
+      <modules>
+          <module>binarylight</module>
+          <module>clock</module>
+          <module>tv</module>
+      </modules>
+    </profile>
+  </profiles>
+</project>

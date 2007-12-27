@@ -125,15 +125,7 @@
           <value>bundle</value>
         </property>
       </activation>
-      <modules>
-
-        <module>../upnp/extra</module>
-        <module>../upnp/basedriver</module>
-        <module>../upnp/tester</module>
-        <module>../upnp/samples/tv</module>
-        <module>../upnp/samples/clock</module>
-        <module>../upnp/samples/binarylight</module>
-        
+      <modules>        
         <module>../org.osgi.foundation</module>
         <module>../javax.servlet</module>
         <module>../org.osgi.core</module>
@@ -149,6 +141,7 @@
         <module>../log</module>
         <module>../eventadmin</module>
         <module>../http.jetty</module>
+        <module>../upnp</module>
         <module>../scr</module>
         <module>../configadmin</module>
         <module>../metatype</module>
