@@ -18,19 +18,10 @@
  */
 package org.apache.felix.prefs.impl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 
-import org.apache.felix.prefs.BackingStoreManager;
-import org.apache.felix.prefs.PreferencesDescription;
-import org.apache.felix.prefs.PreferencesImpl;
+import org.apache.felix.prefs.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.prefs.BackingStoreException;
 
@@ -66,7 +57,7 @@ public class DataFileBackingStoreImpl extends StreamBackingStoreImpl {
     }
 
     /**
-     * @see org.apache.felix.sandbox.preferences.BackingStore#availableBundles()
+     * @see org.apache.felix.prefs.BackingStore#availableBundles()
      */
     public Long[] availableBundles() {
          // If the root directory is not available, then we do nothing!
@@ -110,7 +101,7 @@ public class DataFileBackingStoreImpl extends StreamBackingStoreImpl {
     }
 
     /**
-     * @see org.apache.felix.sandbox.preferences.BackingStore#remove(java.lang.Long)
+     * @see org.apache.felix.prefs.BackingStore#remove(java.lang.Long)
      */
     public void remove(Long bundleId) throws BackingStoreException {
         this.checkAccess();
@@ -128,7 +119,7 @@ public class DataFileBackingStoreImpl extends StreamBackingStoreImpl {
     }
 
     /**
-     * @see org.apache.felix.sandbox.preferences.BackingStore#loadAll(org.apache.felix.sandbox.preferences.BackingStoreManager, java.lang.Long)
+     * @see org.apache.felix.prefs.BackingStore#loadAll(org.apache.felix.prefs.BackingStoreManager, java.lang.Long)
      */
     public PreferencesImpl[] loadAll(BackingStoreManager manager, Long bundleId) throws BackingStoreException {
         this.checkAccess();
@@ -156,7 +147,7 @@ public class DataFileBackingStoreImpl extends StreamBackingStoreImpl {
     }
 
     /**
-     * @see org.apache.felix.sandbox.preferences.BackingStore#load(org.apache.felix.sandbox.preferences.BackingStoreManager, org.apache.felix.sandbox.preferences.PreferencesDescription)
+     * @see org.apache.felix.prefs.BackingStore#load(org.apache.felix.prefs.BackingStoreManager, org.apache.felix.prefs.PreferencesDescription)
      */
     public PreferencesImpl load(BackingStoreManager manager, PreferencesDescription desc) throws BackingStoreException {
         this.checkAccess();

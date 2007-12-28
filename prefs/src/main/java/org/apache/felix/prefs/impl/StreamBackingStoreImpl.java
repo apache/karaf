@@ -18,18 +18,10 @@
  */
 package org.apache.felix.prefs.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
-import org.apache.felix.prefs.BackingStore;
-import org.apache.felix.prefs.PreferencesDescription;
-import org.apache.felix.prefs.PreferencesImpl;
+import org.apache.felix.prefs.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.prefs.BackingStoreException;
 
@@ -60,7 +52,7 @@ public abstract class StreamBackingStoreImpl implements BackingStore {
     throws IOException;
 
     /**
-     * @see org.apache.felix.sandbox.preferences.BackingStore#store(org.apache.felix.sandbox.preferences.PreferencesImpl)
+     * @see org.apache.felix.prefs.BackingStore#store(org.apache.felix.prefs.PreferencesImpl)
      */
     public void store(PreferencesImpl prefs) throws BackingStoreException {
         // do we need to store at all?
@@ -104,7 +96,7 @@ public abstract class StreamBackingStoreImpl implements BackingStore {
     }
 
     /**
-     * @see org.apache.felix.sandbox.preferences.BackingStore#update(org.apache.felix.sandbox.preferences.PreferencesImpl)
+     * @see org.apache.felix.prefs.BackingStore#update(org.apache.felix.prefs.PreferencesImpl)
      */
     public void update(PreferencesImpl prefs) throws BackingStoreException {
         final PreferencesImpl root = this.load(prefs.getBackingStoreManager(), prefs.getDescription());

@@ -18,20 +18,10 @@
  */
 package org.apache.felix.prefs.impl;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
-import org.apache.felix.prefs.BackingStore;
-import org.apache.felix.prefs.BackingStoreManager;
-import org.apache.felix.prefs.PreferencesImpl;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleListener;
-import org.osgi.framework.ServiceFactory;
-import org.osgi.framework.ServiceRegistration;
+import org.apache.felix.prefs.*;
+import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.PreferencesService;
@@ -194,7 +184,7 @@ public class PreferencesManager
     }
 
     /**
-     * @see org.apache.felix.sandbox.preferences.BackingStoreManager#getStore()
+     * @see org.apache.felix.prefs.BackingStoreManager#getStore()
      */
     public BackingStore getStore() {
         // has the service changed?

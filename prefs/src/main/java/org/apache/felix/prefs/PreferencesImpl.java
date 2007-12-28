@@ -19,12 +19,7 @@
 package org.apache.felix.prefs;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.codec.binary.Base64;
 import org.osgi.service.prefs.BackingStoreException;
@@ -99,7 +94,7 @@ public class PreferencesImpl implements Preferences {
 
     /**
      * Return the preferences description.
-     * @return
+     * @return The preferences description.
      */
     public PreferencesDescription getDescription() {
         return this.description;
@@ -118,7 +113,7 @@ public class PreferencesImpl implements Preferences {
 
     /**
      * Return all children or an empty collection.
-     * @return
+     * @return A collection containing the children.
      */
     public Collection getChildren() {
         return this.children.values();
@@ -416,7 +411,7 @@ public class PreferencesImpl implements Preferences {
      * If the node already exists, it's just returned. If not
      * it is created.
      * @param pathName
-     * @return
+     * @return The preferences impl for the path.
      */
     public PreferencesImpl getOrCreateNode(String pathName) {
         if ( pathName == null ) {
@@ -564,13 +559,12 @@ public class PreferencesImpl implements Preferences {
     public String absolutePath() {
         if (this.parent == null) {
             return "/";
-        } else {
-            final String parentPath = this.parent.absolutePath();
-            if ( parentPath.length() == 1 ) {
-                return parentPath + this.name;
-            }
-            return parentPath + '/' + this.name;
         }
+        final String parentPath = this.parent.absolutePath();
+        if ( parentPath.length() == 1 ) {
+            return parentPath + this.name;
+        }
+        return parentPath + '/' + this.name;
     }
 
     /**

@@ -74,8 +74,8 @@
                             org.osgi.service.prefs;version=1.1
                         </Export-Package>
                         <Private-Package>
-                            org.apache.felix.prefs.*,
-                            org.apache.commons.codec.binary.*
+                            org.apache.felix.prefs.impl,
+                            org.apache.commons.codec.binary
                         </Private-Package>
                         <Bundle-Activator>
                             org.apache.felix.prefs.impl.PreferencesManager

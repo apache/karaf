@@ -18,10 +18,7 @@
  */
 package org.apache.felix.prefs;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class keeps track of the changes to a preferences node.
@@ -45,7 +42,7 @@ public class ChangeSet {
 
     /**
      * Do we have changes?
-     * @return
+     * @return True if there are any changes.
      */
     public boolean hasChanges() {
         return this.hasChanges;
