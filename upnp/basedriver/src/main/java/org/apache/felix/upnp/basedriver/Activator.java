@@ -19,16 +19,6 @@
 
 package org.apache.felix.upnp.basedriver;
 
-import org.apache.felix.upnp.extra.controller.DevicesInfo;
-import org.apache.felix.upnp.extra.controller.DriverController;
-
-import org.cybergarage.upnp.UPnP;
-import org.cybergarage.xml.parser.JaxpParser;
-
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-
 import org.apache.felix.upnp.basedriver.controller.impl.DriverControllerImpl;
 import org.apache.felix.upnp.basedriver.export.RootDeviceExportingQueue;
 import org.apache.felix.upnp.basedriver.export.RootDeviceListener;
@@ -41,12 +31,26 @@ import org.apache.felix.upnp.basedriver.importer.core.event.thread.Notifier;
 import org.apache.felix.upnp.basedriver.importer.core.event.thread.SubScriber;
 import org.apache.felix.upnp.basedriver.tool.Logger;
 import org.apache.felix.upnp.basedriver.tool.Util;
+import org.apache.felix.upnp.extra.controller.DevicesInfo;
+import org.apache.felix.upnp.extra.controller.DriverController;
+import org.cybergarage.upnp.UPnP;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public class Activator implements BundleActivator {
-
+	
+	private final static String BASEDRIVER_LOG_PROP = "felix.upnpbase.log";
+	private final static String EXPORTER_ENABLED_PROP = "felix.upnpbase.exporter.enabled";
+	private final static String IMPORTER_ENABLED_PROP = "felix.upnpbase.importer.enabled";
+	private final static String NET_ONLY_IPV4_PROP = "felix.upnpbase.cyberdomo.net.onlyIPV4";
+	private final static String NET_ONLY_IPV6_PROP = "felix.upnpbase.cyberdomo.net.onlyIPV6";
+	private final static String NET_USE_LOOPBACK_PROP = "felix.upnpbase.cyberdomo.net.loopback";
+	private final static String CYBERDOMO_LOG_PROP = "felix.upnpbase.cyberdomo.log";
+	
     public static BundleContext bc;
     public static Logger logger;        
 	private RootDeviceExportingQueue queue;
@@ -70,36 +74,71 @@ public class Activator implements BundleActivator {
         
  		Activator.bc = context;				
 		
-	    String levelStr = (String) Util.getPropertyDefault(context,"felix.upnpbase.log","2");	    
+ 		//
+ 		// Debugger configuration
+ 		//
+	    String levelStr = Util.getPropertyDefault(context,BASEDRIVER_LOG_PROP,"2");	    
 		Activator.logger = new Logger(levelStr);
-	    String cyberLog = (String) Util.getPropertyDefault(context,"felix.upnpbase.cyberlink.log","false");
+		
+	    String cyberLog = Util.getPropertyDefault(context,CYBERDOMO_LOG_PROP,"false");
 	    Activator.logger.setCyberDebug(cyberLog);
+	    
+	    
+ 		//
+	    // NET configuration
+	   	//
+	    String useOnlyIPV4 = Util.getPropertyDefault(context,NET_ONLY_IPV4_PROP,"true");
+    	if (useOnlyIPV4.equalsIgnoreCase("true"))
+            UPnP.setEnable(UPnP.USE_ONLY_IPV4_ADDR);
+    	else
+    		UPnP.setDisable(UPnP.USE_ONLY_IPV4_ADDR);
+    	
+       	String useOnlyIPV6 = Util.getPropertyDefault(context,NET_ONLY_IPV6_PROP,"false");
+    	if (useOnlyIPV6.equalsIgnoreCase("true"))
+            UPnP.setEnable(UPnP.USE_ONLY_IPV6_ADDR);
+    	else
+    		UPnP.setDisable(UPnP.USE_ONLY_IPV6_ADDR);
 
-        UPnP.setEnable(UPnP.USE_ONLY_IPV4_ADDR);
-        UPnP.setDisable(UPnP.USE_LOOPBACK_ADDR);
-		
-		//Setting up Base Driver Exporter
-		this.queue = new RootDeviceExportingQueue();
-		this.producerDeviceToExport = new RootDeviceListener(queue);
-		producerDeviceToExport.activate();
-		consumerDeviceToExport = new ThreadExporter(queue);
-		new Thread(consumerDeviceToExport, "upnp.basedriver.Exporter").start();
+       	String useLoopback = Util.getPropertyDefault(context,NET_USE_LOOPBACK_PROP,"false");
+    	if (useLoopback.equalsIgnoreCase("true"))
+            UPnP.setEnable(UPnP.USE_LOOPBACK_ADDR);
+    	else
+    		UPnP.setDisable(UPnP.USE_LOOPBACK_ADDR);
 
-		//Setting up Base Driver Importer
-		this.notifierQueue = new NotifierQueue();
-		this.subQueue = new SubscriptionQueue();
-		ctrl = new MyCtrlPoint(context, subQueue, notifierQueue);
-		
-		//Enable CyberLink re-new for Event
-		ctrl.setNMPRMode(true);
+    	//
+    	// Exporter configuration		
+       	//
+    	String useExporter = Util.getPropertyDefault(context,EXPORTER_ENABLED_PROP,"true");
+       	if (useExporter.equalsIgnoreCase("true")){
+			//Setting up Base Driver Exporter
+			this.queue = new RootDeviceExportingQueue();
+			this.producerDeviceToExport = new RootDeviceListener(queue);
+			producerDeviceToExport.activate();
+			consumerDeviceToExport = new ThreadExporter(queue);
+			new Thread(consumerDeviceToExport, "upnp.basedriver.Exporter").start();
+       	}
+
+    	//
+       	// Importer configuration		
+      	//
+       	String useImporter = Util.getPropertyDefault(context,IMPORTER_ENABLED_PROP,"true");
+       	if (useImporter.equalsIgnoreCase("true")){
+			//Setting up Base Driver Importer
+			this.notifierQueue = new NotifierQueue();
+			this.subQueue = new SubscriptionQueue();
+			ctrl = new MyCtrlPoint(context, subQueue, notifierQueue);
 			
-		this.monitor=new Monitor();
-		this.notifier = new Notifier(notifierQueue,monitor);
-		this.subScriber = new SubScriber(ctrl, subQueue,monitor);
-		
-		ctrl.start();
-		subScriber.start();
-		notifier.start();
+			//Enable CyberLink re-new for Event
+			ctrl.setNMPRMode(true);
+				
+			this.monitor=new Monitor();
+			this.notifier = new Notifier(notifierQueue,monitor);
+			this.subScriber = new SubScriber(ctrl, subQueue,monitor);
+			
+			ctrl.start();
+			subScriber.start();
+			notifier.start();
+       	}
         
         doControllerRegistration();
         
@@ -123,15 +162,20 @@ public class Activator implements BundleActivator {
         
         drvControllerRegistrar.unregister();
         
-		//Setting up Base Driver Exporter
-		consumerDeviceToExport.end();
-		consumerDeviceToExport.cleanUp();
-		producerDeviceToExport.deactive();
+		//Base Driver Exporter
+        if (consumerDeviceToExport != null) {
+			consumerDeviceToExport.end();
+			consumerDeviceToExport.cleanUp();
+			producerDeviceToExport.deactive();
+        }
 
-		//Setting up Base Driver Importer
-		ctrl.stop();
-		subScriber.close();
-		notifier.close();
+		//Base Driver Importer
+        if (ctrl != null){
+			ctrl.stop();
+			subScriber.close();
+			notifier.close();
+        }
+        
 		Activator.logger.close();
 		Activator.logger=null;
 		Activator.bc = null;

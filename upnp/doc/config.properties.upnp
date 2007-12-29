@@ -36,7 +36,6 @@ felix.auto.start.1= \
  file:../org.osgi.core/target/org.osgi.core-1.1.0-SNAPSHOT.jar \
  file:../javax.servlet/target/javax.servlet-0.9.0-SNAPSHOT.jar \
  file:../org.osgi.compendium/target/org.osgi.compendium-0.9.0-SNAPSHOT.jar \
- file:../log/target/org.apache.felix.log-0.9.0-SNAPSHOT.jar \
  file:../http.jetty/target/org.apache.felix.http.jetty-0.9.0-SNAPSHOT.jar \
  file:../upnp/basedriver/target/org.apache.felix.upnp.basedriver-0.3.0-SNAPSHOT.jar \
  file:../upnp/extra/target/org.apache.felix.upnp.extra-0.3.0-SNAPSHOT.jar \
@@ -56,6 +55,23 @@ felix.startlevel.bundle=1
 org.osgi.service.http.port=8080
 osgi.shell.telnet=on
 #obr.repository.url=http://bundles.osgi.org/obr/browse?_xml=1&cmd=repository
+
+
+#
+# UPnP Basedriver properties
+#
+#felix.upnpbase.log=2
+#felix.upnpbase.exporter.enabled=true
+#felix.upnpbase.importer.enabled=true
+#felix.upnpbase.cyberdomo.log=false
+#felix.upnpbase.cyberdomo.net.loopback=false
+#felix.upnpbase.cyberdomo.net.onlyIPV4=true
+#felix.upnpbase.cyberdomo.net.onlyIPV6=false
+#cyberdomo.ssdp.mx=5
+#cyberdomo.ssdp.buffersize=2048
+#cyberdomo.ssdp.port=1900
+
+
 
 
 #

@@ -58,13 +58,24 @@ public class DriverControllerImpl implements DriverController, DevicesInfo{
     }
 
     public String getLocationURL(String udn) {
+    	if (myCtrl == null){
+    		logger.WARNING("UPnP Importer is disabled. getLocationURL is not available");
+    		return null;
+    	}
         if (udn == null || udn.equals(""))  throw new IllegalArgumentException("Invalid udn paramenter");
         Device device = myCtrl.getDevice(udn);
-        if (device == null) logger.WARNING("getLocationURL():: No device data available for UDN:"+udn);
-        return myCtrl.getDevice(udn).getLocation();
+        if (device == null) {
+        	logger.WARNING("getLocationURL():: No device data available for UDN:"+udn);
+        	return null;
+        }
+        return device.getLocation();
     }
     
     public String getSCPDURL(String udn, String serviceId) {
+    	if (myCtrl == null){
+    		logger.WARNING("UPnP Importer is disabled. getSCPDURL() is not available");
+    		return null;
+    	}
         if (udn == null || udn.equals("") )  throw new IllegalArgumentException("Invalid udn paramenter");
         if (serviceId == null || serviceId.equals("") )  throw new IllegalArgumentException("Invalid serviceId paramenter");
         Device device= myCtrl.getDevice(udn);
@@ -82,8 +93,16 @@ public class DriverControllerImpl implements DriverController, DevicesInfo{
     }
     
     public String resolveRelativeUrl(String udn, String link) {
-        if (udn == null || udn.equals(""))  throw new IllegalArgumentException("Invalid udn paramenter");
+       	if (myCtrl == null){
+    		logger.WARNING("UPnP Importer is disabled. resolveRelativeUrl() is not available");
+    		return null;
+    	}
+       if (udn == null || udn.equals(""))  throw new IllegalArgumentException("Invalid udn paramenter");
         Device device = myCtrl.getDevice(udn);
+        if (device == null) {
+            logger.WARNING("resolveRelativeUrl():: No device data available for UDN: "+udn);
+            return null;
+        }
         return resolveRelativeLink(device,link);        
     }
 
@@ -117,7 +136,11 @@ public class DriverControllerImpl implements DriverController, DevicesInfo{
    }
 
     public void search(String target) {
-        myCtrl.search(target);       
+       	if (myCtrl == null){
+    		logger.WARNING("UPnP Importer is disabled. resolveRelativeUrl() is not available");
+    		return ;
+    	}
+       myCtrl.search(target);       
     }
 
 
