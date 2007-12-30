@@ -15,19 +15,19 @@
  * limitations under the License.
  */
 
-Welcome to Apache ServiceMix Runtime 0.1!
-=========================================
+Welcome to Apache ServiceMix Runtime 
+====================================
 Apache ServiceMix Runtime is a small OSGi based runtime which provides a 
 lightweight container onto which various bundles can be deployed.
 
 The following features are included:
-* Hot deployment of OSGi bundles
-* Dynamic reloadable configuration
-* Provisioning through OBR
-* Native OS integration
-* Extensible Shell console
-* Remote access
-* Running multiple instances
+  * Hot deployment of OSGi bundles
+  * Dynamic reloadable configuration
+  * Provisioning through OBR
+  * Native OS integration
+  * Extensible Shell console
+  * Remote access
+  * Running / managing multiple instances
 
 Getting Started
 ===============
@@ -39,13 +39,13 @@ RELEASE-NOTES.txt for installation instructions and list of supported
 and unsupported features.
 
 Alternatively, you can also find out how to get started here:
-    http://cwiki.apache.org/SMX4/1-quick-start.html
+    http://cwiki.apache.org/confluence/display/SMX4RUN/Home
 
 If you need more help try talking to us on our mailing lists
     http://servicemix.apache.org/mailing-lists.html
 
 If you find any issues with CXF, please submit reports with JIRA here:
-    http://issues.apache.org/activemq/browse/SM
+    http://issues.apache.org/activemq/browse/SMX4RUN
 
 We welcome contributions, and encourage you to get involved in the CXF
 community. If you'd like to learn more about how you can contribute, please
