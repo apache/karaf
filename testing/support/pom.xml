@@ -24,13 +24,13 @@
   <parent>
       <groupId>org.apache.servicemix.runtime.testing</groupId>
       <artifactId>testing</artifactId>
-      <version>1.0-m1</version>
+      <version>1.0-m2-SNAPSHOT</version>
   </parent>
 
   <groupId>org.apache.servicemix.runtime.testing</groupId>
   <artifactId>org.apache.servicemix.runtime.testing.support</artifactId>
   <packaging>bundle</packaging>
-  <version>1.0-m1</version>
+  <version>1.0-m2-SNAPSHOT</version>
   <name>ServiceMix Runtime :: Testing - Support</name>
 
   <dependencies>

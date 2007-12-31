@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.servicemix.runtime</groupId>
         <artifactId>runtime</artifactId>
-        <version>1.0-m1</version>
+        <version>1.0-m2-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.servicemix.runtime.bundles</groupId>
     <artifactId>bundles</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-m1</version>
+    <version>1.0-m2-SNAPSHOT</version>
     <name>ServiceMix OSGI Common Bundles</name>
 
     <modules>
