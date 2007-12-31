@@ -36,7 +36,6 @@ import org.apache.felix.upnp.basedriver.importer.core.event.structs.Subscription
 import org.apache.felix.upnp.basedriver.importer.core.event.thread.Notifier;
 import org.apache.felix.upnp.basedriver.importer.core.event.thread.SubScriber;
 import org.apache.felix.upnp.basedriver.tool.Logger;
-import org.apache.felix.upnp.basedriver.tool.Util;
 import org.apache.felix.upnp.extra.controller.DevicesInfo;
 import org.apache.felix.upnp.extra.controller.DriverController;
 
@@ -79,29 +78,29 @@ public class Activator implements BundleActivator {
  		//
  		// Debugger configuration
  		//
-	    String levelStr = Util.getPropertyDefault(context,BASEDRIVER_LOG_PROP,"2");	    
+	    String levelStr = getPropertyDefault(context,BASEDRIVER_LOG_PROP,"2");	    
 		Activator.logger = new Logger(levelStr);
 		
-	    String cyberLog = Util.getPropertyDefault(context,CYBERDOMO_LOG_PROP,"false");
+	    String cyberLog = getPropertyDefault(context,CYBERDOMO_LOG_PROP,"false");
 	    Activator.logger.setCyberDebug(cyberLog);
 	    
 	    
  		//
 	    // NET configuration
 	   	//
-	    String useOnlyIPV4 = Util.getPropertyDefault(context,NET_ONLY_IPV4_PROP,"true");
+	    String useOnlyIPV4 = getPropertyDefault(context,NET_ONLY_IPV4_PROP,"true");
     	if (useOnlyIPV4.equalsIgnoreCase("true"))
             UPnP.setEnable(UPnP.USE_ONLY_IPV4_ADDR);
     	else
     		UPnP.setDisable(UPnP.USE_ONLY_IPV4_ADDR);
     	
-       	String useOnlyIPV6 = Util.getPropertyDefault(context,NET_ONLY_IPV6_PROP,"false");
+       	String useOnlyIPV6 = getPropertyDefault(context,NET_ONLY_IPV6_PROP,"false");
     	if (useOnlyIPV6.equalsIgnoreCase("true"))
             UPnP.setEnable(UPnP.USE_ONLY_IPV6_ADDR);
     	else
     		UPnP.setDisable(UPnP.USE_ONLY_IPV6_ADDR);
 
-       	String useLoopback = Util.getPropertyDefault(context,NET_USE_LOOPBACK_PROP,"false");
+       	String useLoopback = getPropertyDefault(context,NET_USE_LOOPBACK_PROP,"false");
     	if (useLoopback.equalsIgnoreCase("true"))
             UPnP.setEnable(UPnP.USE_LOOPBACK_ADDR);
     	else
@@ -110,7 +109,7 @@ public class Activator implements BundleActivator {
     	//
     	// Exporter configuration		
        	//
-    	String useExporter = Util.getPropertyDefault(context,EXPORTER_ENABLED_PROP,"true");
+    	String useExporter = getPropertyDefault(context,EXPORTER_ENABLED_PROP,"true");
        	if (useExporter.equalsIgnoreCase("true")){
 			//Setting up Base Driver Exporter
 			this.queue = new RootDeviceExportingQueue();
@@ -123,7 +122,7 @@ public class Activator implements BundleActivator {
     	//
        	// Importer configuration		
       	//
-       	String useImporter = Util.getPropertyDefault(context,IMPORTER_ENABLED_PROP,"true");
+       	String useImporter = getPropertyDefault(context,IMPORTER_ENABLED_PROP,"true");
        	if (useImporter.equalsIgnoreCase("true")){
 			//Setting up Base Driver Importer
 			this.notifierQueue = new NotifierQueue();
@@ -182,4 +181,12 @@ public class Activator implements BundleActivator {
 		Activator.logger=null;
 		Activator.bc = null;
 	}
+	
+	public final String getPropertyDefault(BundleContext bc, String propertyName, String defaultValue ){
+		String value = bc.getProperty(propertyName);
+		if(value == null)
+			return defaultValue;
+		return value;
+	}
+
 }
