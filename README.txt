@@ -39,7 +39,7 @@ RELEASE-NOTES.txt for installation instructions and list of supported
 and unsupported features.
 
 Alternatively, you can also find out how to get started here:
-    http://cwiki.apache.org/confluence/display/SMX4RUN/Home
+    http://servicemix.apache.org/runtime/home.html
 
 If you need more help try talking to us on our mailing lists
     http://servicemix.apache.org/mailing-lists.html
