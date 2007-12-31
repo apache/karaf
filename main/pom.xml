@@ -30,6 +30,7 @@
 
     <artifactId>org.apache.servicemix.runtime.main</artifactId>
     <packaging>bundle</packaging>
+    <version>1.0-m1-SNAPSHOT</version>
     <name>ServiceMix Runtime :: Main</name>
 
     <dependencies>

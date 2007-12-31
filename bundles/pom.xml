@@ -31,6 +31,7 @@
     <groupId>org.apache.servicemix.runtime.bundles</groupId>
     <artifactId>bundles</artifactId>
     <packaging>pom</packaging>
+    <version>1.0-m1-SNAPSHOT</version>
     <name>ServiceMix OSGI Common Bundles</name>
 
     <modules>

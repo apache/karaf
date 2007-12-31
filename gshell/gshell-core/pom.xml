@@ -31,6 +31,7 @@
     <groupId>org.apache.servicemix.runtime.gshell</groupId>
     <artifactId>org.apache.servicemix.runtime.gshell.core</artifactId>
     <packaging>bundle</packaging>
+    <version>1.0-m1-SNAPSHOT</version>
     <name>ServiceMix Runtime :: GShell Core</name>
 
     <description>
