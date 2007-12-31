@@ -25,13 +25,13 @@
     <parent>
         <groupId>org.apache.servicemix.runtime.bundles</groupId>
         <artifactId>bundles</artifactId>
-        <version>1.0-m1-SNAPSHOT</version>
+        <version>1.0-m1</version>
     </parent>
 
     <groupId>org.apache.servicemix.bundles</groupId>
     <artifactId>${pom.groupId}.${pkgArtifactId}-${pkgVersion}</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0-m1-SNAPSHOT</version>
+    <version>1.0-m1</version>
     <name>ServiceMix OSGI Common Bundles: ${pkgArtifactId}-${pkgVersion}</name>
     <description>
         This bundle simply wraps ${pkgArtifactId}-${pkgVersion}.jar.

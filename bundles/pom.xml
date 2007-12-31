@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <!--
 
@@ -25,13 +23,13 @@
     <parent>
         <groupId>org.apache.servicemix.runtime</groupId>
         <artifactId>runtime</artifactId>
-        <version>1.0-m1-SNAPSHOT</version>
+        <version>1.0-m1</version>
     </parent>
 
     <groupId>org.apache.servicemix.runtime.bundles</groupId>
     <artifactId>bundles</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-m1-SNAPSHOT</version>
+    <version>1.0-m1</version>
     <name>ServiceMix OSGI Common Bundles</name>
 
     <modules>
@@ -46,9 +44,9 @@
 
     <properties>
         <servicemix.osgi.export>${servicemix.osgi.export.pkg}*;version=${pkgVersion}</servicemix.osgi.export>
-        <servicemix.osgi.export.pkg></servicemix.osgi.export.pkg>
-        <servicemix.osgi.import.pkg></servicemix.osgi.import.pkg>
-        <servicemix.osgi.private.pkg></servicemix.osgi.private.pkg>
+        <servicemix.osgi.export.pkg />
+        <servicemix.osgi.import.pkg />
+        <servicemix.osgi.private.pkg />
     </properties>
 
     <build>

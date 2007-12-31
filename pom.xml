@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <!--
 
@@ -31,7 +30,7 @@
   <groupId>org.apache.servicemix.runtime</groupId>
   <artifactId>runtime</artifactId>
   <packaging>pom</packaging>
-  <version>1.0-m1-SNAPSHOT</version>
+  <version>1.0-m1</version>
   <name>Apache ServiceMix Runtime</name>
 
   <modules>
@@ -44,9 +43,9 @@
   </modules>
 
   <scm>
-      <connection>scm:svn:http://svn.apache.org/repos/asf/servicemix/smx4/runtime/trunk</connection>
-      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/servicemix/smx4/runtime/trunk</developerConnection>
-      <url>http://svn.apache.org/viewvc/servicemix/smx4/runtime/trunk/</url>
+      <connection>scm:svn:http://svn.apache.org/repos/asf/servicemix/smx4/runtime/tags/runtime-1.0-m1</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/servicemix/smx4/runtime/tags/runtime-1.0-m1</developerConnection>
+      <url>http://svn.apache.org/viewvc/servicemix/smx4/runtime/tags/runtime-1.0-m1</url>
 
   </scm>
   <issueManagement>

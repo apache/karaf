@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <!--
 
@@ -25,25 +24,25 @@
     <parent>
         <groupId>org.apache.servicemix.runtime</groupId>
         <artifactId>runtime</artifactId>
-        <version>1.0-m1-SNAPSHOT</version>
+        <version>1.0-m1</version>
     </parent>
 
     <groupId>org.apache.servicemix.runtime</groupId>
     <artifactId>apache-servicemix-runtime</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-m1-SNAPSHOT</version>
+    <version>1.0-m1</version>
     <name>ServiceMix Runtime :: Assembly</name>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.servicemix.runtime</groupId>
             <artifactId>org.apache.servicemix.runtime.main</artifactId>
-            <version>1.0-m1-SNAPSHOT</version>
+            <version>1.0-m1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.runtime</groupId>
             <artifactId>org.apache.servicemix.runtime.filemonitor</artifactId>
-            <version>1.0-m1-SNAPSHOT</version>
+            <version>1.0-m1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.osgi</groupId>
@@ -93,47 +92,47 @@
       <dependency>
           <groupId>org.apache.servicemix.runtime.gshell</groupId>
           <artifactId>org.apache.servicemix.runtime.gshell.core</artifactId>
-          <version>1.0-m1-SNAPSHOT</version>
+          <version>1.0-m1</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.runtime.gshell</groupId>
           <artifactId>org.apache.servicemix.runtime.gshell.obr</artifactId>
-          <version>1.0-m1-SNAPSHOT</version>
+          <version>1.0-m1</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.runtime.gshell</groupId>
           <artifactId>org.apache.servicemix.runtime.gshell.osgi</artifactId>
-          <version>1.0-m1-SNAPSHOT</version>
+          <version>1.0-m1</version>
       </dependency>
         <dependency>
             <groupId>org.apache.servicemix.runtime.gshell</groupId>
             <artifactId>org.apache.servicemix.runtime.gshell.features</artifactId>
-            <version>1.0-m1-SNAPSHOT</version>
+            <version>1.0-m1</version>
         </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.mina-${mina.version}</artifactId>
-          <version>1.0-m1-SNAPSHOT</version>
+          <version>1.0-m1</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.xstream-${xstream.version}</artifactId>
-          <version>1.0-m1-SNAPSHOT</version>
+          <version>1.0-m1</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.aopalliance-${aopalliance.version}</artifactId>
-          <version>1.0-m1-SNAPSHOT</version>
+          <version>1.0-m1</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.asm-${asm.version}</artifactId>
-          <version>1.0-m1-SNAPSHOT</version>
+          <version>1.0-m1</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.cglib-${cglib.version}</artifactId>
-          <version>1.0-m1-SNAPSHOT</version>
+          <version>1.0-m1</version>
       </dependency>
       <dependency>
           <groupId>org.apache.felix</groupId>
