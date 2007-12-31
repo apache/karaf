@@ -43,7 +43,7 @@ public class PowerSwitchService implements UPnPService{
 	
 	public PowerSwitchService(LightModel model){
 		this.model = model;
-		status = new StatusStateVariable();
+		status = new StatusStateVariable(model);
 		target = new TargetStateVariable();
 		this.states = new UPnPStateVariable[]{status,target};
 		

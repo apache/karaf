@@ -18,12 +18,9 @@
  */
 
 package org.apache.felix.upnp.sample.clock;
-import org.osgi.service.upnp.UPnPStateVariable;
-/* 
-* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
-*/
+import org.osgi.service.upnp.UPnPLocalStateVariable;
 
-public class TimeStateVariable implements UPnPStateVariable{
+public class TimeStateVariable implements UPnPLocalStateVariable{
 	
 	final private String NAME = "Time";
 	final private String DEFAULT_VALUE = "";
@@ -103,5 +100,9 @@ public class TimeStateVariable implements UPnPStateVariable{
 	
 	public void setCurrentTime(long milliseconds){
 		clock.getCalendar().setTimeInMillis(milliseconds);
+	}
+
+	public Object getCurrentValue() {
+		return getCurrentTime();
 	}
 }

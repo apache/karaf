@@ -22,9 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.osgi.service.upnp.UPnPIcon;
-/* 
-* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
-*/
 
 public class ClockIcon implements UPnPIcon {
 

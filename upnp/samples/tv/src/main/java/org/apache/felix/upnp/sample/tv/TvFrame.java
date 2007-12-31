@@ -28,9 +28,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 import org.osgi.framework.BundleException;
-/* 
-* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
-*/
 
 public class TvFrame extends JFrame implements Runnable 
 {

@@ -22,6 +22,8 @@ package org.apache.felix.upnp.sample.binaryLight;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import org.apache.felix.upnp.extra.util.EventSource;
+
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */

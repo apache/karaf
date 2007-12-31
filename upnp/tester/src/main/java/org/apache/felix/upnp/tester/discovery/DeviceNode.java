@@ -18,10 +18,14 @@
  */
 
 package org.apache.felix.upnp.tester.discovery;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Vector;
 
-import org.osgi.framework.*;
-import org.osgi.service.upnp.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.upnp.UPnPDevice;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

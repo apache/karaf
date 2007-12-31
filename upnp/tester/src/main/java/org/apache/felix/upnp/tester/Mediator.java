@@ -20,10 +20,13 @@
 package org.apache.felix.upnp.tester;
 
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JTree;
 
-import org.apache.felix.upnp.tester.discovery.*;
-import org.apache.felix.upnp.tester.gui.*;
+import org.apache.felix.upnp.tester.discovery.DriverProxy;
+import org.apache.felix.upnp.tester.discovery.RootDeviceListener;
+import org.apache.felix.upnp.tester.gui.PropertiesViewer;
+import org.apache.felix.upnp.tester.gui.TreeViewer;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

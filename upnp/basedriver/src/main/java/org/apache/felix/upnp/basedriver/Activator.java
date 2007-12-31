@@ -19,6 +19,12 @@
 
 package org.apache.felix.upnp.basedriver;
 
+import org.cybergarage.upnp.UPnP;
+
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+
 import org.apache.felix.upnp.basedriver.controller.impl.DriverControllerImpl;
 import org.apache.felix.upnp.basedriver.export.RootDeviceExportingQueue;
 import org.apache.felix.upnp.basedriver.export.RootDeviceListener;
@@ -33,10 +39,6 @@ import org.apache.felix.upnp.basedriver.tool.Logger;
 import org.apache.felix.upnp.basedriver.tool.Util;
 import org.apache.felix.upnp.extra.controller.DevicesInfo;
 import org.apache.felix.upnp.extra.controller.DriverController;
-import org.cybergarage.upnp.UPnP;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

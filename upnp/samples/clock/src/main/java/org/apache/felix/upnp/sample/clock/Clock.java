@@ -20,9 +20,6 @@
 package org.apache.felix.upnp.sample.clock;
 
 import java.util.Calendar;
-/* 
-* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
-*/
 
 public class Clock
 {

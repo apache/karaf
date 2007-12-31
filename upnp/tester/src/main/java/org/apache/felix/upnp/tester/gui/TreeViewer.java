@@ -43,14 +43,15 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
-import org.apache.felix.upnp.tester.Activator;
-import org.apache.felix.upnp.tester.Mediator;
-import org.apache.felix.upnp.tester.discovery.DeviceNode;
-import org.apache.felix.upnp.tester.discovery.DeviceNodeListener;
 import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPService;
 import org.osgi.service.upnp.UPnPStateVariable;
+
+import org.apache.felix.upnp.tester.Activator;
+import org.apache.felix.upnp.tester.Mediator;
+import org.apache.felix.upnp.tester.discovery.DeviceNode;
+import org.apache.felix.upnp.tester.discovery.DeviceNodeListener;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

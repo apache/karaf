@@ -34,12 +34,13 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import org.apache.felix.upnp.tester.discovery.DeviceNode;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPService;
 import org.osgi.service.upnp.UPnPStateVariable;
+
+import org.apache.felix.upnp.tester.discovery.DeviceNode;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

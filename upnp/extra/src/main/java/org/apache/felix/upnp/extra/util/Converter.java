@@ -19,13 +19,17 @@
 
 package org.apache.felix.upnp.extra.util;
 
-import java.text.*;
-import java.util.*;
+import java.text.ParseException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
-//import org.apache.xerces.impl.dv.util.*;
 import org.apache.xerces.impl.dv.util.Base64;
 import org.apache.xerces.impl.dv.util.HexBin;
-import org.osgi.service.upnp.*;
+
+import org.osgi.service.upnp.UPnPStateVariable;
 
 /** 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

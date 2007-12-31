@@ -19,9 +19,6 @@
 
 package org.apache.felix.upnp.sample.binaryLight;
 import org.osgi.service.upnp.UPnPStateVariable;
-/* 
-* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
-*/
 
 public class TargetStateVariable implements UPnPStateVariable{
 	

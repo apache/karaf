@@ -24,9 +24,6 @@ import java.util.Hashtable;
 
 import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPStateVariable;
-/* 
-* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
-*/
 
 public class GetPowerAction implements UPnPAction {
 

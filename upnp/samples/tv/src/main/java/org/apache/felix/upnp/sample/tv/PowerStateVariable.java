@@ -19,11 +19,12 @@
 
 package org.apache.felix.upnp.sample.tv;
 import java.beans.PropertyChangeEvent;
-/* 
-* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
-*/
 
-public class PowerStateVariable implements UPnPStateVariableDescriptor {
+import org.osgi.service.upnp.UPnPLocalStateVariable;
+
+import org.apache.felix.upnp.extra.util.UPnPEventNotifier;
+
+public class PowerStateVariable implements UPnPLocalStateVariable {
 	
 	final private String NAME = "Power";
 	final private Boolean DEFAULT_VALUE = Boolean.FALSE;
@@ -113,7 +114,7 @@ public class PowerStateVariable implements UPnPStateVariableDescriptor {
 		this.notifier = notifier;
 	}
 
-    public Object getValue() {
+    public Object getCurrentValue() {
          return power;
     }
 }

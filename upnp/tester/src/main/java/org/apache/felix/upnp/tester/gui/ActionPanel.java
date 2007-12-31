@@ -45,11 +45,12 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
 
-import org.apache.felix.upnp.extra.util.Converter;
-import org.osgi.service.upnp.UPnPException;
-import org.apache.felix.upnp.tester.Mediator;
 import org.osgi.service.upnp.UPnPAction;
+import org.osgi.service.upnp.UPnPException;
 import org.osgi.service.upnp.UPnPStateVariable;
+
+import org.apache.felix.upnp.extra.util.Converter;
+import org.apache.felix.upnp.tester.Mediator;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

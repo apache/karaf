@@ -18,18 +18,17 @@
  */
 
 package org.apache.felix.upnp.sample.binaryLight;
-import org.osgi.service.upnp.UPnPStateVariable;
-/* 
-* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
-*/
+import org.osgi.service.upnp.UPnPLocalStateVariable;
 
-public class StatusStateVariable implements UPnPStateVariable{
+public class StatusStateVariable implements UPnPLocalStateVariable{
 	
 	final private String NAME = "Status";
 	final private Boolean DEFAULT_VALUE = Boolean.FALSE;
+	private LightModel model;
 	
 	
-	public StatusStateVariable(){
+	public StatusStateVariable(LightModel model){
+		this.model= model;
 	}
 	
 	/* (non-Javadoc)
@@ -93,5 +92,9 @@ public class StatusStateVariable implements UPnPStateVariable{
 	 */
 	public boolean sendsEvents() {
 		return true;
+	}
+
+	public Object getCurrentValue() {
+		return Boolean.valueOf(model.getStatus());
 	}
 }

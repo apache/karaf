@@ -34,9 +34,8 @@ import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPEventListener;
 import org.osgi.service.upnp.UPnPIcon;
 import org.osgi.service.upnp.UPnPService;
-/* 
-* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
-*/
+
+import org.apache.felix.upnp.extra.util.UPnPEventNotifier;
 
 public class TvDevice implements UPnPDevice,UPnPEventListener,ServiceListener  {
 	

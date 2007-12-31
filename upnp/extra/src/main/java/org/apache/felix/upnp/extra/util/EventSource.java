@@ -17,14 +17,17 @@
  * under the License.
  */
 
-package org.apache.felix.upnp.sample.tv;
+package org.apache.felix.upnp.extra.util;
 
-import org.osgi.service.upnp.UPnPStateVariable;
+import java.beans.PropertyChangeListener;
 
 /* 
-* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+* @author <a href="mailto:felix-dev@incubator.apache.org">Felix Project Team</a>
 */
-public interface UPnPStateVariableDescriptor extends UPnPStateVariable {
-    Object getValue();
-
+public interface EventSource {
+	void addPropertyChangeListener(PropertyChangeListener listener);
+	void addPropertyChangeListener(String propertyName, PropertyChangeListener listener);
+	void removePropertyChangeListener(PropertyChangeListener listener);
+	void removePropertyChangeListener(String propertyName, PropertyChangeListener listener);
 }
+

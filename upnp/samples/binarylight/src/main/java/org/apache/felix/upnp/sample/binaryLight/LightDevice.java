@@ -29,6 +29,8 @@ import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPIcon;
 import org.osgi.service.upnp.UPnPService;
 
+import org.apache.felix.upnp.extra.util.UPnPEventNotifier;
+
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
@@ -61,7 +63,7 @@ public class LightDevice implements UPnPDevice {
 	 * 
 	 */
 	private void buildEventNotifyer() {
-		notifier = new UPnPEventNotifier(context,DEVICE_ID,powerSwitch,model);
+		notifier = new UPnPEventNotifier(context,this,powerSwitch,model);
 	}
 
 	private void setupDeviceProperties(){

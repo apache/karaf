@@ -44,13 +44,14 @@ import javax.swing.JSplitPane;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import org.osgi.framework.BundleException;
+
 import org.apache.felix.upnp.tester.discovery.DriverProxy;
 import org.apache.felix.upnp.tester.discovery.RootDeviceListener;
 import org.apache.felix.upnp.tester.gui.LogPanel;
 import org.apache.felix.upnp.tester.gui.PropertiesViewer;
 import org.apache.felix.upnp.tester.gui.TreeViewer;
 import org.apache.felix.upnp.tester.gui.Util;
-import org.osgi.framework.BundleException;
  
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

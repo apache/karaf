@@ -38,10 +38,11 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import org.apache.felix.upnp.tester.Mediator;
-import org.apache.felix.upnp.tester.discovery.DeviceNode;
 import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPDevice;
+
+import org.apache.felix.upnp.tester.Mediator;
+import org.apache.felix.upnp.tester.discovery.DeviceNode;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

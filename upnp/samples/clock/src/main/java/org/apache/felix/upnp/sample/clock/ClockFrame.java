@@ -29,9 +29,6 @@ import javax.swing.JFrame;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-/* 
-* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
-*/
 
 public class ClockFrame extends JFrame implements Runnable 
 {

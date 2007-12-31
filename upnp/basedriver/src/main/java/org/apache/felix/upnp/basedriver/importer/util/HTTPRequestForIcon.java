@@ -19,8 +19,12 @@
 
 package org.apache.felix.upnp.basedriver.importer.util;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.URL;
 
 /** 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

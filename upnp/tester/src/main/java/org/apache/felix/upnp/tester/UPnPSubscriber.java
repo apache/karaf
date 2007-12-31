@@ -19,10 +19,16 @@
  
 package org.apache.felix.upnp.tester;
 
-import java.util.*;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Properties;
 
-import org.osgi.framework.*;
-import org.osgi.service.upnp.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.upnp.UPnPDevice;
+import org.osgi.service.upnp.UPnPEventListener;
+import org.osgi.service.upnp.UPnPService;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

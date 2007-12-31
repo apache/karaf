@@ -25,12 +25,14 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.apache.felix.upnp.basedriver.importer.util.DeviceSetup;
 import org.cybergarage.upnp.Device;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPIcon;
 import org.osgi.service.upnp.UPnPService;
+
+import org.apache.felix.upnp.basedriver.importer.util.DeviceSetup;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

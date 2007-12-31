@@ -20,12 +20,19 @@
 package org.apache.felix.upnp.tester.discovery;
 
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.upnp.UPnPDevice;
 
 import org.apache.felix.upnp.tester.Activator;
-import org.apache.felix.upnp.tester.gui.*;
-import org.osgi.framework.*;
-import org.osgi.service.upnp.*;
+import org.apache.felix.upnp.tester.gui.LogPanel;
+import org.apache.felix.upnp.tester.gui.Util;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

@@ -19,15 +19,14 @@
 
 package org.apache.felix.upnp.basedriver.controller.impl;
 
-import org.apache.felix.upnp.extra.controller.DevicesInfo;
-import org.apache.felix.upnp.extra.controller.DriverController;
-
 import org.cybergarage.upnp.Device;
 import org.cybergarage.upnp.Service;
 
 import org.apache.felix.upnp.basedriver.Activator;
 import org.apache.felix.upnp.basedriver.importer.core.MyCtrlPoint;
 import org.apache.felix.upnp.basedriver.tool.Logger;
+import org.apache.felix.upnp.extra.controller.DevicesInfo;
+import org.apache.felix.upnp.extra.controller.DriverController;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

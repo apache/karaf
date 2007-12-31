@@ -31,13 +31,14 @@ import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 
+import org.osgi.service.upnp.UPnPDevice;
+import org.osgi.service.upnp.UPnPEventListener;
+import org.osgi.service.upnp.UPnPService;
+
 import org.apache.felix.upnp.tester.Activator;
 import org.apache.felix.upnp.tester.Mediator;
 import org.apache.felix.upnp.tester.UPnPSubscriber;
 import org.apache.felix.upnp.tester.discovery.DeviceNode;
-import org.osgi.service.upnp.UPnPDevice;
-import org.osgi.service.upnp.UPnPEventListener;
-import org.osgi.service.upnp.UPnPService;
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */

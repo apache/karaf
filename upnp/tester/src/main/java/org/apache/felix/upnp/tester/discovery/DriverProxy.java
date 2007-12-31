@@ -19,10 +19,15 @@
 
 package org.apache.felix.upnp.tester.discovery;
 
-import org.apache.felix.upnp.extra.controller.*;
-import org.apache.felix.upnp.tester.*;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 
-import org.osgi.framework.*;
+import org.apache.felix.upnp.extra.controller.DevicesInfo;
+import org.apache.felix.upnp.extra.controller.DriverController;
+import org.apache.felix.upnp.tester.Activator;
+import org.apache.felix.upnp.tester.Mediator;
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */

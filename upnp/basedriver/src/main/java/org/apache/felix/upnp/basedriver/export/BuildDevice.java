@@ -26,9 +26,9 @@ import org.cybergarage.upnp.AllowedValueRange;
 import org.cybergarage.upnp.Argument;
 import org.cybergarage.upnp.ArgumentList;
 import org.cybergarage.upnp.Device;
+import org.cybergarage.upnp.RootDescription;
 import org.cybergarage.upnp.Service;
 import org.cybergarage.upnp.StateVariable;
-import org.cybergarage.upnp.RootDescription;
 import org.cybergarage.upnp.xml.DeviceData;
 import org.cybergarage.xml.Node;
 

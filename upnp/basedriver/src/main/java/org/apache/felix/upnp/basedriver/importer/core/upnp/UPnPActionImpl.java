@@ -29,10 +29,10 @@ import org.cybergarage.upnp.ArgumentList;
 import org.cybergarage.upnp.UPnPStatus;
 
 import org.osgi.service.upnp.UPnPAction;
+import org.osgi.service.upnp.UPnPException;
 import org.osgi.service.upnp.UPnPStateVariable;
 
 import org.apache.felix.upnp.extra.util.Converter;
-import org.osgi.service.upnp.UPnPException;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

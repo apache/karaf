@@ -19,7 +19,8 @@
 
 package org.apache.felix.upnp.tester.discovery;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

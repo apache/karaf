@@ -36,11 +36,11 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPDevice;
+import org.osgi.service.upnp.UPnPException;
 import org.osgi.service.upnp.UPnPService;
 
 import org.apache.felix.upnp.basedriver.Activator;
 import org.apache.felix.upnp.extra.util.Converter;
-import org.osgi.service.upnp.UPnPException;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

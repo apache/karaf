@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.felix.upnp.sample.clock;
+package org.apache.felix.upnp.extra.util;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -34,6 +34,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPEventListener;
+import org.osgi.service.upnp.UPnPLocalStateVariable;
 import org.osgi.service.upnp.UPnPService;
 import org.osgi.service.upnp.UPnPStateVariable;
 
@@ -41,34 +42,69 @@ import org.osgi.service.upnp.UPnPStateVariable;
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 
-public class UPnPEventNotifier implements PropertyChangeListener,ServiceListener {
+public class UPnPEventNotifier implements PropertyChangeListener, ServiceListener {
 	private BundleContext context;
 	private UPnPDevice device;
 	private UPnPService service;
-	private EventSource source;
-	
-	private Properties UPnPTargetListener;
 	private String deviceId;
 	private String serviceId;
+	
+	private Properties UPnPTargetListener;
 	private Vector upnpListeners = new Vector();
 	final private Object LOCK = new Object();
 	
-	public UPnPEventNotifier(BundleContext context,UPnPDevice device,UPnPService service,EventSource source){
+	
+	private class NotifierThread extends Thread {
+		private ServiceReference sr;
+		private Properties events;
+
+		public NotifierThread(ServiceReference sr, Properties events){
+			super("UPnPEventNotifier");
+			this.sr = sr;
+			this.events = events;
+		}
+		
+		public void run(){
+			try {
+				UPnPEventListener listener = (UPnPEventListener) context.getService(sr);
+				listener.notifyUPnPEvent(deviceId,serviceId,events);
+				context.ungetService(sr);
+			} catch (Exception ignored){
+			}
+		}
+	}
+
+	public UPnPEventNotifier(BundleContext context, UPnPDevice device, UPnPService service, EventSource source){
+		this(context,device,service);
+		
+		if (source != null){
+			UPnPStateVariable[] vars = service.getStateVariables();
+			if (vars != null){
+				for (int i=0;i<vars.length;i++){
+					if(vars[i].sendsEvents()){
+						source.addPropertyChangeListener(vars[i].getName(),this);
+					}
+				}
+			}
+		}
+
+	}
+	
+	public UPnPEventNotifier(BundleContext context, UPnPDevice device, UPnPService service){
 		this.context=context;
 		this.device=device;
 		this.service=service;
-		this.source=source;
-		this.serviceId=service.getId();
-		setupUPnPListenerHouseKeeping(device);
+		setupUPnPListenerWatcher();
 	}
 	
 	/**
 	 * @param deviceId
 	 */
-	private void setupUPnPListenerHouseKeeping(UPnPDevice device) {
-		UPnPTargetListener = new Properties();
+	private void setupUPnPListenerWatcher() {
 		Dictionary dict = device.getDescriptions(null);
-		deviceId = (String) dict.get(UPnPDevice.ID);
+		this.deviceId = (String) dict.get(UPnPDevice.ID);
+		this.serviceId=service.getId();
+		UPnPTargetListener = new Properties();
 		UPnPTargetListener.put(UPnPDevice.ID,deviceId);
 		UPnPTargetListener.put(UPnPService.ID,serviceId);
 		UPnPTargetListener.put(UPnPDevice.TYPE,dict.get(UPnPDevice.TYPE));
@@ -82,8 +118,7 @@ public class UPnPEventNotifier implements PropertyChangeListener,ServiceListener
 			} catch (Exception ex) {
 				System.out.println(ex);
 			}
-			
-			
+						
 			ServiceReference[] listeners = null; 
 			try {
 				listeners = context.getServiceReferences(UPnPEventListener.class.getName(),null);
@@ -101,19 +136,36 @@ public class UPnPEventNotifier implements PropertyChangeListener,ServiceListener
 			} catch (Exception ex) {
 				System.out.println(ex);
 			}
+			
+			Properties status = getCurrentStatus();
+			if (! status.isEmpty())
+					doNotify(status);
 		
-		}
+		} // end LOCK
+	
+	}
 
-		if (source!=null){
-			UPnPStateVariable[] vars = service.getStateVariables();
-			if (vars != null){
-				for (int i=0;i<vars.length;i++)
-					if(vars[i].sendsEvents())
-						source.addPropertyChangeListener(vars[i].getName(),this);
-			}
+	private Properties getCurrentStatus() {
+		Properties status = new Properties();
+		UPnPStateVariable[] vars = service.getStateVariables();
+		if (vars != null){
+			for (int i=0;i<vars.length;i++){
+				if(vars[i].sendsEvents()){
+					if (vars[i] instanceof UPnPLocalStateVariable){
+						UPnPLocalStateVariable localVar = (UPnPLocalStateVariable) vars[i];
+						String property = localVar.getName();
+						Object value = localVar.getCurrentValue();
+						status.put(property,value);						
+					}
+					else {
+						System.out.println("[Warning] The StateVariable (" +vars[i].getName() +")"
+								+ " of device (ID:" + deviceId 	+ ") "
+								+ "should implement the interface UPnPLocalStateVariable");
+					}
+				}
+			} // end for
 		}
-		
-		
+		return status;
 	}
 
 	/* (non-Javadoc)
@@ -121,36 +173,32 @@ public class UPnPEventNotifier implements PropertyChangeListener,ServiceListener
 	 */
 	public void propertyChange(PropertyChangeEvent evt) {
 		
-		synchronized (LOCK) {
-			
-			Iterator list = upnpListeners.iterator();
-			String property = evt.getPropertyName();
-			Object value = evt.getNewValue();
-			String valueString = value.toString();
-			final Properties events = new Properties();
-			events.put(property,valueString);
-			while (list.hasNext()){
-				final ServiceReference sr = (ServiceReference)list.next();
-				String[] props =sr.getPropertyKeys();
-				new Thread(){
-					public void run(){
-						try {
-							UPnPEventListener listener = (UPnPEventListener) context.getService(sr);
-							listener.notifyUPnPEvent(deviceId,serviceId,events);
-							context.ungetService(sr);
-						} catch (Exception ex){
-							System.out.println("Clock UPnPEventNotifier Err: " +ex);
-							System.out.println("context: " +context);
-							System.out.println("listener: " +context.getService(sr));
-							System.out.println("sr: " +sr);
-							System.out.println();
-						}
-					}
-				}.start();						
-			}
-		}
+		String property = evt.getPropertyName();
+		Object value = evt.getNewValue();
+		String valueString = value.toString();
+		Properties events = new Properties();
+		events.put(property,valueString);
+		doNotify(events);
 	}
 
+	private void doNotify(Properties events){
+				
+		synchronized (LOCK) {			
+			Iterator list = upnpListeners.iterator();
+			while (list.hasNext()){
+				final ServiceReference sr = (ServiceReference)list.next();
+				new NotifierThread(sr,events).start();						
+			}
+		}		
+	}
+	
+	private void doNotify(ServiceReference sr) {
+		Properties status = getCurrentStatus();
+		if (! status.isEmpty())
+			new NotifierThread(sr,status).start();						
+	}
+
+	
 	/* (non-Javadoc)
 	 * @see org.osgi.framework.ServiceListener#serviceChanged(org.osgi.framework.ServiceEvent)
 	 */
@@ -160,10 +208,15 @@ public class UPnPEventNotifier implements PropertyChangeListener,ServiceListener
 			switch(e.getType()){
 				case ServiceEvent.REGISTERED:{
 					Filter filter = (Filter) sr.getProperty(UPnPEventListener.UPNP_FILTER);
-					if (filter == null) addNewListener(sr);
+					if (filter == null) {
+						addNewListener(sr);
+						doNotify(sr);
+					}
 					else {				
-						if (filter.match(UPnPTargetListener))
+						if (filter.match(UPnPTargetListener)){
 							addNewListener(sr);
+							doNotify(sr);
+						}
 					}
 				};break;
 				
@@ -185,6 +238,7 @@ public class UPnPEventNotifier implements PropertyChangeListener,ServiceListener
 		}//end LOCK
 		
 	}
+
 
 	/**
 	 * @param reference
