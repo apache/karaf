@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.felix.upnp.sample.binaryLight;
+package org.apache.felix.upnp.sample.binaryLight.icons;
 import java.io.IOException;
 import java.io.InputStream;
 

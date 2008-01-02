@@ -66,12 +66,12 @@ public class ClockDevice implements UPnPDevice {
 		//dictionary.put(UPnPDevice.DEVICE_CATEGORY,new String[]{UPnPDevice.DEVICE_CATEGORY});
 		dictionary.put(UPnPDevice.FRIENDLY_NAME,"Felix OSGi-UPnP Clock");
 		dictionary.put(UPnPDevice.MANUFACTURER,"Apache Software Foundation");
-		dictionary.put(UPnPDevice.MANUFACTURER_URL,"http://incubator.apache.org/felix/");
+		dictionary.put(UPnPDevice.MANUFACTURER_URL,"http://felix.apache.org");
 		dictionary.put(UPnPDevice.MODEL_DESCRIPTION,"A CyberLink Clock device clone to test OSGi to UPnP service export");
 		dictionary.put(UPnPDevice.MODEL_NAME,"DolceDormire");
 		dictionary.put(UPnPDevice.MODEL_NUMBER,"1.0");
-		dictionary.put(UPnPDevice.MODEL_URL,"http://incubator.apache.org/felix/DolceDormire");
-		dictionary.put(UPnPDevice.PRESENTATION_URL,"http://incubator.apache.org/felix/dolceDormire/presentation");
+		dictionary.put(UPnPDevice.MODEL_URL,"http://felix.apache.org/site/upnp-example-clock.html");
+		//dictionary.put(UPnPDevice.PRESENTATION_URL,"http://felix.apache.org/dolceDormire/presentation");
 		dictionary.put(UPnPDevice.SERIAL_NUMBER,"123456789");
 		dictionary.put(UPnPDevice.TYPE,"urn:schemas-upnp-org:device:clock:1");
 		dictionary.put(UPnPDevice.UDN,DEVICE_ID);

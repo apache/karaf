@@ -17,13 +17,15 @@
  * under the License.
  */
 
-package org.apache.felix.upnp.sample.binaryLight;
+package org.apache.felix.upnp.sample.binaryLight.actions;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPStateVariable;
+
+import org.apache.felix.upnp.sample.binaryLight.LightModel;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

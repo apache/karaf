@@ -30,6 +30,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.upnp.UPnPDevice;
 
+import org.apache.felix.upnp.sample.binaryLight.devices.LightDevice;
+
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
@@ -65,31 +67,28 @@ public class Activator implements BundleActivator {
 	
 	private void doServletRegistration() {
         ServiceReference sr = context.getServiceReference(HttpService.class.getName());
-        if (sr != null){
-        	httpServ = (HttpService) context.getService(sr);
-        	
-            try
-            {
-             Servlet presentationServlet = new PresentationServlet(light.getModel());
-             httpServ.registerServlet("/upnp/binaryLight", presentationServlet,null, null);
-            }
-            catch (Exception e)
-            {
-                System.err.println("Exception registering presentationServlet:" + e);
-            }
-            
-            
-            try
-            {
-                httpServ.registerResources("/upnp/binaryLight/images",
-                        "/org/apache/felix/upnp/sample/binaryLight/images", null);
-            }
-            catch (Exception e)
-            {
-                System.err.println("Exception registering /resource:" + e);
-            }
+        if (sr != null) {
+			httpServ = (HttpService) context.getService(sr);
 
-        }		
+			try {
+				Servlet presentationServlet = new PresentationServlet(light
+						.getModel());
+				httpServ.registerServlet("/upnp/binaryLight",
+						presentationServlet, null, null);
+			} catch (Exception e) {
+				System.err.println("Exception registering presentationServlet:"
+						+ e);
+			}
+
+			try {
+				httpServ.registerResources("/upnp/binaryLight/images",
+						"/org/apache/felix/upnp/sample/binaryLight/images",
+						null);
+			} catch (Exception e) {
+				System.err.println("Exception registering /resource:" + e);
+			}
+
+		}		
 	}
 
 	/**

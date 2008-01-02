@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.felix.upnp.sample.binaryLight;
+package org.apache.felix.upnp.sample.binaryLight.devices;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -30,6 +30,10 @@ import org.osgi.service.upnp.UPnPIcon;
 import org.osgi.service.upnp.UPnPService;
 
 import org.apache.felix.upnp.extra.util.UPnPEventNotifier;
+import org.apache.felix.upnp.sample.binaryLight.LightModel;
+import org.apache.felix.upnp.sample.binaryLight.LightUI;
+import org.apache.felix.upnp.sample.binaryLight.icons.LightIcon;
+import org.apache.felix.upnp.sample.binaryLight.services.PowerSwitchService;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
@@ -77,11 +81,11 @@ public class LightDevice implements UPnPDevice {
 		//dictionary.put(UPnPDevice.DEVICE_CATEGORY,new String[]{UPnPDevice.DEVICE_CATEGORY});
 		dictionary.put(UPnPDevice.FRIENDLY_NAME,"Felix OSGi-UPnP BinaryLight");
 		dictionary.put(UPnPDevice.MANUFACTURER,"Apache Software Foundation");
-		dictionary.put(UPnPDevice.MANUFACTURER_URL,"http://incubator.apache.org/felix/");
+		dictionary.put(UPnPDevice.MANUFACTURER_URL,"http://felix.apache.org");
 		dictionary.put(UPnPDevice.MODEL_DESCRIPTION,"A BinaryLight device to test OSGi to UPnP service export");
 		dictionary.put(UPnPDevice.MODEL_NAME,"Lucciola");
 		dictionary.put(UPnPDevice.MODEL_NUMBER,"1.0");
-		dictionary.put(UPnPDevice.MODEL_URL,"http://incubator.apache.org/felix/lucciola");
+		dictionary.put(UPnPDevice.MODEL_URL,"http://felix.apache.org/site/upnp-example-binarylight.html");
 		String port = context.getProperty("org.osgi.service.http.port");
         InetAddress inet;
 		try {

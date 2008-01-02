@@ -17,28 +17,29 @@
  * under the License.
  */
 
-package org.apache.felix.upnp.sample.binaryLight;
+package org.apache.felix.upnp.sample.binaryLight.actions;
 
 import java.util.Dictionary;
-import java.util.Hashtable;
 
 import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPStateVariable;
+
+import org.apache.felix.upnp.sample.binaryLight.LightModel;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 
-public class GetTargetAction implements UPnPAction {
+public class SetTargetAction implements UPnPAction {
 
-	final private String NAME = "GetTarget";
-	final private String RET_TARGET_VALUE = "RetTargetValue";
-	final private String[] OUT_ARG_NAMES = new String[]{RET_TARGET_VALUE};
+	final private String NAME = "SetTarget";
+	final private String NEW_TARGET_VALUE = "NewTargetValue";
+	final private String[] IN_ARG_NAMES = new String[]{NEW_TARGET_VALUE};
 	private UPnPStateVariable state;
 	private LightModel model;
 	
 	
-	public GetTargetAction(LightModel model,UPnPStateVariable state){
+	public SetTargetAction(LightModel model,UPnPStateVariable state){
 		this.state = state;
 		this.model=model;
 	}
@@ -61,15 +62,14 @@ public class GetTargetAction implements UPnPAction {
 	 * @see org.osgi.service.upnp.UPnPAction#getInputArgumentNames()
 	 */
 	public String[] getInputArgumentNames() {
-		
-		return null;
+		return IN_ARG_NAMES;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.osgi.service.upnp.UPnPAction#getOutputArgumentNames()
 	 */
 	public String[] getOutputArgumentNames() {
-		return OUT_ARG_NAMES;
+		return null;
 	}
 
 	/* (non-Javadoc)
@@ -83,9 +83,8 @@ public class GetTargetAction implements UPnPAction {
 	 * @see org.osgi.service.upnp.UPnPAction#invoke(java.util.Dictionary)
 	 */
 	public Dictionary invoke(Dictionary args) throws Exception {
-		boolean target = model.getTarget();
-		Hashtable result = new Hashtable();
-		result.put(RET_TARGET_VALUE,new Boolean(target));
-		return result;
+		Boolean value = (Boolean) args.get(NEW_TARGET_VALUE);
+		model.doSwitch(value.booleanValue());
+		return null;
 	}
 }

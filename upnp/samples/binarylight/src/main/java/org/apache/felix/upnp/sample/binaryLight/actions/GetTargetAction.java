@@ -17,27 +17,30 @@
  * under the License.
  */
 
-package org.apache.felix.upnp.sample.binaryLight;
+package org.apache.felix.upnp.sample.binaryLight.actions;
 
 import java.util.Dictionary;
+import java.util.Hashtable;
 
 import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPStateVariable;
+
+import org.apache.felix.upnp.sample.binaryLight.LightModel;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 
-public class SetTargetAction implements UPnPAction {
+public class GetTargetAction implements UPnPAction {
 
-	final private String NAME = "SetTarget";
-	final private String NEW_TARGET_VALUE = "NewTargetValue";
-	final private String[] IN_ARG_NAMES = new String[]{NEW_TARGET_VALUE};
+	final private String NAME = "GetTarget";
+	final private String RET_TARGET_VALUE = "RetTargetValue";
+	final private String[] OUT_ARG_NAMES = new String[]{RET_TARGET_VALUE};
 	private UPnPStateVariable state;
 	private LightModel model;
 	
 	
-	public SetTargetAction(LightModel model,UPnPStateVariable state){
+	public GetTargetAction(LightModel model,UPnPStateVariable state){
 		this.state = state;
 		this.model=model;
 	}
@@ -60,14 +63,15 @@ public class SetTargetAction implements UPnPAction {
 	 * @see org.osgi.service.upnp.UPnPAction#getInputArgumentNames()
 	 */
 	public String[] getInputArgumentNames() {
-		return IN_ARG_NAMES;
+		
+		return null;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.osgi.service.upnp.UPnPAction#getOutputArgumentNames()
 	 */
 	public String[] getOutputArgumentNames() {
-		return null;
+		return OUT_ARG_NAMES;
 	}
 
 	/* (non-Javadoc)
@@ -81,8 +85,9 @@ public class SetTargetAction implements UPnPAction {
 	 * @see org.osgi.service.upnp.UPnPAction#invoke(java.util.Dictionary)
 	 */
 	public Dictionary invoke(Dictionary args) throws Exception {
-		Boolean value = (Boolean) args.get(NEW_TARGET_VALUE);
-		model.doSwitch(value.booleanValue());
-		return null;
+		boolean target = model.getTarget();
+		Hashtable result = new Hashtable();
+		result.put(RET_TARGET_VALUE,new Boolean(target));
+		return result;
 	}
 }

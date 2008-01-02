@@ -17,13 +17,20 @@
  * under the License.
  */
 
-package org.apache.felix.upnp.sample.binaryLight;
+package org.apache.felix.upnp.sample.binaryLight.services;
 
 import java.util.HashMap;
 
 import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPService;
 import org.osgi.service.upnp.UPnPStateVariable;
+
+import org.apache.felix.upnp.sample.binaryLight.LightModel;
+import org.apache.felix.upnp.sample.binaryLight.actions.GetStatusAction;
+import org.apache.felix.upnp.sample.binaryLight.actions.GetTargetAction;
+import org.apache.felix.upnp.sample.binaryLight.actions.SetTargetAction;
+import org.apache.felix.upnp.sample.binaryLight.statevariables.StatusStateVariable;
+import org.apache.felix.upnp.sample.binaryLight.statevariables.TargetStateVariable;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

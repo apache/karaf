@@ -20,6 +20,7 @@
 package org.apache.felix.upnp.sample.binaryLight;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -28,6 +29,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
 
+import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -48,6 +50,8 @@ public class LightUI extends JFrame implements PropertyChangeListener {
     private final static ImageIcon LIGHT_FAIL = LightUI.loadIcon("LightFail.gif","FAILURE");
 	private final JLabel label = new JLabel();
     private LightModel model;
+	private JButton btnSwitch;
+	private JButton btnFailure;
    
 	public LightUI(LightModel model)   {
 		super("Felix UPnP BinaryLight");
@@ -79,7 +83,7 @@ public class LightUI extends JFrame implements PropertyChangeListener {
 	        }
 	
 		pack();
-		show();
+		setVisible(true);
     }
 	
 	private JPanel doMainPanel(){
@@ -105,10 +109,37 @@ public class LightUI extends JFrame implements PropertyChangeListener {
 	          
 	private JPanel doControlPanel(){
 		JPanel panel = new JPanel();
-		JButton btnSwitch = new JButton("On");
-		JButton btnFailure = new JButton("Failure");
+		btnSwitch = new JButton("On");
+		btnFailure = new JButton("Break");
 		panel.add(btnSwitch);
 		panel.add(btnFailure);
+		
+		btnSwitch.addActionListener(new AbstractAction(){
+			public void actionPerformed(ActionEvent e) {
+				if (btnSwitch.getText().equals("On")){
+					btnSwitch.setText("Off");
+	                model.switchOn();
+				}else {
+					btnSwitch.setText("On");
+	                model.switchOff();					
+				}
+			}			
+		});
+		
+		btnFailure.addActionListener(new AbstractAction(){
+			public void actionPerformed(ActionEvent e) {
+				if (btnFailure.getText().equals("Break")){
+					btnFailure.setText("Repair");
+					btnSwitch.setEnabled(false);
+	                model.setFailure(true);
+				} else {
+					btnFailure.setText("Break");
+					btnSwitch.setEnabled(true);
+	                model.setFailure(false);					
+				}
+			}			
+		});
+		
 		return panel;
 	}
 	
@@ -129,23 +160,25 @@ public class LightUI extends JFrame implements PropertyChangeListener {
 	 */
     public void propertyChange(PropertyChangeEvent evt) {
     	String property = evt.getPropertyName();
-    	System.out.println("Light changed property::"+property);
     	boolean value = ((Boolean) evt.getNewValue()).booleanValue();
-    	if (property.equals("Status")){
-    		if (value)
+    	System.out.println("BinaryLight property::"+property + " changed to:" +  value);
+        	if (property.equals("Status")){
+    		if (value){
     			label.setIcon(LIGHT_ON);
-    		else
+    			btnSwitch.setText("Off");
+    		}
+    		else{
     			label.setIcon(LIGHT_OFF);
+    			btnSwitch.setText("On");
+    		}
     	}
     	else if (property.equals("Failure")){            
     		if (value)
     			label.setIcon(LIGHT_FAIL);
-    		else
-    			label.setIcon(LIGHT_OFF);
     	}
     	getContentPane().validate();
     	repaint();
-		
+
 	}
 
 	

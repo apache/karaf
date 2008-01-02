@@ -77,17 +77,20 @@ public class LightModel implements EventSource{
 	}
 	
 	public void setFailure(boolean value){
-		boolean oldFailure = failure;
-		boolean oldStatus = status;
 		failure = value;
 		if (failure){
 			status = false;
 		}
-		else if (target){
-			status = true;
+		else {
+			if (target)		{
+				status = true;
+			}
+			else{
+				status = false;
+			}
 		}
-		propertySupport.firePropertyChange("Status",oldStatus,status);
-		propertySupport.firePropertyChange("Failure",oldFailure,failure);
+		propertySupport.firePropertyChange("Status",!status,status);
+		propertySupport.firePropertyChange("Failure",!failure,failure);
 	}
 	
 

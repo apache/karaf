@@ -100,12 +100,12 @@ public class TvDevice implements UPnPDevice,UPnPEventListener,ServiceListener  {
         );
 		dictionary.put(UPnPDevice.FRIENDLY_NAME,"Felix Sample Tv");
 		dictionary.put(UPnPDevice.MANUFACTURER,"Apache Software Foundation");
-		dictionary.put(UPnPDevice.MANUFACTURER_URL,"http://incubator.apache.org/felix/");
+		dictionary.put(UPnPDevice.MANUFACTURER_URL,"http://felix.apache.org");
 		dictionary.put(UPnPDevice.MODEL_DESCRIPTION,"A CyberLink Tv device clone to test OSGi to UPnP service import");
 		dictionary.put(UPnPDevice.MODEL_NAME,"BimbiTv");
 		dictionary.put(UPnPDevice.MODEL_NUMBER,"1.0");
-		dictionary.put(UPnPDevice.MODEL_URL,"http://incubator.apache.org/felix/BimbiTv");
-		dictionary.put(UPnPDevice.PRESENTATION_URL,"http://incubator.apache.org/felix/BimbiTv/presentation");
+		dictionary.put(UPnPDevice.MODEL_URL,"http://felix.apache.org/site/upnp-example-tv.html");
+		//dictionary.put(UPnPDevice.PRESENTATION_URL,"http://felix.apache.org/BimbiTv/presentation");
 		dictionary.put(UPnPDevice.SERIAL_NUMBER,"123456789");
 		dictionary.put(UPnPDevice.TYPE,"urn:schemas-upnp-org:device:tv:1");
 		dictionary.put(UPnPDevice.UDN,DEVICE_ID);

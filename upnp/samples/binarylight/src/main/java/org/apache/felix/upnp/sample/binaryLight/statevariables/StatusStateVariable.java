@@ -17,8 +17,10 @@
  * under the License.
  */
 
-package org.apache.felix.upnp.sample.binaryLight;
+package org.apache.felix.upnp.sample.binaryLight.statevariables;
 import org.osgi.service.upnp.UPnPLocalStateVariable;
+
+import org.apache.felix.upnp.sample.binaryLight.LightModel;
 
 public class StatusStateVariable implements UPnPLocalStateVariable{
 	
