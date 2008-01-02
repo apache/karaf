@@ -27,6 +27,8 @@ import org.apache.maven.plugin.MojoExecutionException;
  */
 public interface JavaClassDescription {
 
+    JavaClassDescription[] EMPTY_RESULT = new JavaClassDescription[0];
+
     /**
      * Get the java class tag with the name.
      * @param name
@@ -60,6 +62,12 @@ public interface JavaClassDescription {
 
     JavaField[] getFields();
 
+    /**
+     * Returns an array of the implemented interfaces of this class.
+     * @return An array containing the interfaces or an empty array
+     *         if this class does not implement any interface.
+     * @throws MojoExecutionException
+     */
     JavaClassDescription[] getImplementedInterfaces() throws MojoExecutionException;
 
     /**

@@ -18,21 +18,13 @@
  */
 package org.apache.felix.scrplugin.tags.cl;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.lang.reflect.*;
+import java.util.*;
 
 import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.om.Component;
 import org.apache.felix.scrplugin.om.Reference;
-import org.apache.felix.scrplugin.tags.JavaClassDescription;
-import org.apache.felix.scrplugin.tags.JavaClassDescriptorManager;
-import org.apache.felix.scrplugin.tags.JavaField;
-import org.apache.felix.scrplugin.tags.JavaMethod;
-import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.*;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
@@ -72,8 +64,8 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
      */
     public JavaClassDescription[] getImplementedInterfaces() throws MojoExecutionException {
         Class[] implemented = clazz.getInterfaces();
-        if (implemented == null || implemented.length == 0) {
-            return null;
+        if (implemented.length == 0) {
+            return JavaClassDescription.EMPTY_RESULT;
         }
 
         JavaClassDescription[] jcd = new JavaClassDescription[implemented.length];

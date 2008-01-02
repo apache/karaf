@@ -19,36 +19,15 @@
 package org.apache.felix.scrplugin;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.apache.felix.scrplugin.om.Component;
-import org.apache.felix.scrplugin.om.Components;
-import org.apache.felix.scrplugin.om.Implementation;
-import org.apache.felix.scrplugin.om.Interface;
-import org.apache.felix.scrplugin.om.Property;
-import org.apache.felix.scrplugin.om.Reference;
-import org.apache.felix.scrplugin.om.Service;
-import org.apache.felix.scrplugin.om.metatype.AttributeDefinition;
-import org.apache.felix.scrplugin.om.metatype.Designate;
-import org.apache.felix.scrplugin.om.metatype.MTObject;
-import org.apache.felix.scrplugin.om.metatype.MetaData;
-import org.apache.felix.scrplugin.om.metatype.OCD;
-import org.apache.felix.scrplugin.tags.JavaClassDescription;
-import org.apache.felix.scrplugin.tags.JavaClassDescriptorManager;
-import org.apache.felix.scrplugin.tags.JavaField;
-import org.apache.felix.scrplugin.tags.JavaTag;
-import org.apache.felix.scrplugin.tags.ModifiableJavaClassDescription;
+import org.apache.felix.scrplugin.om.*;
+import org.apache.felix.scrplugin.om.metatype.*;
+import org.apache.felix.scrplugin.tags.*;
 import org.apache.felix.scrplugin.xml.ComponentDescriptorIO;
 import org.apache.felix.scrplugin.xml.MetaTypeIO;
 import org.apache.maven.model.Resource;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.StringUtils;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -420,17 +399,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
             String name = services[i].getNamedParameter(Constants.SERVICE_INTERFACE);
             if (StringUtils.isEmpty(name)) {
 
-                while (description != null) {
-                    JavaClassDescription[] interfaces = description.getImplementedInterfaces();
-                    for (int j=0; interfaces != null && j < interfaces.length; j++) {
-                        final Interface interf = new Interface(services[i]);
-                        interf.setInterfacename(interfaces[j].getName());
-                        service.addInterface(interf);
-                    }
-
-                    // try super class
-                    description = description.getSuperClass();
-                }
+                this.addInterfaces(service, services[i], description);
             } else {
                 final Interface interf = new Interface(services[i]);
                 interf.setInterfacename(name);
@@ -441,6 +410,26 @@ public class SCRDescriptorMojo extends AbstractMojo {
         }
 
         service.setServicefactory(serviceFactory);
+    }
+
+    /**
+     * Recursively add interfaces to the service.
+     */
+    protected void addInterfaces(final Service service, final JavaTag serviceTag, final JavaClassDescription description)
+    throws MojoExecutionException {
+        if ( description != null ) {
+            JavaClassDescription[] interfaces = description.getImplementedInterfaces();
+            for (int j=0; j < interfaces.length; j++) {
+                final Interface interf = new Interface(serviceTag);
+                interf.setInterfacename(interfaces[j].getName());
+                service.addInterface(interf);
+                // recursivly add interfaces implemented by this interface
+                this.addInterfaces(service, serviceTag, interfaces[j]);
+            }
+
+            // try super class
+            this.addInterfaces(service, serviceTag, description.getSuperClass());
+        }
     }
 
     /**

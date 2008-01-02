@@ -18,9 +18,7 @@
  */
 package org.apache.felix.scrplugin.om;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
@@ -32,7 +30,8 @@ public class Service {
 
     protected String servicefactory;
 
-    protected List interfaces = new ArrayList();
+    /** The list of implemented interfaces. */
+    protected final List interfaces = new ArrayList();
 
     /**
      * Default constructor.
@@ -57,12 +56,31 @@ public class Service {
         return this.interfaces;
     }
 
-    public void setInterfaces(List interfaces) {
-        this.interfaces = interfaces;
+    /**
+     * Search for an implemented interface.
+     * @param name The name of the interface.
+     * @return The interface if it is implemented by this service or null.
+     */
+    public Interface findInterface(String name) {
+        final Iterator i = this.interfaces.iterator();
+        while ( i.hasNext() ) {
+            final Interface current = (Interface)i.next();
+            if ( current.getInterfacename().equals(name) ) {
+                return current;
+            }
+        }
+        return null;
     }
 
+    /**
+     * Add an interface to the list of interfaces.
+     * @param interf The interface.
+     */
     public void addInterface(Interface interf) {
-        this.interfaces.add(interf);
+        // add interface only once
+        if ( this.findInterface(interf.getInterfacename()) == null ) {
+            this.interfaces.add(interf);
+        }
     }
 
     /**
