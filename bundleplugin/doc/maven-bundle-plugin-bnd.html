@@ -171,6 +171,8 @@ the second path is the resource to copy. The <tt>inline</tt> form requires a ZIP
 variable substitution will be performed on the resource, where
 variables in the resources are denoted with "${ ... }" syntax.</p>
 
+<p>By default the bundle plugin converts the project's Maven resource directories into a single <tt>&lt;Include-Resource&gt;</tt> instruction. If you specify your own <tt>&lt;Include-Resource&gt;</tt> instruction, this will replace the generated one. To include the generated list of Maven resources in your own <tt>&lt;Include-Resource&gt;</tt> instruction just add {<tt>maven-resources</tt>} to the list and it will be expanded automatically.</p>
+
 <h3><a name="MavenBundlePlugin(BND)-{{&lt;ImportPackage&gt;}}"></a><tt>&lt;Import-Package&gt;</tt></h3>
 
 <p>The <tt>&lt;Import-Package&gt;</tt> instruction is a list of
@@ -194,7 +196,7 @@ defaults for various instructions. For example:</p>
 	<li><tt>&lt;Export-Package&gt;</tt> is assumed to be "<tt>${groupId}.${artifactId}.*</tt>", unless <tt>&lt;Private-Package&gt;</tt> is specified, then <tt>&lt;Export-Package&gt;</tt> is assumed to be empty.</li>
 	<li><tt>&lt;Private-Package&gt;</tt> is assumed to be empty by default.</li>
 	<li><tt>&lt;Import-Package&gt;</tt> is assumed to be "<tt>*</tt>", which imports everything referred to by the bundle content, but not contained in the bundle.</li>
-	<li><tt>&lt;Include-Resource&gt;</tt> is assumed to be "<tt>src/main/resources/</tt>",
+	<li><tt>&lt;Include-Resource&gt;</tt> is generated from the project's Maven resources, typically "<tt>src/main/resources/</tt>",
 which will copy the specified project directory hierarchy into the
 resulting bundle JAR file, mirroring standard Maven behavior.</li>
 	<li><tt>&lt;Bundle-Version&gt;</tt> is assumed to be "<tt>${pom.version</tt>}" with '-' character separator of the qualifier replaced with a '.' character.</li>
@@ -206,7 +208,7 @@ resulting bundle JAR file, mirroring standard Maven behavior.</li>
 </ul>
 
 
-<p>Since the plugin creates bundles for OSGi R4, it hard codes <tt>Bundle-ManifestVersion</tt>
+<p>Since the plugin creates bundles for OSGi R4, it hard-codes <tt>Bundle-ManifestVersion</tt>
 to be '2'. Additionally, it generates imports for every export to
 ensure package substitutability, which is very important when working
 with collaborating services. It is possible to override any of these
@@ -241,7 +243,7 @@ Below is an example of a simple OSGi bundle POM for Maven2:</p>
     &lt;dependency&gt;
       &lt;groupId&gt;org.apache.felix&lt;/groupId&gt;
       &lt;artifactId&gt;org.osgi.core&lt;/artifactId&gt;
-      &lt;version&gt;0.8.0-incubator&lt;/version&gt;
+      &lt;version&gt;1.0.0&lt;/version&gt;
     &lt;/dependency&gt;
   &lt;/dependencies&gt;
   &lt;build&gt;
@@ -467,9 +469,11 @@ tool, which continues to be improved independently; for the latest see <span cla
 
 <p>The default goal <tt>bundle</tt> will be initialized by setting the &lt;packaging&gt; entry to "bundle".</p>
 
+<h1><a name="MavenBundlePlugin(BND)-Thefollowingfeaturesareonlyavailableinthe1.1.0SNAPSHOTversion"></a>The following features are only available in the 1.1.0-SNAPSHOT version</h1>
+
 <h1><a name="MavenBundlePlugin(BND)-Embeddingdependencies"></a>Embedding dependencies</h1>
 
-<p>The Maven Bundle Plugin supports embedding project dependencies into the built bundle using the <tt>&lt;Embed-Dependency&gt;</tt> instruction listing all dependencies in standard Bundle manifest header syntax:</p>
+<p>The Maven Bundle Plugin supports embedding of selected project dependencies inside the bundle by using the <tt>&lt;Embed-Dependency&gt;</tt> instruction:</p>
 
 <div class="code"><div class="codeContent">
 <pre class="code-xml"><span class="code-tag">&lt;Embed-Dependency&gt;</span>dependencies<span class="code-tag">&lt;/Embed-Dependency&gt;</span></pre>
@@ -485,6 +489,8 @@ MATCH ::= &lt;globbed regular expressions&gt;
 </pre>
 </div></div>
 
+<p>The plugin uses the <tt>&lt;Embed-Dependency&gt;</tt> instruction to transform the project dependencies into <tt>&lt;Include-Resource&gt;</tt> and <tt>&lt;Bundle-ClassPath&gt;</tt> clauses, which are then appended to the current set of instructions and passed onto BND.</p>
+
 <p>some examples:</p>
 
 <div class="code"><div class="codeContent">
@@ -495,7 +501,7 @@ MATCH ::= &lt;globbed regular expressions&gt;
 <span class="code-tag">&lt;Embed-Dependency&gt;</span>aopalliance;scope=!test;inline=true<span class="code-tag">&lt;/Embed-Dependency&gt;</span></pre>
 </div></div>
 
-<p>By default matched dependencies are embedded in the bundle under as <tt>artifactId-version.jar</tt>. This behaviour can be modified using the following instructions:</p>
+<p>By default matched dependencies are embedded in the bundle as <tt>artifactId-version.jar</tt>. This behaviour can be modified using the following instructions:</p>
 
 <ul>
 	<li><tt>&lt;Embed-StripVersion&gt;true&lt;/Embed-StripVersion&gt;</tt> - removes the version from the file (ie. <em>artifactId.jar</em>)</li>
@@ -518,6 +524,15 @@ following option:</p>
 <pre class="code-xml"><span class="code-tag">&lt;Embed-Dependency&gt;</span>*;scope=compile|runtime;inline=true<span class="code-tag">&lt;/Embed-Dependency&gt;</span></pre>
 </div></div>
 
+<h2><a name="MavenBundlePlugin(BND)-EmbedDependencyandExportPackage"></a>Embed-Dependency and Export-Package</h2>
+
+<p>If you embed a dependency with <tt>&lt;Embed-Dependency&gt;</tt>, and your <tt>&lt;Export-Package&gt;</tt> or <tt>&lt;Private-Package&gt;</tt> instructions match packages inside the embedded jar, you will see some duplication inside the bundle. This is because the <tt>&lt;Export-Package&gt;</tt> and <tt>&lt;Private-Package&gt;</tt>
+instructions will result in classes being inlined in the bundle, even
+though they also exist inside the embedded jar. If you want to export
+packages from an embedded dependency without such duplication then you
+can either inline the dependency, or use a new BND instruction called <tt>&lt;_exportcontents&gt;</tt>.</p>
+
+<p><tt>&lt;_exportcontents&gt;</tt> behaves just like Export-Package, except it doesn't change the content of the bundle, just what content should be exported.</p>
 
 <h1><a name="MavenBundlePlugin(BND)-OBRintegration"></a>OBR integration</h1>
 
