@@ -78,7 +78,8 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
     /**
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getMethodBySignature(java.lang.String, java.lang.String[])
      */
-    public JavaMethod getMethodBySignature(String name, String[] parameters) {
+    public JavaMethod getMethodBySignature(String name, String[] parameters)
+    throws MojoExecutionException {
         Class[] classParameters = null;
         if ( parameters != null ) {
             classParameters = new Class[parameters.length];
@@ -98,6 +99,10 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
         }
         if ( m != null ) {
             return new ClassLoaderJavaMethod(m);
+        }
+        // try super class
+        if ( this.getSuperClass() != null ) {
+            return this.getSuperClass().getMethodBySignature(name, parameters);
         }
         return null;
     }
