@@ -65,7 +65,7 @@ import org.apache.felix.upnp.basedriver.importer.core.event.structs.Subscription
 import org.apache.felix.upnp.basedriver.importer.core.upnp.UPnPDeviceImpl;
 import org.apache.felix.upnp.basedriver.importer.core.upnp.UPnPServiceImpl;
 import org.apache.felix.upnp.basedriver.importer.util.ParseUSN;
-import org.apache.felix.upnp.extra.util.Converter;
+import org.apache.felix.upnp.basedriver.util.Converter;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
@@ -88,7 +88,7 @@ public class MyCtrlPoint extends ControlPoint
     private final String EXPORT_FLTR =
         "(" + UPnPDevice.UPNP_EXPORT + "=*" + ")";
     private final String IMPORT_FLTR =
-        "(" + org.apache.felix.upnp.extra.util.Constants.UPNP_IMPORT + "=*" + ")";
+        "(" + org.apache.felix.upnp.basedriver.util.Constants.UPNP_IMPORT + "=*" + ")";
 
     
     public MyCtrlPoint(BundleContext context, SubscriptionQueue subQueue,

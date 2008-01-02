@@ -38,7 +38,7 @@ import org.osgi.service.upnp.UPnPService;
 
 import org.apache.felix.upnp.basedriver.importer.core.upnp.UPnPIconImpl;
 import org.apache.felix.upnp.basedriver.importer.core.upnp.UPnPServiceImpl;
-import org.apache.felix.upnp.extra.util.Constants;
+import org.apache.felix.upnp.basedriver.util.Constants;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

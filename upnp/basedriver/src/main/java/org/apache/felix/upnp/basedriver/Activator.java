@@ -25,6 +25,8 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+import org.apache.felix.upnp.basedriver.controller.DevicesInfo;
+import org.apache.felix.upnp.basedriver.controller.DriverController;
 import org.apache.felix.upnp.basedriver.controller.impl.DriverControllerImpl;
 import org.apache.felix.upnp.basedriver.export.RootDeviceExportingQueue;
 import org.apache.felix.upnp.basedriver.export.RootDeviceListener;
@@ -36,8 +38,6 @@ import org.apache.felix.upnp.basedriver.importer.core.event.structs.Subscription
 import org.apache.felix.upnp.basedriver.importer.core.event.thread.Notifier;
 import org.apache.felix.upnp.basedriver.importer.core.event.thread.SubScriber;
 import org.apache.felix.upnp.basedriver.tool.Logger;
-import org.apache.felix.upnp.extra.controller.DevicesInfo;
-import org.apache.felix.upnp.extra.controller.DriverController;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

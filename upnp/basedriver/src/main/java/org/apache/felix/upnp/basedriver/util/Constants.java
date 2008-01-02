@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.felix.upnp.extra.util;
+package org.apache.felix.upnp.basedriver.util;
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */

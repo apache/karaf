@@ -108,7 +108,7 @@ public class ClockFrame extends JFrame implements Runnable
 	{
 		clockDev.start();
 		
-		timerThread = new Thread(this);
+		timerThread = new Thread(this,"upnp.sample.clock.ClockFrame");
 		timerThread.start();
 	}
 	

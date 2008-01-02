@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.felix.upnp.extra.util;
+package org.apache.felix.upnp.basedriver.util;
 
 import java.text.ParseException;
 import java.text.ParsePosition;

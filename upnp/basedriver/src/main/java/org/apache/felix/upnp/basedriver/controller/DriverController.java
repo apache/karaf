@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.felix.upnp.extra.controller;
+package org.apache.felix.upnp.basedriver.controller;
 
 //import java.net.InetAddress;
 

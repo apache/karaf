@@ -24,8 +24,8 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
-import org.apache.felix.upnp.extra.controller.DevicesInfo;
-import org.apache.felix.upnp.extra.controller.DriverController;
+import org.apache.felix.upnp.basedriver.controller.DevicesInfo;
+import org.apache.felix.upnp.basedriver.controller.DriverController;
 import org.apache.felix.upnp.tester.Activator;
 import org.apache.felix.upnp.tester.Mediator;
 /* 

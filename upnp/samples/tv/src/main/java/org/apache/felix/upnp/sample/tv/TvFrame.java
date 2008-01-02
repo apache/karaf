@@ -107,7 +107,7 @@ public class TvFrame extends JFrame implements Runnable
 	{
 		tvDev.start();
 		
-		timerThread = new Thread(this);
+		timerThread = new Thread(this,"upnp.sample.tv.TVFrame");
 		timerThread.start();
 	}
 	

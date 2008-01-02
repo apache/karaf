@@ -30,7 +30,7 @@ import org.cybergarage.upnp.StateVariable;
 
 import org.osgi.service.upnp.UPnPEventListener;
 
-import org.apache.felix.upnp.extra.util.Converter;
+import org.apache.felix.upnp.basedriver.util.Converter;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

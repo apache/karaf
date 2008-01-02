@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.apache.felix</groupId>
@@ -18,16 +19,21 @@
       <id>snap.domoware.isti.cnr.it</id>
       <name>Domoware Snapshot Repository</name>
       <url>http://domoware.isti.cnr.it/maven2-snap</url>
-      <releases><enabled>false</enabled></releases>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
     </repository>
     <!-- For release (no snapshots jars or non-apache jars)           -->
     <repository>
       <id>release.domoware.isti.cnr.it</id>
       <name>Domoware Release Repository</name>
       <url>http://domoware.isti.cnr.it/maven2</url>
-      <snapshots><enabled>false</enabled></snapshots>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
-  </repositories>   <!-- <url>http://maven.apache.org</url> -->
+  </repositories>
+  <!-- <url>http://maven.apache.org</url> -->
 
   <profiles>
 
@@ -39,46 +45,57 @@
           <value>jdk13</value>
         </property>
       </activation>
-  <dependencies>
-    <dependency>
-      <groupId>it.cnr.isti.domoware.cyberdomo</groupId>
-      <artifactId>upnp-stack-jdk13</artifactId>
-      <version>1.8.0-SNAPSHOT</version>
-    </dependency>
-  </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Bundle-Name>${pom.name}</Bundle-Name>
-            <Bundle-Activator>org.apache.felix.upnp.basedriver.Activator</Bundle-Activator>
-            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
-            <Bundle-Author><![CDATA[Matteo Demuru <demuru@apache.org>,Francesco Furfari <furfari@apache.org>,Stefano "Kismet" Lenzi <lenzi@apache.org>]]></Bundle-Author>
-            <Bundle-Description>
-               	A Bundle implementation of the UPnP Service Specification R4
-            </Bundle-Description>
-            <Bundle-SymbolicName>org.apache.felix.upnp.basedriver</Bundle-SymbolicName>
-	    <!--Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
-	    <Embed-Transitive>true</Embed-Transitive-->
-	    <Export-Package>
-	      org.apache.felix.upnp.extra.*
-	    </Export-Package>
-            <Import-Package>
-              org.osgi.*
-            </Import-Package>
-            <Private-Package>
-              org.apache.felix.upnp.basedriver.*, org.kxml2.io, org.xmlpull.v1, org.cybergarage.*, org.apache.xerces.impl.dv.util
-            </Private-Package>
-          </instructions>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+      <dependencies>
+        <dependency>
+          <groupId>it.cnr.isti.domoware.cyberdomo</groupId>
+          <artifactId>upnp-stack-jdk13</artifactId>
+          <version>1.8.0-SNAPSHOT</version>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
+            <extensions>true</extensions>
+            <configuration>
+              <instructions>
+                <Bundle-Name>${pom.name}</Bundle-Name>
+                <Bundle-Activator>
+                  org.apache.felix.upnp.basedriver.Activator
+                </Bundle-Activator>
+                <Bundle-Vendor>
+                  Apache Software Foundation
+                </Bundle-Vendor>
+                <Bundle-Author>
+                  <![CDATA[Matteo Demuru <demuru@apache.org>,Francesco Furfari <furfari@apache.org>,Stefano "Kismet" Lenzi <lenzi@apache.org>]]>
+                </Bundle-Author>
+                <Bundle-Description>
+                  A Bundle implementation of the UPnP Service
+                  Specification R4
+                </Bundle-Description>
+                <Bundle-SymbolicName>
+                  org.apache.felix.upnp.basedriver
+                </Bundle-SymbolicName>
+                <!--Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+                  <Embed-Transitive>true</Embed-Transitive-->
+                <Export-Package>
+                  org.apache.felix.upnp.basedriver.controller.*,
+                  org.apache.felix.upnp.basedriver.util.*,
+                  org.apache.xerces.impl.dv.util.*
+                  
+                </Export-Package>
+                <Import-Package>org.osgi.*</Import-Package>
+                <Private-Package>
+                  org.apache.felix.upnp.basedriver.*, org.kxml2.io,
+                  org.xmlpull.v1, org.cybergarage.*
+                </Private-Package>
+              </instructions>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
 
     <profile>
@@ -86,45 +103,57 @@
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
-  <dependencies>
-    <dependency>
-      <groupId>it.cnr.isti.domoware.cyberdomo</groupId>
-      <artifactId>upnp-stack</artifactId>
-      <version>1.8.0-SNAPSHOT</version>
-    </dependency>
-  </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Bundle-Name>${pom.name}</Bundle-Name>
-            <Bundle-Activator>org.apache.felix.upnp.basedriver.Activator</Bundle-Activator>
-            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
-            <Bundle-Author><![CDATA[Matteo Demuru <demuru@apache.org>,Francesco Furfari <furfari@apache.org>,Stefano "Kismet" Lenzi <lenzi@apache.org>]]></Bundle-Author>
-            <Bundle-Description>
-               	A Bundle implementation of the UPnP Service Specification R4
-            </Bundle-Description>
-            <Bundle-SymbolicName>org.apache.felix.upnp.basedriver</Bundle-SymbolicName>
-	    <Export-Package>
-	      org.apache.felix.upnp.extra.*
-	    </Export-Package>
-            <Import-Package>
-              org.osgi.*, javax.xml.parsers, org.w3c.dom, org.xml.sax
-            </Import-Package>
-            <Private-Package>
-              org.apache.felix.upnp.basedriver.*, org.cybergarage.*,org.apache.xerces.impl.dv.util
-            </Private-Package>
-          </instructions>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
+      <dependencies>
+        <dependency>
+          <groupId>it.cnr.isti.domoware.cyberdomo</groupId>
+          <artifactId>upnp-stack</artifactId>
+          <version>1.8.0-SNAPSHOT</version>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
+            <extensions>true</extensions>
+            <configuration>
+              <instructions>
+                <Bundle-Name>${pom.name}</Bundle-Name>
+                <Bundle-Activator>
+                  org.apache.felix.upnp.basedriver.Activator
+                </Bundle-Activator>
+                <Bundle-Vendor>
+                  Apache Software Foundation
+                </Bundle-Vendor>
+                <Bundle-Author>
+                  <![CDATA[Matteo Demuru <demuru@apache.org>,Francesco Furfari <furfari@apache.org>,Stefano "Kismet" Lenzi <lenzi@apache.org>]]>
+                </Bundle-Author>
+                <Bundle-Description>
+                  A Bundle implementation of the UPnP Service
+                  Specification R4
+                </Bundle-Description>
+                <Bundle-SymbolicName>
+                  org.apache.felix.upnp.basedriver
+                </Bundle-SymbolicName>
+                <Export-Package>
+                  org.apache.felix.upnp.basedriver.controller.*,
+                  org.apache.felix.upnp.basedriver.util.*,
+                  org.apache.xerces.impl.dv.util.*
+                </Export-Package>
+                <Import-Package>
+                  org.osgi.*, javax.xml.parsers, org.w3c.dom,
+                  org.xml.sax
+                </Import-Package>
+                <Private-Package>
+                  org.apache.felix.upnp.basedriver.*,
+                  org.cybergarage.*
+                </Private-Package>
+              </instructions>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 
@@ -141,11 +170,6 @@
       <artifactId>org.osgi.compendium</artifactId>
       <version>0.9.0-SNAPSHOT</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.upnp.extra</artifactId>
-      <version>0.3.0-SNAPSHOT</version>      
     </dependency>
   </dependencies>
 </project>

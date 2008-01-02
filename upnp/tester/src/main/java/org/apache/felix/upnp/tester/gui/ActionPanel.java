@@ -49,7 +49,7 @@ import org.osgi.service.upnp.UPnPAction;
 import org.osgi.service.upnp.UPnPException;
 import org.osgi.service.upnp.UPnPStateVariable;
 
-import org.apache.felix.upnp.extra.util.Converter;
+import org.apache.felix.upnp.basedriver.util.Converter;
 import org.apache.felix.upnp.tester.Mediator;
 
 /* 
