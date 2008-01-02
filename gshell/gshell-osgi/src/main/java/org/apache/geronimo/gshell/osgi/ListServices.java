@@ -33,7 +33,7 @@ import org.osgi.framework.ServiceReference;
  * Time: 9:44:20 AM
  * To change this template use File | Settings | File Templates.
  */
-@CommandComponent(id = "osgi:listServices", description = "List services")
+@CommandComponent(id = "osgi:list-services", description = "List services")
 public class ListServices extends OsgiCommandSupport {
 
     @Option(name = "-a", description = "Show all")
