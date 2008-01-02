@@ -112,27 +112,27 @@
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.mina-${mina.version}</artifactId>
-          <version>1.0-m1</version>
+          <version>1.0-m2-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.xstream-${xstream.version}</artifactId>
-          <version>1.0-m1</version>
+          <version>1.0-m2-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.aopalliance-${aopalliance.version}</artifactId>
-          <version>1.0-m1</version>
+          <version>1.0-m2-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.asm-${asm.version}</artifactId>
-          <version>1.0-m1</version>
+          <version>1.0-m2-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.cglib-${cglib.version}</artifactId>
-          <version>1.0-m1</version>
+          <version>1.0-m2-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.felix</groupId>
