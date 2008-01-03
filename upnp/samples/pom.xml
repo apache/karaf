@@ -44,5 +44,18 @@
           <module>tv</module>
       </modules>
     </profile>
+    <profile>
+      <id>default</id>
+      <activation>
+        <property>
+          <name>!packaging</name>
+        </property>
+      </activation>
+      <modules>
+          <module>binarylight</module>
+          <module>clock</module>
+          <module>tv</module>
+      </modules>
+    </profile>
   </profiles>
 </project>

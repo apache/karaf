@@ -18,6 +18,8 @@
  */
 
 package org.apache.felix.upnp.sample.clock;
+import java.util.Date;
+
 import org.osgi.service.upnp.UPnPLocalStateVariable;
 
 public class TimeStateVariable implements UPnPLocalStateVariable{
@@ -98,11 +100,11 @@ public class TimeStateVariable implements UPnPLocalStateVariable{
 		return clock.getTimeString();
 	}
 	
-	public void setCurrentTime(long milliseconds){
-		clock.getCalendar().setTimeInMillis(milliseconds);
+	public void setCurrentTime(long milliseconds){        
+		clock.getCalendar().setTime(new Date(milliseconds));
 	}
 
 	public Object getCurrentValue() {
-		return getCurrentTime();
+		return new Long(clock.getCalendar().getTime().getTime());
 	}
 }

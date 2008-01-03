@@ -29,7 +29,9 @@ import org.cybergarage.upnp.Service;
 import org.cybergarage.upnp.StateVariable;
 
 import org.osgi.service.upnp.UPnPEventListener;
+import org.osgi.service.upnp.UPnPStateVariable;
 
+import org.apache.felix.upnp.basedriver.Activator;
 import org.apache.felix.upnp.basedriver.util.Converter;
 
 /* 
@@ -47,23 +49,42 @@ public class ExporterUPnPEventListener implements UPnPEventListener {
 	 * @see org.osgi.service.upnp.UPnPEventListener#notifyUPnPEvent(java.lang.String, java.lang.String, java.util.Dictionary)
 	 */
 	public void notifyUPnPEvent(String deviceId, String serviceId,Dictionary events) {
-		Device dAux = null;
-		if(d.getUDN().equals(deviceId)){
-			dAux=d;
-		}else{
-			dAux= d.getDevice(deviceId);
-		}
-		Service s = dAux.getService(serviceId);
+        Device dAux = null;
+        if(d.getUDN().equals(deviceId)){
+            dAux=d;
+        }else{
+            dAux= d.getDevice(deviceId);
+        }
+        Service s = dAux.getService(serviceId);
 		// fix 2/9/2004 francesco 
 		Enumeration e = events.keys();
-		StateVariable sv;
 		while (e.hasMoreElements()) {
-			String name = (String) e.nextElement();
-			sv=s.getStateVariable(name);
-			//sv.setValue((String) events.get(name));
+            StateVariable sv;
+            String dataType;
+            String name;
+            //TODO Keep for compatibility? The OSGi compendium R4 pag. 257 requires pair containg <UPnPStateVariable,Object value> instead of <String name,Object value>
+            Object key = e.nextElement();
+            if(key instanceof String){
+                name=(String) key;
+                sv=s.getStateVariable(name);
+                dataType=sv.getDataType();
+            }else if(key instanceof UPnPStateVariable){
+                UPnPStateVariable variable = (UPnPStateVariable) key;
+                name=variable.getName();
+                dataType=variable.getUPnPDataType();
+                sv=s.getStateVariable(name);
+            }else{
+                Activator.logger.ERROR(deviceId + " notified the change in the StateVariable of " 
+                                       + serviceId + " but the key Java type contained in the Dictiories was " 
+                                       + key.getClass().getName() + " instead of " + UPnPStateVariable.class.getName()
+                                       + " as specified by OSGi Compendium Release 4 pag. 257");
+                continue;
+            }
+            
 			try {
-				sv.setValue(Converter.toString(events.get(name),sv.getDataType()));
+				sv.setValue(Converter.toString(events.get(key),dataType));
 			} catch (Exception ignored) {
+                Activator.logger.ERROR("UPnP Base Driver Exporter: error converting datatype while sending event, exception message follows:"+ignored.getMessage());
 			}
 		}
 	}

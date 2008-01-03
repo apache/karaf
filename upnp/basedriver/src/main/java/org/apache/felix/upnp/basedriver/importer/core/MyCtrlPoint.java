@@ -485,7 +485,6 @@ public class MyCtrlPoint extends ControlPoint
 						dic.put(UPnPDevice.ID, device.getDescriptions(null).get(UPnPDevice.UDN));
 						dic.put(UPnPDevice.TYPE, device.getDescriptions(null).get(UPnPDevice.TYPE));
 						UPnPService[] services = device.getServices();
-						//TODO do I have to do the unget of UPnPDevice??
 						if (services != null) {
 							for (int j = 0; j < services.length; j++) {
 								dic.put(UPnPService.ID, services[j].getId());
@@ -508,6 +507,7 @@ public class MyCtrlPoint extends ControlPoint
 								}
 							}
 						}
+                        context.ungetService(devicesRefs[i]);
 					}
 				}
 			} else {/* obj==null (interested in all devices) */
@@ -526,7 +526,6 @@ public class MyCtrlPoint extends ControlPoint
 						UPnPDevice device = (UPnPDevice) context
 								.getService(devicesRefs[i]);
 						UPnPService[] services = device.getServices();
-						//do I have to do the unget of UPnPDevice??
 						if (services != null) {
 							for (int j = 0; j < services.length; j++) {
 								UPnPStateVariable[] stateVars = services[j]
@@ -548,6 +547,7 @@ public class MyCtrlPoint extends ControlPoint
 								}
 							}
 						}
+                        context.ungetService(devicesRefs[i]);
 					}
 				}
 			}
@@ -584,7 +584,6 @@ public class MyCtrlPoint extends ControlPoint
 								.get(UPnPDevice.TYPE));
 						UPnPService[] services = device.getServices();
 
-						//do I have to do the unget of UPnPDevice??
 						if (services != null) {
 							for (int j = 0; j < services.length; j++) {
 								dic.put(UPnPService.ID, services[j].getId());
@@ -611,6 +610,7 @@ public class MyCtrlPoint extends ControlPoint
 								}
 							}//for services
 						}//services ==null
+						context.ungetService(devicesRefs[i]);
 					}//for devicesRefs
 					ListenerModified msg = new ListenerModified(newServices,
 							listener);
@@ -634,7 +634,6 @@ public class MyCtrlPoint extends ControlPoint
 						UPnPDevice device = (UPnPDevice) context
 								.getService(devicesRefs[i]);
 						UPnPService[] services = device.getServices();
-						//do I have to do the unget of UPnPDevice??
 						if (services != null) {
 							for (int j = 0; j < services.length; j++) {
 								UPnPStateVariable[] stateVars = services[j]
@@ -653,6 +652,7 @@ public class MyCtrlPoint extends ControlPoint
 								}//hasEventedvars
 							}//for services
 						}//services !=null
+                        context.ungetService(devicesRefs[i]);
 					}//for devicesRefs
 					subQueue
 							.enqueue(new ListenerModified(newServices, listener));

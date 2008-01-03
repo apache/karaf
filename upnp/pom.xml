@@ -45,5 +45,19 @@
           <module>samples</module>
       </modules>
     </profile>
+    <profile>
+      <id>default</id>
+      <activation>
+        <property>
+          <name>!packaging</name>
+        </property>
+      </activation>
+      <modules>
+          <module>extra</module>
+          <module>basedriver</module>
+          <module>tester</module>
+          <module>samples</module>
+      </modules>
+    </profile>
   </profiles>
 </project>

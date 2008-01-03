@@ -19,6 +19,7 @@
 
 package org.apache.felix.upnp.sample.clock;
 
+import java.beans.PropertyChangeEvent;
 import java.util.Dictionary;
 
 import org.osgi.service.upnp.UPnPAction;
@@ -85,9 +86,10 @@ public class SetTimeAction implements UPnPAction {
 	 * @see org.osgi.service.upnp.UPnPAction#invoke(java.util.Dictionary)
 	 */
 	public Dictionary invoke(Dictionary args) throws Exception {
-		//Date value = (Date) args.get(NEW_TIME_VALUE);
-		long l = ((Long) args.get(NEW_TIME_VALUE)).longValue();
-		((TimeStateVariable) time).setCurrentTime(l);
+		Long newValue = (Long) args.get(NEW_TIME_VALUE);
+        Long oldValue = (Long) ((TimeStateVariable) time).getCurrentValue();
+		((TimeStateVariable) time).setCurrentTime(newValue.longValue());
+        ClockDevice.notifier.propertyChange(new PropertyChangeEvent(time,"Time",oldValue,newValue));        
 		args.remove(NEW_TIME_VALUE);
 		args.put(NEW_RESULT_VALUE,((TimeStateVariable) time).getCurrentTime());
 		return args;

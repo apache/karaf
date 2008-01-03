@@ -21,6 +21,7 @@ package org.apache.felix.upnp.sample.clock;
 
 
 import java.beans.PropertyChangeEvent;
+import java.util.Calendar;
 import java.util.Dictionary;
 import java.util.Properties;
 
@@ -28,6 +29,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPIcon;
 import org.osgi.service.upnp.UPnPService;
+import org.osgi.service.upnp.UPnPStateVariable;
 
 import org.apache.felix.upnp.extra.util.UPnPEventNotifier;
 
@@ -38,7 +40,7 @@ public class ClockDevice implements UPnPDevice {
 	private TimerService timerService;
 	private UPnPService[] services;
 	private Dictionary dictionary;
-	UPnPEventNotifier notifier;
+	public static UPnPEventNotifier notifier = null;
 	
 	public ClockDevice(BundleContext context) {
 		this.context=context;
@@ -130,8 +132,10 @@ public class ClockDevice implements UPnPDevice {
 	 */
 	public void update() {
 		Clock clock = Clock.getInstance();
-		String timeStr = clock.toString();
-		notifier.propertyChange(new PropertyChangeEvent(this,"Time","",timeStr));
+		Calendar cal = clock.getCalendar();
+        long time = cal.getTime().getTime();
+        UPnPStateVariable variable =  timerService.getStateVariable("Time");
+		notifier.propertyChange(new PropertyChangeEvent(variable,"Time",new Long(time-1000),new Long(time)));
 	}
 	
 }

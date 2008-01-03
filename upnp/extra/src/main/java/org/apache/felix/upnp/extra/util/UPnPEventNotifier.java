@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.apache.felix.upnp.basedriver.Activator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -172,12 +173,19 @@ public class UPnPEventNotifier implements PropertyChangeListener, ServiceListene
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent evt) {
-		
-		String property = evt.getPropertyName();
+        UPnPStateVariable variable;
+        String property = evt.getPropertyName();
+        try{
+            variable = (UPnPStateVariable) evt.getSource();
+        }catch(ClassCastException ex){
+            Activator.logger.ERROR("Trying to nofied the change of a UPnPStateVariable but event source Java type is "
+                                   +evt.getSource().getClass().getName()+" instead of "+UPnPStateVariable.class.getName()
+                                   +" so "+property+"it's been SKIPPED");
+            return;
+        }
 		Object value = evt.getNewValue();
-		String valueString = value.toString();
-		Properties events = new Properties();
-		events.put(property,valueString);
+		Properties events = new Properties();		
+        events.put(variable,value);
 		doNotify(events);
 	}
 

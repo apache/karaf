@@ -97,6 +97,6 @@ public class StatusStateVariable implements UPnPLocalStateVariable{
 	}
 
 	public Object getCurrentValue() {
-		return Boolean.valueOf(model.getStatus());
+		return new Boolean(model.getStatus());
 	}
 }
