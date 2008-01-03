@@ -23,7 +23,7 @@
  <parent>
    <artifactId>felix</artifactId>
    <groupId>org.apache.felix</groupId>
-   <version>1.0.0</version>
+   <version>1.0.1</version>
    <relativePath>../pom/pom.xml</relativePath>
  </parent>
 
