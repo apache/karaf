@@ -24,6 +24,8 @@ package org.apache.felix.scrplugin.tags;
  */
 public interface JavaMethod {
 
+    JavaMethod[] EMPTY_RESULT = new JavaMethod[0];
+
     boolean isPublic();
 
     boolean isProtected();

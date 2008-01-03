@@ -111,8 +111,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getMethods()
      */
     public JavaMethod[] getMethods() {
-        // TODO Auto-generated method stub
-        return null;
+        return JavaMethod.EMPTY_RESULT;
     }
 
     /**

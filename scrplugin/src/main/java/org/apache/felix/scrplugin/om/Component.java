@@ -18,14 +18,9 @@
  */
 package org.apache.felix.scrplugin.om;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
-import org.apache.felix.scrplugin.tags.JavaClassDescription;
-import org.apache.felix.scrplugin.tags.JavaMethod;
-import org.apache.felix.scrplugin.tags.JavaParameter;
-import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.*;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
@@ -211,8 +206,8 @@ public class Component extends AbstractObject {
                 // no errors so far, let's continue
                 if ( issues.size() == 0 ) {
                     // check activate and deactivate methods
-                    this.checkActivationMethod(javaClass, "activate", warnings);
-                    this.checkActivationMethod(javaClass, "deactivate", warnings);
+                    this.checkLifecycleMethod(javaClass, "activate", warnings);
+                    this.checkLifecycleMethod(javaClass, "deactivate", warnings);
 
                     // ensure public default constructor
                     boolean constructorFound = true;
@@ -266,50 +261,34 @@ public class Component extends AbstractObject {
     }
 
     /**
-     * Check methods.
-     * @param javaClass
-     * @param methodName
+     * Check for existence of lifecycle methods.
+     * @param javaClass The java class to inspect.
+     * @param methodName The method name.
+     * @param warnings The list of warnings used to add new warnings.
      */
-    protected void checkActivationMethod(JavaClassDescription javaClass, String methodName, List warnings) {
-        JavaMethod[] methods = javaClass.getMethods();
-        JavaMethod activation = null;
-        for (int i=0; i < methods.length; i++) {
-            // ignore method not matching the name
-            if (!methodName.equals(methods[i].getName())) {
-                continue;
+    protected void checkLifecycleMethod(JavaClassDescription javaClass, String methodName, List warnings)
+    throws MojoExecutionException {
+        final JavaMethod method = javaClass.getMethodBySignature(methodName, new String[] {"org.osgi.service.component.ComponentContext"});
+        if ( method != null ) {
+            // check protected
+            if (method.isPublic()) {
+                warnings.add(this.getMessage("Lifecycle method " + method.getName() + " should be declared protected"));
+            } else if (!method.isProtected()) {
+                warnings.add(this.getMessage("Lifecycle method " + method.getName() + " has wrong qualifier, public or protected required"));
             }
+        } else {
+            // if no method is found, we check for any method with that name
+            final JavaMethod[] methods = javaClass.getMethods();
+            for(int i=0; i<methods.length; i++) {
+                if ( methodName.equals(methods[i].getName()) ) {
 
-            // if the method has the correct parameter type, check protected
-            JavaParameter[] params = methods[i].getParameters();
-            if (params == null || params.length != 1) {
-                continue;
+                    if ( methods[i].getParameters().length != 1 ) {
+                        warnings.add(this.getMessage("Lifecycle method " + methods[i].getName() + " has wrong number of arguments"));
+                    } else {
+                        warnings.add(this.getMessage("Lifecycle method " + methods[i].getName() + " has wrong argument " + methods[i].getParameters()[0].getType()));
+                    }
+                }
             }
-
-            // this might be considered, if it is an overload, drop out of check
-            if (activation != null) {
-                return;
-            }
-
-            // consider this method for further checks
-            activation = methods[i];
-        }
-
-        // no activation method found
-        if (activation == null) {
-            return;
-        }
-
-        // check protected
-        if (activation.isPublic()) {
-            warnings.add(this.getMessage("Activation method " + activation.getName() + " should be declared protected"));
-        } else if (!activation.isProtected()) {
-            warnings.add(this.getMessage("Activation method " + activation.getName() + " has wrong qualifier, public or protected required"));
-        }
-
-        // check paramter (we know there is exactly one)
-        JavaParameter param = activation.getParameters()[0];
-        if (!"org.osgi.service.component.ComponentContext".equals(param.getType())) {
-            warnings.add(this.getMessage("Activation method " + methodName + " has wrong argument type " + param.getType()));
         }
     }
 }

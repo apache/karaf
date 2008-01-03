@@ -167,7 +167,7 @@ public class QDoxJavaClassDescription
     public JavaMethod[] getMethods() {
         final com.thoughtworks.qdox.model.JavaMethod[] methods = this.javaClass.getMethods();
         if ( methods == null || methods.length == 0) {
-            return new JavaMethod[0];
+            return JavaMethod.EMPTY_RESULT;
         }
         final JavaMethod[] m = new JavaMethod[methods.length];
         for(int i=0;i<methods.length;i++) {

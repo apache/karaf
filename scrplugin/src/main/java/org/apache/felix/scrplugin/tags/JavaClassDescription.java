@@ -98,6 +98,10 @@ public interface JavaClassDescription {
      */
     boolean isInterface();
 
+    /**
+     * Return all methods of this class
+     * @return An array of methods or an empty array.
+     */
     JavaMethod[] getMethods();
 
     /**
