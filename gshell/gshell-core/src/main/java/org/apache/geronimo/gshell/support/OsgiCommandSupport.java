@@ -16,6 +16,9 @@
  */
 package org.apache.geronimo.gshell.support;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import org.apache.geronimo.gshell.clp.CommandLineProcessor;
 import org.apache.geronimo.gshell.clp.Option;
 import org.apache.geronimo.gshell.clp.Printer;
@@ -26,6 +29,7 @@ import org.apache.geronimo.gshell.command.Variables;
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.common.Arguments;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.osgi.context.BundleContextAware;
@@ -48,6 +52,8 @@ public abstract class OsgiCommandSupport implements Command, BundleContextAware 
     protected IO io;
 
     protected Variables variables;
+
+    protected List<ServiceReference> usedReferences;
 
     @Option(name="-h", aliases={"--help"}, description="Display this help message", requireOverride = true)
     private boolean displayHelp;
@@ -123,7 +129,11 @@ public abstract class OsgiCommandSupport implements Command, BundleContextAware 
         assert io != null;
         assert variables != null;
 
-        return doExecute();
+        try {
+            return doExecute();
+        } finally {
+            ungetServices();
+        }
     }
 
     protected abstract Object doExecute() throws Exception;
@@ -142,6 +152,38 @@ public abstract class OsgiCommandSupport implements Command, BundleContextAware 
         Printer printer = new Printer(clp);
         printer.printUsage(io.out);
         io.out.println();
+    }
+
+    protected <T> List<T> getAllServices(Class<T> clazz, String filter) throws Exception {
+        ServiceReference[] references = getBundleContext().getAllServiceReferences(clazz.getName(), filter);
+        if (references == null) {
+            return null;
+        }
+        List<T> services = new ArrayList<T>();
+        for (ServiceReference ref : references) {
+            T t = getService(clazz, ref);
+            services.add(t);
+        }
+        return services;
+    }
+
+    protected <T> T getService(Class<T> clazz, ServiceReference reference) {
+        T t = (T) getBundleContext().getService(reference);
+        if (t != null) {
+            if (usedReferences == null) {
+                usedReferences = new ArrayList<ServiceReference>();
+            }
+            usedReferences.add(reference);
+        }
+        return t;
+    }
+
+    protected void ungetServices() {
+        if (usedReferences != null) {
+            for (ServiceReference ref : usedReferences) {
+                getBundleContext().ungetService(ref);
+            }
+        }
     }
 
 }
