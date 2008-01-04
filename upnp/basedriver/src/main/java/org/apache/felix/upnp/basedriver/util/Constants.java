@@ -28,5 +28,5 @@ public interface Constants {
 	 * The value of the does not carry any mean. <br>
 	 * The name of the property is "UPnP.device.import".
 	 */
-	public static final String UPNP_IMPORT = "UPnP.device.imported"; 
+	public final static String UPNP_IMPORT = "UPnP.device.imported"; 
 }

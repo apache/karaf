@@ -262,7 +262,7 @@ public class BuildDevice {
 
 	public static Device createCyberLinkDevice(ServiceReference sr){
 		Node root = buildRootNode();
-		Device devUPnP = buildRootDeviceNode(root,sr);		
+		Device devUPnP = buildRootDeviceNode(root,sr);
 		return devUPnP;
 	}
 }

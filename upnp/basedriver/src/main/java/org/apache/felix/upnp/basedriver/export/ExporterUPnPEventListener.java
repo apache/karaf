@@ -49,35 +49,29 @@ public class ExporterUPnPEventListener implements UPnPEventListener {
 	 * @see org.osgi.service.upnp.UPnPEventListener#notifyUPnPEvent(java.lang.String, java.lang.String, java.util.Dictionary)
 	 */
 	public void notifyUPnPEvent(String deviceId, String serviceId,Dictionary events) {
-        Device dAux = null;
-        if(d.getUDN().equals(deviceId)){
-            dAux=d;
-        }else{
-            dAux= d.getDevice(deviceId);
-        }
-        Service s = dAux.getService(serviceId);
+		Device dAux = null;
+		if(d.getUDN().equals(deviceId)){
+			dAux=d;
+		}else{
+			dAux=d.getDevice(deviceId);
+		}
+		Service s = dAux.getService(serviceId);
 		// fix 2/9/2004 francesco 
 		Enumeration e = events.keys();
 		while (e.hasMoreElements()) {
             StateVariable sv;
             String dataType;
             String name;
-            //TODO Keep for compatibility? The OSGi compendium R4 pag. 257 requires pair containg <UPnPStateVariable,Object value> instead of <String name,Object value>
             Object key = e.nextElement();
             if(key instanceof String){
                 name=(String) key;
                 sv=s.getStateVariable(name);
                 dataType=sv.getDataType();
-            }else if(key instanceof UPnPStateVariable){
-                UPnPStateVariable variable = (UPnPStateVariable) key;
-                name=variable.getName();
-                dataType=variable.getUPnPDataType();
-                sv=s.getStateVariable(name);
             }else{
                 Activator.logger.ERROR(deviceId + " notified the change in the StateVariable of " 
                                        + serviceId + " but the key Java type contained in the Dictiories was " 
-                                       + key.getClass().getName() + " instead of " + UPnPStateVariable.class.getName()
-                                       + " as specified by OSGi Compendium Release 4 pag. 257");
+                                       + key.getClass().getName() + " instead of " + String.class.getName()
+                                       + " as specified by Javadoc");
                 continue;
             }
             
