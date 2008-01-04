@@ -21,6 +21,7 @@ package org.apache.felix.moduleloader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.NoSuchElementException;
 
 public class ContentDirectoryContent implements IContent
 {
@@ -133,25 +134,44 @@ public class ContentDirectoryContent implements IContent
     {
         private Enumeration m_enumeration = null;
         private String m_rootPath = null;
+        private String m_nextEntry = null;
 
         public EntriesEnumeration(Enumeration enumeration, String rootPath)
         {
             m_enumeration = enumeration;
             m_rootPath = rootPath;
+            m_nextEntry = findNextEntry();
         }
 
         public boolean hasMoreElements()
         {
-            return m_enumeration.hasMoreElements();
+            return (m_nextEntry != null);
         }
 
         public Object nextElement()
         {
-            // We need to treat the specified path as the root of the
-            // content, so we need to strip off the leading path from
-            // each entry because it is automatically added back on
-            // in the other calls above.
-            return ((String) m_enumeration.nextElement()).substring(m_rootPath.length());
+            if (m_nextEntry == null)
+            {
+                throw new NoSuchElementException("No more elements.");
+            }
+            String currentEntry = m_nextEntry;
+            m_nextEntry = findNextEntry();
+            return currentEntry;
+        }
+
+        private String findNextEntry()
+        {
+            // Find next entry that is inside the root directory.
+            while (m_enumeration.hasMoreElements())
+            {
+                String next = (String) m_enumeration.nextElement();
+                if (next.startsWith(m_rootPath) && !next.equals(m_rootPath))
+                {
+                    // Strip off the root directory.
+                    return next.substring(m_rootPath.length());
+                }
+            }
+            return null;
         }
     }
 }

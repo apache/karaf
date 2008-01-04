@@ -142,6 +142,13 @@ class DirectoryRevision extends BundleRevision
         List contentList = new ArrayList();
         for (int i = 0; i < classPathStrings.length; i++)
         {
+            // Remove any leading slash, since all bundle class path
+            // entries are relative to the root of the bundle.
+            classPathStrings[i] = (classPathStrings[i].startsWith("/"))
+                ? classPathStrings[i].substring(1)
+                : classPathStrings[i];
+
+            // Check for the bundle itself on the class path.
             if (classPathStrings[i].equals(FelixConstants.CLASS_PATH_DOT))
             {
                 contentList.add(self);
