@@ -24,9 +24,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -36,6 +38,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -73,6 +76,7 @@ public class FileMonitor {
     private List<Bundle> changedBundles = new ArrayList<Bundle>();
     private List<Bundle> bundlesToStart = new ArrayList<Bundle>();
     private List<Bundle> bundlesToUpdate = new ArrayList<Bundle>();
+    private Map<String, String> artifactToBundle = new HashMap<String, String>();
     
     private int logLevel = NONE;
 
@@ -107,7 +111,7 @@ public class FileMonitor {
         deployDir.mkdirs();
         generateDir.mkdirs();
 
-        List dirs = new ArrayList();
+        List<File> dirs = new ArrayList<File>();
         if (configDir != null) {
             dirs.add(configDir);
         }
@@ -200,11 +204,26 @@ public class FileMonitor {
 
         for (Object filename : filenames) {
             String name = filename.toString();
-
-            // now lets iterate to find the parent directory
+            boolean added = true;
+            
             File file = new File(name);
             try {
                 debug("File changed: " + filename + " with type: " + filename.getClass().getName());
+                
+                if (file.exists()) {
+                    file = transformArtifact(file);
+                } else {
+                	added = false;
+                	String transformedFile = artifactToBundle.get(name);
+                	if (transformedFile != null) {
+                		file = new File(transformedFile);
+                		if (file.exists()) {
+                			file.delete();
+                		}
+                	}
+                }
+                
+                // now lets iterate to find the parent directory
                 File jardir = getExpandedBundleRootDirectory(file);
                 if (jardir != null) {
                     if (file.exists() && !bundleJarsCreated.contains(jardir)) {
@@ -213,23 +232,23 @@ public class FileMonitor {
                         deployBundle(newBundle);
                     }
                 }
-                else if (name.endsWith(".jar")) {
-                    if (file.exists()) {
+                else if (file.getName().endsWith(".jar")) {
+                    if (added) {
                         deployBundle(file);
                     }
                     else {
                         undeployBundle(file);
                     }
                 }
-                else if (name.endsWith(".cfg")) {
-                    if (file.exists()) {
+                else if (file.getName().endsWith(".cfg")) {
+                    if (added) {
                         updateConfiguration(file);
                     }
                     else {
                         deleteConfiguration(file);
                     }
                 }
-                else if (name.equals("MANIFEST.MF")) {
+                else if (file.getName().equals("MANIFEST.MF")) {
                     File parentFile = file.getParentFile();
                     if (parentFile.getName().equals("META-INF")) {
                         File bundleDir = parentFile.getParentFile();
@@ -245,6 +264,26 @@ public class FileMonitor {
         }
         refreshPackagesAndStartOrUpdateBundles();
     }
+    
+    
+	private File transformArtifact(File file) throws Exception {
+		ServiceReference[] srvRefs = getContext().getAllServiceReferences(DeploymentListener.class.getName(), null);
+		if(srvRefs != null) {
+		    for(ServiceReference sr : srvRefs) {
+		    	try {
+		    		DeploymentListener deploymentListener = (DeploymentListener)getContext().getService(sr);
+		    		if (deploymentListener.canHandle(file)) {
+		    			File transformedFile =  deploymentListener.handle(file, getGenerateDir());
+		    			artifactToBundle.put(file.getAbsolutePath(), transformedFile.getAbsolutePath());
+		    			file = transformedFile;
+		    		}
+		    	} finally {
+		    		getContext().ungetService(sr);
+		    	}
+		    }
+		}
+		return file;
+	}
 
     protected void deployBundle(File file) throws IOException, BundleException {
         log("Deloying: " + file.getCanonicalPath());
@@ -284,14 +323,12 @@ public class FileMonitor {
     }
 
     protected Bundle getBundleForJarFile(File file) throws IOException {
-        String absoluteFilePath = file.getCanonicalPath();
+        String absoluteFilePath = file.getAbsolutePath();
         Bundle bundles[] = getContext().getBundles();
         for (int i = 0; i < bundles.length; i++) {
             Bundle bundle = bundles[i];
             String location = bundle.getLocation();
-            File locationFile = new File(location);
-            String absoluteLocation = locationFile.getCanonicalPath();
-            if (absoluteFilePath.equals(absoluteLocation)) {
+            if (location.endsWith(absoluteFilePath)) {
                 return bundle;
             }
         }
