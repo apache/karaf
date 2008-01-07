@@ -19,6 +19,13 @@
 
 package org.apache.felix.upnp.basedriver;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Properties;
+
 import org.cybergarage.upnp.UPnP;
 
 import org.osgi.framework.BundleActivator;
@@ -62,6 +69,8 @@ public class Activator implements BundleActivator {
     private DriverControllerImpl drvController;
     private ServiceRegistration drvControllerRegistrar;
     
+    private Properties configuration;
+    
 	
 	/**
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
@@ -71,6 +80,8 @@ public class Activator implements BundleActivator {
         
  		Activator.bc = context;				
 		
+ 		doInitProperties();
+ 		
  		doInitLogger();
  		
  		doInitUPnPStack();
@@ -84,7 +95,33 @@ public class Activator implements BundleActivator {
 	}
 
 
-    /**
+    private void doInitProperties() {
+    	/*
+    	 * Loading default properties value from the embeeded properties file
+    	 */
+    	configuration = new Properties();    
+    	try {    		
+    		configuration.load(Activator.class.getResourceAsStream("upnp.properties"));
+		} catch (Exception ignored) {
+			ignored.printStackTrace();
+		}
+		
+		/*
+		 * Overiding default value with the properties defined in the System
+		 */
+		Enumeration e = configuration.propertyNames();
+		Properties system = System.getProperties();
+		while (e.hasMoreElements()) {
+			String name = (String) e.nextElement();
+			if(system.containsKey(name)){
+				configuration.setProperty(name, system.getProperty(name));
+			}
+		}
+		
+	}
+
+
+	/**
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
@@ -109,13 +146,6 @@ public class Activator implements BundleActivator {
 		Activator.logger=null;
 		Activator.bc = null;
 	}
-	
-	public final String getPropertyDefault(BundleContext bc, String propertyName, String defaultValue ){
-		String value = bc.getProperty(propertyName);
-		if(value == null)
-			return defaultValue;
-		return value;
-	}
 
 	/**
 	 * Method used for initilizing the general properties of the UPnP Base Driver
@@ -124,10 +154,10 @@ public class Activator implements BundleActivator {
 	 */
 	private void doInitLogger() {
 		
- 	    String levelStr = getPropertyDefault(Activator.bc,Constants.BASEDRIVER_LOG_PROP,"2");	    
+ 	    String levelStr = configuration.getProperty(Constants.BASEDRIVER_LOG_PROP,"2");	    
 		Activator.logger = new Logger(levelStr);
 		
-	    String cyberLog = getPropertyDefault(Activator.bc,Constants.CYBERDOMO_LOG_PROP,"false");
+	    String cyberLog = configuration.getProperty(Constants.CYBERDOMO_LOG_PROP,"false");
 	    Activator.logger.setCyberDebug(cyberLog);	    
 
 	}
@@ -138,15 +168,15 @@ public class Activator implements BundleActivator {
 	 * @since 0.3
 	 */
 	private void doInitUPnPStack() {
-		boolean useOnlyIPV4 = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.NET_ONLY_IPV4_PROP,"true")).booleanValue();
+		boolean useOnlyIPV4 = Boolean.valueOf(configuration.getProperty(Constants.NET_ONLY_IPV4_PROP,"true")).booleanValue();
 	    if (useOnlyIPV4) UPnP.setEnable(UPnP.USE_ONLY_IPV4_ADDR);
     	else UPnP.setDisable(UPnP.USE_ONLY_IPV4_ADDR);
 
-		boolean useOnlyIPV6 = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.NET_ONLY_IPV6_PROP,"true")).booleanValue();
+		boolean useOnlyIPV6 = Boolean.valueOf(configuration.getProperty(Constants.NET_ONLY_IPV6_PROP,"true")).booleanValue();
 	    if (useOnlyIPV6) UPnP.setEnable(UPnP.USE_ONLY_IPV6_ADDR);
     	else UPnP.setDisable(UPnP.USE_ONLY_IPV6_ADDR);
 
-		boolean useLoopback = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.NET_USE_LOOPBACK_PROP,"true")).booleanValue();
+		boolean useLoopback = Boolean.valueOf(configuration.getProperty(Constants.NET_USE_LOOPBACK_PROP,"true")).booleanValue();
     	if (useLoopback) UPnP.setEnable(UPnP.USE_LOOPBACK_ADDR);
     	else UPnP.setDisable(UPnP.USE_LOOPBACK_ADDR);
     	
@@ -161,7 +191,7 @@ public class Activator implements BundleActivator {
 	 * @throws InvalidSyntaxException
 	 */
 	private void doInitExporter() throws InvalidSyntaxException {		
-		boolean useExporter = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.EXPORTER_ENABLED_PROP,"true")).booleanValue();
+		boolean useExporter = Boolean.valueOf(configuration.getProperty(Constants.EXPORTER_ENABLED_PROP,"true")).booleanValue();
       	if (!useExporter) return;
    		      	
 		this.queue = new RootDeviceExportingQueue();
@@ -178,7 +208,7 @@ public class Activator implements BundleActivator {
 	 * @since 0.3
 	 */
 	private void doInitImporter() {
-		boolean useImporter = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.IMPORTER_ENABLED_PROP,"true")).booleanValue();
+		boolean useImporter = Boolean.valueOf(configuration.getProperty(Constants.IMPORTER_ENABLED_PROP,"true")).booleanValue();
       	if (!useImporter) return;
    		
    		

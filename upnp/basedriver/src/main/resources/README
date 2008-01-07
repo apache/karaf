@@ -1,0 +1,28 @@
+This bundle tries to be complaint to the UPnP Base Driver OSGi R4 specification.
+
+At the moment the bundle do not support the following requirement:
+ - upnp.ssdp.address Configuration Service
+ - exported device changes: if a service already exported as UPnP Device changes 
+   it's own configuration, i.e.: implements new service, changes the friendly name, etc.,
+   the new service description is not reflected on the UPnP Device
+ - icon for exported device is not tested
+ - no localization support
+
+The bundle provides extra capabilities:
+ - the bundles implements the org.apache.felix.upnp.extra.controller specification
+
+Finally the bundle can be configured by setting the following properties divided by categories:
+1 - LOGGING
+felix.upnpbase.log: integer which identifies the verbosity of the bundle
+felix.upnpbase.cyberdomo.log: boolean which enables or disables the UPnP CyberDomo SDK debugging messages
+2 - FACILITY
+felix.upnpbase.exporter.enabled: boolean which enables or disables the Exporter facilities of the UPnP Base Driver
+felix.upnpbase.importer.enabled: boolean which enables or disables the Exporter facilities of the UPnP Base Driver
+3 - NETWORK 
+felix.upnpbase.cyberdomo.net.loopback: boolean which enables or disables the use of Loopback devices
+felix.upnpbase.cyberdomo.net.onlyIPV4: boolean which enables or disables the use of IPv4 addresses
+felix.upnpbase.cyberdomo.net.onlyIPV6: boolean which enables or disables the use of IPv6 addresses (if base driver is running on JDK 1.4 or greater)
+cyberdomo.ssdp.mx: integer which idntifies the value to set in MX packet while performing discovery operation on UPnP
+cyberdomo.ssdp.buffersize: integer which identifies buffer size for UDP packet
+cyberdomo.ssdp.port: integer which identifies the destination port to use for SDDP multicast discovery packet
+ 

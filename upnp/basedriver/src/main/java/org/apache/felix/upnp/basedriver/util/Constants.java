@@ -27,15 +27,64 @@ public interface Constants {
 	 * device service is been created by UPnP base Driver. <br>
 	 * The value of the does not carry any mean. <br>
 	 * The name of the property is "UPnP.device.import".
+	 * 
+	 * @since 0.1
 	 */
 	public final static String UPNP_IMPORT = "UPnP.device.imported"; 
 	
+	
+	
+	/**
+	 * Set the verbosity of the logging message of the bundle
+	 * 
+	 * @since 0.1 
+	 */
 	public final static String BASEDRIVER_LOG_PROP = "felix.upnpbase.log";
+	
+	/**
+	 * If equal to "true" enables the CyberDomo UPnP SDK debugging messages
+	 * 
+	 * @since 0.1
+	 */
 	public final static String CYBERDOMO_LOG_PROP = "felix.upnpbase.cyberdomo.log";
+	
+	
+	
+	/**
+	 * If equal to "true" enables Exporter facility of the UPnP Base Driver
+	 * 
+	 * @since 0.3
+	 */
 	public final static String EXPORTER_ENABLED_PROP = "felix.upnpbase.exporter.enabled";
+	
+	/**
+	 * If equal to "true" enables Importer facility of the UPnP Base Driver
+	 * 
+	 * @since 0.3
+	 */
 	public final static String IMPORTER_ENABLED_PROP = "felix.upnpbase.importer.enabled";
+	
+	
+	
+	/**
+	 * If equal to "true" enables the use of NICs with IPv4 configured and only IPv4 addresses will be used
+	 * 
+	 * @since 0.3 
+	 */
 	public final static String NET_ONLY_IPV4_PROP = "felix.upnpbase.cyberdomo.net.onlyIPV4";
+	
+	/**
+	 * If equal to "true" enables the use of NICs with IPv6 configured and only IPv6 addresses will be used<br>
+	 * <b>NOTE:</b>This property is used only on JDK 1.4 or greater  
+	 * @since 0.3
+	 */
 	public final static String NET_ONLY_IPV6_PROP = "felix.upnpbase.cyberdomo.net.onlyIPV6";
+	
+	/**
+	 * If equal to "true" enables the use of Loopback addresses, either IPv6 and IPv4
+	 * 
+	 * @since 0.3 
+	 */
 	public final static String NET_USE_LOOPBACK_PROP = "felix.upnpbase.cyberdomo.net.loopback";
 
 }
