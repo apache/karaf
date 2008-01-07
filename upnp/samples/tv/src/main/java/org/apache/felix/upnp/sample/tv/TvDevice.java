@@ -21,6 +21,7 @@ package org.apache.felix.upnp.sample.tv;
 
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Properties;
 
@@ -250,8 +251,10 @@ public class TvDevice implements UPnPDevice,UPnPEventListener,ServiceListener  {
 	public void notifyUPnPEvent(String deviceId, String serviceId, Dictionary events) {
 		if( !LinkedDevices.contains(deviceId))
 			LinkedDevices.add(deviceId);
-		if (deviceId.indexOf("Clock") != -1)
-				clockTime = (String) events.get("Time");
+		if (deviceId.indexOf("Clock") != -1){
+				Long time = (Long) events.get("Time");
+				clockTime = new Date(time).toString();				
+		}
 		else if (deviceId.indexOf("AirCon") != -1)
 				airconTemp = (String) events.get("Temp");
 		else if (deviceId.indexOf("Washer") != -1)

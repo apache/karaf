@@ -204,9 +204,9 @@ public class Converter {
 		} else if (upnpType.equals("boolean")) {
 			if(value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true")
 			|| value.equalsIgnoreCase("1"))
-				return new Boolean(true);
+				return Boolean.TRUE;
 			else
-				return new Boolean(false);					
+				return Boolean.FALSE;					
 		} else if (upnpType.equals("bin.base64")) {
 			return Base64.decode(value);
 		} else if (upnpType.equals("bin.hex")) {

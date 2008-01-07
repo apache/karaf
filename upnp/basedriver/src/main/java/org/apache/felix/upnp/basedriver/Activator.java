@@ -39,20 +39,13 @@ import org.apache.felix.upnp.basedriver.importer.core.event.structs.Subscription
 import org.apache.felix.upnp.basedriver.importer.core.event.thread.Notifier;
 import org.apache.felix.upnp.basedriver.importer.core.event.thread.SubScriber;
 import org.apache.felix.upnp.basedriver.tool.Logger;
-import org.apache.felix.upnp.basedriver.util.Converter;
+import org.apache.felix.upnp.basedriver.util.Constants;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public class Activator implements BundleActivator {
 	
-	public final static String BASEDRIVER_LOG_PROP = "felix.upnpbase.log";
-	public final static String CYBERDOMO_LOG_PROP = "felix.upnpbase.cyberdomo.log";
-	public final static String EXPORTER_ENABLED_PROP = "felix.upnpbase.exporter.enabled";
-	public final static String IMPORTER_ENABLED_PROP = "felix.upnpbase.importer.enabled";
-	public final static String NET_ONLY_IPV4_PROP = "felix.upnpbase.cyberdomo.net.onlyIPV4";
-	public final static String NET_ONLY_IPV6_PROP = "felix.upnpbase.cyberdomo.net.onlyIPV6";
-	public final static String NET_USE_LOOPBACK_PROP = "felix.upnpbase.cyberdomo.net.loopback";
 	
 	public static BundleContext bc;
     public static Logger logger;        
@@ -69,12 +62,6 @@ public class Activator implements BundleActivator {
     private DriverControllerImpl drvController;
     private ServiceRegistration drvControllerRegistrar;
     
-	private boolean useExporter = true;
-	private boolean useImporter = true;
-	
-	private boolean useOnlyIPV4 = true;
-	private boolean useOnlyIPV6 = false;
-	private boolean useLoopback = false;	
 	
 	/**
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
@@ -84,7 +71,7 @@ public class Activator implements BundleActivator {
         
  		Activator.bc = context;				
 		
- 		doInitProperties();
+ 		doInitLogger();
  		
  		doInitUPnPStack();
  		
@@ -130,7 +117,60 @@ public class Activator implements BundleActivator {
 		return value;
 	}
 
+	/**
+	 * Method used for initilizing the general properties of the UPnP Base Driver
+	 * 
+	 * @since 0.3
+	 */
+	private void doInitLogger() {
+		
+ 	    String levelStr = getPropertyDefault(Activator.bc,Constants.BASEDRIVER_LOG_PROP,"2");	    
+		Activator.logger = new Logger(levelStr);
+		
+	    String cyberLog = getPropertyDefault(Activator.bc,Constants.CYBERDOMO_LOG_PROP,"false");
+	    Activator.logger.setCyberDebug(cyberLog);	    
 
+	}
+
+	/**
+	 * Method used for initilizing the UPnP SDK component used by the UPnP Base Driver
+	 * 
+	 * @since 0.3
+	 */
+	private void doInitUPnPStack() {
+		Boolean useOnlyIPV4 = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.NET_ONLY_IPV4_PROP,"true"));
+	    if (useOnlyIPV4) UPnP.setEnable(UPnP.USE_ONLY_IPV4_ADDR);
+    	else UPnP.setDisable(UPnP.USE_ONLY_IPV4_ADDR);
+
+		Boolean useOnlyIPV6 = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.NET_ONLY_IPV6_PROP,"true"));
+	    if (useOnlyIPV6) UPnP.setEnable(UPnP.USE_ONLY_IPV6_ADDR);
+    	else UPnP.setDisable(UPnP.USE_ONLY_IPV6_ADDR);
+
+		Boolean useLoopback = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.NET_USE_LOOPBACK_PROP,"true"));
+    	if (useLoopback) UPnP.setEnable(UPnP.USE_LOOPBACK_ADDR);
+    	else UPnP.setDisable(UPnP.USE_LOOPBACK_ADDR);
+    	
+	}
+
+	/**
+	/**
+	 * Method used for initilizing the Exporter component of the UPnP Base Driver
+	 * @throws InvalidSyntaxException 
+	 * 
+	 * @since 0.3
+	 * @throws InvalidSyntaxException
+	 */
+	private void doInitExporter() throws InvalidSyntaxException {		
+		Boolean useExporter = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.EXPORTER_ENABLED_PROP,"true"));
+      	if (!useExporter) return;
+   		      	
+		this.queue = new RootDeviceExportingQueue();
+		this.producerDeviceToExport = new RootDeviceListener(queue);
+		producerDeviceToExport.activate();
+		consumerDeviceToExport = new ThreadExporter(queue);
+		new Thread(consumerDeviceToExport, "upnp.basedriver.Exporter").start();
+       	
+	}
 	
 	/**
 	 * Method used for initilizing the Import component of the UPnP Base Driver
@@ -138,7 +178,8 @@ public class Activator implements BundleActivator {
 	 * @since 0.3
 	 */
 	private void doInitImporter() {
-       	if (!useImporter) return;
+		Boolean useImporter = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.IMPORTER_ENABLED_PROP,"true"));
+      	if (!useImporter) return;
    		
    		
 		//Setting up Base Driver Importer
@@ -158,111 +199,7 @@ public class Activator implements BundleActivator {
 		notifier.start();
 	}
 
-	/**
-	/**
-	 * Method used for initilizing the Exporter component of the UPnP Base Driver
-	 * @throws InvalidSyntaxException 
-	 * 
-	 * @since 0.3
-	 * @throws InvalidSyntaxException
-	 */
-	private void doInitExporter() throws InvalidSyntaxException {		
-       	if (!useExporter) return;
-   		
-       	
-		//Setting up Base Driver Exporter
-		this.queue = new RootDeviceExportingQueue();
-		this.producerDeviceToExport = new RootDeviceListener(queue);
-		producerDeviceToExport.activate();
-		consumerDeviceToExport = new ThreadExporter(queue);
-		new Thread(consumerDeviceToExport, "upnp.basedriver.Exporter").start();
-       	
-	}
 
-	/**
-	 * Method used for initilizing the UPnP SDK component used by the UPnP Base Driver
-	 * 
-	 * @since 0.3
-	 */
-	private void doInitUPnPStack() {
-		
-	    if (useOnlyIPV4) UPnP.setEnable(UPnP.USE_ONLY_IPV4_ADDR);
-    	else UPnP.setDisable(UPnP.USE_ONLY_IPV4_ADDR);
-
-	    if (useOnlyIPV6) UPnP.setEnable(UPnP.USE_ONLY_IPV6_ADDR);
-    	else UPnP.setDisable(UPnP.USE_ONLY_IPV6_ADDR);
-
-    	if (useLoopback) UPnP.setEnable(UPnP.USE_LOOPBACK_ADDR);
-    	else UPnP.setDisable(UPnP.USE_LOOPBACK_ADDR);
-    	
-	}
-
-	/**
-	 * Method used for initilizing the general properties of the UPnP Base Driver
-	 * 
-	 * @since 0.3
-	 */
-	private void doInitProperties() {
-		
- 		//
- 		// Debugger configuration
- 		//
-	    String levelStr = getPropertyDefault(Activator.bc,BASEDRIVER_LOG_PROP,"2");	    
-		Activator.logger = new Logger(levelStr);
-		
-	    String cyberLog = getPropertyDefault(Activator.bc,CYBERDOMO_LOG_PROP,"false");
-	    Activator.logger.setCyberDebug(cyberLog);	    
-
- 		//
-	    // NET configuration
-	   	//
-	    try {
-			useOnlyIPV4 = ((Boolean) Converter.parseString(
-					getPropertyDefault(Activator.bc,NET_ONLY_IPV4_PROP,"true"),"boolean"
-			)).booleanValue();
-		} catch (Exception e) {
-			logger.WARNING(NET_ONLY_IPV4_PROP+" initialized with wrong value, using default "+useOnlyIPV4);
-		}
-    	
-       	try {
-			useOnlyIPV6 = ((Boolean) Converter.parseString(
-					getPropertyDefault(Activator.bc,NET_ONLY_IPV6_PROP,"false"),"boolean"
-			)).booleanValue();
-		} catch (Exception e) {
-			logger.WARNING(NET_ONLY_IPV6_PROP+" initialized with wrong value, using default "+useOnlyIPV6);
-		}
-       	
-       	try {
-			useLoopback = ((Boolean) Converter.parseString(
-					getPropertyDefault(Activator.bc,NET_USE_LOOPBACK_PROP,"false"),"boolean"
-			)).booleanValue();
-		} catch (Exception e) {
-			logger.WARNING(NET_USE_LOOPBACK_PROP+" initialized with wrong value, using default "+useLoopback);
-		}
-    	
-    	//
-    	// Exporter configuration		
-       	//
-    	try {
-			useExporter = ((Boolean) Converter.parseString(
-					getPropertyDefault(Activator.bc,EXPORTER_ENABLED_PROP,"true"),"boolean"    	
-			)).booleanValue();
-		} catch (Exception e) {
-			logger.WARNING(EXPORTER_ENABLED_PROP+" initialized with wrong value, using default "+useExporter);
-		}
-    	
-    	//
-       	// Importer configuration		
-      	//
-       	try {
-			useImporter = ((Boolean) Converter.parseString(
-					getPropertyDefault(Activator.bc,IMPORTER_ENABLED_PROP,"true"),"boolean"
-					
-			)).booleanValue();
-		} catch (Exception e) {
-			logger.WARNING(IMPORTER_ENABLED_PROP+" initialized with wrong value, using default "+useImporter);
-		}
-	}
 
 	private void doControllerRegistration() {
         drvController = new DriverControllerImpl(ctrl);

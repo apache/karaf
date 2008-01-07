@@ -29,4 +29,13 @@ public interface Constants {
 	 * The name of the property is "UPnP.device.import".
 	 */
 	public final static String UPNP_IMPORT = "UPnP.device.imported"; 
+	
+	public final static String BASEDRIVER_LOG_PROP = "felix.upnpbase.log";
+	public final static String CYBERDOMO_LOG_PROP = "felix.upnpbase.cyberdomo.log";
+	public final static String EXPORTER_ENABLED_PROP = "felix.upnpbase.exporter.enabled";
+	public final static String IMPORTER_ENABLED_PROP = "felix.upnpbase.importer.enabled";
+	public final static String NET_ONLY_IPV4_PROP = "felix.upnpbase.cyberdomo.net.onlyIPV4";
+	public final static String NET_ONLY_IPV6_PROP = "felix.upnpbase.cyberdomo.net.onlyIPV6";
+	public final static String NET_USE_LOOPBACK_PROP = "felix.upnpbase.cyberdomo.net.loopback";
+
 }
