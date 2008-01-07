@@ -172,11 +172,11 @@ public class Activator implements BundleActivator {
 	    if (useOnlyIPV4) UPnP.setEnable(UPnP.USE_ONLY_IPV4_ADDR);
     	else UPnP.setDisable(UPnP.USE_ONLY_IPV4_ADDR);
 
-		boolean useOnlyIPV6 = Boolean.valueOf(configuration.getProperty(Constants.NET_ONLY_IPV6_PROP,"true")).booleanValue();
+		boolean useOnlyIPV6 = Boolean.valueOf(configuration.getProperty(Constants.NET_ONLY_IPV6_PROP,"false")).booleanValue();
 	    if (useOnlyIPV6) UPnP.setEnable(UPnP.USE_ONLY_IPV6_ADDR);
     	else UPnP.setDisable(UPnP.USE_ONLY_IPV6_ADDR);
 
-		boolean useLoopback = Boolean.valueOf(configuration.getProperty(Constants.NET_USE_LOOPBACK_PROP,"true")).booleanValue();
+		boolean useLoopback = Boolean.valueOf(configuration.getProperty(Constants.NET_USE_LOOPBACK_PROP,"false")).booleanValue();
     	if (useLoopback) UPnP.setEnable(UPnP.USE_LOOPBACK_ADDR);
     	else UPnP.setDisable(UPnP.USE_LOOPBACK_ADDR);
     	
