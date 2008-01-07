@@ -138,15 +138,15 @@ public class Activator implements BundleActivator {
 	 * @since 0.3
 	 */
 	private void doInitUPnPStack() {
-		Boolean useOnlyIPV4 = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.NET_ONLY_IPV4_PROP,"true"));
+		boolean useOnlyIPV4 = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.NET_ONLY_IPV4_PROP,"true")).booleanValue();
 	    if (useOnlyIPV4) UPnP.setEnable(UPnP.USE_ONLY_IPV4_ADDR);
     	else UPnP.setDisable(UPnP.USE_ONLY_IPV4_ADDR);
 
-		Boolean useOnlyIPV6 = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.NET_ONLY_IPV6_PROP,"true"));
+		boolean useOnlyIPV6 = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.NET_ONLY_IPV6_PROP,"true")).booleanValue();
 	    if (useOnlyIPV6) UPnP.setEnable(UPnP.USE_ONLY_IPV6_ADDR);
     	else UPnP.setDisable(UPnP.USE_ONLY_IPV6_ADDR);
 
-		Boolean useLoopback = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.NET_USE_LOOPBACK_PROP,"true"));
+		boolean useLoopback = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.NET_USE_LOOPBACK_PROP,"true")).booleanValue();
     	if (useLoopback) UPnP.setEnable(UPnP.USE_LOOPBACK_ADDR);
     	else UPnP.setDisable(UPnP.USE_LOOPBACK_ADDR);
     	
@@ -161,7 +161,7 @@ public class Activator implements BundleActivator {
 	 * @throws InvalidSyntaxException
 	 */
 	private void doInitExporter() throws InvalidSyntaxException {		
-		Boolean useExporter = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.EXPORTER_ENABLED_PROP,"true"));
+		boolean useExporter = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.EXPORTER_ENABLED_PROP,"true")).booleanValue();
       	if (!useExporter) return;
    		      	
 		this.queue = new RootDeviceExportingQueue();
@@ -178,7 +178,7 @@ public class Activator implements BundleActivator {
 	 * @since 0.3
 	 */
 	private void doInitImporter() {
-		Boolean useImporter = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.IMPORTER_ENABLED_PROP,"true"));
+		boolean useImporter = Boolean.valueOf(getPropertyDefault(Activator.bc,Constants.IMPORTER_ENABLED_PROP,"true")).booleanValue();
       	if (!useImporter) return;
    		
    		
