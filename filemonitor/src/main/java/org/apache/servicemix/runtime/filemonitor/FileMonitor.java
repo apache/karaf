@@ -232,7 +232,9 @@ public class FileMonitor {
                         deployBundle(newBundle);
                     }
                 }
-                else if (file.getName().endsWith(".jar")) {
+                else if (file.getName().endsWith(".jar")
+                            || file.getName().endsWith(".zip")
+                            || file.getName().endsWith(".war")) {
                     if (added) {
                         deployBundle(file);
                     }
