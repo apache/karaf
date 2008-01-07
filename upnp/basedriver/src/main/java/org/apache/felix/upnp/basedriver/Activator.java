@@ -19,10 +19,6 @@
 
 package org.apache.felix.upnp.basedriver;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -92,6 +88,10 @@ public class Activator implements BundleActivator {
  		
         doControllerRegistration();
         
+        Activator.logger.DEBUG( "org.apache.felix.upnp.basedriver Configuration:\n"+
+        		configuration.toString()
+        );
+        
 	}
 
 
@@ -101,20 +101,19 @@ public class Activator implements BundleActivator {
     	 */
     	configuration = new Properties();    
     	try {    		
-    		configuration.load(Activator.class.getResourceAsStream("upnp.properties"));
+    		configuration.load(Activator.class.getResourceAsStream("resources/upnp.properties"));
 		} catch (Exception ignored) {
-			ignored.printStackTrace();
 		}
 		
 		/*
-		 * Overiding default value with the properties defined in the System
+		 * Overiding default value with the properties defined in the Bundle/System
 		 */
 		Enumeration e = configuration.propertyNames();
-		Properties system = System.getProperties();
 		while (e.hasMoreElements()) {
 			String name = (String) e.nextElement();
-			if(system.containsKey(name)){
-				configuration.setProperty(name, system.getProperty(name));
+			String systemValue = Activator.bc.getProperty(name);
+			if(systemValue!=null){
+				configuration.setProperty(name, systemValue);
 			}
 		}
 		
@@ -171,11 +170,18 @@ public class Activator implements BundleActivator {
 		boolean useOnlyIPV4 = Boolean.valueOf(configuration.getProperty(Constants.NET_ONLY_IPV4_PROP,"true")).booleanValue();
 	    if (useOnlyIPV4) UPnP.setEnable(UPnP.USE_ONLY_IPV4_ADDR);
     	else UPnP.setDisable(UPnP.USE_ONLY_IPV4_ADDR);
-
-		boolean useOnlyIPV6 = Boolean.valueOf(configuration.getProperty(Constants.NET_ONLY_IPV6_PROP,"false")).booleanValue();
-	    if (useOnlyIPV6) UPnP.setEnable(UPnP.USE_ONLY_IPV6_ADDR);
-    	else UPnP.setDisable(UPnP.USE_ONLY_IPV6_ADDR);
-
+	   
+	    String javaVersion = Activator.bc.getProperty("java.version");
+	    if(!(javaVersion == null 
+	    		|| javaVersion.startsWith("1.0") || javaVersion.startsWith("1.1")
+	    		|| javaVersion.startsWith("1.2") || javaVersion.startsWith("1.3")  
+	    ))	    	
+	    {
+	    	boolean useOnlyIPV6 = Boolean.valueOf(configuration.getProperty(Constants.NET_ONLY_IPV6_PROP,"false")).booleanValue();
+	    	if (useOnlyIPV6) UPnP.setEnable(UPnP.USE_ONLY_IPV6_ADDR);
+	    	else UPnP.setDisable(UPnP.USE_ONLY_IPV6_ADDR);
+	    }
+	    
 		boolean useLoopback = Boolean.valueOf(configuration.getProperty(Constants.NET_USE_LOOPBACK_PROP,"false")).booleanValue();
     	if (useLoopback) UPnP.setEnable(UPnP.USE_LOOPBACK_ADDR);
     	else UPnP.setDisable(UPnP.USE_LOOPBACK_ADDR);
