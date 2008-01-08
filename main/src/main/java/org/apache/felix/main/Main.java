@@ -218,11 +218,13 @@ public class Main
         try
         {
             // Create a list for custom framework activators and
-            // add an instance of Main to process auto-properties.
+            // add an instance of the auto-activator it for processing
+            // auto-install and auto-start properties.
             List list = new ArrayList();
             list.add(new AutoActivator(configProps));
-            // Now create an instance of the framework.
+            // Create a case-insensitive property map.
             Map configMap = new StringMap(configProps, false);
+            // Create an instance of the framework.
             m_felix = new Felix(configMap, list);
             m_felix.start();
         }
