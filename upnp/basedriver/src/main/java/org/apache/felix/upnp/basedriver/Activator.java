@@ -178,8 +178,14 @@ public class Activator implements BundleActivator {
 	    ))	    	
 	    {
 	    	boolean useOnlyIPV6 = Boolean.valueOf(configuration.getProperty(Constants.NET_ONLY_IPV6_PROP,"false")).booleanValue();
-	    	if (useOnlyIPV6) UPnP.setEnable(UPnP.USE_ONLY_IPV6_ADDR);
-	    	else UPnP.setDisable(UPnP.USE_ONLY_IPV6_ADDR);
+		
+		/*
+		 * Defining an alias for UPnP.USE_ONLY_IPV6_ADDR in order to allow compilation of the code either with upnp-stack and upnp-stack-jdk13
+		 */
+		final int ALIAS_USE_ONLY_IPV6_ADDR=1;
+		
+	    	if (useOnlyIPV6) UPnP.setEnable(ALIAS_USE_ONLY_IPV6_ADDR);
+	    	else UPnP.setDisable(ALIAS_USE_ONLY_IPV6_ADDR);
 	    }
 	    
 		boolean useLoopback = Boolean.valueOf(configuration.getProperty(Constants.NET_USE_LOOPBACK_PROP,"false")).booleanValue();

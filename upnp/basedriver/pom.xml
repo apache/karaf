@@ -99,14 +99,19 @@
                 <!--Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
                   <Embed-Transitive>true</Embed-Transitive-->
                 <Export-Package>
-                  org.apache.felix.upnp.basedriver.controller;version=0.1,
-                  org.apache.felix.upnp.basedriver.util;version=0.3
-                  
+                  org.apache.felix.upnp.basedriver.controller;version=0.1.0,
+                  org.apache.felix.upnp.basedriver.util;version=0.3.0
+                  org.apache.felix.upnp.basedriver.resources;version=0.3.0
                 </Export-Package>
                 <Import-Package>org.osgi.*</Import-Package>
                 <Private-Package>
-                  org.apache.felix.upnp.basedriver.*, org.kxml2.io,
-                  org.xmlpull.v1, org.cybergarage.*,
+                  org.apache.felix.upnp.basedriver.controller.impl,
+                  org.apache.felix.upnp.basedriver.importer.*,
+                  org.apache.felix.upnp.basedriver.export.*,
+                  org.apache.felix.upnp.basedriver.tool,
+                  org.apache.felix.upnp.basedriver,
+                  org.kxml2.io, org.xmlpull.v1,
+                  org.cybergarage.*,
                   org.apache.xerces.impl.dv.util
                 </Private-Package>
               </instructions>
