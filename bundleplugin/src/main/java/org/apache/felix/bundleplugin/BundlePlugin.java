@@ -20,7 +20,9 @@ package org.apache.felix.bundleplugin;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,9 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
+import org.apache.maven.archiver.ManifestSection;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.artifact.Artifact;
@@ -327,12 +331,47 @@ public class BundlePlugin extends AbstractMojo {
                  */
                 MavenArchiveConfiguration archiveConfig = JarPluginConfiguration.getArchiveConfiguration( project );
                 String mavenManifestText = new MavenArchiver().getManifest( project, archiveConfig ).toString();
-
                 Manifest mavenManifest = new Manifest();
+
+                // First grab the external manifest file (if specified)
+                File externalManifestFile = archiveConfig.getManifestFile();
+                if ( null != externalManifestFile )
+                {
+                    InputStream mis = new FileInputStream( externalManifestFile );
+                    mavenManifest.read( mis );
+                    mis.close();
+                }
+
+                // Then apply the customized entries from the jar plugin
                 mavenManifest.read( new StringInputStream( mavenManifestText ) );
 
+                if ( !archiveConfig.isManifestSectionsEmpty() )
+                {
+                    /*
+                     * Add customized manifest sections (for some reason MavenArchiver doesn't do this for us)
+                     */
+                    List sections = archiveConfig.getManifestSections();
+                    for ( Iterator i = sections.iterator(); i.hasNext(); )
+                    {
+                        ManifestSection section = (ManifestSection) i.next();
+                        Attributes attributes = new Attributes();
+
+                        if ( !section.isManifestEntriesEmpty() )
+                        {
+                            Map entries = section.getManifestEntries();
+                            for ( Iterator j = entries.entrySet().iterator(); j.hasNext(); )
+                            {
+                                Map.Entry entry = (Map.Entry) j.next();
+                                attributes.putValue( (String)entry.getKey(), (String)entry.getValue() );
+                            }
+                        }
+
+                        mavenManifest.getEntries().put( section.getName(), attributes );
+                    }
+                }
+
                 /*
-                 * Overlay customized Maven manifest with the generated bundle manifest
+                 * Overlay generated bundle manifest with customized entries
                  */
                 Manifest bundleManifest = jar.getManifest();
                 bundleManifest.getMainAttributes().putAll( mavenManifest.getMainAttributes() );
