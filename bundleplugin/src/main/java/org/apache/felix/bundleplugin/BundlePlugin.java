@@ -666,6 +666,9 @@ public class BundlePlugin extends AbstractMojo {
         properties.put(Analyzer.IMPORT_PACKAGE, "*");
         properties.put(Analyzer.BUNDLE_VERSION, project.getVersion());
 
+        // remove the verbose Include-Resource entry from generated manifest
+        properties.put(Analyzer.REMOVE_HEADERS, Analyzer.INCLUDE_RESOURCE);
+
         this.header(properties, Analyzer.BUNDLE_DESCRIPTION, project
            .getDescription());
         StringBuffer licenseText = this.printLicenses(project.getLicenses());
