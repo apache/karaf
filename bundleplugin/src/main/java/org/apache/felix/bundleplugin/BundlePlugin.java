@@ -330,16 +330,15 @@ public class BundlePlugin extends AbstractMojo {
 
                 Manifest mavenManifest = new Manifest();
                 mavenManifest.read( new StringInputStream( mavenManifestText ) );
-                Manifest bundleManifest = jar.getManifest();
 
                 /*
                  * Overlay customized Maven manifest with the generated bundle manifest
                  */
-                mavenManifest.getMainAttributes().putAll( bundleManifest.getMainAttributes() );
-                mavenManifest.getMainAttributes().putValue( "Created-By", "Apache Maven Bundle Plugin" );
-                mavenManifest.getEntries().putAll( bundleManifest.getEntries() );
-
-                jar.setManifest( mavenManifest );
+                Manifest bundleManifest = jar.getManifest();
+                bundleManifest.getMainAttributes().putAll( mavenManifest.getMainAttributes() );
+                bundleManifest.getMainAttributes().putValue( "Created-By", "Apache Maven Bundle Plugin" );
+                bundleManifest.getEntries().putAll( mavenManifest.getEntries() );
+                jar.setManifest( bundleManifest );
             }
             catch (Exception e)
             {
