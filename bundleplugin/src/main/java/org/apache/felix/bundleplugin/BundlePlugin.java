@@ -335,7 +335,7 @@ public class BundlePlugin extends AbstractMojo {
 
                 // First grab the external manifest file (if specified)
                 File externalManifestFile = archiveConfig.getManifestFile();
-                if ( null != externalManifestFile )
+                if ( null != externalManifestFile && externalManifestFile.exists() )
                 {
                     InputStream mis = new FileInputStream( externalManifestFile );
                     mavenManifest.read( mis );
