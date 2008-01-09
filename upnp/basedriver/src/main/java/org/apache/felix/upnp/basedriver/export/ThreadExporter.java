@@ -101,13 +101,10 @@ public class ThreadExporter implements Runnable,ServiceListener {
 	public ThreadExporter(RootDeviceExportingQueue queue) throws InvalidSyntaxException {
 	    end=false;
 	    queueRootDevice=queue;
-//		basePath="./tmp/device"; twa: redundant
-//		baseFile = Activator.bc.getDataFile("./tmp/device"); twa: redundant
-//		if(!baseFile.exists())	baseFile.mkdirs(); twa: redundant
 		this.exportedDevices=new Hashtable();
 		setListening(false);
-		UPnP.setEnable(UPnP.USE_ONLY_IPV4_ADDR);		
 	}
+    
 	public void run() {
 		
 		File osgiRoot = Activator.bc.getDataFile("");
@@ -138,75 +135,33 @@ public class ThreadExporter implements Runnable,ServiceListener {
 			if(!getListening()) 
 				setListen();
 			Activator.logger.INFO("[Exporter] Exporting device "+ rootDevice.getProperty(UPnPDevice.FRIENDLY_NAME));
-			/*
-			File xml = new File(baseFile, 
-					Converter.sanitizeFilename(
-						(String) rootDevice.getProperty(UPnPDevice.UDN)
-					)
-				);
-			if (xml == null)
-				continue;			
-			if (!xml.exists())
-				xml.mkdir();
-
-			FileOutputStream fos = null;
-			try {
-				fos = new FileOutputStream(xml.getAbsolutePath()
-						+ File.separator + "desc.xml");
-			} catch (FileNotFoundException e) {				
-				Activator.logger.log(LogService.LOG_ERROR,"Unable to write:" + xml.getAbsolutePath(), e);
-				continue;
-			}
-			if (fos == null)
-				continue;*/
-			/*
+			
+            /*
 			 * I don't know if the exporting should be make default language of the framework
 			 * or without any lanuguages
 			Root r = new Root(rootDevice, context, context
 					.getProperty(Constants.FRAMEWORK_LANGUAGE));
-					*/
+			*/
             
 			synchronized (this) {
-				//Root r = new Root(rootDevice, Activator.bc, null);
-				/*
-				 * Now that I have XML I'm going to exporting device
-				 * so I have to avoid rece condition with deregistration 
-				 * of the same device
-				 */
-				/*
-				try {
-					r.writeXML(fos);
-				} catch (IOException e) {
-					e.printStackTrace();
-					continue;
-				}
-				if(writeXMLService(xml.getAbsolutePath(),r.getRootDevice())){
-					Device d = null;
-					try {
-						d = new Device(xml.getAbsolutePath()
-								+ File.separator + "desc.xml");
-					} catch (InvalidDescriptionException e) {
-						e.printStackTrace();
-					}*/
-					Device d = BuildDevice.createCyberLinkDevice(dn.getReference());
-					if (d != null) {
-						if(!bindInvokes(d,rootDevice)){
-							Activator.logger.DEBUG("Unable to find all the sub device or to set action listener");
-							continue;
-						}
-						ServiceRegistration listenReg = bindSubscribe(d);
-						if(listenReg==null){
-							Activator.logger.DEBUG("Unable to set action listener event listener");
-							continue;
-						}			
-						//makeIcons(r.getRootDevice(),xml.getAbsolutePath());
-						d.start();
-						exportedDevices.put(
-								rootDevice.getProperty(UPnPDevice.UDN),
-								new ExportedDeviceInfo(d,listenReg,dn)
-						);
+				Device d = BuildDevice.createCyberLinkDevice(dn.getReference());
+				if (d != null) {
+					if(!bindInvokes(d,rootDevice)){
+						Activator.logger.DEBUG("Unable to find all the sub device or to set action listener");
+						continue;
 					}
-				//}
+					ServiceRegistration listenReg = bindSubscribe(d);
+					if(listenReg==null){
+						Activator.logger.DEBUG("Unable to set action listener event listener");
+						continue;
+					}			
+					//makeIcons(r.getRootDevice(),xml.getAbsolutePath());
+					d.start();
+					exportedDevices.put(
+							rootDevice.getProperty(UPnPDevice.UDN),
+							new ExportedDeviceInfo(d,listenReg,dn)
+					);
+				}
 			}
 		}
 	}
@@ -274,7 +229,6 @@ public class ThreadExporter implements Runnable,ServiceListener {
 	 */
 	private boolean bindInvokes(Device d, ServiceReference rootDevice) {
 		bindInvoke(d,rootDevice);
-		//Activator.bc.ungetService(rootDevice);
 		ServiceReference[] childs = null;
 		try {
 			childs = Activator.bc.getServiceReferences(
@@ -290,20 +244,12 @@ public class ThreadExporter implements Runnable,ServiceListener {
 		}else if((childs==null)||(childsUDN==null)){
 			return false;
 		}else if(childs.length==childsUDN.length){
-            /*--- your code ---            
-            for (int i = 0; i < childs.length; i++) {
-                if(!bindInvokes(d,childs[i]))
-                    return false;
-            }           
-            ----- your code end ---*/
-            /*--- twa code ---*/
             DeviceList dl = d.getDeviceList();
             for (int i = 0; i < childs.length; i++) {
                 Device dev = (Device)dl.elementAt(i);
                 if(!bindInvokes(dev,childs[i]))
                     return false;
             }
-            /*----- twa code end ---*/
 
 			return true;
 		}else{
@@ -311,48 +257,7 @@ public class ThreadExporter implements Runnable,ServiceListener {
 		}
 			
 	}
-	/*
-	/**
-	 * @param path
-	 *
-	private boolean writeXMLService(String path,org.apache.felix.upnpbase.export.xml.Device d) {
-		Vector v = new Vector();
-		v.add(d);
-		while(v.size()!=0){
-			d=(org.apache.felix.upnpbase.export.xml.Device) v.elementAt(0);
-			v.remove(0);
-			Service[] servs = d.getServices();
-			if(servs==null)
-				continue;
-			for (int i = 0; i < servs.length; i++) {
-				FileOutputStream fos;
-				String xmlPath=path+servs[i].getScpdURL().replace('/',File.separatorChar);
-				if(!Converter.makeParentPath(xmlPath)) return false;
-				try {
-					fos = new FileOutputStream(xmlPath);
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-					return false;
-				}
-				try {
-					servs[i].writeXML(fos);
-					fos.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			
-			org.apache.felix.upnpbase.export.xml.Device[] subs = d.getDevices();
-			if(subs==null){
-				return true;
-			}else{
-				for(int i = 0; i < subs.length;i++){
-					v.add(subs[i]);
-				}
-			}
-		}
-		return true;
-	}*/
+    
 	/**
 	 * This method add an UPnPEventListener Service to the OSGi Framework so that
 	 * the Base Driver can notify all the event listener registered on the CyberLink

@@ -29,6 +29,7 @@ import org.cybergarage.upnp.StateVariable;
 
 import org.osgi.service.upnp.UPnPStateVariable;
 
+import org.apache.felix.upnp.basedriver.Activator;
 import org.apache.felix.upnp.basedriver.util.Converter;
 
 /* 
@@ -37,6 +38,16 @@ import org.apache.felix.upnp.basedriver.util.Converter;
 public class UPnPStateVariableImpl implements UPnPStateVariable {
 
 	private StateVariable variable;
+    
+    private Number max = null;
+    private Number min = null;
+    private Number step = null;
+
+    private String[] values = null;    
+    
+    private Boolean hasMaxMinStep = null;
+    private Boolean hasRangeValues = null;    
+
 	private static Hashtable upnp2javaTable = null;
 	
 	static{
@@ -96,37 +107,30 @@ public class UPnPStateVariableImpl implements UPnPStateVariable {
 	public UPnPStateVariableImpl(StateVariable variable) {
 
 		this.variable = variable;
-	} /*
-	   * (non-Javadoc)
-	   * 
-	   * @see org.osgi.service.upnp.UPnPStateVariable#getName()
-	   */
+	} 
 
+    /**
+     * @see org.osgi.service.upnp.UPnPStateVariable#getName()
+	 */
 	public String getName() {
 		return variable.getName();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see org.osgi.service.upnp.UPnPStateVariable#getJavaDataType()
 	 */
 	public Class getJavaDataType() {
 		return (Class) upnp2javaTable.get(variable.getDataType());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see org.osgi.service.upnp.UPnPStateVariable#getUPnPDataType()
 	 */
 	public String getUPnPDataType() {
 		return variable.getDataType();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see org.osgi.service.upnp.UPnPStateVariable#getDefaultValue()
 	 */
 	public Object getDefaultValue() {
@@ -134,100 +138,132 @@ public class UPnPStateVariableImpl implements UPnPStateVariable {
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see org.osgi.service.upnp.UPnPStateVariable#getAllowedValues()
 	 */
 	public String[] getAllowedValues() {
-		if (variable.getDataType().equals("string")) {
-			AllowedValueList allowedvalue = variable.getAllowedValueList();
-            if (allowedvalue == null) return null;
-			if(allowedvalue.size()==0){
-				return null;
-			} 
-			String[] values = new String[allowedvalue.size()];
-			for (int i = 0; i < allowedvalue.size(); i++) {
-				values[i] = allowedvalue.getAllowedValue(i).getValue();
-			}
-			return values;
-		}
-
-		return null;
+        if(hasRangeValues == null)
+            initValueConstraint();
+        
+        return values;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see org.osgi.service.upnp.UPnPStateVariable#getMinimum()
 	 */
 	public Number getMinimum() {
-		//TODO the same thing for getMaximum
-		AllowedValueRange allowedValueRange = variable.getAllowedValueRange();
-		if(allowedValueRange==null){
-			return null;
-		}
-		String min=allowedValueRange.getMinimum();
-        //francesco 22/10/2005
-        if (min.equals("")) return null;
-		try {
-			return (Number)Converter.parseString(min,getUPnPDataType());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
+        if(hasMaxMinStep == null)
+            initValueConstraint();
+        
+        return min;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see org.osgi.service.upnp.UPnPStateVariable#getMaximum()
 	 */
 	public Number getMaximum() {
-		//TODO I think that this method will be invoked from people that know what is doing
-		AllowedValueRange allowedValueRange = variable.getAllowedValueRange();
-		if(allowedValueRange==null){
-			return null;
-		}
-		String max = allowedValueRange.getMaximum();
-        //francesco 22/10/2005
-        if (max.equals("")) return null;
-		try {
-			return (Number)Converter.parseString(max,getUPnPDataType());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
+        if(hasMaxMinStep == null)
+            initValueConstraint();
+        
+        return max;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+    /**
+     * <b>NOTE:</b>  This type of control caches the value recieved by the Device so if XML changes it doesn't affect the OSGi service
+     * 
+     * @since 0.3
+     */
+    private void initValueConstraint(){
+        if(hasRangeValues != null || hasMaxMinStep != null)
+            return;
+
+        hasRangeValues = Boolean.FALSE;
+        hasMaxMinStep = Boolean.FALSE;
+        
+        final AllowedValueRange allowedValueRange = variable.getAllowedValueRange();
+        final AllowedValueList allowedValueList = variable.getAllowedValueList();
+        
+        if(allowedValueRange != null && allowedValueList != null){
+            Activator.logger.WARNING("Imported device with StateVariable "
+                                     +variable.getName()+" contains either AllowedValueRange and AllowedValueList UPnP doesn't allow it because it. Neither of the restriction will be applied");
+            
+        }else if( allowedValueRange != null ){
+            
+            initMaxMinStep(allowedValueRange);
+            
+        }else if( allowedValueList != null ){
+            
+            initAllowedValues(allowedValueList);
+            
+        }
+    }
+    
+    /**
+     * @param allowedValueList
+     * @since 0.3
+     */
+    private void initAllowedValues(AllowedValueList allowedValueList){
+        //PRE:invoked only by initValueConstraint() thus allowedValueList must not null
+        if (String.class != getJavaDataType()) {
+            Activator.logger.WARNING("Imported device with StateVariable "
+                                     +variable.getName()+" contains AllowedValueList but its UPnP type doesn't allow it because it is +"+getUPnPDataType());            
+            return;
+        }
+
+        if(allowedValueList.size() == 0){
+            return ;
+        } 
+
+        values = new String[allowedValueList.size()];
+        for (int i = 0; i < allowedValueList.size(); i++) {
+            values[i] = allowedValueList.getAllowedValue(i).getValue();
+        }
+    }
+
+    /**
+     * @param allowedValueRange
+     * @since 0.3
+     */
+    private void initMaxMinStep(AllowedValueRange allowedValueRange){
+        //PRE:invoked only by initValueConstraint() thus allowedValueRange must not  be null
+        if(allowedValueRange==null){
+            return;
+        }
+
+        if(!Number.class.isAssignableFrom(getJavaDataType())){
+            Activator.logger.WARNING("Imported device with StateVariable "
+                                     +variable.getName()+" contains AllowedValueRange but its UPnP type doesn't allow it because it is +"+getUPnPDataType());            
+            return;
+        }
+        
+        final String maxStr = allowedValueRange.getMaximum();
+        final String minStr = allowedValueRange.getMinimum();
+        final String stepStr = allowedValueRange.getStep();
+        
+        try{
+            final String type = getUPnPDataType();
+            max = (Number)Converter.parseString(maxStr,type);
+            min = (Number)Converter.parseString(minStr,type);
+            step = (Number)Converter.parseString(stepStr,type);
+        }catch(Exception ex){
+            Activator.logger.WARNING("Imported device with StateVariable "
+                +variable.getName()+" contains an invalid definition for AllowedValueRange");
+        }
+        hasMaxMinStep = Boolean.TRUE;
+    }
+    
+	/**
 	 * @see org.osgi.service.upnp.UPnPStateVariable#getStep()
 	 */
 	public Number getStep() {
-		//TODO same things of getMaxium
-		AllowedValueRange allowedValueRange = variable.getAllowedValueRange();
-		if(allowedValueRange==null){
-			return null;
-		}
-		String step = allowedValueRange.getStep();
-        //francesco 22/10/2005
-        if (step.equals("")) return null;
-		try {
-			return (Number)Converter.parseString(step,getUPnPDataType());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
+        if(hasMaxMinStep == null)
+            initValueConstraint();
+        
+        return step;        
+
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see org.osgi.service.upnp.UPnPStateVariable#sendsEvents()
 	 */
 	public boolean sendsEvents() {

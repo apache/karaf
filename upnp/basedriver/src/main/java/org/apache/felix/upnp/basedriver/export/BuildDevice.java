@@ -171,7 +171,7 @@ public class BuildDevice {
 		UPnPDevice devOSGi = (UPnPDevice) Activator.bc.getService(sr);
 
 		if( devOSGi == null) {	//added by twa to prevent a null pointer exception
-			Activator.logger.WARNING("UPnP Device taht cotains serviceId="
+			Activator.logger.WARNING("UPnP Device that cotains serviceId="
 					+id+" is deregistered from the framework while is exported");
 			return;
 		}
@@ -194,6 +194,7 @@ public class BuildDevice {
 
 			UPnPAction[] actions = services[i].getActions();
 			for (int j = 0; j < actions.length; j++) {
+                boolean valid=true;
 				Action act = new Action(ser.getServiceNode());
 				act.setName(actions[j].getName());
 				ArgumentList al = new ArgumentList();
@@ -201,29 +202,51 @@ public class BuildDevice {
 				String[] names=actions[j].getInputArgumentNames();				
 				if(names!=null){
 					for (int k = 0; k < names.length; k++) {
-						Argument a = new Argument();
+                        UPnPStateVariable variable = actions[j].getStateVariable(names[k]);
+                        if(variable==null){
+                            /*
+                             * //TODO Create a stict and relaxed behavior of the base driver which 
+                             * export as much it can or export only 100% complaint UPnPDevice service 
+                             */
+                            Activator.logger.WARNING(
+                                "UPnP Device that cotains serviceId="+id+" contains the action "
+                                +actions[j].getName()+" with the Input argument "+names[k]
+                                +" not related to any UPnPStateVariable. Thus this action won't be exported");
+                            valid=false;
+                            break;
+                        }
+                        Argument a = new Argument();
 						a.setDirection(Argument.IN);
 						a.setName(names[k]);
-						a.setRelatedStateVariableName(
-								actions[j].getStateVariable(names[k]).getName()
-						);						
+						a.setRelatedStateVariableName(variable.getName());						
 						al.add(a);						
 					}
 				}
 				names=actions[j].getOutputArgumentNames();
-				if(names!=null){
+				if(names!=null && valid){
 					for (int k = 0; k < names.length; k++) {
+                        UPnPStateVariable variable = actions[j].getStateVariable(names[k]);
+                        if(variable==null){
+                            /*
+                             * //TODO Create a stict and relaxed behavior of the base driver which 
+                             * export as much it can or export only 100% complaint UPnPDevice service 
+                             */
+                            Activator.logger.WARNING(
+                                "UPnP Device that cotains serviceId="+id+" contains the action "
+                                +actions[j].getName()+" with the Output argument "+names[k]
+                                +" not related to any UPnPStateVariable. Thus this action won't be exported");                            
+                        }
 						Argument a = new Argument();
 						a.setDirection(Argument.OUT);
 						a.setName(names[k]);
-						a.setRelatedStateVariableName(
-								actions[j].getStateVariable(names[k]).getName()
-						);						
+						a.setRelatedStateVariableName(variable.getName());						
 						al.add(a);						
 					}
 				}
-				act.setArgumentList(al);
-				ser.addAction(act);
+                if(valid) {
+    				act.setArgumentList(al);
+    				ser.addAction(act);
+                }
 			}			
 			
 			UPnPStateVariable[] vars = services[i].getStateVariables();
