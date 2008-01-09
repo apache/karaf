@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -83,6 +84,13 @@ public class BundlePlugin extends AbstractMojo {
      * @parameter expression="${unpackBundle}"
      */
     protected boolean unpackBundle;
+
+    /**
+     * When true, exclude project dependencies from the classpath passed to BND
+     *
+     * @parameter expression="${excludeDependencies}"
+     */
+    protected boolean excludeDependencies;
 
     /**
      * @component
@@ -554,7 +562,16 @@ public class BundlePlugin extends AbstractMojo {
             list.add(new Jar(".", this.getOutputDirectory()));
         }
 
-        Set artifacts = project.getArtifacts();
+        final Set artifacts;
+        if (excludeDependencies)
+        {
+            artifacts = Collections.EMPTY_SET;
+        }
+        else
+        {
+            artifacts = project.getArtifacts();
+        }
+
         for (Iterator it = artifacts.iterator(); it.hasNext();)
         {
             Artifact artifact = (Artifact) it.next();
