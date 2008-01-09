@@ -10,7 +10,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>maven-obr-plugin</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
   
   <name>OBR Maven Plugin</name>
@@ -46,11 +46,4 @@
       <version>2.0.7</version>
     </dependency>
   </dependencies>
-
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/maven-obr-plugin-1.0.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/maven-obr-plugin-1.0.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/maven-obr-plugin-1.0.0</url>
-  </scm>
 </project>
