@@ -342,7 +342,7 @@ public class BundlePlugin extends AbstractMojo {
             }
             catch (Exception e)
             {
-                getLog().warn( "Unable to merge Maven manifest" );
+                getLog().warn( "Unable to merge Maven manifest: " + e.getLocalizedMessage() );
             }
             
             jarFile.getParentFile().mkdirs();
