@@ -53,7 +53,7 @@ public class KXml2SAXParser extends KXmlParser
     * Parser from the reader provided in the constructor, and call
     * the startElement and endElement in a KxmlHandler
     *
-    * @param   reader  The reader
+    * @param   handler  The handler
     * @exception   Exception thrown by the superclass
     */
     public void parseXML( KXml2SAXHandler handler ) throws Exception

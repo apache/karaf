@@ -19,24 +19,11 @@
 package org.apache.felix.scr.impl;
 
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.*;
+import java.util.*;
 
 import org.apache.felix.scr.Reference;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
 
 
@@ -910,7 +897,7 @@ class DependencyManager implements ServiceListener, Reference
                 return true;
             }
         }
-        else if ( implementationObject == null && m_componentManager.getComponentMetadata().isImmediate() == false )
+        else if ( m_componentManager.getComponentMetadata().isImmediate() == false )
         {
             return true;
         }
@@ -1016,7 +1003,7 @@ class DependencyManager implements ServiceListener, Reference
             }
 
         }
-        else if ( implementationObject == null && m_componentManager.getComponentMetadata().isImmediate() == false )
+        else if ( m_componentManager.getComponentMetadata().isImmediate() == false )
         {
             return true;
         }

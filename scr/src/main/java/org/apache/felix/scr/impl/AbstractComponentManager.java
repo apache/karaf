@@ -19,20 +19,11 @@
 package org.apache.felix.scr.impl;
 
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
+import java.lang.reflect.*;
+import java.util.*;
 
 import org.apache.felix.scr.Reference;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.log.LogService;
 
@@ -288,7 +279,6 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     /**
      * Enable this component
      *
-     * @return true if enabling was successful
      */
     private void enableInternal()
     {

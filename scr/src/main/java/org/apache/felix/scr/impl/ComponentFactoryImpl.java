@@ -19,19 +19,12 @@
 package org.apache.felix.scr.impl;
 
 
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.IdentityHashMap;
-import java.util.Map;
+import java.util.*;
 
-import org.apache.felix.scr.Reference;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedServiceFactory;
-import org.osgi.service.component.ComponentConstants;
-import org.osgi.service.component.ComponentFactory;
-import org.osgi.service.component.ComponentInstance;
+import org.osgi.service.component.*;
 import org.osgi.service.log.LogService;
 
 

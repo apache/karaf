@@ -184,7 +184,7 @@ public class ReferenceMetadata
     /**
      * Setter for the unbind method attribute
      *
-     * @param bind
+     * @param unbind
      */
     public void setUnbind( String unbind )
     {
