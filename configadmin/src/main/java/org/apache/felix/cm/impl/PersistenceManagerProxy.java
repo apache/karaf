@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -57,7 +57,6 @@ class PersistenceManagerProxy implements PersistenceManager
 
     /**
      * @param pid
-     * @return
      * @see org.apache.felix.cm.PersistenceManager#exists(java.lang.String)
      */
     public boolean exists( String pid )
@@ -67,7 +66,6 @@ class PersistenceManagerProxy implements PersistenceManager
 
 
     /**
-     * @return
      * @throws IOException
      * @see org.apache.felix.cm.PersistenceManager#getDictionaries()
      */
@@ -80,7 +78,6 @@ class PersistenceManagerProxy implements PersistenceManager
 
     /**
      * @param pid
-     * @return
      * @throws IOException
      * @see org.apache.felix.cm.PersistenceManager#load(java.lang.String)
      */

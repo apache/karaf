@@ -25,7 +25,7 @@ import org.osgi.service.cm.Configuration;
  * The <code>ConfigurationAdapter</code> TODO
  *
  * @author fmeschbe
- * @version $Rev:$, $Date:$
+ * @version $Rev: 527592 $, $Date$
  */
 public class ConfigurationAdapter implements Configuration
 {
@@ -42,7 +42,6 @@ public class ConfigurationAdapter implements Configuration
 
 
     /**
-     * @return
      * @see org.apache.felix.cm.impl.ConfigurationImpl#getPid()
      */
     public String getPid()
@@ -53,7 +52,6 @@ public class ConfigurationAdapter implements Configuration
 
 
     /**
-     * @return
      * @see org.apache.felix.cm.impl.ConfigurationImpl#getFactoryPid()
      */
     public String getFactoryPid()
@@ -64,7 +62,6 @@ public class ConfigurationAdapter implements Configuration
 
 
     /**
-     * @return
      * @see org.apache.felix.cm.impl.ConfigurationImpl#getBundleLocation()
      */
     public String getBundleLocation()
@@ -111,7 +108,6 @@ public class ConfigurationAdapter implements Configuration
 
 
     /**
-     * @return
      * @see org.apache.felix.cm.impl.ConfigurationImpl#getProperties()
      */
     public Dictionary getProperties()
@@ -133,7 +129,6 @@ public class ConfigurationAdapter implements Configuration
 
 
     /**
-     * @return
      * @see org.apache.felix.cm.impl.ConfigurationImpl#hashCode()
      */
     public int hashCode()
@@ -144,7 +139,6 @@ public class ConfigurationAdapter implements Configuration
 
     /**
      * @param obj
-     * @return
      * @see org.apache.felix.cm.impl.ConfigurationImpl#equals(java.lang.Object)
      */
     public boolean equals( Object obj )
@@ -154,7 +148,6 @@ public class ConfigurationAdapter implements Configuration
 
 
     /**
-     * @return
      * @see org.apache.felix.cm.impl.ConfigurationImpl#toString()
      */
     public String toString()
@@ -164,7 +157,7 @@ public class ConfigurationAdapter implements Configuration
 
     /**
      * Checks whether this configuration object has already been deleted.
-     * 
+     *
      * @throws IllegalStateException If this configuration object has been
      *      deleted.
      */

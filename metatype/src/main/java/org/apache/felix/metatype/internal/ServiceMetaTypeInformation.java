@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,24 +19,17 @@
 package org.apache.felix.metatype.internal;
 
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.MetaTypeProvider;
 
 
 /**
  * The <code>ServiceMetaTypeInformation</code> extends the
- * {@link CompoundMetaTypeInformation} adding support to register and unregister
+ * {@link MetaTypeInformationImpl} adding support to register and unregister
  * <code>ManagedService</code>s and <code>ManagedServiceFactory</code>s
  * also implementing the <code>MetaTypeProvider</code> interface.
- * 
+ *
  * @author fmeschbe
  */
 public class ServiceMetaTypeInformation extends MetaTypeInformationImpl implements ServiceListener
@@ -62,7 +55,7 @@ public class ServiceMetaTypeInformation extends MetaTypeInformationImpl implemen
     /**
      * Creates an instance of this class handling services of the given
      * <code>bundle</code>.
-     * 
+     *
      * @param bundleContext The <code>BundleContext</code> used to get and
      *            unget services.
      * @param bundle The <code>Bundle</code> whose services are handled by
@@ -118,7 +111,7 @@ public class ServiceMetaTypeInformation extends MetaTypeInformationImpl implemen
      * Handles service registration and unregistration events ignoring all
      * services not belonging to the <code>Bundle</code> which is handled by
      * this instance.
-     * 
+     *
      * @param event The <code>ServiceEvent</code>
      */
     public void serviceChanged( ServiceEvent event )
@@ -149,7 +142,7 @@ public class ServiceMetaTypeInformation extends MetaTypeInformationImpl implemen
      * <p>
      * If the service is registered, this bundle keeps a reference, which is
      * ungot when the service is unregistered or this bundle is stopped.
-     * 
+     *
      * @param serviceRef The <code>ServiceReference</code> describing the
      *            service to be checked and handled.
      */
@@ -203,7 +196,7 @@ public class ServiceMetaTypeInformation extends MetaTypeInformationImpl implemen
      * <p>
      * If the service is actually unregistered the reference retrieved by the
      * registration method is ungotten.
-     * 
+     *
      * @param serviceRef The <code>ServiceReference</code> describing the
      *            service to be unregistered.
      */

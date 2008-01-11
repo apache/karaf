@@ -378,10 +378,7 @@ public class MetaDataReader
                     eventType = this.parser.getEventType();
                     continue;
                 }
-                else
-                {
-                    this.ignoreElement();
-                }
+                this.ignoreElement();
             }
             else if ( eventType == XmlPullParser.END_TAG )
             {

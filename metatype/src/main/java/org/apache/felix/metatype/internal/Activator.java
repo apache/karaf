@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,15 +21,10 @@ package org.apache.felix.metatype.internal;
 
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.*;
 
 import org.apache.felix.metatype.internal.l10n.BundleResources;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -41,7 +36,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * <code>LogService</code> is available, that service is used, otherwise
  * logging goes to standard output or standard error (in case of level ERROR
  * messages).
- * 
+ *
  * @author fmeschbe
  */
 public class Activator implements BundleActivator
@@ -66,7 +61,7 @@ public class Activator implements BundleActivator
     /**
      * The <code>LogService</code> used to log messages. If a log service is
      * not available in the framework, this field is <code>null</code>.
-     * 
+     *
      * @see #start(BundleContext)
      * @see #serviceChanged(ServiceEvent)
      */
@@ -84,12 +79,12 @@ public class Activator implements BundleActivator
      * Starts this bundle doing the following:
      * <ol>
      * <li>Register as listener for service events concerning the
-     *      <code>LogService</code> (see {@link #serviceChanged(ServiceEvent)}
+     *      <code>LogService</code>
      * <li>Try to get the <code>LogService</code>
      * <li>Registers the <code>MetaTypeService</code> implementation provided
      *      by this bundle.
      * </ol>
-     * 
+     *
      * @param context The <code>BundleContext</code> of this activator's bundle
      */
     public void start( BundleContext context )
@@ -112,9 +107,9 @@ public class Activator implements BundleActivator
      * Stops this bundle by just unregistering as a service listener.
      * <p>
      * The framework will take care of ungetting the <code>LogService</code> and
-     * unregistering the <code>MetaTypeService</code> registered by the 
+     * unregistering the <code>MetaTypeService</code> registered by the
      * {@link #start(BundleContext)} method.
-     * 
+     *
      * @param context The <code>BundleContext</code> of this activator's bundle
      */
     public void stop( BundleContext context )

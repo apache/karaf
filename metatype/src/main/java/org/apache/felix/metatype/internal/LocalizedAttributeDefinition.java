@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -30,7 +30,7 @@ import org.osgi.service.metatype.AttributeDefinition;
  * calls to the underlying {@link AD} localizing the results of the following
  * methods: {@link #getName()}, {@link #getDescription()},
  * {@link #getOptionLabels()}, and {@link #validate(String)}.
- * 
+ *
  * @author fmeschbe
  */
 class LocalizedAttributeDefinition extends LocalizedBase implements AttributeDefinition
@@ -41,7 +41,7 @@ class LocalizedAttributeDefinition extends LocalizedBase implements AttributeDef
 
     /**
      * Creates and instance of this localizing facade.
-     * 
+     *
      * @param ad The {@link AD} to which calls are delegated.
      * @param resources The {@link Resources} used to localize return values of
      * localizable methods.
@@ -54,7 +54,6 @@ class LocalizedAttributeDefinition extends LocalizedBase implements AttributeDef
 
 
     /**
-     * @return
      * @see org.osgi.service.metatype.AttributeDefinition#getCardinality()
      */
     public int getCardinality()
@@ -64,7 +63,6 @@ class LocalizedAttributeDefinition extends LocalizedBase implements AttributeDef
 
 
     /**
-     * @return
      * @see org.osgi.service.metatype.AttributeDefinition#getDefaultValue()
      */
     public String[] getDefaultValue()
@@ -74,7 +72,6 @@ class LocalizedAttributeDefinition extends LocalizedBase implements AttributeDef
 
 
     /**
-     * @return
      * @see org.osgi.service.metatype.AttributeDefinition#getDescription()
      */
     public String getDescription()
@@ -84,7 +81,6 @@ class LocalizedAttributeDefinition extends LocalizedBase implements AttributeDef
 
 
     /**
-     * @return
      * @see org.osgi.service.metatype.AttributeDefinition#getID()
      */
     public String getID()
@@ -94,7 +90,6 @@ class LocalizedAttributeDefinition extends LocalizedBase implements AttributeDef
 
 
     /**
-     * @return
      * @see org.osgi.service.metatype.AttributeDefinition#getName()
      */
     public String getName()
@@ -104,7 +99,6 @@ class LocalizedAttributeDefinition extends LocalizedBase implements AttributeDef
 
 
     /**
-     * @return
      * @see org.osgi.service.metatype.AttributeDefinition#getOptionLabels()
      */
     public String[] getOptionLabels()
@@ -114,7 +108,6 @@ class LocalizedAttributeDefinition extends LocalizedBase implements AttributeDef
 
 
     /**
-     * @return
      * @see org.osgi.service.metatype.AttributeDefinition#getOptionValues()
      */
     public String[] getOptionValues()
@@ -124,7 +117,6 @@ class LocalizedAttributeDefinition extends LocalizedBase implements AttributeDef
 
 
     /**
-     * @return
      * @see org.osgi.service.metatype.AttributeDefinition#getType()
      */
     public int getType()
@@ -135,7 +127,6 @@ class LocalizedAttributeDefinition extends LocalizedBase implements AttributeDef
 
     /**
      * @param value
-     * @return
      * @see org.osgi.service.metatype.AttributeDefinition#validate(java.lang.String)
      */
     public String validate( String value )

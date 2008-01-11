@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,10 +19,7 @@
 package org.apache.felix.metatype;
 
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.felix.metatype.internal.Activator;
 import org.osgi.service.log.LogService;
@@ -32,7 +29,7 @@ import org.osgi.service.metatype.AttributeDefinition;
 /**
  * The <code>AD</code> class represents the <code>AD</code> element of the
  * meta type descriptor.
- * 
+ *
  * @author fmeschbe
  */
 public class AD
@@ -157,11 +154,11 @@ public class AD
      *      localized is returned. If any of the minimum, maximum or option
      *      values is <code>null</code>, the respective value is not checked.
      * </dl>
-     *  
+     *
      * @param valueString The string representation of the value to validate.
-     * 
+     *
      * @return As explained above.
-     * 
+     *
      * @see #VALIDATE_GREATER_THAN_MAXIMUM
      * @see #VALIDATE_LESS_THAN_MINIMUM
      * @see #VALIDATE_NOT_A_VALID_OPTION
@@ -250,7 +247,7 @@ public class AD
 
 
     /**
-     * @param type the type to set
+     * @param typeString the type to set
      */
     public void setType( String typeString )
     {
@@ -268,7 +265,7 @@ public class AD
 
 
     /**
-     * @param optionLabels the optionLabels to set
+     * @param options the options to set
      */
     public void setOptions( Map options )
     {
@@ -464,14 +461,14 @@ public class AD
 
         return null;
     }
-    
+
     private static class ComparableBoolean implements Comparable {
         private boolean value;
 
         ComparableBoolean(String boolValue) {
             value = Boolean.valueOf(boolValue).booleanValue();
         }
-        
+
         public int compareTo(Object obj) {
             ComparableBoolean cb = (ComparableBoolean) obj;
             return (cb.value == value ? 0 : (value ? 1 : -1));

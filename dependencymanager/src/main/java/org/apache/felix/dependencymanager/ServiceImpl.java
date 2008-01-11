@@ -18,31 +18,22 @@
  */
 package org.apache.felix.dependencymanager;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
+import java.lang.reflect.*;
+import java.util.*;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 /**
  * Service implementation.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ServiceImpl implements Service {
     private static final Class[] VOID = new Class[] {};
 	private static final ServiceRegistration NULL_REGISTRATION;
     private static final ServiceStateListener[] SERVICE_STATE_LISTENER_TYPE = new ServiceStateListener[] {};
-    
+
     private final BundleContext m_context;
 
     // configuration (static)
@@ -52,16 +43,16 @@ public class ServiceImpl implements Service {
     private String m_callbackDestroy;
     private Object m_serviceName;
     private Object m_implementation;
-    
+
     // configuration (dynamic, but does not affect state)
     private Dictionary m_serviceProperties;
-    
+
     // configuration (dynamic, and affects state)
     private ArrayList m_dependencies = new ArrayList();
-    
+
     // runtime state (calculated from dependencies)
     private State m_state;
-    
+
     // runtime state (changes because of state changes)
     private Object m_serviceInstance;
     private ServiceRegistration m_registration;
@@ -71,16 +62,16 @@ public class ServiceImpl implements Service {
 
     // work queue
     private final SerialExecutor m_executor = new SerialExecutor();
-    
+
     // instance factory
 	private Object m_instanceFactory;
 	private String m_instanceFactoryCreateMethod;
-	
+
 	// composition manager
 	private Object m_compositionManager;
 	private String m_compositionManagerGetMethod;
 	private Object m_compositionManagerInstance;
-    
+
     public ServiceImpl(BundleContext context) {
     	m_state = new State((List) m_dependencies.clone(), false);
         m_context = context;
@@ -90,7 +81,7 @@ public class ServiceImpl implements Service {
         m_callbackDestroy = "destroy";
         m_implementation = null;
     }
-    
+
     private void calculateStateChanges(final State oldState, final State newState) {
     	if (oldState.isWaitingForRequired() && newState.isTrackingOptional()) {
         	m_executor.enqueue(new Runnable() {
@@ -131,7 +122,7 @@ public class ServiceImpl implements Service {
     	}
     	m_executor.execute();
     }
-    
+
     public Service add(final Dependency dependency) {
     	State oldState, newState;
         synchronized (m_dependencies) {
@@ -171,15 +162,15 @@ public class ServiceImpl implements Service {
             return (List) m_dependencies.clone();
         }
     }
-    
+
     public ServiceRegistration getServiceRegistration() {
         return m_registration;
     }
-    
+
     public Object getService() {
         return m_serviceInstance;
     }
-    
+
     public void dependencyAvailable(final Dependency dependency) {
     	State oldState, newState;
         synchronized (m_dependencies) {
@@ -212,7 +203,7 @@ public class ServiceImpl implements Service {
         	m_executor.execute();
         }
     }
-    
+
     public void dependencyUnavailable(final Dependency dependency) {
     	State oldState, newState;
         synchronized (m_dependencies) {
@@ -279,7 +270,7 @@ public class ServiceImpl implements Service {
 	    m_implementation = implementation;
 	    return this;
 	}
-	
+
 	public synchronized Service setFactory(Object factory, String createMethod) {
 	    ensureNotActive();
 		m_instanceFactory = factory;
@@ -290,14 +281,14 @@ public class ServiceImpl implements Service {
 	public synchronized Service setFactory(String createMethod) {
 		return setFactory(null, createMethod);
 	}
-	
+
 	public synchronized Service setComposition(Object instance, String getMethod) {
 	    ensureNotActive();
 		m_compositionManager = instance;
 		m_compositionManagerGetMethod = getMethod;
 		return this;
 	}
-	
+
 	public synchronized Service setComposition(String getMethod) {
 		return setComposition(null, getMethod);
 	}
@@ -458,7 +449,7 @@ public class ServiceImpl implements Service {
             }
         }
     }
-    
+
     private void startTrackingOptional(State state) {
         Iterator i = state.getDependencies().iterator();
         while (i.hasNext()) {
@@ -498,7 +489,7 @@ public class ServiceImpl implements Service {
             }
         }
     }
-    
+
     private Object createInstance(Class clazz) throws SecurityException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 		Constructor constructor = clazz.getConstructor(VOID);
 		constructor.setAccessible(true);
@@ -511,11 +502,11 @@ public class ServiceImpl implements Service {
 	            // instantiate
 	            try {
 	            	m_serviceInstance = createInstance((Class) m_implementation);
-	            } 
+	            }
 	            catch (InstantiationException e) {
 	                // TODO handle this exception
 	                e.printStackTrace();
-	            } 
+	            }
 	            catch (IllegalAccessException e) {
 	                // TODO handle this exception
 	                e.printStackTrace();
@@ -534,11 +525,11 @@ public class ServiceImpl implements Service {
 		        		if (m_instanceFactory instanceof Class) {
 		        			try {
 								factory = createInstance((Class) m_instanceFactory);
-							} 
+							}
 		        			catch (InstantiationException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
-							} 
+							}
 		        			catch (IllegalAccessException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -555,7 +546,7 @@ public class ServiceImpl implements Service {
 		        		}
 		        	}
 		        	else {
-		        		factory = null; // TODO!!!! where does the factory come from if not explicitly defined
+		        		// TODO!!!! where does the factory come from if not explicitly defined
 		        		// could be the activator?
 		        		// could be ???
 		        	}
@@ -565,7 +556,7 @@ public class ServiceImpl implements Service {
 		        	try {
 						Method m = factory.getClass().getDeclaredMethod(m_instanceFactoryCreateMethod, null);
 						m_serviceInstance = m.invoke(factory, null);
-					} 
+					}
 		        	catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -579,9 +570,9 @@ public class ServiceImpl implements Service {
 	        // configure the bundle context
 	        configureImplementation(BundleContext.class, m_context);
 	        configureImplementation(ServiceRegistration.class, NULL_REGISTRATION);
-    	}        
+    	}
     }
-    
+
     private void configureService(State state) {
         // configure all services (the optional dependencies might be configured
         // as null objects but that's what we want at this point)
@@ -592,7 +583,7 @@ public class ServiceImpl implements Service {
         unconfigureServices(state);
         m_serviceInstance = null;
     }
-    
+
     private void registerService() {
         if (m_serviceName != null) {
             ServiceRegistrationImpl wrapper = new ServiceRegistrationImpl();
@@ -600,10 +591,10 @@ public class ServiceImpl implements Service {
             configureImplementation(ServiceRegistration.class, wrapper);
             // service name can either be a string or an array of strings
             ServiceRegistration registration;
-            
+
             // determine service properties
             Dictionary properties = calculateServiceProperties();
-            
+
             // register the service
             try {
                 if (m_serviceName instanceof String) {
@@ -653,14 +644,14 @@ public class ServiceImpl implements Service {
 			}
 		}
 	}
-    
+
     private void unregisterService() {
         if (m_serviceName != null) {
             m_registration.unregister();
             configureImplementation(ServiceRegistration.class, NULL_REGISTRATION);
         }
     }
-    
+
     private void updateInstance(Dependency dependency) {
         if (dependency instanceof ServiceDependency) {
             ServiceDependency sd = (ServiceDependency) dependency;
@@ -679,12 +670,12 @@ public class ServiceImpl implements Service {
         	}
         }
     }
-    
+
     /**
      * Configure a field in the service implementation. The service implementation
      * is searched for fields that have the same type as the class that was specified
      * and for each of these fields, the specified instance is filled in.
-     * 
+     *
      * @param clazz the class to search for
      * @param instance the instance to fill in
      */
@@ -702,7 +693,7 @@ public class ServiceImpl implements Service {
 					Method m = m_compositionManagerInstance.getClass().getDeclaredMethod(m_compositionManagerGetMethod, null);
             		m.setAccessible(true);
 					instances = (Object[]) m.invoke(m_compositionManager, null);
-				} 
+				}
 	    		catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -735,7 +726,7 @@ public class ServiceImpl implements Service {
 		                            " by classloader " + clazz.getClassLoader() +
 		                            " of type " + serviceClazz.getName() +
 		                            " by classloader " + serviceClazz.getClassLoader() +
-		                            " on " + serviceInstance + 
+		                            " on " + serviceInstance +
 		                            " by classloader " + serviceInstance.getClass().getClassLoader() +
 		                            "\nDumping stack:"
 		                        );
@@ -776,7 +767,7 @@ public class ServiceImpl implements Service {
             }
         }
     }
-    
+
     private void unconfigureServices(State state) {
         Iterator i = state.getDependencies().iterator();
         while (i.hasNext()) {
@@ -807,8 +798,8 @@ public class ServiceImpl implements Service {
     	}
         return (state.isTrackingOptional());
     }
-    
+
     static {
-        NULL_REGISTRATION = (ServiceRegistration) Proxy.newProxyInstance(ServiceImpl.class.getClassLoader(), new Class[] {ServiceRegistration.class}, new DefaultNullObject()); 
+        NULL_REGISTRATION = (ServiceRegistration) Proxy.newProxyInstance(ServiceImpl.class.getClassLoader(), new Class[] {ServiceRegistration.class}, new DefaultNullObject());
     }
 }

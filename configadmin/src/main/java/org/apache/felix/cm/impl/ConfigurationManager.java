@@ -71,7 +71,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
      * The name of the bundle context property defining the location for the
      * configuration files (value is "felix.cm.dir").
      *
-     * @see #FilePersistenceManager(BundleContext)
+     * @see #start(BundleContext)
      */
     public static final String CM_CONFIG_DIR = "felix.cm.dir";
 
@@ -666,7 +666,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         // sort the plugins by their service.cmRanking
         SortedSet pluginSet = new TreeSet( cmRankComp );
-        for ( int i = 0; plugins != null && i < plugins.length; i++ )
+        for ( int i = 0; i < plugins.length; i++ )
         {
             pluginSet.add( plugins[i] );
         }

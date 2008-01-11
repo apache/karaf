@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,11 +22,7 @@ package org.apache.felix.metatype.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import org.apache.felix.metatype.AD;
 import org.apache.felix.metatype.OCD;
@@ -42,7 +38,7 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  * calls to the underlying {@link OCD} localizing the results of the following
  * methods: {@link #getName()}, {@link #getDescription()}, and
  * {@link #getIcon(int)}.
- * 
+ *
  * @author fmeschbe
  */
 public class LocalizedObjectClassDefinition extends LocalizedBase implements ObjectClassDefinition
@@ -55,7 +51,7 @@ public class LocalizedObjectClassDefinition extends LocalizedBase implements Obj
 
     /**
      * Creates and instance of this localizing facade.
-     * 
+     *
      * @param bundle The <code>Bundle</code> providing this object class
      *            definition.
      * @param ocd The {@link OCD} to which calls are delegated.
@@ -72,7 +68,6 @@ public class LocalizedObjectClassDefinition extends LocalizedBase implements Obj
 
     /**
      * @param filter
-     * @return
      * @see org.osgi.service.metatype.ObjectClassDefinition#getAttributeDefinitions(int)
      */
     public AttributeDefinition[] getAttributeDefinitions( int filter )
@@ -109,7 +104,6 @@ public class LocalizedObjectClassDefinition extends LocalizedBase implements Obj
 
 
     /**
-     * @return
      * @see org.osgi.service.metatype.ObjectClassDefinition#getDescription()
      */
     public String getDescription()
@@ -120,7 +114,6 @@ public class LocalizedObjectClassDefinition extends LocalizedBase implements Obj
 
     /**
      * @param size
-     * @return
      * @throws IOException
      * @see org.osgi.service.metatype.ObjectClassDefinition#getIcon(int)
      */
@@ -174,7 +167,6 @@ public class LocalizedObjectClassDefinition extends LocalizedBase implements Obj
 
 
     /**
-     * @return
      * @see org.osgi.service.metatype.ObjectClassDefinition#getID()
      */
     public String getID()
@@ -184,7 +176,6 @@ public class LocalizedObjectClassDefinition extends LocalizedBase implements Obj
 
 
     /**
-     * @return
      * @see org.osgi.service.metatype.ObjectClassDefinition#getName()
      */
     public String getName()
