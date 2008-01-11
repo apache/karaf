@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -24,14 +24,14 @@ import java.util.List;
 import org.apache.felix.eventadmin.impl.tasks.HandlerTask;
 
 /**
- * This class implements the <tt>TaskQueue</tt> and the <tt>TaskProducer</tt> 
+ * This class implements the <tt>TaskQueue</tt> and the <tt>TaskProducer</tt>
  * interface. It makes the tasks added via the queue interface available via the
- * producer interface until the queue is closed and the producer returns 
- * <tt>null</tt>. 
- * 
+ * producer interface until the queue is closed and the producer returns
+ * <tt>null</tt>.
+ *
  * @see org.apache.felix.eventadmin.impl.dispatch.TaskQueue
  * @see org.apache.felix.eventadmin.impl.dispatch.TaskProducer
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class TaskHandler implements TaskQueue, TaskProducer
@@ -41,15 +41,15 @@ public class TaskHandler implements TaskQueue, TaskProducer
 
     // Are we closed?
     private boolean m_closed = false;
-    
+
     /**
      * Append the tasks to this queue in one atomic operation while preserving their
      * order.
-     * 
+     *
      * @param tasks The tasks to append to this queue
-     * 
+     *
      * @throws IllegalStateException in case that this queue is already closed
-     * 
+     *
      * @see org.apache.felix.eventadmin.impl.dispatch.TaskQueue#append(HandlerTask[])
      */
     public void append(final HandlerTask[] tasks)
@@ -60,12 +60,12 @@ public class TaskHandler implements TaskQueue, TaskProducer
             {
                 throw new IllegalArgumentException("Queue is closed");
             }
-            
+
             for (int i = 0; i < tasks.length; i++)
             {
                 m_queue.add(tasks[i]);
             }
-            
+
             if(!m_queue.isEmpty())
             {
                 m_queue.notifyAll();
@@ -75,12 +75,12 @@ public class TaskHandler implements TaskQueue, TaskProducer
 
     /**
      * Push the tasks to this queue in one atomic operation while preserving their
-     * order.  
-     * 
+     * order.
+     *
      * @param tasks The tasks to push to the front of this queue.
-     * 
+     *
      * @throws IllegalStateException in case that this queue is already closed
-     * 
+     *
      * @see org.apache.felix.eventadmin.impl.dispatch.TaskQueue#push(HandlerTask[])
      */
     public void push(final HandlerTask[] tasks)
@@ -91,12 +91,12 @@ public class TaskHandler implements TaskQueue, TaskProducer
             {
                 throw new IllegalArgumentException("Queue is closed");
             }
-            
+
             for (int i = tasks.length -1; i >= 0; i--)
             {
                 m_queue.add(0, tasks[i]);
             }
-            
+
             if(!m_queue.isEmpty())
             {
                 m_queue.notifyAll();
@@ -107,29 +107,29 @@ public class TaskHandler implements TaskQueue, TaskProducer
     /**
      * Close the queue. The given shutdown task will be executed once the queue is
      * empty.
-     * 
+     *
      * @param shutdownTask The task to execute once the queue is empty
-     * 
-     * @see org.apache.felix.eventadmin.impl.dispatch.TaskQueue#close()
+     *
+     * @see org.apache.felix.eventadmin.impl.dispatch.TaskQueue#close(HandlerTask)
      */
     public void close(final HandlerTask shutdownTask)
     {
         synchronized(m_queue)
         {
             m_closed = true;
-            
+
             m_queue.add(shutdownTask);
-            
+
             m_queue.notifyAll();
         }
     }
-    
+
     /**
-     * Block until a new task is ready and is returned or no more tasks will be 
+     * Block until a new task is ready and is returned or no more tasks will be
      * returned.
-     * 
+     *
      * @return The next task or <tt>null</tt> if no more tasks will be produced
-     * 
+     *
      * @see org.apache.felix.eventadmin.impl.dispatch.TaskProducer#next()
      */
     public HandlerTask next()
@@ -146,12 +146,12 @@ public class TaskHandler implements TaskQueue, TaskProducer
                     // Not needed
                 }
             }
-            
+
             if(!m_queue.isEmpty())
             {
                 return (HandlerTask) m_queue.remove(0);
             }
-            
+
             return null;
         }
     }
