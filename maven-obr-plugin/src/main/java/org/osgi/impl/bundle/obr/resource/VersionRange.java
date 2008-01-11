@@ -28,7 +28,7 @@ public class VersionRange implements Comparable {
 	char start = '[';
 	char end = ']';
 
-	static String V = "[0-9]+(\\.[0-9]+(\\.[0-9]+(\\.[a-zA-Z0-9_-]+)?)?)?";
+	static String V = "\\s*[0-9]+(\\.[0-9]+(\\.[0-9]+(\\.[a-zA-Z0-9_-]+)?)?)?\\s*";
 	static Pattern RANGE = Pattern.compile("(\\(|\\[)(" + V + "),(" + V
 			+ ")(\\)|\\])");
 
@@ -37,8 +37,8 @@ public class VersionRange implements Comparable {
 		Matcher m = RANGE.matcher(string);
 		if (m.matches()) {
 			start = m.group(1).charAt(0);
-			low = new Version(m.group(2));
-			high = new Version(m.group(6));
+			low = new Version(m.group(2).trim());
+			high = new Version(m.group(6).trim());
 			end = m.group(10).charAt(0);
 			if (low.compareTo(high) >= 0)
 				throw new IllegalArgumentException(
