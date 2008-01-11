@@ -22,17 +22,17 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
-import aQute.lib.osgi.Analyzer;
+import aQute.lib.osgi.Builder;
 import aQute.lib.osgi.Jar;
 
 /**
- * Extension of {@link aQute.lib.osgi.Analyzer} to handle package versions
+ * Extension of {@link aQute.lib.osgi.Builder} to handle package versions
  * 
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  * @version $Id$
  */
 public class PackageVersionAnalyzer
-    extends Analyzer
+    extends Builder
 {
 
     /**
