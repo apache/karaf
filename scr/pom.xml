@@ -78,7 +78,8 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.felix.scr.impl.*, org.kxml2.io,
-                            org.osgi.util.tracker, org.xmlpull.v1
+                            org.osgi.util.tracker,
+                            org.xmlpull.v1;-split-package:=merge-first
                         </Private-Package>
                         <Import-Package>
                             org.apache.felix.shell;resolution:=optional,*
