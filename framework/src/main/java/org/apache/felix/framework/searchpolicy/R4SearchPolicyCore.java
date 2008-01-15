@@ -221,7 +221,7 @@ public class R4SearchPolicyCore implements ModuleListener
     public Enumeration findResources(IModule module, String name)
         throws ResourceNotFoundException
     {
-        Enumeration urls;
+        Enumeration urls = null;
         // First, try to resolve the originating module.
 // TODO: FRAMEWORK - Consider opimizing this call to resolve, since it is called
 // for each class load.
@@ -271,11 +271,21 @@ public class R4SearchPolicyCore implements ModuleListener
                     try
                     {
                         urls = getClass().getClassLoader().getResources(name);
-                        return urls;
                     }
                     catch (IOException ex)
                     {
-                        return null;
+                        // This shouldn't happen and even if it does, there
+                        // is nothing we can do, so just ignore it.
+                    }
+                    // If this is a java.* package, then always terminate the
+                    // search; otherwise, continue to look locally if not found.
+                    if (m_bootPkgs[i].startsWith("java.") || (urls != null))
+                    {
+                        return urls;
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
             }
@@ -371,6 +381,7 @@ public class R4SearchPolicyCore implements ModuleListener
 
         // Delegate any packages listed in the boot delegation
         // property to the parent class loader.
+        Object result = null;
         for (int i = 0; i < m_bootPkgs.length; i++)
         {
             // A wildcarded boot delegation package will be in the form of "foo.",
@@ -389,9 +400,31 @@ public class R4SearchPolicyCore implements ModuleListener
                     m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
                     || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
                 {
-                    return (isClass)
-                        ? (Object) getClass().getClassLoader().loadClass(name)
-                        : (Object) getClass().getClassLoader().getResource(name);
+                    try
+                    {
+                        result = (isClass)
+                            ? (Object) getClass().getClassLoader().loadClass(name)
+                            : (Object) getClass().getClassLoader().getResource(name);
+                        // If this is a java.* package, then always terminate the
+                        // search; otherwise, continue to look locally if not found.
+                        if (m_bootPkgs[i].startsWith("java.") || (result != null))
+                        {
+                            return result;
+                        }
+                    }
+                    catch (ClassNotFoundException ex)
+                    {
+                        // If this is a java.* package, then always terminate the
+                        // search; otherwise, continue to look locally if not found.
+                        if (m_bootPkgs[i].startsWith("java."))
+                        {
+                            throw ex;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -399,7 +432,7 @@ public class R4SearchPolicyCore implements ModuleListener
         // Look in the module's imports. Note that the search may
         // be aborted if this method throws an exception, otherwise
         // it continues if a null is returned.
-        Object result = searchImports(module, name, isClass);
+        result = searchImports(module, name, isClass);
 
         // If not found, try the module's own class path.
         if (result == null)
