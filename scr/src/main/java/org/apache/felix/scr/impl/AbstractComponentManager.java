@@ -650,8 +650,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             DependencyManager dm = ( DependencyManager ) it.next();
             if ( name.equals( dm.getName() ) )
             {
-                // only return the dm if it has service references
-                return ( dm.size() > 0 ) ? dm : null;
+                return dm;
             }
         }
 
