@@ -110,10 +110,13 @@ public class ContentLoaderImpl implements IContentLoader
 
     public Class getClass(String name)
     {
-        if (m_classLoader == null)
+        synchronized (this) 
         {
-            m_classLoader = m_secureAction.createContentClassLoader(this,
-                m_protectionDomain);
+            if (m_classLoader == null)
+            {
+                m_classLoader = m_secureAction.createContentClassLoader(this,
+                    m_protectionDomain);
+            }
         }
 
         try
