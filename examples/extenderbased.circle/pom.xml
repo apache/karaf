@@ -19,9 +19,10 @@
 <project>
 
   <parent>
-    <groupId>org.apache</groupId>
-    <artifactId>apache</artifactId>
-    <version>4</version>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>1.0.2</version>
+    <relativePath>../../pom/pom.xml</relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
