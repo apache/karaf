@@ -18,30 +18,28 @@
     under the License. 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  
-  <modelVersion>4.0.0</modelVersion>
-  
+    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.apache.felix.commons</groupId>
-        <artifactId>commons-build</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
-        <relativePath>../pom</relativePath>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>felix</artifactId>
+        <version>1.0.2</version>
+        <relativePath>../../pom</relativePath>
     </parent>
     
-  <properties>
-    <pkgArtifactId>xml-apis</pkgArtifactId>
-    <pkgVersion>1.3.4</pkgVersion>
-    <realPkgVersion>1.3.04</realPkgVersion>
-    <pomVersion>0002</pomVersion>
-    <osgiVersion>${pkgVersion}</osgiVersion>
-  </properties>
+    <properties>
+        <pkgArtifactId>xml-apis</pkgArtifactId>
+        <pkgVersion>1.3.4</pkgVersion>
+        <realPkgVersion>1.3.04</realPkgVersion>
+        <pomVersion>0002</pomVersion>
+        <osgiVersion>${pkgVersion}</osgiVersion>
+    </properties>
   
-  <groupId>org.apache.felix.commons</groupId>
-  <artifactId>${pom.groupId}.${pkgArtifactId}</artifactId>
-  <version>${osgiVersion}-${pomVersion}-SNAPSHOT</version>
-  <packaging>bundle</packaging>
+    <groupId>org.apache.felix.commons</groupId>
+    <artifactId>${pom.groupId}.${pkgArtifactId}</artifactId>
+    <version>${osgiVersion}-${pomVersion}-SNAPSHOT</version>
+    <packaging>bundle</packaging>
     
-  <name>${pkgArtifactId} bundle</name>
+    <name>${pkgArtifactId} bundle</name>
     <description>
         This bundle simply wraps ${pkgArtifactId}-${realPkgVersion}.jar.
     </description>
@@ -52,9 +50,9 @@
     </organization>
 
     <scm>
-      <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/commons/xml-apis</connection>
-      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/commons/xml-apis</developerConnection>
-      <url>http://svn.apache.org/viewcvs/felix/trunk/commons/xml-apis</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/commons/xml-apis</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/commons/xml-apis</developerConnection>
+        <url>http://svn.apache.org/viewcvs/felix/trunk/commons/xml-apis</url>
     </scm>
 
     <dependencies>

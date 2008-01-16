@@ -30,8 +30,6 @@
     </description>
 
     <modules>
-        <!-- parent pom for all contained modules -->
-        <module>pom</module>
         <!-- The bundles: -->
         <module>activation</module>
         <module>antlr</module>
