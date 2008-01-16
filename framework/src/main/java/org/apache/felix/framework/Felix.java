@@ -712,6 +712,22 @@ public class Felix extends FelixBundle
             archives = null;
         }
 
+        // create the system bundle that is responsible for providing specific 
+        // container related services.
+        IContentLoader cl = m_extensionManager;
+        cl.setSearchPolicy(
+            new R4SearchPolicy(
+                m_policyCore, m_systemBundleInfo.getCurrentModule()));
+        m_factory.setContentLoader(
+            m_systemBundleInfo.getCurrentModule(),
+            cl);
+        m_factory.setSecurityContext(
+            m_systemBundleInfo.getCurrentModule(),
+            getClass().getProtectionDomain());
+
+        m_installedBundleMap.put(
+            m_systemBundleInfo.getLocation(), this);
+        
         FelixBundle bundle = null;
 
         // Now install all cached bundles.
@@ -784,25 +800,10 @@ ex.printStackTrace();
             }
         }
 
-        // Now that the cached bundles are reloaded, create the system
-        // bundle that is responsible for providing specific container
-        // related services and activating all custom framework activators.
+        // Now that the cached bundles are reloaded, 
+        // activating all custom framework activators.
         try
         {
-            IContentLoader cl = m_extensionManager;
-            cl.setSearchPolicy(
-                new R4SearchPolicy(
-                    m_policyCore, m_systemBundleInfo.getCurrentModule()));
-            m_factory.setContentLoader(
-                m_systemBundleInfo.getCurrentModule(),
-                cl);
-            m_factory.setSecurityContext(
-                m_systemBundleInfo.getCurrentModule(),
-                getClass().getProtectionDomain());
-
-            m_installedBundleMap.put(
-                m_systemBundleInfo.getLocation(), this);
-
             // Manually resolve the System Bundle, which will cause its
             // state to be set to RESOLVED.
             try
@@ -822,8 +823,10 @@ ex.printStackTrace();
 
             // Create the bundle context for the system bundle and
             // then activate it.
-            m_systemBundleInfo.setBundleContext(new BundleContextImpl(m_logger, this, this));
-            Felix.m_secureAction.startActivator(m_systemBundleInfo.getActivator(), m_systemBundleInfo.getBundleContext());
+            m_systemBundleInfo.setBundleContext(
+                new BundleContextImpl(m_logger, this, this));
+            Felix.m_secureAction.startActivator(m_systemBundleInfo.getActivator(), 
+                m_systemBundleInfo.getBundleContext());
         }
         catch (Throwable ex)
         {
@@ -843,7 +846,8 @@ ex.printStackTrace();
         try
         {
             StartLevel sl = (StartLevel) getService(
-                getBundle(0),getServiceReferences((FelixBundle) getBundle(0), StartLevel.class.getName(), null, true)[0]);
+                getBundle(0),getServiceReferences((FelixBundle) getBundle(0), 
+                StartLevel.class.getName(), null, true)[0]);
             if (sl instanceof StartLevelImpl)
             {
                 ((StartLevelImpl) sl).setStartLevelAndWait(startLevel);
