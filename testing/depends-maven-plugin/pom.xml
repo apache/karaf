@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.runtime.testing</groupId>
+        <groupId>org.apache.servicemix.kernel.testing</groupId>
         <artifactId>testing</artifactId>
-        <version>1.0-m2-SNAPSHOT</version>
+        <version>1.0-m1-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.runtime.testing</groupId>
+    <groupId>org.apache.servicemix.kernel.testing</groupId>
     <artifactId>depends-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>1.0-m2-SNAPSHOT</version>
-    <name>ServiceMix Runtime :: Testing - Depends plugin</name>
+    <version>1.0-m1-SNAPSHOT</version>
+    <name>ServiceMix Kernel :: Testing - Depends plugin</name>
 
     <dependencies>
         <dependency>

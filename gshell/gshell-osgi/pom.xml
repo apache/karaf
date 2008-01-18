@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.runtime.gshell</groupId>
+        <groupId>org.apache.servicemix.kernel.gshell</groupId>
         <artifactId>gshell</artifactId>
-        <version>1.0-m2-SNAPSHOT</version>
+        <version>1.0-m1-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.runtime.gshell</groupId>
-    <artifactId>org.apache.servicemix.runtime.gshell.osgi</artifactId>
+    <groupId>org.apache.servicemix.kernel.gshell</groupId>
+    <artifactId>org.apache.servicemix.kernel.gshell.osgi</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0-m2-SNAPSHOT</version>
-    <name>ServiceMix Runtime :: GShell OSGi Commands</name>
+    <version>1.0-m1-SNAPSHOT</version>
+    <name>ServiceMix Kernel :: GShell OSGi Commands</name>
 
     <description>
         Provides the OSGi GShell commands
@@ -39,9 +39,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.servicemix.runtime.gshell</groupId>
-            <artifactId>org.apache.servicemix.runtime.gshell.core</artifactId>
-            <version>1.0-m2-SNAPSHOT</version>
+            <groupId>org.apache.servicemix.kernel.gshell</groupId>
+            <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+            <version>1.0-m1-SNAPSHOT</version>
         </dependency>
 
         <dependency>

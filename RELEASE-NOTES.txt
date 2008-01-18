@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-                  Apache ServiceMix Runtime 1.0-m2
+                  Apache ServiceMix Kernel 1.0-m2
                   ================================
 
-See the README.txt file for more general informations about ServiceMix Runtime.
+See the README.txt file for more general informations about ServiceMix Kernel.
 
-This is the second milestone of ServiceMix Runtime.  All the features are not 
+This is the second milestone of ServiceMix Kernel.  All the features are not 
 implemented yet and things may be changed until the final 1.0 release.
 Please refer to the web site for more informations and feel free to ask any
 questions on the ServiceMix mailing lists or simply to provide feedback 
@@ -31,7 +31,7 @@ Changes since 1.0-m1
   *
 
 
-Thanks you for downloading ServiceMix Runtime.  Enjoy !
+Thanks you for downloading ServiceMix Kernel.  Enjoy !
 
 The ServiceMix Team
 http://servicemix.apache.org/team.html

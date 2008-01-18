@@ -22,15 +22,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-      <groupId>org.apache.servicemix.runtime</groupId>
-      <artifactId>runtime</artifactId>
-      <version>1.0-m2-SNAPSHOT</version>
+      <groupId>org.apache.servicemix.kernel</groupId>
+      <artifactId>kernel</artifactId>
+      <version>1.0-m1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.apache.servicemix.runtime.main</artifactId>
+    <artifactId>org.apache.servicemix.kernel.main</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0-m2-SNAPSHOT</version>
-    <name>ServiceMix Runtime :: Main</name>
+    <version>1.0-m1-SNAPSHOT</version>
+    <name>ServiceMix Kernel :: Main</name>
 
     <dependencies>
         <dependency>
@@ -82,13 +82,13 @@
                 <configuration>
                     <instructions>
                         <_donotcopy>(CVS|.svn|config.properties)</_donotcopy>
-                        <Main-Class>org.apache.servicemix.runtime.main.Main</Main-Class>
+                        <Main-Class>org.apache.servicemix.kernel.main.Main</Main-Class>
                         <Bundle-Name>Apache ServiceMix</Bundle-Name>
                         <Bundle-Description>OSGi R4 framework.</Bundle-Description>
 			            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.servicemix.runtime.main.spi.*;version=${pom.version}</Export-Package>
+                        <Export-Package>org.apache.servicemix.kernel.main.spi.*;version=${pom.version}</Export-Package>
                         <Private-Package>
-                            org.apache.servicemix.runtime.main,
+                            org.apache.servicemix.kernel.main,
                             org.apache.felix.moduleloader.*,
                             org.apache.felix.framework.*,
                             org.osgi.framework,
@@ -96,7 +96,8 @@
                             org.osgi.service.startlevel,
                             org.osgi.service.event,
                             org.osgi.service.url,
-                            org.osgi.util.tracker
+                            org.osgi.util.tracker,
+                            META-INF
                         </Private-Package>
                         <Import-Package>!*</Import-Package>
                         <Include-Resource>src/main/resources/</Include-Resource>

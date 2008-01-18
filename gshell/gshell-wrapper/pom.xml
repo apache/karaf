@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.runtime.gshell</groupId>
+        <groupId>org.apache.servicemix.kernel.gshell</groupId>
         <artifactId>gshell</artifactId>
-        <version>1.0-m2-SNAPSHOT</version>
+        <version>1.0-m1-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.runtime.gshell</groupId>
-    <artifactId>org.apache.servicemix.runtime.gshell.wrapper</artifactId>
+    <groupId>org.apache.servicemix.kernel.gshell</groupId>
+    <artifactId>org.apache.servicemix.kernel.gshell.wrapper</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0-m2-SNAPSHOT</version>
-    <name>ServiceMix Runtime :: GShell Service Wrapper</name>
+    <version>1.0-m1-SNAPSHOT</version>
+    <name>ServiceMix Kernel :: GShell Service Wrapper</name>
 
     <description>
         Provides the Service Wrapper GShell integration
@@ -39,21 +39,21 @@
 
     <properties>
         <gshell.osgi.import>
-            org.apache.servicemix.runtime.main.spi.*;resolution:=optional,
+            org.apache.servicemix.kernel.main.spi.*;resolution:=optional,
             org.apache.geronimo.gshell*,
         </gshell.osgi.import>
         <gshell.osgi.export>
         </gshell.osgi.export>
         <gshell.osgi.private>
-          org.apache.servicemix.runtime.gshell.wrapper.*,
+          org.apache.servicemix.kernel.gshell.wrapper.*,
         </gshell.osgi.private>
     </properties>
 
     <dependencies>
       <dependency>
-          <groupId>org.apache.servicemix.runtime.gshell</groupId>
-          <artifactId>org.apache.servicemix.runtime.gshell.core</artifactId>
-          <version>1.0-m2-SNAPSHOT</version>
+          <groupId>org.apache.servicemix.kernel.gshell</groupId>
+          <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+          <version>1.0-m1-SNAPSHOT</version>
       </dependency>
 
       <dependency>
@@ -100,7 +100,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.servicemix.runtime.gshell.wrapper.*;version=${project.version}</Export-Package>
+                        <Export-Package>org.apache.servicemix.kernel.gshell.wrapper.*;version=${project.version}</Export-Package>
                         <Import-Package>*</Import-Package>
                         <Private-Package>!*</Private-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>

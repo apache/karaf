@@ -22,15 +22,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-      <groupId>org.apache.servicemix.runtime</groupId>
-      <artifactId>runtime</artifactId>
-      <version>1.0-m2-SNAPSHOT</version>
+      <groupId>org.apache.servicemix.kernel</groupId>
+      <artifactId>kernel</artifactId>
+      <version>1.0-m1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.apache.servicemix.runtime.filemonitor</artifactId>
+  <artifactId>org.apache.servicemix.kernel.filemonitor</artifactId>
   <packaging>bundle</packaging>
-  <version>1.0-m2-SNAPSHOT</version>
-  <name>ServiceMix Runtime :: File Monitor</name>
+  <version>1.0-m1-SNAPSHOT</version>
+  <name>ServiceMix Kernel :: File Monitor</name>
 
   <description>This bundle monitors the deploy directory for new OSGi bundles in jar form, expanded form or for configuration file changes and undeploys/redeploys them</description>
 
@@ -44,7 +44,11 @@
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.ant-${ant.version}</artifactId>
-      <version>1.0-m2-SNAPSHOT</version>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+       <groupId>commons-logging</groupId>
+       <artifactId>commons-logging</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -104,7 +108,7 @@
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Export-Package>${pom.artifactId}</Export-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
-            <Bundle-Activator>org.apache.servicemix.runtime.filemonitor.FileMonitorActivator</Bundle-Activator>
+            <Bundle-Activator>org.apache.servicemix.kernel.filemonitor.FileMonitorActivator</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>

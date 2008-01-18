@@ -22,27 +22,27 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.runtime</groupId>
-        <artifactId>runtime</artifactId>
-        <version>1.0-m2-SNAPSHOT</version>
+        <groupId>org.apache.servicemix.kernel</groupId>
+        <artifactId>kernel</artifactId>
+        <version>1.0-m1-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.runtime</groupId>
-    <artifactId>apache-servicemix-runtime</artifactId>
+    <groupId>org.apache.servicemix.kernel</groupId>
+    <artifactId>apache-servicemix-kernel</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-m2-SNAPSHOT</version>
-    <name>ServiceMix Runtime :: Assembly</name>
+    <version>1.0-m1-SNAPSHOT</version>
+    <name>ServiceMix Kernel :: Assembly</name>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.servicemix.runtime</groupId>
-            <artifactId>org.apache.servicemix.runtime.main</artifactId>
-            <version>1.0-m2-SNAPSHOT</version>
+            <groupId>org.apache.servicemix.kernel</groupId>
+            <artifactId>org.apache.servicemix.kernel.main</artifactId>
+            <version>1.0-m1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.runtime</groupId>
-            <artifactId>org.apache.servicemix.runtime.filemonitor</artifactId>
-            <version>1.0-m2-SNAPSHOT</version>
+            <groupId>org.apache.servicemix.kernel</groupId>
+            <artifactId>org.apache.servicemix.kernel.filemonitor</artifactId>
+            <version>1.0-m1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.osgi</groupId>
@@ -90,49 +90,49 @@
           <version>${felix.bundlerepository.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.apache.servicemix.runtime.gshell</groupId>
-          <artifactId>org.apache.servicemix.runtime.gshell.core</artifactId>
-          <version>1.0-m2-SNAPSHOT</version>
+          <groupId>org.apache.servicemix.kernel.gshell</groupId>
+          <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+          <version>1.0-m1-SNAPSHOT</version>
       </dependency>
       <dependency>
-          <groupId>org.apache.servicemix.runtime.gshell</groupId>
-          <artifactId>org.apache.servicemix.runtime.gshell.obr</artifactId>
-          <version>1.0-m2-SNAPSHOT</version>
+          <groupId>org.apache.servicemix.kernel.gshell</groupId>
+          <artifactId>org.apache.servicemix.kernel.gshell.obr</artifactId>
+          <version>1.0-m1-SNAPSHOT</version>
       </dependency>
       <dependency>
-          <groupId>org.apache.servicemix.runtime.gshell</groupId>
-          <artifactId>org.apache.servicemix.runtime.gshell.osgi</artifactId>
-          <version>1.0-m2-SNAPSHOT</version>
+          <groupId>org.apache.servicemix.kernel.gshell</groupId>
+          <artifactId>org.apache.servicemix.kernel.gshell.osgi</artifactId>
+          <version>1.0-m1-SNAPSHOT</version>
       </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.runtime.gshell</groupId>
-            <artifactId>org.apache.servicemix.runtime.gshell.features</artifactId>
-            <version>1.0-m2-SNAPSHOT</version>
+            <groupId>org.apache.servicemix.kernel.gshell</groupId>
+            <artifactId>org.apache.servicemix.kernel.gshell.features</artifactId>
+            <version>1.0-m1-SNAPSHOT</version>
         </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.mina-${mina.version}</artifactId>
-          <version>1.0-m2-SNAPSHOT</version>
+          <version>1.0-m1-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.xstream-${xstream.version}</artifactId>
-          <version>1.0-m2-SNAPSHOT</version>
+          <version>1.0-m1-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.aopalliance-${aopalliance.version}</artifactId>
-          <version>1.0-m2-SNAPSHOT</version>
+          <version>1.0-m1-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.asm-${asm.version}</artifactId>
-          <version>1.0-m2-SNAPSHOT</version>
+          <version>1.0-m1-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.cglib-${cglib.version}</artifactId>
-          <version>1.0-m2-SNAPSHOT</version>
+          <version>1.0-m1-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.felix</groupId>
@@ -217,8 +217,8 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.apache.servicemix.runtime</groupId>
-                                    <artifactId>org.apache.servicemix.runtime.main</artifactId>
+                                    <groupId>org.apache.servicemix.kernel</groupId>
+                                    <artifactId>org.apache.servicemix.kernel.main</artifactId>
                                     <version>${pom.version}</version>
                                     <outputDirectory>target/dependencies</outputDirectory>
                                     <destFileName>servicemix.jar</destFileName>

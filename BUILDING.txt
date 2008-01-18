@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-Building Apache ServiceMix Runtime
+Building Apache ServiceMix Kernel
 ===================================
 
 Initial Setup
@@ -36,13 +36,13 @@ Initial Setup
 Building
 --------
 
-1) Change to the top level directory of Apache ServiceMix Runtime source distribution.
+1) Change to the top level directory of Apache ServiceMix Kernel source distribution.
 2) Run
 	$> mvn.
-   This will compile Apache ServiceMix Runtime and run all of the tests in the 
-   Apache ServiceMix Runtime source distribution. Alternatively, you can run
+   This will compile Apache ServiceMix Kernel and run all of the tests in the 
+   Apache ServiceMix Kernel source distribution. Alternatively, you can run
          $> mvn -Pfastinstall.
-   This will compile Apache ServiceMix Runtime without running the tests and takes less
+   This will compile Apache ServiceMix Kernel without running the tests and takes less
    time to build.
    Depending on the load of remote Maven 2.0 repositories, you may have 
    to run "mvn" several times until the required dependencies are 

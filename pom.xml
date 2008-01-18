@@ -27,11 +27,11 @@
     <version>4</version>
   </parent>
 
-  <groupId>org.apache.servicemix.runtime</groupId>
-  <artifactId>runtime</artifactId>
+  <groupId>org.apache.servicemix.kernel</groupId>
+  <artifactId>kernel</artifactId>
   <packaging>pom</packaging>
-  <version>1.0-m2-SNAPSHOT</version>
-  <name>Apache ServiceMix Runtime</name>
+  <version>1.0-m1-SNAPSHOT</version>
+  <name>Apache ServiceMix Kernel</name>
 
   <modules>
     <module>bundles</module>
@@ -43,9 +43,9 @@
   </modules>
 
   <scm>
-      <connection>scm:svn:http://svn.apache.org/repos/asf/servicemix/smx4/runtime/trunk</connection>
-      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/servicemix/smx4/runtime/trunk</developerConnection>
-      <url>http://svn.apache.org/viewvc/servicemix/smx4/runtime/trunk/</url>
+      <connection>scm:svn:http://svn.apache.org/repos/asf/servicemix/smx4/kernel/trunk</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/servicemix/smx4/kernel/trunk</developerConnection>
+      <url>http://svn.apache.org/viewvc/servicemix/smx4/kernel/trunk/</url>
 
   </scm>
   <issueManagement>

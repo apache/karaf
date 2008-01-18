@@ -22,16 +22,16 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-      <groupId>org.apache.servicemix.runtime.testing</groupId>
+      <groupId>org.apache.servicemix.kernel.testing</groupId>
       <artifactId>testing</artifactId>
-      <version>1.0-m2-SNAPSHOT</version>
+      <version>1.0-m1-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.apache.servicemix.runtime.testing</groupId>
-  <artifactId>org.apache.servicemix.runtime.testing.support</artifactId>
+  <groupId>org.apache.servicemix.kernel.testing</groupId>
+  <artifactId>org.apache.servicemix.kernel.testing.support</artifactId>
   <packaging>bundle</packaging>
-  <version>1.0-m2-SNAPSHOT</version>
-  <name>ServiceMix Runtime :: Testing - Support</name>
+  <version>1.0-m1-SNAPSHOT</version>
+  <name>ServiceMix Kernel :: Testing - Support</name>
 
   <dependencies>
       <dependency>
@@ -123,17 +123,17 @@
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.aopalliance-${aopalliance.version}</artifactId>
-          <version>1.0-m2-SNAPSHOT</version>
+          <version>1.0-m1-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.asm-${asm.version}</artifactId>
-          <version>1.0-m2-SNAPSHOT</version>
+          <version>1.0-m1-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.junit-${junit.version}</artifactId>
-          <version>1.0-m2-SNAPSHOT</version>
+          <version>1.0-m1-SNAPSHOT</version>
       </dependency>
   </dependencies>
 

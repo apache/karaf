@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-Welcome to Apache ServiceMix Runtime 
+Welcome to Apache ServiceMix Kernel 
 ====================================
-Apache ServiceMix Runtime is a small OSGi based runtime which provides a 
+Apache ServiceMix Kernel is a small OSGi based kernel which provides a 
 lightweight container onto which various bundles can be deployed.
 
 The following features are included:
@@ -31,15 +31,15 @@ The following features are included:
 
 Getting Started
 ===============
-For an Apache ServiceMix Runtime source distribution, please read 
-BUILDING.txt for instructions on building Apache ServiceMix Runtime. 
+For an Apache ServiceMix Kernel source distribution, please read 
+BUILDING.txt for instructions on building Apache ServiceMix Kernel. 
 
-For an Apache ServiceMix Runtime binary distribution, please read 
+For an Apache ServiceMix Kernel binary distribution, please read 
 RELEASE-NOTES.txt for installation instructions and list of supported 
 and unsupported features.
 
 Alternatively, you can also find out how to get started here:
-    http://servicemix.apache.org/runtime/home.html
+    http://servicemix.apache.org/kernel/home.html
 
 If you need more help try talking to us on our mailing lists
     http://servicemix.apache.org/mailing-lists.html

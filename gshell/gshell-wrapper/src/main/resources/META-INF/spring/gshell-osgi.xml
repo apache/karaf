@@ -30,7 +30,7 @@
   http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
     <!-- wrapper commands -->
-    <bean id="install" class="org.apache.servicemix.runtime.gshell.wrapper.InstallCommand" />
+    <bean id="install" class="org.apache.servicemix.kernel.gshell.wrapper.InstallCommand" />
     
     <osgi:service ref="install" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>

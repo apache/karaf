@@ -106,7 +106,7 @@
 
                 <!-- PAX config -->
                 <include>org.apache.felix:org.apache.felix.configadmin</include>
-                <include>org.apache.servicemix.runtime:org.apache.servicemix.runtime.filemonitor</include>
+                <include>org.apache.servicemix.kernel:org.apache.servicemix.kernel.filemonitor</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.ant-${ant.version}</include>
 
                 <!-- Spring OSGi -->
@@ -124,14 +124,14 @@
                 <include>org.apache.geronimo.specs:geronimo-stax-api_1.0_spec</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.mina-${mina.version}</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.xstream-${xstream.version}</include>
-                <include>org.apache.servicemix.runtime.gshell:org.apache.servicemix.runtime.gshell.core</include>
-                <include>org.apache.servicemix.runtime.gshell:org.apache.servicemix.runtime.gshell.osgi</include>
+                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.core</include>
+                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.osgi</include>
 
 		        <!-- OBR + GShell command -->
                 <include>org.apache.felix:org.apache.felix.bundlerepository</include>
                 <include>org.ops4j.pax.runner:pax-runner-handler-mvn</include>
-                <include>org.apache.servicemix.runtime.gshell:org.apache.servicemix.runtime.gshell.obr</include>
-                <include>org.apache.servicemix.runtime.gshell:org.apache.servicemix.runtime.gshell.features</include>
+                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.obr</include>
+                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.features</include>
 
             </includes>
         </dependencySet>

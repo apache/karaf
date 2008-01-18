@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.runtime.gshell</groupId>
+        <groupId>org.apache.servicemix.kernel.gshell</groupId>
         <artifactId>gshell</artifactId>
-        <version>1.0-m2-SNAPSHOT</version>
+        <version>1.0-m1-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.runtime.gshell</groupId>
-    <artifactId>org.apache.servicemix.runtime.gshell.features</artifactId>
+    <groupId>org.apache.servicemix.kernel.gshell</groupId>
+    <artifactId>org.apache.servicemix.kernel.gshell.features</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0-m2-SNAPSHOT</version>
-    <name>ServiceMix Runtime :: GShell Features</name>
+    <version>1.0-m1-SNAPSHOT</version>
+    <name>ServiceMix Kernel :: GShell Features</name>
 
     <description>
         Provides Features in GShell
@@ -52,15 +52,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.servicemix.runtime.gshell</groupId>
-            <artifactId>org.apache.servicemix.runtime.gshell.core</artifactId>
-            <version>1.0-m2-SNAPSHOT</version>
+            <groupId>org.apache.servicemix.kernel.gshell</groupId>
+            <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+            <version>1.0-m1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.servicemix.runtime.gshell</groupId>
-            <artifactId>org.apache.servicemix.runtime.gshell.obr</artifactId>
-            <version>1.0-m2-SNAPSHOT</version>
+            <groupId>org.apache.servicemix.kernel.gshell</groupId>
+            <artifactId>org.apache.servicemix.kernel.gshell.obr</artifactId>
+            <version>1.0-m1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
