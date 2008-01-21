@@ -55,7 +55,7 @@ public class BundleAllPluginTest
         plugin.setBasedir( basedir );
         File buildDirectory = new File( basedir, "target" );
         plugin.setBuildDirectory( buildDirectory.getPath() );
-        File outputDirectory = new File( buildDirectory, "classes" );
+        File outputDirectory = new File( buildDirectory, "test-classes" );
         plugin.setOutputDirectory( outputDirectory );
         plugin.setMaven2OsgiConverter( new DefaultMaven2OsgiConverter() );
     }
@@ -81,7 +81,7 @@ public class BundleAllPluginTest
     public void testNoReBundling()
         throws Exception
     {
-        File testFile = getTestFile( "target/classes/org.apache.maven.maven-model_1.0.0.0.jar" );
+        File testFile = getTestFile( "target/test-classes/org.apache.maven.maven-model_1.0.0.0.jar" );
         if ( testFile.exists() )
         {
             testFile.delete();
