@@ -38,10 +38,10 @@ Building
 
 1) Change to the top level directory of Apache ServiceMix Kernel source distribution.
 2) Run
-	$> mvn.
+         $> mvn
    This will compile Apache ServiceMix Kernel and run all of the tests in the 
    Apache ServiceMix Kernel source distribution. Alternatively, you can run
-         $> mvn -Pfastinstall.
+         $> mvn -Pfastinstall
    This will compile Apache ServiceMix Kernel without running the tests and takes less
    time to build.
    Depending on the load of remote Maven 2.0 repositories, you may have 
