@@ -80,7 +80,7 @@
       <mina.version>1.1.6-r602102</mina.version>
       <pax.logging.version>1.0-RC2</pax.logging.version>
       <pax.runner.version>0.5.5</pax.runner.version>
-      <spring.osgi.version>1.0-rc1</spring.osgi.version>
+      <spring.osgi.version>1.0-rc2</spring.osgi.version>
       <spring.version>2.5</spring.version>
       <xstream.version>1.2.2</xstream.version>
   </properties>
@@ -97,6 +97,12 @@
            <id>servicemix</id>
            <name>ServiceMix Repository</name>
            <url>http://svn.apache.org/repos/asf/servicemix/m2-repo</url>
+       </repository>
+       <!-- Spring Milestone repo -->
+       <repository>
+           <id>spring-milestone</id>
+           <name>Spring Milestone Repository</name>
+           <url>http://s3.amazonaws.com/maven.springframework.org/milestone</url>
        </repository>
    </repositories>
 
