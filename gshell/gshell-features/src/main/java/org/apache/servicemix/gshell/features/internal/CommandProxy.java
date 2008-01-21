@@ -19,6 +19,7 @@ package org.apache.servicemix.gshell.features.internal;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -76,25 +77,14 @@ public class CommandProxy extends ObrCommandSupport {
     protected void deploy(RepositoryAdmin admin) throws Exception {
         List<String> bundles = Arrays.asList(feature.getBundles());
         int idx0 = -1;
-        int idx1 = -1;
         while (++idx0 < bundles.size()) {
             if (bundles.get(idx0).startsWith("obr:")) {
-                if (idx1 < 0) {
-                    idx1 = idx0;
-                }
-                bundles.set(idx0, bundles.get(idx0).substring("obr:".length()));
+                String[] b = bundles.get(idx0).substring("obr:".length()).split(",");
+                doDeploy(admin, Arrays.asList(b), true);
             } else {
-                if (idx1 >= 0) {
-                    doDeploy(admin, bundles.subList(idx1, idx0), true);
-                    idx1 = -1;
-                } else {
-                    Bundle bundle = getBundleContext().installBundle(bundles.get(idx0), null);
-                    bundle.start();
-                }
+                Bundle bundle = getBundleContext().installBundle(bundles.get(idx0), null);
+                bundle.start();
             }
-        }
-        if (idx1 >= 0) {
-            doDeploy(admin, bundles.subList(idx1, idx0), true);
         }
     }
 
