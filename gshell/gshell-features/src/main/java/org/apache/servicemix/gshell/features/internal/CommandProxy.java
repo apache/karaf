@@ -19,12 +19,14 @@ package org.apache.servicemix.gshell.features.internal;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.geronimo.gshell.command.Command;
 import org.apache.geronimo.gshell.obr.ObrCommandSupport;
 import org.apache.geronimo.gshell.support.OsgiCommandSupport;
 import org.apache.servicemix.gshell.features.Feature;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.obr.RepositoryAdmin;
@@ -67,7 +69,32 @@ public class CommandProxy extends ObrCommandSupport {
         if (c == 'y' || c == 'Y') {
             io.out.println("Installing feature.  Please wait...");
             registration.unregister();
-            doDeploy(admin, Arrays.asList(feature.getBundles()), true);
+            deploy(admin);
+        }
+    }
+
+    protected void deploy(RepositoryAdmin admin) throws Exception {
+        List<String> bundles = Arrays.asList(feature.getBundles());
+        int idx0 = -1;
+        int idx1 = -1;
+        while (++idx0 < bundles.size()) {
+            if (bundles.get(idx0).startsWith("obr:")) {
+                if (idx1 < 0) {
+                    idx1 = idx0;
+                }
+                bundles.set(idx0, bundles.get(idx0).substring("obr:".length()));
+            } else {
+                if (idx1 >= 0) {
+                    doDeploy(admin, bundles.subList(idx1, idx0), true);
+                    idx1 = -1;
+                } else {
+                    Bundle bundle = getBundleContext().installBundle(bundles.get(idx0), null);
+                    bundle.start();
+                }
+            }
+        }
+        if (idx1 >= 0) {
+            doDeploy(admin, bundles.subList(idx1, idx0), true);
         }
     }
 
