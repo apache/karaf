@@ -92,6 +92,22 @@ public class SCRDescriptorMojo extends AbstractMojo {
                                                                              this.project);
         // iterate through all source classes and check for component tag
         final JavaClassDescription[] javaSources = jManager.getSourceDescriptions();
+        
+        if (getLog().isDebugEnabled()) {
+            getLog().debug("Java Sources before sorting");
+            for (int i=0; i < javaSources.length; i++) {
+                System.out.println(i + " - " + javaSources[i].getName());
+            }
+        }
+        
+        Arrays.sort(javaSources, new JavaClassDescriptionInheritanceComparator());
+        
+        if (getLog().isDebugEnabled()) {
+            getLog().debug("Java Sources after sorting");
+            for (int i=0; i < javaSources.length; i++) {
+                System.out.println(i + " - " + javaSources[i].getName());
+            }
+        }
 
         final Components components = new Components();
         final Components abstractComponents = new Components();

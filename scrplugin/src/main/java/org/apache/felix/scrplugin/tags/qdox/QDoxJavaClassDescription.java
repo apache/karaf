@@ -308,4 +308,8 @@ public class QDoxJavaClassDescription
         meth.setModifiers(new String[] {"protected"});
         this.javaClass.addMethod(meth);
     }
+    
+    public String toString() {
+        return getName();
+    }
 }

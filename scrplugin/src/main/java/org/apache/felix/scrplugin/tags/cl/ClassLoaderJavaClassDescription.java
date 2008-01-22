@@ -213,4 +213,8 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
     public boolean isPublic() {
         return Modifier.isPublic(this.clazz.getModifiers());
     }
+    
+    public String toString() {
+        return getName();
+    }
 }
