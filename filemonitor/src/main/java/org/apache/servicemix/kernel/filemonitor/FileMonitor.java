@@ -271,22 +271,14 @@ public class FileMonitor {
     
     
 	private File transformArtifact(File file) throws Exception {
-        // Handle OSGi bundles with the default deployer
-        JarFile jar = new JarFile(file);
-        Manifest m = jar.getManifest();
-        if (m.getMainAttributes().getValue(new Attributes.Name("Bundle-SymbolicName")) != null &&
-            m.getMainAttributes().getValue(new Attributes.Name("Bundle-Version")) != null) {
-            return file;
-        }
-        jar.close();
-        // Else delegate to registered deployers
+        // Check registered deployers
         ServiceReference[] srvRefs = getContext().getAllServiceReferences(DeploymentListener.class.getName(), null);
 		if(srvRefs != null) {
 		    for(ServiceReference sr : srvRefs) {
 		    	try {
 		    		DeploymentListener deploymentListener = (DeploymentListener)getContext().getService(sr);
 		    		if (deploymentListener.canHandle(file)) {
-		    			File transformedFile =  deploymentListener.handle(file, getGenerateDir());
+		    			File transformedFile = deploymentListener.handle(file, getGenerateDir());
 		    			artifactToBundle.put(file.getAbsolutePath(), transformedFile.getAbsolutePath());
 		    			return transformedFile;
 		    		}
@@ -295,7 +287,21 @@ public class FileMonitor {
 		    	}
 		    }
 		}
-		return null;
+        JarFile jar = null;
+        try {
+            // Handle OSGi bundles with the default deployer
+            jar = new JarFile(file);
+            Manifest m = jar.getManifest();
+            if (m.getMainAttributes().getValue(new Attributes.Name("Bundle-SymbolicName")) != null &&
+                m.getMainAttributes().getValue(new Attributes.Name("Bundle-Version")) != null) {
+                return file;
+            }
+        } catch (Exception e) {
+            // Ignore
+        } finally {
+            jar.close();
+        }
+        return null;
 	}
 
     protected void deployBundle(File file) throws IOException, BundleException {

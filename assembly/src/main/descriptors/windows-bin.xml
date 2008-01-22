@@ -119,6 +119,7 @@
                 <include>org.springframework.osgi:spring-osgi-io</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.aopalliance-${aopalliance.version}</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.cglib-${cglib.version}</include>
+                <include>org.apache.servicemix.kernel:org.apache.servicemix.kernel.spring</include>
 
 		        <!-- GShell -->
                 <include>org.apache.geronimo.specs:geronimo-stax-api_1.0_spec</include>

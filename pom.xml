@@ -39,6 +39,7 @@
     <module>filemonitor</module>
     <module>testing</module>
     <module>gshell</module>
+    <module>spring</module>
     <module>assembly</module>
   </modules>
 
@@ -66,7 +67,7 @@
       <commons.logging.version>1.1</commons.logging.version>
       <felix.configadmin.version>0.9.0-r605854</felix.configadmin.version>
       <felix.main.version>1.1.0-r605854</felix.main.version>
-      <felix.plugin.version>1.1.0-r605854</felix.plugin.version>
+      <felix.plugin.version>1.2.0</felix.plugin.version>
       <felix.framework.version>1.1.0-r605854-patched</felix.framework.version>
       <felix.osgi.version>1.0.0</felix.osgi.version>
       <felix.compendium.version>0.9.0-r605854</felix.compendium.version>
