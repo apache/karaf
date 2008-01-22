@@ -30,7 +30,7 @@
   <name>OSGi R4 Compendium Bundle</name>
   <description>OSGi Service Platform Release 4 Compendium Interfaces and Classes.</description>
   <artifactId>org.osgi.compendium</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
@@ -70,10 +70,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.osgi.compendium-1.0.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.osgi.compendium-1.0.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.osgi.compendium-1.0.0</url>
-  </scm>
 </project>
