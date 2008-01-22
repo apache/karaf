@@ -68,7 +68,8 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
+                <version>1.2.0</version>
+                <extensions>true</extensions>                
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>
