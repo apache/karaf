@@ -41,26 +41,18 @@
         <gshell.osgi.import>
             org.apache.servicemix.kernel.main.spi.*;resolution:=optional,
             com.thoughtworks.xstream*;resolution:=optional,
-            javax.xml.stream*;resolution:=optional,
             junit.framework*;resolution:=optional,
-            nu.xom*;resolution:=optional,
-            net.sf.cglib*;resolution:=optional,
-            org.codehaus.jettison*;resolution:=optional,
             org.codehaus.plexus*;resolution:=optional,
             org.apache.mina*;resolution:=optional,
-            org.dom4j*;resolution:=optional,
-            org.joda*;resolution:=optional,
-            org.jdom*;resolution:=optional,
-            sun.*;resolution:=optional,
             *
         </gshell.osgi.import>
         <gshell.osgi.export>
-            org.apache.geronimo.gshell*,
+            org.apache.geronimo.gshell*;-split-package:=merge-first,
         </gshell.osgi.export>
         <gshell.osgi.private>
             jline*,
             org.apache.commons.jexl*,
-            org.codehaus.plexus.personality.plexus.lifecycle.phase*,
+            org.codehaus.plexus.personality.plexus.lifecycle.phase*;-split-package:=merge-first,
             org.codehaus.plexus.util*,
             META-INF.spring*
         </gshell.osgi.private>
