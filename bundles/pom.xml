@@ -44,7 +44,7 @@
     </modules>
 
     <properties>
-        <servicemix.osgi.export>${servicemix.osgi.export.pkg}*;version=${pkgVersion}</servicemix.osgi.export>
+        <servicemix.osgi.export>${servicemix.osgi.export.pkg}*;version=${pkgVersion};-split-package:=merge-first</servicemix.osgi.export>
         <servicemix.osgi.export.pkg />
         <servicemix.osgi.import.pkg />
         <servicemix.osgi.private.pkg />

@@ -43,8 +43,8 @@
         <pkgArtifactId>junit</pkgArtifactId>
         <pkgVersion>${junit.version}</pkgVersion>
         <servicemix.osgi.export>
-            org.junit*;version=${pkgVersion},
-            junit*;version=${pkgVersion}
+            org.junit*;version=${pkgVersion};-split-package:=merge-first,
+            junit*;version=${pkgVersion};-split-package:=merge-first
         </servicemix.osgi.export>
         <servicemix.osgi.import.pkg>
             org.hamcrest*;resolution:=optional,
