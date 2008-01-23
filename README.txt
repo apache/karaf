@@ -23,11 +23,11 @@ lightweight container onto which various bundles can be deployed.
 The following features are included:
   * Hot deployment of OSGi bundles
   * Dynamic reloadable configuration
-  * Provisioning through OBR
+  * Provisioning
   * Native OS integration
   * Extensible Shell console
   * Remote access
-  * Running / managing multiple instances
+  * Managing multiple instances
 
 Getting Started
 ===============
@@ -39,7 +39,7 @@ RELEASE-NOTES.txt for installation instructions and list of supported
 and unsupported features.
 
 Alternatively, you can also find out how to get started here:
-    http://servicemix.apache.org/kernel/home.html
+    http://servicemix.apache.org/kernel/
 
 If you need more help try talking to us on our mailing lists
     http://servicemix.apache.org/mailing-lists.html
