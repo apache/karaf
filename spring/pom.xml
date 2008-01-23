@@ -24,13 +24,13 @@
   <parent>
       <groupId>org.apache.servicemix.kernel</groupId>
       <artifactId>kernel</artifactId>
-      <version>1.0-m1-SNAPSHOT</version>
+      <version>1.0-m1</version>
   </parent>
 
   <groupId>org.apache.servicemix.kernel</groupId>
   <artifactId>org.apache.servicemix.kernel.spring</artifactId>
   <packaging>bundle</packaging>
-  <version>1.0-m1-SNAPSHOT</version>
+  <version>1.0-m1</version>
   <name>ServiceMix Kernel :: Spring Deployer</name>
 
   <description>This deployer transforms a plain spring xml file to a deployable bundle</description>

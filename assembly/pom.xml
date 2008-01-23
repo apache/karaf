@@ -24,13 +24,13 @@
     <parent>
         <groupId>org.apache.servicemix.kernel</groupId>
         <artifactId>kernel</artifactId>
-        <version>1.0-m1-SNAPSHOT</version>
+        <version>1.0-m1</version>
     </parent>
 
     <groupId>org.apache.servicemix.kernel</groupId>
     <artifactId>apache-servicemix-kernel</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-m1-SNAPSHOT</version>
+    <version>1.0-m1</version>
     <name>ServiceMix Kernel :: Assembly</name>
 
     <dependencies>
