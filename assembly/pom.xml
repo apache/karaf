@@ -250,6 +250,7 @@
                             </descriptors>
                             <finalName>${pom.artifactId}-${pom.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
+                            <tarLongFileMode>gnu</tarLongFileMode>
                         </configuration>
                     </execution>
                     <execution>
@@ -292,6 +293,12 @@
                     </execution>
                 </executions>
             </plugin>
+          <plugin>
+              <artifactId>maven-remote-resources-plugin</artifactId>
+              <version>1.0-beta-2</version>
+              <executions>
+              </executions>
+          </plugin>
         </plugins>
     </build>
 
