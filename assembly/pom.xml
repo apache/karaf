@@ -116,27 +116,27 @@
         </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.mina-${mina.version}</artifactId>
+          <artifactId>org.apache.servicemix.bundles.mina-1.1.6-r602102</artifactId>
           <version>${pom.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.xstream-${xstream.version}</artifactId>
+          <artifactId>org.apache.servicemix.bundles.xstream-1.2.2</artifactId>
           <version>${pom.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.aopalliance-${aopalliance.version}</artifactId>
+          <artifactId>org.apache.servicemix.bundles.aopalliance-1.0</artifactId>
           <version>${pom.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.asm-${asm.version}</artifactId>
+          <artifactId>org.apache.servicemix.bundles.asm-2.2.3</artifactId>
           <version>${pom.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.cglib-${cglib.version}</artifactId>
+          <artifactId>org.apache.servicemix.bundles.cglib-2.1_3</artifactId>
           <version>${pom.version}</version>
       </dependency>
       <dependency>

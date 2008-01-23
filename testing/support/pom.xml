@@ -122,17 +122,17 @@
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.aopalliance-${aopalliance.version}</artifactId>
+          <artifactId>org.apache.servicemix.bundles.aopalliance-1.0</artifactId>
           <version>${pom.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.asm-${asm.version}</artifactId>
+          <artifactId>org.apache.servicemix.bundles.asm-2.2.3</artifactId>
           <version>${pom.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.junit-${junit.version}</artifactId>
+          <artifactId>org.apache.servicemix.bundles.junit-4.4</artifactId>
           <version>${pom.version}</version>
       </dependency>
   </dependencies>

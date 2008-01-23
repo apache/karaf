@@ -44,7 +44,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.ant-${ant.version}</artifactId>
+      <artifactId>org.apache.servicemix.bundles.ant-1.7.0</artifactId>
       <version>${pom.version}</version>
     </dependency>
     <dependency>
