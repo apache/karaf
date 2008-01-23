@@ -27,6 +27,7 @@
       <version>1.0-m1-SNAPSHOT</version>
   </parent>
 
+  <groupId>org.apache.servicemix.kernel</groupId>
   <artifactId>org.apache.servicemix.kernel.filemonitor</artifactId>
   <packaging>bundle</packaging>
   <version>1.0-m1-SNAPSHOT</version>
@@ -44,7 +45,7 @@
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.ant-${ant.version}</artifactId>
-      <version>${project.version}</version>
+      <version>${pom.version}</version>
     </dependency>
     <dependency>
        <groupId>commons-logging</groupId>

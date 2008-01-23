@@ -27,6 +27,7 @@
       <version>1.0-m1-SNAPSHOT</version>
     </parent>
 
+    <groupId>org.apache.servicemix.kernel</groupId>
     <artifactId>org.apache.servicemix.kernel.main</artifactId>
     <packaging>bundle</packaging>
     <version>1.0-m1-SNAPSHOT</version>
