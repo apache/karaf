@@ -57,10 +57,11 @@ public class CreateCommand
 			
 			copyResourceToDir(serviceMixBase, "etc/config.properties", true);
 			copyResourceToDir(serviceMixBase, "etc/login.conf", true);
-			copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.management.cfg", true);
+			copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.features.cfg", true);
 			copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.shell.cfg", true);
 			copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.logging.cfg", true);
-			copyResourceToDir(serviceMixBase, "etc/system.properties", true);
+            copyResourceToDir(serviceMixBase, "etc/startup.properties", true);
+            copyResourceToDir(serviceMixBase, "etc/system.properties", true);
 
 			HashMap<String, String> props = new HashMap<String, String>();
 			props.put("${servicemix.home}", System.getProperty("servicemix.home"));
