@@ -1044,7 +1044,7 @@ loop:   for (;;)
 
         public void toStringInfix(StringBuffer b)
         {
-            b.append(val.toString());
+            appendEscaped(b, val.toString());
         }
     }
 
@@ -1195,12 +1195,12 @@ loop:   for (;;)
             b.append("=");
             for (int i = 0; i < pieces.length; i++)
             {
-                String piece = (String) pieces[i];
+                String piece = pieces[i];
                 if (i > 0)
                 {
                     b.append("*");
                 }
-                b.append(piece);
+                appendEscaped(b, piece);
             }
             b.append(")");
         }
@@ -1374,6 +1374,19 @@ loop:   for (;;)
         return false;
     }
 
+    private static void appendEscaped(StringBuffer buf, String value) 
+    {
+        for (int i = 0; i < value.length(); i++) 
+        {
+            char c = value.charAt(i);
+            if (c == '(' || c == ')' || c == '*' || c == '\\') 
+            {
+                buf.append('\\');
+            }
+            buf.append(c);
+        }
+    }
+    
     /**
      * This is an ugly utility method to convert an array of primitives
      * to an array of primitive wrapper objects. This method simplifies
