@@ -40,16 +40,16 @@ public class ObrUtils
 
     /**
      * @param baseDir current base directory
-     * @param localRepository path to local maven repository
+     * @param mavenRepository path to local maven repository
      * @param obrRepository path to specific repository.xml
      * @return URI pointing to correct repository.xml
      */
-    public static URI findRepositoryXml( File baseDir, String localRepository, String obrRepository )
+    public static URI findRepositoryXml( File baseDir, String mavenRepository, String obrRepository )
     {
         // Combine location settings into a single repository location
         if ( null == obrRepository || obrRepository.trim().length() == 0 )
         {
-            obrRepository = localRepository + '/' + REPO_XML;
+            obrRepository = mavenRepository + '/' + REPO_XML;
         }
         else if ( !obrRepository.endsWith( ".xml" ) )
         {
