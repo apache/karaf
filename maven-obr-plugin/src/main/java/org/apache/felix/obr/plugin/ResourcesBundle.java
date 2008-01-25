@@ -556,8 +556,8 @@ public class ResourcesBundle
     public boolean isValid()
     {
         // we must verify required properties are present
-        return getPresentationName() != null && getSymbolicName() != null && getVersion() != null
-            && getUri() != null && getSize() != null;
+        return getPresentationName() != null && getSymbolicName() != null && getVersion() != null && getUri() != null
+            && getSize() != null;
     }
 
 
@@ -572,8 +572,7 @@ public class ResourcesBundle
     {
         if ( isValid() )
         {
-            return ( symbolicName.compareTo( getSymbolicName() ) == 0 )
-                && ( version.compareTo( getVersion() ) == 0 );
+            return ( symbolicName.compareTo( getSymbolicName() ) == 0 ) && ( version.compareTo( getVersion() ) == 0 );
         }
         else
         {
