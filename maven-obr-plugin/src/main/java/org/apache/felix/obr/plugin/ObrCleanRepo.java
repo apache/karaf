@@ -18,6 +18,7 @@
  */
 package org.apache.felix.obr.plugin;
 
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -50,6 +51,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+
 /**
  * Clean an OBR repository by finding and removing missing resources. 
  * @goal clean
@@ -57,7 +59,8 @@ import org.xml.sax.SAXException;
  * @requiresDependencyResolution compile
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ObrCleanRepo extends AbstractMojo {
+public class ObrCleanRepo extends AbstractMojo
+{
 
     /**
      * OBR Repository.
@@ -75,96 +78,120 @@ public class ObrCleanRepo extends AbstractMojo {
      */
     private ArtifactRepository localRepository;
 
-    public void execute() throws MojoExecutionException {
+
+    public void execute() throws MojoExecutionException
+    {
         // If no OBR repository, return
-        if ("NONE".equalsIgnoreCase(obrRepository)) {
+        if ( "NONE".equalsIgnoreCase( obrRepository ) )
+        {
             return;
         }
 
-        try {
+        try
+        {
             // Compute local repository location
             String localRepoPath = localRepository.getBasedir();
-            PathFile repositoryXml = normalizeRepositoryPath(obrRepository, localRepoPath);
+            PathFile repositoryXml = normalizeRepositoryPath( obrRepository, localRepoPath );
 
             // Check if the file exist
-            if (!repositoryXml.isExists()) {
-                getLog().error("The repository file " + repositoryXml.getAbsoluteFilename() + " does not exist");
+            if ( !repositoryXml.isExists() )
+            {
+                getLog().error( "The repository file " + repositoryXml.getAbsoluteFilename() + " does not exist" );
                 return;
             }
 
-            Document doc = parseFile(repositoryXml.getFile(), initConstructor());
-            Node finalDocument = cleanDocument(doc.getDocumentElement()); //Analyze existing repository.
+            Document doc = parseFile( repositoryXml.getFile(), initConstructor() );
+            Node finalDocument = cleanDocument( doc.getDocumentElement() ); //Analyze existing repository.
 
-            if (finalDocument == null) {
-                getLog().info("Nothing to clean in " + repositoryXml.getAbsoluteFilename());
-            } else {
-                getLog().info("Cleaning...");
-                writeToFile(repositoryXml.getUri(), finalDocument);  // Write the new file
-                getLog().info("Repository " + repositoryXml.getAbsoluteFilename() + " updated");
+            if ( finalDocument == null )
+            {
+                getLog().info( "Nothing to clean in " + repositoryXml.getAbsoluteFilename() );
             }
-        } catch (Exception e) {
-            getLog().error("Exception while cleaning the OBR repository file : " + e.getLocalizedMessage(), e);
+            else
+            {
+                getLog().info( "Cleaning..." );
+                writeToFile( repositoryXml.getUri(), finalDocument ); // Write the new file
+                getLog().info( "Repository " + repositoryXml.getAbsoluteFilename() + " updated" );
+            }
+        }
+        catch ( Exception e )
+        {
+            getLog().error( "Exception while cleaning the OBR repository file : " + e.getLocalizedMessage(), e );
         }
     }
+
 
     /**
      * Analyze the given XML tree (DOM of the repository file) and remove missing resources.
      * @param elem : the input XML tree
      * @return the cleaned XML tree
      */
-    private Element cleanDocument(Element elem) {
-        NodeList nodes = elem.getElementsByTagName("resource");
+    private Element cleanDocument( Element elem )
+    {
+        NodeList nodes = elem.getElementsByTagName( "resource" );
         List toRemove = new ArrayList();
-        
+
         // First, look for missing resources
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Element n = (Element) nodes.item(i);
-            String value = n.getAttribute("uri");
+        for ( int i = 0; i < nodes.getLength(); i++ )
+        {
+            Element n = ( Element ) nodes.item( i );
+            String value = n.getAttribute( "uri" );
 
             String localRepoPath = localRepository.getBasedir();
-            File file = new File(localRepoPath, value);
+            File file = new File( localRepoPath, value );
 
-            if (!file.exists()) {
+            if ( !file.exists() )
+            {
                 getLog().info(
-                        "The bundle " + n.getAttribute("presentationname") + " - " + n.getAttribute("version")
-                                + " will be removed");
-                toRemove.add(n);
+                    "The bundle " + n.getAttribute( "presentationname" ) + " - " + n.getAttribute( "version" )
+                        + " will be removed" );
+                toRemove.add( n );
             }
         }
 
-        if (toRemove.size() > 0) {
+        if ( toRemove.size() > 0 )
+        {
             // Then remove missing resources.
-            for (int i = 0; i < toRemove.size(); i++) {
-                elem.removeChild((Node) toRemove.get(i));
+            for ( int i = 0; i < toRemove.size(); i++ )
+            {
+                elem.removeChild( ( Node ) toRemove.get( i ) );
             }
-            
+
             // If we have to remove resources, we need to update  'lastmodified' attribute
-            SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS");
+            SimpleDateFormat format = new SimpleDateFormat( "yyyyMMddHHmmss.SSS" );
             Date d = new Date();
-            d.setTime(System.currentTimeMillis());
-            elem.setAttribute("lastmodified", format.format(d));
+            d.setTime( System.currentTimeMillis() );
+            elem.setAttribute( "lastmodified", format.format( d ) );
             return elem;
-        } else {
+        }
+        else
+        {
             return null;
         }
     }
+
 
     /**
      * Initialize the document builder from Xerces.
      * @return DocumentBuilder ready to create new document
      * @throws MojoExecutionException : occurs when the instantiation of the document builder fails
      */
-    private DocumentBuilder initConstructor() throws MojoExecutionException {
+    private DocumentBuilder initConstructor() throws MojoExecutionException
+    {
         DocumentBuilder constructor = null;
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        try {
+        try
+        {
             constructor = factory.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            getLog().error("Unable to create a new xml document");
-            throw new MojoExecutionException("Cannot create the Document Builder : " + e.getMessage());
+        }
+        catch ( ParserConfigurationException e )
+        {
+            getLog().error( "Unable to create a new xml document" );
+            throw new MojoExecutionException( "Cannot create the Document Builder : " + e.getMessage() );
         }
         return constructor;
     }
+
 
     /**
      * Open an XML file.
@@ -173,24 +200,32 @@ public class ObrCleanRepo extends AbstractMojo {
      * @return Document which describes this file
      * @throws MojoExecutionException occurs when the given file cannot be opened or is a valid XML file.
      */
-    private Document parseFile(File file, DocumentBuilder constructor) throws MojoExecutionException {
-        if (constructor == null) {
+    private Document parseFile( File file, DocumentBuilder constructor ) throws MojoExecutionException
+    {
+        if ( constructor == null )
+        {
             return null;
         }
         // The document is the root of the DOM tree.
-        getLog().info("Parsing " + file.getAbsolutePath());
+        getLog().info( "Parsing " + file.getAbsolutePath() );
         Document doc = null;
-        try {
-            doc = constructor.parse(file);
-        } catch (SAXException e) {
-            getLog().error("Cannot parse " + file.getAbsolutePath() + " : " + e.getMessage());
-            throw new MojoExecutionException("Cannot parse " + file.getAbsolutePath() + " : " + e.getMessage());
-        } catch (IOException e) {
-            getLog().error("Cannot open " + file.getAbsolutePath() + " : " + e.getMessage());
-            throw new MojoExecutionException("Cannot open " + file.getAbsolutePath() + " : " + e.getMessage());
+        try
+        {
+            doc = constructor.parse( file );
+        }
+        catch ( SAXException e )
+        {
+            getLog().error( "Cannot parse " + file.getAbsolutePath() + " : " + e.getMessage() );
+            throw new MojoExecutionException( "Cannot parse " + file.getAbsolutePath() + " : " + e.getMessage() );
+        }
+        catch ( IOException e )
+        {
+            getLog().error( "Cannot open " + file.getAbsolutePath() + " : " + e.getMessage() );
+            throw new MojoExecutionException( "Cannot open " + file.getAbsolutePath() + " : " + e.getMessage() );
         }
         return doc;
     }
+
 
     /**
      * write a Node in a xml file.
@@ -198,74 +233,99 @@ public class ObrCleanRepo extends AbstractMojo {
      * @param treeToBeWrite Node root of the tree to be write in file
      * @throws MojoExecutionException if the plugin failed
      */
-    private void writeToFile(URI outputFilename, Node treeToBeWrite) throws MojoExecutionException {
+    private void writeToFile( URI outputFilename, Node treeToBeWrite ) throws MojoExecutionException
+    {
         // init the transformer
         Transformer transformer = null;
         TransformerFactory tfabrique = TransformerFactory.newInstance();
-        try {
+        try
+        {
             transformer = tfabrique.newTransformer();
-        } catch (TransformerConfigurationException e) {
-            getLog().error("Unable to write to file: " + outputFilename.toString());
-            throw new MojoExecutionException("Unable to write to file: " + outputFilename.toString() + " : " + e.getMessage());
+        }
+        catch ( TransformerConfigurationException e )
+        {
+            getLog().error( "Unable to write to file: " + outputFilename.toString() );
+            throw new MojoExecutionException( "Unable to write to file: " + outputFilename.toString() + " : "
+                + e.getMessage() );
         }
         Properties proprietes = new Properties();
-        proprietes.put("method", "xml");
-        proprietes.put("version", "1.0");
-        proprietes.put("encoding", "ISO-8859-1");
-        proprietes.put("standalone", "yes");
-        proprietes.put("indent", "yes");
-        proprietes.put("omit-xml-declaration", "no");
-        transformer.setOutputProperties(proprietes);
+        proprietes.put( "method", "xml" );
+        proprietes.put( "version", "1.0" );
+        proprietes.put( "encoding", "ISO-8859-1" );
+        proprietes.put( "standalone", "yes" );
+        proprietes.put( "indent", "yes" );
+        proprietes.put( "omit-xml-declaration", "no" );
+        transformer.setOutputProperties( proprietes );
 
-        DOMSource input = new DOMSource(treeToBeWrite);
+        DOMSource input = new DOMSource( treeToBeWrite );
 
-        File fichier = new File(outputFilename);
+        File fichier = new File( outputFilename );
         FileOutputStream flux = null;
-        try {
-            flux = new FileOutputStream(fichier);
-        } catch (FileNotFoundException e) {
-            getLog().error("Unable to write to file: " + fichier.getName());
-            throw new MojoExecutionException("Unable to write to file: " + fichier.getName() + " : " + e.getMessage());
+        try
+        {
+            flux = new FileOutputStream( fichier );
         }
-        Result output = new StreamResult(flux);
-        try {
-            transformer.transform(input, output);
-        } catch (TransformerException e) {
-            throw new MojoExecutionException("Unable to write to file: " + outputFilename.toString() + " : " + e.getMessage());
+        catch ( FileNotFoundException e )
+        {
+            getLog().error( "Unable to write to file: " + fichier.getName() );
+            throw new MojoExecutionException( "Unable to write to file: " + fichier.getName() + " : " + e.getMessage() );
+        }
+        Result output = new StreamResult( flux );
+        try
+        {
+            transformer.transform( input, output );
+        }
+        catch ( TransformerException e )
+        {
+            throw new MojoExecutionException( "Unable to write to file: " + outputFilename.toString() + " : "
+                + e.getMessage() );
         }
 
-        try {
+        try
+        {
             flux.flush();
             flux.close();
-        } catch (IOException e) {
-            throw new MojoExecutionException("IOException when closing file : " + e.getMessage());
+        }
+        catch ( IOException e )
+        {
+            throw new MojoExecutionException( "IOException when closing file : " + e.getMessage() );
         }
 
     }
 
-    private static PathFile normalizeRepositoryPath(String obrPath, String mavenPath) {
-        if (null == obrPath || obrPath.length() == 0) {
+
+    private static PathFile normalizeRepositoryPath( String obrPath, String mavenPath )
+    {
+        if ( null == obrPath || obrPath.length() == 0 )
+        {
             obrPath = mavenPath + File.separatorChar + "repository.xml";
-        } else if (!obrPath.endsWith(".xml")) {
+        }
+        else if ( !obrPath.endsWith( ".xml" ) )
+        {
             obrPath = obrPath + File.separatorChar + "repository.xml";
         }
 
         URI uri;
-        try {
-            uri = new URI(obrPath);
-        } catch (URISyntaxException e) {
+        try
+        {
+            uri = new URI( obrPath );
+        }
+        catch ( URISyntaxException e )
+        {
             uri = null;
         }
 
-        if (null == uri || !uri.isAbsolute()) {
-            File file = new File(obrPath);
-            if (!file.isAbsolute()) {
-                file = new File(mavenPath, obrPath);
+        if ( null == uri || !uri.isAbsolute() )
+        {
+            File file = new File( obrPath );
+            if ( !file.isAbsolute() )
+            {
+                file = new File( mavenPath, obrPath );
             }
 
             uri = file.toURI();
         }
 
-        return new PathFile(uri.toASCIIString());
+        return new PathFile( uri.toASCIIString() );
     }
 }

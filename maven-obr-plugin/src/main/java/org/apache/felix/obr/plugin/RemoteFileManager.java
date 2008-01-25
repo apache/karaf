@@ -18,6 +18,7 @@
  */
 package org.apache.felix.obr.plugin;
 
+
 import java.io.File;
 import java.io.IOException;
 
@@ -40,11 +41,13 @@ import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 
+
 /**
  * this class is used to manage all connections by wagon.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class RemoteFileManager {
+public class RemoteFileManager
+{
 
     /**
      * save the connection.
@@ -71,6 +74,7 @@ public class RemoteFileManager {
      */
     private Log m_log;
 
+
     /**
      * initialize main information.
      * @param ar ArtifactRepository provides by maven
@@ -78,7 +82,8 @@ public class RemoteFileManager {
      * @param settings settings of the current project provides by maven
      * @param log logger
      */
-    public RemoteFileManager(ArtifactRepository ar, WagonManager wm, Settings settings, Log log) {
+    public RemoteFileManager( ArtifactRepository ar, WagonManager wm, Settings settings, Log log )
+    {
         m_artifactRepository = ar;
         m_wagonManager = wm;
         m_settings = settings;
@@ -86,58 +91,80 @@ public class RemoteFileManager {
         m_wagon = null;
     }
 
+
     /**
      * disconnect the current object.
      *
      */
-    public void disconnect() {
-        if (m_wagon == null) {
-            m_log.error("must be connected first!");
+    public void disconnect()
+    {
+        if ( m_wagon == null )
+        {
+            m_log.error( "must be connected first!" );
             return;
         }
-        try {
+        try
+        {
             m_wagon.disconnect();
-        } catch (ConnectionException e) {
-            m_log.error("Error disconnecting wagon - ignored", e);
+        }
+        catch ( ConnectionException e )
+        {
+            m_log.error( "Error disconnecting wagon - ignored", e );
         }
     }
+
 
     /**
      * connect the current object to artifact repository given in constructor.
      * @throws MojoExecutionException if connection failed
      */
-    public void connect() throws MojoExecutionException {
+    public void connect() throws MojoExecutionException
+    {
         String url = m_artifactRepository.getUrl();
         String id = m_artifactRepository.getId();
 
-        Repository repository = new Repository(id, url);
+        Repository repository = new Repository( id, url );
 
-        try {
-            m_wagon = m_wagonManager.getWagon(repository);
+        try
+        {
+            m_wagon = m_wagonManager.getWagon( repository );
             //configureWagon(m_wagon, repository.getId());
-        } catch (UnsupportedProtocolException e) {
-            throw new MojoExecutionException("Unsupported protocol: '" + repository.getProtocol() + "'", e);
-        } catch (WagonConfigurationException e) {
-            throw new MojoExecutionException("Unable to configure Wagon: '" + repository.getProtocol() + "'", e);
+        }
+        catch ( UnsupportedProtocolException e )
+        {
+            throw new MojoExecutionException( "Unsupported protocol: '" + repository.getProtocol() + "'", e );
+        }
+        catch ( WagonConfigurationException e )
+        {
+            throw new MojoExecutionException( "Unable to configure Wagon: '" + repository.getProtocol() + "'", e );
         }
 
-        try {
+        try
+        {
             Debug debug = new Debug();
-            m_wagon.addTransferListener(debug);
+            m_wagon.addTransferListener( debug );
 
-            ProxyInfo proxyInfo = getProxyInfo(m_settings);
-            if (proxyInfo != null) {
-                m_wagon.connect(repository, m_wagonManager.getAuthenticationInfo(id), proxyInfo);
-            } else {
-                m_wagon.connect(repository, m_wagonManager.getAuthenticationInfo(id));
+            ProxyInfo proxyInfo = getProxyInfo( m_settings );
+            if ( proxyInfo != null )
+            {
+                m_wagon.connect( repository, m_wagonManager.getAuthenticationInfo( id ), proxyInfo );
+            }
+            else
+            {
+                m_wagon.connect( repository, m_wagonManager.getAuthenticationInfo( id ) );
             }
 
-        } catch (ConnectionException e) {
-            throw new MojoExecutionException("Error uploading file", e);
-        } catch (AuthenticationException e) {
-            throw new MojoExecutionException("Error uploading file", e);
+        }
+        catch ( ConnectionException e )
+        {
+            throw new MojoExecutionException( "Error uploading file", e );
+        }
+        catch ( AuthenticationException e )
+        {
+            throw new MojoExecutionException( "Error uploading file", e );
         }
     }
+
 
     /**
      * get a file from the current repository connected.
@@ -148,17 +175,21 @@ public class RemoteFileManager {
      * @throws ResourceDoesNotExistException if the targeted resource doesn't exist
      * @throws AuthorizationException if the connection authorization failed
      */
-    public File get(String url) throws IOException, TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
+    public File get( String url ) throws IOException, TransferFailedException, ResourceDoesNotExistException,
+        AuthorizationException
+    {
 
-        if (m_wagon == null) {
-            m_log.error("must be connected first!");
+        if ( m_wagon == null )
+        {
+            m_log.error( "must be connected first!" );
             return null;
         }
 
-        File file = File.createTempFile(String.valueOf(System.currentTimeMillis()), "tmp");
-        m_wagon.get(url, file);
+        File file = File.createTempFile( String.valueOf( System.currentTimeMillis() ), "tmp" );
+        m_wagon.get( url, file );
         return file;
     }
+
 
     /**
      * put a file on the current repository connected.
@@ -168,35 +199,42 @@ public class RemoteFileManager {
      * @throws ResourceDoesNotExistException if the targeted resource doesn't exist
      * @throws AuthorizationException if the connection authorization failed
      */
-    public void put(File file, String url) throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
-        if (m_wagon == null) {
-            m_log.error("must be connected first!");
+    public void put( File file, String url ) throws TransferFailedException, ResourceDoesNotExistException,
+        AuthorizationException
+    {
+        if ( m_wagon == null )
+        {
+            m_log.error( "must be connected first!" );
             return;
         }
-        m_wagon.put(file, url);
+        m_wagon.put( file, url );
     }
+
 
     /**
      * Convenience method to map a Proxy object from the user system settings to a ProxyInfo object.
      * @param settings project settings given by maven
      * @return a proxyInfo object instancied or null if no active proxy is define in the settings.xml
      */
-    public static ProxyInfo getProxyInfo(Settings settings) {
+    public static ProxyInfo getProxyInfo( Settings settings )
+    {
         ProxyInfo proxyInfo = null;
-        if (settings != null && settings.getActiveProxy() != null) {
+        if ( settings != null && settings.getActiveProxy() != null )
+        {
             Proxy settingsProxy = settings.getActiveProxy();
 
             proxyInfo = new ProxyInfo();
-            proxyInfo.setHost(settingsProxy.getHost());
-            proxyInfo.setType(settingsProxy.getProtocol());
-            proxyInfo.setPort(settingsProxy.getPort());
-            proxyInfo.setNonProxyHosts(settingsProxy.getNonProxyHosts());
-            proxyInfo.setUserName(settingsProxy.getUsername());
-            proxyInfo.setPassword(settingsProxy.getPassword());
+            proxyInfo.setHost( settingsProxy.getHost() );
+            proxyInfo.setType( settingsProxy.getProtocol() );
+            proxyInfo.setPort( settingsProxy.getPort() );
+            proxyInfo.setNonProxyHosts( settingsProxy.getNonProxyHosts() );
+            proxyInfo.setUserName( settingsProxy.getUsername() );
+            proxyInfo.setPassword( settingsProxy.getPassword() );
         }
 
         return proxyInfo;
     }
+
 
     /**
      * this method indicates if the targeted file is locked or not.
@@ -205,24 +243,37 @@ public class RemoteFileManager {
      * @return  true if thr reuiered file is locked, else false
      * @throws MojoFailureException if the plugin failed
      */
-    public boolean isLockedFile(RemoteFileManager remote, String fileName) throws MojoFailureException {
+    public boolean isLockedFile( RemoteFileManager remote, String fileName ) throws MojoFailureException
+    {
         File file = null;
-        try {
-            file = remote.get(fileName + ".lock");
-        } catch (TransferFailedException e) {
-            e.printStackTrace();
-            throw new MojoFailureException("TransferFailedException");
-
-        } catch (ResourceDoesNotExistException e) {
-            return false;
-        } catch (AuthorizationException e) {
-            e.printStackTrace();
-            throw new MojoFailureException("AuthorizationException");
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new MojoFailureException("IOException");
+        try
+        {
+            file = remote.get( fileName + ".lock" );
         }
-        if (file != null && file.length() == 0) { return false; }
+        catch ( TransferFailedException e )
+        {
+            e.printStackTrace();
+            throw new MojoFailureException( "TransferFailedException" );
+
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            return false;
+        }
+        catch ( AuthorizationException e )
+        {
+            e.printStackTrace();
+            throw new MojoFailureException( "AuthorizationException" );
+        }
+        catch ( IOException e )
+        {
+            e.printStackTrace();
+            throw new MojoFailureException( "IOException" );
+        }
+        if ( file != null && file.length() == 0 )
+        {
+            return false;
+        }
         return true;
     }
 

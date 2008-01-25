@@ -18,9 +18,11 @@
  */
 package org.apache.felix.obr.plugin;
 
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
 
 /**
  * describe and store category node.
@@ -28,37 +30,44 @@ import org.w3c.dom.Node;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 
-public class Category {
+public class Category
+{
     /**
      * id of the category.
      */
     private String m_id;
+
 
     /**
      * get the id attribute.
      * 
      * @return id
      */
-    public String getId() {
+    public String getId()
+    {
         return m_id;
     }
+
 
     /**
      * set the id attribute.
      * @param id new id value
      */
-    public void setId(String id) {
+    public void setId( String id )
+    {
         this.m_id = id;
     }
+
 
     /**
      * transform this object to node.
      * @param father father document for create Node
      * @return node
      */
-    public Node getNode(Document father) {
-        Element category = father.createElement("category");
-        category.setAttribute("id", this.getId());
+    public Node getNode( Document father )
+    {
+        Element category = father.createElement( "category" );
+        category.setAttribute( "id", this.getId() );
         return category;
     }
 }

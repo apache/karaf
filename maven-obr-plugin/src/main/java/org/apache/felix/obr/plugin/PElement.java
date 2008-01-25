@@ -18,16 +18,19 @@
  */
 package org.apache.felix.obr.plugin;
 
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
 
 /**
  * this class describe the p element in a capability tag.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  * 
  */
-public class PElement {
+public class PElement
+{
     /**
      * store the v tag (value).
      */
@@ -43,65 +46,85 @@ public class PElement {
      */
     private String m_n;
 
+
     /**
      * get the n tag.
      * @return attribute n
      */
-    public String getN() {
+    public String getN()
+    {
         return m_n;
     }
+
 
     /**
      * set the n tage.
      * @param n new value
      */
-    public void setN(String n) {
+    public void setN( String n )
+    {
         this.m_n = n;
     }
+
 
     /**
      * get the t tag.
      * @return attribute t
      */
-    public String getT() {
+    public String getT()
+    {
         return m_t;
     }
+
 
     /**
      * set the t tag.
      * @param t new value
      */
-    public void setT(String t) {
+    public void setT( String t )
+    {
         this.m_t = t;
     }
+
 
     /**
      * get the v tag.
      * @return attribute v
      */
-    public String getV() {
+    public String getV()
+    {
         return m_v;
     }
+
 
     /**
      * set the v tag.
      * @param v new value
      */
-    public void setV(String v) {
+    public void setV( String v )
+    {
         this.m_v = v;
     }
+
 
     /**
      * transform this object to node.
      * @param father father document for create Node
      * @return node
      */
-    public Node getNode(Document father) {
-        Element p = father.createElement("p");
-        p.setAttribute("n", this.getN());
-        if (this.getT() != null) { p.setAttribute("t", this.getT()); }
+    public Node getNode( Document father )
+    {
+        Element p = father.createElement( "p" );
+        p.setAttribute( "n", this.getN() );
+        if ( this.getT() != null )
+        {
+            p.setAttribute( "t", this.getT() );
+        }
 
-        if (this.getV() != null) { p.setAttribute("v", this.getV()); }
+        if ( this.getV() != null )
+        {
+            p.setAttribute( "v", this.getV() );
+        }
 
         return p;
     }

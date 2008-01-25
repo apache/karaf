@@ -18,6 +18,7 @@
  */
 package org.apache.felix.obr.plugin;
 
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -37,6 +38,7 @@ import org.apache.maven.wagon.ResourceDoesNotExistException;
 import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 
+
 /**
  * deploy the bundle to a remote site.
  * this goal is used when you compile a project with a pom file
@@ -46,7 +48,8 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 
-public class ObrDeploy extends AbstractMojo {
+public class ObrDeploy extends AbstractMojo
+{
 
     /**
      * setting of maven.
@@ -103,199 +106,266 @@ public class ObrDeploy extends AbstractMojo {
      * @description If true evrything the goal do nothing, the goal just skip over 
      * @parameter expression="${maven.obr.installToRemoteOBR}" default-value="false"
      */
-    private boolean installToRemoteOBR;    
+    private boolean installToRemoteOBR;
 
-    
+
     /**
      * main method for this goal.
      * @implements org.apache.maven.plugin.Mojo.execute 
      * @throws MojoExecutionException if the plugin failed
      * @throws MojoFailureException if the plugin failed
      */
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().info("Obr-deploy start:");
-        if(!installToRemoteOBR)
+    public void execute() throws MojoExecutionException, MojoFailureException
+    {
+        getLog().info( "Obr-deploy start:" );
+        if ( !installToRemoteOBR )
         {
-        	getLog().info("maven-obr-plugin:deploy goal is disable due to one of the following reason:");
-        	getLog().info(" - 'installToRemoteOBR' configuration set to false");
-        	getLog().info(" - JVM property maven.obr.installToRemoteOBR set to false");
-        	return;
+            getLog().info( "maven-obr-plugin:deploy goal is disable due to one of the following reason:" );
+            getLog().info( " - 'installToRemoteOBR' configuration set to false" );
+            getLog().info( " - JVM property maven.obr.installToRemoteOBR set to false" );
+            return;
         }
         ArtifactRepository ar = m_project.getDistributionManagementArtifactRepository();
 
         // locate the obr.xml file
         String obrXmlFile = null;
         List l = m_project.getResources();
-        for (int i = 0; i < l.size(); i++) {
-            File f = new File(((Resource) l.get(i)).getDirectory() + File.separator + "obr.xml");
-            if (f.exists()) {
-                obrXmlFile = ((Resource) l.get(i)).getDirectory() + File.separator + "obr.xml";
+        for ( int i = 0; i < l.size(); i++ )
+        {
+            File f = new File( ( ( Resource ) l.get( i ) ).getDirectory() + File.separator + "obr.xml" );
+            if ( f.exists() )
+            {
+                obrXmlFile = ( ( Resource ) l.get( i ) ).getDirectory() + File.separator + "obr.xml";
                 break;
             }
         }
 
         // the obr.xml file is not present
-        if (obrXmlFile == null) {
-            getLog().warn("obr.xml is not present, use default");
+        if ( obrXmlFile == null )
+        {
+            getLog().warn( "obr.xml is not present, use default" );
         }
 
         File repoDescriptorFile = null;
 
         // init the wagon connection
-        RemoteFileManager remoteFile = new RemoteFileManager(ar, m_wagonManager, m_settings, getLog());
+        RemoteFileManager remoteFile = new RemoteFileManager( ar, m_wagonManager, m_settings, getLog() );
         remoteFile.connect();
 
         // create a non-empty file used to lock the repository descriptor file
         File lockFile = null;
         Writer output = null;
-        try {
-            lockFile = File.createTempFile(String.valueOf(System.currentTimeMillis()), null);
-            output = new BufferedWriter(new FileWriter(lockFile));
-            output.write("locked");
+        try
+        {
+            lockFile = File.createTempFile( String.valueOf( System.currentTimeMillis() ), null );
+            output = new BufferedWriter( new FileWriter( lockFile ) );
+            output.write( "locked" );
             output.close();
-        } catch (IOException e) {
-            getLog().error("Unable to create temporary file");
-            throw new MojoFailureException("IOException");
+        }
+        catch ( IOException e )
+        {
+            getLog().error( "Unable to create temporary file" );
+            throw new MojoFailureException( "IOException" );
         }
 
-        if (m_ignoreLock) {
-            try {
-                remoteFile.put(lockFile, m_repositoryName + ".lock");
-            } catch (TransferFailedException e) {
-                getLog().error("Transfer failed");
+        if ( m_ignoreLock )
+        {
+            try
+            {
+                remoteFile.put( lockFile, m_repositoryName + ".lock" );
+            }
+            catch ( TransferFailedException e )
+            {
+                getLog().error( "Transfer failed" );
                 e.printStackTrace();
-                throw new MojoFailureException("TransferFailedException");
+                throw new MojoFailureException( "TransferFailedException" );
 
-            } catch (ResourceDoesNotExistException e) {
-                throw new MojoFailureException("ResourceDoesNotExistException");
-            } catch (AuthorizationException e) {
-                getLog().error("Authorization failed");
+            }
+            catch ( ResourceDoesNotExistException e )
+            {
+                throw new MojoFailureException( "ResourceDoesNotExistException" );
+            }
+            catch ( AuthorizationException e )
+            {
+                getLog().error( "Authorization failed" );
                 e.printStackTrace();
-                throw new MojoFailureException("AuthorizationException");
+                throw new MojoFailureException( "AuthorizationException" );
             }
 
-        } else {
+        }
+        else
+        {
             int countError = 0;
-            while (remoteFile.isLockedFile(remoteFile, m_repositoryName) && countError < 2) {
+            while ( remoteFile.isLockedFile( remoteFile, m_repositoryName ) && countError < 2 )
+            {
                 countError++;
-                getLog().warn("File is locked, retry in 10s");
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    getLog().warn("Sleep interupted");
+                getLog().warn( "File is locked, retry in 10s" );
+                try
+                {
+                    Thread.sleep( 10000 );
+                }
+                catch ( InterruptedException e )
+                {
+                    getLog().warn( "Sleep interupted" );
                 }
             }
 
-            if (countError == 2) {
-                getLog().error("File: " + m_repositoryName + " is locked. Try -Dignore-lock=true if you want force uploading");
-                throw new MojoFailureException("fileLocked");
+            if ( countError == 2 )
+            {
+                getLog().error(
+                    "File: " + m_repositoryName + " is locked. Try -Dignore-lock=true if you want force uploading" );
+                throw new MojoFailureException( "fileLocked" );
             }
         }
 
         // file is not locked, so we lock it now
-        try {
-            remoteFile.put(lockFile, m_repositoryName + ".lock");
-        } catch (TransferFailedException e) {
-            getLog().error("Transfer failed");
+        try
+        {
+            remoteFile.put( lockFile, m_repositoryName + ".lock" );
+        }
+        catch ( TransferFailedException e )
+        {
+            getLog().error( "Transfer failed" );
             e.printStackTrace();
-            throw new MojoFailureException("TransferFailedException");
+            throw new MojoFailureException( "TransferFailedException" );
 
-        } catch (ResourceDoesNotExistException e) {
-            throw new MojoFailureException("ResourceDoesNotExistException");
-        } catch (AuthorizationException e) {
-            getLog().error("Authorization failed");
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            throw new MojoFailureException( "ResourceDoesNotExistException" );
+        }
+        catch ( AuthorizationException e )
+        {
+            getLog().error( "Authorization failed" );
             e.printStackTrace();
-            throw new MojoFailureException("AuthorizationException");
+            throw new MojoFailureException( "AuthorizationException" );
         }
 
-        try {
-            repoDescriptorFile = remoteFile.get(m_repositoryName);
-        } catch (TransferFailedException e) {
-            getLog().error("Transfer failed");
+        try
+        {
+            repoDescriptorFile = remoteFile.get( m_repositoryName );
+        }
+        catch ( TransferFailedException e )
+        {
+            getLog().error( "Transfer failed" );
             e.printStackTrace();
-            throw new MojoFailureException("TransferFailedException");
+            throw new MojoFailureException( "TransferFailedException" );
 
-        } catch (ResourceDoesNotExistException e) {
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
             // file doesn't exist! create a new one
-            getLog().warn("file specified does not exist: " + m_repositoryName);
-            getLog().warn("Create a new repository descriptor file " + m_repositoryName);
-            try {
-                File f = File.createTempFile(String.valueOf(System.currentTimeMillis()), null);
-                repoDescriptorFile = new File(f.getParent() + File.separator + String.valueOf(System.currentTimeMillis()) + ".xml");
-            } catch (IOException e1) {
-                getLog().error("canno't create temporary file");
+            getLog().warn( "file specified does not exist: " + m_repositoryName );
+            getLog().warn( "Create a new repository descriptor file " + m_repositoryName );
+            try
+            {
+                File f = File.createTempFile( String.valueOf( System.currentTimeMillis() ), null );
+                repoDescriptorFile = new File( f.getParent() + File.separator
+                    + String.valueOf( System.currentTimeMillis() ) + ".xml" );
+            }
+            catch ( IOException e1 )
+            {
+                getLog().error( "canno't create temporary file" );
                 e1.printStackTrace();
                 return;
             }
-        } catch (AuthorizationException e) {
-            getLog().error("Authorization failed");
+        }
+        catch ( AuthorizationException e )
+        {
+            getLog().error( "Authorization failed" );
             e.printStackTrace();
-            throw new MojoFailureException("AuthorizationException");
-        } catch (IOException e) {
+            throw new MojoFailureException( "AuthorizationException" );
+        }
+        catch ( IOException e )
+        {
             e.printStackTrace();
-            throw new MojoFailureException("IOException");
+            throw new MojoFailureException( "IOException" );
         }
 
         Config userConfig = new Config();
-        userConfig.setPathRelative(true);
-        userConfig.setRemotely(true);
+        userConfig.setPathRelative( true );
+        userConfig.setRemotely( true );
 
         PathFile file = null;
 
         // get the path to local maven repository
-        file = new PathFile(PathFile.uniformSeparator(m_settings.getLocalRepository()) + File.separator + PathFile.uniformSeparator(m_localRepo.pathOf(m_project.getArtifact())));
-        if (file.isExists()) {
+        file = new PathFile( PathFile.uniformSeparator( m_settings.getLocalRepository() ) + File.separator
+            + PathFile.uniformSeparator( m_localRepo.pathOf( m_project.getArtifact() ) ) );
+        if ( file.isExists() )
+        {
             m_fileInLocalRepo = file.getOnlyAbsoluteFilename();
-        } else {
-            getLog().error("file not found in local repository: " + m_settings.getLocalRepository() + File.separator + m_localRepo.pathOf(m_project.getArtifact()));
+        }
+        else
+        {
+            getLog().error(
+                "file not found in local repository: " + m_settings.getLocalRepository() + File.separator
+                    + m_localRepo.pathOf( m_project.getArtifact() ) );
             return;
         }
 
-        file = new PathFile("file:/" + repoDescriptorFile.getAbsolutePath());
+        file = new PathFile( "file:/" + repoDescriptorFile.getAbsolutePath() );
 
-        ObrUpdate obrUpdate = new ObrUpdate(file, obrXmlFile, m_project, m_fileInLocalRepo, PathFile.uniformSeparator(m_settings.getLocalRepository()), userConfig, getLog());
+        ObrUpdate obrUpdate = new ObrUpdate( file, obrXmlFile, m_project, m_fileInLocalRepo, PathFile
+            .uniformSeparator( m_settings.getLocalRepository() ), userConfig, getLog() );
 
         obrUpdate.updateRepository();
 
         // the reposiroty descriptor file is modified, we upload it on the remote repository
-        try {
-            remoteFile.put(repoDescriptorFile, m_repositoryName);
-        } catch (TransferFailedException e) {
-            getLog().error("Transfer failed");
+        try
+        {
+            remoteFile.put( repoDescriptorFile, m_repositoryName );
+        }
+        catch ( TransferFailedException e )
+        {
+            getLog().error( "Transfer failed" );
             e.printStackTrace();
-            throw new MojoFailureException("TransferFailedException");
-        } catch (ResourceDoesNotExistException e) {
-            getLog().error("Resource does not exist:" + repoDescriptorFile.getName());
+            throw new MojoFailureException( "TransferFailedException" );
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            getLog().error( "Resource does not exist:" + repoDescriptorFile.getName() );
             e.printStackTrace();
-            throw new MojoFailureException("ResourceDoesNotExistException");
-        } catch (AuthorizationException e) {
-            getLog().error("Authorization failed");
+            throw new MojoFailureException( "ResourceDoesNotExistException" );
+        }
+        catch ( AuthorizationException e )
+        {
+            getLog().error( "Authorization failed" );
             e.printStackTrace();
-            throw new MojoFailureException("AuthorizationException");
+            throw new MojoFailureException( "AuthorizationException" );
         }
         repoDescriptorFile.delete();
 
         // we remove lockFile activation
         lockFile = null;
-        try {
-            lockFile = File.createTempFile(String.valueOf(System.currentTimeMillis()), null);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new MojoFailureException("IOException");
+        try
+        {
+            lockFile = File.createTempFile( String.valueOf( System.currentTimeMillis() ), null );
         }
-        try {
-            remoteFile.put(lockFile, m_repositoryName + ".lock");
-        } catch (TransferFailedException e) {
-            getLog().error("Transfer failed");
+        catch ( IOException e )
+        {
             e.printStackTrace();
-            throw new MojoFailureException("TransferFailedException");
-        } catch (ResourceDoesNotExistException e) {
+            throw new MojoFailureException( "IOException" );
+        }
+        try
+        {
+            remoteFile.put( lockFile, m_repositoryName + ".lock" );
+        }
+        catch ( TransferFailedException e )
+        {
+            getLog().error( "Transfer failed" );
             e.printStackTrace();
-            throw new MojoFailureException("ResourceDoesNotExistException");
-        } catch (AuthorizationException e) {
-            getLog().error("Authorization failed");
+            throw new MojoFailureException( "TransferFailedException" );
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
             e.printStackTrace();
-            throw new MojoFailureException("AuthorizationException");
+            throw new MojoFailureException( "ResourceDoesNotExistException" );
+        }
+        catch ( AuthorizationException e )
+        {
+            getLog().error( "Authorization failed" );
+            e.printStackTrace();
+            throw new MojoFailureException( "AuthorizationException" );
         }
 
         remoteFile.disconnect();

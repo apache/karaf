@@ -18,6 +18,7 @@
  */
 package org.apache.felix.obr.plugin;
 
+
 import java.io.File;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -27,6 +28,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
 
+
 /**
  * construct the repository.xml from a compiled bundle.
  * @description construct the repository.xml from a compiled bundle.
@@ -35,7 +37,8 @@ import org.apache.maven.settings.Settings;
  * @phase install
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ObrInstallFile extends AbstractMojo {
+public class ObrInstallFile extends AbstractMojo
+{
     /**
      * The local Maven repository.
      * 
@@ -100,79 +103,94 @@ public class ObrInstallFile extends AbstractMojo {
      */
     private MavenProject m_project;
 
+
     /**
      * main method for this goal.
      * @implements org.apache.maven.plugin.Mojo.execute 
      * @throws MojoExecutionException if the plugin failed
      * @throws MojoFailureException if the plugin failed
      */
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().info("Install-File Obr starts:");
+    public void execute() throws MojoExecutionException, MojoFailureException
+    {
+        getLog().info( "Install-File Obr starts:" );
 
         m_project = new MavenProject();
-        m_project.setArtifactId(m_artifactId);
-        m_project.setGroupId(m_groupId);
-        m_project.setVersion(m_version);
-        m_project.setPackaging(m_packaging);
+        m_project.setArtifactId( m_artifactId );
+        m_project.setGroupId( m_groupId );
+        m_project.setVersion( m_version );
+        m_project.setPackaging( m_packaging );
 
         PathFile fileOut;
 
-        if (m_groupId == null) {
-            getLog().error("-DgroupId=VALUE is required");
+        if ( m_groupId == null )
+        {
+            getLog().error( "-DgroupId=VALUE is required" );
             return;
         }
-        if (m_artifactId == null) {
-            getLog().error("-Dartifactid=VALUE is required");
+        if ( m_artifactId == null )
+        {
+            getLog().error( "-Dartifactid=VALUE is required" );
             return;
         }
-        if (m_version == null) {
-            getLog().error("-Dversion=VALUE is required");
+        if ( m_version == null )
+        {
+            getLog().error( "-Dversion=VALUE is required" );
             return;
         }
-        if (m_packaging == null) {
-            getLog().error("-Dpackaging=VALUE is required");
+        if ( m_packaging == null )
+        {
+            getLog().error( "-Dpackaging=VALUE is required" );
             return;
         }
 
         // copy the file to the local repository
-        PathFile repoLocal = new PathFile(m_localRepo.getBasedir());
+        PathFile repoLocal = new PathFile( m_localRepo.getBasedir() );
 
         // get the target file in mvn repo
-        fileOut = new PathFile(PathFile.uniformSeparator(m_settings.getLocalRepository()) + File.separator + m_groupId.replace('.', File.separatorChar) + File.separator + m_artifactId + File.separator + m_version + File.separator + m_artifactId
-                + "-" + m_version + "." + m_packaging);
+        fileOut = new PathFile( PathFile.uniformSeparator( m_settings.getLocalRepository() ) + File.separator
+            + m_groupId.replace( '.', File.separatorChar ) + File.separator + m_artifactId + File.separator + m_version
+            + File.separator + m_artifactId + "-" + m_version + "." + m_packaging );
 
-        if (!fileOut.isExists()) {
-            getLog().error("file doesn't exist: " + fileOut.getAbsoluteFilename());
+        if ( !fileOut.isExists() )
+        {
+            getLog().error( "file doesn't exist: " + fileOut.getAbsoluteFilename() );
             return;
-        } else {
-            getLog().info("Target file: " + fileOut.getAbsoluteFilename());
+        }
+        else
+        {
+            getLog().info( "Target file: " + fileOut.getAbsoluteFilename() );
         }
 
-        if (m_repositoryPath == null) {
+        if ( m_repositoryPath == null )
+        {
             m_repositoryPath = "file:" + repoLocal.getOnlyAbsoluteFilename() + "repository.xml";
-            getLog().warn("-DpathRepo is not define, use default repository: " + m_repositoryPath);
+            getLog().warn( "-DpathRepo is not define, use default repository: " + m_repositoryPath );
         }
 
-        PathFile fileRepo = new PathFile(m_repositoryPath);
-        if (fileRepo.isRelative()) {
-            fileRepo.setBaseDir(m_settings.getLocalRepository());
+        PathFile fileRepo = new PathFile( m_repositoryPath );
+        if ( fileRepo.isRelative() )
+        {
+            fileRepo.setBaseDir( m_settings.getLocalRepository() );
         }
 
         // create the folder to the repository
-        PathFile repoExist = new PathFile(fileRepo.getAbsolutePath());
-        if (!repoExist.isExists()) {
+        PathFile repoExist = new PathFile( fileRepo.getAbsolutePath() );
+        if ( !repoExist.isExists() )
+        {
             fileRepo.createPath();
         }
 
-        PathFile fileObrXml = new PathFile(m_obrFile);
-        if (!fileObrXml.isExists()) {
-            getLog().warn("obr.xml file not found, use default");
+        PathFile fileObrXml = new PathFile( m_obrFile );
+        if ( !fileObrXml.isExists() )
+        {
+            getLog().warn( "obr.xml file not found, use default" );
         }
 
         // build the user config
         Config userConfig = new Config();
 
-        ObrUpdate obrUpdate = new ObrUpdate(fileRepo, fileObrXml.getOnlyAbsoluteFilename(), m_project, fileOut.getOnlyAbsoluteFilename(), m_localRepo.getBasedir(), userConfig, getLog());
+        ObrUpdate obrUpdate = new ObrUpdate( fileRepo, fileObrXml.getOnlyAbsoluteFilename(), m_project, fileOut
+            .getOnlyAbsoluteFilename(), m_localRepo.getBasedir(), userConfig, getLog() );
         obrUpdate.updateRepository();
 
     }

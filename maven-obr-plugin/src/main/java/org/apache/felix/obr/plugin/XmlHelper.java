@@ -18,8 +18,10 @@
  */
 package org.apache.felix.obr.plugin;
 
+
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 
 /**
  * Provide XML helper methods to support pre-Java5 runtimes
@@ -33,25 +35,27 @@ public class XmlHelper
      */
     public static String getTextContent( Node node )
     {
-        switch( node.getNodeType() ) {
-        case Node.ELEMENT_NODE:
-        case Node.ATTRIBUTE_NODE:
-        case Node.ENTITY_NODE:
-        case Node.ENTITY_REFERENCE_NODE:
-        case Node.DOCUMENT_FRAGMENT_NODE:
-            return mergeTextContent( node.getChildNodes() );
-        case Node.TEXT_NODE:
-        case Node.CDATA_SECTION_NODE:
-        case Node.COMMENT_NODE:
-        case Node.PROCESSING_INSTRUCTION_NODE:
-            return node.getNodeValue();
-        case Node.DOCUMENT_NODE:
-        case Node.DOCUMENT_TYPE_NODE:
-        case Node.NOTATION_NODE:
-        default:
-            return null;
+        switch ( node.getNodeType() )
+        {
+            case Node.ELEMENT_NODE:
+            case Node.ATTRIBUTE_NODE:
+            case Node.ENTITY_NODE:
+            case Node.ENTITY_REFERENCE_NODE:
+            case Node.DOCUMENT_FRAGMENT_NODE:
+                return mergeTextContent( node.getChildNodes() );
+            case Node.TEXT_NODE:
+            case Node.CDATA_SECTION_NODE:
+            case Node.COMMENT_NODE:
+            case Node.PROCESSING_INSTRUCTION_NODE:
+                return node.getNodeValue();
+            case Node.DOCUMENT_NODE:
+            case Node.DOCUMENT_TYPE_NODE:
+            case Node.NOTATION_NODE:
+            default:
+                return null;
         }
     }
+
 
     /**
      * based on the following quote from public Java5 javadoc of org.w3c.dom.Node.getTextContent method:
@@ -62,22 +66,23 @@ public class XmlHelper
     private static String mergeTextContent( NodeList nodes )
     {
         StringBuffer buf = new StringBuffer();
-        for( int i = 0; i < nodes.getLength(); i++ )
+        for ( int i = 0; i < nodes.getLength(); i++ )
         {
             Node n = nodes.item( i );
             final String text;
 
-            switch( n.getNodeType() ) {
-            case Node.COMMENT_NODE:
-            case Node.PROCESSING_INSTRUCTION_NODE:
-                text = null;
-                break;
-            default:
-                text = getTextContent( n );
-                break;
+            switch ( n.getNodeType() )
+            {
+                case Node.COMMENT_NODE:
+                case Node.PROCESSING_INSTRUCTION_NODE:
+                    text = null;
+                    break;
+                default:
+                    text = getTextContent( n );
+                    break;
             }
 
-            if( text != null )
+            if ( text != null )
             {
                 buf.append( text );
             }
@@ -85,17 +90,18 @@ public class XmlHelper
         return buf.toString();
     }
 
+
     /**
      * based on public Java5 javadoc of org.w3c.dom.Node.setTextContent method
      */
     public static void setTextContent( Node node, final String text )
     {
-        while( node.hasChildNodes() )
+        while ( node.hasChildNodes() )
         {
             node.removeChild( node.getFirstChild() );
         }
 
-        if( text != null && text.length() > 0 )
+        if ( text != null && text.length() > 0 )
         {
             Node textNode = node.getOwnerDocument().createTextNode( text );
             node.appendChild( textNode );

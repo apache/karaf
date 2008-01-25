@@ -18,6 +18,7 @@
  */
 package org.apache.felix.obr.plugin;
 
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -28,11 +29,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+
 /**
  * this class describe all information by bundle.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ResourcesBundle {
+public class ResourcesBundle
+{
     /**
      * store the bundle symbolic name.
      */
@@ -103,141 +106,202 @@ public class ResourcesBundle {
      */
     private Log m_logger;
 
+
     /**
      * initialize logger.
      * @param log log use by plugin
      */
-    public ResourcesBundle(Log log) {
+    public ResourcesBundle( Log log )
+    {
         m_logger = log;
     }
 
-    public List getCapability() {
+
+    public List getCapability()
+    {
         return m_capability;
     }
 
-    public void setCapability(List capability) {
+
+    public void setCapability( List capability )
+    {
         this.m_capability = capability;
     }
 
-    public List getCategory() {
+
+    public List getCategory()
+    {
         return m_category;
     }
 
-    public void setCategory(List category) {
+
+    public void setCategory( List category )
+    {
         this.m_category = category;
     }
 
-    public String getLicense() {
+
+    public String getLicense()
+    {
         return m_license;
     }
 
-    public void setLicense(String license) {
+
+    public void setLicense( String license )
+    {
         this.m_license = license;
     }
 
-    public String getDescription() {
+
+    public String getDescription()
+    {
         return m_description;
     }
 
-    public void setDescription(String description) {
+
+    public void setDescription( String description )
+    {
         this.m_description = description;
     }
 
-    public String getDocumentation() {
+
+    public String getDocumentation()
+    {
         return m_documentation;
     }
 
-    public void setDocumentation(String documentation) {
+
+    public void setDocumentation( String documentation )
+    {
         this.m_documentation = documentation;
     }
 
-    public String getPresentationName() {
+
+    public String getPresentationName()
+    {
         return m_presentationName;
     }
 
-    public void setPresentationName(String name) {
+
+    public void setPresentationName( String name )
+    {
         m_presentationName = name;
     }
 
-    public String getSize() {
+
+    public String getSize()
+    {
         return m_size;
     }
 
-    public void setSize(String size) {
+
+    public void setSize( String size )
+    {
         this.m_size = size;
     }
 
-    public String getSymbolicName() {
+
+    public String getSymbolicName()
+    {
         return m_symbolicName;
     }
 
-    public void setSymbolicName(String name) {
+
+    public void setSymbolicName( String name )
+    {
         m_symbolicName = name;
     }
 
-    public String getUri() {
+
+    public String getUri()
+    {
         return m_uri;
     }
 
-    public void setUri(String url) {
+
+    public void setUri( String url )
+    {
         this.m_uri = url;
     }
 
-    public String getVersion() {
+
+    public String getVersion()
+    {
         return m_version;
     }
 
-    public void setVersion(String version) {
+
+    public void setVersion( String version )
+    {
         this.m_version = version;
     }
 
-    public List getRequire() {
+
+    public List getRequire()
+    {
         return m_require;
     }
 
-    public void setRequire(List require) {
+
+    public void setRequire( List require )
+    {
         this.m_require = require;
     }
 
-    public String getSource() {
+
+    public String getSource()
+    {
         return m_source;
     }
 
-    public void setSource(String source) {
+
+    public void setSource( String source )
+    {
         this.m_source = source;
     }
 
-    public String getId() {
+
+    public String getId()
+    {
         return m_id;
     }
 
-    public void setId(String id) {
+
+    public void setId( String id )
+    {
         this.m_id = id;
     }
+
 
     /**
      * add a new capability for this bundle description.
      * @param capability the Capability to add
      */
-    public void addCapability(Capability capability) {
-        m_capability.add(capability);
+    public void addCapability( Capability capability )
+    {
+        m_capability.add( capability );
     }
+
 
     /**
      * add a new requirement for this bundle description.
      * @param require th Require to add
      */
-    public void addRequire(Require require) {
-        m_require.add(require);
+    public void addRequire( Require require )
+    {
+        m_require.add( require );
     }
+
 
     /**
      * add a new category for this bundle decription.
      * @param category the Category to add
      */
-    public void addCategory(Category category) {
-        m_category.add(category);
+    public void addCategory( Category category )
+    {
+        m_category.add( category );
     }
+
 
     /**
      * transform this object to Node.
@@ -245,64 +309,73 @@ public class ResourcesBundle {
      * @param father father document for create Node
      * @return node
      */
-    public Node getNode(Document father) {
+    public Node getNode( Document father )
+    {
         // return the complete resource tree
-        if (!this.isValid() || this.getId() == null) {
-            m_logger.error("those properties was not defined:" + this.getInvalidProperties());
+        if ( !this.isValid() || this.getId() == null )
+        {
+            m_logger.error( "those properties was not defined:" + this.getInvalidProperties() );
             return null;
         }
 
-        Element resource = father.createElement("resource");
-        Element description = father.createElement("description");
-        Element size = father.createElement("size");
-        Element documentation = father.createElement("documentation");
-        Element source = father.createElement("source");
-        Element license = father.createElement("license");
+        Element resource = father.createElement( "resource" );
+        Element description = father.createElement( "description" );
+        Element size = father.createElement( "size" );
+        Element documentation = father.createElement( "documentation" );
+        Element source = father.createElement( "source" );
+        Element license = father.createElement( "license" );
 
-        resource.setAttribute("id", this.getId());
-        resource.setAttribute("symbolicname", this.getSymbolicName());
-        resource.setAttribute("presentationname", this.getPresentationName());
-        resource.setAttribute("uri", this.getUri());
-        resource.setAttribute("version", this.getVersion());
+        resource.setAttribute( "id", this.getId() );
+        resource.setAttribute( "symbolicname", this.getSymbolicName() );
+        resource.setAttribute( "presentationname", this.getPresentationName() );
+        resource.setAttribute( "uri", this.getUri() );
+        resource.setAttribute( "version", this.getVersion() );
 
-        XmlHelper.setTextContent(description,this.getDescription());
-        resource.appendChild(description);
+        XmlHelper.setTextContent( description, this.getDescription() );
+        resource.appendChild( description );
 
-        XmlHelper.setTextContent(size,this.getSize());
-        resource.appendChild(size);
+        XmlHelper.setTextContent( size, this.getSize() );
+        resource.appendChild( size );
 
-        if (this.getDocumentation() != null) {
-            XmlHelper.setTextContent(documentation,this.getDocumentation());
-            resource.appendChild(documentation);
+        if ( this.getDocumentation() != null )
+        {
+            XmlHelper.setTextContent( documentation, this.getDocumentation() );
+            resource.appendChild( documentation );
         }
 
-        if (this.getSource() != null) {
-            XmlHelper.setTextContent(source,this.getSource());
-            resource.appendChild(source);
+        if ( this.getSource() != null )
+        {
+            XmlHelper.setTextContent( source, this.getSource() );
+            resource.appendChild( source );
         }
 
-        if (this.getLicense() != null) {
-            XmlHelper.setTextContent(license, this.getLicense());
-            resource.appendChild(license);
+        if ( this.getLicense() != null )
+        {
+            XmlHelper.setTextContent( license, this.getLicense() );
+            resource.appendChild( license );
         }
 
-        List list = (ArrayList) this.getNodeCategories(father);
-        for (int i = 0; i < list.size(); i++) {
-            resource.appendChild((Node) list.get(i));
+        List list = ( ArrayList ) this.getNodeCategories( father );
+        for ( int i = 0; i < list.size(); i++ )
+        {
+            resource.appendChild( ( Node ) list.get( i ) );
         }
 
-        list = (ArrayList) this.getNodeCapabilities(father);
-        for (int i = 0; i < list.size(); i++) {
-            resource.appendChild((Node) list.get(i));
+        list = ( ArrayList ) this.getNodeCapabilities( father );
+        for ( int i = 0; i < list.size(); i++ )
+        {
+            resource.appendChild( ( Node ) list.get( i ) );
         }
 
-        list = (ArrayList) this.getNodeRequirement(father);
-        for (int i = 0; i < list.size(); i++) {
-            resource.appendChild((Node) list.get(i));
+        list = ( ArrayList ) this.getNodeRequirement( father );
+        for ( int i = 0; i < list.size(); i++ )
+        {
+            resource.appendChild( ( Node ) list.get( i ) );
         }
 
         return resource;
     }
+
 
     /**
      * this method gets information form pom.xml to complete missing data from those given by user.
@@ -310,134 +383,183 @@ public class ResourcesBundle {
      * @param ebi bundle information extracted from bindex
      * @return true
      */
-    public boolean construct(MavenProject project, ExtractBindexInfo ebi) {
+    public boolean construct( MavenProject project, ExtractBindexInfo ebi )
+    {
 
-        if (ebi.getPresentationName() != null) {
-            this.setPresentationName(ebi.getPresentationName());
-            if (project.getName() != null) { m_logger.debug("pom property override:<presentationname> " + project.getName()); }
-        } else {
-            this.setPresentationName(project.getName());
+        if ( ebi.getPresentationName() != null )
+        {
+            this.setPresentationName( ebi.getPresentationName() );
+            if ( project.getName() != null )
+            {
+                m_logger.debug( "pom property override:<presentationname> " + project.getName() );
+            }
+        }
+        else
+        {
+            this.setPresentationName( project.getName() );
         }
 
-        if (ebi.getSymbolicName() != null) {
-            this.setSymbolicName(ebi.getSymbolicName());
-            if (project.getArtifactId() != null) { m_logger.debug("pom property override:<symbolicname> " + project.getArtifactId()); }
-        } else {
-            this.setSymbolicName(project.getArtifactId());
+        if ( ebi.getSymbolicName() != null )
+        {
+            this.setSymbolicName( ebi.getSymbolicName() );
+            if ( project.getArtifactId() != null )
+            {
+                m_logger.debug( "pom property override:<symbolicname> " + project.getArtifactId() );
+            }
+        }
+        else
+        {
+            this.setSymbolicName( project.getArtifactId() );
         }
 
-        if (ebi.getVersion() != null) {
-            this.setVersion(ebi.getVersion());
-            if (project.getVersion() != null) { m_logger.debug("pom property override:<version> " + project.getVersion()); }
-        } else {
-            this.setVersion(project.getVersion());
+        if ( ebi.getVersion() != null )
+        {
+            this.setVersion( ebi.getVersion() );
+            if ( project.getVersion() != null )
+            {
+                m_logger.debug( "pom property override:<version> " + project.getVersion() );
+            }
         }
-        
-        if (ebi.getId() != null) {
-            this.setId(ebi.getId());
-        }
-
-        if (ebi.getDescription() != null) {
-            this.setDescription(ebi.getDescription());
-            if (project.getDescription() != null) { m_logger.debug("pom property override:<description> " + project.getDescription()); }
-        } else {
-            this.setDescription(project.getDescription());
+        else
+        {
+            this.setVersion( project.getVersion() );
         }
 
-        if (ebi.getDocumentation() != null) {
-            this.setDocumentation(ebi.getDocumentation());
-            if (project.getUrl() != null) { m_logger.debug("pom property override:<documentation> " + project.getUrl()); }
-        } else {
-            this.setDocumentation(project.getUrl());
+        if ( ebi.getId() != null )
+        {
+            this.setId( ebi.getId() );
         }
 
-        if (ebi.getSource() != null) {
-            this.setSource(ebi.getSource());
-            if (project.getScm() != null) { m_logger.debug("pom property override:<source> " + project.getScm()); }
-        } else {
+        if ( ebi.getDescription() != null )
+        {
+            this.setDescription( ebi.getDescription() );
+            if ( project.getDescription() != null )
+            {
+                m_logger.debug( "pom property override:<description> " + project.getDescription() );
+            }
+        }
+        else
+        {
+            this.setDescription( project.getDescription() );
+        }
+
+        if ( ebi.getDocumentation() != null )
+        {
+            this.setDocumentation( ebi.getDocumentation() );
+            if ( project.getUrl() != null )
+            {
+                m_logger.debug( "pom property override:<documentation> " + project.getUrl() );
+            }
+        }
+        else
+        {
+            this.setDocumentation( project.getUrl() );
+        }
+
+        if ( ebi.getSource() != null )
+        {
+            this.setSource( ebi.getSource() );
+            if ( project.getScm() != null )
+            {
+                m_logger.debug( "pom property override:<source> " + project.getScm() );
+            }
+        }
+        else
+        {
             String src = null;
-            if (project.getScm() != null) { src = project.getScm().getUrl(); }
-            this.setSource(src);
+            if ( project.getScm() != null )
+            {
+                src = project.getScm().getUrl();
+            }
+            this.setSource( src );
         }
 
-        if (ebi.getLicense() != null) {
-            this.setLicense(ebi.getLicense());
+        if ( ebi.getLicense() != null )
+        {
+            this.setLicense( ebi.getLicense() );
             String lic = null;
             List l = project.getLicenses();
             Iterator it = l.iterator();
-            while (it.hasNext()) {
-                if (it.next() != null) {
-                    m_logger.debug("pom property override:<license> " + lic);
+            while ( it.hasNext() )
+            {
+                if ( it.next() != null )
+                {
+                    m_logger.debug( "pom property override:<license> " + lic );
                     break;
                 }
             }
-        } else {
+        }
+        else
+        {
             String lic = null;
             List l = project.getLicenses();
             Iterator it = l.iterator();
-            while (it.hasNext()) {
+            while ( it.hasNext() )
+            {
                 lic = it.next() + ";";
             }
 
-            this.setLicense(lic);
+            this.setLicense( lic );
         }
 
         // create the first capability (ie : bundle)
         Capability capability = new Capability();
-        capability.setName("bundle");
+        capability.setName( "bundle" );
         PElement p = new PElement();
-        p.setN("manifestversion");
-        p.setV("2");
-        capability.addP(p);
+        p.setN( "manifestversion" );
+        p.setV( "2" );
+        capability.addP( p );
 
         p = new PElement();
-        p.setN("presentationname");
-        p.setV(this.getPresentationName());
-        capability.addP(p);
+        p.setN( "presentationname" );
+        p.setV( this.getPresentationName() );
+        capability.addP( p );
 
         p = new PElement();
-        p.setN("symbolicname");
-        p.setV(this.getSymbolicName());
-        capability.addP(p);
+        p.setN( "symbolicname" );
+        p.setV( this.getSymbolicName() );
+        capability.addP( p );
 
         p = new PElement();
-        p.setN("version");
-        p.setT("version");
-        p.setV(this.getVersion());
-        capability.addP(p);
+        p.setN( "version" );
+        p.setT( "version" );
+        p.setV( this.getVersion() );
+        capability.addP( p );
 
-        this.addCapability(capability);
+        this.addCapability( capability );
 
-        List capabilities = (ArrayList) ebi.getCapabilities();
-        for (int i = 0; i < capabilities.size(); i++) {
-            this.addCapability((Capability) capabilities.get(i));
+        List capabilities = ( ArrayList ) ebi.getCapabilities();
+        for ( int i = 0; i < capabilities.size(); i++ )
+        {
+            this.addCapability( ( Capability ) capabilities.get( i ) );
         }
 
-        List requirement = (ArrayList) ebi.getRequirement();
-        for (int i = 0; i < requirement.size(); i++) {
-            this.addRequire((Require) requirement.get(i));
+        List requirement = ( ArrayList ) ebi.getRequirement();
+        for ( int i = 0; i < requirement.size(); i++ )
+        {
+            this.addRequire( ( Require ) requirement.get( i ) );
         }
 
         // we also add the goupId
         Category category = new Category();
-        category.setId(project.getGroupId());
-        this.addCategory(category);
+        category.setId( project.getGroupId() );
+        this.addCategory( category );
 
         return true;
     }
+
 
     /**
      * return if the bundle resource is complete.
      * @return false if an information is missing, else true
      */
-    public boolean isValid() {
+    public boolean isValid()
+    {
         // we must verify required properties are present
-        return this.getPresentationName() != null 
-            && this.getSymbolicName() != null
-            && this.getVersion() != null 
-            && this.getUri() != null 
-            && this.getSize() != null;
+        return this.getPresentationName() != null && this.getSymbolicName() != null && this.getVersion() != null
+            && this.getUri() != null && this.getSize() != null;
     }
+
 
     /**
      * test if this bundle has the same symbolicname, and version number.
@@ -446,75 +568,110 @@ public class ResourcesBundle {
      * @param version version to compare with current bundle
      * @return true if the information are the same, else false
      */
-    public boolean isSameBundleResource(String symbolicName, String version) {
-        if (this.isValid()) {
-            return (symbolicName.compareTo(this.getSymbolicName()) == 0) && (version.compareTo(this.getVersion()) == 0);
-        } else {
+    public boolean isSameBundleResource( String symbolicName, String version )
+    {
+        if ( this.isValid() )
+        {
+            return ( symbolicName.compareTo( this.getSymbolicName() ) == 0 )
+                && ( version.compareTo( this.getVersion() ) == 0 );
+        }
+        else
+        {
             return false;
         }
 
     }
+
 
     /**
      * return a list of categories transformed to node.
      * @param father father document to create node from same document
      * @return List of Node
      */
-    private List getNodeCategories(Document father) {
+    private List getNodeCategories( Document father )
+    {
         List listNode = new ArrayList();
-        List listCategory = (ArrayList) this.getCategory();
-        for (int i = 0; i < listCategory.size(); i++) {
-            listNode.add(((Category) listCategory.get(i)).getNode(father));
+        List listCategory = ( ArrayList ) this.getCategory();
+        for ( int i = 0; i < listCategory.size(); i++ )
+        {
+            listNode.add( ( ( Category ) listCategory.get( i ) ).getNode( father ) );
         }
         return listNode;
     }
+
 
     /**
      * return a list of capabilities transformed to node.
      * @param father father document to create node from same document
      * @return List of Node
      */
-    private List getNodeCapabilities(Document father) {
+    private List getNodeCapabilities( Document father )
+    {
         List listNode = new ArrayList();
-        List listCapability = (ArrayList) this.getCapability();
-        for (int i = 0; i < listCapability.size(); i++) {
-            listNode.add(((Capability) listCapability.get(i)).getNode(father));
+        List listCapability = ( ArrayList ) this.getCapability();
+        for ( int i = 0; i < listCapability.size(); i++ )
+        {
+            listNode.add( ( ( Capability ) listCapability.get( i ) ).getNode( father ) );
         }
         return listNode;
     }
+
 
     /**
      * return a list of requirement transformed to node.
      * @param father father document to create node from same document
      * @return List of Node.
      */
-    private List getNodeRequirement(Document father) {
+    private List getNodeRequirement( Document father )
+    {
         List listNode = new ArrayList();
-        List listRequirement = (ArrayList) this.getRequire();
-        for (int i = 0; i < listRequirement.size(); i++) {
-            listNode.add(((Require) listRequirement.get(i)).getNode(father));
+        List listRequirement = ( ArrayList ) this.getRequire();
+        for ( int i = 0; i < listRequirement.size(); i++ )
+        {
+            listNode.add( ( ( Require ) listRequirement.get( i ) ).getNode( father ) );
         }
         return listNode;
     }
+
 
     /**
      * return the list of properties not define in this bundle resource.
      * @return list of properties not define
      */
-    private String getInvalidProperties() {
-        if (this.isValid()) {
-            if (this.getId() == null) {
+    private String getInvalidProperties()
+    {
+        if ( this.isValid() )
+        {
+            if ( this.getId() == null )
+            {
                 return "id";
-            } else {
+            }
+            else
+            {
                 return "";
             }
         }
         String result = "";
-        if (this.getPresentationName() == null) { result = result + "presentationName;"; }
-        if (this.getSymbolicName() == null) { result = result + "symbolicName;"; }
-        if (this.getVersion() == null) { result = result + "version;"; }
-        if (this.getUri() == null) { result = result + "Uri;"; }
-        if (this.getSize() == null) { result = result + "Size"; }
+        if ( this.getPresentationName() == null )
+        {
+            result = result + "presentationName;";
+        }
+        if ( this.getSymbolicName() == null )
+        {
+            result = result + "symbolicName;";
+        }
+        if ( this.getVersion() == null )
+        {
+            result = result + "version;";
+        }
+        if ( this.getUri() == null )
+        {
+            result = result + "Uri;";
+        }
+        if ( this.getSize() == null )
+        {
+            result = result + "Size";
+        }
         return result;
     }
 

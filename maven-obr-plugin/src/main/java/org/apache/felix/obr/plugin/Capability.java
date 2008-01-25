@@ -18,6 +18,7 @@
  */
 package org.apache.felix.obr.plugin;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,11 +26,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+
 /**
  * This class describe and store capability node.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class Capability {
+public class Capability
+{
 
     /**
      * m_name: name of the capability.
@@ -41,14 +44,17 @@ public class Capability {
      */
     private List m_p = new ArrayList();
 
+
     /**
      * get the name attribute.
      * 
      * @return name attribute
      */
-    public String getName() {
+    public String getName()
+    {
         return m_name;
     }
+
 
     /**
      * set the name attribute.
@@ -56,18 +62,22 @@ public class Capability {
      * @param name new name value
      *            
      */
-    public void setName(String name) {
+    public void setName( String name )
+    {
         this.m_name = name;
     }
+
 
     /**
      * return the capabilities.
      * 
      * @return List of PElement
      */
-    public List getP() {
+    public List getP()
+    {
         return m_p;
     }
+
 
     /**
      * set the capabilities.
@@ -75,9 +85,11 @@ public class Capability {
      * @param mp List of PElement
      *            
      */
-    public void setP(List mp) {
+    public void setP( List mp )
+    {
         this.m_p = mp;
     }
+
 
     /**
      * add one element in List.
@@ -85,9 +97,11 @@ public class Capability {
      * @param pelement PElement
      *            
      */
-    public void addP(PElement pelement) {
-        m_p.add(pelement);
+    public void addP( PElement pelement )
+    {
+        m_p.add( pelement );
     }
+
 
     /**
      * transform this object to Node.
@@ -95,11 +109,13 @@ public class Capability {
      * @param father father document for create Node
      * @return node
      */
-    public Node getNode(Document father) {
-        Element capability = father.createElement("capability");
-        capability.setAttribute("name", this.getName());
-        for (int i = 0; i < this.getP().size(); i++) {
-            capability.appendChild(((PElement) (this.getP().get(i))).getNode(father));
+    public Node getNode( Document father )
+    {
+        Element capability = father.createElement( "capability" );
+        capability.setAttribute( "name", this.getName() );
+        for ( int i = 0; i < this.getP().size(); i++ )
+        {
+            capability.appendChild( ( ( PElement ) ( this.getP().get( i ) ) ).getNode( father ) );
         }
         return capability;
     }
