@@ -78,7 +78,7 @@ public class Require
      */
     public void setExtend( String extend )
     {
-        this.m_extend = extend;
+        m_extend = extend;
     }
 
 
@@ -98,7 +98,7 @@ public class Require
      */
     public void setFilter( String filter )
     {
-        this.m_filter = filter;
+        m_filter = filter;
     }
 
 
@@ -118,7 +118,7 @@ public class Require
      */
     public void setMultiple( String multiple )
     {
-        this.m_multiple = multiple;
+        m_multiple = multiple;
     }
 
 
@@ -138,7 +138,7 @@ public class Require
      */
     public void setName( String name )
     {
-        this.m_name = name;
+        m_name = name;
     }
 
 
@@ -158,7 +158,7 @@ public class Require
      */
     public void setOptional( String optionnal )
     {
-        this.m_optional = optionnal;
+        m_optional = optionnal;
     }
 
 
@@ -178,7 +178,7 @@ public class Require
      */
     public void setValue( String value )
     {
-        this.m_value = value;
+        m_value = value;
     }
 
 
@@ -191,12 +191,12 @@ public class Require
     public Node getNode( Document father )
     {
         Element require = father.createElement( "require" );
-        require.setAttribute( "name", this.getName() );
-        require.setAttribute( "filter", this.getFilter() );
-        require.setAttribute( "extend", this.getExtend() );
-        require.setAttribute( "multiple", this.getMultiple() );
-        require.setAttribute( "optional", this.getOptional() );
-        XmlHelper.setTextContent( require, this.getValue() );
+        require.setAttribute( "name", getName() );
+        require.setAttribute( "filter", getFilter() );
+        require.setAttribute( "extend", getExtend() );
+        require.setAttribute( "multiple", getMultiple() );
+        require.setAttribute( "optional", getOptional() );
+        XmlHelper.setTextContent( require, getValue() );
 
         return require;
     }

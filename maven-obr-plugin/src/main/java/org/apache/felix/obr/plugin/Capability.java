@@ -64,7 +64,7 @@ public class Capability
      */
     public void setName( String name )
     {
-        this.m_name = name;
+        m_name = name;
     }
 
 
@@ -87,7 +87,7 @@ public class Capability
      */
     public void setP( List mp )
     {
-        this.m_p = mp;
+        m_p = mp;
     }
 
 
@@ -112,10 +112,10 @@ public class Capability
     public Node getNode( Document father )
     {
         Element capability = father.createElement( "capability" );
-        capability.setAttribute( "name", this.getName() );
-        for ( int i = 0; i < this.getP().size(); i++ )
+        capability.setAttribute( "name", getName() );
+        for ( int i = 0; i < getP().size(); i++ )
         {
-            capability.appendChild( ( ( PElement ) ( this.getP().get( i ) ) ).getNode( father ) );
+            capability.appendChild( ( ( PElement ) ( getP().get( i ) ) ).getNode( father ) );
         }
         return capability;
     }

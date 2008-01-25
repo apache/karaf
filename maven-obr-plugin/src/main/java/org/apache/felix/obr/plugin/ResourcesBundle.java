@@ -125,7 +125,7 @@ public class ResourcesBundle
 
     public void setCapability( List capability )
     {
-        this.m_capability = capability;
+        m_capability = capability;
     }
 
 
@@ -137,7 +137,7 @@ public class ResourcesBundle
 
     public void setCategory( List category )
     {
-        this.m_category = category;
+        m_category = category;
     }
 
 
@@ -149,7 +149,7 @@ public class ResourcesBundle
 
     public void setLicense( String license )
     {
-        this.m_license = license;
+        m_license = license;
     }
 
 
@@ -161,7 +161,7 @@ public class ResourcesBundle
 
     public void setDescription( String description )
     {
-        this.m_description = description;
+        m_description = description;
     }
 
 
@@ -173,7 +173,7 @@ public class ResourcesBundle
 
     public void setDocumentation( String documentation )
     {
-        this.m_documentation = documentation;
+        m_documentation = documentation;
     }
 
 
@@ -197,7 +197,7 @@ public class ResourcesBundle
 
     public void setSize( String size )
     {
-        this.m_size = size;
+        m_size = size;
     }
 
 
@@ -221,7 +221,7 @@ public class ResourcesBundle
 
     public void setUri( String url )
     {
-        this.m_uri = url;
+        m_uri = url;
     }
 
 
@@ -233,7 +233,7 @@ public class ResourcesBundle
 
     public void setVersion( String version )
     {
-        this.m_version = version;
+        m_version = version;
     }
 
 
@@ -245,7 +245,7 @@ public class ResourcesBundle
 
     public void setRequire( List require )
     {
-        this.m_require = require;
+        m_require = require;
     }
 
 
@@ -257,7 +257,7 @@ public class ResourcesBundle
 
     public void setSource( String source )
     {
-        this.m_source = source;
+        m_source = source;
     }
 
 
@@ -269,7 +269,7 @@ public class ResourcesBundle
 
     public void setId( String id )
     {
-        this.m_id = id;
+        m_id = id;
     }
 
 
@@ -312,9 +312,9 @@ public class ResourcesBundle
     public Node getNode( Document father )
     {
         // return the complete resource tree
-        if ( !this.isValid() || this.getId() == null )
+        if ( !isValid() || getId() == null )
         {
-            m_logger.error( "those properties was not defined:" + this.getInvalidProperties() );
+            m_logger.error( "those properties was not defined:" + getInvalidProperties() );
             return null;
         }
 
@@ -325,49 +325,49 @@ public class ResourcesBundle
         Element source = father.createElement( "source" );
         Element license = father.createElement( "license" );
 
-        resource.setAttribute( "id", this.getId() );
-        resource.setAttribute( "symbolicname", this.getSymbolicName() );
-        resource.setAttribute( "presentationname", this.getPresentationName() );
-        resource.setAttribute( "uri", this.getUri() );
-        resource.setAttribute( "version", this.getVersion() );
+        resource.setAttribute( "id", getId() );
+        resource.setAttribute( "symbolicname", getSymbolicName() );
+        resource.setAttribute( "presentationname", getPresentationName() );
+        resource.setAttribute( "uri", getUri() );
+        resource.setAttribute( "version", getVersion() );
 
-        XmlHelper.setTextContent( description, this.getDescription() );
+        XmlHelper.setTextContent( description, getDescription() );
         resource.appendChild( description );
 
-        XmlHelper.setTextContent( size, this.getSize() );
+        XmlHelper.setTextContent( size, getSize() );
         resource.appendChild( size );
 
-        if ( this.getDocumentation() != null )
+        if ( getDocumentation() != null )
         {
-            XmlHelper.setTextContent( documentation, this.getDocumentation() );
+            XmlHelper.setTextContent( documentation, getDocumentation() );
             resource.appendChild( documentation );
         }
 
-        if ( this.getSource() != null )
+        if ( getSource() != null )
         {
-            XmlHelper.setTextContent( source, this.getSource() );
+            XmlHelper.setTextContent( source, getSource() );
             resource.appendChild( source );
         }
 
-        if ( this.getLicense() != null )
+        if ( getLicense() != null )
         {
-            XmlHelper.setTextContent( license, this.getLicense() );
+            XmlHelper.setTextContent( license, getLicense() );
             resource.appendChild( license );
         }
 
-        List list = ( ArrayList ) this.getNodeCategories( father );
+        List list = ( ArrayList ) getNodeCategories( father );
         for ( int i = 0; i < list.size(); i++ )
         {
             resource.appendChild( ( Node ) list.get( i ) );
         }
 
-        list = ( ArrayList ) this.getNodeCapabilities( father );
+        list = ( ArrayList ) getNodeCapabilities( father );
         for ( int i = 0; i < list.size(); i++ )
         {
             resource.appendChild( ( Node ) list.get( i ) );
         }
 
-        list = ( ArrayList ) this.getNodeRequirement( father );
+        list = ( ArrayList ) getNodeRequirement( father );
         for ( int i = 0; i < list.size(); i++ )
         {
             resource.appendChild( ( Node ) list.get( i ) );
@@ -388,7 +388,7 @@ public class ResourcesBundle
 
         if ( ebi.getPresentationName() != null )
         {
-            this.setPresentationName( ebi.getPresentationName() );
+            setPresentationName( ebi.getPresentationName() );
             if ( project.getName() != null )
             {
                 m_logger.debug( "pom property override:<presentationname> " + project.getName() );
@@ -396,12 +396,12 @@ public class ResourcesBundle
         }
         else
         {
-            this.setPresentationName( project.getName() );
+            setPresentationName( project.getName() );
         }
 
         if ( ebi.getSymbolicName() != null )
         {
-            this.setSymbolicName( ebi.getSymbolicName() );
+            setSymbolicName( ebi.getSymbolicName() );
             if ( project.getArtifactId() != null )
             {
                 m_logger.debug( "pom property override:<symbolicname> " + project.getArtifactId() );
@@ -409,12 +409,12 @@ public class ResourcesBundle
         }
         else
         {
-            this.setSymbolicName( project.getArtifactId() );
+            setSymbolicName( project.getArtifactId() );
         }
 
         if ( ebi.getVersion() != null )
         {
-            this.setVersion( ebi.getVersion() );
+            setVersion( ebi.getVersion() );
             if ( project.getVersion() != null )
             {
                 m_logger.debug( "pom property override:<version> " + project.getVersion() );
@@ -422,17 +422,17 @@ public class ResourcesBundle
         }
         else
         {
-            this.setVersion( project.getVersion() );
+            setVersion( project.getVersion() );
         }
 
         if ( ebi.getId() != null )
         {
-            this.setId( ebi.getId() );
+            setId( ebi.getId() );
         }
 
         if ( ebi.getDescription() != null )
         {
-            this.setDescription( ebi.getDescription() );
+            setDescription( ebi.getDescription() );
             if ( project.getDescription() != null )
             {
                 m_logger.debug( "pom property override:<description> " + project.getDescription() );
@@ -440,12 +440,12 @@ public class ResourcesBundle
         }
         else
         {
-            this.setDescription( project.getDescription() );
+            setDescription( project.getDescription() );
         }
 
         if ( ebi.getDocumentation() != null )
         {
-            this.setDocumentation( ebi.getDocumentation() );
+            setDocumentation( ebi.getDocumentation() );
             if ( project.getUrl() != null )
             {
                 m_logger.debug( "pom property override:<documentation> " + project.getUrl() );
@@ -453,12 +453,12 @@ public class ResourcesBundle
         }
         else
         {
-            this.setDocumentation( project.getUrl() );
+            setDocumentation( project.getUrl() );
         }
 
         if ( ebi.getSource() != null )
         {
-            this.setSource( ebi.getSource() );
+            setSource( ebi.getSource() );
             if ( project.getScm() != null )
             {
                 m_logger.debug( "pom property override:<source> " + project.getScm() );
@@ -471,12 +471,12 @@ public class ResourcesBundle
             {
                 src = project.getScm().getUrl();
             }
-            this.setSource( src );
+            setSource( src );
         }
 
         if ( ebi.getLicense() != null )
         {
-            this.setLicense( ebi.getLicense() );
+            setLicense( ebi.getLicense() );
             String lic = null;
             List l = project.getLicenses();
             Iterator it = l.iterator();
@@ -499,7 +499,7 @@ public class ResourcesBundle
                 lic = it.next() + ";";
             }
 
-            this.setLicense( lic );
+            setLicense( lic );
         }
 
         // create the first capability (ie : bundle)
@@ -512,38 +512,38 @@ public class ResourcesBundle
 
         p = new PElement();
         p.setN( "presentationname" );
-        p.setV( this.getPresentationName() );
+        p.setV( getPresentationName() );
         capability.addP( p );
 
         p = new PElement();
         p.setN( "symbolicname" );
-        p.setV( this.getSymbolicName() );
+        p.setV( getSymbolicName() );
         capability.addP( p );
 
         p = new PElement();
         p.setN( "version" );
         p.setT( "version" );
-        p.setV( this.getVersion() );
+        p.setV( getVersion() );
         capability.addP( p );
 
-        this.addCapability( capability );
+        addCapability( capability );
 
         List capabilities = ( ArrayList ) ebi.getCapabilities();
         for ( int i = 0; i < capabilities.size(); i++ )
         {
-            this.addCapability( ( Capability ) capabilities.get( i ) );
+            addCapability( ( Capability ) capabilities.get( i ) );
         }
 
         List requirement = ( ArrayList ) ebi.getRequirement();
         for ( int i = 0; i < requirement.size(); i++ )
         {
-            this.addRequire( ( Require ) requirement.get( i ) );
+            addRequire( ( Require ) requirement.get( i ) );
         }
 
         // we also add the goupId
         Category category = new Category();
         category.setId( project.getGroupId() );
-        this.addCategory( category );
+        addCategory( category );
 
         return true;
     }
@@ -556,8 +556,8 @@ public class ResourcesBundle
     public boolean isValid()
     {
         // we must verify required properties are present
-        return this.getPresentationName() != null && this.getSymbolicName() != null && this.getVersion() != null
-            && this.getUri() != null && this.getSize() != null;
+        return getPresentationName() != null && getSymbolicName() != null && getVersion() != null
+            && getUri() != null && getSize() != null;
     }
 
 
@@ -570,10 +570,10 @@ public class ResourcesBundle
      */
     public boolean isSameBundleResource( String symbolicName, String version )
     {
-        if ( this.isValid() )
+        if ( isValid() )
         {
-            return ( symbolicName.compareTo( this.getSymbolicName() ) == 0 )
-                && ( version.compareTo( this.getVersion() ) == 0 );
+            return ( symbolicName.compareTo( getSymbolicName() ) == 0 )
+                && ( version.compareTo( getVersion() ) == 0 );
         }
         else
         {
@@ -591,7 +591,7 @@ public class ResourcesBundle
     private List getNodeCategories( Document father )
     {
         List listNode = new ArrayList();
-        List listCategory = ( ArrayList ) this.getCategory();
+        List listCategory = ( ArrayList ) getCategory();
         for ( int i = 0; i < listCategory.size(); i++ )
         {
             listNode.add( ( ( Category ) listCategory.get( i ) ).getNode( father ) );
@@ -608,7 +608,7 @@ public class ResourcesBundle
     private List getNodeCapabilities( Document father )
     {
         List listNode = new ArrayList();
-        List listCapability = ( ArrayList ) this.getCapability();
+        List listCapability = ( ArrayList ) getCapability();
         for ( int i = 0; i < listCapability.size(); i++ )
         {
             listNode.add( ( ( Capability ) listCapability.get( i ) ).getNode( father ) );
@@ -625,7 +625,7 @@ public class ResourcesBundle
     private List getNodeRequirement( Document father )
     {
         List listNode = new ArrayList();
-        List listRequirement = ( ArrayList ) this.getRequire();
+        List listRequirement = ( ArrayList ) getRequire();
         for ( int i = 0; i < listRequirement.size(); i++ )
         {
             listNode.add( ( ( Require ) listRequirement.get( i ) ).getNode( father ) );
@@ -640,9 +640,9 @@ public class ResourcesBundle
      */
     private String getInvalidProperties()
     {
-        if ( this.isValid() )
+        if ( isValid() )
         {
-            if ( this.getId() == null )
+            if ( getId() == null )
             {
                 return "id";
             }
@@ -652,23 +652,23 @@ public class ResourcesBundle
             }
         }
         String result = "";
-        if ( this.getPresentationName() == null )
+        if ( getPresentationName() == null )
         {
             result = result + "presentationName;";
         }
-        if ( this.getSymbolicName() == null )
+        if ( getSymbolicName() == null )
         {
             result = result + "symbolicName;";
         }
-        if ( this.getVersion() == null )
+        if ( getVersion() == null )
         {
             result = result + "version;";
         }
-        if ( this.getUri() == null )
+        if ( getUri() == null )
         {
             result = result + "Uri;";
         }
-        if ( this.getSize() == null )
+        if ( getSize() == null )
         {
             result = result + "Size";
         }

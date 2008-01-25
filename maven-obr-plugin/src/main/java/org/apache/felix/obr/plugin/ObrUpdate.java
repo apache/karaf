@@ -136,24 +136,24 @@ public class ObrUpdate
     public ObrUpdate( PathFile repoFilename, String obrXml, MavenProject project, String outputFile, String localRepo,
         Config userConfig, Log log )
     {
-        // this.m_localRepo = localRepo;
-        this.m_outputFile = outputFile;
-        this.m_repoFilename = repoFilename.getUri();
-        this.m_obrXml = obrXml;
-        this.m_project = project;
-        this.m_logger = log;
+        // m_localRepo = localRepo;
+        m_outputFile = outputFile;
+        m_repoFilename = repoFilename.getUri();
+        m_obrXml = obrXml;
+        m_project = project;
+        m_logger = log;
 
-        this.m_userConfig = userConfig;
+        m_userConfig = userConfig;
 
         m_resourceBundle = new ResourcesBundle( log );
 
         if ( userConfig.isRemotely() )
         {
-            this.m_repo = new PathFile( localRepo );
+            m_repo = new PathFile( localRepo );
         }
         else
         {
-            this.m_repo = repoFilename;
+            m_repo = repoFilename;
         }
     }
 

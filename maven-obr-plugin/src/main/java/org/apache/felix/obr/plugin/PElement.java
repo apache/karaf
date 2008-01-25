@@ -63,7 +63,7 @@ public class PElement
      */
     public void setN( String n )
     {
-        this.m_n = n;
+        m_n = n;
     }
 
 
@@ -83,7 +83,7 @@ public class PElement
      */
     public void setT( String t )
     {
-        this.m_t = t;
+        m_t = t;
     }
 
 
@@ -103,7 +103,7 @@ public class PElement
      */
     public void setV( String v )
     {
-        this.m_v = v;
+        m_v = v;
     }
 
 
@@ -115,15 +115,15 @@ public class PElement
     public Node getNode( Document father )
     {
         Element p = father.createElement( "p" );
-        p.setAttribute( "n", this.getN() );
-        if ( this.getT() != null )
+        p.setAttribute( "n", getN() );
+        if ( getT() != null )
         {
-            p.setAttribute( "t", this.getT() );
+            p.setAttribute( "t", getT() );
         }
 
-        if ( this.getV() != null )
+        if ( getV() != null )
         {
-            p.setAttribute( "v", this.getV() );
+            p.setAttribute( "v", getV() );
         }
 
         return p;

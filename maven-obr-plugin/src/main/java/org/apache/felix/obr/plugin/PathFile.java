@@ -93,13 +93,13 @@ public class PathFile
     public PathFile( String filename )
     {
 
-        this.m_fullFilename = filename;
+        m_fullFilename = filename;
         if ( filename == null )
         {
-            this.m_valid = false;
+            m_valid = false;
             return;
         }
-        this.m_valid = true;
+        m_valid = true;
         m_protocol = extractProtocol( filename );
         m_pathFile = extractPathFile( filename );
         if ( m_pathFile.startsWith( "//" ) )
@@ -141,7 +141,7 @@ public class PathFile
         }
 
         // add the '/' before the complete path if it is absolute path
-        if ( !this.isRelative() && !m_pathFile.startsWith( "/" ) )
+        if ( !isRelative() && !m_pathFile.startsWith( "/" ) )
         {
             m_pathFile = "/".concat( m_pathFile );
         }
@@ -230,10 +230,10 @@ public class PathFile
      */
     public void setBaseDir( String baseDir )
     {
-        this.m_baseDir = baseDir;
-        if ( isRelative() && this.m_fullFilename != null )
+        m_baseDir = baseDir;
+        if ( isRelative() && m_fullFilename != null )
         {
-            this.m_valid = true;
+            m_valid = true;
             if ( getProtocol().compareTo( "file" ) == 0 || getProtocol().compareTo( "" ) == 0 )
             {
                 File f = new File( getOnlyAbsoluteFilename() );
@@ -256,7 +256,7 @@ public class PathFile
      */
     public String getBaseDir()
     {
-        return this.m_baseDir;
+        return m_baseDir;
     }
 
 
@@ -296,11 +296,11 @@ public class PathFile
      */
     public File getFile()
     {
-        if ( !this.isValid() )
+        if ( !isValid() )
         {
             return null;
         }
-        String path = PathFile.uniformSeparator( this.getOnlyAbsoluteFilename() );
+        String path = PathFile.uniformSeparator( getOnlyAbsoluteFilename() );
         if ( File.separatorChar == '\\' )
         {
             path = path.replace( '\\', '/' );
@@ -316,7 +316,7 @@ public class PathFile
      */
     public URI getUri()
     {
-        if ( !this.isValid() )
+        if ( !isValid() )
         {
             return null;
         }
@@ -349,7 +349,7 @@ public class PathFile
      */
     public String getRelativePath()
     {
-        if ( !this.isValid() )
+        if ( !isValid() )
         {
             return null;
         }
@@ -364,11 +364,11 @@ public class PathFile
      */
     public String getOnlyRelativePath()
     {
-        if ( !this.isValid() )
+        if ( !isValid() )
         {
             return null;
         }
-        if ( this.isRelative() )
+        if ( isRelative() )
         {
             return m_pathFile;
 
@@ -446,7 +446,7 @@ public class PathFile
      */
     public String getOnlyAbsolutePath()
     {
-        if ( !this.isValid() )
+        if ( !isValid() )
         {
             return null;
         }
@@ -526,7 +526,7 @@ public class PathFile
      */
     public String getOnlyRelativeFilename()
     {
-        if ( !this.isValid() )
+        if ( !isValid() )
         {
             return "";
         }
@@ -542,12 +542,12 @@ public class PathFile
      */
     public String getRelativeFilename()
     {
-        if ( !this.isValid() )
+        if ( !isValid() )
         {
             return "";
         }
 
-        if ( this.isRelative() )
+        if ( isRelative() )
         {
             return getRelativePath() + getFilename();
         }
@@ -576,7 +576,7 @@ public class PathFile
      */
     public boolean createPath()
     {
-        File path = new File( this.getOnlyAbsolutePath() );
+        File path = new File( getOnlyAbsolutePath() );
         if ( path.exists() )
         {
             return true;
@@ -591,15 +591,15 @@ public class PathFile
      */
     public boolean createFile()
     {
-        File path = new File( this.getOnlyAbsolutePath() );
+        File path = new File( getOnlyAbsolutePath() );
         if ( !path.exists() )
         {
-            if ( !this.createPath() )
+            if ( !createPath() )
             {
                 return false;
             }
         }
-        path = new File( this.getOnlyAbsoluteFilename() );
+        path = new File( getOnlyAbsoluteFilename() );
         try
         {
             return path.createNewFile();
@@ -618,7 +618,7 @@ public class PathFile
      */
     public boolean delete()
     {
-        File path = new File( this.getAbsoluteFilename() );
+        File path = new File( getAbsoluteFilename() );
         if ( path.exists() )
         {
             return path.delete();

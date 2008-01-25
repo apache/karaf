@@ -59,7 +59,7 @@ public class ExtractBindexInfo
     public ExtractBindexInfo( URI repoFilename, String outFile ) throws MojoExecutionException
     {
 
-        this.m_resource = null;
+        m_resource = null;
         RepositoryImpl repository = null;
         try
         {
@@ -187,7 +187,7 @@ public class ExtractBindexInfo
             require.setMultiple( String.valueOf( ci.isMultiple() ) );
             require.setOptional( String.valueOf( ci.isOptional() ) );
             require.setName( ci.getName() );
-            require.setFilter( this.parseFilter( ci.getFilter() ) );
+            require.setFilter( parseFilter( ci.getFilter() ) );
             require.setValue( ci.getComment() );
             list.add( require );
         }

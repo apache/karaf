@@ -55,7 +55,7 @@ public class Category
      */
     public void setId( String id )
     {
-        this.m_id = id;
+        m_id = id;
     }
 
 
@@ -67,7 +67,7 @@ public class Category
     public Node getNode( Document father )
     {
         Element category = father.createElement( "category" );
-        category.setAttribute( "id", this.getId() );
+        category.setAttribute( "id", getId() );
         return category;
     }
 }
