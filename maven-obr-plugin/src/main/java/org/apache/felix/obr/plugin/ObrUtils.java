@@ -21,7 +21,6 @@ package org.apache.felix.obr.plugin;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -61,8 +60,9 @@ public class ObrUtils
         try
         {
             uri = new URI( obrRepository );
+            uri.toURL(); // check protocol
         }
-        catch ( URISyntaxException e )
+        catch ( Exception e )
         {
             uri = null;
         }
