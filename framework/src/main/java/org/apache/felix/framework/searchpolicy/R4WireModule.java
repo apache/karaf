@@ -23,6 +23,7 @@ import java.util.*;
 
 import org.apache.felix.framework.searchpolicy.R4SearchPolicyCore.ResolvedPackage;
 import org.apache.felix.framework.searchpolicy.R4SearchPolicyCore.PackageSource;
+import org.apache.felix.framework.util.CompoundEnumeration;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.moduleloader.*;
@@ -127,6 +128,9 @@ public class R4WireModule implements IWire
                     return url;
                 }
             }
+
+            // Don't throw ResourceNotFoundException because module
+            // dependencies support split packages.
         }
 
         return null;
@@ -137,8 +141,37 @@ public class R4WireModule implements IWire
      */
     public Enumeration getResources(String name) throws ResourceNotFoundException
     {
-// TODO: RB - Implement R4WireModule.getResources()
-        return null;
+        // List to hold all enumerations from all package sources.
+        List enums = new ArrayList();
+
+        // Get the package of the target class.
+        String pkgName = Util.getResourcePackage(name);
+
+        // See if we have a resolved package for the resource's package.
+        // If so, loop through all package sources and aggregate any
+        // matching resource enumerations.
+        ResolvedPackage rp = (ResolvedPackage) m_pkgMap.get(pkgName);
+        if (rp != null)
+        {
+            for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
+            {
+                PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
+                Enumeration urls = ps.m_module.getContentLoader().getResources(name);
+                if (urls != null)
+                {
+                    enums.add(urls);
+                }
+            }
+
+            // Don't throw ResourceNotFoundException because module
+            // dependencies support split packages.
+        }
+
+        return (enums.size() == 0)
+            ? null
+            : new CompoundEnumeration(
+                (Enumeration[]) enums.toArray(new Enumeration[enums.size()]));
+
     }
 
     public String toString()

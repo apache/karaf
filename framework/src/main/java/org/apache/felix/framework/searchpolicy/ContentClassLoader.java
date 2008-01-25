@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -46,7 +46,7 @@ public class ContentClassLoader extends SecureClassLoader
             Class dexFileClass =  Class.forName("android.dalvik.DexFile");
             dexFileClassConstructor = dexFileClass.getConstructor(
                 new Class[] { java.io.File.class });
-            dexFileClassLoadClass = dexFileClass.getMethod("loadClass", 
+            dexFileClassLoadClass = dexFileClass.getMethod("loadClass",
                 new Class[] { String.class, ClassLoader.class });
         }
         catch (Exception ex)
@@ -99,7 +99,7 @@ public class ContentClassLoader extends SecureClassLoader
 
         // Make sure the class was not already loaded.
         synchronized (this)
-        {    
+        {
             clazz = findLoadedClass(name);
         }
 
@@ -138,7 +138,7 @@ public class ContentClassLoader extends SecureClassLoader
             String actual = name.replace('.', '/') + ".class";
 
             byte[] bytes = null;
-            
+
             IContent content = null;
             // Check the module class path.
             for (int i = 0;
@@ -194,7 +194,7 @@ public class ContentClassLoader extends SecureClassLoader
                         // If we can load the class from a dex file do so
                         if (content instanceof JarContent)
                         {
-                            try 
+                            try
                             {
                                 clazz = getDexFileClass((JarContent) content, name, this);
                             }
@@ -237,7 +237,7 @@ public class ContentClassLoader extends SecureClassLoader
 
         Object dexFile = null;
 
-        if (!m_jarContentToDexFile.containsKey(content)) 
+        if (!m_jarContentToDexFile.containsKey(content))
         {
             try
             {
@@ -253,10 +253,10 @@ public class ContentClassLoader extends SecureClassLoader
         {
             dexFile = m_jarContentToDexFile.get(content);
         }
-        
+
         if (dexFile != null)
         {
-            return (Class) m_dexFileClassLoadClass.invoke(dexFile, 
+            return (Class) m_dexFileClassLoadClass.invoke(dexFile,
                 new Object[] { name.replace('.','/'), loader });
         }
         return null;
@@ -290,12 +290,28 @@ public class ContentClassLoader extends SecureClassLoader
 
     protected URL findResource(String name)
     {
-        return m_contentLoader.getResource(name);
+        // Ask the search policy for the resource.
+        try
+        {
+            return m_contentLoader.getSearchPolicy().findResource(name);
+        }
+        catch (ResourceNotFoundException ex)
+        {
+        }
+        return null;
     }
 
     protected Enumeration findResources(String name)
     {
-        return m_contentLoader.getResources(name);
+        // Ask the search policy for the resources.
+        try
+        {
+            return m_contentLoader.getSearchPolicy().findResources(name);
+        }
+        catch (ResourceNotFoundException ex)
+        {
+        }
+        return null;
     }
 
     protected String findLibrary(String name)

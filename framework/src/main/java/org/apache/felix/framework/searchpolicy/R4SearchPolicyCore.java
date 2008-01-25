@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.apache.felix.framework.Logger;
+import org.apache.felix.framework.util.CompoundEnumeration;
 import org.apache.felix.framework.util.SecurityManagerEx;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.Capability;
@@ -222,6 +223,8 @@ public class R4SearchPolicyCore implements ModuleListener
         throws ResourceNotFoundException
     {
         Enumeration urls = null;
+        List enums = new ArrayList();
+
         // First, try to resolve the originating module.
 // TODO: FRAMEWORK - Consider opimizing this call to resolve, since it is called
 // for each class load.
@@ -278,21 +281,20 @@ public class R4SearchPolicyCore implements ModuleListener
                         // is nothing we can do, so just ignore it.
                     }
                     // If this is a java.* package, then always terminate the
-                    // search; otherwise, continue to look locally if not found.
-                    if (m_bootPkgs[i].startsWith("java.") || (urls != null))
+                    // search; otherwise, continue to look locally.
+                    if (m_bootPkgs[i].startsWith("java."))
                     {
                         return urls;
                     }
-                    else
-                    {
-                        break;
-                    }
+
+                    enums.add(urls);
+                    break;
                 }
             }
         }
 
         // Look in the module's imports.
-        // We delegate to the module's wires to the resources.
+        // We delegate to the module's wires for the resources.
         // If any resources are found, this means that the package of these
         // resources is imported, we must not keep looking since we do not
         // support split-packages.
@@ -302,37 +304,63 @@ public class R4SearchPolicyCore implements ModuleListener
         IWire[] wires = module.getWires();
         for (int i = 0; (wires != null) && (i < wires.length); i++)
         {
-            // If we find the class or resource, then return it.
-            urls = wires[i].getResources(name);
-            if (urls != null)
+            if (wires[i] instanceof R4Wire)
             {
-                return urls;
+                // If we find the class or resource, then return it.
+                urls = wires[i].getResources(name);
+                if (urls != null)
+                {
+                    enums.add(urls);
+                    return new CompoundEnumeration((Enumeration[])
+                        enums.toArray(new Enumeration[enums.size()]));
+                }
             }
         }
 
-        // If not found, try the module's own class path.
+        // See whether we can get the resource from the required bundles and
+        // regardless of whether or not this is the case continue to the next
+        // step potentially passing on the result of this search (if any).
+        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        {
+            if (wires[i] instanceof R4WireModule)
+            {
+                // If we find the class or resource, then add it.
+                urls = wires[i].getResources(name);
+                if (urls != null)
+                {
+                    enums.add(urls);
+                }
+            }
+        }
+
+        // Try the module's own class path. If we can find the resource then
+        // return it together with the results from the other searches else
+        // try to look into the dynamic imports.
         urls = module.getContentLoader().getResources(name);
         if (urls != null)
         {
-            return urls;
+            enums.add(urls);
         }
-
-        // If still not found, then try the module's dynamic imports.
-        // At this point, the module's imports were searched and so was the
-        // the module's content. Now we make an attempt to load the
-        // class/resource via a dynamic import, if possible.
-        IWire wire = attemptDynamicImport(module, pkgName);
-        if (wire != null)
+        else
         {
-            urls = wire.getResources(name);
+            // If not found, then try the module's dynamic imports.
+            // At this point, the module's imports were searched and so was the
+            // the module's content. Now we make an attempt to load the
+            // class/resource via a dynamic import, if possible.
+            IWire wire = attemptDynamicImport(module, pkgName);
+            if (wire != null)
+            {
+                urls = wire.getResources(name);
+
+                if (urls != null)
+                {
+                    enums.add(urls);
+                }
+            }
         }
 
-        if (urls == null)
-        {
-            throw new ResourceNotFoundException(name);
-        }
-
-        return urls;
+        return new CompoundEnumeration((Enumeration[])
+            enums.toArray(new Enumeration[enums.size()]));
     }
 
     private Object findClassOrResource(IModule module, String name, boolean isClass)
