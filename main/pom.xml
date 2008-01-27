@@ -27,12 +27,12 @@
   <packaging>bundle</packaging>
   <name>Apache Felix Main</name>
   <artifactId>org.apache.felix.main</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>1.0.2</version>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.framework</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.0.2</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -47,7 +47,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.0.0</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -58,7 +58,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell.tui</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.0.0</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -69,7 +69,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.bundlerepository</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.0.1</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -102,7 +102,7 @@
             <Main-Class>org.apache.felix.main.Main</Main-Class>
             <Bundle-Name>Apache Felix</Bundle-Name>
             <Bundle-Description>OSGi R4 framework.</Bundle-Description>
-            <Private-Package>org.apache.felix.main.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.startlevel,org.osgi.service.url,org.osgi.util.tracker</Private-Package>
+            <Private-Package>org.apache.felix.main.*,org.apache.felix.moduleloader.*;-split-package:=merge-first,org.apache.felix.framework.*;-split-package:=merge-first,org.osgi.framework;-split-package:=merge-first,org.osgi.service.packageadmin;-split-package:=merge-first,org.osgi.service.startlevel;-split-package:=merge-first,org.osgi.service.url;-split-package:=merge-first,org.osgi.util.tracker;-split-package:=merge-first</Private-Package>
             <Import-Package>!*</Import-Package>
             <Include-Resource>{src/main/resources/}</Include-Resource>
             <!-- Include these properties here because we want them
@@ -130,7 +130,7 @@
                 <artifactItem>
                   <groupId>${pom.groupId}</groupId>
                   <artifactId>org.apache.felix.framework</artifactId>
-                  <version>1.1.0-SNAPSHOT</version>
+                  <version>1.0.2</version>
                 </artifactItem>
               </artifactItems>
             </configuration>
@@ -146,7 +146,7 @@
                   <artifactItem>
                      <groupId>${pom.groupId}</groupId>
                      <artifactId>org.apache.felix.shell</artifactId>
-                     <version>1.1.0-SNAPSHOT</version>
+                     <version>1.0.0</version>
                      <type>jar</type>
                      <overWrite>true</overWrite>
                      <outputDirectory>${project.build.directory}/bundle</outputDirectory >
@@ -154,7 +154,7 @@
                    <artifactItem>
                      <groupId>${pom.groupId}</groupId>
                      <artifactId>org.apache.felix.shell.tui</artifactId>
-                     <version>1.1.0-SNAPSHOT</version>
+                     <version>1.0.0</version>
                      <type>jar</type>
                      <overWrite>true</overWrite>
                      <outputDirectory>${project.build.directory}/bundle</outputDirectory >
@@ -162,7 +162,7 @@
                    <artifactItem>
                      <groupId>${pom.groupId}</groupId>
                      <artifactId>org.apache.felix.bundlerepository</artifactId>
-                     <version>1.1.0-SNAPSHOT</version>
+                     <version>1.0.1</version>
                      <type>jar</type>
                      <overWrite>true</overWrite>
                      <outputDirectory>${project.build.directory}/bundle</outputDirectory >
