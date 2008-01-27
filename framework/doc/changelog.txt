@@ -1,3 +1,78 @@
+Changes from 1.0.1 to 1.0.2
+---------------------------
+
+* [2008-01-27] Moved framework docs to main, since the launcher examples now
+  depend on main for the auto-property handling.
+* [2008-01-25] Applied patches  to improve how Felix finds resources when
+  getResources() is called. (FELIX-466, FELIX-467)
+* [2008-01-25] Make FilterImpl.toString() add escape characters where needed.
+  (FELIX-471)
+* [2008-01-16] Fix a NPE on framework restart when extension bundles are
+  installed.
+* [2008-01-15] Try to fix a potential visibility issue on loading a class
+  form a bundle where it seems to be possible that we create two classloaders
+  instead of one.
+* [2008-01-15] Modified boot delegation to not terminate when delegating to
+  parent class loader for non-java.* packages. (FELIX-463)
+* [2008-01-04] Fix some issues related to directories on the bundle class
+  path. Specifically, leading slashes created an issue and are now stripped
+  and entries were not being properly filtered when enumerating the contents
+  of a class path directory. (FELIX-426)
+* [2007-12-20] Modified logger to have all of its public methods be final to
+  avoid it from being extended in undesired ways via the constructor supplied
+  logger. (FELIX-428)
+* [2007-12-20] The TCK has changed to verify that bundles do not depend on
+  themselves, so we filter that case now.
+* [2007-12-20] Applied patch from Guillaume Nodet to properly fire a framework
+  error event only when a bundle cannot be resolved. (FELIX-441)
+* [2007-12-19] Modified framework to accept a Logger instance so that host
+  applications can do custom logging until the log service arrives. (FELIX-428)
+* [2007-12-19] Add support for loading bundles on Google Android (FELIX-440).
+* [2007-12-18] Improve native code loading - bundle installation will now
+  fail in case a native library is not in the jar and we only use the first
+  library of a given name. Furthermore, we now support .dylib extensions on
+  the mac as well as others; should make it possible to use .netmodules as
+  well. (FELIX-439)
+* [2007-12-17] Make the win32 alias match any version of windows for native
+  clauses. (FELIX-438)
+* [2007-12-14] Removed auto-property processing out of the framework and
+  into the default launcher, i.e, main. (FELIX-393)
+* [2007-12-13] Fix a StackOverflowError in URLHandlers.createStreamHandler() 
+  when creating URL on jamvm and Mika. This patch resolves an unfortunate 
+  interaction between our ExtensionManager and the URLHandlers by making the 
+  URLHandlers aware of the extension protocol. Pretty much like we do already 
+  for the bundle protocol. (FELIX-435)
+* [2007-11-26] Fix a small oversight in the extension manager that could lead
+  to a null pointer exception and save some memory by creating less objects.
+* [2007-11-26] Degrate to version 0.0.0 if we can not find the Felix.properties 
+  for some reason and avoid a null pointer in this case.
+* [2007-11-08] Reorganized usage count methods to better handle null
+  reference checking in response to Karl Pauls seeing an NPE when trying to
+  get a service that was already unregistered while shutting down the
+  framework.
+* [2007-11-06] Added a simple check to detect and work around a bug in J9.
+  (FELIX-416)
+* [2007-10-30] Change how the extension manager url stream handler handles 
+  request to the root path in order to make some tomcat issue go away.
+  (FELIX-414)
+* [2007-10-26] Added support for "/" bundle resources as requested. (FELIX-383)
+* [2007-10-24] Use system bundle when firing a framework error event when an 
+  install error occurs.
+* [2007-10-22] Fix a NPE when getEntryPaths is called on the system bundle. 
+  (FELIX-394)
+* [2007-10-16] Modifies bundle resource URL handling such that if a resource 
+  URL points to a resource that does not exist, a bundle class path search 
+  for the resource will be instigated and if any matching resource is found, 
+  that one will be used instead. (FELIX-383)
+* [2007-10-10] Auto-property handling now installs bundles into the default 
+  bundle start level if a start level is not specified. (FELIX-359)
+* [2007-10-08] Overwrite the URLStreamHandler.getHostAddress(URL) in the 
+  ExtensionManager to immediately return null to prevent DNS lookup. 
+  (FELIX-388)
+* [2007-09-30] Resolved a concurrency issue that could result in the same 
+  bundle being resolved more than once; also tried to simplify locking in 
+  the core search policy implementation. (FELIX-381)
+
 Changes from 1.0.0 to 1.0.1
 ---------------------------
 
