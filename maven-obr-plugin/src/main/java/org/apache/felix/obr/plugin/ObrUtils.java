@@ -100,4 +100,27 @@ public class ObrUtils
         }
         return null;
     }
+
+
+    /**
+     * @param repositoryXml URI pointing to repository.xml
+     * @param bundlePath local path to bundle jarfile
+     * @return relative path to bundle jarfile
+     */
+    public static String relativize( URI repositoryXml, String bundlePath )
+    {
+        try
+        {
+            String repositoryPath = repositoryXml.getPath();
+            int index = repositoryPath.lastIndexOf( '/' );
+
+            URI rootURI = new URI( null, repositoryPath.substring( 0, index ), null );
+
+            return rootURI.relativize( new URI( null, bundlePath, null ) ).toASCIIString();
+        }
+        catch ( Exception e )
+        {
+            return bundlePath;
+        }
+    }
 }
