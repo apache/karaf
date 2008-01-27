@@ -36,7 +36,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
     private Comparator m_nameComparator = new ResourceComparator();
 
     private static final String DEFAULT_REPOSITORY_URL =
-        "http://oscar-osgi.sf.net/obr2/repository.xml";
+        "http://oscar-osgi.sourceforge.net/obr2/repository.xml";
     public static final String REPOSITORY_URL_PROP = "obr.repository.url";
     public static final String EXTERN_REPOSITORY_TAG = "extern-repositories";
 
