@@ -54,7 +54,6 @@ import org.xml.sax.SAXException;
  * this class parse the old repository.xml file build the bundle resource description and update the repository.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-
 public class ObrUpdate
 {
     /**
@@ -70,7 +69,7 @@ public class ObrUpdate
     /**
      * name and path to the repository descriptor file.
      */
-    private URI m_repoFilename;
+    private URI m_repositoryXml;
 
     /**
      * name and path to the obr.xml file.
@@ -80,7 +79,7 @@ public class ObrUpdate
     /**
      * name and path to the bundle jar file.
      */
-    private String m_outputFile;
+    private String m_bundlePath;
 
     /**
      * maven project description.
@@ -95,22 +94,12 @@ public class ObrUpdate
     /**
      * used to build another xml document.
      */
-    private DocumentBuilder m_constructor;
+    private DocumentBuilder m_documentBuilder;
 
     /**
      * root on parent document.
      */
-    private Document m_repoDoc;
-
-    /**
-     * first Node on repository descriptor tree.
-     */
-    private Node m_root;
-
-    /**
-     * used to extract bindex bundle information.
-     */
-    private ExtractBindexInfo m_ebi;
+    private Document m_repositoryDoc;
 
     /**
      * used to store bundle information.
@@ -118,42 +107,42 @@ public class ObrUpdate
     private ResourcesBundle m_resourceBundle;
 
     /**
-     * pathfile to the repository descriptor file.
+     * base directory used to relativize bundle URIs.
      */
-    private PathFile m_repo;
+    private PathFile m_baseDir;
 
 
     /**
      * initialize information.
-     * @param repoFilename path to the repository descriptor file
+     * @param repositoryXml path to the repository descriptor file
      * @param obrXml path and filename to the obr.xml file
      * @param project maven project description
-     * @param outputFile path to the bundle jar file
-     * @param localRepo only path to the local repository
+     * @param bundlePath path to the bundle jar file
+     * @param mavenRepositoryPath path to the local maven repository
      * @param userConfig user information
-     * @param log plugin logger
+     * @param logger plugin logger
      */
-    public ObrUpdate( PathFile repoFilename, String obrXml, MavenProject project, String outputFile, String localRepo,
-        Config userConfig, Log log )
+    public ObrUpdate( PathFile repositoryXml, String obrXml, MavenProject project, String bundlePath,
+        String mavenRepositoryPath, Config userConfig, Log logger )
     {
         // m_localRepo = localRepo;
-        m_outputFile = outputFile;
-        m_repoFilename = repoFilename.getUri();
+        m_bundlePath = bundlePath;
+        m_repositoryXml = repositoryXml.getUri();
         m_obrXml = obrXml;
         m_project = project;
-        m_logger = log;
+        m_logger = logger;
 
         m_userConfig = userConfig;
 
-        m_resourceBundle = new ResourcesBundle( log );
+        m_resourceBundle = new ResourcesBundle( logger );
 
         if ( userConfig.isRemotely() )
         {
-            m_repo = new PathFile( localRepo );
+            m_baseDir = new PathFile( mavenRepositoryPath );
         }
         else
         {
-            m_repo = repoFilename;
+            m_baseDir = repositoryXml;
         }
     }
 
@@ -166,35 +155,35 @@ public class ObrUpdate
     {
 
         m_logger.debug( " (f) m_obrXml = " + m_obrXml );
-        m_logger.debug( " (f) m_outputFile = " + m_outputFile );
-        m_logger.debug( " (f) m_repoFilename = " + m_repoFilename );
+        m_logger.debug( " (f) m_bundlePath = " + m_bundlePath );
+        m_logger.debug( " (f) m_repositoryXml = " + m_repositoryXml );
 
-        m_constructor = initConstructor();
+        m_documentBuilder = initDocumentBuilder();
 
-        if ( m_constructor == null )
+        if ( m_documentBuilder == null )
         {
             return;
         }
 
         // get the file size
-        PathFile pf = new PathFile( m_outputFile );
-        File fout = pf.getFile();
-        pf.setBaseDir( m_repo.getOnlyAbsolutePath() );
-        if ( fout.exists() )
+        PathFile pf = new PathFile( m_bundlePath );
+        File bundleFile = pf.getFile();
+        pf.setBaseDir( m_baseDir.getOnlyAbsolutePath() );
+        if ( bundleFile.exists() )
         {
-            m_resourceBundle.setSize( String.valueOf( fout.length() ) );
+            m_resourceBundle.setSize( String.valueOf( bundleFile.length() ) );
             if ( m_userConfig.isPathRelative() )
             {
                 m_resourceBundle.setUri( pf.getOnlyRelativeFilename().replace( '\\', '/' ) );
             }
             else
             {
-                m_resourceBundle.setUri( "file:" + m_outputFile );
+                m_resourceBundle.setUri( "file:" + m_bundlePath );
             }
         }
         else
         {
-            m_logger.error( "file doesn't exist: " + m_outputFile );
+            m_logger.error( "file doesn't exist: " + m_bundlePath );
             return;
         }
 
@@ -210,7 +199,7 @@ public class ObrUpdate
             // URL url = getClass().getResource("/SchemaObr.xsd");
             // TODO validate obr.xml file
 
-            Document obrXmlDoc = parseFile( m_obrXml, m_constructor );
+            Document obrXmlDoc = parseFile( m_obrXml, m_documentBuilder );
             if ( obrXmlDoc == null )
             {
                 return;
@@ -220,10 +209,11 @@ public class ObrUpdate
             sortObrXml( obrXmlRoot );
         }
 
-        // use bindex to extract bundle information
+        ExtractBindexInfo bindexExtractor;
         try
         {
-            m_ebi = new ExtractBindexInfo( m_repoFilename, m_outputFile );
+            // use bindex to extract bundle information
+            bindexExtractor = new ExtractBindexInfo( m_repositoryXml, m_bundlePath );
         }
         catch ( MojoExecutionException e )
         {
@@ -232,19 +222,20 @@ public class ObrUpdate
             throw new MojoExecutionException( "MojoFailureException" );
         }
 
-        m_resourceBundle.construct( m_project, m_ebi );
+        m_resourceBundle.construct( m_project, bindexExtractor );
 
-        if ( !walkOnTree( m_root ) )
+        Element rootElement = m_repositoryDoc.getDocumentElement();
+        if ( !walkOnTree( rootElement ) )
         {
             // the correct resource node was not found, we must create it
             // we compute the new id
             String id = m_resourceBundle.getId();
-            searchRepository( m_root, id );
+            searchRepository( rootElement, id );
         }
 
         // the repository.xml file have been modified, so we save it
         m_logger.info( "Writing OBR metadata" );
-        writeToFile( m_repoFilename, m_root );
+        writeToFile( m_repositoryXml, rootElement );
     }
 
 
@@ -252,20 +243,20 @@ public class ObrUpdate
      * init the document builder from xerces.
      * @return DocumentBuilder ready to create new document
      */
-    private DocumentBuilder initConstructor()
+    private DocumentBuilder initDocumentBuilder()
     {
-        DocumentBuilder constructor = null;
+        DocumentBuilder documentBuilder = null;
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try
         {
-            constructor = factory.newDocumentBuilder();
+            documentBuilder = factory.newDocumentBuilder();
         }
         catch ( ParserConfigurationException e )
         {
             m_logger.error( "unable to create a new xml document" );
             e.printStackTrace();
         }
-        return constructor;
+        return documentBuilder;
 
     }
 
@@ -279,7 +270,7 @@ public class ObrUpdate
     private int parseRepositoryXml() throws MojoExecutionException
     {
 
-        File fout = new File( m_repoFilename );
+        File fout = new File( m_repositoryXml );
         if ( !fout.exists() )
         {
             // create the repository.xml
@@ -295,7 +286,7 @@ public class ObrUpdate
                 return -1;
             }
 
-            Document doc = m_constructor.newDocument();
+            Document doc = m_documentBuilder.newDocument();
             // create xml tree
             Date d = new Date();
             d.setTime( System.currentTimeMillis() );
@@ -304,7 +295,7 @@ public class ObrUpdate
             root.setAttribute( "name", "MyRepository" );
             try
             {
-                writeToFile( m_repoFilename, root );
+                writeToFile( m_repositoryXml, root );
             }
             catch ( MojoExecutionException e )
             {
@@ -314,13 +305,12 @@ public class ObrUpdate
         }
 
         // now we parse the repository.xml file
-        m_repoDoc = parseFile( fout.getAbsolutePath(), m_constructor );
-        if ( m_repoDoc == null )
+        m_repositoryDoc = parseFile( fout.getAbsolutePath(), m_documentBuilder );
+        if ( m_repositoryDoc == null )
         {
             return -1;
         }
 
-        m_root = ( Element ) m_repoDoc.getDocumentElement();
         return 0;
     }
 
@@ -328,12 +318,12 @@ public class ObrUpdate
     /**
      * transform a xml file to a xerces Document.
      * @param filename path to the xml file
-     * @param constructor DocumentBuilder get from xerces
+     * @param documentBuilder DocumentBuilder get from xerces
      * @return Document which describe this file
      */
-    private Document parseFile( String filename, DocumentBuilder constructor )
+    private Document parseFile( String filename, DocumentBuilder documentBuilder )
     {
-        if ( constructor == null )
+        if ( documentBuilder == null )
         {
             return null;
         }
@@ -342,7 +332,7 @@ public class ObrUpdate
         Document doc = null;
         try
         {
-            doc = constructor.parse( new File( filename ) );
+            doc = documentBuilder.parse( new File( filename ) );
         }
         catch ( SAXException e )
         {
@@ -559,7 +549,7 @@ public class ObrUpdate
     {
         if ( node.getNodeName().compareTo( "repository" ) == 0 )
         {
-            node.appendChild( m_resourceBundle.getNode( m_repoDoc ) );
+            node.appendChild( m_resourceBundle.getNode( m_repositoryDoc ) );
             return;
         }
         else
@@ -594,7 +584,7 @@ public class ObrUpdate
             .getNamedItem( "version" ).getNodeValue() ) )
         {
             m_resourceBundle.setId( String.valueOf( id ) );
-            node.getParentNode().replaceChild( m_resourceBundle.getNode( m_repoDoc ), node );
+            node.getParentNode().replaceChild( m_resourceBundle.getNode( m_repositoryDoc ), node );
             return true;
         }
         return false;

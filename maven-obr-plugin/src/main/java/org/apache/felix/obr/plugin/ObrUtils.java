@@ -112,9 +112,9 @@ public class ObrUtils
         try
         {
             String repositoryPath = repositoryXml.getPath();
-            int index = repositoryPath.lastIndexOf( '/' );
+            int lastFolderIndex = repositoryPath.lastIndexOf( '/' );
 
-            URI rootURI = new URI( null, repositoryPath.substring( 0, index ), null );
+            URI rootURI = new URI( null, repositoryPath.substring( 0, lastFolderIndex ), null );
 
             return rootURI.relativize( new URI( null, bundlePath, null ) ).toASCIIString();
         }
