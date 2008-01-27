@@ -34,6 +34,7 @@ import org.apache.maven.model.Resource;
  */
 public class ObrUtils
 {
+    private static final String DOT_XML = ".xml";
     private static final String REPO_XML = "repository.xml";
     private static final String OBR_XML = "obr.xml";
 
@@ -51,7 +52,7 @@ public class ObrUtils
         {
             obrRepository = mavenRepository + '/' + REPO_XML;
         }
-        else if ( !obrRepository.endsWith( ".xml" ) )
+        else if ( !obrRepository.toLowerCase().endsWith( DOT_XML ) )
         {
             obrRepository = obrRepository + '/' + REPO_XML;
         }
@@ -103,24 +104,51 @@ public class ObrUtils
 
 
     /**
-     * @param repositoryXml URI pointing to repository.xml
-     * @param bundlePath local path to bundle jarfile
-     * @return relative path to bundle jarfile
+     * @param path filesystem path
+     * @return file URI for the path
      */
-    public static String relativize( URI repositoryXml, String bundlePath )
+    public static URI toFileURI( String path )
+    {
+        if ( null == path )
+        {
+            return null;
+        }
+        else if ( path.startsWith( "file:" ) )
+        {
+            return URI.create( path );
+        }
+        else
+        {
+            return new File( path ).toURI();
+        }
+    }
+
+
+    /**
+     * @param repositoryXml URI pointing to repository.xml, or directory containing it
+     * @param bundleJar URI pointing to bundle jarfile
+     * @return relative URI to bundle jarfile
+     */
+    public static URI getRelativeURI( URI repositoryXml, URI bundleJar )
     {
         try
         {
             String repositoryPath = repositoryXml.getPath();
-            int lastFolderIndex = repositoryPath.lastIndexOf( '/' );
+            if ( repositoryPath.toLowerCase().endsWith( DOT_XML ) )
+            {
+                // remove filename to get containing directory
+                int dirnameIndex = repositoryPath.lastIndexOf( '/' );
+                repositoryPath = repositoryPath.substring( 0, dirnameIndex );
+            }
 
-            URI rootURI = new URI( null, repositoryPath.substring( 0, lastFolderIndex ), null );
+            URI rootURI = new URI( null, repositoryPath, null );
+            URI localURI = new URI( null, bundleJar.getPath(), null );
 
-            return rootURI.relativize( new URI( null, bundlePath, null ) ).toASCIIString();
+            return rootURI.relativize( localURI );
         }
         catch ( Exception e )
         {
-            return bundlePath;
+            return bundleJar;
         }
     }
 }

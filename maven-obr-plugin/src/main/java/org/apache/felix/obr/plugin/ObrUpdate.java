@@ -74,12 +74,12 @@ public class ObrUpdate
     /**
      * name and path to the obr.xml file.
      */
-    private String m_obrXml;
+    private URI m_obrXml;
 
     /**
      * name and path to the bundle jar file.
      */
-    private String m_bundlePath;
+    private URI m_bundlePath;
 
     /**
      * maven project description.
@@ -107,9 +107,9 @@ public class ObrUpdate
     private ResourcesBundle m_resourceBundle;
 
     /**
-     * base directory used to relativize bundle URIs.
+     * base URI used to relativize bundle URIs.
      */
-    private PathFile m_baseDir;
+    private URI m_baseURI;
 
 
     /**
@@ -126,9 +126,9 @@ public class ObrUpdate
         String mavenRepositoryPath, Config userConfig, Log logger )
     {
         // m_localRepo = localRepo;
-        m_bundlePath = bundlePath;
-        m_repositoryXml = repositoryXml.getUri();
-        m_obrXml = obrXml;
+        m_bundlePath = ObrUtils.toFileURI( bundlePath );
+        m_repositoryXml = repositoryXml.getFile().toURI(); // FIXME: remove when PathFile is gone
+        m_obrXml = ObrUtils.toFileURI( obrXml );
         m_project = project;
         m_logger = logger;
 
@@ -138,11 +138,11 @@ public class ObrUpdate
 
         if ( userConfig.isRemotely() )
         {
-            m_baseDir = new PathFile( mavenRepositoryPath );
+            m_baseURI = ObrUtils.toFileURI( mavenRepositoryPath );
         }
         else
         {
-            m_baseDir = repositoryXml;
+            m_baseURI = m_repositoryXml;
         }
     }
 
@@ -166,20 +166,17 @@ public class ObrUpdate
         }
 
         // get the file size
-        PathFile pf = new PathFile( m_bundlePath );
-        File bundleFile = pf.getFile();
-        pf.setBaseDir( m_baseDir.getOnlyAbsolutePath() );
+        File bundleFile = new File( m_bundlePath );
         if ( bundleFile.exists() )
         {
-            m_resourceBundle.setSize( String.valueOf( bundleFile.length() ) );
+            URI bundleURI = m_bundlePath;
             if ( m_userConfig.isPathRelative() )
             {
-                m_resourceBundle.setUri( pf.getOnlyRelativeFilename().replace( '\\', '/' ) );
+                bundleURI = ObrUtils.getRelativeURI( m_baseURI, bundleURI );
             }
-            else
-            {
-                m_resourceBundle.setUri( "file:" + m_bundlePath );
-            }
+
+            m_resourceBundle.setSize( String.valueOf( bundleFile.length() ) );
+            m_resourceBundle.setUri( bundleURI.toASCIIString() );
         }
         else
         {
@@ -213,7 +210,7 @@ public class ObrUpdate
         try
         {
             // use bindex to extract bundle information
-            bindexExtractor = new ExtractBindexInfo( m_repositoryXml, m_bundlePath );
+            bindexExtractor = new ExtractBindexInfo( m_repositoryXml, m_bundlePath.getPath() );
         }
         catch ( MojoExecutionException e )
         {
@@ -273,20 +270,8 @@ public class ObrUpdate
         File fout = new File( m_repositoryXml );
         if ( !fout.exists() )
         {
-            // create the repository.xml
-            try
-            {
-                fout.createNewFile();
-                m_logger.info( "Created " + fout.getAbsolutePath() );
-            }
-            catch ( IOException e )
-            {
-                m_logger.error( "Cannot create file " + fout.getAbsolutePath() );
-                e.printStackTrace();
-                return -1;
-            }
-
             Document doc = m_documentBuilder.newDocument();
+
             // create xml tree
             Date d = new Date();
             d.setTime( System.currentTimeMillis() );
@@ -305,7 +290,7 @@ public class ObrUpdate
         }
 
         // now we parse the repository.xml file
-        m_repositoryDoc = parseFile( fout.getAbsolutePath(), m_documentBuilder );
+        m_repositoryDoc = parseFile( m_repositoryXml, m_documentBuilder );
         if ( m_repositoryDoc == null )
         {
             return -1;
@@ -321,7 +306,7 @@ public class ObrUpdate
      * @param documentBuilder DocumentBuilder get from xerces
      * @return Document which describe this file
      */
-    private Document parseFile( String filename, DocumentBuilder documentBuilder )
+    private Document parseFile( URI filename, DocumentBuilder documentBuilder )
     {
         if ( documentBuilder == null )
         {
@@ -465,6 +450,7 @@ public class ObrUpdate
         DOMSource input = new DOMSource( treeToBeWrite );
 
         File fichier = new File( outputFilename );
+        fichier.getParentFile().mkdirs();
         FileOutputStream flux = null;
         try
         {
