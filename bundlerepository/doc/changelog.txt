@@ -1,3 +1,13 @@
+Changes from 1.0.0 to 1.0.1
+---------------------------
+
+* [2008-01-27] Change the default url from sf.net to sourceforge.net.
+* [2007-10-25] Add support for zipped repository files. (FELIX-410)
+* [2007-10-03] Updated OBR's VersionRange to match the Framework's VersionRange
+  and now accept whitespace in its version range. (FELIX-389)
+* [2007-09-24] Extract OSGi OBR service API to a non-bundle jar to avoid 
+  circular build problems.
+
 Changes from 0.8.0-incubator to 1.0.0
 -------------------------------------
 
