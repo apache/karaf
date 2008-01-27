@@ -1,3 +1,23 @@
+Changes from 1.0.1 to 1.0.2
+---------------------------
+
+* [2008-01-27] Added launching and embedding docs to main project.
+* [2008-01-22] Update to maven-bundle-plugin version 1.2.0.
+* [2008-01-07] Modifed default launcher in Main to separate out 
+  auto-property processing so that it is easier to reuse the code in 
+  custom launchers. (FELIX-448)
+* [2007-12-14] Removed auto-property processing out of the framework and 
+  into the default launcher. (FELIX-393)
+* [2007-10-16] Use variable substitution via BND to define the properties 
+  in default.properties from the properties in config.properties.
+  (FELIX-380)
+* [2007-10-03] Added support to the Main launcher to use a default 
+  embedded resource for setting the framework configuration properties 
+  if the actual config.properties file cannot be loaded. (FELIX-380)
+* [2007-09-20] Remove some packages for jre1.3 profile  and add/remove a 
+  few for 1.4, 1.5, and 1.6 (javax.crypto.*). (FELIX-371)
+
+
 Changes from 1.0.0 to 1.0.1
 ---------------------------
 
