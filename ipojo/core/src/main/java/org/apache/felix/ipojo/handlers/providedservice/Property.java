@@ -132,7 +132,18 @@ public class Property {
      * @param o : the new value of the property (object)
      */
     protected void set(Object o) {
-        m_value = o;
+        // Is the object is directly assignable to the property, affect it.
+        if (!(o instanceof String) || m_type.equals("java.lang.String")) {
+            m_value = o;
+        } else {
+            // If the object is a String, we must recreate the object from the String form
+            if (o instanceof String) {
+                setValue((String) o);
+            } else {
+                // Error, the given property cannot be injected.
+                throw new ClassCastException("Incompatible type for the property " + m_name + " " + m_type + " expected");
+            }
+        }
     }
 
     /**
