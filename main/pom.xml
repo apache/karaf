@@ -38,12 +38,10 @@
           <groupId>${pom.groupId}</groupId>
           <artifactId>org.osgi.core</artifactId>
         </exclusion>
-        <!--exclusion>
-          For now framework doesn't have this dependency, but it
-          will once the compendium bundle is released.
+        <exclusion>
           <groupId>${pom.groupId}</groupId>
           <artifactId>org.osgi.compendium</artifactId>
-        </exclusion-->
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -76,6 +74,10 @@
         <exclusion>
           <groupId>${pom.groupId}</groupId>
           <artifactId>org.osgi.core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>${pom.groupId}</groupId>
+          <artifactId>org.osgi.service.obr</artifactId>
         </exclusion>
         <exclusion>
           <groupId>net.sf.kxml</groupId>
