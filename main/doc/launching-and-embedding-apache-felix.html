@@ -1,0 +1,987 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><title>Apache Felix - Launching and Embedding Apache Felix</title>
+
+
+  
+    
+    <link rel="stylesheet" href="launching-and-embedding-apache-felix_files/site.css" type="text/css" media="all">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"></head><body linkifying="true">
+    <div class="title"><div class="logo"><a href="http://felix.apache.org/site/index.html"><img alt="Apache Felix" src="launching-and-embedding-apache-felix_files/logo.png" border="0"></a></div><div class="header"><a href="http://www.apache.org/"><img alt="Apache" src="launching-and-embedding-apache-felix_files/apache.png" border="0"></a></div></div>
+    <div class="menu">
+<ul>
+	<li><a href="http://cwiki.apache.org/FELIX/index.html" title="Index">home</a></li>
+	<li><a href="http://cwiki.apache.org/FELIX/news.html" title="news">news</a></li>
+	<li><a href="http://cwiki.apache.org/FELIX/status.html" title="status">status</a></li>
+	<li><a href="http://cwiki.apache.org/FELIX/license.html" title="license">license</a></li>
+	<li><span class="nobr"><a href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<sup><img class="rendericon" src="launching-and-embedding-apache-felix_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><a href="http://cwiki.apache.org/FELIX/documentation.html" title="documentation">documentation</a></li>
+	<li><a href="http://cwiki.apache.org/FELIX/mailinglists.html" title="mailinglists">mailing lists</a></li>
+	<li><span class="nobr"><a href="http://cwiki.apache.org/confluence/x/O-" title="Visit page outside Confluence" rel="nofollow">wiki<sup><img class="rendericon" src="launching-and-embedding-apache-felix_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><a href="http://cwiki.apache.org/FELIX/committers.html" title="committers">committers</a></li>
+	<li><a href="http://cwiki.apache.org/FELIX/faq.html" title="faq">faq</a></li>
+	<li><a href="http://cwiki.apache.org/FELIX/roadmap.html" title="roadmap">roadmap</a></li>
+	<li><a href="http://cwiki.apache.org/FELIX/sourcecode.html" title="sourcecode">source code</a></li>
+	<li><a href="http://cwiki.apache.org/FELIX/codingstandards.html" title="codingstandards">coding standards</a></li>
+	<li><a href="http://cwiki.apache.org/FELIX/issuetracking.html" title="issuetracking">issue tracking</a></li>
+	<li><a href="http://cwiki.apache.org/FELIX/dependencies.html" title="dependencies">dependencies</a></li>
+	<li><span class="nobr"><a href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">apache software foundation<sup><img class="rendericon" src="launching-and-embedding-apache-felix_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<sup><img class="rendericon" src="launching-and-embedding-apache-felix_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<sup><img class="rendericon" src="launching-and-embedding-apache-felix_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+</ul> </div>
+    <div class="main">
+<h1><a name="LaunchingandEmbeddingApacheFelix-LaunchingandEmbeddingApacheFelix"></a>Launching and Embedding Apache Felix</h1>
+
+<p><em>[This document is based on Felix 1.0.2.]</em></p>
+
+<ul>
+	<li><a href="#LaunchingandEmbeddingApacheFelix-introduction" title="introduction on Launching and Embedding Apache Felix">Introduction</a></li>
+	<li><a href="#LaunchingandEmbeddingApacheFelix-overview" title="overview on Launching and Embedding Apache Felix">API Overview</a></li>
+	<li><a href="#LaunchingandEmbeddingApacheFelix-launching" title="launching on Launching and Embedding Apache Felix">Launching Felix</a>
+	<ul>
+		<li><a href="#LaunchingandEmbeddingApacheFelix-standardlauncher" title="standard-launcher on Launching and Embedding Apache Felix">Standard Felix Launcher</a></li>
+		<li><a href="#LaunchingandEmbeddingApacheFelix-customlauncher" title="custom-launcher on Launching and Embedding Apache Felix">Custom Felix Launcher</a></li>
+	</ul>
+	</li>
+	<li><a href="#LaunchingandEmbeddingApacheFelix-embedding" title="embedding on Launching and Embedding Apache Felix">Embedding Felix</a>
+	<ul>
+		<li><a href="#LaunchingandEmbeddingApacheFelix-configproperty" title="config-property on Launching and Embedding Apache Felix">Embedded Execution Configuration Property</a></li>
+		<li><a href="#LaunchingandEmbeddingApacheFelix-hostinteraction" title="host-interaction on Launching and Embedding Apache Felix">Host/Felix Interaction</a></li>
+		<li><a href="#LaunchingandEmbeddingApacheFelix-hostservices" title="host-services on Launching and Embedding Apache Felix">Providing Host Application Services</a></li>
+		<li><a href="#LaunchingandEmbeddingApacheFelix-hostserviceusage" title="host-service-usage on Launching and Embedding Apache Felix">Using Services Provided by Bundles</a>
+		<ul>
+			<li><a href="#LaunchingandEmbeddingApacheFelix-servicereflection" title="service-reflection on Launching and Embedding Apache Felix">Using Bundle Services via Reflection</a></li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+	<li><a href="#LaunchingandEmbeddingApacheFelix-caveat" title="caveat on Launching and Embedding Apache Felix">Caveat</a></li>
+	<li><a href="#LaunchingandEmbeddingApacheFelix-feedback" title="feedback on Launching and Embedding Apache Felix">Feedback</a></li>
+</ul>
+
+
+<p><a name="LaunchingandEmbeddingApacheFelix-introduction"></a></p>
+
+<h1><a name="LaunchingandEmbeddingApacheFelix-Introduction"></a>Introduction</h1>
+
+<p>The Apache Felix OSGi framework is intended to be easily launchable
+and embeddable. For example, Felix avoids the use of system properties
+for configuration, since these are globals that can cause interference
+if multiple framework instances are created in the same VM. Felix is
+also implemented to multiplex singleton facilities, like the URL stream
+handler factory. The goal is to make it possible to use Felix in as
+many scenarios as possible; however, this is still just a goal. In
+other words, this is a work in progress and if any issues arise, it
+would be greatly appreciated if they are brought to the attention of
+the Felix community. The next section provides a Felix API overview,
+while the remainder of the document is divided into two sections, one
+focusing on how to launch Felix and one focusing on how to embed Felix
+into a host application.</p>
+
+<p><a name="LaunchingandEmbeddingApacheFelix-overview"></a></p>
+
+<h1><a name="LaunchingandEmbeddingApacheFelix-APIOverview"></a>API Overview</h1>
+
+<p>The Felix class that implements the OSGi framework is <tt>org.apache.felix.framework.Felix</tt> or just <tt>Felix</tt> for short. The OSGi specification defines a special bundle, called the <em><b>System Bundle</b></em>,
+that represents the framework at run time and appears like any other
+bundle in the list of installed bundles. To make this notion even more
+intuitive, the <tt>Felix</tt> class implements the <tt>org.osgi.framework.Bundle</tt> interface, which is reiterated here:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> <span class="code-keyword">interface</span> Bundle
+{
+    <span class="code-keyword">public</span> BundleContext getBundleContext();
+    <span class="code-keyword">public</span> <span class="code-object">long</span> getBundleId();
+    <span class="code-keyword">public</span> URL getEntry(<span class="code-object">String</span> name);
+    <span class="code-keyword">public</span> Enumeration getEntryPaths(<span class="code-object">String</span> path);
+    <span class="code-keyword">public</span> Enumeration findEntries(<span class="code-object">String</span> path, <span class="code-object">String</span> filePattern, <span class="code-object">boolean</span> recurse);
+    <span class="code-keyword">public</span> Dictionary getHeaders();
+    <span class="code-keyword">public</span> Dictionary getHeaders(<span class="code-object">String</span> locale);
+    <span class="code-keyword">public</span> <span class="code-object">long</span> getLastModified();
+    <span class="code-keyword">public</span> <span class="code-object">String</span> getLocation();
+    <span class="code-keyword">public</span> URL getResource(<span class="code-object">String</span> name);
+    <span class="code-keyword">public</span> Enumeration getResources(<span class="code-object">String</span> name) <span class="code-keyword">throws</span> IOException;
+    <span class="code-keyword">public</span> ServiceReference[] getRegisteredServices();
+    <span class="code-keyword">public</span> ServiceReference[] getServicesInUse();
+    <span class="code-keyword">public</span> <span class="code-object">int</span> getState();
+    <span class="code-keyword">public</span> <span class="code-object">String</span> getSymbolicName();
+    <span class="code-keyword">public</span> <span class="code-object">boolean</span> hasPermission(<span class="code-object">Object</span> obj);
+    <span class="code-keyword">public</span> <span class="code-object">Class</span> loadClass(<span class="code-object">String</span> name) <span class="code-keyword">throws</span> ClassNotFoundException;
+    <span class="code-keyword">public</span> void start() <span class="code-keyword">throws</span> BundleException;
+    <span class="code-keyword">public</span> void stop() <span class="code-keyword">throws</span> BundleException;
+    <span class="code-keyword">public</span> void uninstall() <span class="code-keyword">throws</span> BundleException;
+    <span class="code-keyword">public</span> void update() <span class="code-keyword">throws</span> BundleException;
+    <span class="code-keyword">public</span> void update(InputStream is) <span class="code-keyword">throws</span> BundleException;
+}</pre>
+</div></div>
+
+<p>When you instantiate the <tt>Felix</tt> class, the resulting object is actually the System Bundle and can be cast to the <tt>Bundle</tt> interface. The <tt>start()</tt> method is used to start the framework instance, while the <tt>stop()</tt> method is used to asynchronously stop the framework instance. The <tt>Felix</tt> class also includes the following three additional public methods:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> class Felix <span class="code-keyword">extends</span> FelixBundle
+{
+    <span class="code-keyword">public</span> Felix(Map configMutableMap, List activatorList);
+    <span class="code-keyword">public</span> Felix(Logger logger, Map configMutableMap, List activatorList)
+    <span class="code-keyword">public</span> void stopAndWait();
+}</pre>
+</div></div>
+
+<p>The first two methods are constructors used to instantiate framework
+instances; the important parameters of the constructors are the
+configuration properties and System Bundle activators, which are both
+described in more detail later. The <tt>stopAndWait()</tt> method is a synchronous version of the <tt>stop()</tt> method, used to stop the framework and block the calling thread until the framework is completely stopped.</p>
+
+<p><a name="LaunchingandEmbeddingApacheFelix-launching"></a></p>
+
+<h1><a name="LaunchingandEmbeddingApacheFelix-LaunchingFelix"></a>Launching Felix</h1>
+
+<p>Launching Felix is fairly simple and involves only three steps:</p>
+
+<ol>
+	<li>Defining some configuration properties.</li>
+	<li>Creating an instance of <tt>org.apache.felix.framework.Felix</tt> with the configuration properties.</li>
+	<li>Invoking the <tt>org.apache.felix.framework.Felix.start()</tt> method.</li>
+</ol>
+
+
+<p>The only configuration properties that are actually required to
+start Felix are ones that tell it where/how to locate the bundle cache
+profile directory where installed bundles will be cached. Felix' bundle
+cache implementation allows you to configure the location where bundles
+are cached using configuration properties. At a minimum, either a
+bundle cache profile name or directory must be specified; see the <a href="http://cwiki.apache.org/FELIX/apache-felix-bundle-cache.html" title="Apache Felix Bundle Cache">bundle cache document</a> for more detailed information on configuring the bundle cache.</p>
+
+<p>Besides configuration properties for the bundle cache, it is usually necessary to set the <tt>org.osgi.framework.system.packages</tt> configuration property to export packages from the class path, such as the OSGi interface classes (e.g., <tt>org.osgi.framework</tt>)
+on which all bundles depend. If you are creating a launcher for Felix,
+then often you want to automatically install and start bundles when you
+start the framework instance. The default Felix launcher defines
+reusable functionality to automatically install and/or start bundles
+upon framework startup; see the <a href="http://cwiki.apache.org/FELIX/apache-felix-usage-documentation.html#ApacheFelixUsageDocumentation-configuringfelix" title="configuring-felix on Apache Felix Usage Documentation">usage document</a> for more information on configuring Felix and on the various configuration properties.</p>
+
+<p>The remainder of this section describes how the standard Felix
+launcher works as well as how to create a custom launcher for Felix.</p>
+
+<p><a name="LaunchingandEmbeddingApacheFelix-standardlauncher"></a></p>
+
+<h2><a name="LaunchingandEmbeddingApacheFelix-StandardFelixLauncher"></a>Standard Felix Launcher</h2>
+
+<p>The standard Felix launcher is very simple and is not intended to
+solve every possible requirement; it is intended to work for most
+standard situations. Most special launching requirements should be
+resolved by creating a custom launcher. This section describes how the
+standard launcher works. The following code represents the complete <tt>main()</tt> method of the standard launcher, each numbered comment will be described in more detail below:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> <span class="code-keyword">static</span> void main(<span class="code-object">String</span>[] argv) <span class="code-keyword">throws</span> Exception
+{
+    <span class="code-comment">// (1) Load system properties.
+</span>    Main.loadSystemProperties();
+
+    <span class="code-comment">// (2) Read configuration properties.
+</span>    Properties configProps = Main.loadConfigProperties();
+
+    <span class="code-comment">// (3) Copy framework properties from the system properties.
+</span>    Main.copySystemProperties(configProps);
+
+    <span class="code-comment">// (4) See <span class="code-keyword">if</span> the profile name property was specified.
+</span>    <span class="code-object">String</span> profileName = configProps.getProperty(BundleCache.CACHE_PROFILE_PROP);
+
+    <span class="code-comment">// (4) See <span class="code-keyword">if</span> the profile directory property was specified.
+</span>    <span class="code-object">String</span> profileDirName = configProps.getProperty(BundleCache.CACHE_PROFILE_DIR_PROP);
+
+    <span class="code-comment">// Print welcome banner.
+</span>    <span class="code-object">System</span>.out.println(<span class="code-quote">"\nWelcome to Felix."</span>);
+    <span class="code-object">System</span>.out.println(<span class="code-quote">"=================\n"</span>);
+
+    <span class="code-comment">// (5) If no profile or profile directory is specified in the
+</span>    <span class="code-comment">// properties, then ask <span class="code-keyword">for</span> a profile name.
+</span>    <span class="code-keyword">if</span> ((profileName == <span class="code-keyword">null</span>) &amp;&amp; (profileDirName == <span class="code-keyword">null</span>))
+    {
+        <span class="code-object">System</span>.out.print(<span class="code-quote">"Enter profile name: "</span>);
+        BufferedReader in = <span class="code-keyword">new</span> BufferedReader(<span class="code-keyword">new</span> InputStreamReader(<span class="code-object">System</span>.in));
+        <span class="code-keyword">try</span>
+        {
+            profileName = in.readLine();
+        }
+        <span class="code-keyword">catch</span> (IOException ex)
+        {
+            <span class="code-object">System</span>.err.println(<span class="code-quote">"Could not read input."</span>);
+            <span class="code-object">System</span>.exit(-1);
+        }
+        <span class="code-object">System</span>.out.println("");
+        <span class="code-keyword">if</span> (profileName.length() != 0)
+        {
+            configProps.setProperty(BundleCache.CACHE_PROFILE_PROP, profileName);
+        }
+    }
+
+    <span class="code-comment">// (6) A profile directory or name must be specified.
+</span>    <span class="code-keyword">if</span> ((profileDirName == <span class="code-keyword">null</span>) &amp;&amp; (profileName.length() == 0))
+    {
+        <span class="code-object">System</span>.err.println(<span class="code-quote">"You must specify a profile name or directory."</span>);
+        <span class="code-object">System</span>.exit(-1);
+    }
+
+    <span class="code-keyword">try</span>
+    {
+        <span class="code-comment">// (7) Create a list <span class="code-keyword">for</span> custom framework activators and
+</span>        <span class="code-comment">// add an instance of the auto-activator it <span class="code-keyword">for</span> processing
+</span>        <span class="code-comment">// auto-install and auto-start properties.
+</span>        List list = <span class="code-keyword">new</span> ArrayList();
+        list.add(<span class="code-keyword">new</span> AutoActivator(configProps));
+        <span class="code-comment">// (8) Create a <span class="code-keyword">case</span>-insensitive property map.
+</span>        Map configMap = <span class="code-keyword">new</span> StringMap(configProps, <span class="code-keyword">false</span>);
+        <span class="code-comment">// (9) Create an instance of the framework.
+</span>        m_felix = <span class="code-keyword">new</span> Felix(configMap, list);
+        m_felix.start();
+    }
+    <span class="code-keyword">catch</span> (Exception ex)
+    {
+        <span class="code-object">System</span>.err.println(<span class="code-quote">"Could not create framework: "</span> + ex);
+        ex.printStackTrace();
+        <span class="code-object">System</span>.exit(-1);
+    }
+}</pre>
+</div></div>
+
+<p>The general steps of the standard launcher are quite straightforward:</p>
+
+<ol>
+	<li>Load any system properties specified in the <tt>system.properties</tt> file; this file is typically located in the <tt>conf/</tt> directory of the Felix installation directory, but it can be specified directly using the <tt>felix.system.properties</tt>
+system property. This file is not needed to launch Felix and is
+provided merely for convenience when system properties must be
+specified. The file is a standard Java properties file, but it also
+supports property substitution using <tt>${&lt;property-name</tt>} syntax. Property substitution can be nested; only system properties will be used for substitution.</li>
+	<li>Load any configuration properties specified in the <tt>config.properties</tt> file; this file is typically located in the <tt>conf/</tt> directory of the Felix installation directory, but it can be specified directly using the <tt>felix.config.properties</tt>
+system property. This file is used to configure the Felix instance
+created by the launcher. The file is a standard Java properties file,
+but it also supports property substitution using "<tt>${&lt;property-name</tt>}"
+syntax. Property substitution can be nested; configuration and system
+properties will be used for substitution with configuration properties
+having precedence.</li>
+	<li>For convenience, any configuration
+properties that are set as system properties will be copied into the
+set of configuration properties to provide an easy way to add to or
+override configuration properties specified in the <tt>config.properties</tt> file.</li>
+	<li>Try to load the profile name or profile directory configuration properties. At least one of these must be specified so that the <a href="http://cwiki.apache.org/FELIX/apache-felix-bundle-cache.html" title="Apache Felix Bundle Cache">bundle cache</a> knows where to save installed bundles.</li>
+	<li>If
+either the profile name or profile directory configuration property has
+not been specified, then ask the user to specify a profile name and add
+it to the current set of configuration properties.</li>
+	<li>Error if there is no profile name or profile directory.</li>
+	<li>Create a list to hold custom framework activators and add an instance of <tt>org.apache.felix.main.AutoActivator</tt>, which will process <tt>felix.auto.install</tt> and <tt>felix.auto.start</tt> configuration properties during framework startup to automatically install and/or start bundles; see the <a href="http://cwiki.apache.org/FELIX/apache-felix-usage-documentation.html#ApacheFelixUsageDocumentation-configuringfelix" title="configuring-felix on Apache Felix Usage Documentation">usage document</a> for more information configuration properties.</li>
+	<li>Create a case-insensitive map to hold our configuration properties.</li>
+	<li>Create the Felix instance passing in the configuration properties and custom framework activators, then call <tt>start()</tt>.</li>
+</ol>
+
+
+<p>The framework is not active until the <tt>start()</tt> method is
+called. If no shell bundles are installed and started or if there is
+difficulty locating the shell bundles specified in the auto-start
+property, then it will appear as if the framework is hung, but it is
+actually running without any way to interact with it since the shell
+bundles provide the only means of interaction.</p>
+
+<p><a name="LaunchingandEmbeddingApacheFelix-customlauncher"></a></p>
+
+<h2><a name="LaunchingandEmbeddingApacheFelix-CustomFelixLauncher"></a>Custom Felix Launcher</h2>
+
+<p>This section creates a bare-bones launcher to demonstrate the
+minimum requirements for creating an interactive launcher for the Felix
+framework. This example uses the standard Felix shell bundles for
+interactivity, but any other bundles could be used instead. For
+example, the shell service and telnet bundles could be used to launch
+Felix and make it remotely accessible.</p>
+
+<p>This example launcher project has the following directory structure:</p>
+
+<div class="preformatted"><div class="preformattedContent">
+<pre>launcher/
+   lib/
+      org.apache.felix.main-1.0.2.jar
+   bundle/
+      org.apache.felix.shell-1.0.0.jar
+      org.apache.felix.shell.tui-1.0.0.jar
+   src/
+      example/
+         Main.java
+</pre>
+</div></div>
+
+<p>The <tt>lib/</tt> directory contains Felix' main JAR file, which
+also contains the OSGi core interfaces. The main JAR file is used so
+that we can reuse the default launcher's auto-install/auto-start
+configuration property handling; if these capabilities are needed, then
+it would be possible to use the framework JAR file. The <tt>bundle/</tt>
+directory contains the shell service and textual shell interface
+bundles that will be used for interacting with the framework instance.
+Note: If you do not launch Felix with interactive bundles, it will
+appear as if the framework instance is hung, but it is actually just
+sitting there waiting for someone to tell it to do something. The <tt>src/example/</tt> directory contains the following <tt>Main.java</tt> file, which is a very simplistic Felix launcher.</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">package</span> example;
+
+<span class="code-keyword">import</span> java.util.Map;
+<span class="code-keyword">import</span> org.osgi.framework.Constants;
+<span class="code-keyword">import</span> org.apache.felix.framework.Felix;
+<span class="code-keyword">import</span> org.apache.felix.framework.cache.BundleCache;
+<span class="code-keyword">import</span> org.apache.felix.framework.util.StringMap;
+<span class="code-keyword">import</span> org.apache.felix.framework.util.FelixConstants;
+<span class="code-keyword">import</span> org.apache.felix.framework.main.AutoActivator;
+
+<span class="code-keyword">public</span> class Main
+{
+    <span class="code-keyword">private</span> <span class="code-keyword">static</span> Felix m_felix = <span class="code-keyword">null</span>;
+
+    <span class="code-keyword">public</span> <span class="code-keyword">static</span> void main(<span class="code-object">String</span>[] argv) <span class="code-keyword">throws</span> Exception
+    {
+        <span class="code-comment">// Print welcome banner.
+</span>        <span class="code-object">System</span>.out.println(<span class="code-quote">"\nWelcome to Felix."</span>);
+        <span class="code-object">System</span>.out.println(<span class="code-quote">"=================\n"</span>);
+
+        Map configMap = <span class="code-keyword">new</span> StringMap(<span class="code-keyword">false</span>);
+        configMap.put(Constants.FRAMEWORK_SYSTEMPACKAGES,
+            <span class="code-quote">"org.osgi.framework; version=1.3.0,"</span> +
+            <span class="code-quote">"org.osgi.service.packageadmin; version=1.2.0,"</span> +
+            <span class="code-quote">"org.osgi.service.startlevel; version=1.0.0,"</span> +
+            <span class="code-quote">"org.osgi.service.url; version=1.0.0"</span>);
+        configMap.put(FelixConstants.AUTO_START_PROP + <span class="code-quote">".1"</span>,
+            <span class="code-quote">"file:bundle/org.apache.felix.shell-1.0.0.jar "</span> +
+            <span class="code-quote">"file:bundle/org.apache.felix.shell.tui-1.0.0.jar"</span>);
+        configMap.put(BundleCache.CACHE_PROFILE_DIR_PROP, <span class="code-quote">"cache"</span>);
+
+        <span class="code-keyword">try</span>
+        {
+            List list = <span class="code-keyword">new</span> ArrayList();
+            list.add(<span class="code-keyword">new</span> AutoActivator(configProps));
+            Map configMap = <span class="code-keyword">new</span> StringMap(configProps, <span class="code-keyword">false</span>);
+            m_felix = <span class="code-keyword">new</span> Felix(configMap, list);
+            m_felix.start();
+        }
+        <span class="code-keyword">catch</span> (Exception ex)
+        {
+            <span class="code-object">System</span>.err.println(<span class="code-quote">"Could not create framework: "</span> + ex);
+            ex.printStackTrace();
+            <span class="code-object">System</span>.exit(-1);
+        }
+    }
+}</pre>
+</div></div>
+
+<p>This launcher has all information hard coded in it, unlike the
+default Felix launcher, which loads configuration properties from files
+and performs variable substitution. This simple launcher provides a
+good starting point if the features of the default launcher are not
+necessary. For example, if you want to create a launcher that
+automatically deletes the bundle cache directory each time it starts,
+then it is quite easy to figure out how to do that with this simple
+launcher.</p>
+
+<p>By breaking down the above source code into small chunks, it is quite easy to see what is going on.</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">Map configMap = <span class="code-keyword">new</span> StringMap(<span class="code-keyword">false</span>);</pre>
+</div></div>
+
+<p>This simply creates a map to hold configuration properties where the keys are strings and lookups are case insensitive.</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">configMap.put(Constants.FRAMEWORK_SYSTEMPACKAGES,
+            <span class="code-quote">"org.osgi.framework; version=1.3.0,"</span> +
+            <span class="code-quote">"org.osgi.service.packageadmin; version=1.2.0,"</span> +
+            <span class="code-quote">"org.osgi.service.startlevel; version=1.0.0,"</span> +
+            <span class="code-quote">"org.osgi.service.url; version=1.0.0"</span>);</pre>
+</div></div>
+
+<p>This sets the <tt>Constants.FRAMEWORK_SYSTEMPACKAGES</tt> configuration property (string value "<tt>org.osgi.framework.system.packages</tt>"),
+which specifies the class path packages the system bundle should
+export; this is how classes on the class path are made available to
+bundles. This example only exports the core OSGi API packages, but
+other JRE packages could also be added, such as <tt>javax.swing</tt>.
+For example, the default Felix launcher defines properties for all
+packages in various JRE versions (e.g., 1.3.x, 1.4.x, 1.5.x) and
+appends them to this property using property substitution.</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">configMap.put(FelixConstants.AUTO_START_PROP + <span class="code-quote">".1"</span>,
+            <span class="code-quote">"file:bundle/org.apache.felix.shell-1.0.0.jar "</span> +
+            <span class="code-quote">"file:bundle/org.apache.felix.shell.tui-1.0.0.jar"</span>);</pre>
+</div></div>
+
+<p>This sets the <tt>FelixConstants.AUTO_START_PROP</tt> configuration property (string value "<tt>felix.auto.start</tt>"),
+which is a space-delimited list of bundle URLs that the framework will
+automatically install and start when the framework starts. However,
+this property key cannot be used as is; it must be appended with a "."
+and then a number, where the number represents the start level for the
+bundle when it is installed. In this particular example, ".1" is
+appended to the property name, thus the two bundles will be installed
+into start level one. This example uses relative <tt>file:</tt> URLs, which will load the bundles from the <tt>bundle/</tt>
+directory assuming that the launcher is started from the root directory
+of the launcher project. It is also possible to specify absolute URLs
+or remote URLs.</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">configMap.put(BundleCache.CACHE_PROFILE_DIR_PROP, <span class="code-quote">"cache"</span>);</pre>
+</div></div>
+
+<p>This sets the last configuration property, <tt>BundleCache.CACHE_PROFILE_DIR_PROP</tt> (string value "<tt>felix.cache.profiledir</tt>"),
+which is a string that specifies the precise directory to be used as
+the bundle cache profile directory; the Felix bundle cache supports
+other properties to configure its behavior, but those are not covered
+here. In this example, the bundle cache profile directory is specified
+as a relative directory called "<tt>cache</tt>". Assuming that the
+launcher is executed from the root directory of the launcher project,
+then the bundle cache profile directory will be created in the root
+directory of the project.</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">List list = <span class="code-keyword">new</span> ArrayList();
+            list.add(<span class="code-keyword">new</span> AutoActivator(configProps));</pre>
+</div></div>
+
+<p>This above creates a list to hold custom framework activators and adds an instance of <tt>org.apache.felix.main.AutoActivator</tt> to it, which will process the auto-install and auto-start configuration properties during framework startup.</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">Map configMap = <span class="code-keyword">new</span> StringMap(configProps, <span class="code-keyword">false</span>);</pre>
+</div></div>
+
+<p>This above creates a case-insensitive map from the configuration
+properties, since the OSGi specification says that properties are not
+case sensitive.</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java">m_felix = <span class="code-keyword">new</span> Felix(configMap, list);
+            m_felix.start();</pre>
+</div></div>
+
+<p>These last steps create the framework instance and start it. The
+configuration property map and custom framework activator list are
+passed into the <tt>Felix</tt> constructor.</p>
+
+<p>The following command compiles the launcher when run from the root directory of the launcher project:</p>
+
+<div class="preformatted"><div class="preformattedContent">
+<pre>javac -d . -classpath lib/org.apache.felix.main-1.0.2.jar src/example/Main.java
+</pre>
+</div></div>
+
+<p>After executing this command, an <tt>example/</tt> directory is
+created in the current directory, which contains the generated class
+file. The following command executes the simple launcher when run from
+the root directory of the launcher project:</p>
+
+<div class="preformatted"><div class="preformattedContent">
+<pre>java -cp .:lib/org.apache.felix.main-1.0.2.jar example.Main
+</pre>
+</div></div>
+
+<p>After executing this command, a <tt>cache/</tt> directory is created that contains the installed bundles, which were installed from the <tt>bundle/</tt> directory.</p>
+
+<p><a name="LaunchingandEmbeddingApacheFelix-embedding"></a></p>
+
+<h1><a name="LaunchingandEmbeddingApacheFelix-EmbeddingFelix"></a>Embedding Felix</h1>
+
+<p>Embedding Felix into a host application is a simple way to provide a
+sophisticated extensibility mechanism (i.e., plugin system) to the host
+application. Embedding Felix is very similar to launching Felix as
+described above, the main difference is that the host application
+typically wants to interact with the framework instance and/or
+installed bundles/services from the outside. This is fairly easy to
+achieve with Felix, but there are some subtle issues to understand.
+This section presents the mechanisms for embedding Felix into a host
+application and the issues in doing so.</p>
+
+<p><a name="LaunchingandEmbeddingApacheFelix-configproperty"></a></p>
+
+<h2><a name="LaunchingandEmbeddingApacheFelix-EmbeddedExecutionConfigurationProperty"></a>Embedded Execution Configuration Property</h2>
+
+<p>When a Felix instance is embedded in a host application, the host
+application must inform the Felix instance that it is embedded. To do
+this, the host application sets the "<tt>felix.embedded.execution</tt>" configuration property to "<tt>true</tt>";
+this can be accomplished in the same way that all configuration
+properties are set, i.e., passing it into the Felix constructor via a
+map. This property specifically controls whether or not the Felix
+instance will shutdown the JVM (i.e., call <tt>System.exit()</tt>)
+when the framework is shutdown. When embedding Felix it is generally
+not desirable for Felix to shutdown the JVM; therefore, by setting this
+property to "<tt>true</tt>" it can be avoided.</p>
+
+<p><a name="LaunchingandEmbeddingApacheFelix-hostinteraction"></a></p>
+
+<h2><a name="LaunchingandEmbeddingApacheFelix-Host/FelixInteraction"></a>Host/Felix Interaction</h2>
+
+<p>In the section on <a href="#LaunchingandEmbeddingApacheFelix-launching" title="launching on Launching and Embedding Apache Felix">launching</a> Felix above, the <tt>Felix</tt>
+constructor accepts two arguments, the first being the configuration
+properties for the framework, the second being a list of bundle
+activator instances. These bundle activator instances provide a
+convenient way for host applications to interact with the Felix
+framework.</p>
+
+<p>Each bundle activator instance passed into the constructor
+effectively becomes part of the System Bundle. This means that the
+start()/stop() method of each bundle activator instance in the passed
+in list gets invoked when the System Bundle's activator start()/stop()
+method gets invoked. Consequently, each bundle activator instance will
+be given the system bundle's <tt>BundleContext</tt> object so that they can interact with the framework externally. While it is possible to get the System Bundle's <tt>BundleContext</tt> object directly by calling <tt>Felix.getBundleContext()</tt>,
+this is generally not as convenient since it requires that you monitor
+when the System Bundle starts and/or stops. Consider following snippet
+of a bundle activator:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> class HostActivator <span class="code-keyword">implements</span> BundleActivator
+{
+    <span class="code-keyword">private</span> BundleContext m_context = <span class="code-keyword">null</span>;
+
+    <span class="code-keyword">public</span> void start(BundleContext context)
+    {
+        m_context = context;
+    }
+
+    <span class="code-keyword">public</span> void stop(BundleContext context)
+    {
+        m_context = <span class="code-keyword">null</span>;
+    }
+
+    <span class="code-keyword">public</span> Bundle[] getBundles()
+    {
+        <span class="code-keyword">if</span> (m_context != <span class="code-keyword">null</span>)
+        {
+            <span class="code-keyword">return</span> m_context.getBundles();
+        }
+        <span class="code-keyword">return</span> <span class="code-keyword">null</span>;
+    }
+}</pre>
+</div></div>
+
+<p>Given the above bundle activator, it is now possible to embed Felix
+into a host application and interact with it as the following snippet
+illustrates:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> class HostApplication
+{
+    <span class="code-keyword">private</span> HostActivator m_activator = <span class="code-keyword">null</span>;
+    <span class="code-keyword">private</span> Felix m_felix = <span class="code-keyword">null</span>;
+
+    <span class="code-keyword">public</span> HostApplication()
+    {
+        <span class="code-comment">// Create a <span class="code-keyword">case</span>-insensitive configuration property map.
+</span>        Map configMap = <span class="code-keyword">new</span> StringMap(<span class="code-keyword">false</span>);
+        <span class="code-comment">// Configure the Felix instance to be embedded.
+</span>        configMap.put(FelixConstants.EMBEDDED_EXECUTION_PROP, <span class="code-quote">"<span class="code-keyword">true</span>"</span>);
+        <span class="code-comment">// Add core OSGi packages to be exported from the class path
+</span>        <span class="code-comment">// via the system bundle.
+</span>        configMap.put(Constants.FRAMEWORK_SYSTEMPACKAGES,
+            <span class="code-quote">"org.osgi.framework; version=1.3.0,"</span> +
+            <span class="code-quote">"org.osgi.service.packageadmin; version=1.2.0,"</span> +
+            <span class="code-quote">"org.osgi.service.startlevel; version=1.0.0,"</span> +
+            <span class="code-quote">"org.osgi.service.url; version=1.0.0"</span>);
+        <span class="code-comment">// Explicitly specify the directory to use <span class="code-keyword">for</span> caching bundles.
+</span>        configMap.put(BundleCache.CACHE_PROFILE_DIR_PROP, <span class="code-quote">"cache"</span>);
+
+        <span class="code-keyword">try</span>
+        {
+            <span class="code-comment">// Create host activator;
+</span>            m_activator = <span class="code-keyword">new</span> HostActivator();
+            List list = <span class="code-keyword">new</span> ArrayList();
+            list.add(m_activator);
+
+            <span class="code-comment">// Now create an instance of the framework with
+</span>            <span class="code-comment">// our configuration properties and activator.
+</span>            m_felix = <span class="code-keyword">new</span> Felix(configMap, list);
+
+            <span class="code-comment">// Now start Felix instance.
+</span>            m_felix.start();
+        }
+        <span class="code-keyword">catch</span> (Exception ex)
+        {
+            <span class="code-object">System</span>.err.println(<span class="code-quote">"Could not create framework: "</span> + ex);
+            ex.printStackTrace();
+        }
+    }
+
+    <span class="code-keyword">public</span> Bundle[] getInstalledBundles()
+    {
+        <span class="code-comment">// Use the system bundle activator to gain external
+</span>        <span class="code-comment">// access to the set of installed bundles.
+</span>        <span class="code-keyword">return</span> m_activator.getBundles();
+    }
+
+    <span class="code-keyword">public</span> void shutdownApplication()
+    {
+        <span class="code-comment">// Shut down the felix framework when stopping the
+</span>        <span class="code-comment">// host application.
+</span>        m_felix.shutdown();
+    }
+}</pre>
+</div></div>
+
+<p>Notice how the <tt>HostApplication.getInstalledBundles()</tt> method
+uses its activator instance to get access to the System Bundle's
+context in order to interact with the embedded Felix framework
+instance. This approach provides the foundation for all interaction
+between the host application and the embedded framework instance.</p>
+
+<p><a name="LaunchingandEmbeddingApacheFelix-hostservices"></a></p>
+
+<h2><a name="LaunchingandEmbeddingApacheFelix-ProvidingHostApplicationServices"></a>Providing Host Application Services</h2>
+
+<p>Providing services from the host application to bundles inside the
+embedded Felix framework instance follows the basic approach laid out
+in <a href="#LaunchingandEmbeddingApacheFelix-hostinteraction" title="host-interaction on Launching and Embedding Apache Felix">above</a>.
+The main complication for providing a host application service to
+bundles is the fact that both the host application and the bundles must
+be using the same class definitions for the service interface classes.
+Since the host application cannot import classes from a bundle, this
+means that the service interface classes <b>must</b> be accessible on
+the class path, typically as part of the host application itself. The
+host application then must export the service interface package via the
+system bundle so that bundles installed into the embedded framework
+instance can import it. This is achieved using the <tt>org.osgi.framework.system.packages</tt> configuration property previously presented.</p>
+
+<p>Consider the follow simple property lookup service:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">package</span> host.service.lookup;
+
+<span class="code-keyword">public</span> class Lookup
+{
+    <span class="code-keyword">public</span> <span class="code-object">Object</span> lookup(<span class="code-object">String</span> name);
+}</pre>
+</div></div>
+
+<p>This package is simply part of the host application, which is potentially packaged into a JAR file and started with the "<tt>java -jar</tt>"
+command. Now consider the following host application bundle activator,
+which will be used to register/unregister the property lookup service
+when the embedded framework instance starts/stops:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">package</span> host.core;
+
+<span class="code-keyword">import</span> java.util.Map;
+<span class="code-keyword">import</span> org.osgi.framework.BundleActivator;
+<span class="code-keyword">import</span> org.osgi.framework.BundleContext;
+<span class="code-keyword">import</span> org.osgi.framework.ServiceRegistration;
+<span class="code-keyword">import</span> host.service.lookup;
+
+<span class="code-keyword">public</span> class HostActivator <span class="code-keyword">implements</span> BundleActivator
+{
+    <span class="code-keyword">private</span> Map m_lookupMap = <span class="code-keyword">null</span>;
+    <span class="code-keyword">private</span> BundleContext m_context = <span class="code-keyword">null</span>;
+    <span class="code-keyword">private</span> ServiceRegistration m_registration = <span class="code-keyword">null</span>;
+
+    <span class="code-keyword">public</span> HostActivator(Map lookupMap)
+    {
+        <span class="code-comment">// Save a reference to the service's backing store.
+</span>        m_lookupMap = lookupMap;
+    }
+
+    <span class="code-keyword">public</span> void start(BundleContext context)
+    {
+        <span class="code-comment">// Save a reference to the bundle context.
+</span>        m_context = context;
+        <span class="code-comment">// Create a property lookup service implementation.
+</span>        Lookup lookup = <span class="code-keyword">new</span> Lookup() {
+            <span class="code-keyword">public</span> <span class="code-object">Object</span> lookup(<span class="code-object">String</span> name)
+            {
+                <span class="code-keyword">return</span> m_lookupMap.get(name);
+            }
+        };
+        <span class="code-comment">// Register the property lookup service and save
+</span>        <span class="code-comment">// the service registration.
+</span>        m_registration = m_context.registerService(
+            Lookup.class.getName(), lookup, <span class="code-keyword">null</span>);
+    }
+
+    <span class="code-keyword">public</span> void stop(BundleContext context)
+    {
+        <span class="code-comment">// Unregister the property lookup service.
+</span>        m_registration.unregister();
+        m_context = <span class="code-keyword">null</span>;
+    }
+}</pre>
+</div></div>
+
+<p>Given the above host application bundle activator, the following
+code snippet shows how the host application could create an embedded
+version of the Felix framework and provide the property lookup service
+to installed bundles:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">package</span> host.core;
+
+<span class="code-keyword">import</span> java.util.List;
+<span class="code-keyword">import</span> java.util.ArrayList;
+<span class="code-keyword">import</span> java.util.Map;
+<span class="code-keyword">import</span> java.util.HashMap;
+<span class="code-keyword">import</span> host.service.lookup.Lookup;
+<span class="code-keyword">import</span> org.apache.felix.framework.Felix;
+<span class="code-keyword">import</span> org.apache.felix.framework.util.FelixConstants;
+<span class="code-keyword">import</span> org.apache.felix.framework.util.StringMap;
+<span class="code-keyword">import</span> org.apache.felix.framework.cache.BundleCache;
+
+<span class="code-keyword">public</span> class HostApplication
+{
+    <span class="code-keyword">private</span> HostActivator m_activator = <span class="code-keyword">null</span>;
+    <span class="code-keyword">private</span> Felix m_felix = <span class="code-keyword">null</span>;
+    <span class="code-keyword">private</span> Map m_lookupMap = <span class="code-keyword">new</span> HashMap();
+
+    <span class="code-keyword">public</span> HostApplication()
+    {
+        <span class="code-comment">// Initialize the map <span class="code-keyword">for</span> the property lookup service.
+</span>        m_lookupMap.put(<span class="code-quote">"name1"</span>, <span class="code-quote">"value1"</span>);
+        m_lookupMap.put(<span class="code-quote">"name2"</span>, <span class="code-quote">"value2"</span>);
+        m_lookupMap.put(<span class="code-quote">"name3"</span>, <span class="code-quote">"value3"</span>);
+        m_lookupMap.put(<span class="code-quote">"name4"</span>, <span class="code-quote">"value4"</span>);
+
+        <span class="code-comment">// Create a <span class="code-keyword">case</span>-insensitive configuration property map.
+</span>        Map configMap = <span class="code-keyword">new</span> StringMap(<span class="code-keyword">false</span>);
+        <span class="code-comment">// Configure the Felix instance to be embedded.
+</span>        configMap.put(FelixConstants.EMBEDDED_EXECUTION_PROP, <span class="code-quote">"<span class="code-keyword">true</span>"</span>);
+        <span class="code-comment">// Add the host provided service <span class="code-keyword">interface</span> <span class="code-keyword">package</span> and the core OSGi
+</span>        <span class="code-comment">// packages to be exported from the class path via the system bundle.
+</span>        configMap.put(Constants.FRAMEWORK_SYSTEMPACKAGES,
+            <span class="code-quote">"org.osgi.framework; version=1.3.0,"</span> +
+            <span class="code-quote">"org.osgi.service.packageadmin; version=1.2.0,"</span> +
+            <span class="code-quote">"org.osgi.service.startlevel; version=1.0.0,"</span> +
+            <span class="code-quote">"org.osgi.service.url; version=1.0.0,"</span> +
+            <span class="code-quote">"host.service.lookup; version=1.0.0"</span>);
+        <span class="code-comment">// Explicitly specify the directory to use <span class="code-keyword">for</span> caching bundles.
+</span>        configMap.put(BundleCache.CACHE_PROFILE_DIR_PROP, <span class="code-quote">"cache"</span>);
+
+        <span class="code-keyword">try</span>
+        {
+            <span class="code-comment">// Create host activator;
+</span>            m_activator = <span class="code-keyword">new</span> HostActivator(m_lookupMap);
+            List list = <span class="code-keyword">new</span> ArrayList();
+            list.add(m_activator);
+
+            <span class="code-comment">// Now create an instance of the framework with
+</span>            <span class="code-comment">// our configuration properties and activator.
+</span>            m_felix = <span class="code-keyword">new</span> Felix(configMap, list);
+
+            <span class="code-comment">// Now start Felix instance.
+</span>            m_felix.start();
+        }
+        <span class="code-keyword">catch</span> (Exception ex)
+        {
+            <span class="code-object">System</span>.err.println(<span class="code-quote">"Could not create framework: "</span> + ex);
+            ex.printStackTrace();
+        }
+    }
+
+    <span class="code-keyword">public</span> void shutdownApplication()
+    {
+        <span class="code-comment">// Shut down the felix framework when stopping the
+</span>        <span class="code-comment">// host application.
+</span>        m_felix.shutdown();
+    }
+}</pre>
+</div></div>
+
+<p>Rather than having the host application bundle activator register
+the service, it is also possible for the the host application to simply
+get the bundle context from the bundle activator and register the
+service directly, but the presented approach is perhaps a little
+cleaner since it allows the host application to register/unregister the
+service when the system bundle starts/stops.</p>
+
+<p><a name="LaunchingandEmbeddingApacheFelix-hostserviceusage"></a></p>
+
+<h2><a name="LaunchingandEmbeddingApacheFelix-UsingServicesProvidedbyBundles"></a>Using Services Provided by Bundles</h2>
+
+<p>Using services provided by bundles follows the same general approach
+of using a host application bundle activator. The main complication for
+the host application using a service from a bundle is the fact that
+both the host application and the bundle must be using the same class
+definitions for the service interface classes. Since the host
+application cannot import classes from a bundle, this means that the
+service interface classes <b>must</b> be accessible on the class path,
+typically as part of the host application itself. The host application
+then must export the service interface package via the system bundle so
+that bundles installed into the embedded framework instance can import
+it. This is achieved using the <tt>org.osgi.framework.system.packages</tt> configuration property previously presented.</p>
+
+<p>Consider the following simple command service interface for which
+bundles provide implementations, such as might be used to create an
+extensible interactive shell:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">package</span> host.service.command;
+
+<span class="code-keyword">public</span> class Command
+{
+    <span class="code-keyword">public</span> <span class="code-object">String</span> getName();
+    <span class="code-keyword">public</span> <span class="code-object">String</span> getDescription();
+    <span class="code-keyword">public</span> <span class="code-object">boolean</span> execute(<span class="code-object">String</span> commandline);
+}</pre>
+</div></div>
+
+<p>This package is simply part of the host application, which is potentially packaged into a JAR file and started with the "<tt>java -jar</tt>"
+command. Now consider the previously introduced host application bundle
+activator below, which simply provides access to the system bundle
+context:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">package</span> host.core;
+
+<span class="code-keyword">import</span> org.osgi.framework.BundleActivator;
+<span class="code-keyword">import</span> org.osgi.framework.BundleContext;
+
+<span class="code-keyword">public</span> class HostActivator <span class="code-keyword">implements</span> BundleActivator
+{
+    <span class="code-keyword">private</span> BundleContext m_context = <span class="code-keyword">null</span>;
+
+    <span class="code-keyword">public</span> void start(BundleContext context)
+    {
+        m_context = context;
+    }
+
+    <span class="code-keyword">public</span> void stop(BundleContext context)
+    {
+        m_context = <span class="code-keyword">null</span>;
+    }
+
+    <span class="code-keyword">public</span> BundleContext getContext()
+    {
+        <span class="code-keyword">return</span> m_context;
+    }
+}</pre>
+</div></div>
+
+<p>With this bundle activator, the host application can command
+services provided by bundles installed inside its embedded Felix
+framework instance. The following code snippet illustrates one possible
+approach:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">package</span> host.core;
+
+<span class="code-keyword">import</span> java.util.List;
+<span class="code-keyword">import</span> java.util.ArrayList;
+<span class="code-keyword">import</span> java.util.Map;
+<span class="code-keyword">import</span> host.service.command.Command;
+<span class="code-keyword">import</span> org.apache.felix.framework.Felix;
+<span class="code-keyword">import</span> org.apache.felix.framework.util.FelixConstants;
+<span class="code-keyword">import</span> org.apache.felix.framework.util.StringMap;
+<span class="code-keyword">import</span> org.apache.felix.framework.cache.BundleCache;
+<span class="code-keyword">import</span> org.osgi.util.tracker.ServiceTracker;
+
+<span class="code-keyword">public</span> class HostApplication
+{
+    <span class="code-keyword">private</span> HostActivator m_activator = <span class="code-keyword">null</span>;
+    <span class="code-keyword">private</span> Felix m_felix = <span class="code-keyword">null</span>;
+    <span class="code-keyword">private</span> ServiceTracker m_tracker = <span class="code-keyword">null</span>;
+
+    <span class="code-keyword">public</span> HostApplication()
+    {
+        <span class="code-comment">// Create a <span class="code-keyword">case</span>-insensitive configuration property map.
+</span>        Map configMap = <span class="code-keyword">new</span> StringMap(<span class="code-keyword">false</span>);
+        <span class="code-comment">// Configure the Felix instance to be embedded.
+</span>        configMap.put(FelixConstants.EMBEDDED_EXECUTION_PROP, <span class="code-quote">"<span class="code-keyword">true</span>"</span>);
+        <span class="code-comment">// Add the bundle provided service <span class="code-keyword">interface</span> <span class="code-keyword">package</span> and the core OSGi
+</span>        <span class="code-comment">// packages to be exported from the class path via the system bundle.
+</span>        configMap.put(Constants.FRAMEWORK_SYSTEMPACKAGES,
+            <span class="code-quote">"org.osgi.framework; version=1.3.0,"</span> +
+            <span class="code-quote">"org.osgi.service.packageadmin; version=1.2.0,"</span> +
+            <span class="code-quote">"org.osgi.service.startlevel; version=1.0.0,"</span> +
+            <span class="code-quote">"org.osgi.service.url; version=1.0.0,"</span> +
+            <span class="code-quote">"host.service.command; version=1.0.0"</span>);
+        <span class="code-comment">// Explicitly specify the directory to use <span class="code-keyword">for</span> caching bundles.
+</span>        configMap.put(BundleCache.CACHE_PROFILE_DIR_PROP, <span class="code-quote">"cache"</span>);
+
+        <span class="code-keyword">try</span>
+        {
+            <span class="code-comment">// Create host activator;
+</span>            m_activator = <span class="code-keyword">new</span> HostActivator(m_lookupMap);
+            List list = <span class="code-keyword">new</span> ArrayList();
+            list.add(m_activator);
+
+            <span class="code-comment">// Now create an instance of the framework with
+</span>            <span class="code-comment">// our configuration properties and activator.
+</span>            m_felix = <span class="code-keyword">new</span> Felix(configMap, list);
+
+            <span class="code-comment">// Now start Felix instance.
+</span>            m_felix.start();
+        }
+        <span class="code-keyword">catch</span> (Exception ex)
+        {
+            <span class="code-object">System</span>.err.println(<span class="code-quote">"Could not create framework: "</span> + ex);
+            ex.printStackTrace();
+        }
+
+        m_tracker = <span class="code-keyword">new</span> ServiceTracker(
+            m_activator.getContext(), Command.class.getName(), <span class="code-keyword">null</span>);
+        m_tracker.open();
+    }
+
+    <span class="code-keyword">public</span> <span class="code-object">boolean</span> execute(<span class="code-object">String</span> name, <span class="code-object">String</span> commandline)
+    {
+        <span class="code-comment">// See <span class="code-keyword">if</span> any of the currently tracked command services
+</span>        <span class="code-comment">// match the specified command name, <span class="code-keyword">if</span> so then execute it.
+</span>        <span class="code-object">Object</span>[] services = m_tracker.getServices();
+        <span class="code-keyword">for</span> (<span class="code-object">int</span> i = 0; (services != <span class="code-keyword">null</span>) &amp;&amp; (i &lt; services.length); i++)
+        {
+            <span class="code-keyword">try</span>
+            {
+                <span class="code-keyword">if</span> (((Command) services[i]).getName().equals(name))
+                {
+                    <span class="code-keyword">return</span> ((Command) services[i]).execute(commandline);
+                }
+            }
+            <span class="code-keyword">catch</span> (Exception ex)
+            {
+                <span class="code-comment">// Since the services returned by the tracker could become
+</span>                <span class="code-comment">// invalid at any moment, we will <span class="code-keyword">catch</span> all exceptions, log
+</span>                <span class="code-comment">// a message, and then ignore faulty services.
+</span>                <span class="code-object">System</span>.err.println(ex);
+            }
+        }
+        <span class="code-keyword">return</span> <span class="code-keyword">false</span>;
+    }
+
+    <span class="code-keyword">public</span> void shutdownApplication()
+    {
+        <span class="code-comment">// Shut down the felix framework when stopping the
+</span>        <span class="code-comment">// host application.
+</span>        m_felix.shutdown();
+    }
+}</pre>
+</div></div>
+
+<p>The above example is overly simplistic with respect to concurrency
+issues and error conditions, but it demonstrates the overall approach
+for using bundle-provided services from the host application. Note, to
+compile the above code you will need to compile against the Felix
+framework and Felix OSGi compendium JAR files, since the <tt>ServiceTracker</tt> classes are included in the compendium JAR file, not the framework JAR file.</p>
+
+<p><a name="LaunchingandEmbeddingApacheFelix-servicereflection"></a></p>
+
+<h3><a name="LaunchingandEmbeddingApacheFelix-UsingBundleServicesviaReflection"></a>Using Bundle Services via Reflection</h3>
+
+<p>It possible for the host application to use services provided by
+bundles without having access to the service interface classes and thus
+not needing to put the service interface classes on the class path. To
+do this, the host application uses the same general approach to acquire
+the system bundle context object, which it can use to look up service
+objects. Using either an LDAP filter or the service interface class
+name, the host application can retrieve the service object and then use
+standard Java reflection to invoke methods on the service object.</p>
+
+<p><a name="LaunchingandEmbeddingApacheFelix-caveat"></a></p>
+
+<h1><a name="LaunchingandEmbeddingApacheFelix-Caveat"></a>Caveat</h1>
+
+<p>The code in this document has not been thoroughly tested or even
+compiled and may be out of date with respect to the current Felix
+source code. If you find errors please report them so the that they can
+be corrected.</p>
+
+<p><a name="LaunchingandEmbeddingApacheFelix-feedback"></a></p>
+
+<h2><a name="LaunchingandEmbeddingApacheFelix-Feedback"></a>Feedback</h2>
+
+<p>Subscribe to the Felix users mailing list by sending a message to <span class="nobr"><a href="mailto:users-subscribe@felix.apache.org" title="Send mail to users-subscribe@felix.apache.org" rel="nofollow">users-subscribe@felix.apache.org<sup><img class="rendericon" src="launching-and-embedding-apache-felix_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>; after subscribing, email questions or feedback to <span class="nobr"><a href="mailto:users@felix.apache.org" title="Send mail to users@felix.apache.org" rel="nofollow">users@felix.apache.org<sup><img class="rendericon" src="launching-and-embedding-apache-felix_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>.</p>
+    </div>
+  
+</body></html>
