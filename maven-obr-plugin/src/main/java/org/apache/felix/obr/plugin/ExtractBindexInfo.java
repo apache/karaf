@@ -94,20 +94,6 @@ public class ExtractBindexInfo
 
 
     /**
-     * transform logical operator in xml syntax.
-     * @param filter string which contains logical operator
-     * @return string in correct xml syntax
-     */
-    private String parseFilter( String filter )
-    {
-        filter.replaceAll( "&", "&amp" );
-        filter.replaceAll( ">=", "&gt" );
-
-        return filter;
-    }
-
-
-    /**
      * extract capabilities from bindex information.
      * @return bundle capabilities List
      */
@@ -125,11 +111,12 @@ public class ExtractBindexInfo
             if ( !( ci.getName().compareTo( "bundle" ) == 0 ) )
             {
                 Map properties = ci.getProperties();
-                for ( Iterator k = properties.keySet().iterator(); k.hasNext(); )
+                for ( Iterator e = properties.entrySet().iterator(); e.hasNext(); )
                 {
                     PElement p = new PElement();
-                    String key = ( String ) k.next();
-                    List values = ( List ) properties.get( key );
+                    Map.Entry entry = ( Map.Entry ) e.next();
+                    String key = ( String ) entry.getKey();
+                    List values = ( List ) entry.getValue();
                     for ( Iterator v = values.iterator(); v.hasNext(); )
                     {
                         Object value = v.next();
@@ -149,7 +136,7 @@ public class ExtractBindexInfo
                         }
                         else
                         {
-                            if ( value.getClass() == VersionRange.class )
+                            if ( value instanceof VersionRange )
                             {
                                 type = "version";
                             }
@@ -187,7 +174,7 @@ public class ExtractBindexInfo
             require.setMultiple( String.valueOf( ci.isMultiple() ) );
             require.setOptional( String.valueOf( ci.isOptional() ) );
             require.setName( ci.getName() );
-            require.setFilter( parseFilter( ci.getFilter() ) );
+            require.setFilter( ci.getFilter() );
             require.setValue( ci.getComment() );
             list.add( require );
         }
