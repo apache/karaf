@@ -200,15 +200,14 @@ public class FileMonitor {
 
         for (Object filename : filenames) {
             String name = filename.toString();
-            boolean added = true;
-            
+
             File file = new File(name);
             try {
                 logger.debug("File changed: " + filename + " with type: " + filename.getClass().getName());
 
                 // Handle config files
                 if (isValidConfigFile(file)) {
-                    if (added) {
+                    if (file.exists()) {
                         updateConfiguration(file);
                     }
                     else {
@@ -217,6 +216,29 @@ public class FileMonitor {
                     continue;
                 }
 
+                // Handle exploded artifacts removal
+                if (!file.exists() && file.getName().equals("MANIFEST.MF")) {
+                    File parentFile = file.getParentFile();
+                    if (parentFile.getName().equals("META-INF")) {
+                        File bundleDir = parentFile.getParentFile();
+                        if (isValidBundleSourceDirectory(bundleDir)) {
+                            undeployBundle(bundleDir);
+                            continue;
+                        }
+                    }
+                }
+
+                // Handle exploded artifacts add
+                File jardir = getExpandedBundleRootDirectory(file);
+                if (jardir != null) {
+                    if (bundleJarsCreated.contains(jardir)) {
+                        continue;
+                    }
+                    bundleJarsCreated.add(jardir);
+                    file = createBundleJar(jardir);
+                }
+
+                // Transformation step
                 if (file.exists()) {
                     file = transformArtifact(file);
                     if (file == null) {
@@ -224,7 +246,6 @@ public class FileMonitor {
                         continue;
                     }
                 } else {
-                	added = false;
                 	String transformedFile = artifactToBundle.get(name);
                 	if (transformedFile != null) {
                 		file = new File(transformedFile);
@@ -234,31 +255,13 @@ public class FileMonitor {
                 	}
                 }
 
-                // Check artifacts
-                // now lets iterate to find the parent directory
-                File jardir = getExpandedBundleRootDirectory(file);
-                if (jardir != null) {
-                    if (file.exists() && !bundleJarsCreated.contains(jardir)) {
-                        bundleJarsCreated.add(jardir);
-                        File newBundle = createBundleJar(jardir);
-                        deployBundle(newBundle);
-                    }
-                }
-                else if (isValidArtifactFile(file)) {
-                    if (added) {
+                // Handle final bundles
+                if (isValidArtifactFile(file)) {
+                    if (file.exists()) {
                         deployBundle(file);
                     }
                     else {
                         undeployBundle(file);
-                    }
-                }
-                else if (file.getName().equals("MANIFEST.MF")) {
-                    File parentFile = file.getParentFile();
-                    if (parentFile.getName().equals("META-INF")) {
-                        File bundleDir = parentFile.getParentFile();
-                        if (isValidBundleSourceDirectory(bundleDir)) {
-                            undeployBundle(bundleDir);
-                        }
                     }
                 }
             }
