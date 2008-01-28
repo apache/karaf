@@ -35,7 +35,7 @@
   <packaging>jar</packaging>
   <dependencies>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>org.apache.felix</groupId>
       <artifactId>org.osgi.core</artifactId>
       <version>1.0.0</version>
     </dependency>
