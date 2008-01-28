@@ -1,4 +1,4 @@
-Changes from 1.0.0 to 1.0.1
+Changes from 1.0.0 to 1.0.2
 ---------------------------
 
 * [2008-01-27] Change the default url from sf.net to sourceforge.net.
