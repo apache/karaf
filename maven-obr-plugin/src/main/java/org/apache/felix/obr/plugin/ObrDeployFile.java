@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URI;
 
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -120,10 +121,10 @@ public class ObrDeployFile extends AbstractMojo
         ArtifactRepository ar = m_project.getDistributionManagementArtifactRepository();
 
         // locate the obr.xml file
-        PathFile fileObrXml = new PathFile( m_obrFile );
-        if ( !fileObrXml.isExists() )
+        URI obrXml = ObrUtils.toFileURI( m_obrFile );
+        if ( null == obrXml )
         {
-            getLog().warn( "obr.xml file not found, use default" );
+            getLog().info( "obr.xml is not present, use default" );
         }
 
         File repoDescriptorFile = null;
@@ -285,8 +286,8 @@ public class ObrDeployFile extends AbstractMojo
 
         file = new PathFile( "file:/" + repoDescriptorFile.getAbsolutePath() );
 
-        ObrUpdate obrUpdate = new ObrUpdate( file, fileObrXml.getOnlyAbsoluteFilename(), m_project, m_fileInLocalRepo,
-            PathFile.uniformSeparator( m_settings.getLocalRepository() ), userConfig, getLog() );
+        ObrUpdate obrUpdate = new ObrUpdate( file, obrXml, m_project, m_fileInLocalRepo, PathFile
+            .uniformSeparator( m_settings.getLocalRepository() ), userConfig, getLog() );
 
         obrUpdate.updateRepository();
 

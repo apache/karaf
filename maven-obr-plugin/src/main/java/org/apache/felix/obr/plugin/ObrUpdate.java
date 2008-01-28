@@ -122,13 +122,13 @@ public class ObrUpdate
      * @param userConfig user information
      * @param logger plugin logger
      */
-    public ObrUpdate( PathFile repositoryXml, String obrXml, MavenProject project, String bundlePath,
+    public ObrUpdate( PathFile repositoryXml, URI obrXml, MavenProject project, String bundlePath,
         String mavenRepositoryPath, Config userConfig, Log logger )
     {
         // m_localRepo = localRepo;
         m_bundlePath = ObrUtils.toFileURI( bundlePath );
         m_repositoryXml = repositoryXml.getFile().toURI(); // FIXME: remove when PathFile is gone
-        m_obrXml = ObrUtils.toFileURI( obrXml );
+        m_obrXml = obrXml;
         m_project = project;
         m_logger = logger;
 

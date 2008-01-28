@@ -20,6 +20,7 @@ package org.apache.felix.obr.plugin;
 
 
 import java.io.File;
+import java.net.URI;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
@@ -112,8 +113,6 @@ public class ObrInstallFile extends AbstractMojo
      */
     public void execute() throws MojoExecutionException, MojoFailureException
     {
-        getLog().info( "Install-File Obr starts:" );
-
         m_project = new MavenProject();
         m_project.setArtifactId( m_artifactId );
         m_project.setGroupId( m_groupId );
@@ -164,7 +163,7 @@ public class ObrInstallFile extends AbstractMojo
         if ( m_repositoryPath == null )
         {
             m_repositoryPath = "file:" + repoLocal.getOnlyAbsoluteFilename() + "repository.xml";
-            getLog().warn( "-DpathRepo is not define, use default repository: " + m_repositoryPath );
+            getLog().info( "-Drepository-path is not set, using default repository: " + m_repositoryPath );
         }
 
         PathFile fileRepo = new PathFile( m_repositoryPath );
@@ -180,17 +179,17 @@ public class ObrInstallFile extends AbstractMojo
             fileRepo.createPath();
         }
 
-        PathFile fileObrXml = new PathFile( m_obrFile );
-        if ( !fileObrXml.isExists() )
+        URI obrXml = ObrUtils.toFileURI( m_obrFile );
+        if ( null == obrXml )
         {
-            getLog().warn( "obr.xml file not found, use default" );
+            getLog().info( "obr.xml is not present, use default" );
         }
 
         // build the user config
         Config userConfig = new Config();
 
-        ObrUpdate obrUpdate = new ObrUpdate( fileRepo, fileObrXml.getOnlyAbsoluteFilename(), m_project, fileOut
-            .getOnlyAbsoluteFilename(), m_localRepo.getBasedir(), userConfig, getLog() );
+        ObrUpdate obrUpdate = new ObrUpdate( fileRepo, obrXml, m_project, fileOut.getOnlyAbsoluteFilename(),
+            m_localRepo.getBasedir(), userConfig, getLog() );
         obrUpdate.updateRepository();
 
     }

@@ -89,15 +89,9 @@ public class OBRInstall extends AbstractMojo
             URI repositoryXml = ObrUtils.findRepositoryXml( project.getBasedir(), mavenRepository, obrRepository );
             URI obrXml = ObrUtils.findObrXml( project.getResources() );
 
-            String obrXmlPath = null;
-            if ( null != obrXml )
-            {
-                obrXmlPath = obrXml.getPath();
-            }
-
             Config userConfig = new Config();
 
-            update = new ObrUpdate( new PathFile( repositoryXml.getPath() ), obrXmlPath, project, bundlePath,
+            update = new ObrUpdate( new PathFile( repositoryXml.getPath() ), obrXml, project, bundlePath,
                 mavenRepository, userConfig, log );
 
             update.updateRepository();

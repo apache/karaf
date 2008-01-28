@@ -24,11 +24,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.List;
+import java.net.URI;
 
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -128,22 +127,12 @@ public class ObrDeploy extends AbstractMojo
         ArtifactRepository ar = m_project.getDistributionManagementArtifactRepository();
 
         // locate the obr.xml file
-        String obrXmlFile = null;
-        List l = m_project.getResources();
-        for ( int i = 0; i < l.size(); i++ )
-        {
-            File f = new File( ( ( Resource ) l.get( i ) ).getDirectory() + File.separator + "obr.xml" );
-            if ( f.exists() )
-            {
-                obrXmlFile = ( ( Resource ) l.get( i ) ).getDirectory() + File.separator + "obr.xml";
-                break;
-            }
-        }
+        URI obrXml = ObrUtils.findObrXml( m_project.getResources() );
 
         // the obr.xml file is not present
-        if ( obrXmlFile == null )
+        if ( null == obrXml )
         {
-            getLog().warn( "obr.xml is not present, use default" );
+            getLog().info( "obr.xml is not present, use default" );
         }
 
         File repoDescriptorFile = null;
@@ -305,7 +294,7 @@ public class ObrDeploy extends AbstractMojo
 
         file = new PathFile( "file:/" + repoDescriptorFile.getAbsolutePath() );
 
-        ObrUpdate obrUpdate = new ObrUpdate( file, obrXmlFile, m_project, m_fileInLocalRepo, PathFile
+        ObrUpdate obrUpdate = new ObrUpdate( file, obrXml, m_project, m_fileInLocalRepo, PathFile
             .uniformSeparator( m_settings.getLocalRepository() ), userConfig, getLog() );
 
         obrUpdate.updateRepository();

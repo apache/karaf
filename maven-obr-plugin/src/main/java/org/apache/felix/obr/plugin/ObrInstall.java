@@ -20,10 +20,9 @@ package org.apache.felix.obr.plugin;
 
 
 import java.io.File;
-import java.util.List;
+import java.net.URI;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -106,7 +105,7 @@ public class ObrInstall extends AbstractMojo
         if ( m_repositoryPath == null )
         {
             m_repositoryPath = "file:/" + m_localRepo.getBasedir() + File.separator + "repository.xml";
-            getLog().warn( "-DpathRepo is not define, use default repository: " + m_repositoryPath );
+            getLog().info( "-Drepository-path is not set, using default repository: " + m_repositoryPath );
         }
 
         PathFile file = new PathFile( m_repositoryPath );
@@ -119,21 +118,12 @@ public class ObrInstall extends AbstractMojo
         }
 
         // locate the obr.xml file
-        String obrXmlFile = null;
-        List l = m_project.getResources();
-        for ( int i = 0; i < l.size(); i++ )
-        {
-            File f = new File( ( ( Resource ) l.get( i ) ).getDirectory() + File.separator + "obr.xml" );
-            if ( f.exists() )
-            {
-                obrXmlFile = ( ( Resource ) l.get( i ) ).getDirectory() + File.separator + "obr.xml";
-                break;
-            }
-        }
+        URI obrXml = ObrUtils.findObrXml( m_project.getResources() );
+
         // the obr.xml file is not present
-        if ( obrXmlFile == null )
+        if ( null == obrXml )
         {
-            getLog().warn( "obr.xml is not present, use default" );
+            getLog().info( "obr.xml is not present, use default" );
         }
 
         // get the path to local maven repository
@@ -173,9 +163,9 @@ public class ObrInstall extends AbstractMojo
         Config user = new Config();
 
         getLog().debug( "Maven2 Local File repository = " + fileRepo.getAbsoluteFilename() );
-        getLog().debug( "OBR repository = " + obrXmlFile );
+        getLog().debug( "OBR repository = " + obrXml );
 
-        ObrUpdate obrUpdate = new ObrUpdate( fileRepo, obrXmlFile, m_project, m_fileInLocalRepo, PathFile
+        ObrUpdate obrUpdate = new ObrUpdate( fileRepo, obrXml, m_project, m_fileInLocalRepo, PathFile
             .uniformSeparator( m_settings.getLocalRepository() ), user, getLog() );
         try
         {
