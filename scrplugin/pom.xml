@@ -50,8 +50,8 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.core.compendium</artifactId>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
 			<version>1.0.0</version>
 			<scope>compile</scope>
 		</dependency>
