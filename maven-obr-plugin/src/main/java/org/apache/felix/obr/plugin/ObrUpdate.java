@@ -79,7 +79,7 @@ public class ObrUpdate
     /**
      * name and path to the bundle jar file.
      */
-    private URI m_bundlePath;
+    private URI m_bundleJar;
 
     /**
      * maven project description.
@@ -117,17 +117,16 @@ public class ObrUpdate
      * @param repositoryXml path to the repository descriptor file
      * @param obrXml path and filename to the obr.xml file
      * @param project maven project description
-     * @param bundlePath path to the bundle jar file
+     * @param bundleJar path to the bundle jar file
      * @param mavenRepositoryPath path to the local maven repository
      * @param userConfig user information
      * @param logger plugin logger
      */
-    public ObrUpdate( PathFile repositoryXml, URI obrXml, MavenProject project, String bundlePath,
-        String mavenRepositoryPath, Config userConfig, Log logger )
+    public ObrUpdate( URI repositoryXml, URI obrXml, MavenProject project, URI bundleJar, String mavenRepositoryPath,
+        Config userConfig, Log logger )
     {
-        // m_localRepo = localRepo;
-        m_bundlePath = ObrUtils.toFileURI( bundlePath );
-        m_repositoryXml = repositoryXml.getFile().toURI(); // FIXME: remove when PathFile is gone
+        m_bundleJar = bundleJar;
+        m_repositoryXml = repositoryXml;
         m_obrXml = obrXml;
         m_project = project;
         m_logger = logger;
@@ -153,10 +152,9 @@ public class ObrUpdate
      */
     public void updateRepository() throws MojoExecutionException
     {
-
-        m_logger.debug( " (f) m_obrXml = " + m_obrXml );
-        m_logger.debug( " (f) m_bundlePath = " + m_bundlePath );
-        m_logger.debug( " (f) m_repositoryXml = " + m_repositoryXml );
+        m_logger.debug( " (f) repositoryXml = " + m_repositoryXml );
+        m_logger.debug( " (f) bundleJar = " + m_bundleJar );
+        m_logger.debug( " (f) obrXml = " + m_obrXml );
 
         m_documentBuilder = initDocumentBuilder();
 
@@ -166,21 +164,21 @@ public class ObrUpdate
         }
 
         // get the file size
-        File bundleFile = new File( m_bundlePath );
+        File bundleFile = new File( m_bundleJar );
         if ( bundleFile.exists() )
         {
-            URI bundleURI = m_bundlePath;
+            URI resourceURI = m_bundleJar;
             if ( m_userConfig.isPathRelative() )
             {
-                bundleURI = ObrUtils.getRelativeURI( m_baseURI, bundleURI );
+                resourceURI = ObrUtils.getRelativeURI( m_baseURI, resourceURI );
             }
 
             m_resourceBundle.setSize( String.valueOf( bundleFile.length() ) );
-            m_resourceBundle.setUri( bundleURI.toASCIIString() );
+            m_resourceBundle.setUri( resourceURI.toASCIIString() );
         }
         else
         {
-            m_logger.error( "file doesn't exist: " + m_bundlePath );
+            m_logger.error( "file doesn't exist: " + m_bundleJar );
             return;
         }
 
@@ -210,7 +208,7 @@ public class ObrUpdate
         try
         {
             // use bindex to extract bundle information
-            bindexExtractor = new ExtractBindexInfo( m_repositoryXml, m_bundlePath.getPath() );
+            bindexExtractor = new ExtractBindexInfo( m_repositoryXml, m_bundleJar.getPath() );
         }
         catch ( MojoExecutionException e )
         {

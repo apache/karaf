@@ -22,12 +22,13 @@ package org.apache.felix.obr.plugin;
 import java.io.File;
 import java.net.URI;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.settings.Settings;
 
 
 /**
@@ -41,10 +42,18 @@ import org.apache.maven.settings.Settings;
 public class ObrInstallFile extends AbstractMojo
 {
     /**
+     * Component factory for Maven artifacts
+     * 
+     * @component
+     */
+    private ArtifactFactory m_factory;
+
+    /**
      * The local Maven repository.
      * 
      * @parameter expression="${localRepository}"
      * @required
+     * @readonly
      */
     private ArtifactRepository m_localRepo;
 
@@ -52,17 +61,8 @@ public class ObrInstallFile extends AbstractMojo
      * path to the repository.xml.
      * 
      * @parameter expression="${repository-path}"
-     * @require
      */
     private String m_repositoryPath;
-
-    /**
-     * setting of maven.
-     * 
-     * @parameter expression="${settings}"
-     * @require
-     */
-    private Settings m_settings;
 
     /**
      * Artifact Id.
@@ -119,8 +119,6 @@ public class ObrInstallFile extends AbstractMojo
         m_project.setVersion( m_version );
         m_project.setPackaging( m_packaging );
 
-        PathFile fileOut;
-
         if ( m_groupId == null )
         {
             getLog().error( "-DgroupId=VALUE is required" );
@@ -142,56 +140,32 @@ public class ObrInstallFile extends AbstractMojo
             return;
         }
 
-        // copy the file to the local repository
-        PathFile repoLocal = new PathFile( m_localRepo.getBasedir() );
-
-        // get the target file in mvn repo
-        fileOut = new PathFile( PathFile.uniformSeparator( m_settings.getLocalRepository() ) + File.separator
-            + m_groupId.replace( '.', File.separatorChar ) + File.separator + m_artifactId + File.separator + m_version
-            + File.separator + m_artifactId + "-" + m_version + "." + m_packaging );
-
-        if ( !fileOut.isExists() )
-        {
-            getLog().error( "file doesn't exist: " + fileOut.getAbsoluteFilename() );
-            return;
-        }
-        else
-        {
-            getLog().info( "Target file: " + fileOut.getAbsoluteFilename() );
-        }
-
-        if ( m_repositoryPath == null )
-        {
-            m_repositoryPath = "file:" + repoLocal.getOnlyAbsoluteFilename() + "repository.xml";
-            getLog().info( "-Drepository-path is not set, using default repository: " + m_repositoryPath );
-        }
-
-        PathFile fileRepo = new PathFile( m_repositoryPath );
-        if ( fileRepo.isRelative() )
-        {
-            fileRepo.setBaseDir( m_settings.getLocalRepository() );
-        }
-
-        // create the folder to the repository
-        PathFile repoExist = new PathFile( fileRepo.getAbsolutePath() );
-        if ( !repoExist.isExists() )
-        {
-            fileRepo.createPath();
-        }
-
+        // locate the obr.xml file
         URI obrXml = ObrUtils.toFileURI( m_obrFile );
         if ( null == obrXml )
         {
             getLog().info( "obr.xml is not present, use default" );
         }
 
-        // build the user config
+        Artifact bundleArtifact = m_factory.createBuildArtifact( m_groupId, m_artifactId, m_version, m_packaging );
+
+        // get the path to local maven repository
+        String mavenRepository = m_localRepo.getBasedir();
+
+        URI repoXml = ObrUtils.findRepositoryXml( mavenRepository, m_repositoryPath );
+        URI bundleJar = ObrUtils.findBundleJar( m_localRepo, bundleArtifact );
+
+        if ( !new File( bundleJar ).exists() )
+        {
+            getLog().error( "file doesn't exist: " + bundleJar );
+            return;
+        }
+
+        // use default configuration
         Config userConfig = new Config();
 
-        ObrUpdate obrUpdate = new ObrUpdate( fileRepo, obrXml, m_project, fileOut.getOnlyAbsoluteFilename(),
-            m_localRepo.getBasedir(), userConfig, getLog() );
-        obrUpdate.updateRepository();
+        ObrUpdate update = new ObrUpdate( repoXml, obrXml, m_project, bundleJar, null, userConfig, getLog() );
 
+        update.updateRepository();
     }
-
 }

@@ -41,7 +41,7 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 /**
  * deploy the bundle to a remote site.
  * this goal is used when you compile a project with a pom file
- * @goal deployment
+ * @goal deploy
  * @phase deploy
  * @requiresDependencyResolution compile
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
@@ -49,9 +49,8 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 
 public class ObrDeploy extends AbstractMojo
 {
-
     /**
-     * setting of maven.
+     * Maven settings.
      * 
      * @parameter expression="${settings}"
      * @require
@@ -70,6 +69,7 @@ public class ObrDeploy extends AbstractMojo
      * 
      * @parameter expression="${localRepository}"
      * @required
+     * @readonly
      */
     private ArtifactRepository m_localRepo;
 
@@ -88,24 +88,11 @@ public class ObrDeploy extends AbstractMojo
     private WagonManager m_wagonManager;
 
     /**
-     * obr file define by the user.
+     * When true, ignore remote locking.
      * 
      * @parameter expression="${ignore-lock}"
-     * 
      */
     private boolean m_ignoreLock;
-
-    /**
-     * used to store pathfile in local repo.
-     */
-    private String m_fileInLocalRepo;
-
-    /**
-     * Enable/Disable this goal
-     * @description If true evrything the goal do nothing, the goal just skip over 
-     * @parameter expression="${maven.obr.installToRemoteOBR}" default-value="false"
-     */
-    private boolean installToRemoteOBR;
 
 
     /**
@@ -116,20 +103,10 @@ public class ObrDeploy extends AbstractMojo
      */
     public void execute() throws MojoExecutionException, MojoFailureException
     {
-        getLog().info( "Obr-deploy start:" );
-        if ( !installToRemoteOBR )
-        {
-            getLog().info( "maven-obr-plugin:deploy goal is disable due to one of the following reason:" );
-            getLog().info( " - 'installToRemoteOBR' configuration set to false" );
-            getLog().info( " - JVM property maven.obr.installToRemoteOBR set to false" );
-            return;
-        }
         ArtifactRepository ar = m_project.getDistributionManagementArtifactRepository();
 
         // locate the obr.xml file
         URI obrXml = ObrUtils.findObrXml( m_project.getResources() );
-
-        // the obr.xml file is not present
         if ( null == obrXml )
         {
             getLog().info( "obr.xml is not present, use default" );
@@ -232,32 +209,13 @@ public class ObrDeploy extends AbstractMojo
 
         try
         {
-            repoDescriptorFile = remoteFile.get( m_repositoryName );
+            repoDescriptorFile = remoteFile.get( m_repositoryName, ".xml" );
         }
         catch ( TransferFailedException e )
         {
             getLog().error( "Transfer failed" );
             e.printStackTrace();
             throw new MojoFailureException( "TransferFailedException" );
-
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
-            // file doesn't exist! create a new one
-            getLog().warn( "file specified does not exist: " + m_repositoryName );
-            getLog().warn( "Create a new repository descriptor file " + m_repositoryName );
-            try
-            {
-                File f = File.createTempFile( String.valueOf( System.currentTimeMillis() ), null );
-                repoDescriptorFile = new File( f.getParent() + File.separator
-                    + String.valueOf( System.currentTimeMillis() ) + ".xml" );
-            }
-            catch ( IOException e1 )
-            {
-                getLog().error( "canno't create temporary file" );
-                e1.printStackTrace();
-                return;
-            }
         }
         catch ( AuthorizationException e )
         {
@@ -271,33 +229,25 @@ public class ObrDeploy extends AbstractMojo
             throw new MojoFailureException( "IOException" );
         }
 
+        // get the path to local maven repository
+        String mavenRepository = m_localRepo.getBasedir();
+
+        URI repoXml = repoDescriptorFile.toURI();
+        URI bundleJar = ObrUtils.findBundleJar( m_localRepo, m_project.getArtifact() );
+
+        if ( !new File( bundleJar ).exists() )
+        {
+            getLog().error( "file not found in local repository: " + bundleJar );
+            return;
+        }
+
         Config userConfig = new Config();
         userConfig.setPathRelative( true );
         userConfig.setRemotely( true );
 
-        PathFile file = null;
+        ObrUpdate update = new ObrUpdate( repoXml, obrXml, m_project, bundleJar, mavenRepository, userConfig, getLog() );
 
-        // get the path to local maven repository
-        file = new PathFile( PathFile.uniformSeparator( m_settings.getLocalRepository() ) + File.separator
-            + PathFile.uniformSeparator( m_localRepo.pathOf( m_project.getArtifact() ) ) );
-        if ( file.isExists() )
-        {
-            m_fileInLocalRepo = file.getOnlyAbsoluteFilename();
-        }
-        else
-        {
-            getLog().error(
-                "file not found in local repository: " + m_settings.getLocalRepository() + File.separator
-                    + m_localRepo.pathOf( m_project.getArtifact() ) );
-            return;
-        }
-
-        file = new PathFile( "file:/" + repoDescriptorFile.getAbsolutePath() );
-
-        ObrUpdate obrUpdate = new ObrUpdate( file, obrXml, m_project, m_fileInLocalRepo, PathFile
-            .uniformSeparator( m_settings.getLocalRepository() ), userConfig, getLog() );
-
-        obrUpdate.updateRepository();
+        update.updateRepository();
 
         // the reposiroty descriptor file is modified, we upload it on the remote repository
         try
@@ -323,6 +273,7 @@ public class ObrDeploy extends AbstractMojo
             throw new MojoFailureException( "AuthorizationException" );
         }
         repoDescriptorFile.delete();
+        lockFile.delete();
 
         // we remove lockFile activation
         lockFile = null;
@@ -358,6 +309,6 @@ public class ObrDeploy extends AbstractMojo
         }
 
         remoteFile.disconnect();
+        lockFile.delete();
     }
-
 }

@@ -55,7 +55,7 @@ import org.xml.sax.SAXException;
  * Clean an OBR repository by finding and removing missing resources.
  * 
  * @goal clean
- * @phase install
+ * @phase clean
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -75,14 +75,7 @@ public class ObrCleanRepo extends AbstractMojo
      * @required
      * @readonly
      */
-    private ArtifactRepository localRepository;
-
-    /**
-     * @parameter expression="${project.basedir}"
-     * @required
-     * @readonly
-     */
-    private File basedir;
+    private ArtifactRepository m_localRepo;
 
 
     public void execute() throws MojoExecutionException
@@ -96,7 +89,7 @@ public class ObrCleanRepo extends AbstractMojo
         try
         {
             // Compute local repository location
-            URI repositoryXml = ObrUtils.findRepositoryXml( basedir, localRepository.getBasedir(), obrRepository );
+            URI repositoryXml = ObrUtils.findRepositoryXml( m_localRepo.getBasedir(), obrRepository );
             if ( !"file".equals( repositoryXml.getScheme() ) )
             {
                 getLog().error( "The repository URI " + repositoryXml + " is not a local file" );
@@ -141,7 +134,7 @@ public class ObrCleanRepo extends AbstractMojo
      */
     private Element cleanDocument( Element elem )
     {
-        String localRepoPath = localRepository.getBasedir();
+        String localRepoPath = m_localRepo.getBasedir();
         NodeList nodes = elem.getElementsByTagName( "resource" );
         List toRemove = new ArrayList();
 

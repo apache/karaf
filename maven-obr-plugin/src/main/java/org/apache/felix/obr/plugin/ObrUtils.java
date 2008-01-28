@@ -24,6 +24,8 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Resource;
 
 
@@ -40,12 +42,11 @@ public class ObrUtils
 
 
     /**
-     * @param baseDir current base directory
      * @param mavenRepository path to local maven repository
      * @param obrRepository path to specific repository.xml
      * @return URI pointing to correct repository.xml
      */
-    public static URI findRepositoryXml( File baseDir, String mavenRepository, String obrRepository )
+    public static URI findRepositoryXml( String mavenRepository, String obrRepository )
     {
         // Combine location settings into a single repository location
         if ( null == obrRepository || obrRepository.trim().length() == 0 )
@@ -71,13 +72,7 @@ public class ObrUtils
         // fall-back to file-system approach
         if ( null == uri || !uri.isAbsolute() )
         {
-            File file = new File( obrRepository );
-            if ( !file.isAbsolute() )
-            {
-                file = new File( baseDir, obrRepository );
-            }
-
-            uri = file.toURI();
+            uri = new File( obrRepository ).toURI();
         }
 
         return uri;
@@ -100,6 +95,20 @@ public class ObrUtils
             }
         }
         return null;
+    }
+
+
+    /**
+     * @param repository maven repository
+     * @param artifact maven artifact
+     * @return file URI pointing to artifact in repository
+     */
+    public static URI findBundleJar( ArtifactRepository repository, Artifact artifact )
+    {
+        String baseDir = repository.getBasedir();
+        String artifactPath = repository.pathOf( artifact );
+
+        return toFileURI( baseDir + '/' + artifactPath );
     }
 
 

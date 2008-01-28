@@ -19,13 +19,11 @@
 package org.apache.felix.bundleplugin;
 
 
-import java.io.File;
 import java.net.URI;
 
 import org.apache.felix.obr.plugin.Config;
 import org.apache.felix.obr.plugin.ObrUpdate;
 import org.apache.felix.obr.plugin.ObrUtils;
-import org.apache.felix.obr.plugin.PathFile;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -82,17 +80,14 @@ public class OBRInstall extends AbstractMojo
         try
         {
             String mavenRepository = localRepository.getBasedir();
-            String artifactPath = localRepository.pathOf( project.getArtifact() );
-            String bundlePath = mavenRepository + File.separator + artifactPath;
-            bundlePath = bundlePath.replace( '\\', '/' );
 
-            URI repositoryXml = ObrUtils.findRepositoryXml( project.getBasedir(), mavenRepository, obrRepository );
+            URI repositoryXml = ObrUtils.findRepositoryXml( mavenRepository, obrRepository );
             URI obrXml = ObrUtils.findObrXml( project.getResources() );
+            URI bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
 
             Config userConfig = new Config();
 
-            update = new ObrUpdate( new PathFile( repositoryXml.getPath() ), obrXml, project, bundlePath,
-                mavenRepository, userConfig, log );
+            update = new ObrUpdate( repositoryXml, obrXml, project, bundleJar, mavenRepository, userConfig, log );
 
             update.updateRepository();
         }

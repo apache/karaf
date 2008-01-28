@@ -26,13 +26,12 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.settings.Settings;
 
 
 /**
  * construct the repository.xml with a project Maven compiled
  *
- * @goal repository
+ * @goal install
  * @phase install
  * @requiresDependencyResolution compile
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
@@ -44,6 +43,7 @@ public class ObrInstall extends AbstractMojo
      * 
      * @parameter expression="${localRepository}"
      * @required
+     * @readonly
      */
     private ArtifactRepository m_localRepo;
 
@@ -51,7 +51,6 @@ public class ObrInstall extends AbstractMojo
      * path to the repository.xml.
      * 
      * @parameter expression="${repository-path}"
-     * @require
      */
     private String m_repositoryPath;
 
@@ -64,27 +63,6 @@ public class ObrInstall extends AbstractMojo
 
     private MavenProject m_project;
 
-    /**
-     * setting of maven.
-     * 
-     * @parameter expression="${settings}"
-     * @require
-     */
-
-    private Settings m_settings;
-
-    /**
-     * Enable/Disable this goal
-     * @description If true evrything the goal do nothing, the goal just skip over 
-     * @parameter expression="${maven.obr.installToLocalOBR}" default-value="true"
-     */
-    private boolean installToLocalOBR;
-
-    /**
-     * path to file in the maven local repository.
-     */
-    private String m_fileInLocalRepo;
-
 
     /**
      * main method for this goal.
@@ -93,89 +71,30 @@ public class ObrInstall extends AbstractMojo
      */
     public void execute() throws MojoExecutionException
     {
-        getLog().info( "Obr Plugin starts:" );
-        if ( !installToLocalOBR )
-        {
-            getLog().info( "maven-obr-plugin:repository goal is disable due to one of the following reason:" );
-            getLog().info( " - 'installToLocalOBR' configuration set to false" );
-            getLog().info( " - JVM property maven.obr.installToLocalOBR set to false" );
-            return;
-        }
-
-        if ( m_repositoryPath == null )
-        {
-            m_repositoryPath = "file:/" + m_localRepo.getBasedir() + File.separator + "repository.xml";
-            getLog().info( "-Drepository-path is not set, using default repository: " + m_repositoryPath );
-        }
-
-        PathFile file = new PathFile( m_repositoryPath );
-        if ( file.isExists() )
-        {
-            if ( !m_repositoryPath.startsWith( "file:/" ) )
-            {
-                m_repositoryPath = "file:/" + m_repositoryPath;
-            }
-        }
-
         // locate the obr.xml file
         URI obrXml = ObrUtils.findObrXml( m_project.getResources() );
-
-        // the obr.xml file is not present
         if ( null == obrXml )
         {
             getLog().info( "obr.xml is not present, use default" );
         }
 
         // get the path to local maven repository
-        file = new PathFile( PathFile.uniformSeparator( m_settings.getLocalRepository() ) + File.separator
-            + PathFile.uniformSeparator( m_localRepo.pathOf( m_project.getArtifact() ) ) );
+        String mavenRepository = m_localRepo.getBasedir();
 
-        if ( file.isExists() )
+        URI repoXml = ObrUtils.findRepositoryXml( mavenRepository, m_repositoryPath );
+        URI bundleJar = ObrUtils.findBundleJar( m_localRepo, m_project.getArtifact() );
+
+        if ( !new File( bundleJar ).exists() )
         {
-            m_fileInLocalRepo = file.getOnlyAbsoluteFilename();
-        }
-        else
-        {
-            getLog().error(
-                "file not found in local repository: " + m_settings.getLocalRepository() + File.separator
-                    + m_localRepo.pathOf( m_project.getArtifact() ) );
-            getLog().error(
-                "file not found in local repository: " + m_localRepo.getBasedir() + File.separator
-                    + m_localRepo.pathOf( m_project.getArtifact() ) );
+            getLog().error( "file not found in local repository: " + bundleJar );
             return;
         }
 
-        // verify the repository.xml
-        PathFile fileRepo = new PathFile( m_repositoryPath );
-        if ( fileRepo.isRelative() )
-        {
-            fileRepo.setBaseDir( m_settings.getLocalRepository() );
-        }
+        // use default configuration
+        Config userConfig = new Config();
 
-        // create the folder to the repository
-        PathFile repoExist = new PathFile( fileRepo.getAbsolutePath() );
-        if ( !repoExist.isExists() )
-        {
-            fileRepo.createPath();
-        }
+        ObrUpdate update = new ObrUpdate( repoXml, obrXml, m_project, bundleJar, null, userConfig, getLog() );
 
-        // build the user configuration (use default)
-        Config user = new Config();
-
-        getLog().debug( "Maven2 Local File repository = " + fileRepo.getAbsoluteFilename() );
-        getLog().debug( "OBR repository = " + obrXml );
-
-        ObrUpdate obrUpdate = new ObrUpdate( fileRepo, obrXml, m_project, m_fileInLocalRepo, PathFile
-            .uniformSeparator( m_settings.getLocalRepository() ), user, getLog() );
-        try
-        {
-            obrUpdate.updateRepository();
-        }
-        catch ( MojoExecutionException e )
-        {
-            e.printStackTrace();
-            throw new MojoExecutionException( "MojoFailureException" );
-        }
+        update.updateRepository();
     }
-
 }

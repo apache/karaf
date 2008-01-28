@@ -169,14 +169,13 @@ public class RemoteFileManager
     /**
      * get a file from the current repository connected.
      * @param url url to the targeted file
+     * @param suffix suggested file suffix
      * @return  get a file descriptor on the requiered resource
      * @throws IOException if an IO error occurs
-     * @throws TransferFailedException  if the transfer failed 
-     * @throws ResourceDoesNotExistException if the targeted resource doesn't exist
+     * @throws TransferFailedException  if the transfer failed
      * @throws AuthorizationException if the connection authorization failed
      */
-    public File get( String url ) throws IOException, TransferFailedException, ResourceDoesNotExistException,
-        AuthorizationException
+    public File get( String url, String suffix ) throws IOException, TransferFailedException, AuthorizationException
     {
 
         if ( m_wagon == null )
@@ -185,8 +184,26 @@ public class RemoteFileManager
             return null;
         }
 
-        File file = File.createTempFile( String.valueOf( System.currentTimeMillis() ), "tmp" );
-        m_wagon.get( url, file );
+        File file = File.createTempFile( String.valueOf( System.currentTimeMillis() ), suffix );
+        try
+        {
+            m_wagon.get( url, file );
+        }
+        catch ( TransferFailedException e )
+        {
+            file.delete();
+            throw e;
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            file.delete();
+        }
+        catch ( AuthorizationException e )
+        {
+            file.delete();
+            throw e;
+        }
+
         return file;
     }
 
@@ -240,7 +257,7 @@ public class RemoteFileManager
      * this method indicates if the targeted file is locked or not.
      * @param remote connection manager
      * @param fileName name targeted
-     * @return  true if thr reuiered file is locked, else false
+     * @return  true if the required file is locked, else false
      * @throws MojoFailureException if the plugin failed
      */
     public boolean isLockedFile( RemoteFileManager remote, String fileName ) throws MojoFailureException
@@ -248,17 +265,17 @@ public class RemoteFileManager
         File file = null;
         try
         {
-            file = remote.get( fileName + ".lock" );
+            file = remote.get( fileName + ".lock", ".lock" );
+            if ( null != file && file.length() == 0 )
+            {
+                return false;
+            }
+            return true;
         }
         catch ( TransferFailedException e )
         {
             e.printStackTrace();
             throw new MojoFailureException( "TransferFailedException" );
-
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
-            return false;
         }
         catch ( AuthorizationException e )
         {
@@ -270,11 +287,13 @@ public class RemoteFileManager
             e.printStackTrace();
             throw new MojoFailureException( "IOException" );
         }
-        if ( file != null && file.length() == 0 )
+        finally
         {
-            return false;
+            if ( null != file )
+            {
+                file.delete();
+            }
         }
-        return true;
     }
 
 }
