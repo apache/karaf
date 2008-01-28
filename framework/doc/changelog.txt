@@ -1,4 +1,4 @@
-Changes from 1.0.1 to 1.0.2
+Changes from 1.0.1 to 1.0.3
 ---------------------------
 
 * [2008-01-27] Moved framework docs to main, since the launcher examples now
