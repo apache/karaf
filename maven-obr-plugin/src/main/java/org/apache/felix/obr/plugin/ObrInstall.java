@@ -29,11 +29,12 @@ import org.apache.maven.project.MavenProject;
 
 
 /**
- * construct the repository.xml with a project Maven compiled
- *
+ * Install bundle metadata to local OBR.
+ * 
  * @goal install
  * @phase install
  * @requiresDependencyResolution compile
+ * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ObrInstall extends AbstractMojo
@@ -50,7 +51,7 @@ public class ObrInstall extends AbstractMojo
     /**
      * path to the repository.xml.
      * 
-     * @parameter expression="${repository-path}"
+     * @parameter expression="${repository-path}" alias="repository-path"
      */
     private String m_repositoryPath;
 

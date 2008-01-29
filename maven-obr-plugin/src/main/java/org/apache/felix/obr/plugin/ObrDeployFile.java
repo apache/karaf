@@ -39,10 +39,11 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 
 
 /**
- * deploy the bundle to a ftp site.
- * this goal is used when you upload a jar file (in command line)
+ * Deploy bundle metadata to remote OBR (command-line goal).
+ * 
  * @goal deploy-file
  * @phase deploy
+ * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ObrDeployFile extends AbstractMojo
@@ -58,7 +59,7 @@ public class ObrDeployFile extends AbstractMojo
     /**
      * name of the repository xml descriptor file.
      * 
-     * @parameter expression="${repository-name}" default-value="repository.xml"
+     * @parameter expression="${repository-name}" default-value="repository.xml" alias="repository-name"
      */
     private String m_repositoryName;
 
@@ -88,7 +89,7 @@ public class ObrDeployFile extends AbstractMojo
     /**
      * obr file define by the user.
      * 
-     * @parameter expression="${obr-file}"
+     * @parameter expression="${obr-file}" alias="obr-file"
      * 
      */
     private String m_obrFile;
@@ -96,7 +97,7 @@ public class ObrDeployFile extends AbstractMojo
     /**
      * When true, ignore remote locking.
      * 
-     * @parameter expression="${ignore-lock}"
+     * @parameter expression="${ignore-lock}" alias="ignore-lock"
      */
     private boolean m_ignoreLock;
 
@@ -120,8 +121,8 @@ public class ObrDeployFile extends AbstractMojo
 
         File repoDescriptorFile = null;
 
+        // init the wagon connection
         RemoteFileManager remoteFile = new RemoteFileManager( ar, m_wagonManager, m_settings, getLog() );
-
         remoteFile.connect();
 
         // create a non-empty file used to lock the repository descriptor file
@@ -140,32 +141,7 @@ public class ObrDeployFile extends AbstractMojo
             throw new MojoFailureException( "IOException" );
         }
 
-        if ( m_ignoreLock )
-        {
-            try
-            {
-                remoteFile.put( lockFile, m_repositoryName + ".lock" );
-            }
-            catch ( TransferFailedException e )
-            {
-                getLog().error( "Transfer failed" );
-                e.printStackTrace();
-                throw new MojoFailureException( "TransferFailedException" );
-
-            }
-            catch ( ResourceDoesNotExistException e )
-            {
-                throw new MojoFailureException( "ResourceDoesNotExistException" );
-            }
-            catch ( AuthorizationException e )
-            {
-                getLog().error( "Authorization failed" );
-                e.printStackTrace();
-                throw new MojoFailureException( "AuthorizationException" );
-            }
-
-        }
-        else
+        if ( !m_ignoreLock )
         {
             int countError = 0;
             while ( remoteFile.isLockedFile( remoteFile, m_repositoryName ) && countError < 2 )
@@ -178,7 +154,7 @@ public class ObrDeployFile extends AbstractMojo
                 }
                 catch ( InterruptedException e )
                 {
-                    getLog().warn( "Sleep Interupted" );
+                    getLog().warn( "Sleep interrupted" );
                 }
             }
 
@@ -190,10 +166,11 @@ public class ObrDeployFile extends AbstractMojo
             }
         }
 
-        // file is not locked, so we lock it now
         try
         {
+            // file is not locked, so we lock it now
             remoteFile.put( lockFile, m_repositoryName + ".lock" );
+            lockFile.delete();
         }
         catch ( TransferFailedException e )
         {
@@ -279,7 +256,6 @@ public class ObrDeployFile extends AbstractMojo
             throw new MojoFailureException( "AuthorizationException" );
         }
         repoDescriptorFile.delete();
-        lockFile.delete();
 
         // we remove lockFile activation
         lockFile = null;
@@ -295,6 +271,7 @@ public class ObrDeployFile extends AbstractMojo
         try
         {
             remoteFile.put( lockFile, m_repositoryName + ".lock" );
+            lockFile.delete();
         }
         catch ( TransferFailedException e )
         {
@@ -313,7 +290,7 @@ public class ObrDeployFile extends AbstractMojo
             e.printStackTrace();
             throw new MojoFailureException( "AuthorizationException" );
         }
+
         remoteFile.disconnect();
-        lockFile.delete();
     }
 }

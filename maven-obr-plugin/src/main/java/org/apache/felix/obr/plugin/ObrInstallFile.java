@@ -27,16 +27,16 @@ import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 
 
 /**
- * construct the repository.xml from a compiled bundle.
- * @description construct the repository.xml from a compiled bundle.
+ * Install bundle metadata to local OBR (command-line goal).
+ * 
  * @goal install-file
  * @requiresProject false
  * @phase install
+ * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ObrInstallFile extends AbstractMojo
@@ -60,7 +60,7 @@ public class ObrInstallFile extends AbstractMojo
     /**
      * path to the repository.xml.
      * 
-     * @parameter expression="${repository-path}"
+     * @parameter expression="${repository-path}" alias="repository-path"
      */
     private String m_repositoryPath;
 
@@ -95,29 +95,23 @@ public class ObrInstallFile extends AbstractMojo
     /**
      * OBR File.
      * @description obr file define by the user
-     * @parameter expression="${obr-file}"
+     * @parameter expression="${obr-file}" alias="obr-file"
      */
     private String m_obrFile;
-
-    /**
-     * store user information in a project.
-     */
-    private MavenProject m_project;
 
 
     /**
      * main method for this goal.
      * @implements org.apache.maven.plugin.Mojo.execute 
      * @throws MojoExecutionException if the plugin failed
-     * @throws MojoFailureException if the plugin failed
      */
-    public void execute() throws MojoExecutionException, MojoFailureException
+    public void execute() throws MojoExecutionException
     {
-        m_project = new MavenProject();
-        m_project.setArtifactId( m_artifactId );
-        m_project.setGroupId( m_groupId );
-        m_project.setVersion( m_version );
-        m_project.setPackaging( m_packaging );
+        MavenProject project = new MavenProject();
+        project.setArtifactId( m_artifactId );
+        project.setGroupId( m_groupId );
+        project.setVersion( m_version );
+        project.setPackaging( m_packaging );
 
         if ( m_groupId == null )
         {
@@ -157,14 +151,14 @@ public class ObrInstallFile extends AbstractMojo
 
         if ( !new File( bundleJar ).exists() )
         {
-            getLog().error( "file doesn't exist: " + bundleJar );
+            getLog().error( "file not found in local repository: " + bundleJar );
             return;
         }
 
         // use default configuration
         Config userConfig = new Config();
 
-        ObrUpdate update = new ObrUpdate( repoXml, obrXml, m_project, bundleJar, null, userConfig, getLog() );
+        ObrUpdate update = new ObrUpdate( repoXml, obrXml, project, bundleJar, null, userConfig, getLog() );
 
         update.updateRepository();
     }
