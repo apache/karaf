@@ -1,5 +1,6 @@
 package org.apache.felix.bundleplugin;
 
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,7 +20,6 @@ package org.apache.felix.bundleplugin;
  * under the License.
  */
 
-import org.apache.felix.bundleplugin.BundleAllPlugin;
 import java.io.File;
 import java.util.Collections;
 import java.util.Map;
@@ -29,24 +29,25 @@ import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.osgi.DefaultMaven2OsgiConverter;
 
+
 /**
  * Test for {@link BundleAllPlugin}
  * 
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  * @version $Id$
  */
-public class BundleAllPluginTest
-    extends AbstractBundlePluginTest
+public class BundleAllPluginTest extends AbstractBundlePluginTest
 {
 
     private BundleAllPlugin plugin;
 
-    protected void setUp()
-        throws Exception
+
+    protected void setUp() throws Exception
     {
         super.setUp();
         init();
     }
+
 
     private void init()
     {
@@ -59,6 +60,7 @@ public class BundleAllPluginTest
         plugin.setOutputDirectory( outputDirectory );
         plugin.setMaven2OsgiConverter( new DefaultMaven2OsgiConverter() );
     }
+
 
     public void testSnapshotMatch()
     {
@@ -78,8 +80,8 @@ public class BundleAllPluginTest
         assertFalse( plugin.snapshotMatch( artifact, bundleName ) );
     }
 
-    public void testNoReBundling()
-        throws Exception
+
+    public void testNoReBundling() throws Exception
     {
         File testFile = getTestFile( "target/test-classes/org.apache.maven.maven-model_1.0.0.0.jar" );
         if ( testFile.exists() )
@@ -103,44 +105,43 @@ public class BundleAllPluginTest
         BundleInfo bundleInfo = plugin.bundle( project );
 
         Map exports = bundleInfo.getExportedPackages();
-        String[] packages = new String[] {
-            "org.apache.maven.model.io.jdom",
-            "org.apache.maven.model" };
+        String[] packages = new String[]
+            { "org.apache.maven.model.io.jdom", "org.apache.maven.model" };
 
         for ( int i = 0; i < packages.length; i++ )
         {
             assertTrue( "Bundle info does not contain a package that it is  exported in the manifest: " + packages[i],
-                        exports.containsKey( packages[i] ) );
+                exports.containsKey( packages[i] ) );
         }
 
         assertFalse( "Bundle info contains a package that it is not exported in the manifest", exports
             .containsKey( "org.apache.maven.model.io.xpp3" ) );
     }
 
-//    public void testRewriting()
-//        throws Exception
-//    {
-//
-//        MavenProjectStub project = new MavenProjectStub();
-//        project.setArtifact( getArtifactStub() );
-//        project.getArtifact().setFile( getTestBundle() );
-//        project.setDependencyArtifacts( Collections.EMPTY_SET );
-//        project.setVersion( project.getArtifact().getVersion() );
-//
-//        File output = new File( plugin.getBuildDirectory(), plugin.getBundleName( project ) );
-//        boolean delete = output.delete();
-//
-//        plugin.bundle( project );
-//
-//        init();
-//        try
-//        {
-//            plugin.bundle( project );
-//            fail();
-//        }
-//        catch ( RuntimeException e )
-//        {
-//            // expected
-//        }
-//    }
+    //    public void testRewriting()
+    //        throws Exception
+    //    {
+    //
+    //        MavenProjectStub project = new MavenProjectStub();
+    //        project.setArtifact( getArtifactStub() );
+    //        project.getArtifact().setFile( getTestBundle() );
+    //        project.setDependencyArtifacts( Collections.EMPTY_SET );
+    //        project.setVersion( project.getArtifact().getVersion() );
+    //
+    //        File output = new File( plugin.getBuildDirectory(), plugin.getBundleName( project ) );
+    //        boolean delete = output.delete();
+    //
+    //        plugin.bundle( project );
+    //
+    //        init();
+    //        try
+    //        {
+    //            plugin.bundle( project );
+    //            fail();
+    //        }
+    //        catch ( RuntimeException e )
+    //        {
+    //            // expected
+    //        }
+    //    }
 }

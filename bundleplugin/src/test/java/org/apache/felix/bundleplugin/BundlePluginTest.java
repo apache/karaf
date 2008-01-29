@@ -1,5 +1,6 @@
 package org.apache.felix.bundleplugin;
 
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -30,25 +31,26 @@ import org.apache.maven.shared.osgi.DefaultMaven2OsgiConverter;
 import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Jar;
 
+
 /**
  * Test for {@link BundlePlugin}.
  * 
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  * @version $Id$
  */
-public class BundlePluginTest
-    extends AbstractBundlePluginTest
+public class BundlePluginTest extends AbstractBundlePluginTest
 {
 
     private BundlePlugin plugin;
 
-    protected void setUp()
-        throws Exception
+
+    protected void setUp() throws Exception
     {
         super.setUp();
         plugin = new BundlePlugin();
         plugin.setMaven2OsgiConverter( new DefaultMaven2OsgiConverter() );
     }
+
 
     public void testConvertVersionToOsgi()
     {
@@ -94,8 +96,8 @@ public class BundlePluginTest
         assertEquals( "1.4.1.20070217_082013_7", osgiVersion );
     }
 
-    public void testReadExportedModules()
-        throws Exception
+
+    public void testReadExportedModules() throws Exception
     {
         File osgiBundleFile = getTestBundle();
 
@@ -109,7 +111,8 @@ public class BundlePluginTest
         PackageVersionAnalyzer analyzer = new PackageVersionAnalyzer();
         Jar jar = new Jar( "name", osgiBundleFile );
         analyzer.setJar( jar );
-        analyzer.setClasspath( new Jar[] { jar } );
+        analyzer.setClasspath( new Jar[]
+            { jar } );
 
         analyzer.setProperty( Analyzer.EXPORT_PACKAGE, "*" );
         analyzer.calcManifest();
@@ -117,41 +120,41 @@ public class BundlePluginTest
         assertEquals( 3, analyzer.getExports().size() );
     }
 
-    public void testTransformDirectives()
-        throws Exception
+
+    public void testTransformDirectives() throws Exception
     {
         Map instructions = new TreeMap();
 
-        instructions.put("a", "1");
-        instructions.put("-a", "2");
-        instructions.put("_a", "3");
-        instructions.put("A", "3");
-        instructions.put("_A", "1");
-        instructions.put("_b", "4");
-        instructions.put("b", "6");
-        instructions.put("_B", "6");
-        instructions.put("-B", "5");
-        instructions.put("B", "4");
+        instructions.put( "a", "1" );
+        instructions.put( "-a", "2" );
+        instructions.put( "_a", "3" );
+        instructions.put( "A", "3" );
+        instructions.put( "_A", "1" );
+        instructions.put( "_b", "4" );
+        instructions.put( "b", "6" );
+        instructions.put( "_B", "6" );
+        instructions.put( "-B", "5" );
+        instructions.put( "B", "4" );
 
-        instructions.put("z", null);
-        instructions.put("_z", null);
+        instructions.put( "z", null );
+        instructions.put( "_z", null );
 
         Map transformedInstructions = plugin.transformDirectives( instructions );
 
-        assertEquals( "1", transformedInstructions.get("a") );
-        assertEquals( "3", transformedInstructions.get("-a") );
-        assertEquals( null, transformedInstructions.get("_a") );
-        assertEquals( "3", transformedInstructions.get("A") );
-        assertEquals( "1", transformedInstructions.get("-A") );
-        assertEquals( null, transformedInstructions.get("_A") );
-        assertEquals( null, transformedInstructions.get("_b") );
-        assertEquals( "4", transformedInstructions.get("-b") );
-        assertEquals( "6", transformedInstructions.get("b") );
-        assertEquals( null, transformedInstructions.get("_B") );
-        assertEquals( "6", transformedInstructions.get("-B") );
-        assertEquals( "4", transformedInstructions.get("B") );
+        assertEquals( "1", transformedInstructions.get( "a" ) );
+        assertEquals( "3", transformedInstructions.get( "-a" ) );
+        assertEquals( null, transformedInstructions.get( "_a" ) );
+        assertEquals( "3", transformedInstructions.get( "A" ) );
+        assertEquals( "1", transformedInstructions.get( "-A" ) );
+        assertEquals( null, transformedInstructions.get( "_A" ) );
+        assertEquals( null, transformedInstructions.get( "_b" ) );
+        assertEquals( "4", transformedInstructions.get( "-b" ) );
+        assertEquals( "6", transformedInstructions.get( "b" ) );
+        assertEquals( null, transformedInstructions.get( "_B" ) );
+        assertEquals( "6", transformedInstructions.get( "-B" ) );
+        assertEquals( "4", transformedInstructions.get( "B" ) );
 
-        assertEquals( "", transformedInstructions.get("z") );
-        assertEquals( "", transformedInstructions.get("-z") );
+        assertEquals( "", transformedInstructions.get( "z" ) );
+        assertEquals( "", transformedInstructions.get( "-z" ) );
     }
 }

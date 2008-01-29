@@ -1,5 +1,6 @@
 package org.apache.felix.bundleplugin;
 
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -24,14 +25,14 @@ import java.io.File;
 import org.apache.maven.plugin.testing.stubs.ArtifactStub;
 import org.codehaus.plexus.PlexusTestCase;
 
+
 /**
  * Common methods for bundle plugin testing
  * 
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  * @version $Id$
  */
-public abstract class AbstractBundlePluginTest
-    extends PlexusTestCase
+public abstract class AbstractBundlePluginTest extends PlexusTestCase
 {
 
     protected ArtifactStub getArtifactStub()
@@ -42,6 +43,7 @@ public abstract class AbstractBundlePluginTest
         artifact.setVersion( "1.0" );
         return artifact;
     }
+
 
     protected File getTestBundle()
     {
