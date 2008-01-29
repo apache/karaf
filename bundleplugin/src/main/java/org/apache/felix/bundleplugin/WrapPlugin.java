@@ -23,19 +23,16 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 
 /**
- * 
  * @goal wrap
  * @phase package
  * @requiresDependencyResolution runtime
  * @description build an OSGi bundle jar for direct dependencies
  */
-public class WrapPlugin extends BundleAllPlugin
+public final class WrapPlugin extends BundleAllPlugin
 {
-
     public void execute() throws MojoExecutionException
     {
         BundleInfo bundleInfo = bundleAll( getProject(), 1 );
         logDuplicatedPackages( bundleInfo );
     }
-
 }

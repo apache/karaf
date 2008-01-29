@@ -33,19 +33,10 @@ import aQute.lib.osgi.Jar;
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  * @version $Id$
  */
-public class PackageVersionAnalyzer extends Builder
+public final class PackageVersionAnalyzer extends Builder
 {
-
-    /**
+    /*
      * Remove META-INF subfolders from exports and set package versions to bundle version.
-     * 
-     * @param dot
-     * @param bundleClasspath
-     * @param contained
-     * @param referred
-     * @param uses
-     * @return 
-     * @throws IOException
      */
     public Map analyzeBundleClasspath( Jar dot, Map bundleClasspath, Map contained, Map referred, Map uses )
         throws IOException
@@ -72,9 +63,7 @@ public class PackageVersionAnalyzer extends Builder
                     values.put( "version", bundleVersion );
                 }
             }
-
         }
         return classSpace;
     }
-
 }

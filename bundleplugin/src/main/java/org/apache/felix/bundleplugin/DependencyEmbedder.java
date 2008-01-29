@@ -39,7 +39,7 @@ import aQute.lib.osgi.Instruction;
  * 
  * @author stuart.mcculloch@jayway.net (Stuart McCulloch)
  */
-public class DependencyEmbedder
+public final class DependencyEmbedder
 {
     public static final String EMBED_DEPENDENCY = "Embed-Dependency";
     public static final String EMBED_DIRECTORY = "Embed-Directory";
@@ -50,54 +50,54 @@ public class DependencyEmbedder
     /**
      * Dependency artifacts.
      */
-    private final Collection dependencyArtifacts;
+    private final Collection m_dependencyArtifacts;
 
     /**
      * Inlined artifacts.
      */
-    private final Collection inlinedArtifacts;
+    private final Collection m_inlinedArtifacts;
 
     /**
      * Embedded artifacts.
      */
-    private final Collection embeddedArtifacts;
+    private final Collection m_embeddedArtifacts;
 
 
     public DependencyEmbedder( Collection dependencyArtifacts )
     {
-        this.dependencyArtifacts = dependencyArtifacts;
+        m_dependencyArtifacts = dependencyArtifacts;
 
-        this.inlinedArtifacts = new HashSet();
-        this.embeddedArtifacts = new HashSet();
+        m_inlinedArtifacts = new HashSet();
+        m_embeddedArtifacts = new HashSet();
     }
 
 
     public void processHeaders( Properties properties ) throws MojoExecutionException
     {
-        this.inlinedArtifacts.clear();
-        this.embeddedArtifacts.clear();
+        m_inlinedArtifacts.clear();
+        m_embeddedArtifacts.clear();
 
         String embedDependencyHeader = properties.getProperty( EMBED_DEPENDENCY );
         if ( null != embedDependencyHeader && embedDependencyHeader.length() > 0 )
         {
             Map embedInstructions = OSGiHeader.parseHeader( embedDependencyHeader );
-            this.processEmbedInstructions( embedInstructions );
+            processEmbedInstructions( embedInstructions );
 
-            for ( Iterator i = this.inlinedArtifacts.iterator(); i.hasNext(); )
+            for ( Iterator i = m_inlinedArtifacts.iterator(); i.hasNext(); )
             {
-                DependencyEmbedder.inlineDependency( properties, ( Artifact ) i.next() );
+                inlineDependency( properties, ( Artifact ) i.next() );
             }
-            for ( Iterator i = this.embeddedArtifacts.iterator(); i.hasNext(); )
+            for ( Iterator i = m_embeddedArtifacts.iterator(); i.hasNext(); )
             {
-                DependencyEmbedder.embedDependency( properties, ( Artifact ) i.next() );
+                embedDependency( properties, ( Artifact ) i.next() );
             }
         }
     }
 
     protected static abstract class DependencyFilter
     {
-        Instruction instruction;
-        String defaultValue;
+        private final Instruction m_instruction;
+        private final String m_defaultValue;
 
 
         public DependencyFilter( String expression )
@@ -108,8 +108,8 @@ public class DependencyEmbedder
 
         public DependencyFilter( String expression, String defaultValue )
         {
-            this.instruction = Instruction.getPattern( expression );
-            this.defaultValue = defaultValue;
+            m_instruction = Instruction.getPattern( expression );
+            m_defaultValue = defaultValue;
         }
 
 
@@ -128,19 +128,20 @@ public class DependencyEmbedder
         abstract boolean matches( Artifact dependency );
 
 
-        boolean matches( String text )
+        private boolean matches( String text )
         {
             if ( null == text )
             {
-                text = defaultValue;
+                text = m_defaultValue;
             }
-            boolean result = this.instruction.matches( text );
-            return this.instruction.isNegated() ? !result : result;
+
+            boolean result = m_instruction.matches( text );
+            return m_instruction.isNegated() ? !result : result;
         }
     }
 
 
-    protected void processEmbedInstructions( Map embedInstructions ) throws MojoExecutionException
+    private void processEmbedInstructions( Map embedInstructions ) throws MojoExecutionException
     {
         DependencyFilter filter;
         for ( Iterator clauseIterator = embedInstructions.entrySet().iterator(); clauseIterator.hasNext(); )
@@ -148,7 +149,7 @@ public class DependencyEmbedder
             boolean inline = false;
 
             // must use a fresh *modifiable* collection for each unique clause
-            Collection filteredDependencies = new HashSet( this.dependencyArtifacts );
+            Collection filteredDependencies = new HashSet( m_dependencyArtifacts );
 
             // CLAUSE: REGEXP --> { ATTRIBUTE MAP }
             Map.Entry clause = ( Map.Entry ) clauseIterator.next();
@@ -264,20 +265,20 @@ public class DependencyEmbedder
 
             if ( inline )
             {
-                this.inlinedArtifacts.addAll( filteredDependencies );
+                m_inlinedArtifacts.addAll( filteredDependencies );
             }
             else
             {
-                this.embeddedArtifacts.addAll( filteredDependencies );
+                m_embeddedArtifacts.addAll( filteredDependencies );
             }
         }
 
         // remove any inlined artifacts from the embedded list
-        this.embeddedArtifacts.removeAll( this.inlinedArtifacts );
+        m_embeddedArtifacts.removeAll( m_inlinedArtifacts );
     }
 
 
-    public static void embedDependency( Properties properties, Artifact dependency )
+    private void embedDependency( Properties properties, Artifact dependency )
     {
         File sourceFile = dependency.getFile();
 
@@ -353,7 +354,7 @@ public class DependencyEmbedder
     }
 
 
-    public static void inlineDependency( Properties properties, Artifact dependency )
+    private void inlineDependency( Properties properties, Artifact dependency )
     {
         File sourceFile = dependency.getFile();
 
@@ -379,12 +380,12 @@ public class DependencyEmbedder
 
     public Collection getInlinedArtifacts()
     {
-        return this.inlinedArtifacts;
+        return m_inlinedArtifacts;
     }
 
 
     public Collection getEmbeddedArtifacts()
     {
-        return this.embeddedArtifacts;
+        return m_embeddedArtifacts;
     }
 }

@@ -36,7 +36,7 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
  * 
  * @author stuart.mcculloch@jayway.net (Stuart McCulloch)
  */
-public class JarPluginConfiguration
+public final class JarPluginConfiguration
 {
     public static MavenArchiveConfiguration getArchiveConfiguration( MavenProject project )
     {

@@ -33,12 +33,11 @@ import org.apache.maven.artifact.Artifact;
  */
 public class BundleInfo
 {
-
     /**
      * {@link Map} &lt; {@link String}, {@link Set} &lt; {@link Artifact} > >
      * Used to check for duplicated exports. Key is package name and value list of artifacts where it's exported.
      */
-    private Map exportedPackages = new HashMap();
+    private Map m_exportedPackages = new HashMap();
 
 
     public void addExportedPackage( String packageName, Artifact artifact )
@@ -47,15 +46,15 @@ public class BundleInfo
         if ( artifacts == null )
         {
             artifacts = new HashSet();
-            exportedPackages.put( packageName, artifacts );
+            m_exportedPackages.put( packageName, artifacts );
         }
         artifacts.add( artifact );
     }
 
 
-    Map getExportedPackages()
+    protected Map getExportedPackages()
     {
-        return exportedPackages;
+        return m_exportedPackages;
     }
 
 

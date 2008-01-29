@@ -39,7 +39,7 @@ import org.apache.maven.project.MavenProject;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class OBRInstall extends AbstractMojo
+public final class OBRInstall extends AbstractMojo
 {
     /**
      * OBR Repository.

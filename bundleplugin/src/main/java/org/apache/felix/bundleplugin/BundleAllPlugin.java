@@ -66,13 +66,12 @@ import aQute.lib.osgi.Jar;
  */
 public class BundleAllPlugin extends ManifestPlugin
 {
-
     private static final String LS = System.getProperty( "line.separator" );
 
     private static final Pattern SNAPSHOT_VERSION_PATTERN = Pattern.compile( "[0-9]{8}_[0-9]{6}_[0-9]+" );
 
     /**
-     * Local Repository.
+     * Local repository.
      *
      * @parameter expression="${localRepository}"
      * @required
@@ -81,7 +80,7 @@ public class BundleAllPlugin extends ManifestPlugin
     private ArtifactRepository localRepository;
 
     /**
-     * Remote repositories
+     * Remote repositories.
      * 
      * @parameter expression="${project.remoteArtifactRepositories}"
      * @required
@@ -92,34 +91,34 @@ public class BundleAllPlugin extends ManifestPlugin
     /**
      * @component
      */
-    private ArtifactFactory factory;
+    private ArtifactFactory m_factory;
 
     /**
      * @component
      */
-    private ArtifactMetadataSource artifactMetadataSource;
+    private ArtifactMetadataSource m_artifactMetadataSource;
 
     /**
      * @component
      */
-    private ArtifactCollector collector;
+    private ArtifactCollector m_collector;
 
     /**
      * Artifact resolver, needed to download jars.
      * 
      * @component
      */
-    private ArtifactResolver artifactResolver;
+    private ArtifactResolver m_artifactResolver;
 
     /**
      * @component
      */
-    private DependencyTreeBuilder dependencyTreeBuilder;
+    private DependencyTreeBuilder m_dependencyTreeBuilder;
 
     /**
      * @component
      */
-    private MavenProjectBuilder mavenProjectBuilder;
+    private MavenProjectBuilder m_mavenProjectBuilder;
 
     /**
      * Ignore missing artifacts that are not required by current project but are required by the
@@ -129,7 +128,7 @@ public class BundleAllPlugin extends ManifestPlugin
      */
     private boolean ignoreMissingArtifacts;
 
-    private Set artifactsBeingProcessed = new HashSet();
+    private Set m_artifactsBeingProcessed = new HashSet();
 
 
     public void execute() throws MojoExecutionException
@@ -167,19 +166,19 @@ public class BundleAllPlugin extends ManifestPlugin
             return null;
         }
 
-        if ( artifactsBeingProcessed.contains( project.getArtifact() ) )
+        if ( m_artifactsBeingProcessed.contains( project.getArtifact() ) )
         {
             getLog().warn( "Ignoring artifact due to dependency cycle " + project.getArtifact() );
             return null;
         }
-        artifactsBeingProcessed.add( project.getArtifact() );
+        m_artifactsBeingProcessed.add( project.getArtifact() );
 
         DependencyNode dependencyTree;
 
         try
         {
-            dependencyTree = dependencyTreeBuilder.buildDependencyTree( project, localRepository, factory,
-                artifactMetadataSource, null, collector );
+            dependencyTree = m_dependencyTreeBuilder.buildDependencyTree( project, localRepository, m_factory,
+                m_artifactMetadataSource, null, m_collector );
         }
         catch ( DependencyTreeBuilderException e )
         {
@@ -247,11 +246,11 @@ public class BundleAllPlugin extends ManifestPlugin
             MavenProject childProject;
             try
             {
-                childProject = mavenProjectBuilder.buildFromRepository( artifact, remoteRepositories, localRepository,
-                    true );
+                childProject = m_mavenProjectBuilder.buildFromRepository( artifact, remoteRepositories,
+                    localRepository, true );
                 if ( childProject.getDependencyArtifacts() == null )
                 {
-                    childProject.setDependencyArtifacts( childProject.createArtifacts( factory, null, null ) );
+                    childProject.setDependencyArtifacts( childProject.createArtifacts( m_factory, null, null ) );
                 }
             }
             catch ( ProjectBuildingException e )
@@ -318,7 +317,7 @@ public class BundleAllPlugin extends ManifestPlugin
      * @param project
      * @throws MojoExecutionException
      */
-    BundleInfo bundle( MavenProject project ) throws MojoExecutionException
+    protected BundleInfo bundle( MavenProject project ) throws MojoExecutionException
     {
         Artifact artifact = project.getArtifact();
         getLog().info( "Bundling " + artifact );
@@ -500,7 +499,7 @@ public class BundleAllPlugin extends ManifestPlugin
      * @param bundleName bundle file name 
      * @return if both represent the same artifact and version, forgetting about the snapshot timestamp
      */
-    boolean snapshotMatch( Artifact artifact, String bundleName )
+    protected boolean snapshotMatch( Artifact artifact, String bundleName )
     {
         String artifactBundleName = getBundleName( artifact );
         int i = artifactBundleName.indexOf( "SNAPSHOT" );
@@ -544,12 +543,13 @@ public class BundleAllPlugin extends ManifestPlugin
          * String, String, String) that ignores the scope parameter, that's why we use the one with
          * the extra null parameter
          */
-        Artifact resolvedArtifact = factory.createDependencyArtifact( artifact.getGroupId(), artifact.getArtifactId(),
-            versionRange, artifact.getType(), artifact.getClassifier(), artifact.getScope(), null );
+        Artifact resolvedArtifact = m_factory.createDependencyArtifact( artifact.getGroupId(),
+            artifact.getArtifactId(), versionRange, artifact.getType(), artifact.getClassifier(), artifact.getScope(),
+            null );
 
         try
         {
-            artifactResolver.resolve( resolvedArtifact, remoteRepositories, localRepository );
+            m_artifactResolver.resolve( resolvedArtifact, remoteRepositories, localRepository );
         }
         catch ( ArtifactResolutionException e )
         {

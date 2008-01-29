@@ -139,7 +139,7 @@ public class BundlePluginTest extends AbstractBundlePluginTest
         instructions.put( "z", null );
         instructions.put( "_z", null );
 
-        Map transformedInstructions = plugin.transformDirectives( instructions );
+        Map transformedInstructions = BundlePlugin.transformDirectives( instructions );
 
         assertEquals( "1", transformedInstructions.get( "a" ) );
         assertEquals( "3", transformedInstructions.get( "-a" ) );

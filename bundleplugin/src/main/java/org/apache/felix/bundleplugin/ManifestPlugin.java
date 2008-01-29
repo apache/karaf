@@ -50,7 +50,7 @@ public class ManifestPlugin extends BundlePlugin
         Manifest manifest;
         try
         {
-            manifest = this.getManifest( project, instructions, properties, classpath );
+            manifest = getManifest( project, instructions, properties, classpath );
         }
         catch ( FileNotFoundException e )
         {
@@ -62,7 +62,7 @@ public class ManifestPlugin extends BundlePlugin
             throw new MojoExecutionException( "Error trying to generate Manifest", e );
         }
 
-        File outputFile = new File( this.manifestLocation, "MANIFEST.MF" );
+        File outputFile = new File( manifestLocation, "MANIFEST.MF" );
 
         try
         {
@@ -77,20 +77,20 @@ public class ManifestPlugin extends BundlePlugin
 
     public Manifest getManifest( MavenProject project, Jar[] classpath ) throws IOException
     {
-        return this.getManifest( project, null, null, classpath );
+        return getManifest( project, null, null, classpath );
     }
 
 
     public Manifest getManifest( MavenProject project, Map instructions, Properties properties, Jar[] classpath )
         throws IOException
     {
-        return this.getAnalyzer( project, instructions, properties, classpath ).getJar().getManifest();
+        return getAnalyzer( project, instructions, properties, classpath ).getJar().getManifest();
     }
 
 
     protected Analyzer getAnalyzer( MavenProject project, Jar[] classpath ) throws IOException
     {
-        return this.getAnalyzer( project, new HashMap(), new Properties(), classpath );
+        return getAnalyzer( project, new HashMap(), new Properties(), classpath );
     }
 
 
@@ -99,7 +99,7 @@ public class ManifestPlugin extends BundlePlugin
     {
         PackageVersionAnalyzer analyzer = new PackageVersionAnalyzer();
 
-        Properties props = this.getDefaultProperties( project );
+        Properties props = getDefaultProperties( project );
         props.putAll( properties );
 
         if ( !instructions.containsKey( Analyzer.IMPORT_PACKAGE ) )
@@ -107,7 +107,7 @@ public class ManifestPlugin extends BundlePlugin
             props.put( Analyzer.IMPORT_PACKAGE, "*" );
         }
 
-        props.putAll( this.transformDirectives( instructions ) );
+        props.putAll( transformDirectives( instructions ) );
 
         analyzer.setProperties( props );
 

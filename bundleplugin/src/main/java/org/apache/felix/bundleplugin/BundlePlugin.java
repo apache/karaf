@@ -73,7 +73,6 @@ import aQute.lib.osgi.Jar;
  */
 public class BundlePlugin extends AbstractMojo
 {
-
     /**
      * Directory where the manifest will be written
      *
@@ -98,12 +97,12 @@ public class BundlePlugin extends AbstractMojo
     /**
      * @component
      */
-    private ArchiverManager archiverManager;
+    private ArchiverManager m_archiverManager;
 
     /**
      * @component
      */
-    private ArtifactHandlerManager artifactHandlerManager;
+    private ArtifactHandlerManager m_artifactHandlerManager;
 
     /**
      * Project types which this plugin supports.
@@ -156,7 +155,7 @@ public class BundlePlugin extends AbstractMojo
     /**
      * @component
      */
-    private Maven2OsgiConverter maven2OsgiConverter;
+    private Maven2OsgiConverter m_maven2OsgiConverter;
 
     private static final String MAVEN_RESOURCES = "{maven-resources}";
     private static final String MAVEN_RESOURCES_REGEX = "\\{maven-resources\\}";
@@ -168,19 +167,19 @@ public class BundlePlugin extends AbstractMojo
 
     protected Maven2OsgiConverter getMaven2OsgiConverter()
     {
-        return this.maven2OsgiConverter;
+        return m_maven2OsgiConverter;
     }
 
 
-    void setMaven2OsgiConverter( Maven2OsgiConverter maven2OsgiConverter )
+    protected void setMaven2OsgiConverter( Maven2OsgiConverter maven2OsgiConverter )
     {
-        this.maven2OsgiConverter = maven2OsgiConverter;
+        m_maven2OsgiConverter = maven2OsgiConverter;
     }
 
 
     protected MavenProject getProject()
     {
-        return this.project;
+        return project;
     }
 
 
@@ -192,38 +191,37 @@ public class BundlePlugin extends AbstractMojo
         Properties properties = new Properties();
 
         // ignore project types not supported, useful when the plugin is configured in the parent pom
-        if ( !this.supportedProjectTypes.contains( this.getProject().getArtifact().getType() ) )
+        if ( !supportedProjectTypes.contains( getProject().getArtifact().getType() ) )
         {
-            this.getLog().debug(
-                "Ignoring project " + this.getProject().getArtifact() + " : type "
-                    + this.getProject().getArtifact().getType()
-                    + " is not supported by bundle plugin, supported types are " + this.supportedProjectTypes );
+            getLog().debug(
+                "Ignoring project " + getProject().getArtifact() + " : type " + getProject().getArtifact().getType()
+                    + " is not supported by bundle plugin, supported types are " + supportedProjectTypes );
             return;
         }
 
-        this.execute( this.project, this.instructions, properties );
+        execute( getProject(), instructions, properties );
     }
 
 
-    protected void execute( MavenProject project, Map instructions, Properties properties )
+    protected void execute( MavenProject currentProject, Map theInstructions, Properties theProperties )
         throws MojoExecutionException
     {
         try
         {
-            this.execute( project, instructions, properties, this.getClasspath( project ) );
+            execute( currentProject, theInstructions, theProperties, getClasspath( currentProject ) );
         }
         catch ( IOException e )
         {
-            throw new MojoExecutionException( "Error calculating classpath for project " + project, e );
+            throw new MojoExecutionException( "Error calculating classpath for project " + currentProject, e );
         }
     }
 
 
     /* transform directives from their XML form to the expected BND syntax (eg. _include becomes -include) */
-    protected Map transformDirectives( Map instructions )
+    protected static Map transformDirectives( Map originalInstructions )
     {
         Map transformedInstructions = new HashMap();
-        for ( Iterator i = instructions.entrySet().iterator(); i.hasNext(); )
+        for ( Iterator i = originalInstructions.entrySet().iterator(); i.hasNext(); )
         {
             Map.Entry e = ( Map.Entry ) i.next();
 
@@ -249,26 +247,26 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    protected void execute( MavenProject project, Map instructions, Properties properties, Jar[] classpath )
+    protected void execute( MavenProject currentProject, Map theInstructions, Properties theProperties, Jar[] classpath )
         throws MojoExecutionException
     {
         try
         {
-            File jarFile = new File( this.getBuildDirectory(), this.getBundleName( project ) );
+            File jarFile = new File( getBuildDirectory(), getBundleName( currentProject ) );
 
-            properties.putAll( this.getDefaultProperties( project ) );
+            theProperties.putAll( getDefaultProperties( currentProject ) );
 
-            String bsn = project.getGroupId() + "." + project.getArtifactId();
-            if ( !instructions.containsKey( Analyzer.PRIVATE_PACKAGE ) )
+            String bsn = currentProject.getGroupId() + "." + currentProject.getArtifactId();
+            if ( !theInstructions.containsKey( Analyzer.PRIVATE_PACKAGE ) )
             {
-                properties.put( Analyzer.EXPORT_PACKAGE, bsn + ".*" );
+                theProperties.put( Analyzer.EXPORT_PACKAGE, bsn + ".*" );
             }
 
-            properties.putAll( this.transformDirectives( instructions ) );
+            theProperties.putAll( transformDirectives( theInstructions ) );
 
             // pass maven resource paths onto BND analyzer
-            final String mavenResourcePaths = this.getMavenResourcePaths( project );
-            final String includeResource = ( String ) properties.get( Analyzer.INCLUDE_RESOURCE );
+            final String mavenResourcePaths = getMavenResourcePaths( currentProject );
+            final String includeResource = ( String ) theProperties.get( Analyzer.INCLUDE_RESOURCE );
             if ( includeResource != null )
             {
                 if ( includeResource.indexOf( MAVEN_RESOURCES ) >= 0 )
@@ -280,47 +278,47 @@ public class BundlePlugin extends AbstractMojo
                         String cleanedResource = removeMavenResourcesTag( includeResource );
                         if ( cleanedResource.length() > 0 )
                         {
-                            properties.put( Analyzer.INCLUDE_RESOURCE, cleanedResource );
+                            theProperties.put( Analyzer.INCLUDE_RESOURCE, cleanedResource );
                         }
                         else
                         {
-                            properties.remove( Analyzer.INCLUDE_RESOURCE );
+                            theProperties.remove( Analyzer.INCLUDE_RESOURCE );
                         }
                     }
                     else
                     {
                         String combinedResource = includeResource
                             .replaceAll( MAVEN_RESOURCES_REGEX, mavenResourcePaths );
-                        properties.put( Analyzer.INCLUDE_RESOURCE, combinedResource );
+                        theProperties.put( Analyzer.INCLUDE_RESOURCE, combinedResource );
                     }
                 }
                 else if ( mavenResourcePaths.length() > 0 )
                 {
-                    this.getLog().warn(
+                    getLog().warn(
                         Analyzer.INCLUDE_RESOURCE + ": overriding " + mavenResourcePaths + " with " + includeResource
                             + " (add " + MAVEN_RESOURCES + " if you want to include the maven resources)" );
                 }
             }
             else if ( mavenResourcePaths.length() > 0 )
             {
-                properties.put( Analyzer.INCLUDE_RESOURCE, mavenResourcePaths );
+                theProperties.put( Analyzer.INCLUDE_RESOURCE, mavenResourcePaths );
             }
 
             Builder builder = new Builder();
-            builder.setBase( project.getBasedir() );
-            builder.setProperties( properties );
+            builder.setBase( currentProject.getBasedir() );
+            builder.setProperties( theProperties );
             builder.setClasspath( classpath );
 
-            Collection embeddableArtifacts = getEmbeddableArtifacts( project, properties );
+            Collection embeddableArtifacts = getEmbeddableArtifacts( currentProject, theProperties );
             if ( embeddableArtifacts.size() > 0 )
             {
                 // add BND instructions to embed selected dependencies
-                new DependencyEmbedder( embeddableArtifacts ).processHeaders( properties );
+                new DependencyEmbedder( embeddableArtifacts ).processHeaders( theProperties );
             }
 
             builder.build();
             Jar jar = builder.getJar();
-            this.doMavenMetadata( project, jar );
+            doMavenMetadata( currentProject, jar );
             builder.setJar( jar );
 
             List errors = builder.getErrors();
@@ -329,17 +327,17 @@ public class BundlePlugin extends AbstractMojo
             for ( Iterator w = warnings.iterator(); w.hasNext(); )
             {
                 String msg = ( String ) w.next();
-                this.getLog().warn( "Warning building bundle " + project.getArtifact() + " : " + msg );
+                getLog().warn( "Warning building bundle " + currentProject.getArtifact() + " : " + msg );
             }
             for ( Iterator e = errors.iterator(); e.hasNext(); )
             {
                 String msg = ( String ) e.next();
-                this.getLog().error( "Error building bundle " + project.getArtifact() + " : " + msg );
+                getLog().error( "Error building bundle " + currentProject.getArtifact() + " : " + msg );
             }
 
             if ( errors.size() > 0 )
             {
-                String failok = properties.getProperty( "-failok" );
+                String failok = theProperties.getProperty( "-failok" );
                 if ( null == failok || "false".equalsIgnoreCase( failok ) )
                 {
                     jarFile.delete();
@@ -353,8 +351,9 @@ public class BundlePlugin extends AbstractMojo
                 /*
                  * Grab customized manifest entries from the maven-jar-plugin configuration
                  */
-                MavenArchiveConfiguration archiveConfig = JarPluginConfiguration.getArchiveConfiguration( project );
-                String mavenManifestText = new MavenArchiver().getManifest( project, archiveConfig ).toString();
+                MavenArchiveConfiguration archiveConfig = JarPluginConfiguration
+                    .getArchiveConfiguration( currentProject );
+                String mavenManifestText = new MavenArchiver().getManifest( currentProject, archiveConfig ).toString();
                 Manifest mavenManifest = new Manifest();
 
                 // First grab the external manifest file (if specified)
@@ -410,15 +409,15 @@ public class BundlePlugin extends AbstractMojo
 
             jarFile.getParentFile().mkdirs();
             builder.getJar().write( jarFile );
-            Artifact bundleArtifact = project.getArtifact();
+            Artifact bundleArtifact = currentProject.getArtifact();
             bundleArtifact.setFile( jarFile );
 
             if ( unpackBundle )
             {
-                File outputDir = this.getOutputDirectory();
+                File outputDir = getOutputDirectory();
                 if ( null == outputDir )
                 {
-                    outputDir = new File( this.getBuildDirectory(), "classes" );
+                    outputDir = new File( getBuildDirectory(), "classes" );
                 }
 
                 try
@@ -432,7 +431,7 @@ public class BundlePlugin extends AbstractMojo
                         outputDir.mkdirs();
                     }
 
-                    UnArchiver unArchiver = archiverManager.getUnArchiver( "jar" );
+                    UnArchiver unArchiver = m_archiverManager.getUnArchiver( "jar" );
                     unArchiver.setDestDirectory( outputDir );
                     unArchiver.setSourceFile( jarFile );
                     unArchiver.extract();
@@ -459,7 +458,7 @@ public class BundlePlugin extends AbstractMojo
             }
 
             // workaround for MNG-1682: force maven to install artifact using the "jar" handler
-            bundleArtifact.setArtifactHandler( artifactHandlerManager.getArtifactHandler( "jar" ) );
+            bundleArtifact.setArtifactHandler( m_artifactHandlerManager.getArtifactHandler( "jar" ) );
         }
         catch ( MojoFailureException e )
         {
@@ -474,7 +473,7 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    private String removeMavenResourcesTag( String includeResource )
+    private static String removeMavenResourcesTag( String includeResource )
     {
         StringBuffer buf = new StringBuffer();
 
@@ -496,7 +495,7 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    private Map getProperies( Model projectModel, String prefix, Object model )
+    private static Map getProperties( Model projectModel, String prefix, Object model )
     {
         Map properties = new HashMap();
         Method methods[] = Model.class.getDeclaredMethods();
@@ -528,7 +527,7 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    private StringBuffer printLicenses( List licenses )
+    private static StringBuffer printLicenses( List licenses )
     {
         if ( licenses == null || licenses.size() == 0 )
             return null;
@@ -554,18 +553,18 @@ public class BundlePlugin extends AbstractMojo
      * @param jar
      * @throws IOException
      */
-    private void doMavenMetadata( MavenProject project, Jar jar ) throws IOException
+    private void doMavenMetadata( MavenProject currentProject, Jar jar ) throws IOException
     {
-        String path = "META-INF/maven/" + project.getGroupId() + "/" + project.getArtifactId();
-        File pomFile = new File( this.baseDir, "pom.xml" );
+        String path = "META-INF/maven/" + currentProject.getGroupId() + "/" + currentProject.getArtifactId();
+        File pomFile = new File( baseDir, "pom.xml" );
         jar.putResource( path + "/pom.xml", new FileResource( pomFile ) );
 
         Properties p = new Properties();
-        p.put( "version", project.getVersion() );
-        p.put( "groupId", project.getGroupId() );
-        p.put( "artifactId", project.getArtifactId() );
+        p.put( "version", currentProject.getVersion() );
+        p.put( "groupId", currentProject.getGroupId() );
+        p.put( "artifactId", currentProject.getArtifactId() );
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        p.store( out, "Generated by org.apache.felix.plugin.bundle" );
+        p.store( out, "Generated by org.apache.felix.bundleplugin" );
         jar
             .putResource( path + "/pom.properties",
                 new EmbeddedResource( out.toByteArray(), System.currentTimeMillis() ) );
@@ -577,13 +576,13 @@ public class BundlePlugin extends AbstractMojo
      * @throws ZipException
      * @throws IOException
      */
-    protected Jar[] getClasspath( MavenProject project ) throws ZipException, IOException
+    protected Jar[] getClasspath( MavenProject currentProject ) throws ZipException, IOException
     {
         List list = new ArrayList();
 
-        if ( this.getOutputDirectory() != null && this.getOutputDirectory().exists() )
+        if ( getOutputDirectory() != null && getOutputDirectory().exists() )
         {
-            list.add( new Jar( ".", this.getOutputDirectory() ) );
+            list.add( new Jar( ".", getOutputDirectory() ) );
         }
 
         final Set artifacts;
@@ -593,7 +592,7 @@ public class BundlePlugin extends AbstractMojo
         }
         else
         {
-            artifacts = project.getArtifacts();
+            artifacts = currentProject.getArtifacts();
         }
 
         for ( Iterator it = artifacts.iterator(); it.hasNext(); )
@@ -605,11 +604,12 @@ public class BundlePlugin extends AbstractMojo
                     || Artifact.SCOPE_SYSTEM.equals( artifact.getScope() )
                     || Artifact.SCOPE_PROVIDED.equals( artifact.getScope() ) )
                 {
-                    File file = this.getFile( artifact );
+                    File file = getFile( artifact );
                     if ( file == null )
                     {
                         getLog().warn(
-                            "File is not available for artifact " + artifact + " in project " + project.getArtifact() );
+                            "File is not available for artifact " + artifact + " in project "
+                                + currentProject.getArtifact() );
                         continue;
                     }
                     Jar jar = new Jar( artifact.getArtifactId(), file );
@@ -634,7 +634,7 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    private void header( Properties properties, String key, Object value )
+    private static void header( Properties properties, String key, Object value )
     {
         if ( value == null )
             return;
@@ -654,102 +654,102 @@ public class BundlePlugin extends AbstractMojo
      */
     protected String convertVersionToOsgi( String version )
     {
-        return this.getMaven2OsgiConverter().getVersion( version );
+        return getMaven2OsgiConverter().getVersion( version );
     }
 
 
     /**
      * TODO this should return getMaven2Osgi().getBundleFileName( project.getArtifact() )
      */
-    protected String getBundleName( MavenProject project )
+    protected String getBundleName( MavenProject currentProject )
     {
-        return project.getBuild().getFinalName() + ".jar";
+        return currentProject.getBuild().getFinalName() + ".jar";
     }
 
 
     protected String getBuildDirectory()
     {
-        return this.buildDirectory;
+        return buildDirectory;
     }
 
 
-    void setBuildDirectory( String buildirectory )
+    protected void setBuildDirectory( String _buildirectory )
     {
-        this.buildDirectory = buildirectory;
+        buildDirectory = _buildirectory;
     }
 
 
-    protected Properties getDefaultProperties( MavenProject project )
+    protected Properties getDefaultProperties( MavenProject currentProject )
     {
         Properties properties = new Properties();
 
         String bsn;
         try
         {
-            bsn = maven2OsgiConverter.getBundleSymbolicName( project.getArtifact() );
+            bsn = getMaven2OsgiConverter().getBundleSymbolicName( currentProject.getArtifact() );
         }
         catch ( Exception e )
         {
-            bsn = project.getGroupId() + "." + project.getArtifactId();
+            bsn = currentProject.getGroupId() + "." + currentProject.getArtifactId();
         }
 
         // Setup defaults
         properties.put( Analyzer.BUNDLE_SYMBOLICNAME, bsn );
         properties.put( Analyzer.IMPORT_PACKAGE, "*" );
-        properties.put( Analyzer.BUNDLE_VERSION, project.getVersion() );
+        properties.put( Analyzer.BUNDLE_VERSION, currentProject.getVersion() );
 
         // remove the verbose Include-Resource entry from generated manifest
         properties.put( Analyzer.REMOVE_HEADERS, Analyzer.INCLUDE_RESOURCE );
 
-        this.header( properties, Analyzer.BUNDLE_DESCRIPTION, project.getDescription() );
-        StringBuffer licenseText = this.printLicenses( project.getLicenses() );
+        header( properties, Analyzer.BUNDLE_DESCRIPTION, currentProject.getDescription() );
+        StringBuffer licenseText = printLicenses( currentProject.getLicenses() );
         if ( licenseText != null )
         {
-            this.header( properties, Analyzer.BUNDLE_LICENSE, licenseText );
+            header( properties, Analyzer.BUNDLE_LICENSE, licenseText );
         }
-        this.header( properties, Analyzer.BUNDLE_NAME, project.getName() );
+        header( properties, Analyzer.BUNDLE_NAME, currentProject.getName() );
 
-        if ( project.getOrganization() != null )
+        if ( currentProject.getOrganization() != null )
         {
-            this.header( properties, Analyzer.BUNDLE_VENDOR, project.getOrganization().getName() );
-            if ( project.getOrganization().getUrl() != null )
+            header( properties, Analyzer.BUNDLE_VENDOR, currentProject.getOrganization().getName() );
+            if ( currentProject.getOrganization().getUrl() != null )
             {
-                this.header( properties, Analyzer.BUNDLE_DOCURL, project.getOrganization().getUrl() );
+                header( properties, Analyzer.BUNDLE_DOCURL, currentProject.getOrganization().getUrl() );
             }
         }
 
-        properties.putAll( project.getProperties() );
-        properties.putAll( project.getModel().getProperties() );
-        properties.putAll( this.getProperies( project.getModel(), "project.build.", project.getBuild() ) );
-        properties.putAll( this.getProperies( project.getModel(), "pom.", project.getModel() ) );
-        properties.putAll( this.getProperies( project.getModel(), "project.", project ) );
-        properties.put( "project.baseDir", this.baseDir );
-        properties.put( "project.build.directory", this.getBuildDirectory() );
-        properties.put( "project.build.outputdirectory", this.getOutputDirectory() );
+        properties.putAll( currentProject.getProperties() );
+        properties.putAll( currentProject.getModel().getProperties() );
+        properties.putAll( getProperties( currentProject.getModel(), "project.build.", currentProject.getBuild() ) );
+        properties.putAll( getProperties( currentProject.getModel(), "pom.", currentProject.getModel() ) );
+        properties.putAll( getProperties( currentProject.getModel(), "project.", currentProject ) );
+        properties.put( "project.baseDir", baseDir );
+        properties.put( "project.build.directory", getBuildDirectory() );
+        properties.put( "project.build.outputdirectory", getOutputDirectory() );
 
         return properties;
     }
 
 
-    void setBasedir( File basedir )
+    protected void setBasedir( File _basedir )
     {
-        this.baseDir = basedir;
+        baseDir = _basedir;
     }
 
 
-    File getOutputDirectory()
+    protected File getOutputDirectory()
     {
-        return this.outputDirectory;
+        return outputDirectory;
     }
 
 
-    void setOutputDirectory( File outputDirectory )
+    protected void setOutputDirectory( File _outputDirectory )
     {
-        this.outputDirectory = outputDirectory;
+        outputDirectory = _outputDirectory;
     }
 
 
-    String getMavenResourcePaths( MavenProject project )
+    private static String getMavenResourcePaths( MavenProject project )
     {
         final String basePath = project.getBasedir().getAbsolutePath();
 
@@ -842,7 +842,7 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    Collection getEmbeddableArtifacts( MavenProject project, Properties properties )
+    private static Collection getEmbeddableArtifacts( MavenProject project, Properties properties )
     {
         String embedTransitive = properties.getProperty( DependencyEmbedder.EMBED_TRANSITIVE );
         if ( Boolean.valueOf( embedTransitive ).booleanValue() )
