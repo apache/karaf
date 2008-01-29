@@ -291,27 +291,6 @@ public final class DependencyEmbedder
         File sourceFile = dependency.getFile();
         if ( null != sourceFile && sourceFile.exists() )
         {
-            String bundleClassPath = properties.getProperty( Analyzer.BUNDLE_CLASSPATH );
-            String includeResource = properties.getProperty( Analyzer.INCLUDE_RESOURCE );
-
-            if ( null == bundleClassPath )
-            {
-                bundleClassPath = ".,";
-            }
-            else if ( bundleClassPath.length() > 0 )
-            {
-                bundleClassPath += ",";
-            }
-
-            if ( null == includeResource )
-            {
-                includeResource = "";
-            }
-            else if ( includeResource.length() > 0 )
-            {
-                includeResource += ",";
-            }
-
             String embedDirectory = m_embedDirectory;
             if ( "".equals( embedDirectory ) || ".".equals( embedDirectory ) )
             {
@@ -349,8 +328,32 @@ public final class DependencyEmbedder
                 targetFilePath = targetFilePath.replace( File.separatorChar, '/' );
             }
 
+            String bundleClassPath = properties.getProperty( Analyzer.BUNDLE_CLASSPATH );
+            String includeResource = properties.getProperty( Analyzer.INCLUDE_RESOURCE );
+
+            if ( null == includeResource )
+            {
+                includeResource = "";
+            }
+            else if ( includeResource.length() > 0 )
+            {
+                includeResource += ",";
+            }
+
+            includeResource += targetFilePath;
+            includeResource += "=";
+            includeResource += sourceFile;
+
+            if ( null == bundleClassPath )
+            {
+                bundleClassPath = ".,";
+            }
+            else if ( bundleClassPath.length() > 0 )
+            {
+                bundleClassPath += ",";
+            }
+
             bundleClassPath += targetFilePath;
-            includeResource += targetFilePath + "=" + sourceFile;
 
             properties.setProperty( Analyzer.BUNDLE_CLASSPATH, bundleClassPath );
             properties.setProperty( Analyzer.INCLUDE_RESOURCE, includeResource );
@@ -374,7 +377,8 @@ public final class DependencyEmbedder
                 includeResource += ",";
             }
 
-            includeResource += "@" + sourceFile;
+            includeResource += "@";
+            includeResource += sourceFile;
 
             properties.setProperty( Analyzer.INCLUDE_RESOURCE, includeResource );
         }
