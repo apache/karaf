@@ -203,12 +203,12 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    protected void execute( MavenProject currentProject, Map theInstructions, Properties theProperties )
+    protected void execute( MavenProject currentProject, Map originalInstructions, Properties properties )
         throws MojoExecutionException
     {
         try
         {
-            execute( currentProject, theInstructions, theProperties, getClasspath( currentProject ) );
+            execute( currentProject, originalInstructions, properties, getClasspath( currentProject ) );
         }
         catch ( IOException e )
         {
@@ -247,26 +247,26 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    protected void execute( MavenProject currentProject, Map theInstructions, Properties theProperties, Jar[] classpath )
-        throws MojoExecutionException
+    protected void execute( MavenProject currentProject, Map originalInstructions, Properties properties,
+        Jar[] classpath ) throws MojoExecutionException
     {
         try
         {
             File jarFile = new File( getBuildDirectory(), getBundleName( currentProject ) );
 
-            theProperties.putAll( getDefaultProperties( currentProject ) );
+            properties.putAll( getDefaultProperties( currentProject ) );
 
             String bsn = currentProject.getGroupId() + "." + currentProject.getArtifactId();
-            if ( !theInstructions.containsKey( Analyzer.PRIVATE_PACKAGE ) )
+            if ( !originalInstructions.containsKey( Analyzer.PRIVATE_PACKAGE ) )
             {
-                theProperties.put( Analyzer.EXPORT_PACKAGE, bsn + ".*" );
+                properties.put( Analyzer.EXPORT_PACKAGE, bsn + ".*" );
             }
 
-            theProperties.putAll( transformDirectives( theInstructions ) );
+            properties.putAll( transformDirectives( originalInstructions ) );
 
             // pass maven resource paths onto BND analyzer
             final String mavenResourcePaths = getMavenResourcePaths( currentProject );
-            final String includeResource = ( String ) theProperties.get( Analyzer.INCLUDE_RESOURCE );
+            final String includeResource = ( String ) properties.get( Analyzer.INCLUDE_RESOURCE );
             if ( includeResource != null )
             {
                 if ( includeResource.indexOf( MAVEN_RESOURCES ) >= 0 )
@@ -278,18 +278,18 @@ public class BundlePlugin extends AbstractMojo
                         String cleanedResource = removeMavenResourcesTag( includeResource );
                         if ( cleanedResource.length() > 0 )
                         {
-                            theProperties.put( Analyzer.INCLUDE_RESOURCE, cleanedResource );
+                            properties.put( Analyzer.INCLUDE_RESOURCE, cleanedResource );
                         }
                         else
                         {
-                            theProperties.remove( Analyzer.INCLUDE_RESOURCE );
+                            properties.remove( Analyzer.INCLUDE_RESOURCE );
                         }
                     }
                     else
                     {
                         String combinedResource = includeResource
                             .replaceAll( MAVEN_RESOURCES_REGEX, mavenResourcePaths );
-                        theProperties.put( Analyzer.INCLUDE_RESOURCE, combinedResource );
+                        properties.put( Analyzer.INCLUDE_RESOURCE, combinedResource );
                     }
                 }
                 else if ( mavenResourcePaths.length() > 0 )
@@ -301,19 +301,19 @@ public class BundlePlugin extends AbstractMojo
             }
             else if ( mavenResourcePaths.length() > 0 )
             {
-                theProperties.put( Analyzer.INCLUDE_RESOURCE, mavenResourcePaths );
+                properties.put( Analyzer.INCLUDE_RESOURCE, mavenResourcePaths );
             }
 
             Builder builder = new Builder();
             builder.setBase( currentProject.getBasedir() );
-            builder.setProperties( theProperties );
+            builder.setProperties( properties );
             builder.setClasspath( classpath );
 
-            Collection embeddableArtifacts = getEmbeddableArtifacts( currentProject, theProperties );
+            Collection embeddableArtifacts = getEmbeddableArtifacts( currentProject, properties );
             if ( embeddableArtifacts.size() > 0 )
             {
                 // add BND instructions to embed selected dependencies
-                new DependencyEmbedder( embeddableArtifacts ).processHeaders( theProperties );
+                new DependencyEmbedder( embeddableArtifacts ).processHeaders( properties );
             }
 
             builder.build();
@@ -337,7 +337,7 @@ public class BundlePlugin extends AbstractMojo
 
             if ( errors.size() > 0 )
             {
-                String failok = theProperties.getProperty( "-failok" );
+                String failok = properties.getProperty( "-failok" );
                 if ( null == failok || "false".equalsIgnoreCase( failok ) )
                 {
                     jarFile.delete();
