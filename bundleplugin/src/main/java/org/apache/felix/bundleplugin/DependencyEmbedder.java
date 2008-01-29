@@ -47,6 +47,10 @@ public final class DependencyEmbedder
     public static final String EMBED_STRIP_VERSION = "Embed-StripVersion";
     public static final String EMBED_TRANSITIVE = "Embed-Transitive";
 
+    private String m_embedDirectory;
+    private String m_embedStripGroup;
+    private String m_embedStripVersion;
+
     /**
      * Dependency artifacts.
      */
@@ -80,6 +84,10 @@ public final class DependencyEmbedder
         String embedDependencyHeader = properties.getProperty( EMBED_DEPENDENCY );
         if ( null != embedDependencyHeader && embedDependencyHeader.length() > 0 )
         {
+            m_embedDirectory = properties.getProperty( EMBED_DIRECTORY );
+            m_embedStripGroup = properties.getProperty( EMBED_STRIP_GROUP, "true" );
+            m_embedStripVersion = properties.getProperty( EMBED_STRIP_VERSION );
+
             Map embedInstructions = OSGiHeader.parseHeader( embedDependencyHeader );
             processEmbedInstructions( embedInstructions );
 
@@ -281,7 +289,6 @@ public final class DependencyEmbedder
     private void embedDependency( Properties properties, Artifact dependency )
     {
         File sourceFile = dependency.getFile();
-
         if ( null != sourceFile && sourceFile.exists() )
         {
             String bundleClassPath = properties.getProperty( Analyzer.BUNDLE_CLASSPATH );
@@ -305,22 +312,19 @@ public final class DependencyEmbedder
                 includeResource += ",";
             }
 
-            String embedDirectory = properties.getProperty( EMBED_DIRECTORY );
-            String embedStripGroup = properties.getProperty( EMBED_STRIP_GROUP, "true" );
-            String embedStripVersion = properties.getProperty( EMBED_STRIP_VERSION );
-
+            String embedDirectory = m_embedDirectory;
             if ( "".equals( embedDirectory ) || ".".equals( embedDirectory ) )
             {
                 embedDirectory = null;
             }
 
-            if ( false == Boolean.valueOf( embedStripGroup ).booleanValue() )
+            if ( false == Boolean.valueOf( m_embedStripGroup ).booleanValue() )
             {
                 embedDirectory = new File( embedDirectory, dependency.getGroupId() ).getPath();
             }
 
             File targetFile;
-            if ( Boolean.valueOf( embedStripVersion ).booleanValue() )
+            if ( Boolean.valueOf( m_embedStripVersion ).booleanValue() )
             {
                 String extension = dependency.getArtifactHandler().getExtension();
                 if ( extension != null )
@@ -357,7 +361,6 @@ public final class DependencyEmbedder
     private void inlineDependency( Properties properties, Artifact dependency )
     {
         File sourceFile = dependency.getFile();
-
         if ( null != sourceFile && sourceFile.exists() )
         {
             String includeResource = properties.getProperty( Analyzer.INCLUDE_RESOURCE );
