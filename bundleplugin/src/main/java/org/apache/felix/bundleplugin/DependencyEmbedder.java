@@ -47,6 +47,9 @@ public final class DependencyEmbedder
     public static final String EMBED_STRIP_VERSION = "Embed-StripVersion";
     public static final String EMBED_TRANSITIVE = "Embed-Transitive";
 
+    private static final String MAVEN_DEPENDENCIES = "{maven-dependencies}";
+    private static final String MAVEN_DEPENDENCIES_REGEX = "\\{maven-dependencies\\}";
+
     private String m_embedDirectory;
     private String m_embedStripGroup;
     private String m_embedStripVersion;
@@ -84,15 +87,6 @@ public final class DependencyEmbedder
         m_inlinedArtifacts.clear();
         m_embeddedArtifacts.clear();
 
-        if ( properties.containsKey( Analyzer.INCLUDE_RESOURCE ) )
-        {
-            includeResource.append( properties.getProperty( Analyzer.INCLUDE_RESOURCE ) );
-        }
-        if ( properties.containsKey( Analyzer.BUNDLE_CLASSPATH ) )
-        {
-            bundleClassPath.append( properties.getProperty( Analyzer.BUNDLE_CLASSPATH ) );
-        }
-
         String embedDependencyHeader = properties.getProperty( EMBED_DEPENDENCY );
         if ( null != embedDependencyHeader && embedDependencyHeader.length() > 0 )
         {
@@ -113,14 +107,17 @@ public final class DependencyEmbedder
             }
         }
 
-        if ( includeResource.length() > 0 )
-        {
-            properties.setProperty( Analyzer.INCLUDE_RESOURCE, includeResource.toString() );
-        }
         if ( bundleClassPath.length() > 0 )
         {
-            properties.setProperty( Analyzer.BUNDLE_CLASSPATH, bundleClassPath.toString() );
+            // set explicit default before merging dependency classpath
+            if ( !properties.containsKey( Analyzer.BUNDLE_CLASSPATH ) )
+            {
+                properties.setProperty( Analyzer.BUNDLE_CLASSPATH, "." );
+            }
         }
+
+        appendDependencies( properties, Analyzer.INCLUDE_RESOURCE, includeResource.toString() );
+        appendDependencies( properties, Analyzer.BUNDLE_CLASSPATH, bundleClassPath.toString() );
     }
 
     protected static abstract class DependencyFilter
@@ -358,11 +355,7 @@ public final class DependencyEmbedder
             includeResource.append( '=' );
             includeResource.append( sourceFile );
 
-            if ( bundleClassPath.length() == 0 )
-            {
-                bundleClassPath.append( ".," );
-            }
-            else if ( bundleClassPath.length() > 0 )
+            if ( bundleClassPath.length() > 0 )
             {
                 bundleClassPath.append( ',' );
             }
@@ -397,5 +390,43 @@ public final class DependencyEmbedder
     public Collection getEmbeddedArtifacts()
     {
         return m_embeddedArtifacts;
+    }
+
+
+    private static void appendDependencies( Properties properties, String directiveName, String mavenDependencies )
+    {
+        /*
+         * similar algorithm to {maven-resources} but default behaviour here is to append rather than override
+         */
+        final String instruction = properties.getProperty( directiveName );
+        if ( instruction != null && instruction.length() > 0 )
+        {
+            if ( instruction.indexOf( MAVEN_DEPENDENCIES ) >= 0 )
+            {
+                // if there are no embeddded dependencies, we do a special treatment and replace
+                // every occurance of MAVEN_DEPENDENCIES and a following comma with an empty string
+                if ( mavenDependencies.length() == 0 )
+                {
+                    String cleanInstruction = BundlePlugin.removeTagFromInstruction( instruction, MAVEN_DEPENDENCIES );
+                    properties.setProperty( directiveName, cleanInstruction );
+                }
+                else
+                {
+                    String mergedInstruction = instruction.replaceAll( MAVEN_DEPENDENCIES_REGEX, mavenDependencies );
+                    properties.setProperty( directiveName, mergedInstruction );
+                }
+            }
+            else if ( mavenDependencies.length() > 0 )
+            {
+                // original behaviour: append dependencies to the instruction
+                properties.setProperty( directiveName, instruction + ',' + mavenDependencies );
+            }
+            // otherwise leave instruction unchanged
+        }
+        else if ( mavenDependencies.length() > 0 )
+        {
+            properties.setProperty( directiveName, mavenDependencies );
+        }
+        // otherwise leave instruction unchanged
     }
 }
