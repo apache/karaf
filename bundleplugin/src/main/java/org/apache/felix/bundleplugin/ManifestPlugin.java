@@ -18,6 +18,7 @@
  */
 package org.apache.felix.bundleplugin;
 
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -33,6 +34,7 @@ import org.apache.maven.project.MavenProject;
 import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Jar;
 
+
 /**
  * Generate an OSGi manifest for this project
  *
@@ -40,8 +42,7 @@ import aQute.lib.osgi.Jar;
  * @phase process-classes
  * @requiresDependencyResolution runtime
  */
-public class ManifestPlugin
-    extends BundlePlugin
+public class ManifestPlugin extends BundlePlugin
 {
     protected void execute( MavenProject project, Map instructions, Properties properties, Jar[] classpath )
         throws MojoExecutionException
@@ -53,7 +54,8 @@ public class ManifestPlugin
         }
         catch ( FileNotFoundException e )
         {
-            throw new MojoExecutionException( "Cannot find " + e.getMessage() + " (manifest goal must be run after compile phase)", e );
+            throw new MojoExecutionException( "Cannot find " + e.getMessage()
+                + " (manifest goal must be run after compile phase)", e );
         }
         catch ( IOException e )
         {
@@ -72,11 +74,12 @@ public class ManifestPlugin
         }
     }
 
-    public Manifest getManifest( MavenProject project, Jar[] classpath )
-        throws IOException
+
+    public Manifest getManifest( MavenProject project, Jar[] classpath ) throws IOException
     {
         return this.getManifest( project, null, null, classpath );
     }
+
 
     public Manifest getManifest( MavenProject project, Map instructions, Properties properties, Jar[] classpath )
         throws IOException
@@ -84,11 +87,12 @@ public class ManifestPlugin
         return this.getAnalyzer( project, instructions, properties, classpath ).getJar().getManifest();
     }
 
-    protected Analyzer getAnalyzer( MavenProject project, Jar[] classpath )
-        throws IOException
+
+    protected Analyzer getAnalyzer( MavenProject project, Jar[] classpath ) throws IOException
     {
         return this.getAnalyzer( project, new HashMap(), new Properties(), classpath );
     }
+
 
     protected Analyzer getAnalyzer( MavenProject project, Map instructions, Properties properties, Jar[] classpath )
         throws IOException
@@ -137,8 +141,8 @@ public class ManifestPlugin
         return analyzer;
     }
 
-    public static void writeManifest( Manifest manifest, File outputFile )
-        throws IOException
+
+    public static void writeManifest( Manifest manifest, File outputFile ) throws IOException
     {
         outputFile.getParentFile().mkdirs();
 

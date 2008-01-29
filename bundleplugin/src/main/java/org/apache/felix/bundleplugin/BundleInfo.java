@@ -14,6 +14,7 @@
  */
 package org.apache.felix.bundleplugin;
 
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
+
 
 /**
  * Information result of the bundling process 
@@ -38,9 +40,10 @@ public class BundleInfo
      */
     private Map exportedPackages = new HashMap();
 
+
     public void addExportedPackage( String packageName, Artifact artifact )
     {
-        Set artifacts = (Set) getExportedPackages().get( packageName );
+        Set artifacts = ( Set ) getExportedPackages().get( packageName );
         if ( artifacts == null )
         {
             artifacts = new HashSet();
@@ -49,10 +52,12 @@ public class BundleInfo
         artifacts.add( artifact );
     }
 
+
     Map getExportedPackages()
     {
         return exportedPackages;
     }
+
 
     /**
      * Get a list of packages that are exported in more than one bundle.
@@ -65,17 +70,17 @@ public class BundleInfo
 
         for ( Iterator it = getExportedPackages().entrySet().iterator(); it.hasNext(); )
         {
-            Map.Entry entry = (Map.Entry) it.next();
-            Set artifacts = (Set) entry.getValue();
+            Map.Entry entry = ( Map.Entry ) it.next();
+            Set artifacts = ( Set ) entry.getValue();
             if ( artifacts.size() > 1 )
             {
                 /* remove warnings caused by different versions of same artifact */
                 Set artifactKeys = new HashSet();
 
-                String packageName = (String) entry.getKey();
+                String packageName = ( String ) entry.getKey();
                 for ( Iterator it2 = artifacts.iterator(); it2.hasNext(); )
                 {
-                    Artifact artifact = (Artifact) it2.next();
+                    Artifact artifact = ( Artifact ) it2.next();
                     artifactKeys.add( artifact.getGroupId() + "." + artifact.getArtifactId() );
                 }
 
@@ -89,15 +94,16 @@ public class BundleInfo
         return duplicatedExports;
     }
 
+
     public void merge( BundleInfo bundleInfo )
     {
         for ( Iterator it = bundleInfo.getExportedPackages().entrySet().iterator(); it.hasNext(); )
         {
-            Map.Entry entry = (Map.Entry) it.next();
-            String packageName = (String) entry.getKey();
-            Collection artifacts = (Collection) entry.getValue();
+            Map.Entry entry = ( Map.Entry ) it.next();
+            String packageName = ( String ) entry.getKey();
+            Collection artifacts = ( Collection ) entry.getValue();
 
-            Collection artifactsWithPackage = (Collection) getExportedPackages().get( packageName );
+            Collection artifactsWithPackage = ( Collection ) getExportedPackages().get( packageName );
             if ( artifactsWithPackage == null )
             {
                 artifactsWithPackage = new HashSet();

@@ -18,6 +18,7 @@
  */
 package org.apache.felix.bundleplugin;
 
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
@@ -25,14 +26,14 @@ import java.util.Map;
 import aQute.lib.osgi.Builder;
 import aQute.lib.osgi.Jar;
 
+
 /**
  * Extension of {@link aQute.lib.osgi.Builder} to handle package versions
  * 
  * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
  * @version $Id$
  */
-public class PackageVersionAnalyzer
-    extends Builder
+public class PackageVersionAnalyzer extends Builder
 {
 
     /**
@@ -53,10 +54,10 @@ public class PackageVersionAnalyzer
         String bundleVersion = getProperties().getProperty( BUNDLE_VERSION );
         for ( Iterator it = contained.entrySet().iterator(); it.hasNext(); )
         {
-            Map.Entry entry = (Map.Entry) it.next();
+            Map.Entry entry = ( Map.Entry ) it.next();
 
             /* remove packages under META-INF */
-            String packageName = (String) entry.getKey();
+            String packageName = ( String ) entry.getKey();
             if ( packageName.startsWith( "META-INF." ) )
             {
                 it.remove();
@@ -65,7 +66,7 @@ public class PackageVersionAnalyzer
             /* set package versions to bundle version values */
             if ( bundleVersion != null )
             {
-                Map values = (Map) entry.getValue();
+                Map values = ( Map ) entry.getValue();
                 if ( values.get( "version" ) == null )
                 {
                     values.put( "version", bundleVersion );

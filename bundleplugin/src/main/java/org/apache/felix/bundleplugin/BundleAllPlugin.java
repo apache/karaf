@@ -18,6 +18,7 @@
  */
 package org.apache.felix.bundleplugin;
 
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -54,6 +55,7 @@ import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
 import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Jar;
 
+
 /**
  * Create OSGi bundles from all dependencies in the Maven project
  * 
@@ -62,8 +64,7 @@ import aQute.lib.osgi.Jar;
  * @requiresDependencyResolution runtime
  * @description build an OSGi bundle jar for all transitive dependencies
  */
-public class BundleAllPlugin
-    extends ManifestPlugin
+public class BundleAllPlugin extends ManifestPlugin
 {
 
     private static final String LS = System.getProperty( "line.separator" );
@@ -128,14 +129,15 @@ public class BundleAllPlugin
      */
     private boolean ignoreMissingArtifacts;
 
-    private Set artifactsBeingProcessed = new HashSet(); 
+    private Set artifactsBeingProcessed = new HashSet();
 
-    public void execute()
-        throws MojoExecutionException
+
+    public void execute() throws MojoExecutionException
     {
         BundleInfo bundleInfo = bundleAll( getProject() );
         logDuplicatedPackages( bundleInfo );
     }
+
 
     /**
      * Bundle a project and all its dependencies
@@ -143,11 +145,11 @@ public class BundleAllPlugin
      * @param project
      * @throws MojoExecutionException
      */
-    private BundleInfo bundleAll( MavenProject project )
-        throws MojoExecutionException
+    private BundleInfo bundleAll( MavenProject project ) throws MojoExecutionException
     {
         return bundleAll( project, Integer.MAX_VALUE );
     }
+
 
     /**
      * Bundle a project and its transitive dependencies up to some depth level
@@ -156,8 +158,7 @@ public class BundleAllPlugin
      * @param depth how deep to process the dependency tree
      * @throws MojoExecutionException
      */
-    protected BundleInfo bundleAll( MavenProject project, int depth )
-        throws MojoExecutionException
+    protected BundleInfo bundleAll( MavenProject project, int depth ) throws MojoExecutionException
     {
 
         if ( alreadyBundled( project.getArtifact() ) )
@@ -178,7 +179,7 @@ public class BundleAllPlugin
         try
         {
             dependencyTree = dependencyTreeBuilder.buildDependencyTree( project, localRepository, factory,
-                                                                        artifactMetadataSource, null, collector );
+                artifactMetadataSource, null, collector );
         }
         catch ( DependencyTreeBuilderException e )
         {
@@ -197,7 +198,7 @@ public class BundleAllPlugin
 
         for ( Iterator it = dependencyTree.inverseIterator(); it.hasNext(); )
         {
-            DependencyNode node = (DependencyNode) it.next();
+            DependencyNode node = ( DependencyNode ) it.next();
             if ( !it.hasNext() )
             {
                 /* this is the root, current project */
@@ -238,7 +239,8 @@ public class BundleAllPlugin
             if ( nodeDepth > depth )
             {
                 /* node is deeper than we want */
-                getLog().debug( "Ignoring " + node.getArtifact() + ", depth is " + nodeDepth + ", bigger than " + depth );
+                getLog()
+                    .debug( "Ignoring " + node.getArtifact() + ", depth is " + nodeDepth + ", bigger than " + depth );
                 continue;
             }
 
@@ -246,7 +248,7 @@ public class BundleAllPlugin
             try
             {
                 childProject = mavenProjectBuilder.buildFromRepository( artifact, remoteRepositories, localRepository,
-                                                                        true );
+                    true );
                 if ( childProject.getDependencyArtifacts() == null )
                 {
                     childProject.setDependencyArtifacts( childProject.createArtifacts( factory, null, null ) );
@@ -276,13 +278,14 @@ public class BundleAllPlugin
             else
             {
                 getLog().debug(
-                                "Not processing due to scope (" + childProject.getArtifact().getScope() + "): "
-                                    + childProject.getArtifact() );
+                    "Not processing due to scope (" + childProject.getArtifact().getScope() + "): "
+                        + childProject.getArtifact() );
             }
         }
 
         return bundleRoot( project, bundleInfo );
     }
+
 
     /**
      * Bundle the root of a dependency tree after all its children have been bundled
@@ -292,8 +295,7 @@ public class BundleAllPlugin
      * @return
      * @throws MojoExecutionException
      */
-    private BundleInfo bundleRoot( MavenProject project, BundleInfo bundleInfo )
-        throws MojoExecutionException
+    private BundleInfo bundleRoot( MavenProject project, BundleInfo bundleInfo ) throws MojoExecutionException
     {
         /* do not bundle the project the mojo was called on */
         if ( getProject() != project )
@@ -309,14 +311,14 @@ public class BundleAllPlugin
         return bundleInfo;
     }
 
+
     /**
      * Bundle one project only without building its childre
      * 
      * @param project
      * @throws MojoExecutionException
      */
-    BundleInfo bundle( MavenProject project )
-        throws MojoExecutionException
+    BundleInfo bundle( MavenProject project ) throws MojoExecutionException
     {
         Artifact artifact = project.getArtifact();
         getLog().info( "Bundling " + artifact );
@@ -349,8 +351,8 @@ public class BundleAllPlugin
             {
                 /* if it is already an OSGi jar copy it as is */
                 getLog().info(
-                               "Using existing OSGi bundle for " + project.getGroupId() + ":" + project.getArtifactId()
-                                   + ":" + project.getVersion() );
+                    "Using existing OSGi bundle for " + project.getGroupId() + ":" + project.getArtifactId() + ":"
+                        + project.getVersion() );
                 String exportHeader = osgiJar.getManifest().getMainAttributes().getValue( Analyzer.EXPORT_PACKAGE );
                 exportedPackages = analyzer.parseHeader( exportHeader ).keySet();
             }
@@ -377,8 +379,8 @@ public class BundleAllPlugin
         }
     }
 
-    private boolean isOsgi( Jar jar )
-        throws IOException
+
+    private boolean isOsgi( Jar jar ) throws IOException
     {
         if ( jar.getManifest() != null )
         {
@@ -387,36 +389,42 @@ public class BundleAllPlugin
         return false;
     }
 
+
     private BundleInfo addExportedPackages( MavenProject project, Collection packages )
     {
         BundleInfo bundleInfo = new BundleInfo();
         for ( Iterator it = packages.iterator(); it.hasNext(); )
         {
-            String packageName = (String) it.next();
+            String packageName = ( String ) it.next();
             bundleInfo.addExportedPackage( packageName, project.getArtifact() );
         }
         return bundleInfo;
     }
+
 
     private String getArtifactKey( Artifact artifact )
     {
         return artifact.getGroupId() + ":" + artifact.getArtifactId();
     }
 
+
     protected String getBundleName( MavenProject project )
     {
         return getBundleName( project.getArtifact() );
     }
+
 
     private String getBundleName( Artifact artifact )
     {
         return getMaven2OsgiConverter().getBundleFileName( artifact );
     }
 
+
     private boolean alreadyBundled( Artifact artifact )
     {
         return getBuiltFile( artifact ) != null;
     }
+
 
     /**
      * Use previously built bundles when available.
@@ -434,6 +442,7 @@ public class BundleAllPlugin
         }
         return super.getFile( artifact );
     }
+
 
     private File getBuiltFile( final Artifact artifact )
     {
@@ -482,6 +491,7 @@ public class BundleAllPlugin
         return bundle;
     }
 
+
     /**
      * Check that the bundleName provided correspond to the artifact provided.
      * Used to determine when the bundle name is a timestamped snapshot and the artifact is a snapshot not timestamped.
@@ -510,13 +520,14 @@ public class BundleAllPlugin
         return false;
     }
 
+
     protected File getOutputFile( Artifact artifact )
     {
         return new File( getOutputDirectory(), getBundleName( artifact ) );
     }
 
-    private Artifact resolveArtifact( Artifact artifact )
-        throws MojoExecutionException, ArtifactNotFoundException
+
+    private Artifact resolveArtifact( Artifact artifact ) throws MojoExecutionException, ArtifactNotFoundException
     {
         VersionRange versionRange;
         if ( artifact.getVersion() != null )
@@ -534,8 +545,7 @@ public class BundleAllPlugin
          * the extra null parameter
          */
         Artifact resolvedArtifact = factory.createDependencyArtifact( artifact.getGroupId(), artifact.getArtifactId(),
-                                                                      versionRange, artifact.getType(), artifact
-                                                                          .getClassifier(), artifact.getScope(), null );
+            versionRange, artifact.getType(), artifact.getClassifier(), artifact.getScope(), null );
 
         try
         {
@@ -549,6 +559,7 @@ public class BundleAllPlugin
         return resolvedArtifact;
     }
 
+
     /**
      * Log what packages are exported in more than one bundle
      */
@@ -558,14 +569,14 @@ public class BundleAllPlugin
 
         for ( Iterator it = duplicatedExports.entrySet().iterator(); it.hasNext(); )
         {
-            Map.Entry entry = (Map.Entry) it.next();
-            String packageName = (String) entry.getKey();
-            Collection artifacts = (Collection) entry.getValue();
+            Map.Entry entry = ( Map.Entry ) it.next();
+            String packageName = ( String ) entry.getKey();
+            Collection artifacts = ( Collection ) entry.getValue();
 
             getLog().warn( "Package " + packageName + " is exported in more than a bundle: " );
             for ( Iterator it2 = artifacts.iterator(); it2.hasNext(); )
             {
-                Artifact artifact = (Artifact) it2.next();
+                Artifact artifact = ( Artifact ) it2.next();
                 getLog().warn( "  " + artifact );
             }
 

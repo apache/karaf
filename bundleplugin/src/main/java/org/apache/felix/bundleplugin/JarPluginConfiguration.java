@@ -18,6 +18,7 @@
  */
 package org.apache.felix.bundleplugin;
 
+
 import org.apache.maven.archiver.MavenArchiveConfiguration;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.configurator.converters.composite.ObjectWithFieldsConverter;
@@ -28,6 +29,7 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator
 import org.codehaus.plexus.configuration.PlexusConfiguration;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+
 
 /**
  * Provide access to the archive configuration from the jar plugin
@@ -52,7 +54,7 @@ public class JarPluginConfiguration
 
             converter.processConfiguration( converters, archiveConfig, loader, archiveSettings, evaluator, null );
         }
-        catch( Exception e )
+        catch ( Exception e )
         {
             // ignore and return empty configuration...
         }
@@ -60,10 +62,12 @@ public class JarPluginConfiguration
         return archiveConfig;
     }
 
+
     private static PlexusConfiguration getCorePluginConfiguration( MavenProject project, String pluginName )
     {
         return getPluginConfiguration( project, "org.apache.maven.plugins", "maven-" + pluginName + "-plugin" );
     }
+
 
     private static PlexusConfiguration getPluginConfiguration( MavenProject project, String groupId, String artifactId )
     {

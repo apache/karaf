@@ -18,7 +18,9 @@
  */
 package org.apache.felix.bundleplugin;
 
+
 import org.apache.maven.plugin.MojoExecutionException;
+
 
 /**
  * 
@@ -27,12 +29,10 @@ import org.apache.maven.plugin.MojoExecutionException;
  * @requiresDependencyResolution runtime
  * @description build an OSGi bundle jar for direct dependencies
  */
-public class WrapPlugin
-    extends BundleAllPlugin
+public class WrapPlugin extends BundleAllPlugin
 {
 
-    public void execute()
-        throws MojoExecutionException
+    public void execute() throws MojoExecutionException
     {
         BundleInfo bundleInfo = bundleAll( getProject(), 1 );
         logDuplicatedPackages( bundleInfo );
