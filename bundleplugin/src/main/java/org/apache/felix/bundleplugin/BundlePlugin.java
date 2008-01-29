@@ -275,7 +275,7 @@ public class BundlePlugin extends AbstractMojo
                     // every occurance of MAVEN_RESOURCES and a following comma with an empty string
                     if ( mavenResourcePaths.length() == 0 )
                     {
-                        String cleanedResource = removeMavenResourcesTag( includeResource );
+                        String cleanedResource = removeTagFromInstruction( includeResource, MAVEN_RESOURCES );
                         if ( cleanedResource.length() > 0 )
                         {
                             properties.put( Analyzer.INCLUDE_RESOURCE, cleanedResource );
@@ -310,11 +310,9 @@ public class BundlePlugin extends AbstractMojo
             builder.setClasspath( classpath );
 
             Collection embeddableArtifacts = getEmbeddableArtifacts( currentProject, properties );
-            if ( embeddableArtifacts.size() > 0 )
-            {
-                // add BND instructions to embed selected dependencies
-                new DependencyEmbedder( embeddableArtifacts ).processHeaders( properties );
-            }
+
+            // add BND instructions to embed selected dependencies
+            new DependencyEmbedder( embeddableArtifacts ).processHeaders( properties );
 
             builder.build();
             Jar jar = builder.getJar();
@@ -473,15 +471,15 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    private static String removeMavenResourcesTag( String includeResource )
+    protected static String removeTagFromInstruction( String instruction, String tag )
     {
         StringBuffer buf = new StringBuffer();
 
-        String[] clauses = includeResource.split( "," );
+        String[] clauses = instruction.split( "," );
         for ( int i = 0; i < clauses.length; i++ )
         {
             String clause = clauses[i].trim();
-            if ( !MAVEN_RESOURCES.equals( clause ) )
+            if ( !tag.equals( clause ) )
             {
                 if ( buf.length() > 0 )
                 {
