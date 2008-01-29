@@ -78,8 +78,20 @@ public final class DependencyEmbedder
 
     public void processHeaders( Properties properties ) throws MojoExecutionException
     {
+        StringBuffer includeResource = new StringBuffer();
+        StringBuffer bundleClassPath = new StringBuffer();
+
         m_inlinedArtifacts.clear();
         m_embeddedArtifacts.clear();
+
+        if ( properties.containsKey( Analyzer.INCLUDE_RESOURCE ) )
+        {
+            includeResource.append( properties.getProperty( Analyzer.INCLUDE_RESOURCE ) );
+        }
+        if ( properties.containsKey( Analyzer.BUNDLE_CLASSPATH ) )
+        {
+            bundleClassPath.append( properties.getProperty( Analyzer.BUNDLE_CLASSPATH ) );
+        }
 
         String embedDependencyHeader = properties.getProperty( EMBED_DEPENDENCY );
         if ( null != embedDependencyHeader && embedDependencyHeader.length() > 0 )
@@ -93,12 +105,21 @@ public final class DependencyEmbedder
 
             for ( Iterator i = m_inlinedArtifacts.iterator(); i.hasNext(); )
             {
-                inlineDependency( properties, ( Artifact ) i.next() );
+                inlineDependency( ( Artifact ) i.next(), includeResource );
             }
             for ( Iterator i = m_embeddedArtifacts.iterator(); i.hasNext(); )
             {
-                embedDependency( properties, ( Artifact ) i.next() );
+                embedDependency( ( Artifact ) i.next(), includeResource, bundleClassPath );
             }
+        }
+
+        if ( includeResource.length() > 0 )
+        {
+            properties.setProperty( Analyzer.INCLUDE_RESOURCE, includeResource.toString() );
+        }
+        if ( bundleClassPath.length() > 0 )
+        {
+            properties.setProperty( Analyzer.BUNDLE_CLASSPATH, bundleClassPath.toString() );
         }
     }
 
@@ -286,7 +307,7 @@ public final class DependencyEmbedder
     }
 
 
-    private void embedDependency( Properties properties, Artifact dependency )
+    private void embedDependency( Artifact dependency, StringBuffer includeResource, StringBuffer bundleClassPath )
     {
         File sourceFile = dependency.getFile();
         if ( null != sourceFile && sourceFile.exists() )
@@ -328,59 +349,41 @@ public final class DependencyEmbedder
                 targetFilePath = targetFilePath.replace( File.separatorChar, '/' );
             }
 
-            String bundleClassPath = properties.getProperty( Analyzer.BUNDLE_CLASSPATH );
-            String includeResource = properties.getProperty( Analyzer.INCLUDE_RESOURCE );
-
-            if ( null == includeResource )
+            if ( includeResource.length() > 0 )
             {
-                includeResource = "";
-            }
-            else if ( includeResource.length() > 0 )
-            {
-                includeResource += ",";
+                includeResource.append( ',' );
             }
 
-            includeResource += targetFilePath;
-            includeResource += "=";
-            includeResource += sourceFile;
+            includeResource.append( targetFilePath );
+            includeResource.append( '=' );
+            includeResource.append( sourceFile );
 
-            if ( null == bundleClassPath )
+            if ( bundleClassPath.length() == 0 )
             {
-                bundleClassPath = ".,";
+                bundleClassPath.append( ".," );
             }
             else if ( bundleClassPath.length() > 0 )
             {
-                bundleClassPath += ",";
+                bundleClassPath.append( ',' );
             }
 
-            bundleClassPath += targetFilePath;
-
-            properties.setProperty( Analyzer.BUNDLE_CLASSPATH, bundleClassPath );
-            properties.setProperty( Analyzer.INCLUDE_RESOURCE, includeResource );
+            bundleClassPath.append( targetFilePath );
         }
     }
 
 
-    private void inlineDependency( Properties properties, Artifact dependency )
+    private void inlineDependency( Artifact dependency, StringBuffer includeResource )
     {
         File sourceFile = dependency.getFile();
         if ( null != sourceFile && sourceFile.exists() )
         {
-            String includeResource = properties.getProperty( Analyzer.INCLUDE_RESOURCE );
-
-            if ( null == includeResource )
+            if ( includeResource.length() > 0 )
             {
-                includeResource = "";
-            }
-            else if ( includeResource.length() > 0 )
-            {
-                includeResource += ",";
+                includeResource.append( ',' );
             }
 
-            includeResource += "@";
-            includeResource += sourceFile;
-
-            properties.setProperty( Analyzer.INCLUDE_RESOURCE, includeResource );
+            includeResource.append( '@' );
+            includeResource.append( sourceFile );
         }
     }
 
