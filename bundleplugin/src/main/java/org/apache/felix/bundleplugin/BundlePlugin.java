@@ -857,7 +857,7 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    private static Collection getEmbeddableArtifacts( MavenProject project, Properties properties )
+    protected static Collection getEmbeddableArtifacts( MavenProject project, Properties properties )
     {
         String embedTransitive = properties.getProperty( DependencyEmbedder.EMBED_TRANSITIVE );
         if ( Boolean.valueOf( embedTransitive ).booleanValue() )
