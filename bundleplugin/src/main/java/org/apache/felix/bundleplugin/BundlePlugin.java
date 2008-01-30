@@ -49,6 +49,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.osgi.Maven2OsgiConverter;
 import org.codehaus.plexus.archiver.UnArchiver;
@@ -264,60 +265,24 @@ public class BundlePlugin extends AbstractMojo
 
             properties.putAll( transformDirectives( originalInstructions ) );
 
-            // pass maven resource paths onto BND analyzer
-            final String mavenResourcePaths = getMavenResourcePaths( currentProject );
-            final String includeResource = ( String ) properties.get( Analyzer.INCLUDE_RESOURCE );
-            if ( includeResource != null )
-            {
-                if ( includeResource.indexOf( MAVEN_RESOURCES ) >= 0 )
-                {
-                    // if there is no maven resource path, we do a special treatment and replace
-                    // every occurance of MAVEN_RESOURCES and a following comma with an empty string
-                    if ( mavenResourcePaths.length() == 0 )
-                    {
-                        String cleanedResource = removeTagFromInstruction( includeResource, MAVEN_RESOURCES );
-                        if ( cleanedResource.length() > 0 )
-                        {
-                            properties.put( Analyzer.INCLUDE_RESOURCE, cleanedResource );
-                        }
-                        else
-                        {
-                            properties.remove( Analyzer.INCLUDE_RESOURCE );
-                        }
-                    }
-                    else
-                    {
-                        String combinedResource = includeResource
-                            .replaceAll( MAVEN_RESOURCES_REGEX, mavenResourcePaths );
-                        properties.put( Analyzer.INCLUDE_RESOURCE, combinedResource );
-                    }
-                }
-                else if ( mavenResourcePaths.length() > 0 )
-                {
-                    getLog().warn(
-                        Analyzer.INCLUDE_RESOURCE + ": overriding " + mavenResourcePaths + " with " + includeResource
-                            + " (add " + MAVEN_RESOURCES + " if you want to include the maven resources)" );
-                }
-            }
-            else if ( mavenResourcePaths.length() > 0 )
-            {
-                properties.put( Analyzer.INCLUDE_RESOURCE, mavenResourcePaths );
-            }
+            // update BND instructions to add Maven resources
+            includeMavenResources( currentProject, properties, getLog() );
 
             Builder builder = new Builder();
             builder.setBase( currentProject.getBasedir() );
             builder.setProperties( properties );
             builder.setClasspath( classpath );
 
+            // update BND instructions to embed selected Maven dependencies
             Collection embeddableArtifacts = getEmbeddableArtifacts( currentProject, properties );
-
-            // add BND instructions to embed selected dependencies
             new DependencyEmbedder( embeddableArtifacts ).processHeaders( properties );
 
             builder.build();
             Jar jar = builder.getJar();
             doMavenMetadata( currentProject, jar );
             builder.setJar( jar );
+
+            mergeMavenManifest( currentProject, jar, getLog() );
 
             List errors = builder.getErrors();
             List warnings = builder.getWarnings();
@@ -344,67 +309,7 @@ public class BundlePlugin extends AbstractMojo
                 }
             }
 
-            try
-            {
-                /*
-                 * Grab customized manifest entries from the maven-jar-plugin configuration
-                 */
-                MavenArchiveConfiguration archiveConfig = JarPluginConfiguration
-                    .getArchiveConfiguration( currentProject );
-                String mavenManifestText = new MavenArchiver().getManifest( currentProject, archiveConfig ).toString();
-                Manifest mavenManifest = new Manifest();
-
-                // First grab the external manifest file (if specified)
-                File externalManifestFile = archiveConfig.getManifestFile();
-                if ( null != externalManifestFile && externalManifestFile.exists() )
-                {
-                    InputStream mis = new FileInputStream( externalManifestFile );
-                    mavenManifest.read( mis );
-                    mis.close();
-                }
-
-                // Then apply the customized entries from the jar plugin
-                mavenManifest.read( new StringInputStream( mavenManifestText ) );
-
-                if ( !archiveConfig.isManifestSectionsEmpty() )
-                {
-                    /*
-                     * Add customized manifest sections (for some reason MavenArchiver doesn't do this for us)
-                     */
-                    List sections = archiveConfig.getManifestSections();
-                    for ( Iterator i = sections.iterator(); i.hasNext(); )
-                    {
-                        ManifestSection section = ( ManifestSection ) i.next();
-                        Attributes attributes = new Attributes();
-
-                        if ( !section.isManifestEntriesEmpty() )
-                        {
-                            Map entries = section.getManifestEntries();
-                            for ( Iterator j = entries.entrySet().iterator(); j.hasNext(); )
-                            {
-                                Map.Entry entry = ( Map.Entry ) j.next();
-                                attributes.putValue( ( String ) entry.getKey(), ( String ) entry.getValue() );
-                            }
-                        }
-
-                        mavenManifest.getEntries().put( section.getName(), attributes );
-                    }
-                }
-
-                /*
-                 * Overlay generated bundle manifest with customized entries
-                 */
-                Manifest bundleManifest = jar.getManifest();
-                bundleManifest.getMainAttributes().putAll( mavenManifest.getMainAttributes() );
-                bundleManifest.getMainAttributes().putValue( "Created-By", "Apache Maven Bundle Plugin" );
-                bundleManifest.getEntries().putAll( mavenManifest.getEntries() );
-                jar.setManifest( bundleManifest );
-            }
-            catch ( Exception e )
-            {
-                getLog().warn( "Unable to merge Maven manifest: " + e.getLocalizedMessage() );
-            }
-
+            // attach bundle to maven project
             jarFile.getParentFile().mkdirs();
             builder.getJar().write( jarFile );
             Artifact bundleArtifact = currentProject.getArtifact();
@@ -412,32 +317,7 @@ public class BundlePlugin extends AbstractMojo
 
             if ( unpackBundle )
             {
-                File outputDir = getOutputDirectory();
-                if ( null == outputDir )
-                {
-                    outputDir = new File( getBuildDirectory(), "classes" );
-                }
-
-                try
-                {
-                    /*
-                     * this directory must exist before unpacking, otherwise the plexus
-                     * unarchiver decides to use the current working directory instead!
-                     */
-                    if ( !outputDir.exists() )
-                    {
-                        outputDir.mkdirs();
-                    }
-
-                    UnArchiver unArchiver = m_archiverManager.getUnArchiver( "jar" );
-                    unArchiver.setDestDirectory( outputDir );
-                    unArchiver.setSourceFile( jarFile );
-                    unArchiver.extract();
-                }
-                catch ( Exception e )
-                {
-                    getLog().error( "Problem unpacking " + jarFile + " to " + outputDir, e );
-                }
+                unpackBundle( jarFile );
             }
 
             if ( manifestLocation != null )
@@ -467,6 +347,143 @@ public class BundlePlugin extends AbstractMojo
         {
             getLog().error( "An internal error occurred", e );
             throw new MojoExecutionException( "Internal error in maven-bundle-plugin", e );
+        }
+    }
+
+
+    protected static void includeMavenResources( MavenProject currentProject, Properties properties, Log log )
+    {
+        // pass maven resource paths onto BND analyzer
+        final String mavenResourcePaths = getMavenResourcePaths( currentProject );
+        final String includeResource = ( String ) properties.get( Analyzer.INCLUDE_RESOURCE );
+        if ( includeResource != null )
+        {
+            if ( includeResource.indexOf( MAVEN_RESOURCES ) >= 0 )
+            {
+                // if there is no maven resource path, we do a special treatment and replace
+                // every occurance of MAVEN_RESOURCES and a following comma with an empty string
+                if ( mavenResourcePaths.length() == 0 )
+                {
+                    String cleanedResource = removeTagFromInstruction( includeResource, MAVEN_RESOURCES );
+                    if ( cleanedResource.length() > 0 )
+                    {
+                        properties.put( Analyzer.INCLUDE_RESOURCE, cleanedResource );
+                    }
+                    else
+                    {
+                        properties.remove( Analyzer.INCLUDE_RESOURCE );
+                    }
+                }
+                else
+                {
+                    String combinedResource = includeResource.replaceAll( MAVEN_RESOURCES_REGEX, mavenResourcePaths );
+                    properties.put( Analyzer.INCLUDE_RESOURCE, combinedResource );
+                }
+            }
+            else if ( mavenResourcePaths.length() > 0 )
+            {
+                log.warn( Analyzer.INCLUDE_RESOURCE + ": overriding " + mavenResourcePaths + " with " + includeResource
+                    + " (add " + MAVEN_RESOURCES + " if you want to include the maven resources)" );
+            }
+        }
+        else if ( mavenResourcePaths.length() > 0 )
+        {
+            properties.put( Analyzer.INCLUDE_RESOURCE, mavenResourcePaths );
+        }
+    }
+
+
+    protected static void mergeMavenManifest( MavenProject currentProject, Jar jar, Log log )
+    {
+        try
+        {
+            /*
+             * Grab customized manifest entries from the maven-jar-plugin configuration
+             */
+            MavenArchiveConfiguration archiveConfig = JarPluginConfiguration.getArchiveConfiguration( currentProject );
+            String mavenManifestText = new MavenArchiver().getManifest( currentProject, archiveConfig ).toString();
+            Manifest mavenManifest = new Manifest();
+
+            // First grab the external manifest file (if specified)
+            File externalManifestFile = archiveConfig.getManifestFile();
+            if ( null != externalManifestFile && externalManifestFile.exists() )
+            {
+                InputStream mis = new FileInputStream( externalManifestFile );
+                mavenManifest.read( mis );
+                mis.close();
+            }
+
+            // Then apply the customized entries from the jar plugin
+            mavenManifest.read( new StringInputStream( mavenManifestText ) );
+
+            if ( !archiveConfig.isManifestSectionsEmpty() )
+            {
+                /*
+                 * Add customized manifest sections (for some reason MavenArchiver doesn't do this for us)
+                 */
+                List sections = archiveConfig.getManifestSections();
+                for ( Iterator i = sections.iterator(); i.hasNext(); )
+                {
+                    ManifestSection section = ( ManifestSection ) i.next();
+                    Attributes attributes = new Attributes();
+
+                    if ( !section.isManifestEntriesEmpty() )
+                    {
+                        Map entries = section.getManifestEntries();
+                        for ( Iterator j = entries.entrySet().iterator(); j.hasNext(); )
+                        {
+                            Map.Entry entry = ( Map.Entry ) j.next();
+                            attributes.putValue( ( String ) entry.getKey(), ( String ) entry.getValue() );
+                        }
+                    }
+
+                    mavenManifest.getEntries().put( section.getName(), attributes );
+                }
+            }
+
+            /*
+             * Overlay generated bundle manifest with customized entries
+             */
+            Manifest bundleManifest = jar.getManifest();
+            bundleManifest.getMainAttributes().putAll( mavenManifest.getMainAttributes() );
+            bundleManifest.getMainAttributes().putValue( "Created-By", "Apache Maven Bundle Plugin" );
+            bundleManifest.getEntries().putAll( mavenManifest.getEntries() );
+            jar.setManifest( bundleManifest );
+        }
+        catch ( Exception e )
+        {
+            log.warn( "Unable to merge Maven manifest: " + e.getLocalizedMessage() );
+        }
+    }
+
+
+    private void unpackBundle( File jarFile )
+    {
+        File outputDir = getOutputDirectory();
+        if ( null == outputDir )
+        {
+            outputDir = new File( getBuildDirectory(), "classes" );
+        }
+
+        try
+        {
+            /*
+             * this directory must exist before unpacking, otherwise the plexus
+             * unarchiver decides to use the current working directory instead!
+             */
+            if ( !outputDir.exists() )
+            {
+                outputDir.mkdirs();
+            }
+
+            UnArchiver unArchiver = m_archiverManager.getUnArchiver( "jar" );
+            unArchiver.setDestDirectory( outputDir );
+            unArchiver.setSourceFile( jarFile );
+            unArchiver.extract();
+        }
+        catch ( Exception e )
+        {
+            getLog().error( "Problem unpacking " + jarFile + " to " + outputDir, e );
         }
     }
 
