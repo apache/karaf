@@ -61,15 +61,15 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
         m_autoConfig = true;
     }
 
-    public boolean isRequired() {
+    public synchronized boolean isRequired() {
         return m_isRequired;
     }
 
-    public boolean isAvailable() {
+    public synchronized boolean isAvailable() {
         return m_isAvailable;
     }
     
-    public boolean isAutoConfig() {
+    public synchronized boolean isAutoConfig() {
         return m_autoConfig;
     }
 
@@ -86,12 +86,16 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
 
     private Object getNullObject() {
         if (m_nullObject == null) {
-            m_nullObject = Proxy.newProxyInstance(m_trackedServiceName.getClassLoader(), new Class[] {m_trackedServiceName}, new DefaultNullObject()); 
+            Class trackedServiceName;
+            synchronized (this) {
+                trackedServiceName = m_trackedServiceName;
+            }
+            m_nullObject = Proxy.newProxyInstance(trackedServiceName.getClassLoader(), new Class[] {trackedServiceName}, new DefaultNullObject()); 
         }
         return m_nullObject;
     }
     
-    public Class getInterface() {
+    public synchronized Class getInterface() {
         return m_trackedServiceName;
     }
 
@@ -203,6 +207,8 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
         if (!isRequired()) {
             invokeRemoved(ref, service);
         }
+        
+        // unget what we got in addingService (see ServiceTracker 701.4.1)
         m_context.ungetService(ref);
     }
 
@@ -241,7 +247,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
         return false;
     }
     
-    private Object getCallbackInstance() {
+    private synchronized Object getCallbackInstance() {
         Object callbackInstance = m_callbackInstance;
         if (callbackInstance == null) {
             callbackInstance = m_service.getService();
@@ -253,8 +259,12 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
         Class currentClazz = instance.getClass();
         boolean done = false;
         while (!done && currentClazz != null) {
+            Class trackedServiceName;
+            synchronized (this) {
+                trackedServiceName = m_trackedServiceName;
+            }
             done = invokeMethod(instance, currentClazz, methodName,
-                new Class[][] {{ServiceReference.class, m_trackedServiceName}, {ServiceReference.class, Object.class}, {ServiceReference.class}, {m_trackedServiceName}, {Object.class}, {}},
+                new Class[][] {{ServiceReference.class, trackedServiceName}, {ServiceReference.class, Object.class}, {ServiceReference.class}, {trackedServiceName}, {Object.class}, {}},
                 new Object[][] {{reference, service}, {reference, service}, {reference}, {service}, {service}, {}},
                 false);
             if (!done) {
@@ -419,7 +429,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
         }
     }
     
-    public String toString() {
+    public synchronized String toString() {
         return "ServiceDependency[" + m_trackedServiceName + " " + m_trackedServiceFilter + "]";
     }
 }

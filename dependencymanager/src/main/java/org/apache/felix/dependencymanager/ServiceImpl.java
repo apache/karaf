@@ -18,8 +18,17 @@
  */
 package org.apache.felix.dependencymanager;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -692,7 +701,7 @@ public class ServiceImpl implements Service {
 	    		try {
 					Method m = m_compositionManagerInstance.getClass().getDeclaredMethod(m_compositionManagerGetMethod, null);
             		m.setAccessible(true);
-					instances = (Object[]) m.invoke(m_compositionManager, null);
+					instances = (Object[]) m.invoke(m_compositionManagerInstance, null);
 				}
 	    		catch (Exception e) {
 					// TODO Auto-generated catch block

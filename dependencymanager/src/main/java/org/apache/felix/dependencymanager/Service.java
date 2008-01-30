@@ -197,4 +197,51 @@ public interface Service {
      * for this service.
      */
     public void stop();
+    
+    /**
+     * Sets the factory to use to create the implementation. You can specify
+     * both the factory class and method to invoke. The method should return
+     * the implementation, and can use any method to create it. Actually, this
+     * can be used together with <code>setComposition</code> to create a
+     * composition of instances that work together to implement a service. The
+     * factory itself can also be instantiated lazily by not specifying an
+     * instance, but a <code>Class</code>.
+     * 
+     * @param factory the factory instance or class
+     * @param createMethod the name of the create method
+     */
+	public Service setFactory(Object factory, String createMethod);
+	
+	/**
+	 * Sets the factory to use to create the implementation. You specify the
+	 * method to invoke. The method should return the implementation, and can
+	 * use any method to create it. Actually, this can be used together with
+	 * <code>setComposition</code> to create a composition of instances that
+	 * work together to implement a service. The factory method is called on
+	 * ??? TODO ???
+	 * 
+	 * @param createMethod the name of the create method
+	 */
+	public Service setFactory(String createMethod);
+	
+	/**
+	 * Sets the instance and method to invoke to get back all instances that
+	 * are part of a composition and need dependencies injected. All of them
+	 * will be searched for any of the dependencies. The method that is
+	 * invoked must return an <code>Object[]</code>.
+	 * 
+	 * @param instance the instance that has the method
+	 * @param getMethod the method to invoke
+	 */
+	public Service setComposition(Object instance, String getMethod);
+	
+	/**
+	 * Sets the method to invoke on the service implementation to get back all
+	 * instances that are part of a composition and need dependencies injected.
+	 * All of them will be searched for any of the dependencies. The method that
+	 * is invoked must return an <code>Object[]</code>.
+	 * 
+	 * @param getMethod the method to invoke
+	 */
+	public Service setComposition(String getMethod);
 }

@@ -120,7 +120,7 @@ public class ConfigurationDependency implements Dependency, ManagedService {
 		if ((oldSettings == null) && (settings != null)) {
 			m_service.dependencyAvailable(this);
 		}
-		if ((oldSettings == null) && (settings == null)) {
+		if ((oldSettings != null) && (settings == null)) {
 			m_service.dependencyUnavailable(this);
 		}
 		if ((oldSettings != null) && (settings != null)) {
