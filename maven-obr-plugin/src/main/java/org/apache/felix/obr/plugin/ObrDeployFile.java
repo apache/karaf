@@ -19,23 +19,15 @@
 package org.apache.felix.obr.plugin;
 
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
 import java.net.URI;
 
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.TransferFailedException;
-import org.apache.maven.wagon.authorization.AuthorizationException;
 
 
 /**
@@ -105,10 +97,9 @@ public class ObrDeployFile extends AbstractMojo
     /**
      * main method for this goal.
      * @implements org.apache.maven.plugin.Mojo.execute 
-     * @throws MojoExecutionException if the plugin failed
-     * @throws MojoFailureException if the plugin failed
+     * @throws MojoExecutionException
      */
-    public void execute() throws MojoExecutionException, MojoFailureException
+    public void execute() throws MojoExecutionException
     {
         ArtifactRepository ar = m_project.getDistributionManagementArtifactRepository();
 
@@ -125,29 +116,13 @@ public class ObrDeployFile extends AbstractMojo
         RemoteFileManager remoteFile = new RemoteFileManager( ar, m_wagonManager, m_settings, getLog() );
         remoteFile.connect();
 
-        // create a non-empty file used to lock the repository descriptor file
-        File lockFile = null;
-        Writer output = null;
-        try
-        {
-            lockFile = File.createTempFile( String.valueOf( System.currentTimeMillis() ), null );
-            output = new BufferedWriter( new FileWriter( lockFile ) );
-            output.write( "locked" );
-            output.close();
-        }
-        catch ( IOException e )
-        {
-            getLog().error( "Unable to create temporary file" );
-            throw new MojoFailureException( "IOException" );
-        }
-
         if ( !m_ignoreLock )
         {
             int countError = 0;
-            while ( remoteFile.isLockedFile( remoteFile, m_repositoryName ) && countError < 2 )
+            while ( remoteFile.isLockedFile( m_repositoryName ) && countError < 2 )
             {
                 countError++;
-                getLog().warn( "File is locked, retry in 10s" );
+                getLog().warn( "OBR is locked, retry in 10s" );
                 try
                 {
                     Thread.sleep( 10000 );
@@ -160,57 +135,16 @@ public class ObrDeployFile extends AbstractMojo
 
             if ( countError == 2 )
             {
-                getLog().error(
-                    "File: " + m_repositoryName + " is locked. Try -Dignore-lock=true if you want to force uploading" );
-                throw new MojoFailureException( "fileLocked" );
+                getLog().error( "OBR " + m_repositoryName + " is locked. Use -Dignore-lock to force uploading" );
+                throw new MojoExecutionException( "OBR locked" );
             }
         }
 
-        try
-        {
-            // file is not locked, so we lock it now
-            remoteFile.put( lockFile, m_repositoryName + ".lock" );
-            lockFile.delete();
-        }
-        catch ( TransferFailedException e )
-        {
-            getLog().error( "Transfer failed" );
-            e.printStackTrace();
-            throw new MojoFailureException( "TransferFailedException" );
+        // ======== LOCK REMOTE OBR ========
+        remoteFile.lockFile( m_repositoryName );
 
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
-            throw new MojoFailureException( "ResourceDoesNotExistException" );
-        }
-        catch ( AuthorizationException e )
-        {
-            getLog().error( "Authorization failed" );
-            e.printStackTrace();
-            throw new MojoFailureException( "AuthorizationException" );
-        }
-
-        try
-        {
-            repoDescriptorFile = remoteFile.get( m_repositoryName, ".xml" );
-        }
-        catch ( TransferFailedException e )
-        {
-            getLog().error( "Transfer failed" );
-            e.printStackTrace();
-            throw new MojoFailureException( "TransferFailedException" );
-        }
-        catch ( AuthorizationException e )
-        {
-            getLog().error( "Authorization failed" );
-            e.printStackTrace();
-            throw new MojoFailureException( "AuthorizationException" );
-        }
-        catch ( IOException e )
-        {
-            e.printStackTrace();
-            throw new MojoFailureException( "IOException" );
-        }
+        // ======== DOWNLOAD REMOTE OBR ========
+        repoDescriptorFile = remoteFile.get( m_repositoryName, ".xml" );
 
         // get the path to local maven repository
         String mavenRepository = m_localRepo.getBasedir();
@@ -232,64 +166,12 @@ public class ObrDeployFile extends AbstractMojo
 
         update.updateRepository();
 
-        // the reposiroty descriptor file is modified, we upload it on the remote repository
-        try
-        {
-            remoteFile.put( repoDescriptorFile, m_repositoryName );
-        }
-        catch ( TransferFailedException e )
-        {
-            getLog().error( "Transfer failed" );
-            e.printStackTrace();
-            throw new MojoFailureException( "TransferFailedException" );
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
-            getLog().error( "Resource does not exist:" + repoDescriptorFile.getName() );
-            e.printStackTrace();
-            throw new MojoFailureException( "ResourceDoesNotExistException" );
-        }
-        catch ( AuthorizationException e )
-        {
-            getLog().error( "Authorization failed" );
-            e.printStackTrace();
-            throw new MojoFailureException( "AuthorizationException" );
-        }
+        // ======== UPLOAD MODIFIED OBR ========
+        remoteFile.put( repoDescriptorFile, m_repositoryName );
         repoDescriptorFile.delete();
 
-        // we remove lockFile activation
-        lockFile = null;
-        try
-        {
-            lockFile = File.createTempFile( String.valueOf( System.currentTimeMillis() ), null );
-        }
-        catch ( IOException e )
-        {
-            e.printStackTrace();
-            throw new MojoFailureException( "IOException" );
-        }
-        try
-        {
-            remoteFile.put( lockFile, m_repositoryName + ".lock" );
-            lockFile.delete();
-        }
-        catch ( TransferFailedException e )
-        {
-            getLog().error( "Transfer failed" );
-            e.printStackTrace();
-            throw new MojoFailureException( "TransferFailedException" );
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
-            e.printStackTrace();
-            throw new MojoFailureException( "ResourceDoesNotExistException" );
-        }
-        catch ( AuthorizationException e )
-        {
-            getLog().error( "Authorization failed" );
-            e.printStackTrace();
-            throw new MojoFailureException( "AuthorizationException" );
-        }
+        // ======== UNLOCK REMOTE OBR ========
+        remoteFile.unlockFile( m_repositoryName );
 
         remoteFile.disconnect();
     }

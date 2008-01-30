@@ -19,14 +19,16 @@
 package org.apache.felix.obr.plugin;
 
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 
 import org.apache.maven.artifact.manager.WagonConfigurationException;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Settings;
@@ -48,7 +50,6 @@ import org.apache.maven.wagon.repository.Repository;
  */
 public class RemoteFileManager
 {
-
     /**
      * save the connection.
      */
@@ -103,6 +104,7 @@ public class RemoteFileManager
             m_log.error( "must be connected first!" );
             return;
         }
+
         try
         {
             m_wagon.disconnect();
@@ -116,7 +118,7 @@ public class RemoteFileManager
 
     /**
      * connect the current object to artifact repository given in constructor.
-     * @throws MojoExecutionException if connection failed
+     * @throws MojoExecutionException
      */
     public void connect() throws MojoExecutionException
     {
@@ -157,11 +159,11 @@ public class RemoteFileManager
         }
         catch ( ConnectionException e )
         {
-            throw new MojoExecutionException( "Error uploading file", e );
+            throw new MojoExecutionException( "Connection failed", e );
         }
         catch ( AuthenticationException e )
         {
-            throw new MojoExecutionException( "Error uploading file", e );
+            throw new MojoExecutionException( "Authentication failed", e );
         }
     }
 
@@ -170,38 +172,40 @@ public class RemoteFileManager
      * get a file from the current repository connected.
      * @param url url to the targeted file
      * @param suffix suggested file suffix
-     * @return  get a file descriptor on the requiered resource
-     * @throws IOException if an IO error occurs
-     * @throws TransferFailedException  if the transfer failed
-     * @throws AuthorizationException if the connection authorization failed
+     * @return get a file descriptor on the required resource
+     * @throws MojoExecutionException
      */
-    public File get( String url, String suffix ) throws IOException, TransferFailedException, AuthorizationException
+    public File get( String url, String suffix ) throws MojoExecutionException
     {
-
         if ( m_wagon == null )
         {
             m_log.error( "must be connected first!" );
             return null;
         }
 
-        File file = File.createTempFile( String.valueOf( System.currentTimeMillis() ), suffix );
+        File file = null;
         try
         {
+            file = File.createTempFile( String.valueOf( System.currentTimeMillis() ), suffix );
             m_wagon.get( url, file );
+        }
+        catch ( IOException e )
+        {
+            throw new MojoExecutionException( "I/O problem", e );
         }
         catch ( TransferFailedException e )
         {
-            file.delete();
-            throw e;
-        }
-        catch ( ResourceDoesNotExistException e )
-        {
-            file.delete();
+            file.delete(); // cleanup on failure
+            throw new MojoExecutionException( "Transfer failed", e );
         }
         catch ( AuthorizationException e )
         {
-            file.delete();
-            throw e;
+            file.delete(); // cleanup on failure
+            throw new MojoExecutionException( "Authorization failed", e );
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            file.delete(); // return non-existent file
         }
 
         return file;
@@ -212,19 +216,32 @@ public class RemoteFileManager
      * put a file on the current repository connected.
      * @param file file to upload
      * @param url url to copy file
-     * @throws TransferFailedException if the transfer failed 
-     * @throws ResourceDoesNotExistException if the targeted resource doesn't exist
-     * @throws AuthorizationException if the connection authorization failed
+     * @throws MojoExecutionException
      */
-    public void put( File file, String url ) throws TransferFailedException, ResourceDoesNotExistException,
-        AuthorizationException
+    public void put( File file, String url ) throws MojoExecutionException
     {
         if ( m_wagon == null )
         {
             m_log.error( "must be connected first!" );
             return;
         }
-        m_wagon.put( file, url );
+
+        try
+        {
+            m_wagon.put( file, url );
+        }
+        catch ( TransferFailedException e )
+        {
+            throw new MojoExecutionException( "Transfer failed", e );
+        }
+        catch ( AuthorizationException e )
+        {
+            throw new MojoExecutionException( "Authorization failed", e );
+        }
+        catch ( ResourceDoesNotExistException e )
+        {
+            throw new MojoExecutionException( "Resource does not exist:" + file, e );
+        }
     }
 
 
@@ -253,39 +270,23 @@ public class RemoteFileManager
     }
 
 
-    /**
-     * this method indicates if the targeted file is locked or not.
-     * @param remote connection manager
-     * @param fileName name targeted
-     * @return  true if the required file is locked, else false
-     * @throws MojoFailureException if the plugin failed
-     */
-    public boolean isLockedFile( RemoteFileManager remote, String fileName ) throws MojoFailureException
+    public void lockFile( String fileName ) throws MojoExecutionException
     {
         File file = null;
         try
         {
-            file = remote.get( fileName + ".lock", ".lock" );
-            if ( null != file && file.length() == 0 )
-            {
-                return false;
-            }
-            return true;
-        }
-        catch ( TransferFailedException e )
-        {
-            e.printStackTrace();
-            throw new MojoFailureException( "TransferFailedException" );
-        }
-        catch ( AuthorizationException e )
-        {
-            e.printStackTrace();
-            throw new MojoFailureException( "AuthorizationException" );
+            // create a non-empty file used to lock the remote file
+            file = File.createTempFile( String.valueOf( System.currentTimeMillis() ), ".lock" );
+
+            Writer writer = new BufferedWriter( new FileWriter( file ) );
+            writer.write( "LOCKED" );
+            writer.close();
+
+            put( file, fileName + ".lock" );
         }
         catch ( IOException e )
         {
-            e.printStackTrace();
-            throw new MojoFailureException( "IOException" );
+            throw new MojoExecutionException( "I/O problem", e );
         }
         finally
         {
@@ -296,4 +297,63 @@ public class RemoteFileManager
         }
     }
 
+
+    public void unlockFile( String fileName ) throws MojoExecutionException
+    {
+        File file = null;
+        try
+        {
+            // clear the contents of the file used to lock the remote file
+            file = File.createTempFile( String.valueOf( System.currentTimeMillis() ), ".lock" );
+
+            Writer writer = new BufferedWriter( new FileWriter( file ) );
+            writer.write( " " ); // write 1 byte to force wagon upload
+            writer.close();
+
+            put( file, fileName + ".lock" );
+        }
+        catch ( IOException e )
+        {
+            throw new MojoExecutionException( "I/O problem", e );
+        }
+        finally
+        {
+            if ( null != file )
+            {
+                file.delete();
+            }
+        }
+    }
+
+
+    /**
+     * this method indicates if the targeted file is locked or not.
+     * @param remote connection manager
+     * @param fileName name targeted
+     * @return  true if the required file is locked, else false
+     * @throws MojoExecutionException
+     */
+    public boolean isLockedFile( String fileName ) throws MojoExecutionException
+    {
+        File file = null;
+        try
+        {
+            file = get( fileName + ".lock", ".lock" );
+
+            // file is locked with contents "LOCKED"
+            if ( null != file && file.length() <= 2 )
+            {
+                return false;
+            }
+        }
+        finally
+        {
+            if ( null != file )
+            {
+                file.delete();
+            }
+        }
+
+        return true;
+    }
 }
