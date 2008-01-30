@@ -31,7 +31,7 @@
     <div class="main">
 <h1><a name="LaunchingandEmbeddingApacheFelix-LaunchingandEmbeddingApacheFelix"></a>Launching and Embedding Apache Felix</h1>
 
-<p><em>[This document is based on Felix 1.0.2.]</em></p>
+<p><em>[This document is based on Felix 1.0.3.]</em></p>
 
 <ul>
 	<li><a href="#LaunchingandEmbeddingApacheFelix-introduction" title="introduction on Launching and Embedding Apache Felix">Introduction</a></li>
@@ -297,7 +297,7 @@ Felix and make it remotely accessible.</p>
 <div class="preformatted"><div class="preformattedContent">
 <pre>launcher/
    lib/
-      org.apache.felix.main-1.0.2.jar
+      org.apache.felix.main-1.0.3.jar
    bundle/
       org.apache.felix.shell-1.0.0.jar
       org.apache.felix.shell.tui-1.0.0.jar
@@ -326,7 +326,6 @@ sitting there waiting for someone to tell it to do something. The <tt>src/exampl
 <span class="code-keyword">import</span> org.apache.felix.framework.Felix;
 <span class="code-keyword">import</span> org.apache.felix.framework.cache.BundleCache;
 <span class="code-keyword">import</span> org.apache.felix.framework.util.StringMap;
-<span class="code-keyword">import</span> org.apache.felix.framework.util.FelixConstants;
 <span class="code-keyword">import</span> org.apache.felix.framework.main.AutoActivator;
 
 <span class="code-keyword">public</span> class Main
@@ -345,7 +344,7 @@ sitting there waiting for someone to tell it to do something. The <tt>src/exampl
             <span class="code-quote">"org.osgi.service.packageadmin; version=1.2.0,"</span> +
             <span class="code-quote">"org.osgi.service.startlevel; version=1.0.0,"</span> +
             <span class="code-quote">"org.osgi.service.url; version=1.0.0"</span>);
-        configMap.put(FelixConstants.AUTO_START_PROP + <span class="code-quote">".1"</span>,
+        configMap.put(AutoActivator.AUTO_START_PROP + <span class="code-quote">".1"</span>,
             <span class="code-quote">"file:bundle/org.apache.felix.shell-1.0.0.jar "</span> +
             <span class="code-quote">"file:bundle/org.apache.felix.shell.tui-1.0.0.jar"</span>);
         configMap.put(BundleCache.CACHE_PROFILE_DIR_PROP, <span class="code-quote">"cache"</span>);
@@ -403,12 +402,12 @@ packages in various JRE versions (e.g., 1.3.x, 1.4.x, 1.5.x) and
 appends them to this property using property substitution.</p>
 
 <div class="code"><div class="codeContent">
-<pre class="code-java">configMap.put(FelixConstants.AUTO_START_PROP + <span class="code-quote">".1"</span>,
+<pre class="code-java">configMap.put(AutoActivator.AUTO_START_PROP + <span class="code-quote">".1"</span>,
             <span class="code-quote">"file:bundle/org.apache.felix.shell-1.0.0.jar "</span> +
             <span class="code-quote">"file:bundle/org.apache.felix.shell.tui-1.0.0.jar"</span>);</pre>
 </div></div>
 
-<p>This sets the <tt>FelixConstants.AUTO_START_PROP</tt> configuration property (string value "<tt>felix.auto.start</tt>"),
+<p>This sets the <tt>AutoActivator.AUTO_START_PROP</tt> configuration property (string value "<tt>felix.auto.start</tt>"),
 which is a space-delimited list of bundle URLs that the framework will
 automatically install and start when the framework starts. However,
 this property key cannot be used as is; it must be appended with a "."
@@ -983,5 +982,4 @@ be corrected.</p>
 
 <p>Subscribe to the Felix users mailing list by sending a message to <span class="nobr"><a href="mailto:users-subscribe@felix.apache.org" title="Send mail to users-subscribe@felix.apache.org" rel="nofollow">users-subscribe@felix.apache.org<sup><img class="rendericon" src="launching-and-embedding-apache-felix_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>; after subscribing, email questions or feedback to <span class="nobr"><a href="mailto:users@felix.apache.org" title="Send mail to users@felix.apache.org" rel="nofollow">users@felix.apache.org<sup><img class="rendericon" src="launching-and-embedding-apache-felix_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>.</p>
     </div>
-  
-</body></html>
+  </body></html>
