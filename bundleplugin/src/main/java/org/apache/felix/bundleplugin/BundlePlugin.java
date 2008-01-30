@@ -255,34 +255,7 @@ public class BundlePlugin extends AbstractMojo
         {
             File jarFile = new File( getBuildDirectory(), getBundleName( currentProject ) );
 
-            properties.putAll( getDefaultProperties( currentProject ) );
-
-            String bsn = currentProject.getGroupId() + "." + currentProject.getArtifactId();
-            if ( !originalInstructions.containsKey( Analyzer.PRIVATE_PACKAGE ) )
-            {
-                properties.put( Analyzer.EXPORT_PACKAGE, bsn + ".*" );
-            }
-
-            properties.putAll( transformDirectives( originalInstructions ) );
-
-            // update BND instructions to add Maven resources
-            includeMavenResources( currentProject, properties, getLog() );
-
-            Builder builder = new Builder();
-            builder.setBase( currentProject.getBasedir() );
-            builder.setProperties( properties );
-            builder.setClasspath( classpath );
-
-            // update BND instructions to embed selected Maven dependencies
-            Collection embeddableArtifacts = getEmbeddableArtifacts( currentProject, properties );
-            new DependencyEmbedder( embeddableArtifacts ).processHeaders( properties );
-
-            builder.build();
-            Jar jar = builder.getJar();
-            doMavenMetadata( currentProject, jar );
-            builder.setJar( jar );
-
-            mergeMavenManifest( currentProject, jar, getLog() );
+            Builder builder = buildOSGiBundle( currentProject, originalInstructions, properties, classpath );
 
             List errors = builder.getErrors();
             List warnings = builder.getWarnings();
@@ -348,6 +321,42 @@ public class BundlePlugin extends AbstractMojo
             getLog().error( "An internal error occurred", e );
             throw new MojoExecutionException( "Internal error in maven-bundle-plugin", e );
         }
+    }
+
+
+    protected Builder buildOSGiBundle( MavenProject currentProject, Map originalInstructions, Properties properties,
+        Jar[] classpath ) throws Exception
+    {
+        properties.putAll( getDefaultProperties( currentProject ) );
+
+        String bsn = currentProject.getGroupId() + "." + currentProject.getArtifactId();
+        if ( !originalInstructions.containsKey( Analyzer.PRIVATE_PACKAGE ) )
+        {
+            properties.put( Analyzer.EXPORT_PACKAGE, bsn + ".*" );
+        }
+
+        properties.putAll( transformDirectives( originalInstructions ) );
+
+        // update BND instructions to add Maven resources
+        includeMavenResources( currentProject, properties, getLog() );
+
+        Builder builder = new Builder();
+        builder.setBase( currentProject.getBasedir() );
+        builder.setProperties( properties );
+        builder.setClasspath( classpath );
+
+        // update BND instructions to embed selected Maven dependencies
+        Collection embeddableArtifacts = getEmbeddableArtifacts( currentProject, properties );
+        new DependencyEmbedder( embeddableArtifacts ).processHeaders( properties );
+
+        builder.build();
+        Jar jar = builder.getJar();
+        doMavenMetadata( currentProject, jar );
+        builder.setJar( jar );
+
+        mergeMavenManifest( currentProject, jar, getLog() );
+
+        return builder;
     }
 
 
