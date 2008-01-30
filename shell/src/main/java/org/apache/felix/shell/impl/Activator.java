@@ -225,7 +225,18 @@ public class Activator implements BundleActivator
 
         public synchronized ServiceReference getCommandReference(String name)
         {
-            return (ServiceReference) m_commandNameMap.get(name);
+            ServiceReference ref = null;
+            Iterator itr = m_commandRefMap.entrySet().iterator();
+            while (itr.hasNext())
+            {
+                Map.Entry entry = (Map.Entry) itr.next();
+                if (((Command) entry.getValue()).getName().equals(name))
+                {
+                    ref = (ServiceReference) entry.getKey();
+                    break;
+                }
+            }
+            return ref;
         }
 
         public synchronized void removeCommand(ServiceReference ref)
