@@ -328,13 +328,6 @@ public class BundlePlugin extends AbstractMojo
         Jar[] classpath ) throws Exception
     {
         properties.putAll( getDefaultProperties( currentProject ) );
-
-        String bsn = currentProject.getGroupId() + "." + currentProject.getArtifactId();
-        if ( !originalInstructions.containsKey( Analyzer.PRIVATE_PACKAGE ) )
-        {
-            properties.put( Analyzer.EXPORT_PACKAGE, bsn + ".*" );
-        }
-
         properties.putAll( transformDirectives( originalInstructions ) );
 
         // update BND instructions to add Maven resources
@@ -344,6 +337,12 @@ public class BundlePlugin extends AbstractMojo
         builder.setBase( currentProject.getBasedir() );
         builder.setProperties( properties );
         builder.setClasspath( classpath );
+
+        if ( !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
+        {
+            String bsn = currentProject.getGroupId() + "." + currentProject.getArtifactId();
+            properties.put( Analyzer.EXPORT_PACKAGE, bsn + ".*" );
+        }
 
         // update BND instructions to embed selected Maven dependencies
         Collection embeddableArtifacts = getEmbeddableArtifacts( currentProject, properties );
