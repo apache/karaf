@@ -340,8 +340,10 @@ public class BundlePlugin extends AbstractMojo
 
         if ( !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
         {
-            String bsn = currentProject.getGroupId() + "." + currentProject.getArtifactId();
-            properties.put( Analyzer.EXPORT_PACKAGE, bsn + ".*" );
+            String bsn = properties.getProperty( Analyzer.BUNDLE_SYMBOLICNAME );
+            String namespace = bsn.replaceAll( "\\W", "." );
+
+            properties.put( Analyzer.EXPORT_PACKAGE, namespace + ".*" );
         }
 
         // update BND instructions to embed selected Maven dependencies
