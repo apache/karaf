@@ -50,7 +50,14 @@ public class ManifestPlugin extends BundlePlugin
         Manifest manifest;
         try
         {
-            manifest = getManifest( project, instructions, properties, classpath );
+            if ( "bundle".equals( project.getPackaging() ) )
+            {
+                manifest = buildOSGiBundle( project, instructions, properties, classpath ).getJar().getManifest();
+            }
+            else
+            {
+                manifest = getManifest( project, instructions, properties, classpath );
+            }
         }
         catch ( FileNotFoundException e )
         {
@@ -60,6 +67,11 @@ public class ManifestPlugin extends BundlePlugin
         catch ( IOException e )
         {
             throw new MojoExecutionException( "Error trying to generate Manifest", e );
+        }
+        catch ( Exception e )
+        {
+            getLog().error( "An internal error occurred", e );
+            throw new MojoExecutionException( "Internal error in maven-bundle-plugin", e );
         }
 
         File outputFile = new File( manifestLocation, "MANIFEST.MF" );
