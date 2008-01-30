@@ -354,7 +354,8 @@ public class BundlePlugin extends AbstractMojo
         doMavenMetadata( currentProject, jar );
         builder.setJar( jar );
 
-        mergeMavenManifest( currentProject, jar, getLog() );
+        String[] removeHeaders = properties.getProperty( Analyzer.REMOVE_HEADERS, "" ).split( "," );
+        mergeMavenManifest( currentProject, jar, removeHeaders, getLog() );
 
         return builder;
     }
@@ -402,7 +403,7 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    protected static void mergeMavenManifest( MavenProject currentProject, Jar jar, Log log )
+    protected static void mergeMavenManifest( MavenProject currentProject, Jar jar, String[] removeHeaders, Log log )
     {
         try
         {
@@ -450,12 +451,26 @@ public class BundlePlugin extends AbstractMojo
                 }
             }
 
+            Attributes mainMavenAttributes = mavenManifest.getMainAttributes();
+            mainMavenAttributes.putValue( "Created-By", "Apache Maven Bundle Plugin" );
+
+            // apply -removeheaders to the custom manifest
+            for ( int i = 0; i < removeHeaders.length; i++ )
+            {
+                for ( Iterator j = mainMavenAttributes.keySet().iterator(); j.hasNext(); )
+                {
+                    if ( j.next().toString().matches( removeHeaders[i].trim() ) )
+                    {
+                        j.remove();
+                    }
+                }
+            }
+
             /*
              * Overlay generated bundle manifest with customized entries
              */
             Manifest bundleManifest = jar.getManifest();
-            bundleManifest.getMainAttributes().putAll( mavenManifest.getMainAttributes() );
-            bundleManifest.getMainAttributes().putValue( "Created-By", "Apache Maven Bundle Plugin" );
+            bundleManifest.getMainAttributes().putAll( mainMavenAttributes );
             bundleManifest.getEntries().putAll( mavenManifest.getEntries() );
             jar.setManifest( bundleManifest );
         }
