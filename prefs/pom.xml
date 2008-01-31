@@ -73,6 +73,7 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.felix.prefs.impl,
+                            org.apache.commons.codec,
                             org.apache.commons.codec.binary
                         </Private-Package>
                         <Bundle-Activator>
