@@ -102,12 +102,6 @@
        </repository>
        <!-- Spring Milestone repo -->
        <repository>
-           <id>spring-milestone</id>
-           <name>Spring Milestone Repository</name>
-           <url>http://s3.amazonaws.com/maven.springframework.org/milestone</url>
-       </repository>
-       <!-- Spring Milestone repo -->
-       <repository>
            <id>ops4j</id>
            <name>OPS4j Repository</name>
            <url>http://repository.ops4j.org/maven2</url>
