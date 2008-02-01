@@ -64,14 +64,14 @@
       <aopalliance.version>1.0</aopalliance.version>
       <asm.version>2.2.3</asm.version>
       <cglib.version>2.1_3</cglib.version>
-      <commons.io.version>1.3.1</commons.io.version>
-      <commons.logging.version>1.1</commons.logging.version>
+      <commons.io.version>1.3.2</commons.io.version>
+      <commons.logging.version>1.1.1</commons.logging.version>
       <felix.configadmin.version>0.9.0-r605854</felix.configadmin.version>
       <felix.main.version>1.1.0-r605854</felix.main.version>
       <felix.plugin.version>1.2.0</felix.plugin.version>
       <felix.framework.version>1.1.0-r605854-patched</felix.framework.version>
       <felix.osgi.version>1.0.0</felix.osgi.version>
-      <felix.compendium.version>0.9.0-r605854</felix.compendium.version>
+      <felix.compendium.version>1.0.0</felix.compendium.version>
       <felix.bundlerepository.version>1.1.0-r605854</felix.bundlerepository.version>
       <geronimo.servlet.version>1.1.1</geronimo.servlet.version>
       <geronimo.stax.version>1.0.1</geronimo.stax.version>
@@ -80,10 +80,10 @@
       <jline.version>0.9.93</jline.version>
       <log4j.version>1.2.14</log4j.version>
       <mina.version>1.1.6-r602102</mina.version>
-      <pax.logging.version>1.0-RC2</pax.logging.version>
+      <pax.logging.version>1.0.0</pax.logging.version>
       <pax.runner.version>0.5.5</pax.runner.version>
-      <spring.osgi.version>1.0-rc2</spring.osgi.version>
-      <spring.version>2.5</spring.version>
+      <spring.osgi.version>1.0</spring.osgi.version>
+      <spring.version>2.5.1</spring.version>
       <xstream.version>1.2.2</xstream.version>
   </properties>
 
@@ -105,6 +105,12 @@
            <id>spring-milestone</id>
            <name>Spring Milestone Repository</name>
            <url>http://s3.amazonaws.com/maven.springframework.org/milestone</url>
+       </repository>
+       <!-- Spring Milestone repo -->
+       <repository>
+           <id>ops4j</id>
+           <name>OPS4j Repository</name>
+           <url>http://repository.ops4j.org/maven2</url>
        </repository>
    </repositories>
 
