@@ -20,9 +20,7 @@ package org.apache.felix.scrplugin.tags.cl;
 
 import java.lang.reflect.Field;
 
-import org.apache.felix.scrplugin.tags.JavaClassDescription;
-import org.apache.felix.scrplugin.tags.JavaField;
-import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.*;
 
 /**
  * <code>ClassLoaderJavaField.java</code>...
@@ -43,8 +41,17 @@ public class ClassLoaderJavaField implements JavaField {
      * @see org.apache.felix.scrplugin.tags.JavaField#getInitializationExpression()
      */
     public String getInitializationExpression() {
-        // TODO
-        return null;
+        try {
+            this.field.setAccessible(true);
+            final Object value = this.field.get(null);
+            if ( value != null ) {
+                return value.toString();
+            }
+            return null;
+        } catch (Exception e) {
+            // ignore and return null
+            return null;
+        }
     }
 
     /**

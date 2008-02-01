@@ -18,21 +18,11 @@
  */
 package org.apache.felix.scrplugin.tags;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
+import java.util.*;
+import java.util.jar.*;
 
 import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.om.Component;
@@ -214,7 +204,7 @@ public class JavaClassDescriptorManager {
     protected ClassLoader getCompileClassLoader(MavenProject project)
     throws MojoFailureException {
         List artifacts = project.getCompileArtifacts();
-        URL[] path = new URL[artifacts.size()];
+        URL[] path = new URL[artifacts.size() + 1];
         int i = 0;
         for (Iterator ai=artifacts.iterator(); ai.hasNext(); ) {
             Artifact a = (Artifact) ai.next();
@@ -223,6 +213,12 @@ public class JavaClassDescriptorManager {
             } catch (IOException ioe) {
                 throw new MojoFailureException("Unable to get compile class loader.");
             }
+        }
+        final String targetDirectory = this.getProject().getBuild().getOutputDirectory();
+        try {
+            path[path.length - 1] = new File(targetDirectory).toURI().toURL();
+        } catch (IOException ioe) {
+            throw new MojoFailureException("Unable to add target directory to classloader.");
         }
         return new URLClassLoader(path);
     }
@@ -273,10 +269,15 @@ public class JavaClassDescriptorManager {
      * Return all source descriptions of this project.
      * @return All contained java class descriptions.
      */
-    public JavaClassDescription[] getSourceDescriptions() {
+    public JavaClassDescription[] getSourceDescriptions() throws MojoExecutionException {
         final JavaClassDescription[] descs = new JavaClassDescription[this.sources.length];
         for(int i=0; i<this.sources.length; i++) {
-            descs[i] = new QDoxJavaClassDescription(this.sources[i], this);
+            final String className = this.sources[i].getClasses()[0].getFullyQualifiedName();
+            try {
+                descs[i] = new QDoxJavaClassDescription(this.classloader.loadClass(className), this.sources[i], this);
+            } catch (ClassNotFoundException e) {
+                throw new MojoExecutionException("Unable to load class " + className);
+            }
         }
         return descs;
     }
@@ -295,8 +296,12 @@ public class JavaClassDescriptorManager {
             int index = 0;
             while ( result == null && index < this.sources.length) {
                 if ( this.sources[index].getClasses()[0].getFullyQualifiedName().equals(className) ) {
-                    this.log.debug("Found qdox description for: " + className);
-                    result = new QDoxJavaClassDescription(this.sources[index], this);
+                    try {
+                        this.log.debug("Found qdox description for: " + className);
+                        result = new QDoxJavaClassDescription(this.classloader.loadClass(className), this.sources[index], this);
+                    } catch (ClassNotFoundException e) {
+                        throw new MojoExecutionException("Unable to load class " + className);
+                    }
                 } else {
                     index++;
                 }

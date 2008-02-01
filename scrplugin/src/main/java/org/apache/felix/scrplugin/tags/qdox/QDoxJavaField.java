@@ -18,7 +18,8 @@
  */
 package org.apache.felix.scrplugin.tags.qdox;
 
-import org.apache.felix.scrplugin.tags.JavaClassDescription;
+import java.lang.reflect.Field;
+
 import org.apache.felix.scrplugin.tags.JavaField;
 import org.apache.felix.scrplugin.tags.JavaTag;
 
@@ -32,9 +33,9 @@ public class QDoxJavaField implements JavaField {
 
     protected final com.thoughtworks.qdox.model.JavaField field;
 
-    protected final JavaClassDescription description;
+    protected final QDoxJavaClassDescription description;
 
-    public QDoxJavaField(com.thoughtworks.qdox.model.JavaField f, JavaClassDescription d) {
+    public QDoxJavaField(com.thoughtworks.qdox.model.JavaField f, QDoxJavaClassDescription d) {
         this.field = f;
         this.description = d;
     }
@@ -43,7 +44,19 @@ public class QDoxJavaField implements JavaField {
      * @see org.apache.felix.scrplugin.tags.JavaField#getInitializationExpression()
      */
     public String getInitializationExpression() {
-        return this.field.getInitializationExpression();
+        final Class c = this.description.getCompiledClass();
+        try {
+            final Field field = c.getDeclaredField(this.getName());
+            field.setAccessible(true);
+            final Object value = field.get(null);
+            if ( value != null ) {
+                return value.toString();
+            }
+            return null;
+        } catch (Exception e) {
+            // ignore and return null
+            return null;
+        }
     }
 
     /**

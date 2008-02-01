@@ -59,6 +59,12 @@ public class Constants {
 
     public static final String PROPERTY_VALUE = "value";
 
+    public static final String PROPERTY_MULTIVALUE_PREFIX = "values";
+
+    public static final String PROPERTY_VALUE_REF = "valueRef";
+
+    public static final String PROPERTY_MULTIVALUE_REF_PREFIX = "refValues";
+
     public static final String PROPERTY_TYPE = "type";
 
     public static final String PROPERTY_CARDINALITY = "cardinality";

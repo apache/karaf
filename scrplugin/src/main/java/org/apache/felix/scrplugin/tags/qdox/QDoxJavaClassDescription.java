@@ -45,10 +45,14 @@ public class QDoxJavaClassDescription
 
     protected final JavaSource source;
 
-    public QDoxJavaClassDescription(JavaSource source, JavaClassDescriptorManager m) {
+    /** The compiled class. */
+    protected final Class clazz;
+
+    public QDoxJavaClassDescription(Class clazz, JavaSource source, JavaClassDescriptorManager m) {
         this.javaClass = source.getClasses()[0];
         this.manager = m;
         this.source = source;
+        this.clazz = clazz;
     }
 
     /**
@@ -119,6 +123,21 @@ public class QDoxJavaClassDescription
             f[i] = new QDoxJavaField(fields[i], this);
         }
         return f;
+    }
+
+    /**
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getFieldByName(java.lang.String)
+     */
+    public JavaField getFieldByName(String name)
+    throws MojoExecutionException {
+        final com.thoughtworks.qdox.model.JavaField field = this.javaClass.getFieldByName(name);
+        if ( field != null ) {
+            return new QDoxJavaField(field, this);
+        }
+        if ( this.getSuperClass() != null ) {
+            return this.getSuperClass().getFieldByName(name);
+        }
+        return null;
     }
 
     /**
@@ -308,8 +327,15 @@ public class QDoxJavaClassDescription
         meth.setModifiers(new String[] {"protected"});
         this.javaClass.addMethod(meth);
     }
-    
+
+    /**
+     * @see java.lang.Object#toString()
+     */
     public String toString() {
         return getName();
+    }
+
+    public Class getCompiledClass() {
+        return this.clazz;
     }
 }

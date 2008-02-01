@@ -30,7 +30,6 @@ import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.StringUtils;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * The <code>SCRDescriptorMojo</code>
@@ -78,6 +77,9 @@ public class SCRDescriptorMojo extends AbstractMojo {
      * @parameter default-value="true"
      */
     private boolean generateAccessors;
+
+    /** Utility handler for propertie. */
+    private final PropertyHandler propertyHandler = new PropertyHandler();
 
     /**
      * @see org.apache.maven.plugin.AbstractMojo#execute()
@@ -219,7 +221,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
         final OCD ocd = this.doComponent(componentTag, component, metaData);
 
-        boolean inherited = this.getBoolean(componentTag, Constants.COMPONENT_INHERIT, true);
+        boolean inherited = getBoolean(componentTag, Constants.COMPONENT_INHERIT, true);
         this.doServices(description.getTagsByName(Constants.SERVICE, inherited), component, description);
 
         // collect properties and references from class tags and fields
@@ -231,7 +233,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
             // properties
             final JavaTag[] props = currentDescription.getTagsByName(Constants.PROPERTY, false);
             for (int i=0; i < props.length; i++) {
-                this.testProperty(properties, props[i], null, description == currentDescription);
+                this.propertyHandler.testProperty(properties, props[i], null, description == currentDescription);
             }
 
             // references
@@ -252,14 +254,9 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 if (tag != null) {
                     String defaultName = null;
                     if ( "java.lang.String".equals(fields[i].getType()) ) {
-                        defaultName = fields[i].getInitializationExpression().trim();
-                        int pos = defaultName.indexOf("\"");
-                        if ( pos != -1 ) {
-                            defaultName = defaultName.substring(pos + 1);
-                            defaultName = defaultName.substring(0, defaultName.lastIndexOf("\""));
-                        }
+                        defaultName = fields[i].getInitializationExpression();
                     }
-                    this.testProperty(properties, tag, defaultName, description == currentDescription);
+                    this.propertyHandler.testProperty(properties, tag, defaultName, description == currentDescription);
                 }
             }
 
@@ -272,7 +269,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
             final Map.Entry entry = (Map.Entry)propIter.next();
             final String propName = entry.getKey().toString();
             final JavaTag tag = (JavaTag)entry.getValue();
-            this.doProperty(tag, propName, component, ocd);
+            this.propertyHandler.doProperty(tag, propName, component, ocd);
         }
 
         // process references
@@ -285,7 +282,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         }
 
         // pid handling
-        final boolean createPid = this.getBoolean(componentTag, Constants.COMPONENT_CREATE_PID, true);
+        final boolean createPid = getBoolean(componentTag, Constants.COMPONENT_CREATE_PID, true);
         if ( createPid ) {
             // check for an existing pid first
             boolean found = false;
@@ -343,9 +340,9 @@ public class SCRDescriptorMojo extends AbstractMojo {
         String name = tag.getNamedParameter(Constants.COMPONENT_NAME);
         component.setName(StringUtils.isEmpty(name) ? component.getImplementation().getClassame() : name);
 
-        component.setEnabled(Boolean.valueOf(this.getBoolean(tag, Constants.COMPONENT_ENABLED, true)));
+        component.setEnabled(Boolean.valueOf(getBoolean(tag, Constants.COMPONENT_ENABLED, true)));
         component.setFactory(tag.getNamedParameter(Constants.COMPONENT_FACTORY));
-        component.setImmediate(Boolean.valueOf(this.getBoolean(tag, Constants.COMPONENT_IMMEDIATE, true)));
+        component.setImmediate(Boolean.valueOf(getBoolean(tag, Constants.COMPONENT_IMMEDIATE, true)));
 
         // whether metatype information is to generated for the component
         final String metaType = tag.getNamedParameter(Constants.COMPONENT_METATYPE);
@@ -407,7 +404,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 service.addInterface(interf);
             }
 
-            serviceFactory |= this.getBoolean(services[i], Constants.SERVICE_FACTORY, false);
+            serviceFactory |= getBoolean(services[i], Constants.SERVICE_FACTORY, false);
         }
 
         service.setServicefactory(serviceFactory);
@@ -430,134 +427,6 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
             // try super class
             this.addInterfaces(service, serviceTag, description.getSuperClass());
-        }
-    }
-
-    /**
-     * @param property
-     * @param defaultName
-     * @param component
-     */
-    protected void doProperty(JavaTag property, String name, Component component, OCD ocd) {
-        final Property prop = new Property(property);
-        prop.setName(name);
-        prop.setType(property.getNamedParameter(Constants.PROPERTY_TYPE));
-        final String value = property.getNamedParameter(Constants.PROPERTY_VALUE);
-        if ( value != null ) {
-            prop.setValue(value);
-        } else {
-            // check for multivalue
-            final List values = new ArrayList();
-            final Map valueMap = property.getNamedParameterMap();
-            for (Iterator vi = valueMap.entrySet().iterator(); vi.hasNext();) {
-                final Map.Entry entry = (Map.Entry) vi.next();
-                final String key = (String) entry.getKey();
-                if (key.startsWith("values")) {
-                    values.add(entry.getValue());
-                }
-            }
-            if ( values.size() > 0 ) {
-                prop.setMultiValue((String[])values.toArray(new String[values.size()]));
-            }
-        }
-
-        // property is private if explicitly marked or a well known
-        // service property such as service.pid
-        final boolean isPrivate = getBoolean(property,
-            Constants.PROPERTY_PRIVATE, false)
-            || name.equals(org.osgi.framework.Constants.SERVICE_PID)
-            || name.equals(org.osgi.framework.Constants.SERVICE_DESCRIPTION)
-            || name.equals(org.osgi.framework.Constants.SERVICE_ID)
-            || name.equals(org.osgi.framework.Constants.SERVICE_RANKING)
-            || name.equals(org.osgi.framework.Constants.SERVICE_VENDOR)
-            || name.equals(ConfigurationAdmin.SERVICE_BUNDLELOCATION)
-            || name.equals(ConfigurationAdmin.SERVICE_FACTORYPID);
-
-        // if this is a public property and the component is generating metatype info
-        // store the information!
-        if ( !isPrivate && ocd != null ) {
-            final AttributeDefinition ad = new AttributeDefinition();
-            ocd.getProperties().add(ad);
-            ad.setId(prop.getName());
-            ad.setType(prop.getType());
-
-            String adName = property.getNamedParameter(Constants.PROPERTY_LABEL);
-            if ( adName == null ) {
-                adName = "%" + prop.getName() + ".name";
-            }
-            ad.setName(adName);
-            String adDesc = property.getNamedParameter(Constants.PROPERTY_DESCRIPTION);
-            if ( adDesc == null ) {
-                adDesc = "%" + prop.getName() + ".description";
-            }
-            ad.setDescription(adDesc);
-            // set optional multivalues, cardinality might be overwritten by setValues !!
-            final String cValue = property.getNamedParameter(Constants.PROPERTY_CARDINALITY);
-            if (cValue != null) {
-                if ("-".equals(cValue)) {
-                    // unlimited vector
-                    ad.setCardinality(new Integer(Integer.MIN_VALUE));
-                } else if ("+".equals(cValue)) {
-                   // unlimited array
-                    ad.setCardinality(new Integer(Integer.MAX_VALUE));
-                } else {
-                    try {
-                        ad.setCardinality(Integer.valueOf(cValue));
-                    } catch (NumberFormatException nfe) {
-                        // default to scalar in case of conversion problem
-                    }
-                }
-            }
-            ad.setDefaultValue(prop.getValue());
-            ad.setDefaultMultiValue(prop.getMultiValue());
-
-            // check options
-            String[] parameters = property.getParameters();
-            Map options = null;
-            for (int j=0; j < parameters.length; j++) {
-                if (Constants.PROPERTY_OPTIONS.equals(parameters[j])) {
-                    options = new LinkedHashMap();
-                } else if (options != null) {
-                    String optionLabel = parameters[j];
-                    String optionValue = (j < parameters.length-2) ? parameters[j+2] : null;
-                    if (optionValue != null) {
-                        options.put(optionLabel, optionValue);
-                    }
-                    j += 2;
-                }
-            }
-            ad.setOptions(options);
-        }
-
-        component.addProperty(prop);
-    }
-
-    protected String getPropertyName(JavaTag property, String defaultName) {
-        String name = property.getNamedParameter(Constants.PROPERTY_NAME);
-        if (StringUtils.isEmpty(name) && defaultName != null) {
-            name = defaultName;
-        }
-
-        if (!StringUtils.isEmpty(name)) {
-            return name;
-        }
-        return null;
-    }
-
-    protected void testProperty(Map properties, JavaTag property, String defaultName, boolean isInspectedClass)
-    throws MojoExecutionException {
-        final String propName = this.getPropertyName(property, defaultName);
-
-        if ( propName != null ) {
-            if ( properties.containsKey(propName) ) {
-                // if the current class is the class we are currently inspecting, we
-                // have found a duplicate definition
-                if ( isInspectedClass ) {
-                    throw new MojoExecutionException("Duplicate definition for property " + propName + " in class " + property.getJavaClassDescription().getName());
-                }
-            } else {
-                properties.put(propName, property);
-            }
         }
     }
 
@@ -651,7 +520,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         component.addReference(ref);
     }
 
-    protected boolean getBoolean(JavaTag tag, String name, boolean defaultValue) {
+    public static boolean getBoolean(JavaTag tag, String name, boolean defaultValue) {
         String value = tag.getNamedParameter(name);
         return (value == null) ? defaultValue : Boolean.valueOf(value).booleanValue();
     }
