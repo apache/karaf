@@ -338,7 +338,7 @@ public class BundlePlugin extends AbstractMojo
         builder.setProperties( properties );
         builder.setClasspath( classpath );
 
-        if ( !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
+        if ( !properties.containsKey( Analyzer.EXPORT_PACKAGE ) && !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
         {
             String bsn = properties.getProperty( Analyzer.BUNDLE_SYMBOLICNAME );
             String namespace = bsn.replaceAll( "\\W", "." );
