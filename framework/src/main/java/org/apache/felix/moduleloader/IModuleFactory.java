@@ -31,8 +31,6 @@ public interface IModuleFactory
     public void addModuleListener(ModuleListener l);
     public void removeModuleListener(ModuleListener l);
 
-    public void setSecurityContext(IModule module, Object securityContext);
-
     /**
      * This is an experimental method that is likely to change or go
      * away - so don't use it for now.

@@ -36,6 +36,9 @@ public interface IContentLoader
     public void setURLPolicy(IURLPolicy urlPolicy);
     public IURLPolicy getURLPolicy();
 
+    public void setSecurityContext(Object securityContext);
+    public Object getSecurityContext();
+
     public Class getClass(String name);
     public URL getResource(String name);
     public Enumeration getResources(String name);

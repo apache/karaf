@@ -405,6 +405,6 @@ class BundleImpl extends FelixBundle
 
     Object getSignerMatcher()
     {
-        return null;
+        return m_felix.getSignerMatcher(this);
     }
 }

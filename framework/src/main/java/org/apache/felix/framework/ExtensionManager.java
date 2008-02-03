@@ -25,7 +25,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.security.AllPermission;
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -112,10 +111,11 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
     private Set m_exportNames = null;
     private ISearchPolicy m_searchPolicy = null;
     private IURLPolicy m_urlPolicy = null;
+    private Object m_securityContext = null;
     private final List m_extensions;
     private final Set m_names;
     private final Map m_sourceToExtensions;
-    
+
     // This constructor is only used for the private instance added to the parent
     // classloader.
     private ExtensionManager()
@@ -124,7 +124,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         m_names = new HashSet();
         m_sourceToExtensions = new HashMap();
     }
-    
+
     /**
      * This constructor is used to create one instance per framework instance.
      * The general approach is to have one private static instance that we register 
@@ -180,6 +180,16 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         }
     }
 
+    public synchronized Object getSecurityContext()
+    {
+        return m_securityContext;
+    }
+
+    public synchronized void setSecurityContext(Object securityContext)
+    {
+        m_securityContext = securityContext;
+    }
+
     /**
      * Check whether the given manifest headers are from an extension bundle.
      */
@@ -187,7 +197,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
     {
         R4Directive dir = ManifestParser.parseExtensionBundleHeader((String)
             headers.get(Constants.FRAGMENT_HOST));
-    
+
         return (dir != null) && (Constants.EXTENSION_FRAMEWORK.equals(
             dir.getValue()) || Constants.EXTENSION_BOOTCLASSPATH.equals(
             dir.getValue()));
@@ -216,21 +226,15 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
             ((SecurityManager) sm).checkPermission(
                 new AdminPermission(bundle, AdminPermission.EXTENSIONLIFECYCLE));
         }
-    
-        ProtectionDomain pd = (ProtectionDomain)
-        bundle.getInfo().getCurrentModule().getSecurityContext();
-    
-        if (pd != null)
+
+        if (!bundle.getInfo().getProtectionDomain().implies(new AllPermission()))
         {
-            if (!pd.implies(new AllPermission()))
-            {
-                throw new SecurityException("Extension Bundles must have AllPermission");
-            }
+            throw new SecurityException("Extension Bundles must have AllPermission");
         }
-    
+
         R4Directive dir = ManifestParser.parseExtensionBundleHeader((String)
             bundle.getInfo().getCurrentHeader().get(Constants.FRAGMENT_HOST));
-    
+
         // We only support classpath extensions (not bootclasspath).
         if (!Constants.EXTENSION_FRAMEWORK.equals(dir.getValue()))
         {
@@ -238,17 +242,17 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
                 dir.getValue(), new UnsupportedOperationException(
                 "Unsupported Extension Bundle type!"));
         }
-    
+
         // Not sure whether this is a good place to do it but we need to lock
         felix.acquireBundleLock(felix);
-    
+
         try
         {
             bundle.getInfo().setExtension(true);
-    
+
             SystemBundleArchive systemArchive =
                 (SystemBundleArchive) felix.getInfo().getArchive();
-        
+
             // Merge the exported packages with the exported packages of the systembundle.
             Map headers = null;
             ICapability[] exports = null;
@@ -265,7 +269,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
                     + bundle.getInfo().getCurrentHeader().get(Constants.EXPORT_PACKAGE), ex);
                 return;
             }
-        
+
             // Add the bundle as extension if we support extensions
             if (m_extensionManager != null) 
             {
@@ -318,17 +322,21 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
                 BundleActivator activator = (BundleActivator)
                     felix.getClass().getClassLoader().loadClass(
                         activatorClass.trim()).newInstance();
+                
                 felix.m_activatorList.add(activator);
-                if (felix.m_activatorContextMap == null)
+                
+                BundleContext context = m_systemBundleInfo.getBundleContext();
+                
+                bundle.getInfo().setBundleContext(context);
+                
+                if (felix.getInfo().getState() == Bundle.ACTIVE)
                 {
-                    felix.m_activatorContextMap = new HashMap();
+                    Felix.m_secureAction.startActivator(activator, context);
                 }
-                BundleContext context = new BundleContextImpl(m_logger, felix, bundle);
-                felix.m_activatorContextMap.put(activator, context);
-                Felix.m_secureAction.startActivator(activator, context);
             }
             catch (Throwable ex)
             {
+                ex.printStackTrace();
                 m_logger.log(Logger.LOG_WARNING,
                     "Unable to start Felix Extension Activator", ex);
             }
@@ -363,7 +371,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         m_capabilities = capabilities;
 
         Map map = ((SystemBundleArchive) m_systemBundleInfo.getArchive()).getManifestHeader(0);
-        map.put(FelixConstants.EXPORT_PACKAGE, convertCapabilitiesToHeaders(map));
+        map.put(Constants.EXPORT_PACKAGE, convertCapabilitiesToHeaders(map));
         ((SystemBundleArchive) m_systemBundleInfo.getArchive()).setManifestHeader(map);
     }
 
@@ -490,12 +498,12 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         return null;
     }
 
-    public boolean hasInputStream(int index, String urlPath) throws IOException
+    public boolean hasInputStream(int index, String urlPath)
     {
         return (getClass().getClassLoader().getResource(urlPath) != null);
     }
 
-    public InputStream getInputStream(int index, String urlPath) throws IOException
+    public InputStream getInputStream(int index, String urlPath)
     {
         return getClass().getClassLoader().getResourceAsStream(urlPath);
     }

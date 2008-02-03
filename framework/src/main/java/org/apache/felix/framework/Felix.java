@@ -21,10 +21,10 @@ package org.apache.felix.framework;
 import java.io.*;
 import java.net.*;
 import java.security.*;
-import java.security.cert.Certificate;
 import java.util.*;
 
 import org.apache.felix.framework.cache.*;
+import org.apache.felix.framework.ext.SecurityProvider;
 import org.apache.felix.framework.searchpolicy.*;
 import org.apache.felix.framework.util.*;
 import org.apache.felix.framework.util.manifestparser.*;
@@ -89,7 +89,6 @@ public class Felix extends FelixBundle
     private BundleInfo m_systemBundleInfo = null;
     // System bundle activator list.
     List m_activatorList = null;
-    Map m_activatorContextMap = null;
 
     // Next available bundle identifier.
     private long m_nextId = 1L;
@@ -218,7 +217,7 @@ public class Felix extends FelixBundle
         m_configMutableMap = (configMutableMap == null)
             ? new StringMap(false) : configMutableMap;
         m_configMap = createUnmodifiableMap(m_configMutableMap);
-        m_activatorList = activatorList;
+        m_activatorList = (activatorList == null) ? new ArrayList() : activatorList;
 
         // Create logger with appropriate log level. Even though the
         // logger needs the system bundle's context for tracking log
@@ -570,6 +569,11 @@ public class Felix extends FelixBundle
     {
         return true;
     }
+    
+    Object getSignerMatcher()
+    {
+        return null;
+    }
 
     public Class loadClass(String name) throws ClassNotFoundException
     {
@@ -721,12 +725,27 @@ public class Felix extends FelixBundle
         m_factory.setContentLoader(
             m_systemBundleInfo.getCurrentModule(),
             cl);
-        m_factory.setSecurityContext(
-            m_systemBundleInfo.getCurrentModule(),
-            getClass().getProtectionDomain());
 
+        addSecurity(this);
+
+        // Note: we need this ordering to launch:
+        // 1) create all stuff of the system bundle (extension manager needs it)
+        // 2) install all bundles from cache (will start extension bundles)
+        // 3) start the system bundle (will start custom activators)
+        // 4) start the other bundles via the start level
+        // it is important to keep this order because bundles are installed 
+        // from added activators in step 3 and extension bundles are started 
+        // in 2 and need the stuff from 1. 
         m_installedBundleMap.put(
             m_systemBundleInfo.getLocation(), this);
+
+        // Create system bundle activator.
+        m_systemBundleInfo.setActivator(new SystemBundleActivator());
+
+        // Create the bundle context for the system bundle and
+        // then activate it.
+        m_systemBundleInfo.setBundleContext(
+            new BundleContextImpl(m_logger, this, this));
         
         FelixBundle bundle = null;
 
@@ -817,14 +836,7 @@ ex.printStackTrace();
                     "Unresolved package in System Bundle:"
                     + ex.getRequirement());
             }
-
-            // Create system bundle activator.
-            m_systemBundleInfo.setActivator(new SystemBundleActivator());
-
-            // Create the bundle context for the system bundle and
-            // then activate it.
-            m_systemBundleInfo.setBundleContext(
-                new BundleContextImpl(m_logger, this, this));
+            
             Felix.m_secureAction.startActivator(m_systemBundleInfo.getActivator(), 
                 m_systemBundleInfo.getBundleContext());
         }
@@ -1432,9 +1444,10 @@ ex.printStackTrace();
             try
             {
                 return (obj instanceof java.security.Permission)
-                    ? ((ProtectionDomain)
-                    bundle.getInfo().getCurrentModule().getSecurityContext())
-                    .implies((java.security.Permission) obj)
+                    ? impliesBundlePermission(
+                    (BundleProtectionDomain) 
+                    bundle.getInfo().getProtectionDomain(), 
+                    (java.security.Permission) obj, true)
                     : false;
             }
             catch (Exception ex)
@@ -1637,8 +1650,7 @@ ex.printStackTrace();
         // to import the necessary packages.
         if (System.getSecurityManager() != null)
         {
-            ProtectionDomain pd = (ProtectionDomain)
-                bundle.getInfo().getCurrentModule().getSecurityContext();
+            ProtectionDomain pd = bundle.getInfo().getProtectionDomain();
 
             IRequirement[] imports =
                 bundle.getInfo().getCurrentModule().getDefinition().getRequirements();
@@ -1784,20 +1796,21 @@ ex.printStackTrace();
                         info.getBundleId(),
                         archive.getRevisionCount() - 1,
                         info.getCurrentHeader(),
-                        createBundleProtectionDomain(archive),
-                        bundle.getInfo().isExtension() || m_extensionManager.isExtensionBundle(
-                            bundle.getInfo().getCurrentHeader()));
+                        (bundle.getInfo().isExtension() || 
+                        m_extensionManager.isExtensionBundle(
+                            bundle.getInfo().getCurrentHeader())));
 
                     // Add module to bundle info.
                     info.addModule(module);
 
                     // If this is an update from a normal to an extension bundle
                     // then attach the extension or else if this already is
-                    // an extension bundle then done allow it to be resolved
+                    // an extension bundle then dont allow it to be resolved
                     // again as per spec.
                     if (!bundle.getInfo().isExtension() &&
                         m_extensionManager.isExtensionBundle(bundle.getInfo().getCurrentHeader()))
                     {
+                        addSecurity(bundle);
                         m_extensionManager.addExtensionBundle(this, bundle);
                         m_factory.refreshModule(m_systemBundleInfo.getCurrentModule());
                         bundle.getInfo().setState(Bundle.RESOLVED);
@@ -1805,6 +1818,10 @@ ex.printStackTrace();
                     else if (bundle.getInfo().isExtension())
                     {
                         bundle.getInfo().setState(Bundle.INSTALLED);
+                    }
+                    else
+                    {
+                        addSecurity(bundle);
                     }
                 }
                 catch (Throwable ex)
@@ -2283,6 +2300,8 @@ ex.printStackTrace();
 
                 verifyExecutionEnvironment(bundle);
 
+                addSecurity(bundle);
+
                 if (!bundle.getInfo().isExtension())
                 {
                     Object sm = System.getSecurityManager();
@@ -2664,7 +2683,7 @@ ex.printStackTrace();
             BundleInfo info = bundle.getInfo();
 
             // Can only register services if starting or active.
-            if ((info.getState() & (Bundle.STARTING | Bundle.ACTIVE)) == 0)
+            if (((info.getState() & (Bundle.STARTING | Bundle.ACTIVE)) == 0) && !info.isExtension())
             {
                 throw new IllegalStateException(
                     "Can only register services while bundle is active or activating.");
@@ -2842,19 +2861,13 @@ ex.printStackTrace();
 
     protected File getDataFile(FelixBundle bundle, String s)
     {
-        // The spec says to throw an error if the bundle
-        // is stopped, which I assume means not active,
-        // starting, or stopping.
-        // Additionally, we make an exception for extension bundles
-        if ((bundle.getInfo().getState() != Bundle.ACTIVE) &&
-            (bundle.getInfo().getState() != Bundle.STARTING) &&
-            (bundle.getInfo().getState() != Bundle.STOPPING) &&
-            !bundle.getInfo().isExtension())
-        {
-            throw new IllegalStateException("Only active bundles can create files.");
-        }
         try
         {
+            if (bundle == this)
+            {
+                return m_systemBundleInfo.getArchive().getDataFile(s);
+            }
+            
             return m_cache.getArchive(
                 bundle.getInfo().getBundleId()).getDataFile(s);
         }
@@ -3329,8 +3342,8 @@ ex.printStackTrace();
         // ever be one revision at this point, create the module for
         // the current revision to be safe.
         IModule module = createModule(
-            archive.getId(), archive.getRevisionCount() - 1, headerMap,
-            createBundleProtectionDomain(archive), isExtension);
+            archive.getId(), archive.getRevisionCount() - 1, headerMap, 
+            isExtension);
 
         // Finally, create an return the bundle info.
         BundleInfo info = new BundleInfo(m_logger, archive, module);
@@ -3339,20 +3352,34 @@ ex.printStackTrace();
         return info;
     }
 
-    private ProtectionDomain createBundleProtectionDomain(BundleArchive archive)
-        throws Exception
-    {
-// TODO: Security - create a real ProtectionDomain for the Bundle
-        FakeURLStreamHandler handler = new FakeURLStreamHandler();
-        URL context = new URL(null, "location:", handler);
-        CodeSource codesource = new CodeSource(m_secureAction.createURL(context,
-            archive.getLocation(), handler), (Certificate[]) null);
+    private volatile SecurityProvider m_securityProvider;
 
-        Permissions allPerms = new Permissions();
-        allPerms.add(new AllPermission());
-        ProtectionDomain pd = new ProtectionDomain(codesource,
-            allPerms);
-        return pd;
+    void setSecurityProvider(SecurityProvider securityProvider)
+    {
+        m_securityProvider = securityProvider;
+    }
+
+    Object getSignerMatcher(FelixBundle bundle)
+    {
+        if (m_securityProvider != null)
+        {
+            return m_securityProvider.getSignerMatcher(bundle);
+        }
+        return null;
+    }
+
+    boolean impliesBundlePermission(BundleProtectionDomain bundleProtectionDomain, Permission permission, boolean direct)
+    {
+        if (m_securityProvider != null)
+        {
+            return m_securityProvider.hasBundlePermission(bundleProtectionDomain, permission, direct);
+        }
+        return true;
+    }
+
+    void addSecurity(final FelixBundle bundle)
+    {
+        bundle.getInfo().setProtectionDomain(new BundleProtectionDomain(this, bundle));
     }
 
     /**
@@ -3365,8 +3392,7 @@ ex.printStackTrace();
      * @return The initialized and/or newly created module.
     **/
     private IModule createModule(long targetId, int revision, Map headerMap,
-        Object securityContext, boolean isExtensionBundle)
-        throws Exception
+        boolean isExtensionBundle) throws Exception
     {
         ManifestParser mp = new ManifestParser(m_logger, m_configMap, headerMap);
 
@@ -3412,14 +3438,11 @@ ex.printStackTrace();
         IModule module = m_factory.createModule(
             Long.toString(targetId) + "." + Integer.toString(revision), md);
 
-        m_factory.setSecurityContext(module, securityContext);
-
         // Create the content loader from the module archive.
         IContentLoader contentLoader = new ContentLoaderImpl(
                 m_logger,
                 m_cache.getArchive(targetId).getRevision(revision).getContent(),
-                m_cache.getArchive(targetId).getRevision(revision).getContentPath(),
-                (ProtectionDomain) module.getSecurityContext());
+                m_cache.getArchive(targetId).getRevision(revision).getContentPath());
         // Set the content loader's search policy.
         contentLoader.setSearchPolicy(
                 new R4SearchPolicy(m_policyCore, module));
@@ -3752,12 +3775,6 @@ ex.printStackTrace();
     {
         public void start(BundleContext context) throws Exception
         {
-            // Create an activator list if necessary.
-            if (m_activatorList == null)
-            {
-                m_activatorList = new ArrayList();
-            }
-
             // Add the bundle activator for the package admin service.
             m_activatorList.add(0, new PackageAdminActivator(Felix.this));
             // Add the bundle activator for the start level service.
@@ -3891,17 +3908,8 @@ ex.printStackTrace();
                 {
                     try
                     {
-                        if ((m_activatorContextMap != null) &&
-                            m_activatorContextMap.containsKey(m_activatorList.get(i)))
-                        {
-                            Felix.m_secureAction.stopActivator((BundleActivator) m_activatorList.get(i),
-                                (BundleContext) m_activatorContextMap.get(m_activatorList.get(i)));
-                        }
-                        else
-                        {
-                            Felix.m_secureAction.stopActivator((BundleActivator) m_activatorList.get(i),
-                                getInfo().getBundleContext());
-                        }
+                        Felix.m_secureAction.stopActivator((BundleActivator) 
+                            m_activatorList.get(i), getInfo().getBundleContext());
                     }
                     catch (Throwable throwable)
                     {
@@ -4007,6 +4015,7 @@ ex.printStackTrace();
                         info.isExtension());
                     newInfo.syncLock(info);
                     ((BundleImpl) m_bundle).setInfo(newInfo);
+                    addSecurity(m_bundle);
                     fireBundleEvent(BundleEvent.UNRESOLVED, m_bundle);
                 }
                 catch (Exception ex)

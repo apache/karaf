@@ -134,14 +134,6 @@ public class ModuleFactoryImpl implements IModuleFactory
         }
     }
 
-    public void setSecurityContext(IModule module, Object securityContext)
-    {
-        synchronized (this)
-        {
-            ((ModuleImpl) module).setSecurityContext(securityContext);
-        }
-    }
-
     /**
      * <p>
      * Adds a listener to the <tt>IModuleFactory</tt> to listen for

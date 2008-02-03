@@ -33,6 +33,4 @@ public interface IModule
     public Class getClass(String name);
     public URL getResource(String name);
     public Enumeration getResources(String name);
-
-    public Object getSecurityContext();
 }

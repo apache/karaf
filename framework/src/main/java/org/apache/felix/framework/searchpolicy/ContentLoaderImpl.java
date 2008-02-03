@@ -40,19 +40,12 @@ public class ContentLoaderImpl implements IContentLoader
     private ProtectionDomain m_protectionDomain = null;
     private static SecureAction m_secureAction = new SecureAction();
 
-    public ContentLoaderImpl(Logger logger, IContent content,
+    public ContentLoaderImpl(Logger logger, IContent content, 
         IContent[] contentPath)
-    {
-        this(logger, content, contentPath, null);
-    }
-
-    public ContentLoaderImpl(Logger logger, IContent content,
-        IContent[] contentPath, ProtectionDomain protectionDomain)
     {
         m_logger = logger;
         m_content = content;
         m_contentPath = contentPath;
-        m_protectionDomain = protectionDomain;
     }
 
     public Logger getLogger()
@@ -106,6 +99,16 @@ public class ContentLoaderImpl implements IContentLoader
     public IURLPolicy getURLPolicy()
     {
         return m_urlPolicy;
+    }
+    
+    public synchronized void setSecurityContext(Object securityContext)
+    {
+        m_protectionDomain = (ProtectionDomain) securityContext; 
+    }
+
+    public synchronized Object getSecurityContext()
+    {
+        return m_protectionDomain;
     }
 
     public Class getClass(String name)

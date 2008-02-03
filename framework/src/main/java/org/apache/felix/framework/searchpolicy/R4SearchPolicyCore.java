@@ -859,7 +859,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     {
 // TODO: RB - Is this permission check correct.
                         if ((System.getSecurityManager() != null) &&
-                            !((ProtectionDomain) modules[modIdx].getSecurityContext()).implies(
+                            !((ProtectionDomain) modules[modIdx].getContentLoader().getSecurityContext()).implies(
                                 new PackagePermission(pkgName,
                                     PackagePermission.EXPORT)))
                         {
@@ -894,7 +894,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 // TODO: RB - Is this permission check correct.
                             if (inUseCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
                                 (System.getSecurityManager() != null) &&
-                                !((ProtectionDomain) module.getSecurityContext()).implies(
+                                !((ProtectionDomain) module.getContentLoader().getSecurityContext()).implies(
                                     new PackagePermission(
                                         (String) inUseCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY),
                                         PackagePermission.EXPORT)))

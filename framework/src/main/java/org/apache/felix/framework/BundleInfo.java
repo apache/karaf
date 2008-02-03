@@ -20,6 +20,7 @@ package org.apache.felix.framework;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.ProtectionDomain;
 import java.util.*;
 
 import org.apache.felix.framework.cache.BundleArchive;
@@ -37,7 +38,7 @@ class BundleInfo
     private BundleContext m_context = null;
     private Map m_cachedHeaders = new HashMap();
     private long m_cachedHeadersTimestamp;
-
+    
     // Indicates whether the bundle is stale, meaning that it has
     // been refreshed and completely removed from the framework.
     private boolean m_stale = false;
@@ -531,5 +532,23 @@ class BundleInfo
     {
         m_lockCount = info.m_lockCount;
         m_lockThread = info.m_lockThread;
+    }
+    
+    public synchronized void setProtectionDomain(ProtectionDomain pd)
+    {
+        getCurrentModule().getContentLoader().setSecurityContext(pd);
+    }
+    
+    public synchronized ProtectionDomain getProtectionDomain()
+    {
+        ProtectionDomain pd = null;
+        
+        for (int i = m_modules.length - 1; (i >= 0) && (pd == null); i--)
+        {
+            pd = (ProtectionDomain) 
+                m_modules[i].getContentLoader().getSecurityContext();
+        }
+        
+        return pd;
     }
 }

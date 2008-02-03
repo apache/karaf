@@ -448,13 +448,6 @@ class BundleContextImpl implements FelixBundleContext
                 case Bundle.STOPPING:
                     return;
             }
-
-            // As an exception we allow extension bundles to use their bundle
-            // context while not being active.
-            if (m_bundle.getInfo().isExtension())
-            {
-                return;
-            }
         }
 
         throw new IllegalStateException("Invalid BundleContext.");
