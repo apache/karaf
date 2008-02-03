@@ -23,7 +23,7 @@ import java.util.Iterator;
 
 public class IteratorToEnumeration implements Enumeration
 {
-    private Iterator m_iter = null;
+    private final Iterator m_iter;
 
     public IteratorToEnumeration(Iterator iter)
     {
