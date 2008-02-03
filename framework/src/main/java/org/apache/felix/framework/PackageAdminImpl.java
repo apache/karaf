@@ -26,6 +26,15 @@ import org.osgi.service.packageadmin.*;
 
 class PackageAdminImpl implements PackageAdmin, Runnable
 {
+    private static final Comparator COMPARATOR = new Comparator() {
+        public int compare(Object o1, Object o2)
+        {
+            // Reverse arguments to sort in descending order.
+            return ((ExportedPackage) o2).getVersion().compareTo(
+                ((ExportedPackage) o1).getVersion());
+        }
+    };
+
     private Felix m_felix = null;
     private Bundle[][] m_reqBundles = null;
     private Bundle m_systemBundle = null;
@@ -153,14 +162,7 @@ class PackageAdminImpl implements PackageAdmin, Runnable
             return null;
         }
         // Sort the exported versions.
-        Arrays.sort(pkgs, new Comparator() {
-            public int compare(Object o1, Object o2)
-            {
-                // Reverse arguments to sort in descending order.
-                return ((ExportedPackage) o2).getVersion().compareTo(
-                    ((ExportedPackage) o1).getVersion());
-            }
-        });
+        Arrays.sort(pkgs, COMPARATOR);
         // Return the highest version.
         return pkgs[0];
     }
