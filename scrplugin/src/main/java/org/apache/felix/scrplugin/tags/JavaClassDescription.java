@@ -66,7 +66,15 @@ public interface JavaClassDescription {
      */
     JavaField[] getFields();
 
+    /**
+     * Get the field with the name.
+     * @param name The name of the field
+     * @return The field with the name or null.
+     * @throws MojoExecutionException
+     */
     JavaField getFieldByName(String name) throws MojoExecutionException;
+
+    JavaField getExternalFieldByName(String name) throws MojoExecutionException;
 
     /**
      * Returns an array of the implemented interfaces of this class.

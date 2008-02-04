@@ -81,6 +81,14 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
     }
 
     /**
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getExternalFieldByName(java.lang.String)
+     */
+    public JavaField getExternalFieldByName(String name)
+    throws MojoExecutionException {
+        throw new MojoExecutionException("getExternalFieldByName not support for this class.");
+    }
+
+    /**
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getImplementedInterfaces()
      */
     public JavaClassDescription[] getImplementedInterfaces() throws MojoExecutionException {

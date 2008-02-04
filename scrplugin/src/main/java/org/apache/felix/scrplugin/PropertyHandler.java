@@ -46,7 +46,7 @@ public class PropertyHandler {
      * @param component
      * @param ocd
      */
-    public void doProperty(JavaTag property, String name, Component component, OCD ocd, JavaField javaField)
+    protected void doProperty(JavaTag property, String name, Component component, OCD ocd, JavaField javaField)
     throws MojoExecutionException {
         final Property prop = new Property(property);
         prop.setName(name);
@@ -167,7 +167,7 @@ public class PropertyHandler {
      * @param defaultName
      * @return The name of the property or the defaultName
      */
-    public String getPropertyName(JavaTag property, String defaultName) {
+    protected String getPropertyName(JavaTag property, String defaultName) {
         final String name = property.getNamedParameter(Constants.PROPERTY_NAME);
         if (!StringUtils.isEmpty(name)) {
             return name;
@@ -176,7 +176,7 @@ public class PropertyHandler {
         return defaultName;
     }
 
-    public void setPropertyValueRef(final JavaTag tag, Property property, String valueRef)
+    protected void setPropertyValueRef(final JavaTag tag, Property property, String valueRef)
     throws MojoExecutionException {
         final String[] values = this.getPropertyValueRef(tag, property, valueRef);
         if ( values != null && values.length == 1 ) {
@@ -186,43 +186,45 @@ public class PropertyHandler {
         }
     }
 
-    public String[] getPropertyValueRef(final JavaTag tag, Property prop, String valueRef)
+    protected String[] getPropertyValueRef(final JavaTag tag, Property prop, String valueRef)
     throws MojoExecutionException {
         int classSep = valueRef.lastIndexOf('.');
+        JavaField field = null;
         if ( classSep == -1 ) {
             // local variable
-            // TODO - This could be a static import!
-            final JavaField field = tag.getJavaClassDescription().getFieldByName(valueRef);
-            if ( field == null ) {
-                throw new MojoExecutionException("Property references unknown field " + valueRef + " in class " + tag.getJavaClassDescription().getName());
-            }
-            // determine type (if not set explicitly)
-            if ( prop.getType() == null ) {
-                final String type = field.getType();
-                if ( "java.lang.String".equals(type) ) {
-                    prop.setType("String");
-                } else if ("java.lang.Long".equals(type) || "long".equals(type) ) {
-                    prop.setType("Long");
-                } else if ("java.lang.Double".equals(type) || "double".equals(type) ) {
-                    prop.setType("Double");
-                } else if ("java.lang.Float".equals(type) || "float".equals(type) ) {
-                    prop.setType("Float");
-                } else if ("java.lang.Integer".equals(type) || "int".equals(type) ) {
-                    prop.setType("Integer");
-                } else if ("java.lang.Byte".equals(type) || "byte".equals(type) ) {
-                    prop.setType("Byte");
-                } else if ("java.lang.Character".equals(type) || "char".equals(type) ) {
-                    prop.setType("Char");
-                } else if ("java.lang.Boolean".equals(type) || "boolean".equals(type) ) {
-                    prop.setType("Boolean");
-                } else if ("java.lang.Short".equals(type) || "short".equals(type) ) {
-                    prop.setType("Short");
-                }
-
-            }
-            return field.getInitializationExpression();
+            field = tag.getJavaClassDescription().getFieldByName(valueRef);
         }
-        throw new MojoExecutionException("Referencing values from foreign classes not supported yet.");
+        if ( field == null ) {
+            field = tag.getJavaClassDescription().getExternalFieldByName(valueRef);
+        }
+        if ( field == null ) {
+            throw new MojoExecutionException("Property references unknown field " + valueRef + " in class " + tag.getJavaClassDescription().getName());
+        }
+        // determine type (if not set explicitly)
+        if ( prop.getType() == null ) {
+            final String type = field.getType();
+            if ( "java.lang.String".equals(type) ) {
+                prop.setType("String");
+            } else if ("java.lang.Long".equals(type) || "long".equals(type) ) {
+                prop.setType("Long");
+            } else if ("java.lang.Double".equals(type) || "double".equals(type) ) {
+                prop.setType("Double");
+            } else if ("java.lang.Float".equals(type) || "float".equals(type) ) {
+                prop.setType("Float");
+            } else if ("java.lang.Integer".equals(type) || "int".equals(type) ) {
+                prop.setType("Integer");
+            } else if ("java.lang.Byte".equals(type) || "byte".equals(type) ) {
+                prop.setType("Byte");
+            } else if ("java.lang.Character".equals(type) || "char".equals(type) ) {
+                prop.setType("Char");
+            } else if ("java.lang.Boolean".equals(type) || "boolean".equals(type) ) {
+                prop.setType("Boolean");
+            } else if ("java.lang.Short".equals(type) || "short".equals(type) ) {
+                prop.setType("Short");
+            }
+
+        }
+        return field.getInitializationExpression();
     }
 
     public void testProperty(JavaTag property, String defaultName, JavaField field, boolean isInspectedClass)

@@ -141,6 +141,51 @@ public class QDoxJavaClassDescription
     }
 
     /**
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getExternalFieldByName(java.lang.String)
+     */
+    public JavaField getExternalFieldByName(String name)
+    throws MojoExecutionException {
+        JavaField field = this.searchExternalFieldByName(name);
+        if ( field == null ) {
+            field = this.searchExternalFieldByName(this.javaClass.getSource().getPackage() + '.' + name);
+        }
+        return field;
+    }
+
+    protected JavaField searchExternalFieldByName(String name)
+    throws MojoExecutionException {
+        int sep = name.lastIndexOf('.');
+        final String className = name.substring(0, sep);
+        final String constantName = name.substring(sep+1);
+        // we know that the name is external, so let's scan imports first
+        // for a fully qualified static import
+        boolean isStatic = this.searchImport(name);
+        if ( isStatic ) {
+            final JavaClassDescription jcd = this.manager.getJavaClassDescription(className);
+            if ( jcd != null ) {
+                return jcd.getFieldByName(constantName);
+            }
+        }
+        final JavaClassDescription jcd = this.manager.getJavaClassDescription(className);
+        if ( jcd != null ) {
+            return jcd.getFieldByName(constantName);
+        }
+        return null;
+    }
+
+    protected boolean searchImport(String name) {
+        final String[] imports = this.javaClass.getSource().getImports();
+        if ( imports != null ) {
+            for(int i=0; i<imports.length; i++ ) {
+                if ( imports[i].equals(name) ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getImplementedInterfaces()
      */
     public JavaClassDescription[] getImplementedInterfaces()
