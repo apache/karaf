@@ -35,6 +35,11 @@ import org.osgi.service.cm.ConfigurationAdmin;
  */
 public class PropertyHandler {
 
+    /** This is a map using the name as the key and {@link PropertyDescription}
+     * as values.
+     */
+    final private Map properties = new HashMap();
+
     /**
      * @param property
      * @param name
@@ -220,7 +225,7 @@ public class PropertyHandler {
         throw new MojoExecutionException("Referencing values from foreign classes not supported yet.");
     }
 
-    public void testProperty(Map properties, JavaTag property, String defaultName, JavaField field, boolean isInspectedClass)
+    public void testProperty(JavaTag property, String defaultName, JavaField field, boolean isInspectedClass)
     throws MojoExecutionException {
         final String propName = this.getPropertyName(property, defaultName);
 
@@ -232,10 +237,44 @@ public class PropertyHandler {
                     throw new MojoExecutionException("Duplicate definition for property " + propName + " in class " + property.getJavaClassDescription().getName());
                 }
             } else {
-                properties.put(propName, new Object[] {property, field});
+                properties.put(propName, new PropertyDescription(property, field));
             }
         }
     }
 
+    public void handleField(JavaField javaField, boolean isInspectedClass)
+    throws MojoExecutionException {
+        final JavaTag tag = javaField.getTagByName(Constants.PROPERTY);
+        if (tag != null) {
+            String defaultName = null;
+            if ( "java.lang.String".equals(javaField.getType()) ) {
+                final String[] initValues = javaField.getInitializationExpression();
+                if ( initValues != null && initValues.length == 1 ) {
+                    defaultName = initValues[0];
+                }
+            }
+            this.testProperty(tag, defaultName, javaField, isInspectedClass);
+        }
+    }
 
+    public void processProperties(final Component component, final OCD ocd)
+    throws MojoExecutionException {
+        final Iterator propIter = properties.entrySet().iterator();
+        while ( propIter.hasNext() ) {
+            final Map.Entry entry = (Map.Entry)propIter.next();
+            final String propName = entry.getKey().toString();
+            final PropertyDescription desc = (PropertyDescription)entry.getValue();
+            this.doProperty(desc.propertyTag, propName, component, ocd, desc.field);
+        }
+    }
+
+    protected static final class PropertyDescription {
+        public final JavaTag propertyTag;
+        public final JavaField field;
+
+        public PropertyDescription(final JavaTag p, final JavaField f) {
+            this.propertyTag = p;
+            this.field = f;
+        }
+    }
 }

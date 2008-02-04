@@ -224,8 +224,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         boolean inherited = getBoolean(componentTag, Constants.COMPONENT_INHERIT, true);
         this.doServices(description.getTagsByName(Constants.SERVICE, inherited), component, description);
 
-        // collect properties and references from class tags and fields
-        final Map properties = new HashMap();
+        // collect references from class tags and fields
         final Map references = new HashMap();
 
         JavaClassDescription currentDescription = description;
@@ -233,7 +232,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
             // properties
             final JavaTag[] props = currentDescription.getTagsByName(Constants.PROPERTY, false);
             for (int i=0; i < props.length; i++) {
-                this.propertyHandler.testProperty(properties, props[i], null, null, description == currentDescription);
+                this.propertyHandler.testProperty(props[i], null, null, description == currentDescription);
             }
 
             // references
@@ -250,31 +249,14 @@ public class SCRDescriptorMojo extends AbstractMojo {
                     this.testReference(references, tag, fields[i].getName(), description == currentDescription);
                 }
 
-                tag = fields[i].getTagByName(Constants.PROPERTY);
-                if (tag != null) {
-                    String defaultName = null;
-                    if ( "java.lang.String".equals(fields[i].getType()) ) {
-                        final String[] initValues = fields[i].getInitializationExpression();
-                        if ( initValues != null && initValues.length == 1 ) {
-                            defaultName = initValues[0];
-                        }
-                    }
-                    this.propertyHandler.testProperty(properties, tag, defaultName, fields[i], description == currentDescription);
-                }
+                this.propertyHandler.handleField(fields[i], description == currentDescription);
             }
 
             currentDescription = currentDescription.getSuperClass();
         } while (inherited && currentDescription != null);
 
         // process properties
-        final Iterator propIter = properties.entrySet().iterator();
-        while ( propIter.hasNext() ) {
-            final Map.Entry entry = (Map.Entry)propIter.next();
-            final String propName = entry.getKey().toString();
-            final Object[] values = (Object[])entry.getValue();
-            final JavaTag tag = (JavaTag)values[0];
-            this.propertyHandler.doProperty(tag, propName, component, ocd, (JavaField)values[1]);
-        }
+        this.propertyHandler.processProperties(component, ocd);
 
         // process references
         final Iterator refIter = references.entrySet().iterator();
