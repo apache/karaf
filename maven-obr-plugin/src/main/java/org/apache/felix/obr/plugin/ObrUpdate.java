@@ -199,7 +199,7 @@ public class ObrUpdate
             {
                 return;
             }
-            Node obrXmlRoot = ( Element ) obrXmlDoc.getDocumentElement();
+            Node obrXmlRoot = obrXmlDoc.getDocumentElement();
             // sort the obr file
             sortObrXml( obrXmlRoot );
         }
@@ -497,30 +497,30 @@ public class ObrUpdate
         {
             return resource( node );
         }
-        else
-        { // look at the repository node (first in the file)
-            if ( node.getNodeName().compareTo( "repository" ) == 0 )
-            {
-                Date d = new Date();
-                d.setTime( System.currentTimeMillis() );
-                NamedNodeMap nList = node.getAttributes();
-                Node n = nList.getNamedItem( "lastmodified" );
-                n.setNodeValue( m_format.format( d ) );
-            }
-            NodeList list = node.getChildNodes();
-            if ( list.getLength() > 0 )
-            {
-                for ( int i = 0; i < list.getLength(); i++ )
-                {
-                    if ( walkOnTree( list.item( i ) ) )
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
+
+        // look at the repository node (first in the file)
+        if ( node.getNodeName().compareTo( "repository" ) == 0 )
+        {
+            Date d = new Date();
+            d.setTime( System.currentTimeMillis() );
+            NamedNodeMap nList = node.getAttributes();
+            Node n = nList.getNamedItem( "lastmodified" );
+            n.setNodeValue( m_format.format( d ) );
         }
 
+        NodeList list = node.getChildNodes();
+        if ( list.getLength() > 0 )
+        {
+            for ( int i = 0; i < list.getLength(); i++ )
+            {
+                if ( walkOnTree( list.item( i ) ) )
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 
@@ -536,19 +536,16 @@ public class ObrUpdate
             node.appendChild( m_resourceBundle.getNode( m_repositoryDoc ) );
             return;
         }
-        else
+
+        System.out.println( "Second branch..." );
+        NodeList list = node.getChildNodes();
+        if ( list.getLength() > 0 )
         {
-            System.out.println( "Second branch..." );
-            NodeList list = node.getChildNodes();
-            if ( list.getLength() > 0 )
+            for ( int i = 0; i < list.getLength(); i++ )
             {
-                for ( int i = 0; i < list.getLength(); i++ )
-                {
-                    searchRepository( list.item( i ), id );
-                }
+                searchRepository( list.item( i ), id );
             }
         }
-
     }
 
 

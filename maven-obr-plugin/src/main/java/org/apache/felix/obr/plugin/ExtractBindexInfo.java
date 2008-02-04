@@ -202,10 +202,8 @@ public class ExtractBindexInfo
         {
             return m_resource.getVersion().toString();
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
 
@@ -249,10 +247,8 @@ public class ExtractBindexInfo
         {
             return m_resource.getDocumentation().toString();
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
 
@@ -266,10 +262,8 @@ public class ExtractBindexInfo
         {
             return m_resource.getLicense().toString();
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
 
@@ -283,10 +277,8 @@ public class ExtractBindexInfo
         {
             return m_resource.getSource().toString();
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
 
@@ -300,10 +292,8 @@ public class ExtractBindexInfo
         {
             return m_resource.getId();
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
 }

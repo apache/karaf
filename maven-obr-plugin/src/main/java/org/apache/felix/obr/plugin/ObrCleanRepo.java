@@ -78,7 +78,7 @@ public class ObrCleanRepo extends AbstractMojo
     private ArtifactRepository m_localRepo;
 
 
-    public void execute() throws MojoExecutionException
+    public void execute()
     {
         // If no OBR repository, return
         if ( "NONE".equalsIgnoreCase( obrRepository ) )
@@ -169,10 +169,8 @@ public class ObrCleanRepo extends AbstractMojo
             elem.setAttribute( "lastmodified", format.format( d ) );
             return elem;
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
 
@@ -214,22 +212,22 @@ public class ObrCleanRepo extends AbstractMojo
             return null;
         }
         // The document is the root of the DOM tree.
-        file = file.getAbsoluteFile();
-        getLog().info( "Parsing " + file );
+        File targetFile = file.getAbsoluteFile();
+        getLog().info( "Parsing " + targetFile );
         Document doc = null;
         try
         {
-            doc = constructor.parse( file );
+            doc = constructor.parse( targetFile );
         }
         catch ( SAXException e )
         {
-            getLog().error( "Cannot parse " + file + " : " + e.getMessage() );
-            throw new MojoExecutionException( "Cannot parse " + file + " : " + e.getMessage() );
+            getLog().error( "Cannot parse " + targetFile + " : " + e.getMessage() );
+            throw new MojoExecutionException( "Cannot parse " + targetFile + " : " + e.getMessage() );
         }
         catch ( IOException e )
         {
-            getLog().error( "Cannot open " + file + " : " + e.getMessage() );
-            throw new MojoExecutionException( "Cannot open " + file + " : " + e.getMessage() );
+            getLog().error( "Cannot open " + targetFile + " : " + e.getMessage() );
+            throw new MojoExecutionException( "Cannot open " + targetFile + " : " + e.getMessage() );
         }
         return doc;
     }

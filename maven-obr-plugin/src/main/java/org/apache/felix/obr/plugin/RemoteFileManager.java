@@ -187,11 +187,15 @@ public class RemoteFileManager
         try
         {
             file = File.createTempFile( String.valueOf( System.currentTimeMillis() ), suffix );
-            m_wagon.get( url, file );
         }
         catch ( IOException e )
         {
             throw new MojoExecutionException( "I/O problem", e );
+        }
+
+        try
+        {
+            m_wagon.get( url, file );
         }
         catch ( TransferFailedException e )
         {

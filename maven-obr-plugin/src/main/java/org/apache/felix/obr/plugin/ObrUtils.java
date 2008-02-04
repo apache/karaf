@@ -48,20 +48,22 @@ public class ObrUtils
      */
     public static URI findRepositoryXml( String mavenRepository, String obrRepository )
     {
+        String targetPath = obrRepository;
+
         // Combine location settings into a single repository location
-        if ( null == obrRepository || obrRepository.trim().length() == 0 )
+        if ( null == targetPath || targetPath.trim().length() == 0 )
         {
-            obrRepository = mavenRepository + '/' + REPO_XML;
+            targetPath = mavenRepository + '/' + REPO_XML;
         }
-        else if ( !obrRepository.toLowerCase().endsWith( DOT_XML ) )
+        else if ( !targetPath.toLowerCase().endsWith( DOT_XML ) )
         {
-            obrRepository = obrRepository + '/' + REPO_XML;
+            targetPath = targetPath + '/' + REPO_XML;
         }
 
         URI uri;
         try
         {
-            uri = new URI( obrRepository );
+            uri = new URI( targetPath );
             uri.toURL(); // check protocol
         }
         catch ( Exception e )
@@ -72,7 +74,7 @@ public class ObrUtils
         // fall-back to file-system approach
         if ( null == uri || !uri.isAbsolute() )
         {
-            uri = new File( obrRepository ).toURI();
+            uri = new File( targetPath ).toURI();
         }
 
         return uri;

@@ -355,19 +355,19 @@ public class ResourcesBundle
             resource.appendChild( license );
         }
 
-        List list = ( ArrayList ) getNodeCategories( father );
+        List list = getNodeCategories( father );
         for ( int i = 0; i < list.size(); i++ )
         {
             resource.appendChild( ( Node ) list.get( i ) );
         }
 
-        list = ( ArrayList ) getNodeCapabilities( father );
+        list = getNodeCapabilities( father );
         for ( int i = 0; i < list.size(); i++ )
         {
             resource.appendChild( ( Node ) list.get( i ) );
         }
 
-        list = ( ArrayList ) getNodeRequirement( father );
+        list = getNodeRequirement( father );
         for ( int i = 0; i < list.size(); i++ )
         {
             resource.appendChild( ( Node ) list.get( i ) );
@@ -528,13 +528,13 @@ public class ResourcesBundle
 
         addCapability( capability );
 
-        List capabilities = ( ArrayList ) ebi.getCapabilities();
+        List capabilities = ebi.getCapabilities();
         for ( int i = 0; i < capabilities.size(); i++ )
         {
             addCapability( ( Capability ) capabilities.get( i ) );
         }
 
-        List requirement = ( ArrayList ) ebi.getRequirement();
+        List requirement = ebi.getRequirement();
         for ( int i = 0; i < requirement.size(); i++ )
         {
             addRequire( ( Require ) requirement.get( i ) );
@@ -574,11 +574,8 @@ public class ResourcesBundle
         {
             return ( symbolicName.compareTo( getSymbolicName() ) == 0 ) && ( version.compareTo( getVersion() ) == 0 );
         }
-        else
-        {
-            return false;
-        }
 
+        return false;
     }
 
 
@@ -590,7 +587,7 @@ public class ResourcesBundle
     private List getNodeCategories( Document father )
     {
         List listNode = new ArrayList();
-        List listCategory = ( ArrayList ) getCategory();
+        List listCategory = getCategory();
         for ( int i = 0; i < listCategory.size(); i++ )
         {
             listNode.add( ( ( Category ) listCategory.get( i ) ).getNode( father ) );
@@ -607,7 +604,7 @@ public class ResourcesBundle
     private List getNodeCapabilities( Document father )
     {
         List listNode = new ArrayList();
-        List listCapability = ( ArrayList ) getCapability();
+        List listCapability = getCapability();
         for ( int i = 0; i < listCapability.size(); i++ )
         {
             listNode.add( ( ( Capability ) listCapability.get( i ) ).getNode( father ) );
@@ -624,7 +621,7 @@ public class ResourcesBundle
     private List getNodeRequirement( Document father )
     {
         List listNode = new ArrayList();
-        List listRequirement = ( ArrayList ) getRequire();
+        List listRequirement = getRequire();
         for ( int i = 0; i < listRequirement.size(); i++ )
         {
             listNode.add( ( ( Require ) listRequirement.get( i ) ).getNode( father ) );
@@ -645,10 +642,8 @@ public class ResourcesBundle
             {
                 return "id";
             }
-            else
-            {
-                return "";
-            }
+
+            return "";
         }
         String result = "";
         if ( getPresentationName() == null )
