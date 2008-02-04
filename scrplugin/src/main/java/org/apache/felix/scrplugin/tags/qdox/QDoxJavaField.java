@@ -53,10 +53,25 @@ public class QDoxJavaField implements JavaField {
                 return value.toString();
             }
             return null;
+        } catch (NoClassDefFoundError e) {
+            // ignore and try qdox
         } catch (Exception e) {
-            // ignore and return null
-            return null;
+            // ignore and try qdox
         }
+        String value = this.field.getInitializationExpression();
+        if ( value != null ) {
+            int pos = value.indexOf("\"");
+            if ( pos != -1 ) {
+                try {
+                    value = value.substring(pos + 1);
+                    value = value.substring(0, value.lastIndexOf("\""));
+                } catch (ArrayIndexOutOfBoundsException aioobe) {
+                    // ignore this as this is a qdox problem
+                    value = this.field.getInitializationExpression();
+                }
+            }
+        }
+        return value;
     }
 
     /**
