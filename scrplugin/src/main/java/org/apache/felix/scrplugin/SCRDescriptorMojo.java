@@ -226,6 +226,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
         // collect references from class tags and fields
         final Map references = new HashMap();
+        this.propertyHandler.clear();
 
         JavaClassDescription currentDescription = description;
         do {
