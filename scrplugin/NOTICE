@@ -1,16 +1,35 @@
 Apache Felix SCR Maven Plugin
 Copyright 2007 The Apache Software Foundation
 
-This product includes software developed at
-The Apache Software Foundation (http://www.apache.org/).
+
+I. Included Software
 
 This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Licensed under the Apache License 2.0.
+
+
+II. Used Software
+
+This product uses software developed at
 The OSGi Alliance (http://www.osgi.org/).
 Copyright 2006 The OSGi Alliance.
 Licensed under the Apache License 2.0.
 
-This product includes software developed at http://asm.objectweb.org
+This product uses software developed at http://asm.objectweb.org
 Copyright (c) 2000-2005 INRIA, France Telecom
+Licensed under the BSD License.
 
-This product includes software developed at
+This product uses software developed at
 The Codehaus (http://www.codehaus.org)
+Licensed under the Apache License 2.0.
+
+This product uses software developed at
+slf4j (http://www.sl4j.org)
+Licensed under the MIT License.
+
+
+III. License Summary
+- Apache License 2.0
+- BSD License
+- MIT License
