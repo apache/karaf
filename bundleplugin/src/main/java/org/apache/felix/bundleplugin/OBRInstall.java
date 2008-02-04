@@ -26,7 +26,6 @@ import org.apache.felix.obr.plugin.ObrUpdate;
 import org.apache.felix.obr.plugin.ObrUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
@@ -67,7 +66,7 @@ public final class OBRInstall extends AbstractMojo
     private MavenProject project;
 
 
-    public void execute() throws MojoExecutionException
+    public void execute()
     {
         if ( "NONE".equalsIgnoreCase( obrRepository ) )
         {

@@ -226,10 +226,8 @@ public class BundleAllPlugin extends ManifestPlugin
                 {
                     continue;
                 }
-                else
-                {
-                    throw new MojoExecutionException( "Artifact was not found in the repo" + node.getArtifact(), e );
-                }
+
+                throw new MojoExecutionException( "Artifact was not found in the repo" + node.getArtifact(), e );
             }
 
             node.getArtifact().setFile( artifact.getFile() );

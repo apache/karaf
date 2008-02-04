@@ -535,7 +535,7 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    private static Map getProperties( Model projectModel, String prefix, Object model )
+    private static Map getProperties( Model projectModel, String prefix )
     {
         Map properties = new HashMap();
         Method methods[] = Model.class.getDeclaredMethods();
@@ -760,9 +760,9 @@ public class BundlePlugin extends AbstractMojo
 
         properties.putAll( currentProject.getProperties() );
         properties.putAll( currentProject.getModel().getProperties() );
-        properties.putAll( getProperties( currentProject.getModel(), "project.build.", currentProject.getBuild() ) );
-        properties.putAll( getProperties( currentProject.getModel(), "pom.", currentProject.getModel() ) );
-        properties.putAll( getProperties( currentProject.getModel(), "project.", currentProject ) );
+        properties.putAll( getProperties( currentProject.getModel(), "project.build." ) );
+        properties.putAll( getProperties( currentProject.getModel(), "pom." ) );
+        properties.putAll( getProperties( currentProject.getModel(), "project." ) );
         properties.put( "project.baseDir", baseDir );
         properties.put( "project.build.directory", getBuildDirectory() );
         properties.put( "project.build.outputdirectory", getOutputDirectory() );
@@ -890,10 +890,8 @@ public class BundlePlugin extends AbstractMojo
             // includes transitive dependencies
             return project.getArtifacts();
         }
-        else
-        {
-            // only includes direct dependencies
-            return project.getDependencyArtifacts();
-        }
+
+        // only includes direct dependencies
+        return project.getDependencyArtifacts();
     }
 }

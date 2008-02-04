@@ -37,7 +37,7 @@ import aQute.lib.osgi.Jar;
 
 /**
  * Generate an OSGi manifest for this project
- *
+ * 
  * @goal manifest
  * @phase process-classes
  * @requiresDependencyResolution runtime
@@ -89,7 +89,7 @@ public class ManifestPlugin extends BundlePlugin
 
     public Manifest getManifest( MavenProject project, Jar[] classpath ) throws IOException
     {
-        return getManifest( project, null, null, classpath );
+        return getManifest( project, new Properties(), new Properties(), classpath );
     }
 
 
@@ -166,16 +166,13 @@ public class ManifestPlugin extends BundlePlugin
         }
         finally
         {
-            if ( os != null )
+            try
             {
-                try
-                {
-                    os.close();
-                }
-                catch ( IOException e )
-                {
-                    //nothing we can do here
-                }
+                os.close();
+            }
+            catch ( IOException e )
+            {
+                // nothing we can do here
             }
         }
     }

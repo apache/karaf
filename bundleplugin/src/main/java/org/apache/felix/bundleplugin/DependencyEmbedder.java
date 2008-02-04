@@ -154,14 +154,19 @@ public final class DependencyEmbedder
         abstract boolean matches( Artifact dependency );
 
 
-        private boolean matches( String text )
+        boolean matches( String text )
         {
+            boolean result;
+
             if ( null == text )
             {
-                text = m_defaultValue;
+                result = m_instruction.matches( m_defaultValue );
+            }
+            else
+            {
+                result = m_instruction.matches( text );
             }
 
-            boolean result = m_instruction.matches( text );
             return m_instruction.isNegated() ? !result : result;
         }
     }
