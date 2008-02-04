@@ -233,7 +233,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
             // properties
             final JavaTag[] props = currentDescription.getTagsByName(Constants.PROPERTY, false);
             for (int i=0; i < props.length; i++) {
-                this.propertyHandler.testProperty(properties, props[i], null, description == currentDescription);
+                this.propertyHandler.testProperty(properties, props[i], null, null, description == currentDescription);
             }
 
             // references
@@ -254,9 +254,12 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 if (tag != null) {
                     String defaultName = null;
                     if ( "java.lang.String".equals(fields[i].getType()) ) {
-                        defaultName = fields[i].getInitializationExpression();
+                        final String[] initValues = fields[i].getInitializationExpression();
+                        if ( initValues != null && initValues.length == 1 ) {
+                            defaultName = initValues[0];
+                        }
                     }
-                    this.propertyHandler.testProperty(properties, tag, defaultName, description == currentDescription);
+                    this.propertyHandler.testProperty(properties, tag, defaultName, fields[i], description == currentDescription);
                 }
             }
 
@@ -268,8 +271,9 @@ public class SCRDescriptorMojo extends AbstractMojo {
         while ( propIter.hasNext() ) {
             final Map.Entry entry = (Map.Entry)propIter.next();
             final String propName = entry.getKey().toString();
-            final JavaTag tag = (JavaTag)entry.getValue();
-            this.propertyHandler.doProperty(tag, propName, component, ocd);
+            final Object[] values = (Object[])entry.getValue();
+            final JavaTag tag = (JavaTag)values[0];
+            this.propertyHandler.doProperty(tag, propName, component, ocd, (JavaField)values[1]);
         }
 
         // process references

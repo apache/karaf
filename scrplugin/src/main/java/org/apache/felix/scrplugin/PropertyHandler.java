@@ -24,7 +24,8 @@ import org.apache.felix.scrplugin.om.Component;
 import org.apache.felix.scrplugin.om.Property;
 import org.apache.felix.scrplugin.om.metatype.AttributeDefinition;
 import org.apache.felix.scrplugin.om.metatype.OCD;
-import org.apache.felix.scrplugin.tags.*;
+import org.apache.felix.scrplugin.tags.JavaField;
+import org.apache.felix.scrplugin.tags.JavaTag;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.util.StringUtils;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -40,7 +41,7 @@ public class PropertyHandler {
      * @param component
      * @param ocd
      */
-    public void doProperty(JavaTag property, String name, Component component, OCD ocd)
+    public void doProperty(JavaTag property, String name, Component component, OCD ocd, JavaField javaField)
     throws MojoExecutionException {
         final Property prop = new Property(property);
         prop.setName(name);
@@ -53,7 +54,7 @@ public class PropertyHandler {
             // now we check for a value ref attribute
             final String valueRef = property.getNamedParameter(Constants.PROPERTY_VALUE_REF);
             if ( valueRef != null ) {
-                prop.setValue(this.getPropertyValueRef(property.getJavaClassDescription(), prop, valueRef));
+                this.setPropertyValueRef(property, prop, valueRef);
             } else {
                 // check for multivalue - these can either be values or value refs
                 final List values = new ArrayList();
@@ -64,11 +65,22 @@ public class PropertyHandler {
                     if (key.startsWith(Constants.PROPERTY_MULTIVALUE_PREFIX) ) {
                         values.add(entry.getValue());
                     } else if ( key.startsWith(Constants.PROPERTY_MULTIVALUE_REF_PREFIX) ) {
-                        values.add(this.getPropertyValueRef(property.getJavaClassDescription(), prop, (String)entry.getValue()));
+                        final String[] stringValues = this.getPropertyValueRef(property, prop, (String)entry.getValue());
+                        if ( stringValues != null ) {
+                            for(int i=0; i<stringValues.length; i++) {
+                                values.add(stringValues[i]);
+                            }
+                        }
                     }
                 }
                 if ( values.size() > 0 ) {
                     prop.setMultiValue((String[])values.toArray(new String[values.size()]));
+                } else {
+                    // we have no value, valueRef or values so let's try to
+                    // get the value of the field if a name attribute is specified
+                    if ( property.getNamedParameter(Constants.PROPERTY_NAME) != null && javaField != null ) {
+                        this.setPropertyValueRef(property, prop, javaField.getName());
+                    }
                 }
             }
         }
@@ -159,14 +171,25 @@ public class PropertyHandler {
         return defaultName;
     }
 
-    public String getPropertyValueRef(JavaClassDescription desc, Property prop, String valueRef)
+    public void setPropertyValueRef(final JavaTag tag, Property property, String valueRef)
+    throws MojoExecutionException {
+        final String[] values = this.getPropertyValueRef(tag, property, valueRef);
+        if ( values != null && values.length == 1 ) {
+            property.setValue(values[0]);
+        } else if ( values != null && values.length > 1 ) {
+            property.setMultiValue(values);
+        }
+    }
+
+    public String[] getPropertyValueRef(final JavaTag tag, Property prop, String valueRef)
     throws MojoExecutionException {
         int classSep = valueRef.lastIndexOf('.');
         if ( classSep == -1 ) {
             // local variable
-            final JavaField field = desc.getFieldByName(valueRef);
+            // TODO - This could be a static import!
+            final JavaField field = tag.getJavaClassDescription().getFieldByName(valueRef);
             if ( field == null ) {
-                throw new MojoExecutionException("Property references unknown field " + valueRef + " in class " + desc.getName());
+                throw new MojoExecutionException("Property references unknown field " + valueRef + " in class " + tag.getJavaClassDescription().getName());
             }
             // determine type (if not set explicitly)
             if ( prop.getType() == null ) {
@@ -197,7 +220,7 @@ public class PropertyHandler {
         throw new MojoExecutionException("Referencing values from foreign classes not supported yet.");
     }
 
-    public void testProperty(Map properties, JavaTag property, String defaultName, boolean isInspectedClass)
+    public void testProperty(Map properties, JavaTag property, String defaultName, JavaField field, boolean isInspectedClass)
     throws MojoExecutionException {
         final String propName = this.getPropertyName(property, defaultName);
 
@@ -209,7 +232,7 @@ public class PropertyHandler {
                     throw new MojoExecutionException("Duplicate definition for property " + propName + " in class " + property.getJavaClassDescription().getName());
                 }
             } else {
-                properties.put(propName, property);
+                properties.put(propName, new Object[] {property, field});
             }
         }
     }

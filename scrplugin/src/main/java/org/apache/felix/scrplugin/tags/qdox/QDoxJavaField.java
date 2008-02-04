@@ -18,10 +18,7 @@
  */
 package org.apache.felix.scrplugin.tags.qdox;
 
-import java.lang.reflect.Field;
-
-import org.apache.felix.scrplugin.tags.JavaField;
-import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.*;
 
 import com.thoughtworks.qdox.model.DocletTag;
 
@@ -43,35 +40,26 @@ public class QDoxJavaField implements JavaField {
     /**
      * @see org.apache.felix.scrplugin.tags.JavaField#getInitializationExpression()
      */
-    public String getInitializationExpression() {
-        final Class c = this.description.getCompiledClass();
-        try {
-            final Field field = c.getDeclaredField(this.getName());
-            field.setAccessible(true);
-            final Object value = field.get(null);
+    public String[] getInitializationExpression() {
+        String[] values = ClassUtil.getInitializationExpression(this.description.getCompiledClass(), this.getName());
+        if ( values == null ) {
+            // try qdox
+            String value = this.field.getInitializationExpression();
             if ( value != null ) {
-                return value.toString();
-            }
-            return null;
-        } catch (NoClassDefFoundError e) {
-            // ignore and try qdox
-        } catch (Exception e) {
-            // ignore and try qdox
-        }
-        String value = this.field.getInitializationExpression();
-        if ( value != null ) {
-            int pos = value.indexOf("\"");
-            if ( pos != -1 ) {
-                try {
-                    value = value.substring(pos + 1);
-                    value = value.substring(0, value.lastIndexOf("\""));
-                } catch (ArrayIndexOutOfBoundsException aioobe) {
-                    // ignore this as this is a qdox problem
-                    value = this.field.getInitializationExpression();
+                int pos = value.indexOf("\"");
+                if ( pos != -1 ) {
+                    try {
+                        value = value.substring(pos + 1);
+                        value = value.substring(0, value.lastIndexOf("\""));
+                    } catch (ArrayIndexOutOfBoundsException aioobe) {
+                        // ignore this as this is a qdox problem
+                        value = this.field.getInitializationExpression();
+                    }
                 }
+                values = new String[] {value};
             }
         }
-        return value;
+        return values;
     }
 
     /**

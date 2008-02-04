@@ -40,18 +40,8 @@ public class ClassLoaderJavaField implements JavaField {
     /**
      * @see org.apache.felix.scrplugin.tags.JavaField#getInitializationExpression()
      */
-    public String getInitializationExpression() {
-        try {
-            this.field.setAccessible(true);
-            final Object value = this.field.get(null);
-            if ( value != null ) {
-                return value.toString();
-            }
-            return null;
-        } catch (Exception e) {
-            // ignore and return null
-            return null;
-        }
+    public String[] getInitializationExpression() {
+        return ClassUtil.getInitializationExpression(this.field.getDeclaringClass(), this.field.getName());
     }
 
     /**

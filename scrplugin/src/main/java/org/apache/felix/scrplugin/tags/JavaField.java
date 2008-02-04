@@ -24,11 +24,25 @@ package org.apache.felix.scrplugin.tags;
  */
 public interface JavaField {
 
+    /** The name of the field. */
     String getName();
 
+    /** The type of the field. */
     String getType();
 
+    /**
+     * Return the given tag.
+     * @param name The tag name.
+     * @return The tag or null.
+     */
     JavaTag getTagByName(String name);
 
-    String getInitializationExpression();
+    /**
+     * Return the initial value if this is a static constant.
+     * If this field is not an array, an array of length 1 is
+     * returned with the value. If this field is an array,
+     * the array of values is returned.
+     * @return The initial value of the field.
+     */
+    String[] getInitializationExpression();
 }
