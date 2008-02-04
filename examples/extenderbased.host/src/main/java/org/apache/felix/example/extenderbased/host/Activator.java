@@ -32,6 +32,7 @@ import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.cache.BundleCache;
+import org.apache.felix.main.AutoActivator;
 
 /**
  * The activator of the host application bundle. The activator creates the
@@ -153,14 +154,18 @@ public class Activator implements BundleActivator, Runnable
             "org.osgi.util.tracker; version=1.3.2," +
             "org.apache.felix.example.extenderbased.host.extension; version=1.0.0," +
             "javax.swing");
-        configMap.put(FelixConstants.AUTO_START_PROP + ".1",
+        configMap.put(AutoActivator.AUTO_START_PROP + ".1",
             "file:../extenderbased.circle/target/extenderbased.circle-1.0.0.jar " +
             "file:../extenderbased.square/target/extenderbased.square-1.0.0.jar " +
             "file:../extenderbased.triangle/target/extenderbased.triangle-1.0.0.jar");
         configMap.put(FelixConstants.LOG_LEVEL_PROP, "1");
         configMap.put(BundleCache.CACHE_PROFILE_DIR_PROP, cachedir.getAbsolutePath());
 
+        // Create list to hold custom framework activators.
         List list = new ArrayList();
+        // Add activator to process auto-start/install properties.
+        list.add(new AutoActivator(configMap));
+        // Add our own activator.
         list.add(new Activator());
 
         try

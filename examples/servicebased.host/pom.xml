@@ -35,8 +35,8 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.framework</artifactId>
-      <version>1.0.0</version>
+      <artifactId>org.apache.felix.main</artifactId>
+      <version>1.0.3</version>
     </dependency>
   </dependencies>
   <build>
