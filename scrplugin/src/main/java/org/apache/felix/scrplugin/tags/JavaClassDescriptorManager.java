@@ -37,8 +37,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.IOUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.thoughtworks.qdox.JavaDocBuilder;
 import com.thoughtworks.qdox.model.JavaSource;
@@ -50,8 +48,6 @@ import com.thoughtworks.qdox.model.JavaSource;
 public class JavaClassDescriptorManager {
 
     protected static final String SERVICE_COMPONENT = "Service-Component";
-
-    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /** The sources read by qdox. */
     protected final JavaSource[] sources;
