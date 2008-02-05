@@ -71,6 +71,13 @@ public final class ObrDeploy extends AbstractMojo
     private String altDeploymentRepository;
 
     /**
+     * Optional public URL where the bundle has been deployed.
+     *
+     * @parameter expression="${bundleUrl}"
+     */
+    private String bundleUrl;
+
+    /**
      * Local Repository.
      * 
      * @parameter expression="${localRepository}"
@@ -109,11 +116,18 @@ public final class ObrDeploy extends AbstractMojo
     {
         if ( "NONE".equalsIgnoreCase( obrRepository ) )
         {
+            getLog().info( "OBR update disabled (enable with -DobrRepository)" );
             return;
         }
 
-        URI repositoryURI = ObrUtils.findRepositoryXml( "", obrRepository );
-        String repositoryName = new File( repositoryURI.getPath() ).getName();
+        URI remoteBundleURI = null;
+        if ( null != bundleUrl )
+        {
+            remoteBundleURI = URI.create( bundleUrl );
+        }
+
+        URI tempURI = ObrUtils.findRepositoryXml( "", obrRepository );
+        String repositoryName = new File( tempURI.getPath() ).getName();
 
         Log log = getLog();
         ObrUpdate update;
@@ -139,8 +153,9 @@ public final class ObrDeploy extends AbstractMojo
             URI bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
 
             Config userConfig = new Config();
+            userConfig.setRemoteBundle( remoteBundleURI );
             userConfig.setPathRelative( true );
-            userConfig.setRemotely( true );
+            userConfig.setRemoteFile( true );
 
             update = new ObrUpdate( repositoryXml, obrXmlFile, project, bundleJar, mavenRepository, userConfig, log );
 

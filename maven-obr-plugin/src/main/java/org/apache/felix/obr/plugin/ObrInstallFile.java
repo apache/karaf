@@ -61,6 +61,7 @@ public final class ObrInstallFile extends AbstractFileMojo
 
         if ( "NONE".equalsIgnoreCase( obrRepository ) )
         {
+            getLog().info( "OBR update disabled (enable with -DobrRepository)" );
             return;
         }
 

@@ -70,6 +70,7 @@ public final class ObrInstall extends AbstractMojo
     {
         if ( "NONE".equalsIgnoreCase( obrRepository ) )
         {
+            getLog().info( "OBR update disabled (enable with -DobrRepository)" );
             return;
         }
 

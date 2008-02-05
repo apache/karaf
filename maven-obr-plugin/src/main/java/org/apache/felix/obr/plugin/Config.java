@@ -19,6 +19,9 @@
 package org.apache.felix.obr.plugin;
 
 
+import java.net.URI;
+
+
 /**
  * this class is used to store some user information about configuration of the plugin.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
@@ -26,33 +29,25 @@ package org.apache.felix.obr.plugin;
  */
 public class Config
 {
-
-    /**
-     * use relative path or not.
-     */
     private boolean m_pathRelative; // use relative or absolute path in repository.xml
-
-    /**
-     * deploy file or not.
-     */
-    private boolean m_fileRemote; // deploy file on remote server
+    private boolean m_remoteFile; // deploy file on remote server
+    private URI m_remoteBundle; // public address of deployed bundle
 
 
     /**
      * constructor: set default configuration: use relative path and don't upload file.
-     *
      */
     public Config()
     {
         // default configuration
         m_pathRelative = true;
-        m_fileRemote = false;
+        m_remoteFile = false;
+        m_remoteBundle = null;
     }
 
 
     /**
-     * set relativePath attribute.
-     * @param value new value of attribute
+     * @param value enable to use relative path
      */
     public void setPathRelative( boolean value )
     {
@@ -61,18 +56,25 @@ public class Config
 
 
     /**
-     * set fileRemote attribute.
-     * @param value new value of attribute
+     * @param value enable when uploading
      */
-    public void setRemotely( boolean value )
+    public void setRemoteFile( boolean value )
     {
-        m_fileRemote = value;
+        m_remoteFile = value;
     }
 
 
     /**
-     * get use path relative.
-     * @return true if plugin use relative path, else false
+     * @param value public address of deployed bundle
+     */
+    public void setRemoteBundle( URI value )
+    {
+        m_remoteBundle = value;
+    }
+
+
+    /**
+     * @return true if plugin uses relative path, else false
      */
     public boolean isPathRelative()
     {
@@ -81,11 +83,19 @@ public class Config
 
 
     /**
-     * get if use upload file.
      * @return true if the file will be uploaded, else false
      */
-    public boolean isRemotely()
+    public boolean isRemoteFile()
     {
-        return m_fileRemote;
+        return m_remoteFile;
+    }
+
+
+    /**
+     * @return public address of deployed bundle
+     */
+    public URI getRemoteBundle()
+    {
+        return m_remoteBundle;
     }
 }

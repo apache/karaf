@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,7 +19,15 @@
 package org.apache.felix.obr.plugin;
 
 
-import org.apache.maven.plugin.AbstractMojo;
+import java.io.File;
+import java.net.URI;
+
+import org.apache.maven.artifact.manager.WagonManager;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.settings.Settings;
 
 
 /**
@@ -31,10 +39,153 @@ import org.apache.maven.plugin.AbstractMojo;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ObrDeployFile extends AbstractMojo
+public final class ObrDeployFile extends AbstractFileMojo
 {
-    public void execute()
+    /**
+     * When true, ignore remote locking.
+     * 
+     * @parameter expression="${ignoreLock}"
+     */
+    private boolean ignoreLock;
+
+    /**
+     * OBR Repository.
+     * 
+     * @parameter expression="${obrRepository}"
+     */
+    private String obrRepository;
+
+    /**
+     * Remote repository id, used to lookup authentication settings.
+     *
+     * @parameter expression="${repositoryId}" default-value="remote-repository"
+     * @required
+     */
+    private String repositoryId;
+
+    /**
+     * Remote OBR repository URL, where the bundle details are to be uploaded.
+     *
+     * @parameter expression="${url}"
+     * @required
+     */
+    private String url;
+
+    /**
+     * Optional public URL where the bundle has been deployed.
+     *
+     * @parameter expression="${bundleUrl}"
+     */
+    private String bundleUrl;
+
+    /**
+     * Local Repository.
+     * 
+     * @parameter expression="${localRepository}"
+     * @required
+     * @readonly
+     */
+    private ArtifactRepository localRepository;
+
+    /**
+     * Local Maven settings.
+     * 
+     * @parameter expression="${settings}"
+     * @required
+     * @readonly
+     */
+    private Settings settings;
+
+    /**
+     * The Wagon manager.
+     * 
+     * @component
+     */
+    private WagonManager m_wagonManager;
+
+
+    public void execute() throws MojoExecutionException
     {
-        // TODO Auto-generated method stub       
+        MavenProject project = getProject();
+
+        if ( "NONE".equalsIgnoreCase( obrRepository ) )
+        {
+            getLog().info( "OBR update disabled (enable with -DobrRepository)" );
+            return;
+        }
+
+        URI remoteBundleURI = null;
+        if ( null != bundleUrl )
+        {
+            remoteBundleURI = URI.create( bundleUrl );
+        }
+
+        URI tempURI = ObrUtils.findRepositoryXml( "", obrRepository );
+        String repositoryName = new File( tempURI.getPath() ).getName();
+
+        Log log = getLog();
+        ObrUpdate update;
+
+        RemoteFileManager remoteFile = new RemoteFileManager( m_wagonManager, settings, log );
+        remoteFile.connect( repositoryId, url );
+
+        // ======== LOCK REMOTE OBR ========
+        log.info( "LOCK " + remoteFile + '/' + repositoryName );
+        remoteFile.lockFile( repositoryName, ignoreLock );
+        File downloadedRepositoryXml = null;
+
+        try
+        {
+            // ======== DOWNLOAD REMOTE OBR ========
+            log.info( "Downloading " + repositoryName );
+            downloadedRepositoryXml = remoteFile.get( repositoryName, ".xml" );
+
+            String mavenRepository = localRepository.getBasedir();
+
+            URI repositoryXml = downloadedRepositoryXml.toURI();
+            URI obrXmlFile = ObrUtils.toFileURI( obrXml );
+            URI bundleJar;
+
+            if ( null == file )
+            {
+                bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
+            }
+            else
+            {
+                bundleJar = file.toURI();
+            }
+
+            Config userConfig = new Config();
+            userConfig.setRemoteBundle( remoteBundleURI );
+            userConfig.setPathRelative( true );
+            userConfig.setRemoteFile( true );
+
+            update = new ObrUpdate( repositoryXml, obrXmlFile, project, bundleJar, mavenRepository, userConfig, log );
+
+            update.updateRepository();
+
+            if ( downloadedRepositoryXml.exists() )
+            {
+                // ======== UPLOAD MODIFIED OBR ========
+                log.info( "Uploading " + repositoryName );
+                remoteFile.put( downloadedRepositoryXml, repositoryName );
+            }
+        }
+        catch ( Exception e )
+        {
+            log.warn( "Exception while updating remote OBR: " + e.getLocalizedMessage(), e );
+        }
+        finally
+        {
+            // ======== UNLOCK REMOTE OBR ========
+            log.info( "UNLOCK " + remoteFile + '/' + repositoryName );
+            remoteFile.unlockFile( repositoryName );
+            remoteFile.disconnect();
+
+            if ( null != downloadedRepositoryXml )
+            {
+                downloadedRepositoryXml.delete();
+            }
+        }
     }
 }

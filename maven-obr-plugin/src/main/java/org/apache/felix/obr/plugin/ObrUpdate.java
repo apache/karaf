@@ -135,7 +135,7 @@ public class ObrUpdate
 
         m_resourceBundle = new ResourcesBundle( logger );
 
-        if ( userConfig.isRemotely() )
+        if ( userConfig.isRemoteFile() )
         {
             m_baseURI = ObrUtils.toFileURI( mavenRepositoryPath );
         }
@@ -167,10 +167,14 @@ public class ObrUpdate
         File bundleFile = new File( m_bundleJar );
         if ( bundleFile.exists() )
         {
-            URI resourceURI = m_bundleJar;
-            if ( m_userConfig.isPathRelative() )
+            URI resourceURI = m_userConfig.getRemoteBundle();
+            if ( null == resourceURI )
             {
-                resourceURI = ObrUtils.getRelativeURI( m_baseURI, resourceURI );
+                resourceURI = m_bundleJar;
+                if ( m_userConfig.isPathRelative() )
+                {
+                    resourceURI = ObrUtils.getRelativeURI( m_baseURI, resourceURI );
+                }
             }
 
             m_resourceBundle.setSize( String.valueOf( bundleFile.length() ) );
@@ -219,7 +223,7 @@ public class ObrUpdate
             m_logger.error( "unable to build Bindex informations" );
             e.printStackTrace();
 
-            throw new MojoExecutionException( "MojoFailureException" );
+            throw new MojoExecutionException( "BindexException" );
         }
 
         m_resourceBundle.construct( m_project, bindexExtractor );
@@ -288,7 +292,7 @@ public class ObrUpdate
             catch ( MojoExecutionException e )
             {
                 e.printStackTrace();
-                throw new MojoExecutionException( "MojoExecutionException" );
+                throw new MojoExecutionException( "IOException" );
             }
         }
 
@@ -542,7 +546,7 @@ public class ObrUpdate
             return;
         }
 
-        System.out.println( "Second branch..." );
+        m_logger.info( "Second branch..." );
         NodeList list = node.getChildNodes();
         if ( list.getLength() > 0 )
         {
