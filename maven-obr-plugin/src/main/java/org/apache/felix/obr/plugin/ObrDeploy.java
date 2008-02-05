@@ -53,7 +53,7 @@ public final class ObrDeploy extends AbstractMojo
     /**
      * OBR Repository.
      * 
-     * @parameter expression="${obrRepository}" default-value="NONE"
+     * @parameter expression="${obrRepository}"
      */
     private String obrRepository;
 
