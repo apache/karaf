@@ -31,7 +31,7 @@ import org.apache.maven.project.MavenProject;
 
 
 /**
- * Installs bundle details in the local OBR repository
+ * Installs bundle details in the local OBR repository (life-cycle goal)
  * 
  * @goal install
  * @phase install
@@ -81,12 +81,12 @@ public final class ObrInstall extends AbstractMojo
             String mavenRepository = localRepository.getBasedir();
 
             URI repositoryXml = ObrUtils.findRepositoryXml( mavenRepository, obrRepository );
-            URI obrXml = ObrUtils.findObrXml( project.getResources() );
+            URI obrXmlFile = ObrUtils.findObrXml( project.getResources() );
             URI bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
 
             Config userConfig = new Config();
 
-            update = new ObrUpdate( repositoryXml, obrXml, project, bundleJar, mavenRepository, userConfig, log );
+            update = new ObrUpdate( repositoryXml, obrXmlFile, project, bundleJar, mavenRepository, userConfig, log );
 
             update.updateRepository();
         }

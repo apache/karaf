@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,146 +19,72 @@
 package org.apache.felix.obr.plugin;
 
 
-import java.io.File;
 import java.net.URI;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
 
 /**
- * Install bundle metadata to local OBR (command-line goal).
+ * Installs bundle details in the local OBR repository (command-line goal)
  * 
- * @goal install-file
  * @requiresProject false
+ * @goal install-file
  * @phase install
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ObrInstallFile extends AbstractMojo
+public final class ObrInstallFile extends AbstractFileMojo
 {
     /**
-     * Component factory for Maven artifacts
+     * OBR Repository.
      * 
-     * @component
+     * @parameter expression="${obrRepository}"
      */
-    private ArtifactFactory m_factory;
+    private String obrRepository;
 
     /**
-     * The local Maven repository.
+     * Local Repository.
      * 
      * @parameter expression="${localRepository}"
      * @required
      * @readonly
      */
-    private ArtifactRepository m_localRepo;
-
-    /**
-     * path to the repository.xml.
-     * 
-     * @parameter expression="${repository-path}" alias="repository-path"
-     */
-    private String m_repositoryPath;
-
-    /**
-     * Artifact Id.
-     * @description symbolic name define by the user
-     * @parameter expression="${artifactId}"
-     */
-    private String m_artifactId;
-
-    /**
-     * Group Id.
-     * @description groupId define by the user
-     * @parameter expression="${groupId}"
-     */
-    private String m_groupId;
-
-    /**
-     * Version.
-     * @description version define by the user
-     * @parameter expression="${version}"
-     */
-    private String m_version;
-
-    /**
-     * Packaging.
-     * @description packaging define by the user
-     * @parameter expression="${packaging}"
-     */
-    private String m_packaging;
-
-    /**
-     * OBR File.
-     * @description obr file define by the user
-     * @parameter expression="${obr-file}" alias="obr-file"
-     */
-    private String m_obrFile;
+    private ArtifactRepository localRepository;
 
 
-    /**
-     * main method for this goal.
-     * @implements org.apache.maven.plugin.Mojo.execute 
-     * @throws MojoExecutionException if the plugin failed
-     */
     public void execute() throws MojoExecutionException
     {
-        MavenProject project = new MavenProject();
-        project.setArtifactId( m_artifactId );
-        project.setGroupId( m_groupId );
-        project.setVersion( m_version );
-        project.setPackaging( m_packaging );
+        MavenProject project = getProject();
 
-        if ( m_groupId == null )
+        if ( "NONE".equalsIgnoreCase( obrRepository ) )
         {
-            getLog().error( "-DgroupId=VALUE is required" );
-            return;
-        }
-        if ( m_artifactId == null )
-        {
-            getLog().error( "-Dartifactid=VALUE is required" );
-            return;
-        }
-        if ( m_version == null )
-        {
-            getLog().error( "-Dversion=VALUE is required" );
-            return;
-        }
-        if ( m_packaging == null )
-        {
-            getLog().error( "-Dpackaging=VALUE is required" );
             return;
         }
 
-        // locate the obr.xml file
-        URI obrXml = ObrUtils.toFileURI( m_obrFile );
-        if ( null == obrXml )
+        Log log = getLog();
+        ObrUpdate update;
+
+        String mavenRepository = localRepository.getBasedir();
+
+        URI repositoryXml = ObrUtils.findRepositoryXml( mavenRepository, obrRepository );
+        URI obrXmlFile = ObrUtils.toFileURI( obrXml );
+        URI bundleJar;
+
+        if ( null == file )
         {
-            getLog().info( "obr.xml is not present, use default" );
+            bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
+        }
+        else
+        {
+            bundleJar = file.toURI();
         }
 
-        Artifact bundleArtifact = m_factory.createBuildArtifact( m_groupId, m_artifactId, m_version, m_packaging );
-
-        // get the path to local maven repository
-        String mavenRepository = m_localRepo.getBasedir();
-
-        URI repoXml = ObrUtils.findRepositoryXml( mavenRepository, m_repositoryPath );
-        URI bundleJar = ObrUtils.findBundleJar( m_localRepo, bundleArtifact );
-
-        if ( !new File( bundleJar ).exists() )
-        {
-            getLog().error( "file not found in local repository: " + bundleJar );
-            return;
-        }
-
-        // use default configuration
         Config userConfig = new Config();
 
-        ObrUpdate update = new ObrUpdate( repoXml, obrXml, project, bundleJar, null, userConfig, getLog() );
+        update = new ObrUpdate( repositoryXml, obrXmlFile, project, bundleJar, mavenRepository, userConfig, log );
 
         update.updateRepository();
     }
