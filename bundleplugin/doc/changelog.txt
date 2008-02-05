@@ -1,3 +1,35 @@
+Changes from 1.0.0 to 1.2.0
+---------------------------
+
+ * [2008-01-11] FELIX-455: need to use the Builder class instead of Analyzer, because it provides additional cleanup of version information
+ * [2008-01-10] FELIX-451: remove Include-Resource header from final bundle manifest
+ * [2008-01-10] FELIX-449: add 'excludeDependencies' option (disabled by default) to exclude all dependencies from the classpath passed to BND
+ * [2008-01-09] FELIX-442: handle custom manifest sections and external manifest files
+ * [2008-01-08] Update to bndlib 0.0.227 (disables spring xml parser by default)
+ * [2007-12-27] FELIX-442: Add manifest entries from maven-jar-plugin configuration to final bundle
+ * [2007-12-07] FELIX-433: add unpackBundle option that unpacks the bundle contents to the Maven output directory
+ * [2007-11-18] FELIX-400: add resource code to properly handle Maven includes/excludes
+ * [2007-11-01] Make Embed-StripGroup default to true, as it is much more useful than the current default
+ * [2007-10-31] FELIX-417: fix project references
+ * [2007-10-26] Better error messages (and detect difference between internal error and configuration error)
+ * [2007-10-23] FELIX 406: fix Windows path entries in Bundle-ClassPath when embedding jars
+ * [2007-10-22] FELIX-405: support custom obr repository filenames, such as foo.xml
+ * [2007-10-21] FELIX-403: replace line-breaks with spaces when using Maven project description in Bundle manifest
+ * [2007-10-19] FELIX-402: use correct manifest location when using reactor build
+ * [2007-10-19] FELIX-400: fix array out of bounds exception when the resource directory is the same as the basedir
+ * [2007-09-25] FELIX-360: various fixes to the bundleall goal
+ * [2007-09-22] FELIX-370: OBR integration work
+ * [2007-09-22] FELIX-306: be consistent and delegate all version mangling to BND library
+ * [2007-09-21] FELIX-377: support -failok directive
+ * [2007-09-21] FELIX-376: Support writing of manifest to the file system when using bundle goal
+ * [2007-09-11] FELIX-352: provide informational error message when manifest goal is run before compile phase
+ * [2007-08-26] FELIX-308: support embedding of artifacts with non-jar extension names
+ * [2007-08-24] Workaround for MNG-1682 (incorrect extension used when installing to local repository)
+ * [2007-08-23] FELIX-343: replace any instances of {maven-resources} in Include-Resource with the actual project's resource paths
+ * [2007-08-23] FELIX-308: initial implementation to support embedding dependencies
+ * [2007-08-22] FELIX-340: update classpath algorithm to match maven compilation classpath
+ * [2007-08-14] FELIX-333: remove new-lines/form-feeds from property values.
+
 Changes from 0.8.0-incubator to 1.0.0
 -------------------------------------
 
