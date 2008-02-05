@@ -35,42 +35,56 @@ import org.osgi.service.cm.ConfigurationAdmin;
  */
 public class PropertyHandler {
 
-    /** This is a map using the name as the key and {@link PropertyDescription}
-     * as values.
+    /**
+     * This is a map using the property name as the key and
+     * {@link PropertyDescription} as values.
      */
     final private Map properties = new HashMap();
 
+    /** The component. */
+    final private Component component;
+
+    /** The ocd or null. */
+    final private OCD ocd;
+
+    public PropertyHandler(final Component c, OCD o) {
+        this.component = c;
+        this.ocd = o;
+    }
+
     /**
-     * @param property
-     * @param name
-     * @param component
-     * @param ocd
+     * Process a property.
+     * @param tag       The property tag.
+     * @param name      The name of the property.
+     * @param javaField The corresponding java field or null.
      */
-    protected void doProperty(JavaTag property, String name, Component component, OCD ocd, JavaField javaField)
+    protected void processProperty(JavaTag   tag,
+                                   String    name,
+                                   JavaField javaField)
     throws MojoExecutionException {
-        final Property prop = new Property(property);
+        final Property prop = new Property(tag);
         prop.setName(name);
-        prop.setType(property.getNamedParameter(Constants.PROPERTY_TYPE));
+        prop.setType(tag.getNamedParameter(Constants.PROPERTY_TYPE));
         // let's first check for a value attribute
-        final String value = property.getNamedParameter(Constants.PROPERTY_VALUE);
+        final String value = tag.getNamedParameter(Constants.PROPERTY_VALUE);
         if ( value != null ) {
             prop.setValue(value);
         } else {
             // now we check for a value ref attribute
-            final String valueRef = property.getNamedParameter(Constants.PROPERTY_VALUE_REF);
+            final String valueRef = tag.getNamedParameter(Constants.PROPERTY_VALUE_REF);
             if ( valueRef != null ) {
-                this.setPropertyValueRef(property, prop, valueRef);
+                this.setPropertyValueRef(tag, prop, valueRef);
             } else {
                 // check for multivalue - these can either be values or value refs
                 final List values = new ArrayList();
-                final Map valueMap = property.getNamedParameterMap();
+                final Map valueMap = tag.getNamedParameterMap();
                 for (Iterator vi = valueMap.entrySet().iterator(); vi.hasNext();) {
                     final Map.Entry entry = (Map.Entry) vi.next();
                     final String key = (String) entry.getKey();
                     if (key.startsWith(Constants.PROPERTY_MULTIVALUE_PREFIX) ) {
                         values.add(entry.getValue());
                     } else if ( key.startsWith(Constants.PROPERTY_MULTIVALUE_REF_PREFIX) ) {
-                        final String[] stringValues = this.getPropertyValueRef(property, prop, (String)entry.getValue());
+                        final String[] stringValues = this.getPropertyValueRef(tag, prop, (String)entry.getValue());
                         if ( stringValues != null ) {
                             for(int i=0; i<stringValues.length; i++) {
                                 values.add(stringValues[i]);
@@ -83,8 +97,8 @@ public class PropertyHandler {
                 } else {
                     // we have no value, valueRef or values so let's try to
                     // get the value of the field if a name attribute is specified
-                    if ( property.getNamedParameter(Constants.PROPERTY_NAME) != null && javaField != null ) {
-                        this.setPropertyValueRef(property, prop, javaField.getName());
+                    if ( tag.getNamedParameter(Constants.PROPERTY_NAME) != null && javaField != null ) {
+                        this.setPropertyValueRef(tag, prop, javaField.getName());
                     }
                 }
             }
@@ -92,7 +106,7 @@ public class PropertyHandler {
 
         // property is private if explicitly marked or a well known
         // service property such as service.pid
-        final boolean isPrivate = SCRDescriptorMojo.getBoolean(property,
+        final boolean isPrivate = SCRDescriptorMojo.getBoolean(tag,
             Constants.PROPERTY_PRIVATE, false)
             || name.equals(org.osgi.framework.Constants.SERVICE_PID)
             || name.equals(org.osgi.framework.Constants.SERVICE_DESCRIPTION)
@@ -110,18 +124,18 @@ public class PropertyHandler {
             ad.setId(prop.getName());
             ad.setType(prop.getType());
 
-            String adName = property.getNamedParameter(Constants.PROPERTY_LABEL);
+            String adName = tag.getNamedParameter(Constants.PROPERTY_LABEL);
             if ( adName == null ) {
                 adName = "%" + prop.getName() + ".name";
             }
             ad.setName(adName);
-            String adDesc = property.getNamedParameter(Constants.PROPERTY_DESCRIPTION);
+            String adDesc = tag.getNamedParameter(Constants.PROPERTY_DESCRIPTION);
             if ( adDesc == null ) {
                 adDesc = "%" + prop.getName() + ".description";
             }
             ad.setDescription(adDesc);
             // set optional multivalues, cardinality might be overwritten by setValues !!
-            final String cValue = property.getNamedParameter(Constants.PROPERTY_CARDINALITY);
+            final String cValue = tag.getNamedParameter(Constants.PROPERTY_CARDINALITY);
             if (cValue != null) {
                 if ("-".equals(cValue)) {
                     // unlimited vector
@@ -141,7 +155,7 @@ public class PropertyHandler {
             ad.setDefaultMultiValue(prop.getMultiValue());
 
             // check options
-            String[] parameters = property.getParameters();
+            String[] parameters = tag.getParameters();
             Map options = null;
             for (int j=0; j < parameters.length; j++) {
                 if (Constants.PROPERTY_OPTIONS.equals(parameters[j])) {
@@ -163,14 +177,21 @@ public class PropertyHandler {
 
     /**
      * Return the name of the property.
-     * @param property
-     * @param defaultName
+     * @param property The property tag.
+     * @param field    The corresponding field if the property is a tag of a field.
      * @return The name of the property or the defaultName
      */
-    protected String getPropertyName(JavaTag property, String defaultName) {
-        final String name = property.getNamedParameter(Constants.PROPERTY_NAME);
+    protected String getPropertyName(JavaTag tag, JavaField field) {
+        final String name = tag.getNamedParameter(Constants.PROPERTY_NAME);
         if (!StringUtils.isEmpty(name)) {
             return name;
+        }
+        String defaultName = null;
+        if ( field != null && "java.lang.String".equals(field.getType()) ) {
+            final String[] initValues = field.getInitializationExpression();
+            if ( initValues != null && initValues.length == 1 ) {
+                defaultName = initValues[0];
+            }
         }
 
         return defaultName;
@@ -227,9 +248,18 @@ public class PropertyHandler {
         return field.getInitializationExpression();
     }
 
-    public void testProperty(JavaTag property, String defaultName, JavaField field, boolean isInspectedClass)
+    /**
+     * Test if there is already a property with the same name.
+     * @param property The tag.
+     * @param field
+     * @param isInspectedClass
+     * @throws MojoExecutionException
+     */
+    public void testProperty(JavaTag   property,
+                             JavaField field,
+                             boolean   isInspectedClass)
     throws MojoExecutionException {
-        final String propName = this.getPropertyName(property, defaultName);
+        final String propName = this.getPropertyName(property, field);
 
         if ( propName != null ) {
             if ( properties.containsKey(propName) ) {
@@ -241,6 +271,8 @@ public class PropertyHandler {
             } else {
                 properties.put(propName, new PropertyDescription(property, field));
             }
+        } else {
+            throw new MojoExecutionException("Property has no name " + property.getSourceLocation());
         }
     }
 
@@ -248,25 +280,22 @@ public class PropertyHandler {
     throws MojoExecutionException {
         final JavaTag tag = javaField.getTagByName(Constants.PROPERTY);
         if (tag != null) {
-            String defaultName = null;
-            if ( "java.lang.String".equals(javaField.getType()) ) {
-                final String[] initValues = javaField.getInitializationExpression();
-                if ( initValues != null && initValues.length == 1 ) {
-                    defaultName = initValues[0];
-                }
-            }
-            this.testProperty(tag, defaultName, javaField, isInspectedClass);
+            this.testProperty(tag, javaField, isInspectedClass);
         }
     }
 
-    public void processProperties(final Component component, final OCD ocd)
+    /**
+     * Process all found properties for the component.
+     * @throws MojoExecutionException
+     */
+    public void processProperties()
     throws MojoExecutionException {
         final Iterator propIter = properties.entrySet().iterator();
         while ( propIter.hasNext() ) {
             final Map.Entry entry = (Map.Entry)propIter.next();
             final String propName = entry.getKey().toString();
             final PropertyDescription desc = (PropertyDescription)entry.getValue();
-            this.doProperty(desc.propertyTag, propName, component, ocd, desc.field);
+            this.processProperty(desc.propertyTag, propName, desc.field);
         }
     }
 
