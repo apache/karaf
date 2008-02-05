@@ -279,8 +279,4 @@ public class PropertyHandler {
             this.field = f;
         }
     }
-
-    public void clear() {
-        this.properties.clear();
-    }
 }

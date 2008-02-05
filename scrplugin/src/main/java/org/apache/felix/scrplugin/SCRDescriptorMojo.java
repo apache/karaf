@@ -78,9 +78,6 @@ public class SCRDescriptorMojo extends AbstractMojo {
      */
     private boolean generateAccessors;
 
-    /** Utility handler for propertie. */
-    private final PropertyHandler propertyHandler = new PropertyHandler();
-
     /**
      * @see org.apache.maven.plugin.AbstractMojo#execute()
      */
@@ -226,14 +223,15 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
         // collect references from class tags and fields
         final Map references = new HashMap();
-        this.propertyHandler.clear();
+        // Utility handler for propertie
+        final PropertyHandler propertyHandler = new PropertyHandler();
 
         JavaClassDescription currentDescription = description;
         do {
             // properties
             final JavaTag[] props = currentDescription.getTagsByName(Constants.PROPERTY, false);
             for (int i=0; i < props.length; i++) {
-                this.propertyHandler.testProperty(props[i], null, null, description == currentDescription);
+                propertyHandler.testProperty(props[i], null, null, description == currentDescription);
             }
 
             // references
@@ -250,14 +248,14 @@ public class SCRDescriptorMojo extends AbstractMojo {
                     this.testReference(references, tag, fields[i].getName(), description == currentDescription);
                 }
 
-                this.propertyHandler.handleField(fields[i], description == currentDescription);
+                propertyHandler.handleField(fields[i], description == currentDescription);
             }
 
             currentDescription = currentDescription.getSuperClass();
         } while (inherited && currentDescription != null);
 
         // process properties
-        this.propertyHandler.processProperties(component, ocd);
+        propertyHandler.processProperties(component, ocd);
 
         // process references
         final Iterator refIter = references.entrySet().iterator();
