@@ -51,7 +51,7 @@ public class ObrUtils
         String targetPath = obrRepository;
 
         // Combine location settings into a single repository location
-        if ( null == targetPath || targetPath.trim().length() == 0 )
+        if ( null == targetPath || targetPath.trim().length() == 0 || "true".equalsIgnoreCase( targetPath ) )
         {
             targetPath = mavenRepository + '/' + REPO_XML;
         }
