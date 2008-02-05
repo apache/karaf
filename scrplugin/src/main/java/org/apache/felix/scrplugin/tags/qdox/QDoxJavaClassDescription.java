@@ -145,44 +145,61 @@ public class QDoxJavaClassDescription
      */
     public JavaField getExternalFieldByName(String name)
     throws MojoExecutionException {
-        JavaField field = this.searchExternalFieldByName(name);
-        if ( field == null ) {
-            field = this.searchExternalFieldByName(this.javaClass.getSource().getPackage() + '.' + name);
-        }
-        return field;
-    }
-
-    protected JavaField searchExternalFieldByName(String name)
-    throws MojoExecutionException {
-        int sep = name.lastIndexOf('.');
-        final String className = name.substring(0, sep);
-        final String constantName = name.substring(sep+1);
-        // we know that the name is external, so let's scan imports first
-        // for a fully qualified static import
-        boolean isStatic = this.searchImport(name);
-        if ( isStatic ) {
-            final JavaClassDescription jcd = this.manager.getJavaClassDescription(className);
-            if ( jcd != null ) {
-                return jcd.getFieldByName(constantName);
+        int lastDot = name.lastIndexOf('.');
+        // if there is no dot, this should be a static import
+        if ( lastDot == -1 ) {
+            final String importDef = this.searchImport('.' + name);
+            if ( importDef != null ) {
+                int sep = importDef.lastIndexOf('.');
+                final String className = importDef.substring(0, sep);
+                final String constantName = importDef.substring(sep+1);
+                final JavaClassDescription jcd = this.manager.getJavaClassDescription(className);
+                if ( jcd != null ) {
+                    return jcd.getFieldByName(constantName);
+                }
             }
-        }
-        final JavaClassDescription jcd = this.manager.getJavaClassDescription(className);
-        if ( jcd != null ) {
-            return jcd.getFieldByName(constantName);
+        } else {
+            // check for fully qualified
+            int firstDot = name.indexOf('.');
+            if ( firstDot == lastDot ) {
+                // we only have one dot, so either the class is imported or in the same package
+                final String className = name.substring(0, lastDot);
+                final String constantName = name.substring(lastDot+1);
+                final String importDef = this.searchImport('.' + className);
+                if ( importDef != null ) {
+                    final JavaClassDescription jcd = this.manager.getJavaClassDescription(importDef);
+                    if ( jcd != null ) {
+                        return jcd.getFieldByName(constantName);
+                    }
+                }
+                final JavaClassDescription jcd = this.manager.getJavaClassDescription(this.javaClass.getSource().getPackage() + '.' + className);
+                if ( jcd != null ) {
+                    return jcd.getFieldByName(constantName);
+                }
+
+            } else {
+                // we have more than one dot, so this is a fully qualified class
+                final String className = name.substring(0, lastDot);
+                final String constantName = name.substring(lastDot+1);
+                final JavaClassDescription jcd = this.manager.getJavaClassDescription(className);
+                if ( jcd != null ) {
+                    return jcd.getFieldByName(constantName);
+                }
+            }
         }
         return null;
     }
 
-    protected boolean searchImport(String name) {
+    protected String searchImport(String name) {
         final String[] imports = this.javaClass.getSource().getImports();
         if ( imports != null ) {
             for(int i=0; i<imports.length; i++ ) {
-                if ( imports[i].equals(name) ) {
-                    return true;
+                if ( imports[i].endsWith(name) ) {
+                    return imports[i];
                 }
             }
         }
-        return false;
+        return null;
     }
 
     /**
