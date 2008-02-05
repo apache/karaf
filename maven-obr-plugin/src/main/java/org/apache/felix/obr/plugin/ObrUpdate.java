@@ -191,6 +191,8 @@ public class ObrUpdate
         // parse the obr.xml file
         if ( m_obrXml != null )
         {
+            m_logger.info( "Adding " + m_obrXml );
+
             // URL url = getClass().getResource("/SchemaObr.xsd");
             // TODO validate obr.xml file
 
@@ -199,8 +201,10 @@ public class ObrUpdate
             {
                 return;
             }
+
             Node obrXmlRoot = obrXmlDoc.getDocumentElement();
-            // sort the obr file
+
+            // add contents to resource bundle
             sortObrXml( obrXmlRoot );
         }
 
@@ -214,6 +218,7 @@ public class ObrUpdate
         {
             m_logger.error( "unable to build Bindex informations" );
             e.printStackTrace();
+
             throw new MojoExecutionException( "MojoFailureException" );
         }
 
