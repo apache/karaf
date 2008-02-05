@@ -92,7 +92,7 @@ public final class ObrInstall extends AbstractMojo
         }
         catch ( Exception e )
         {
-            log.warn( "Exception while updating OBR: " + e.getLocalizedMessage(), e );
+            log.warn( "Exception while updating local OBR: " + e.getLocalizedMessage(), e );
         }
     }
 }
