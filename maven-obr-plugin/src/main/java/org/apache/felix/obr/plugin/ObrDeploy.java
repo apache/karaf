@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,151 +21,185 @@ package org.apache.felix.obr.plugin;
 
 import java.io.File;
 import java.net.URI;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
 
 
 /**
- * Deploy bundle metadata to remote OBR.
+ * Deploys bundle details to a remote OBR repository (life-cycle goal)
  * 
  * @goal deploy
  * @phase deploy
- * @requiresDependencyResolution compile
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ObrDeploy extends AbstractMojo
+public final class ObrDeploy extends AbstractMojo
 {
     /**
-     * Maven settings.
+     * When true, ignore remote locking.
      * 
-     * @parameter expression="${settings}"
-     * @require
+     * @parameter expression="${ignoreLock}"
      */
-    private Settings m_settings;
+    private boolean ignoreLock;
 
     /**
-     * name of the repository xml descriptor file.
+     * OBR Repository.
      * 
-     * @parameter expression="${repository-name}" default-value="repository.xml" alias="repository-name"
+     * @parameter expression="${obrRepository}" default-value="NONE"
      */
-    private String m_repositoryName;
+    private String obrRepository;
 
     /**
-     * The local Maven repository.
+     * @parameter expression="${project.distributionManagementArtifactRepository}"
+     * @readonly
+     */
+    private ArtifactRepository deploymentRepository;
+
+    /**
+     * Alternative deployment repository. Format: id::layout::url
+     * 
+     * @parameter expression="${altDeploymentRepository}"
+     */
+    private String altDeploymentRepository;
+
+    /**
+     * Local Repository.
      * 
      * @parameter expression="${localRepository}"
      * @required
      * @readonly
      */
-    private ArtifactRepository m_localRepo;
+    private ArtifactRepository localRepository;
 
     /**
-     * Project in use.
+     * The Maven project.
      * 
      * @parameter expression="${project}"
-     * @require
+     * @required
+     * @readonly
      */
-    private MavenProject m_project;
+    private MavenProject project;
 
     /**
-     * Wagon Manager.
+     * Local Maven settings.
+     * 
+     * @parameter expression="${settings}"
+     * @required
+     * @readonly
+     */
+    private Settings settings;
+
+    /**
+     * The Wagon manager.
+     * 
      * @component
      */
     private WagonManager m_wagonManager;
 
-    /**
-     * When true, ignore remote locking.
-     * 
-     * @parameter expression="${ignore-lock}" alias="ignore-lock"
-     */
-    private boolean m_ignoreLock;
 
-
-    /**
-     * main method for this goal.
-     * @implements org.apache.maven.plugin.Mojo.execute 
-     * @throws MojoExecutionException
-     */
     public void execute() throws MojoExecutionException
     {
-        ArtifactRepository ar = m_project.getDistributionManagementArtifactRepository();
-
-        // locate the obr.xml file
-        URI obrXml = ObrUtils.findObrXml( m_project.getResources() );
-        if ( null == obrXml )
+        if ( "NONE".equalsIgnoreCase( obrRepository ) )
         {
-            getLog().info( "obr.xml is not present, use default" );
-        }
-
-        File repoDescriptorFile = null;
-
-        // init the wagon connection
-        RemoteFileManager remoteFile = new RemoteFileManager( ar, m_wagonManager, m_settings, getLog() );
-        remoteFile.connect();
-
-        if ( !m_ignoreLock )
-        {
-            int countError = 0;
-            while ( remoteFile.isLockedFile( m_repositoryName ) && countError < 2 )
-            {
-                countError++;
-                getLog().warn( "OBR is locked, retry in 10s" );
-                try
-                {
-                    Thread.sleep( 10000 );
-                }
-                catch ( InterruptedException e )
-                {
-                    getLog().warn( "Sleep interrupted" );
-                }
-            }
-
-            if ( countError == 2 )
-            {
-                getLog().error( "OBR " + m_repositoryName + " is locked. Use -Dignore-lock to force uploading" );
-                throw new MojoExecutionException( "OBR locked" );
-            }
-        }
-
-        // ======== LOCK REMOTE OBR ========
-        remoteFile.lockFile( m_repositoryName );
-
-        // ======== DOWNLOAD REMOTE OBR ========
-        repoDescriptorFile = remoteFile.get( m_repositoryName, ".xml" );
-
-        // get the path to local maven repository
-        String mavenRepository = m_localRepo.getBasedir();
-
-        URI repoXml = repoDescriptorFile.toURI();
-        URI bundleJar = ObrUtils.findBundleJar( m_localRepo, m_project.getArtifact() );
-
-        if ( !new File( bundleJar ).exists() )
-        {
-            getLog().error( "file not found in local repository: " + bundleJar );
             return;
         }
 
-        Config userConfig = new Config();
-        userConfig.setPathRelative( true );
-        userConfig.setRemotely( true );
+        URI repositoryURI = ObrUtils.findRepositoryXml( "", obrRepository );
+        String repositoryName = new File( repositoryURI.getPath() ).getName();
 
-        ObrUpdate update = new ObrUpdate( repoXml, obrXml, m_project, bundleJar, mavenRepository, userConfig, getLog() );
+        Log log = getLog();
+        ObrUpdate update;
 
-        update.updateRepository();
+        RemoteFileManager remoteFile = new RemoteFileManager( m_wagonManager, settings, log );
+        openRepositoryConnection( remoteFile );
 
-        // ======== UPLOAD MODIFIED OBR ========
-        remoteFile.put( repoDescriptorFile, m_repositoryName );
-        repoDescriptorFile.delete();
+        // ======== LOCK REMOTE OBR ========
+        log.info( "LOCK " + remoteFile + '/' + repositoryName );
+        remoteFile.lockFile( repositoryName, ignoreLock );
+        File downloadedRepositoryXml = null;
 
-        // ======== UNLOCK REMOTE OBR ========
-        remoteFile.unlockFile( m_repositoryName );
+        try
+        {
+            // ======== DOWNLOAD REMOTE OBR ========
+            log.info( "Downloading " + repositoryName );
+            downloadedRepositoryXml = remoteFile.get( repositoryName, ".xml" );
 
-        remoteFile.disconnect();
+            String mavenRepository = localRepository.getBasedir();
+
+            URI repositoryXml = downloadedRepositoryXml.toURI();
+            URI obrXmlFile = ObrUtils.findObrXml( project.getResources() );
+            URI bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
+
+            Config userConfig = new Config();
+            userConfig.setPathRelative( true );
+            userConfig.setRemotely( true );
+
+            update = new ObrUpdate( repositoryXml, obrXmlFile, project, bundleJar, mavenRepository, userConfig, log );
+
+            update.updateRepository();
+
+            if ( downloadedRepositoryXml.exists() )
+            {
+                // ======== UPLOAD MODIFIED OBR ========
+                log.info( "Uploading " + repositoryName );
+                remoteFile.put( downloadedRepositoryXml, repositoryName );
+            }
+        }
+        catch ( Exception e )
+        {
+            log.warn( "Exception while updating remote OBR: " + e.getLocalizedMessage(), e );
+        }
+        finally
+        {
+            // ======== UNLOCK REMOTE OBR ========
+            log.info( "UNLOCK " + remoteFile + '/' + repositoryName );
+            remoteFile.unlockFile( repositoryName );
+            remoteFile.disconnect();
+
+            if ( null != downloadedRepositoryXml )
+            {
+                downloadedRepositoryXml.delete();
+            }
+        }
+    }
+
+    private static final Pattern ALT_REPO_SYNTAX_PATTERN = Pattern.compile( "(.+)::(.+)::(.+)" );
+
+
+    private void openRepositoryConnection( RemoteFileManager remoteFile ) throws MojoExecutionException
+    {
+        if ( deploymentRepository == null && altDeploymentRepository == null )
+        {
+            String msg = "Deployment failed: repository element was not specified in the pom inside"
+                + " distributionManagement element or in -DaltDeploymentRepository=id::layout::url parameter";
+
+            throw new MojoExecutionException( msg );
+        }
+
+        if ( altDeploymentRepository != null )
+        {
+            getLog().info( "Using alternate deployment repository " + altDeploymentRepository );
+
+            Matcher matcher = ALT_REPO_SYNTAX_PATTERN.matcher( altDeploymentRepository );
+            if ( !matcher.matches() )
+            {
+                throw new MojoExecutionException( "Invalid syntax for alternative repository \""
+                    + altDeploymentRepository + "\". Use \"id::layout::url\"." );
+            }
+
+            remoteFile.connect( matcher.group( 1 ).trim(), matcher.group( 3 ).trim() );
+        }
+        else
+        {
+            remoteFile.connect( deploymentRepository.getId(), deploymentRepository.getUrl() );
+        }
     }
 }

@@ -27,7 +27,6 @@ import java.io.Writer;
 
 import org.apache.maven.artifact.manager.WagonConfigurationException;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.settings.Proxy;
@@ -39,7 +38,6 @@ import org.apache.maven.wagon.UnsupportedProtocolException;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
-import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
 
@@ -61,11 +59,6 @@ public class RemoteFileManager
     private WagonManager m_wagonManager;
 
     /**
-     * artifact repository.
-     */
-    private ArtifactRepository m_artifactRepository;
-
-    /**
      * the project settings.
      */
     private Settings m_settings;
@@ -78,14 +71,12 @@ public class RemoteFileManager
 
     /**
      * initialize main information.
-     * @param ar ArtifactRepository provides by maven
      * @param wm WagonManager provides by maven
      * @param settings settings of the current project provides by maven
      * @param log logger
      */
-    public RemoteFileManager( ArtifactRepository ar, WagonManager wm, Settings settings, Log log )
+    public RemoteFileManager( WagonManager wm, Settings settings, Log log )
     {
-        m_artifactRepository = ar;
         m_wagonManager = wm;
         m_settings = settings;
         m_log = log;
@@ -95,42 +86,36 @@ public class RemoteFileManager
 
     /**
      * disconnect the current object.
-     *
      */
     public void disconnect()
     {
-        if ( m_wagon == null )
-        {
-            m_log.error( "must be connected first!" );
-            return;
-        }
-
         try
         {
-            m_wagon.disconnect();
+            if ( m_wagon != null )
+            {
+                m_wagon.disconnect();
+            }
         }
         catch ( ConnectionException e )
         {
-            m_log.error( "Error disconnecting wagon - ignored", e );
+            m_log.error( "Error disconnecting Wagon", e );
         }
     }
 
 
     /**
-     * connect the current object to artifact repository given in constructor.
+     * connect the current object to repository given in constructor.
+     * @param id repository id
+     * @param url repository url
      * @throws MojoExecutionException
      */
-    public void connect() throws MojoExecutionException
+    public void connect( String id, String url ) throws MojoExecutionException
     {
-        String url = m_artifactRepository.getUrl();
-        String id = m_artifactRepository.getId();
-
         Repository repository = new Repository( id, url );
 
         try
         {
             m_wagon = m_wagonManager.getWagon( repository );
-            //configureWagon(m_wagon, repository.getId());
         }
         catch ( UnsupportedProtocolException e )
         {
@@ -143,9 +128,6 @@ public class RemoteFileManager
 
         try
         {
-            Debug debug = new Debug();
-            m_wagon.addTransferListener( debug );
-
             ProxyInfo proxyInfo = getProxyInfo( m_settings );
             if ( proxyInfo != null )
             {
@@ -155,7 +137,6 @@ public class RemoteFileManager
             {
                 m_wagon.connect( repository, m_wagonManager.getAuthenticationInfo( id ) );
             }
-
         }
         catch ( ConnectionException e )
         {
@@ -274,8 +255,32 @@ public class RemoteFileManager
     }
 
 
-    public void lockFile( String fileName ) throws MojoExecutionException
+    public void lockFile( String fileName, boolean ignoreLock ) throws MojoExecutionException
     {
+        if ( !ignoreLock )
+        {
+            int countError = 0;
+            while ( isLockedFile( fileName ) && countError < 2 )
+            {
+                countError++;
+                m_log.warn( "File is currently locked, retry in 10s" );
+                try
+                {
+                    Thread.sleep( 10000 );
+                }
+                catch ( InterruptedException e )
+                {
+                    m_log.warn( "Sleep interrupted" );
+                }
+            }
+
+            if ( countError == 2 )
+            {
+                m_log.error( "File " + fileName + " is locked. Use -DignoreLock to force uploading" );
+                throw new MojoExecutionException( "Remote file locked" );
+            }
+        }
+
         File file = null;
         try
         {
@@ -359,5 +364,11 @@ public class RemoteFileManager
         }
 
         return true;
+    }
+
+
+    public String toString()
+    {
+        return m_wagon.getRepository().getUrl();
     }
 }
