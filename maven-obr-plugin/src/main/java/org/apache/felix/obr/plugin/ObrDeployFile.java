@@ -114,12 +114,6 @@ public final class ObrDeployFile extends AbstractFileMojo
             return;
         }
 
-        URI remoteBundleURI = null;
-        if ( null != bundleUrl )
-        {
-            remoteBundleURI = URI.create( bundleUrl );
-        }
-
         URI tempURI = ObrUtils.findRepositoryXml( "", obrRepository );
         String repositoryName = new File( tempURI.getPath() ).getName();
 
@@ -153,6 +147,16 @@ public final class ObrDeployFile extends AbstractFileMojo
             else
             {
                 bundleJar = file.toURI();
+            }
+
+            URI remoteBundleURI = null;
+            if ( null != bundleUrl )
+            {
+                remoteBundleURI = URI.create( bundleUrl );
+            }
+            else if ( null != file )
+            {
+                remoteBundleURI = URI.create( localRepository.pathOf( project.getArtifact() ) );
             }
 
             Config userConfig = new Config();
