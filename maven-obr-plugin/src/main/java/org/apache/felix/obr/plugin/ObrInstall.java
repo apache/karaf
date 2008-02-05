@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,83 +19,80 @@
 package org.apache.felix.obr.plugin;
 
 
-import java.io.File;
 import java.net.URI;
 
+import org.apache.felix.obr.plugin.Config;
+import org.apache.felix.obr.plugin.ObrUpdate;
+import org.apache.felix.obr.plugin.ObrUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
 
 /**
- * Install bundle metadata to local OBR.
+ * Installs bundle details in the local OBR repository
  * 
  * @goal install
  * @phase install
- * @requiresDependencyResolution compile
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ObrInstall extends AbstractMojo
+public final class ObrInstall extends AbstractMojo
 {
     /**
-     * The local Maven repository.
+     * OBR Repository.
+     * 
+     * @parameter expression="${obrRepository}"
+     */
+    private String obrRepository;
+
+    /**
+     * Local Repository.
      * 
      * @parameter expression="${localRepository}"
      * @required
      * @readonly
      */
-    private ArtifactRepository m_localRepo;
+    private ArtifactRepository localRepository;
 
     /**
-     * path to the repository.xml.
-     * 
-     * @parameter expression="${repository-path}" alias="repository-path"
-     */
-    private String m_repositoryPath;
-
-    /**
-     * Project in use.
+     * The Maven project.
      * 
      * @parameter expression="${project}"
-     * @require
+     * @required
+     * @readonly
      */
+    private MavenProject project;
 
-    private MavenProject m_project;
 
-
-    /**
-     * main method for this goal.
-     * @implements org.apache.maven.plugin.Mojo.execute 
-     * @throws MojoExecutionException if the plugin failed
-     */
-    public void execute() throws MojoExecutionException
+    public void execute()
     {
-        // locate the obr.xml file
-        URI obrXml = ObrUtils.findObrXml( m_project.getResources() );
-        if ( null == obrXml )
+        if ( "NONE".equalsIgnoreCase( obrRepository ) )
         {
-            getLog().info( "obr.xml is not present, use default" );
-        }
-
-        // get the path to local maven repository
-        String mavenRepository = m_localRepo.getBasedir();
-
-        URI repoXml = ObrUtils.findRepositoryXml( mavenRepository, m_repositoryPath );
-        URI bundleJar = ObrUtils.findBundleJar( m_localRepo, m_project.getArtifact() );
-
-        if ( !new File( bundleJar ).exists() )
-        {
-            getLog().error( "file not found in local repository: " + bundleJar );
             return;
         }
 
-        // use default configuration
-        Config userConfig = new Config();
+        Log log = getLog();
+        ObrUpdate update;
 
-        ObrUpdate update = new ObrUpdate( repoXml, obrXml, m_project, bundleJar, null, userConfig, getLog() );
+        try
+        {
+            String mavenRepository = localRepository.getBasedir();
 
-        update.updateRepository();
+            URI repositoryXml = ObrUtils.findRepositoryXml( mavenRepository, obrRepository );
+            URI obrXml = ObrUtils.findObrXml( project.getResources() );
+            URI bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
+
+            Config userConfig = new Config();
+
+            update = new ObrUpdate( repositoryXml, obrXml, project, bundleJar, mavenRepository, userConfig, log );
+
+            update.updateRepository();
+        }
+        catch ( Exception e )
+        {
+            log.warn( "Exception while updating OBR: " + e.getLocalizedMessage(), e );
+        }
     }
 }
