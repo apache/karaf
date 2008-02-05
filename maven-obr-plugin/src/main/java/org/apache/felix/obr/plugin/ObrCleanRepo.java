@@ -75,21 +75,21 @@ public class ObrCleanRepo extends AbstractMojo
      * @required
      * @readonly
      */
-    private ArtifactRepository m_localRepo;
+    private ArtifactRepository localRepository;
 
 
     public void execute()
     {
-        // If no OBR repository, return
         if ( "NONE".equalsIgnoreCase( obrRepository ) )
         {
+            getLog().info( "OBR clean disabled (enable with -DobrRepository)" );
             return;
         }
 
         try
         {
             // Compute local repository location
-            URI repositoryXml = ObrUtils.findRepositoryXml( m_localRepo.getBasedir(), obrRepository );
+            URI repositoryXml = ObrUtils.findRepositoryXml( localRepository.getBasedir(), obrRepository );
             if ( !"file".equals( repositoryXml.getScheme() ) )
             {
                 getLog().error( "The repository URI " + repositoryXml + " is not a local file" );
@@ -105,6 +105,8 @@ public class ObrCleanRepo extends AbstractMojo
                 return;
             }
 
+            getLog().info( "Cleaning..." );
+
             Document doc = parseFile( repositoryFile, initConstructor() );
             Node finalDocument = cleanDocument( doc.getDocumentElement() ); // Analyze existing repository.
 
@@ -114,14 +116,13 @@ public class ObrCleanRepo extends AbstractMojo
             }
             else
             {
-                getLog().info( "Cleaning..." );
                 writeToFile( repositoryXml, finalDocument ); // Write the new file
-                getLog().info( "Repository " + repositoryFile + " updated" );
+                getLog().info( "Repository " + repositoryFile + " cleaned" );
             }
         }
         catch ( Exception e )
         {
-            getLog().error( "Exception while cleaning the OBR repository file : " + e.getLocalizedMessage(), e );
+            getLog().error( "Exception while cleaning local OBR: " + e.getLocalizedMessage(), e );
         }
     }
 
@@ -134,7 +135,7 @@ public class ObrCleanRepo extends AbstractMojo
      */
     private Element cleanDocument( Element elem )
     {
-        String localRepoPath = m_localRepo.getBasedir();
+        String localRepoPath = localRepository.getBasedir();
         NodeList nodes = elem.getElementsByTagName( "resource" );
         List toRemove = new ArrayList();
 
