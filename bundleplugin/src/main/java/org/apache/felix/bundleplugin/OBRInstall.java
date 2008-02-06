@@ -20,6 +20,8 @@ package org.apache.felix.bundleplugin;
 
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.felix.obr.plugin.Config;
 import org.apache.felix.obr.plugin.ObrUpdate;
@@ -31,7 +33,7 @@ import org.apache.maven.project.MavenProject;
 
 
 /**
- * Installs bundle details in the local OBR repository
+ * Installs bundle details in the local OBR repository (life-cycle goal)
  * 
  * @goal install
  * @phase install
@@ -46,6 +48,14 @@ public final class OBRInstall extends AbstractMojo
      * @parameter expression="${obrRepository}"
      */
     private String obrRepository;
+
+    /**
+     * Project types which this plugin supports.
+     *
+     * @parameter
+     */
+    private List supportedProjectTypes = Arrays.asList( new String[]
+        { "jar", "bundle" } );
 
     /**
      * Local Repository.
@@ -68,8 +78,14 @@ public final class OBRInstall extends AbstractMojo
 
     public void execute()
     {
-        if ( "NONE".equalsIgnoreCase( obrRepository ) )
+        if ( !supportedProjectTypes.contains( project.getPackaging() ) )
         {
+            getLog().info( "Ignoring packaging type " + project.getPackaging() );
+            return;
+        }
+        else if ( "NONE".equalsIgnoreCase( obrRepository ) )
+        {
+            getLog().info( "OBR update disabled (enable with -DobrRepository)" );
             return;
         }
 
@@ -81,18 +97,18 @@ public final class OBRInstall extends AbstractMojo
             String mavenRepository = localRepository.getBasedir();
 
             URI repositoryXml = ObrUtils.findRepositoryXml( mavenRepository, obrRepository );
-            URI obrXml = ObrUtils.findObrXml( project.getResources() );
+            URI obrXmlFile = ObrUtils.findObrXml( project.getResources() );
             URI bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
 
             Config userConfig = new Config();
 
-            update = new ObrUpdate( repositoryXml, obrXml, project, bundleJar, mavenRepository, userConfig, log );
+            update = new ObrUpdate( repositoryXml, obrXmlFile, project, bundleJar, mavenRepository, userConfig, log );
 
             update.updateRepository();
         }
         catch ( Exception e )
         {
-            log.warn( "Exception while updating OBR: " + e.getLocalizedMessage(), e );
+            log.warn( "Exception while updating local OBR: " + e.getLocalizedMessage(), e );
         }
     }
 }
