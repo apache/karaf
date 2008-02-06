@@ -99,40 +99,44 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
         return m_trackedServiceName;
     }
 
-    public synchronized void start(Service service) {
-        if (m_isStarted) {
-            throw new IllegalStateException("Service dependency was already started." + m_trackedServiceName);
-        }
-        m_service = service;
-        if (m_trackedServiceName != null) {
-            if (m_trackedServiceFilter != null) {
-                try {
-                    m_tracker = new ServiceTracker(m_context, m_context.createFilter(m_trackedServiceFilter), this);
-                }
-                catch (InvalidSyntaxException e) {
-                    throw new IllegalStateException("Invalid filter definition for dependency.");
-                }
+    public void start(Service service) {
+        synchronized (this) {
+            if (m_isStarted) {
+                throw new IllegalStateException("Service dependency was already started." + m_trackedServiceName);
             }
-            else if (m_trackedServiceReference != null) {
-                m_tracker = new ServiceTracker(m_context, m_trackedServiceReference, this);
+            m_service = service;
+            if (m_trackedServiceName != null) {
+                if (m_trackedServiceFilter != null) {
+                    try {
+                        m_tracker = new ServiceTracker(m_context, m_context.createFilter(m_trackedServiceFilter), this);
+                    }
+                    catch (InvalidSyntaxException e) {
+                        throw new IllegalStateException("Invalid filter definition for dependency.");
+                    }
+                }
+                else if (m_trackedServiceReference != null) {
+                    m_tracker = new ServiceTracker(m_context, m_trackedServiceReference, this);
+                }
+                else {
+                    m_tracker = new ServiceTracker(m_context, m_trackedServiceName.getName(), this);
+                }
             }
             else {
-                m_tracker = new ServiceTracker(m_context, m_trackedServiceName.getName(), this);
+                throw new IllegalStateException("Could not create tracker for dependency, no service name specified.");
             }
+            m_isStarted = true;
         }
-        else {
-            throw new IllegalStateException("Could not create tracker for dependency, no service name specified.");
-        }
-        m_isStarted = true;
         m_tracker.open();
     }
 
-    public synchronized void stop(Service service) {
-        if (!m_isStarted) {
-            throw new IllegalStateException("Service dependency was not started.");
+    public void stop(Service service) {
+        synchronized (this) {
+            if (!m_isStarted) {
+                throw new IllegalStateException("Service dependency was not started.");
+            }
+            m_isStarted = false;
         }
         m_tracker.close();
-        m_isStarted = false;
         m_tracker = null;
     }
 
