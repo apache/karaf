@@ -20,6 +20,8 @@ package org.apache.felix.obr.plugin;
 
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -46,6 +48,14 @@ public final class ObrInstallFile extends AbstractFileMojo
     private String obrRepository;
 
     /**
+     * Project types which this plugin supports.
+     *
+     * @parameter
+     */
+    private List supportedProjectTypes = Arrays.asList( new String[]
+        { "jar", "bundle" } );
+
+    /**
      * Local Repository.
      * 
      * @parameter expression="${localRepository}"
@@ -59,7 +69,12 @@ public final class ObrInstallFile extends AbstractFileMojo
     {
         MavenProject project = getProject();
 
-        if ( "NONE".equalsIgnoreCase( obrRepository ) )
+        if ( !supportedProjectTypes.contains( project.getPackaging() ) )
+        {
+            getLog().info( "Ignoring packaging type " + project.getPackaging() );
+            return;
+        }
+        else if ( "NONE".equalsIgnoreCase( obrRepository ) )
         {
             getLog().info( "OBR update disabled (enable with -DobrRepository)" );
             return;

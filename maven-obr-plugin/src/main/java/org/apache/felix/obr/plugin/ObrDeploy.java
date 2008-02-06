@@ -21,6 +21,8 @@ package org.apache.felix.obr.plugin;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,6 +58,14 @@ public final class ObrDeploy extends AbstractMojo
      * @parameter expression="${obrRepository}"
      */
     private String obrRepository;
+
+    /**
+     * Project types which this plugin supports.
+     *
+     * @parameter
+     */
+    private List supportedProjectTypes = Arrays.asList( new String[]
+        { "jar", "bundle" } );
 
     /**
      * @parameter expression="${project.distributionManagementArtifactRepository}"
@@ -107,7 +117,12 @@ public final class ObrDeploy extends AbstractMojo
 
     public void execute() throws MojoExecutionException
     {
-        if ( "NONE".equalsIgnoreCase( obrRepository ) )
+        if ( !supportedProjectTypes.contains( project.getPackaging() ) )
+        {
+            getLog().info( "Ignoring packaging type " + project.getPackaging() );
+            return;
+        }
+        else if ( "NONE".equalsIgnoreCase( obrRepository ) )
         {
             getLog().info( "OBR update disabled (enable with -DobrRepository)" );
             return;

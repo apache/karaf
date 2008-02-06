@@ -54,6 +54,7 @@ import org.xml.sax.SAXException;
 /**
  * Clean an OBR repository by finding and removing missing resources.
  * 
+ * @requiresProject false
  * @goal clean
  * @phase clean
  * 
