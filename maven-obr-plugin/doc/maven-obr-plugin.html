@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html><head><title>Apache Felix - Maven Obr Plugin</title>
+<html><head><title>Apache Felix - Maven OBR Plugin</title>
 
 
   
@@ -13,10 +13,10 @@
 	<li><a href="http://felix.apache.org/site/news.html" title="news">news</a></li>
 	<li><a href="http://felix.apache.org/site/status.html" title="status">status</a></li>
 	<li><a href="http://felix.apache.org/site/license.html" title="license">license</a></li>
-	<li><span class="nobr"><a href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://felix.apache.org/site/downloads.cgi">downloads<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
 	<li><a href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</a></li>
 	<li><a href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</a></li>
-	<li><span class="nobr"><a href="http://cwiki.apache.org/confluence/x/O-" title="Visit page outside Confluence" rel="nofollow">wiki<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://cwiki.apache.org/confluence/x/O-">wiki<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
 	<li><a href="http://felix.apache.org/site/committers.html" title="committers">committers</a></li>
 	<li><a href="http://felix.apache.org/site/faq.html" title="faq">faq</a></li>
 	<li><a href="http://felix.apache.org/site/roadmap.html" title="roadmap">roadmap</a></li>
@@ -24,355 +24,261 @@
 	<li><a href="http://felix.apache.org/site/codingstandards.html" title="codingstandards">coding standards</a></li>
 	<li><a href="http://felix.apache.org/site/issuetracking.html" title="issuetracking">issue tracking</a></li>
 	<li><a href="http://felix.apache.org/site/dependencies.html" title="dependencies">dependencies</a></li>
-	<li><span class="nobr"><a href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">apache software foundation<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
-	<li><span class="nobr"><a href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
-	<li><span class="nobr"><a href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/">apache software foundation<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/sponsorship.html">sponsorship<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/thanks.html">sponsors<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
 </ul> </div>
     <div class="main">
-<p>This Maven plug-in aims to automate OBR (<span class="nobr"><a href="http://www2.osgi.org/Repository/HomePage" title="Visit page outside Confluence" rel="nofollow">OSGi Bundle Repository<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span>)
-management. It creates a local OBR repository and can create a remote
-OBR to distribute bundles. This plug-in allows you to install your
-bundles inside an OBR repository at the same time you install it in
-your Maven repository. It can also deploy your bundle in a remote Maven
-repository when you deploy your Maven artefact. The plug-in computes
-capabilities and requirements and edits the repository description file
-to add (or update) the bundle description.</p>
+<p>This Maven plug-in aims to automate OBR (OSGi Bundle Repository)
+management. It helps manage a local OBR for your local Maven
+repository, and also supports remote OBRs for bundle distribution. The
+plug-in automatically computes bundle capabilities and requirements,
+using a combination of Bindex and Maven metadata.</p>
 
-<h2><a name="MavenObrPlugin-Features:"></a>Features:</h2>
+<h2><a name="MavenOBRPlugin-Features"></a>Features</h2>
 
-<p>The plug-in allows:</p>
+<p>The maven-obr-plugin supports:</p>
+
 <ul>
-	<li>Installing Maven artefact inside an OBR repository,
-automatically or manually (for legacy bundles). This OBR could be
-remote or local.</li>
-	<li>Discovering bundle capabilities and requirements</li>
+	<li>Management of both local and remote OBRs</li>
+	<li>Registering Maven and non-Maven artifacts with OBRs</li>
+	<li>Automatically discovering bundle capabilities and requirements</li>
 	<li>Customizing bundle descriptions</li>
 </ul>
 
 
-<h2><a name="MavenObrPlugin-Howtousetheplugin?"></a>How to use the plug-in?</h2>
+<h2><a name="MavenOBRPlugin-Howtousethemavenobrplugin?"></a>How to use the maven-obr-plugin?</h2>
 
 <p>The plug-in offers five Maven goals:</p>
+
 <ul>
-	<li>A: The standard 'install' goal: it will install your bundle
-in the repository at the same time it install it in your Maven
-repository.</li>
-	<li>B: An 'install-file' goal which takes a jar file,
-and installs it in the local Maven repository and update&nbsp; the
-remote repository descriptor file.</li>
-	<li>C: A 'deploy' goal which upload a bundle on a remote repository and update the remote repository descriptor file.</li>
-	<li>D: A 'deploy-file' goal which upload jar file on a remote repository and update the remote repository descriptor file.&nbsp;</li>
-	<li>E : A 'clean' goal cleaning the local obr repository. &nbsp;&nbsp;&nbsp; &nbsp;</li>
+	<li><b>install</b>       adds the current bundle project to the local OBR</li>
+	<li><b>install-file</b>  adds a local bundle file to the local OBR</li>
+	<li><b>deploy</b>        adds the current bundle project to a remote OBR</li>
+	<li><b>deploy-file</b>   adds a local bundle file to a remote OBR</li>
+	<li><b>clean</b>         cleans the local OBR, removing missing bundles</li>
 </ul>
 
 
-<h3><a name="MavenObrPlugin-A:InstallingbundlesinalocalOBRrepository"></a>A: Installing bundles in a local OBR repository</h3>
+<p>Any of these goals can be disabled by setting <tt>-DobrRepository=NONE</tt></p>
 
-<p>The plug-in can create a local OBR repository at the root of the
-local Maven repository. At each time the artefact is installed in the
-local maven repository (by using the 'mvn install' command), a local
-OBR repository is updated to contain the description of the artefact.
-This feature is automated inside the <span class="nobr"><a href="http://felix.apache.org/site/maven-bundle-plugin-bnd.html" title="Visit page outside Confluence" rel="nofollow">maven-bundle-plugin<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span>.</p>
+<h2><a name="MavenOBRPlugin-obr:install"></a>obr:install</h2>
 
-<h3><a name="MavenObrPlugin-B:InstallinganexistingMavenartefactinalocalOBRrepository"></a>B: Installing an existing Maven artefact in a local OBR repository</h3>
+<p>The <b>install</b> goal updates the local OBR with the details of the installed bundle from the local Maven repository.</p>
 
-<p>This second way, to use the plug-in is to add an already existing bundle in the OBR. The bundle <b>must</b>
-be already in the Maven local repository (you can use the Maven
-install:install-file plug-in to install an external bundle in your
-Maven repository).<br>
-To use this goal, the user must provide information in command line:</p>
-<table class="confluenceTable"><tbody>
-<tr>
-<td class="confluenceTd"> Variable name (prefixed by --D) </td>
-<td class="confluenceTd"> status </td>
-<td class="confluenceTd"> description </td>
-</tr>
-<tr>
-<td class="confluenceTd"> file </td>
-<td class="confluenceTd"> require </td>
-<td class="confluenceTd"> Path to the jar file (used to install bundle only) </td>
-</tr>
-<tr>
-<td class="confluenceTd"> artefactId </td>
-<td class="confluenceTd"> require </td>
-<td class="confluenceTd"> artefactId of the bundle Use to determine
-path to the jar file in local maven Repository use as symbolic name if
-it isn't define in manifest </td>
-</tr>
-<tr>
-<td class="confluenceTd"> groupId </td>
-<td class="confluenceTd"> require </td>
-<td class="confluenceTd"> groupId of the bundle Use to determine path to the jar file on local maven repository </td>
-</tr>
-<tr>
-<td class="confluenceTd"> version </td>
-<td class="confluenceTd"> require </td>
-<td class="confluenceTd"> Version of the bundle Use to determine path to the jar file on local maven repository </td>
-</tr>
-<tr>
-<td class="confluenceTd"> packaging </td>
-<td class="confluenceTd"> require </td>
-<td class="confluenceTd"> File type Use by maven to install the file (used to install bundle only) </td>
-</tr>
-<tr>
-<td class="confluenceTd"> repository-path </td>
-<td class="confluenceTd"> optional </td>
-<td class="confluenceTd"> Path to the repository descriptor file (if not define: default path is : MavenRepo\repository.xml </td>
-</tr>
-<tr>
-<td class="confluenceTd"> obr-file </td>
-<td class="confluenceTd"> optional </td>
-<td class="confluenceTd"> Path to the obr.xml, file which describe
-capabilities requirement and category given manually by user. (if not
-define: nothing is added to the resource description). </td>
-</tr>
-</tbody></table>
+<p>(If the project has an <tt>obr.xml</tt> file somewhere in its resources, then it will be automatically detected and applied.)</p>
 
-<h4><a name="MavenObrPlugin-Exampleofcommandline:"></a>Example of command line:</h4>
+<p>configuration:</p>
 
-<p>mvn homega.tools:obrPlugin:install-file \<br>
--Drepository-path=<span class="nobr"><a href="file:///c:repository.xml" title="Visit page outside Confluence" rel="nofollow">file:/c:\repository.xml<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span> \<br>
--obr-file=<span class="nobr"><a href="file:///c:projecthomegaobr.xml" title="Visit page outside Confluence" rel="nofollow">file:/c:\project\homega\obr.xml<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span> \<br>
--DartifactId=multicast.discovery \<br>
--DgroupId=<font color="black">homega.utils</font> <font color="black">{color}</font><br>
-<font color="black">-Dversion=1.0.0</font></p>
-
-<p>By using this command, the plug-in will look at the artefact
-MavenRepo\homega\utils\multicast.discovery\1.0.0\multicast.discovery-1.0.0.jar
-<br clear="all"></p>
-
-<p>Then it will compute bundle description by using <span class="nobr"><a href="http://www2.osgi.org/Repository/BIndex" title="Visit page outside Confluence" rel="nofollow">bindex <sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span>and information from the command line (artifactId, groupId, version, and obr file (if set)).</p>
-
-<h4><a name="MavenObrPlugin-"></a><font color="black">Note:</font></h4>
-
-<p><font color="black">As said previously, the plug-in does not install
-the file in the Maven repository but target an already install
-artefact. However, it is possible to install the bundle in the
-repository and to add it in the OBR repository file in one command:</font><br>
-<font color="black">&nbsp;mvn install:install-file homega.tools:obrPlugin:install-file {color}</font><br>
-<font color="black">-Dfile=</font><font color="black"><span class="nobr"><a href="file:///c:projethomegamulticast.discovery-1.0.0.jar" title="Visit page outside Confluence" rel="nofollow">file:/c:\projet\homega\multicast.discovery-1.0.0.jar<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></font> <font color="black">{color}</font><br>
-<font color="black">-Drepository-path=</font><font color="black"><span class="nobr"><a href="file:///c:repository.xml" title="Visit page outside Confluence" rel="nofollow">file:/c:\repository.xml<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></font> <font color="black">{color}</font><br>
-<font color="black">-Dobr-file=</font><font color="black"><span class="nobr"><a href="file:///c:projecthomegaobr.xml" title="Visit page outside Confluence" rel="nofollow">file:/c:\project\homega\obr.xml<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></font> <font color="black">{color}</font><br>
-<font color="black">-DartifactId=multicast.discovery {color}</font><br>
-<font color="black">-DgroupId=</font><font color="black">homega.utils</font> <font color="black">{color}</font><br>
-<font color="black">-Dversion=1.0.0 {color}</font><br>
-<font color="black">-Dpackaging=jar</font></p>
-
-<h3><a name="MavenObrPlugin-"></a><font color="black">C: Deploying a bundle on a remote OBR</font></h3>
-
-<p><font color="black">To use the deploy goal, you must change your pom.xml:</font></p>
 <ul>
-	<li><font color="black">Add the "</font><font color="black">deployment"</font> <font color="black">goal</font></li>
+	<li><em>obrRepository</em>  path to local OBR, defaults to <em>&lt;local-maven-repository&gt;</em><tt>/repository.xml</tt></li>
 </ul>
 
 
+<p>To attach this goal to your project's lifecycle, use:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;plugin&gt;</span>
+  <span class="code-tag">&lt;groupId&gt;</span>org.apache.felix<span class="code-tag">&lt;/groupId&gt;</span>
+  <span class="code-tag">&lt;artifactId&gt;</span>maven-obr-plugin<span class="code-tag">&lt;/artifactId&gt;</span>
+  <span class="code-tag">&lt;version&gt;</span>1.2.0-SNAPSHOT<span class="code-tag">&lt;/version&gt;</span>
+  <span class="code-tag">&lt;executions&gt;</span>
+    <span class="code-tag">&lt;execution&gt;</span>
+      <span class="code-tag">&lt;goals&gt;</span>
+        <span class="code-tag">&lt;goal&gt;</span>install<span class="code-tag">&lt;/goal&gt;</span>
+      <span class="code-tag">&lt;/goals&gt;</span>
+    <span class="code-tag">&lt;/execution&gt;</span>
+  <span class="code-tag">&lt;/executions&gt;</span>
+<span class="code-tag">&lt;/plugin&gt;</span></pre>
+</div></div>
+
+<h2><a name="MavenOBRPlugin-obr:installfile"></a>obr:install-file</h2>
+
+<p>The <b>install-file</b> goal updates the local OBR with the details of a bundle from the local filesystem.</p>
+
+<p>configuration:</p>
+
 <ul>
-	<li>
-	<ul>
-		<li><font color="black">Indicate the repository-name
-property. This is the name of the repository descriptor file (this
-property is optional; default value is "repository.xml"). This file is
-located on url provided by user.</font><br>
-<font color="teal">&lt;</font><font color="#3f7f7f">plugin</font><font color="teal">&gt;</font><br>
-<font color="teal">&nbsp;&nbsp;&nbsp; &lt;</font><font color="#3f7f7f">groupId</font><font color="teal">&gt;</font><font color="black">org.apache.felix</font><font color="teal">&lt;/</font><font color="#3f7f7f">groupId</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">artifactId</font><font color="teal">&gt;</font><font color="black">maven-obr-plugin</font><font color="teal">&lt;/</font><font color="#3f7f7f">artifactId</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">configuration</font><font color="teal">&gt;</font><br>
-<font color="black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;</font> <font color="teal">&lt;</font><font color="#3f7f7f">repository-name</font><font color="teal">&gt;</font><font color="black">repository.xml</font><font color="teal">&lt;/</font><font color="#3f7f7f">repository-name</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;/</font><font color="#3f7f7f">configuration</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">executions</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">execution</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">goals</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">goal</font><font color="teal">&gt;</font><font color="black">deployment</font><font color="teal">&lt;/</font><font color="#3f7f7f">goal</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;/</font><font color="#3f7f7f">goals</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;/</font><font color="#3f7f7f">execution</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;/</font><font color="#3f7f7f">executions</font><font color="teal">&gt;</font><br>
-<font color="teal">&lt;/</font><font color="#3f7f7f">plugin</font><font color="teal">&gt;</font></li>
-		<li>You must also configure where the plugin will upload bundles and repository descriptor file. You could do it in maven as this:<br>
-&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">distributionManagement</font><font color="teal">&gt;</font><br>
-<font color="teal">&nbsp;&nbsp;&nbsp; &lt;</font><font color="#3f7f7f">repository</font><font color="teal">&gt;</font><br>
-<font color="teal">&nbsp;&nbsp;&nbsp;&nbsp; &lt;</font><font color="#3f7f7f">id</font><font color="teal">&gt;</font><font color="black">ftp-repository</font><font color="teal">&lt;/</font><font color="#3f7f7f">id</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">name</font><font color="teal">&gt;</font><font color="black">RepoName</font><font color="teal">&lt;/</font><font color="#3f7f7f">name</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">url</font><font color="teal">&gt;</font><font color="black"><span class="nobr"><a href="ftp://ftp.youraddress.com/obr" title="Visit page outside Confluence" rel="nofollow">ftp://ftp.youraddress.com/obr<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></font><font color="teal">&lt;/</font><font color="#3f7f7f">url</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp; <font color="teal">&lt;/</font><font color="#3f7f7f">repository</font><font color="teal">&gt;</font><br>
-&nbsp; <font color="teal">&lt;/</font><font color="#3f7f7f">distributionManagement</font><font color="teal">&gt;</font></li>
-		<li>Now maven will upload your bundle on this ftp site.</li>
-	</ul>
-	</li>
-	<li>Launch the 'mvn deploy' command</li>
+	<li><em>obrRepository</em>  path to local OBR, defaults to <em>&lt;local-maven-repository&gt;</em><tt>/repository.xml</tt></li>
+	<li><em>groupId</em>        Maven groupId for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>artifactId</em>     Maven artifactId for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>version</em>        Maven version for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>packaging</em>      Maven packaging type for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>classifier</em>     Maven classifier type, defaults to none</li>
+	<li><em>pomFile</em>        optional Pom file describing the bundle</li>
+	<li><em>file</em>           bundle file, defaults to the bundle from the local Maven repository</li>
+	<li><em>obrXml</em>         optional additional properties for the bundle</li>
 </ul>
 
 
-<p>In fact, all protocols are not supported by maven. For example ftp
-protocol as describe above require wagon plugin to run correctly. So
-you could add this part in your pom.xml to use wagon in ftp protocol:</p>
+<p>Example:</p>
 
-<p><font color="teal">&lt;</font><font color="#3f7f7f">build</font><font color="teal">&gt;</font><br>
-<font color="teal">&nbsp;&nbsp;&nbsp;&nbsp; &lt;</font><font color="#3f7f7f">extensions</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">extension</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">groupId</font><font color="teal">&gt;</font><font color="black">org.apache.maven.wagon</font><font color="teal">&lt;/</font><font color="#3f7f7f">groupId</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">artifactId</font><font color="teal">&gt;</font><font color="black">wagon-ftp</font><font color="teal">&lt;/</font><font color="#3f7f7f">artifactId</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">version</font><font color="teal">&gt;</font><font color="black">1.0-alpha-6</font><font color="teal">&lt;/</font><font color="#3f7f7f">version</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;/</font><font color="#3f7f7f">extension</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp; <font color="teal">&lt;/</font><font color="#3f7f7f">extensions</font><font color="teal">&gt;</font></p>
+<div class="preformatted"><div class="preformattedContent">
+<pre>mvn org.apache.felix:maven-obr-plugin:1.2.0-SNAPSHOT:install-file \
+  -DpomFile=myPom.xml -Dfile=foo-1.0.jar
+</pre>
+</div></div>
 
-<p>By this way, the deploy goal supports all protocols supported by wagon.</p>
+<h2><a name="MavenOBRPlugin-obr:deploy"></a>obr:deploy</h2>
 
-<h3><a name="MavenObrPlugin-D:DeploynonmavenbundleonaremoteOBRrepository"></a>D: Deploy non maven bundle on a remote OBR repository</h3>
+<p>The <b>deploy goal</b> updates the remote OBR with the details of
+the deployed bundle from the local Maven repository. The remote OBR is
+found by querying the <tt>&lt;distributionManagement&gt;</tt> section of the project, unless <tt>-DaltDeploymentRepository</tt> is set. See <span class="nobr"><a href="http://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html" title="Visit page outside Confluence" rel="nofollow">http://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span> for more details about these particular settings.</p>
 
-<p>This goal is useful if you want add a non-maven project on your
-remote repository, for example a legacy bundles.The command line is
-compozed by :</p>
-<table class="confluenceTable"><tbody>
-<tr>
-<td class="confluenceTd"> Variable name (preceded by --D) </td>
-<td class="confluenceTd"> status </td>
-<td class="confluenceTd"> description </td>
-</tr>
-<tr>
-<td class="confluenceTd"> file </td>
-<td class="confluenceTd"> require </td>
-<td class="confluenceTd"> Path to the jar file </td>
-</tr>
-<tr>
-<td class="confluenceTd"> artefactId </td>
-<td class="confluenceTd"> require </td>
-<td class="confluenceTd"> artefactId of the bundle Use to determine
-path to the jar file in local maven Repository use as symbolic name if
-it isn't define in manifest </td>
-</tr>
-<tr>
-<td class="confluenceTd"> groupId </td>
-<td class="confluenceTd"> require </td>
-<td class="confluenceTd"> groupId of the bundle Use to determine path to the jar file on local maven repository </td>
-</tr>
-<tr>
-<td class="confluenceTd"> version </td>
-<td class="confluenceTd"> require </td>
-<td class="confluenceTd"> Version of the bundle Use to determine path to the jar file on local maven repository </td>
-</tr>
-<tr>
-<td class="confluenceTd"> packaging </td>
-<td class="confluenceTd"> require </td>
-<td class="confluenceTd"> File type Use by maven to install the file (used to install bundle only) </td>
-</tr>
-<tr>
-<td class="confluenceTd"> url </td>
-<td class="confluenceTd"> require </td>
-<td class="confluenceTd"> url to the remote server </td>
-</tr>
-<tr>
-<td class="confluenceTd"> uniqueVersion </td>
-<td class="confluenceTd"> optional </td>
-<td class="confluenceTd"> Set it to false to avoid unique filename when you upload </td>
-</tr>
-<tr>
-<td class="confluenceTd"> repositoryId </td>
-<td class="confluenceTd"> optional </td>
-<td class="confluenceTd"> Name of the repository use to upload file </td>
-</tr>
-<tr>
-<td class="confluenceTd"> obr-file </td>
-<td class="confluenceTd"> optional </td>
-<td class="confluenceTd"> Path to the obr.xml, file which describe
-capabilities requirement and category given manually by user. (if not
-define: nothing is added to the resource description). </td>
-</tr>
-</tbody></table>
+<p>(If the project has an <tt>obr.xml</tt> file somewhere in its resources, then it will be automatically detected and applied.)</p>
 
-<h4><a name="MavenObrPlugin-Exampleofcompletecommandline:"></a>Example of complete command line:</h4>
+<p>configuration:</p>
 
-<p>mvn deploy:deploy-file homega.tools:obrPlugin:deploy-file \<br>
--DartifactId=echo2<br>
--DgroupId=tools<br>
--Dversion=2.0.0<br>
--Dpackaging=jar<br>
--DrepositoryId=ftp-repository<br>
--DuniqueVersion=false<br>
--Durl=<span class="nobr"><a href="ftp://ftp.plop-plop.net/obr" title="Visit page outside Confluence" rel="nofollow">ftp://ftp.plop-plop.net/obr<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span><br>
--Dobr-file=c:\obr.xml<br>
--Dfile=echo2.jar</p>
+<ul>
+	<li><em>obrRepository</em>             name of remote OBR, defaults to <tt>repository.xml</tt></li>
+	<li><em>altDeploymentRepository</em>   alternative remote repository, <em>id::layout::url</em></li>
+	<li><em>ignoreLock</em>                ignore remote locking when updating the OBR</li>
+</ul>
 
-<p>To upload your file, you must create a small pom file declaring a
-repositoryManagement to indicates which remote server you use and the
-component to use for the protocol transfer. This file must contain also
-groupId, artifactId version and packaging information (in fact those
-data are redundant with the command line, so you could omit them in
-command line).<br>
-<em>Example of additional pom.xml:</em><br>
-<font color="teal">&lt;</font><font color="#3f7f7f">project</font><font color="teal">&gt;</font><br>
-&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">modelVersion</font><font color="teal">&gt;</font><font color="black">4.0.0</font><font color="teal">&lt;/</font><font color="#3f7f7f">modelVersion</font><font color="teal">&gt;</font><br>
-&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">packaging</font><font color="teal">&gt;</font><font color="black">jar</font><font color="teal">&lt;/</font><font color="#3f7f7f">packaging</font><font color="teal">&gt;</font><br>
-&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">groupId</font><font color="teal">&gt;</font><font color="black">tools</font><font color="teal">&lt;/</font><font color="#3f7f7f">groupId</font><font color="teal">&gt;</font><br>
-&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">artifactId</font><font color="teal">&gt;</font><font color="black">echo2</font><font color="teal">&lt;/</font><font color="#3f7f7f">artifactId</font><font color="teal">&gt;</font><br>
-&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">version</font><font color="teal">&gt;</font><font color="black">2.0.0</font><font color="teal">&lt;/</font><font color="#3f7f7f">version</font><font color="teal">&gt;</font><br>
-&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">distributionManagement</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">repository</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">id</font><font color="teal">&gt;</font><font color="black">ftp-repository</font><font color="teal">&lt;/</font><font color="#3f7f7f">id</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">name</font><font color="teal">&gt;</font><font color="black">RepoName</font><font color="teal">&lt;/</font><font color="#3f7f7f">name</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">url</font><font color="teal">&gt;</font><font color="black"><span class="nobr"><a href="ftp://ftp.plop-plop.net/obr" title="Visit page outside Confluence" rel="nofollow">ftp://ftp.plop-plop.net/obr<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></font><font color="teal">&lt;/</font><font color="#3f7f7f">url</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp; <font color="teal">&lt;/</font><font color="#3f7f7f">repository</font><font color="teal">&gt;</font><br>
-&nbsp; <font color="teal">&lt;/</font><font color="#3f7f7f">distributionManagement</font><font color="teal">&gt;</font><br>
-&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">build</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">extensions</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">extension</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">groupId</font><font color="teal">&gt;</font><font color="black">org.apache.maven.wagon</font><font color="teal">&lt;/</font><font color="#3f7f7f">groupId</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">artifactId</font><font color="teal">&gt;</font><font color="black">wagon-ftp</font><font color="teal">&lt;/</font><font color="#3f7f7f">artifactId</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;</font><font color="#3f7f7f">version</font><font color="teal">&gt;</font><font color="black">1.0-alpha-6</font><font color="teal">&lt;/</font><font color="#3f7f7f">version</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="teal">&lt;/</font><font color="#3f7f7f">extension</font><font color="teal">&gt;</font><br>
-&nbsp;&nbsp;&nbsp; <font color="teal">&lt;/</font><font color="#3f7f7f">extensions</font><font color="teal">&gt;</font><br>
-&nbsp; <font color="teal">&lt;/</font><font color="#3f7f7f">build</font><font color="teal">&gt;</font><br>
-<font color="teal">&lt;/</font><font color="#3f7f7f">project</font><font color="teal">&gt;</font></p>
 
-<h4><a name="MavenObrPlugin-Concurrentupdates&amp;nbsp;"></a>Concurrent updates&nbsp;</h4>
+<p>To attach this goal to your project's lifecycle, use:</p>
 
-<p>As the obr file is remote, several uploads can occur at the same
-time. However, the obr repository is centralized in one file, so
-concurrent modification need to be avoided. To achieve this, the
-plug-in&nbsp; implement a locking systems. At each time the plug-in try
-to modify the file, it set a lock on it. If it can't take the lock, it
-will wait and retry. After 3 tries, the upload process failed.</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;plugin&gt;</span>
+  <span class="code-tag">&lt;groupId&gt;</span>org.apache.felix<span class="code-tag">&lt;/groupId&gt;</span>
+  <span class="code-tag">&lt;artifactId&gt;</span>maven-obr-plugin<span class="code-tag">&lt;/artifactId&gt;</span>
+  <span class="code-tag">&lt;version&gt;</span>1.2.0-SNAPSHOT<span class="code-tag">&lt;/version&gt;</span>
+  <span class="code-tag">&lt;executions&gt;</span>
+    <span class="code-tag">&lt;execution&gt;</span>
+      <span class="code-tag">&lt;goals&gt;</span>
+        <span class="code-tag">&lt;goal&gt;</span>deploy<span class="code-tag">&lt;/goal&gt;</span>
+      <span class="code-tag">&lt;/goals&gt;</span>
+    <span class="code-tag">&lt;/execution&gt;</span>
+  <span class="code-tag">&lt;/executions&gt;</span>
+<span class="code-tag">&lt;/plugin&gt;</span></pre>
+</div></div>
 
-<h3><a name="MavenObrPlugin-E:Cleaningthelocalobrrepository&amp;nbsp;"></a>E: Cleaning the local obr repository&nbsp;</h3>
+<h2><a name="MavenOBRPlugin-obr:deployfile"></a>obr:deploy-file</h2>
 
-<p>Sometimes, you would like to clean your obr repository because it
-contains no more existing bundles. This case often occurs when
-artifacts were deleted manually from the maven repository. The plug-in
-provides a simple goal to look for missing bundle and to remove them
-from the obr repository.</p>
+<p>The <b>deploy-file</b> goal updates the remote OBR with the details of a deployed bundle from the local filesystem. The remote OBR is found using the <tt>-DrepositoryId</tt> and <tt>-Durl</tt> parameters. See <span class="nobr"><a href="http://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html" title="Visit page outside Confluence" rel="nofollow">http://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span> for more details about these particular settings.</p>
 
-<p>To launch this feature, launch the following command from a folder
-of one of your bundle 'mvn org.apache.felix:maven-obr-plugin:clean'.</p>
+<p>You can use the <tt>-DbundleUrl</tt> parameter to give the public location of the deployed bundle, which may differ from the remote OBR location.</p>
 
-<h2><a name="MavenObrPlugin-Howtheplugincomputethedescriptionofthebundle"></a>How the plug-in compute the description of the bundle</h2>
+<p>configuration:</p>
+
+<ul>
+	<li><em>obrRepository</em>  name of remote OBR, defaults to <tt>repository.xml</tt></li>
+	<li><em>repositoryId</em>   optional repository id, used to lookup authentication settings</li>
+	<li><em>url</em>            remote repository transport URL, like <div class="preformatted"><div class="preformattedContent">
+<pre>scpexe://host/path/to/obr</pre>
+</div></div></li>
+	<li><em>bundleUrl</em>      public URL of deployed bundle, like <div class="preformatted"><div class="preformattedContent">
+<pre>http://www.foo.org/bundles/foo.jar</pre>
+</div></div></li>
+	<li><em>groupId</em>        Maven groupId for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>artifactId</em>     Maven artifactId for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>version</em>        Maven version for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>packaging</em>      Maven packaging type for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>classifier</em>     Maven classifier type, defaults to none</li>
+	<li><em>pomFile</em>        optional Pom file describing the bundle</li>
+	<li><em>file</em>           bundle file, defaults to the bundle from the local Maven repository</li>
+	<li><em>obrXml</em>         optional additional properties for the bundle</li>
+	<li><em>ignoreLock</em>     ignore remote locking when updating the OBR</li>
+</ul>
+
+
+<p>Example:</p>
+
+<div class="preformatted"><div class="preformattedContent">
+<pre>mvn org.apache.felix:maven-obr-plugin:1.2.0-SNAPSHOT:deploy-file \
+  -DpomFile=myPom.xml -Dfile=foo-1.0.jar -Durl=file:/tmp/example/OBR \
+  -DbundleUrl=http://www.foo.org/bundles/foo.jar
+</pre>
+</div></div>
+
+<h2><a name="MavenOBRPlugin-obr:clean"></a>obr:clean</h2>
+
+<p>Sometimes you would like to clean your local OBR because it contains
+bundles that are no longer in your local Maven repository. This case
+often occurs when artifacts were deleted manually. The maven-obr-plugin
+provides a simple goal to check for missing bundles, and remove them
+from the local OBR.</p>
+
+<p>configuration:</p>
+
+<ul>
+	<li><em>obrRepository</em>  path to local OBR, defaults to <em>&lt;local-maven-repository&gt;<tt></tt></em><tt>/repository.xml</tt></li>
+</ul>
+
+
+<p>To attach this goal to your project's lifecycle, use:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;plugin&gt;</span>
+  <span class="code-tag">&lt;groupId&gt;</span>org.apache.felix<span class="code-tag">&lt;/groupId&gt;</span>
+  <span class="code-tag">&lt;artifactId&gt;</span>maven-obr-plugin<span class="code-tag">&lt;/artifactId&gt;</span>
+  <span class="code-tag">&lt;version&gt;</span>1.2.0-SNAPSHOT<span class="code-tag">&lt;/version&gt;</span>
+  <span class="code-tag">&lt;executions&gt;</span>
+    <span class="code-tag">&lt;execution&gt;</span>
+      <span class="code-tag">&lt;goals&gt;</span>
+        <span class="code-tag">&lt;goal&gt;</span>clean<span class="code-tag">&lt;/goal&gt;</span>
+      <span class="code-tag">&lt;/goals&gt;</span>
+    <span class="code-tag">&lt;/execution&gt;</span>
+  <span class="code-tag">&lt;/executions&gt;</span>
+<span class="code-tag">&lt;/plugin&gt;</span></pre>
+</div></div>
+
+<h2><a name="MavenOBRPlugin-Concurrentupdates"></a>Concurrent updates</h2>
+
+<p>With a remote OBR, several uploads may occur at the same time.
+However, the remote OBR is centralized in one file, so concurrent
+modification must be avoided. To achieve this, the plug-in implements a
+locking system. Each time the plug-in tries to modify the file it sets
+a file based lock. If it can't take the lock, it will wait and retry.
+After 3 attempts the upload process fails. To bypass this lock add <tt>-DignoreLock</tt> to the command-line (or add <tt>&lt;ignoreLock&gt;true&lt;ignoreLock&gt;</tt> to the configuration section of your Pom).</p>
+
+<h2><a name="MavenOBRPlugin-FTPprotocol"></a>FTP protocol</h2>
+
+<p>Not all protocols are supported by Maven out of the box. For example the ftp protocol requires the <b>wagon-ftp</b> component. To enable the ftp protocol add this to your Pom:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;build&gt;</span>
+  <span class="code-tag">&lt;extensions&gt;</span>
+    <span class="code-tag">&lt;extension&gt;</span>
+      <span class="code-tag">&lt;groupId&gt;</span>org.apache.maven.wagon<span class="code-tag">&lt;/groupId&gt;</span>
+      <span class="code-tag">&lt;artifactId&gt;</span>wagon-ftp<span class="code-tag">&lt;/artifactId&gt;</span>
+      <span class="code-tag">&lt;version&gt;</span>1.0-alpha-6<span class="code-tag">&lt;/version&gt;</span>
+    <span class="code-tag">&lt;/extension&gt;</span>
+  <span class="code-tag">&lt;/extensions&gt;</span>
+<span class="code-tag">&lt;/build&gt;</span></pre>
+</div></div>
+
+<h2><a name="MavenOBRPlugin-Howtheplugincomputesthedescriptionofthebundle"></a>How the plug-in computes the description of the bundle</h2>
 
 <p>The description of the bundle comes from three different sources:</p>
+
 <ul>
-	<li>Bindex : Bindex is a tool analyzing&nbsp; a bundle manifest to generate OBR description</li>
-	<li>The Pom file : by analyzing the pom file, some information are collected (symbolic name ...)</li>
-	<li>The obr.xml file : this file contains customized description of the bundle</li>
+	<li>Bindex : Bindex is a tool that analyzes a bundle manifest to generate OBR description</li>
+	<li>pom.xml : by analyzing the pom file, various information is collected (symbolic name ...)</li>
+	<li>obr.xml : this file contains customized description and capabilities for the bundle</li>
 </ul>
 
 
-<p>In order to create the bundle description, the plug-in gets
-information from bindex, the pom.xml and the obr.xml file. Information
-can be overridden:<br>
-Bindex<br>
-| (overrides)<br>
-Pom.xml<br>
-| (overrides)<br>
-Obr.xml</p>
+<p>These sources are merged together using the following precedence:</p>
 
-<p>A warning message is displayed each time already existing
-information is overridden. In case of install-file goal, the
-information given by user (i.e.: artefactId, groupId, version) is
-considered as pom.xml properties.</p>
+<div class="preformatted"><div class="preformattedContent">
+<pre>Bindex
+| (overrides)
+pom.xml
+| (overrides)
+obr.xml
+</pre>
+</div></div>
 
-<h2><a name="MavenObrPlugin-Knownissues&amp;limitations:"></a>Known issues &amp; limitations:</h2>
+<p>A warning message is displayed when existing information is overridden.</p>
 
-<p>1.&nbsp;&nbsp;&nbsp; Do not support relative paths when you specify the repository descriptor in command line use.<br>
-2.&nbsp;&nbsp;&nbsp; obr.xml (file given by the user to describe some
-properties not found by Bindex) must be correct, because the plug-in
-does not check the syntax.</p>
+<h2><a name="MavenOBRPlugin-Knownissues&amp;limitations"></a>Known issues &amp; limitations</h2>
+
+<ol>
+	<li>obr.xml (file given by the user to add properties not found
+by Bindex) must be correct, because the plug-in does not check its
+syntax.</li>
+</ol>
+
     </div>
-  
-</body></html>
+  </body></html>
