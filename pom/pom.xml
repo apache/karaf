@@ -94,7 +94,6 @@
         </property>
       </activation>
       <modules>
-        <module>../org.osgi.service.obr</module>
         <module>../maven-obr-plugin</module>
         <module>../bundleplugin</module>
         <module>../scrplugin</module>
