@@ -33,11 +33,10 @@
  
  <name>Maven Bundle Plugin</name>
  <description>
-  Provides a maven plugin which allows the creation of an OSGi bundle by
-  embedding used packages as class or jars by inspecting the classpath used to
-  compile the bundle. Plus a zillion other features. 
-  The plugin relies on the bnd tools, so to gather more information you can look
-  at is documentation http://www.aqute.biz/php/tools/bnd.php
+  Provides a maven plugin that supports creating an OSGi bundle
+  from the contents of the compilation classpath along with its
+  resources and dependencies. Plus a zillion other features.
+  The plugin uses the Bnd tool (http://www.aqute.biz/Code/Bnd)
  </description>
  
  <dependencies>

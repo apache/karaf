@@ -33,8 +33,8 @@
   
   <name>OBR Maven Plugin</name>
   <description>
-    Provides a maven plugin which allows the automatic cration and update of an
-    OSGi Bundle Repository complaint to OSGi RFC 0112.
+    Provides a maven plugin that supports the automatic creation and
+    update of an OSGi Bundle Repository compliant with OSGi RFC 0112.
   </description>
 
   <dependencies>
