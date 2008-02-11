@@ -13,10 +13,10 @@
 	<li><a href="http://felix.apache.org/site/news.html" title="news">news</a></li>
 	<li><a href="http://felix.apache.org/site/status.html" title="status">status</a></li>
 	<li><a href="http://felix.apache.org/site/license.html" title="license">license</a></li>
-	<li><span class="nobr"><a href="http://felix.apache.org/site/downloads.cgi">downloads<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
 	<li><a href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</a></li>
 	<li><a href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</a></li>
-	<li><span class="nobr"><a href="http://cwiki.apache.org/confluence/x/O-">wiki<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://cwiki.apache.org/confluence/x/O-" title="Visit page outside Confluence" rel="nofollow">wiki<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
 	<li><a href="http://felix.apache.org/site/committers.html" title="committers">committers</a></li>
 	<li><a href="http://felix.apache.org/site/faq.html" title="faq">faq</a></li>
 	<li><a href="http://felix.apache.org/site/roadmap.html" title="roadmap">roadmap</a></li>
@@ -24,9 +24,9 @@
 	<li><a href="http://felix.apache.org/site/codingstandards.html" title="codingstandards">coding standards</a></li>
 	<li><a href="http://felix.apache.org/site/issuetracking.html" title="issuetracking">issue tracking</a></li>
 	<li><a href="http://felix.apache.org/site/dependencies.html" title="dependencies">dependencies</a></li>
-	<li><span class="nobr"><a href="http://www.apache.org/">apache software foundation<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
-	<li><span class="nobr"><a href="http://www.apache.org/foundation/sponsorship.html">sponsorship<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
-	<li><span class="nobr"><a href="http://www.apache.org/foundation/thanks.html">sponsors<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">apache software foundation<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<sup><img class="rendericon" src="maven-obr-plugin_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
 </ul> </div>
     <div class="main">
 <p>This Maven plug-in aims to automate OBR (OSGi Bundle Repository)
@@ -81,7 +81,7 @@ using a combination of Bindex and Maven metadata.</p>
 <pre class="code-xml"><span class="code-tag">&lt;plugin&gt;</span>
   <span class="code-tag">&lt;groupId&gt;</span>org.apache.felix<span class="code-tag">&lt;/groupId&gt;</span>
   <span class="code-tag">&lt;artifactId&gt;</span>maven-obr-plugin<span class="code-tag">&lt;/artifactId&gt;</span>
-  <span class="code-tag">&lt;version&gt;</span>1.2.0-SNAPSHOT<span class="code-tag">&lt;/version&gt;</span>
+  <span class="code-tag">&lt;version&gt;</span>1.2.0<span class="code-tag">&lt;/version&gt;</span>
   <span class="code-tag">&lt;executions&gt;</span>
     <span class="code-tag">&lt;execution&gt;</span>
       <span class="code-tag">&lt;goals&gt;</span>
@@ -114,7 +114,7 @@ using a combination of Bindex and Maven metadata.</p>
 <p>Example:</p>
 
 <div class="preformatted"><div class="preformattedContent">
-<pre>mvn org.apache.felix:maven-obr-plugin:1.2.0-SNAPSHOT:install-file \
+<pre>mvn org.apache.felix:maven-obr-plugin:1.2.0:install-file \
   -DpomFile=myPom.xml -Dfile=foo-1.0.jar
 </pre>
 </div></div>
@@ -142,7 +142,7 @@ found by querying the <tt>&lt;distributionManagement&gt;</tt> section of the pro
 <pre class="code-xml"><span class="code-tag">&lt;plugin&gt;</span>
   <span class="code-tag">&lt;groupId&gt;</span>org.apache.felix<span class="code-tag">&lt;/groupId&gt;</span>
   <span class="code-tag">&lt;artifactId&gt;</span>maven-obr-plugin<span class="code-tag">&lt;/artifactId&gt;</span>
-  <span class="code-tag">&lt;version&gt;</span>1.2.0-SNAPSHOT<span class="code-tag">&lt;/version&gt;</span>
+  <span class="code-tag">&lt;version&gt;</span>1.2.0<span class="code-tag">&lt;/version&gt;</span>
   <span class="code-tag">&lt;executions&gt;</span>
     <span class="code-tag">&lt;execution&gt;</span>
       <span class="code-tag">&lt;goals&gt;</span>
@@ -185,7 +185,7 @@ found by querying the <tt>&lt;distributionManagement&gt;</tt> section of the pro
 <p>Example:</p>
 
 <div class="preformatted"><div class="preformattedContent">
-<pre>mvn org.apache.felix:maven-obr-plugin:1.2.0-SNAPSHOT:deploy-file \
+<pre>mvn org.apache.felix:maven-obr-plugin:1.2.0:deploy-file \
   -DpomFile=myPom.xml -Dfile=foo-1.0.jar -Durl=file:/tmp/example/OBR \
   -DbundleUrl=http://www.foo.org/bundles/foo.jar
 </pre>
@@ -212,7 +212,7 @@ from the local OBR.</p>
 <pre class="code-xml"><span class="code-tag">&lt;plugin&gt;</span>
   <span class="code-tag">&lt;groupId&gt;</span>org.apache.felix<span class="code-tag">&lt;/groupId&gt;</span>
   <span class="code-tag">&lt;artifactId&gt;</span>maven-obr-plugin<span class="code-tag">&lt;/artifactId&gt;</span>
-  <span class="code-tag">&lt;version&gt;</span>1.2.0-SNAPSHOT<span class="code-tag">&lt;/version&gt;</span>
+  <span class="code-tag">&lt;version&gt;</span>1.2.0<span class="code-tag">&lt;/version&gt;</span>
   <span class="code-tag">&lt;executions&gt;</span>
     <span class="code-tag">&lt;execution&gt;</span>
       <span class="code-tag">&lt;goals&gt;</span>
@@ -281,4 +281,5 @@ syntax.</li>
 </ol>
 
     </div>
-  </body></html>
+  
+</body></html>
