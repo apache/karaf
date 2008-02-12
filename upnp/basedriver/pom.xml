@@ -95,14 +95,13 @@
                 <Bundle-SymbolicName>
                   org.apache.felix.upnp.basedriver
                 </Bundle-SymbolicName>
-                <!--Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
-                  <Embed-Transitive>true</Embed-Transitive-->
                 <Export-Package>
                   org.apache.felix.upnp.basedriver.controller;version=0.1.0,
                   org.apache.felix.upnp.basedriver.util;version=0.3.0,
                   org.apache.felix.upnp.basedriver.resources;version=0.3.0,
+                  org.osgi.service.upnp;version=1.1.0
                 </Export-Package>
-                <Import-Package>org.osgi.*</Import-Package>
+                <Import-Package>org.osgi.framework, org.osgi.service.log</Import-Package>
                 <Private-Package>
                   org.apache.felix.upnp.basedriver.controller.impl,
                   org.apache.felix.upnp.basedriver.importer.*,
@@ -164,8 +163,7 @@
                   org.apache.felix.upnp.basedriver.resources;version=0.3.0
                 </Export-Package>
                 <Import-Package>
-                  org.osgi.*, javax.xml.parsers, org.w3c.dom,
-                  org.xml.sax
+                  org.osgi.*, javax.xml.parsers, org.w3c.dom, org.xml.sax
                 </Import-Package>
                 <Private-Package>
                   org.apache.felix.upnp.basedriver.controller.impl,
@@ -196,7 +194,6 @@
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.compendium</artifactId>
       <version>1.0.0</version>
-      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
