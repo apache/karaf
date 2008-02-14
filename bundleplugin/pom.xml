@@ -28,7 +28,7 @@
  <modelVersion>4.0.0</modelVersion>
 
  <artifactId>maven-bundle-plugin</artifactId>
- <version>1.2.1-SNAPSHOT</version>
+ <version>1.2.1</version>
  <packaging>maven-plugin</packaging>
  
  <name>Maven Bundle Plugin</name>
@@ -107,4 +107,10 @@
    <scope>test</scope>
   </dependency>
  </dependencies>
+
+  <scm>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/maven-bundle-plugin-1.2.1</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/maven-bundle-plugin-1.2.1</developerConnection>
+    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/maven-bundle-plugin-1.2.1</url>
+  </scm>
 </project>
