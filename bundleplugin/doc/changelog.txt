@@ -1,3 +1,17 @@
+Changes from 1.2.0 to 1.2.1
+---------------------------
+
+ * [2008-01-28] FELIX-457: remove PathFile class and use URIs instead
+ * [2008-01-22] FELIX-458: BND: -split-package:=merge-first behaves like merge-last
+ * [2008-02-02] FELIX-459: BND: allow customization of the "uses" clause in the generated Export-Package
+ * [2008-01-29] FELIX-460: Remove "." from the Bundle-ClassPath when embedding dependencies in a bundle with no local classes
+ * [2008-01-30] FELIX-461: Ensure manifest goal creates same manifest as bundle goal when project packaging is "bundle"
+ * [2008-01-30] FELIX-462: Support removal of manifest headers added by the bundleplugin
+ * [2008-01-29] FELIX-472: Embed-Dependency, Include-Resource and inline
+ * [2008-01-30] FELIX-476: Improve default Export-Package (used when no Export-Package and Private-Package is set)
+ * [2008-02-12] FELIX-477: BND: Versions with fourth section all numbers are truncated
+ * [2008-02-06] FELIX-479: add supportedProjectTypes configuration option to install goal
+
 Changes from 1.0.0 to 1.2.0
 ---------------------------
 
