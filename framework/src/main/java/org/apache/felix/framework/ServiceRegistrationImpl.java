@@ -44,6 +44,8 @@ class ServiceRegistrationImpl implements ServiceRegistration
     private Map m_propMap =  new StringMap(false);
     // Re-usable service reference.
     private ServiceReferenceImpl m_ref = null;
+    // Flag indicating that we are unregistering.
+    private boolean m_isUnregistering = false;
 
     public ServiceRegistrationImpl(
         ServiceRegistry registry, Bundle bundle,
@@ -68,9 +70,14 @@ class ServiceRegistrationImpl implements ServiceRegistration
         m_ref = new ServiceReferenceImpl(this, m_bundle);
     }
 
-    protected boolean isValid()
+    protected synchronized boolean isValid()
     {
         return (m_svcObj != null);
+    }
+
+    protected synchronized void invalidate()
+    {
+        m_svcObj = null;
     }
 
     public ServiceReference getReference()
@@ -94,15 +101,19 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
     public void unregister()
     {
-        if (m_svcObj != null)
+        synchronized (this)
         {
-            m_registry.unregisterService(m_bundle, this);
+            if (!isValid() || m_isUnregistering)
+            {
+                throw new IllegalStateException("Service already unregistered.");
+            }
+            m_isUnregistering = true;
+        }
+        m_registry.unregisterService(m_bundle, this);
+        synchronized (this)
+        {
             m_svcObj = null;
             m_factory = null;
-        }
-        else
-        {
-            throw new IllegalStateException("Service already unregistered.");
         }
     }
 
@@ -195,7 +206,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
     protected void ungetService(Bundle relBundle, Object svcObj)
     {
         // If the service object is a service factory, then
-        // let is release the service object.
+        // let it release the service object.
         if (m_factory != null)
         {
             try
