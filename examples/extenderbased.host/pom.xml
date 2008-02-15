@@ -49,9 +49,9 @@
         <configuration>
           <instructions>
             <Main-Class>org.apache.felix.example.extenderbased.host.Activator</Main-Class>
-            <Import-Package>org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.url,org.osgi.service.startlevel,org.osgi.util.tracker,*</Import-Package>
+            <Import-Package>!android.dalvik,org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.url,org.osgi.service.startlevel,org.osgi.util.tracker,*</Import-Package>
             <Export-Package>org.apache.felix.example.extenderbased.host.extension.*</Export-Package>
-            <Private-Package>org.apache.felix.example.extenderbased.host.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.osgi.*</Private-Package>
+            <Private-Package>org.apache.felix.example.extenderbased.host.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.apache.felix.main,org.osgi.*</Private-Package>
             <Bundle-Activator>org.apache.felix.example.extenderbased.host.Activator</Bundle-Activator>
           </instructions>
         </configuration>
