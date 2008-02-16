@@ -60,7 +60,7 @@
           <instructions>
             <Bundle-SymbolicName>org.osgi.compendium</Bundle-SymbolicName>
             <Export-Package>org.osgi.service.cm,org.osgi.service.component,org.osgi.service.device,org.osgi.service.event,org.osgi.service.http,org.osgi.service.io,org.osgi.service.log,org.osgi.service.metatype,org.osgi.service.prefs,org.osgi.service.provisioning,org.osgi.service.upnp,org.osgi.service.useradmin,org.osgi.service.wireadmin,org.osgi.util.measurement,org.osgi.util.position,org.osgi.util.tracker,org.osgi.util.xml</Export-Package>
-            <Import-Package>javax.microedition.io;resolution:=optional,org.osgi.framework,!org.osgi.*,*</Import-Package>
+            <Import-Package />
             <DynamicImport-Package>*</DynamicImport-Package>
             <Bundle-Version>4</Bundle-Version>
             <Bundle-Copyright>Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.</Bundle-Copyright>
