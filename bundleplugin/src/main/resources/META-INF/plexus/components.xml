@@ -38,7 +38,10 @@
                 org.apache.maven.plugins:maven-install-plugin:install,
                 org.apache.felix:maven-bundle-plugin:install
               </install>
-              <deploy>org.apache.maven.plugins:maven-deploy-plugin:deploy</deploy>
+              <deploy>
+                org.apache.maven.plugins:maven-deploy-plugin:deploy<!--,
+         TODO:  org.apache.felix:maven-bundle-plugin:deploy-->
+              </deploy>
             </phases>
             <!-- END SNIPPET: bundle-lifecycle -->
           </lifecycle>
