@@ -16,29 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.obr.plugin;
+package org.apache.felix.obrplugin;
 
 
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.felix.obrplugin.Config;
+import org.apache.felix.obrplugin.ObrUpdate;
+import org.apache.felix.obrplugin.ObrUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
 
 /**
- * Installs bundle details in the local OBR repository (command-line goal)
+ * Installs bundle details in the local OBR repository (life-cycle goal)
  * 
- * @requiresProject false
- * @goal install-file
+ * @goal install
  * @phase install
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public final class ObrInstallFile extends AbstractFileMojo
+public final class ObrInstall extends AbstractMojo
 {
     /**
      * OBR Repository.
@@ -64,11 +66,18 @@ public final class ObrInstallFile extends AbstractFileMojo
      */
     private ArtifactRepository localRepository;
 
+    /**
+     * The Maven project.
+     * 
+     * @parameter expression="${project}"
+     * @required
+     * @readonly
+     */
+    private MavenProject project;
 
-    public void execute() throws MojoExecutionException
+
+    public void execute()
     {
-        MavenProject project = getProject();
-
         if ( !supportedProjectTypes.contains( project.getPackaging() ) )
         {
             getLog().info( "Ignoring packaging type " + project.getPackaging() );
@@ -83,25 +92,23 @@ public final class ObrInstallFile extends AbstractFileMojo
         Log log = getLog();
         ObrUpdate update;
 
-        String mavenRepository = localRepository.getBasedir();
-
-        URI repositoryXml = ObrUtils.findRepositoryXml( mavenRepository, obrRepository );
-        URI obrXmlFile = ObrUtils.toFileURI( obrXml );
-        URI bundleJar;
-
-        if ( null == file )
+        try
         {
-            bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
+            String mavenRepository = localRepository.getBasedir();
+
+            URI repositoryXml = ObrUtils.findRepositoryXml( mavenRepository, obrRepository );
+            URI obrXmlFile = ObrUtils.findObrXml( project.getResources() );
+            URI bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
+
+            Config userConfig = new Config();
+
+            update = new ObrUpdate( repositoryXml, obrXmlFile, project, bundleJar, mavenRepository, userConfig, log );
+
+            update.updateRepository();
         }
-        else
+        catch ( Exception e )
         {
-            bundleJar = file.toURI();
+            log.warn( "Exception while updating local OBR: " + e.getLocalizedMessage(), e );
         }
-
-        Config userConfig = new Config();
-
-        update = new ObrUpdate( repositoryXml, obrXmlFile, project, bundleJar, mavenRepository, userConfig, log );
-
-        update.updateRepository();
     }
 }
