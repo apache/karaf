@@ -23,6 +23,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -50,8 +51,10 @@ public class ObrUtils
     {
         String targetPath = obrRepository;
 
+        Pattern ignoredNames = Pattern.compile( "^(true|false|none|null)?$", Pattern.CASE_INSENSITIVE );
+
         // Combine location settings into a single repository location
-        if ( null == targetPath || targetPath.trim().length() == 0 || "true".equalsIgnoreCase( targetPath ) )
+        if ( null == targetPath || ignoredNames.matcher( targetPath ).matches() )
         {
             targetPath = mavenRepository + '/' + REPO_XML;
         }

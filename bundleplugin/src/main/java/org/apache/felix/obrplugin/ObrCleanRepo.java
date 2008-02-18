@@ -81,9 +81,9 @@ public class ObrCleanRepo extends AbstractMojo
 
     public void execute()
     {
-        if ( "NONE".equalsIgnoreCase( obrRepository ) )
+        if ( "NONE".equalsIgnoreCase( obrRepository ) || "false".equalsIgnoreCase( obrRepository ) )
         {
-            getLog().info( "OBR clean disabled (enable with -DobrRepository)" );
+            getLog().info( "Local OBR clean disabled (enable with -DobrRepository)" );
             return;
         }
 

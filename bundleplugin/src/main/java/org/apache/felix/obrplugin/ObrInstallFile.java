@@ -74,9 +74,9 @@ public final class ObrInstallFile extends AbstractFileMojo
             getLog().info( "Ignoring packaging type " + project.getPackaging() );
             return;
         }
-        else if ( "NONE".equalsIgnoreCase( obrRepository ) )
+        else if ( "NONE".equalsIgnoreCase( obrRepository ) || "false".equalsIgnoreCase( obrRepository ) )
         {
-            getLog().info( "OBR update disabled (enable with -DobrRepository)" );
+            getLog().info( "Local OBR update disabled (enable with -DobrRepository)" );
             return;
         }
 

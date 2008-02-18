@@ -51,7 +51,14 @@ public final class ObrDeployFile extends AbstractFileMojo
     private boolean ignoreLock;
 
     /**
-     * OBR Repository.
+     * Remote OBR Repository.
+     * 
+     * @parameter expression="${remoteOBR}"
+     */
+    private String remoteOBR;
+
+    /**
+     * Local OBR Repository.
      * 
      * @parameter expression="${obrRepository}"
      */
@@ -123,13 +130,19 @@ public final class ObrDeployFile extends AbstractFileMojo
             getLog().info( "Ignoring packaging type " + project.getPackaging() );
             return;
         }
-        else if ( "NONE".equalsIgnoreCase( obrRepository ) )
+        else if ( "NONE".equalsIgnoreCase( remoteOBR ) || "false".equalsIgnoreCase( remoteOBR ) )
         {
-            getLog().info( "OBR update disabled (enable with -DobrRepository)" );
+            getLog().info( "Remote OBR update disabled (enable with -DremoteOBR)" );
             return;
         }
 
-        URI tempURI = ObrUtils.findRepositoryXml( "", obrRepository );
+        // if the user doesn't supply an explicit name for the remote OBR file, use the local name instead
+        if ( null == remoteOBR || remoteOBR.trim().length() == 0 || "true".equalsIgnoreCase( remoteOBR ) )
+        {
+            remoteOBR = obrRepository;
+        }
+
+        URI tempURI = ObrUtils.findRepositoryXml( "", remoteOBR );
         String repositoryName = new File( tempURI.getPath() ).getName();
 
         Log log = getLog();
