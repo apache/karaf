@@ -155,7 +155,6 @@ public final class ObrDeploy extends AbstractMojo
             URI bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
 
             Config userConfig = new Config();
-            userConfig.setPathRelative( true );
             userConfig.setRemoteFile( true );
 
             update = new ObrUpdate( repositoryXml, obrXmlFile, project, bundleJar, mavenRepository, userConfig, log );
