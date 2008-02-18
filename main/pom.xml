@@ -47,7 +47,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell</artifactId>
-      <version>1.0.0</version>
+      <version>1.1.0-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -58,7 +58,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell.tui</artifactId>
-      <version>1.0.0</version>
+      <version>1.1.0-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -146,7 +146,7 @@
                   <artifactItem>
                      <groupId>${pom.groupId}</groupId>
                      <artifactId>org.apache.felix.shell</artifactId>
-                     <version>1.0.0</version>
+                     <version>1.1.0-SNAPSHOT</version>
                      <type>jar</type>
                      <overWrite>true</overWrite>
                      <outputDirectory>${project.build.directory}/bundle</outputDirectory >
@@ -154,7 +154,7 @@
                    <artifactItem>
                      <groupId>${pom.groupId}</groupId>
                      <artifactId>org.apache.felix.shell.tui</artifactId>
-                     <version>1.0.0</version>
+                     <version>1.1.0-SNAPSHOT</version>
                      <type>jar</type>
                      <overWrite>true</overWrite>
                      <outputDirectory>${project.build.directory}/bundle</outputDirectory >
