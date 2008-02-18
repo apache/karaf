@@ -361,6 +361,12 @@ public class BundlePlugin extends AbstractMojo
         builder.setProperties( properties );
         builder.setClasspath( classpath );
 
+        if ( null != classifier && classifier.trim().length() > 0 )
+        {
+            String bundleVersion = properties.getProperty( Analyzer.BUNDLE_VERSION );
+            properties.put( Analyzer.BUNDLE_VERSION, bundleVersion + '-' + classifier );
+        }
+
         if ( !properties.containsKey( Analyzer.EXPORT_PACKAGE ) && !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
         {
             String bsn = properties.getProperty( Analyzer.BUNDLE_SYMBOLICNAME );

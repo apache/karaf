@@ -21,14 +21,13 @@ package org.apache.felix.obrplugin;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
-import org.apache.felix.obrplugin.Config;
-import org.apache.felix.obrplugin.ObrUpdate;
-import org.apache.felix.obrplugin.ObrUtils;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 
 
@@ -75,6 +74,13 @@ public final class ObrInstall extends AbstractMojo
      */
     private MavenProject project;
 
+    /**
+     * @parameter expression="${project.attachedArtifacts}
+     * @required
+     * @readonly
+     */
+    private List attachedArtifacts;
+
 
     public void execute()
     {
@@ -89,26 +95,41 @@ public final class ObrInstall extends AbstractMojo
             return;
         }
 
-        Log log = getLog();
-        ObrUpdate update;
-
         try
         {
             String mavenRepository = localRepository.getBasedir();
 
             URI repositoryXml = ObrUtils.findRepositoryXml( mavenRepository, obrRepository );
             URI obrXmlFile = ObrUtils.findObrXml( project.getResources() );
-            URI bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
 
-            Config userConfig = new Config();
-
-            update = new ObrUpdate( repositoryXml, obrXmlFile, project, bundleJar, mavenRepository, userConfig, log );
-
-            update.updateRepository();
+            updateLocalBundleMetadata( project.getArtifact(), repositoryXml, obrXmlFile, mavenRepository );
+            for ( Iterator i = attachedArtifacts.iterator(); i.hasNext(); )
+            {
+                updateLocalBundleMetadata( ( Artifact ) i.next(), repositoryXml, obrXmlFile, mavenRepository );
+            }
         }
         catch ( Exception e )
         {
-            log.warn( "Exception while updating local OBR: " + e.getLocalizedMessage(), e );
+            getLog().warn( "Exception while updating local OBR: " + e.getLocalizedMessage(), e );
         }
+    }
+
+
+    private void updateLocalBundleMetadata( Artifact artifact, URI repoXml, URI obrXml, String mavenRepo )
+        throws MojoExecutionException
+    {
+        if ( null == artifact.getFile() || artifact.getFile().isDirectory() )
+        {
+            return;
+        }
+
+        getLog().info( "Updating: " + artifact );
+
+        URI bundleJar = ObrUtils.findBundleJar( localRepository, artifact );
+
+        Config userConfig = new Config();
+
+        ObrUpdate update = new ObrUpdate( repoXml, obrXml, project, bundleJar, mavenRepo, userConfig, getLog() );
+        update.updateRepository();
     }
 }
