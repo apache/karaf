@@ -51,6 +51,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.shared.osgi.Maven2OsgiConverter;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
@@ -94,6 +95,19 @@ public class BundlePlugin extends AbstractMojo
      * @parameter expression="${excludeDependencies}"
      */
     protected boolean excludeDependencies;
+
+    /**
+     * Classifier type of the bundle to be installed.  For example, "jdk14".
+     * Defaults to none which means this is the project's main bundle.
+     *
+     * @parameter expression="${classifier}"
+     */
+    protected String classifier;
+
+    /**
+     * @component
+     */
+    private MavenProjectHelper m_projectHelper;
 
     /**
      * @component
@@ -147,7 +161,7 @@ public class BundlePlugin extends AbstractMojo
     private MavenProject project;
 
     /**
-     * The name of the generated JAR file.
+     * The BND instructions for the bundle.
      *
      * @parameter
      */
@@ -285,8 +299,20 @@ public class BundlePlugin extends AbstractMojo
             // attach bundle to maven project
             jarFile.getParentFile().mkdirs();
             builder.getJar().write( jarFile );
-            Artifact bundleArtifact = currentProject.getArtifact();
-            bundleArtifact.setFile( jarFile );
+
+            Artifact mainArtifact = currentProject.getArtifact();
+
+            // workaround for MNG-1682: force maven to install artifact using the "jar" handler
+            mainArtifact.setArtifactHandler( m_artifactHandlerManager.getArtifactHandler( "jar" ) );
+
+            if ( null == classifier || classifier.trim().length() == 0 )
+            {
+                mainArtifact.setFile( jarFile );
+            }
+            else
+            {
+                m_projectHelper.attachArtifact( currentProject, jarFile, classifier );
+            }
 
             if ( unpackBundle )
             {
@@ -307,9 +333,6 @@ public class BundlePlugin extends AbstractMojo
                     getLog().error( "Error trying to write Manifest to file " + outputFile, e );
                 }
             }
-
-            // workaround for MNG-1682: force maven to install artifact using the "jar" handler
-            bundleArtifact.setArtifactHandler( m_artifactHandlerManager.getArtifactHandler( "jar" ) );
         }
         catch ( MojoFailureException e )
         {
