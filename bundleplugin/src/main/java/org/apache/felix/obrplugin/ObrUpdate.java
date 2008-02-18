@@ -177,6 +177,15 @@ public class ObrUpdate
                 }
             }
 
+            if ( m_userConfig.isRemoteFile() )
+            {
+                m_logger.info( "Deploying " + resourceURI );
+            }
+            else
+            {
+                m_logger.info( "Installing " + resourceURI );
+            }
+
             m_resourceBundle.setSize( String.valueOf( bundleFile.length() ) );
             m_resourceBundle.setUri( resourceURI.toASCIIString() );
         }

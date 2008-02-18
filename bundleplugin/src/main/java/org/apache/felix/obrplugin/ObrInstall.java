@@ -123,8 +123,6 @@ public final class ObrInstall extends AbstractMojo
             return;
         }
 
-        getLog().info( "Updating: " + artifact );
-
         URI bundleJar = ObrUtils.findBundleJar( localRepository, artifact );
 
         Config userConfig = new Config();
