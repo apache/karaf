@@ -170,7 +170,7 @@ public final class ObrDeployFile extends AbstractFileMojo
 
             if ( null == file )
             {
-                bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
+                bundleJar = ObrUtils.getArtifactURI( localRepository, project.getArtifact() );
             }
             else
             {
@@ -191,9 +191,12 @@ public final class ObrDeployFile extends AbstractFileMojo
                 userConfig.setRemoteBundle( URI.create( localRepository.pathOf( project.getArtifact() ) ) );
             }
 
-            update = new ObrUpdate( repositoryXml, obrXmlFile, project, bundleJar, mavenRepository, userConfig, log );
+            update = new ObrUpdate( repositoryXml, obrXmlFile, project, mavenRepository, userConfig, log );
+            update.parseRepositoryXml();
 
-            update.updateRepository();
+            update.updateRepository( bundleJar, null );
+
+            update.writeRepositoryXml();
 
             if ( downloadedRepositoryXml.exists() )
             {

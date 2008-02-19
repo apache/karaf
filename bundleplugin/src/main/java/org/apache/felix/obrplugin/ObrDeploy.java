@@ -130,6 +130,11 @@ public final class ObrDeploy extends AbstractMojo
      */
     private WagonManager m_wagonManager;
 
+    /**
+     * Attached source artifact
+     */
+    private Artifact m_sourceArtifact;
+
 
     public void execute() throws MojoExecutionException
     {
@@ -144,6 +149,17 @@ public final class ObrDeploy extends AbstractMojo
             return;
         }
 
+        // check for any attached sources
+        for ( Iterator i = attachedArtifacts.iterator(); i.hasNext(); )
+        {
+            Artifact artifact = ( Artifact ) i.next();
+            if ( "sources".equals( artifact.getClassifier() ) )
+            {
+                m_sourceArtifact = artifact;
+                break;
+            }
+        }
+
         // if the user doesn't supply an explicit name for the remote OBR file, use the local name instead
         if ( null == remoteOBR || remoteOBR.trim().length() == 0 || "true".equalsIgnoreCase( remoteOBR ) )
         {
@@ -154,6 +170,7 @@ public final class ObrDeploy extends AbstractMojo
         String repositoryName = new File( tempURI.getPath() ).getName();
 
         Log log = getLog();
+        ObrUpdate update;
 
         RemoteFileManager remoteFile = new RemoteFileManager( m_wagonManager, settings, log );
         openRepositoryConnection( remoteFile );
@@ -174,11 +191,19 @@ public final class ObrDeploy extends AbstractMojo
             URI repositoryXml = downloadedRepositoryXml.toURI();
             URI obrXmlFile = ObrUtils.findObrXml( project.getResources() );
 
-            updateRemoteBundleMetadata( project.getArtifact(), repositoryXml, obrXmlFile, mavenRepository );
+            Config userConfig = new Config();
+            userConfig.setRemoteFile( true );
+
+            update = new ObrUpdate( repositoryXml, obrXmlFile, project, mavenRepository, userConfig, log );
+            update.parseRepositoryXml();
+
+            updateRemoteBundleMetadata( project.getArtifact(), update );
             for ( Iterator i = attachedArtifacts.iterator(); i.hasNext(); )
             {
-                updateRemoteBundleMetadata( ( Artifact ) i.next(), repositoryXml, obrXmlFile, mavenRepository );
+                updateRemoteBundleMetadata( ( Artifact ) i.next(), update );
             }
+
+            update.writeRepositoryXml();
 
             if ( downloadedRepositoryXml.exists() )
             {
@@ -238,20 +263,21 @@ public final class ObrDeploy extends AbstractMojo
     }
 
 
-    private void updateRemoteBundleMetadata( Artifact artifact, URI repoXml, URI obrXml, String mavenRepo )
-        throws MojoExecutionException
+    private void updateRemoteBundleMetadata( Artifact artifact, ObrUpdate update ) throws MojoExecutionException
     {
         if ( !"bundle".equals( artifact.getType() ) || null == artifact.getFile() || artifact.getFile().isDirectory() )
         {
             return;
         }
 
-        URI bundleJar = ObrUtils.findBundleJar( localRepository, artifact );
+        URI bundleJar = ObrUtils.getArtifactURI( localRepository, artifact );
+        URI sourceJar = null;
 
-        Config userConfig = new Config();
-        userConfig.setRemoteFile( true );
+        if ( null != m_sourceArtifact )
+        {
+            sourceJar = ObrUtils.getArtifactURI( localRepository, m_sourceArtifact );
+        }
 
-        ObrUpdate update = new ObrUpdate( repoXml, obrXml, project, bundleJar, mavenRepo, userConfig, getLog() );
-        update.updateRepository();
+        update.updateRepository( bundleJar, sourceJar );
     }
 }

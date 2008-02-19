@@ -77,11 +77,6 @@ public class ObrUpdate
     private URI m_obrXml;
 
     /**
-     * name and path to the bundle jar file.
-     */
-    private URI m_bundleJar;
-
-    /**
      * maven project description.
      */
     private MavenProject m_project;
@@ -117,23 +112,19 @@ public class ObrUpdate
      * @param repositoryXml path to the repository descriptor file
      * @param obrXml path and filename to the obr.xml file
      * @param project maven project description
-     * @param bundleJar path to the bundle jar file
      * @param mavenRepositoryPath path to the local maven repository
      * @param userConfig user information
      * @param logger plugin logger
      */
-    public ObrUpdate( URI repositoryXml, URI obrXml, MavenProject project, URI bundleJar, String mavenRepositoryPath,
+    public ObrUpdate( URI repositoryXml, URI obrXml, MavenProject project, String mavenRepositoryPath,
         Config userConfig, Log logger )
     {
-        m_bundleJar = bundleJar;
         m_repositoryXml = repositoryXml;
         m_obrXml = obrXml;
         m_project = project;
         m_logger = logger;
 
         m_userConfig = userConfig;
-
-        m_resourceBundle = new ResourcesBundle( logger );
 
         if ( userConfig.isRemoteFile() )
         {
@@ -143,34 +134,43 @@ public class ObrUpdate
         {
             m_baseURI = m_repositoryXml;
         }
+
+        m_documentBuilder = initDocumentBuilder();
     }
 
 
     /**
-     * update the repository descriptor file. parse the old repository descriptor file, get the old reference of the bundle or determine the id for a new bundle, extract information from bindex set the new information in descriptor file and save it.
+     * update the repository descriptor file. parse the old repository descriptor file,
+     * get the old reference of the bundle or determine the id for a new bundle, extract
+     * information from bindex set the new information in descriptor file and save it.
+     * 
+     * @param bundleJar path to the bundle jar file
+     * @param sourceJar path to the source jar file
+     * 
      * @throws MojoExecutionException if the plugin failed
      */
-    public void updateRepository() throws MojoExecutionException
+    public void updateRepository( URI bundleJar, URI sourceJar ) throws MojoExecutionException
     {
         m_logger.debug( " (f) repositoryXml = " + m_repositoryXml );
-        m_logger.debug( " (f) bundleJar = " + m_bundleJar );
+        m_logger.debug( " (f) bundleJar = " + bundleJar );
+        m_logger.debug( " (f) sourceJar = " + sourceJar );
         m_logger.debug( " (f) obrXml = " + m_obrXml );
 
-        m_documentBuilder = initDocumentBuilder();
-
-        if ( m_documentBuilder == null )
+        if ( m_repositoryDoc == null )
         {
             return;
         }
 
+        m_resourceBundle = new ResourcesBundle( m_logger );
+
         // get the file size
-        File bundleFile = new File( m_bundleJar );
+        File bundleFile = new File( bundleJar );
         if ( bundleFile.exists() )
         {
             URI resourceURI = m_userConfig.getRemoteBundle();
             if ( null == resourceURI )
             {
-                resourceURI = m_bundleJar;
+                resourceURI = bundleJar;
                 if ( m_userConfig.isPathRelative() )
                 {
                     resourceURI = ObrUtils.getRelativeURI( m_baseURI, resourceURI );
@@ -191,13 +191,7 @@ public class ObrUpdate
         }
         else
         {
-            m_logger.error( "file doesn't exist: " + m_bundleJar );
-            return;
-        }
-
-        // parse repository
-        if ( parseRepositoryXml() == -1 )
-        {
+            m_logger.error( "file doesn't exist: " + bundleJar );
             return;
         }
 
@@ -225,7 +219,7 @@ public class ObrUpdate
         try
         {
             // use bindex to extract bundle information
-            bindexExtractor = new ExtractBindexInfo( m_repositoryXml, m_bundleJar.getPath() );
+            bindexExtractor = new ExtractBindexInfo( m_repositoryXml, bundleJar.getPath() );
         }
         catch ( MojoExecutionException e )
         {
@@ -235,20 +229,36 @@ public class ObrUpdate
             throw new MojoExecutionException( "BindexException" );
         }
 
-        m_resourceBundle.construct( m_project, bindexExtractor );
+        String sourcePath = null;
+        if ( null != sourceJar )
+        {
+            if ( m_userConfig.isPathRelative() )
+            {
+                sourcePath = ObrUtils.getRelativeURI( m_baseURI, sourceJar ).toASCIIString();
+            }
+            else
+            {
+                sourcePath = sourceJar.toASCIIString();
+            }
+        }
+
+        m_resourceBundle.construct( m_project, bindexExtractor, sourcePath );
 
         Element rootElement = m_repositoryDoc.getDocumentElement();
         if ( !walkOnTree( rootElement ) )
         {
             // the correct resource node was not found, we must create it
-            // we compute the new id
             String id = m_resourceBundle.getId();
             searchRepository( rootElement, id );
         }
+    }
 
-        // the repository.xml file have been modified, so we save it
+
+    public void writeRepositoryXml() throws MojoExecutionException
+    {
         m_logger.info( "Writing OBR metadata" );
-        writeToFile( m_repositoryXml, rootElement );
+
+        writeToFile( m_repositoryXml, m_repositoryDoc.getDocumentElement() );
     }
 
 
@@ -277,12 +287,11 @@ public class ObrUpdate
     /**
      * Parse the repository descriptor file.
      * 
-     * @return 0 if the bundle is already in the descriptor, else -1
+     * @return true if the repository file was parsed, otherwise false
      * @throws MojoExecutionException if the plugin failed
      */
-    private int parseRepositoryXml() throws MojoExecutionException
+    public boolean parseRepositoryXml() throws MojoExecutionException
     {
-
         File fout = new File( m_repositoryXml );
         if ( !fout.exists() )
         {
@@ -305,14 +314,9 @@ public class ObrUpdate
             }
         }
 
-        // now we parse the repository.xml file
         m_repositoryDoc = parseFile( m_repositoryXml, m_documentBuilder );
-        if ( m_repositoryDoc == null )
-        {
-            return -1;
-        }
 
-        return 0;
+        return ( null != m_repositoryDoc );
     }
 
 
@@ -454,6 +458,7 @@ public class ObrUpdate
             e.printStackTrace();
             throw new MojoExecutionException( "TransformerConfigurationException" );
         }
+
         Properties proprietes = new Properties();
         proprietes.put( "method", "xml" );
         proprietes.put( "version", "1.0" );
@@ -510,7 +515,6 @@ public class ObrUpdate
      */
     private boolean walkOnTree( Node node )
     {
-
         if ( node.getNodeName().compareTo( "resource" ) == 0 )
         {
             return resource( node );
@@ -574,7 +578,6 @@ public class ObrUpdate
      */
     private boolean resource( Node node )
     {
-
         // this part save all the id free if we need to add resource
         String id = node.getAttributes().getNamedItem( "id" ).getNodeValue();
         NamedNodeMap map = node.getAttributes();

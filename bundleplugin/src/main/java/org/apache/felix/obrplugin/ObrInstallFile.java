@@ -91,7 +91,7 @@ public final class ObrInstallFile extends AbstractFileMojo
 
         if ( null == file )
         {
-            bundleJar = ObrUtils.findBundleJar( localRepository, project.getArtifact() );
+            bundleJar = ObrUtils.getArtifactURI( localRepository, project.getArtifact() );
         }
         else
         {
@@ -100,8 +100,11 @@ public final class ObrInstallFile extends AbstractFileMojo
 
         Config userConfig = new Config();
 
-        update = new ObrUpdate( repositoryXml, obrXmlFile, project, bundleJar, mavenRepository, userConfig, log );
+        update = new ObrUpdate( repositoryXml, obrXmlFile, project, mavenRepository, userConfig, log );
+        update.parseRepositoryXml();
 
-        update.updateRepository();
+        update.updateRepository( bundleJar, null );
+
+        update.writeRepositoryXml();
     }
 }

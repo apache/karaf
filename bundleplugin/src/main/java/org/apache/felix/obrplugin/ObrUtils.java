@@ -108,7 +108,7 @@ public class ObrUtils
      * @param artifact maven artifact
      * @return file URI pointing to artifact in repository
      */
-    public static URI findBundleJar( ArtifactRepository repository, Artifact artifact )
+    public static URI getArtifactURI( ArtifactRepository repository, Artifact artifact )
     {
         String baseDir = repository.getBasedir();
         String artifactPath = repository.pathOf( artifact );

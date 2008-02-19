@@ -28,6 +28,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
 
@@ -81,6 +82,11 @@ public final class ObrInstall extends AbstractMojo
      */
     private List attachedArtifacts;
 
+    /**
+     * Attached source artifact
+     */
+    private Artifact m_sourceArtifact;
+
 
     public void execute()
     {
@@ -95,6 +101,20 @@ public final class ObrInstall extends AbstractMojo
             return;
         }
 
+        // check for any attached sources
+        for ( Iterator i = attachedArtifacts.iterator(); i.hasNext(); )
+        {
+            Artifact artifact = ( Artifact ) i.next();
+            if ( "sources".equals( artifact.getClassifier() ) )
+            {
+                m_sourceArtifact = artifact;
+                break;
+            }
+        }
+
+        Log log = getLog();
+        ObrUpdate update;
+
         try
         {
             String mavenRepository = localRepository.getBasedir();
@@ -102,32 +122,41 @@ public final class ObrInstall extends AbstractMojo
             URI repositoryXml = ObrUtils.findRepositoryXml( mavenRepository, obrRepository );
             URI obrXmlFile = ObrUtils.findObrXml( project.getResources() );
 
-            updateLocalBundleMetadata( project.getArtifact(), repositoryXml, obrXmlFile, mavenRepository );
+            Config userConfig = new Config();
+
+            update = new ObrUpdate( repositoryXml, obrXmlFile, project, mavenRepository, userConfig, log );
+            update.parseRepositoryXml();
+
+            updateLocalBundleMetadata( project.getArtifact(), update );
             for ( Iterator i = attachedArtifacts.iterator(); i.hasNext(); )
             {
-                updateLocalBundleMetadata( ( Artifact ) i.next(), repositoryXml, obrXmlFile, mavenRepository );
+                updateLocalBundleMetadata( ( Artifact ) i.next(), update );
             }
+
+            update.writeRepositoryXml();
         }
         catch ( Exception e )
         {
-            getLog().warn( "Exception while updating local OBR: " + e.getLocalizedMessage(), e );
+            log.warn( "Exception while updating local OBR: " + e.getLocalizedMessage(), e );
         }
     }
 
 
-    private void updateLocalBundleMetadata( Artifact artifact, URI repoXml, URI obrXml, String mavenRepo )
-        throws MojoExecutionException
+    private void updateLocalBundleMetadata( Artifact artifact, ObrUpdate update ) throws MojoExecutionException
     {
         if ( !"bundle".equals( artifact.getType() ) || null == artifact.getFile() || artifact.getFile().isDirectory() )
         {
             return;
         }
 
-        URI bundleJar = ObrUtils.findBundleJar( localRepository, artifact );
+        URI bundleJar = ObrUtils.getArtifactURI( localRepository, artifact );
+        URI sourceJar = null;
 
-        Config userConfig = new Config();
+        if ( null != m_sourceArtifact )
+        {
+            sourceJar = ObrUtils.getArtifactURI( localRepository, m_sourceArtifact );
+        }
 
-        ObrUpdate update = new ObrUpdate( repoXml, obrXml, project, bundleJar, mavenRepo, userConfig, getLog() );
-        update.updateRepository();
+        update.updateRepository( bundleJar, sourceJar );
     }
 }

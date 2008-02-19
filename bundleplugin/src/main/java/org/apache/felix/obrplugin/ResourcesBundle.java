@@ -381,9 +381,10 @@ public class ResourcesBundle
      * this method gets information form pom.xml to complete missing data from those given by user.
      * @param project project information given by maven
      * @param ebi bundle information extracted from bindex
+     * @param sourcePath path to local sources
      * @return true
      */
-    public boolean construct( MavenProject project, ExtractBindexInfo ebi )
+    public boolean construct( MavenProject project, ExtractBindexInfo ebi, String sourcePath )
     {
 
         if ( ebi.getPresentationName() != null )
@@ -466,12 +467,7 @@ public class ResourcesBundle
         }
         else
         {
-            String src = null;
-            if ( project.getScm() != null )
-            {
-                src = project.getScm().getUrl();
-            }
-            setSource( src );
+            setSource( sourcePath );
         }
 
         if ( ebi.getLicense() != null )
