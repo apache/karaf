@@ -1,2 +1,0 @@
--output: ${maven.build.dir}/${maven.build.finalName}.jar
-
