@@ -732,7 +732,13 @@ public class BundlePlugin extends AbstractMojo
      */
     protected String getBundleName( MavenProject currentProject )
     {
-        return currentProject.getBuild().getFinalName() + ".jar";
+        String finalName = currentProject.getBuild().getFinalName();
+        if ( null != classifier && classifier.trim().length() > 0 )
+        {
+            return finalName + '-' + classifier + ".jar";
+        }
+
+        return finalName + ".jar";
     }
 
 
