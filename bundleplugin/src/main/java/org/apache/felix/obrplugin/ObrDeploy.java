@@ -241,7 +241,7 @@ public final class ObrDeploy extends AbstractMojo
     private void updateRemoteBundleMetadata( Artifact artifact, URI repoXml, URI obrXml, String mavenRepo )
         throws MojoExecutionException
     {
-        if ( null == artifact.getFile() || artifact.getFile().isDirectory() )
+        if ( !"bundle".equals( artifact.getType() ) || null == artifact.getFile() || artifact.getFile().isDirectory() )
         {
             return;
         }

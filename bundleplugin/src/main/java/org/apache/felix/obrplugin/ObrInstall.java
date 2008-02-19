@@ -118,7 +118,7 @@ public final class ObrInstall extends AbstractMojo
     private void updateLocalBundleMetadata( Artifact artifact, URI repoXml, URI obrXml, String mavenRepo )
         throws MojoExecutionException
     {
-        if ( null == artifact.getFile() || artifact.getFile().isDirectory() )
+        if ( !"bundle".equals( artifact.getType() ) || null == artifact.getFile() || artifact.getFile().isDirectory() )
         {
             return;
         }
