@@ -90,11 +90,11 @@ public class BundlePlugin extends AbstractMojo
     protected boolean unpackBundle;
 
     /**
-     * When true, exclude project dependencies from the classpath passed to BND
+     * Comma separated list of artifactIds to exclude from the dependency classpath passed to BND (use "true" to exclude everything)
      *
      * @parameter expression="${excludeDependencies}"
      */
-    protected boolean excludeDependencies;
+    protected String excludeDependencies;
 
     /**
      * Classifier type of the bundle to be installed.  For example, "jdk14".
@@ -654,16 +654,7 @@ public class BundlePlugin extends AbstractMojo
             list.add( new Jar( ".", getOutputDirectory() ) );
         }
 
-        final Set artifacts;
-        if ( excludeDependencies )
-        {
-            artifacts = Collections.EMPTY_SET;
-        }
-        else
-        {
-            artifacts = currentProject.getArtifacts();
-        }
-
+        final Collection artifacts = getSelectedDependencies( currentProject.getArtifacts() );
         for ( Iterator it = artifacts.iterator(); it.hasNext(); )
         {
             Artifact artifact = ( Artifact ) it.next();
@@ -689,6 +680,33 @@ public class BundlePlugin extends AbstractMojo
         Jar[] cp = new Jar[list.size()];
         list.toArray( cp );
         return cp;
+    }
+
+
+    private Collection getSelectedDependencies( Set artifacts )
+    {
+        if ( null == excludeDependencies || excludeDependencies.length() == 0 )
+        {
+            return artifacts;
+        }
+        else if ( "true".equalsIgnoreCase( excludeDependencies ) )
+        {
+            return Collections.EMPTY_LIST;
+        }
+
+        List excludes = Arrays.asList( excludeDependencies.trim().split( "\\s*,\\s*" ) );
+
+        Collection classpath = new ArrayList();
+        for ( Iterator i = artifacts.iterator(); i.hasNext(); )
+        {
+            Artifact artifact = ( Artifact ) i.next();
+            if ( !excludes.contains( artifact.getArtifactId() ) )
+            {
+                classpath.add( artifact );
+            }
+        }
+
+        return classpath;
     }
 
 
