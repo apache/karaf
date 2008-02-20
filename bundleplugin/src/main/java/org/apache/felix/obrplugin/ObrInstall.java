@@ -87,6 +87,11 @@ public final class ObrInstall extends AbstractMojo
      */
     private Artifact m_sourceArtifact;
 
+    /**
+     * Attached doc artifact
+     */
+    private Artifact m_docArtifact;
+
 
     public void execute()
     {
@@ -101,14 +106,17 @@ public final class ObrInstall extends AbstractMojo
             return;
         }
 
-        // check for any attached sources
+        // check for any attached sources or docs
         for ( Iterator i = attachedArtifacts.iterator(); i.hasNext(); )
         {
             Artifact artifact = ( Artifact ) i.next();
             if ( "sources".equals( artifact.getClassifier() ) )
             {
                 m_sourceArtifact = artifact;
-                break;
+            }
+            else if ( "javadoc".equals( artifact.getClassifier() ) )
+            {
+                m_docArtifact = artifact;
             }
         }
 
@@ -150,13 +158,19 @@ public final class ObrInstall extends AbstractMojo
         }
 
         URI bundleJar = ObrUtils.getArtifactURI( localRepository, artifact );
-        URI sourceJar = null;
 
+        URI sourceJar = null;
         if ( null != m_sourceArtifact )
         {
             sourceJar = ObrUtils.getArtifactURI( localRepository, m_sourceArtifact );
         }
 
-        update.updateRepository( bundleJar, sourceJar );
+        URI docJar = null;
+        if ( null != m_docArtifact )
+        {
+            docJar = ObrUtils.getArtifactURI( localRepository, m_docArtifact );
+        }
+
+        update.updateRepository( bundleJar, sourceJar, docJar );
     }
 }

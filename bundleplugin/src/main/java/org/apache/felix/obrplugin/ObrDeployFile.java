@@ -194,7 +194,7 @@ public final class ObrDeployFile extends AbstractFileMojo
             update = new ObrUpdate( repositoryXml, obrXmlFile, project, mavenRepository, userConfig, log );
             update.parseRepositoryXml();
 
-            update.updateRepository( bundleJar, null );
+            update.updateRepository( bundleJar, null, null );
 
             update.writeRepositoryXml();
 

@@ -382,9 +382,10 @@ public class ResourcesBundle
      * @param project project information given by maven
      * @param ebi bundle information extracted from bindex
      * @param sourcePath path to local sources
+     * @param docPath path to local docs
      * @return true
      */
-    public boolean construct( MavenProject project, ExtractBindexInfo ebi, String sourcePath )
+    public boolean construct( MavenProject project, ExtractBindexInfo ebi, String sourcePath, String docPath )
     {
 
         if ( ebi.getPresentationName() != null )
@@ -444,25 +445,32 @@ public class ResourcesBundle
             setDescription( project.getDescription() );
         }
 
+        // fallback to javadoc if no project URL
+        String documentation = project.getUrl();
+        if ( null == documentation )
+        {
+            documentation = docPath;
+        }
+
         if ( ebi.getDocumentation() != null )
         {
             setDocumentation( ebi.getDocumentation() );
-            if ( project.getUrl() != null )
+            if ( documentation != null )
             {
-                m_logger.debug( "pom property override:<documentation> " + project.getUrl() );
+                m_logger.debug( "pom property override:<documentation> " + documentation );
             }
         }
         else
         {
-            setDocumentation( project.getUrl() );
+            setDocumentation( documentation );
         }
 
         if ( ebi.getSource() != null )
         {
             setSource( ebi.getSource() );
-            if ( project.getScm() != null )
+            if ( sourcePath != null )
             {
-                m_logger.debug( "pom property override:<source> " + project.getScm() );
+                m_logger.debug( "pom property override:<source> " + sourcePath );
             }
         }
         else

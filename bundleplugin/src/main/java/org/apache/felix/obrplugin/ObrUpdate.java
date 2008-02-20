@@ -146,10 +146,11 @@ public class ObrUpdate
      * 
      * @param bundleJar path to the bundle jar file
      * @param sourceJar path to the source jar file
+     * @param docJar path to the docs jar file
      * 
      * @throws MojoExecutionException if the plugin failed
      */
-    public void updateRepository( URI bundleJar, URI sourceJar ) throws MojoExecutionException
+    public void updateRepository( URI bundleJar, URI sourceJar, URI docJar ) throws MojoExecutionException
     {
         m_logger.debug( " (f) repositoryXml = " + m_repositoryXml );
         m_logger.debug( " (f) bundleJar = " + bundleJar );
@@ -229,20 +230,10 @@ public class ObrUpdate
             throw new MojoExecutionException( "BindexException" );
         }
 
-        String sourcePath = null;
-        if ( null != sourceJar )
-        {
-            if ( m_userConfig.isPathRelative() )
-            {
-                sourcePath = ObrUtils.getRelativeURI( m_baseURI, sourceJar ).toASCIIString();
-            }
-            else
-            {
-                sourcePath = sourceJar.toASCIIString();
-            }
-        }
+        String sourcePath = relativisePath( sourceJar );
+        String docPath = relativisePath( docJar );
 
-        m_resourceBundle.construct( m_project, bindexExtractor, sourcePath );
+        m_resourceBundle.construct( m_project, bindexExtractor, sourcePath, docPath );
 
         Element rootElement = m_repositoryDoc.getDocumentElement();
         if ( !walkOnTree( rootElement ) )
@@ -251,6 +242,22 @@ public class ObrUpdate
             String id = m_resourceBundle.getId();
             searchRepository( rootElement, id );
         }
+    }
+
+
+    private String relativisePath( URI uri )
+    {
+        if ( null != uri )
+        {
+            if ( m_userConfig.isPathRelative() )
+            {
+                return ObrUtils.getRelativeURI( m_baseURI, uri ).toASCIIString();
+            }
+
+            return uri.toASCIIString();
+        }
+
+        return null;
     }
 
 
