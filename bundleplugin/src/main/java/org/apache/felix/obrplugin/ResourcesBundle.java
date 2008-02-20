@@ -77,6 +77,11 @@ public class ResourcesBundle
     private String m_source;
 
     /**
+     * store the bundle javadoc.
+     */
+    private String m_javadoc;
+
+    /**
      * store the bundle license.
      */
     private String m_license;
@@ -261,6 +266,18 @@ public class ResourcesBundle
     }
 
 
+    public String getJavadoc()
+    {
+        return m_javadoc;
+    }
+
+
+    public void setJavadoc( String javadoc )
+    {
+        m_javadoc = javadoc;
+    }
+
+
     public String getId()
     {
         return m_id;
@@ -323,6 +340,7 @@ public class ResourcesBundle
         Element size = father.createElement( "size" );
         Element documentation = father.createElement( "documentation" );
         Element source = father.createElement( "source" );
+        Element javadoc = father.createElement( "javadoc" );
         Element license = father.createElement( "license" );
 
         resource.setAttribute( "id", getId() );
@@ -347,6 +365,12 @@ public class ResourcesBundle
         {
             XmlHelper.setTextContent( source, getSource() );
             resource.appendChild( source );
+        }
+
+        if ( getJavadoc() != null )
+        {
+            XmlHelper.setTextContent( javadoc, getJavadoc() );
+            resource.appendChild( javadoc );
         }
 
         if ( getLicense() != null )
@@ -382,10 +406,10 @@ public class ResourcesBundle
      * @param project project information given by maven
      * @param ebi bundle information extracted from bindex
      * @param sourcePath path to local sources
-     * @param docPath path to local docs
+     * @param javadocPath path to local javadocs
      * @return true
      */
-    public boolean construct( MavenProject project, ExtractBindexInfo ebi, String sourcePath, String docPath )
+    public boolean construct( MavenProject project, ExtractBindexInfo ebi, String sourcePath, String javadocPath )
     {
 
         if ( ebi.getPresentationName() != null )
@@ -449,7 +473,7 @@ public class ResourcesBundle
         String documentation = project.getUrl();
         if ( null == documentation )
         {
-            documentation = docPath;
+            documentation = javadocPath;
         }
 
         if ( ebi.getDocumentation() != null )
@@ -477,6 +501,8 @@ public class ResourcesBundle
         {
             setSource( sourcePath );
         }
+
+        setJavadoc( javadocPath );
 
         if ( ebi.getLicense() != null )
         {
