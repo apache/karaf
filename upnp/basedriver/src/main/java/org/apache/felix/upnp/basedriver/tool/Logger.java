@@ -21,16 +21,14 @@ package org.apache.felix.upnp.basedriver.tool;
 
 import java.io.PrintStream;
 
+import org.apache.felix.upnp.basedriver.Activator;
 import org.cybergarage.util.Debug;
-
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
-
-import org.apache.felix.upnp.basedriver.Activator;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

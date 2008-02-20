@@ -24,15 +24,12 @@ package org.apache.felix.upnp.basedriver.export;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
+import org.apache.felix.upnp.basedriver.Activator;
+import org.apache.felix.upnp.basedriver.util.Converter;
 import org.cybergarage.upnp.Device;
 import org.cybergarage.upnp.Service;
 import org.cybergarage.upnp.StateVariable;
-
 import org.osgi.service.upnp.UPnPEventListener;
-import org.osgi.service.upnp.UPnPStateVariable;
-
-import org.apache.felix.upnp.basedriver.Activator;
-import org.apache.felix.upnp.basedriver.util.Converter;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

@@ -26,11 +26,10 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.apache.felix.upnp.basedriver.Activator;
 import org.cybergarage.upnp.Device;
 import org.cybergarage.upnp.DeviceList;
 import org.cybergarage.upnp.ServiceList;
-import org.cybergarage.upnp.UPnP;
-
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -41,8 +40,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.upnp.UPnPDevice;
 import org.osgi.service.upnp.UPnPEventListener;
-
-import org.apache.felix.upnp.basedriver.Activator;
 
 /* 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
