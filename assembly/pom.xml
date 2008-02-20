@@ -116,7 +116,7 @@
         </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.mina-1.1.6-r602102</artifactId>
+          <artifactId>org.apache.servicemix.bundles.mina-1.1.6</artifactId>
           <version>${pom.version}</version>
       </dependency>
       <dependency>

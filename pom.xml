@@ -73,13 +73,13 @@
       <felix.osgi.version>1.0.0</felix.osgi.version>
       <felix.compendium.version>1.0.0</felix.compendium.version>
       <felix.bundlerepository.version>1.1.0-r605854</felix.bundlerepository.version>
-      <geronimo.servlet.version>1.1.1</geronimo.servlet.version>
+      <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
       <geronimo.stax.version>1.0.1</geronimo.stax.version>
       <gshell.version>1.0-alpha-1</gshell.version>
       <junit.version>4.4</junit.version>
       <jline.version>0.9.93</jline.version>
       <log4j.version>1.2.14</log4j.version>
-      <mina.version>1.1.6-r602102</mina.version>
+      <mina.version>1.1.6</mina.version>
       <pax.logging.version>1.0.0</pax.logging.version>
       <pax.runner.version>0.5.5</pax.runner.version>
       <spring.osgi.version>1.0</spring.osgi.version>
