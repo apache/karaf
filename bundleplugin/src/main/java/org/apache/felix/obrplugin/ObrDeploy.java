@@ -74,7 +74,7 @@ public final class ObrDeploy extends AbstractMojo
      * @parameter
      */
     private List supportedProjectTypes = Arrays.asList( new String[]
-        { "jar", "bundle" } );
+        { "bundle" } );
 
     /**
      * @parameter expression="${project.distributionManagementArtifactRepository}"

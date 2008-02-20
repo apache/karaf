@@ -55,7 +55,7 @@ public final class ObrInstall extends AbstractMojo
      * @parameter
      */
     private List supportedProjectTypes = Arrays.asList( new String[]
-        { "jar", "bundle" } );
+        { "bundle" } );
 
     /**
      * Local Repository.
