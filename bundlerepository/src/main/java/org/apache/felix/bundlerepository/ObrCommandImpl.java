@@ -38,6 +38,7 @@ public class ObrCommandImpl implements Command
     private static final String DEPLOY_CMD = "deploy";
     private static final String START_CMD = "start";
     private static final String SOURCE_CMD = "source";
+    private static final String JAVADOC_CMD = "javadoc";
 
     private static final String EXTRACT_SWITCH = "-x";
 
@@ -112,6 +113,10 @@ public class ObrCommandImpl implements Command
                 else if (command.equals(SOURCE_CMD))
                 {
                     source(commandLine, command, out, err);
+                }
+                else if (command.equals(JAVADOC_CMD))
+                {
+                    javadoc(commandLine, command, out, err);
                 }
                 else
                 {
@@ -414,6 +419,37 @@ public class ObrCommandImpl implements Command
                 else
                 {
                     err.println("Missing source URL: " + pc.getTargetId(i));
+                }
+            }
+        }
+    }
+
+    private void javadoc(
+        String commandLine, String command, PrintStream out, PrintStream err)
+        throws IOException, InvalidSyntaxException
+    {
+        // Parse the command line to get all local targets to update.
+        ParsedCommand pc = parseSource(commandLine);
+        for (int i = 0; i < pc.getTargetCount(); i++)
+        {
+            Resource resource = selectNewestVersion(
+                searchRepository(pc.getTargetId(i), pc.getTargetVersion(i)));
+            if (resource == null)
+            {
+                err.println("Unknown bundle and/or version: "
+                    + pc.getTargetId(i));
+            }
+            else
+            {
+                URL docURL = (URL) resource.getProperties().get("javadoc");
+                if (docURL != null)
+                {
+                    FileUtil.downloadSource(
+                        out, err, docURL, pc.getDirectory(), pc.isExtract());
+                }
+                else
+                {
+                    err.println("Missing javadoc URL: " + pc.getTargetId(i));
                 }
             }
         }
@@ -978,6 +1014,27 @@ public class ObrCommandImpl implements Command
                 "specified local directory.");
             out.println("");
         }
+        else if (command.equals(JAVADOC_CMD))
+        {
+            out.println("");
+            out.println("obr " + JAVADOC_CMD
+                + " [" + EXTRACT_SWITCH
+                + "] <local-dir> <bundle-name>[;<version>] ...");
+            out.println("");
+            out.println(
+                "This command retrieves the javadoc archives of the specified\n" +
+                "bundles and saves them to the specified local directory; use\n" +
+                "the \"" + EXTRACT_SWITCH + "\" switch to automatically extract the javadoc archives.\n" +
+                "If a bundle name contains spaces, then it must be surrounded\n" +
+                "by quotes. It is also possible to specify a precise version if\n" +                "more than one version exists, such as:\n" +
+                "\n" +
+                "    obr javadoc /home/rickhall/tmp \"Bundle Repository\";1.0.0\n" +
+                "\n" +
+                "The above example retrieves the javadoc archive of version \"1.0.0\"\n" +
+                "of the bundle named \"Bundle Repository\" and saves it to the\n" +
+                "specified local directory.");
+            out.println("");
+        }
         else
         {
             out.println("obr " + HELP_CMD
@@ -987,7 +1044,7 @@ public class ObrCommandImpl implements Command
                 + " | " + LIST_CMD
                 + " | " + INFO_CMD
                 + " | " + DEPLOY_CMD + " | " + START_CMD
-                + " | " + SOURCE_CMD + "]");
+                + " | " + SOURCE_CMD + " | " + JAVADOC_CMD + "]");
             out.println("obr " + ADDURL_CMD + " [<repository-file-url> ...]");
             out.println("obr " + REMOVEURL_CMD + " [<repository-file-url> ...]");
             out.println("obr " + LISTURL_CMD);
@@ -999,6 +1056,9 @@ public class ObrCommandImpl implements Command
             out.println("obr " + START_CMD
                 + " <bundle-name>|<bundle-symbolic-name>|<bundle-id>[;<version>] ...");
             out.println("obr " + SOURCE_CMD
+                + " [" + EXTRACT_SWITCH
+                + "] <local-dir> <bundle-name>[;<version>] ...");
+            out.println("obr " + JAVADOC_CMD
                 + " [" + EXTRACT_SWITCH
                 + "] <local-dir> <bundle-name>[;<version>] ...");
         }

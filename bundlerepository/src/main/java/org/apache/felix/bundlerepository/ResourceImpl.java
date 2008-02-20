@@ -39,6 +39,7 @@ public class ResourceImpl implements Resource
     private String m_docURI = null;
     private String m_licenseURI = null;
     private String m_sourceURI = null;
+    private String m_javadocURI = null;
     private boolean m_converted = false;
 
     public ResourceImpl()
@@ -178,6 +179,10 @@ public class ResourceImpl implements Resource
         {
             m_sourceURI = (String) value;
         }
+        else if (key.equals("javadoc"))
+        {
+            m_javadocURI = (String) value;
+        }
         else if (key.equals(URI))
         {
             m_resourceURI = (String) value;
@@ -221,6 +226,10 @@ public class ResourceImpl implements Resource
                 if (m_sourceURI != null)
                 {
                     m_map.put(SOURCE_URL, new URL(base, m_sourceURI));
+                }
+                if (m_javadocURI != null)
+                {
+                    m_map.put("javadoc", new URL(base, m_javadocURI));
                 }
                 m_converted = true;
             }
