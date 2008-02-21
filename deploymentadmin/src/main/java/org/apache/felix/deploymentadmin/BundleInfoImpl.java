@@ -53,13 +53,16 @@ public class BundleInfoImpl extends AbstractInfo implements BundleInfo {
         }
 
         String version = attributes.getValue(org.osgi.framework.Constants.BUNDLE_VERSION);
+        if (version == null || version == "") {
+            throw new DeploymentException(DeploymentException.CODE_BAD_HEADER, "Invalid '" + org.osgi.framework.Constants.BUNDLE_VERSION + "' header for manifest entry '" + getPath() + "'");
+        }
         try {
             m_version = Version.parseVersion(version);
         } catch (IllegalArgumentException e) {
             throw new DeploymentException(DeploymentException.CODE_BAD_HEADER, "Invalid '" + org.osgi.framework.Constants.BUNDLE_VERSION + "' header for manifest entry '" + getPath() + "'");
         }
 
-        m_customizer = parseBooleanHeader(attributes, Constants.DEPLOYMENTPACKAGE_CUSTOMISER);
+        m_customizer = parseBooleanHeader(attributes, Constants.DEPLOYMENTPACKAGE_CUSTOMIZER);
     }
 
     public String getSymbolicName() {

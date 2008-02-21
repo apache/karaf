@@ -57,7 +57,7 @@ public class ProcessResourceCommand extends Command {
         BundleContext context = session.getBundleContext();
 
         Map expectedResources = new HashMap();
-        AbstractInfo[] resourceInfos = (AbstractInfo[]) source.getBundleInfos();
+        AbstractInfo[] resourceInfos = (AbstractInfo[]) source.getResourceInfos();
         for (int i = 0; i < resourceInfos.length; i++) {
             AbstractInfo resourceInfo = resourceInfos[i];
             if(!resourceInfo.isMissing()) {
