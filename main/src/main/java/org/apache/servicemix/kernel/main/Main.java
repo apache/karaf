@@ -823,7 +823,7 @@ public class Main implements MainService, BundleActivator
 	                    System.err.print( "Ignoring " + file.toString() + " (" + e + ")" );
 	                }
 				} else {
-					System.err.println("Bundle listed in "+STARTUP_PROPERTIES_FILE_NAME+" configuration not found: "+file);
+					System.err.println("Bundle listed in "+STARTUP_PROPERTIES_FILE_NAME+" configuration not found: " + name);
 				}
 			}
         	for (Map.Entry<Integer, StringBuffer> entry : levels.entrySet()) {
