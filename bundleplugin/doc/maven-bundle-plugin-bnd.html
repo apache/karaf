@@ -40,6 +40,12 @@ This plugin wraps BND to make it work specifically with the Maven 2
 project structure and to provide it with reasonable default behavior
 for Maven 2 projects.</p>
 
+<p>Since the 1.4.0 release, this plugin also aims to automate OBR (OSGi
+Bundle Repository) management. It helps manage a local OBR for your
+local Maven repository, and also supports remote OBRs for bundle
+distribution. The plug-in automatically computes bundle capabilities
+and requirements, using a combination of Bindex and Maven metadata.</p>
+
 <p><a name="MavenBundlePlugin(BND)-simpleexample"></a></p>
 
 <h1><a name="MavenBundlePlugin(BND)-SimpleExample"></a>Simple Example</h1>
@@ -193,7 +199,7 @@ defaults for various instructions. For example:</p>
 
 <ul>
 	<li><tt>&lt;Bundle-SymbolicName&gt;</tt> is assumed to be "<tt>${groupId}.${artifactId</tt>}".</li>
-	<li><tt>&lt;Export-Package&gt;</tt> is assumed to be "<tt>${groupId}.${artifactId}.*</tt>", unless <tt>&lt;Private-Package&gt;</tt> is specified, then <tt>&lt;Export-Package&gt;</tt> is assumed to be empty.</li>
+	<li><tt>&lt;Export-Package&gt;</tt> is assumed to be "<tt>&lt;Bundle-SymbolicName&gt;.*</tt>", unless <tt>&lt;Private-Package&gt;</tt> is specified, then <tt>&lt;Export-Package&gt;</tt> is assumed to be empty.</li>
 	<li><tt>&lt;Private-Package&gt;</tt> is assumed to be empty by default.</li>
 	<li><tt>&lt;Import-Package&gt;</tt> is assumed to be "<tt>*</tt>", which imports everything referred to by the bundle content, but not contained in the bundle.</li>
 	<li><tt>&lt;Include-Resource&gt;</tt> is generated from the project's Maven resources, typically "<tt>src/main/resources/</tt>",
@@ -464,20 +470,21 @@ follows:</p>
 <p>Where GOAL is one of the following:</p>
 
 <ul>
-	<li><b><tt>bundle</tt></b> - build an OSGi bundle jar<br>
+	<li><b><tt>bundle</tt></b> - build an OSGi bundle jar for the current project<br>
 configuration options:
 	<ul>
 		<li><em><tt>manifestLocation</tt></em> defaults to ${project.build.outputDirectory}/META-INF</li>
 		<li><em><tt>unpackBundle</tt></em> unpack bundle contents to output directory, defaults to false</li>
-		<li><em><tt>excludeDependencies</tt></em> exclude all dependencies from the classpath passed to Bnd, defaults to false</li>
+		<li><em><tt>excludeDependencies</tt></em> comma-separated list of dependency artifactIds to exclude from the classpath passed to Bnd (use "true" to exclude everything)</li>
 		<li><em><tt>supportedProjectTypes</tt></em> defaults to "jar","bundle"</li>
+		<li><em><tt>classifier</tt></em> attach bundle to the project using the given classifier</li>
 	</ul>
 	</li>
 </ul>
 
 
 <ul>
-	<li><b><tt>bundleall</tt></b> - build an OSGi bundle jar for all transitive dependencies<br>
+	<li><b><tt>bundleall</tt></b> - build OSGi bundle jars for all transitive dependencies<br>
 configuration options:
 	<ul>
 		<li><em><tt>supportedProjectTypes</tt></em> defaults to "jar","bundle"</li>
@@ -507,12 +514,101 @@ configuration options:
 </ul>
 
 
+<ul>
+	<li><b><tt>install</tt></b> - adds the current bundle project to the local OBR<br>
+configuration options:
+	<ul>
+		<li><em><tt>obrRepository</tt></em> path to local OBR, defaults to <em>&lt;local-maven-repository&gt;</em><tt>/repository.xml</tt></li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>More GOALs are available in the <b>1.4.0</b> release:</p>
+
+<ul>
+	<li><b><tt>ant</tt></b> - create an Ant build script to rebuild the bundle</li>
+</ul>
+
+
+<ul>
+	<li><b><tt>install-file</tt></b> - adds a local bundle file to the local OBR<br>
+configuration options:
+	<ul>
+		<li><em><tt>obrRepository</tt></em> path to local OBR, defaults to <em>&lt;local-maven-repository&gt;</em><tt>/repository.xml</tt></li>
+		<li><em><tt>groupId</tt></em> Maven groupId for the bundle, taken from <em>pomFile</em> if given</li>
+		<li><em><tt>artifactId</tt></em> Maven artifactId for the bundle, taken from <em>pomFile</em> if given</li>
+		<li><em><tt>version</tt></em> Maven version for the bundle, taken from <em>pomFile</em> if given</li>
+		<li><em><tt>packaging</tt></em> Maven packaging type for the bundle, taken from <em>pomFile</em> if given</li>
+		<li><em><tt>classifier</tt></em> Maven classifier type, defaults to none</li>
+		<li><em><tt>pomFile</tt></em> optional Pom file describing the bundle</li>
+		<li><em><tt>file</tt></em> bundle file, defaults to the bundle from the local Maven repository</li>
+		<li><em><tt>obrXml</tt></em> optional additional properties for the bundle</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><b><tt>deploy</tt></b> - adds the current bundle project to a remote OBR<br>
+configuration options:
+	<ul>
+		<li><em><tt>remoteOBR</tt></em> name of remote OBR, defaults to NONE (which means no remote OBR deployment)</li>
+		<li><em><tt>obrRepository</tt></em> used when the remoteOBR name is blank, defaults to <tt>repository.xml</tt></li>
+		<li><em><tt>altDeploymentRepository</tt></em> alternative remote repository, <em>id::layout::url</em></li>
+		<li><em><tt>ignoreLock</tt></em> ignore remote locking when updating the OBR</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><b><tt>deploy-file</tt></b> - adds a local bundle file to a remote OBR<br>
+configuration options:
+	<ul>
+		<li><em><tt>remoteOBR</tt></em> name of remote OBR, defaults to an empty string</li>
+		<li><em><tt>obrRepository</tt></em> used when the remoteOBR name is blank, defaults to <tt>repository.xml</tt></li>
+		<li><em><tt>repositoryId</tt></em> optional repository id, used to lookup authentication settings</li>
+		<li><em><tt>url</tt></em> remote repository transport URL, like
+<div class="preformatted"><div class="preformattedContent">
+<pre>scpexe://host/path/to/obr
+</pre>
+</div></div></li>
+		<li><em><tt>bundleUrl</tt></em> public URL of deployed bundle, like
+<div class="preformatted"><div class="preformattedContent">
+<pre>http://www.foo.org/bundles/foo.jar
+</pre>
+</div></div></li>
+		<li><em><tt>groupId</tt></em> Maven groupId for the bundle, taken from <em>pomFile</em> if given</li>
+		<li><em><tt>artifactId</tt></em> Maven artifactId for the bundle, taken from <em>pomFile</em> if given</li>
+		<li><em><tt>version</tt></em> Maven version for the bundle, taken from <em>pomFile</em> if given</li>
+		<li><em><tt>packaging</tt></em> Maven packaging type for the bundle, taken from <em>pomFile</em> if given</li>
+		<li><em><tt>classifier</tt></em> Maven classifier type, defaults to none</li>
+		<li><em><tt>pomFile</tt></em> optional Pom file describing the bundle</li>
+		<li><em><tt>file</tt></em> bundle file, defaults to the bundle from the local Maven repository</li>
+		<li><em><tt>obrXml</tt></em> optional additional properties for the bundle</li>
+		<li><em><tt>ignoreLock</tt></em> ignore remote locking when updating the OBR</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><b><tt>clean</tt></b> - cleans the local OBR, removing missing bundles<br>
+configuration options:
+	<ul>
+		<li><em><tt>obrRepository</tt></em> path to local OBR, defaults to <em>&lt;local-maven-repository&gt;</em><tt>/repository.xml</tt></li>
+	</ul>
+	</li>
+</ul>
+
+
 <p>There are also new instructions available from the underlying BND
 tool, which continues to be improved independently; for the latest see <span class="nobr"><a href="http://aqute.biz/Code/Bnd" title="Visit page outside Confluence" rel="nofollow">BND documentation<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span>.</p>
 
 <p>The default goal <b><tt>bundle</tt></b> will be initialized by setting the &lt;packaging&gt; entry to "bundle".</p>
 
-<h1><a name="MavenBundlePlugin(BND)-Thefollowingfeaturesareonlyavailableinversionsafter1.0.0"></a>The following features are only available in versions after 1.0.0</h1>
+<h1><a name="MavenBundlePlugin(BND)-Thefollowingfeaturesareonlyavailablefromversion1.2.0onwards"></a>The following features are only available from version 1.2.0 onwards</h1>
 
 <h2><a name="MavenBundlePlugin(BND)-Embeddingdependencies"></a>Embedding dependencies</h2>
 
@@ -532,7 +628,10 @@ MATCH ::= &lt;globbed regular expressions&gt;
 </pre>
 </div></div>
 
-<p>The plugin uses the <tt>&lt;Embed-Dependency&gt;</tt> instruction to transform the project dependencies into <tt>&lt;Include-Resource&gt;</tt> and <tt>&lt;Bundle-ClassPath&gt;</tt> clauses, which are then appended to the current set of instructions and passed onto BND.</p>
+<p>The plugin uses the <tt>&lt;Embed-Dependency&gt;</tt> instruction to transform the project dependencies into <tt>&lt;Include-Resource&gt;</tt> and <tt>&lt;Bundle-ClassPath&gt;</tt>
+clauses, which are then appended to the current set of instructions and
+passed onto BND. If you want the embedded dependencies to be at the
+start or middle of <tt>&lt;Include-Resource&gt;</tt> or <tt>&lt;Bundle-ClassPath&gt;</tt> then you can use {<tt>maven-dependencies</tt>}, which will automatically expand to the relevant clauses.</p>
 
 <p>some examples:</p>
 
@@ -542,6 +641,17 @@ MATCH ::= &lt;globbed regular expressions&gt;
 <span class="code-tag">&lt;Embed-Dependency&gt;</span>junit;scope=test<span class="code-tag">&lt;/Embed-Dependency&gt;</span>
 
 <span class="code-tag">&lt;Embed-Dependency&gt;</span>aopalliance;scope=!test;inline=true<span class="code-tag">&lt;/Embed-Dependency&gt;</span></pre>
+</div></div>
+
+<p>examples of using {<tt>maven-dependencies</tt>}:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;Include-Resource&gt;</span>
+  {maven-resources}, {maven-dependencies},
+  org/foo/Example.class=target/classes/org/foo/Example.class
+<span class="code-tag">&lt;/Include-Resource&gt;</span>
+
+<span class="code-tag">&lt;Bundle-ClassPath&gt;</span>.,{maven-dependencies},some.jar<span class="code-tag">&lt;/Bundle-ClassPath&gt;</span></pre>
 </div></div>
 
 <p>By default matched dependencies are embedded in the bundle as <tt>artifactId-version.jar</tt>. This behaviour can be modified using the following instructions:</p>
@@ -662,7 +772,7 @@ example POM that does this:</p>
       &lt;plugin&gt;
         &lt;groupId&gt;org.apache.felix&lt;/groupId&gt;
         &lt;artifactId&gt;maven-bundle-plugin&lt;/artifactId&gt;
-        &lt;version&gt;1.2.0&lt;/version&gt;
+        &lt;version&gt;1.2.1&lt;/version&gt;
         &lt;extensions&gt;true&lt;/extensions&gt;
         &lt;!--
           the following instructions build a simple set of public/private classes into an OSGi bundle
@@ -788,9 +898,184 @@ copy across all manifest attributes starting with a capital letter.<br>
 As shown in the above example, you could use this to include a non-OSGi
 manifest which you then customize with extra OSGi attributes.</p>
 
+<h1><a name="MavenBundlePlugin(BND)-Thefollowingfeaturesareonlyavailablefromversion1.4.0onwards"></a>The following features are only available from version 1.4.0 onwards</h1>
+
+<h2><a name="MavenBundlePlugin(BND)-bundle:ant"></a>bundle:ant</h2>
+
+<p>The <b>ant</b> goal creates a customized <tt>build.xml</tt> Ant script along with a collection of BND instructions and properties, taken from the current project and stored in <tt>maven-build.bnd</tt>. You also need to run <b><tt>ant:ant</tt></b> to create the standard Ant support tasks to download Maven dependencies and perform compilation, etc.</p>
+
+<p>The customized Ant script uses the BND tool to rebuild the bundle,
+so any source changes should be reflected in the (re)generated manifest.</p>
+
+<p>Example:</p>
+<div class="preformatted"><div class="preformattedContent">
+<pre>mvn ant:ant bundle:ant
+
+ant clean package
+</pre>
+</div></div>
+
+<h2><a name="MavenBundlePlugin(BND)-bundle:installfile"></a>bundle:install-file</h2>
+
+<p>The <b>install-file</b> goal updates the local OBR with the details of a bundle from the local filesystem.</p>
+
+<p>configuration:</p>
+<ul>
+	<li><em>obrRepository</em> path to local OBR, defaults to <em>&lt;local-maven-repository&gt;</em><tt>/repository.xml</tt></li>
+	<li><em>groupId</em> Maven groupId for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>artifactId</em> Maven artifactId for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>version</em> Maven version for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>packaging</em> Maven packaging type for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>classifier</em> Maven classifier type, defaults to none</li>
+	<li><em>pomFile</em> optional Pom file describing the bundle</li>
+	<li><em>file</em> bundle file, defaults to the bundle from the local Maven repository</li>
+	<li><em>obrXml</em> optional additional properties for the bundle</li>
+</ul>
+
+
+<p>Example:</p>
+<div class="preformatted"><div class="preformattedContent">
+<pre>mvn org.apache.felix:maven-bundle-plugin:1.4.0:install-file \
+  -DpomFile=myPom.xml -Dfile=foo-1.0.jar
+</pre>
+</div></div>
+
+<h2><a name="MavenBundlePlugin(BND)-bundle:deploy"></a>bundle:deploy</h2>
+
+<p>The <b>deploy goal</b> updates the remote OBR with the details of
+the deployed bundle from the local Maven repository. The remote OBR is
+found by querying the <tt>&lt;distributionManagement&gt;</tt> section of the project, unless <tt>-DaltDeploymentRepository</tt> is set. See <span class="nobr"><a href="http://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html" title="Visit page outside Confluence" rel="nofollow">http://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span> for more details about these particular settings.</p>
+
+<p>(If the project has an <tt>obr.xml</tt> file somewhere in its resources, then it will be automatically detected and applied.)</p>
+
+<p>configuration:</p>
+<ul>
+	<li><em>remoteOBR</em> name of remote OBR, defaults to NONE (which means no remote OBR deployment)</li>
+	<li><em>obrRepository</em> used when the remoteOBR name is blank, defaults to <tt>repository.xml</tt></li>
+	<li><em>altDeploymentRepository</em> alternative remote repository, <em>id::layout::url</em></li>
+	<li><em>ignoreLock</em> ignore remote locking when updating the OBR</li>
+</ul>
+
+
+<p>This goal is part of the "bundle" packaging lifecycle, but is disabled by default - to enable just set the <tt>remoteOBR</tt> parameter.</p>
+
+<h2><a name="MavenBundlePlugin(BND)-bundle:deployfile"></a>bundle:deploy-file</h2>
+
+<p>The <b>deploy-file</b> goal updates the remote OBR with the details of a deployed bundle from the local filesystem. The remote OBR is found using the <tt>-DrepositoryId</tt> and <tt>-Durl</tt> parameters. See <span class="nobr"><a href="http://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html" title="Visit page outside Confluence" rel="nofollow">http://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span> for more details about these particular settings.</p>
+
+<p>You can use the <tt>-DbundleUrl</tt> parameter to give the public location of the deployed bundle, which may differ from the remote OBR location.</p>
+
+<p>configuration:</p>
+<ul>
+	<li><em>remoteOBR</em> name of remote OBR, defaults to an empty string</li>
+	<li><em>obrRepository</em> used when the remoteOBR name is blank, defaults to <tt>repository.xml</tt></li>
+	<li><em>repositoryId</em> optional repository id, used to lookup authentication settings</li>
+	<li><em>url</em> remote repository transport URL, like
+<div class="preformatted"><div class="preformattedContent">
+<pre>scpexe://host/path/to/obr
+</pre>
+</div></div></li>
+	<li><em>bundleUrl</em> public URL of deployed bundle, like
+<div class="preformatted"><div class="preformattedContent">
+<pre>http://www.foo.org/bundles/foo.jar
+</pre>
+</div></div></li>
+	<li><em>groupId</em> Maven groupId for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>artifactId</em> Maven artifactId for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>version</em> Maven version for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>packaging</em> Maven packaging type for the bundle, taken from <em>pomFile</em> if given</li>
+	<li><em>classifier</em> Maven classifier type, defaults to none</li>
+	<li><em>pomFile</em> optional Pom file describing the bundle</li>
+	<li><em>file</em> bundle file, defaults to the bundle from the local Maven repository</li>
+	<li><em>obrXml</em> optional additional properties for the bundle</li>
+	<li><em>ignoreLock</em> ignore remote locking when updating the OBR</li>
+</ul>
+
+
+<p>Example:</p>
+<div class="preformatted"><div class="preformattedContent">
+<pre>mvn org.apache.felix:maven-bundle-plugin:1.4.0:deploy-file \
+  -DpomFile=myPom.xml -Dfile=foo-1.0.jar -Durl=file:/tmp/example/OBR \
+  -DbundleUrl=http://www.foo.org/bundles/foo.jar
+</pre>
+</div></div>
+
+<h2><a name="MavenBundlePlugin(BND)-bundle:clean"></a>bundle:clean</h2>
+
+<p>Sometimes you would like to clean your local OBR because it contains
+bundles that are no longer in your local Maven repository. This case
+often occurs when artifacts were deleted manually. The
+maven-bundle-plugin provides a simple goal to check for missing
+bundles, and remove them from the local OBR.</p>
+
+<p>configuration:</p>
+<ul>
+	<li><em>obrRepository</em> path to local OBR, defaults to <em>&lt;local-maven-repository&gt;</em><tt>/repository.xml</tt></li>
+</ul>
+
+
+<p>Example:</p>
+<div class="preformatted"><div class="preformattedContent">
+<pre>mvn bundle:clean
+</pre>
+</div></div>
+
+<h2><a name="MavenBundlePlugin(BND)-Concurrentupdates"></a>Concurrent updates</h2>
+
+<p>With a remote OBR, several uploads may occur at the same time.
+However, the remote OBR is centralized in one file, so concurrent
+modification must be avoided. To achieve this, the plug-in implements a
+locking system. Each time the plug-in tries to modify the file it sets
+a file based lock. If it can't take the lock, it will wait and retry.
+After 3 attempts the upload process fails. To bypass this lock add <tt>-DignoreLock</tt> to the command-line (or add <tt>&lt;ignoreLock&gt;true&lt;ignoreLock&gt;</tt> to the configuration section of your Pom).</p>
+
+<h2><a name="MavenBundlePlugin(BND)-FTPprotocol"></a>FTP protocol</h2>
+
+<p>Not all protocols are supported by Maven out of the box. For example the ftp protocol requires the <b>wagon-ftp</b> component. To enable the ftp protocol add this to your Pom:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;build&gt;</span>
+  <span class="code-tag">&lt;extensions&gt;</span>
+    <span class="code-tag">&lt;extension&gt;</span>
+      <span class="code-tag">&lt;groupId&gt;</span>org.apache.maven.wagon<span class="code-tag">&lt;/groupId&gt;</span>
+      <span class="code-tag">&lt;artifactId&gt;</span>wagon-ftp<span class="code-tag">&lt;/artifactId&gt;</span>
+      <span class="code-tag">&lt;version&gt;</span>1.0-alpha-6<span class="code-tag">&lt;/version&gt;</span>
+    <span class="code-tag">&lt;/extension&gt;</span>
+  <span class="code-tag">&lt;/extensions&gt;</span>
+<span class="code-tag">&lt;/build&gt;</span></pre>
+</div></div>
+
+<h2><a name="MavenBundlePlugin(BND)-Howtheplugincomputesthedescriptionofthebundle"></a>How the plug-in computes the description of the bundle</h2>
+
+<p>The description of the bundle comes from three different sources:</p>
+<ul>
+	<li>Bindex : Bindex is a tool that analyzes a bundle manifest to generate OBR description</li>
+	<li>pom.xml : by analyzing the pom file, various information is collected (symbolic name ...)</li>
+	<li>obr.xml : this file contains customized description and capabilities for the bundle</li>
+</ul>
+
+
+<p>These sources are merged together using the following precedence:</p>
+<div class="preformatted"><div class="preformattedContent">
+<pre>Bindex
+| (overrides)
+pom.xml
+| (overrides)
+obr.xml
+</pre>
+</div></div>
+<p>A warning message is displayed when existing information is overridden.</p>
+
+<h2><a name="MavenBundlePlugin(BND)-Knownissues&amp;limitations"></a>Known issues &amp; limitations</h2>
+
+<ol>
+	<li>obr.xml (file given by the user to add properties not found
+by Bindex) must be correct, because the plug-in does not check its
+syntax.</li>
+</ol>
+
+
 <h1><a name="MavenBundlePlugin(BND)-Feedback"></a>Feedback</h1>
 
 <p>Subscribe to the Felix users mailing list by sending a message to <span class="nobr"><a href="mailto:users-subscribe@felix.apache.org" title="Send mail to users-subscribe@felix.apache.org" rel="nofollow">users-subscribe@felix.apache.org<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>; after subscribing, email questions or feedback to <span class="nobr"><a href="mailto:users@felix.apache.org" title="Send mail to users@felix.apache.org" rel="nofollow">users@felix.apache.org<sup><img class="rendericon" src="maven-bundle-plugin-bnd_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>.</p>
     </div>
-  
-</body></html>
+  </body></html>
