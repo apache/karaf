@@ -24,8 +24,10 @@ import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadMXBean;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.geronimo.gshell.ansi.Code;
@@ -48,8 +50,8 @@ public class InfoCommand
     private Branding branding;
 
     private Renderer renderer = new Renderer();
-    private NumberFormat fmtI = new DecimalFormat("###,###");
-    private NumberFormat fmtD = new DecimalFormat("###,##0.000");
+    private NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
+    private NumberFormat fmtD = new DecimalFormat("###,##0.000", new DecimalFormatSymbols(Locale.ENGLISH));
 
     public InfoCommand(Branding branding) {
         this.branding = branding;
