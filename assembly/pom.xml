@@ -277,6 +277,7 @@
                             <descriptors>
                                 <descriptor>src/main/descriptors/unix-src.xml</descriptor>
                             </descriptors>
+                            <tarLongFileMode>gnu</tarLongFileMode>
                         </configuration>
                     </execution>
                     <execution>
