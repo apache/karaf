@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,9 +32,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.jar.Attributes;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,7 +45,10 @@ import org.apache.tools.ant.taskdefs.Jar;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -75,6 +81,9 @@ public class FileMonitor {
     private List<Bundle> bundlesToStart = new ArrayList<Bundle>();
     private List<Bundle> bundlesToUpdate = new ArrayList<Bundle>();
     private Map<String, String> artifactToBundle = new HashMap<String, String>();
+    private Set<String> pendingArtifacts = new HashSet<String>();
+    private ServiceListener listener;
+    private Executor executor;
 
     public FileMonitor() {
     }
@@ -192,7 +201,7 @@ public class FileMonitor {
     // Implementation methods
     //-------------------------------------------------------------------------
 
-    protected void onFilesChanged(List<String> filenames) {
+    protected synchronized void onFilesChanged(Collection<String> filenames) {
         changedBundles.clear();
         bundlesToStart.clear();
         bundlesToUpdate.clear();
@@ -240,11 +249,13 @@ public class FileMonitor {
 
                 // Transformation step
                 if (file.exists()) {
-                    file = transformArtifact(file);
-                    if (file == null) {
+                    File f = transformArtifact(file);
+                    if (f == null) {
                         logger.warn("Unsupported deployment: " + name);
+                        reschedule(file);
                         continue;
                     }
+                    file = f;
                 } else {
                 	String transformedFile = artifactToBundle.get(name);
                 	if (transformedFile != null) {
@@ -271,15 +282,37 @@ public class FileMonitor {
         }
         refreshPackagesAndStartOrUpdateBundles();
     }
-    
-    
-	private File transformArtifact(File file) throws Exception {
+
+    private void reschedule(File file) {
+        pendingArtifacts.add(file.getAbsolutePath());
+        if (listener == null) {
+            try {
+                executor = Executors.newSingleThreadExecutor();
+                String filter = "(" + Constants.OBJECTCLASS + "=" + DeploymentListener.class.getName() + ")";
+                listener = new ServiceListener() {
+                    public void serviceChanged(ServiceEvent event) {
+                        executor.execute(new Runnable() {
+                            public void run() {
+                                onFilesChanged(pendingArtifacts);
+                            }
+                        });
+                    }
+                };
+                getContext().addServiceListener(listener, filter);
+            } catch (InvalidSyntaxException e) {
+                // Ignore
+            }
+        }
+    }
+
+
+    private File transformArtifact(File file) throws Exception {
         // Check registered deployers
         ServiceReference[] srvRefs = getContext().getAllServiceReferences(DeploymentListener.class.getName(), null);
 		if(srvRefs != null) {
 		    for(ServiceReference sr : srvRefs) {
 		    	try {
-		    		DeploymentListener deploymentListener = (DeploymentListener)getContext().getService(sr);
+		    		DeploymentListener deploymentListener = (DeploymentListener) getContext().getService(sr);
 		    		if (deploymentListener.canHandle(file)) {
 		    			File transformedFile = deploymentListener.handle(file, getGenerateDir());
 		    			artifactToBundle.put(file.getAbsolutePath(), transformedFile.getAbsolutePath());
