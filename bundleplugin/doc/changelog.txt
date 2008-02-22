@@ -1,3 +1,14 @@
+Changes from 1.2.1 to 1.4.0
+---------------------------
+
+ * [2008-02-20] FELIX-499: Enhance "excludeDependencies" configuration parameter to also support comma-separated list of artifactIds
+ * [2008-02-20] FELIX-498: Enable javadoc deployment on OBR repository
+ * [2008-02-19] FELIX-497: Genearated Source url is not a valid url
+ * [2008-02-19] FELIX-493: maven-bundle-plugin bundle:install goal install too many artifact
+ * [2008-02-19] FELIX-247: Add ant goal to maven-bundle-plugin which creates a build.xml and MANIFEST.MF with bundle headers
+ * [2008-02-18] FELIX-492: Add support to classifier: enable bunlde:bundle goal to generate classified artifact
+ * [2008-02-18] FELIX-491: Merge the maven-obr-plugin and the bundleplugin into a single plugin
+
 Changes from 1.2.0 to 1.2.1
 ---------------------------
 
