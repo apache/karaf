@@ -17,9 +17,11 @@
 package org.apache.geronimo.gshell.osgi;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.geronimo.gshell.clp.Option;
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.support.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
@@ -38,15 +40,25 @@ public class InstallBundle extends OsgiCommandSupport {
     @Argument(required = true, multiValued = true, description = "Bundle URLs")
     List<String> urls;
 
+    @Option(name = "-s", aliases={"--start"}, description="Start the bundles after installation")
+    boolean start;
+
     protected Object doExecute() throws Exception {
+        List<Bundle> bundles = new ArrayList<Bundle>();
         StringBuffer sb = new StringBuffer();
         for (String url : urls) {
             Bundle bundle = install(url, io.out, io.err);
+            bundles.add(bundle);
             if (bundle != null) {
                 if (sb.length() > 0) {
                     sb.append(", ");
                 }
                 sb.append(bundle.getBundleId());
+            }
+        }
+        if (start) {
+            for (Bundle bundle : bundles) {
+                bundle.start();
             }
         }
         if (sb.toString().indexOf(',') > 0) {
