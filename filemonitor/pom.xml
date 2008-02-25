@@ -108,7 +108,6 @@
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Export-Package>${pom.artifactId}</Export-Package>
-            <DynamicImport-Package>*</DynamicImport-Package>
             <Bundle-Activator>org.apache.servicemix.kernel.filemonitor.FileMonitorActivator</Bundle-Activator>
           </instructions>
         </configuration>
