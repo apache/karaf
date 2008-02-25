@@ -118,7 +118,7 @@ public class InfoCommand
         io.out.println("Operating system");
         printValue("Name", maxNameLen, os.getName() + " version " + os.getVersion());
         printValue("Architecture", maxNameLen, os.getArch());
-        printValue("Processrors", maxNameLen, Integer.toString(os.getAvailableProcessors()));
+        printValue("Processors", maxNameLen, Integer.toString(os.getAvailableProcessors()));
         try {
             com.sun.management.OperatingSystemMXBean sunOs = (com.sun.management.OperatingSystemMXBean) os;
             printValue("Total physical memory", maxNameLen, printSizeInKb(sunOs.getTotalPhysicalMemorySize()));
