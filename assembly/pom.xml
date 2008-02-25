@@ -170,9 +170,9 @@
           <version>${pax.logging.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.ops4j.pax.runner</groupId>
-          <artifactId>pax-runner-handler-mvn</artifactId>
-          <version>${pax.runner.version}</version>
+          <groupId>org.ops4j.pax.url</groupId>
+          <artifactId>pax-url-mvn</artifactId>
+          <version>${pax.url.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.geronimo.specs</groupId>
