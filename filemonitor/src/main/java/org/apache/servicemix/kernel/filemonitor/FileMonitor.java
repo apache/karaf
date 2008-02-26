@@ -67,8 +67,11 @@ public class FileMonitor {
     public final static String DEPLOY_DIR = "org.apache.servicemix.filemonitor.monitorDir";
     public final static String GENERATED_JAR_DIR = "org.apache.servicemix.filemonitor.generatedJarDir";
     public final static String SCAN_INTERVAL = "org.apache.servicemix.filemonitor.scanInterval";
+
     protected static final String ALIAS_KEY = "_alias_factory_pid";
-    private static Log logger = LogFactory.getLog(FileMonitor.class);
+
+    private static final Log LOGGER = LogFactory.getLog(FileMonitor.class);
+
     private FileMonitorActivator activator;
     private File configDir = new File("./etc");
     private File deployDir = new File("./deploy");
@@ -130,11 +133,11 @@ public class FileMonitor {
             }
         });
 
-        logger.info("Starting to monitor the deploy directory: " + deployDir + " every " + scanInterval + " millis");
+        LOGGER.info("Starting to monitor the deploy directory: " + deployDir + " every " + scanInterval + " millis");
         if (configDir != null) {
-            logger.info("Config directory is at: " + configDir);
+            LOGGER.info("Config directory is at: " + configDir);
         }
-        logger.info("Will generate bundles from expanded source directories to: " + generateDir);
+        LOGGER.info("Will generate bundles from expanded source directories to: " + generateDir);
 
         scanner.start();
     }
@@ -212,7 +215,7 @@ public class FileMonitor {
 
             File file = new File(name);
             try {
-                logger.debug("File changed: " + filename + " with type: " + filename.getClass().getName());
+                LOGGER.debug("File changed: " + filename + " with type: " + filename.getClass().getName());
 
                 // Handle config files
                 if (isValidConfigFile(file)) {
@@ -251,7 +254,7 @@ public class FileMonitor {
                 if (file.exists()) {
                     File f = transformArtifact(file);
                     if (f == null) {
-                        logger.warn("Unsupported deployment: " + name);
+                        LOGGER.warn("Unsupported deployment: " + name);
                         reschedule(file);
                         continue;
                     }
@@ -277,7 +280,7 @@ public class FileMonitor {
                 }
             }
             catch (Exception e) {
-                logger.warn("Failed to process: " + file + ". Reason: " + e, e);
+                LOGGER.warn("Failed to process: " + file + ". Reason: " + e, e);
             }
         }
         refreshPackagesAndStartOrUpdateBundles();
@@ -333,15 +336,17 @@ public class FileMonitor {
                 return file;
             }
         } catch (Exception e) {
-            // Ignore
+            LOGGER.debug("Error transforming artifact", e);
         } finally {
-            jar.close();
+            if (jar != null) {
+                jar.close();
+            }
         }
         return null;
 	}
 
     protected void deployBundle(File file) throws IOException, BundleException {
-        logger.info("Deloying: " + file.getCanonicalPath());
+        LOGGER.info("Deloying: " + file.getCanonicalPath());
 
         InputStream in = new FileInputStream(file);
 
@@ -364,11 +369,11 @@ public class FileMonitor {
     }
 
     protected void undeployBundle(File file) throws BundleException, IOException {
-        logger.info("Undeploying: " + file.getCanonicalPath());
+        LOGGER.info("Undeploying: " + file.getCanonicalPath());
         Bundle bundle = getBundleForJarFile(file);
 
         if (bundle == null) {
-            logger.warn("Could not find Bundle for file: " + file.getCanonicalPath());
+            LOGGER.warn("Could not find Bundle for file: " + file.getCanonicalPath());
         }
         else {
             changedBundles.add(bundle);
@@ -394,7 +399,7 @@ public class FileMonitor {
         ConfigurationAdmin configurationAdmin = activator.getConfigurationAdmin();
         if (configurationAdmin == null) {
             if (!loggedConfigAdminWarning) {
-                logger.warn("No ConfigurationAdmin so cannot deploy configurations");
+                LOGGER.warn("No ConfigurationAdmin so cannot deploy configurations");
                 loggedConfigAdminWarning = true;
             }
         }
@@ -492,20 +497,20 @@ public class FileMonitor {
         for (Bundle bundle : bundlesToUpdate) {
             try {
                 bundle.update();
-                logger.info("Updated: " + bundle);
+                LOGGER.info("Updated: " + bundle);
 
             }
             catch (BundleException e) {
-                logger.warn("Failed to update bundle: " + bundle + ". Reason: " + e, e);
+                LOGGER.warn("Failed to update bundle: " + bundle + ". Reason: " + e, e);
             }
         }
         for (Bundle bundle : bundlesToStart) {
             try {
                 bundle.start();
-                logger.info("Started: " + bundle);
+                LOGGER.info("Started: " + bundle);
             }
             catch (BundleException e) {
-                logger.warn("Failed to start bundle: " + bundle + ". Reason: " + e, e);
+                LOGGER.warn("Failed to start bundle: " + bundle + ". Reason: " + e, e);
             }
         }
     }
@@ -518,7 +523,7 @@ public class FileMonitor {
             undeployBundle(destFile);
             destFile.delete();
         }
-        logger.info("Creating jar:  " + destFile + " from dir: " + dir);
+        LOGGER.info("Creating jar:  " + destFile + " from dir: " + dir);
         jar.setDestFile(destFile);
         jar.setManifest(new File(new File(dir, "META-INF"), "MANIFEST.MF"));
         jar.setBasedir(dir);
@@ -631,7 +636,7 @@ public class FileMonitor {
             in.close();
         }
         catch (IOException e) {
-            logger.warn("Failed to close stream. " + e, e);
+            LOGGER.warn("Failed to close stream. " + e, e);
         }
     }
 
