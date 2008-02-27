@@ -31,7 +31,7 @@
     <packaging>bundle</packaging>
     <version>1.0.3-SNAPSHOT</version>
 
-    <name>Apache Felix Prefrences Service</name>
+    <name>Apache Felix Preferences Service</name>
     <description>
         Implementation of the OSGi Preferences Service Specification 1.1
     </description>
