@@ -15,6 +15,28 @@
  * limitations under the License.
  */
 
+                  Apache ServiceMix Kernel 1.0-m2
+                  ================================
+
+This is the second milestone of ServiceMix Kernel, but mostly a bug fix release
+compared to the first milestone.
+
+** Bug
+    * [SMX4KNL-13] - startup issue in recognizing new files in deploy folder
+    * [SMX4KNL-15] - Display of memory size using the info command on Windows is ugly
+    * [SMX4KNL-16] - Bad error message when startup.properties lists a unknown file (the file name is not displayed, but 'null' instead)
+    * [SMX4KNL-18] - No need for DynamicImport-Package=* in filemonitor
+    * [SMX4KNL-19] - Performance problems when using the OSGi classloaders in a certain way
+
+** Improvement
+    * [SMX4KNL-4] - Add a start option on the 'osgi install' command so that the bundle is automatically started
+
+** Task
+    * [SMX4KNL-17] - Remove all the warnings when building the distribution tar.gz
+
+See the README.txt file for more general informations about ServiceMix Kernel.
+
+
                   Apache ServiceMix Kernel 1.0-m1
                   ================================
 

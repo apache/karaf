@@ -44,12 +44,13 @@ Alternatively, you can also find out how to get started here:
 If you need more help try talking to us on our mailing lists
     http://servicemix.apache.org/mailing-lists.html
 
-If you find any issues with CXF, please submit reports with JIRA here:
+If you find any issues with ServiceMix Kernel, please submit reports 
+with JIRA here:
     http://issues.apache.org/activemq/browse/SMX4KNL
 
-We welcome contributions, and encourage you to get involved in the CXF
-community. If you'd like to learn more about how you can contribute, please
-see:
+We welcome contributions, and encourage you to get involved in the 
+ServiceMix community. If you'd like to learn more about how you can 
+contribute, please see:
     http://servicemix.apache.org/contributing.html
 
 Many thanks for using Apache ServiceMix.
