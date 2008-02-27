@@ -191,7 +191,11 @@ public class R4SearchPolicyCore implements ModuleListener
         }
         catch (ClassNotFoundException ex)
         {
-            String msg = diagnoseClassLoadError(module, name);
+            String msg = name;
+            if (m_logger.getLogLevel() >= Logger.LOG_DEBUG)
+            {
+                msg = diagnoseClassLoadError(module, name);
+            }
             throw new ClassNotFoundException(msg, ex);
         }
 
