@@ -69,7 +69,7 @@
       <felix.configadmin.version>1.0.0</felix.configadmin.version>
       <felix.main.version>1.0.3</felix.main.version>
       <felix.plugin.version>1.4.0</felix.plugin.version>
-      <felix.framework.version>1.1.0-r631540-patched</felix.framework.version>
+      <felix.framework.version>1.1.0-r631613</felix.framework.version>
       <felix.osgi.version>1.0.0</felix.osgi.version>
       <felix.compendium.version>1.0.0</felix.compendium.version>
       <felix.bundlerepository.version>1.0.2</felix.bundlerepository.version>
