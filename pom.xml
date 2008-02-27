@@ -66,13 +66,13 @@
       <cglib.version>2.1_3</cglib.version>
       <commons.io.version>1.3.2</commons.io.version>
       <commons.logging.version>1.1.1</commons.logging.version>
-      <felix.configadmin.version>0.9.0-r605854</felix.configadmin.version>
-      <felix.main.version>1.1.0-r605854</felix.main.version>
-      <felix.plugin.version>1.2.0</felix.plugin.version>
-      <felix.framework.version>1.1.0-SNAPSHOT</felix.framework.version>
+      <felix.configadmin.version>1.0.0</felix.configadmin.version>
+      <felix.main.version>1.0.3</felix.main.version>
+      <felix.plugin.version>1.4.0</felix.plugin.version>
+      <felix.framework.version>1.1.0-r631540-patched</felix.framework.version>
       <felix.osgi.version>1.0.0</felix.osgi.version>
       <felix.compendium.version>1.0.0</felix.compendium.version>
-      <felix.bundlerepository.version>1.1.0-r605854</felix.bundlerepository.version>
+      <felix.bundlerepository.version>1.0.2</felix.bundlerepository.version>
       <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
       <geronimo.stax.version>1.0.1</geronimo.stax.version>
       <gshell.version>1.0-alpha-1</gshell.version>
