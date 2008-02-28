@@ -24,13 +24,13 @@
     <parent>
         <groupId>org.apache.servicemix.kernel</groupId>
         <artifactId>kernel</artifactId>
-        <version>1.0-m2</version>
+        <version>1.0-m3-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.servicemix.kernel.bundles</groupId>
     <artifactId>bundles</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-m2</version>
+    <version>1.0-m3-SNAPSHOT</version>
     <name>ServiceMix OSGI Common Bundles</name>
 
     <modules>
