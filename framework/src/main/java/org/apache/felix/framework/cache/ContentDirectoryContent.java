@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.moduleloader;
+package org.apache.felix.framework.cache;
 
+import org.apache.felix.moduleloader.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -37,14 +38,6 @@ public class ContentDirectoryContent implements IContent
             ? path + "/" : path;
     }
 
-    protected void finalize()
-    {
-        if (m_content != null)
-        {
-            m_content.close();
-        }
-    }
-
     public void open()
     {
         m_content.open();
@@ -53,18 +46,10 @@ public class ContentDirectoryContent implements IContent
 
     public synchronized void close()
     {
-        try
-        {
-            if (m_content != null)
-            {
-                m_content.close();
-            }
-        }
-        catch (Exception ex)
-        {
-            System.err.println("JarContent: " + ex);
-        }
-
+        // We do not actually close the associated content
+        // from which we are filtering our directory because
+        // we assume that this will be close manually by
+        // the owner of that content.
         m_content = null;
         m_opened = false;
     }
@@ -84,7 +69,17 @@ public class ContentDirectoryContent implements IContent
         return m_content.hasEntry(m_rootPath + name);
     }
 
-    public synchronized byte[] getEntry(String name) throws IllegalStateException
+    public synchronized Enumeration getEntries()
+    {
+        if (!m_opened)
+        {
+            throw new IllegalStateException("ContentDirectoryContent is not open");
+        }
+
+        return new EntriesEnumeration(m_content.getEntries(), m_rootPath);
+    }
+
+    public synchronized byte[] getEntryAsBytes(String name) throws IllegalStateException
     {
         if (!m_opened)
         {
@@ -96,7 +91,7 @@ public class ContentDirectoryContent implements IContent
             name = name.substring(1);
         }
 
-        return m_content.getEntry(m_rootPath + name);
+        return m_content.getEntryAsBytes(m_rootPath + name);
     }
 
     public synchronized InputStream getEntryAsStream(String name)
@@ -115,14 +110,34 @@ public class ContentDirectoryContent implements IContent
         return m_content.getEntryAsStream(m_rootPath + name);
     }
 
-    public synchronized Enumeration getEntries()
+    public IContent getEntryAsContent(String name)
     {
         if (!m_opened)
         {
             throw new IllegalStateException("ContentDirectoryContent is not open");
         }
 
-        return new EntriesEnumeration(m_content.getEntries(), m_rootPath);
+        if ((name.length() > 0) && (name.charAt(0) == '/'))
+        {
+            name = name.substring(1);
+        }
+
+        return m_content.getEntryAsContent(m_rootPath + name);
+    }
+
+    public String getEntryAsNativeLibrary(String name)
+    {
+        if (!m_opened)
+        {
+            throw new IllegalStateException("ContentDirectoryContent is not open");
+        }
+
+        if ((name.length() > 0) && (name.charAt(0) == '/'))
+        {
+            name = name.substring(1);
+        }
+
+        return m_content.getEntryAsNativeLibrary(m_rootPath + name);
     }
 
     public String toString()

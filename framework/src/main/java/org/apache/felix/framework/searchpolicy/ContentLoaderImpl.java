@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,11 +22,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.security.ProtectionDomain;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
+import java.util.jar.Manifest;
 import org.apache.felix.framework.Logger;
+import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.SecureAction;
+import org.apache.felix.framework.util.StringMap;
+import org.apache.felix.framework.util.manifestparser.ManifestParser;
 import org.apache.felix.moduleloader.*;
 
 public class ContentLoaderImpl implements IContentLoader
@@ -40,12 +47,10 @@ public class ContentLoaderImpl implements IContentLoader
     private ProtectionDomain m_protectionDomain = null;
     private static SecureAction m_secureAction = new SecureAction();
 
-    public ContentLoaderImpl(Logger logger, IContent content, 
-        IContent[] contentPath)
+    public ContentLoaderImpl(Logger logger, IContent content)
     {
         m_logger = logger;
         m_content = content;
-        m_contentPath = contentPath;
     }
 
     public Logger getLogger()
@@ -56,6 +61,15 @@ public class ContentLoaderImpl implements IContentLoader
     public void open()
     {
         m_content.open();
+        try
+        {
+            initializeContentPath();
+        }
+        catch (Exception ex)
+        {
+            m_logger.log(Logger.LOG_ERROR, "Unable to initialize content path.", ex);
+        }
+
         for (int i = 0; (m_contentPath != null) && (i < m_contentPath.length); i++)
         {
             m_contentPath[i].open();
@@ -100,10 +114,10 @@ public class ContentLoaderImpl implements IContentLoader
     {
         return m_urlPolicy;
     }
-    
+
     public synchronized void setSecurityContext(Object securityContext)
     {
-        m_protectionDomain = (ProtectionDomain) securityContext; 
+        m_protectionDomain = (ProtectionDomain) securityContext;
     }
 
     public synchronized Object getSecurityContext()
@@ -113,7 +127,7 @@ public class ContentLoaderImpl implements IContentLoader
 
     public Class getClass(String name)
     {
-        synchronized (this) 
+        synchronized (this)
         {
             if (m_classLoader == null)
             {
@@ -266,5 +280,83 @@ public class ContentLoaderImpl implements IContentLoader
     public String toString()
     {
         return m_searchPolicy.toString();
+    }
+
+    private void initializeContentPath() throws Exception
+    {
+        // Creating the content path entails examining the bundle's
+        // class path to determine whether the bundle JAR file itself
+        // is on the bundle's class path and then creating content
+        // objects for everything on the class path.
+
+        // Get the bundle's manifest header.
+        InputStream is = null;
+        Map headers = null;
+        try
+        {
+            is = m_content.getEntryAsStream("META-INF/MANIFEST.MF");
+            headers = new StringMap(new Manifest(is).getMainAttributes(), false);
+        }
+        finally
+        {
+            if (is != null) is.close();
+        }
+
+        // Find class path meta-data.
+        String classPath = (headers == null)
+            ? null : (String) headers.get(FelixConstants.BUNDLE_CLASSPATH);
+
+        // Parse the class path into strings.
+        String[] classPathStrings = ManifestParser.parseDelimitedString(
+            classPath, FelixConstants.CLASS_PATH_SEPARATOR);
+
+        if (classPathStrings == null)
+        {
+            classPathStrings = new String[0];
+        }
+
+        // Create the bundles class path.
+        List contentList = new ArrayList();
+        for (int i = 0; i < classPathStrings.length; i++)
+        {
+            // Remove any leading slash, since all bundle class path
+            // entries are relative to the root of the bundle.
+            classPathStrings[i] = (classPathStrings[i].startsWith("/"))
+                ? classPathStrings[i].substring(1)
+                : classPathStrings[i];
+
+            // Check for the bundle itself on the class path.
+            if (classPathStrings[i].equals(FelixConstants.CLASS_PATH_DOT))
+            {
+                contentList.add(m_content);
+            }
+            else
+            {
+                // Determine if the class path entry is a file or directory
+                // in the bundle JAR file.
+                IContent content = m_content.getEntryAsContent(classPathStrings[i]);
+                if (content != null)
+                {
+                    contentList.add(content);
+                }
+                else
+                {
+// TODO: FRAMEWORK - Per the spec, this should fire a FrameworkEvent.INFO event;
+//       need to create an "Eventer" class like "Logger" perhaps.
+                    m_logger.log(Logger.LOG_INFO,
+                        "Class path entry not found: "
+                        + classPathStrings[i]);
+                }
+            }
+        }
+
+        // If there is nothing on the class path, then include
+        // "." by default, as per the spec.
+        if (contentList.size() == 0)
+        {
+            contentList.add(m_content);
+        }
+
+        m_contentPath = (IContent[]) contentList.toArray(new IContent[contentList.size()]);
     }
 }

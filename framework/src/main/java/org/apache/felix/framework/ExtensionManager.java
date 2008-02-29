@@ -607,7 +607,11 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         };
     }
 
-    public byte[] getEntry(String name) 
+    public boolean hasEntry(String name) {
+        return false;
+    }
+
+    public byte[] getEntryAsBytes(String name) 
     {
         return null;
     }
@@ -617,7 +621,13 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         return null;
     }
 
-    public boolean hasEntry(String name) {
-        return false;
+    public IContent getEntryAsContent(String name)
+    {
+        return null;
+    }
+
+    public String getEntryAsNativeLibrary(String name)
+    {
+        return null;
     }
 }

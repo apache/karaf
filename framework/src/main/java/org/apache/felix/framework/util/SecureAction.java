@@ -26,7 +26,7 @@ import java.util.jar.JarFile;
 
 import org.apache.felix.framework.searchpolicy.ContentClassLoader;
 import org.apache.felix.framework.searchpolicy.ContentLoaderImpl;
-import org.apache.felix.moduleloader.JarFileX;
+import org.apache.felix.framework.util.JarFileX;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 

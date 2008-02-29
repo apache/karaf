@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.moduleloader;
+package org.apache.felix.framework.util;
 
 import java.io.File;
 import java.io.IOException;

@@ -833,10 +833,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         R4Library[] libs = module.getDefinition().getLibraries();
         for (int i = 0; (libs != null) && (i < libs.length); i++)
         {
-            String lib = libs[i].getPath(name);
-            if (lib != null)
+            if (libs[i].match(name))
             {
-                return lib;
+                return module.getContentLoader().getContent()
+                    .getEntryAsNativeLibrary(libs[i].getEntryName());
             }
         }
 

@@ -3432,7 +3432,7 @@ ex.printStackTrace();
             (isExtensionBundle) ? null : mp.getCapabilities(),
             mp.getRequirements(),
             mp.getDynamicRequirements(),
-            mp.getLibraries(m_cache.getArchive(targetId).getRevision(revision)));
+            mp.getLibraries());
 
         // Create the module using the module definition.
         IModule module = m_factory.createModule(
@@ -3440,9 +3440,7 @@ ex.printStackTrace();
 
         // Create the content loader from the module archive.
         IContentLoader contentLoader = new ContentLoaderImpl(
-                m_logger,
-                m_cache.getArchive(targetId).getRevision(revision).getContent(),
-                m_cache.getArchive(targetId).getRevision(revision).getContentPath());
+                m_logger, m_cache.getArchive(targetId).getRevision(revision).getContent());
         // Set the content loader's search policy.
         contentLoader.setSearchPolicy(
                 new R4SearchPolicy(m_policyCore, module));
@@ -3454,6 +3452,26 @@ ex.printStackTrace();
 
         // Set the module's content loader to the created content loader.
         m_factory.setContentLoader(module, contentLoader);
+
+        // Verify that all native libraries exist in advance; this will
+        // throw an exception if the native library does not exist.
+        // TODO: CACHE - It would be nice if this check could be done
+        //               some place else in the module, perhaps.
+        R4Library[] libs = md.getLibraries();
+        for (int i = 0; (libs != null) && (i < libs.length); i++)
+        {
+            String entryName = libs[i].getEntryName();
+            if (entryName != null)
+            {
+                if (contentLoader.getContent().getEntryAsNativeLibrary(entryName) == null)
+                {
+                    // The content loader was opened when trying to find the libraries,
+                    // so make sure to close it since it will be deleted.
+                    contentLoader.close();
+                    throw new BundleException("Native library does not exist: " + entryName);
+                }
+            }
+        }
 
         // Done, so return the module.
         return module;

@@ -30,7 +30,7 @@ import java.util.Map;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.IContent;
 import org.apache.felix.moduleloader.IContentLoader;
-import org.apache.felix.moduleloader.JarContent;
+import org.apache.felix.framework.cache.JarContent;
 import org.apache.felix.moduleloader.ResourceNotFoundException;
 
 public class ContentClassLoader extends SecureClassLoader
@@ -145,7 +145,7 @@ public class ContentClassLoader extends SecureClassLoader
                 (bytes == null) &&
                 (i < m_contentLoader.getClassPath().length); i++)
             {
-                bytes = m_contentLoader.getClassPath()[i].getEntry(actual);
+                bytes = m_contentLoader.getClassPath()[i].getEntryAsBytes(actual);
                 content = m_contentLoader.getClassPath()[i];
             }
 

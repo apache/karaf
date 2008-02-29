@@ -18,28 +18,19 @@
  */
 package org.apache.felix.framework.cache;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.PrivilegedActionException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.zip.ZipEntry;
 
 import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.Util;
-import org.apache.felix.framework.util.manifestparser.ManifestParser;
-import org.apache.felix.moduleloader.ContentDirectoryContent;
 import org.apache.felix.moduleloader.IContent;
-import org.apache.felix.moduleloader.JarContent;
 
 /**
  * <p>
@@ -55,8 +46,6 @@ import org.apache.felix.moduleloader.JarContent;
 class JarRevision extends BundleRevision
 {
     private static final transient String BUNDLE_JAR_FILE = "bundle.jar";
-    private static final transient String EMBEDDED_DIRECTORY = "embedded";
-    private static final transient String LIBRARY_DIRECTORY = "lib";
 
     private File m_bundleFile = null;
     private Map m_header = null;
@@ -122,142 +111,9 @@ class JarRevision extends BundleRevision
         }
     }
 
-    public IContent getContent() throws Exception
+    public synchronized IContent getContent() throws Exception
     {
-        return new JarContent(m_bundleFile);
-    }
-
-    public synchronized IContent[] getContentPath() throws Exception
-    {
-        // Creating the content path entails examining the bundle's
-        // class path to determine whether the bundle JAR file itself
-        // is on the bundle's class path and then creating content
-        // objects for everything on the class path.
-
-        File embedDir = new File(getRevisionRootDir(), EMBEDDED_DIRECTORY);
-
-        // Get the bundle's manifest header.
-        Map map = getManifestHeader();
-
-        // Find class path meta-data.
-        String classPath = (map == null)
-            ? null : (String) map.get(FelixConstants.BUNDLE_CLASSPATH);
-
-        // Parse the class path into strings.
-        String[] classPathStrings = ManifestParser.parseDelimitedString(
-            classPath, FelixConstants.CLASS_PATH_SEPARATOR);
-
-        if (classPathStrings == null)
-        {
-            classPathStrings = new String[0];
-        }
-
-        // Create the bundles class path.
-        JarFile bundleJar = null;
-        try
-        {
-            bundleJar = BundleCache.getSecureAction().openJAR(m_bundleFile);
-            IContent self = new JarContent(m_bundleFile);
-            List contentList = new ArrayList();
-            for (int i = 0; i < classPathStrings.length; i++)
-            {
-                // Remove any leading slash, since all bundle class path
-                // entries are relative to the root of the bundle.
-                classPathStrings[i] = (classPathStrings[i].startsWith("/"))
-                    ? classPathStrings[i].substring(1)
-                    : classPathStrings[i];
-
-                // Check for the bundle itself on the class path.
-                if (classPathStrings[i].equals(FelixConstants.CLASS_PATH_DOT))
-                {
-                    contentList.add(self);
-                }
-                else
-                {
-                    // Determine if the class path entry is a file or directory
-                    // in the bundle JAR file.
-                    ZipEntry entry = bundleJar.getEntry(classPathStrings[i]);
-                    if ((entry != null) && entry.isDirectory())
-                    {
-                        contentList.add(new ContentDirectoryContent(self, classPathStrings[i]));
-                    }
-                    else
-                    {
-                        // Ignore any entries that do not exist per the spec.
-                        File extractedJar = new File(embedDir, classPathStrings[i]);
-                        if (BundleCache.getSecureAction().fileExists(extractedJar))
-                        {
-                            contentList.add(new JarContent(extractedJar));
-                        }
-                    }
-                }
-            }
-
-            // If there is nothing on the class path, then include
-            // "." by default, as per the spec.
-            if (contentList.size() == 0)
-            {
-                contentList.add(self);
-            }
-
-            return (IContent[]) contentList.toArray(new IContent[contentList.size()]);
-        }
-        finally
-        {
-            if (bundleJar != null) bundleJar.close();
-        }
-    }
-
-// TODO: This will need to consider security.
-    public synchronized String findLibrary(String libName) throws Exception
-    {
-        // Get bundle lib directory.
-        File libDir = new File(getRevisionRootDir(), LIBRARY_DIRECTORY);
-        // Get lib file.
-        File libFile = new File(libDir, File.separatorChar + libName);
-        // Make sure that the library's parent directory exists;
-        // it may be in a sub-directory.
-        libDir = libFile.getParentFile();
-        if (!BundleCache.getSecureAction().fileExists(libDir))
-        {
-            if (!BundleCache.getSecureAction().mkdirs(libDir))
-            {
-                throw new IOException("Unable to create library directory.");
-            }
-        }
-        // Extract the library from the JAR file if it does not
-        // already exist.
-        if (!BundleCache.getSecureAction().fileExists(libFile))
-        {
-            JarFile bundleJar = null;
-            InputStream is = null;
-
-            try
-            {
-                bundleJar = BundleCache.getSecureAction().openJAR(m_bundleFile);
-                ZipEntry ze = bundleJar.getEntry(libName);
-                if (ze == null)
-                {
-                    throw new IOException("No JAR entry: " + libName);
-                }
-                is = new BufferedInputStream(
-                    bundleJar.getInputStream(ze), BundleCache.BUFSIZE);
-                if (is == null)
-                {
-                    throw new IOException("No input stream: " + libName);
-                }
-
-                // Create the file.
-                BundleCache.copyStreamToFile(is, libFile);
-            }
-            finally
-            {
-                if (bundleJar != null) bundleJar.close();
-                if (is != null) is.close();
-            }
-        }
-
-        return BundleCache.getSecureAction().getAbsolutePath(libFile);
+        return new JarContent(getLogger(), this, getRevisionRootDir(), m_bundleFile, true);
     }
 
     public void dispose() throws Exception
@@ -320,147 +176,10 @@ class JarRevision extends BundleRevision
                 // Save the bundle jar file.
                 BundleCache.copyStreamToFile(is, m_bundleFile);
             }
-
-            preprocessBundleJar();
         }
         finally
         {
             if (is != null) is.close();
-        }
-    }
-
-    /**
-     * This method pre-processes a bundle JAR file making it ready
-     * for use. This entails extracting all embedded JAR files and
-     * all native libraries.
-     * @throws java.lang.Exception if any error occurs while processing JAR file.
-    **/
-    private void preprocessBundleJar() throws Exception
-    {
-        //
-        // Create special directories so that we can avoid checking
-        // for their existence all the time.
-        //
-
-        File embedDir = new File(getRevisionRootDir(), EMBEDDED_DIRECTORY);
-        if (!BundleCache.getSecureAction().fileExists(embedDir))
-        {
-            if (!BundleCache.getSecureAction().mkdir(embedDir))
-            {
-                throw new IOException("Could not create embedded JAR directory.");
-            }
-        }
-
-        File libDir = new File(getRevisionRootDir(), LIBRARY_DIRECTORY);
-        if (!BundleCache.getSecureAction().fileExists(libDir))
-        {
-            if (!BundleCache.getSecureAction().mkdir(libDir))
-            {
-                throw new IOException("Unable to create native library directory.");
-            }
-        }
-
-        //
-        // This block extracts all embedded JAR files.
-        //
-
-        try
-        {
-            // Get the bundle's manifest header.
-            Map map = getManifestHeader();
-
-            // Find class path meta-data.
-            String classPath = (map == null)
-                ? null : (String) map.get(FelixConstants.BUNDLE_CLASSPATH);
-
-            // Parse the class path into strings.
-            String[] classPathStrings = ManifestParser.parseDelimitedString(
-                classPath, FelixConstants.CLASS_PATH_SEPARATOR);
-
-            if (classPathStrings == null)
-            {
-                classPathStrings = new String[0];
-            }
-
-            for (int i = 0; i < classPathStrings.length; i++)
-            {
-                if (!classPathStrings[i].equals(FelixConstants.CLASS_PATH_DOT))
-                {
-                    extractEmbeddedJar(classPathStrings[i]);
-                }
-            }
-
-        }
-        catch (PrivilegedActionException ex)
-        {
-            throw ex.getException();
-        }
-    }
-
-    /**
-     * This method extracts an embedded JAR file from the bundle's
-     * JAR file.
-     * @param id the identifier of the bundle that owns the embedded JAR file.
-     * @param jarPath the path to the embedded JAR file inside the bundle JAR file.
-    **/
-    private void extractEmbeddedJar(String jarPath)
-        throws Exception
-    {
-        // Remove leading slash if present.
-        jarPath = (jarPath.length() > 0) && (jarPath.charAt(0) == '/')
-            ? jarPath.substring(1) : jarPath;
-
-        // If JAR is already extracted, then don't re-extract it...
-        File jarFile = new File(
-            getRevisionRootDir(), EMBEDDED_DIRECTORY + File.separatorChar + jarPath);
-
-        if (!BundleCache.getSecureAction().fileExists(jarFile))
-        {
-            JarFile bundleJar = null;
-            InputStream is = null;
-            try
-            {
-                // Make sure class path entry is a JAR file.
-                bundleJar = BundleCache.getSecureAction().openJAR(m_bundleFile);
-                ZipEntry ze = bundleJar.getEntry(jarPath);
-                if (ze == null)
-                {
-// TODO: FRAMEWORK - Per the spec, this should fire a FrameworkEvent.INFO event;
-//       need to create an "Eventer" class like "Logger" perhaps.
-                    getLogger().log(Logger.LOG_INFO, "Class path entry not found: " + jarPath);
-                    return;
-                }
-                // If the zip entry is a directory, then ignore it since
-                // we don't need to extact it; otherwise, it points to an
-                // embedded JAR file, so extract it.
-                else if (!ze.isDirectory())
-                {
-                    // Make sure that the embedded JAR's parent directory exists;
-                    // it may be in a sub-directory.
-                    File jarDir = jarFile.getParentFile();
-                    if (!BundleCache.getSecureAction().fileExists(jarDir))
-                    {
-                        if (!BundleCache.getSecureAction().mkdirs(jarDir))
-                        {
-                            throw new IOException("Unable to create embedded JAR directory.");
-                        }
-                    }
-
-                    // Extract embedded JAR into its directory.
-                    is = new BufferedInputStream(bundleJar.getInputStream(ze), BundleCache.BUFSIZE);
-                    if (is == null)
-                    {
-                        throw new IOException("No input stream: " + jarPath);
-                    }
-                    // Copy the file.
-                    BundleCache.copyStreamToFile(is, jarFile);
-                }
-            }
-            finally
-            {
-                if (bundleJar != null) bundleJar.close();
-                if (is != null) is.close();
-            }
         }
     }
 }

@@ -61,16 +61,6 @@ public class SystemBundleArchive extends BundleArchive
                     return null;
                 }
 
-                public IContent[] getContentPath() throws Exception
-                {
-                    return null;
-                }
-
-                public String findLibrary(String libName) throws Exception
-                {
-                    return null;
-                }
-
                 public void dispose() throws Exception
                 {
                 }

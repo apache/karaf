@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,15 +18,10 @@
  */
 package org.apache.felix.framework.util.manifestparser;
 
-import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.cache.BundleRevision;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class R4Library
 {
-    private Logger m_logger = null;
-    private BundleRevision m_revision = null;
     private String m_libraryFile = null;
     private String[] m_osnames = null;
     private String[] m_processors = null;
@@ -34,21 +29,21 @@ public class R4Library
     private String[] m_languages = null;
     private String m_selectionFilter = null;
 
-    public R4Library(Logger logger, BundleRevision revision,
+    public R4Library(
         String libraryFile, String[] osnames, String[] processors, String[] osversions,
         String[] languages, String selectionFilter) throws Exception
     {
-        m_logger = logger;
-        m_revision = revision;
         m_libraryFile = libraryFile;
         m_osnames = osnames;
         m_processors = processors;
         m_osversions = osversions;
         m_languages = languages;
         m_selectionFilter = selectionFilter;
+    }
 
-        // Make sure we actually have the library in the revision
-        m_revision.findLibrary(m_libraryFile);
+    public String getEntryName()
+    {
+        return m_libraryFile;
     }
 
     public String[] getOSNames()
@@ -78,43 +73,34 @@ public class R4Library
 
     /**
      * <p>
-     * Returns a file system path to the specified library.
+     * Determines if the specified native library name matches this native
+     * library definition.
      * </p>
-     * 
-     * @param name the name of the library that is being requested.
-     * @return a file system path to the specified library.
-     */
-    public String getPath(String name)
+     * @param name the native library name to try to match.
+     * @return <tt>true</tt> if this native library name matches this native
+     *         library definition; <tt>false</tt> otherwise.
+    **/
+    public boolean match(String name)
     {
         String libname = System.mapLibraryName(name);
-
-        try
+        if (m_libraryFile.equals(libname) || m_libraryFile.endsWith("/" + libname))
         {
+            return true;
+        }
+        else if (libname.endsWith(".jnilib") &&
+            m_libraryFile.endsWith(".dylib"))
+        {
+            libname = libname.substring(0, libname.length() - 6) + "dylib";
             if (m_libraryFile.equals(libname) || m_libraryFile.endsWith("/" + libname))
             {
-                return m_revision.findLibrary(m_libraryFile);
-            }
-            else if (libname.endsWith(".jnilib") && 
-                m_libraryFile.endsWith(".dylib"))
-            {
-                libname = libname.substring(0, libname.length() - 6) + "dylib";
-                if (m_libraryFile.equals(libname) || m_libraryFile.endsWith("/" + libname))
-                {
-                    return m_revision.findLibrary(m_libraryFile);
-                }
-            }
-            else if (m_libraryFile.equals(name) || m_libraryFile.endsWith("/" + name))
-            {
-                return m_revision.findLibrary(m_libraryFile);
+                return true;
             }
         }
-        catch (Exception ex)
+        else if (m_libraryFile.equals(name) || m_libraryFile.endsWith("/" + name))
         {
-            m_logger.log(Logger.LOG_ERROR, "R4Library: Finding library '"
-                + name + "'.", new BundleException(
-                "Unable to find native library '" + name + "'."));
+            return true;
         }
-        return null;
+        return false;
     }
 
     public String toString()

@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,25 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.moduleloader;
+package org.apache.felix.framework.cache;
 
+import org.apache.felix.moduleloader.*;
 import java.io.*;
 import java.util.*;
+import org.apache.felix.framework.Logger;
 
 public class DirectoryContent implements IContent
 {
     private static final int BUFSIZE = 4096;
+    private static final transient String EMBEDDED_DIRECTORY = "-embedded";
+    private static final transient String LIBRARY_DIRECTORY = "lib";
 
-    private File m_dir = null;
+    private Logger m_logger;
+    private Object m_revisionLock;
+    private File m_rootDir;
+    private File m_dir;
     private boolean m_opened = false;
 
-    public DirectoryContent(File dir)
+    public DirectoryContent(Logger logger, Object revisionLock, File rootDir, File dir)
     {
+        m_logger = logger;
+        m_revisionLock = revisionLock;
+        m_rootDir = rootDir;
         m_dir = dir;
-    }
-
-    protected void finalize()
-    {
     }
 
     public void open()
@@ -62,7 +68,21 @@ public class DirectoryContent implements IContent
         return new File(m_dir, name).exists();
     }
 
-    public synchronized byte[] getEntry(String name) throws IllegalStateException
+    public synchronized Enumeration getEntries()
+    {
+        if (!m_opened)
+        {
+            throw new IllegalStateException("JarContent is not open");
+        }
+
+        // Wrap entries enumeration to filter non-matching entries.
+        Enumeration e = new EntriesEnumeration(m_dir);
+
+        // Spec says to return null if there are no entries.
+        return (e.hasMoreElements()) ? e : null;
+    }
+
+    public synchronized byte[] getEntryAsBytes(String name) throws IllegalStateException
     {
         if (!m_opened)
         {
@@ -130,18 +150,64 @@ public class DirectoryContent implements IContent
         return new FileInputStream(new File(m_dir, name));
     }
 
-    public synchronized Enumeration getEntries()
+    public synchronized IContent getEntryAsContent(String entryName)
     {
         if (!m_opened)
         {
-            throw new IllegalStateException("JarContent is not open");
+            throw new IllegalStateException("DirectoryContent is not open");
         }
 
-        // Wrap entries enumeration to filter non-matching entries.
-        Enumeration e = new EntriesEnumeration(m_dir);
+        // Remove any leading slash, since all bundle class path
+        // entries are relative to the root of the bundle.
+        entryName = (entryName.startsWith("/")) ? entryName.substring(1) : entryName;
 
-        // Spec says to return null if there are no entries.
-        return (e.hasMoreElements()) ? e : null;
+        // Any embedded JAR files will be extracted to the embedded directory.
+        File embedDir = new File(m_rootDir, m_dir.getName() + EMBEDDED_DIRECTORY);
+
+        // Determine if the entry is an emdedded JAR file or
+        // directory in the bundle JAR file. Ignore any entries
+        // that do not exist per the spec.
+        File file = new File(m_dir, entryName);
+        if (BundleCache.getSecureAction().isFileDirectory(file))
+        {
+            return new DirectoryContent(m_logger, m_revisionLock, m_rootDir, file);
+        }
+        else if (BundleCache.getSecureAction().fileExists(file)
+            && entryName.endsWith(".jar"))
+        {
+            File extractedDir = new File(embedDir,
+                (entryName.lastIndexOf('/') >= 0)
+                    ? entryName.substring(0, entryName.lastIndexOf('/'))
+                    : entryName);
+            synchronized (m_revisionLock)
+            {
+                if (!BundleCache.getSecureAction().fileExists(extractedDir))
+                {
+                    if (!BundleCache.getSecureAction().mkdirs(extractedDir))
+                    {
+                        m_logger.log(
+                            Logger.LOG_ERROR,
+                            "Unable to extract embedded directory.");
+                    }
+                }
+            }
+            System.out.println("+++ EXTRACTED JAR DIR " + extractedDir);
+            return new JarContent(m_logger, m_revisionLock, extractedDir, file);
+        }
+
+        // The entry could not be found, so return null.
+        return null;
+    }
+
+// TODO: This will need to consider security.
+    public synchronized String getEntryAsNativeLibrary(String name)
+    {
+        if (!m_opened)
+        {
+            throw new IllegalStateException("DirectoryContent is not open");
+        }
+
+        return BundleCache.getSecureAction().getAbsolutePath(new File(m_rootDir, name));
     }
 
     public String toString()

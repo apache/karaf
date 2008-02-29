@@ -72,11 +72,10 @@ public abstract class BundleRevision
         m_location = location;
     }
 
-
     /**
      * <p>
      * Returns the logger for this revision.
-     * <p>
+     * </p>
      * @return the logger instance for this revision.
     **/
     public Logger getLogger()
@@ -116,36 +115,7 @@ public abstract class BundleRevision
     **/
     public abstract Map getManifestHeader() throws Exception;
 
-    /**
-     * <p>
-     * Returns a content object that is associated with the revision.
-     * </p>
-     * @return a content object that is associated with the revision.
-     * @throws java.lang.Exception if any error occurs.
-    **/
     public abstract IContent getContent() throws Exception;
-
-    /**
-     * <p>
-     * Returns an array of content objects that are associated with the
-     * specified revision's bundle class path.
-     * </p>
-     * @return an array of content objects for the revision's bundle class path.
-     * @throws java.lang.Exception if any error occurs.
-    **/
-    public abstract IContent[] getContentPath() throws Exception;
-
-    /**
-     * <p>
-     * Returns the absolute file path for the specified native library of the
-     * revision.
-     * </p>
-     * @param libName the name of the library.
-     * @return a <tt>String</tt> that contains the absolute path name to
-     *         the requested native library of the revision.
-     * @throws java.lang.Exception if any error occurs.
-    **/
-    public abstract String findLibrary(String libName) throws Exception;
 
     /**
      * <p>

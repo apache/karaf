@@ -27,18 +27,18 @@ import org.osgi.framework.*;
 
 public class R4LibraryClause
 {
-    private String[] m_libraryFiles = null;
+    private String[] m_libraryEntries = null;
     private String[] m_osnames = null;
     private String[] m_processors = null;
     private String[] m_osversions = null;
     private String[] m_languages = null;
     private String m_selectionFilter = null;
 
-    public R4LibraryClause(String[] libraryFiles, String[] osnames,
+    public R4LibraryClause(String[] libraryEntries, String[] osnames,
         String[] processors, String[] osversions, String[] languages,
         String selectionFilter)
     {
-        m_libraryFiles = libraryFiles;
+        m_libraryEntries = libraryEntries;
         m_osnames = osnames;
         m_processors = processors;
         m_osversions = osversions;
@@ -48,7 +48,7 @@ public class R4LibraryClause
 
     public R4LibraryClause(R4LibraryClause library)
     {
-        m_libraryFiles = library.m_libraryFiles;
+        m_libraryEntries = library.m_libraryEntries;
         m_osnames = library.m_osnames;
         m_osversions = library.m_osversions;
         m_processors = library.m_processors;
@@ -56,9 +56,9 @@ public class R4LibraryClause
         m_selectionFilter = library.m_selectionFilter;
     }
 
-    public String[] getLibraryFiles()
+    public String[] getLibraryEntries()
     {
-        return m_libraryFiles;
+        return m_libraryEntries;
     }
 
     public String[] getOSNames()
@@ -241,7 +241,7 @@ public class R4LibraryClause
             // any number of libraries along with one set of associated
             // properties.
             StringTokenizer st = new StringTokenizer(s, ";");
-            String[] libFiles = new String[st.countTokens()];
+            String[] libEntries = new String[st.countTokens()];
             List osNameList = new ArrayList();
             List osVersionList = new ArrayList();
             List processorList = new ArrayList();
@@ -254,7 +254,7 @@ public class R4LibraryClause
                 if (token.indexOf('=') < 0)
                 {
                     // Remove the slash, if necessary.
-                    libFiles[libCount] = (token.charAt(0) == '/')
+                    libEntries[libCount] = (token.charAt(0) == '/')
                         ? token.substring(1)
                         : token;
                     libCount++;
@@ -327,10 +327,10 @@ public class R4LibraryClause
             }
 
             // Shrink lib file array.
-            String[] actualLibFiles = new String[libCount];
-            System.arraycopy(libFiles, 0, actualLibFiles, 0, libCount);
+            String[] actualLibEntries = new String[libCount];
+            System.arraycopy(libEntries, 0, actualLibEntries, 0, libCount);
             return new R4LibraryClause(
-                actualLibFiles,
+                actualLibEntries,
                 (String[]) osNameList.toArray(new String[osNameList.size()]),
                 (String[]) processorList.toArray(new String[processorList.size()]),
                 (String[]) osVersionList.toArray(new String[osVersionList.size()]),

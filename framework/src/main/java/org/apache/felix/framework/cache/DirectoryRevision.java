@@ -30,9 +30,9 @@ import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
-import org.apache.felix.moduleloader.DirectoryContent;
+import org.apache.felix.framework.cache.DirectoryContent;
 import org.apache.felix.moduleloader.IContent;
-import org.apache.felix.moduleloader.JarContent;
+import org.apache.felix.framework.cache.JarContent;
 
 /**
  * <p>
@@ -43,8 +43,6 @@ import org.apache.felix.moduleloader.JarContent;
 **/
 class DirectoryRevision extends BundleRevision
 {
-    private static final transient String BUNDLE_JAR_FILE = "bundle.jar";
-
     private File m_refDir = null;
     private Map m_header = null;
 
@@ -109,90 +107,9 @@ class DirectoryRevision extends BundleRevision
         }
     }
 
-    public IContent getContent() throws Exception
+    public synchronized IContent getContent() throws Exception
     {
-        return new DirectoryContent(m_refDir);
-    }
-
-    public synchronized IContent[] getContentPath() throws Exception
-    {
-        // Creating the content path entails examining the bundle's
-        // class path to determine whether the bundle JAR file itself
-        // is on the bundle's class path and then creating content
-        // objects for everything on the class path.
-
-        // Get the bundle's manifest header.
-        Map map = getManifestHeader();
-
-        // Find class path meta-data.
-        String classPath = (map == null)
-            ? null : (String) map.get(FelixConstants.BUNDLE_CLASSPATH);
-
-        // Parse the class path into strings.
-        String[] classPathStrings = ManifestParser.parseDelimitedString(
-            classPath, FelixConstants.CLASS_PATH_SEPARATOR);
-
-        if (classPathStrings == null)
-        {
-            classPathStrings = new String[0];
-        }
-
-        // Create the bundles class path.
-        IContent self = new DirectoryContent(m_refDir);
-        List contentList = new ArrayList();
-        for (int i = 0; i < classPathStrings.length; i++)
-        {
-            // Remove any leading slash, since all bundle class path
-            // entries are relative to the root of the bundle.
-            classPathStrings[i] = (classPathStrings[i].startsWith("/"))
-                ? classPathStrings[i].substring(1)
-                : classPathStrings[i];
-
-            // Check for the bundle itself on the class path.
-            if (classPathStrings[i].equals(FelixConstants.CLASS_PATH_DOT))
-            {
-                contentList.add(self);
-            }
-            else
-            {
-                // Determine if the class path entry is a file or directory.
-                File file = new File(m_refDir, classPathStrings[i]);
-                if (BundleCache.getSecureAction().isFileDirectory(file))
-                {
-                    contentList.add(new DirectoryContent(file));
-                }
-                else
-                {
-                    // Ignore any entries that do not exist per the spec.
-                    if (BundleCache.getSecureAction().fileExists(file))
-                    {
-                        contentList.add(new JarContent(file));
-                    }
-                }
-            }
-        }
-
-        // If there is nothing on the class path, then include
-        // "." by default, as per the spec.
-        if (contentList.size() == 0)
-        {
-            contentList.add(self);
-        }
-
-        return (IContent[]) contentList.toArray(new IContent[contentList.size()]);
-    }
-
-// TODO: This will need to consider security.
-    public String findLibrary(String libName) throws Exception 
-    {
-        String result = BundleCache.getSecureAction().getAbsolutePath(new File(m_refDir, libName));
-        
-        if (result == null)
-        {
-            throw new IOException("No such file: " + libName);
-        }
-        
-        return result;
+        return new DirectoryContent(getLogger(), this, getRevisionRootDir(), m_refDir);
     }
 
     public void dispose() throws Exception

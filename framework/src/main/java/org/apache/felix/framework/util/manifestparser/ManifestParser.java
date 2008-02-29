@@ -220,7 +220,7 @@ public class ManifestParser
         // Check to see if there was an optional native library clause, which is
         // represented by a null library header; if so, record it and remove it.
         if ((m_libraryHeaders.length > 0) &&
-            (m_libraryHeaders[m_libraryHeaders.length - 1].getLibraryFiles() == null))
+            (m_libraryHeaders[m_libraryHeaders.length - 1].getLibraryEntries() == null))
         {
             m_libraryHeadersOptional = true;
             R4LibraryClause[] tmp = new R4LibraryClause[m_libraryHeaders.length - 1];
@@ -285,33 +285,32 @@ public class ManifestParser
      * used for finding its native libraries at run time. To inspect the
      * raw native library metadata refer to <tt>getLibraryClauses()</tt>.
      * </p>
-     * @param revision the bundle revision for the module.
      * @return an array of selected library metadata objects from the manifest.
      * @throws BundleException if any problems arise.
-     */
-    public R4Library[] getLibraries(BundleRevision revision) throws BundleException
+    **/
+    public R4Library[] getLibraries() throws BundleException
     {
         R4LibraryClause clause = getSelectedLibraryClause();
 
         if (clause != null)
         {
-            String[] files = clause.getLibraryFiles();
-            R4Library[] libraries = new R4Library[files.length];
+            String[] entries = clause.getLibraryEntries();
+            R4Library[] libraries = new R4Library[entries.length];
             int current = 0;
             try
             {
                 for (int i = 0; i < libraries.length; i++)
                 {
-                    String name = getName(files[i]);
+                    String name = getName(entries[i]);
                     boolean found = false;
                     for (int j = 0; !found && (j < current); j++)
                     {
-                        found = getName(files[j]).equals(name);
+                        found = getName(entries[j]).equals(name);
                     }
                     if (!found)
                     {
                         libraries[current++] = new R4Library(
-                            m_logger, revision, clause.getLibraryFiles()[i],
+                            clause.getLibraryEntries()[i],
                             clause.getOSNames(), clause.getProcessors(), clause.getOSVersions(),
                             clause.getLanguages(), clause.getSelectionFilter());
                     } 
