@@ -1145,6 +1145,9 @@ ex.printStackTrace();
                 // Always release bundle lock.
                 releaseBundleLock(impl);
             }
+            // Hint to GC to collect bundle; not sure why this
+            // is necessary, but it appears to help.
+            bundles[i] = null;
         }
 
         if (m_systemBundleInfo.getState() == Bundle.ACTIVE)
