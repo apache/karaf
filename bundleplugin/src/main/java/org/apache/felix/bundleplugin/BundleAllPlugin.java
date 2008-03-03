@@ -51,6 +51,7 @@ import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
+import org.codehaus.plexus.util.FileUtils;
 
 import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Jar;
@@ -130,6 +131,13 @@ public class BundleAllPlugin extends ManifestPlugin
 
     private Set m_artifactsBeingProcessed = new HashSet();
 
+    /**
+     * Process up to some depth 
+     * 
+     * @parameter
+     */
+    private int depth = Integer.MAX_VALUE;
+
 
     public void execute() throws MojoExecutionException
     {
@@ -146,7 +154,7 @@ public class BundleAllPlugin extends ManifestPlugin
      */
     private BundleInfo bundleAll( MavenProject project ) throws MojoExecutionException
     {
-        return bundleAll( project, Integer.MAX_VALUE );
+        return bundleAll( project, depth );
     }
 
 
@@ -154,10 +162,10 @@ public class BundleAllPlugin extends ManifestPlugin
      * Bundle a project and its transitive dependencies up to some depth level
      * 
      * @param project
-     * @param depth how deep to process the dependency tree
+     * @param maxDepth how deep to process the dependency tree
      * @throws MojoExecutionException
      */
-    protected BundleInfo bundleAll( MavenProject project, int depth ) throws MojoExecutionException
+    protected BundleInfo bundleAll( MavenProject project, int maxDepth ) throws MojoExecutionException
     {
 
         if ( alreadyBundled( project.getArtifact() ) )
@@ -233,11 +241,11 @@ public class BundleAllPlugin extends ManifestPlugin
             node.getArtifact().setFile( artifact.getFile() );
 
             int nodeDepth = node.getDepth();
-            if ( nodeDepth > depth )
+            if ( nodeDepth > maxDepth )
             {
                 /* node is deeper than we want */
-                getLog()
-                    .debug( "Ignoring " + node.getArtifact() + ", depth is " + nodeDepth + ", bigger than " + depth );
+                getLog().debug(
+                    "Ignoring " + node.getArtifact() + ", depth is " + nodeDepth + ", bigger than " + maxDepth );
                 continue;
             }
 
@@ -266,7 +274,7 @@ public class BundleAllPlugin extends ManifestPlugin
             if ( ( Artifact.SCOPE_COMPILE.equals( artifact.getScope() ) )
                 || ( Artifact.SCOPE_RUNTIME.equals( artifact.getScope() ) ) )
             {
-                BundleInfo subBundleInfo = bundleAll( childProject, depth - 1 );
+                BundleInfo subBundleInfo = bundleAll( childProject, maxDepth - 1 );
                 if ( subBundleInfo != null )
                 {
                     bundleInfo.merge( subBundleInfo );
@@ -343,6 +351,8 @@ public class BundleAllPlugin extends ManifestPlugin
 
             Jar osgiJar = new Jar( project.getArtifactId(), project.getArtifact().getFile() );
 
+            outputFile.getAbsoluteFile().getParentFile().mkdirs();
+
             Collection exportedPackages;
             if ( isOsgi( osgiJar ) )
             {
@@ -352,17 +362,16 @@ public class BundleAllPlugin extends ManifestPlugin
                         + project.getVersion() );
                 String exportHeader = osgiJar.getManifest().getMainAttributes().getValue( Analyzer.EXPORT_PACKAGE );
                 exportedPackages = analyzer.parseHeader( exportHeader ).keySet();
+                FileUtils.copyFile( project.getArtifact().getFile(), outputFile );
             }
             else
             {
-                /* else generate the mainfest from the packages */
+                /* else generate the manifest from the packages */
                 exportedPackages = analyzer.getExports().keySet();
                 Manifest manifest = analyzer.getJar().getManifest();
                 osgiJar.setManifest( manifest );
+                osgiJar.write( outputFile );
             }
-
-            outputFile.getAbsoluteFile().getParentFile().mkdirs();
-            osgiJar.write( outputFile );
 
             BundleInfo bundleInfo = addExportedPackages( project, exportedPackages );
 

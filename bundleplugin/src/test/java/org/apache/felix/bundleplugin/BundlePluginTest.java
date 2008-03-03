@@ -29,6 +29,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.osgi.DefaultMaven2OsgiConverter;
 
 import aQute.lib.osgi.Analyzer;
+import aQute.lib.osgi.Builder;
 import aQute.lib.osgi.Jar;
 
 
@@ -49,6 +50,9 @@ public class BundlePluginTest extends AbstractBundlePluginTest
         super.setUp();
         plugin = new BundlePlugin();
         plugin.setMaven2OsgiConverter( new DefaultMaven2OsgiConverter() );
+        plugin.setBasedir( new File( "." ) );
+        plugin.setBuildDirectory( "." );
+        plugin.setOutputDirectory( new File( "." ) );
     }
 
 
@@ -156,5 +160,12 @@ public class BundlePluginTest extends AbstractBundlePluginTest
 
         assertEquals( "", transformedInstructions.get( "z" ) );
         assertEquals( "", transformedInstructions.get( "-z" ) );
+    }
+
+
+    public void testVersion() throws Exception
+    {
+        String cleanupVersion = Builder.cleanupVersion( "0.0.0.4aug2000r7-dev" );
+        assertEquals( "0.0.0.4aug2000r7-dev", cleanupVersion );
     }
 }
