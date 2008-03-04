@@ -22,8 +22,7 @@ import java.lang.reflect.*;
 import java.util.*;
 
 import org.apache.felix.scrplugin.Constants;
-import org.apache.felix.scrplugin.om.Component;
-import org.apache.felix.scrplugin.om.Reference;
+import org.apache.felix.scrplugin.om.*;
 import org.apache.felix.scrplugin.tags.*;
 import org.apache.maven.plugin.MojoExecutionException;
 
@@ -164,7 +163,8 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getTagByName(java.lang.String)
      */
     public JavaTag getTagByName(String name) {
-        // TODO Auto-generated method stub
+        // this is only used to retrieve the component tag, so we can ignore it
+        // for classes from other bundles and simply return null
         return null;
     }
 
@@ -176,9 +176,21 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
         JavaTag[] javaTags = EMPTY_TAGS;
         if ( this.component != null ) {
             if ( Constants.SERVICE.equals(name) ) {
-
+                if ( this.component.getService() != null &&
+                     this.component.getService().getInterfaces().size() > 0 ) {
+                    javaTags = new JavaTag[this.component.getService().getInterfaces().size()];
+                    for(int i=0; i<this.component.getService().getInterfaces().size(); i++) {
+                        javaTags[i] = new ClassLoaderJavaTag(this, (Interface)this.component.getProperties().get(i),
+                                                             this.component.getService().isServicefactory());
+                    }
+                }
             } else if ( Constants.PROPERTY.equals(name) ) {
-
+                if ( this.component.getProperties().size() > 0 ) {
+                    javaTags = new JavaTag[this.component.getProperties().size()];
+                    for(int i=0; i<this.component.getProperties().size(); i++) {
+                        javaTags[i] = new ClassLoaderJavaTag(this, (Property)this.component.getProperties().get(i));
+                    }
+                }
             } else if ( Constants.REFERENCE.equals(name) ) {
                 if ( this.component.getReferences().size() > 0 ) {
                     javaTags = new JavaTag[this.component.getReferences().size()];

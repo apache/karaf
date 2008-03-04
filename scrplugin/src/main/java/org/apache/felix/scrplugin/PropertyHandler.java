@@ -116,6 +116,14 @@ public class PropertyHandler {
             || name.equals(ConfigurationAdmin.SERVICE_BUNDLELOCATION)
             || name.equals(ConfigurationAdmin.SERVICE_FACTORYPID);
 
+        // if this is an abstract component we store the extra info in the property
+        if ( component.isAbstract() ) {
+            prop.setPrivate(isPrivate);
+            prop.setLabel(tag.getNamedParameter(Constants.PROPERTY_LABEL));
+            prop.setDescription(tag.getNamedParameter(Constants.PROPERTY_DESCRIPTION));
+            prop.setCardinality(tag.getNamedParameter(Constants.PROPERTY_CARDINALITY));
+        }
+
         // if this is a public property and the component is generating metatype info
         // store the information!
         if ( !isPrivate && ocd != null ) {

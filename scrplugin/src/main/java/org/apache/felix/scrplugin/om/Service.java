@@ -28,7 +28,7 @@ import org.apache.maven.plugin.MojoExecutionException;
  */
 public class Service {
 
-    protected String servicefactory;
+    protected boolean isServicefactory;
 
     /** The list of implemented interfaces. */
     protected final List interfaces = new ArrayList();
@@ -40,16 +40,18 @@ public class Service {
         // nothing to do
     }
 
-    public String getServicefactory() {
-        return this.servicefactory;
+    public boolean isServicefactory() {
+        return this.isServicefactory;
     }
 
     public void setServicefactory(String servicefactory) {
-        this.servicefactory = servicefactory;
+        if ( servicefactory != null ) {
+            this.isServicefactory = Boolean.valueOf(servicefactory).booleanValue();
+        }
     }
 
-    public void setServicefactory(boolean servicefactory) {
-        this.servicefactory = String.valueOf(servicefactory);
+    public void setServicefactory(boolean flag) {
+        this.isServicefactory = flag;
     }
 
     public List getInterfaces() {

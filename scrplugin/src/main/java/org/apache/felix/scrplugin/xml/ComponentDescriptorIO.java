@@ -25,17 +25,9 @@ import java.util.StringTokenizer;
 
 import javax.xml.transform.TransformerException;
 
-import org.apache.felix.scrplugin.om.Component;
-import org.apache.felix.scrplugin.om.Components;
-import org.apache.felix.scrplugin.om.Implementation;
-import org.apache.felix.scrplugin.om.Interface;
-import org.apache.felix.scrplugin.om.Property;
-import org.apache.felix.scrplugin.om.Reference;
-import org.apache.felix.scrplugin.om.Service;
+import org.apache.felix.scrplugin.om.*;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.SAXException;
+import org.xml.sax.*;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -158,7 +150,7 @@ public class ComponentDescriptorIO {
             final Iterator i = component.getProperties().iterator();
             while ( i.hasNext() ) {
                 final Property property = (Property)i.next();
-                generateXML(property, contentHandler);
+                generateXML(property, contentHandler, component.isAbstract());
             }
         }
         if ( component.getReferences() != null ) {
@@ -194,7 +186,7 @@ public class ComponentDescriptorIO {
     protected static void generateXML(Service service, ContentHandler contentHandler)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
-        IOUtils.addAttribute(ai, "servicefactory", service.getServicefactory());
+        IOUtils.addAttribute(ai, "servicefactory", String.valueOf(service.isServicefactory()));
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.SERVICE, ComponentDescriptorIO.SERVICE_QNAME, ai);
         if ( service.getInterfaces() != null ) {
             final Iterator i = service.getInterfaces().iterator();
@@ -226,12 +218,25 @@ public class ComponentDescriptorIO {
      * @param contentHandler
      * @throws SAXException
      */
-    protected static void generateXML(Property property, ContentHandler contentHandler)
+    protected static void generateXML(Property property, ContentHandler contentHandler, boolean isAbstract)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "name", property.getName());
         IOUtils.addAttribute(ai, "type", property.getType());
         IOUtils.addAttribute(ai, "value", property.getValue());
+        // we have to write more information if the component is abstract
+        if ( isAbstract ) {
+            IOUtils.addAttribute(ai, "private", String.valueOf(property.isPrivate()));
+            if ( property.getLabel() != null ) {
+                IOUtils.addAttribute(ai, "label", String.valueOf(property.getLabel()));
+            }
+            if ( property.getDescription() != null ) {
+                IOUtils.addAttribute(ai, "description", String.valueOf(property.getDescription()));
+            }
+            if ( property.getCardinality() != null ) {
+                IOUtils.addAttribute(ai, "cardinality", String.valueOf(property.getCardinality()));
+            }
+        }
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.PROPERTY, ComponentDescriptorIO.PROPERTY_QNAME, ai);
         if ( property.getMultiValue() != null && property.getMultiValue().length > 0 ) {
             // generate a new line first
@@ -342,6 +347,14 @@ public class ComponentDescriptorIO {
                     } else {
                         // hold the property pending as we have a multi value
                         this.pendingProperty = prop;
+                    }
+                    // check for abstract properties
+                    prop.setLabel(attributes.getValue("label"));
+                    prop.setDescription(attributes.getValue("description"));
+                    prop.setCardinality(attributes.getValue("cardinality"));
+                    final String pValue = attributes.getValue("private");
+                    if ( pValue != null ) {
+                        prop.setPrivate(Boolean.valueOf(pValue).booleanValue());
                     }
 
                 } else if (localName.equals("properties")) {

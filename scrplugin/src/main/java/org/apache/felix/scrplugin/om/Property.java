@@ -33,6 +33,11 @@ public class Property extends AbstractObject {
     protected String type;
     protected String[] multiValue;
 
+    protected boolean isPrivate;
+    protected String label;
+    protected String description;
+    protected String cardinality;
+
     /**
      * Default constructor.
      */
@@ -92,4 +97,37 @@ public class Property extends AbstractObject {
         }
         // might want to check type (and value)
     }
+
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCardinality() {
+        return cardinality;
+    }
+
+    public void setCardinality(String cardinality) {
+        this.cardinality = cardinality;
+    }
+
 }

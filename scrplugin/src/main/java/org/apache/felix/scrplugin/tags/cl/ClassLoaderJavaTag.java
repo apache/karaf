@@ -22,10 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.felix.scrplugin.Constants;
-import org.apache.felix.scrplugin.om.Reference;
-import org.apache.felix.scrplugin.tags.JavaClassDescription;
-import org.apache.felix.scrplugin.tags.JavaField;
-import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.om.*;
+import org.apache.felix.scrplugin.tags.*;
 
 /**
  * <code>ClassLoaderJavaTag.java</code>...
@@ -35,10 +33,30 @@ public class ClassLoaderJavaTag implements JavaTag {
 
     protected final JavaClassDescription description;
     protected final Reference reference;
+    protected final Property property;
+    protected final Interface interf;
+    protected boolean isServiceFactory;
 
     public ClassLoaderJavaTag(JavaClassDescription desc, Reference reference) {
-        this.reference = reference;
         this.description = desc;
+        this.reference = reference;
+        this.interf = null;
+        this.property = null;
+    }
+
+    public ClassLoaderJavaTag(JavaClassDescription desc, Property property) {
+        this.description = desc;
+        this.property = property;
+        this.reference = null;
+        this.interf = null;
+    }
+
+    public ClassLoaderJavaTag(JavaClassDescription desc, Interface i, boolean isSF) {
+        this.interf = i;
+        this.description = desc;
+        this.property = null;
+        this.reference = null;
+        this.isServiceFactory = isSF;
     }
 
     /**
@@ -62,6 +80,10 @@ public class ClassLoaderJavaTag implements JavaTag {
     public String getName() {
         if ( this.reference != null ) {
             return Constants.REFERENCE;
+        } else if ( this.property != null ) {
+            return Constants.PROPERTY;
+        } else if ( this.interf != null ) {
+            return Constants.SERVICE;
         }
         return null;
     }
@@ -90,6 +112,36 @@ public class ClassLoaderJavaTag implements JavaTag {
             map.put(Constants.REFERENCE_POLICY, this.reference.getPolicy());
             map.put(Constants.REFERENCE_TARGET, this.reference.getTarget());
             map.put(Constants.REFERENCE_UNDBIND, this.reference.getUnbind());
+            return map;
+        } else if ( this.property != null ) {
+            final Map map = new HashMap();
+            map.put(Constants.PROPERTY_TYPE, this.property.getType());
+            map.put(Constants.PROPERTY_NAME, this.property.getName());
+            final String[] values = this.property.getMultiValue();
+            if ( values != null ) {
+                for(int i=0; i<values.length;i++) {
+                    map.put(Constants.PROPERTY_MULTIVALUE_PREFIX + '.' + i, values[i]);
+                }
+            } else {
+                map.put(Constants.PROPERTY_VALUE, this.property.getValue());
+            }
+            map.put(Constants.PROPERTY_PRIVATE, String.valueOf(property.isPrivate()));
+            if ( this.property.getLabel() != null ) {
+                map.put(Constants.PROPERTY_LABEL, this.property.getLabel());
+            }
+            if ( this.property.getDescription() != null ) {
+                map.put(Constants.PROPERTY_DESCRIPTION, this.property.getDescription());
+            }
+            if ( this.property.getCardinality() != null ) {
+                map.put(Constants.PROPERTY_CARDINALITY, this.property.getCardinality());
+            }
+            return map;
+        } else if ( this.interf != null ) {
+            final Map map = new HashMap();
+            map.put(Constants.SERVICE_INTERFACE, this.interf.getInterfacename());
+            if ( this.isServiceFactory ) {
+                map.put(Constants.SERVICE_FACTORY, "true");
+            }
             return map;
         }
         return null;

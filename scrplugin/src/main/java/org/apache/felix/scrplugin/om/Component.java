@@ -242,7 +242,7 @@ public class Component extends AbstractObject {
                             issues.add(this.getMessage("Service interface information is missing for @scr.service tag"));
                         }
                         this.getService().validate(issues, warnings);
-                        isServiceFactory = Boolean.valueOf(this.getService().getServicefactory()).booleanValue();
+                        isServiceFactory = this.getService().isServicefactory();
                     }
 
                     // serviceFactory must not be true for immediate of component factory
