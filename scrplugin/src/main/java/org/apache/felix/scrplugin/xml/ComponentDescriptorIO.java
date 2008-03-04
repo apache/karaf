@@ -427,7 +427,7 @@ public class ComponentDescriptorIO {
         public void characters(char[] ch, int start, int length) throws SAXException {
             if ( this.pendingProperty != null ) {
                 final String text = new String(ch, start, length);
-                if ( this.pendingProperty.getValue() != null ) {
+                if ( this.pendingProperty.getValue() == null ) {
                     this.pendingProperty.setValue(text);
                 } else {
                     this.pendingProperty.setValue(this.pendingProperty.getValue() + text);
