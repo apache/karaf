@@ -125,9 +125,9 @@ public class SCRDescriptorMojo extends AbstractMojo {
             throw new MojoFailureException("SCR Descriptor parsing had failures (see log)");
         }
 
-        // write meta type info if there is a file
+        boolean addResources = false;
+        // write meta type info if there is a file name
         if (!StringUtils.isEmpty(this.metaTypeName)) {
-
             File mtFile = new File(this.outputDirectory, "OSGI-INF" + File.separator + "metatype" + File.separator + this.metaTypeName);
             if ( metaData.getDescriptors().size() > 0 ) {
                 this.getLog().info("Generating "
@@ -135,6 +135,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
                     + " MetaType Descriptors to " + mtFile);
                 mtFile.getParentFile().mkdirs();
                 MetaTypeIO.write(metaData, mtFile);
+                addResources = true;
             } else {
                 if ( mtFile.exists() ) {
                     mtFile.delete();
@@ -142,7 +143,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
             }
 
         } else {
-            this.getLog().info("Have no meta type file name, not writing metatype info");
+            this.getLog().info("Meta type file name is not set: meta type info is not written.");
         }
 
         // if we have abstract descriptors, write them
@@ -151,6 +152,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
             this.getLog().info("Writing abstract service descriptor " + adFile + " with " + abstractComponents.getComponents().size() + " entries.");
             adFile.getParentFile().mkdirs();
             ComponentDescriptorIO.write(abstractComponents, adFile);
+            addResources = true;
         } else {
             this.getLog().debug("No abstract SCR Descriptors found in project.");
             // remove file
@@ -160,46 +162,53 @@ public class SCRDescriptorMojo extends AbstractMojo {
             }
         }
 
+        // check descriptor file
+        final File descriptorFile = StringUtils.isEmpty(this.finalName) ? null : new File(new File(this.outputDirectory, "OSGI-INF"), this.finalName);
+
         // terminate if there is nothing else to write
         if (components.getComponents().isEmpty()) {
             this.getLog().debug("No SCR Descriptors found in project.");
-            return;
+            // remove file if it exists
+            if ( descriptorFile != null && descriptorFile.exists() ) {
+                this.getLog().debug("Removing obsolete service descriptor " + descriptorFile);
+                descriptorFile.delete();
+            }
+        } else {
+
+            if (descriptorFile == null) {
+                throw new MojoFailureException("Descriptor file name must not be empty.");
+            }
+
+            // finally the descriptors have to be written ....
+            descriptorFile.getParentFile().mkdirs(); // ensure parent dir
+
+            this.getLog().info("Generating " + components.getComponents().size()
+                    + " Service Component Descriptors to " + descriptorFile);
+
+            ComponentDescriptorIO.write(components, descriptorFile);
+            addResources = true;
+
+            // and set include accordingly
+            String svcComp = project.getProperties().getProperty("Service-Component");
+            svcComp= (svcComp == null) ? "OSGI-INF/" + finalName : svcComp + ", " + "OSGI-INF/" + finalName;
+            project.getProperties().setProperty("Service-Component", svcComp);
         }
 
-        // check file name
-        if (StringUtils.isEmpty(this.finalName)) {
-            this.getLog().error("Descriptor file name must not be empty.");
-            return;
+        // now add the descriptor directory to the maven resources
+        if (addResources) {
+            final String ourRsrcPath = this.outputDirectory.getAbsolutePath();
+            boolean found = false;
+            final Iterator rsrcIterator = this.project.getResources().iterator();
+            while ( !found && rsrcIterator.hasNext() ) {
+                final Resource rsrc = (Resource)rsrcIterator.next();
+                found = rsrc.getDirectory().equals(ourRsrcPath);
+            }
+            if ( !found ) {
+                final Resource resource = new Resource();
+                resource.setDirectory(this.outputDirectory.getAbsolutePath());
+                this.project.addResource(resource);
+            }
         }
-
-        // finally the descriptors have to be written ....
-        File descriptorFile = new File(new File(this.outputDirectory, "OSGI-INF"), this.finalName);
-        descriptorFile.getParentFile().mkdirs(); // ensure parent dir
-
-        this.getLog().info("Generating " + components.getComponents().size()
-                + " Service Component Descriptors to " + descriptorFile);
-
-        ComponentDescriptorIO.write(components, descriptorFile);
-
-
-        // now add the descriptor file to the maven resources
-        final String ourRsrcPath = this.outputDirectory.getAbsolutePath();
-        boolean found = false;
-        final Iterator rsrcIterator = this.project.getResources().iterator();
-        while ( !found && rsrcIterator.hasNext() ) {
-            final Resource rsrc = (Resource)rsrcIterator.next();
-            found = rsrc.getDirectory().equals(ourRsrcPath);
-        }
-        if ( !found ) {
-            final Resource resource = new Resource();
-            resource.setDirectory(this.outputDirectory.getAbsolutePath());
-            this.project.addResource(resource);
-        }
-
-        // and set include accordingly
-        String svcComp = project.getProperties().getProperty("Service-Component");
-        svcComp= (svcComp == null) ? "OSGI-INF/" + finalName : svcComp + ", " + "OSGI-INF/" + finalName;
-        project.getProperties().setProperty("Service-Component", svcComp);
     }
 
     /**
