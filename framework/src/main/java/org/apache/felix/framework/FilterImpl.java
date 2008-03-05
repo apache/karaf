@@ -133,6 +133,7 @@ public class FilterImpl implements Filter
         {
             evaluator = (Evaluator) tuple[0];
             mapper = (SimpleMapper) tuple[1];
+            m_cache.set(null);
         }
 
         try 
@@ -170,6 +171,10 @@ public class FilterImpl implements Filter
             if (tuple == null) 
             {
                 m_cache.set(new SoftReference(new Object[] {evaluator, mapper}));
+            }
+            else
+            {
+                m_cache.set(tupleRef);
             }
         }
 
