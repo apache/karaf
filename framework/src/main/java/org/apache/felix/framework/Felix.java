@@ -39,7 +39,7 @@ public class Felix extends FelixBundle
     static SecureAction m_secureAction = new SecureAction();
 
     // The extension manager to handle extension bundles
-    private ExtensionManager m_extensionManager;
+    ExtensionManager m_extensionManager;
 
     // Logging related member variables.
     private Logger m_logger = null; // TODO: KARL - Why package private?
@@ -1653,7 +1653,8 @@ ex.printStackTrace();
         // to import the necessary packages.
         if (System.getSecurityManager() != null)
         {
-            ProtectionDomain pd = bundle.getInfo().getProtectionDomain();
+            BundleProtectionDomain pd = (BundleProtectionDomain) 
+                bundle.getInfo().getProtectionDomain();
 
             IRequirement[] imports =
                 bundle.getInfo().getCurrentModule().getDefinition().getRequirements();
@@ -1671,7 +1672,7 @@ ex.printStackTrace();
                         imports[i].???,
                         PackagePermission.IMPORT);
 
-                    if (!pd.implies(perm))
+                    if (!pd.impliesDirect(perm))
                     {
                         throw new java.security.AccessControlException(
                             "PackagePermission.IMPORT denied for import: " +
@@ -1690,7 +1691,7 @@ ex.printStackTrace();
                     PackagePermission perm = new PackagePermission(
                         (String) exports[i].getProperties().get(ICapability.PACKAGE_PROPERTY), PackagePermission.EXPORT);
 
-                    if (!pd.implies(perm))
+                    if (!pd.impliesDirect(perm))
                     {
                         throw new java.security.AccessControlException(
                             "PackagePermission.EXPORT denied for export: " +
@@ -3380,8 +3381,12 @@ ex.printStackTrace();
         return true;
     }
 
-    void addSecurity(final FelixBundle bundle)
+    void addSecurity(final FelixBundle bundle) throws Exception
     {
+        if (m_securityProvider != null)
+        {
+            m_securityProvider.checkBundle(bundle);
+        }
         bundle.getInfo().setProtectionDomain(new BundleProtectionDomain(this, bundle));
     }
 
@@ -3922,23 +3927,19 @@ ex.printStackTrace();
             }
 
             // Next, stop all system bundle activators.
-            if (m_activatorList != null)
+            for (int i = 0; i < m_activatorList.size(); i++)
             {
-                // Stop all activators.
-                for (int i = 0; i < m_activatorList.size(); i++)
+                try
                 {
-                    try
-                    {
-                        Felix.m_secureAction.stopActivator((BundleActivator) 
-                            m_activatorList.get(i), getInfo().getBundleContext());
-                    }
-                    catch (Throwable throwable)
-                    {
-                        m_logger.log(
-                            Logger.LOG_WARNING,
-                            "Exception stopping a system bundle activator.",
-                            throwable);
-                    }
+                    Felix.m_secureAction.stopActivator((BundleActivator) 
+                        m_activatorList.get(i), getInfo().getBundleContext());
+                }
+                catch (Throwable throwable)
+                {
+                    m_logger.log(
+                        Logger.LOG_WARNING,
+                        "Exception stopping a system bundle activator.",
+                        throwable);
                 }
             }
 
