@@ -227,7 +227,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
                 new AdminPermission(bundle, AdminPermission.EXTENSIONLIFECYCLE));
         }
 
-        if (!bundle.getInfo().getProtectionDomain().implies(new AllPermission()))
+        if (!((BundleProtectionDomain) bundle.getInfo().getProtectionDomain()).impliesDirect(new AllPermission()))
         {
             throw new SecurityException("Extension Bundles must have AllPermission");
         }
@@ -577,8 +577,12 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
 
         for (Iterator iter = m_sourceToExtensions.values().iterator(); iter.hasNext();)
         {
-            Bundle bundle = (Bundle) iter.next();
-            _add(bundle.getSymbolicName(), bundle);
+            List extensions = (List) iter.next();
+            for (Iterator extIter = extensions.iterator(); extIter.hasNext();)
+            {
+                Bundle bundle = (Bundle) extIter.next();
+                _add(bundle.getSymbolicName(), bundle);
+            }
         }
     }
 
