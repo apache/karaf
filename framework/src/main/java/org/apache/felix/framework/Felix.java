@@ -726,7 +726,14 @@ public class Felix extends FelixBundle
             m_systemBundleInfo.getCurrentModule(),
             cl);
 
-        addSecurity(this);
+        try
+        {
+            addSecurity(this);
+        }
+        catch (Exception e)
+        {
+            // This should not happen
+        }
 
         // Note: we need this ordering to launch:
         // 1) create all stuff of the system bundle (extension manager needs it)
