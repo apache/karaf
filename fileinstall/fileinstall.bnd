@@ -1,0 +1,8 @@
+-sources: true
+Export-Package: aQute.fileinstall, org.osgi.service.cm
+Bundle-Activator: aQute.fileinstall.FileInstall
+Bundle-Version: 1.3.4
+Bundle-Description: This bundle watches a directory set by the aQute.fileinstall.dir property; the default \
+is "load". JAR files in this directory are installed and uninstalled when they are no longer there. Updating
+ the JAR file in the directory will update the bundle. The bundle allows you to use downloads from
+ a browser, drag and drop, or the command line copy function, for OSGi management.
