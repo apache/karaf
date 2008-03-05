@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.apache.felix.framework.BundleProtectionDomain;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.CompoundEnumeration;
 import org.apache.felix.framework.util.SecurityManagerEx;
@@ -863,7 +864,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     {
 // TODO: RB - Is this permission check correct.
                         if ((System.getSecurityManager() != null) &&
-                            !((ProtectionDomain) modules[modIdx].getContentLoader().getSecurityContext()).implies(
+                            !((BundleProtectionDomain) modules[modIdx].getContentLoader().getSecurityContext()).impliesDirect(
                                 new PackagePermission(pkgName,
                                     PackagePermission.EXPORT)))
                         {
@@ -898,7 +899,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 // TODO: RB - Is this permission check correct.
                             if (inUseCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
                                 (System.getSecurityManager() != null) &&
-                                !((ProtectionDomain) module.getContentLoader().getSecurityContext()).implies(
+                                !((BundleProtectionDomain) module.getContentLoader().getSecurityContext()).impliesDirect(
                                     new PackagePermission(
                                         (String) inUseCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY),
                                         PackagePermission.EXPORT)))
