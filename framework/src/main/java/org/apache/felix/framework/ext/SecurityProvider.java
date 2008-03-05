@@ -28,4 +28,6 @@ public interface SecurityProvider
     boolean hasBundlePermission(ProtectionDomain pd, Permission p, boolean direct);
 
     Object getSignerMatcher(Bundle bundle);
+    
+    void checkBundle(Bundle bundle) throws Exception;
 }

@@ -21,7 +21,7 @@ package org.apache.felix.framework;
 import java.security.Permission;
 import java.security.ProtectionDomain;
 
-class BundleProtectionDomain extends ProtectionDomain
+public class BundleProtectionDomain extends ProtectionDomain
 {
     private final Felix m_felix;
     private final FelixBundle m_bundle;
@@ -38,6 +38,11 @@ class BundleProtectionDomain extends ProtectionDomain
         return m_felix.impliesBundlePermission(this, permission, false);
     }
 
+    public boolean impliesDirect(Permission permission)
+    {
+        return m_felix.impliesBundlePermission(this, permission, true);
+    }
+
     FelixBundle getBundle()
     {
         return m_bundle;
@@ -50,6 +55,15 @@ class BundleProtectionDomain extends ProtectionDomain
 
     public boolean equals(Object other)
     {
-        return m_bundle.equals(other);
+        if ((other == null) || other.getClass() != BundleProtectionDomain.class)
+        {
+            return false;
+        }
+        return m_bundle == ((BundleProtectionDomain) other).m_bundle;
+    }
+    
+    public String toString()
+    {
+        return "[" + m_bundle + "]";
     }
 }
