@@ -143,6 +143,7 @@
         <module>../configadmin</module>
         <module>../metatype</module>
         <module>../dependencymanager</module>
+	<module>../deploymentadmin</module>
         <module>../servicebinder</module>
         <module>../wireadmin</module>
         <module>../prefs</module>
