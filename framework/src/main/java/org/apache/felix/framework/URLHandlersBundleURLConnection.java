@@ -52,7 +52,7 @@ class URLHandlersBundleURLConnection extends URLConnection
         // one from the call context.
         if (m_framework == null)
         {
-            m_framework = URLHandlers.getFrameworkFromContext();
+            m_framework = (Felix) URLHandlers.getFrameworkFromContext();
         }
 
         // If there is still no framework, then error.
@@ -60,7 +60,7 @@ class URLHandlersBundleURLConnection extends URLConnection
         {
             throw new IOException("Unable to find framework for URL: " + url);
         }
-        // Verify that the resource pointed to be the URL exists.
+        // Verify that the resource pointed to by the URL exists.
         // The URL is constructed like this:
         //     bundle://<module-id>:<bundle-classpath-index>/<resource-path>
         // Where <module-id> = <bundle-id>.<revision>

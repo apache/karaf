@@ -36,7 +36,6 @@ class URLHandlersActivator implements BundleActivator
 {
     private Map m_configMap = null;
     private Felix m_framework = null;
-    private BundleContext m_context = null;
 
     public URLHandlersActivator(Map configMap, Felix framework)
     {
@@ -50,18 +49,17 @@ class URLHandlersActivator implements BundleActivator
 
     public void start(BundleContext context)
     {
-        m_context = context;
         // Only register the framework with the URL Handlers service
         // if the service is enabled.
         boolean enable = (m_configMap.get(
                 FelixConstants.SERVICE_URLHANDLERS_PROP) == null)
                 ? true
                 : !m_configMap.get(FelixConstants.SERVICE_URLHANDLERS_PROP).equals("false");
-        URLHandlers.registerInstance(m_framework, m_context, enable);
+        URLHandlers.registerFrameworkInstance(m_framework, enable);
     }
 
     public void stop(BundleContext context)
     {
-        URLHandlers.unregisterInstance(m_framework);
+        URLHandlers.unregisterFrameworkInstance(m_framework);
     }
 }

@@ -47,9 +47,10 @@ class URLHandlersServiceTracker
      * @param context the bundle context used for tracking services.
      * @param filter the filter used for matching services.
     **/
-    public URLHandlersServiceTracker(BundleContext context, String filter)
+    public URLHandlersServiceTracker(Felix framework, String filter)
     {
-        m_context = context;
+        m_context = ((FelixBundle) 
+            framework.getBundle(0)).getInfo().getBundleContext();
         m_filter = filter;
 
         synchronized (this)

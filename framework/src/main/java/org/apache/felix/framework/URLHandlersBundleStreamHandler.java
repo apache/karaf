@@ -21,17 +21,51 @@ package org.apache.felix.framework;
 import java.io.IOException;
 import java.net.*;
 
+import org.apache.felix.framework.util.SecureAction;
+
 class URLHandlersBundleStreamHandler extends URLStreamHandler
 {
-    private Felix m_framework = null;
+    private final Felix m_framework;
+    private final SecureAction m_action;
 
     public URLHandlersBundleStreamHandler(Felix framework)
     {
         m_framework = framework;
+        m_action = null;
+    }
+
+    public URLHandlersBundleStreamHandler(SecureAction action)
+    {
+        m_framework = null;
+        m_action = action;
     }
 
     protected synchronized URLConnection openConnection(URL url) throws IOException
     {
-        return new URLHandlersBundleURLConnection(url, m_framework);
+        if (m_framework != null)
+        {
+            return new URLHandlersBundleURLConnection(url, m_framework);
+        }
+        
+        Object framework = URLHandlers.getFrameworkFromContext();
+        
+        if (framework != null)
+        {
+            // TODO: optimize this to not use reflection if not needed
+            try
+            {
+                Class targetClass = framework.getClass().getClassLoader().loadClass(
+                    URLHandlersBundleURLConnection.class.getName());
+                
+                return (URLConnection) m_action.invoke(m_action.getConstructor(targetClass, 
+                    new Class[]{URL.class, framework.getClass()}),
+                    new Object[]{url, framework});
+            }
+            catch (Exception ex)
+            {
+                throw new IOException(ex.getMessage());
+            }
+        }
+        throw new IOException("No framework context found");
     }
 }

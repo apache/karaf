@@ -19,12 +19,17 @@
 package org.apache.felix.framework;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.service.url.*;
+import org.apache.felix.framework.util.SecureAction;
+import org.osgi.service.url.URLConstants;
+import org.osgi.service.url.URLStreamHandlerService;
+import org.osgi.service.url.URLStreamHandlerSetter;
 
 /**
  * <p>
@@ -49,14 +54,25 @@ import org.osgi.service.url.*;
  * </p>
 **/
 public class URLHandlersStreamHandlerProxy extends URLStreamHandler
-    implements URLStreamHandlerSetter
+    implements URLStreamHandlerSetter, InvocationHandler
 {
-    private Map m_trackerMap = new HashMap();
-    private String m_protocol = null;
+    private final Map m_trackerMap = new HashMap();
+    private final String m_protocol;
+    private final Object m_service;
+    private final SecureAction m_action;
 
-    public URLHandlersStreamHandlerProxy(String protocol)
+    public URLHandlersStreamHandlerProxy(String protocol, SecureAction action)
     {
         m_protocol = protocol;
+        m_service = null;
+        m_action = action;
+    }
+    
+    private URLHandlersStreamHandlerProxy(Object service, SecureAction action)
+    {
+        m_protocol = null;
+        m_service = service;
+        m_action = action;
     }
 
     //
@@ -187,7 +203,7 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
     private URLStreamHandlerService getStreamHandlerService()
     {
         // Get the framework instance associated with call stack.
-        Felix framework = URLHandlers.getFrameworkFromContext();
+        Object framework = URLHandlers.getFrameworkFromContext();
 
         // If the framework has disabled the URL Handlers service,
         // then it will not be found so just return null.
@@ -197,27 +213,73 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
         }
 
         // Get the service tracker for the framework instance or create one.
-        URLHandlersServiceTracker tracker =
-            (URLHandlersServiceTracker) m_trackerMap.get(framework);
-        if (tracker == null)
+        Object tracker = m_trackerMap.get(framework);
+        try
         {
-            // Get the framework's system bundle context.
-            BundleContext context =
-                ((FelixBundle) framework.getBundle(0)).getInfo().getBundleContext();
-            // Create a filter for the protocol.
-            String filter = 
-                "(&(objectClass="
-                + URLStreamHandlerService.class.getName()
-                + ")("
-                + URLConstants.URL_HANDLER_PROTOCOL
-                + "="
-                + m_protocol
-                + "))";
-            // Create a simple service tracker for the framework.
-            tracker = new URLHandlersServiceTracker(context, filter);
-            // Cache the simple service tracker.
-            m_trackerMap.put(framework, tracker);
+            if (tracker == null)
+            {
+                // Create a filter for the protocol.
+                String filter = 
+                    "(&(objectClass="
+                    + URLStreamHandlerService.class.getName()
+                    + ")("
+                    + URLConstants.URL_HANDLER_PROTOCOL
+                    + "="
+                    + m_protocol
+                    + "))";
+                // Create a simple service tracker for the framework.
+                tracker = m_action.invoke(m_action.getConstructor(
+                    framework.getClass().getClassLoader().loadClass(
+                    URLHandlersServiceTracker.class.getName()), 
+                    new Class[]{framework.getClass(), String.class}), 
+                    new Object[]{framework, filter});
+
+                // Cache the simple service tracker.
+                m_trackerMap.put(framework, tracker);
+            }
+            Object service = m_action.invoke(m_action.getMethod(
+                tracker.getClass(), "getService", null), tracker, null);
+            if (service == null)
+            {
+                return null;
+            }
+            if (service instanceof URLStreamHandlerService)
+            {
+                return (URLStreamHandlerService) service;
+            }
+            return (URLStreamHandlerService) Proxy.newProxyInstance(
+                URLStreamHandlerService.class.getClassLoader(), 
+                new Class[]{URLStreamHandlerService.class}, 
+                new URLHandlersStreamHandlerProxy(service, m_action));
         }
-        return (URLStreamHandlerService) tracker.getService();
+        catch (Exception ex)
+        {
+            // TODO: log this or something
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public Object invoke(Object obj, Method method, Object[] params)
+        throws Throwable
+    {
+        try
+        {
+            Class[] types = method.getParameterTypes();
+            if ("parseURL".equals(method.getName()))
+            {
+                types[0] = m_service.getClass().getClassLoader().loadClass(
+                    URLStreamHandlerSetter.class.getName());
+                params[0] = Proxy.newProxyInstance(
+                    m_service.getClass().getClassLoader(), new Class[]{types[0]}, 
+                    (URLHandlersStreamHandlerProxy) params[0]);
+            }
+            return m_action.invoke(m_action.getMethod(m_service.getClass(), 
+                method.getName(), types), m_service, params);
+        } 
+        catch (Exception ex)
+        {
+            throw ex;
+        }
     }
 }

@@ -24,7 +24,7 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.osgi.framework.BundleContext;
+import org.apache.felix.framework.util.SecureAction;
 import org.osgi.service.url.URLConstants;
 
 /**
@@ -51,12 +51,14 @@ import org.osgi.service.url.URLConstants;
 **/
 class URLHandlersContentHandlerProxy extends ContentHandler
 {
-    private Map m_trackerMap = new HashMap();
-    private String m_mimeType = null;
+    private final Map m_trackerMap = new HashMap();
+    private final String m_mimeType;
+    private final SecureAction m_action;
 
-    public URLHandlersContentHandlerProxy(String mimeType)
+    public URLHandlersContentHandlerProxy(String mimeType, SecureAction action)
     {
         m_mimeType = mimeType;
+        m_action = action;
     }
 
     //
@@ -87,7 +89,7 @@ class URLHandlersContentHandlerProxy extends ContentHandler
     private ContentHandler getContentHandlerService()
     {
         // Get the framework instance associated with call stack.
-        Felix framework = URLHandlers.getFrameworkFromContext();
+        Object framework = URLHandlers.getFrameworkFromContext();
 
         // If the framework has disabled the URL Handlers service,
         // then it will not be found so just return null.
@@ -97,27 +99,38 @@ class URLHandlersContentHandlerProxy extends ContentHandler
         }
 
         // Get the service tracker for the framework instance or create one.
-        URLHandlersServiceTracker tracker =
-            (URLHandlersServiceTracker) m_trackerMap.get(framework);
-        if (tracker == null)
+        Object tracker = m_trackerMap.get(framework);
+        try
         {
-            // Get the framework's system bundle context.
-            BundleContext context =
-                ((FelixBundle) framework.getBundle(0)).getInfo().getBundleContext();
-            // Create a filter for the mime type.
-            String filter = 
-                "(&(objectClass="
-                + ContentHandler.class.getName()
-                + ")("
-                + URLConstants.URL_CONTENT_MIMETYPE
-                + "="
-                + m_mimeType
-                + "))";
-            // Create a simple service tracker for the framework.
-            tracker = new URLHandlersServiceTracker(context, filter);
-            // Cache the simple service tracker.
-            m_trackerMap.put(framework, tracker);
+            if (tracker == null)
+            {
+                // Create a filter for the mime type.
+                String filter = 
+                    "(&(objectClass="
+                    + ContentHandler.class.getName()
+                    + ")("
+                    + URLConstants.URL_CONTENT_MIMETYPE
+                    + "="
+                    + m_mimeType
+                    + "))";
+                // Create a simple service tracker for the framework.
+                tracker = m_action.invoke(m_action.getConstructor(
+                    framework.getClass().getClassLoader().loadClass(
+                    URLHandlersServiceTracker.class.getName()),
+                    new Class[]{framework.getClass(), String.class}), 
+                    new Object[]{framework, filter});
+                // Cache the simple service tracker.
+                m_trackerMap.put(framework, tracker);
+            }
+            return (ContentHandler) m_action.invoke(
+                m_action.getMethod(tracker.getClass(), "getService", null), 
+                tracker, null);
         }
-        return (ContentHandler) tracker.getService();
+        catch (Exception ex)
+        {
+            // TODO: log this or something
+            ex.printStackTrace();
+            return null;
+        }
     }
 }
