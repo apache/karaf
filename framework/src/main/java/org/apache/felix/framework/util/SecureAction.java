@@ -19,14 +19,16 @@
 package org.apache.felix.framework.util;
 
 import java.io.*;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
+import java.net.JarURLConnection;
+import java.net.MalformedURLException;
 import java.net.*;
 import java.security.*;
+import java.util.Hashtable;
 import java.util.jar.JarFile;
 
 import org.apache.felix.framework.searchpolicy.ContentClassLoader;
 import org.apache.felix.framework.searchpolicy.ContentLoaderImpl;
-import org.apache.felix.framework.util.JarFileX;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -680,6 +682,232 @@ public class SecureAction
         }
     }
     
+    public Constructor getConstructor(Class target, Class[] types) throws Exception
+    {
+        if (System.getSecurityManager() != null)
+        {
+            Actions actions = (Actions) m_actions.get();
+            actions.set(Actions.GET_CONSTRUCTOR_ACTION, target, types);
+            try
+            {
+                return (Constructor) AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException e)
+            {
+                throw e.getException();
+            }
+        }
+        else
+        {
+            return target.getConstructor(types);
+        }
+    }
+    
+    public Method getMethod(Class target, String method, Class[] types) throws Exception
+    {
+        if (System.getSecurityManager() != null)
+        {
+            Actions actions = (Actions) m_actions.get();
+            actions.set(Actions.GET_METHOD_ACTION, target, method, types);
+            try
+            {
+                return (Method) AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException e)
+            {
+                throw e.getException();
+            }
+        }
+        else
+        {
+            return target.getMethod(method, types);
+        }
+    }
+    
+    public Method getDeclaredMethod(Class target, String method, Class[] types) throws Exception
+    {
+        if (System.getSecurityManager() != null)
+        {
+            Actions actions = (Actions) m_actions.get();
+            actions.set(Actions.GET_DECLAREDMETHOD_ACTION, target, method, types);
+            try
+            {
+                return (Method) AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException e)
+            {
+                throw e.getException();
+            }
+        }
+        else
+        {
+            return target.getDeclaredMethod(method, types);
+        }
+    }
+    
+    public Object invoke(Method method, Object target, Object[] params) throws Exception
+    {
+        if (System.getSecurityManager() != null)
+        {
+            Actions actions = (Actions) m_actions.get();
+            actions.set(Actions.INVOKE_METHOD_ACTION, method, target, params);
+            try
+            {
+                return AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException e)
+            {
+                throw e.getException();
+            }
+        }
+        else
+        {
+            method.setAccessible(true);
+            return method.invoke(target, params);
+        }
+    }
+    
+    public Object invoke(Constructor constructor, Object[] params) throws Exception
+    {
+        if (System.getSecurityManager() != null)
+        {
+            Actions actions = (Actions) m_actions.get();
+            actions.set(Actions.INVOKE_CONSTRUCTOR_ACTION, constructor, params);
+            try
+            {
+                return AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException e)
+            {
+                throw e.getException();
+            }
+        }
+        else
+        {
+            constructor.setAccessible(true);
+            return constructor.newInstance(params);
+        }
+    }
+
+    public Object getDeclaredField(Class targetClass, String name, Object target) 
+        throws Exception
+    {
+        if (System.getSecurityManager() != null)
+        {
+            Actions actions = (Actions) m_actions.get();
+            actions.set(Actions.GET_FIELD_ACTION, targetClass, name, target);
+            try
+            {
+                return AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException e)
+            {
+                throw e.getException();
+            }
+        }
+        else
+        {
+            Field field = targetClass.getDeclaredField(name);
+            field.setAccessible(true);
+            
+            return field.get(target);
+        }
+    }
+
+    public Object swapStaticFieldIfNotClass(Class targetClazz, 
+        Class targetType, Class condition, String lockName) throws Exception
+    {
+        if (System.getSecurityManager() != null)
+        {
+            Actions actions = (Actions) m_actions.get();
+            actions.set(Actions.SWAP_FIELD_ACTION, targetClazz, targetType, 
+                condition, lockName);
+            try
+            {
+                return AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException e)
+            {
+                throw e.getException();
+            }
+        }
+        else
+        {
+            return _swapStaticFieldIfNotClass(targetClazz, targetType, 
+                condition, lockName);
+        }
+    }
+    
+    private static Object _swapStaticFieldIfNotClass(Class targetClazz, 
+        Class targetType, Class condition, String lockName) throws Exception
+    {
+        Object lock = null;
+        if (lockName != null)
+        {
+            try 
+            {
+                Field lockField = 
+                    targetClazz.getDeclaredField(lockName); 
+                lockField.setAccessible(true);
+                lock = lockField.get(null);
+            } 
+            catch (NoSuchFieldException ex) 
+            {
+            }
+        }
+        if (lock == null)
+        {
+            lock = targetClazz;
+        }
+        synchronized (lock)
+        {
+            Field[] fields = targetClazz.getDeclaredFields();
+
+            Object result = null;
+            for (int i = 0; (i < fields.length) && (result == null); i++)
+            {
+                if (Modifier.isStatic(fields[i].getModifiers()) && 
+                    (fields[i].getType() == targetType))
+                {
+                    fields[i].setAccessible(true);
+                    
+                    result = fields[i].get(null);
+                    
+                    if (result != null)
+                    {
+                        if ((condition == null) ||
+                            !result.getClass().getName().equals(condition.getName()))
+                        {
+                            fields[i].set(null, null);
+                        }
+                    }
+                }
+            }
+            if (result != null)
+            {
+                if ((condition == null) || !result.getClass().getName().equals(condition.getName()))
+                {
+                    // reset cache
+                    for (int i = 0; i < fields.length; i++)
+                    {
+                        if (Modifier.isStatic(fields[i].getModifiers()) && 
+                            (fields[i].getType() == Hashtable.class))
+                        {
+                            fields[i].setAccessible(true);
+                            Hashtable cache = (Hashtable) fields[i].get(null);
+                            if (cache != null)
+                            {
+                                cache.clear();
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+        }
+        return null;
+    }
+    
     private static class Actions implements PrivilegedExceptionAction
     {
         public static final int GET_PROPERTY_ACTION = 0;
@@ -708,6 +936,13 @@ public class SecureAction
         public static final int OPEN_URLCONNECTION_ACTION = 23;
         public static final int OPEN_JARURLCONNECTIONJAR_ACTION = 24;
         public static final int ADD_EXTENSION_URL = 25;
+        public static final int GET_CONSTRUCTOR_ACTION = 26;
+        public static final int GET_METHOD_ACTION = 27;
+        public static final int INVOKE_METHOD_ACTION = 28;
+        public static final int INVOKE_CONSTRUCTOR_ACTION = 29;
+        public static final int SWAP_FIELD_ACTION = 30;
+        public static final int GET_FIELD_ACTION = 31;
+        public static final int GET_DECLAREDMETHOD_ACTION = 32;
 
         private int m_action = -1;
         private Object m_arg1 = null;
@@ -887,7 +1122,40 @@ public class SecureAction
                     addURL.setAccessible(true);
                     addURL.invoke(m_arg2, new Object[]{m_arg1});
                 }
-
+                else if (m_action == GET_CONSTRUCTOR_ACTION)
+                {
+                    return ((Class) m_arg1).getConstructor((Class[]) m_arg2);
+                }
+                else if (m_action == GET_METHOD_ACTION)
+                {
+                    return ((Class) m_arg1).getMethod((String) m_arg2, (Class[]) m_arg3);
+                }
+                else if (m_action == INVOKE_METHOD_ACTION)
+                {
+                    ((Method) m_arg1).setAccessible(true);
+                    return ((Method) m_arg1).invoke(m_arg2, (Object[]) m_arg3);
+                }
+                else if (m_action == INVOKE_CONSTRUCTOR_ACTION)
+                {
+                    ((Constructor) m_arg1).setAccessible(true);
+                    return ((Constructor) m_arg1).newInstance((Object[]) m_arg2);
+                }
+                else if (m_action == SWAP_FIELD_ACTION)
+                {
+                    return _swapStaticFieldIfNotClass((Class) m_arg1, 
+                        (Class) m_arg2, (Class) m_arg3, (String) m_arg4);
+                }
+                else if (m_action == GET_FIELD_ACTION)
+                {
+                    Field field = ((Class) m_arg1).getDeclaredField((String) m_arg2);
+                    field.setAccessible(true);
+                    return field.get(m_arg3);
+                }
+                else if (m_action == GET_DECLAREDMETHOD_ACTION)
+                {
+                    return ((Class) m_arg1).getDeclaredMethod((String) m_arg2, (Class[]) m_arg3);
+                }
+                
                 return null;
             }
             finally
