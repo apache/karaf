@@ -533,7 +533,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
 
         for (Iterator iter = m_extensions.iterator(); iter.hasNext();)
         {
-            URL result = ((Bundle) iter.next()).getEntry(path);
+            URL result = ((FelixBundle) iter.next()).getInfo().getCurrentModule().getContentLoader().getResourceFromContent(path);
 
             if (result != null)
             {
