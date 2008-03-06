@@ -88,10 +88,10 @@ public class ComponentDescriptorIO {
      * @param file
      * @throws MojoExecutionException
      */
-    public static void write(Components components, File file)
+    public static void write(Components components, File file, boolean isScrPrivateFile)
     throws MojoExecutionException {
         try {
-            generateXML(components, IOUtils.getSerializer(file));
+            generateXML(components, IOUtils.getSerializer(file), isScrPrivateFile);
         } catch (TransformerException e) {
             throw new MojoExecutionException("Unable to write xml to " + file, e);
         } catch (SAXException e) {
@@ -108,7 +108,7 @@ public class ComponentDescriptorIO {
      * @param contentHandler
      * @throws SAXException
      */
-    protected static void generateXML(Components components, ContentHandler contentHandler)
+    protected static void generateXML(Components components, ContentHandler contentHandler, boolean isScrPrivateFile)
     throws SAXException {
         contentHandler.startDocument();
         contentHandler.startPrefixMapping(PREFIX, NAMESPACE_URI);
@@ -119,7 +119,7 @@ public class ComponentDescriptorIO {
         final Iterator i = components.getComponents().iterator();
         while ( i.hasNext() ) {
             final Component component = (Component)i.next();
-            generateXML(component, contentHandler);
+            generateXML(component, contentHandler, isScrPrivateFile);
         }
         // end wrapper element
         contentHandler.endElement("", ComponentDescriptorIO.COMPONENTS, ComponentDescriptorIO.COMPONENTS);
@@ -133,7 +133,7 @@ public class ComponentDescriptorIO {
      * @param contentHandler
      * @throws SAXException
      */
-    protected static void generateXML(Component component, ContentHandler contentHandler)
+    protected static void generateXML(Component component, ContentHandler contentHandler, boolean isScrPrivateFile)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "enabled", component.isEnabled());
@@ -150,7 +150,7 @@ public class ComponentDescriptorIO {
             final Iterator i = component.getProperties().iterator();
             while ( i.hasNext() ) {
                 final Property property = (Property)i.next();
-                generateXML(property, contentHandler, component.isAbstract());
+                generateXML(property, contentHandler, isScrPrivateFile);
             }
         }
         if ( component.getReferences() != null ) {
@@ -218,14 +218,14 @@ public class ComponentDescriptorIO {
      * @param contentHandler
      * @throws SAXException
      */
-    protected static void generateXML(Property property, ContentHandler contentHandler, boolean isAbstract)
+    protected static void generateXML(Property property, ContentHandler contentHandler, boolean isScrPrivateFile)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "name", property.getName());
         IOUtils.addAttribute(ai, "type", property.getType());
         IOUtils.addAttribute(ai, "value", property.getValue());
-        // we have to write more information if the component is abstract
-        if ( isAbstract ) {
+        // we have to write more information if this is our scr private file
+        if ( isScrPrivateFile ) {
             IOUtils.addAttribute(ai, "private", String.valueOf(property.isPrivate()));
             if ( property.getLabel() != null ) {
                 IOUtils.addAttribute(ai, "label", String.valueOf(property.getLabel()));

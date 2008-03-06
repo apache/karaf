@@ -113,6 +113,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
                     } else {
                         this.getLog().debug("Adding descriptor " + comp);
                         components.addComponent(comp);
+                        abstractComponents.addComponent(comp);
                     }
                 } else {
                     hasFailures = true;
@@ -146,12 +147,12 @@ public class SCRDescriptorMojo extends AbstractMojo {
             this.getLog().info("Meta type file name is not set: meta type info is not written.");
         }
 
-        // if we have abstract descriptors, write them
+        // if we have descriptors, write them in our scr private file (for component inheritance)
         final File adFile = new File(this.outputDirectory, Constants.ABSTRACT_DESCRIPTOR_RELATIVE_PATH);
         if ( !abstractComponents.getComponents().isEmpty() ) {
             this.getLog().info("Writing abstract service descriptor " + adFile + " with " + abstractComponents.getComponents().size() + " entries.");
             adFile.getParentFile().mkdirs();
-            ComponentDescriptorIO.write(abstractComponents, adFile);
+            ComponentDescriptorIO.write(abstractComponents, adFile, true);
             addResources = true;
         } else {
             this.getLog().debug("No abstract SCR Descriptors found in project.");
@@ -185,7 +186,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
             this.getLog().info("Generating " + components.getComponents().size()
                     + " Service Component Descriptors to " + descriptorFile);
 
-            ComponentDescriptorIO.write(components, descriptorFile);
+            ComponentDescriptorIO.write(components, descriptorFile, false);
             addResources = true;
 
             // and set include accordingly
