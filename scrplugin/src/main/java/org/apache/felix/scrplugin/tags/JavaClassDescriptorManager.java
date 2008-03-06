@@ -131,6 +131,8 @@ public class JavaClassDescriptorManager {
                         throw new MojoExecutionException("Unable to get manifest from artifact " + artifact, ioe);
                     }
                     this.log.debug("Trying to get scrinfo from artifact " + artifact);
+                    // now read the scr private file - components stored there overwrite components already
+                    // read from the service component section.
                     try {
                         final File scrInfoFile = this.getFile(artifact, Constants.ABSTRACT_DESCRIPTOR_ARCHIV_PATH);
                         if ( scrInfoFile != null ) {
