@@ -167,6 +167,21 @@ class BundleImpl extends FelixBundle
     **/
     public URL getResource(String name)
     {
+        Object sm = System.getSecurityManager();
+
+        if (sm != null)
+        {
+            try
+            {
+                ((SecurityManager) sm).checkPermission(new AdminPermission(this,
+                    AdminPermission.RESOURCE));
+            }
+            catch (Exception e)
+            {
+                return null; // No permission
+            }
+        }
+
         return m_felix.getBundleResource(this, name);
     }
 
