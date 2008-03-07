@@ -66,30 +66,29 @@ public class ProcessResourceCommand extends Command {
         }
 
         try {
-            for (AbstractInfo jarEntry = source.getNextEntry(); (jarEntry != null) && (!expectedResources.isEmpty()); jarEntry = source.getNextEntry()) {
-                String name = jarEntry.getPath();
-
-                if (!expectedResources.containsKey(name)) {
-                    throw new DeploymentException(DeploymentException.CODE_OTHER_ERROR, "Resource '" + name + "' is not described in the manifest.");
-                }
+        	while (!expectedResources.isEmpty()) {
+            	AbstractInfo jarEntry = source.getNextEntry();
+            	if (jarEntry == null) {
+                	throw new DeploymentException(DeploymentException.CODE_OTHER_ERROR, "Expected more resources in the stream: " + expectedResources.keySet());
+            	}
+            	
+            	String name = jarEntry.getPath();
 
                 ResourceInfoImpl resourceInfo = (ResourceInfoImpl) expectedResources.remove(name);
-
-                String resourceProcessorPID = resourceInfo.getResourceProcessor();
-                if (resourceProcessorPID == null) {
-                    // no resource processor specified, resource can be ignored
-                    continue;
+                if (resourceInfo == null) {
+                	throw new DeploymentException(DeploymentException.CODE_OTHER_ERROR, "Resource '" + name + "' is not described in the manifest.");
                 }
 
-                ServiceReference ref = source.getResourceProcessor(resourceProcessorPID);
+                ServiceReference ref = source.getResourceProcessor(name);
                 if (ref != null) {
                     String serviceOwnerSymName = ref.getBundle().getSymbolicName();
                     if (source.getBundleInfoByName(serviceOwnerSymName) != null) {
                         ResourceProcessor resourceProcessor = (ResourceProcessor) context.getService(ref);
                         if (resourceProcessor != null) {
-                            resourceProcessor.begin(session);
                             try {
-                                m_commitCommand.addResourceProcessor(resourceProcessor);
+                                if (m_commitCommand.addResourceProcessor(resourceProcessor)) {
+                                	resourceProcessor.begin(session);
+                                }
                                 resourceProcessor.process(name, source.getCurrentEntryStream());
                             }
                             catch (ResourceProcessorException rpe) {

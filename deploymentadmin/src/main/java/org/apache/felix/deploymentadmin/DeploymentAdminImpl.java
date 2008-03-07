@@ -102,7 +102,7 @@ public class DeploymentAdminImpl implements DeploymentAdmin {
                 if (packages[i].isDirectory()) {
                     try {
                         File index = new File(packages[i], PACKAGEINDEX_FILE);
-                        File contents = new File(packages[i], PACKAGE_DIR);
+                        File contents = new File(packages[i], PACKAGECONTENTS_DIR);
                         FileDeploymentPackage dp = new FileDeploymentPackage(index, contents, m_context);
                         m_packages.put(dp.getName(), dp);
                     }

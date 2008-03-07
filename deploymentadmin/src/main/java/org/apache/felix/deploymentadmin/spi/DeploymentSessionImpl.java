@@ -82,7 +82,7 @@ public class DeploymentSessionImpl implements DeploymentSession {
     }
 
     private void rollback(List executedCommands) {
-        for (ListIterator i = executedCommands.listIterator(); i.hasPrevious();) {
+        for (ListIterator i = executedCommands.listIterator(executedCommands.size()); i.hasPrevious();) {
             Command command = (Command) i.previous();
             command.rollback();
         }

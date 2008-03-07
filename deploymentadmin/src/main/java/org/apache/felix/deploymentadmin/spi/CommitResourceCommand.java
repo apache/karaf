@@ -36,8 +36,8 @@ public class CommitResourceCommand extends Command implements Runnable {
     private final List m_processors = new ArrayList();
 
     public void execute(DeploymentSessionImpl session) throws DeploymentException {
-        for (ListIterator i = m_processors.listIterator(); i.hasPrevious();) {
-            ResourceProcessor processor = (ResourceProcessor) i.previous();
+        for (ListIterator i = m_processors.listIterator(m_processors.size()); i.hasPrevious();) {
+    		ResourceProcessor processor = (ResourceProcessor) i.previous();
             try {
                 processor.prepare();
             }
@@ -46,7 +46,7 @@ public class CommitResourceCommand extends Command implements Runnable {
                 throw new DeploymentException(DeploymentException.CODE_OTHER_ERROR, "Preparing commit for resource processor failed", e);
             }
         }
-        for (ListIterator i = m_processors.listIterator(); i.hasPrevious();) {
+        for (ListIterator i = m_processors.listIterator(m_processors.size()); i.hasPrevious();) {
             ResourceProcessor processor = (ResourceProcessor) i.previous();
             try {
                 processor.commit();
@@ -56,10 +56,11 @@ public class CommitResourceCommand extends Command implements Runnable {
                 // TODO Throw exception?
             }
         }
+        m_processors.clear();
     }
 
     public void rollback() {
-        for (ListIterator i = m_processors.listIterator(); i.hasPrevious();) {
+        for (ListIterator i = m_processors.listIterator(m_processors.size()); i.hasPrevious();) {
             ResourceProcessor processor = (ResourceProcessor) i.previous();
             try {
                 processor.rollback();
@@ -75,15 +76,17 @@ public class CommitResourceCommand extends Command implements Runnable {
      * Add a resource processor, all resource processors that are added will be committed when the command is executed.
      *
      * @param processor The resource processor to add.
+     * @return true if the resource processor was added, false if it was already added.
      */
-    public void addResourceProcessor(ResourceProcessor processor) {
+    public boolean addResourceProcessor(ResourceProcessor processor) {
         for (Iterator i = m_processors.iterator(); i.hasNext();) {
             ResourceProcessor proc = (ResourceProcessor) i.next();
             if (proc == processor) {
-                return;
+                return false;
             }
         }
         m_processors.add(processor);
+        return true;
     }
 
     public void run() {

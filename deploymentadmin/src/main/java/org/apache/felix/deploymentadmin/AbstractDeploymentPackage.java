@@ -177,9 +177,13 @@ public abstract class AbstractDeploymentPackage implements DeploymentPackage {
             if (processor != null) {
                 try {
                     ServiceReference[] services = m_bundleContext.getServiceReferences(ResourceProcessor.class.getName(), "(" + org.osgi.framework.Constants.SERVICE_PID + "=" + processor + ")");
-                    if (services.length > 0) {
+                    if (services != null && services.length > 0) {
                         return services[0];
                     }
+                    else {
+                    	return null;
+                    }
+                    
                 }
                 catch (InvalidSyntaxException e) {
                 	// TODO: log this

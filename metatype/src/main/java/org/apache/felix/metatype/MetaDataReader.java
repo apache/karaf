@@ -281,7 +281,7 @@ public class MetaDataReader
     {
         AD ad = this.createAD();
         ad.setID( this.getRequiredAttribute( "id" ) );
-        ad.setName( this.getRequiredAttribute( "name" ) );
+        ad.setName( this.getOptionalAttribute( "name" ) );
         ad.setDescription( this.getOptionalAttribute( "description" ) );
         ad.setType( this.getRequiredAttribute( "type" ) );
         ad.setCardinality( this.getOptionalAttribute( "cardinality", 0 ) );

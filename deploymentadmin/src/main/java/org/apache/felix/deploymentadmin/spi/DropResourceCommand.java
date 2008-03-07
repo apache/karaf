@@ -60,7 +60,9 @@ public class DropResourceCommand extends Command {
                     ResourceProcessor resourceProcessor = (ResourceProcessor) context.getService(ref);
                     if (resourceProcessor != null) {
                         try {
-                            m_commitCommand.addResourceProcessor(resourceProcessor);
+                            if (m_commitCommand.addResourceProcessor(resourceProcessor)) {
+                            	resourceProcessor.begin(session);
+                            }
                             resourceProcessor.dropped(path);
                         }
                         catch (ResourceProcessorException e) {

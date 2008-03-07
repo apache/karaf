@@ -55,13 +55,18 @@ public class UpdateCommand extends Command {
         }
 
         try {
-            for (AbstractInfo entry = source.getNextEntry(); (entry != null) && (!expectedBundles.isEmpty()); entry = source.getNextEntry()) {
-                String name = entry.getPath();
-                if (!expectedBundles.containsKey(name)) {
+            while (!expectedBundles.isEmpty()) {
+            	AbstractInfo entry = source.getNextEntry();
+            	if (entry == null) {
+                	throw new DeploymentException(DeploymentException.CODE_OTHER_ERROR, "Expected more bundles in the stream: " + expectedBundles.keySet());
+            	}
+            	
+            	String name = entry.getPath();
+                BundleInfoImpl bundleInfo = (BundleInfoImpl) expectedBundles.remove(name);
+                if (bundleInfo == null) {
                     throw new DeploymentException(DeploymentException.CODE_OTHER_ERROR, "Resource '" + name + "' is not described in the manifest.");
                 }
 
-                BundleInfoImpl bundleInfo = (BundleInfoImpl) expectedBundles.remove(name);
                 Bundle bundle = source.getBundle(bundleInfo.getSymbolicName());
                 try {
                     if (bundle == null) {

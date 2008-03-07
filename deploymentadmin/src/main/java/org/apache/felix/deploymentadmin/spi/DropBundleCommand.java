@@ -41,7 +41,7 @@ public class DropBundleCommand extends Command {
         BundleInfoImpl[] orderedTargetBundles = target.getOrderedBundleInfos();
         for (int i = orderedTargetBundles.length - 1; i >= 0; i--) {
             BundleInfoImpl bundleInfo = orderedTargetBundles[i];
-            if (source.getBundleInfoByPath(bundleInfo.getPath()) == null) {
+            if (!bundleInfo.isCustomizer() && source.getBundleInfoByPath(bundleInfo.getPath()) == null) {
                 // stale bundle, save a copy for rolling back and uninstall it
                 String symbolicName = bundleInfo.getSymbolicName();
                 try {

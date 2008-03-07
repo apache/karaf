@@ -50,7 +50,7 @@ public abstract class Command {
      * command was never executed, a best effort should be made though.
      */
     public void rollback() {
-        for (ListIterator i = m_rollback.listIterator(); i.hasPrevious();) {
+        for (ListIterator i = m_rollback.listIterator(m_commit.size()); i.hasPrevious();) {
             Runnable runnable = (Runnable) i.previous();
             runnable.run();
         }
@@ -61,7 +61,7 @@ public abstract class Command {
      * Commits all changes the command may have defined when it was executed by calling the <code>execute()</code> method.
      */
     protected void commit() {
-        for (ListIterator i = m_commit.listIterator(); i.hasPrevious();) {
+        for (ListIterator i = m_commit.listIterator(m_commit.size()); i.hasPrevious();) {
             Runnable runnable = (Runnable) i.previous();
             runnable.run();
         }

@@ -56,7 +56,7 @@ public class DeploymentPackageManifest {
 
         Attributes mainAttributes = m_manifest.getMainAttributes();
 
-        // TODO: verify symbolic name for valid format/chars
+        // TODO: verify symbolic name and entry-names for valid format/chars
         m_symbolicName = getNonNullHeader(mainAttributes.getValue(Constants.DEPLOYMENTPACKAGE_SYMBOLICMAME));
 
         String version = getNonNullHeader(mainAttributes.getValue(Constants.DEPLOYMENTPACKAGE_VERSION));
