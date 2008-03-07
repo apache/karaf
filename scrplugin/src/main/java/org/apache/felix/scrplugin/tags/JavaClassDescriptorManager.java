@@ -74,8 +74,9 @@ public class JavaClassDescriptorManager {
      * @throws MojoFailureException
      * @throws MojoExecutionException
      */
-    public JavaClassDescriptorManager(final Log         log,
-                                      final MavenProject project)
+    public JavaClassDescriptorManager(final Log          log,
+                                      final MavenProject project,
+                                      final String       excludes)
     throws MojoFailureException, MojoExecutionException {
         this.log = log;
         this.project = project;
@@ -91,7 +92,31 @@ public class JavaClassDescriptorManager {
             this.log.debug("Adding source tree " + tree);
             builder.addSourceTree(new File(tree));
         }
-        this.sources = builder.getSources();
+        // FELIX-509: check for excludes
+        if ( excludes != null ) {
+            final List sourcesList = new ArrayList(Arrays.asList(builder.getSources()));
+            final File projectDir = project.getBasedir();
+            final StringTokenizer st = new StringTokenizer(excludes, ",");
+            while ( st.hasMoreTokens() ) {
+                final String excludeEntry = st.nextToken();
+                this.log.debug("Processing configured exclude " + excludeEntry);
+                String exclude = projectDir.getAbsolutePath() + File.separatorChar + excludeEntry;
+                if ( File.separatorChar != '/' ) {
+                    exclude = exclude.replace('/', File.separatorChar);
+                }
+                final Iterator iter = sourcesList.iterator();
+                while ( iter.hasNext() ) {
+                    JavaSource current = (JavaSource)iter.next();
+                    if ( current.getFile().getAbsolutePath().startsWith(exclude)) {
+                        this.log.debug("Excluding source " + current.getFile());
+                        iter.remove();
+                    }
+                }
+            }
+            this.sources = (JavaSource[]) sourcesList.toArray(new JavaSource[sourcesList.size()]);
+        } else {
+            this.sources = builder.getSources();
+        }
 
         // and now scan artifacts
         final List components = new ArrayList();

@@ -79,6 +79,14 @@ public class SCRDescriptorMojo extends AbstractMojo {
     private boolean generateAccessors;
 
     /**
+     * The comma separated list of tokens to exclude when processing sources.
+     * All entries should be relative to the project directory
+     *
+     * @parameter alias="excludes"
+     */
+    private String sourceExcludes;
+
+    /**
      * @see org.apache.maven.plugin.AbstractMojo#execute()
      */
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -88,7 +96,8 @@ public class SCRDescriptorMojo extends AbstractMojo {
         boolean hasFailures = false;
 
         JavaClassDescriptorManager jManager = new JavaClassDescriptorManager(this.getLog(),
-                                                                             this.project);
+                                                                             this.project,
+                                                                             this.sourceExcludes);
         // iterate through all source classes and check for component tag
         final JavaClassDescription[] javaSources = jManager.getSourceDescriptions();
         Arrays.sort(javaSources, new JavaClassDescriptionInheritanceComparator());
