@@ -175,6 +175,11 @@ class DependencyManager implements ServiceListener, Reference
                 // only reactivate if the service has an influence on binding
                 if ( m_dependencyMetadata.isMultiple() || !isBound() )
                 {
+                    m_componentManager.getActivator().log(
+                        LogService.LOG_DEBUG,
+                        "Dependency Manager: Service " + m_dependencyMetadata.getName()
+                            + " registered, reactivate component", m_componentManager.getComponentMetadata(), null );
+
                     m_componentManager.reactivate();
                 }
             }

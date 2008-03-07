@@ -163,6 +163,9 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
             ComponentManager cm = ( ComponentManager ) m_configuredServices.remove( pid );
             if ( cm != null )
             {
+                getActivator().log( LogService.LOG_DEBUG, "Disposing component after configuration deletion",
+                    getComponentMetadata(), null );
+
                 disposeComponentManager( cm );
             }
         }

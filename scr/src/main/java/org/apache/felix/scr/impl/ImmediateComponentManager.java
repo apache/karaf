@@ -396,6 +396,8 @@ class ImmediateComponentManager extends AbstractComponentManager
         // configuration data
         if ( ( getState() & ( STATE_ACTIVE | STATE_FACTORY | STATE_REGISTERED ) ) != 0 )
         {
+            getActivator().log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure from configuration",
+                getComponentMetadata(), null );
             reactivate();
         }
     }

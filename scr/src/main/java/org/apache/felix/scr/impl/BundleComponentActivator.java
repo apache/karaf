@@ -384,6 +384,7 @@ class BundleComponentActivator
         {
             try
             {
+                log( LogService.LOG_DEBUG, "Disabling Component", cm[i].getComponentMetadata(), null );
                 cm[i].disable();
             }
             catch ( Throwable t )
