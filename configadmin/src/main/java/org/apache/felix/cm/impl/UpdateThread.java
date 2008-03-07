@@ -86,6 +86,7 @@ public class UpdateThread extends Thread
             // otherwise execute the task, log any issues
             try
             {
+                configurationManager.log( LogService.LOG_DEBUG, "Running task " + task, null );
                 task.run();
             }
             catch ( Throwable t )
@@ -109,6 +110,8 @@ public class UpdateThread extends Thread
     {
         synchronized ( updateTasks )
         {
+            configurationManager.log( LogService.LOG_DEBUG, "Scheduling task " + update, null );
+
             // append to the task queue
             updateTasks.add( update );
             

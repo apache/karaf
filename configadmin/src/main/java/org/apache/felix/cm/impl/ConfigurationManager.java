@@ -880,6 +880,11 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 log( LogService.LOG_ERROR, sr + ": Unexpected problem updating configuration", t );
             }
         }
+        
+        public String toString()
+        {
+            return "ManagedService Update: pid=" + pid;
+        }
     }
 
     private class ManagedServiceFactoryUpdate implements Runnable
@@ -957,6 +962,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     // Configuration has just been created but not yet updated
                     // we currently just ignore it and have the update mechanism
                     // provide the configuration to the ManagedServiceFactory
+                    log( LogService.LOG_DEBUG, "Ignoring new configuration pid=" + pid, null );
                     continue;
                 }
                 else if ( !factoryPid.equals( cfg.getFactoryPid() ) )
@@ -992,6 +998,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     // only, if there is non-null configuration data
                     if ( dictionary != null )
                     {
+                        log( LogService.LOG_DEBUG, sr + ": Updating configuration pid=" + pid, null );
                         service.updated( pid, dictionary );
                     }
                 }
@@ -1014,6 +1021,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     log( LogService.LOG_ERROR, sr + ": Unexpected problem updating configuration", t );
                 }
             }
+        }
+        
+        
+        public String toString()
+        {
+            return "ManagedServiceFactory Update: factoryPid=" + factoryPid;
         }
     }
 
@@ -1139,6 +1152,11 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
             fireConfigurationEvent( ConfigurationEvent.CM_UPDATED, config.getPid(), config.getFactoryPid() );
         }
+        
+        public String toString()
+        {
+            return "Update: pid=" + config.getPid();
+        }
     }
 
     private class DeleteConfiguration implements Runnable
@@ -1219,6 +1237,11 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
             fireConfigurationEvent( ConfigurationEvent.CM_DELETED, pid, factoryPid );
         }
+        
+        public String toString()
+        {
+            return "Delete: pid=" + pid;
+        }
     }
 
     private class FireConfigurationEvent implements Runnable
@@ -1261,6 +1284,11 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     log( LogService.LOG_ERROR, "Unexpected problem delivery configuration event to " + srs[i], t );
                 }
             }
+        }
+        
+        public String toString()
+        {
+            return "Fire ConfigurationEvent: pid=" + pid;
         }
     }
 
