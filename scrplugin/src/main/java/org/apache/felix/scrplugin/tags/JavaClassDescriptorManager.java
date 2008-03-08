@@ -36,7 +36,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.*;
 
 import com.thoughtworks.qdox.JavaDocBuilder;
 import com.thoughtworks.qdox.model.JavaSource;
@@ -76,7 +76,7 @@ public class JavaClassDescriptorManager {
      */
     public JavaClassDescriptorManager(final Log          log,
                                       final MavenProject project,
-                                      final String       excludes)
+                                      final String       excludeString)
     throws MojoFailureException, MojoExecutionException {
         this.log = log;
         this.project = project;
@@ -87,36 +87,49 @@ public class JavaClassDescriptorManager {
         JavaDocBuilder builder = new JavaDocBuilder();
         builder.getClassLibrary().addClassLoader(this.classloader);
         final Iterator i = project.getCompileSourceRoots().iterator();
-        while ( i.hasNext() ) {
-            final String tree = (String)i.next();
-            this.log.debug("Adding source tree " + tree);
-            builder.addSourceTree(new File(tree));
-        }
         // FELIX-509: check for excludes
-        if ( excludes != null ) {
-            final List sourcesList = new ArrayList(Arrays.asList(builder.getSources()));
-            final File projectDir = project.getBasedir();
-            final StringTokenizer st = new StringTokenizer(excludes, ",");
-            while ( st.hasMoreTokens() ) {
-                final String excludeEntry = st.nextToken();
-                this.log.debug("Processing configured exclude " + excludeEntry);
-                String exclude = projectDir.getAbsolutePath() + File.separatorChar + excludeEntry;
-                if ( File.separatorChar != '/' ) {
-                    exclude = exclude.replace('/', File.separatorChar);
+        if ( excludeString != null ) {
+            final String[] excludes = StringUtils.split(excludeString, ",");
+            final String[] includes = new String[] {"**/*.java"};
+
+            while ( i.hasNext() ) {
+                final String tree = (String)i.next();
+                this.log.debug("Scanning source tree " + tree);
+                final File directory = new File(tree);
+                final DirectoryScanner scanner = new DirectoryScanner();
+                scanner.setBasedir( directory );
+
+                if ( excludes != null && excludes.length > 0 ) {
+                    scanner.setExcludes( excludes );
                 }
-                final Iterator iter = sourcesList.iterator();
-                while ( iter.hasNext() ) {
-                    JavaSource current = (JavaSource)iter.next();
-                    if ( current.getFile().getAbsolutePath().startsWith(exclude)) {
-                        this.log.debug("Excluding source " + current.getFile());
-                        iter.remove();
+                scanner.addDefaultExcludes();
+                scanner.setIncludes( includes );
+
+                scanner.scan();
+
+                final String[] files = scanner.getIncludedFiles();
+                if ( files != null ) {
+                    for(int m=0; m<files.length; m++) {
+                        this.log.debug("Adding source file " + files[m]);
+                        try {
+                            builder.addSource(new File(directory, files[m]));
+                        } catch (FileNotFoundException e) {
+                            throw new MojoExecutionException("Unable to scan directory.", e);
+                        } catch (IOException e) {
+                            throw new MojoExecutionException("Unable to scan directory.", e);
+                        }
                     }
                 }
             }
-            this.sources = (JavaSource[]) sourcesList.toArray(new JavaSource[sourcesList.size()]);
         } else {
-            this.sources = builder.getSources();
+            while ( i.hasNext() ) {
+                final String tree = (String)i.next();
+                this.log.debug("Adding source tree " + tree);
+                final File directory = new File(tree);
+                builder.addSourceTree(directory);
+            }
         }
+        this.sources = builder.getSources();
 
         // and now scan artifacts
         final List components = new ArrayList();

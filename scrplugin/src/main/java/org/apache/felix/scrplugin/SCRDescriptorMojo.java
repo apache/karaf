@@ -80,7 +80,6 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
     /**
      * The comma separated list of tokens to exclude when processing sources.
-     * All entries should be relative to the project directory
      *
      * @parameter alias="excludes"
      */
