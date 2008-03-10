@@ -491,7 +491,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                             Factory factory = Factory.getFactory( pmList[i], config );
                             if ( factory != null )
                             {
-                                Factory cachedFactory = ( Factory ) factories.get( factory.getFactoryPid() );
+                                Factory cachedFactory = getCachedFactory( factory.getFactoryPid() );
                                 if ( cachedFactory != null )
                                 {
                                     factory = cachedFactory;
@@ -591,9 +591,27 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     }
 
 
+    Factory getCachedFactory( String factoryPid )
+    {
+        synchronized ( factories )
+        {
+            return ( Factory ) factories.get( factoryPid );
+        }
+    }
+
+
+    void cacheFactory( Factory factory )
+    {
+        synchronized ( factories )
+        {
+            factories.put( factory.getFactoryPid(), factory );
+        }
+    }
+
+
     Factory getFactory( String factoryPid ) throws IOException
     {
-        Factory factory = ( Factory ) factories.get( factoryPid );
+        Factory factory = getCachedFactory( factoryPid );
         if ( factory != null )
         {
             return factory;
@@ -605,7 +623,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             if ( Factory.exists( pmList[i], factoryPid ) )
             {
                 factory = Factory.load( pmList[i], factoryPid );
-                factories.put( factoryPid, factory );
+                cacheFactory( factory );
                 return factory;
             }
         }
@@ -618,7 +636,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     Factory createFactory( String factoryPid )
     {
         Factory factory = new Factory( getPersistenceManagers()[0], factoryPid );
-        factories.put( factoryPid, factory );
+        cacheFactory( factory );
         return factory;
     }
 
@@ -816,6 +834,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             if ( cfg != null && !cfg.isNew() )
             {
 
+                if ( cfg.isDelivered() )
+                {
+                    log( LogService.LOG_DEBUG, "Configuration " + pid + " has already been delivered", null );
+                    return;
+                }
+                
                 // 104.3 Ignore duplicate PIDs from other bundles and report
                 // them to the log
                 // 104.4.1 No update call back for PID already bound to another
@@ -861,6 +885,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             try
             {
                 service.updated( dictionary );
+
+                // if there is nothing to set, don't
+                if ( cfg != null )
+                {
+                    cfg.setDelivered( true );
+                }
             }
             catch ( ConfigurationException ce )
             {
@@ -974,6 +1004,13 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     continue;
                 }
 
+                // do not re-updated unmodified configuration
+                if ( cfg.isDelivered() )
+                {
+                    log( LogService.LOG_DEBUG, "Configuration " + pid + " has already been updated", null );
+                    continue;
+                }
+                
                 // check bundle location of configuration
                 if ( cfg.getBundleLocation() == null )
                 {
@@ -1000,6 +1037,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     {
                         log( LogService.LOG_DEBUG, sr + ": Updating configuration pid=" + pid, null );
                         service.updated( pid, dictionary );
+                        cfg.setDelivered( true );
                     }
                 }
                 catch ( ConfigurationException ce )
@@ -1044,6 +1082,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         public void run()
         {
+            if ( config.isDelivered() )
+            {
+                log( LogService.LOG_DEBUG, "Configuration " + config.getPid() + " has already been updated", null );
+                return;
+            }
+            
             try
             {
                 if ( config.getFactoryPid() == null )
@@ -1079,6 +1123,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
                             // update the ManagedService with the properties
                             srv.updated( dictionary );
+                            config.setDelivered( true );
                         }
                         finally
                         {
@@ -1123,6 +1168,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                             if ( dictionary != null )
                             {
                                 srv.updated( config.getPid(), dictionary );
+                                config.setDelivered( true );
                             }
                         }
                         finally
@@ -1162,12 +1208,14 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     private class DeleteConfiguration implements Runnable
     {
 
+        private ConfigurationImpl config;
         private String pid;
         private String factoryPid;
 
 
         DeleteConfiguration( ConfigurationImpl config )
         {
+            this.config = config;
             this.pid = config.getPid();
             this.factoryPid = config.getFactoryPid();
         }
@@ -1175,6 +1223,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         public void run()
         {
+            if ( config.isDelivered() )
+            {
+                log( LogService.LOG_DEBUG, "Deletion of configuration " + pid + " has already been delivered", null );
+                return;
+            }
+            
             try
             {
                 if ( factoryPid == null )
@@ -1187,6 +1241,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                         try
                         {
                             srv.updated( null );
+                            config.setDelivered( true );
                         }
                         finally
                         {
@@ -1209,6 +1264,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                         try
                         {
                             srv.deleted( pid );
+                            config.setDelivered( true );
                         }
                         finally
                         {
@@ -1314,6 +1370,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 if ( cfg != null && reference.equals( cfg.getServiceReference() ) )
                 {
                     cfg.setServiceReference( null );
+                    cfg.setDelivered( false );
                 }
             }
 
@@ -1372,5 +1429,30 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
             return serviceObject;
         }
+        
+        public void removedService( ServiceReference reference, Object service )
+        {
+            // check whether we can take back the configuration objects
+            String factoryPid = ( String ) reference.getProperty( Constants.SERVICE_PID );
+            if ( factoryPid != null )
+            {
+                Factory factory = cm.getCachedFactory( factoryPid );
+                if ( factory != null )
+                {
+                    for ( Iterator pi = factory.getPIDs().iterator(); pi.hasNext(); )
+                    {
+                        String pid = ( String ) pi.next();
+                        ConfigurationImpl cfg = cm.getCachedConfiguration( pid );
+                        if ( cfg != null )
+                        {
+                            cfg.setDelivered( false );
+                        }
+                    }
+                }
+            }
+
+            super.removedService( reference, service );
+        }
+
     }
 }

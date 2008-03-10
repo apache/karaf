@@ -106,6 +106,17 @@ class ConfigurationImpl
      */
     private CaseInsensitiveDictionary properties;
 
+    /**
+     * Flag indicating that this configuration object has been delivered to the
+     * owning ManagedService[Factory] after the last update or after being
+     * deleted. This flag is set by the {@link #delete()}, {@link #update()}
+     * and {@link #update(Dictionary)} method and must be checked when this
+     * instance is about to be delivered and reset after the configuration has
+     * been delivered.
+     * @see #setDelivered(boolean)
+     * @see #isDelivered()
+     */
+    private boolean delivered;
 
     ConfigurationImpl( ConfigurationManager configurationManager, PersistenceManager persistenceManager,
         Dictionary properties )
@@ -140,7 +151,30 @@ class ConfigurationImpl
     }
 
 
-    /* (non-Javadoc)
+    /**
+     * Sets whether the last change (update, delete) to this instance should be
+     * assumed as being delivered to the owning ManagedService[Factory] or not.
+     */
+    void setDelivered( boolean delivered )
+    {
+        this.delivered = delivered;
+    }
+
+
+    /**
+     * Returns whether the last change (update, delete) to this instance should
+     * be assumed as being delivered to the owning ManagedService[Factory] or
+     * not.
+     */
+    boolean isDelivered()
+    {
+        return delivered;
+    }
+
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.osgi.service.cm.Configuration#delete()
      */
     public void delete() throws IOException
@@ -150,6 +184,9 @@ class ConfigurationImpl
             persistenceManager.delete( pid );
             persistenceManager = null;
 
+            // ensure configuration is being delivered
+            setDelivered( false );
+            
             configurationManager.deleted( this );
         }
     }
@@ -244,6 +281,9 @@ class ConfigurationImpl
 
             configureFromPersistence( properties );
 
+            // ensure configuration is being delivered
+            setDelivered( false );
+            
             configurationManager.updated( this );
         }
     }
@@ -264,6 +304,9 @@ class ConfigurationImpl
 
             configure( newProperties );
 
+            // ensure configuration is being delivered
+            setDelivered( false );
+            
             configurationManager.updated( this );
         }
     }
