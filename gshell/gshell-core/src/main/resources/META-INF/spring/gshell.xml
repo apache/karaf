@@ -56,6 +56,7 @@
         <constructor-arg ref="terminal" />
         <constructor-arg ref="environment" />
         <constructor-arg ref="io" />
+        <property name="prompter" ref="prompter" />
     </bean>
 
     <bean id="shellInfo" class="org.apache.geronimo.gshell.DefaultShellInfo" init-method="initialize">
@@ -71,7 +72,6 @@
         <property name="executor" ref="commandExecutor" />
     </bean>
 
-    
     <bean id="environment" class="org.springframework.aop.framework.ProxyFactoryBean">
       <property name="targetSource">
           <bean class="org.apache.geronimo.gshell.spring.EnvironmentTargetSource" />
@@ -82,6 +82,11 @@
       <property name="targetSource">
           <bean class="org.apache.geronimo.gshell.spring.IOTargetSource" />
       </property>
+    </bean>
+
+    <bean id="prompter" class="org.apache.geronimo.gshell.spring.Prompter">
+        <constructor-arg ref="shellInfo" />
+        <constructor-arg ref="environment" />
     </bean>
     
 </beans>

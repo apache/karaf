@@ -89,7 +89,11 @@ public class OsgiLayoutManager implements LayoutManager
         return node;        
 	}
 
-	public Layout getLayout() {
+    public Node findNode(String path, String searchPath) throws NotFoundException {
+        return findNode(path);
+    }
+
+    public Layout getLayout() {
 		return getLayoutForShell(shell);
 	}
 	
@@ -117,9 +121,13 @@ public class OsgiLayoutManager implements LayoutManager
 				return OsgiLayoutManager.this.findNode(getLayoutForShell(shell), path);
 			}
 
-			public Node findNode(Node node, String path) throws NotFoundException {
-				return OsgiLayoutManager.this.findNode(node, path);
-			}
+            public Node findNode(Node node, String path) throws NotFoundException {
+                return OsgiLayoutManager.this.findNode(node, path);
+            }
+
+            public Node findNode(String path, String searchPath) throws NotFoundException {
+                return OsgiLayoutManager.this.findNode(path, searchPath);
+            }
 
 			public Layout getLayout() {
 				return getLayoutForShell(shell);
