@@ -1,0 +1,6 @@
+Changes from 1.0.0 to 1.0.1
+-------------------------------------
+
+* [2008-02-16] Updated import-package in order to match the bundle released by OSGi Alliance 
+  (FELIX-488)
+
