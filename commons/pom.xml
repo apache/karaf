@@ -35,6 +35,8 @@
         <module>antlr</module>
         <module>aopalliance</module>
         <module>avalon-framework</module>
+        <module>backport-util-concurrent</module>
+        <module>c3p0</module>
         <module>cglib</module>
         <module>commons-attributes-api</module>
         <module>commons-attributes-compiler</module>
