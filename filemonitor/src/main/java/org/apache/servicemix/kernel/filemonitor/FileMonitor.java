@@ -336,7 +336,7 @@ public class FileMonitor {
                 return file;
             }
         } catch (Exception e) {
-            LOGGER.debug("Error transforming artifact", e);
+            LOGGER.debug("Error transforming artifact " + file.getName(), e);
         } finally {
             if (jar != null) {
                 jar.close();
