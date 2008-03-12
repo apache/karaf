@@ -96,8 +96,14 @@ public class Util
             {
                 return ((Float) obj).toString();
             }
-
-            return "<unknown value type>";
+            else if (obj == null)
+            {
+                return "null";
+            }
+            else
+            {
+                return obj.toString();
+            }
         }
     }
 }
