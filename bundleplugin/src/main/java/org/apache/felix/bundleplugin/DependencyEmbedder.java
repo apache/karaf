@@ -28,6 +28,7 @@ import java.util.Properties;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.codehaus.plexus.util.StringUtils;
 
 import aQute.lib.header.OSGiHeader;
 import aQute.lib.osgi.Analyzer;
@@ -48,7 +49,6 @@ public final class DependencyEmbedder
     public static final String EMBED_TRANSITIVE = "Embed-Transitive";
 
     private static final String MAVEN_DEPENDENCIES = "{maven-dependencies}";
-    private static final String MAVEN_DEPENDENCIES_REGEX = "\\{maven-dependencies\\}";
 
     private String m_embedDirectory;
     private String m_embedStripGroup;
@@ -417,7 +417,7 @@ public final class DependencyEmbedder
                 }
                 else
                 {
-                    String mergedInstruction = instruction.replaceAll( MAVEN_DEPENDENCIES_REGEX, mavenDependencies );
+                    String mergedInstruction = StringUtils.replace( instruction, MAVEN_DEPENDENCIES, mavenDependencies );
                     properties.setProperty( directiveName, mergedInstruction );
                 }
             }

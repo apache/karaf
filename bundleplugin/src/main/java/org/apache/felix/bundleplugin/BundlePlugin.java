@@ -57,6 +57,7 @@ import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.StringInputStream;
+import org.codehaus.plexus.util.StringUtils;
 
 import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Builder;
@@ -173,7 +174,7 @@ public class BundlePlugin extends AbstractMojo
     private Maven2OsgiConverter m_maven2OsgiConverter;
 
     private static final String MAVEN_RESOURCES = "{maven-resources}";
-    private static final String MAVEN_RESOURCES_REGEX = "\\{maven-resources\\}";
+
     private static final String[] EMPTY_STRING_ARRAY =
         {};
     private static final String[] DEFAULT_INCLUDES =
@@ -416,7 +417,7 @@ public class BundlePlugin extends AbstractMojo
                 }
                 else
                 {
-                    String combinedResource = includeResource.replaceAll( MAVEN_RESOURCES_REGEX, mavenResourcePaths );
+                    String combinedResource = StringUtils.replace( includeResource, MAVEN_RESOURCES, mavenResourcePaths );
                     properties.put( Analyzer.INCLUDE_RESOURCE, combinedResource );
                 }
             }
