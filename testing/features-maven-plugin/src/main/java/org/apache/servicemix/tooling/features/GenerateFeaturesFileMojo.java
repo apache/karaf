@@ -33,8 +33,10 @@ import org.apache.maven.plugin.MojoFailureException;
  *
  * @version $Revision: 1.1 $
  * @goal generate-features-file
- * @phase generate-resources
+ * @phase compile
+ * @execute phase="compile"
  * @requiresDependencyResolution runtime
+ * @inheritByDefault true
  * @description Generates the features XML file
  */
 public class GenerateFeaturesFileMojo extends MojoSupport {
@@ -60,6 +62,9 @@ public class GenerateFeaturesFileMojo extends MojoSupport {
             PrintStream printer = new PrintStream(out);
             populateProperties(printer);
             getLog().info("Created: " + outputFile);
+
+            // now lets attach it
+            projectHelper.attachArtifact(project, "features.xml", null, outputFile);
         }
         catch (Exception e) {
             throw new MojoExecutionException(
