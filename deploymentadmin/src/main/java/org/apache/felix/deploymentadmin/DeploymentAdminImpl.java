@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -261,14 +262,14 @@ public class DeploymentAdminImpl implements DeploymentAdmin {
         }
     }
 
-    private void delete(File tempPackage) {
-    	if (tempPackage.isDirectory()) {
-            File[] childs = tempPackage.listFiles();
+    private void delete(File target) {
+    	if (target.isDirectory()) {
+            File[] childs = target.listFiles();
             for (int i = 0; i < childs.length; i++) {
                 delete(childs[i]);
             }
         }
-    	tempPackage.delete();
+    	target.delete();
 	}
 
 	public DeploymentPackage[] listDeploymentPackages() {
@@ -311,9 +312,9 @@ public class DeploymentAdminImpl implements DeploymentAdmin {
     }
 
     private void sendCompleteEvent(String name, boolean success) {
-        Dictionary props = new Properties();
+        Dictionary props = new Hashtable();
         props.put(Constants.EVENTPROPERTY_DEPLOYMENTPACKAGE_NAME, name);
-        props.put(Constants.EVENTPROPERTY_SUCCESFUL, String.valueOf(success));
+        props.put(Constants.EVENTPROPERTY_SUCCESSFUL, Boolean.valueOf(success));
         Event completeEvent = new Event(Constants.EVENTTOPIC_COMPLETE, props);
         m_eventAdmin.postEvent(completeEvent);
     }

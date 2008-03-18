@@ -92,7 +92,7 @@ class StreamDeploymentPackage extends AbstractDeploymentPackage {
     }
 
     public InputStream getCurrentEntryStream() {
-        return m_input;
+        return new NonCloseableStream(m_input);
     }
 
 }

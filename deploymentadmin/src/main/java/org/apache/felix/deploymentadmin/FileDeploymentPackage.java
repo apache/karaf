@@ -43,7 +43,7 @@ class FileDeploymentPackage extends AbstractDeploymentPackage {
      * Creates a new instance of a deployment package stored on disk.
      *
      * @param index Reference to the index file that contains the order in which all the resources of this deployment package were received
-     * @param packageDir Reference to the directory in which the index and package cotents are stored.
+     * @param packageDir Reference to the directory in which the index and package contents are stored.
      * @param bundleContext The bundle context
      * @throws DeploymentException Thrown if the disk contents do not resemble a valid deployment package.
      * @throws IOException Thrown if there was a problem reading the resources from disk.

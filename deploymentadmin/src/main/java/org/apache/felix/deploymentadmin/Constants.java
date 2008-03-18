@@ -35,7 +35,7 @@ public interface Constants extends org.osgi.framework.Constants {
     public static final String EVENTTOPIC_UNINSTALL = "org/osgi/service/deployment/UNINSTALL";
     public static final String EVENTTOPIC_COMPLETE = "org/osgi/service/deployment/COMPLETE";
     public static final String EVENTPROPERTY_DEPLOYMENTPACKAGE_NAME = "deploymentpackage.name";
-    public static final String EVENTPROPERTY_SUCCESFUL = "succesful";
+    public static final String EVENTPROPERTY_SUCCESSFUL = "successful";
 
     // miscellaneous constants
     public static final String BUNDLE_LOCATION_PREFIX = "osgi-dp:";

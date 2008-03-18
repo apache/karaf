@@ -309,9 +309,5 @@ public abstract class AbstractDeploymentPackage implements DeploymentPackage {
      */
     public abstract InputStream getCurrentEntryStream();
 
-	public Bundle getBundle(Object symbolicName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
 
