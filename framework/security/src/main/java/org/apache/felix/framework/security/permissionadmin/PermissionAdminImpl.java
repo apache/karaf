@@ -132,7 +132,7 @@ public final class PermissionAdminImpl implements PermissionAdmin
                 permissions = (PermissionInfo[]) m_store.get(location);
                 file = true;
             }
-            else if (cpai == null)
+            else if ((cpai == null) || (cpai.isEmpty()))
             {
                 if (m_default != null)
                 {
@@ -144,7 +144,7 @@ public final class PermissionAdminImpl implements PermissionAdmin
                 }
             }
         }
-        if ((cpai == null) || file)
+        if ((cpai == null) || cpai.isEmpty() || file)
         {
             if (check(permissions, permission, file ? bundle : null))
             {

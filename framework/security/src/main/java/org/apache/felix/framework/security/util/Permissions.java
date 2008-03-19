@@ -278,8 +278,7 @@ public final class Permissions
                             break;
                         }
                         name =
-                            (new File(context.getDataFile(""), name))
-                                .getAbsolutePath();
+                            m_action.getAbsolutePath(new File(context.getDataFile(""), name));
                     }
                     if (postfix.length() > 0)
                     {

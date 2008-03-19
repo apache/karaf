@@ -87,7 +87,7 @@ final class DomainGripper implements DomainCombiner, PrivilegedAction
      * Get the current bundle protection domains on the stack up to the last 
      * privileged call.
      */
-    public static List grep()
+    public static List grab()
     {
         // First try to get a cached version. We cache by thread.
         DomainGripper gripper = (DomainGripper) m_cache.get();

@@ -100,6 +100,7 @@ public final class SecurityProviderImpl implements SecurityProvider
             return true;
         }
 
+        // System.out.println(info.getBundleId() + " - " + permission);
         // TODO: using true, false, or null seems a bit awkward. Improve this.
         Boolean result = null;
         if (m_pai != null)
@@ -122,7 +123,7 @@ public final class SecurityProviderImpl implements SecurityProvider
                     info.getCurrentModule().getContentLoader(), 
                     bundle.getBundleId() + "-" + 
                     info.getArchive().getLastModified(),null, pd,
-                    permission, direct);
+                    permission, direct, m_pai);
             }
             catch (Exception e)
             {

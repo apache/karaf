@@ -163,7 +163,7 @@ public final class ConditionalPermissionAdminImpl implements
                         public boolean implies(Permission permission)
                         {
                             return hasPermission(null, null, null, finalSigners,
-                                this, permission, true);
+                                this, permission, true, null);
                         }
                     } };
                 }
@@ -305,7 +305,7 @@ public final class ConditionalPermissionAdminImpl implements
      */
     public boolean hasPermission(Bundle felixBundle, IContentLoader loader, String root, 
         String[] signers, ProtectionDomain pd, Permission permission,
-        boolean direct)
+        boolean direct, Object admin)
     {
         // System.out.println(felixBundle + "-" + permission);
         List domains = null;
@@ -331,7 +331,7 @@ public final class ConditionalPermissionAdminImpl implements
                 if (entry == null)
                 {
                     entry =
-                        new Object[] { new ArrayList(DomainGripper.grep()),
+                        new Object[] { new ArrayList(DomainGripper.grab()),
                             new ArrayList() };
                 }
                 else
@@ -359,7 +359,7 @@ public final class ConditionalPermissionAdminImpl implements
 
         List posts = new ArrayList();
 
-        boolean result = eval(posts, felixBundle, signers, permission);
+        boolean result = eval(posts, felixBundle, signers, permission, admin);
 
         if (signers != null)
         {
@@ -395,19 +395,27 @@ public final class ConditionalPermissionAdminImpl implements
         return result;
     }
 
+    public boolean isEmpty()
+    {
+        synchronized (m_condPermInfos)
+        {
+            return m_condPermInfos.isEmpty();
+        }
+    }
+
     // we need to find all conditions that apply and then check whether they
     // de note the permission in question unless the conditions are postponed
     // then we make sure their permissions imply the permission and add them
     // to the list of posts. Return true in case we pass or have posts
     // else falls and clear the posts first.
     private boolean eval(List posts, Bundle bundle, String[] signers,
-        Permission permission)
+        Permission permission, Object admin)
     {
         List condPermInfos = null;
 
         synchronized (m_condPermInfos)
         {
-            if (m_condPermInfos.isEmpty())
+            if (isEmpty() && (admin == null))
             {
                 return true;
             }
