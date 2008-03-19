@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.security.*;
 
 import org.apache.felix.bundlerepository.metadataparser.XmlCommonHandler;
 import org.apache.felix.bundlerepository.metadataparser.kxmlsax.KXml2SAXParser;
@@ -45,7 +46,21 @@ public class RepositoryImpl implements Repository
     public RepositoryImpl(URL url) throws Exception
     {
         m_url = url;
-        parseRepositoryFile(m_hopCount);
+        try
+        {
+            AccessController.doPrivileged(new PrivilegedExceptionAction()
+            {
+                public Object run() throws Exception
+                {
+                    parseRepositoryFile(m_hopCount);
+                    return null;
+                }
+            });
+        } 
+        catch (PrivilegedActionException ex) 
+        {
+            throw (Exception) ex.getCause();
+        }
     }
 
     public URL getURL()
