@@ -43,12 +43,10 @@
                     <groupId>org.apache.felix</groupId>
                     <artifactId>org.osgi.core</artifactId>
                 </exclusion>
-                <!--exclusion>
-                  For now framework doesn't have this dependency, but it
-                  will once the compendium bundle is released.
-                  <groupId>${pom.groupId}</groupId>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
                   <artifactId>org.osgi.compendium</artifactId>
-                </exclusion-->
+                </exclusion>
             </exclusions>
         </dependency>
         <!--
