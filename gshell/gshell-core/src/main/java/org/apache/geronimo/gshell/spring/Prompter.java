@@ -23,6 +23,9 @@ import org.apache.geronimo.gshell.layout.model.Node;
 import org.apache.geronimo.gshell.shell.Environment;
 import org.apache.geronimo.gshell.shell.ShellInfo;
 
+/**
+ * A prompter that displays the current sub-shell.
+ */
 public class Prompter implements Console.Prompter {
 
     private Renderer renderer = new Renderer();

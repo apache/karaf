@@ -35,7 +35,7 @@
         <constructor-arg value="servicemix-version.properties" />
     </bean>
 
-    <bean id="terminal" class="jline.Terminal" factory-method="getTerminal" />
+    <bean id="terminal" class="org.apache.geronimo.gshell.spring.TerminalFactoryBean" />
 
     <bean id="promptReader" class="org.apache.geronimo.gshell.console.PromptReader" init-method="initialize">
         <constructor-arg ref="terminal" />
@@ -78,15 +78,11 @@
       </property>
     </bean>
 
-    <bean id="io" class="org.springframework.aop.framework.ProxyFactoryBean">
-      <property name="targetSource">
-          <bean class="org.apache.geronimo.gshell.spring.IOTargetSource" />
-      </property>
-    </bean>
+    <bean id="io" class="org.apache.geronimo.gshell.spring.ProxyIO" />
 
     <bean id="prompter" class="org.apache.geronimo.gshell.spring.Prompter">
         <constructor-arg ref="shellInfo" />
         <constructor-arg ref="environment" />
     </bean>
-    
+
 </beans>

@@ -16,21 +16,12 @@
  */
 package org.apache.geronimo.gshell.remote.server.handler;
 
-import org.apache.geronimo.gshell.remote.message.ExecuteMessage;
-import org.apache.geronimo.gshell.whisper.transport.Session;
-import org.apache.geronimo.gshell.lookup.IOLookup;
-import org.apache.geronimo.gshell.lookup.EnvironmentLookup;
 import org.apache.geronimo.gshell.common.Notification;
-import org.apache.geronimo.gshell.spring.IOTargetSource;
+import org.apache.geronimo.gshell.remote.message.ExecuteMessage;
 import org.apache.geronimo.gshell.spring.EnvironmentTargetSource;
+import org.apache.geronimo.gshell.spring.ProxyIO;
+import org.apache.geronimo.gshell.whisper.transport.Session;
 
-/**
- * Created by IntelliJ IDEA.
- * User: gnodet
- * Date: Dec 5, 2007
- * Time: 5:14:29 PM
- * To change this template use File | Settings | File Templates.
- */
 public class SpringExecuteHandler extends ServerMessageHandlerSupport<ExecuteMessage>
 {
     public SpringExecuteHandler() {
@@ -39,7 +30,7 @@ public class SpringExecuteHandler extends ServerMessageHandlerSupport<ExecuteMes
 
     public void handle(final Session session, final ServerSessionContext context, final ExecuteMessage message) throws Exception {
         // Need to make sure that the execuing thread has the right I/O and environment in context
-        IOTargetSource.setIO(context.io);
+        ProxyIO.setIO(context.io);
         EnvironmentTargetSource.setEnvironment(context.env);
 
         ExecuteMessage.Result reply;

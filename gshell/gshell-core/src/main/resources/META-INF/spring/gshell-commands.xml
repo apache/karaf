@@ -52,4 +52,6 @@
 
     <bean id="create" class="org.apache.geronimo.gshell.spring.CreateCommand" />
 
+    <bean id="grep" class="org.apache.geronimo.gshell.commands.utils.GrepCommand" />
+
 </beans>

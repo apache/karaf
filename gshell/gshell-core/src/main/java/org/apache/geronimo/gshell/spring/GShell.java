@@ -16,13 +16,16 @@
  */
 package org.apache.geronimo.gshell.spring;
 
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.geronimo.gshell.DefaultEnvironment;
+import org.apache.geronimo.gshell.DefaultShell;
 import org.apache.geronimo.gshell.ExitNotification;
 import org.apache.geronimo.gshell.command.IO;
 import org.apache.geronimo.gshell.common.Arguments;
+import org.apache.geronimo.gshell.console.Console;
 import org.apache.geronimo.gshell.shell.Environment;
 import org.apache.geronimo.gshell.shell.InteractiveShell;
 import org.apache.servicemix.kernel.main.spi.MainService;
@@ -32,6 +35,7 @@ import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.osgi.context.BundleContextAware;
 
 /**
@@ -51,11 +55,18 @@ public class GShell implements Runnable, BundleContextAware {
     private MainService mainService;
     private BundleContext bundleContext;
     private CountDownLatch frameworkStarted;
+    private volatile boolean closed;
 
-    public GShell(InteractiveShell shell) {
+    public GShell(InteractiveShell shell) throws IOException {
         this.shell = shell;
-        this.io = new IO(System.in, System.out, System.err);
-        this.env = new DefaultEnvironment(io);
+        if (shell instanceof DefaultShell) {
+            DefaultShell sh = (DefaultShell) shell;
+            sh.setErrorHandler(wrapErrorHandler(sh.getErrorHandler()));
+        }
+        this.io = new IO(new NoCloseInputStream(System.in),
+                         new NoCloseOutputStream(System.out),
+                         new NoCloseOutputStream(System.err));
+        this.env = new DefaultEnvironment(new ProxyIO());
     }
 
     public void setStart(boolean start) {
@@ -78,7 +89,9 @@ public class GShell implements Runnable, BundleContextAware {
         }
     }
 
-    public void stop() throws InterruptedException {
+    public void stop() throws Exception {
+        closed = true;
+        io.close();
         if (thread != null) {
             frameworkStarted.countDown();
             thread.interrupt();
@@ -90,7 +103,7 @@ public class GShell implements Runnable, BundleContextAware {
 
     public void run() {
         try {
-            IOTargetSource.setIO(io);
+            ProxyIO.setIO(io);
             EnvironmentTargetSource.setEnvironment(env);
 
             String[] args = null;
@@ -113,26 +126,28 @@ public class GShell implements Runnable, BundleContextAware {
             } else {
                 // Otherwise go into a command shell.
                 shell.run();
+            }
+
+        } catch (Throwable e) {
+            if (e instanceof ExitNotification) {
+                if (closed) {
+                    // Ignore notifications coming because the spring app has been destroyed
+                    return;
+                }
                 if (mainService != null) {
                     mainService.setExitCode(0);
                 }
+                log.info("Exiting shell due received exit notification");
+            } else {
+                if (mainService != null) {
+                    mainService.setExitCode(-1);
+                }
+                log.info("Exiting shell due to caught exception " + e, e);
             }
-
-        } catch (ExitNotification e) {
-            if (mainService != null) {
-                mainService.setExitCode(0);
-            }
-            log.info("Exiting shell due received exit notification");
-        } catch (Exception e) {
-            if (mainService != null) {
-                mainService.setExitCode(-1);
-            }
-            log.info("Exiting shell due to caught exception " + e, e);
-        } finally {
             try {
                 getBundleContext().getBundle(0).stop();
-            } catch (BundleException e) {
-                log.info("Caught exception while shutting down framework: " + e, e);
+            } catch (BundleException e2) {
+                log.info("Caught exception while shutting down framework: " + e2, e2);
             }
         }
     }
@@ -166,5 +181,17 @@ public class GShell implements Runnable, BundleContextAware {
     public BundleContext getBundleContext() {
         return bundleContext;
 	}
+
+    protected Console.ErrorHandler wrapErrorHandler(final Console.ErrorHandler handler) {
+        return new Console.ErrorHandler() {
+            public Result handleError(Throwable error) {
+                if (closed) {
+                    throw new ExitNotification();
+                }
+                return handler.handleError(error);
+            }
+        };
+    }
+
 
 }

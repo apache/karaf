@@ -28,6 +28,10 @@ public class EnvironmentTargetSource implements TargetSource {
 
     private static ThreadLocal<Environment> tls = new ThreadLocal<Environment>();
 
+    public static Environment getEnvironment() {
+        return tls.get();
+    }
+
     public static void setEnvironment(Environment env) {
         tls.set(env);
     }

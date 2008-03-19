@@ -54,7 +54,7 @@ public class OsgiSubShell implements SubShell {
 			// that the DefaultEnvironment tries to overwrite.
 			Environment environment = new DefaultEnvironment(ctx.getIo(), new DefaultVariables());
 			ctx.setEnvironment(environment);
-	        IOTargetSource.setIO(ctx.getIo());
+	        ProxyIO.setIO(ctx.getIo());
 	        EnvironmentTargetSource.setEnvironment(environment);
 			InteractiveShell interactiveShell = createInteractiveShell(ctx);
 			if( args!=null && args.length>0 ) {

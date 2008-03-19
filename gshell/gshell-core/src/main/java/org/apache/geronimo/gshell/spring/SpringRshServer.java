@@ -20,13 +20,6 @@ import java.net.URI;
 
 import org.apache.geronimo.gshell.remote.server.RshServer;
 
-/**
- * Created by IntelliJ IDEA.
- * User: gnodet
- * Date: Dec 5, 2007
- * Time: 8:34:40 PM
- * To change this template use File | Settings | File Templates.
- */
 public class SpringRshServer {
 
     private RshServer server;

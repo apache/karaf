@@ -20,6 +20,7 @@ import org.apache.geronimo.gshell.CommandLineBuilder;
 import org.apache.geronimo.gshell.DefaultCommandExecutor;
 import org.apache.geronimo.gshell.registry.CommandRegistry;
 import org.apache.geronimo.gshell.command.CommandExecutor;
+import org.apache.geronimo.gshell.command.IO;
 import org.apache.geronimo.gshell.layout.LayoutManager;
 import org.apache.geronimo.gshell.shell.Environment;
 
@@ -53,7 +54,22 @@ public class SpringCommandExecutor implements CommandExecutor {
     }
     
     public void init() {
-        executor = new DefaultCommandExecutor(layoutManager, commandRegistry, commandLineBuilder, env);
+        executor = new DefaultCommandExecutor(layoutManager, commandRegistry, commandLineBuilder, env) {
+            @Override
+            protected Thread createThread(final Runnable run) {
+                final IO proxyio = ProxyIO.getIO();
+                final Environment env = EnvironmentTargetSource.getEnvironment();
+                return new Thread() {
+                    @Override
+                    public void run() {
+                        EnvironmentTargetSource.setEnvironment(env);
+                        ProxyIO.setIO(proxyio);
+                        run.run();
+                    }
+                };
+            }
+
+        };
     }
 
     public Object execute(String s) throws Exception {
@@ -65,6 +81,10 @@ public class SpringCommandExecutor implements CommandExecutor {
     }
 
     public Object execute(Object... objects) throws Exception {
+        return executor.execute(objects);
+    }
+
+    public Object execute(Object[][] objects) throws Exception {
         return executor.execute(objects);
     }
 }

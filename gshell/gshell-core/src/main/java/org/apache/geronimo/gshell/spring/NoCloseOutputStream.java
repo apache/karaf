@@ -16,33 +16,26 @@
  */
 package org.apache.geronimo.gshell.spring;
 
-import org.apache.geronimo.gshell.command.IO;
-import org.springframework.aop.TargetSource;
+import java.io.FilterOutputStream;
+import java.io.OutputStream;
+import java.io.IOException;
 
 /**
- * A TargetSource that provides an IO that has to be 
- * previously set in a thread local storage.
+ * Simple OutputStream, that do not close the underlying
+ * stream when close() is called.
  */
-public class IOTargetSource implements TargetSource {
+public class NoCloseOutputStream extends FilterOutputStream {
 
-    private static ThreadLocal<IO> tls = new ThreadLocal<IO>();
-
-    public static void setIO(IO io) {
-        tls.set(io);
+    public NoCloseOutputStream(OutputStream out) {
+        super(out);
     }
 
-    public Class getTargetClass() {
-        return IO.class;
-    }
-
-    public boolean isStatic() {
-        return false;
-    }
-
-    public Object getTarget() throws Exception {
-        return tls.get();
-    }
-
-    public void releaseTarget(Object o) throws Exception {
+    public void close() throws IOException {
+        try {
+            flush();
+        } catch (IOException ignored) {
+        } finally {
+            out = null;
+        }
     }
 }
