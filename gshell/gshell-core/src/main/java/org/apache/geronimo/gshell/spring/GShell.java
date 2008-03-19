@@ -26,6 +26,7 @@ import org.apache.geronimo.gshell.ExitNotification;
 import org.apache.geronimo.gshell.command.IO;
 import org.apache.geronimo.gshell.common.Arguments;
 import org.apache.geronimo.gshell.console.Console;
+import org.apache.geronimo.gshell.layout.NotFoundException;
 import org.apache.geronimo.gshell.shell.Environment;
 import org.apache.geronimo.gshell.shell.InteractiveShell;
 import org.apache.servicemix.kernel.main.spi.MainService;
@@ -35,7 +36,6 @@ import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.osgi.context.BundleContextAware;
 
 /**
@@ -187,8 +187,13 @@ public class GShell implements Runnable, BundleContextAware {
             public Result handleError(Throwable error) {
                 if (closed) {
                     throw new ExitNotification();
+                } else if (error instanceof NotFoundException) {
+                    // Spit out the terse reason why we've failed
+                    io.err.println("@|bold,red ERROR| Command not found: @|bold,red " + error.getMessage() + "|");
+                    return Result.CONTINUE;
+                } else {
+                    return handler.handleError(error);
                 }
-                return handler.handleError(error);
             }
         };
     }
