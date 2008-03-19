@@ -54,4 +54,12 @@
 
     <bean id="grep" class="org.apache.geronimo.gshell.commands.utils.GrepCommand" />
 
+    <bean id="cat" class="org.apache.geronimo.gshell.commands.utils.CatCommand" />
+
+    <bean id="exec" class="org.apache.geronimo.gshell.commands.utils.ExecuteCommand" />
+
+    <bean id="java" class="org.apache.geronimo.gshell.commands.utils.JavaCommand" />
+
+    <bean id="sleep" class="org.apache.geronimo.gshell.commands.utils.SleepCommand" />
+
 </beans>

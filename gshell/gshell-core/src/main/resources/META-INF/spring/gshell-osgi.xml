@@ -102,6 +102,34 @@
         </osgi:service-properties>
     </osgi:service>
 
+    <osgi:service ref="cat" interface="org.apache.geronimo.gshell.command.Command">
+        <osgi:service-properties>
+            <entry key="shell" value="utils"/>
+        	<entry key="alias" value="cat"/>
+        </osgi:service-properties>
+    </osgi:service>
+
+    <osgi:service ref="java" interface="org.apache.geronimo.gshell.command.Command">
+        <osgi:service-properties>
+            <entry key="shell" value="utils"/>
+        	<entry key="alias" value="java"/>
+        </osgi:service-properties>
+    </osgi:service>
+
+    <osgi:service ref="exec" interface="org.apache.geronimo.gshell.command.Command">
+        <osgi:service-properties>
+            <entry key="shell" value="utils"/>
+        	<entry key="alias" value="exec"/>
+        </osgi:service-properties>
+    </osgi:service>
+
+    <osgi:service ref="sleep" interface="org.apache.geronimo.gshell.command.Command">
+        <osgi:service-properties>
+            <entry key="shell" value="utils"/>
+        	<entry key="alias" value="sleep"/>
+        </osgi:service-properties>
+    </osgi:service>
+
     <osgix:property-placeholder persistent-id="org.apache.servicemix.shell">
         <osgix:default-properties>
             <prop key="startLocalConsole">true</prop>
