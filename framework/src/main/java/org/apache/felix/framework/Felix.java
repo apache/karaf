@@ -1656,6 +1656,10 @@ ex.printStackTrace();
     protected void _resolveBundle(FelixBundle bundle)
         throws BundleException
     {
+        if (bundle.getInfo().isExtension())
+        {
+            return;
+        }
         // If a security manager is installed, then check for permission
         // to import the necessary packages.
         if (System.getSecurityManager() != null)
