@@ -18,11 +18,16 @@
  */
 package org.apache.geronimo.gshell.commands.utils;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.geronimo.gshell.command.IO;
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.common.io.PumpStreamHandler;
+import org.apache.geronimo.gshell.common.io.StreamPumper;
+import org.apache.geronimo.gshell.spring.ProxyIO;
 import org.apache.geronimo.gshell.support.OsgiCommandSupport;
 
 /**
@@ -33,19 +38,36 @@ import org.apache.geronimo.gshell.support.OsgiCommandSupport;
 @CommandComponent(id="utils:exec", description="Execute system processes")
 public class ExecuteCommand extends OsgiCommandSupport
 {
-    private ProcessBuilder builder;
 
     @Argument(description="Argument", required=true)
     private List<String> args;
 
     protected Object doExecute() throws Exception {
-        assert builder != null;
+        ProcessBuilder builder = new ProcessBuilder(args);
 
         log.info("Executing: {}", builder.command());
 
         Process p = builder.start();
 
-        PumpStreamHandler handler = new PumpStreamHandler(io.inputStream, io.outputStream, io.errorStream);
+        PumpStreamHandler handler = new PumpStreamHandler(io.inputStream, io.outputStream, io.errorStream) {
+            protected Thread createPump(final InputStream in, final OutputStream out, final boolean closeWhenExhausted) {
+                assert in != null;
+                assert out != null;
+                final Thread result = new Thread(new StreamPumper(in, out, closeWhenExhausted)) {
+                    private IO io;
+                    public void start() {
+                        io = ProxyIO.getIO();
+                        super.start();
+                    }
+                    public void run() {
+                        ProxyIO.setIO(io);
+                        super.run();
+                    }
+                };
+                result.setDaemon(true);
+                return result;
+            }
+        };
         handler.attach(p);
         handler.start();
 
