@@ -205,13 +205,13 @@ public class BundlePlugin extends AbstractMojo
     public void execute() throws MojoExecutionException
     {
         Properties properties = new Properties();
+        String projectType = getProject().getArtifact().getType();
 
-        // ignore project types not supported, useful when the plugin is configured in the parent pom
-        if ( !supportedProjectTypes.contains( getProject().getArtifact().getType() ) )
+        // ignore unsupported project types, useful when bundleplugin is configured in parent pom
+        if ( !supportedProjectTypes.contains( projectType ) )
         {
-            getLog().debug(
-                "Ignoring project " + getProject().getArtifact() + " : type " + getProject().getArtifact().getType()
-                    + " is not supported by bundle plugin, supported types are " + supportedProjectTypes );
+            getLog().warn( "Ignoring project type " + projectType +
+                           " - supportedProjectTypes = " + supportedProjectTypes );
             return;
         }
 

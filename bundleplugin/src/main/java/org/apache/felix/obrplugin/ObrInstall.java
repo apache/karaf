@@ -95,9 +95,13 @@ public final class ObrInstall extends AbstractMojo
 
     public void execute()
     {
-        if ( !supportedProjectTypes.contains( project.getPackaging() ) )
+        String projectType = project.getPackaging();
+
+        // ignore unsupported project types, useful when bundleplugin is configured in parent pom
+        if ( !supportedProjectTypes.contains( projectType ) )
         {
-            getLog().info( "Ignoring packaging type " + project.getPackaging() );
+            getLog().warn( "Ignoring project type " + projectType +
+                           " - supportedProjectTypes = " + supportedProjectTypes );
             return;
         }
         else if ( "NONE".equalsIgnoreCase( obrRepository ) || "false".equalsIgnoreCase( obrRepository ) )

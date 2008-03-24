@@ -68,10 +68,13 @@ public final class ObrInstallFile extends AbstractFileMojo
     public void execute() throws MojoExecutionException
     {
         MavenProject project = getProject();
+        String projectType = project.getPackaging();
 
-        if ( !supportedProjectTypes.contains( project.getPackaging() ) )
+        // ignore unsupported project types, useful when bundleplugin is configured in parent pom
+        if ( !supportedProjectTypes.contains( projectType ) )
         {
-            getLog().info( "Ignoring packaging type " + project.getPackaging() );
+            getLog().warn( "Ignoring project type " + projectType +
+                           " - supportedProjectTypes = " + supportedProjectTypes );
             return;
         }
         else if ( "NONE".equalsIgnoreCase( obrRepository ) || "false".equalsIgnoreCase( obrRepository ) )

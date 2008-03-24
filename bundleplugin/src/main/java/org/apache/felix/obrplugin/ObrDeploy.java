@@ -143,9 +143,13 @@ public final class ObrDeploy extends AbstractMojo
 
     public void execute() throws MojoExecutionException
     {
-        if ( !supportedProjectTypes.contains( project.getPackaging() ) )
+        String projectType = project.getPackaging();
+
+        // ignore unsupported project types, useful when bundleplugin is configured in parent pom
+        if ( !supportedProjectTypes.contains( projectType ) )
         {
-            getLog().info( "Ignoring packaging type " + project.getPackaging() );
+            getLog().warn( "Ignoring project type " + projectType +
+                           " - supportedProjectTypes = " + supportedProjectTypes );
             return;
         }
         else if ( "NONE".equalsIgnoreCase( remoteOBR ) || "false".equalsIgnoreCase( remoteOBR ) )
