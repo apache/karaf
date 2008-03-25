@@ -135,6 +135,10 @@
           <artifactId>org.apache.servicemix.bundles.junit-4.4</artifactId>
           <version>${pom.version}</version>
       </dependency>
+      <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+      </dependency>
   </dependencies>
 
   <build>
