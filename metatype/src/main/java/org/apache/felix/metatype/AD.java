@@ -196,7 +196,7 @@ public class AD
         }
 
         String[] optionValues = getOptionValues();
-        if ( optionValues != null )
+        if ( optionValues != null && optionValues.length > 0)
         {
             for ( int i = 0; i < optionValues.length; i++ )
             {
