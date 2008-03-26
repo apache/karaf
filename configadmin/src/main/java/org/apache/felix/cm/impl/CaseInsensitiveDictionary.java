@@ -31,7 +31,7 @@ import java.util.Vector;
  * <code>java.util.Dictionary</code> which conforms to the requirements laid
  * out by the Configuration Admin Service Specification requiring the property
  * names to keep case but to ignore case when accessing the properties.
- *
+ * 
  * @author fmeschbe
  */
 class CaseInsensitiveDictionary extends Dictionary
@@ -43,8 +43,8 @@ class CaseInsensitiveDictionary extends Dictionary
     private Hashtable internalMap;
 
     /**
-     * Mapping of lower case keys to original case keys as last used to set
-     * a property value.
+     * Mapping of lower case keys to original case keys as last used to set a
+     * property value.
      */
     private Hashtable originalKeys;
 
@@ -64,10 +64,9 @@ class CaseInsensitiveDictionary extends Dictionary
         while ( keys.hasMoreElements() )
         {
             Object key = keys.nextElement();
-            if ( !( key instanceof String ) )
-            {
-                throw new IllegalArgumentException( "Key [" + key + "] must be a String" );
-            }
+
+            // check the correct syntax of the key
+            checkKey( key );
 
             // check uniqueness of key
             String lowerCase = ( ( String ) key ).toLowerCase();
@@ -94,7 +93,9 @@ class CaseInsensitiveDictionary extends Dictionary
     }
 
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Dictionary#elements()
      */
     public Enumeration elements()
@@ -103,7 +104,9 @@ class CaseInsensitiveDictionary extends Dictionary
     }
 
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Dictionary#get(java.lang.Object)
      */
     public Object get( Object key )
@@ -118,7 +121,9 @@ class CaseInsensitiveDictionary extends Dictionary
     }
 
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Dictionary#isEmpty()
      */
     public boolean isEmpty()
@@ -127,7 +132,9 @@ class CaseInsensitiveDictionary extends Dictionary
     }
 
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Dictionary#keys()
      */
     public Enumeration keys()
@@ -136,7 +143,9 @@ class CaseInsensitiveDictionary extends Dictionary
     }
 
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Dictionary#put(java.lang.Object, java.lang.Object)
      */
     public Object put( Object key, Object value )
@@ -146,11 +155,7 @@ class CaseInsensitiveDictionary extends Dictionary
             throw new NullPointerException( "key or value" );
         }
 
-        if ( !( key instanceof String ) )
-        {
-            throw new IllegalArgumentException( "Key [" + key + "] must be a String" );
-        }
-
+        checkKey( key );
         checkValue( value );
 
         String lowerCase = String.valueOf( key ).toLowerCase();
@@ -159,7 +164,9 @@ class CaseInsensitiveDictionary extends Dictionary
     }
 
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Dictionary#remove(java.lang.Object)
      */
     public Object remove( Object key )
@@ -175,7 +182,9 @@ class CaseInsensitiveDictionary extends Dictionary
     }
 
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Dictionary#size()
      */
     public int size()
@@ -184,7 +193,61 @@ class CaseInsensitiveDictionary extends Dictionary
     }
 
 
-    //---------- internal -----------------------------------------------------
+    // ---------- internal -----------------------------------------------------
+
+    /**
+     * Ensures the <code>key</code> complies with the <em>symbolic-name</em>
+     * production of the OSGi core specification (1.3.2):
+     * 
+     * <pre>
+     * symbolic-name :: = token('.'token)*
+     * digit    ::= [0..9]
+     * alpha    ::= [a..zA..Z]
+     * alphanum ::= alpha | digit
+     * token    ::= ( alphanum | ’_’ | ’-’ )+
+     * </pre>
+     * 
+     * If the key does not comply an <code>IllegalArgumentException</code> is
+     * thrown.
+     * 
+     * @param key
+     *            The configuration property key to check.
+     * @throws IllegalArgumentException
+     *             if the key does not comply with the symbolic-name production.
+     */
+    static void checkKey( Object keyObject )
+    {
+        if ( !( keyObject instanceof String ) )
+        {
+            throw new IllegalArgumentException( "Key [" + keyObject + "] must be a String" );
+        }
+
+        String key = ( String ) keyObject;
+        if ( key.startsWith( "." ) || key.endsWith( "." ) )
+        {
+            throw new IllegalArgumentException( "Key [" + key + "] must not start or end with a dot" );
+        }
+
+        int lastDot = Integer.MIN_VALUE;
+        for ( int i = 0; i < key.length(); i++ )
+        {
+            char c = key.charAt( i );
+            if ( c == '.' )
+            {
+                if ( lastDot == i - 1 )
+                {
+                    throw new IllegalArgumentException( "Key [" + key + "] must not have consecutive dots" );
+                }
+                lastDot = i;
+            }
+            else if ( ( c < '0' || c > '9' ) && ( c < 'a' || c > 'z' ) && ( c < 'A' || c > 'Z' ) && c != '_'
+                && c != '-' )
+            {
+                throw new IllegalArgumentException( "Key [" + key + "] contains illegal character" );
+            }
+        }
+    }
+
 
     static void checkValue( Object value )
     {
@@ -256,7 +319,7 @@ class CaseInsensitiveDictionary extends Dictionary
     }
 
 
-    //---------- Object Overwrites --------------------------------------------
+    // ---------- Object Overwrites --------------------------------------------
 
     public String toString()
     {
