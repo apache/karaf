@@ -286,7 +286,7 @@ public class MetaDataReader
         ad.setType( this.getRequiredAttribute( "type" ) );
         ad.setCardinality( this.getOptionalAttribute( "cardinality", 0 ) );
         ad.setMin( this.getOptionalAttribute( "min" ) );
-        ad.setMax( this.getOptionalAttribute( "min" ) );
+        ad.setMax( this.getOptionalAttribute( "max" ) );
         ad.setDefaultValue( this.getOptionalAttribute( "default" ) );
         ad.setRequired( this.getOptionalAttribute( "required", true ) );
 
