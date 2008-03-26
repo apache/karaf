@@ -85,7 +85,13 @@ public class OsgiResourceHolder extends ServletHolder
     {
         HttpServletRequest request = ( HttpServletRequest ) sRequest;
         HttpServletResponse response = ( HttpServletResponse ) sResponse;
+        
+        // get the relative path (assume empty path if there is no path info)
+        // (FELIX-503)
         String target = request.getPathInfo();
+        if (target == null) {
+            target = "";
+        }
 
         Activator.debug( "handle for name:" + getName() + "(path=" + target + ")" );
 
