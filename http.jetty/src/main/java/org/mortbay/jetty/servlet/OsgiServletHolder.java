@@ -31,9 +31,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.http.jetty.ServletContextGroup;
+import org.osgi.service.http.HttpContext;
 
 
 public class OsgiServletHolder extends ServletHolder
@@ -46,7 +48,10 @@ public class OsgiServletHolder extends ServletHolder
     public OsgiServletHolder( ServletHandler handler, Servlet servlet, String name,
         ServletContextGroup servletContextGroup, Dictionary params )
     {
-        super( handler, name, servlet.getClass().getName() );
+        super(servlet);
+        setServletHandler( handler );
+        setName( name );
+        
         m_servlet = servlet;
         m_servletContextGroup = servletContextGroup;
 
@@ -58,7 +63,7 @@ public class OsgiServletHolder extends ServletHolder
             while ( e.hasMoreElements() )
             {
                 Object key = e.nextElement();
-                super.put( key, params.get( key ) );
+                setInitParameter( String.valueOf( key ), String.valueOf( params.get( key ) ) );
             }
         }
     }
@@ -89,6 +94,9 @@ public class OsgiServletHolder extends ServletHolder
         if ( m_servletContextGroup.getOsgiHttpContext().handleSecurity( ( HttpServletRequest ) request,
             ( HttpServletResponse ) response ) )
         {
+            // wrap request to get auth type and remote user
+            request = new HttpServiceHttpServletRequest( ( HttpServletRequest ) request );
+
             // service request
             super.handle( request, response );
         }
@@ -112,7 +120,7 @@ public class OsgiServletHolder extends ServletHolder
 
     // override "Holder" method to prevent attempt to load
     // the servlet class.
-    public void start() throws Exception
+    public void doStart() throws Exception
     {
         _class = m_servlet.getClass();
 
@@ -130,7 +138,41 @@ public class OsgiServletHolder extends ServletHolder
 
     // override "Holder" method to prevent destroy, which is only called
     // when a bundle manually unregisters
-    public void stop()
+    public void doStop()
     {
+    }
+
+    // Simple wrapper class returning the authentication type and remote user
+    // from the respective request attribute as specificed by the HttpService
+    // spec (step 4 in Section 102.7, Authentication)
+    private static class HttpServiceHttpServletRequest extends HttpServletRequestWrapper {
+
+        HttpServiceHttpServletRequest(HttpServletRequest request) {
+            super(request);
+        }
+
+        public String getAuthType()
+        {
+            // use the auth type attribute; should not be null, but
+            // better check and use wrapped result if missing
+            Object name = getAttribute( HttpContext.AUTHENTICATION_TYPE );
+            if (name != null) {
+                return name.toString();
+            }
+
+            return super.getAuthType();
+        }
+
+        public String getRemoteUser()
+        {
+            // use the remote user attribute; should not be null, but
+            // better check and use wrapped result if missing
+            Object name = getAttribute( HttpContext.REMOTE_USER );
+            if (name != null) {
+                return name.toString();
+            }
+
+            return super.getRemoteUser();
+        }
     }
 }

@@ -18,6 +18,7 @@ package org.apache.felix.http.jetty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -31,6 +32,8 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
+import org.mortbay.jetty.servlet.Holder;
+import org.mortbay.jetty.servlet.OsgiResourceHolder;
 import org.mortbay.jetty.servlet.OsgiServletHandler;
 import org.mortbay.jetty.servlet.OsgiServletHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
@@ -116,22 +119,45 @@ public class ServletContextGroup implements ServletContext
     }
 
 
-    void removeServlet( String alias, boolean destroy )
+    void addResource( String alias, String path )
     {
         String wAlias = aliasWildcard( alias );
-        OsgiServletHolder holder = m_hdlr.removeOsgiServletHolder( wAlias );
-        Servlet servlet = holder.getOsgiServlet();
-        Activator.debug( " removing servlet instance: " + servlet );
-        m_servletSet.remove( servlet );
+        ServletHolder holder = new OsgiResourceHolder( m_hdlr, path, this );
+        m_hdlr.addOsgiServletHolder( wAlias, holder );
+        Activator.debug( " adding resources for " + wAlias + " at: " + path );
+    }
 
-        if ( destroy )
-        {
-            servlet.destroy();
-        }
 
-        if ( m_servletSet.isEmpty() )
+    void remove( String alias, boolean destroy )
+    {
+        String wAlias = aliasWildcard( alias );
+        ServletHolder holder = m_hdlr.removeOsgiServletHolder( wAlias );
+
+        if ( holder != null )
         {
-            destroy();
+            try
+            {
+                Servlet servlet = holder.getServlet();
+                if ( servlet != null )
+                {
+                    Activator.debug( " removing servlet instance: " + servlet );
+                    m_servletSet.remove( servlet );
+
+                    if ( destroy )
+                    {
+                        servlet.destroy();
+                    }
+
+                    if ( m_servletSet.isEmpty() )
+                    {
+                        destroy();
+                    }
+                }
+            }
+            catch ( ServletException se )
+            {
+                // may only be thrown if servlet in holder is null
+            }
         }
     }
 
@@ -161,6 +187,12 @@ public class ServletContextGroup implements ServletContext
     public int getMinorVersion()
     {
         return m_hdlr.getServletContext().getMinorVersion();
+    }
+
+
+    public String getContextPath()
+    {
+        return m_hdlr.getServletContext().getContextPath();
     }
 
 
@@ -209,15 +241,44 @@ public class ServletContextGroup implements ServletContext
     }
 
 
+    public Set getResourcePaths( String path )
+    {
+        // This is not implemented yet, might want to access the bundle entries
+        return null;
+    }
+
+
     public RequestDispatcher getRequestDispatcher( String uri )
     {
         return m_hdlr.getServletContext().getRequestDispatcher( uri );
     }
 
 
+    public RequestDispatcher getNamedDispatcher( String name )
+    {
+        if ( getMinorVersion() >= 2 )
+        {
+            return m_hdlr.getServletContext().getNamedDispatcher( name );
+        }
+
+        return null;
+    }
+
+
     public String getServerInfo()
     {
         return m_hdlr.getServletContext().getServerInfo();
+    }
+
+
+    public String getServletContextName()
+    {
+        if ( getMinorVersion() >= 3 )
+        {
+            return m_hdlr.getServletContext().getServletContextName();
+        }
+
+        return null;
     }
 
 
@@ -230,6 +291,28 @@ public class ServletContextGroup implements ServletContext
     public Enumeration getServletNames()
     {
         return m_hdlr.getServletContext().getServletNames();
+    }
+
+
+    public String getInitParameter( String name )
+    {
+        if ( getMinorVersion() >= 2 )
+        {
+            return m_hdlr.getServletContext().getInitParameter( name );
+        }
+
+        return null;
+    }
+
+
+    public Enumeration getInitParameterNames()
+    {
+        if ( getMinorVersion() >= 2 )
+        {
+            return m_hdlr.getServletContext().getInitParameterNames();
+        }
+
+        return Collections.enumeration( Collections.EMPTY_LIST );
     }
 
 

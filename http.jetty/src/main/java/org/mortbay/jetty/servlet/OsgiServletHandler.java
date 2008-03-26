@@ -21,13 +21,14 @@ package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
 import java.net.URL;
+
 import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.http.PathMap;
-import org.mortbay.util.Code;
+import org.apache.felix.http.jetty.Activator;
+import org.mortbay.util.LazyList;
+import org.osgi.service.log.LogService;
 
 
 public class OsgiServletHandler extends ServletHandler
@@ -35,20 +36,68 @@ public class OsgiServletHandler extends ServletHandler
     // allow external adding of osgi servlet holder
     public void addOsgiServletHolder( String pathSpec, ServletHolder holder )
     {
-        super.addServletHolder( pathSpec, holder );
+        super.addServletWithMapping( holder, pathSpec );
     }
 
 
-    public OsgiServletHolder removeOsgiServletHolder( String pathSpec )
+    public ServletHolder removeOsgiServletHolder( String pathSpec )
     {
-        OsgiServletHolder holder = ( OsgiServletHolder ) super.getServletHolder( pathSpec );
-        PathMap map = super.getServletMap();
-        map.remove( pathSpec );
+        ServletMapping oldMapping = null;
+        ServletMapping[] mappings = getServletMappings();
+        for ( int i = 0; i < mappings.length && oldMapping == null; i++ )
+        {
+            String[] pathSpecs = mappings[i].getPathSpecs();
+            for ( int j = 0; j < pathSpecs.length && oldMapping == null; j++ )
+            {
+                if ( pathSpec.equals( pathSpecs[j] ) )
+                {
+                    oldMapping = mappings[i];
+                }
+            }
+        }
 
-        // Remove holder from handler name map to allow re-registration.
-        super._nameMap.remove( holder.getName() );
+        if ( oldMapping == null )
+        {
+            return null;
+        }
 
-        return holder;
+        ServletHolder[] holders = getServlets();
+        if ( holders != null )
+        {
+            holders = ( ServletHolder[] ) holders.clone();
+        }
+
+        ServletHolder oldHolder = null;
+        for ( int i = 0; i < holders.length; i++ )
+        {
+            if ( oldMapping.getServletName().equals( holders[i].getName() ) )
+            {
+                oldHolder = holders[i];
+            }
+        }
+        if ( oldHolder == null )
+        {
+            return null;
+        }
+
+        try
+        {
+            setServlets( ( ServletHolder[] ) LazyList.removeFromArray( holders, oldHolder ) );
+            setServletMappings( ( ServletMapping[] ) LazyList.removeFromArray( mappings, oldMapping ) );
+
+            if (oldHolder.isStarted() && isStopped()) {
+                oldHolder.stop();
+            }
+
+            return ( ServletHolder ) oldHolder;
+        }
+        catch ( Exception e )
+        {
+            setServlets( holders );
+            if ( e instanceof RuntimeException )
+                throw ( RuntimeException ) e;
+            throw new RuntimeException( e );
+        }
     }
 
 
@@ -56,16 +105,16 @@ public class OsgiServletHandler extends ServletHandler
     // HttpContext
     public URL getResource( String uriInContext )
     {
-        Code.debug( "OSGI ServletHandler getResource:" + uriInContext );
+        Activator.debug( "OSGI ServletHandler getResource:" + uriInContext );
         return null;
     }
 
 
-    // override standard behaviour to check context first
-    protected void dispatch( String pathInContext, HttpServletRequest request, HttpServletResponse response,
-        ServletHolder servletHolder ) throws ServletException, UnavailableException, IOException
+    public void handle( String target, HttpServletRequest request, HttpServletResponse response, int type )
+        throws IOException, ServletException
     {
-        Code.debug( "dispatch path = " + pathInContext );
-        super.dispatch( pathInContext, request, response, servletHolder );
+        Activator.debug( "dispatch path = " + target );
+        super.handle( target, request, response, type );
     }
+
 }

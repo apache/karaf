@@ -30,12 +30,16 @@ import java.util.Set;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import org.mortbay.http.HttpServer;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.OsgiResourceHolder;
 import org.mortbay.jetty.servlet.OsgiServletHandler;
+import org.mortbay.jetty.servlet.SessionHandler;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.log.LogService;
 
 
 public class HttpServiceImpl implements HttpService
@@ -48,11 +52,11 @@ public class HttpServiceImpl implements HttpService
 
     /** Bundle which "got" this service instance from the service factory */
     private Bundle m_bundle = null;
-    private HttpServer m_server = null;
+    private Server m_server = null;
     private OsgiServletHandler m_serverServletHandler = null;
 
 
-    public HttpServiceImpl( Bundle bundle, HttpServer server, OsgiServletHandler serverServletHandler )
+    public HttpServiceImpl( Bundle bundle, Server server, OsgiServletHandler serverServletHandler )
     {
         m_bundle = bundle;
         m_server = server;
@@ -139,38 +143,25 @@ public class HttpServiceImpl implements HttpService
         addAlias( alias, null );
 
         //make sure alias is unique, and create
-        org.mortbay.http.HttpContext hdlrContext = null;
+        Context hdlrContext = null;
 
         if ( osgiHttpContext == null )
         {
             osgiHttpContext = createDefaultHttpContext();
         }
 
-        hdlrContext = m_server.addContext( alias );
+        // servlets using same context must get same handler to ensure
+        // they share a common ServletContext
+        Activator.debug( "looking for context: " + osgiHttpContext );
+        ServletContextGroup grp = ServletContextGroup.getServletContextGroup( m_serverServletHandler, osgiHttpContext );
 
-        // update alias namespace with reference to context object for later
+        grp.addResource( alias, name );
+
+        // update alias namespace with reference to group object for later
         // unregistering
-        updateAlias( alias, hdlrContext );
+        updateAlias( alias, grp );
 
-        // create resource handler, observing any access controls
-        AccessControlContext acc = null;
-        if ( System.getSecurityManager() != null )
-        {
-            acc = AccessController.getContext();
-        }
-        OsgiResourceHandler hdlr = new OsgiResourceHandler( osgiHttpContext, name, acc );
-
-        hdlrContext.addHandler( hdlr );
-        try
-        {
-            hdlrContext.start();
-        }
-        catch ( Exception e )
-        {
-            System.err.println( "Oscar exception adding resource: " + e );
-            e.printStackTrace( System.err );
-            // maybe we should remove alias here?
-        }
+        // maybe should remove alias/servlet entries if exceptions?
     }
 
 
@@ -196,34 +187,11 @@ public class HttpServiceImpl implements HttpService
 
     protected void doUnregister( String alias, boolean forced )
     {
-        Object obj = removeAlias( alias );
-
-        if ( obj instanceof org.mortbay.http.HttpContext )
+        Activator.debug( "** http unregister servlet :" + m_bundle + ", alias: " + alias + ",forced:" + forced );
+        ServletContextGroup grp = removeAlias( alias );
+        if ( grp != null )
         {
-            Activator.debug( "** http unregister resource :" + m_bundle + ", alias: " + alias );
-
-            org.mortbay.http.HttpContext ctxt = ( org.mortbay.http.HttpContext ) obj;
-            try
-            {
-                ctxt.stop();
-                m_server.removeContext( ctxt );
-            }
-            catch ( Exception e )
-            {
-                System.err.println( "Oscar exception removing resource: " + e );
-                e.printStackTrace();
-            }
-        }
-        else if ( obj instanceof ServletContextGroup )
-        {
-            Activator.debug( "** http unregister servlet :" + m_bundle + ", alias: " + alias + ",forced:" + forced );
-
-            ServletContextGroup grp = ( ServletContextGroup ) obj;
-            grp.removeServlet( alias, forced );
-        }
-        else
-        {
-            // oops - this shouldn't happen !
+            grp.remove( alias, forced );
         }
     }
 
@@ -243,14 +211,14 @@ public class HttpServiceImpl implements HttpService
     }
 
 
-    protected Object removeAlias( String alias )
+    protected ServletContextGroup removeAlias( String alias )
     {
         synchronized ( m_aliasNamespace )
         {
             // remove alias, don't worry if doesn't exist
             Object obj = m_aliasNamespace.remove( alias );
             m_localAliasSet.remove( alias );
-            return obj;
+            return ( ServletContextGroup ) obj;
         }
     }
 

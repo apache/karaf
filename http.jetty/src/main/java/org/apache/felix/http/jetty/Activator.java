@@ -19,16 +19,18 @@
 package org.apache.felix.http.jetty;
 
 
-import java.lang.reflect.Constructor;
-
-import org.mortbay.http.HashUserRealm;
-import org.mortbay.http.HttpServer;
-import org.mortbay.http.JsseListener;
-import org.mortbay.http.SocketListener;
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.security.HashUserRealm;
+import org.mortbay.jetty.security.SslSocketConnector;
+import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.OsgiServletHandler;
-import org.mortbay.jetty.servlet.ServletHttpContext;
-import org.mortbay.util.Code;
-import org.mortbay.util.InetAddrPort;
+import org.mortbay.jetty.servlet.SessionHandler;
+import org.mortbay.log.Log;
+import org.mortbay.log.Logger;
+import org.mortbay.log.StdErrLog;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -36,6 +38,8 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.log.LogService;
+import org.osgi.util.tracker.ServiceTracker;
 
 
 /**
@@ -63,11 +67,12 @@ import org.osgi.service.http.HttpService;
 public class Activator implements BundleActivator
 {
     protected static boolean debug = false;
+    private static ServiceTracker m_logTracker = null;
 
     private BundleContext m_bundleContext = null;
     private ServiceRegistration m_svcReg = null;
     private HttpServiceFactory m_httpServ = null;
-    private HttpServer m_server = null;
+    private Server m_server = null;
     private OsgiServletHandler m_hdlr = null;
 
     private int m_httpPort;
@@ -84,10 +89,9 @@ public class Activator implements BundleActivator
         String optDebug = m_bundleContext.getProperty( "org.apache.felix.http.jetty.debug" );
         if ( optDebug != null && optDebug.toLowerCase().equals( "true" ) )
         {
-            Code.setDebug( true );
             debug = true;
         }
-
+        
         // get default HTTP and HTTPS ports as per the OSGi spec
         try
         {
@@ -110,6 +114,12 @@ public class Activator implements BundleActivator
             m_httpsPort = 443;
         }
 
+        m_logTracker = new ServiceTracker( bundleContext, LogService.class.getName(), null );
+        m_logTracker.open();
+
+        // set the Jetty logger to be LogService based
+        initializeJettyLogger();
+
         try
         {
             initializeJetty();
@@ -118,7 +128,7 @@ public class Activator implements BundleActivator
         catch ( Exception ex )
         {
             //TODO: maybe throw a bundle exception in here?
-            System.out.println( "Http2: " + ex );
+            log( LogService.LOG_INFO, "Http2", ex );
             return;
         }
 
@@ -144,9 +154,29 @@ public class Activator implements BundleActivator
         {
             //TODO: log some form of error
         }
+
+        // replace non-LogService logger for jetty
+        Log.setLog( new StdErrLog() );
+        
+        m_logTracker.close();
     }
 
 
+    protected void initializeJettyLogger() {
+        String oldProperty = System.getProperty( "org.mortbay.log.class" );
+        System.setProperty( "org.mortbay.log.class", LogServiceLog.class.getName() );
+        
+        if (!(Log.getLog() instanceof LogServiceLog)) {
+            Log.setLog( new LogServiceLog() );
+        }
+        
+        Log.getLog().setDebugEnabled( debug );
+        
+        if (oldProperty != null) {
+            System.setProperty( "org.mortbay.log.class", oldProperty );
+        }
+    }
+    
     protected void initializeJetty() throws Exception
     {
         //TODO: Maybe create a separate "JettyServer" object here?
@@ -154,13 +184,14 @@ public class Activator implements BundleActivator
         HashUserRealm realm = new HashUserRealm( "OSGi HTTP Service Realm" );
 
         // Create server
-        m_server = new HttpServer();
-        m_server.addRealm( realm );
+        m_server = new Server();
+        m_server.addUserRealm( realm );
 
         // Add a regular HTTP listener
-        SocketListener listener = null;
-        listener = ( SocketListener ) m_server.addListener( new InetAddrPort( m_httpPort ) );
-        listener.setMaxIdleTimeMs( 60000 );
+        Connector connector = new SelectChannelConnector();
+        connector.setPort( m_httpPort );
+        connector.setMaxIdleTime( 60000 );
+        m_server.addConnector( connector );
 
         // See if we need to add an HTTPS listener
         String enableHTTPS = m_bundleContext.getProperty( "org.ungoverned.osgi.bundle.https.enable" );
@@ -169,20 +200,13 @@ public class Activator implements BundleActivator
             initializeHTTPS();
         }
 
-        m_server.start();
-
         // setup the Jetty web application context shared by all Http services
-        ServletHttpContext hdlrContext = new ServletHttpContext();
-        hdlrContext.setContextPath( "/" );
-        //TODO: was in original code, but seems we shouldn't serve
-        //      resources in servlet context
-        //hdlrContext.setServingResources(true);
-        hdlrContext.setClassLoader( getClass().getClassLoader() );
-        debug( " adding handler context : " + hdlrContext );
-        m_server.addContext( hdlrContext );
-
         m_hdlr = new OsgiServletHandler();
-        hdlrContext.addHandler( m_hdlr );
+
+        Context hdlrContext = new Context( m_server, new SessionHandler(), null, m_hdlr, null );
+        hdlrContext.setClassLoader( getClass().getClassLoader() );
+        hdlrContext.setContextPath( "/" );
+        debug( " adding handler context : " + hdlrContext );
 
         try
         {
@@ -191,9 +215,10 @@ public class Activator implements BundleActivator
         catch ( Exception e )
         {
             // make sure we unwind the adding process
-            System.err.println( "Exception Starting Jetty Handler Context: " + e );
-            e.printStackTrace( System.err );
+            log( LogService.LOG_ERROR, "Exception Starting Jetty Handler Context", e );
         }
+
+        m_server.start();
     }
 
 
@@ -208,45 +233,60 @@ public class Activator implements BundleActivator
             sslProvider = "org.mortbay.http.SunJsseListener";
         }
 
+
+        SslSocketConnector s_listener = new SslSocketConnector();
+        s_listener.setPort( m_httpsPort );
+        s_listener.setMaxIdleTime( 60000 );
+
         // Set default jetty properties for supplied values. For any not set,
         // Jetty will fallback to checking system properties.
         String keystore = m_bundleContext.getProperty( "org.ungoverned.osgi.bundle.https.keystore" );
         if ( keystore != null )
         {
-            System.setProperty( JsseListener.KEYSTORE_PROPERTY, keystore );
+            s_listener.setKeystore( keystore );
         }
 
         String passwd = m_bundleContext.getProperty( "org.ungoverned.osgi.bundle.https.password" );
         if ( passwd != null )
         {
-            System.setProperty( JsseListener.PASSWORD_PROPERTY, passwd );
+            System.setProperty( SslSocketConnector.PASSWORD_PROPERTY, passwd );
+            s_listener.setPassword( passwd );
         }
 
         String keyPasswd = m_bundleContext.getProperty( "org.ungoverned.osgi.bundle.https.key.password" );
         if ( keyPasswd != null )
         {
-            System.setProperty( JsseListener.KEYPASSWORD_PROPERTY, keyPasswd );
+            System.setProperty( SslSocketConnector.KEYPASSWORD_PROPERTY, keyPasswd );
+            s_listener.setKeyPassword( keyPasswd );
         }
 
-        //SunJsseListener s_listener = new SunJsseListener(new InetAddrPort(m_httpsPort));
-        Object args[] =
-            { new InetAddrPort( m_httpsPort ) };
-        Class argTypes[] =
-            { args[0].getClass() };
-        Class clazz = Class.forName( sslProvider );
-        Constructor cstruct = clazz.getDeclaredConstructor( argTypes );
-        JsseListener s_listener = ( JsseListener ) cstruct.newInstance( args );
-
-        m_server.addListener( s_listener );
-        s_listener.setMaxIdleTimeMs( 60000 );
+        m_server.addConnector( s_listener );
     }
 
 
-    protected static void debug( String txt )
+    public static void debug( String txt )
     {
         if ( debug )
         {
-            System.err.println( ">>Oscar HTTP: " + txt );
+            log( LogService.LOG_DEBUG, ">>Felix HTTP: " + txt, null );
+        }
+    }
+
+
+    public static void log( int level, String message, Throwable throwable )
+    {
+        LogService log = ( LogService ) m_logTracker.getService();
+        if ( log != null )
+        {
+            log.log( level, message, throwable );
+        }
+        else
+        {
+            System.out.println( message );
+            if ( throwable != null )
+            {
+                throwable.printStackTrace( System.out );
+            }
         }
     }
 

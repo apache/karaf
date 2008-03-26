@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.http.jetty;
+package org.mortbay.jetty.servlet;
 
 
 import java.io.IOException;
@@ -28,78 +28,89 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
-import org.mortbay.http.HttpException;
-import org.mortbay.http.HttpRequest;
-import org.mortbay.http.HttpResponse;
-import org.mortbay.http.handler.AbstractHttpHandler;
-import org.mortbay.jetty.servlet.DummyServletHttpRequest;
-import org.mortbay.jetty.servlet.DummyServletHttpResponse;
-import org.mortbay.jetty.servlet.OsgiServletHandler;
-import org.mortbay.jetty.servlet.ServletHttpRequest;
-import org.mortbay.jetty.servlet.ServletHttpResponse;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.felix.http.jetty.Activator;
+import org.apache.felix.http.jetty.ServletContextGroup;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.HttpMethods;
+import org.mortbay.jetty.Request;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.log.LogService;
 
 
-public class OsgiResourceHandler extends AbstractHttpHandler
+public class OsgiResourceHolder extends ServletHolder
 {
-    protected HttpContext m_osgiHttpContext;
-    protected String m_name;
-    protected OsgiServletHandler m_dummyHandler;
-    protected AccessControlContext m_acc;
+    private ServletContextGroup m_servletContextGroup;
+    private HttpContext m_osgiHttpContext;
+    private AccessControlContext m_acc;
 
 
-    public OsgiResourceHandler( HttpContext osgiHttpContext, String name, AccessControlContext acc )
+    public OsgiResourceHolder( ServletHandler handler, String name, ServletContextGroup servletContextGroup )
     {
-        m_osgiHttpContext = osgiHttpContext;
-        m_name = name;
-        // needed for OSGi security handling
-        m_dummyHandler = new OsgiServletHandler();
-        m_acc = acc;
-    }
+        super();
 
+        setServletHandler( handler );
+        setName( name );
 
-    public void initialize( org.mortbay.http.HttpContext context )
-    {
-        super.initialize( context );
-        m_dummyHandler.initialize( context );
-    }
+        m_servletContextGroup = servletContextGroup;
+        m_osgiHttpContext = servletContextGroup.getOsgiHttpContext();
 
-
-    public void handle( String pathInContext, String pathParams, HttpRequest request, HttpResponse response )
-        throws HttpException, IOException
-    {
-        Activator.debug( "handle for name:" + m_name + "(path=" + pathInContext + ")" );
-
-        ServletHttpRequest servletRequest = new DummyServletHttpRequest( m_dummyHandler, pathInContext, request );
-        ServletHttpResponse servletResponse = new DummyServletHttpResponse( servletRequest, response );
-
-        if ( !m_osgiHttpContext.handleSecurity( servletRequest, servletResponse ) )
+        if ( System.getSecurityManager() != null )
         {
-            // spec doesn't state specific processing here apart from
-            // "send the response back to the client". We take this to mean
-            // any response generated in the context, and so all we do here
-            // is set handled to "true" to ensure any output is sent back
-            request.setHandled( true );
+            m_acc = AccessController.getContext();
+        }
+    }
+
+
+    public synchronized Servlet getServlet()
+    {
+        return null;
+    }
+
+
+    // override "Holder" method to prevent instantiation
+    public synchronized Object newInstance()
+    {
+        return null;
+    }
+
+
+    public void handle( ServletRequest sRequest, ServletResponse sResponse ) throws ServletException, IOException
+    {
+        HttpServletRequest request = ( HttpServletRequest ) sRequest;
+        HttpServletResponse response = ( HttpServletResponse ) sResponse;
+        String target = request.getPathInfo();
+
+        Activator.debug( "handle for name:" + getName() + "(path=" + target + ")" );
+
+        if ( !m_osgiHttpContext.handleSecurity( request, response ) )
+        {
             return;
         }
 
         // Create resource based name and see if we can resolve it
-        String resName = m_name + pathInContext;
+        String resName = getName() + target;
         Activator.debug( "** looking for: " + resName );
         URL url = m_osgiHttpContext.getResource( resName );
 
         if ( url == null )
         {
+            Request base_request = sRequest instanceof Request ? ( Request ) sRequest : HttpConnection
+                .getCurrentConnection().getRequest();
+            base_request.setHandled( false );
             return;
         }
 
         Activator.debug( "serving up:" + resName );
 
-        // It doesn't state so in the OSGi spec, but can't see how anything
-        // other than GET and variants would be supported
         String method = request.getMethod();
-        if ( method.equals( HttpRequest.__GET ) || method.equals( HttpRequest.__POST )
-            || method.equals( HttpRequest.__HEAD ) )
+        if ( method.equals( HttpMethods.GET ) || method.equals( HttpMethods.POST ) || method.equals( HttpMethods.HEAD ) )
         {
             handleGet( request, response, url, resName );
         }
@@ -107,7 +118,7 @@ public class OsgiResourceHandler extends AbstractHttpHandler
         {
             try
             {
-                response.sendError( HttpResponse.__501_Not_Implemented );
+                response.sendError( HttpServletResponse.SC_NOT_IMPLEMENTED );
             }
             catch ( Exception e )
             {/*TODO: include error logging*/
@@ -116,31 +127,30 @@ public class OsgiResourceHandler extends AbstractHttpHandler
     }
 
 
-    public void handleGet( HttpRequest request, final HttpResponse response, final URL url, String resName )
+    public void handleGet( HttpServletRequest request, final HttpServletResponse response, final URL url, String resName )
         throws IOException
     {
         String encoding = m_osgiHttpContext.getMimeType( resName );
 
         if ( encoding == null )
         {
-            encoding = getHttpContext().getMimeByExtension( resName );
+            encoding = m_servletContextGroup.getMimeType( resName );
         }
 
         if ( encoding == null )
         {
-            encoding = getHttpContext().getMimeByExtension( ".default" );
+            encoding = m_servletContextGroup.getMimeType( ".default" );
         }
 
         //TODO: not sure why this is needed, but sometimes get "IllegalState"
         // errors if not included
-        response.setAcceptTrailer( true );
         response.setContentType( encoding );
 
         //TODO: check other http fields e.g. ranges, timestamps etc.
 
         // make sure we access the resource inside the bundle's access control
         // context if supplied
-        if ( System.getSecurityManager() != null )
+        if ( m_acc != null )
         {
             try
             {
@@ -164,12 +174,11 @@ public class OsgiResourceHandler extends AbstractHttpHandler
             copyResourceBytes( url, response );
         }
 
-        request.setHandled( true );
         //TODO: set other http fields e.g. __LastModified, __ContentLength
     }
 
 
-    private void copyResourceBytes( URL url, HttpResponse response ) throws IOException
+    private void copyResourceBytes( URL url, HttpServletResponse response ) throws IOException
     {
         OutputStream os = null;
         InputStream is = null;
@@ -195,7 +204,7 @@ public class OsgiResourceHandler extends AbstractHttpHandler
             }
             catch ( IllegalStateException ex )
             {
-                System.err.println( "OsgiResourceHandler: " + ex );
+                Activator.log( LogService.LOG_ERROR, "OsgiResourceHandler", ex );
             }
         }
         finally
@@ -210,4 +219,19 @@ public class OsgiResourceHandler extends AbstractHttpHandler
             }
         }
     }
+
+
+    // override "Holder" method to prevent attempt to load
+    // the servlet class.
+    public void doStart() throws Exception
+    {
+    }
+
+
+    // override "Holder" method to prevent destroy, which is only called
+    // when a bundle manually unregisters
+    public void doStop()
+    {
+    }
+
 }
