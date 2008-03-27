@@ -43,16 +43,6 @@
           <groupId>org.apache.felix</groupId>
           <artifactId>org.osgi.compendium</artifactId>
           <version>${felix.compendium.version}</version>
-          <exclusions>
-	         <exclusion>
-	              <groupId>org.apache.felix</groupId>
-    	          <artifactId>javax.servlet</artifactId>
-             </exclusion>
-	         <exclusion>
-	              <groupId>org.apache.felix</groupId>
-    	          <artifactId>org.osgi.foundation</artifactId>
-             </exclusion>
-	      </exclusions>
       </dependency>
       <dependency>
           <groupId>org.apache.felix</groupId>
