@@ -69,89 +69,15 @@ public class SpringDeploymentListener implements DeploymentListener {
     }
 
     public File handle(File artifact, File tmpDir) {
-        InputStream is = null;
-        OutputStream os = null;
         try {
-            Document doc = parse(artifact);
-            String name = artifact.getName();
-            String artifactId = name.substring(0, name.length() - 4);
-            String version = "0.0.0";
-            File destFile = new File(tmpDir, name + ".jar");
-            Manifest m = new Manifest();
-            m.getMainAttributes().putValue("Manifest-Version", "2");
-            m.getMainAttributes().putValue("Bundle-SymbolicName", artifactId);
-            m.getMainAttributes().putValue("Bundle-Version", version);
-            m.getMainAttributes().putValue("Spring-Context", "*;publish-context:=true;create-asynchronously:=true");
-            String importPkgs = getImportPackages(doc);
-            if (importPkgs != null && importPkgs.length() > 0) {
-                m.getMainAttributes().putValue("Import-Package", importPkgs);
-            }
-
-            os = new FileOutputStream(destFile);
-            JarOutputStream out = new JarOutputStream(os);
-            ZipEntry e = new ZipEntry(JarFile.MANIFEST_NAME);
-            out.putNextEntry(e);
-            m.write(out);
-            out.closeEntry();
-            e = new ZipEntry("META-INF/");
-            out.putNextEntry(e);
-            e = new ZipEntry("META-INF/spring/");
-            out.putNextEntry(e);
-            out.closeEntry();
-            e = new ZipEntry("META-INF/spring/" + artifact.getName());
-            out.putNextEntry(e);
-            is = new FileInputStream(artifact);
-            copyInputStream(is, out);
-            out.closeEntry();
-            out.close();
+            File destFile = new File(tmpDir, artifact.getName() + ".jar");
+            FileOutputStream os = new FileOutputStream(destFile);
+            SpringTransformer.transform(artifact.toURL(), os);
+            os.close();
             return destFile;
         } catch (Exception e) {
             LOGGER.info("Unable to build spring application bundle", e);
             return null;
-        } finally {
-            try {
-                is.close();
-            } catch (Exception e) { }
-            try {
-                os.close();
-            } catch (Exception e) { }
-        }
-    }
-
-    protected String getImportPackages(Document doc) {
-        Set<String> packages = getBeanPackages(doc);
-        StringBuilder sb = new StringBuilder();
-        for (String pkg : packages) {
-            if (sb.length() > 0) {
-                sb.append(",");
-            }
-            sb.append(pkg);
-        }
-        return sb.toString();
-    }
-
-    protected Set<String> getBeanPackages(Document doc) {
-        Set<String> packages = new HashSet<String>();
-        extractBeanPackages(doc, packages);
-        return packages;
-    }
-
-    private void extractBeanPackages(Node node, Set<String> packages) {
-        if (node instanceof Element) {
-            Element element = (Element) node;
-            String name = element.getLocalName();
-            String uri  = element.getNamespaceURI();
-            if ("bean".equals(name) && "http://www.springframework.org/schema/beans".equals(uri)) {
-                String clazz = element.getAttribute("class");
-                if (clazz != null) {
-                    String pkg = clazz.substring(0, clazz.lastIndexOf('.'));
-                    packages.add(pkg);
-                }
-            }
-        }
-        if (node != null) {
-            extractBeanPackages(node.getFirstChild(), packages);
-            extractBeanPackages(node.getNextSibling(), packages);
         }
     }
 
@@ -162,22 +88,6 @@ public class SpringDeploymentListener implements DeploymentListener {
         }
         DocumentBuilder db = dbf.newDocumentBuilder();
         return db.parse(artifact);
-    }
-
-    /**
-     * Copy in stream to an out stream
-     *
-     * @param in
-     * @param out
-     * @throws java.io.IOException
-     */
-    public static void copyInputStream(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[4096];
-        int len = in.read(buffer);
-        while (len >= 0) {
-            out.write(buffer, 0, len);
-            len = in.read(buffer);
-        }
     }
 
 }

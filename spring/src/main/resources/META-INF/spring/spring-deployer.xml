@@ -39,4 +39,12 @@
         </osgi:interfaces>
     </osgi:service>
 
+    <bean id="springHandler" class="org.apache.servicemix.kernel.spring.SpringURLHandler" />
+
+    <osgi:service ref="springHandler" interface="org.osgi.service.url.URLStreamHandlerService">
+    	<osgi:service-properties>
+            <entry key="url.handler.protocol" value="spring"/>
+        </osgi:service-properties>
+    </osgi:service>
+
 </beans>
