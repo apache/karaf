@@ -38,9 +38,23 @@
 
     <bean id="removeUrl" class="org.apache.servicemix.gshell.features.internal.commands.RemoveUrlCommand" />
 
+    <bean id="refreshUrl" class="org.apache.servicemix.gshell.features.internal.commands.RefreshUrlCommand" />
+
+    <bean id="installFeature" class="org.apache.servicemix.gshell.features.internal.commands.InstallFeatureCommand" />
+
+    <bean id="uninstallFeature" class="org.apache.servicemix.gshell.features.internal.commands.UninstallFeatureCommand" />
+
+    <bean id="listFeatures" class="org.apache.servicemix.gshell.features.internal.commands.ListFeaturesCommand" />
+
     <bean id="featuresService" class="org.apache.servicemix.gshell.features.internal.FeaturesServiceImpl" init-method="start" destroy-method="stop">
         <property name="urls" value="${featuresRepositories}" />
+        <property name="configAdmin" ref="configAdmin" />
+        <property name="preferences" ref="preferences" />
     </bean>
+
+    <osgi:reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
+
+    <osgi:reference id="preferences" interface="org.osgi.service.prefs.PreferencesService" cardinality="0..1" />
 
     <osgi:service ref="addUrl" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
@@ -60,6 +74,34 @@
       <osgi:service-properties>
         <entry key="shell" value="features"/>
         <entry key="alias" value="removeUrl"/>
+      </osgi:service-properties>
+    </osgi:service>
+
+    <osgi:service ref="refreshUrl" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="features"/>
+        <entry key="alias" value="refreshUrl"/>
+      </osgi:service-properties>
+    </osgi:service>
+
+    <osgi:service ref="installFeature" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="features"/>
+        <entry key="alias" value="installFeature"/>
+      </osgi:service-properties>
+    </osgi:service>
+
+    <osgi:service ref="uninstallFeature" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="features"/>
+        <entry key="alias" value="uninstallFeature"/>
+      </osgi:service-properties>
+    </osgi:service>
+
+    <osgi:service ref="listFeatures" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="features"/>
+        <entry key="alias" value="listFeatures"/>
       </osgi:service-properties>
     </osgi:service>
 

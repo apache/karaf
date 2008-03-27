@@ -17,7 +17,9 @@
 package org.apache.servicemix.gshell.features.internal;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.servicemix.gshell.features.Feature;
 
@@ -28,6 +30,7 @@ public class FeatureImpl implements Feature {
 
     private String name;
     private List<String> bundles = new ArrayList<String>();
+    private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
 
     public FeatureImpl(String name) {
         this.name = name;
@@ -37,11 +40,19 @@ public class FeatureImpl implements Feature {
         return name;
     }
 
-    public String[] getBundles() {
-        return bundles.toArray(new String[bundles.size()]);
+    public List<String> getBundles() {
+        return bundles;
+    }
+
+    public Map<String, Map<String, String>> getConfigurations() {
+        return configs;
     }
 
     public void addBundle(String bundle) {
         bundles.add(bundle);
+    }
+
+    public void addConfig(String name, Map<String,String> properties) {
+        configs.put(name, properties);
     }
 }

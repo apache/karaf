@@ -28,4 +28,13 @@ public interface FeaturesService {
     void removeRepository(URL url);
 
     Repository[] listRepositories();
+
+    void installFeature(String name) throws Exception;
+
+    void uninstallFeature(String name) throws Exception;
+
+    String[] listFeatures();
+
+    String[] listInstalledFeatures();
+
 }

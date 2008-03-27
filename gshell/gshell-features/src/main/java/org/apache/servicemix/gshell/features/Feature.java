@@ -16,6 +16,9 @@
  */
 package org.apache.servicemix.gshell.features;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * A feature is a list of bundles associated identified by its name.
  */
@@ -23,6 +26,8 @@ public interface Feature {
 
     String getName();
 
-    String[] getBundles();
+    List<String> getBundles();
+
+    Map<String, Map<String, String>> getConfigurations();
 
 }

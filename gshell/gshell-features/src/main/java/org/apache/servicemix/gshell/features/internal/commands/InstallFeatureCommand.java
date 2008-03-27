@@ -14,18 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.gshell.features;
+package org.apache.servicemix.gshell.features.internal.commands;
 
-import java.io.IOException;
+import java.util.List;
 import java.net.URL;
 
-/**
- * A repository of features.
- */
-public interface Repository {
+import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.geronimo.gshell.command.annotation.CommandComponent;
+import org.apache.servicemix.gshell.features.FeaturesService;
 
-    URL getURL();
+@CommandComponent(id="features:install", description="Install a feature")
+public class InstallFeatureCommand extends FeaturesCommandSupport {
 
-    Feature[] getFeatures();
+    @Argument(required = true, description = "The name of the feature")
+    String name;
 
+    protected void doExecute(FeaturesService admin) throws Exception {
+        admin.installFeature(name);
+    }
 }

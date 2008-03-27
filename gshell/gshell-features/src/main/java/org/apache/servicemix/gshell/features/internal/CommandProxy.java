@@ -75,7 +75,7 @@ public class CommandProxy extends ObrCommandSupport {
     }
 
     protected void deploy(RepositoryAdmin admin) throws Exception {
-        List<String> bundles = Arrays.asList(feature.getBundles());
+        List<String> bundles = feature.getBundles();
         int idx0 = -1;
         while (++idx0 < bundles.size()) {
             if (bundles.get(idx0).startsWith("obr:")) {

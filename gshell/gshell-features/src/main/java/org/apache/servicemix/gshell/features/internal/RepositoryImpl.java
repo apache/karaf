@@ -16,11 +16,17 @@
  */
 package org.apache.servicemix.gshell.features.internal;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -28,6 +34,7 @@ import org.w3c.dom.NodeList;
 
 import org.apache.servicemix.gshell.features.Feature;
 import org.apache.servicemix.gshell.features.Repository;
+import org.xml.sax.SAXException;
 
 /**
  * The repository implementation.
@@ -49,22 +56,42 @@ public class RepositoryImpl implements Repository {
         return features.toArray(new Feature[features.size()]);
     }
 
-    public void load() throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Document doc = factory.newDocumentBuilder().parse(url.openStream());
-        NodeList nodes = doc.getDocumentElement().getElementsByTagName("feature");
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Element e = (Element) nodes.item(i);
-            String name = e.getAttribute("name");
-            FeatureImpl f = new FeatureImpl(name);
-            NodeList bundleNodes = e.getElementsByTagName("bundle");
-            for (int j = 0; j < bundleNodes.getLength(); j++) {
-                Element b = (Element) bundleNodes.item(j);
-                f.addBundle(b.getTextContent());
+    public void load() throws IOException {
+        try {
+            features = new ArrayList<Feature>();
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            Document doc = factory.newDocumentBuilder().parse(url.openStream());
+            NodeList nodes = doc.getDocumentElement().getElementsByTagName("feature");
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Element e = (Element) nodes.item(i);
+                String name = e.getAttribute("name");
+                FeatureImpl f = new FeatureImpl(name);
+                NodeList configNodes = e.getElementsByTagName("config");
+                for (int j = 0; j < configNodes.getLength(); j++) {
+                    Element c = (Element) configNodes.item(j);
+                    String cfgName = c.getAttribute("name");
+                    String data = c.getTextContent();
+                    Properties properties = new Properties();
+                    properties.load(new ByteArrayInputStream(data.getBytes()));
+                    Map<String, String> hashtable = new Hashtable<String, String>();
+                    for (Object key : properties.keySet()) {
+                        String n = key.toString();
+                        hashtable.put(n, properties.getProperty(n));
+                    }
+                    f.addConfig(cfgName, hashtable);
+                }
+                NodeList bundleNodes = e.getElementsByTagName("bundle");
+                for (int j = 0; j < bundleNodes.getLength(); j++) {
+                    Element b = (Element) bundleNodes.item(j);
+                    f.addBundle(b.getTextContent());
+                }
+                features.add(f);
             }
-            features.add(f);
+        } catch (SAXException e) {
+            throw (IOException) new IOException().initCause(e);
+        } catch (ParserConfigurationException e) {
+            throw (IOException) new IOException().initCause(e);
         }
-
     }
 
 }
