@@ -41,6 +41,8 @@
 
     <bean id="removeUrl" class="org.apache.geronimo.gshell.obr.RemoveUrlCommand" />
 
+    <bean id="refreshUrl" class="org.apache.geronimo.gshell.obr.RefreshUrlCommand" />
+
     <bean id="source" class="org.apache.geronimo.gshell.obr.SourceCommand" />
 
     <bean id="start" class="org.apache.geronimo.gshell.obr.StartCommand" />
@@ -84,6 +86,13 @@
       <osgi:service-properties>
         <entry key="shell" value="obr"/>
         <entry key="alias" value="removeUrl"/>
+      </osgi:service-properties>
+    </osgi:service>
+
+    <osgi:service ref="refreshUrl" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="obr"/>
+        <entry key="alias" value="refreshUrl"/>
       </osgi:service-properties>
     </osgi:service>
 
