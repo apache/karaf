@@ -27,12 +27,13 @@ import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.FieldMetadata;
-import org.apache.felix.ipojo.parser.ManipulationMetadata;
 import org.apache.felix.ipojo.parser.MethodMetadata;
+import org.apache.felix.ipojo.parser.PojoMetadata;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-/** this class implements iPOJO Handler.
+/** 
+ * This class implements iPOJO Handler.
  * it builds the dynamic MBean from metadata.xml and expose it to the MBean Server.
  *  
  *  @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
@@ -43,7 +44,7 @@ public class MBeanHandler extends PrimitiveHandler {
      */
     private InstanceManager m_instanceManager;
     /**
-     * ServiceRegistration : use to register and deregister the Dynamic MBean.
+     * ServiceRegistration : use to register and unregister the Dynamic MBean.
      */
     private ServiceRegistration m_serviceRegistration;
     /**
@@ -57,16 +58,16 @@ public class MBeanHandler extends PrimitiveHandler {
     /**
      * String : constant which store the name of the class.
      */
-    private String m_NAMESPACE = this.getClass().getName();
+    private String m_namespace = this.getClass().getName();
 
     /** 
      * configure : construct the structure JmxConfigFieldMap.and the Dynamic Mbean.
      * @param metadata Element
-     * @param dict Dictionnary
+     * @param dict Dictionary
      */
     public void configure(Element metadata, Dictionary dict) {
         
-        ManipulationMetadata manipulation = new ManipulationMetadata(metadata);
+        PojoMetadata manipulation = getPojoMetadata();
         
         m_instanceManager = getInstanceManager();
 
@@ -74,7 +75,7 @@ public class MBeanHandler extends PrimitiveHandler {
         m_jmxConfigFieldMap = new JmxConfigFieldMap();
 
         // Build the hashmap
-        Element[] mbeans = metadata.getElements("config", m_NAMESPACE);
+        Element[] mbeans = metadata.getElements("config", m_namespace);
 
         if (mbeans.length != 1) { return; }
         
@@ -83,47 +84,48 @@ public class MBeanHandler extends PrimitiveHandler {
         // set property 
         Element[] attributes = mbeans[0].getElements("property");
         //String[] fields = new String[attributes.length];
-        FieldMetadata[] fields = new FieldMetadata[attributes.length];
-        for (int i = 0 ; i < attributes.length ; i++) {
-            boolean notif = false;
-            String rights;
-            String name;
-            String field = attributes[i].getAttribute("field");
+        if (attributes != null) {
+            for (int i = 0 ; attributes != null && i < attributes.length ; i++) {
+                boolean notif = false;
+                String rights;
+                String name;
+                String field = attributes[i].getAttribute("field");
             
-            if (attributes[i].containsAttribute("name")) {
-                name = attributes[i].getAttribute("name");
-            } else {
-                name = field;
-            }
-            if (attributes[i].containsAttribute("rights")) {
-                rights = attributes[i].getAttribute("rights");
-            } else {
-                rights = "w";
-            }
+                if (attributes[i].containsAttribute("name")) {
+                    name = attributes[i].getAttribute("name");
+                } else {
+                    name = field;
+                }
+                if (attributes[i].containsAttribute("rights")) {
+                    rights = attributes[i].getAttribute("rights");
+                } else {
+                    rights = "w";
+                }
             
-            PropertyField property = new PropertyField(name, field, rights, getTypeFromAttributeField(field, manipulation));
+                PropertyField property = new PropertyField(name, field, rights, getTypeFromAttributeField(field, manipulation));
             
-            if (attributes[i].containsAttribute("notification")) {
-                notif = Boolean.parseBoolean(attributes[i].getAttribute("notification"));
-            }
+                if (attributes[i].containsAttribute("notification")) {
+                    notif = Boolean.parseBoolean(attributes[i].getAttribute("notification"));
+                }
             
-            property.setNotifiable(notif);
+                property.setNotifiable(notif);
             
-            if (notif) {
-                //add the new notifiable property in structure
-                NotificationField notification = new NotificationField(name, this.getClass().getName() + "." + field, null);
-                m_jmxConfigFieldMap.addNotificationFromName(name, notification);
-            }
-            m_jmxConfigFieldMap.addPropertyFromName(name, property);
-            fields[i] = manipulation.getField(field);
-            System.out.println("DEBUG: property exposed:" + name + " " + field + ":" 
+                if (notif) {
+                    //add the new notifiable property in structure
+                    NotificationField notification = new NotificationField(name, this.getClass().getName() + "." + field, null);
+                    m_jmxConfigFieldMap.addNotificationFromName(name, notification);
+                }
+                m_jmxConfigFieldMap.addPropertyFromName(name, property);
+                getInstanceManager().register(manipulation.getField(field), this);
+                info("property exposed:" + name + " " + field + ":" 
                     + getTypeFromAttributeField(field, manipulation) + " " + rights 
                     + ", Notif=" + notif);
+            }
         }
         
         //set methods 
         Element[] methods = mbeans[0].getElements("method");
-        for (int i = 0 ; i < methods.length ; i++) {
+        for (int i = 0 ; methods != null && i < methods.length ; i++) {
             String name = methods[i].getAttribute("name");
             String description = null;
             if (methods[i].containsAttribute("description")) {
@@ -135,19 +137,16 @@ public class MBeanHandler extends PrimitiveHandler {
             for (int j = 0 ; j < method.length ; j++) {
                 m_jmxConfigFieldMap.addMethodFromName(name, method[j]);
             
-                System.out.println("DEBUG: method exposed:" + method[j].getReturnType() + " " + name);
+                info("method exposed:" + method[j].getReturnType() + " " + name);
             }
         }
-
-        m_instanceManager.register(this, fields, null);
         
     }
     /**
      * start : register the Dynamic Mbean.
      */
     public void start() {
-        
-//      create the corresponding MBean
+        // create the corresponding MBean
         m_MBean = new DynamicMBeanImpl(m_jmxConfigFieldMap, m_instanceManager);
         if (m_serviceRegistration != null) { m_serviceRegistration.unregister(); }
 
@@ -163,21 +162,20 @@ public class MBeanHandler extends PrimitiveHandler {
     }
 
     /** 
-     * stop : deregister the Dynamic Mbean.
+     * stop : unregister the Dynamic Mbean.
      */
     public void stop() {
         if (m_serviceRegistration != null) { m_serviceRegistration.unregister(); }
-        
-        
     }
     
     
     /** 
      * setterCallback : call when a POJO member is modified externally.
+     * @param pojo : the POJO object
      * @param fieldName : name of the modified field 
      * @param value     : new value of the field
      */
-    public void setterCallback(String fieldName, Object value) {
+    public void onSet(Object pojo, String fieldName, Object value) {
         // Check if the field is a configurable property
 
         PropertyField propertyField = (PropertyField) m_jmxConfigFieldMap.getPropertyFromField(fieldName);
@@ -193,20 +191,20 @@ public class MBeanHandler extends PrimitiveHandler {
 
     /** 
      * getterCallback : call when a POJO member is modified by the MBean.
+     * @pojo : pojo object.
      * @param fieldName : name of the modified field 
      * @param value     : old value of the field
      * @return          : new value of the field
      */
-    public Object getterCallback(String fieldName, Object value) {
-        
+    public Object onGet(Object pojo, String fieldName, Object value) {
         
         // Check if the field is a configurable property
         PropertyField propertyField = (PropertyField) m_jmxConfigFieldMap.getPropertyFromField(fieldName);
         if (propertyField != null) { 
-            m_instanceManager.setterCallback(fieldName, propertyField.getValue());
+            m_instanceManager.onSet(pojo, fieldName, propertyField.getValue());
             return propertyField.getValue();
         }
-        m_instanceManager.setterCallback(fieldName, value);
+        m_instanceManager.onSet(pojo, fieldName, value);
         return value;
     }
     
@@ -216,13 +214,13 @@ public class MBeanHandler extends PrimitiveHandler {
      * @param manipulation : metadata extract from metadata.xml file
      * @return          : type of the field or null if it wasn't found
      */
-    private static String getTypeFromAttributeField(String fieldRequire, ManipulationMetadata manipulation) {
+    private static String getTypeFromAttributeField(String fieldRequire, PojoMetadata manipulation) {
         
         FieldMetadata field = manipulation.getField(fieldRequire);
         if (field == null) {
             return null;
         } else {
-            return field.getReflectionType();
+            return FieldMetadata.getReflectionType(field.getFieldType());
         }
     }
     
@@ -233,7 +231,7 @@ public class MBeanHandler extends PrimitiveHandler {
      * @param description  : description which appears in jmx console
      * @return          : array of methods with the right name
      */
-    private MethodField[] getMethodsFromName(String methodName, ManipulationMetadata manipulation, String description) {
+    private MethodField[] getMethodsFromName(String methodName, PojoMetadata manipulation, String description) {
         
         MethodMetadata[] fields = manipulation.getMethods(methodName);
         if (fields.length == 0) {

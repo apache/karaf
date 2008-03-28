@@ -24,7 +24,6 @@ import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.util.Logger;
 
 /**
  * Architecture Handler : do reflection on your component.
@@ -52,6 +51,7 @@ public class ArchitectureHandler extends PrimitiveHandler implements Architectur
      * @see org.apache.felix.ipojo.Handler#stop()
      */
     public void stop() {
+        // Nothing do do when stopping.
     }
 
     /**
@@ -59,7 +59,7 @@ public class ArchitectureHandler extends PrimitiveHandler implements Architectur
      * @see org.apache.felix.ipojo.Handler#start()
      */
     public void start() {
-        log(Logger.INFO, "Start architecture handler with " + m_name + " name");
+        info("Start architecture handler with " + m_name + " name");
     }
 
     /**

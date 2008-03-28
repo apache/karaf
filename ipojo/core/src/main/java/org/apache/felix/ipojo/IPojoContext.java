@@ -54,25 +54,24 @@ public class IPojoContext implements BundleContext, ServiceContext {
     /**
      * Constructor. Used when the service context = the bundle context
      * 
-     * @param bc : bundle context
+     * @param context : bundle context
      */
-    public IPojoContext(BundleContext bc) {
-        m_bundleContext = bc;
+    public IPojoContext(BundleContext context) {
+        m_bundleContext = context;
     }
 
     /**
      * Constructor. Used when the service context and the bundle context are
      * different
      * 
-     * @param bc : bundle context
-     * @param sc : service context
+     * @param bundleContext : bundle context
+     * @param serviceContext : service context
      */
-    public IPojoContext(BundleContext bc, ServiceContext sc) {
-        m_bundleContext = bc;
-        m_serviceContext = sc;
+    public IPojoContext(BundleContext bundleContext, ServiceContext serviceContext) {
+        m_bundleContext = bundleContext;
+        m_serviceContext = serviceContext;
     }
 
-   
     /**
      * Add a bundle listener.
      * @param listener : the listener to add
@@ -119,7 +118,6 @@ public class IPojoContext implements BundleContext, ServiceContext {
         }
     }
 
-
     /**
      * Create a Filter object.
      * @param filter : the string form of the LDAP filter to create
@@ -158,12 +156,12 @@ public class IPojoContext implements BundleContext, ServiceContext {
 
     /**
      * Get the bundle object with the given id.
-     * @param id : bundle id
+     * @param bundleId : bundle id
      * @return the bundle object
      * @see org.osgi.framework.BundleContext#getBundle(long)
      */
-    public Bundle getBundle(long id) {
-        return m_bundleContext.getBundle(id);
+    public Bundle getBundle(long bundleId) {
+        return m_bundleContext.getBundle(bundleId);
     }
 
     /**
@@ -174,7 +172,6 @@ public class IPojoContext implements BundleContext, ServiceContext {
     public Bundle[] getBundles() {
         return m_bundleContext.getBundles();
     }
-
 
     /**
      * Get a data file.
@@ -340,7 +337,7 @@ public class IPojoContext implements BundleContext, ServiceContext {
             return m_serviceContext.ungetService(reference);
         }
     }
-    
+
     /**
      * Get the global context, i.e. the bundle context of the factory.
      * @return the global bundle context.
@@ -348,15 +345,12 @@ public class IPojoContext implements BundleContext, ServiceContext {
     public BundleContext getGlobalContext() {
         return m_bundleContext;
     }
-    
+
     /**
      * Get the service context, i.e. the composite context.
      * @return the service context.
      */
     public ServiceContext getServiceContext() {
-        if (m_serviceContext == null) {
-            return this;
-        }
         return m_serviceContext;
     }
 

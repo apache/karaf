@@ -19,7 +19,10 @@
 package org.apache.felix.ipojo.arch;
 
 import java.io.PrintStream;
+import java.lang.reflect.Field;
+import java.util.List;
 
+import org.apache.felix.ipojo.IPojoFactory;
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.HandlerFactory;
@@ -29,25 +32,17 @@ import org.apache.felix.shell.Command;
 
 /**
  * Implementation of the arch command printing the actual architecture.
- * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ArchCommandImpl implements Command {
 
-    /**
-     * List of arch service.
-     */
+    /** List of arch services. */
     private Architecture[] m_archs;
     
-    /**
-     * Factory services. 
-     */
+    /** Factory services. */
     private Factory[] m_factories;
     
-    
-    /**
-     * Handler Factories.
-     */
+    /** Handler Factories. */
     private Factory[] m_handlers;
 
     /**
@@ -60,7 +55,7 @@ public class ArchCommandImpl implements Command {
     }
 
     /**
-     * Get help message.
+     * Gets help message.
      * @return the command usage.
      * @see org.apache.felix.shell.Command#getUsage()
      */
@@ -69,7 +64,7 @@ public class ArchCommandImpl implements Command {
     }
 
     /**
-     * Get a small description.
+     * Gets a small description.
      * @return get a description.
      * @see org.apache.felix.shell.Command#getShortDescription()
      */
@@ -78,7 +73,7 @@ public class ArchCommandImpl implements Command {
     }
 
     /**
-     * Execute the arch command.
+     * Executes the arch command.
      * @param line : command line
      * @param out : the default output stream
      * @param err : the error output stream
@@ -113,15 +108,41 @@ public class ArchCommandImpl implements Command {
             printHandlers(out);
             return;
         }
+        
+        if (line2.startsWith("-stats")) {
+            printStats(out);
+            return;
+        }
 
         err.println(getUsage());
     }
     
     /**
-     * Print instance list.
-     * 
-     * @param out :
-     *            default print stream
+     * Prints the statistics.
+     * @param out the out
+     */
+    private void printStats(PrintStream out) {
+        try {
+            Field field = IPojoFactory.class.getDeclaredField("m_instancesName");
+            field.setAccessible(true); // The field is not accessible.
+            List names = (List) field.get(null);
+            out.println("Number of living instances : " + names.size());
+            out.println("Created instances : " + names);
+        } catch (SecurityException e) {
+            out.println("Cannot compute stats : " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            out.println("Cannot compute stats : " + e.getMessage());
+        } catch (IllegalAccessException e) {
+            out.println("Cannot compute stats : " + e.getMessage());
+        } catch (NoSuchFieldException e) {
+            out.println("Cannot compute stats : " + e.getMessage());
+        }
+        
+    }
+
+    /**
+     * Prints instance list.
+     * @param out : default print stream
      */
     private void printInstances(PrintStream out) {
         for (int i = 0; i < m_archs.length; i++) {
@@ -139,7 +160,7 @@ public class ArchCommandImpl implements Command {
     }
     
     /**
-     * Print instance description.
+     * Prints instance description.
      * @param name : instance name
      * @param out : default print stream
      * @param err : error print stream (if the instance is not found)
@@ -156,7 +177,7 @@ public class ArchCommandImpl implements Command {
     }
     
     /**
-     * Print Factory information.
+     * Prints factories.
      * @param out : output stream
      */
     private void printFactories(PrintStream out) {
@@ -170,7 +191,7 @@ public class ArchCommandImpl implements Command {
     }
     
     /**
-     * Print factory description.
+     * Prints factory description.
      * @param name : factory name
      * @param out : default print stream
      * @param err : error print stream (if the factory is not found)
@@ -186,7 +207,7 @@ public class ArchCommandImpl implements Command {
     }
     
     /**
-     * Print the list of available handlers (and validity).
+     * Prints the list of available handlers (and validity).
      * @param out : default print stream
      */
     private void printHandlers(PrintStream out) {

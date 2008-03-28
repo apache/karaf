@@ -18,7 +18,7 @@
  */
 package org.apache.felix.ipojo.parser;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ParseUtils {
+public final class ParseUtils {
 
     /**
      * Parse the string form of an array as {a, b, c}.
@@ -37,18 +37,13 @@ public class ParseUtils {
      */
     public static String[] parseArrays(String str) {
         // Remove { and }
-        if (str.startsWith("{") && str.endsWith("}")) {
-            String m = str.substring(1, str.length() - 1);
+        if (str.charAt(0) == '{' && str.charAt(str.length() - 1) == '}') {
+            String internal = (str.substring(1, str.length() - 1)).trim();
             // Check empty array
-            m = m.trim();
-            if (m.length() == 0) {
+            if (internal.length() == 0) {
                 return new String[0];
             }
-            String[] values = split(m, ",");
-            for (int i = 0; i < values.length; i++) {
-                values[i] = values[i].trim();
-            }
-            return values;
+            return split(internal, ",");
         } else {
             return new String[] { str };
         }
@@ -61,40 +56,24 @@ public class ParseUtils {
      * @return the resulting string array
      */
     public static List parseArraysAsList(String str) {
-        List result = new ArrayList();
-        // Remove { and }
-        if (str.startsWith("{") && str.endsWith("}")) {
-            String m = str.substring(1, str.length() - 1);
-            // Check empty array
-            m = m.trim();
-            if (m.length() == 0) {
-                return result;
-            }
-            String[] values = split(m, ",");
-            for (int i = 0; i < values.length; i++) {
-                result.add(values[i].trim());
-            }
-            return result;
-        } else {
-            result.add(str);
-            return result;
-        }
+        return Arrays.asList(parseArrays(str));
     }
     
     /**
      * Split method. 
      * This method is equivalent of the String.split in java 1.4
+     * The result array contains 'trimmed' String
      * @param toSplit : String to split
      * @param separator : separator
      * @return the token array 
      */
     public static String[] split(String toSplit, String separator) {
-        StringTokenizer st = new StringTokenizer(toSplit, separator);
-        String[] result = new String[st.countTokens()];
-        int i = 0;
-        while (st.hasMoreElements()) {
-            result[i] = st.nextToken();
-            i++;
+        StringTokenizer tokenizer = new StringTokenizer(toSplit, separator);
+        String[] result = new String[tokenizer.countTokens()];
+        int index = 0;
+        while (tokenizer.hasMoreElements()) {
+            result[index] = tokenizer.nextToken().trim();
+            index++;
         }
         return result;
     }

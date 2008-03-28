@@ -79,7 +79,6 @@ public class DependencyDescription {
         m_optional = optional;
         m_filter = filter;
         m_state = state;
-        m_serviceReferences = new ArrayList();
     }
 
     public boolean isMultiple() { return m_multiple; }
@@ -106,9 +105,9 @@ public class DependencyDescription {
 
     /**
      * Set the service reference array.
-     * @param sr : the list of service reference
+     * @param refs : the list of service reference
      */
-    public void setServiceReferences(List sr) { m_serviceReferences = sr; }
+    public void setServiceReferences(List refs) { m_serviceReferences = refs; }
 
     /**
      * Get the used service set.
@@ -118,10 +117,10 @@ public class DependencyDescription {
 
     /**
      * Set the usedServices.
-     * @param hm : the list of used service reference.
+     * @param usages : the list of used service reference.
      */
-    public void setUsedServices(List hm) {
-        m_usedServices = hm;
+    public void setUsedServices(List usages) {
+        m_usedServices = usages;
     }
 
 

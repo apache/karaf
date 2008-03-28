@@ -26,9 +26,8 @@ import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.parser.ManipulationMetadata;
 import org.apache.felix.ipojo.parser.MethodMetadata;
-import org.apache.felix.ipojo.util.Logger;
+import org.apache.felix.ipojo.parser.PojoMetadata;
 
 /**
  * Lifecycle callback handler.
@@ -54,11 +53,11 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
     /**
      * Add the given callback to the callback list.
      * 
-     * @param hk : the element to add
+     * @param callback : the element to add
      */
-    private void addCallback(LifecycleCallback hk) {
+    private void addCallback(LifecycleCallback callback) {
         for (int i = 0; (m_callbacks != null) && (i < m_callbacks.length); i++) {
-            if (m_callbacks[i] == hk) {
+            if (m_callbacks[i] == callback) {
                 return;
             }
         }
@@ -66,10 +65,10 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
         if (m_callbacks.length > 0) {
             LifecycleCallback[] newHk = new LifecycleCallback[m_callbacks.length + 1];
             System.arraycopy(m_callbacks, 0, newHk, 0, m_callbacks.length);
-            newHk[m_callbacks.length] = hk;
+            newHk[m_callbacks.length] = callback;
             m_callbacks = newHk;
         } else {
-            m_callbacks = new LifecycleCallback[] { hk };
+            m_callbacks = new LifecycleCallback[] { callback };
         }
 
     }
@@ -87,38 +86,38 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
         String imm = metadata.getAttribute("immediate");
         m_immediate = imm != null && imm.equalsIgnoreCase("true");
         
-        ManipulationMetadata mm = new ManipulationMetadata(metadata);
+        PojoMetadata meta = getFactory().getPojoMetadata();
 
         Element[] hooksMetadata = metadata.getElements("callback");
-        for (int i = 0; i < hooksMetadata.length; i++) {
+        for (int i = 0; hooksMetadata != null && i < hooksMetadata.length; i++) {
             String method = hooksMetadata[i].getAttribute("method");
             if (method == null) {
                 throw new ConfigurationException("Lifecycle callback : A callback needs to contains a method attribute");
             }
             
-            MethodMetadata met = mm.getMethod(method, new String[0]);
+            MethodMetadata met = meta.getMethod(method, new String[0]);
             
             int transition = -1;
             String trans = hooksMetadata[i].getAttribute("transition");
-            if (trans != null) {
+            if (trans == null) {
+                throw new ConfigurationException("Lifecycle callback : the transition attribute is missing");
+            } else {
                 if (trans.equalsIgnoreCase("validate")) {
                     transition = LifecycleCallback.VALIDATE;
                 } else if (trans.equalsIgnoreCase("invalidate")) {
                     transition = LifecycleCallback.INVALIDATE; 
                 } else {
-                    throw new ConfigurationException("Lifecycle callback : Unknown or malformed transition : " + transition);
+                    throw new ConfigurationException("Lifecycle callback : Unknown or malformed transition : " + trans);
                 }
-            } else {
-                throw new ConfigurationException("Lifecycle callback : Unknown or malformed transition");
             }
             
-            LifecycleCallback hk = null;
-            if (met != null) { 
-                hk = new LifecycleCallback(this, transition, met);
+            LifecycleCallback callback = null;
+            if (met == null) {
+                callback = new LifecycleCallback(this, transition, method);
             } else {
-                hk = new LifecycleCallback(this, transition, method);
+                callback = new LifecycleCallback(this, transition, met);
             }
-            addCallback(hk);
+            addCallback(callback);
         }
     }
 
@@ -127,7 +126,8 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
      * @see org.apache.felix.ipojo.Handler#start()
      */
     public void start() {
-    } // Do nothing during the start
+     // Do nothing during the start
+    } 
 
     /**
      * Stop the handler.
@@ -162,13 +162,13 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
                 try {
                     m_callbacks[i].call();
                 } catch (NoSuchMethodException e) {
-                    log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " is not found", e);
-                    getInstanceManager().stop();
+                    error("[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " is not found");
+                    throw new IllegalStateException(e.getMessage());
                 } catch (IllegalAccessException e) {
-                    log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " is not accessible", e);
-                    getInstanceManager().stop();
+                    error("[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " is not accessible");
+                    throw new IllegalStateException(e.getMessage());
                 } catch (InvocationTargetException e) {
-                    log(Logger.ERROR, "[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " has throws an exception : " + e.getTargetException().getMessage());
+                    error("[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " has throws an exception : " + e.getTargetException().getMessage(), e.getTargetException());
                     getInstanceManager().setState(ComponentInstance.INVALID);
                 }
             }

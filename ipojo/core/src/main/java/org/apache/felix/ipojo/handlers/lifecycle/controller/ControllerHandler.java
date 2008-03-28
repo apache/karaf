@@ -24,11 +24,10 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.PrimitiveHandler;
-import org.apache.felix.ipojo.architecture.ComponentDescription;
+import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.FieldMetadata;
-import org.apache.felix.ipojo.parser.ManipulationMetadata;
-import org.apache.felix.ipojo.util.Logger;
+import org.apache.felix.ipojo.parser.PojoMetadata;
 
 /**
  * Lifecycle Controller handler.
@@ -51,9 +50,9 @@ public class ControllerHandler extends PrimitiveHandler {
      * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager, org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
     public void configure(Element metadata, Dictionary configuration) throws ConfigurationException {
-        Element[] lc = metadata.getElements("controller");
-        String field = lc[0].getAttribute("field");   
-        getInstanceManager().register(this, new FieldMetadata[] {new FieldMetadata(field, "boolean")}, null);
+        Element[] controller = metadata.getElements("controller");
+        String field = controller[0].getAttribute("field");   
+        getInstanceManager().register(new FieldMetadata(field, "boolean"), this);
     }
 
     /**
@@ -70,38 +69,42 @@ public class ControllerHandler extends PrimitiveHandler {
      * Nothing to do. 
      * @see org.apache.felix.ipojo.Handler#stop()
      */
-    public void stop() { }
+    public void stop() { 
+        // Nothing to do.
+    }
     
     /**
      * GetterCallback.
+     * @param pojo : the pojo object on which the field is accessed
      * Return the stored value.
      * @param field : field name.
-     * @param o : value given by the previous handler.
+     * @param value : value given by the previous handler.
      * @return : the handler state.
      */
-    public Object getterCallback(String field, Object o) {
+    public Object onGet(Object pojo, String field, Object value) {
         return new Boolean(m_state);
     }
     
     /**
      * SetterCallback.
+     * @param pojo : the pojo object on which the field is accessed
      * Store the new field value & invalidate / validate the handler is required.
      * @param field : field name.
-     * @param o : new value.
+     * @param value : new value.
      */
-    public void setterCallback(String field, Object o) {
-        if (o instanceof Boolean) {
-            boolean nv = ((Boolean) o).booleanValue();
-            if (nv != m_state) {
-                m_state = nv;
+    public void onSet(Object pojo, String field, Object value) {
+        if (value instanceof Boolean) {
+            boolean newValue = ((Boolean) value).booleanValue();
+            if (newValue != m_state) {
+                m_state = newValue;
                 if (m_state) {
-                    ((InstanceManager) getInstance()).setState(ComponentInstance.VALID);
+                    ((InstanceManager) getHandlerManager()).setState(ComponentInstance.VALID);
                 } else {
-                    ((InstanceManager) getInstance()).setState(ComponentInstance.INVALID);
+                    ((InstanceManager) getHandlerManager()).setState(ComponentInstance.INVALID);
                 }
             }
         } else {
-            log(Logger.ERROR, "Boolean expected for the lifecycle controller");
+            error("Boolean expected for the lifecycle controller");
             getInstanceManager().stop();
         }
     }
@@ -109,28 +112,28 @@ public class ControllerHandler extends PrimitiveHandler {
     /**
      * Initialize the component factory.
      * The controller field is checked to avoid configure check.
-     * @param cd : component description
+     * @param desc : component description
      * @param metadata : component type metadata
      * @throws ConfigurationException : occurs if the controller field is not in the POJO class or is not a boolean.
-     * @see org.apache.felix.ipojo.Handler#initializeComponentFactory(org.apache.felix.ipojo.architecture.ComponentDescription, org.apache.felix.ipojo.metadata.Element)
+     * @see org.apache.felix.ipojo.Handler#initializeComponentFactory(org.apache.felix.ipojo.architecture.ComponentTypeDescription, org.apache.felix.ipojo.metadata.Element)
      */
-    public void initializeComponentFactory(ComponentDescription cd, Element metadata) throws ConfigurationException {
+    public void initializeComponentFactory(ComponentTypeDescription desc, Element metadata) throws ConfigurationException {
         String field = null;
-        Element[] lc = metadata.getElements("controller");
+        Element[] controller = metadata.getElements("controller");
         // Use only the first controller
-        field = lc[0].getAttribute("field");
+        field = controller[0].getAttribute("field");
         if (field == null) {
             throw new ConfigurationException("Lifecycle controller : the controller element needs to have a field attribute");
         }
         
-        ManipulationMetadata mm = new ManipulationMetadata(metadata);
-        FieldMetadata fm = mm.getField(field);
-        if (fm == null) {
+        PojoMetadata method = getFactory().getPojoMetadata();
+        FieldMetadata fieldMetadata = method.getField(field);
+        if (fieldMetadata == null) {
             throw new ConfigurationException("Lifecycle controller : The field " + field + " does not exist in the class");
         }
         
-        if (!fm.getFieldType().equalsIgnoreCase("boolean")) {
-            throw new ConfigurationException("Lifecycle controller : The field " + field + " must be a boolean (" + fm.getFieldType() + " found)");
+        if (!fieldMetadata.getFieldType().equalsIgnoreCase("boolean")) {
+            throw new ConfigurationException("Lifecycle controller : The field " + field + " must be a boolean (" + fieldMetadata.getFieldType() + " found)");
         }
     }
 

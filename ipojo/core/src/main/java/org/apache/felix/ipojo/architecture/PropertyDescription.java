@@ -18,6 +18,10 @@
  */
 package org.apache.felix.ipojo.architecture;
 
+import org.apache.felix.ipojo.ConfigurationException;
+import org.apache.felix.ipojo.util.Property;
+import org.osgi.framework.BundleContext;
+
 /**
  * Property Information.
  * 
@@ -39,6 +43,14 @@ public class PropertyDescription {
      * Default value of the property.
      */
     private String m_value = null;
+    
+    
+    /**
+     * Immutable property flag
+     * IF true, the property cannot be override by the instance configuration.
+     * Moreover, immutable properties are exposed on the factory service too.
+     */
+    private boolean m_immutable = false;
 
     /**
      * Constructor.
@@ -51,6 +63,21 @@ public class PropertyDescription {
         m_name = name;
         m_type = type;
         m_value = value;
+    }
+    
+    /**
+     * Constructor.
+     * 
+     * @param name : name of the property
+     * @param type : type of the property
+     * @param value : default value of the property
+     * @param immutable : the property is immutable.
+     */
+    public PropertyDescription(String name, String type, String value, boolean immutable) {
+        m_name = name;
+        m_type = type;
+        m_value = value;
+        m_immutable = immutable;
     }
 
     /**
@@ -75,6 +102,28 @@ public class PropertyDescription {
      */
     public String getValue() {
         return m_value;
+    }
+    
+    /**
+     * Is the property immutable.
+     * @return true if the property is immutable.
+     */
+    public boolean isImmutable() {
+        return m_immutable;
+    }
+    /**
+     * Get the object value of the current immutable property.
+     * @param context : bundle context to use to load classes.
+     * @return the object value of the current property.
+     */
+    public Object getObjectValue(BundleContext context) {
+        Class type = null;
+        try {
+            type = Property.computeType(m_type, context);
+            return Property.create(type, m_value);
+        } catch (ConfigurationException e) {
+            return m_value; // Cannot create the object.
+        }
     }
 
 }

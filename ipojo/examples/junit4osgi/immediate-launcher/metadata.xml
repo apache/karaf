@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iPOJO>
+	<component
+		className="org.apache.felix.ipojo.junit4osgi.command.ImmediateRunner"
+		factory="false">
+		<requires field="runner" />
+		<callback method="start" transition="validate" />
+	</component>
+	<instance
+		component="org.apache.felix.ipojo.junit4osgi.command.ImmediateRunner"
+		name="immediate-runner" />
+</iPOJO>

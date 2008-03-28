@@ -1,0 +1,40 @@
+<project>
+  <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>iPOJO</artifactId>
+    <version>0.7.6-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>ipojo.examples</groupId>
+  <artifactId>ipojo.examples</artifactId>
+  <name>Apache Felix iPOJO Examples</name>
+  <packaging>pom</packaging>
+  <modules>
+	<module>tutorial-maven</module>
+  </modules>
+  
+  <profiles>
+	<profile>
+		<id>java5</id>
+		<activation>
+			<jdk>1.5</jdk>
+		</activation>
+		<modules>
+			<module>junit4osgi</module>
+			<module>property-handler</module>
+		</modules>
+	</profile>
+	<profile>
+		<id>java6</id>
+		<activation>
+			<jdk>1.6</jdk>
+		</activation>
+		<modules>
+			<module>junit4osgi</module>
+			<module>property-handler</module>
+		</modules>
+	</profile>
+  </profiles>
+</project>

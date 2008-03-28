@@ -40,10 +40,10 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
 
     /**
      * Constructor.
-     * @param h : handler.
+     * @param handler : handler.
      */
-    public ProvidedServiceHandlerDescription(Handler h) {
-        super(h);
+    public ProvidedServiceHandlerDescription(Handler handler) {
+        super(handler);
     }
 
     /**
@@ -83,17 +83,18 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
     public Element getHandlerInfo() {
         Element services = super.getHandlerInfo();
         for (int i = 0; i < m_providedServices.length; i++) {
-            Element service = new Element("provides", "");
-            String spec = "[";
+            Element service = new Element("provides", null);
+            StringBuffer spec = new StringBuffer("[");
             for (int j = 0; j < m_providedServices[i].getServiceSpecification().length; j++) {
                 if (j == 0) {
-                    spec += m_providedServices[i].getServiceSpecification()[j];
+                    spec.append(m_providedServices[i].getServiceSpecification()[j]);
                 } else {
-                    spec += ", " + m_providedServices[i].getServiceSpecification()[j];
+                    spec.append(',');
+                    spec.append(m_providedServices[i].getServiceSpecification()[j]);
                 }
             }
-            spec += "]";
-            service.addAttribute(new Attribute("specifications", spec));
+            spec.append(']');
+            service.addAttribute(new Attribute("specifications", spec.toString()));
 
             if (m_providedServices[i].getState() == ProvidedService.REGISTERED) {
                 service.addAttribute(new Attribute("state", "registered"));
@@ -102,12 +103,12 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
                 service.addAttribute(new Attribute("state", "unregistered"));
             }
             
-            Iterator it = m_providedServices[i].getProperties().keySet().iterator();
-            while (it.hasNext()) {
-                Element prop = new Element("property", "");
-                String k = (String) it.next();
-                prop.addAttribute(new Attribute("name", k));
-                prop.addAttribute(new Attribute("value", m_providedServices[i].getProperties().getProperty(k).toString()));
+            Iterator iterator = m_providedServices[i].getProperties().keySet().iterator();
+            while (iterator.hasNext()) {
+                Element prop = new Element("property", null);
+                String name = (String) iterator.next();
+                prop.addAttribute(new Attribute("name", name));
+                prop.addAttribute(new Attribute("value", m_providedServices[i].getProperties().getProperty(name).toString()));
                 service.addElement(prop);
             }
             services.addElement(service);

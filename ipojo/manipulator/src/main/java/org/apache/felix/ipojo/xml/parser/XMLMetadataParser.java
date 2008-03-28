@@ -38,62 +38,13 @@ public class XMLMetadataParser implements ContentHandler {
     private Element[] m_elements = new Element[0];
 
     /**
-     * Get component type metadata. (both component and composite)
-     * 
-     * @return a components metadata
-     * @throws ParseException :  occurs in the xml parsing
-     */
-    public Element[] getComponentsMetadata() throws ParseException {
-        Element[] comp = m_elements[0].getElements("Component");
-        Element[] compo = m_elements[0].getElements("Composite");
-        Element[] handl = m_elements[0].getElements("Handler");
-        Element[] metadata = new Element[comp.length + compo.length + handl.length];
-        int l = 0;
-        for (int i = 0; i < comp.length; i++) {
-            metadata[l] = comp[i];
-            l++;
-        }
-        for (int i = 0; i < compo.length; i++) {
-            metadata[l] = compo[i];
-            l++;
-        }
-        for (int i = 0; i < handl.length; i++) {
-            metadata[l] = handl[i];
-            l++;
-        }
-        return metadata;
-    }
-
-    /**
      * Get parsed metadata.
      * The document must be parsed before calling this method. 
      * @return : all the metadata.
      * @throws ParseException : occurs if an error occurs during the parsing.
      */
     public Element[] getMetadata() throws ParseException {
-        Element[] comp = m_elements[0].getElements("Component");
-        Element[] compo = m_elements[0].getElements("Composite");
-        Element[] conf = m_elements[0].getElements("Instance");
-        Element[] handl = m_elements[0].getElements("Handler");
-        Element[] metadata = new Element[comp.length + conf.length + compo.length + handl.length];
-        int l = 0;
-        for (int i = 0; i < comp.length; i++) {
-            metadata[l] = comp[i];
-            l++;
-        }
-        for (int i = 0; i < compo.length; i++) {
-            metadata[l] = compo[i];
-            l++;
-        }
-        for (int i = 0; i < conf.length; i++) {
-            metadata[l] = conf[i];
-            l++;
-        }
-        for (int i = 0; i < handl.length; i++) {
-            metadata[l] = handl[i];
-            l++;
-        }
-        return metadata;
+        return m_elements[0].getElements();
     }
 
 

@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.felix.ipojo.manipulator.Pojoization;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 
@@ -113,11 +112,10 @@ public class ManipulatorMojo extends AbstractMojo {
 
     /**
      * Execute method : launch the pojoization.
-     * @throws MojoExecutionException : an exception occurs.
-     * @throws MojoFailureException : an failure occurs.
+     * @throws MojoExecutionException : an exception occurs during the manipulation.
      * @see org.apache.maven.plugin.AbstractMojo#execute()
      */
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void execute() throws MojoExecutionException {
         // ignore project types not supported, useful when the plugin is configured in the parent pom
         if (!this.m_supportedProjectTypes.contains(this.getProject().getArtifact().getType())) {
             this.getLog().debug("Ignoring project " + this.getProject().getArtifact() + " : type " + this.getProject().getArtifact().getType() + " is not supported by ipojo plugin, supported types are " + this.m_supportedProjectTypes);
@@ -126,7 +124,15 @@ public class ManipulatorMojo extends AbstractMojo {
 
         getLog().info("Start bundle manipulation");
         // Get metadata file
+        
+        // Look for the metadata file in the output directory
         File meta = new File(m_outputDirectory + File.separator + m_metadata);
+        
+        // If not found look inside the pom directory
+        if (! meta.exists()) {
+            meta = new File(m_project.getBasedir() + File.separator + m_metadata);
+        }
+        
         getLog().info("Metadata File : " + meta.getAbsolutePath());
         if (!meta.exists()) {
             // Verify if annotations are ignored

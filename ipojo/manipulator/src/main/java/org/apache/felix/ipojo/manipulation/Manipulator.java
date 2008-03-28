@@ -19,11 +19,8 @@
 package org.apache.felix.ipojo.manipulation;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -60,73 +57,6 @@ public class Manipulator {
     private String m_superClass;
 
     /**
-     * Manipulate the class.
-     * 
-     * @param name : The name of the class
-     * @param outputDirectory : output directory where the class if stored.
-     * @return true if the class is correctly manipulated.
-     * @throws Exception : occurs if the manipulation failed.
-     */
-    public boolean manipulate(String name, File outputDirectory) throws Exception {
-        // gets an input stream to read the byte code of the class
-        String path = outputDirectory + "/" + name.replace('.', '/') + ".class";
-        File clazz = new File(path);
-
-        if (!clazz.exists()) {
-            return false;
-        }
-
-        URL url = clazz.toURL();
-
-        // if (url == null) { throw new ClassNotFoundException(name); }
-        ManipulationProperty.getLogger().log(ManipulationProperty.INFO, "Manipulate the class file : " + clazz.getAbsolutePath());
-
-        InputStream is1 = url.openStream();
-
-        // First check if the class is already manipulated :
-        ClassReader ckReader = new ClassReader(is1);
-        ClassChecker ck = new ClassChecker();
-        ckReader.accept(ck, ClassReader.SKIP_FRAMES);
-        is1.close();
-
-        m_fields = ck.getFields(); // Get visited fields (contains only POJO fields)
-
-        // Get interfaces and super class.
-        m_interfaces = ck.getInterfaces();
-        m_superClass = ck.getSuperClass();
-
-        // Get the methods list
-        m_methods = ck.getMethods();
-
-        if (!ck.isalreadyManipulated()) {
-
-            // Manipulation ->
-            // Add the _setComponentManager method
-            // Instrument all fields
-            InputStream is2 = url.openStream();
-            ClassReader cr0 = new ClassReader(is2);
-            ClassWriter cw0 = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-            PojoAdapter preprocess = new PojoAdapter(cw0, m_fields);
-            cr0.accept(preprocess, ClassReader.SKIP_FRAMES);
-            is2.close();
-
-            try {
-                FileOutputStream fos = new FileOutputStream(clazz);
-
-                fos.write(cw0.toByteArray());
-
-                fos.close();
-                ManipulationProperty.getLogger().log(ManipulationProperty.INFO, "Put the file " + clazz.getAbsolutePath() + " in the jar file");
-            } catch (Exception e) {
-                System.err.println("Problem to write the adapted class on the file system " + " [ " + clazz.getAbsolutePath() + " ] " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-        // The file is in the bundle
-        return true;
-    }
-
-    /**
      * Manipulate the given byte array.
      * @param origin : original class.
      * @return the manipulated class.
@@ -158,7 +88,8 @@ public class Manipulator {
             InputStream is2 = new ByteArrayInputStream(origin);
             ClassReader cr0 = new ClassReader(is2);
             ClassWriter cw0 = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-            PojoAdapter preprocess = new PojoAdapter(cw0, m_fields);
+            //CheckClassAdapter ch = new CheckClassAdapter(cw0);
+            MethodCreator preprocess = new MethodCreator(cw0, m_fields);
             cr0.accept(preprocess, ClassReader.SKIP_FRAMES);
             is2.close();
             finalWriter = cw0;

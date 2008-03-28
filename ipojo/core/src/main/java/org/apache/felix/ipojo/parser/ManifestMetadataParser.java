@@ -18,7 +18,9 @@
  */
 package org.apache.felix.ipojo.parser;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.metadata.Attribute;
@@ -32,11 +34,6 @@ import org.apache.felix.ipojo.metadata.Element;
 public class ManifestMetadataParser {
 
     /**
-     * Manifest Headers.
-     */
-    private Dictionary m_headers;
-
-    /**
      * Element list.
      */
     private Element[] m_elements = new Element[0];
@@ -47,24 +44,14 @@ public class ManifestMetadataParser {
      * @throws ParseException when a parsing error occurs
      */
     public Element[] getComponentsMetadata() throws ParseException {
-        Element[] components = m_elements[0].getElements("Component");
-        Element[] composites = m_elements[0].getElements("Composite");
-        Element[] handlers = m_elements[0].getElements("Handler");
-        Element[] all = new Element[components.length + composites.length + handlers.length];
-        int l = 0;
-        for (int i = 0; i < components.length; i++) {
-            all[l] = components[i];
-            l++;
+        Element[] elems = m_elements[0].getElements();
+        List list = new ArrayList();
+        for (int i = 0; i < elems.length; i++) {
+            if (!"instance".equals(elems[i].getName())) {
+                list.add(elems[i]);
+            }
         }
-        for (int i = 0; i < composites.length; i++) {
-            all[l] = composites[i];
-            l++;
-        }
-        for (int i = 0; i < handlers.length; i++) {
-            all[l] = handlers[i];
-            l++;
-        }
-        return all;
+        return (Element[]) list.toArray(new Element[list.size()]);
     }
 
     /**
@@ -73,7 +60,10 @@ public class ManifestMetadataParser {
      * @throws ParseException : if the metadata cannot be parsed successfully
      */
     public Dictionary[] getInstances() throws ParseException {
-        Element[] configs = m_elements[0].getElements("Instance");
+        Element[] configs = m_elements[0].getElements("instance");
+        if (configs == null) {
+            return null;
+        }
         Dictionary[] dicts = new Dictionary[configs.length];
         for (int i = 0; i < configs.length; i++) {
             dicts[i] = parseInstance(configs[i]);
@@ -95,17 +85,18 @@ public class ManifestMetadataParser {
         if (name != null) {
             dict.put("name", instance.getAttribute("name"));
         }
-        
+
         if (comp == null) {
             throw new ParseException("An instance does not have the 'component' attribute");
         }
-        
-        dict.put("component", comp);
 
-        for (int i = 0; i < instance.getElements("property").length; i++) {
-            parseProperty(instance.getElements("property")[i], dict);
+        dict.put("component", comp);
+        Element[] props = instance.getElements("property");
+
+        for (int i = 0; props != null && i < props.length; i++) {
+            parseProperty(props[i], dict);
         }
-        
+
         return dict;
     }
 
@@ -122,10 +113,8 @@ public class ManifestMetadataParser {
         if (name == null) {
             throw new ParseException("A property does not have the 'name' attribute");
         }
-        // Final case : the property element has a 'value' attribute
-        if (value != null) {
-            dict.put(prop.getAttribute("name"), prop.getAttribute("value"));
-        } else {
+        //case : the property element has a 'value' attribute
+        if (value == null) {
             // Recursive case
             // Check if there is 'property' element
             Element[] subProps = prop.getElements("property");
@@ -137,6 +126,8 @@ public class ManifestMetadataParser {
                 parseProperty(subProps[i], dict2);
                 dict.put(name, dict2);
             }
+        } else {
+            dict.put(prop.getAttribute("name"), prop.getAttribute("value"));
         }
     }
 
@@ -146,13 +137,13 @@ public class ManifestMetadataParser {
      * @param elem : the element to add
      */
     private void addElement(Element elem) {
-        if (m_elements != null) {
+        if (m_elements == null) {
+            m_elements = new Element[] { elem };
+        } else {
             Element[] newElementsList = new Element[m_elements.length + 1];
             System.arraycopy(m_elements, 0, newElementsList, 0, m_elements.length);
             newElementsList[m_elements.length] = elem;
             m_elements = newElementsList;
-        } else {
-            m_elements = new Element[] { elem };
         }
     }
 
@@ -180,19 +171,18 @@ public class ManifestMetadataParser {
     }
 
     /**
-     * Parse the given dictionnary and create the instance managers.
+     * Parse the given dictionary and create the instance managers.
      * 
      * @param dict : the given headers of the manifest file
      * @throws ParseException : if any error occurs
      */
     public void parse(Dictionary dict) throws ParseException {
-        m_headers = dict;
-        String componentClassesStr = (String) m_headers.get("iPOJO-Components");
+        String componentClassesStr = (String) dict.get("iPOJO-Components");
         // Add the ipojo element inside the element list
         addElement(new Element("iPOJO", ""));
         parseElements(componentClassesStr.trim());
     }
-    
+
     /**
      * Parse the given header and create the instance managers.
      * 
@@ -222,57 +212,61 @@ public class ManifestMetadataParser {
     }
 
     /**
-     * Paser the given string.
+     * Parse the given string.
      * 
-     * @param s : the string to parse
+     * @param elems : the string to parse
      */
-    private void parseElements(String s) {
-        char[] string = s.toCharArray();
+    private void parseElements(String elems) {
+        char[] string = elems.toCharArray();
 
         for (int i = 0; i < string.length; i++) {
-            char c = string[i];
+            char current = string[i];
 
-            switch (c) {
+            switch (current) { //NOPMD
                 // Beginning of an attribute.
                 case '$':
-                    String attName = "";
-                    String attValue = "";
-                    String attNs = "";
+                    StringBuffer attName = new StringBuffer();
+                    StringBuffer attValue = new StringBuffer();
+                    StringBuffer attNs = null;
                     i++;
-                    c = string[i];
-                    while (c != '=') {
-                        if (c == ':') {
+                    current = string[i]; // Increment and get the new current char.
+                    while (current != '=') {
+                        if (current == ':') {
                             attNs = attName;
-                            attName = "";
+                            attName = new StringBuffer();
                         } else {
-                            attName = attName + c;
+                            attName.append(current);
                         }
-                        i = i + 1;
-                        c = string[i];
-                    }
-                    i++; // skip =
-                    i++; // skip "
-                    c = string[i];
-                    while (c != '"') {
-                        attValue = attValue + c;
                         i++;
-                        c = string[i];
+                        current = string[i];
+                    }
+                    i = i + 2; // skip ="
+                    current = string[i];
+                    while (current != '"') {
+                        attValue.append(current);
+                        i++;
+                        current = string[i]; // Increment and get the new current char.
                     }
                     i++; // skip "
-                    c = string[i];
+                    current = string[i];
 
-                    Attribute att = new Attribute(attName, attNs, attValue);
+                    Attribute att = null;
+                    if (attNs == null) {
+                        att = new Attribute(attName.toString(), attValue.toString());
+                    } else {
+                        att = new Attribute(attName.toString(), attNs.toString(), attValue.toString());
+                    }
                     m_elements[m_elements.length - 1].addAttribute(att);
                     break;
 
                 // End of an element
                 case '}':
                     Element lastElement = removeLastElement();
-                    if (m_elements.length != 0) {
+                    if (m_elements.length == 0) {
+                        addElement(lastElement);
+                    } else {
                         Element newQueue = m_elements[m_elements.length - 1];
                         newQueue.addElement(lastElement);
-                    } else {
-                        addElement(lastElement);
                     }
                     break;
 
@@ -282,19 +276,19 @@ public class ManifestMetadataParser {
 
                 // Default case
                 default:
-                    String name = "";
-                    String ns = "";
-                    c = string[i];
-                    while (c != ' ') {
-                        if (c == ':') {
-                            ns = name;
-                            name = "";
+                    StringBuffer name = new StringBuffer();
+                    StringBuffer namespace = null;
+                    current = string[i];
+                    while (current != ' ') {
+                        if (current == ':') {
+                            namespace = name;
+                            name = new StringBuffer();
                             i++;
-                            c = string[i];
+                            current = string[i];
                         } else {
-                            name = name + c;
+                            name.append(current);
                             i++;
-                            c = string[i];
+                            current = string[i]; // Increment and get the new current char.
                         }
                     }
                     // Skip spaces
@@ -302,8 +296,15 @@ public class ManifestMetadataParser {
                         i = i + 1;
                     }
                     i = i + 1; // skip {
-                    Element elem = new Element(name, ns);
+                    
+                    Element elem = null;
+                    if (namespace == null) {
+                        elem = new Element(name.toString(), null);
+                    } else {
+                        elem = new Element(name.toString(), namespace.toString());
+                    }
                     addElement(elem);
+                    
                     break;
             }
         }

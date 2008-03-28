@@ -69,13 +69,13 @@ public class ProvidedServiceDescription {
      * 
      * @param serviceSpecification : the provided contract
      * @param state : state (UNREGITRED | REGISTRED)
-     * @param sr : Service Registration (to obtain the reference), or null if
+     * @param ref : Service Registration (to obtain the reference), or null if
      * state is UNREGISTRED
      */
-    public ProvidedServiceDescription(String[] serviceSpecification, int state, ServiceReference sr) {
+    public ProvidedServiceDescription(String[] serviceSpecification, int state, ServiceReference ref) {
         m_serviceSpecification = serviceSpecification;
         m_state = state;
-        m_serviceReference = sr;
+        m_serviceReference = ref;
         // m_parent = parent;
     }
 

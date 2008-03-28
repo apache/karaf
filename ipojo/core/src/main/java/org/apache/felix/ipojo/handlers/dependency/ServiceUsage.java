@@ -18,8 +18,6 @@
  */
 package org.apache.felix.ipojo.handlers.dependency;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Object managing thread local copy of required services.
@@ -31,19 +29,40 @@ public class ServiceUsage extends ThreadLocal {
     /**
      * Structure contained in the Thread Local.
      */
-    private class Usage {
+    public class Usage {
+        
         /**
          * Stack Size.
          */
-        Integer m_stack = new Integer(0);
-        /**
-         * List of used service references.
-         */
-        List m_refs = new ArrayList();
+        int m_stack = 0;
         /**
          * List of used objects.
          */
-        List m_objects = new ArrayList();
+        Object[] m_objects;
+        
+        /**
+         * Increment the statck level.
+         */
+        public void inc() {
+            m_stack++;
+        }
+        
+        /**
+         * Decrement the stack level.
+         * @return  true if the stack is 0 after the decrement.
+         */
+        public boolean dec() {
+            m_stack--;
+            return m_stack == 0;
+        }
+        
+        /**
+         * Clear the service object array.
+         */
+        public void clear() {
+            m_objects = null;
+        }
+        
     }
     
     /**
@@ -53,45 +72,6 @@ public class ServiceUsage extends ThreadLocal {
      */
     public Object initialValue() {
         return new Usage();
-    }
-    
-    /**
-     * Get the list of stored references.
-     * @return the list of stored references.
-     */
-    public List getReferences() {
-        Usage use = (Usage) super.get();
-        return use.m_refs;
-    }
-    
-    /**
-     * Get the lost of stored object.
-     * @return the list of stored service objects.
-     */
-    public List getObjects() {
-        Usage use = (Usage) super.get();
-        return use.m_objects;
-    }
-    
-    /**
-     * Get the stack level.
-     * @return the stack level.
-     */
-    public int getStackLevel() {
-        Usage use = (Usage) super.get();
-        return use.m_stack.intValue();
-    }
-    
-    /**
-     * Set the stack level.
-     * @param level : the new stack level.
-     */
-    public void setStackLevel(int level) {
-        Usage use = (Usage) super.get();
-        use.m_stack = new Integer(level);
-    }
-    
-    
-    
+    }   
 
 }

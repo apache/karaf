@@ -1,0 +1,6 @@
+<ipojo>
+	<handler
+		classname="org.apache.felix.ipojo.handler.extender.ExtenderModelHandler"
+		name="extender" namespace="org.apache.felix.ipojo.extender">
+	</handler>
+</ipojo>

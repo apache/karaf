@@ -18,24 +18,23 @@
  */
 package org.apache.felix.ipojo.handlers.configuration;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.IPojoConfiguration;
+import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.PrimitiveHandler;
-import org.apache.felix.ipojo.architecture.ComponentDescription;
+import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.FieldMetadata;
-import org.apache.felix.ipojo.parser.ManipulationMetadata;
 import org.apache.felix.ipojo.parser.MethodMetadata;
+import org.apache.felix.ipojo.parser.PojoMetadata;
+import org.apache.felix.ipojo.util.Property;
 
 /**
  * Handler managing the Configuration Admin.
@@ -46,7 +45,7 @@ public class ConfigurationHandler extends PrimitiveHandler {
     /**
      * List of the configurable fields.
      */
-    private ConfigurableProperty[] m_configurableProperties = new ConfigurableProperty[0];
+    private Property[] m_configurableProperties = new Property[0];
 
     /**
      * ProvidedServiceHandler of the component. It is useful to propagate
@@ -71,16 +70,16 @@ public class ConfigurationHandler extends PrimitiveHandler {
 
     /**
      * Initialize the component type.
-     * @param cd : component type description to populate.
+     * @param desc : component type description to populate.
      * @param metadata : component type metadata.
      * @throws ConfigurationException : metadata are incorrect.
-     * @see org.apache.felix.ipojo.Handler#initializeComponentFactory(org.apache.felix.ipojo.architecture.ComponentDescription, org.apache.felix.ipojo.metadata.Element)
+     * @see org.apache.felix.ipojo.Handler#initializeComponentFactory(org.apache.felix.ipojo.architecture.ComponentTypeDescription, org.apache.felix.ipojo.metadata.Element)
      */
-    public void initializeComponentFactory(ComponentDescription cd, Element metadata) throws ConfigurationException {
+    public void initializeComponentFactory(ComponentTypeDescription desc, Element metadata) throws ConfigurationException {
         Element[] confs = metadata.getElements("Properties", "");
-        if (confs.length == 0) { return; }
+        if (confs == null) { return; }
         Element[] configurables = confs[0].getElements("Property");
-        for (int i = 0; i < configurables.length; i++) {
+        for (int i = 0; configurables != null && i < configurables.length; i++) {
             String fieldName = configurables[i].getAttribute("field");
             String methodName = configurables[i].getAttribute("method");
             
@@ -90,10 +89,10 @@ public class ConfigurationHandler extends PrimitiveHandler {
 
             String name = configurables[i].getAttribute("name");
             if (name == null) {
-                if (fieldName != null) {
-                    name = fieldName;
-                } else {
+                if (fieldName == null) {
                     name = methodName;
+                } else {
+                    name = fieldName;
                 }
                 configurables[i].addAttribute(new Attribute("name", name)); // Add the type to avoid configure checking
             }
@@ -101,35 +100,43 @@ public class ConfigurationHandler extends PrimitiveHandler {
             String value = configurables[i].getAttribute("value");
 
             // Detect the type of the property
-            ManipulationMetadata manipulation = new ManipulationMetadata(metadata);
+            PojoMetadata manipulation = getFactory().getPojoMetadata();
             String type = null;
-            if (fieldName != null) {
-                FieldMetadata fm = manipulation.getField(fieldName);
-                if (fm == null) { throw new ConfigurationException("Malformed property : The field " + fieldName + " does not exist in the implementation"); }
-                type = fm.getFieldType();
-                configurables[i].addAttribute(new Attribute("type", type)); // Add the type to avoid configure checking
-            } else {
-                MethodMetadata[] mm = manipulation.getMethods(methodName);
-                if (mm.length != 0) {
-                    if (mm[0].getMethodArguments().length != 1) {
-                        throw new ConfigurationException("Malformed property :  The method " + methodName + " does not have one argument");
-                    }
-                    if (type != null && !type.equals(mm[0].getMethodArguments()[0])) {
-                        throw new ConfigurationException("Malformed property :   The field type (" + type + ") and the method type (" + mm[0].getMethodArguments()[0] + ") are not the same.");
-                    }
-                    type = mm[0].getMethodArguments()[0];
-                    configurables[i].addAttribute(new Attribute("type", type)); // Add the type to avoid configure checking
-                } else {
+            if (fieldName == null) {
+                MethodMetadata[] method = manipulation.getMethods(methodName);
+                if (method.length == 0) {
                     type = configurables[i].getAttribute("type");
                     if (type == null) {
                         throw new ConfigurationException("Malformed property : The type of the property cannot be discovered, please add a 'type' attribute");
                     }
+                } else {
+                    if (method[0].getMethodArguments().length != 1) {
+                        throw new ConfigurationException("Malformed property :  The method " + methodName + " does not have one argument");
+                    }
+                    if (type != null && !type.equals(method[0].getMethodArguments()[0])) {
+                        throw new ConfigurationException("Malformed property :   The field type (" + type + ") and the method type (" + method[0].getMethodArguments()[0] + ") are not the same.");
+                    }
+                    type = method[0].getMethodArguments()[0];
+                    configurables[i].addAttribute(new Attribute("type", type)); // Add the type to avoid configure checking
                 }
-            }
-            if (value != null) {
-                cd.addProperty(new PropertyDescription(name, type, value));
             } else {
-                cd.addProperty(new PropertyDescription(name, type, null));
+                FieldMetadata field = manipulation.getField(fieldName);
+                if (field == null) { throw new ConfigurationException("Malformed property : The field " + fieldName + " does not exist in the implementation"); }
+                type = field.getFieldType();
+                configurables[i].addAttribute(new Attribute("type", type)); // Add the type to avoid configure checking
+            }
+            
+            // Is the property set to immutable
+            boolean immutable = false;
+            String imm = configurables[i].getAttribute("immutable");
+            if (imm != null && imm.equalsIgnoreCase("true")) {
+                immutable = true;
+            }
+            
+            if (value == null) {
+                desc.addProperty(new PropertyDescription(name, type, null, false)); // Cannot be immutable if we have no value.
+            } else {
+                desc.addProperty(new PropertyDescription(name, type, value, immutable));
             }
         }
     }
@@ -145,7 +152,7 @@ public class ConfigurationHandler extends PrimitiveHandler {
      */
     public void configure(Element metadata, Dictionary configuration) throws ConfigurationException {
         // Store the component manager
-        m_configurableProperties = new ConfigurableProperty[0];
+        m_configurableProperties = new Property[0];
 
         // Build the map
         Element[] confs = metadata.getElements("Properties", "");
@@ -160,43 +167,32 @@ public class ConfigurationHandler extends PrimitiveHandler {
             m_toPropagate = configuration;
         }
 
-        List ff = new ArrayList();
-
-        for (int i = 0; i < configurables.length; i++) {
+        for (int i = 0; configurables != null && i < configurables.length; i++) {
             String fieldName = configurables[i].getAttribute("field");
             String methodName = configurables[i].getAttribute("method");
 
             String name = configurables[i].getAttribute("name"); // The initialize method has fixed the property name.
             String value = configurables[i].getAttribute("value");
 
-            if (configuration.get(name) != null && configuration.get(name) instanceof String) {
-                value = (String) configuration.get(name);
-            } else {
-                if (fieldName != null && configuration.get(fieldName) != null && configuration.get(fieldName) instanceof String) {
-                    value = (String) configuration.get(fieldName);
-                }
-            }
-
             String type = configurables[i].getAttribute("type"); // The initialize method has fixed the property name.
             
-            if (fieldName != null) {
-                FieldMetadata fm = new FieldMetadata(fieldName, type);
-                ff.add(fm);
-            }
-            
-            ConfigurableProperty cp = new ConfigurableProperty(name, fieldName, methodName, value, type, this);
-            addProperty(cp);
+            Property prop = new Property(name, fieldName, methodName, value, type, getInstanceManager(), this);
+            addProperty(prop);
 
             // Check if the instance configuration contains value for the current property :
-            if (configuration.get(name) != null && !(configuration.get(name) instanceof String)) {
-                cp.setValue(configuration.get(name));
-            } else {
-                if (fieldName != null && configuration.get(fieldName) != null && !(configuration.get(fieldName) instanceof String)) {
-                    cp.setValue(configuration.get(fieldName));
+            if (configuration.get(name) == null) {
+                if (fieldName != null && configuration.get(fieldName) != null) {
+                    prop.setValue(configuration.get(fieldName));
                 }
+            } else {
+                prop.setValue(configuration.get(name));
+            }
+            
+            if (fieldName != null) {
+                FieldMetadata field = new FieldMetadata(fieldName, type);
+                getInstanceManager().register(field, prop);
             }
         }
-        getInstanceManager().register(this, (FieldMetadata[]) ff.toArray(new FieldMetadata[ff.size()]), null);
     }
 
     /**
@@ -205,6 +201,7 @@ public class ConfigurationHandler extends PrimitiveHandler {
       * @see org.apache.felix.ipojo.Handler#stop()
       */
     public void stop() {
+        // Nothing to do.
     }
 
     /**
@@ -214,7 +211,7 @@ public class ConfigurationHandler extends PrimitiveHandler {
      */
     public void start() {
         // Get the provided service handler :
-        m_providedServiceHandler = (ProvidedServiceHandler) getHandler(IPojoConfiguration.IPOJO_NAMESPACE + ":provides");
+        m_providedServiceHandler = (ProvidedServiceHandler) getHandler(HandlerFactory.IPOJO_NAMESPACE + ":provides");
 
         // Propagation
         if (m_isConfigurable) {
@@ -225,45 +222,47 @@ public class ConfigurationHandler extends PrimitiveHandler {
         }
     }
 
-    /**
-     * Setter Callback Method.
-     * Check if the modified field is a configurable property to update the value.
-     * @param fieldName : field name
-     * @param value : new value
-     * @see org.apache.felix.ipojo.Handler#setterCallback(java.lang.String, java.lang.Object)
-     */
-    public void setterCallback(String fieldName, Object value) {
-        // Verify that the field name correspond to a configurable property
-        for (int i = 0; i < m_configurableProperties.length; i++) {
-            ConfigurableProperty cp = m_configurableProperties[i];
-            if (cp.hasField() && cp.getField().equals(fieldName)) {
-                // Check if the value has changed
-                if (cp.getValue() == null || !cp.getValue().equals(value)) {
-                    cp.setValue(value); // Change the value
-                }
-            }
-        }
-        // Else do nothing
-    }
-
-    /**
-     * Getter Callback Method.
-     * Check if the field is a configurable property to push the stored value.
-     * @param fieldName : field name
-     * @param value : value pushed by the previous handler
-     * @return the stored value or the previous value.
-     * @see org.apache.felix.ipojo.Handler#getterCallback(java.lang.String,
-     * java.lang.Object)
-     */
-    public Object getterCallback(String fieldName, Object value) {
-        // Check if the field is a configurable property
-        for (int i = 0; i < m_configurableProperties.length; i++) {
-            if (fieldName.equals(m_configurableProperties[i].getField())) { 
-                return m_configurableProperties[i].getValue(); 
-            }
-        }
-        return value;
-    }
+//    /**
+//     * Setter Callback Method.
+//     * Check if the modified field is a configurable property to update the value.
+//     * @param pojo : the pojo object on which the field is accessed
+//     * @param fieldName : field name
+//     * @param value : new value
+//     * @see org.apache.felix.ipojo.Handler#onSet(Object, java.lang.String, java.lang.Object)
+//     */
+//    public void onSet(Object pojo, String fieldName, Object value) {
+//        // Verify that the field name correspond to a configurable property
+//        for (int i = 0; i < m_configurableProperties.length; i++) {
+//            Property prop = m_configurableProperties[i];
+//            if (prop.hasField() && prop.getField().equals(fieldName)) {
+//                // Check if the value has changed
+//                if (prop.getValue() == null || !prop.getValue().equals(value)) {
+//                    prop.setValue(value); // Change the value
+//                }
+//            }
+//        }
+//        // Else do nothing
+//    }
+//
+//    /**
+//     * Getter Callback Method.
+//     * Check if the field is a configurable property to push the stored value.
+//     * @param pojo : the pojo object on which the field is accessed
+//     * @param fieldName : field name
+//     * @param value : value pushed by the previous handler
+//     * @return the stored value or the previous value.
+//     * @see org.apache.felix.ipojo.Handler#onGet(Object,
+//     * java.lang.String, java.lang.Object)
+//     */
+//    public Object onGet(Object pojo, String fieldName, Object value) {
+//        // Check if the field is a configurable property
+//        for (int i = 0; i < m_configurableProperties.length; i++) {
+//            if (fieldName.equals(m_configurableProperties[i].getField())) { 
+//                return m_configurableProperties[i].getValue(); 
+//            }
+//        }
+//        return value;
+//    }
 
     /**
      * Handler state changed.
@@ -284,20 +283,20 @@ public class ConfigurationHandler extends PrimitiveHandler {
     /**
      * Add the given property metadata to the property metadata list.
      * 
-     * @param p : property metadata to add
+     * @param prop : property metadata to add
      */
-    protected void addProperty(ConfigurableProperty p) {
+    protected void addProperty(Property prop) {
         for (int i = 0; (m_configurableProperties != null) && (i < m_configurableProperties.length); i++) {
-            if (m_configurableProperties[i].getName().equals(p.getName())) { return; }
+            if (m_configurableProperties[i].getName().equals(prop.getName())) { return; }
         }
 
         if (m_configurableProperties.length > 0) {
-            ConfigurableProperty[] newProp = new ConfigurableProperty[m_configurableProperties.length + 1];
+            Property[] newProp = new Property[m_configurableProperties.length + 1];
             System.arraycopy(m_configurableProperties, 0, newProp, 0, m_configurableProperties.length);
-            newProp[m_configurableProperties.length] = p;
+            newProp[m_configurableProperties.length] = prop;
             m_configurableProperties = newProp;
         } else {
-            m_configurableProperties = new ConfigurableProperty[] { p };
+            m_configurableProperties = new Property[] { prop };
         }
     }
 
@@ -317,31 +316,31 @@ public class ConfigurationHandler extends PrimitiveHandler {
     /**
      * Reconfigure the component instance.
      * Check if the new configuration modify the current configuration.
-     * @param np : the new configuration
+     * @param configuration : the new configuration
      * @see org.apache.felix.ipojo.Handler#reconfigure(java.util.Dictionary)
      */
-    public void reconfigure(Dictionary np) {
+    public void reconfigure(Dictionary configuration) {
         Properties toPropagate = new Properties();
-        Enumeration keysEnumeration = np.keys();
+        Enumeration keysEnumeration = configuration.keys();
         while (keysEnumeration.hasMoreElements()) {
             String name = (String) keysEnumeration.nextElement();
-            Object value = np.get(name);
+            Object value = configuration.get(name);
             boolean found = false;
             // Check if the name is a configurable property
-            for (int i = 0; !found && i < m_configurableProperties.length; i++) {
+            for (int i = 0; i < m_configurableProperties.length; i++) {
                 if (m_configurableProperties[i].getName().equals(name)) {
                     // Check if the value has changed
                     if (m_configurableProperties[i].getValue() == null || !m_configurableProperties[i].getValue().equals(value)) {
                         if (m_configurableProperties[i].hasField()) {
-                            getInstanceManager().setterCallback(m_configurableProperties[i].getField(), value); // dispatch that the value has changed
+                            getInstanceManager().onSet(null, m_configurableProperties[i].getField(), value); // dispatch that the value has changed
                         }
                         if (m_configurableProperties[i].hasMethod()) {
                             m_configurableProperties[i].setValue(value);
-                            m_configurableProperties[i].invoke();
+                            m_configurableProperties[i].invoke(null); // Call on all created pojo objects.
                         }
                     }
                     found = true;
-                    // Else do nothing
+                    break;
                 }
             }
             if (!found) {
@@ -366,9 +365,9 @@ public class ConfigurationHandler extends PrimitiveHandler {
      * Handler createInstance method.
      * This method is override to allow delayed callback invocation.
      * @param instance : the created object
-     * @see org.apache.felix.ipojo.Handler#objectCreated(java.lang.Object)
+     * @see org.apache.felix.ipojo.Handler#onCreation(java.lang.Object)
      */
-    public void objectCreated(Object instance) {
+    public void onCreation(Object instance) {
         for (int i = 0; i < m_configurableProperties.length; i++) {
             if (m_configurableProperties[i].hasMethod()) {
                 m_configurableProperties[i].invoke(instance);

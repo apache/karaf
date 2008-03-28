@@ -1,0 +1,27 @@
+<ipojo>
+	<!-- Composite Handler -->
+	<handler
+		classname="org.apache.felix.ipojo.composite.instance.InstanceHandler"
+		name="instance" type="composite" architecture="false" level="1">
+		<requires filter="(factory.state=1)" field="m_factories"
+			optional="true">
+			<callback type="bind" method="bindFactory" />
+			<callback type="unbind" method="unbindFactory" />
+		</requires>
+	</handler>
+	<handler
+		classname="org.apache.felix.ipojo.composite.service.instantiator.ServiceDependencyHandler"
+		name="subservice" type="composite" architecture="false">
+	</handler>
+	<handler
+		classname="org.apache.felix.ipojo.composite.service.provides.ProvidedServiceHandler"
+		name="provides" type="composite" architecture="false" level="3">
+	</handler>
+	<handler
+		classname="org.apache.felix.ipojo.composite.architecture.ArchitectureHandler"
+		name="architecture" type="composite" architecture="false">
+		<provides>
+			<property field="m_name" name="instance.name" value="" />
+		</provides>
+	</handler>
+</ipojo>

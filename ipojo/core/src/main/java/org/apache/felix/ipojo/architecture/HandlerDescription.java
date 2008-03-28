@@ -18,7 +18,6 @@
  */
 package org.apache.felix.ipojo.architecture;
 
-import org.apache.felix.ipojo.CompositeHandler;
 import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
@@ -43,21 +42,11 @@ public class HandlerDescription {
     /**
      * Constructor.
      * 
-     * @param h : handler.
+     * @param handler : handler.
      */
-    public HandlerDescription(Handler h) {
-        m_handlerName = h.getClass().getName();
-        m_isValid = h.isValid();
-    }
-
-    /**
-     * Constructor.
-     * 
-     * @param h : composite handler.
-     */
-    public HandlerDescription(CompositeHandler h) {
-        m_handlerName = h.getClass().getName();
-        m_isValid = h.isValid();
+    public HandlerDescription(Handler handler) {
+        m_handlerName = handler.getClass().getName();
+        m_isValid = handler.isValid();
     }
 
     /**

@@ -133,6 +133,9 @@ public class Pojoization {
                 path = "/" + path;
             }
             m_metadata = parseXMLMetadata(path);
+            if (m_metadata == null) {
+                return;
+            }
         }
         
         JarFile inputJar;
@@ -422,7 +425,7 @@ public class Pojoization {
     private void setImports(Attributes att) {
         Map imports = parseHeader(att.getValue("Import-Package"));
         Map ver = new TreeMap();
-        ver.put("version", "0.7.5");
+        ver.put("version", "0.7.6");
         if (!imports.containsKey("org.apache.felix.ipojo")) {
             imports.put("org.apache.felix.ipojo", ver);
         }

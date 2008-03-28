@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iPOJO xmlns:extender="org.apache.felix.ipojo.extender">
+	<Component className="org.apache.felix.ipojo.junit4osgi.impl.JunitExtender">
+		<extender:extender extension="Test-Suite" onArrival="onBundleArrival" onDeparture="onBundleDeparture"/>
+		<callback transition="invalidate" method="stopping"/>
+		<provides/>
+	</Component>
+	<instance component="org.apache.felix.ipojo.junit4osgi.impl.JunitExtender"/>
+	
+	<component className="org.apache.felix.ipojo.junit4osgi.command.JunitCommand" factory="false">
+		<requires field="runner"/>
+		<provides/>
+	</component>
+	<instance component="org.apache.felix.ipojo.junit4osgi.command.JunitCommand"/>
+</iPOJO>

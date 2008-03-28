@@ -42,10 +42,10 @@ public class DependencyHandlerDescription extends HandlerDescription {
 
     /**
      * Constructor.
-     * @param h : Handler.
+     * @param handler : Handler.
      */
-    public DependencyHandlerDescription(Handler h) {
-        super(h);
+    public DependencyHandlerDescription(Handler handler) {
+        super(handler);
     }
 
     /**
@@ -94,7 +94,7 @@ public class DependencyHandlerDescription extends HandlerDescription {
             Element dep = new Element("Requires", "");
             dep.addAttribute(new Attribute("Specification", m_dependencies[i].getInterface()));
             
-            if (!"".equals(m_dependencies[i].getFilter())) {
+            if (m_dependencies[i].getFilter() != null) {
                 dep.addAttribute(new Attribute("Filter", m_dependencies[i].getFilter()));
             }
             
@@ -112,16 +112,18 @@ public class DependencyHandlerDescription extends HandlerDescription {
             
             dep.addAttribute(new Attribute("State", state));
             List set = m_dependencies[i].getUsedServices();
-            Iterator it = set.iterator();
-            while (it.hasNext()) {
-                Element use = new Element("Uses", "");
-                ServiceReference ref = (ServiceReference) it.next();
-                use.addAttribute(new Attribute("service.id", ref.getProperty(Constants.SERVICE_ID).toString()));                
-                String in = (String) ref.getProperty("instance.name");
-                if (in != null) {
-                    use.addAttribute(new Attribute("instance.name", in));
+            if (set != null) {
+                Iterator iterator = set.iterator();
+                while (iterator.hasNext()) {
+                    Element use = new Element("Uses", "");
+                    ServiceReference ref = (ServiceReference) iterator.next();
+                    use.addAttribute(new Attribute("service.id", ref.getProperty(Constants.SERVICE_ID).toString()));                
+                    String instance = (String) ref.getProperty("instance.name");
+                    if (instance != null) {
+                        use.addAttribute(new Attribute("instance.name", instance));
+                    }
+                    dep.addElement(use);
                 }
-                dep.addElement(use);
             }
             
             deps.addElement(dep);

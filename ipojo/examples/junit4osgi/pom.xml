@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <parent>
+    <groupId>ipojo.examples</groupId>
+  	<artifactId>ipojo.examples</artifactId>
+  	<version>0.7.6-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>Junit4Osgi</artifactId>
+  <name>Apache Felix iPOJO Junit4OSGi</name>
+  <packaging>pom</packaging>
+
+  <profiles>
+	<profile>
+		<id>java5</id>
+		<activation>
+			<jdk>1.5</jdk>
+		</activation>
+		<modules>
+			<module>junit4osgi</module>
+			<module>felix-command</module>
+			<module>swing-runner</module>
+			<module>immediate-launcher</module>
+		</modules>
+	</profile>
+	<profile>
+		<id>java6</id>
+		<activation>
+			<jdk>1.6</jdk>
+		</activation>
+		<modules>
+			<module>junit4osgi</module>
+			<module>felix-command</module>
+			<module>swing-runner</module>
+			<module>immediate-launcher</module>
+		</modules>
+	</profile>
+  </profiles>
+</project>

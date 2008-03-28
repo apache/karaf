@@ -20,6 +20,7 @@ package org.apache.felix.ipojo.handler.event;
 
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.util.Callback;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.Filter;
@@ -43,7 +44,7 @@ class EventAdminSubscriberMetadata {
     private Callback m_callback;
 
     /**
-     * Listenned topics.
+     * Listened topics.
      */
     private String m_topics;
 
@@ -112,12 +113,11 @@ class EventAdminSubscriberMetadata {
      * @return true if the given topic is a listenned topic.
      */
     public boolean matchingTopic(String topic) {
-        return EventUtil.matches(topic, m_topics.split(","));
+        return EventUtil.matches(topic, ParseUtils.split(m_topics, ","));
     }
 
     /**
-     * Is the subscriber metadata valid ?
-     * This method check only the existence of a callback and a name attribute.
+     * Is the subscriber metadata valid ? This method check only the existence of a callback and a name attribute.
      * @param subscriber : metadata.
      * @return true if the metadata is valid.
      */
@@ -174,8 +174,7 @@ class EventAdminSubscriberMetadata {
     }
 
     /**
-     * Create and set the filter.
-     * The filter is create from the given argument.
+     * Create and set the filter. The filter is create from the given argument.
      * @param filter : the String form of the LDAP filter.
      * @throws InvalidSyntaxException : occurs when the given filter is invalid.
      */

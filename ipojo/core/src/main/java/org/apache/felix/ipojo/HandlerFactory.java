@@ -18,20 +18,12 @@
  */
 package org.apache.felix.ipojo;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Dictionary;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 
-import org.apache.felix.ipojo.architecture.ComponentDescription;
+import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.util.Logger;
-import org.apache.felix.ipojo.util.Tracker;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceRegistration;
 
 /**
  * The component factory manages component instance objects. This management
@@ -43,20 +35,20 @@ import org.osgi.framework.ServiceRegistration;
 public class HandlerFactory extends ComponentFactory implements Factory {
 
     /**
-     * Service Registration of this factory (Factory & ManagedServiceFactory).
+     * iPOJO Default Namespace.
      */
-    private ServiceRegistration m_sr;
-    
+    public static final String IPOJO_NAMESPACE = "org.apache.felix.ipojo";
+
     /**
      * Handler type (composite|primitive).
      * Default: handler.
      */
     private String m_type = "primitive";
-    
+
     /**
      * Default iPOJO Namespace.
      */
-    private String m_namespace = IPojoConfiguration.IPOJO_NAMESPACE;
+    private String m_namespace = IPOJO_NAMESPACE;
 
     /**
      * Get the handler start level.
@@ -67,114 +59,67 @@ public class HandlerFactory extends ComponentFactory implements Factory {
 
     /**
      * Create a composite factory.
-     * @param bc : bundle context
-     * @param cm : metadata of the component to create
+     * @param context : bundle context
+     * @param metadata : metadata of the component to create
+     * @throws ConfigurationException occurs when the element describing the factory is malformed.
      */
-    public HandlerFactory(BundleContext bc, Element cm) {
-        super(bc, cm);
-        
+    public HandlerFactory(BundleContext context, Element metadata) throws ConfigurationException {
+        super(context, metadata);
+
         // Get the name
-        m_factoryName = cm.getAttribute("name").toLowerCase();
-        if (m_factoryName == null) {
-            System.err.println("An Handler needs a name");
-            return;
-        }
-        
+        m_factoryName = metadata.getAttribute("name");
+        if (m_factoryName == null) { throw new ConfigurationException("An Handler needs a name"); }
+
         // Get the type
-        String t = cm.getAttribute("type");
-        if (t != null) {
-            m_type = t;
+        String type = metadata.getAttribute("type");
+        if (type != null) {
+            m_type = type;
         }
-        
-        String l = cm.getAttribute("level");
-        if (l != null) {
-            m_level = new Integer(l).intValue();
+
+        String level = metadata.getAttribute("level");
+        if (level != null) {
+            m_level = new Integer(level).intValue();
         }
-        
+
         // Get the namespace
-        String ns = cm.getAttribute("namespace");
-        if (ns != null) {
-            m_namespace = ns.toLowerCase();
-        }        
+        String namespace = metadata.getAttribute("namespace");
+        if (namespace != null) {
+            m_namespace = namespace.toLowerCase();
+        }
     }
-    
+
     public String getNamespace() {
         return m_namespace;
     }
-    
+
     public String getHandlerName() {
         return m_namespace + ":" + getName();
     }
-    
+
     public String getType() {
         return m_type;
     }
-    
+
     public int getStartLevel() {
         return m_level;
     }
 
-    /**
-     * Start all the instance managers.
-     */
-    public synchronized void start() {
-        if (m_sr != null) { // Already started.
-            return;
-        }
-        
-        if (m_handlerIdentifiers.size() != 0) {
-            try {
-                String filter = "(&(" + Handler.HANDLER_TYPE_PROPERTY + "=" + PrimitiveHandler.HANDLER_TYPE + ")" 
-                    + "(factory.state=1)"
-                    + ")";
-                m_tracker = new Tracker(m_context, m_context.createFilter(filter), this);
-                m_tracker.open();
-            } catch (InvalidSyntaxException e) {
-                m_logger.log(Logger.ERROR, "A factory filter is not valid: " + e.getMessage());
-                stop();
-                return;
-            }
-        }
-                
-        try {
-            computeFactoryState();
-        } catch (ConfigurationException e) {
-            m_logger.log(Logger.ERROR, "Cannot initilize the factory " + e.getMessage());
-            stop();
-            return;
-        }
-        
-        // Exposition of the factory service (always public for handlers)
-        m_sr = m_context.registerService(new String[] { Factory.class.getName()}, this, getProperties());
+    public ComponentTypeDescription getComponentTypeDescription() {
+        return new HandlerTypeDescription(this);
     }
-    
+
     /**
      * Stop the factory.
      * This method does not disposed created instances.
      * These instances will be disposed by the instance managers.
      */
-    public synchronized void stop() {
-        if (m_sr != null) {
-            m_sr.unregister();
-            m_sr = null;
-        }
-        
+    public synchronized void stopping() {
         if (m_tracker != null) {
             m_tracker.close();
             m_tracker = null;
         }
-        
-        // Release each handler
-        for (int i = 0; i < m_handlerIdentifiers.size(); i++) {
-            ((HandlerIdentifier) m_handlerIdentifiers.get(i)).unRef();
-        }
-        
-        m_handlerIdentifiers.clear();        
-        m_listeners.clear();
-        m_state = INVALID;        
     }
-    
-    
+
     /**
      * Compute factory service properties.
      * This method add three mandatory handler factory properties (name, namespace and type)
@@ -183,164 +128,53 @@ public class HandlerFactory extends ComponentFactory implements Factory {
      */
     protected Properties getProperties() {
         Properties props = new Properties();
-        
-        // Add factory state
-        props.put("factory.state", "" + m_state);
 
-        props.put(Handler.HANDLER_NAME_PROPERTY, m_factoryName);
-        props.put(Handler.HANDLER_NAMESPACE_PROPERTY, m_namespace);
-        props.put(Handler.HANDLER_TYPE_PROPERTY, m_type);
-        if (m_level != Integer.MAX_VALUE) {
-            props.put(Handler.HANDLER_LEVEL_PROPERTY, new Integer(m_level));
-        }
-        
         return props;
     }
-    
-    /**
-     * Compute handler factory state.
-     * @throws ConfigurationException : occurs when an handler cannot be initialized.
-     */
-    protected void computeFactoryState() throws ConfigurationException {
-        boolean isValid = true;
-        for (int i = 0; isValid && i < m_handlerIdentifiers.size(); i++) {
-            HandlerIdentifier hi = (HandlerIdentifier) m_handlerIdentifiers.get(i);
-            isValid = hi.getReference() != null;
-        }
-        
-        if (isValid) {            
-            if (m_state == INVALID) {
-                m_state = VALID;
-                
-                if (m_sr == null) {
-                    m_componentDesc = new ComponentDescription(this);
-                    for (int i = 0; i < m_handlerIdentifiers.size(); i++) {
-                        HandlerIdentifier hi = (HandlerIdentifier) m_handlerIdentifiers.get(i);
-                        HandlerManager hm = getHandlerInstance(hi, null);
-                        hm.getHandler();
-                        Handler ch = hm.getHandler();
-                        ch.setLogger(getLogger());
-                        ch.initializeComponentFactory(m_componentDesc, m_componentMetadata);
-                        ((Pojo) ch).getComponentInstance().dispose();
-                    }
-                }
-                
-                if (m_sr != null) {
-                    m_sr.setProperties(getProperties());
-                }
-                for (int i = 0; i < m_listeners.size(); i++) {
-                    ((FactoryStateListener) m_listeners.get(i)).stateChanged(this, VALID);
-                }
-                return;
-            }
-        } else {
-            if (m_state == VALID) {
-                m_state = INVALID;
-                
-                // Notify listeners.
-                for (int i = 0; i < m_listeners.size(); i++) {
-                    ((FactoryStateListener) m_listeners.get(i)).stateChanged(this, INVALID);
-                }
 
-                // Dispose created instances.
-                final Collection col = m_componentInstances.values();
-                final Iterator it = col.iterator();
-                while (it.hasNext()) {
-                    InstanceManager ci = (InstanceManager) it.next();
-                    if (ci.getState() != ComponentInstance.DISPOSED) {
-                        ci.kill();
-                    }
-                    m_instancesName.remove(ci.m_name);
-                }
-
-                m_componentInstances.clear();
-
-                if (m_sr != null) {
-                    m_sr.setProperties(getProperties());
-                }
-                
-                return;
-            }
-        }
-    }
-    
     /**
      * Create an instance. The given configuration needs to contain the 'name'
      * property.
      * @param configuration : configuration of the created instance.
-     * @param serviceContext : the service context to push for this instance.
+     * @param context : the service context to push for this instance.
+     * @param handlers : handler array to used.
      * @return the created component instance.
-     * @throws UnacceptableConfiguration : occurs if the given configuration is
      * not consistent with the component type of this factory.
-     * @throws MissingHandlerException : occurs when an handler is unavailable when creating the instance.
      * @throws org.apache.felix.ipojo.ConfigurationException : when the instance configuration failed.
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
-    public synchronized ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration, MissingHandlerException, org.apache.felix.ipojo.ConfigurationException {
-        if (m_state == Factory.INVALID) {
-            throw new MissingHandlerException(getMissingHandlers());
-        }
-        
-        if (configuration == null) {
-            configuration = new Properties();
-        }
-        
-        String in = null;
-        if (configuration.get("name") != null) {
-            in = (String) configuration.get("name");
-        } else {
-            in = generateName();
-            configuration.put("name", in);
-        }
-        
-        if (m_instancesName.contains(in)) {
-            throw new UnacceptableConfiguration("Name already used : " + in);
-        } else {
-            m_instancesName.add(in);
-        }
-
-        BundleContext context = null;
-        if (serviceContext == null) {
-            context = new IPojoContext(m_context);
-        } else {
-            context = new IPojoContext(m_context, serviceContext);
-        }
-        List handlers = new ArrayList();
-        for (int i = 0; i < m_handlerIdentifiers.size(); i++) {
-            HandlerIdentifier hi = (HandlerIdentifier) m_handlerIdentifiers.get(i);
-            handlers.add(getHandlerInstance(hi, serviceContext));
-        }
-        
-        HandlerManager instance = new HandlerManager(this, context, (HandlerManager[]) handlers.toArray(new HandlerManager[handlers.size()]));
+    public ComponentInstance createInstance(Dictionary configuration, IPojoContext context, HandlerManager[] handlers) throws ConfigurationException {
+        HandlerManager instance = new HandlerManager(this, context, handlers);
         instance.configure(m_componentMetadata, configuration);
-
-        m_componentInstances.put(in, instance);
-        
-        
         return instance;
     }
-    
-    /**
-     * Return an handler object.
-     * @param hi : handler to create.
-     * @param sc : service context in which create the handler (instance context).
-     * @return the Handler object.
-     */
-    private HandlerManager getHandlerInstance(HandlerIdentifier hi, ServiceContext sc) {
-        try {
-            return (HandlerManager) hi.getFactory().createComponentInstance(null, sc);
-        } catch (MissingHandlerException e) {
-            m_logger.log(Logger.ERROR, "The creation of the handler " + hi.getFullName() + " has failed: " + e.getMessage());
-            stop();
-            return null;
-        } catch (UnacceptableConfiguration e) {
-            m_logger.log(Logger.ERROR, "The creation of the handler " + hi.getFullName() + " has failed (UnacceptableConfiguration): " + e.getMessage());
-            stop();
-            return null;
-        } catch (org.apache.felix.ipojo.ConfigurationException e) {
-            m_logger.log(Logger.ERROR, "The configuration of the handler " + hi.getFullName() + " has failed (ConfigurationException): " + e.getMessage());
-            stop();
-            return null;
+
+    private class HandlerTypeDescription extends ComponentTypeDescription {
+
+        /**
+         * Constructor.
+         * @param factory : factory.
+         */
+        public HandlerTypeDescription(Factory factory) {
+            super(factory);
+        }
+
+        /**
+         * Add properties to publish : 
+         * handler.name, handler.namespace, handler.type and handler.level if the level is not Integer.MAX.
+         * @return return the dictionary to publish.
+         * @see org.apache.felix.ipojo.architecture.ComponentTypeDescription#getPropertiesToPublish()
+         */
+        public Dictionary getPropertiesToPublish() {
+            Dictionary props = super.getPropertiesToPublish();
+
+            props.put(Handler.HANDLER_NAME_PROPERTY, m_factoryName);
+            props.put(Handler.HANDLER_NAMESPACE_PROPERTY, m_namespace);
+            props.put(Handler.HANDLER_TYPE_PROPERTY, m_type);
+            if (m_level != Integer.MAX_VALUE) {
+                props.put(Handler.HANDLER_LEVEL_PROPERTY, new Integer(m_level));
+            }
+            return props;
         }
     }
 }

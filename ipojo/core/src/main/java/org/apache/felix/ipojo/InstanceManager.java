@@ -19,7 +19,9 @@
 package org.apache.felix.ipojo;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -35,13 +37,10 @@ import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 
 /**
- * The instance manager class manages one instance of a component type. It
- * manages component lifecycle, component instance creation and handlers.
- * 
+ * The instance manager class manages one instance of a component type. It manages component lifecycle, component instance creation and handlers.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class InstanceManager implements ComponentInstance, InstanceStateListener {
-
     /**
      * Name of the component instance.
      */
@@ -51,7 +50,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * Name of the component type implementation class.
      */
     protected String m_className;
-    
+
     /**
      * Handler list.
      */
@@ -61,12 +60,12 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * Component state (STOPPED at the beginning).
      */
     protected int m_state = STOPPED;
-    
+
     /**
      * Instance State Listener List.
      */
-    protected List m_instanceListeners = null;
-    
+    protected List m_listeners = null;
+
     /**
      * Parent factory (ComponentFactory).
      */
@@ -78,12 +77,12 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     private BundleContext m_context;
 
     /**
-     * Map [field, handler list] storing handlers interested by the field.
+     * Map [field, field interceptor list] storing handlers interested by the field.
      */
-    private Map m_fieldRegistration = new HashMap();
-    
+    private Map m_fieldRegistration;
+
     /**
-     * Map [method identifier, handler list] storing handlers interested by the method.
+     * Map [method identifier, method interceptor list] storing handlers interested by the method.
      */
     private Map m_methodRegistration;
 
@@ -95,78 +94,89 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     /**
      * Instances of the components.
      */
-    private Object[] m_pojoObjects = null;
+    private List m_pojoObjects;
 
-   /**
-    * Is the component instance state changing?
-    */
-    private boolean m_inTransition = false;
-    
     /**
-     * Queue of stored state changed. 
+     * Factory method. Contains the name of the static method used to create POJO objects.
+     */
+    private String m_factoryMethod = null;
+
+    /**
+     * Is the component instance state changing?
+     */
+    private boolean m_inTransition = false;
+
+    /**
+     * Queue of stored state changed.
      */
     private List m_stateQueue = new ArrayList();
-    
+
     /**
      * Map of [field, value], storing POJO field value.
      */
-    private Map m_map = new HashMap();
+    private Map m_fields = new HashMap();
+
+    /**
+     * Map method [id=>method].
+     */
+    private Map m_methods = new HashMap();
 
     /**
      * Construct a new Component Manager.
-     * 
      * @param factory : the factory managing the instance manager
-     * @param bc : the bundle context to give to the instance
+     * @param context : the bundle context to give to the instance
      * @param handlers : handlers array
      */
-    public InstanceManager(ComponentFactory factory, BundleContext bc, HandlerManager[] handlers) {
+    public InstanceManager(ComponentFactory factory, BundleContext context, HandlerManager[] handlers) {
         m_factory = factory;
-        m_context = bc;
+        m_context = context;
         m_handlers = handlers;
     }
 
     /**
-     * Configure the instance manager. Stop the existing handler, clear the
-     * handler list, change the metadata, recreate the handlers
-     * 
-     * @param cm : the component type metadata
+     * Configure the instance manager. Stop the existing handler, clear the handler list, change the metadata, recreate the handlers
+     * @param metadata : the component type metadata
      * @param configuration : the configuration of the instance
      * @throws ConfigurationException : occurs if the metadata are not correct
      */
-    public void configure(Element cm, Dictionary configuration) throws ConfigurationException {
-        m_className = cm.getAttribute("className");
-        
+    public void configure(Element metadata, Dictionary configuration) throws ConfigurationException {
+        m_className = metadata.getAttribute("className");
+
         // Add the name
         m_name = (String) configuration.get("name");
-        
+
+        // Get the factory method if presents.
+        m_factoryMethod = (String) metadata.getAttribute("factory-method");
+
         // Create the standard handlers and add these handlers to the list
         for (int i = 0; i < m_handlers.length; i++) {
-            m_handlers[i].init(this, cm, configuration);
+            m_handlers[i].init(this, metadata, configuration);
         }
     }
 
     /**
-     * Get the description of the current instance. 
+     * Get the description of the current instance.
      * @return the instance description.
      * @see org.apache.felix.ipojo.ComponentInstance#getInstanceDescription()
      */
     public InstanceDescription getInstanceDescription() {
         int componentState = getState();
-        InstanceDescription instanceDescription = new InstanceDescription(m_name, componentState, getContext().getBundle().getBundleId(), m_factory.getComponentDescription());
+        InstanceDescription desc =
+                new InstanceDescription(m_name, componentState, getContext().getBundle().getBundleId(), m_factory.getComponentDescription());
 
         if (m_pojoObjects != null) {
-            String[] objects = new String[m_pojoObjects.length];
-            for (int i = 0; i < m_pojoObjects.length; i++) {
-                objects[i] = m_pojoObjects[i].toString();
+            String[] objects = new String[m_pojoObjects.size()];
+            for (int i = 0; i < m_pojoObjects.size(); i++) {
+                objects[i] = m_pojoObjects.get(i).toString();
             }
-            instanceDescription.setCreatedObjects(objects);
+            desc.setCreatedObjects(objects);
         }
 
         Handler[] handlers = getRegistredHandlers();
         for (int i = 0; i < handlers.length; i++) {
-            instanceDescription.addHandler(handlers[i].getDescription());
+            desc.addHandler(handlers[i].getDescription());
         }
-        return instanceDescription;
+        return desc;
     }
 
     /**
@@ -174,22 +184,21 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @return the handler array of plugged handlers.
      */
     public Handler[] getRegistredHandlers() {
-        Handler[] h = new Handler[m_handlers.length];
+        Handler[] handler = new Handler[m_handlers.length];
         for (int i = 0; i < m_handlers.length; i++) {
-            h[i] = m_handlers[i].getHandler();
+            handler[i] = m_handlers[i].getHandler();
         }
-        return h;
+        return handler;
     }
 
     /**
      * Return a specified handler.
-     * 
      * @param name : class name of the handler to find or its qualified name (namespace:name)
      * @return : the handler, or null if not found
      */
     public Handler getHandler(String name) {
         for (int i = 0; i < m_handlers.length; i++) {
-            HandlerFactory fact = (HandlerFactory) m_handlers[i].getHandler().getInstance().getFactory();
+            HandlerFactory fact = (HandlerFactory) m_handlers[i].getHandler().getHandlerManager().getFactory();
             if (fact.getHandlerName().equals(name)) {
                 return m_handlers[i].getHandler();
             }
@@ -198,24 +207,83 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
+     * Give access to a field value to the first created pojo.
+     * This method process by analyzing both managed fields and pojo fields (by reflection).
+     * If no pojo were already created try only on managed fields.
+     * @param fieldName : field name.
+     * @return the field value, null is returned if the value is managed and not already set.
+     */
+    public synchronized Object getFieldValue(String fieldName) {
+        if (m_pojoObjects == null) {
+            return getFieldValue(fieldName, null);
+        } else {
+            return getFieldValue(fieldName, m_pojoObjects.get(0)); // Use the first pojo.
+        }
+    }
+
+    /**
+     * Give access to a field value to the given created pojo.
+     * This method process by analyzing both managed fields and pojo fields (by reflection).
+     * If the given pojo is null, try only on managed fields.
+     * @param fieldName : field name.
+     * @param pojo : the pojo on which computing field value.
+     * @return the field value, null is returned if the value is managed and not already set.
+     */
+    public synchronized Object getFieldValue(String fieldName, Object pojo) {
+        Object setByContainer = null;
+        
+        if (m_fields != null) {
+            setByContainer = m_fields.get(fieldName);
+        }
+        
+        if (setByContainer == null && pojo != null) { // In the case of no given pojo, return null.
+            // If null either the value was not already set or has the null value.
+            try {
+                Field field = pojo.getClass().getDeclaredField(fieldName);
+                if (!field.isAccessible()) {
+                    field.setAccessible(true);
+                }
+                return field.get(pojo);
+            } catch (SecurityException e) {
+                m_factory.getLogger().log(Logger.ERROR, "Cannot reflect on field " + fieldName + " to obtain the value : " + e.getMessage());
+            } catch (NoSuchFieldException e) {
+                m_factory.getLogger().log(Logger.ERROR, "Cannot reflect on field " + fieldName + " to obtain the value : " + e.getMessage());
+            } catch (IllegalArgumentException e) {
+                m_factory.getLogger().log(Logger.ERROR, "Cannot reflect on field " + fieldName + " to obtain the value : " + e.getMessage());
+            } catch (IllegalAccessException e) {
+                m_factory.getLogger().log(Logger.ERROR, "Cannot reflect on field " + fieldName + " to obtain the value : " + e.getMessage());
+            }
+            return null;
+        } else {
+            return setByContainer;
+        }
+    }
+
+    /**
      * Start the instance manager.
      */
     public synchronized void start() {
         if (m_state != STOPPED) { // Instance already started
             return;
-        } 
-        
+        }
+
         for (int i = 0; i < m_handlers.length; i++) {
             m_handlers[i].addInstanceStateListener(this);
-            m_handlers[i].start();
+            try {
+                m_handlers[i].start();
+            } catch (IllegalStateException e) {
+                m_factory.getLogger().log(Logger.ERROR, e.getMessage());
+                stop();
+                throw e;
+            }
         }
-        
+
         for (int i = 0; i < m_handlers.length; i++) {
-            
             if (m_handlers[i].getState() != VALID) {
                 setState(INVALID);
                 return;
             }
+
         }
         setState(VALID);
     }
@@ -227,26 +295,27 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         if (m_state == STOPPED) {
             return;
         } // Instance already stopped
-        
+
         setState(INVALID);
-        
+
+        m_state = STOPPED;
+
         // Stop all the handlers
         for (int i = m_handlers.length - 1; i > -1; i--) {
             m_handlers[i].removeInstanceStateListener(this);
             m_handlers[i].stop();
         }
-        
+
         m_pojoObjects = null;
 
-        m_state = STOPPED;
-        if (m_instanceListeners != null) {
-            for (int i = 0; i < m_instanceListeners.size(); i++) {
-                ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, STOPPED);
+        if (m_listeners != null) {
+            for (int i = 0; i < m_listeners.size(); i++) {
+                ((InstanceStateListener) m_listeners.get(i)).stateChanged(this, STOPPED);
             }
         }
     }
-    
-    /** 
+
+    /**
      * Dispose the instance.
      * @see org.apache.felix.ipojo.ComponentInstance#dispose()
      */
@@ -254,100 +323,79 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         if (m_state > STOPPED) { // Valid or invalid
             stop();
         }
-        
+
         m_state = DISPOSED;
-        
-        if (m_instanceListeners != null) {
-            for (int i = 0; i < m_instanceListeners.size(); i++) {
-                ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, DISPOSED);
-            }
-            m_instanceListeners = null;
+
+        for (int i = 0; m_listeners != null && i < m_listeners.size(); i++) {
+            ((InstanceStateListener) m_listeners.get(i)).stateChanged(this, DISPOSED);
         }
-        
-        m_factory.disposed(this);
-        
+        m_listeners = null;
+
         for (int i = m_handlers.length - 1; i > -1; i--) {
             m_handlers[i].dispose();
         }
-        
-        m_map.clear();
-        m_handlers = new HandlerManager[0];
-        m_fieldRegistration = new HashMap();
-        m_methodRegistration = new HashMap();
-        m_clazz = null;
-        m_inTransition = false;
-    }
-    
-    /**
-     * Kill the current instance.
-     * Only the factory of this instance can call this method.
-     */
-    protected void kill() {
-        if (m_state > STOPPED) {
-            stop();
-        }
-        if (m_instanceListeners != null) {
-            for (int i = 0; i < m_instanceListeners.size(); i++) {
-                ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, DISPOSED);
-            }
-            m_instanceListeners = null;
-        }
 
-        // Cleaning
-        m_state = DISPOSED;
-        
-        for (int i = 0; i < m_handlers.length; i++) {
-            m_handlers[i].dispose();
-        }
-        
-        m_map.clear();
         m_handlers = new HandlerManager[0];
+        m_factory.disposed(this);
+        m_fields.clear();
         m_fieldRegistration = new HashMap();
         m_methodRegistration = new HashMap();
         m_clazz = null;
         m_inTransition = false;
-        
     }
-    
+
     /**
-     * Set the state of the component instance.
-     * if the state changed call the stateChanged(int) method on the handlers.
-     * This method has a reentrant mechanism. If in the flow of the first call the method is called another times, 
-     * the second call is stored and executed after the first one is finished.
+     * Set the state of the component instance. if the state changed call the stateChanged(int) method on the handlers. This method has a reentrant
+     * mechanism. If in the flow of the first call the method is called another times, the second call is stored and executed after the first one is
+     * finished.
      * @param state : the new state
      */
     public synchronized void setState(int state) {
         if (m_inTransition) {
-            m_stateQueue.add(new Integer(state)); 
+            m_stateQueue.add(new Integer(state));
             return;
         }
-        
+
         if (m_state != state) {
             m_inTransition = true;
 
             if (state > m_state) {
                 // The state increases (Stopped = > IV, IV => V) => invoke handlers from the higher priority to the lower
                 m_state = state;
-                for (int i = 0; i < m_handlers.length; i++) {
-                    m_handlers[i].getHandler().stateChanged(state);
+                try {
+                    for (int i = 0; i < m_handlers.length; i++) {
+                        m_handlers[i].getHandler().stateChanged(state);
+                    }
+                } catch (IllegalStateException e) {
+                    // When an illegal state exception happens, the instance manager must be stopped immediately.
+                    m_stateQueue.clear();
+                    stop();
+                    return;
                 }
             } else {
                 // The state decreases (V => IV, IV = > Stopped, Stopped => Disposed)
                 m_state = state;
-                for (int i = m_handlers.length - 1; i > -1; i--) {
-                    m_handlers[i].getHandler().stateChanged(state);
+                try {
+                    for (int i = m_handlers.length - 1; i > -1; i--) {
+                        m_handlers[i].getHandler().stateChanged(state);
+                    }
+                } catch (IllegalStateException e) {
+                    // When an illegal state exception happens, the instance manager must be stopped immediately.
+                    m_stateQueue.clear();
+                    stop();
+                    return;
                 }
             }
-            
-            if (m_instanceListeners != null) {
-                for (int i = 0; i < m_instanceListeners.size(); i++) {
-                    ((InstanceStateListener) m_instanceListeners.get(i)).stateChanged(this, state);
+
+            if (m_listeners != null) {
+                for (int i = 0; i < m_listeners.size(); i++) {
+                    ((InstanceStateListener) m_listeners.get(i)).stateChanged(this, state);
                 }
             }
         }
-        
+
         m_inTransition = false;
-        if (! m_stateQueue.isEmpty()) {
+        if (!m_stateQueue.isEmpty()) {
             int newState = ((Integer) (m_stateQueue.remove(0))).intValue();
             setState(newState);
         }
@@ -370,18 +418,18 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     public boolean isStarted() {
         return m_state > STOPPED;
     }
-    
+
     /**
      * Register an instance state listener.
      * @param listener : listener to register.
      * @see org.apache.felix.ipojo.ComponentInstance#addInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
      */
-    public void addInstanceStateListener(InstanceStateListener listener) {
-        if (m_instanceListeners == null) {
-            m_instanceListeners = new ArrayList();
+    public synchronized void addInstanceStateListener(InstanceStateListener listener) {
+        if (m_listeners == null) {
+            m_listeners = new ArrayList();
         }
-        synchronized (m_instanceListeners) {
-            m_instanceListeners.add(listener);
+        synchronized (m_listeners) {
+            m_listeners.add(listener);
         }
     }
 
@@ -390,12 +438,12 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @param listener : listener to unregister.
      * @see org.apache.felix.ipojo.ComponentInstance#removeInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
      */
-    public void removeInstanceStateListener(InstanceStateListener listener) {
-        if (m_instanceListeners != null) {
-            synchronized (m_instanceListeners) {
-                m_instanceListeners.remove(listener);
-                if (m_instanceListeners.size() == 0) {
-                    m_instanceListeners = null;
+    public synchronized void removeInstanceStateListener(InstanceStateListener listener) {
+        if (m_listeners != null) {
+            synchronized (m_listeners) {
+                m_listeners.remove(listener);
+                if (m_listeners.isEmpty()) {
+                    m_listeners = null;
                 }
             }
         }
@@ -424,129 +472,186 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Add an instance to the created instance list.
-     * @param o : the instance to add
-     */
-    private synchronized void addInstance(Object o) {
-        if (m_pojoObjects != null) {
-            Object[] newInstances = new Object[m_pojoObjects.length + 1];
-            System.arraycopy(m_pojoObjects, 0, newInstances, 0, m_pojoObjects.length);
-            newInstances[m_pojoObjects.length] = o;
-            m_pojoObjects = newInstances;
-        } else {
-            m_pojoObjects = new Object[] { o };
-        }
-    }
-
-    /**
      * Get the array of object created by the instance.
      * @return the created instance of the component instance.
      */
     public Object[] getPojoObjects() {
-        return m_pojoObjects;
+        if (m_pojoObjects == null) {
+            return null;
+        }
+        return m_pojoObjects.toArray(new Object[m_pojoObjects.size()]);
     }
 
     /**
-     * Delete the created instance (remove it from the list, to allow the
-     * garbage collector to eat the instance).
-     * 
-     * @param o : the instance to delete
-     */
-    public synchronized void deletePojoObject(Object o) {
-        int idx = -1;
-        for (int i = 0; i < m_pojoObjects.length; i++) {
-            if (m_pojoObjects[i] == o) {
-                idx = i;
-                break;
-            }
-        }
-
-        if (idx >= 0) {
-            if ((m_pojoObjects.length - 1) == 0) {
-                m_pojoObjects = null;
-            } else {
-                Object[] newInstances = new Object[m_pojoObjects.length - 1];
-                System.arraycopy(m_pojoObjects, 0, newInstances, 0, idx);
-                if (idx < newInstances.length) {
-                    System.arraycopy(m_pojoObjects, idx + 1, newInstances, idx, newInstances.length - idx);
-                }
-                m_pojoObjects = newInstances;
-            }
-        }
-    }
-
-    /**
-     * Create an instance of the component. This method need to be called one
-     * time only for singleton provided service
-     * 
+     * Create an instance of the component. This method need to be called one time only for singleton provided service
      * @return a new instance
      */
     public Object createPojoObject() {
-
         if (m_clazz == null) {
             load();
         }
+
         Object instance = null;
-        try {
-            // Try to find if there is a constructor with a bundle context as
-            // parameter :
+
+        if (m_factoryMethod == null) {
+            // No factory-method, we use the constructor.
             try {
-                Constructor constructor = m_clazz.getConstructor(new Class[] { InstanceManager.class, BundleContext.class });
-                constructor.setAccessible(true);
-                instance = constructor.newInstance(new Object[] { this, m_context });
+                // Try to find if there is a constructor with a bundle context as parameter :
+                try {
+                    Constructor cst = m_clazz.getDeclaredConstructor(new Class[] { InstanceManager.class, BundleContext.class });
+                    if (! cst.isAccessible()) {
+                        cst.setAccessible(true);
+                    }
+                    Object[] args = new Object[] { this, m_context };
+                    onEntry(null, m_className,  new Object[] {m_context});
+                    instance = cst.newInstance(args);
+                    onExit(null, m_className, instance);
+                } catch (NoSuchMethodException e) {
+                    // Create an instance if no instance are already created with <init>()BundleContext
+                    if (instance == null) {
+                        Constructor cst = m_clazz.getDeclaredConstructor(new Class[] { InstanceManager.class });
+                        if (! cst.isAccessible()) {
+                            cst.setAccessible(true);
+                        }
+                        Object[] args = new Object[] {this};
+                        onEntry(null, m_className, new Object[0]);
+                        instance = cst.newInstance(args);
+                        onExit(null, m_className, instance);
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                m_factory.getLogger().log(Logger.ERROR,
+                                          "[" + m_name + "] createInstance -> The POJO constructor is not accessible : " + e.getMessage());
+                stop();
+            } catch (SecurityException e) {
+                m_factory.getLogger().log(
+                                          Logger.ERROR,
+                                          "["
+                                                  + m_name
+                                                  + "] createInstance -> The Component Instance is not accessible (security reason) : "
+                                                  + e.getMessage());
+                stop();
+            } catch (InvocationTargetException e) {
+                m_factory.getLogger().log(
+                                          Logger.ERROR,
+                                          "["
+                                                  + m_name
+                                                  + "] createInstance -> Cannot invoke the constructor method (illegal target) : "
+                                                  + e.getTargetException().getMessage());
+                onError(null, m_className, e.getTargetException());
+                stop();
             } catch (NoSuchMethodException e) {
-                instance = null;
+                m_factory.getLogger().log(Logger.ERROR,
+                                          "[" + m_name + "] createInstance -> Cannot invoke the constructor (method not found) : " + e.getMessage());
+                stop();
+            } catch (IllegalArgumentException e) {
+                m_factory.getLogger().log(Logger.ERROR,
+                                          "[" + m_name + "] createInstance -> The POJO constructor invocation failed : " + e.getMessage());
+                stop();
+            } catch (InstantiationException e) {
+                m_factory.getLogger().log(Logger.ERROR,
+                                          "[" + m_name + "] createInstance -> The POJO constructor invocation failed : " + e.getMessage());
+                stop();
+            }
+        } else {
+            try {
+                // Build the pojo object with the factory-method.
+                Method factory = null;
+                // Try with the bundle context
+                try {
+                    factory = m_clazz.getDeclaredMethod(m_factoryMethod, new Class[] { BundleContext.class });
+                    if (! factory.isAccessible()) {
+                        factory.setAccessible(true);
+                    }
+                    Object[] args = new Object[] { m_context };
+                    onEntry(null, m_className, args);
+                    instance = factory.invoke(null, new Object[] { m_context });
+                } catch (NoSuchMethodException e1) {
+                    // Try without the bundle context
+                    try {
+                        factory = m_clazz.getDeclaredMethod(m_factoryMethod, new Class[0]);
+                        if (! factory.isAccessible()) {
+                            factory.setAccessible(true);
+                        }
+                        Object[] args = new Object[0];
+                        onEntry(null, m_className, args);
+                        instance = factory.invoke(null, args);
+                    } catch (NoSuchMethodException e2) {
+                        // Error : factory-method not found
+                        m_factory.getLogger().log(
+                                                  Logger.ERROR,
+                                                  "["
+                                                          + m_name
+                                                          + "] createInstance -> Cannot invoke the factory-method (method not found) : "
+                                                          + e2.getMessage());
+                        stop();
+                    }
+                }
+
+                // Now call the setInstanceManager method.
+                Method method = instance.getClass().getDeclaredMethod("_setInstanceManager", new Class[] { InstanceManager.class });
+                if (!method.isAccessible()) {
+                    method.setAccessible(true);
+                }
+                method.invoke(instance, new Object[] { this });
+                onExit(null, m_className, instance);
+
+            } catch (SecurityException e) {
+                // Error : invocation failed
+                m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the factory-method : " + e.getMessage());
+                stop();
+            } catch (IllegalArgumentException e) {
+                // Error : arguments mismatch
+                m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the factory-method : " + e.getMessage());
+                stop();
+            } catch (IllegalAccessException e) {
+                // Error : illegal access
+                m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the factory-method : " + e.getMessage());
+                stop();
+            } catch (InvocationTargetException e) {
+                // Error : invocation failed
+                m_factory.getLogger().log(Logger.ERROR,
+                                          "[" + m_name + "] createInstance -> The factory-method returns an exception : " + e.getTargetException());
+                onError(null, m_className, e.getTargetException());
+                stop();
+            } catch (NoSuchMethodException e) {
+                // Error : _setInstanceManager method is missing
+                m_factory.getLogger()
+                        .log(
+                             Logger.ERROR,
+                             "["
+                                     + m_name
+                                     + "] createInstance -> Cannot invoke the factory-method (the _setInstanceManager method does not exist) : "
+                                     + e.getMessage());
+                stop();
             }
 
-            // Create an instance if no instance are already created with
-            // <init>()BundleContext
-            if (instance == null) {
-                Constructor constructor = m_clazz.getConstructor(new Class[] { InstanceManager.class });
-                constructor.setAccessible(true);
-                instance = constructor.newInstance(new Object[] { this });
+        }
+
+        // Register the new instance in not already present.
+        if (m_pojoObjects == null) {
+            m_pojoObjects = new ArrayList(1);
+        }
+        if (!m_pojoObjects.contains(instance)) {
+            m_pojoObjects.add(instance);
+            // Call createInstance on Handlers :
+            for (int i = 0; i < m_handlers.length; i++) {
+                ((PrimitiveHandler) m_handlers[i].getHandler()).onCreation(instance);
             }
-
-        } catch (InstantiationException e) {
-            m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> The Component Instance cannot be instancied : " + e.getMessage());
-            stop();
-        } catch (IllegalAccessException e) {
-            m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> The Component Instance is not accessible : " + e.getMessage());
-            stop();
-        } catch (SecurityException e) {
-            m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> The Component Instance is not accessible (security reason) : " + e.getMessage());
-            stop();
-        } catch (InvocationTargetException e) {
-            m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the constructor method (illegal target) : " + e.getTargetException().getMessage());
-            e.printStackTrace();
-            stop();
-        } catch (NoSuchMethodException e) {
-            m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the constructor (method not found) : " + e.getMessage());
-            stop();
-        }
-        if (instance == null) {
-            m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot create the instance");
-            stop();
         }
 
-        // Register the new instance
-        addInstance(instance);
-        // Call createInstance on Handlers :
-        for (int i = 0; i < m_handlers.length; i++) {
-            ((PrimitiveHandler) m_handlers[i].getHandler()).objectCreated(instance);
-        }
         return instance;
     }
 
     /**
-     * Get the first object created by the instance.
-     * If no object created, create and return one object.
+     * Get the first object created by the instance. If no object created, create and return one object.
      * @return the instance of the component instance to use for singleton component
      */
     public synchronized Object getPojoObject() {
         if (m_pojoObjects == null) {
-            createPojoObject();
+            return createPojoObject();
         }
-        return m_pojoObjects[0];
+        return m_pojoObjects.get(0);
     }
 
     /**
@@ -561,134 +666,219 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Register an handler. The handler will be notified of event on each field
-     * given in the list.
-     * 
-     * @param h : the handler to register
+     * Register an handler. The handler will be notified of event on each field given in the list.
+     * @param handler : the handler to register
      * @param fields : the field metadata list
      * @param methods : the method metadata list
+     * @deprecated use register(FieldMetadata fm, FieldInterceptor fi) and register(MethodMetadata mm, MethodInterceptor mi) instead. 
      */
-    public void register(PrimitiveHandler h, FieldMetadata[] fields, MethodMetadata[] methods) {
+    public void register(PrimitiveHandler handler, FieldMetadata[] fields, MethodMetadata[] methods) {
         for (int i = 0; fields != null && i < fields.length; i++) {
-            if (m_fieldRegistration.get(fields[i].getFieldName()) == null) {
-                m_fieldRegistration.put(fields[i].getFieldName(), new PrimitiveHandler[] { h });
+            register(fields[i], handler);
+        }
+        for (int i = 0; methods != null && i < methods.length; i++) {
+            register(methods[i], handler);
+        }
+
+    }
+    
+    /**
+     * Register a field interceptor.
+     * @param field : intercepted field
+     * @param interceptor : interceptor
+     */
+    public void register(FieldMetadata field, FieldInterceptor interceptor) {
+        if (m_fieldRegistration == null) {
+            m_fieldRegistration = new HashMap();
+            m_fieldRegistration.put(field.getFieldName(), new FieldInterceptor[] { interceptor });
+        } else {
+            FieldInterceptor[] list = (FieldInterceptor[]) m_fieldRegistration.get(field.getFieldName());
+            if (list == null) {
+                m_fieldRegistration.put(field.getFieldName(), new FieldInterceptor[] { interceptor });
             } else {
-                PrimitiveHandler[] list = (PrimitiveHandler[]) m_fieldRegistration.get(fields[i].getFieldName());
                 for (int j = 0; j < list.length; j++) {
-                    if (list[j] == h) {
+                    if (list[j] == interceptor) {
                         return;
                     }
                 }
-                PrimitiveHandler[] newList = new PrimitiveHandler[list.length + 1];
+                FieldInterceptor[] newList = new FieldInterceptor[list.length + 1];
                 System.arraycopy(list, 0, newList, 0, list.length);
-                newList[list.length] = h;
-                m_fieldRegistration.put(fields[i].getFieldName(), newList);
+                newList[list.length] = interceptor;
+                m_fieldRegistration.put(field.getFieldName(), newList);
             }
         }
-        for (int i = 0; methods != null && i < methods.length; i++) {
-            if (m_methodRegistration == null) { 
-                m_methodRegistration = new HashMap();
-                m_methodRegistration.put(methods[i].getMethodIdentifier(), new PrimitiveHandler[] { h });
-            } else { 
-                PrimitiveHandler[] list = (PrimitiveHandler[]) m_methodRegistration.get(methods[i].getMethodIdentifier());
-                if (list == null) {
-                    m_methodRegistration.put(methods[i].getMethodIdentifier(), new PrimitiveHandler[] { h });
-                } else {
-                    for (int j = 0; j < list.length; j++) {
-                        if (list[j] == h) {
-                            return;
-                        }
+    }
+    
+    /**
+     * Register a method interceptor.
+     * @param method : intercepted method
+     * @param interceptor : interceptor
+     */
+    public void register(MethodMetadata method, MethodInterceptor interceptor) {
+        if (m_methodRegistration == null) {
+            m_methodRegistration = new HashMap();
+            m_methodRegistration.put(method.getMethodIdentifier(), new MethodInterceptor[] { interceptor });
+        } else {
+            MethodInterceptor[] list = (MethodInterceptor[]) m_methodRegistration.get(method.getMethodIdentifier());
+            if (list == null) {
+                m_methodRegistration.put(method.getMethodIdentifier(), new MethodInterceptor[] { interceptor });
+            } else {
+                for (int j = 0; j < list.length; j++) {
+                    if (list[j] == interceptor) {
+                        return;
                     }
-                    PrimitiveHandler[] newList = new PrimitiveHandler[list.length + 1];
-                    System.arraycopy(list, 0, newList, 0, list.length);
-                    newList[list.length] = h;
-                    m_methodRegistration.put(methods[i].getMethodIdentifier(), newList);
                 }
+                MethodInterceptor[] newList = new MethodInterceptor[list.length + 1];
+                System.arraycopy(list, 0, newList, 0, list.length);
+                newList[list.length] = interceptor;
+                m_methodRegistration.put(method.getMethodIdentifier(), newList);
             }
         }
-        
     }
 
     /**
-     * This method is called by the manipulated class each time that a GETFIELD
-     * instruction is found. The method ask to each handler which value need to
-     * be returned.
-     * 
-     * @param fieldName : the field name on which the GETFIELD instruction is
-     * called
-     * @return the value decided by the last asked handler (throw a warning if
-     * two fields decide two different values)
+     * This method is called by the manipulated class each time that a GETFIELD instruction is found. The method ask to each handler which value need
+     * to be returned.
+     * @param pojo : the pojo object on which the field was get
+     * @param fieldName : the field name on which the GETFIELD instruction is called
+     * @return the value decided by the last asked handler (throw a warning if two fields decide two different values)
      */
-    public Object getterCallback(String fieldName) {
-        Object initialValue = m_map.get(fieldName);
+    public Object onGet(Object pojo, String fieldName) {
+        Object initialValue = m_fields.get(fieldName);
         Object result = initialValue;
         // Get the list of registered handlers
-        PrimitiveHandler[] list = (PrimitiveHandler[]) m_fieldRegistration.get(fieldName);
+
+        FieldInterceptor[] list = (FieldInterceptor[]) m_fieldRegistration.get(fieldName);
         for (int i = 0; list != null && i < list.length; i++) {
-            Object handlerResult = list[i].getterCallback(fieldName, initialValue);
+            Object handlerResult = list[i].onGet(null, fieldName, initialValue);
             if (handlerResult == initialValue) {
                 continue; // Non-binding case (default implementation).
             } else {
                 if (result != initialValue) {
-                    if ((handlerResult != null && ! handlerResult.equals(result)) || (result != null && handlerResult == null)) {
-                        m_factory.getLogger().log(Logger.WARNING, "A conflict was detected on the injection of " + fieldName + " - return the last value from " + list[i].getInstance().getInstanceName());
+                    if ((handlerResult != null && !handlerResult.equals(result)) || (result != null && handlerResult == null)) {
+                        m_factory.getLogger().log(
+                                                  Logger.WARNING,
+                                                  "A conflict was detected on the injection of "
+                                                          + fieldName);
                     }
                 }
                 result = handlerResult;
             }
         }
-        
-        if ((result != null && ! result.equals(initialValue)) || (result == null && initialValue != null)) {
+
+        if ((result != null && !result.equals(initialValue)) || (result == null && initialValue != null)) {
             // A change occurs => notify the change
-            m_map.put(fieldName, result);
+            m_fields.put(fieldName, result);
             for (int i = 0; list != null && i < list.length; i++) {
-                list[i].setterCallback(fieldName, result);
+                list[i].onSet(null, fieldName, result);
             }
         }
-        
-        return result;        
+
+        return result;
     }
-    
+
     /**
      * Dispatch entry method event on registered handler.
+     * @param pojo : the pojo object on which method is invoked.
      * @param methodId : method id
+     * @param args : argument array
      */
-    public void entryCallback(String methodId) {
-        PrimitiveHandler[] list = (PrimitiveHandler[]) m_methodRegistration.get(methodId);
+    public void onEntry(Object pojo, String methodId, Object[] args) {
+        if (m_methodRegistration == null) {
+            return;
+        }
+        MethodInterceptor[] list = (MethodInterceptor[]) m_methodRegistration.get(methodId);
+        Method method = getMethodById(methodId);
         for (int i = 0; list != null && i < list.length; i++) {
-            list[i].entryCallback(methodId);
+            list[i].onEntry(pojo, method, args);
         }
     }
 
     /**
-     * Dispatch exit method event on registered handler.
-     * The given returned object is an instance of Exception if the method has launched an exception.
+     * Dispatch exit method event on registered handler. The given returned object is an instance of Exception if the method has launched an
+     * exception. If the given object is null, either the method returns void, either the method has returned null.
+     * @param pojo : the pojo object on which the method was invoked
+     * @param methodId : method id
+     * @param result : returned object.
+     */
+    public void onExit(Object pojo, String methodId, Object result) {
+        if (m_methodRegistration == null) {
+            return;
+        }
+        MethodInterceptor[] list = (MethodInterceptor[]) m_methodRegistration.get(methodId);
+        Method method = getMethodById(methodId);
+        for (int i = 0; list != null && i < list.length; i++) {
+            list[i].onExit(pojo, method, result);
+        }
+        for (int i = 0; list != null && i < list.length; i++) {
+            list[i].onFinally(pojo, method);
+        }
+    }
+
+    /**
+     * Dispatch error method event on registered handler. The given returned object is an instance of Exception if the method has thrown an exception.
      * If the given object is null, either the method returns void, either the method has returned null.
+     * @param pojo : the pojo object on which the method was invoked
      * @param methodId : method id
-     * @param e : returned object.
+     * @param error : throwable object.
      */
-    public void exitCallback(String methodId, Object e) {
-        PrimitiveHandler[] list = (PrimitiveHandler[]) m_methodRegistration.get(methodId);
+    public void onError(Object pojo, String methodId, Throwable error) {        
+        if (m_methodRegistration == null) {
+            return;
+        }
+        MethodInterceptor[] list = (MethodInterceptor[]) m_methodRegistration.get(methodId);
+        Method method = getMethodById(methodId);
         for (int i = 0; list != null && i < list.length; i++) {
-            list[i].exitCallback(methodId, e);
+            list[i].onError(pojo, method, error);
+        }
+        for (int i = 0; list != null && i < list.length; i++) {
+            list[i].onFinally(pojo, method);
         }
     }
 
     /**
-     * This method is called by the manipulated class each time that a PUTFILED
-     * instruction is found. the method send to each handler the new value.
-     * 
-     * @param fieldName : the field name on which the PUTFIELD instruction is
-     * called
+     * Get method object by id.
+     * @param methodId : method id
+     * @return : the method object or null if the method cannot be found.
+     */
+    private Method getMethodById(String methodId) {
+        Method method = (Method) m_methods.get(methodId);
+        if (method == null) {
+            Method[] mets = m_clazz.getDeclaredMethods();
+            for (int i = 0; i < mets.length; i++) {
+                // Check if the method was not already computed. If not, compute the Id and check.
+                if (!m_methods.containsValue(mets[i]) && (MethodMetadata.computeMethodId(mets[i]).equals(methodId))) {
+                    // Store the new methodId
+                    m_methods.put(methodId, mets[i]);
+                    return mets[i];
+                }
+            }
+            // If not found, it is a constructor, return null in this case.
+            if (methodId.equals(m_clazz.getName())) {
+                // Constructor.
+                return null;
+            }
+            // Cannot happen
+            m_factory.getLogger().log(Logger.ERROR, "A methodID cannot be associate with a POJO method : " + methodId);
+            return null;
+        } else {
+            return method;
+        }
+    }
+
+    /**
+     * This method is called by the manipulated class each time that a PUTFILED instruction is found. the method send to each handler the new value.
+     * @param pojo : the pojo object on which the field was set
+     * @param fieldName : the field name on which the PUTFIELD instruction is called
      * @param objectValue : the value of the field
      */
-    public void setterCallback(String fieldName, Object objectValue) {
-        Object o = m_map.get(fieldName);
-        if ((o != null && ! o.equals(objectValue)) || (o == null && objectValue != null)) {
-            m_map.put(fieldName, objectValue);
-            PrimitiveHandler[] list = (PrimitiveHandler[]) m_fieldRegistration.get(fieldName);
+    public void onSet(Object pojo, String fieldName, Object objectValue) {
+        Object value = m_fields.get(fieldName);
+        if ((value != null && !value.equals(objectValue)) || (value == null && objectValue != null)) {
+            m_fields.put(fieldName, objectValue);
+            FieldInterceptor[] list = (FieldInterceptor[]) m_fieldRegistration.get(fieldName);
             for (int i = 0; list != null && i < list.length; i++) {
-                list[i].setterCallback(fieldName, objectValue);
+                list[i].onSet(null, fieldName, objectValue);
             }
         }
     }
@@ -701,11 +891,11 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     public BundleContext getContext() {
         return m_context;
     }
-    
+
     public BundleContext getGlobalContext() {
         return ((IPojoContext) m_context).getGlobalContext();
     }
-    
+
     public ServiceContext getLocalServiceContext() {
         return ((IPojoContext) m_context).getServiceContext();
     }
@@ -748,15 +938,16 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * State Change listener callback.
-     * This method is notified at each time a plugged handler becomes invalid.
-     * @param instance : changing instance 
+     * State Change listener callback. This method is notified at each time a plugged handler becomes invalid.
+     * @param instance : changing instance
      * @param newState : new state
      * @see org.apache.felix.ipojo.InstanceStateListener#stateChanged(org.apache.felix.ipojo.ComponentInstance, int)
      */
     public synchronized void stateChanged(ComponentInstance instance, int newState) {
-        if (m_state <= STOPPED) { return; }
-        
+        if (m_state <= STOPPED) {
+            return;
+        }
+
         // Update the component state if necessary
         if (newState == INVALID && m_state == VALID) {
             // Need to update the state to UNRESOLVED
@@ -766,36 +957,35 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         if (newState == VALID && m_state == INVALID) {
             // An handler becomes valid => check if all handlers are valid
             for (int i = 0; i < m_handlers.length; i++) {
-                if (m_handlers[i].getState() != VALID) { return; }
+                if (m_handlers[i].getState() != VALID) {
+                    return;
+                }
             }
             setState(VALID);
             return;
-        }        
+        }
     }
-    
+
     /**
-     * Get the list of registered fields.
-     * This method is invoked by the POJO itself.
+     * Get the list of registered fields. This method is invoked by the POJO itself.
      * @return the set of registered fields.
      */
     public Set getRegistredFields() {
-        if (m_fieldRegistration != null) {
-            return m_fieldRegistration.keySet();
-        } else {
+        if (m_fieldRegistration == null) {
             return null;
         }
+        return m_fieldRegistration.keySet();
     }
-    
+
     /**
-     * Get the list of registered methods.
-     * This method is invoked by the POJO itself.
+     * Get the list of registered methods. This method is invoked by the POJO itself.
      * @return the set of registered methods.
      */
     public Set getRegistredMethods() {
-        if (m_methodRegistration != null) {
-            return m_methodRegistration.keySet();
-        } else {
+        if (m_methodRegistration == null) {
             return null;
+        } else {
+            return m_methodRegistration.keySet();
         }
     }
 }

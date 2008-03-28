@@ -26,41 +26,42 @@ import java.lang.reflect.Method;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class NullableObject implements InvocationHandler {
-    
+
     /**
      * Default boolean value.
      */
     private static final Boolean DEFAULT_BOOLEAN = Boolean.FALSE;
+
     /**
      * Default byte value.
      */
     private static final Byte DEFAULT_BYTE = new Byte((byte) 0);
-    
+
     /**
      * Default short value.
      */
     private static final Short DEFAULT_SHORT = new Short((short) 0);
-    
+
     /**
      * Default integer value.
      */
     private static final Integer DEFAULT_INT = new Integer(0);
-    
+
     /**
      * Default long value.
      */
     private static final Long DEFAULT_LONG = new Long(0);
-    
+
     /**
      * Default float value.
      */
     private static final Float DEFAULT_FLOAT = new Float(0.0f);
-    
+
     /**
      * Default double value.
      */
     private static final Double DEFAULT_DOUBLE = new Double(0.0);
-    
+
     /**
      * Invokes a method on this null object. The method will return a default
      * value without doing anything.
@@ -72,19 +73,19 @@ public class NullableObject implements InvocationHandler {
      */
     public Object invoke(Object proxy, Method method, Object[] args) {
         Class returnType = method.getReturnType();
-        if (returnType.equals(Boolean.TYPE)) {
+        if (Boolean.TYPE.equals(returnType)) {
             return DEFAULT_BOOLEAN;
-        } else if (returnType.equals(Byte.TYPE)) {
+        } else if (Byte.TYPE.equals(returnType)) {
             return DEFAULT_BYTE;
-        } else if (returnType.equals(Short.TYPE)) {
+        } else if (Short.TYPE.equals(returnType)) {
             return DEFAULT_SHORT;
-        } else if (returnType.equals(Integer.TYPE)) {
+        } else if (Integer.TYPE.equals(returnType)) {
             return DEFAULT_INT;
-        } else if (returnType.equals(Long.TYPE)) {
+        } else if (Long.TYPE.equals(returnType)) {
             return DEFAULT_LONG;
-        } else if (returnType.equals(Float.TYPE)) {
+        } else if (Float.TYPE.equals(returnType)) {
             return DEFAULT_FLOAT;
-        } else if (returnType.equals(Double.TYPE)) {
+        } else if (Double.TYPE.equals(returnType)) {
             return DEFAULT_DOUBLE;
         } else {
             return null;

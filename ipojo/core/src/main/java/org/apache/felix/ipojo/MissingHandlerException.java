@@ -42,6 +42,7 @@ public class MissingHandlerException extends Exception {
      * @param missing : list of missing handlers.
      */
     public MissingHandlerException(List missing) {
+        super();
         m_message = "Missing handlers : ";
         for (int i = 0; i < missing.size(); i++) {
             m_message += (String) missing.get(i) + " ";

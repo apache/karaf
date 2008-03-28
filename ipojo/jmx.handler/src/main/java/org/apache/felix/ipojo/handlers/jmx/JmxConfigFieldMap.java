@@ -228,7 +228,6 @@ public class JmxConfigFieldMap {
             return false;
         } else {
             for (int i = 0; i < sig1.length; i++) {
-                //System.out.println(sig1[i] +" == "+ sig2[i]);
                 if (!sig1[i].equals(sig2[i])) {
                     return false;
                 }

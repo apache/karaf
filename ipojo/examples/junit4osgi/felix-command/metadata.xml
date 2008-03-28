@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iPOJO>
+	<component
+		className="org.apache.felix.ipojo.junit4osgi.command.JunitCommand"
+		factory="false">
+		<requires field="runner" />
+		<provides />
+	</component>
+	<instance
+		component="org.apache.felix.ipojo.junit4osgi.command.JunitCommand" />
+</iPOJO>

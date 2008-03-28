@@ -25,30 +25,21 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
 /**
-* iPOJO Ant Task.
-* This Ant taks manipulate an input bundle.
-* @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
-*/
+ * iPOJO Ant Task. This Ant task manipulates an input bundle.
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ */
 public class IPojoTask extends Task {
     
-    /**
-     * Metadata file.
-     */
+    /** Metadata file. */
     private File m_metadata;
     
-    /**
-     * Input bundle.
-     */
+    /** Input bundle. */
     private File m_input;
     
-    /**
-     * Output bundle.
-     */
+    /** Output bundle. */
     private File m_output;
 
-    /**
-     * Flag describing if we need to ignore annotation of not.
-     */
+    /** Flag describing if we need to ignore annotation of not. */
     private boolean m_ignoreAnnotations = false;
     
     /**
@@ -96,7 +87,7 @@ public class IPojoTask extends Task {
             throw new BuildException("The input bundle " + m_input.getAbsolutePath() + " does not exist");
         }
         
-        System.out.println("Input Bundle File : " + m_input.getAbsolutePath());
+        log("Input Bundle File : " + m_input.getAbsolutePath());
         
         // Get metadata file
         if (m_metadata == null) {
@@ -104,25 +95,25 @@ public class IPojoTask extends Task {
             if (!m_metadata.exists()) {
              // Verify if annotations are ignored
                 if (m_ignoreAnnotations) {
-                    System.out.println("No metadata file found - ignore annotations");
+                    log("No metadata file found & ignore annotations : nothing to do");
                     return;
                 } else {
-                    System.out.println("No metadata file found - try to use only annotations");
+                    log("No metadata file found - try to use only annotations");
                     m_metadata = null;
                 }
             } else {
-                System.out.println("Metadata File : " + m_metadata.getAbsolutePath());
+                log("Metadata File : " + m_metadata.getAbsolutePath());
             }
         } else {
-            // Metadata file is specified, check existency
+            // Metadata file is specified, check existence
             if (!m_metadata.exists()) {
                 throw new BuildException("No metadata file found - the file " + m_metadata.getAbsolutePath() + " does not exist");
             } else {
-                System.out.println("Metadata File : " + m_metadata.getAbsolutePath());
+                log("Metadata File : " + m_metadata.getAbsolutePath());
             }
         }
 
-        System.out.println("Start bundle manipulation");
+        log("Start bundle manipulation");
         
         if (m_output == null) {
             m_output = new File("./_out.jar");
@@ -139,7 +130,7 @@ public class IPojoTask extends Task {
         }
         pojo.pojoization(m_input, m_output, m_metadata);
         for (int i = 0; i < pojo.getWarnings().size(); i++) {
-            System.out.println((String) pojo.getWarnings().get(i));
+            log((String) pojo.getWarnings().get(i));
         }
         if (pojo.getErrors().size() > 0) { throw new BuildException((String) pojo.getErrors().get(0)); }
         
@@ -152,8 +143,8 @@ public class IPojoTask extends Task {
             out = m_output.getAbsolutePath();
         }
         
-        System.out.println("Bundle manipulation - SUCCESS");
-        System.out.println("Output File : " + out);
+        log("Bundle manipulation - SUCCESS");
+        log("Output File : " + out);
         
     }
     

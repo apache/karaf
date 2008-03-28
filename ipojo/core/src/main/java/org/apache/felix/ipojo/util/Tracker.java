@@ -42,7 +42,7 @@ public class Tracker implements TrackerCustomizer {
     /**
      * Bundle context against which this Tracker object is tracking.
      */
-    protected final BundleContext m_context;
+    protected BundleContext m_context;
 
     /**
      * Filter specifying search criteria for the services to track.
@@ -52,22 +52,22 @@ public class Tracker implements TrackerCustomizer {
     /**
      * TrackerCustomizer object for this tracker.
      */
-    final TrackerCustomizer m_customizer;
+    protected TrackerCustomizer m_customizer;
 
     /**
      * Filter string for use when adding the ServiceListener. If this field is set, then certain optimizations can be taken since we don't have a user supplied filter.
      */
-    final String m_listenerFilter;
+    protected String m_listenerFilter;
 
     /**
      * Class name to be tracked. If this field is set, then we are tracking by class name.
      */
-    private final String m_trackClass;
+    private String m_trackClass;
 
     /**
      * Reference to be tracked. If this field is set, then we are tracking a single ServiceReference.
      */
-    private final ServiceReference m_trackReference;
+    private ServiceReference m_trackReference;
 
     /**
      * Tracked services: ServiceReference object -> customized. Object and ServiceListener object
@@ -126,13 +126,13 @@ public class Tracker implements TrackerCustomizer {
         } else {
             m_customizer = customizer;
         }
-        this.m_listenerFilter = "(" + Constants.OBJECTCLASS + "=" + clazz.toString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        this.m_listenerFilter = "(" + Constants.OBJECTCLASS + "=" + clazz + ")";
         try {
             this.m_filter = context.createFilter(m_listenerFilter);
         } catch (InvalidSyntaxException e) { // we could only get this exception
             // if the clazz argument was
             // malformed
-            throw new IllegalArgumentException("unexpected InvalidSyntaxException: " + e.getMessage()); //$NON-NLS-1$
+            throw new IllegalArgumentException("unexpected InvalidSyntaxException: " + e.getMessage());
         }
     }
 
@@ -157,7 +157,7 @@ public class Tracker implements TrackerCustomizer {
             m_customizer = customizer;
         }
         if ((context == null) || (filter == null)) { // we throw a NPE here to be consistent with the other constructors
-            throw new NullPointerException();
+            throw new NullPointerException(); // NOPMD by clement on 29/02/08 14:12
         }
     }
 
@@ -188,7 +188,7 @@ public class Tracker implements TrackerCustomizer {
                 // the initial
                 // references
             } catch (InvalidSyntaxException e) {
-                throw new RuntimeException("unexpected InvalidSyntaxException: " + e.getMessage()); //$NON-NLS-1$
+                throw new IllegalStateException("unexpected InvalidSyntaxException: " + e.getMessage()); //$NON-NLS-1$
             }
         }
         /* Call tracked outside of synchronized region */
@@ -220,8 +220,8 @@ public class Tracker implements TrackerCustomizer {
 
         try {
             m_context.removeServiceListener(outgoing);
-        } catch (IllegalStateException e) {
-            System.err.println("Context stopped");
+        } catch (IllegalStateException e) { //NOPMD
+            //System.err.println("Context stopped");
             /* In case the context was stopped. */
         }
         if (references != null) {
@@ -254,7 +254,7 @@ public class Tracker implements TrackerCustomizer {
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
      */
     public void addedService(ServiceReference reference) {
-
+        // Nothing to do.
     }
 
     /**
@@ -266,6 +266,7 @@ public class Tracker implements TrackerCustomizer {
      * @see TrackerCustomizer
      */
     public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
     }
 
     /**
@@ -326,8 +327,7 @@ public class Tracker implements TrackerCustomizer {
             Iterator keys = tracked.keySet().iterator();
             for (int i = 0; i < length; i++) {
                 references[i] = (ServiceReference) keys.next();
-            }
-            // The resulting array is sorted by ranking.
+            }            
             return references;
         }
     }
@@ -350,6 +350,31 @@ public class Tracker implements TrackerCustomizer {
                 references.add(keys.next());
             }
             // The resulting array is sorted by ranking.
+            return references;
+        }
+    }
+    
+    /**
+     * Return the list of references used by the tracker.
+     * A reference becomes used when the dependency has already
+     * call getService on this reference.
+     * @return : the list of used references.
+     */
+    public List/*<ServiceReference>*/getUsedServiceReferences() {
+        Tracked tracked = this.m_tracked; // use local var since we are not synchronized
+        if (tracked == null || tracked.size() == 0) { // if Tracker is not open or empty
+            return null;
+        }
+        synchronized (tracked) {
+            int length = tracked.size();
+            List references = new ArrayList();
+            Iterator keys = tracked.keySet().iterator();
+            for (int i = 0; i < length; i++) {
+                Object key = keys.next(); 
+                if (tracked.get(key) != null) {
+                    references.add(key);
+                }
+            }
             return references;
         }
     }
@@ -388,11 +413,13 @@ public class Tracker implements TrackerCustomizer {
         Object object = null;
         synchronized (tracked) {
             object = tracked.get(reference);
-            if (object != null) { // The object was already get.
-                return object;
-            } else if (tracked.containsKey(reference)) { // Not already get
-                object = m_context.getService(reference);
-                tracked.put(reference, object);
+            if (object == null) {
+                if (tracked.containsKey(reference)) { // Not already get but already tracked.
+                    object = m_context.getService(reference);
+                    tracked.put(reference, object);
+                    return object;
+                }
+            } else { // The object was already get.
                 return object;
             }
             // Not already tracked.
@@ -430,10 +457,10 @@ public class Tracker implements TrackerCustomizer {
         synchronized (tracked) {
             ServiceReference[] references = getServiceReferences();
             int length = 0;
-            if (references != null) {
-                length = references.length;
-            } else {
+            if (references == null) {
                 return null;
+            } else {
+                length = references.length;
             }
             Object[] objects = new Object[length];
             for (int i = 0; i < length; i++) {
@@ -541,7 +568,7 @@ public class Tracker implements TrackerCustomizer {
             while (true) {
                 ServiceReference reference;
                 synchronized (this) {
-                    if (m_initial.size() == 0) { //  if there are no more inital services
+                    if (m_initial.isEmpty()) { //  if there are no more inital services
                         return; // we are done
                     }
 
@@ -580,14 +607,14 @@ public class Tracker implements TrackerCustomizer {
             switch (event.getType()) {
                 case ServiceEvent.REGISTERED:
                 case ServiceEvent.MODIFIED:
-                    if (m_listenerFilter != null) { // constructor supplied filter
-                        track(reference);
-                    } else { // user supplied filter
+                    if (m_listenerFilter == null) { // user supplied filter 
                         if (m_filter.match(reference)) {
                             track(reference); // Arrival
                         } else {
                             untrack(reference); // Departure
                         }
+                    } else { // constructor supplied filter
+                        track(reference);
                     }
                     break;
                 case ServiceEvent.UNREGISTERING:

@@ -20,62 +20,28 @@ package org.apache.felix.ipojo.handlers.dependency;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
-import org.apache.felix.ipojo.ComponentInstance;
-import org.apache.felix.ipojo.IPojoContext;
+import org.apache.felix.ipojo.FieldInterceptor;
 import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.MethodInterceptor;
 import org.apache.felix.ipojo.Nullable;
 import org.apache.felix.ipojo.PolicyServiceContext;
-import org.apache.felix.ipojo.ServiceContext;
-import org.apache.felix.ipojo.composite.CompositeServiceContext;
-import org.apache.felix.ipojo.util.Logger;
-import org.apache.felix.ipojo.util.ServiceReferenceRankingComparator;
-import org.apache.felix.ipojo.util.Tracker;
-import org.apache.felix.ipojo.util.TrackerCustomizer;
+import org.apache.felix.ipojo.handlers.dependency.ServiceUsage.Usage;
+import org.apache.felix.ipojo.util.DependencyModel;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 /**
  * Represent a service dependency of the component instance.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class Dependency implements TrackerCustomizer {
-
-    /**
-     * Dependency State : RESOLVED.
-     */
-    public static final int RESOLVED = 1;
-
-    /**
-     * Dependency State : UNRESOLVED.
-     */
-    public static final int UNRESOLVED = 2;
-    
-    /**
-     * Dependency State : BROKEN.
-     * Broken means that a used service disappears for static dependency.
-     */
-    public static final int BROKEN = 3;
-    
-    /**
-     * Dynamic Binding Policy (default).
-     */
-    public static final int DYNAMIC_POLICY = 0;
-
-    /**
-     * Dynamic Priority Binding Policy.
-     */
-    public static final int DYNAMIC_PRIORITY_POLICY = 1;
-    
-    /**
-     * Static Binding Policy.
-     */
-    public static final int STATIC_POLICY = 2;
+public class Dependency extends DependencyModel implements FieldInterceptor, MethodInterceptor {
 
     /**
      * Reference on the Dependency Handler.
@@ -90,144 +56,88 @@ public class Dependency implements TrackerCustomizer {
     /**
      * List of dependency callback.
      */
-    private DependencyCallback[] m_callbacks = new DependencyCallback[0];
+    private DependencyCallback[] m_callbacks;
 
-    /**
-     * Service Specification required by the dependency.
-     */
-    private String m_specification;
-    
-    /**
-     * Dependency ID (declared ID, if not declare use the specification).
-     */
-    private String m_id;
-
-    /**
-     * Is the dependency a multiple dependency ?
-     */
-    private boolean m_isAggregate = false;
-
-    /**
-     * Is the Dependency an optional dependency ?
-     */
-    private boolean m_isOptional = false;
-
-    /**
-     * LDAP Filter of the Dependency (String form).
-     */
-    private String m_strFilter;
-    
     /**
      * Is the dependency a service level dependency.
      */
-    private boolean m_isServiceLevelRequirement = false;
-    
-    /**
-     * Resolution policy.
-     */
-    private int m_policy = PolicyServiceContext.LOCAL_AND_GLOBAL; 
+    private boolean m_isServiceLevelRequirement;
 
     /**
-     * Array of service references.
-     * m_ref : Array
+     * Is the provider set frozen ?
      */
-    private List m_references = new ArrayList();
-    
-    /**
-     * Array of service reference containing used service references. 
-     */
-    private List m_usedReferences = new ArrayList();
+    private boolean m_isFrozen;
 
     /**
-     * State of the dependency. 0 : stopped, 1 : valid, 2 : invalid. 
-     * m_state : int
+     * Is the dependency started ?
      */
-    private int m_state;
+    private boolean m_isStarted;
 
-    /**
-     * Class of the dependency. 
-     * Useful to create in the case of multiple dependency
-     */
-    private Class m_clazz;
-
-    /**
-     * LDAP Filter of the dependency.
-     */
-    private Filter m_filter;
-    
-    /**
-     * Service Context in which resolving the dependency.
-     */
-    private ServiceContext m_serviceContext;
-    
     /**
      * Thread Local.
      */
-    private ServiceUsage m_usage = new ServiceUsage();
+    private ServiceUsage m_usage;
 
-    /**
-     * Service Tracker.
-     */
-    private Tracker m_tracker;
-    
-    /**
-     * IS the instance activated ? 
-     */
-    private boolean m_activated = false;
-    
-    /**
-     * Binding Policy.
-     */
-    private int m_bindingPolicy;
-    
     /**
      * Nullable object.
      */
     private Object m_nullable;
-    
+
     /**
      * Default-Implementation.
      */
     private String m_di;
 
     /**
+     * Id of the dependency.
+     */
+    private String m_id;
+
+    /**
      * Dependency constructor. After the creation the dependency is not started.
      * 
-     * @param dh : the dependency handler managing this dependency
+     * @param handler : the dependency handler managing this dependency
      * @param field : field of the dependency
      * @param spec : required specification
      * @param filter : LDAP filter of the dependency
      * @param isOptional : is the dependency an optional dependency ?
      * @param isAggregate : is the dependency an aggregate dependency
-     * @param id : id of the dependency, may be null
+     * @param identity : id of the dependency, may be null
+     * @param context : bundle context (or service context) to use.
      * @param policy : resolution policy
-     * @param bindingPolicy : binding policy
-     * @param di : default-implementation class
+     * @param cmp : comparator to sort references
+     * @param defaultImplem : default-implementation class
      */
-    public Dependency(DependencyHandler dh, String field, String spec, String filter, boolean isOptional, boolean isAggregate, String id, int policy, int bindingPolicy, String di) {
-        m_handler = dh;
-        m_field = field;
-        m_specification = spec;
-        m_isOptional = isOptional;
-        m_di = di;
-       
-        m_strFilter = filter;
-        m_isAggregate = isAggregate;
-        if (m_id == null) {
-            m_id = m_specification;
+    public Dependency(DependencyHandler handler, String field, Class spec, Filter filter, boolean isOptional, boolean isAggregate, String identity, BundleContext context, int policy, Comparator cmp, String defaultImplem) {
+        super(spec, isAggregate, isOptional, filter, cmp, policy, context, handler);
+        m_handler = handler;
+        if (field != null) {
+            m_field = field;
+            m_usage = new ServiceUsage();
+        }
+        m_di = defaultImplem;
+
+        if (identity == null) {
+            if (spec != null) {
+                m_id = spec.getName();
+            }
         } else {
-            m_id = id;
-        }
-        if (policy != -1) {
-            m_policy = policy;
-        }
-        
-        m_bindingPolicy = bindingPolicy;
-        
-        // Fix the policy according to the level
-        if ((m_policy == PolicyServiceContext.LOCAL_AND_GLOBAL || m_policy == PolicyServiceContext.LOCAL) && ! ((((IPojoContext) m_handler.getInstanceManager().getContext()).getServiceContext()) instanceof CompositeServiceContext)) {
-            // We are not in a composite : BOTH | STRICT => GLOBAL
-            m_policy = PolicyServiceContext.GLOBAL;
+            m_id = identity;
+        } 
+        // Else wait the setSpecification call.
+    }
+
+    /**
+     * Set the specification of the current dependency.
+     * In order to store the id of the dependency, this
+     * method is override.
+     * @param spec : request service Class
+     * @see org.apache.felix.ipojo.util.DependencyModel#setSpecification(java.lang.Class)
+     */
+    public void setSpecification(Class spec) {
+        super.setSpecification(spec);
+        if (m_id == null) {
+            m_id = spec.getName();
         }
     }
 
@@ -235,122 +145,76 @@ public class Dependency implements TrackerCustomizer {
         return m_field;
     }
 
-
-    public String getSpecification() {
-        return m_specification;
-    }
-
-
-    public boolean isOptional() {
-        return m_isOptional;
-    }
-
-
-    public boolean isAggregate() {
-        return m_isAggregate;
-    }
-
-    /**
-     * Set the dependency to aggregate.
-     */
-    protected void setAggregate() {
-        m_isAggregate = true;
-    }
-    
-    /**
-     * Activate the dependency.
-     * For static policy it freezes the service reference set.
-     */
-    void activate() {
-        if (m_bindingPolicy == STATIC_POLICY) {
-            m_activated = true;
-        }
-    }
-
-    /**
-     * Set the tracked specification for this dependency.
-     * @param spec : the tracked specification (interface name)
-     */
-    protected void setSpecification(String spec) {
-        m_specification = spec;
-    }
-
     /**
      * Add a callback to the dependency.
-     * @param cb : callback to add
+     * @param callback : callback to add
      */
-    protected void addDependencyCallback(DependencyCallback cb) {
-        if (m_callbacks.length > 0) {
+    protected void addDependencyCallback(DependencyCallback callback) {
+        if (m_callbacks == null) {
+            m_callbacks = new DependencyCallback[] { callback };
+        } else {
             DependencyCallback[] newCallbacks = new DependencyCallback[m_callbacks.length + 1];
             System.arraycopy(m_callbacks, 0, newCallbacks, 0, m_callbacks.length);
-            newCallbacks[m_callbacks.length] = cb;
+            newCallbacks[m_callbacks.length] = callback;
             m_callbacks = newCallbacks;
-        } else {
-            m_callbacks = new DependencyCallback[] { cb };
         }
     }
 
+    /**
+     * Stop the current dependency.
+     * @see org.apache.felix.ipojo.util.DependencyModel#stop()
+     */
+    public void stop() {
+        m_isStarted = false;
+        super.stop();
+    }
 
     /**
      * Get the string form of the filter.
      * @return : the string form of the filter.
      */
-    public String getFilter() {
-        if (m_strFilter == null) { return ""; }
-        return m_strFilter;
+    public String getStringFilter() {
+        return getFilter().toString();
     }
-
 
     public DependencyHandler getHandler() {
         return m_handler;
     }
 
-    /**
-     * Build the Set [service reference] of used services.
-     * @return the used service.
-     */
-    public List getUsedServices() {
-        return m_usedReferences;
+    public synchronized boolean isFrozen() {
+        return m_isFrozen;
     }
 
     /**
-     * This method is called by the replaced code in the component
-     * implementation class. Construct the service object list is necessary.
-     * 
-     * @return null or a service object or a list of service object according to
-     * the dependency.
+     * Call the bind method.
+     * @param pojo : pojo instance on which calling the bind method.
      */
-    Object get() {
-        // Initialize the thread local object is not already touched.
-        if (m_usage.getObjects().isEmpty()) {
-            if (isAggregate()) {
-                synchronized (m_tracker) {
-                    for (int i = 0; i < m_references.size(); i++) {
-                        ServiceReference ref = (ServiceReference) m_references.get(i);
-                        m_usage.getReferences().add(ref);
-                        m_usage.getObjects().add(getService(ref));
-                    }
-                }
-            } else {
-                if (m_references.size() == 0) {
-                    if (m_nullable == null) {
-                        m_handler.log(Logger.WARNING, "[" + m_handler.getInstanceManager().getInstanceName() + "] The dependency is not optional, however no service object can be injected in " + m_field + " -> " + m_specification);
-                        return null;
-                    }
-                    m_usage.getObjects().add(m_nullable);
-                } else {
-                    ServiceReference ref = (ServiceReference) m_references.get(0);
-                    m_usage.getReferences().add(ref); // Get the first one
-                    m_usage.getObjects().add(getService(ref));
-                }
-            }
-            m_usage.setStackLevel(1);
+    protected synchronized void onObjectCreation(Object pojo) {
+        if (!m_isStarted) { return; }
+
+        // We are notified of an instance creation, we have to freeze when the static policy is used
+        if (getBindingPolicy() == STATIC_BINDING_POLICY) {
+            m_isFrozen = true;
         }
 
-        if (m_isAggregate) { // Multiple dependency
-            return (Object[]) m_usage.getObjects().toArray((Object[]) Array.newInstance(m_clazz, m_usage.getObjects().size()));
-        } else {
-            return m_usage.getObjects().get(0);
+        // Check optional case : nullable object case : do not call bind on nullable object
+        if (isOptional() && getSize() == 0) { return; }
+
+        // Call bind callback.
+        for (int j = 0; m_callbacks != null && j < m_callbacks.length; j++) {
+            if (m_callbacks[j].getMethodType() == DependencyCallback.BIND) {
+                if (isAggregate()) {
+                    ServiceReference[] refs = getServiceReferences();
+                    for (int i = 0; i < refs.length; i++) {
+                        invokeCallback(m_callbacks[j], refs[i], pojo);
+                    }
+                } else {
+                    ServiceReference ref = getServiceReference();
+                    if (ref != null) {
+                        invokeCallback(m_callbacks[j], ref, pojo);
+                    }
+                }
+            }
         }
     }
 
@@ -360,95 +224,38 @@ public class Dependency implements TrackerCustomizer {
      */
     private void callUnbindMethod(ServiceReference ref) {
         if (m_handler.getInstanceManager().getState() > InstanceManager.STOPPED && m_handler.getInstanceManager().getPojoObjects() != null) {
-            for (int i = 0; i < m_callbacks.length; i++) {
+            for (int i = 0; m_callbacks != null && i < m_callbacks.length; i++) {
                 if (m_callbacks[i].getMethodType() == DependencyCallback.UNBIND) {
-                    try {
-                        m_callbacks[i].call(ref, getService(ref));
-                    } catch (NoSuchMethodException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
-                        m_handler.getInstanceManager().stop();
-                    } catch (IllegalAccessException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
-                        m_handler.getInstanceManager().stop();
-                    } catch (InvocationTargetException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getTargetException().getMessage());
-                        m_handler.getInstanceManager().stop();
-                    }
+                    invokeCallback(m_callbacks[i], ref, null); // Call on each created pojo objects.
                 }
             }
         }
     }
 
     /**
-     * Get a service object for the given reference according to the resolving policy.
-     * @param ref : service reference
-     * @return the service object
+     * Helper method calling the given callback.
+     * @param callback : callback to call.
+     * @param ref : service reference.
+     * @param pojo : pojo on which calling the callback, if null call on each created pojo objects.
      */
-    private synchronized Object getService(ServiceReference ref) {
-        if (!m_usedReferences.contains(ref)) {
-            m_usedReferences.add(ref);
-        }
-        return m_tracker.getService(ref);
-    }
-    
-    /**
-     * Unget the given service reference according to the resolving policy.
-     * @param ref : service reference to unget
-     */
-    private void ungetService(ServiceReference ref) {
-        m_tracker.ungetService(ref);
-    }
-
-    /**
-     * Call the bind method.
-     * @param instance : instance on which calling the bind method.
-     */
-    protected synchronized void callBindMethod(Object instance) {
-        if (m_tracker == null) { return; }
-        // Check optional case : nullable object case : do not call bind on nullable object
-        if (m_isOptional && m_references.size() == 0) { return; }
-
-        if (m_isAggregate) {
-            for (int i = 0; i < m_references.size(); i++) {
-                ServiceReference ref = (ServiceReference) m_references.get(i);
-                for (int j = 0; j < m_callbacks.length; j++) {
-                    if (m_callbacks[j].getMethodType() == DependencyCallback.BIND) {
-                        try {
-                            m_callbacks[j].callOnInstance(instance, ref, getService(ref));
-                        } catch (NoSuchMethodException e) {
-                            m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
-                            m_handler.getInstanceManager().stop();
-                        } catch (IllegalAccessException e) {
-                            m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
-                            m_handler.getInstanceManager().stop();
-                        } catch (InvocationTargetException e) {
-                            m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getTargetException().getMessage());
-                            m_handler.getInstanceManager().setState(ComponentInstance.INVALID);
-                        }
-                    }
-                }
+    private void invokeCallback(DependencyCallback callback, ServiceReference ref, Object pojo) {
+        try {
+            if (pojo == null) {
+                callback.call(ref, getService(ref));
+            } else {
+                callback.callOnInstance(pojo, ref, getService(ref));
             }
-        } else {
-            for (int j = 0; j < m_callbacks.length; j++) {
-                if (m_callbacks[j].getMethodType() == DependencyCallback.BIND) {
-                    try {
-                        ServiceReference ref = (ServiceReference) m_references.get(0);
-                        if (ref != null) {
-                            m_callbacks[j].callOnInstance(instance, ref, getService(ref));
-                        }
-                    } catch (NoSuchMethodException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
-                        m_handler.getInstanceManager().stop();
-                    } catch (IllegalAccessException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
-                        m_handler.getInstanceManager().stop();
-                    } catch (InvocationTargetException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[j].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getTargetException().getMessage());
-                        m_handler.getInstanceManager().setState(ComponentInstance.INVALID);
-                    }
-                }
-            }
+        } catch (NoSuchMethodException e) {
+            m_handler.error("The method " + callback.getMethodName() + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
+            m_handler.getInstanceManager().stop();
+        } catch (IllegalAccessException e) {
+            m_handler.error("The method " + callback.getMethodName() + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
+            m_handler.getInstanceManager().stop();
+        } catch (InvocationTargetException e) {
+            m_handler.error("The method " + callback.getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + " throws an exception : " + e.getTargetException().getMessage(), e.getTargetException());
+            m_handler.getInstanceManager().stop();
         }
+
     }
 
     /**
@@ -459,112 +266,45 @@ public class Dependency implements TrackerCustomizer {
         // call bind method :
         // if (m_handler.getInstanceManager().getState() == InstanceManager.VALID) {
         if (m_handler.getInstanceManager().getState() > InstanceManager.STOPPED && m_handler.getInstanceManager().getPojoObjects() != null) {
-            for (int i = 0; i < m_callbacks.length; i++) {
+            for (int i = 0; m_callbacks != null && i < m_callbacks.length; i++) {
                 if (m_callbacks[i].getMethodType() == DependencyCallback.BIND) {
-                    try {
-                        m_callbacks[i].call(ref, getService(ref));
-                        ungetService(ref);
-                    } catch (NoSuchMethodException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
-                        m_handler.getInstanceManager().stop();
-                    } catch (IllegalAccessException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
-                        m_handler.getInstanceManager().stop();
-                    } catch (InvocationTargetException e) {
-                        m_handler.log(Logger.ERROR, "The method " + m_callbacks[i].getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + "throws an exception : " + e.getTargetException().getMessage());
-                        m_handler.getInstanceManager().setState(ComponentInstance.INVALID);
-                    }
+                    invokeCallback(m_callbacks[i], ref, null);
                 }
             }
         }
     }
-
+    
     /**
      * Start the dependency.
      */
-    public void start() {
-        
-        m_serviceContext = new PolicyServiceContext(m_handler.getInstanceManager().getGlobalContext(), m_handler.getInstanceManager().getLocalServiceContext(), m_policy);
-        
-        // Construct the filter with the objectclass + filter
-        String filter = "(objectClass=" + m_specification + ")";
-        if (m_strFilter != null) {
-            filter = "(&" + filter + m_strFilter + ")";
-        }
-        
-        try {
-            m_clazz = m_handler.getInstanceManager().getContext().getBundle().loadClass(m_specification);
-        } catch (ClassNotFoundException e) {
-            m_handler.log(Logger.ERROR, "Cannot load the interface class for the dependency " + m_field + " [" + m_specification + "]");
-        }
-        
-        if (m_isOptional) {
-            if (m_di != null) {
-                try {
-                    Class c = getHandler().getInstanceManager().getContext().getBundle().loadClass(m_di);
-                    m_nullable = c.newInstance();
-                } catch (IllegalAccessException e) {
-                    m_handler.log(Logger.ERROR, "Cannot load the default-implementation " + m_di + " : " + e.getMessage());
-                } catch (InstantiationException e) {
-                    m_handler.log(Logger.ERROR, "Cannot load the default-implementation " + m_di + " : " + e.getMessage());
-                } catch (ClassNotFoundException e) {
-                    m_handler.log(Logger.ERROR, "Cannot load the default-implementation " + m_di + " : " + e.getMessage());
-                }
+    public void start() {        
+        if (isOptional() && !isAggregate()) {
+            if (m_di == null) {
+                // To load the proxy we use the POJO class loader. Indeed, this classloader imports iPOJO (so can access to Nullable) and has access to the service specification.
+                m_nullable = Proxy.newProxyInstance(getHandler().getInstanceManager().getClazz().getClassLoader(), new Class[] { getSpecification(), Nullable.class }, new NullableObject()); // NOPMD
             } else {
-                m_nullable = Proxy.newProxyInstance(getHandler().getInstanceManager().getClazz().getClassLoader(), new Class[] {m_clazz, Nullable.class}, new NullableObject());
+                try {
+                    Class clazz = getHandler().getInstanceManager().getContext().getBundle().loadClass(m_di);
+                    m_nullable = clazz.newInstance();
+                } catch (IllegalAccessException e) {
+                    throw new IllegalStateException("Cannot load the default-implementation " + m_di + " : " + e.getMessage());
+                } catch (InstantiationException e) {
+                    throw new IllegalStateException("Cannot load the default-implementation " + m_di + " : " + e.getMessage());
+                } catch (ClassNotFoundException e) {
+                    throw new IllegalStateException("Cannot load the default-implementation " + m_di + " : " + e.getMessage());
+                }
             }
         }
 
-        m_state = UNRESOLVED;
+        super.start();
 
-        try {
-            m_filter = m_handler.getInstanceManager().getContext().createFilter(filter); // Store the filter
-        } catch (InvalidSyntaxException e1) {
-            m_handler.log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] A filter is malformed : " + filter + " - " + e1.getMessage());
-            m_handler.getInstanceManager().stop();
-        }  
-        m_tracker = new Tracker(m_serviceContext, m_filter, this);
-        m_tracker.open();
-        if (m_tracker.size() == 0 && !m_isOptional) {
-            m_state = UNRESOLVED;
-        } else {
-            m_state = RESOLVED;
-        }
-    }
-
-    /**
-     * Stop the dependency.
-     */
-    public void stop() {
-        if (m_tracker != null) {
-            m_tracker.close(); // Will unget all used reference.
-            m_tracker = null;
+        if (getBindingPolicy() == STATIC_BINDING_POLICY && m_handler.getInstanceManager().getPojoObjects() != null) {
+            m_isFrozen = true;
         }
 
-        m_state = UNRESOLVED;
-
-        m_activated = false;
-        m_references.clear();
-        m_usedReferences.clear();
-        m_clazz = null;
+        m_isStarted = true;
     }
 
-    /**
-     * Return the state of the dependency.
-     * @return the state of the dependency (1 : valid, 2 : invalid)
-     */
-    public int getState() {
-        return m_state;
-    }
-
-    /**
-     * Return the list of used service reference.
-     * @return the service reference list.
-     */
-    public List getServiceReferences() {
-        return m_references;
-    }
-    
     protected DependencyCallback[] getCallbacks() {
         return m_callbacks;
     }
@@ -572,136 +312,183 @@ public class Dependency implements TrackerCustomizer {
     /**
      * Set that this dependency is a service level dependency.
      * This forces the scoping policy to be STRICT. 
-     * @param b
      */
     public void setServiceLevelDependency() {
         m_isServiceLevelRequirement = true;
-        m_policy = PolicyServiceContext.LOCAL;
+        setBundleContext(new PolicyServiceContext(m_handler.getInstanceManager().getGlobalContext(), m_handler.getInstanceManager().getLocalServiceContext(), PolicyServiceContext.LOCAL));
     }
 
     public String getId() {
         return m_id;
     }
-    
+
     public boolean isServiceLevelRequirement() {
         return m_isServiceLevelRequirement;
     }
 
-    /**
-     * Method called when a thread enters in a method.
-     * @param method : method id.
-     */
-    public void entry(String method) {
-        if (! m_usage.getObjects().isEmpty()) {
-            int level = m_usage.getStackLevel();
-            m_usage.setStackLevel(level++);
-        }
-    }
-    
-    /**
-     * Method called when a thread exits a method.
-     * @param method : the method id.
-     */
-    public void exit(String method) {
-        if (! m_usage.getObjects().isEmpty()) {
-            int level = m_usage.getStackLevel();
-            level = level - 1;
-            if (level == 0) {
-                // Exit the method flow => Release all object
-                m_usage.getObjects().clear();
-                List refs = m_usage.getReferences();
-                refs.clear();
-            }
-        }
-    }
 
-   /**
-    * A new service is detected. This method check the reference against the stored filter.
-    * @param ref : new service reference.
-    * @return the service object, null is the service object is rejected.
-    * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-    */
-    public boolean addingService(ServiceReference ref) {
-        if (! m_activated) {
-            return true;
-        }
-        return false;
-    }
-    
     /**
-     * A new service reference has been added in the tracker.
-     * Call the bind method if needed, and check the dependency context.
-     * @param reference : added reference.
-     * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
+     * A new service has to be injected.
+     * @param reference : the new matching service reference.
+     * @see org.apache.felix.ipojo.util.DependencyModel#onServiceArrival(org.osgi.framework.ServiceReference)
      */
-    public void addedService(ServiceReference reference) {
-        m_references.add(reference);
-        if (m_bindingPolicy == DYNAMIC_PRIORITY_POLICY) {
-            Collections.sort(m_references, new ServiceReferenceRankingComparator());
-        }
-        m_state = RESOLVED;
-        if (m_isAggregate || m_references.size() == 1) {
-            callBindMethod(reference);
-        }
-        
-        m_handler.checkContext();
+    public void onServiceArrival(ServiceReference reference) {
+        callBindMethod(reference);
+        //The method is only called when a new service arrives, or when the used one is replaced.
     }
 
     /**
-     * A used service is modified.
-     * @param ref : modified reference
-     * @param arg1 : service object (returned when added) 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     * A used (already injected) service disappears.
+     * @param ref : leaving service reference.
+     * @see org.apache.felix.ipojo.util.DependencyModel#onServiceDeparture(org.osgi.framework.ServiceReference)
      */
-    public void modifiedService(ServiceReference ref, Object arg1) { }
+    public void onServiceDeparture(ServiceReference ref) {
+        callUnbindMethod(ref);
+    }
 
     /**
-     * A used service disappears.
-     * @param ref : implicated service.
-     * @param arg1 : service object.
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     * The dependency has been reconfigured.
+     * @param departs : service no more matching.
+     * @param arrivals : new services
+     * @see org.apache.felix.ipojo.util.DependencyModel#onDependencyReconfiguration(org.osgi.framework.ServiceReference[], org.osgi.framework.ServiceReference[])
      */
-    public void removedService(ServiceReference ref, Object arg1) {
-        // Call unbind method
-        boolean hasChanged = false;
-        m_references.remove(ref);
-        if (m_usedReferences.remove(ref)) {
-            callUnbindMethod(ref);
-            
-            // Null the ref in the instance manager map
-            if (m_field != null) {
-                m_handler.getInstanceManager().setterCallback(m_field, null);
-            }
-            
-            // Unget the service reference
-            ungetService(ref);
-            hasChanged = true;
-        }
-        
-        if (m_bindingPolicy == STATIC_POLICY) {
-            if (hasChanged && m_activated) {
-                m_state = BROKEN;
-            }
+    public void onDependencyReconfiguration(ServiceReference[] departs, ServiceReference[] arrivals) {
+        throw new UnsupportedOperationException("Dependency set change is not yet supported");
+    }
+
+    /**
+     * Get the used service references list.
+     * @return the used service reference or null if no service reference are available.
+     */
+    public List getServiceReferencesAsList() {
+        ServiceReference[] refs = super.getServiceReferences();
+        if (refs == null) {
+            return null;
         } else {
-            // Is the state valid or invalid, the reference is already removed
-            if (m_references.size() == 0 && !m_isOptional) {
-                m_state = UNRESOLVED;
-            } else {
-                m_state = RESOLVED;
-            }
-            
-            // Is there any change ?
-            if (!m_isAggregate) {
-                if (hasChanged) { // The used reference has been removed
-                    if (m_references.size() != 0) {
-                        callBindMethod(m_references.get(0));
+            return Arrays.asList(refs);
+        }
+    }
+
+    /**
+     * This method is called by the replaced code in the component
+     * implementation class. Construct the service object list is necessary.
+     * @param pojo : POJO object.
+     * @param fieldName : field
+     * @param value : last value.
+     * @return the service object or a nullable / default implementation if defined.
+     * @see org.apache.felix.ipojo.FieldInterceptor#onGet(java.lang.Object, java.lang.String, java.lang.Object)
+     */
+    public Object onGet(Object pojo, String fieldName, Object value) {
+     // Initialize the thread local object is not already touched.
+        Usage usage = (Usage) m_usage.get();
+        if (usage.m_stack == 0) { // uninitialized usage.
+            ServiceReference[] refs = super.getServiceReferences();
+            if (isAggregate()) { // If we are aggregate we get the objects.
+                if (refs == null) {
+                    usage.m_objects = (Object[]) Array.newInstance(getSpecification(), 0); // Create an empty array.
+                } else {
+                   // Use a reflective construction to avoid class cast exception. This method allow to set the component type.
+                    usage.m_objects = (Object[]) Array.newInstance(getSpecification(), refs.length); 
+                    for (int i = 0; refs != null && i < refs.length; i++) {
+                        ServiceReference ref = refs[i];
+                        usage.m_objects[i] = getService(ref);
                     }
+                }
+            } else { // We are singular.
+                // Use a reflective construction to avoid class cast exception. This method allow to set the component type.
+                usage.m_objects = (Object[]) Array.newInstance(getSpecification(), 1);
+                if (refs == null) {
+                    if (m_nullable == null) {
+                        m_handler.warn("[" + m_handler.getInstanceManager().getInstanceName() + "] The dependency is not optional, however no service object can be injected in " + m_field + " -> " + getSpecification().getName());
+                        return null;
+                    }
+                    usage.m_objects[0] = m_nullable;
+                } else {
+                    ServiceReference ref = getServiceReference();
+                    usage.m_objects[0] = getService(ref);
+                }
+            }
+            usage.inc(); // Start the tracking, so fix the stack level to 1
+            m_usage.set(usage);
+        }
+
+        if (isAggregate()) { // Multiple dependency
+            return usage.m_objects;
+        } else {
+            return usage.m_objects[0];
+        }
+    }
+
+    /**
+     * The field was set.
+     * This method should not be call if the POJO is written correctly.
+     * @param pojo : POJO object
+     * @param fieldName : field name
+     * @param value : set value.
+     * @see org.apache.felix.ipojo.FieldInterceptor#onSet(java.lang.Object, java.lang.String, java.lang.Object)
+     */
+    public void onSet(Object pojo, String fieldName, Object value) {
+        // Nothing to do.
+    }
+
+    /**
+     * A POJO method will be invoked.
+     * @param pojo : Pojo object
+     * @param method : called method
+     * @param args : arguments
+     * @see org.apache.felix.ipojo.MethodInterceptor#onEntry(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+     */
+    public void onEntry(Object pojo, Method method, Object[] args) {
+        if (m_usage != null) {
+            Usage usage = (Usage) m_usage.get();
+            if (usage.m_stack > 0) {
+                usage.inc();
+                m_usage.set(usage); // Set the Thread local as value has been modified
+            }
+        }
+    }
+
+    /**
+     * A POJO method has thrown an error.
+     * This method does nothing and wait for the finally.
+     * @param pojo : POJO object.
+     * @param method : Method object.
+     * @param throwable : thrown error
+     * @see org.apache.felix.ipojo.MethodInterceptor#onError(java.lang.Object, java.lang.reflect.Method, java.lang.Throwable)
+     */
+    public void onError(Object pojo, Method method, Throwable throwable) {
+        // Nothing to do  : wait onFinally
+    }
+
+    /**
+     * A POJO method has returned.
+     * @param pojo : POJO object.
+     * @param method : Method object.
+     * @param returnedObj : returned object (null for void method)
+     * @see org.apache.felix.ipojo.MethodInterceptor#onExit(java.lang.Object, java.lang.reflect.Method, java.lang.Object)
+     */
+    public void onExit(Object pojo, Method method, Object returnedObj) {
+        // Nothing to do  : wait onFinally
+        
+    }
+
+    /**
+     * A POJO method is finished.
+     * @param pojo : POJO object.
+     * @param method : Method object.
+     * @see org.apache.felix.ipojo.MethodInterceptor#onFinally(java.lang.Object, java.lang.reflect.Method)
+     */
+    public void onFinally(Object pojo, Method method) {
+        if (m_usage != null) {
+            Usage usage = (Usage) m_usage.get();
+            if (usage.m_stack > 0) {
+                if (usage.dec()) {
+                    // Exit the method flow => Release all objects
+                    usage.clear();
+                    m_usage.set(usage); // Set the Thread local as value has been modified
                 }
             }
         }
-
-        m_handler.checkContext();
-        return;
     }
 
 }

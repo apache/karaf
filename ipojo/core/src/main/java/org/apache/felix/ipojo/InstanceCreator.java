@@ -18,51 +18,238 @@
  */
 package org.apache.felix.ipojo;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.ipojo.util.Logger;
-import org.apache.felix.ipojo.util.Tracker;
-import org.apache.felix.ipojo.util.TrackerCustomizer;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 
 /**
- * An instance creator aims to create instances and to track their factories.
- * It's allow to create instance from outside factories.
- * 
+ * An instance creator aims to create instances and to track their factories. It's allow to create instance from outside factories.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class InstanceCreator implements TrackerCustomizer, FactoryStateListener {
-    /**
-     * Bundle Context.
-     */
-    private BundleContext m_context;
+public class InstanceCreator implements FactoryStateListener {
 
     /**
      * Logger to log messages if error occurs.
      */
     private Logger m_logger;
-    
-    /**
-     * Private factories.
-     */
-    private ComponentFactory[] m_factories;
 
     /**
-     * This structure aims to manage a configuration. It stores all necessary
-     * information to create an instance and to track the factory.
+     * Configurations to create and maintains.
      */
-    private class ManagedConfiguration {
+    private List m_idle = new ArrayList();
+
+    /**
+     * Map storing created instance. [AbstractFactory, List [ManagedInstance]]
+     */
+    private Map m_attached = new HashMap();
+
+    /**
+     * Abstract Factory list.
+     */
+    private List m_factories = new ArrayList();
+
+    /**
+     * Constructor.
+     * @param context : iPOJO bundle context.
+     */
+    public InstanceCreator(BundleContext context) {
+        m_logger = new Logger(context, "iPOJO Instance Creator");
+    }
+
+    /**
+     * Add an instance to manage.
+     * @param instance : instance configuration
+     * @param bundle : bundle id declaring the instance
+     */
+    synchronized void addInstance(Dictionary instance, long bundle) {
+        ManagedInstance managed = new ManagedInstance(instance, bundle);
+        for (int i = 0; i < m_factories.size(); i++) {
+            IPojoFactory factory = (IPojoFactory) m_factories.get(i);
+            if (factory.getState() == Factory.VALID && managed.match(factory)) {
+                managed.create(factory);
+                List list = (List) m_attached.get(factory);
+                if (list == null) {
+                    list = new ArrayList();
+                    list.add(managed);
+                    m_attached.put(factory, list);
+                    // Subscribe to the factory state change
+                    factory.addFactoryStateListener(this);
+                } else {
+                    list.add(managed);
+                }
+                return;
+            }
+        }
+        // If there is no matching factory, add the instance to the idle list
+        m_idle.add(managed);
+    }
+
+    /**
+     * Dispose and stop to manage all instances declared by the given bundle.
+     * @param bundle : bundle.
+     */
+    void removeInstancesFromBundle(long bundle) {
+        // Disposes instance from attached instances
+        Collection col = m_attached.keySet();
+        Iterator iterator = col.iterator();
+        List instanceToRemove = new ArrayList();
+        List factoryToRemove = new ArrayList();
+        while (iterator.hasNext()) {
+            IPojoFactory factory = (IPojoFactory) iterator.next();
+            List list = (List) m_attached.get(factory);
+            for (int i = 0; i < list.size(); i++) {
+                ManagedInstance managed = (ManagedInstance) list.get(i);
+                if (managed.m_bundleId == bundle) {
+                    managed.dispose();
+                    instanceToRemove.add(managed);
+                }
+            }
+            if (!instanceToRemove.isEmpty()) {
+                list.removeAll(instanceToRemove);
+                if (list.isEmpty()) {
+                    factory.removeFactoryStateListener(this);
+                    factoryToRemove.add(factory);
+                }
+            }
+        }
+
+        for (int i = 0; i < factoryToRemove.size(); i++) {
+            m_attached.remove(factoryToRemove.get(i));
+        }
+
+        // Delete idle instances
+        instanceToRemove.clear();
+        for (int i = 0; i < m_idle.size(); i++) {
+            ManagedInstance managed = (ManagedInstance) m_idle.get(i);
+            if (managed.m_bundleId == bundle) {
+                instanceToRemove.add(managed);
+            }
+        }
+        m_idle.removeAll(instanceToRemove);
+    }
+
+    /**
+     * A new factory appears.
+     * @param factory : the new factory.
+     */
+    public synchronized void addFactory(IPojoFactory factory) {
+        List createdInstances = new ArrayList(1);
+        m_factories.add(factory);
+        for (int i = 0; i < m_idle.size(); i++) {
+            ManagedInstance managed = (ManagedInstance) m_idle.get(i);
+            if (managed.match(factory)) {
+                // We have to subscribe to the factory.
+                factory.addFactoryStateListener(this);
+                if (factory.getState() == Factory.VALID) {
+                    managed.create(factory);
+                    List list = (List) m_attached.get(factory);
+                    if (list == null) {
+                        list = new ArrayList();
+                        list.add(managed);
+                        m_attached.put(factory, list);
+                    } else {
+                        list.add(managed);
+                    }
+                    createdInstances.add(managed);
+                }
+            }
+        }
+        if (!createdInstances.isEmpty()) {
+            m_idle.removeAll(createdInstances);
+        }
+    }
+
+    /**
+     * A factory is leaving.
+     * @param factory : the leaving factory
+     */
+    void removeFactory(IPojoFactory factory) {
+        factory.removeFactoryStateListener(this);
+        m_factories.remove(factory);
+        onInvalidation(factory);
+        m_attached.remove(factory);
+    }
+
+    /**
+     * The given factory becomes valid.
+     * @param factory : the factory becoming valid.
+     */
+    private void onValidation(IPojoFactory factory) {
+        List toRemove = new ArrayList();
+        for (int i = 0; i < m_idle.size(); i++) {
+            ManagedInstance managed = (ManagedInstance) m_idle.get(i);
+            if (managed.match(factory)) {
+                managed.create(factory);
+                List list = (List) m_attached.get(factory);
+                if (list == null) {
+                    list = new ArrayList();
+                    list.add(managed);
+                    m_attached.put(factory, list);
+                } else {
+                    list.add(managed);
+                }
+                toRemove.add(managed);
+            }
+        }
+        if (!toRemove.isEmpty()) {
+            m_idle.removeAll(toRemove);
+        }
+    }
+
+    /**
+     * The given factory becomes invalid.
+     * @param factory : factory which becomes invalid.
+     */
+    private void onInvalidation(IPojoFactory factory) {
+        List instances = (List) m_attached.remove(factory);
+        if (instances != null) {
+            for (int i = 0; i < instances.size(); i++) {
+                ManagedInstance managed = (ManagedInstance) instances.get(i);
+                managed.dispose();
+                m_idle.add(managed);
+            }
+        }
+    }
+
+    /**
+     * Factory state changed method.
+     * @param factory : factory.
+     * @param newState : new state.
+     * @see org.apache.felix.ipojo.FactoryStateListener#stateChanged(org.apache.felix.ipojo.Factory, int)
+     */
+    public void stateChanged(Factory factory, int newState) {
+        if (newState == Factory.VALID) {
+            onValidation((IPojoFactory) factory);
+        } else {
+            onInvalidation((IPojoFactory) factory);
+        }
+    }
+
+    /**
+     * This structure aims to manage a configuration. It stores all necessary information to create an instance and to track the factory.
+     */
+    private class ManagedInstance {
         /**
          * Configuration of the instance to create.
          */
         private Dictionary m_configuration;
 
         /**
-         * Factory name.
+         * Bundle which create the instance.
          */
-        private String m_factoryName;
+        private long m_bundleId;
+
+        /**
+         * Factory used to create the instance.
+         */
+        private IPojoFactory m_factory;
 
         /**
          * Created instance.
@@ -71,27 +258,20 @@ public class InstanceCreator implements TrackerCustomizer, FactoryStateListener 
 
         /**
          * Constructor.
-         * 
          * @param conf : the configuration to create.
+         * @param bundle : the bundle in which the instance is declared.
          */
-        ManagedConfiguration(Dictionary conf) {
+        ManagedInstance(Dictionary conf, long bundle) {
             m_configuration = conf;
-        }
-
-        /**
-         * Return the managed configuration.
-         * @return the configuration.
-         */
-        Dictionary getConfiguration() {
-            return m_configuration;
+            m_bundleId = bundle;
         }
 
         /**
          * Return the used factory name.
          * @return the factory
          */
-        String getFactory() {
-            return m_factoryName;
+        IPojoFactory getFactory() {
+            return m_factory;
         }
 
         /**
@@ -103,215 +283,59 @@ public class InstanceCreator implements TrackerCustomizer, FactoryStateListener 
         }
 
         /**
-         * Set the factory name.
-         * 
-         * @param name : the factory name.
+         * Test if the given factory match with the factory required by this instance. A factory matches if its name or its class name is equals to
+         * the 'component' property of the instance. Then the acceptability of the configuration is checked.
+         * @param factory : the factory to confront against the current instance.
+         * @return true if the factory match.
          */
-        void setFactory(String name) {
-            m_factoryName = name;
+        public boolean match(IPojoFactory factory) {
+            // Test factory name (and classname)
+            String component = (String) m_configuration.get("component");
+            if (factory.getName().equals(component) || factory.getClassName().equalsIgnoreCase(component)) {
+                // Test factory accessibility
+                if (factory.m_isPublic || factory.getBundleContext().getBundle().getBundleId() == m_bundleId) {
+                    // Test the configuration validity.
+                    if (factory.isAcceptable(m_configuration)) {
+                        return true;
+                    } else {
+                        m_logger.log(Logger.ERROR, "An instance can be bound to a matching factory, however the configuration seems unacceptable : "
+                                + m_configuration);
+                    }
+                }
+            }
+            return false;
         }
 
         /**
-         * Set the instance object.
-         * 
-         * @param instance : the instance
+         * Create the instance by using the given factory.
+         * @param factory : the factory to use to create the instance. The factory must match.
          */
-        void setInstance(ComponentInstance instance) {
-            m_instance = instance;
-        }
-    }
-
-    /**
-     * Configurations to create and maintains.
-     */
-    private ManagedConfiguration[] m_configurations = new ManagedConfiguration[0];
-
-    /**
-     * Service Tracker tracking factories.
-     */
-    private Tracker m_tracker;
-
-    /**
-     * Constructor.
-     * 
-     * @param context : the bundle context.
-     * @param configurations : configuration set to create and maintain.
-     * @param factories : private factories.
-     */
-    public InstanceCreator(BundleContext context, Dictionary[] configurations, ComponentFactory[] factories) {
-        m_context = context;
-        m_logger = new Logger(context, "InstanceCreator" + context.getBundle().getBundleId(), Logger.WARNING);
-        
-        m_configurations = new ManagedConfiguration[configurations.length];
-        m_factories = factories;
-       
-        for (int i = 0; i < configurations.length; i++) {
-            ManagedConfiguration conf = new ManagedConfiguration(configurations[i]);
-            m_configurations[i] = conf;
-            // Get the component type name :
-            String componentType = (String) conf.getConfiguration().get("component");
-
-            boolean found = false;
-            for (int j = 0; m_factories != null && !found && j < m_factories.length; j++) {
-                if (m_factories[j].m_state == Factory.VALID && (m_factories[j].getName().equals(componentType) || (m_factories[j].getComponentClassName() != null && m_factories[j].getComponentClassName().equals(componentType)))) {
-                    createInstance(m_factories[j], conf);
-                    found = true;
-                }
+        public void create(IPojoFactory factory) {
+            try {
+                m_factory = factory;
+                m_instance = m_factory.createComponentInstance(m_configuration);
+            } catch (UnacceptableConfiguration e) {
+                m_logger.log(Logger.ERROR, "A matching factory was found for " + m_configuration + ", but the instantiation failed : "
+                        + e.getMessage());
+            } catch (MissingHandlerException e) {
+                m_logger.log(Logger.ERROR, "A matching factory was found for " + m_configuration + ", but the instantiation failed : "
+                        + e.getMessage());
+            } catch (ConfigurationException e) {
+                m_logger.log(Logger.ERROR, "A matching factory was found for " + m_configuration + ", but the instantiation failed : "
+                        + e.getMessage());
             }
         }
-        
-        for (int i = 0; m_factories != null && i < m_factories.length; i++) {
-            m_factories[i].addFactoryStateListener(this);
-        }
-       
-        
-        String filter = "(&(objectclass=" + Factory.class.getName() + ")(factory.state=1))";
-        try {
-            m_tracker = new Tracker(m_context, m_context.createFilter(filter), this);
-            m_tracker.open();
-        } catch (InvalidSyntaxException e) {
-            e.printStackTrace();
-            return;
-        } 
-    }
 
-    /**
-     * Create an instance using the given factory and the given configuration.
-     * 
-     * @param fact : the factory name to used.
-     * @param config : the configuration.
-     */
-    private void createInstance(Factory fact, ManagedConfiguration config) {
-        Dictionary conf = config.getConfiguration();
-        try {
-            config.setInstance(fact.createComponentInstance(conf));
-            config.setFactory(fact.getName());
-        } catch (UnacceptableConfiguration e) {
-            m_logger.log(Logger.ERROR, "A factory is available for the configuration but the configuration is not acceptable", e);
-            stop();
-        } catch (MissingHandlerException e) {
-            m_logger.log(Logger.ERROR, "The instance creation has failed, at least one handler is missing", e);
-            stop();
-        } catch (ConfigurationException e) {
-            m_logger.log(Logger.ERROR, "The instance creation has failed, an error during the configuration has occured", e);
-            stop();
-        }
-    }
-
-    /**
-     * Stop all created instances.
-     */
-    public synchronized void stop() {
-        m_tracker.close();
-        
-        for (int i = 0; m_factories != null && i < m_factories.length; i++) {
-            m_factories[i].removeFactoryStateListener(this);
-        }
-        
-        for (int i = 0; i < m_configurations.length; i++) {
-            if (m_configurations[i].getInstance() != null) {
-                m_configurations[i].getInstance().dispose();
+        /**
+         * Dispose the current instance.
+         */
+        public void dispose() {
+            if (m_instance != null) {
+                m_instance.dispose();
             }
-            m_configurations[i].setInstance(null);
-            m_configurations[i].setFactory(null);
+            m_instance = null;
+            m_factory = null;
         }
-        
-        m_factories = null;
-        m_tracker = null;
-        m_logger = null;
-        m_configurations = null;
-    }
-
-    /**
-     * Factory state changed method.
-     * @param factory : factory.
-     * @param newState : new state.
-     * @see org.apache.felix.ipojo.FactoryStateListener#stateChanged(org.apache.felix.ipojo.Factory, int)
-     */
-    public void stateChanged(Factory factory, int newState) {
-        if (newState == Factory.VALID) {
-            for (int i = 0; i < m_configurations.length; i++) {
-                if (m_configurations[i].getInstance() == null
-                        && (m_configurations[i].getConfiguration().get("component").equals(factory.getName()) || m_configurations[i].getConfiguration().get(
-                                "component").equals(((ComponentFactory) factory).getComponentClassName()))) {
-                    Factory fact = factory;
-                    createInstance(fact, m_configurations[i]);
-                }
-            }
-            return;
-        } else {
-            // newState == INVALID
-            for (int i = 0; i < m_configurations.length; i++) {
-                if (m_configurations[i].getInstance() != null && m_configurations[i].getFactory().equals(factory.getName())) {
-                    m_configurations[i].setInstance(null);
-                    m_configurations[i].setFactory(null);
-                }
-            }
-            return;
-        }
-    }
-
-    /**
-     * A new factory has been detected.
-     * @param ref : the factory service reference.
-     * @return true if the factory can be used to create a managed instance.
-     * @see org.apache.felix.ipojo.util.TrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-     */
-    public boolean addingService(ServiceReference ref) {
-        String factoryName = (String) ref.getProperty("factory.name");
-        String componentClass = (String) ref.getProperty("component.class");
-        boolean isValid = ((String) ref.getProperty("factory.state")).equals("" + Factory.VALID); 
-        Factory fact = (Factory) m_tracker.getService(ref);
-
-        boolean used = false;
-        if (isValid) {
-            for (int i = 0; i < m_configurations.length; i++) {
-                if (m_configurations[i].getInstance() == null
-                        && (m_configurations[i].getConfiguration().get("component").equals(factoryName) || m_configurations[i].getConfiguration().get("component").equals(componentClass))) {
-                    createInstance(fact, m_configurations[i]);
-                    used = true;
-                }
-            }
-        }
-        return used;
-    }
-    
-    /**
-     * A matching service has been added to the tracker.
-     * Nothing to do, as all action are computed in the adding method.
-     * @param ref : added reference.
-     * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
-     */
-    public void addedService(ServiceReference ref) { }
-
-    /**
-     * A used factory is modified.
-     * @param ref : modified reference.
-     * @param obj : factory object.
-     * @see org.apache.felix.ipojo.util.TrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
-    public void modifiedService(ServiceReference ref, Object obj) { }
-
-    /**
-     * A used factory disappears.
-     * All created instance are disposed.
-     * @param ref : service reference.
-     * @param obj : factory object.
-     * @see org.apache.felix.ipojo.util.TrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
-    public void removedService(ServiceReference ref, Object obj) {
-        String name = (String) ref.getProperty("factory.name");
-        if (name == null) { return; }
-        for (int i = 0; i < m_configurations.length; i++) {
-            if (m_configurations[i].getFactory() != null && m_configurations[i].getFactory().equals(name)) {
-                if (m_configurations[i].getInstance() != null) {
-                    m_configurations[i].getInstance().dispose();
-                    m_configurations[i].setInstance(null);
-                }
-                m_configurations[i].setFactory(null);
-            }
-        }
-        m_tracker.ungetService(ref);
     }
 
 }

@@ -1,0 +1,66 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>bundle</packaging>
+  <groupId>ipojo.examples</groupId>
+  <artifactId>hello.client.annotation</artifactId>
+   <version>0.7.6-SNAPSHOT</version>
+  <name>Hello Service Client using Annotations</name>
+  
+  <dependencies>
+    <dependency>
+      <groupId>ipojo.examples</groupId>
+      <artifactId>hello.service</artifactId>
+      <version>${pom.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.ipojo.annotations</artifactId>
+      <version>0.7.6-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+  
+  <pluginRepositories>
+    <pluginRepository>
+      <id>apache.snapshots</id>
+      <name>snapshot plugins</name>
+      <url>
+        http://people.apache.org/repo/m2-snapshot-repository
+      </url>
+    </pluginRepository>
+  </pluginRepositories>
+  
+  <build>
+    <plugins>
+     <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-compiler-plugin</artifactId>
+		<configuration>
+		<source>1.5</source>
+		<target>1.5</target>
+		</configuration>
+	  </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Private-Package>ipojo.example.hello.client</Private-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+	      <groupId>org.apache.felix</groupId>
+	      <artifactId>maven-ipojo-plugin</artifactId>
+		  <executions>
+          	<execution>
+            	<goals>
+	              <goal>ipojo-bundle</goal>
+               </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

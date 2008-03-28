@@ -53,29 +53,29 @@ public class LifecycleCallback {
     /**
      * LifecycleCallback constructor.
      * 
-     * @param hh : the callback handler calling the callback
+     * @param handler : the callback handler calling the callback
      * @param transition : transition on which calling the callback
-     * @param mm : method metadata to invoke
+     * @param method : method metadata to invoke
      */
-    public LifecycleCallback(LifecycleCallbackHandler hh, int transition, MethodMetadata mm) {
+    public LifecycleCallback(LifecycleCallbackHandler handler, int transition, MethodMetadata method) {
         m_transition = transition;
-        m_callback = new Callback(mm, hh.getInstanceManager());
+        m_callback = new Callback(method, handler.getInstanceManager());
     }
     
     /**
      * LifecycleCallback constructor.
      * 
-     * @param hh : the callback handler calling the callback
+     * @param handler : the callback handler calling the callback
      * @param transition : transition on which calling the callback
-     * @param mm : method name to invoke
+     * @param method : method name to invoke
      */
-    public LifecycleCallback(LifecycleCallbackHandler hh, int transition, String mm) {
+    public LifecycleCallback(LifecycleCallbackHandler handler, int transition, String method) {
         m_transition = transition;
-        m_callback = new Callback(mm, new String[0], false, hh.getInstanceManager());
+        m_callback = new Callback(method, new String[0], false, handler.getInstanceManager());
     }
 
     /**
-     * Call the callback method when the transition from inital to final state is
+     * Call the callback method when the transition from inital tostate is
      * detected.
      * 
      * @throws NoSuchMethodException : Method is not found in the class

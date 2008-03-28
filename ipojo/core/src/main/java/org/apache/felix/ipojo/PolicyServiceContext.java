@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Dictionary;
 
-import org.apache.felix.ipojo.composite.ServiceReferenceImpl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -85,7 +84,11 @@ public class PolicyServiceContext implements ServiceContext {
     public PolicyServiceContext(BundleContext global, ServiceContext local, int policy) {
         m_global = global;
         m_local = local;
-        m_policy = policy;
+        if (m_local == null) {
+            m_policy = GLOBAL;
+        } else {
+            m_policy = policy;
+        }
     }
 
     /**
@@ -137,23 +140,7 @@ public class PolicyServiceContext implements ServiceContext {
             case LOCAL_AND_GLOBAL:
                 ServiceReference[] refLocal = m_local.getAllServiceReferences(clazz, filter);
                 ServiceReference[] refGlobal = m_global.getAllServiceReferences(clazz, filter);
-                if (refLocal != null && refGlobal != null) {
-                    ServiceReference[] refs = new ServiceReference[refLocal.length + refGlobal.length];
-                    int j = 0;
-                    for (int i = 0; i < refLocal.length; i++) {
-                        refs[j] = refLocal[i];
-                        j++;
-                    }
-                    for (int i = 0; i < refGlobal.length; i++) {
-                        refs[j] = refGlobal[i];
-                        j++;
-                    }
-                    return refs;
-                } else if (refLocal != null && refGlobal == null) {
-                    return refLocal;
-                } else {
-                    return refGlobal;
-                }
+                return computeServiceReferencesFromBoth(refLocal, refGlobal);
             default:
                 return null;
         }
@@ -166,7 +153,7 @@ public class PolicyServiceContext implements ServiceContext {
      * @see org.apache.felix.ipojo.ServiceContext#getService(org.osgi.framework.ServiceReference)
      */
     public Object getService(ServiceReference ref) {
-        switch(m_policy) {
+        switch(m_policy) { // NOPMD No break needed as we return in each branch.
             case LOCAL:
                 // The reference comes from the local scope
                 return m_local.getService(ref);
@@ -174,8 +161,7 @@ public class PolicyServiceContext implements ServiceContext {
                 // The reference comes from the global registry
                 return m_global.getService(ref);
             case LOCAL_AND_GLOBAL:
-                if (ref instanceof org.apache.felix.ipojo.composite.ServiceReferenceImpl) {
-                    // The reference comes from a composite, i.e. necessary the local composite
+                if (ref instanceof org.apache.felix.ipojo.context.ServiceReferenceImpl) {
                     return m_local.getService(ref);
                 } else {
                     return m_global.getService(ref);
@@ -192,17 +178,17 @@ public class PolicyServiceContext implements ServiceContext {
      * @see org.apache.felix.ipojo.ServiceContext#getServiceReference(java.lang.String)
      */
     public ServiceReference getServiceReference(String clazz) {
-        switch (m_policy) {
+        switch (m_policy) { // NOPMD No break needed as we return in each branch.
             case LOCAL:
                 return m_local.getServiceReference(clazz);
             case GLOBAL:
                 return m_global.getServiceReference(clazz);
             case LOCAL_AND_GLOBAL:
                 ServiceReference refLocal = m_local.getServiceReference(clazz);
-                if (refLocal != null) {
-                    return refLocal;
+                if (refLocal == null) {
+                    return m_global.getServiceReference(clazz);
                 } else {
-                    return m_global.getServiceReference(clazz); 
+                    return refLocal;
                 }
             default:
                 return null;
@@ -226,27 +212,30 @@ public class PolicyServiceContext implements ServiceContext {
             case LOCAL_AND_GLOBAL:
                 ServiceReference[] refLocal = m_local.getServiceReferences(clazz, filter);
                 ServiceReference[] refGlobal = m_global.getServiceReferences(clazz, filter);
-                if (refLocal != null && refGlobal != null) {
-                    ServiceReference[] refs = new ServiceReference[refLocal.length + refGlobal.length];
-                    int j = 0;
-                    for (int i = 0; i < refLocal.length; i++) {
-                        refs[j] = refLocal[i];
-                        j++;
-                    }
-                    for (int i = 0; i < refGlobal.length; i++) {
-                        refs[j] = refGlobal[i];
-                        j++;
-                    }
-                    return refs;
-                } else if (refLocal != null && refGlobal == null) {
-                    return refLocal;
-                } else {
-                    return refGlobal;
-                }
+                return computeServiceReferencesFromBoth(refLocal, refGlobal);
             default:
                 return null;
         }
 
+    }
+    
+    /**
+     * Compute the service reference array from the two given set of service references.
+     * @param refLocal : local references
+     * @param refGlobal : global references
+     * @return the set of service reference
+     */
+    private ServiceReference[] computeServiceReferencesFromBoth(ServiceReference[] refLocal, ServiceReference[] refGlobal) {
+        if (refLocal == null) {
+            return refGlobal; // If refGlobal is null, return null, else return refGlobal
+        } else if (refGlobal == null) { // refLocal != null && refGlobal == null
+            return refLocal;
+        } else { // Both refGlobal and refLocal are not null
+            ServiceReference[] refs = new ServiceReference[refLocal.length + refGlobal.length];
+            System.arraycopy(refLocal, 0, refs, 0, refLocal.length);
+            System.arraycopy(refGlobal, 0, refs, refLocal.length, refGlobal.length);
+            return refs;
+        }        
     }
 
     /**
@@ -294,7 +283,7 @@ public class PolicyServiceContext implements ServiceContext {
      * @see org.apache.felix.ipojo.ServiceContext#ungetService(org.osgi.framework.ServiceReference)
      */
     public boolean ungetService(ServiceReference reference) {
-        if (reference instanceof ServiceReferenceImpl) {
+        if (reference instanceof org.apache.felix.ipojo.context.ServiceReferenceImpl) {
             return m_local.ungetService(reference);
         } else {
             return m_global.ungetService(reference);
@@ -343,12 +332,12 @@ public class PolicyServiceContext implements ServiceContext {
 
     /**
      * Get the bundle object with the given id.
-     * @param id : bundle id
+     * @param bundleId : bundle id
      * @return the bundle object
      * @see org.osgi.framework.BundleContext#getBundle(long)
      */
-    public Bundle getBundle(long id) {
-        return m_global.getBundle(id);
+    public Bundle getBundle(long bundleId) {
+        return m_global.getBundle(bundleId);
     }
 
     /**

@@ -25,16 +25,57 @@
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>ipojo</artifactId>
+  <artifactId>iPOJO</artifactId>
+  <groupId>org.apache.felix</groupId>
   <name>Apache Felix iPOJO</name>
-  <version>0.7.5-SNAPSHOT</version>
+  <version>0.7.6-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <modules>
-	<module>metadata</module>
-    <module>manipulator</module>
-	<module>plugin</module>
-    <module>core</module>
-    <module>arch</module>
-	<module>ant</module>
-  </modules>
+  
+  	<modules>
+		<module>metadata</module>
+		<module>manipulator</module>
+		<module>plugin</module>
+		<module>core</module>
+		<module>composite</module>
+		<module>arch</module>
+		<module>ant</module>
+		<module>event.admin.handler</module>
+		<module>white.board.pattern.handler</module>
+		<module>extender.pattern.handler</module>
+	</modules>
+	
+  <profiles>
+	<profile>
+		<id>java5</id>
+		<activation>
+			<jdk>1.5</jdk>
+		</activation>
+		<modules>
+			<module>annotations</module>
+			<module>jmx.handler</module>
+		</modules>
+	</profile>
+	<profile>
+		<id>java6</id>
+		<activation>
+			<jdk>1.6</jdk>
+		</activation>
+		<modules>
+			<module>annotations</module>
+			<module>jmx.handler</module>
+		</modules>
+	</profile>
+	<profile>
+		<id>examples</id>
+		<modules>
+			<module>examples</module>
+		</modules>
+	</profile>
+	<profile>
+		<id>tests</id>
+		<modules>
+			<module>tests</module>
+		</modules>
+	</profile>
+  </profiles>
 </project>

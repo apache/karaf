@@ -83,7 +83,7 @@ public class Element {
                 list.add(v[i]);
             }
         }
-        return (Element[]) list.toArray(new Element[0]);
+        return (Element[]) list.toArray(new Element[list.size()]);
     }
 
     /**
@@ -223,25 +223,21 @@ public class Element {
     /**
      * Get the elements array of the element type given in parameter. This method look for an empty namespace.
      * @param name : the type of the element to find (element name)
-     * @return the resulting element array (empty if the search failed)
+     * @return the resulting element array (null if the search failed)
      */
     public Element[] getElements(String name) {
         Element[] elems = (Element[]) m_elements.get(name.toLowerCase());
-        if (elems == null) {
-            return new Element[0];
-        } else {
-            return elems;
-        }
+        return elems;
     }
 
     /**
      * Get the elements array of the element type given in parameter.
      * @param name : the type of the element to find (element name)
      * @param ns : the namespace of the element
-     * @return the resulting element array (empty if the search failed)
+     * @return the resulting element array (null if the search failed)
      */
     public Element[] getElements(String name, String ns) {
-        if (ns == null || ns.equals("")) {
+        if (ns == null || ns.length() == 0) {
             return getElements(name);
         }
         name = ns + ":" + name;
@@ -254,8 +250,7 @@ public class Element {
      * @return true if the element contains an element of the type "name"
      */
     public boolean containsElement(String name) {
-        name = name.toLowerCase();
-        return m_elements.containsKey(name);
+        return m_elements.containsKey(name.toLowerCase());
     }
 
     /**
@@ -265,7 +260,7 @@ public class Element {
      * @return true if the element contains an element of the type "name"
      */
     public boolean containsElement(String name, String ns) {
-        if (ns != null && !ns.equals("")) {
+        if (ns != null && ns.length() != 0) {
             name = ns + ":" + name;
         }
         return containsElement(name);

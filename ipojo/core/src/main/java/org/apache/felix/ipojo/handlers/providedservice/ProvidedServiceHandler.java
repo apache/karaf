@@ -19,7 +19,6 @@
 package org.apache.felix.ipojo.handlers.providedservice;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,10 +27,10 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.IPojoConfiguration;
+import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.PrimitiveHandler;
-import org.apache.felix.ipojo.architecture.ComponentDescription;
+import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.handlers.dependency.Dependency;
@@ -40,9 +39,10 @@ import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.FieldMetadata;
 import org.apache.felix.ipojo.parser.ManifestMetadataParser;
-import org.apache.felix.ipojo.parser.ManipulationMetadata;
 import org.apache.felix.ipojo.parser.ParseException;
 import org.apache.felix.ipojo.parser.ParseUtils;
+import org.apache.felix.ipojo.parser.PojoMetadata;
+import org.apache.felix.ipojo.util.Property;
 import org.osgi.framework.Bundle;
 
 /**
@@ -60,21 +60,21 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
     /**
      * Add a provided service to the list .
      * 
-     * @param ps : the provided service to add
+     * @param svc : the provided service to add
      */
-    private void addProvidedService(ProvidedService ps) {
+    private void addProvidedService(ProvidedService svc) {
         // Verify that the provided service is not already in the array.
         for (int i = 0; (m_providedServices != null) && (i < m_providedServices.length); i++) {
-            if (m_providedServices[i] == ps) { return; }
+            if (m_providedServices[i] == svc) { return; }
         }
 
         if (m_providedServices.length > 0) {
             ProvidedService[] newPS = new ProvidedService[m_providedServices.length + 1];
             System.arraycopy(m_providedServices, 0, newPS, 0, m_providedServices.length);
-            newPS[m_providedServices.length] = ps;
+            newPS[m_providedServices.length] = svc;
             m_providedServices = newPS;
         } else {
-            m_providedServices = new ProvidedService[] { ps };
+            m_providedServices = new ProvidedService[] { svc };
         }
     }
 
@@ -97,7 +97,6 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
         m_providedServices = new ProvidedService[0];
         // Create the dependency according to the component metadata
         Element[] providedServices = componentMetadata.getElements("Provides");
-        List fields = new ArrayList();
         for (int i = 0; i < providedServices.length; i++) {
             String[] serviceSpecifications = ParseUtils.parseArrays(providedServices[i].getAttribute("interface")); // Set by the initialize component factory.
             
@@ -107,62 +106,54 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             if (fact != null && "service".equalsIgnoreCase(fact)) {
                 factory = ProvidedService.SERVICE_FACTORY;
             }
-
-            // Then create the provided service
-            ProvidedService ps = new ProvidedService(this, serviceSpecifications, factory);
-
-            Element[] props = providedServices[i].getElements("Property");
-            Property[] properties = new Property[props.length];
-            for (int j = 0; j < props.length; j++) {
-                String name = props[j].getAttribute("name");
-                String value = props[j].getAttribute("value");
-                String type = props[j].getAttribute("type");
-                String field = props[j].getAttribute("field");
-
-                if (name != null && configuration.get(name) != null && configuration.get(name) instanceof String) {
-                    value = (String) configuration.get(name);
-                } else {
-                    if (field != null && configuration.get(field) != null && configuration.get(field) instanceof String) {
-                        value = (String) configuration.get(field);
-                    }
-                }
-
-                Property prop = new Property(ps, name, field, type, value);
-                properties[j] = prop;
-                
-                // Check if the instance configuration has a value for this property
-                Object o = configuration.get(prop.getName()); 
-                if (o != null && ! (o instanceof String)) {
-                    prop.set(o);
-                } else {
-                    if (field != null) {
-                        o = configuration.get(field);
-                        if (o != null && !(o instanceof String)) {
-                            prop.set(configuration.get(field));
-                        }
-                    }
-                }
-                
-                if (field != null) {
-                    fields.add(new FieldMetadata(field, type));
-                }
+            if (fact != null && "method".equalsIgnoreCase(fact)) {
+                factory = ProvidedService.STATIC_FACTORY;
             }
 
-            // Attached to properties to the provided service
-            ps.setProperties(properties);
+            // Then create the provided service
+            ProvidedService svc = new ProvidedService(this, serviceSpecifications, factory);
 
-            if (checkProvidedService(ps)) {
-                addProvidedService(ps);
+            Element[] props = providedServices[i].getElements("Property");
+            if (props != null) {
+                //Property[] properties = new Property[props.length];
+                Property[] properties = new Property[props.length];
+                for (int j = 0; j < props.length; j++) {
+                    String name = props[j].getAttribute("name");
+                    String value = props[j].getAttribute("value");
+                    String type = props[j].getAttribute("type");
+                    String field = props[j].getAttribute("field");
+
+                    Property prop = new Property(name, field, null, value, type, getInstanceManager(), this);
+                    properties[j] = prop;
+
+                    // Check if the instance configuration has a value for this property                    
+                    Object object = configuration.get(prop.getName());
+                    if (object != null) {
+                        prop.setValue(object);
+                    }
+                    
+                    if (field != null) {
+                        getInstanceManager().register(new FieldMetadata(field, type), this);
+                        // Cannot register the property as the interception is necessary to deal with registration update.
+                    }
+                }
+
+                // Attach to properties to the provided service
+                svc.setProperties(properties);
+            }
+
+            if (checkProvidedService(svc)) {
+                addProvidedService(svc);
             } else {
-                String itfs = "";
+                StringBuffer itfs = new StringBuffer();
                 for (int j = 0; j < serviceSpecifications.length; j++) {
-                    itfs = itfs + " " + serviceSpecifications[j];
+                    itfs.append(' ');
+                    itfs.append(serviceSpecifications[j]);
                 }
                 throw new ConfigurationException("[" + getInstanceManager().getInstanceName() + "] The provided service" + itfs + " is not valid");                
             }
 
         }
-        getInstanceManager().register(this, (FieldMetadata[]) fields.toArray(new FieldMetadata[fields.size()]), null);
     }
     
     /**
@@ -185,8 +176,8 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
 
         // Look for parent class.
         if (parent != null) {
-            Class cl = bundle.loadClass(parent);
-            collectInterfacesFromClass(cl, result, bundle);
+            Class clazz = bundle.loadClass(parent);
+            collectInterfacesFromClass(clazz, result, bundle);
         }
 
         return result;
@@ -195,78 +186,78 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
     /**
      * Look for inherited interfaces.
      * @param clazz : interface name to explore (class object)
-     * @param l : set (accumulator)
-     * @param b : bundle
+     * @param acc : set (accumulator)
+     * @param bundle : bundle
      * @throws ClassNotFoundException : occurs when an interface cannot be loaded.
      */
-    private void collectInterfaces(Class clazz, Set l, Bundle b) throws ClassNotFoundException {
+    private void collectInterfaces(Class clazz, Set acc, Bundle bundle) throws ClassNotFoundException {
         Class[] clazzes = clazz.getInterfaces();
         for (int i = 0; i < clazzes.length; i++) {
-            l.add(clazzes[i].getName());
-            collectInterfaces(clazzes[i], l, b);
+            acc.add(clazzes[i].getName());
+            collectInterfaces(clazzes[i], acc, bundle);
         }
     }
     
     /**
      * Collect interfaces for the given class.
      * This method explores super class to.
-     * @param cl : class object.
-     * @param l : set of implemented interface (accumulator)
-     * @param b : bundle.
+     * @param clazz : class object.
+     * @param acc : set of implemented interface (accumulator)
+     * @param bundle : bundle.
      * @throws ClassNotFoundException : occurs if an interface cannot be load.
      */
-    private void collectInterfacesFromClass(Class cl, Set l, Bundle b) throws ClassNotFoundException {
-        Class[] clazzes = cl.getInterfaces();
+    private void collectInterfacesFromClass(Class clazz, Set acc, Bundle bundle) throws ClassNotFoundException {
+        Class[] clazzes = clazz.getInterfaces();
         for (int i = 0; i < clazzes.length; i++) {
-            l.add(clazzes[i].getName());
-            collectInterfaces(clazzes[i], l, b);
+            acc.add(clazzes[i].getName());
+            collectInterfaces(clazzes[i], acc, bundle);
         }
         // Iterate on parent classes
-        Class sup = cl.getSuperclass();
+        Class sup = clazz.getSuperclass();
         if (sup != null) {
-            collectInterfacesFromClass(sup, l, b);
+            collectInterfacesFromClass(sup, acc, bundle);
         }
     }
 
     /**
      * Check the provided service given in argument in the sense that the metadata are consistent.
-     * @param ps : the provided service to check.
+     * @param svc : the provided service to check.
      * @return true if the provided service is correct
      * @throws ConfigurationException : the checked provided service is not correct.
      */
-    private boolean checkProvidedService(ProvidedService ps) throws ConfigurationException {        
-        for (int i = 0; i < ps.getServiceSpecification().length; i++) {
-            String specName = ps.getServiceSpecification()[i];
+    private boolean checkProvidedService(ProvidedService svc) throws ConfigurationException {        
+        for (int i = 0; i < svc.getServiceSpecification().length; i++) {
+            String specName = svc.getServiceSpecification()[i];
             
             // Check service level dependencies
             try {
                 Class spec = getInstanceManager().getFactory().loadClass(specName);
                 Field specField = spec.getField("specification");
-                Object o = specField.get(null);
-                if (o instanceof String) {
-                    Element specification = ManifestMetadataParser.parse((String) o);
+                Object specif = specField.get(null);
+                if (specif instanceof String) {
+                    Element specification = ManifestMetadataParser.parse((String) specif);
                     Element[] deps = specification.getElements("requires");
-                    for (int j = 0; j < deps.length; j++) {
-                        Dependency d = getAttachedDependency(deps[j]);
-                        if (d != null) {
+                    for (int j = 0; deps != null && j < deps.length; j++) {
+                        Dependency dep = getAttachedDependency(deps[j]);
+                        if (dep != null) {
                             // Fix service-level dependency flag
-                            d.setServiceLevelDependency();
+                            dep.setServiceLevelDependency();
                         }
-                        isDependencyCorrect(d, deps[j]);
+                        isDependencyCorrect(dep, deps[j]);
                     }
                 } else {
-                    throw new ConfigurationException("Provides  : The specification field of the service specification " + ps.getServiceSpecification()[i] + " need to be a String");
+                    throw new ConfigurationException("Provides  : The specification field of the service specification " + svc.getServiceSpecification()[i] + " need to be a String");
                 }
             } catch (NoSuchFieldException e) {
                 return true; // No specification field
             } catch (ClassNotFoundException e) {
-                throw new ConfigurationException("Provides  : The service specification " + ps.getServiceSpecification()[i] + " cannot be load");
+                throw new ConfigurationException("Provides  : The service specification " + svc.getServiceSpecification()[i] + " cannot be load");
             } catch (IllegalArgumentException e) {
-                throw new ConfigurationException("Provides  : The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
+                throw new ConfigurationException("Provides  : The field 'specification' of the service specification " + svc.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
             } catch (IllegalAccessException e) {
-                throw new ConfigurationException("Provides  : The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
+                throw new ConfigurationException("Provides  : The field 'specification' of the service specification " + svc.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
             } catch (ParseException e) {
-                throw new ConfigurationException("Provides  :  The field 'specification' of the service specification " + ps.getServiceSpecification()[i] + " does not contain a valid String : " + e.getMessage());
+                throw new ConfigurationException("Provides  :  The field 'specification' of the service specification " + svc.getServiceSpecification()[i] + " does not contain a valid String : " + e.getMessage());
             }
         }
 
@@ -279,20 +270,20 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * @return the Dependency object, null if not found or if the DependencyHandler is not plugged to the instance
      */
     private Dependency getAttachedDependency(Element element) {
-        DependencyHandler dh = (DependencyHandler) getHandler(IPojoConfiguration.IPOJO_NAMESPACE + ":requires");
-        if (dh == null) { return null; }
+        DependencyHandler handler = (DependencyHandler) getHandler(HandlerFactory.IPOJO_NAMESPACE + ":requires");
+        if (handler == null) { return null; }
 
-        String id = element.getAttribute("id");
-        if (id != null) {
+        String identity = element.getAttribute("id");
+        if (identity != null) {
             // Look for dependency Id
-            for (int i = 0; i < dh.getDependencies().length; i++) {
-                if (dh.getDependencies()[i].getId().equals(id)) { return dh.getDependencies()[i]; }
+            for (int i = 0; i < handler.getDependencies().length; i++) {
+                if (handler.getDependencies()[i].getId().equals(identity)) { return handler.getDependencies()[i]; }
             }
         }
         // If not found or no id, look for a dependency with the same specification
         String requirement = element.getAttribute("specification");
-        for (int i = 0; i < dh.getDependencies().length; i++) {
-            if (dh.getDependencies()[i].getSpecification().equals(requirement)) { return dh.getDependencies()[i]; }
+        for (int i = 0; i < handler.getDependencies().length; i++) {
+            if (handler.getDependencies()[i].getSpecification().equals(requirement)) { return handler.getDependencies()[i]; }
         }
 
         return null;
@@ -334,6 +325,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * @see org.apache.felix.ipojo.Handler#stop()
      */
     public void stop() {
+        //Nothing to do.
     }
 
     /**
@@ -341,31 +333,34 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * 
      * @see org.apache.felix.ipojo.Handler#start()
      */
-    public void start() { }
+    public void start() {
+        // Nothing to do.
+    }
 
     /**
      * Setter Callback Method.
      * Check if the modified field is a property to update the value.
+     * @param pojo : the pojo object on which the field is accessed
      * @param fieldName : field name
      * @param value : new value
-     * @see org.apache.felix.ipojo.Handler#setterCallback(java.lang.String,
-     * java.lang.Object)
+     * @see org.apache.felix.ipojo.Handler#onSet(Object,
+     * java.lang.String, java.lang.Object)
      */
-    public void setterCallback(String fieldName, Object value) {
+    public void onSet(Object pojo, String fieldName, Object value) {
         // Verify that the field name correspond to a dependency
         for (int i = 0; i < m_providedServices.length; i++) {
-            ProvidedService ps = m_providedServices[i];
+            ProvidedService svc = m_providedServices[i];
             boolean update = false;
-            for (int j = 0; j < ps.getProperties().length; j++) {
-                Property prop = ps.getProperties()[j];
-                if (fieldName.equals(prop.getField())) {
+            for (int j = 0; j < svc.getProperties().length; j++) {
+                Property prop = svc.getProperties()[j];
+                if (fieldName.equals(prop.getField()) && ! prop.getValue().equals(value)) {
                     // it is the associated property
-                    prop.set(value);
+                    prop.setValue(value);
                     update = true;
                 }
             }
             if (update) {
-                ps.update();
+                svc.update();
             }
         }
         // Else do nothing
@@ -374,20 +369,21 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
     /**
      * Getter Callback Method.
      * Check if the field is a property to push the stored value.
+     * @param pojo : the pojo object on which the field is accessed
      * @param fieldName : field name
      * @param value : value pushed by the previous handler
      * @return the stored value or the previous value.
-     * @see org.apache.felix.ipojo.Handler#getterCallback(java.lang.String,
-     * java.lang.Object)
+     * @see org.apache.felix.ipojo.Handler#onGet(Object,
+     * java.lang.String, java.lang.Object)
      */
-    public Object getterCallback(String fieldName, Object value) {
+    public Object onGet(Object pojo, String fieldName, Object value) {
         for (int i = 0; i < m_providedServices.length; i++) {
-            ProvidedService ps = m_providedServices[i];
-            for (int j = 0; j < ps.getProperties().length; j++) {
-                Property prop = ps.getProperties()[j];
+            ProvidedService svc = m_providedServices[i];
+            for (int j = 0; j < svc.getProperties().length; j++) {
+                Property prop = svc.getProperties()[j];
                 if (fieldName.equals(prop.getField())) {
                     // it is the associated property
-                    return prop.get();
+                    return prop.getValue();
                 }
             }
         }
@@ -452,12 +448,12 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
         ProvidedServiceHandlerDescription pshd = new ProvidedServiceHandlerDescription(this);
 
         for (int j = 0; j < getProvidedService().length; j++) {
-            ProvidedService ps = getProvidedService()[j];
-            ProvidedServiceDescription psd = new ProvidedServiceDescription(ps.getServiceSpecification(), ps.getState(), ps.getServiceReference());
+            ProvidedService svc = getProvidedService()[j];
+            ProvidedServiceDescription psd = new ProvidedServiceDescription(svc.getServiceSpecification(), svc.getState(), svc.getServiceReference());
 
             Properties props = new Properties();
-            for (int k = 0; k < ps.getProperties().length; k++) {
-                Property prop = ps.getProperties()[k];
+            for (int k = 0; k < svc.getProperties().length; k++) {
+                Property prop = svc.getProperties()[k];
                 if (prop.getValue() != null) {
                     props.put(prop.getName(), prop.getValue().toString());
                 }
@@ -475,36 +471,32 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      */
     public void reconfigure(Dictionary dict) {
         for (int j = 0; j < getProvidedService().length; j++) {
-            ProvidedService ps = getProvidedService()[j];
-            Property[] props = ps.getProperties();
+            ProvidedService svc = getProvidedService()[j];
+            Property[] props = svc.getProperties();
             boolean update = false;
             for (int k = 0; k < props.length; k++) {
                 if (dict.get(props[k].getName()) != null) {
                     update = true;
-                    if (dict.get(props[k].getName()) instanceof String) {
-                        props[k].set((String) dict.get(props[k].getName()));
-                    } else {
-                        props[k].set(dict.get(props[k].getName()));
-                    }
+                    props[k].setValue(dict.get(props[k].getName()));
                 }
             }
             if (update) {
-                ps.update();
+                svc.update();
             }
         }
     }
 
     /**
      * Initialize the component type.
-     * @param cd : component type description to populate.
+     * @param desc : component type description to populate.
      * @param metadata : component type metadata.
      * @throws ConfigurationException : occurs when the POJO does not implement any interfaces.
-     * @see org.apache.felix.ipojo.Handler#initializeComponentFactory(org.apache.felix.ipojo.architecture.ComponentDescription, org.apache.felix.ipojo.metadata.Element)
+     * @see org.apache.felix.ipojo.Handler#initializeComponentFactory(org.apache.felix.ipojo.architecture.ComponentTypeDescription, org.apache.felix.ipojo.metadata.Element)
      */
-    public void initializeComponentFactory(ComponentDescription cd, Element metadata) throws ConfigurationException {
+    public void initializeComponentFactory(ComponentTypeDescription desc, Element metadata) throws ConfigurationException {
         // Change ComponentInfo
         Element[] provides = metadata.getElements("provides");
-        ManipulationMetadata manipulation = new ManipulationMetadata(metadata);
+        PojoMetadata manipulation = getFactory().getPojoMetadata();
 
         for (int i = 0; i < provides.length; i++) {
          // First : create the serviceSpecification list
@@ -512,7 +504,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             String parent = manipulation.getSuperClass();
             Set all = null;
             try {
-                all = computeInterfaces(serviceSpecification, parent, cd.getBundleContext().getBundle());
+                all = computeInterfaces(serviceSpecification, parent, desc.getBundleContext().getBundle());
             } catch (ClassNotFoundException e) {
                 throw new ConfigurationException("A interface cannot be loaded : " + e.getMessage());
             }
@@ -522,35 +514,37 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                 List itfs = ParseUtils.parseArraysAsList(serviceSpecificationStr);
                 for (int j = 0; j < itfs.size(); j++) {
                     if (! all.contains(itfs.get(j))) {
-                        throw new ConfigurationException("The specification " + itfs.get(j) + " is not implemented by " + cd.getClassName());
+                        throw new ConfigurationException("The specification " + itfs.get(j) + " is not implemented by " + desc.getClassName());
                     }
                 }
                 all = new HashSet(itfs);
             }
             
-            if (all.size() == 0) {
+            if (all.isEmpty()) {
                 throw new ConfigurationException("Provides  : Cannot instantiate a provided service : no specifications found (no interfaces implemented by the pojo)");
             }
 
-            String specs = null;
+            StringBuffer specs = null;
             Set set = new HashSet(all);
-            Iterator it = set.iterator(); 
-            while (it.hasNext()) {
-                String sp = (String) it.next();
-                cd.addProvidedServiceSpecification(sp);
+            Iterator iterator = set.iterator(); 
+            while (iterator.hasNext()) {
+                String spec = (String) iterator.next();
+                desc.addProvidedServiceSpecification(spec);
                 if (specs == null) {
-                    specs = "{" + sp;
+                    specs = new StringBuffer("{");
+                    specs.append(spec);
                 } else {
-                    specs += "," + sp;
+                    specs.append(',');
+                    specs.append(spec);
                 }
             }
             
-            specs += "}";
+            specs.append('}');
             
-            provides[i].addAttribute(new Attribute("interface", specs)); // Add interface attribute to avoid checking in the configure method
+            provides[i].addAttribute(new Attribute("interface", specs.toString())); // Add interface attribute to avoid checking in the configure method
 
             Element[] props = provides[i].getElements("property");
-            for (int j = 0; j < props.length; j++) {
+            for (int j = 0; props != null && j < props.length; j++) {
                 String name = props[j].getAttribute("name");
                 String value = props[j].getAttribute("value");
                 String type = props[j].getAttribute("type");
@@ -566,15 +560,22 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                     if (field == null) {
                         throw new ConfigurationException("The property " + name + " has neither type neither field.");
                     }
-                    FieldMetadata fm = manipulation.getField(field);
-                    if (fm == null) {
+                    FieldMetadata fieldMeta = manipulation.getField(field);
+                    if (fieldMeta == null) {
                         throw new ConfigurationException("A declared property was not found in the class : " + field);
                     }
-                    type = fm.getFieldType();
+                    type = fieldMeta.getFieldType();
                     props[j].addAttribute(new Attribute("type", type));
                 }
+                
+                // Is the property set to immutable
+                boolean immutable = false;
+                String imm = props[j].getAttribute("immutable");
+                if (imm != null && imm.equalsIgnoreCase("true")) {
+                    immutable = true;
+                }
 
-                cd.addProperty(new PropertyDescription(name, type, value));
+                desc.addProperty(new PropertyDescription(name, type, value, immutable));
             }
         }
     }

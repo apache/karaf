@@ -22,7 +22,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.apache.felix.ipojo.util.Callback;
-import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -42,7 +41,6 @@ public class DependencyCallback extends Callback {
      * Unbind method (called when a service disappears).
      */
     public static final int UNBIND = 1;
-    
 
     /**
      * Is the method a bind method or an unbind method ?
@@ -104,20 +102,25 @@ public class DependencyCallback extends Callback {
     protected void searchMethod() {
         if (m_argument != null) {
             Method[] methods = m_dependency.getHandler().getInstanceManager().getClazz().getDeclaredMethods();
-            for (int i = 0; m_methodObj == null && i < methods.length; i++) {
+            for (int i = 0; i < methods.length; i++) {
                 // First check the method name
                 if (methods[i].getName().equals(m_method)) {
                     // Check arguments
                     Class[] clazzes = methods[i].getParameterTypes();
-                    if (clazzes.length == m_argument.length) { // Test size to avoid useless loop
-                        boolean ok = true;
-                        for (int j = 0; ok && j < m_argument.length; j++) {
-                            if (!m_argument[j].equals(clazzes[j].getName())) {
-                                ok = false;
+                    if (clazzes.length == m_argument.length) { // Test size to avoid useless loop // NOPMD
+                        int argIndex = 0;
+                        for (; argIndex < m_argument.length; argIndex++) {
+                            if (!m_argument[argIndex].equals(clazzes[argIndex].getName())) {
+                                break;
                             }
                         }
-                        if (ok) {
+                        if (argIndex == m_argument.length) { // If the array was completely read.
                             m_methodObj = methods[i]; // It is the looked method.
+                            if (! m_methodObj.isAccessible()) { 
+                                // If not accessible, try to set the accessibility.
+                                m_methodObj.setAccessible(true);
+                            }
+                            return;
                         }
                     }
 
@@ -125,51 +128,64 @@ public class DependencyCallback extends Callback {
             }
         }
         
-        if (m_methodObj == null) { //look at parent classes
-            Method[] methods = m_dependency.getHandler().getInstanceManager().getClazz().getMethods();
-            for (int i = 0; m_methodObj == null && i < methods.length; i++) {
-                // First check the method name
-                if (methods[i].getName().equals(m_method)) {
-                    // Check arguments
-                    Class[] clazzes = methods[i].getParameterTypes();
-                    switch(clazzes.length) {
-                        case 0 : 
-                            // Callback with no arguments.
-                            m_methodObj = methods[i];
-                            m_argument = new String[0];
-                            break;
-                        case 1 :
-                            if (clazzes[0].getName().equals(ServiceReference.class.getName())) {
-                                // Callback with a service reference.
-                                m_methodObj = methods[i];
-                                m_argument = new String[] {ServiceReference.class.getName()};
-                                break;
-                            }
-                            if (clazzes[0].getName().equals(m_dependency.getSpecification())) {
-                                // Callback with the service object.
-                                m_methodObj = methods[i];
-                                m_argument = new String[] {m_dependency.getSpecification()};
-                                break;
-                            }
-                        case 2 : 
-                            if (clazzes[0].getName().equals(m_dependency.getSpecification())  && clazzes[1].getName().equals(ServiceReference.class.getName())) {
-                                // Callback with two arguments.
-                                m_methodObj = methods[i];
-                                m_argument = new String[] {m_dependency.getSpecification(), ServiceReference.class.getName()};
-                            }
-                            break;
-                        default :
-                            break;
-                    }
-                }
-            }
-        }
+        // Not found => Try parent method.
+        searchParentMethod();
         
         if (m_methodObj == null) {
-            m_dependency.getHandler().log(Logger.ERROR, "The method " + m_method + " cannot be called : method not found");
+            // If not found, stop the instance (fatal error)
+            m_dependency.getHandler().error("The method " + m_method + " cannot be called : method not found");
             m_dependency.getHandler().getInstanceManager().stop();
         } else {
-            m_methodObj.setAccessible(true);
+            if (! m_methodObj.isAccessible()) { 
+                // If not accessible, try to set the accessibility.
+                m_methodObj.setAccessible(true);
+            }
+        }
+    }
+    
+    /**
+     * Introspect parent class to find the method.
+     */
+    private void searchParentMethod() {
+        // look at parent classes
+        Method[] methods = m_dependency.getHandler().getInstanceManager().getClazz().getMethods();
+        for (int i = 0; i < methods.length; i++) {
+            // First check the method name
+            if (methods[i].getName().equals(m_method)) {
+                // Check arguments
+                Class[] clazzes = methods[i].getParameterTypes();
+                switch (clazzes.length) {
+                    case 0:
+                        // Callback with no arguments.
+                        m_methodObj = methods[i];
+                        m_argument = new String[0];
+                        return;
+                    case 1:
+                        if (clazzes[0].getName().equals(ServiceReference.class.getName())) {
+                            // Callback with a service reference.
+                            m_methodObj = methods[i];
+                            m_argument = new String[] { ServiceReference.class.getName() };
+                            return;
+                        }
+                        if (clazzes[0].getName().equals(m_dependency.getSpecification().getName())) {
+                            // Callback with the service object.
+                            m_methodObj = methods[i];
+                            m_argument = new String[] { m_dependency.getSpecification().getName() };
+                            return;
+                        }
+                        break;
+                    case 2:
+                        if (clazzes[0].getName().equals(m_dependency.getSpecification().getName()) && clazzes[1].getName().equals(ServiceReference.class.getName())) {
+                            // Callback with two arguments.
+                            m_methodObj = methods[i];
+                            m_argument = new String[] { m_dependency.getSpecification().getName(), ServiceReference.class.getName() };
+                            return;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 

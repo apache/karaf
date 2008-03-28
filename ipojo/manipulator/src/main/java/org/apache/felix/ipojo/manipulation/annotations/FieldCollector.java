@@ -279,7 +279,7 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
             
             Element[] props = m_parent.getElements("Property");
             Element prop = null;
-            for (int i = 0; prop == null && i < props.length; i++) {
+            for (int i = 0; prop == null && props != null && i < props.length; i++) {
                 String name = props[i].getAttribute("name");
                 if (name != null && name.equals(m_name)) {
                     prop = props[i];

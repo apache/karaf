@@ -57,7 +57,7 @@ public class InstanceDescription {
     /**
      * Component Type of the instance.
      */
-    private ComponentDescription m_type;
+    private ComponentTypeDescription m_type;
 
     /**
      * COntained instance list.
@@ -70,16 +70,16 @@ public class InstanceDescription {
      * @param name : the name of the component instance.
      * @param state : the state of the instance.
      * @param bundleId : bundle id owning this instance.
-     * @param cd : the component type description of this instance.
+     * @param desc : the component type description of this instance.
      */
-    public InstanceDescription(String name, int state, long bundleId, ComponentDescription cd) {
+    public InstanceDescription(String name, int state, long bundleId, ComponentTypeDescription desc) {
         m_name = name;
         m_state = state;
         m_createdObjects = new String[0];
         m_handlers = new HandlerDescription[0];
         m_containedInstances = new InstanceDescription[0];
         m_bundleId = bundleId;
-        m_type = cd;
+        m_type = desc;
     }
 
     /**
@@ -110,7 +110,7 @@ public class InstanceDescription {
      * Get the component type description of the described instance.
      * @return : the component type description of this instance.
      */
-    public ComponentDescription getComponentDescription() {
+    public ComponentTypeDescription getComponentDescription() {
         return m_type;
     }
 
@@ -124,12 +124,12 @@ public class InstanceDescription {
 
     /**
      * Add an handler description to the list.
-     * @param hd : the handler description to add
+     * @param desc : the handler description to add
      */
-    public void addHandler(HandlerDescription hd) {
+    public void addHandler(HandlerDescription desc) {
         // Verify that the dependency description is not already in the array.
         for (int i = 0; i < m_handlers.length; i++) {
-            if (m_handlers[i] == hd) {
+            if (m_handlers[i] == desc) {
                 return; // NOTHING TO DO, the description is already in the
                         // array
             }
@@ -137,7 +137,7 @@ public class InstanceDescription {
         // The component Description is not in the array, add it
         HandlerDescription[] newHd = new HandlerDescription[m_handlers.length + 1];
         System.arraycopy(m_handlers, 0, newHd, 0, m_handlers.length);
-        newHd[m_handlers.length] = hd;
+        newHd[m_handlers.length] = desc;
         m_handlers = newHd;
     }
 
@@ -163,10 +163,10 @@ public class InstanceDescription {
     /**
      * Set the state of the component.
      * 
-     * @param i : the state
+     * @param state : the state
      */
-    public void setState(int i) {
-        m_state = i;
+    public void setState(int state) {
+        m_state = state;
     }
 
     /**
@@ -215,7 +215,7 @@ public class InstanceDescription {
             instance.addAttribute(new Attribute("state", "disposed"));
         }
         // Bundle
-        instance.addAttribute(new Attribute("bundle", "" + m_bundleId));
+        instance.addAttribute(new Attribute("bundle", Long.toString(m_bundleId)));
 
         // Component Type
         instance.addAttribute(new Attribute("component.type", m_type.getName()));

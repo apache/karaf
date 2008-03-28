@@ -27,13 +27,13 @@ import java.util.Properties;
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.PrimitiveHandler;
-import org.apache.felix.ipojo.architecture.ComponentDescription;
+import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.parser.ManipulationMetadata;
 import org.apache.felix.ipojo.parser.MethodMetadata;
+import org.apache.felix.ipojo.parser.ParseUtils;
+import org.apache.felix.ipojo.parser.PojoMetadata;
 import org.apache.felix.ipojo.util.Callback;
-import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -71,7 +71,7 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements Eve
      * @throws ConfigurationException : metadata are incorrect.
      * @see org.apache.felix.ipojo.Handler#initializeComponentFactory(org.apache.felix.ipojo.architecture.ComponentDescription, org.apache.felix.ipojo.metadata.Element)
      */
-    public void initializeComponentFactory(ComponentDescription cd, Element metadata) throws ConfigurationException {
+    public void initializeComponentFactory(ComponentTypeDescription cd, Element metadata) throws ConfigurationException {
         // Update the current component description
         Dictionary dict = new Properties();
         cd.addProperty(new PropertyDescription("event.topics", Dictionary.class.getName(), dict.toString()));
@@ -93,11 +93,11 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements Eve
 
         // Store the component manager
         m_manager = getInstanceManager();
-        ManipulationMetadata mm = new ManipulationMetadata(metadata);
+        PojoMetadata mm = getFactory().getPojoMetadata();
 
         // Get Metadata subscribers
         Element[] subscribers = metadata.getElements("subscriber", NAMESPACE);
-        if (subscribers.length > 0) {
+        if (subscribers != null) {
             // then check publishers are well formed and fill the publishers'
             // map
             for (int i = 0; i < subscribers.length; i++) {
@@ -109,25 +109,24 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements Eve
                         Callback cb = new Callback(methodMetadata, m_manager);
                         eventAdminSubscriberMetadata.setCallback(cb);
                     } else {
-                        log(Logger.WARNING, " EVENT HANDLER SUBSCRIBERS : malformed subscriber : the method " + eventAdminSubscriberMetadata.getCallbackStr() + "(Event myEvent) is not present in the component");
+                        warn(" EVENT HANDLER SUBSCRIBERS : malformed subscriber : the method " + eventAdminSubscriberMetadata.getCallbackStr() + "(Event myEvent) is not present in the component");
                         throw new ConfigurationException("EVENT HANDLER SUBSCRIBERS : malformed subscriber : the method " + eventAdminSubscriberMetadata.getCallbackStr() + "(Event myEvent) is not present in the component");
                     }
                     m_subEvent.add(eventAdminSubscriberMetadata);
                 } else {
-                    log(Logger.WARNING, " EVENT HANDLER SUBSCRIBERS : malformed subscriber !");
+                    warn(" EVENT HANDLER SUBSCRIBERS : malformed subscriber !");
                     throw new ConfigurationException("EVENT HANDLER SUBSCRIBERS : malformed subscriber !");
                 }
             }
-            log(Logger.INFO, " EVENT HANDLER SUBSCRIBERS : Suscribers detected !");
         } else {
-            log(Logger.ERROR, " EVENT HANDLER SUBSCRIBERS : no Suscribers detected !");
+            error(" EVENT HANDLER SUBSCRIBERS : no Suscribers detected !");
             throw new ConfigurationException(" EVENT HANDLER SUBSCRIBERS : no Suscribers detected !");
         }
 
         // if well formed publishers or subscribers found
         if (!m_subEvent.isEmpty()) {
             // register the handler
-            log(Logger.INFO, " EVENT HANDLER SUBSCRIBERS has been configured !");
+            info(" EVENT HANDLER SUBSCRIBERS has been configured !");
         } else {
             return;
         }
@@ -178,8 +177,6 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements Eve
      * @see org.apache.felix.ipojo.Handler#start()
      */
     public void start() {
-        log(Logger.INFO, " EVENT HANDLER SUBSCRIBERS STARTING!!!");
-
         if (!m_subEvent.isEmpty()) {
             // build the topic to listen
             // Topics is a merge of all required topics by subscribers
@@ -198,9 +195,7 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements Eve
             }
 
             // Put the m_topics properties to the good value
-            m_topics = topics.split(",");
-
-            log(Logger.INFO, " EVENT HANDLER SUBSCRIBERS : EventHandler registered object: " + this);
+            m_topics = ParseUtils.split(topics, ",");
         }
     }
 
@@ -249,7 +244,7 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements Eve
                             c.call(new Object[] { event });
                         }
                     } catch (Exception e) {
-                        log(Logger.ERROR, "EVENT HANDLER SUBSCRIBERS CALLBACK error : " + eventSubscriberData.getCallbackStr() + " exception :" + e + " Cause : " + e.getCause());
+                        error("EVENT HANDLER SUBSCRIBERS CALLBACK error : " + eventSubscriberData.getCallbackStr() + " exception :" + e.getMessage());
                         // stop the component :
                         m_manager.setState(InstanceManager.INVALID);
                     }

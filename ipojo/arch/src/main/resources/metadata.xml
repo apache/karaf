@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <iPOJO>
-	<Component className="org.apache.felix.ipojo.arch.ArchCommandImpl" factory="false">
-		  <Provides/>
-		  <Requires field="m_archs" optional="true"/>
-		  <Requires field="m_factories" optional="true" filter="(!(handler.name=*))"/>
-		  <Requires field="m_handlers" optional="true" filter="(handler.name=*)"/>
+	<Component className="org.apache.felix.ipojo.arch.ArchCommandImpl"
+		factory="false">
+		<Provides />
+		<Requires field="m_archs" optional="true" />
+		<Requires field="m_factories" optional="true"
+			filter="(!(handler.name=*))" />
+		<Requires field="m_handlers" optional="true"
+			filter="(handler.name=*)" />
 	</Component>
-	<instance component="org.apache.felix.ipojo.arch.ArchCommandImpl" name="ArchCommand"/>
+	<instance component="org.apache.felix.ipojo.arch.ArchCommandImpl"
+		name="ArchCommand" />
 </iPOJO>

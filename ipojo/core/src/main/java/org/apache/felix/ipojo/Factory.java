@@ -21,7 +21,7 @@ package org.apache.felix.ipojo;
 import java.util.Dictionary;
 import java.util.List;
 
-import org.apache.felix.ipojo.architecture.ComponentDescription;
+import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.BundleContext;
 
@@ -72,7 +72,7 @@ public interface Factory {
      * Get the component type description.
      * @return the component type description object
      */
-    ComponentDescription getComponentDescription();
+    ComponentTypeDescription getComponentDescription();
 
     /**
      * Check if the given configuration is acceptable as a configuration of a component instance.
@@ -97,15 +97,15 @@ public interface Factory {
 
     /**
      * Add a factory state listener on the current factory.
-     * @param l : the listener to add
+     * @param listener : the listener to add
      */
-    void addFactoryStateListener(FactoryStateListener l);
+    void addFactoryStateListener(FactoryStateListener listener);
 
     /**
      * Remove the given factory state listener from the listener list.
-     * @param l : the listener to remove
+     * @param listener : the listener to remove
      */
-    void removeFactoryStateListener(FactoryStateListener l);
+    void removeFactoryStateListener(FactoryStateListener listener);
 
     /**
      * Get the list of missing handlers.

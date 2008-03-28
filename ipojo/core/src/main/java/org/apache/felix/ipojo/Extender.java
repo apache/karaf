@@ -19,20 +19,27 @@
 package org.apache.felix.ipojo;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ManifestMetadataParser;
 import org.apache.felix.ipojo.parser.ParseException;
+import org.apache.felix.ipojo.parser.ParseUtils;
+import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.SynchronousBundleListener;
-import org.osgi.service.log.LogService;
 
 /**
  * iPOJO Extender.
@@ -42,39 +49,52 @@ import org.osgi.service.log.LogService;
 public class Extender implements SynchronousBundleListener, BundleActivator {
 
     /**
-     * iPOJO Manifest header.
+     * iPOJO Component Type and Instance declaration header.
      */
     private static final String IPOJO_HEADER = "iPOJO-Components";
-    
+
+    /**
+     * iPOJO Extension declaration header. 
+     */
+    private static final String IPOJO_EXTENSION = "IPOJO-Extension";
+
+    /**
+     * iPOJO Extender logger.
+     */
+    private Logger m_logger;
+
     /**
      * iPOJO Bundle Context.
      */
     private BundleContext m_context;
-    
+
     /**
-     * Dictionary of [BundleId, Factory List]. 
+     * Declared instance manager.
      */
-    private Dictionary m_components;
-    
+    private InstanceCreator m_creator;
+
     /**
-     * Dictionary of [BundleId, Instance Creator]. 
+     * iPOJO Bundle.
      */
-    private Dictionary m_creators;
-    
+    private Bundle m_bundle;
+
     /**
-     * iPOJO Bundle Id.
+     * List of factory types.
      */
-    private long m_bundleId;
-    
+    private List m_factoryTypes = new ArrayList();
+
+    /**
+     * List of unbound types.
+     */
+    private final List m_unboundTypes = new ArrayList();
+
     /**
      * Bundle Listener Notification.
      * @param event : the bundle event.
      * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.BundleEvent)
      */
     public synchronized void bundleChanged(BundleEvent event) {
-        if (event.getBundle().getBundleId() == m_bundleId) {
-            return;
-        }
+        if (event.getBundle() == m_bundle) { return; }
 
         switch (event.getType()) {
             case BundleEvent.STARTED:
@@ -83,7 +103,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
             case BundleEvent.STOPPING:
                 closeManagementFor(event.getBundle());
                 break;
-            default: 
+            default:
                 break;
         }
 
@@ -94,42 +114,109 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      * @param bundle : the bundle.
      */
     private void closeManagementFor(Bundle bundle) {
-        ComponentFactory[] cfs = (ComponentFactory[]) m_components.get(bundle);
-        InstanceCreator creator = (InstanceCreator) m_creators.get(bundle);
-        if (cfs == null && creator == null) { return; }
-        for (int i = 0; cfs != null && i < cfs.length; i++) {
-            ComponentFactory factory = cfs[i];
-            factory.stop();
+        List toRemove = new ArrayList();
+        for (int k = 0; k < m_factoryTypes.size(); k++) {
+            ManagedAbstractFactoryType mft = (ManagedAbstractFactoryType) m_factoryTypes.get(k);
+
+            // Delete instances declared in the leaving bundle.
+            m_creator.removeInstancesFromBundle(bundle.getBundleId());
+
+            // Look for component type created from this bundle.
+            if (mft.m_created != null) {
+                List cfs = (List) mft.m_created.remove(bundle);
+                for (int i = 0; cfs != null && i < cfs.size(); i++) {
+                    IPojoFactory factory = (IPojoFactory) cfs.get(i);
+                    m_creator.removeFactory(factory);
+                    factory.stop();
+                }
+            }
+
+            // If the leaving bundle has declared mft : destroy all created factories.
+            if (mft.m_bundle == bundle) {
+                if (mft.m_created != null) {
+                    Iterator iterator = mft.m_created.keySet().iterator();
+                    while (iterator.hasNext()) {
+                        Bundle key = (Bundle) iterator.next();
+                        List list = (List) mft.m_created.get(key);
+                        for (int i = 0; i < list.size(); i++) {
+                            IPojoFactory factory = (IPojoFactory) list.get(i);
+                            factory.stop();
+                            m_unboundTypes.add(new UnboundComponentType(mft.m_type, factory.m_componentMetadata, factory.getBundleContext()
+                                    .getBundle()));
+                        }
+                    }
+                }
+                toRemove.add(mft);
+            }
         }
-        if (creator != null) { creator.stop(); }
-        
-        m_components.remove(bundle);
-        m_creators.remove(bundle);
-        
+
+        for (int i = 0; i < toRemove.size(); i++) {
+            ManagedAbstractFactoryType mft = (ManagedAbstractFactoryType) toRemove.get(i);
+            m_logger.log(Logger.WARNING, "The factory type available: " + mft.m_type + " is no more available");
+            mft.m_bundle = null;
+            mft.m_clazz = null;
+            mft.m_created = null;
+            mft.m_type = null;
+            m_factoryTypes.remove(mft);
+        }
     }
 
     /**
-     * Check if the given bundle is an iPOJO bundle, and begin the iPOJO management is true. 
+     * Check if the given bundle is an iPOJO bundle, and begin the iPOJO management is true.
      * @param bundle : the bundle to check.
      */
     private void startManagementFor(Bundle bundle) {
-        // Check bundle
         Dictionary dict = bundle.getHeaders();
+        // Check for abstract factory type
+        String typeHeader = (String) dict.get(IPOJO_EXTENSION);
+        if (typeHeader != null) {
+            parseAbstractFactoryType(bundle, typeHeader);
+        }
+
+        // Check bundle
         String header = (String) dict.get(IPOJO_HEADER);
-        if (header == null) {
-            return;
-        } else {
+        if (header != null) {
             try {
                 parse(bundle, header);
             } catch (IOException e) {
-                err("An exception occurs during the parsing of the bundle " + bundle.getBundleId(), e);
+                m_logger.log(Logger.ERROR, "An exception occurs during the parsing of the bundle " + bundle.getBundleId(), e);
             } catch (ParseException e) {
-                err("A parse exception occurs during the parsing of the bundle " + bundle.getBundleId(), e);
+                m_logger.log(Logger.ERROR, "A parse exception occurs during the parsing of the bundle " + bundle.getBundleId(), e);
             }
         }
-        
     }
-    
+
+    /**
+     * Parse an IPOJO-Extension manifest header.
+     * @param bundle : bundle containing the header.
+     * @param header : header to parse.
+     */
+    private void parseAbstractFactoryType(Bundle bundle, String header) {
+        String[] arr = ParseUtils.split(header, ",");
+        for (int i = 0; arr != null && i < arr.length; i++) {
+            String[] arr2 = ParseUtils.split(arr[i], ":");
+            String type = arr2[0];
+            Class clazz;
+            try {
+                clazz = bundle.loadClass(arr2[1]);
+            } catch (ClassNotFoundException e) {
+                m_logger.log(Logger.ERROR, "Cannot load the extension " + type, e);
+                return;
+            }
+            ManagedAbstractFactoryType mft = new ManagedAbstractFactoryType(clazz, type, bundle);
+            m_factoryTypes.add(mft);
+            m_logger.log(Logger.WARNING, "New factory type available: " + type);
+
+            for (int j = m_unboundTypes.size() - 1; j >= 0; j--) {
+                UnboundComponentType unbound = (UnboundComponentType) m_unboundTypes.get(j);
+                if (unbound.m_type.equals(type)) {
+                    createAbstractFactory(unbound.m_bundle, unbound.m_description);
+                    m_unboundTypes.remove(unbound);
+                }
+            }
+        }
+    }
+
     /**
      * Parse the internal metadata (from the manifest (in the iPOJO-Components property)).
      * @param bundle : the owner bundle.
@@ -140,35 +227,40 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     private void parse(Bundle bundle, String components) throws IOException, ParseException {
         ManifestMetadataParser parser = new ManifestMetadataParser();
         parser.parseHeader(components);
-          
-        Element[] componentsMetadata = parser.getComponentsMetadata(); // Get the component type declaration
-        for (int i = 0; i < componentsMetadata.length; i++) { addComponentFactory(bundle, componentsMetadata[i]); }
-        
-        start(bundle, parser.getInstances());
+
+        Element[] metadata = parser.getComponentsMetadata(); // Get the component type declaration
+        for (int i = 0; i < metadata.length; i++) {
+            createAbstractFactory(bundle, metadata[i]);
+        }
+
+        Dictionary[] instances = parser.getInstances();
+        for (int i = 0; instances != null && i < instances.length; i++) {
+            m_creator.addInstance(instances[i], bundle.getBundleId());
+        }
     }
 
     /**
      * iPOJO Starting method.
-     * @param bc : iPOJO bundle context.
-     * @throws Exception : the start method failed.
+     * @param context : iPOJO bundle context.
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
-    public void start(BundleContext bc) throws Exception {
-        m_context = bc;
-        m_bundleId = bc.getBundle().getBundleId();
-        m_components = new Hashtable();
-        m_creators = new Hashtable();
+    public void start(BundleContext context) {
+        m_context = context;
+        m_bundle = context.getBundle();
+        m_creator = new InstanceCreator(context);
+
+        m_logger = new Logger(m_context, "IPOJO Extender");
 
         // Begin by initializing core handlers
-        startManagementFor(bc.getBundle());
+        startManagementFor(m_bundle);
 
         synchronized (this) {
             // listen to any changes in bundles.
             m_context.addBundleListener(this);
             // compute already started bundles.
-            for (int i = 0; i < bc.getBundles().length; i++) {
-                if (bc.getBundles()[i].getState() == Bundle.ACTIVE) {
-                    startManagementFor(bc.getBundles()[i]);
+            for (int i = 0; i < context.getBundles().length; i++) {
+                if (context.getBundles()[i].getState() == Bundle.ACTIVE) {
+                    startManagementFor(context.getBundles()[i]);
                 }
             }
         }
@@ -176,96 +268,238 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
 
     /**
      * Stop the iPOJO Management.
-     * @param bc : bundle context.
-     * @throws Exception : the stop method failed.
+     * @param context : bundle context.
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
-    public void stop(BundleContext bc) throws Exception {
+    public void stop(BundleContext context) {
         m_context.removeBundleListener(this);
-        Enumeration e = m_components.keys();
-        while (e.hasMoreElements()) {
-            ComponentFactory[] cfs = (ComponentFactory[]) m_components.get(e.nextElement());
-            for (int i = 0; i < cfs.length; i++) {
-                cfs[i].stop();
+
+        for (int k = 0; k < m_factoryTypes.size(); k++) {
+            ManagedAbstractFactoryType mft = (ManagedAbstractFactoryType) m_factoryTypes.get(k);
+
+            if (mft.m_created != null) {
+                Iterator iterator = mft.m_created.keySet().iterator();
+                while (iterator.hasNext()) {
+                    Bundle key = (Bundle) iterator.next();
+                    List list = (List) mft.m_created.get(key);
+                    for (int i = 0; i < list.size(); i++) {
+                        IPojoFactory factory = (IPojoFactory) list.get(i);
+                        m_creator.removeFactory(factory);
+                        factory.dispose();
+                    }
+                }
             }
         }
-        m_components = null;
-        Enumeration e2 = m_creators.keys();
-        while (e2.hasMoreElements()) {
-            InstanceCreator creator = (InstanceCreator) m_creators.remove(e2.nextElement());
-            creator.stop();
-        }
-        m_creators = null;
+
+        m_factoryTypes = null;
+        m_creator = null;
     }
-    
+
     /**
      * Add a component factory to the factory list.
-     * @param cm : the new component metadata.
+     * @param metadata : the new component metadata.
      * @param bundle : the bundle.
      */
-    private void addComponentFactory(Bundle bundle, Element cm) {
-        ComponentFactory factory = null;
-        if (cm.getName().equalsIgnoreCase("component")) {
-            factory = new ComponentFactory(bundle.getBundleContext(), cm);
-        } else if (cm.getName().equalsIgnoreCase("composite")) {
-            factory = new CompositeFactory(bundle.getBundleContext(), cm);
-        } else if (cm.getName().equalsIgnoreCase("handler")) {
-            factory = new HandlerFactory(bundle.getBundleContext(), cm);
-        } else {
-            err("Not recognized element type : " + cm.getName(), null);
-        }
-
-        ComponentFactory[] cfs = (ComponentFactory[]) m_components.get(bundle);
-        
-        // If the factory array is not empty add the new factory at the end
-        if (cfs != null && cfs.length != 0) {
-            ComponentFactory[] newFactory = new ComponentFactory[cfs.length + 1];
-            System.arraycopy(cfs, 0, newFactory, 0, cfs.length);
-            newFactory[cfs.length] = factory;
-            cfs = newFactory;
-            m_components.put(bundle, cfs);
-        } else {
-            m_components.put(bundle, new ComponentFactory[] {factory}); // Else create an array of size one with the new Factory 
-        }
-    }
-    
-    /**
-     * Start the management of factories and create instances.
-     * @param bundle : the bundle. 
-     * @param confs : the instances to create.
-     */
-    private void start(Bundle bundle, Dictionary[] confs) {
-        ComponentFactory[] cfs = (ComponentFactory[]) m_components.get(bundle);
-        
-        // Start the factories
-        if (cfs != null) {
-            for (int j = 0; j < cfs.length; j++) {
-                cfs[j].start();
+    private void createAbstractFactory(Bundle bundle, Element metadata) {
+        ManagedAbstractFactoryType factoryType = null;
+        // First, look for factory-type (component, handler, composite ...)
+        for (int i = 0; i < m_factoryTypes.size(); i++) {
+            ManagedAbstractFactoryType type = (ManagedAbstractFactoryType) m_factoryTypes.get(i);
+            if (type.m_type.equals(metadata.getName())) {
+                factoryType = type;
+                break;
             }
         }
 
-        // Create the instance creator if needed.
-        if (confs.length > 0) {
-            m_creators.put(bundle, new InstanceCreator(bundle.getBundleContext(), confs, cfs));
+        // If not found, return. It will wait for a new component type factory.
+        if (factoryType == null) {
+            m_logger.log(Logger.WARNING, "Type of component not yet recognized : " + metadata.getName());
+            m_unboundTypes.add(new UnboundComponentType(metadata.getName(), metadata, bundle));
+            return;
+        }
+
+        // Once found, we invoke the AbstractFactory constructor to create the component factory. 
+        Class clazz = factoryType.m_clazz;
+        try {
+            // Look for the constructor, and invoke it.
+            Constructor cst = clazz.getConstructor(new Class[] { BundleContext.class, Element.class });
+            IPojoFactory factory = (IPojoFactory) cst.newInstance(new Object[] { getBundleContext(bundle), metadata });
+
+            // Add the created factory in the m_createdFactories map.
+            if (factoryType.m_created == null) {
+                factoryType.m_created = new HashMap();
+                List list = new ArrayList();
+                list.add(factory);
+                factoryType.m_created.put(bundle, list);
+            } else {
+                List list = (List) factoryType.m_created.get(bundle);
+                if (list == null) {
+                    list = new ArrayList();
+                    list.add(factory);
+                    factoryType.m_created.put(bundle, list);
+                } else {
+                    list.add(factory);
+                }
+            }
+
+            // Start the created factory.
+            factory.start();
+            // Then add the factory to the instance creator.
+            m_creator.addFactory(factory);
+
+        } catch (SecurityException e) {
+            m_logger.log(Logger.ERROR, "Cannot instantiate an abstract factory from " + clazz.getName(), e);
+        } catch (NoSuchMethodException e) {
+            m_logger.log(Logger.ERROR, "Cannot instantiate an abstract factory from " + clazz.getName() + ": the given class constructor cannot be found");
+        } catch (IllegalArgumentException e) {
+            m_logger.log(Logger.ERROR, "Cannot instantiate an abstract factory from " + clazz.getName(), e);
+        } catch (InstantiationException e) {
+            m_logger.log(Logger.ERROR, "Cannot instantiate an abstract factory from " + clazz.getName(), e);
+        } catch (IllegalAccessException e) {
+            m_logger.log(Logger.ERROR, "Cannot instantiate an abstract factory from " + clazz.getName(), e);
+        } catch (InvocationTargetException e) {
+            m_logger.log(Logger.ERROR, "Cannot instantiate an abstract factory from " + clazz.getName(), e.getTargetException());
         }
     }
-    
+
     /**
-     * Log an error message in a log service (if available) and display the message in the console.
-     * @param message : the message to log
-     * @param t : an attached error (can be null)
+     * Structure storing an iPOJO extension.
      */
-    private void err(String message, Throwable t) {
-        ServiceReference ref = m_context.getServiceReference(LogService.class.getName());
-        if (ref != null) {
-            LogService log = (LogService) m_context.getService(ref);
-            log.log(LogService.LOG_ERROR, message, t);
-            m_context.ungetService(ref);
-        }
-        if (t != null) {
-            System.err.println("[iPOJO-Core] " + message + " : " + t.getMessage());
-        } else {
-            System.err.println("[iPOJO-Core] " + message);
+    private final class ManagedAbstractFactoryType {
+        /**
+         * TYpe (i.e.) name of the extension.
+         */
+        String m_type;
+
+        /**
+         * Abstract Factory class.
+         */
+        Class m_clazz;
+
+        /**
+         * Bundle object containing the declaration of the extension.
+         */
+        Bundle m_bundle;
+
+        /**
+         * Factories created by this extension. 
+         */
+        private Map m_created;
+
+        /**
+         * Constructor.
+         * @param factory : abstract factory class.
+         * @param type : name of the extension.
+         * @param bundle : bundle declaring the extension.
+         */
+        protected ManagedAbstractFactoryType(Class factory, String type, Bundle bundle) {
+            m_bundle = bundle;
+            m_clazz = factory;
+            m_type = type;
         }
     }
+
+    /**
+     * Structure storing unbound component type declaration.
+     * Unbound means that there is no extension able to manage it.
+     */
+    private final class UnboundComponentType {
+        /**
+         * Component type description.
+         */
+        private final Element m_description;
+
+        /**
+         * Bundle declaring this type.
+         */
+        private final Bundle m_bundle;
+
+        /**
+         * Required extension name.
+         */
+        private final String m_type;
+
+        /**
+         * Constructor.
+         * @param description : description of the component type.
+         * @param bundle : bundle declaring this type.
+         * @param type : required extension name.
+         */
+        protected UnboundComponentType(String type, Element description, Bundle bundle) {
+            m_type = type;
+            m_description = description;
+            m_bundle = bundle;
+        }
+    }
+
+    /**
+     * Compute the bundle context from the bundle class by introspection.
+     * @param bundle : bundle.
+     * @return the bundle context object or null if not found.
+     */
+    public BundleContext getBundleContext(Bundle bundle) {
+        if (bundle == null) { return null; }
+
+        // getBundleContext (OSGi 4.1)
+        Method meth = null;
+        try {
+            meth = bundle.getClass().getMethod("getBundleContext", new Class[0]);
+        } catch (SecurityException e) {
+            // Nothing do to, will try the Equinox method
+        } catch (NoSuchMethodException e) {
+            // Nothing do to, will try the Equinox method
+        }
+
+        // try Equinox getContext if not found.
+        if (meth == null) {
+            try {
+                meth = bundle.getClass().getMethod("getContext", new Class[0]);
+            } catch (SecurityException e) {
+                // Nothing do to, will try field inspection
+            } catch (NoSuchMethodException e) {
+                // Nothing do to, will try field inspection
+            }
+        }
+
+        if (meth != null) {
+            if (! meth.isAccessible()) { 
+                // If not accessible, try to set the accessibility.
+                meth.setAccessible(true);
+            }
+            try {
+                return (BundleContext) meth.invoke(bundle, new Object[0]);
+            } catch (IllegalArgumentException e) {
+                m_logger.log(Logger.ERROR, "Cannot get the BundleContext by invoking " + meth.getName(), e);
+                return null;
+            } catch (IllegalAccessException e) {
+                m_logger.log(Logger.ERROR, "Cannot get the BundleContext by invoking " + meth.getName(), e);
+                return null;
+            } catch (InvocationTargetException e) {
+                m_logger.log(Logger.ERROR, "Cannot get the BundleContext by invoking " + meth.getName(), e.getTargetException());
+                return null;
+            }
+        }
+
+        // Else : Field inspection (KF and Prosyst)        
+        Field[] fields = bundle.getClass().getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            if (BundleContext.class.isAssignableFrom(fields[i].getType())) {
+                if (!fields[i].isAccessible()) {
+                    fields[i].setAccessible(true);
+                }
+                try {
+                    return (BundleContext) fields[i].get(bundle);
+                } catch (IllegalArgumentException e) {
+                    m_logger.log(Logger.ERROR, "Cannot get the BundleContext by invoking " + meth.getName(), e);
+                    return null;
+                } catch (IllegalAccessException e) {
+                    m_logger.log(Logger.ERROR, "Cannot get the BundleContext by invoking " + meth.getName(), e);
+                    return null;
+                }
+            }
+        }
+        m_logger.log(Logger.ERROR, "Cannot find the BundleContext for " + bundle.getSymbolicName(), null);
+        return null;
+    }
+
 }

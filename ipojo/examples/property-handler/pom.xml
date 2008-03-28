@@ -1,0 +1,36 @@
+<project>
+ <parent>
+    <groupId>ipojo.examples</groupId>
+  	<artifactId>ipojo.examples</artifactId>
+  	<version>0.7.6-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>ipojo.examples.property.handler</artifactId>
+  <name>Apache Felix iPOJO Property Handler</name>
+  <packaging>pom</packaging>
+
+  <profiles>
+	<profile>
+		<id>java5</id>
+		<activation>
+			<jdk>1.5</jdk>
+		</activation>
+		<modules>
+			<module>PropertyHandler</module>
+			<module>PropertyHandlerTest</module>
+		</modules>
+	</profile>
+	<profile>
+		<id>java6</id>
+		<activation>
+			<jdk>1.6</jdk>
+		</activation>
+		<modules>
+			<module>PropertyHandler</module>
+			<module>PropertyHandlerTest</module>
+		</modules>
+	</profile>
+  </profiles>
+</project>

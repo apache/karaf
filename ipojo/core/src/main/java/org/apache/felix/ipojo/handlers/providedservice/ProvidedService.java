@@ -22,8 +22,9 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.InstanceManager;
-import org.apache.felix.ipojo.util.Logger;
+import org.apache.felix.ipojo.util.Property;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
@@ -55,6 +56,11 @@ public class ProvidedService implements ServiceFactory {
      * Factory policy : SERVICE_FACTORY.
      */
     public static final int SERVICE_FACTORY = 1;
+    
+    /**
+     * Factory policy : STATIC_FACTORY.
+     */
+    public static final int STATIC_FACTORY = 2;
 
     /**
      * At this time, it is only the java interface full name.
@@ -80,7 +86,7 @@ public class ProvidedService implements ServiceFactory {
     /**
      * Properties Array.
      */
-    private Property[] m_properties = new Property[0];
+    private Property[] m_properties;
 
     /**
      * Construct a provided service object.
@@ -96,8 +102,12 @@ public class ProvidedService implements ServiceFactory {
         m_factoryPolicy = factoryPolicy;
         
         // Add instance name & factory name
-        addProperty(new Property(this, "instance.name", handler.getInstanceManager().getInstanceName()));       
-        addProperty(new Property(this, "factory.name", handler.getInstanceManager().getFactory().getName()));
+        try {
+            addProperty(new Property("instance.name", null, null, handler.getInstanceManager().getInstanceName(), String.class.getName(), handler.getInstanceManager(), handler));       
+            addProperty(new Property("factory.name", null, null, handler.getInstanceManager().getFactory().getFactoryName(), String.class.getName(), handler.getInstanceManager(), handler));
+        } catch (ConfigurationException e) {
+            m_handler.error("An exception occurs when adding instance.name and factory.name property : " + e.getMessage());
+        }
     }
 
     /**
@@ -113,22 +123,22 @@ public class ProvidedService implements ServiceFactory {
     /**
      * Add the given property to the property list.
      * 
-     * @param p : the element to add
+     * @param prop : the element to add
      */
-    private synchronized void addProperty(Property p) {
+    private synchronized void addProperty(Property prop) {
         for (int i = 0; (m_properties != null) && (i < m_properties.length); i++) {
-            if (m_properties[i] == p) {
+            if (m_properties[i] == prop) {
                 return;
             }
         }
 
-        if (m_properties.length > 0) {
+        if (m_properties == null) {
+            m_properties = new Property[] { prop };
+        } else {
             Property[] newProp = new Property[m_properties.length + 1];
             System.arraycopy(m_properties, 0, newProp, 0, m_properties.length);
-            newProp[m_properties.length] = p;
+            newProp[m_properties.length] = prop;
             m_properties = newProp;
-        } else {
-            m_properties = new Property[] { p };
         }
     }
 
@@ -148,7 +158,7 @@ public class ProvidedService implements ServiceFactory {
 
         if (idx >= 0) {
             if ((m_properties.length - 1) == 0) {
-                m_properties = new Property[0];
+                m_properties = null;
             } else {
                 Property[] newPropertiesList = new Property[m_properties.length - 1];
                 System.arraycopy(m_properties, 0, newPropertiesList, 0, idx);
@@ -166,10 +176,10 @@ public class ProvidedService implements ServiceFactory {
      * service is not published).
      */
     public ServiceReference getServiceReference() {
-        if (m_serviceRegistration != null) {
-            return m_serviceRegistration.getReference();
-        } else {
+        if (m_serviceRegistration == null) {
             return null;
+        } else {
+            return m_serviceRegistration.getReference();
         }
     }
 
@@ -189,9 +199,14 @@ public class ProvidedService implements ServiceFactory {
             case SERVICE_FACTORY:
                 svc = m_handler.getInstanceManager().createPojoObject();
                 break;
+            case STATIC_FACTORY:
+                // In this case, we need to try to create a new pojo object, the factory method will handle the creation.
+                svc = m_handler.getInstanceManager().createPojoObject();
+                break;
             default:
-                m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "[" + m_handler.getInstanceManager().getClassName() + "] Unknown factory policy for " + m_serviceSpecification + " : " + m_factoryPolicy);
+                m_handler.error("[" + m_handler.getInstanceManager().getClassName() + "] Unknown factory policy for " + m_serviceSpecification + " : " + m_factoryPolicy);
                 getInstanceManager().stop();
+                break;
         }
         return svc;
     }
@@ -258,8 +273,8 @@ public class ProvidedService implements ServiceFactory {
         // Contruct the service properties list
         Properties serviceProperties = new Properties();
         for (int i = 0; i < m_properties.length; i++) {
-            if (m_properties[i].get() != null) {
-                serviceProperties.put(m_properties[i].getName(), m_properties[i].get());
+            if (m_properties[i].getValue() != null) {
+                serviceProperties.put(m_properties[i].getName(), m_properties[i].getValue());
             }
         }
         return serviceProperties;
@@ -278,18 +293,9 @@ public class ProvidedService implements ServiceFactory {
      * the service registry.
      */
     public synchronized void update() {
-        // Contruct the service properties list
-        Properties serviceProperties = getServiceProperties();
-
-        if (serviceProperties == null) {
-            m_handler.getInstanceManager().getFactory().getLogger().log(Logger.ERROR, "Cannot get the properties of the provided service");
-            getInstanceManager().stop();
-            return;
-        }
-
         // Update the service registration
         if (m_serviceRegistration != null) {
-            m_serviceRegistration.setProperties(serviceProperties);
+            m_serviceRegistration.setProperties(getServiceProperties());
         }
     }
 
@@ -302,8 +308,13 @@ public class ProvidedService implements ServiceFactory {
         while (keys.hasMoreElements()) {
             String key = (String) keys.nextElement();
             Object value = props.get(key);
-            Property prop = new Property(this, key, value);
-            addProperty(prop);
+            Property prop;
+            try {
+                prop = new Property(key, null, null, value.toString(), value.getClass().getName(), getInstanceManager(), m_handler);
+                addProperty(prop);
+            } catch (ConfigurationException e) {
+                m_handler.error("The propagated property " + key + " cannot be pcreated correctly : " + e.getMessage());
+            }
         }
     }
 

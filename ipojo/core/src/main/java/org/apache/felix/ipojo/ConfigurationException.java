@@ -29,11 +29,6 @@ public class ConfigurationException extends Exception {
      * Serialization Id.
      */
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Message.
-     */
-    private String m_message;
     
     /**
      * Component Type on which the error occurs.
@@ -46,8 +41,8 @@ public class ConfigurationException extends Exception {
      * @param typ : component type
      */
     ConfigurationException(String mes, String typ) {
+        super(mes);
         m_type = typ;
-        m_message = mes;
     }
     
     /**
@@ -55,7 +50,7 @@ public class ConfigurationException extends Exception {
      * @param mes : message
      */
     public ConfigurationException(String mes) {
-        m_message = mes;
+        super(mes);
     }
     
     /**
@@ -64,10 +59,10 @@ public class ConfigurationException extends Exception {
      * @see java.lang.Throwable#getMessage()
      */
     public String getMessage() {
-        if (m_type != null) {
-            return "The configuration is not correct for the type " + m_type + " : " + m_message;
+        if (m_type == null) {
+            return super.getMessage();
         } else {
-            return m_message;
+            return "The configuration is not correct for the type " + m_type + " : " + super.getMessage();
         }
     }
 

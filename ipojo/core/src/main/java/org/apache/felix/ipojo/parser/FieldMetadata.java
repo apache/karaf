@@ -62,45 +62,32 @@ public class FieldMetadata {
     public String getFieldType() { return m_type; }
     
     /**
-     * Get the 'reflective' type of the field.
+     * Get the 'reflective' type of the given type.
      * The reflective type is the type used by the Java Reflection API.
+     * @param type : the type to analyze to find the Java reflective type.
      * @return : the reflective type corresponding to this field.
      */
-    public String getReflectionType() {
+    public static String getReflectionType(String type) {
         // Primitive Array 
-        if (m_type.endsWith("[]") && m_type.indexOf(".") == -1) {
-            String arr = "";
-            for (int i = 0; i < m_type.length(); i++) {
-                if (m_type.charAt(i) == '[') { arr += '['; }
-            }
-            int index = m_type.indexOf('[');
-            String t = m_type.substring(0, index);
-            return arr + getInternalPrimitiveType(t);
+        if (type.endsWith("[]") && type.indexOf('.') == -1) {
+            int index = type.indexOf('[');
+            return '[' + getInternalPrimitiveType(type.substring(0, index));
         }
         // Non-Primitive Array 
-        if (m_type.endsWith("[]") && m_type.indexOf(".") != -1) {
-            String arr = "";
-            for (int i = 0; i < m_type.length(); i++) {
-                if (m_type.charAt(i) == '[') { arr += '['; }
-            }
-            int index = m_type.indexOf('[');
-            String t = m_type.substring(0, index);
-            return arr + "L" + t + ";";
+        if (type.endsWith("[]") && type.indexOf('.') != -1) {
+            int index = type.indexOf('[');
+            return "[L" + type.substring(0, index) + ";";
         }
-        // Simple type 
-        if (!m_type.endsWith("[]")) {
-            return m_type;
-        }
-        
-        return null;
+        // The type is not an array.
+        return type;
     }
     
     /**
      * Get the internal notation for primitive type.
-     * @param string : Stringform of the type
+     * @param string : String form of the type
      * @return the internal notation or null if not found
      */
-    private String getInternalPrimitiveType(String string) {
+    public static String getInternalPrimitiveType(String string) {
         if (string.equalsIgnoreCase("boolean")) {
             return "Z";
         }
@@ -125,7 +112,39 @@ public class FieldMetadata {
         if (string.equalsIgnoreCase("double")) {
             return "D";
         }
-        System.err.println("No primitive type found for " + m_type);
+        return null;
+    }
+    
+    /**
+     * Get the iPOJO primitive type from the given primitive class.
+     * @param clazz : a primitive class
+     * @return the primitive type.
+     */
+    public static String getPrimitiveTypeByClass(Class clazz) {
+        if (clazz.equals(Boolean.TYPE)) {
+            return "boolean";
+        }
+        if (clazz.equals(Character.TYPE)) {
+            return "char";
+        }
+        if (clazz.equals(Byte.TYPE)) {
+            return "byte";
+        }
+        if (clazz.equals(Short.TYPE)) {
+            return "short";
+        }
+        if (clazz.equals(Integer.TYPE)) {
+            return "int";
+        }
+        if (clazz.equals(Float.TYPE)) {
+            return "float";
+        }
+        if (clazz.equals(Long.TYPE)) {
+            return "long";
+        }
+        if (clazz.equals(Double.TYPE)) {
+            return "double";
+        }
         return null;
     }
 
