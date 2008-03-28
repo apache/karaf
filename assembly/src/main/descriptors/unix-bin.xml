@@ -137,6 +137,7 @@
 
 		        <!-- OBR + GShell command -->
                 <include>org.apache.felix:org.apache.felix.bundlerepository</include>
+                <include>org.apache.felix:org.apache.felix.prefs</include>
                 <include>org.ops4j.pax.url:pax-url-mvn</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.obr</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.features</include>

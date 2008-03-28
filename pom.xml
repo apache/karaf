@@ -73,6 +73,7 @@
       <felix.osgi.version>1.0.0</felix.osgi.version>
       <felix.compendium.version>1.0.0</felix.compendium.version>
       <felix.bundlerepository.version>1.0.2</felix.bundlerepository.version>
+      <felix.prefs.version>1.0.2</felix.prefs.version>
       <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
       <geronimo.stax.version>1.0.1</geronimo.stax.version>
       <gshell.version>1.0-alpha-2-SNAPSHOT</gshell.version>

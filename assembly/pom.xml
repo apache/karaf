@@ -149,6 +149,11 @@
           <artifactId>org.apache.felix.configadmin</artifactId>
           <version>${felix.configadmin.version}</version>
       </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.prefs</artifactId>
+            <version>${felix.prefs.version}</version>
+        </dependency>
       <dependency>
           <groupId>org.ops4j.pax.logging</groupId>
           <artifactId>pax-logging-api</artifactId>
