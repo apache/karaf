@@ -20,14 +20,16 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
-		<artifactId>iPOJO</artifactId>
 		<groupId>org.apache.felix</groupId>
-		<version>0.7.6-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+		<artifactId>felix</artifactId>
+		<version>1.0.2</version>
+		<relativePath>../../pom/pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>bundle</packaging>
 	<artifactId>org.apache.felix.ipojo.manipulator</artifactId>
+	<groupId>org.apache.felix</groupId>
+	<version>0.7.6-SNAPSHOT</version>
 	<name>Apache Felix iPOJO Manipulator</name>
 
 	<dependencies>

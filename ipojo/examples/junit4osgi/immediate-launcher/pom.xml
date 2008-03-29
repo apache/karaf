@@ -17,18 +17,14 @@
 	under the License.
 -->
 <project>
-	<parent>
-		<groupId>ipojo.examples</groupId>
-		<artifactId>Junit4Osgi</artifactId>
-		<version>0.7.6-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>bundle</packaging>
 	<name>Junit4Osgi-Immediate-Runner</name>
 	<artifactId>
 		org.apache.felix.ipojo.junit4osgi.immediate-runner
 	</artifactId>
+	<groupId>ipojo.examples</groupId>
+	<version>0.7.6-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>

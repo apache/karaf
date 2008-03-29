@@ -19,15 +19,21 @@
     </dependency>
   </dependencies>
   
-  <pluginRepositories>
-    <pluginRepository>
-      <id>apache.snapshots</id>
-      <name>snapshot plugins</name>
-      <url>
-        http://people.apache.org/repo/m2-snapshot-repository
-      </url>
-    </pluginRepository>
-  </pluginRepositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>apache.snapshots</id>
+			<name>snapshot plugins</name>
+			<url>
+				http://people.apache.org/repo/m2-snapshot-repository
+			</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
   
   <build>
     <plugins>
@@ -53,6 +59,7 @@
       <plugin>
 	      <groupId>org.apache.felix</groupId>
 	      <artifactId>maven-ipojo-plugin</artifactId>
+		  <version>0.7.6-SNAPSHOT</version>
 		  <executions>
           	<execution>
             	<goals>

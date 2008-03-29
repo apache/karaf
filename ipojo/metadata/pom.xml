@@ -18,13 +18,15 @@
 -->
 <project>
 	<parent>
-		<artifactId>iPOJO</artifactId>
 		<groupId>org.apache.felix</groupId>
-		<version>0.7.6-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+		<artifactId>felix</artifactId>
+		<version>1.0.2</version>
+		<relativePath>../../pom/pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.apache.felix.ipojo.metadata</artifactId>
+	<groupId>org.apache.felix</groupId>
+	<version>0.7.6-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 	<name>Apache Felix iPOJO Metadata</name>
 	<build>

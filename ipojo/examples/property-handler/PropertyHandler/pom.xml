@@ -17,18 +17,14 @@
 	under the License.
 -->
 <project>
-	<parent>
-		<groupId>ipojo.examples</groupId>
-		<artifactId>ipojo.examples.property.handler</artifactId>
-		<version>0.7.6-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>bundle</packaging>
 	<name>Apache Felix iPOJO Property Handler</name>
 	<artifactId>
 		org.apache.felix.ipojo.example.handler.property
 	</artifactId>
+	<groupId>ipojo.examples</groupId>
+	<version>0.7.6-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
