@@ -423,8 +423,16 @@ public final class DependencyEmbedder
             }
             else if ( mavenDependencies.length() > 0 )
             {
-                // original behaviour: append dependencies to the instruction
-                properties.setProperty( directiveName, instruction + ',' + mavenDependencies );
+                if ( Analyzer.INCLUDE_RESOURCE.equalsIgnoreCase( directiveName ) )
+                {
+                    // dependencies should be prepended so they can be overwritten by local resources
+                    properties.setProperty( directiveName, mavenDependencies + ',' + instruction );
+                }
+                else  // Analyzer.BUNDLE_CLASSPATH
+                {
+                    // for the classpath we want dependencies to be appended after local entries
+                    properties.setProperty( directiveName, instruction + ',' + mavenDependencies );
+                }
             }
             // otherwise leave instruction unchanged
         }

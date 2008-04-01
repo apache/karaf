@@ -354,13 +354,13 @@ public class BundlePlugin extends AbstractMojo
         properties.putAll( getDefaultProperties( currentProject ) );
         properties.putAll( transformDirectives( originalInstructions ) );
 
-        // update BND instructions to add Maven resources
-        includeMavenResources( currentProject, properties, getLog() );
-
         Builder builder = new Builder();
         builder.setBase( currentProject.getBasedir() );
         builder.setProperties( properties );
         builder.setClasspath( classpath );
+
+        // update BND instructions to add included Maven resources
+        includeMavenResources( currentProject, properties, getLog() );
 
         if ( null != classifier && classifier.trim().length() > 0 )
         {
