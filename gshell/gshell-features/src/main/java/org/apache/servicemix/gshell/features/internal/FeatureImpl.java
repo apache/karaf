@@ -29,6 +29,7 @@ import org.apache.servicemix.gshell.features.Feature;
 public class FeatureImpl implements Feature {
 
     private String name;
+    private List<String> dependencies = new ArrayList<String>();
     private List<String> bundles = new ArrayList<String>();
     private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
 
@@ -40,12 +41,20 @@ public class FeatureImpl implements Feature {
         return name;
     }
 
+    public List<String> getDependencies() {
+        return dependencies;
+    }
+
     public List<String> getBundles() {
         return bundles;
     }
 
     public Map<String, Map<String, String>> getConfigurations() {
         return configs;
+    }
+
+    public void addDependency(String dependency) {
+        dependencies.add(dependency);
     }
 
     public void addBundle(String bundle) {

@@ -26,6 +26,8 @@ public interface Feature {
 
     String getName();
 
+    List<String> getDependencies();
+
     List<String> getBundles();
 
     Map<String, Map<String, String>> getConfigurations();
