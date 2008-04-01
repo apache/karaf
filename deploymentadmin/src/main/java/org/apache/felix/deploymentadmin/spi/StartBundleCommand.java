@@ -63,7 +63,7 @@ public class StartBundleCommand extends Command {
                     }
                 }
                 else {
-                	log.log(LogService.LOG_WARNING, "Could not start bundle '" + bundleInfoImpl.getSymbolicName() + "' because it is no defined in the framework");
+                	log.log(LogService.LOG_WARNING, "Could not start bundle '" + bundleInfoImpl.getSymbolicName() + "' because it is not defined in the framework");
                 }
             }
         }
