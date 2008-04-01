@@ -23,6 +23,7 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadMXBean;
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
@@ -89,10 +90,9 @@ public class InfoCommand
         printValue("Vendor", maxNameLen, runtime.getVmVendor());
         printValue("Uptime", maxNameLen, printDuration(runtime.getUptime()));
         try {
-            com.sun.management.OperatingSystemMXBean sunOs = (com.sun.management.OperatingSystemMXBean) os;
-            printValue("Process CPU time", maxNameLen, printDuration(sunOs.getProcessCpuTime() / 1000000));
-            printValue("Total compile time", maxNameLen, printDuration(ManagementFactory.getCompilationMXBean().getTotalCompilationTime()));
+            printValue("Process CPU time", maxNameLen, printDuration(getSunOsValueAsLong(os, "getProcessCpuTime") / 1000000));
         } catch (Throwable t) {}
+        printValue("Total compile time", maxNameLen, printDuration(ManagementFactory.getCompilationMXBean().getTotalCompilationTime()));
 
         io.out.println("Threads");
         printValue("Live threads", maxNameLen, Integer.toString(threads.getThreadCount()));
@@ -120,15 +120,19 @@ public class InfoCommand
         printValue("Architecture", maxNameLen, os.getArch());
         printValue("Processors", maxNameLen, Integer.toString(os.getAvailableProcessors()));
         try {
-            com.sun.management.OperatingSystemMXBean sunOs = (com.sun.management.OperatingSystemMXBean) os;
-            printValue("Total physical memory", maxNameLen, printSizeInKb(sunOs.getTotalPhysicalMemorySize()));
-            printValue("Free physical memory", maxNameLen, printSizeInKb(sunOs.getFreePhysicalMemorySize()));
-            printValue("Committed virtual memory", maxNameLen, printSizeInKb(sunOs.getCommittedVirtualMemorySize()));
-            printValue("Total swap space", maxNameLen, printSizeInKb(sunOs.getTotalSwapSpaceSize()));
-            printValue("Free swap space", maxNameLen, printSizeInKb(sunOs.getFreeSwapSpaceSize()));
+            printValue("Total physical memory", maxNameLen, printSizeInKb(getSunOsValueAsLong(os, "getTotalPhysicalMemorySize")));
+            printValue("Free physical memory", maxNameLen, printSizeInKb(getSunOsValueAsLong(os, "getFreePhysicalMemorySize")));
+            printValue("Committed virtual memory", maxNameLen, printSizeInKb(getSunOsValueAsLong(os, "getCommittedVirtualMemorySize")));
+            printValue("Total swap space", maxNameLen, printSizeInKb(getSunOsValueAsLong(os, "getTotalSwapSpaceSize")));
+            printValue("Free swap space", maxNameLen, printSizeInKb(getSunOsValueAsLong(os, "getFreeSwapSpaceSize")));
         } catch (Throwable t) {}
 
         return null;
+    }
+
+    private long getSunOsValueAsLong(OperatingSystemMXBean os, String name) throws Exception {
+        Method mth = os.getClass().getMethod(name);
+        return (Long) mth.invoke(os);
     }
 
     private String printLong(long i) {
