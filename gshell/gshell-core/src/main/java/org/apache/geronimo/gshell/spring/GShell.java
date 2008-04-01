@@ -98,7 +98,6 @@ public class GShell implements Runnable, BundleContextAware {
             thread.join();
             thread = null;
         }
-        Thread.dumpStack();
     }
 
     public void run() {
