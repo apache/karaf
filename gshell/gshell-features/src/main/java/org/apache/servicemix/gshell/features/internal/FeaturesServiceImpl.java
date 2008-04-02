@@ -70,7 +70,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     private Set<URL> urls;
     private Map<URL, RepositoryImpl> repositories = new HashMap<URL, RepositoryImpl>();
     private Map<String, Feature> features;
-    private Set<String> installed = new HashSet<String>();
+    private Map<String, Set<Long>> installed = new HashMap<String, Set<Long>>();
 
     public BundleContext getBundleContext() {
         return bundleContext;
@@ -155,11 +155,13 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
             }
             cfg.update(props);
         }
+        Set<Long> bundles = new HashSet<Long>();
         for (String bundleLocation : f.getBundles()) {
             Bundle b = installBundleIfNeeded(bundleLocation);
             b.start();
+            bundles.add(b.getBundleId());
         }
-        installed.add(name);
+        installed.put(name, bundles);
         saveState();
     }
 
@@ -198,8 +200,20 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public void uninstallFeature(String name) throws Exception {
-        // TODO
-        //saveState();
+        if (!installed.containsKey(name)) {
+            throw new Exception("Feature named '" + name + "' is not installed");
+        }
+        // Grab all the bundles installed by this feature
+        // and remove all those who will still be in use.
+        // This gives this list of bundles to uninstall.
+        Set<Long> bundles = installed.remove(name);
+        for (Set<Long> b : installed.values()) {
+            bundles.removeAll(b);
+        }
+        for (long bundleId : bundles) {
+            getBundleContext().getBundle(bundleId).uninstall();
+        }
+        saveState();
     }
 
     public String[] listFeatures() {
@@ -213,7 +227,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public String[] listInstalledFeatures() {
-        return installed.toArray(new String[installed.size()]);
+        return installed.keySet().toArray(new String[installed.size()]);
     }
 
     protected Feature getFeature(String name) {
@@ -280,7 +294,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         try {
             Preferences prefs = preferences.getUserPreferences("FeaturesServiceState");
             saveSet(prefs.node("repositories"), repositories.keySet());
-            saveSet(prefs.node("features"), installed);
+            saveMap(prefs.node("features"), installed);
             prefs.flush();
         } catch (Exception e) {
             LOGGER.error("Error persisting FeaturesService state", e);
@@ -291,11 +305,11 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         try {
             Preferences prefs = preferences.getUserPreferences("FeaturesServiceState");
             if (prefs.nodeExists("repositories")) {
-                Set<String> repositories = loadSet(prefs.node("repositories"));
-                for (String repo : repositories) {
-                    internalAddRepository(new URL(repo));
+                Set<URL> repositories = loadSet(prefs.node("repositories"));
+                for (URL repo : repositories) {
+                    internalAddRepository(repo);
                 }
-                installed = loadSet(prefs.node("features"));
+                installed = loadMap(prefs.node("features"));
                 return true;
             }
         } catch (Exception e) {
@@ -304,8 +318,8 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         return false;
     }
 
-    protected void saveSet(Preferences node, Set set) throws BackingStoreException {
-        List l = new ArrayList(set);
+    protected void saveSet(Preferences node, Set<URL> set) throws BackingStoreException {
+        List<URL> l = new ArrayList<URL>(set);
         node.clear();
         node.putInt("count", l.size());
         for (int i = 0; i < l.size(); i++) {
@@ -313,13 +327,59 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         }
     }
 
-    protected Set<String> loadSet(Preferences node) {
-        Set<String> l = new HashSet<String>();
+    protected Set<URL> loadSet(Preferences node) {
+        Set<URL> l = new HashSet<URL>();
         int count = node.getInt("count", 0);
         for (int i = 0; i < count; i++) {
-            l.add(node.get("item." + i, null));
+            l.add(createURL(node.get("item." + i, null)));
         }
         return l;
+    }
+
+    protected URL createURL(String url) {
+        try {
+            return new URL(url);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void saveMap(Preferences node, Map<String, Set<Long>> map) throws BackingStoreException {
+        node.clear();
+        for (Map.Entry<String, Set<Long>> entry : map.entrySet()) {
+            String key = entry.getKey();
+            String val = createValue(entry.getValue());
+            node.put(key, val);
+        }
+    }
+
+    protected Map<String, Set<Long>> loadMap(Preferences node) throws BackingStoreException {
+        Map<String, Set<Long>> map = new HashMap<String, Set<Long>>();
+        for (String key : node.keys()) {
+            String val = node.get(key, null);
+            Set<Long> set = readValue(val);
+            map.put(key, set);
+        }
+        return map;
+    }
+
+    protected String createValue(Set<Long> set) {
+        StringBuilder sb = new StringBuilder();
+        for (long i : set) {
+            if (sb.length() > 0) {
+                sb.append(",");
+            }
+            sb.append(i);
+        }
+        return sb.toString();
+    }
+
+    protected Set<Long> readValue(String val) {
+        Set<Long> set = new HashSet<Long>();
+        for (String str : val.split(",")) {
+            set.add(Long.parseLong(str));
+        }
+        return set;
     }
 
 }
