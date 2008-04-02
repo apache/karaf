@@ -132,6 +132,7 @@ public class SpringCommandRegistry extends DefaultCommandRegistry implements Lay
             gn.removeNode(n);
             if (gn.size() == 0) {
                 layout.removeNode(gn);
+                unregister(lookup(shell));
             }
         }
 
