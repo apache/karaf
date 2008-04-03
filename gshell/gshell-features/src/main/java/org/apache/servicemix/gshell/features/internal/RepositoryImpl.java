@@ -31,6 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
 
 import org.apache.servicemix.gshell.features.Feature;
 import org.apache.servicemix.gshell.features.Repository;
@@ -61,8 +62,12 @@ public class RepositoryImpl implements Repository {
             features = new ArrayList<Feature>();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             Document doc = factory.newDocumentBuilder().parse(url.openStream());
-            NodeList nodes = doc.getDocumentElement().getElementsByTagName("feature");
+            NodeList nodes = doc.getDocumentElement().getChildNodes();
             for (int i = 0; i < nodes.getLength(); i++) {
+                Node node = nodes.item(i);
+                if (!(node instanceof Element) || !"feature".equals(node.getNodeName())) {
+                    continue;
+                }
                 Element e = (Element) nodes.item(i);
                 String name = e.getAttribute("name");
                 FeatureImpl f = new FeatureImpl(name);

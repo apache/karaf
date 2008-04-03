@@ -114,10 +114,12 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         repositories.put(url, repo);
         features = null;
         repo.load();
+        /*
         Feature[] features = repo.getFeatures();
         for (int i = 0; i < features.length; i++) {
             CommandProxy cmd = new CommandProxy(features[i], bundleContext);
         }
+        */
     }
 
     public void removeRepository(URL url) {

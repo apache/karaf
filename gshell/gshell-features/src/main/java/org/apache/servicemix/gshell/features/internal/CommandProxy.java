@@ -88,14 +88,4 @@ public class CommandProxy extends ObrCommandSupport {
         }
     }
 
-    private String readLine(Reader in) throws IOException {
-        StringBuffer buf = new StringBuffer();
-        while (true) {
-            int i = in.read();
-            if ((i == -1) || (i == '\n') || (i == '\r')) {
-                return buf.toString();
-            }
-            buf.append((char) i);
-        }
-    }
 }
