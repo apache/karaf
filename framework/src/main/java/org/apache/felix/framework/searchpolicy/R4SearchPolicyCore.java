@@ -599,7 +599,14 @@ public class R4SearchPolicyCore implements ModuleListener
                 }
                 if (delegate)
                 {
-                    return this.getClass().getClassLoader().loadClass(name);
+                    try
+                    {
+                        return this.getClass().getClassLoader().loadClass(name);
+                    }
+                    catch (NoClassDefFoundError ex)
+                    {
+                        // Ignore, will return null
+                    }
                 }
                 break;
             }
@@ -3187,6 +3194,10 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             {
                 getClass().getClassLoader().loadClass(name);
                 classpath = true;
+            }
+            catch (NoClassDefFoundError err)
+            {
+                // Ignore
             }
             catch (Exception ex)
             {
