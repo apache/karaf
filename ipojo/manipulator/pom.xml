@@ -45,7 +45,7 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.metadata</artifactId>
 			<version>0.7.6-SNAPSHOT</version>
 		</dependency>

@@ -31,22 +31,22 @@
 	<version>0.7.6-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>org.apache.felix</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>org.apache.felix</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.metadata</artifactId>
 			<version>0.7.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.manipulator</artifactId>
 			<version>0.7.6-SNAPSHOT</version>
 		</dependency>
@@ -109,7 +109,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-ipojo-plugin</artifactId>
-				<version>${pom.version}</version>
+				<version>0.7.6-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>

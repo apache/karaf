@@ -17,7 +17,7 @@
  under the License.
 -->
 <project>
-  <parent>
+ <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
     <version>1.0.2</version>

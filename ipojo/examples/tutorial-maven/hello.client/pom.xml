@@ -27,7 +27,7 @@
 		<dependency>
 			<groupId>ipojo.examples</groupId>
 			<artifactId>hello.service</artifactId>
-			<version>${pom.version}</version>
+			<version>0.7.6-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

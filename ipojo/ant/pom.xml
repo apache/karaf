@@ -33,14 +33,14 @@
 	<name>Apache Felix iPOJO Ant Task</name>
 	<dependencies>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.metadata</artifactId>
-			<version>${pom.version}</version>
+			<version>0.7.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>${pom.groupId}</groupId>
+			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.manipulator</artifactId>
-			<version>${pom.version}</version>
+			<version>0.7.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>xerces</groupId>

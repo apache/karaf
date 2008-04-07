@@ -100,6 +100,19 @@
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="FooProviderType-4" architecture="true">
+		<provides>
+			<property name="foo" field="m_foo" />
+			<property name="bar" field="m_bar" />
+			<property name="baz" type="java.lang.String" />
+		</provides>
+		<properties propagation="true" pid="FooProvider-3">
+			<property name="foo" field="m_foo" />
+			<property name="bar" field="m_bar" />
+		</properties>
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		factory="FooProviderType-itf" architecture="true">
 		<provides
 			interface="org.apache.felix.ipojo.test.scenarios.service.FooService" />

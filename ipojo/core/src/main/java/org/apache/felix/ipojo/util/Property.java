@@ -40,17 +40,18 @@ public class Property implements FieldInterceptor {
     /**
      * Name of the property (filed name if not set).
      */
-    private String m_name;
+    private final String m_name;
 
     /**
      * Field of the property.
+     * Cannot change once set.
      */
-    private String m_field;
+    private final String m_field;
 
     /**
      * Setter method of the property.
      */
-    private Callback m_method;
+    private final Callback m_method;
 
     /**
      * Value of the property.
@@ -60,17 +61,17 @@ public class Property implements FieldInterceptor {
     /**
      * Type of the property.
      */
-    private Class m_type;
+    private final Class m_type;
 
     /**
      * Handler object on to use the logger.
      */
-    private Handler m_handler;
+    private final Handler m_handler;
     
     /**
      * Instance Manager.
      */
-    private InstanceManager m_manager;
+    private final InstanceManager m_manager;
 
     /**
      * Configurable Property Constructor. At least the method or the field need
@@ -100,7 +101,6 @@ public class Property implements FieldInterceptor {
             m_name = name;
         }
         
-        m_field = field;
         m_type = computeType(type, manager.getGlobalContext());
         if (value != null) {
             m_value = create(m_type, value);
@@ -108,6 +108,8 @@ public class Property implements FieldInterceptor {
 
         if (method != null) {
             m_method = new Callback(method, new String[] { m_type.getName() }, false, manager);
+        } else {
+            m_method = null;
         }
 
     }
@@ -242,7 +244,7 @@ public class Property implements FieldInterceptor {
         return m_field != null;
     }
 
-    public Object getValue() {
+    public synchronized Object getValue() {
         return m_value;
     }
 
@@ -251,20 +253,23 @@ public class Property implements FieldInterceptor {
      * @param value : the new value.
      */
     public void setValue(Object value) {
-        // Is the object is directly assignable to the property, affect it.
-        if (isAssignable(m_type, value)) {
-            m_value = value;
-        } else {
-            // If the object is a String, we must recreate the object from the String form
-            if (value instanceof String) {
-                try {
-                    m_value = create(m_type, (String) value);
-                } catch (ConfigurationException e) {
-                    throw new ClassCastException("Incompatible type for the property " + m_name + " : " + e.getMessage());
-                }
+        synchronized (this) {
+            // Is the object is directly assignable to the property, affect it.
+            if (isAssignable(m_type, value)) {
+                m_value = value;
             } else {
-                // Error, the given property cannot be injected.
-                throw new ClassCastException("Incompatible type for the property " + m_name + " " + m_type.getName() + " expected, " + value.getClass() + " received");
+                // If the object is a String, we must recreate the object from the String form
+                if (value instanceof String) {
+                    try {
+                        m_value = create(m_type, (String) value);
+                    } catch (ConfigurationException e) {
+                        throw new ClassCastException("Incompatible type for the property " + m_name + " : " + e.getMessage());
+                    }
+                } else {
+                    // Error, the given property cannot be injected.
+                    throw new ClassCastException("Incompatible type for the property " + m_name + " " + m_type.getName() + " expected, " 
+                                                 + value.getClass() + " received");
+                }
             }
         }
     }
@@ -427,7 +432,7 @@ public class Property implements FieldInterceptor {
      * @param instance : the created object (could be null
      * @see org.apache.felix.ipojo.Handler#onCreation(java.lang.Object)
      */
-    public void invoke(Object instance) {
+    public synchronized void invoke(Object instance) {
         try {
             if (instance == null) {
                 m_method.call(new Object[] { m_value });
@@ -466,7 +471,8 @@ public class Property implements FieldInterceptor {
      * @see org.apache.felix.ipojo.FieldInterceptor#onSet(java.lang.Object, java.lang.String, java.lang.Object)
      */
     public void onSet(Object pojo, String fieldName, Object value) {
-        setValue(value);
-        
+        if (m_value == null || ! m_value.equals(value)) {
+            setValue(value);
+        }
     }
 }

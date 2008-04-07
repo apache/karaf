@@ -78,6 +78,7 @@ public class Utils {
         try {
             return fact.createComponentInstance(configuration);
         } catch (Exception e) {
+            e.printStackTrace();
             Assert.fail("Cannot create the instance from " + factoryName + " : " + e.getMessage());
             return null;
         }
@@ -152,6 +153,24 @@ public class Utils {
             return null;
         } else {
             return refs[0];
+        }
+    }
+    
+    public static ServiceReference getServiceReferenceByPID(BundleContext bc, String itf, String pid) {
+        ServiceReference[] refs = null;
+        String filter = "(" + "service.pid" + "=" + pid + ")";
+        try {
+            refs = bc.getServiceReferences(itf, filter);
+        } catch (InvalidSyntaxException e) {
+            System.err.println("Invalid Filter : " + filter);
+        }
+        if (refs == null) {
+            return null;
+        } else if (refs.length == 1) {
+            return refs[0];
+        } else {
+            Assert.fail("A service lookup by PID returned several providers (" + refs.length + ")" + " for " + itf + " with " + pid);
+            return null;
         }
     }
 

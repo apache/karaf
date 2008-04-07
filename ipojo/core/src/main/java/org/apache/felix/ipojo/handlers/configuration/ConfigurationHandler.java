@@ -35,12 +35,15 @@ import org.apache.felix.ipojo.parser.FieldMetadata;
 import org.apache.felix.ipojo.parser.MethodMetadata;
 import org.apache.felix.ipojo.parser.PojoMetadata;
 import org.apache.felix.ipojo.util.Property;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.ManagedService;
 
 /**
  * Handler managing the Configuration Admin.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ConfigurationHandler extends PrimitiveHandler {
+public class ConfigurationHandler extends PrimitiveHandler implements ManagedService {
 
     /**
      * List of the configurable fields.
@@ -67,6 +70,18 @@ public class ConfigurationHandler extends PrimitiveHandler {
      * should the component propagate configuration ?
      */
     private boolean m_isConfigurable;
+    
+    /**
+     * Service Registration to publish the service registration.
+     */
+    private ServiceRegistration m_sr;
+    
+    /**
+     * Managed Service PID.
+     * This PID must be different from the instance name if the instance was created 
+     * with the Configuration Admin.
+     */
+    private String m_managedServicePID;
 
     /**
      * Initialize the component type.
@@ -160,12 +175,19 @@ public class ConfigurationHandler extends PrimitiveHandler {
 
         // Check if the component is dynamically configurable
         m_isConfigurable = false;
-       
         String propa = confs[0].getAttribute("propagation");
         if (propa != null && propa.equalsIgnoreCase("true")) {
             m_isConfigurable = true;
             m_toPropagate = configuration;
         }
+        
+        // Check if the component support ConfigurationADmin reconfiguration
+        m_managedServicePID = confs[0].getAttribute("pid"); // Look inside the component type description
+        String instanceMSPID = (String) configuration.get("managed.service.pid"); // Look inside the instance configuration.
+        if (instanceMSPID != null) {
+            m_managedServicePID = instanceMSPID;
+        }
+        
 
         for (int i = 0; configurables != null && i < configurables.length; i++) {
             String fieldName = configurables[i].getAttribute("field");
@@ -201,7 +223,10 @@ public class ConfigurationHandler extends PrimitiveHandler {
       * @see org.apache.felix.ipojo.Handler#stop()
       */
     public void stop() {
-        // Nothing to do.
+        if (m_sr != null) {
+            m_sr.unregister();
+            m_sr = null;
+        }
     }
 
     /**
@@ -220,49 +245,15 @@ public class ConfigurationHandler extends PrimitiveHandler {
             }
             reconfigure(m_toPropagate);
         }
+        
+        if (m_managedServicePID != null && m_sr == null) {
+            Properties props = new Properties();
+            props.put(Constants.SERVICE_PID, m_managedServicePID);
+            props.put("instance.name", getInstanceManager().getInstanceName());
+            props.put("factory.name", getInstanceManager().getFactory().getFactoryName());
+            m_sr = getInstanceManager().getContext().registerService(ManagedService.class.getName(), this, props);
+        }
     }
-
-//    /**
-//     * Setter Callback Method.
-//     * Check if the modified field is a configurable property to update the value.
-//     * @param pojo : the pojo object on which the field is accessed
-//     * @param fieldName : field name
-//     * @param value : new value
-//     * @see org.apache.felix.ipojo.Handler#onSet(Object, java.lang.String, java.lang.Object)
-//     */
-//    public void onSet(Object pojo, String fieldName, Object value) {
-//        // Verify that the field name correspond to a configurable property
-//        for (int i = 0; i < m_configurableProperties.length; i++) {
-//            Property prop = m_configurableProperties[i];
-//            if (prop.hasField() && prop.getField().equals(fieldName)) {
-//                // Check if the value has changed
-//                if (prop.getValue() == null || !prop.getValue().equals(value)) {
-//                    prop.setValue(value); // Change the value
-//                }
-//            }
-//        }
-//        // Else do nothing
-//    }
-//
-//    /**
-//     * Getter Callback Method.
-//     * Check if the field is a configurable property to push the stored value.
-//     * @param pojo : the pojo object on which the field is accessed
-//     * @param fieldName : field name
-//     * @param value : value pushed by the previous handler
-//     * @return the stored value or the previous value.
-//     * @see org.apache.felix.ipojo.Handler#onGet(Object,
-//     * java.lang.String, java.lang.Object)
-//     */
-//    public Object onGet(Object pojo, String fieldName, Object value) {
-//        // Check if the field is a configurable property
-//        for (int i = 0; i < m_configurableProperties.length; i++) {
-//            if (fieldName.equals(m_configurableProperties[i].getField())) { 
-//                return m_configurableProperties[i].getValue(); 
-//            }
-//        }
-//        return value;
-//    }
 
     /**
      * Handler state changed.
@@ -329,22 +320,24 @@ public class ConfigurationHandler extends PrimitiveHandler {
             // Check if the name is a configurable property
             for (int i = 0; i < m_configurableProperties.length; i++) {
                 if (m_configurableProperties[i].getName().equals(name)) {
-                    // Check if the value has changed
-                    if (m_configurableProperties[i].getValue() == null || !m_configurableProperties[i].getValue().equals(value)) {
-                        if (m_configurableProperties[i].hasField()) {
-                            getInstanceManager().onSet(null, m_configurableProperties[i].getField(), value); // dispatch that the value has changed
-                        }
-                        if (m_configurableProperties[i].hasMethod()) {
+                    if (m_configurableProperties[i].hasField()) {
+                        if (m_configurableProperties[i].getValue() == null || ! m_configurableProperties[i].getValue().equals(value)) {
                             m_configurableProperties[i].setValue(value);
-                            m_configurableProperties[i].invoke(null); // Call on all created pojo objects.
+                            getInstanceManager().onSet(null, m_configurableProperties[i].getField(), m_configurableProperties[i].getValue()); // Notify other handler of the field value change.
+                            if (m_configurableProperties[i].hasMethod()) {
+                                m_configurableProperties[i].invoke(null); // Call on all created pojo objects.
+                            }
                         }
+                    } else if (m_configurableProperties[i].hasMethod()) { // Method but no field
+                        m_configurableProperties[i].setValue(value);
+                        m_configurableProperties[i].invoke(null); // Call on all created pojo objects.
                     }
                     found = true;
                     break;
                 }
             }
-            if (!found) {
-                // The property is not a configurable property
+            if (!found) { 
+                // The property is not a configurable property, at it to the toPropagate list.
                 toPropagate.put(name, value);
             }
         }
@@ -353,8 +346,10 @@ public class ConfigurationHandler extends PrimitiveHandler {
         if (m_providedServiceHandler != null && !toPropagate.isEmpty()) {
             m_providedServiceHandler.removeProperties(m_propagated);
 
-            // Remove the name props
+            // Remove the name, the pid and the managed service pid props
             toPropagate.remove("name");
+            toPropagate.remove("managed.service.pid");
+            toPropagate.remove(Constants.SERVICE_PID);
 
             m_providedServiceHandler.addProperties(toPropagate);
             m_propagated = toPropagate;
@@ -373,6 +368,17 @@ public class ConfigurationHandler extends PrimitiveHandler {
                 m_configurableProperties[i].invoke(instance);
             }
         }
+    }
+
+    /**
+     * Managed Service method.
+     * This method is called when the instance is reconfigured by the ConfigurationAdmin.
+     * @param arg0 : pushed configuration.
+     * @throws org.osgi.service.cm.ConfigurationException the reconfiguration failed.
+     * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
+     */
+    public void updated(Dictionary arg0) throws org.osgi.service.cm.ConfigurationException {
+        reconfigure(arg0);
     }
 
 }

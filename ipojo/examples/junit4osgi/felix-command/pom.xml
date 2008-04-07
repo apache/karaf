@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
 			<artifactId>org.apache.felix.ipojo.junit4osgi</artifactId>
-			<version>${pom.version}</version>
+			<version>0.7.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -74,7 +74,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-ipojo-plugin</artifactId>
-				<version>${pom.version}</version>
+				<version>0.7.6-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>
