@@ -24,7 +24,6 @@ import java.util.Properties;
 
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.HandlerFactory;
-import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.architecture.PropertyDescription;
@@ -57,19 +56,29 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
     private ProvidedServiceHandler m_providedServiceHandler;
 
     /**
-     * Properties propagated at the last "updated".
+     * Properties propagated during the last instance "update".
      */
-    private Dictionary m_propagated = new Properties();
+    private Dictionary m_propagatedFromInstance = new Properties();
 
     /**
      * Properties to propagate.
      */
     private Dictionary m_toPropagate = new Properties();
+    
+    /**
+     * Properties propagated from the configuration admin.
+     */
+    private Dictionary m_propagatedFromCA;
+    
+    /**
+     * Check if the instance was already reconfigured by the configuration admin.
+     */
+    private boolean m_configurationAlreadyPushed;
 
     /**
      * should the component propagate configuration ?
      */
-    private boolean m_isConfigurable;
+    private boolean m_mustPropagate;
     
     /**
      * Service Registration to publish the service registration.
@@ -174,11 +183,11 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
         Element[] configurables = confs[0].getElements("Property");
 
         // Check if the component is dynamically configurable
-        m_isConfigurable = false;
+        m_mustPropagate = false;
         String propa = confs[0].getAttribute("propagation");
         if (propa != null && propa.equalsIgnoreCase("true")) {
-            m_isConfigurable = true;
-            m_toPropagate = configuration;
+            m_mustPropagate = true;
+            m_toPropagate = configuration; // Instance configuration to propagate.
         }
         
         // Check if the component support ConfigurationADmin reconfiguration
@@ -219,10 +228,11 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
 
     /**
       * Stop method.
+      * This method is synchronized to avoid the configuration admin pushing a configuration during the un-registration.
       * Do nothing.
       * @see org.apache.felix.ipojo.Handler#stop()
       */
-    public void stop() {
+    public synchronized void stop() {
         if (m_sr != null) {
             m_sr.unregister();
             m_sr = null;
@@ -231,15 +241,16 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
 
     /**
      * Start method.
+     * This method is synchronized to avoid the config admin pushing a configuration before ending the method.
      * Propagate properties if the propagation is activated.
      * @see org.apache.felix.ipojo.Handler#start()
      */
-    public void start() {
+    public synchronized void start() {
         // Get the provided service handler :
         m_providedServiceHandler = (ProvidedServiceHandler) getHandler(HandlerFactory.IPOJO_NAMESPACE + ":provides");
 
         // Propagation
-        if (m_isConfigurable) {
+        if (m_mustPropagate) {
             for (int i = 0; i < m_configurableProperties.length; i++) {
                 m_toPropagate.put(m_configurableProperties[i].getName(), m_configurableProperties[i].getValue());
             }
@@ -255,21 +266,21 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
         }
     }
 
-    /**
-     * Handler state changed.
-     * @param state : the new instance state.
-     * @see org.apache.felix.ipojo.CompositeHandler#stateChanged(int)
-     */
-    public void stateChanged(int state) {
-        if (state == InstanceManager.VALID) {
-            start();
-            return;
-        }
-        if (state == InstanceManager.INVALID) {
-            stop();
-            return;
-        }
-    }
+//    /**
+//     * Handler state changed.
+//     * @param state : the new instance state.
+//     * @see org.apache.felix.ipojo.CompositeHandler#stateChanged(int)
+//     */
+//    public void stateChanged(int state) {
+//        if (state == InstanceManager.VALID) {
+//            start();
+//            return;
+//        }
+//        if (state == InstanceManager.INVALID) {
+//            stop();
+//            return;
+//        }
+//    }
 
     /**
      * Add the given property metadata to the property metadata list.
@@ -310,7 +321,19 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
      * @param configuration : the new configuration
      * @see org.apache.felix.ipojo.Handler#reconfigure(java.util.Dictionary)
      */
-    public void reconfigure(Dictionary configuration) {
+    public synchronized void reconfigure(Dictionary configuration) {      
+        Properties props = reconfigureProperties(configuration);
+        propagate(props, m_propagatedFromInstance);
+        m_propagatedFromInstance = props;
+    }
+    
+    /**
+     * Reconfigured configuration properties and returns non matching properties.
+     * When called, it must hold the monitor lock.
+     * @param configuration : new configuration
+     * @return the properties that does not match with configuration properties
+     */
+    private Properties reconfigureProperties(Dictionary configuration) {        
         Properties toPropagate = new Properties();
         Enumeration keysEnumeration = configuration.keys();
         while (keysEnumeration.hasMoreElements()) {
@@ -342,17 +365,29 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             }
         }
 
-        // Propagation of the properties to service registrations :
-        if (m_providedServiceHandler != null && !toPropagate.isEmpty()) {
-            m_providedServiceHandler.removeProperties(m_propagated);
+        return toPropagate;
 
-            // Remove the name, the pid and the managed service pid props
-            toPropagate.remove("name");
-            toPropagate.remove("managed.service.pid");
-            toPropagate.remove(Constants.SERVICE_PID);
+    }
+    
+    /**
+     * Removes the old properties from the provided services and propagate new properties.
+     * @param newProps : new properties to propagate
+     * @param oldProps : old properties to remove
+     */
+    private void propagate(Dictionary newProps, Dictionary oldProps) {
+        if (m_mustPropagate && m_providedServiceHandler != null) {
+            if (oldProps != null) {
+                m_providedServiceHandler.removeProperties(oldProps);
+            }
 
-            m_providedServiceHandler.addProperties(toPropagate);
-            m_propagated = toPropagate;
+            if (newProps != null) {
+                // Remove the name, the pid and the managed service pid props
+                newProps.remove("name");
+                newProps.remove("managed.service.pid");
+                newProps.remove(Constants.SERVICE_PID);
+                // Propagation of the properties to service registrations :
+                m_providedServiceHandler.addProperties(newProps);
+            }
         }
     }
 
@@ -373,12 +408,24 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
     /**
      * Managed Service method.
      * This method is called when the instance is reconfigured by the ConfigurationAdmin.
-     * @param arg0 : pushed configuration.
+     * When called, it must hold the monitor lock.
+     * @param conf : pushed configuration.
      * @throws org.osgi.service.cm.ConfigurationException the reconfiguration failed.
      * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
      */
-    public void updated(Dictionary arg0) throws org.osgi.service.cm.ConfigurationException {
-        reconfigure(arg0);
+    public synchronized void updated(Dictionary conf) throws org.osgi.service.cm.ConfigurationException {
+        if (conf == null && ! m_configurationAlreadyPushed) {
+            return; // First call
+        } else if (conf != null) { // Configuration push
+            Properties props = reconfigureProperties(conf);
+            propagate(props, m_propagatedFromCA);
+            m_propagatedFromCA = props;
+            m_configurationAlreadyPushed = true;
+        } else if (conf == null && m_configurationAlreadyPushed) { // Configuration deletion
+            propagate(null, m_propagatedFromCA);
+            m_propagatedFromCA = null;
+            m_configurationAlreadyPushed = false;
+        }
     }
 
 }
