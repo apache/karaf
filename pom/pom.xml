@@ -98,6 +98,7 @@
         <module>../bundleplugin</module>
         <module>../scrplugin</module>
         <module>../tools/maven2/maven-osgi-plugin</module>
+        <module>../tools/maven2/maven-felix-plugin</module>
       </modules>
     </profile>
 
