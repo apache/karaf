@@ -87,6 +87,11 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * Default-Implementation.
      */
     private String m_di;
+    
+    /**
+     * Is the Nullable pattern enable?
+     */
+    private boolean m_supportNullable;
 
     /**
      * Id of the dependency.
@@ -102,19 +107,22 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @param filter : LDAP filter of the dependency
      * @param isOptional : is the dependency an optional dependency ?
      * @param isAggregate : is the dependency an aggregate dependency
+     * @param nullable : describe if the nullable ability is enable or disable
      * @param identity : id of the dependency, may be null
      * @param context : bundle context (or service context) to use.
      * @param policy : resolution policy
      * @param cmp : comparator to sort references
      * @param defaultImplem : default-implementation class
      */
-    public Dependency(DependencyHandler handler, String field, Class spec, Filter filter, boolean isOptional, boolean isAggregate, String identity, BundleContext context, int policy, Comparator cmp, String defaultImplem) {
+    public Dependency(DependencyHandler handler, String field, Class spec, Filter filter, boolean isOptional, boolean isAggregate, boolean nullable, String identity, BundleContext context, int policy, Comparator cmp, String defaultImplem) {
         super(spec, isAggregate, isOptional, filter, cmp, policy, context, handler);
         m_handler = handler;
         if (field != null) {
             m_field = field;
             m_usage = new ServiceUsage();
         }
+        
+        m_supportNullable = nullable;
         m_di = defaultImplem;
 
         if (identity == null) {
@@ -277,12 +285,19 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
     /**
      * Start the dependency.
      */
-    public void start() {        
+    public void start() {
         if (isOptional() && !isAggregate()) {
             if (m_di == null) {
-                // To load the proxy we use the POJO class loader. Indeed, this classloader imports iPOJO (so can access to Nullable) and has access to the service specification.
-                m_nullable = Proxy.newProxyInstance(getHandler().getInstanceManager().getClazz().getClassLoader(), new Class[] { getSpecification(), Nullable.class }, new NullableObject()); // NOPMD
+                // If nullable are supported, create the nullable object.
+                if (m_supportNullable) {
+                    // To load the proxy we use the POJO class loader. Indeed, this classloader imports iPOJO (so can access to Nullable) and has
+                    // access to the service specification.
+                    m_nullable =
+                            Proxy.newProxyInstance(getHandler().getInstanceManager().getClazz().getClassLoader(), new Class[] {
+                                    getSpecification(), Nullable.class }, new NullableObject()); // NOPMD
+                }
             } else {
+                // Create the default-implementation object.
                 try {
                     Class clazz = getHandler().getInstanceManager().getContext().getBundle().loadClass(m_di);
                     m_nullable = clazz.newInstance();
@@ -394,15 +409,14 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                         usage.m_objects[i] = getService(ref);
                     }
                 }
-            } else { // We are singular.
+            } else { // We are not aggregate.
                 // Use a reflective construction to avoid class cast exception. This method allow to set the component type.
                 usage.m_objects = (Object[]) Array.newInstance(getSpecification(), 1);
                 if (refs == null) {
-                    if (m_nullable == null) {
+                    if (m_nullable == null && m_supportNullable) {
                         m_handler.warn("[" + m_handler.getInstanceManager().getInstanceName() + "] The dependency is not optional, however no service object can be injected in " + m_field + " -> " + getSpecification().getName());
-                        return null;
                     }
-                    usage.m_objects[0] = m_nullable;
+                    usage.m_objects[0] = m_nullable; // Add null if the Nullable pattern is disable.
                 } else {
                     ServiceReference ref = getServiceReference();
                     usage.m_objects[0] = getService(ref);

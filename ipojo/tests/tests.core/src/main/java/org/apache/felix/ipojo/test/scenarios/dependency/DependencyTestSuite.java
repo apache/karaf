@@ -31,6 +31,7 @@ public class DependencyTestSuite {
 		OSGiTestSuite ots = new OSGiTestSuite("Service Dependencies Test Suite", bc);
 		ots.addTestSuite(SimpleDependencies.class);
 		ots.addTestSuite(OptionalDependencies.class);
+		ots.addTestSuite(OptionalNoNullableDependencies.class);
 		ots.addTestSuite(MultipleDependencies.class);
 		ots.addTestSuite(OptionalMultipleDependencies.class);
 		ots.addTestSuite(DelayedSimpleDependencies.class);

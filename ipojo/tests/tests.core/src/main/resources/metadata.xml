@@ -347,8 +347,23 @@
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="SimpleOptionalNoNullableCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" nullable="false" />
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
 		factory="VoidOptionalCheckServiceProvider" architecture="true">
 		<requires field="fs" optional="true">
+			<callback type="bind" method="voidBind" />
+			<callback type="unbind" method="voidUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="VoidOptionalNoNullableCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" nullable="false">
 			<callback type="bind" method="voidBind" />
 			<callback type="unbind" method="voidUnbind" />
 		</requires>
@@ -365,6 +380,15 @@
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="ObjectOptionalNoNullableCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" nullable="false">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
 		factory="RefOptionalCheckServiceProvider" architecture="true">
 		<requires field="fs" optional="true">
 			<callback type="bind" method="refBind" />
@@ -374,8 +398,26 @@
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="RefOptionalNoNullableCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" nullable="false">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
 		factory="BothOptionalCheckServiceProvider" architecture="true">
 		<requires field="fs" optional="true">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="BothOptionalNoNullableCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" nullable="false">
 			<callback type="bind" method="bothBind" />
 			<callback type="unbind" method="bothUnbind" />
 		</requires>

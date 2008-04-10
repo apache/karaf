@@ -280,6 +280,9 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
             String agg = deps[i].getAttribute("aggregate");
             boolean aggregate = agg != null && agg.equalsIgnoreCase("true");
             String identitity = deps[i].getAttribute("id");
+            
+            String nul = deps[i].getAttribute("nullable");
+            boolean nullable = nul == null || nul.equalsIgnoreCase("true");
 
             String scope = deps[i].getAttribute("scope");
             BundleContext context = getInstanceManager().getContext(); // Get the default bundle context.
@@ -321,7 +324,7 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
 
             int policy = DependencyModel.getPolicy(deps[i]);
             Comparator cmp = DependencyModel.getComparator(deps[i], getInstanceManager().getGlobalContext());
-            Dependency dep = new Dependency(this, field, spec, fil, optional, aggregate, identitity, context, policy, cmp, defaultImplem);
+            Dependency dep = new Dependency(this, field, spec, fil, optional, aggregate, nullable, identitity, context, policy, cmp, defaultImplem);
 
             // Look for dependency callback :
             Element[] cbs = deps[i].getElements("Callback");

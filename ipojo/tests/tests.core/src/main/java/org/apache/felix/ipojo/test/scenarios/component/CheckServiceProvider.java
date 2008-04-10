@@ -39,7 +39,6 @@ public class CheckServiceProvider extends CheckProviderParentClass implements Ch
 
 	public Properties getProps() {
 		Properties props = new Properties();
-		props.put("result", new Boolean(fs.foo()));
 		props.put("voidB", new Integer(simpleB));
 		props.put("objectB", new Integer(objectB));
 		props.put("refB", new Integer(refB));
@@ -48,13 +47,16 @@ public class CheckServiceProvider extends CheckProviderParentClass implements Ch
 		props.put("objectU", new Integer(objectU));
 		props.put("refU", new Integer(refU));
 		props.put("bothU", new Integer(bothU));
-		props.put("boolean", new Boolean(fs.getBoolean()));
-		props.put("int", new Integer(fs.getInt()));
-		props.put("long", new Long(fs.getLong()));
-		props.put("double", new Double(fs.getDouble()));
+		if (fs != null) {
+		    props.put("result", new Boolean(fs.foo()));
+		    props.put("boolean", new Boolean(fs.getBoolean()));
+		    props.put("int", new Integer(fs.getInt()));
+		    props.put("long", new Long(fs.getLong()));
+		    props.put("double", new Double(fs.getDouble()));
+		    if(fs.getObject() != null) { props.put("object", fs.getObject()); }
+		}
         props.put("static", CheckService.foo);
         props.put("class", CheckService.class.getName());
-		if(fs.getObject() != null) { props.put("object", fs.getObject()); }
 		return props;
 	}
 	

@@ -205,7 +205,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
             }
             ManagedAbstractFactoryType mft = new ManagedAbstractFactoryType(clazz, type, bundle);
             m_factoryTypes.add(mft);
-            m_logger.log(Logger.WARNING, "New factory type available: " + type);
+            m_logger.log(Logger.INFO, "New factory type available: " + type);
 
             for (int j = m_unboundTypes.size() - 1; j >= 0; j--) {
                 UnboundComponentType unbound = (UnboundComponentType) m_unboundTypes.get(j);
