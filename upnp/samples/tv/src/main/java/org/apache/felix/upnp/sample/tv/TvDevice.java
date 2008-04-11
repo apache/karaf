@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Properties;
+import java.util.Random;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -37,21 +38,22 @@ import org.osgi.service.upnp.UPnPIcon;
 import org.osgi.service.upnp.UPnPService;
 
 import org.apache.felix.upnp.extra.util.UPnPEventNotifier;
+import org.apache.felix.upnp.extra.util.UPnPSubscriber;
 
 public class TvDevice implements UPnPDevice,UPnPEventListener,ServiceListener  {
 	
-	final private String DEVICE_ID = "uuid:Felix-TV";
+	final private String DEVICE_ID = "uuid:Felix-TV+" +Integer.toHexString(new Random(System.currentTimeMillis()).nextInt());
 	private final static String CLOCK_DEVICE_TYPE = "urn:schemas-upnp-org:device:clock:1";
-	private final static String CLOCK_SERVICE_TYPE = "urn:schemas-upnp-org:service:timer:1";
+	private final static String TIME_SERVICE_TYPE = "urn:schemas-upnp-org:service:timer:1";
 	
 	private final static String LIGHT_DEVICE_TYPE = "urn:schemas-upnp-org:device:light:1";
-	private final static String LIGHT_SERVICE_TYPE = "urn:schemas-upnp-org:service:power:1";
+	private final static String POWER_SERVICE_TYPE = "urn:schemas-upnp-org:service:power:1";
 
 	private final static String AIRCON_DEVICE_TYPE = "urn:schemas-upnp-org:device:aircon:1";
-	private final static String AIRCON_SERVICE_TYPE = "urn:schemas-upnp-org:service:temp:1";
+	private final static String TEMP_SERVICE_TYPE = "urn:schemas-upnp-org:service:temp:1";
 	
 	private final static String WASHER_DEVICE_TYPE = "urn:schemas-upnp-org:device:washer:1";
-	private final static String WASHER_SERVICE_TYPE = "urn:schemas-upnp-org:service:state:1";
+	private final static String STATUS_SERVICE_TYPE = "urn:schemas-upnp-org:service:state:1";
 
 	private final String devicesFilter = 
 		"(&"+
@@ -85,7 +87,7 @@ public class TvDevice implements UPnPDevice,UPnPEventListener,ServiceListener  {
 	 * 
 	 */
 	private void buildEventNotifyer() {
-		notifier = new UPnPEventNotifier(Activator.context,this,powerService,null);
+		notifier = new UPnPEventNotifier(Activator.context,this,powerService);
 		powerState.setNotifier(notifier);
 	}
 
@@ -234,14 +236,14 @@ public class TvDevice implements UPnPDevice,UPnPEventListener,ServiceListener  {
 	public void doSubscribe()
 	{
 		subscriber = new UPnPSubscriber(Activator.context,this);
-		subscriber.subscribe(CLOCK_DEVICE_TYPE, CLOCK_SERVICE_TYPE);
-		subscriber.subscribe(AIRCON_DEVICE_TYPE, AIRCON_SERVICE_TYPE);
-		subscriber.subscribe(LIGHT_DEVICE_TYPE, LIGHT_SERVICE_TYPE);
-		subscriber.subscribe(WASHER_DEVICE_TYPE, WASHER_SERVICE_TYPE);
+		subscriber.subscribeEveryServiceType(CLOCK_DEVICE_TYPE, TIME_SERVICE_TYPE);
+		subscriber.subscribeEveryServiceType(AIRCON_DEVICE_TYPE, TEMP_SERVICE_TYPE);
+		subscriber.subscribeEveryServiceType(LIGHT_DEVICE_TYPE, POWER_SERVICE_TYPE);
+		subscriber.subscribeEveryServiceType(WASHER_DEVICE_TYPE, STATUS_SERVICE_TYPE);
 	}
 	
 	public void undoSubscribe(){
-		subscriber.unsubscribe();
+		subscriber.unsubscribeAll();
 	}
 	
 	ArrayList LinkedDevices = new ArrayList();

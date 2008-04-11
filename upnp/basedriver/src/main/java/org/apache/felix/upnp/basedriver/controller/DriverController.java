@@ -26,12 +26,12 @@ package org.apache.felix.upnp.basedriver.controller;
 */
 public interface DriverController {
 	/**
-	 * String for searching all the device on UPnP Network
+	 * String for searching all the device on UPnP Networks
 	 */
     public final static String ALL_DEVICE = "ssdp:all";
     
     /**
-     * String for searching only root device on UPnP Network
+     * String for searching only root device on UPnP Networks
      */
     public final static String ROOT_DEVICE = "upnp:rootdevice";
     /*
@@ -44,7 +44,7 @@ public interface DriverController {
      * Set how much messages should be sent by UPnP Base Driver
      * for debugging purpose
      * 
-     * @param n the level of log that you want to set
+     * @param n the level of log that you want to set (0-4)
      */
     public void setLogLevel(int n);
     
@@ -68,8 +68,8 @@ public interface DriverController {
     public boolean getCyberDebug();
     
     /**
-     * Sent a search message on the UPnP Network, and refresh the device 
-     * founded by UPnP Base Driver 
+     * forces the UPnP base driver to send an M-SEARCH message on the UPnP Networks, and refresh the device 
+     * found by UPnP Base Driver 
      * 
      * @param target The SSDP string used for the search
      */

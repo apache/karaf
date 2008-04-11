@@ -24,6 +24,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.Calendar;
 import java.util.Dictionary;
 import java.util.Properties;
+import java.util.Random;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.service.upnp.UPnPDevice;
@@ -35,7 +36,7 @@ import org.apache.felix.upnp.extra.util.UPnPEventNotifier;
 
 public class ClockDevice implements UPnPDevice {
 
-	final private String DEVICE_ID = "uuid:Felix-Clock";
+	final private String DEVICE_ID = "uuid:Felix-Clock+"+Integer.toHexString(new Random(System.currentTimeMillis()).nextInt());
 	private BundleContext context;
 	private TimerService timerService;
 	private UPnPService[] services;
@@ -54,7 +55,7 @@ public class ClockDevice implements UPnPDevice {
 	 * 
 	 */
 	private void buildEventNotifyer() {
-		 notifier = new UPnPEventNotifier(context,this,timerService,null);
+		 notifier = new UPnPEventNotifier(context,this,timerService);
 	}
 
 	private void setupDeviceProperties(){

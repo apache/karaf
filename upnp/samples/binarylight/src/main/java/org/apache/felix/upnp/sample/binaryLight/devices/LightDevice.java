@@ -23,6 +23,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Dictionary;
 import java.util.Properties;
+import java.util.Random;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.service.upnp.UPnPDevice;
@@ -41,7 +42,7 @@ import org.apache.felix.upnp.sample.binaryLight.services.PowerSwitchService;
 
 public class LightDevice implements UPnPDevice {
 
-	final private String DEVICE_ID = "uuid:Felix-BinaryLight";
+	final private String DEVICE_ID = "uuid:Felix-BinaryLight+" +Integer.toHexString(new Random(System.currentTimeMillis()).nextInt());
 	private BundleContext context;
 	private LightModel model;
 	private LightUI ui;
