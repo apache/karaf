@@ -72,8 +72,16 @@ public class Logger implements ServiceListener
 
     protected void setSystemBundleContext(BundleContext context)
     {
-        m_context = context;
-        startListeningForLogService();
+        // TODO: Find a way to log to a log service inside the framework.
+        // The issue is that we log messages while holding framework
+        // internal locks -- hence, when a log service calls back into 
+        // the framework (e.g., by loading a class) we might deadlock. 
+        // One instance of this problem is tracked in FELIX-536.
+        // For now we just disable logging to log services inside the
+        // framework. 
+
+        // m_context = context;
+        // startListeningForLogService();
     }
 
     public final void log(int level, String msg)
