@@ -257,6 +257,11 @@ public class Parser
         switch (kind)
         {
             case SIMPLE :
+                if ("objectClass".equals(attr.toString()) && (op == '='))
+                {
+                    program.add(new ObjectClassOperator((String) pieces.get(0)));
+                    return true;
+                }
                 // Code: Push(attr); Constant(pieces.get(0)); <operator>();
                 program.add(new PushOperator(attr.toString()));
                 program.add(new ConstOperator(pieces.get(0)));
@@ -534,8 +539,7 @@ loop:   for (;;)
     }
 
     // Exclusive inner classes
-
-    private static class AndOperator extends Operator
+    private static final class AndOperator extends Operator
     {
         private int operandCount;
 
@@ -600,7 +604,7 @@ loop:   for (;;)
         }
     }
 
-    private static class OrOperator extends Operator
+    private static final class OrOperator extends Operator
     {
         private int operandCount;
 
@@ -665,7 +669,7 @@ loop:   for (;;)
         }
     }
 
-    private static class NotOperator extends Operator
+    private static final class NotOperator extends Operator
     {
         public NotOperator()
         {
@@ -706,7 +710,50 @@ loop:   for (;;)
         }
     }
 
-    private static class EqualOperator extends Operator
+    private static final class ObjectClassOperator extends Operator
+    {
+        public final String m_target;
+        
+        public ObjectClassOperator(String target)
+        {
+            m_target = target;
+        }
+
+        public void buildTree(Stack operands)
+        {
+            operands.push(this);
+        }
+
+        public void execute(Stack operands, Mapper mapper)
+            throws EvaluationException
+        {
+            String[] objectClass = (String[]) mapper.lookup("objectClass");
+            if (objectClass != null)
+            {
+                for (int i = 0; i < objectClass.length; i++)
+                {
+                    if (m_target.equals(objectClass[i]))
+                    {
+                        operands.push(Boolean.TRUE);
+                        return;
+                    }
+                }
+            }
+            operands.push(Boolean.FALSE);
+        }
+
+        public String toString()
+        {
+            return "=()";
+        }
+
+        public void toStringInfix(StringBuffer b)
+        {
+            b.append('(').append("objectClass=").append(m_target).append(')');
+        }
+    }
+
+    private static final class EqualOperator extends Operator
     {
         public EqualOperator()
         {
@@ -766,7 +813,7 @@ loop:   for (;;)
         }
     }
 
-    private static class GreaterEqualOperator extends Operator
+    private static final class GreaterEqualOperator extends Operator
     {
         public GreaterEqualOperator()
         {
@@ -823,7 +870,7 @@ loop:   for (;;)
         }
     }
 
-    private static class LessEqualOperator extends Operator
+    private static final class LessEqualOperator extends Operator
     {
         public LessEqualOperator()
         {
@@ -879,7 +926,7 @@ loop:   for (;;)
         }
     }
 
-    private static class ApproxOperator extends Operator
+    private static final class ApproxOperator extends Operator
     {
         public ApproxOperator()
         {
@@ -935,7 +982,7 @@ loop:   for (;;)
         }
     }
 
-    private static class PresentOperator extends Operator
+    private static final class PresentOperator extends Operator
     {
         String attribute;
 
@@ -969,7 +1016,7 @@ loop:   for (;;)
         }
     }
 
-    private static class PushOperator extends Operator
+    private static final class PushOperator extends Operator
     {
         String attribute;
 
@@ -1012,7 +1059,7 @@ loop:   for (;;)
         }
     }
 
-    private static class ConstOperator extends Operator
+    private static final class ConstOperator extends Operator
     {
         Object val;
 
@@ -1048,7 +1095,7 @@ loop:   for (;;)
         }
     }
 
-    private static class SubStringOperator extends Operator
+    private static final class SubStringOperator extends Operator
         implements OperatorConstants
     {
         String[] pieces;

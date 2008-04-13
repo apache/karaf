@@ -35,6 +35,7 @@ import org.osgi.framework.*;
 **/
 public class FilterImpl implements Filter
 {
+    private static final WeakHashMap m_programCache = new WeakHashMap();
     private final ThreadLocal m_cache = new ThreadLocal();
     private final Logger m_logger;
     private final Object[] m_program;
@@ -57,29 +58,44 @@ public class FilterImpl implements Filter
         {
             throw new InvalidSyntaxException("Filter cannot be null", null);
         }
-
-        CharArrayReader car = new CharArrayReader(expr.toCharArray());
-        LdapLexer lexer = new LdapLexer(car);
-        Parser parser = new Parser(lexer);
-        try
+        Object[] program = null;
+        synchronized (m_programCache)
         {
-            if (!parser.start())
+            program = (Object[]) m_programCache.get(expr);
+        }
+        if (program == null)
+        {
+            CharArrayReader car = new CharArrayReader(expr.toCharArray());
+            LdapLexer lexer = new LdapLexer(car);
+            Parser parser = new Parser(lexer);
+            try
+            {
+                if (!parser.start())
+                {
+                    throw new InvalidSyntaxException(
+                        "Failed to parse LDAP query.", expr);
+                }
+            }
+            catch (ParseException ex)
             {
                 throw new InvalidSyntaxException(
-                    "Failed to parse LDAP query.", expr);
+                   ex.getMessage(), expr);
+            }
+            catch (IOException ex)
+            {
+                throw new InvalidSyntaxException(
+                    ex.getMessage(), expr);
+            }
+            program = parser.getProgram();
+            synchronized (m_programCache)
+            {
+                if (!m_programCache.containsKey(expr))
+                {
+                    m_programCache.put(expr, program);
+                }
             }
         }
-        catch (ParseException ex)
-        {
-            throw new InvalidSyntaxException(
-               ex.getMessage(), expr);
-        }
-        catch (IOException ex)
-        {
-            throw new InvalidSyntaxException(
-                ex.getMessage(), expr);
-        }
-        m_program = parser.getProgram();
+        m_program = program;
     }
 
     /**
@@ -254,7 +270,7 @@ public class FilterImpl implements Filter
         public void setSource(Dictionary dict, boolean caseSensitive)
         {
             // Create a map if we don't have one.
-            
+
             if (m_map == null)
             {
                 m_map = new StringMap();
