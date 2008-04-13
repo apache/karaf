@@ -19,6 +19,7 @@
 package org.apache.felix.framework;
 
 import org.apache.felix.framework.util.Util;
+import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IWire;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -120,12 +121,9 @@ class ServiceReferenceImpl implements ServiceReference
         // Get the package.
         String pkgName =
             Util.getClassPackage(className);
+        IModule current = ((FelixBundle) requester).getInfo().getCurrentModule();
         // Get package wiring from service requester.
-        IWire requesterWire = Util.getWire(
-            ((FelixBundle) requester).getInfo().getCurrentModule(), pkgName);
-        // Get package wiring from service provider.
-        IWire providerWire = Util.getWire(
-            ((FelixBundle) m_bundle).getInfo().getCurrentModule(), pkgName);
+        IWire requesterWire = Util.getWire(current, pkgName);
 
         // There are three situations that may occur here:
         //   1. The requester does not have a wire for the package.
@@ -144,11 +142,15 @@ class ServiceReferenceImpl implements ServiceReference
         // Case 1: Always include service reference.
         if (requesterWire == null)
         {
-            // This is an intentional no-op.
+            return allow;
         }
+
+        // Get package wiring from service provider.
+        IWire providerWire = Util.getWire(current, pkgName);
+        
         // Case 2: Only include service reference if the service
         // object uses the same class as the requester.
-        else if (providerWire == null)
+        if (providerWire == null)
         {
             // If the provider is not the exporter of the requester's package,
             // then try to use the service registration to see if the requester's
@@ -158,8 +160,7 @@ class ServiceReferenceImpl implements ServiceReference
                 try
                 {
                     // Load the class from the requesting bundle.
-                    Class requestClass =
-                        ((FelixBundle) requester).getInfo().getCurrentModule().getClass(className);
+                    Class requestClass = current.getClass(className);
                     // Get the service registration and ask it to check
                     // if the service object is assignable to the requesting
                     // bundle's class.
@@ -176,7 +177,7 @@ class ServiceReferenceImpl implements ServiceReference
                 // O.k. the provider is the exporter of the requester's package, now check
                 // if the requester is wired to the latest version of the provider, if so
                 // then allow else don't (the provider has been updated but not refreshed).
-                allow = ((FelixBundle) m_bundle).getInfo().getCurrentModule() == requesterWire.getExporter();
+                allow = current == requesterWire.getExporter();
             }
         }
         // Case 3: Include service reference if the wires have the
