@@ -66,6 +66,7 @@ public class Felix extends FelixBundle
 
     // Maps a bundle location to a bundle.
     private HashMap m_installedBundleMap = new HashMap();
+    private SortedMap m_installedBundleIndex = new TreeMap();
     // This lock must be acquired to modify m_installedBundleMap;
     // to help avoid deadlock this lock as priority 2 and should
     // be acquired before locks with lower priority.
@@ -745,6 +746,7 @@ public class Felix extends FelixBundle
         // in 2 and need the stuff from 1. 
         m_installedBundleMap.put(
             m_systemBundleInfo.getLocation(), this);
+        m_installedBundleIndex.put(new Long(0), this);
 
         // Create system bundle activator.
         m_systemBundleInfo.setActivator(new SystemBundleActivator());
@@ -1057,7 +1059,7 @@ ex.printStackTrace();
                         {
                             return -1;
                         }
-                        else if (b1.getInfo().getBundleId() < b2.getInfo().getBundleId())
+                        else if (b1.getBundleId() < b2.getBundleId())
                         {
                             return 1;
                         }
@@ -1083,7 +1085,7 @@ ex.printStackTrace();
                         {
                             return -1;
                         }
-                        else if (b1.getInfo().getBundleId() > b2.getInfo().getBundleId())
+                        else if (b1.getBundleId() > b2.getBundleId())
                         {
                             return 1;
                         }
@@ -2115,6 +2117,7 @@ ex.printStackTrace();
         synchronized (m_installedBundleLock_Priority2)
         {
             target = (FelixBundle) m_installedBundleMap.remove(info.getLocation());
+            m_installedBundleIndex.remove(new Long(target.getBundleId()));
         }
 
         // Finally, put the uninstalled bundle into the
@@ -2379,6 +2382,7 @@ ex.printStackTrace();
             synchronized (m_installedBundleLock_Priority2)
             {
                 m_installedBundleMap.put(location, bundle);
+                m_installedBundleIndex.put(new Long(bundle.getBundleId()), bundle);
             }
 
             if (bundle.getInfo().isExtension())
@@ -2539,15 +2543,10 @@ ex.printStackTrace();
     {
         synchronized (m_installedBundleLock_Priority2)
         {
-            FelixBundle bundle = null;
-
-            for (Iterator i = m_installedBundleMap.values().iterator(); i.hasNext(); )
+            FelixBundle bundle = (FelixBundle) m_installedBundleIndex.get(new Long(id));
+            if (bundle != null)
             {
-                bundle = (FelixBundle) i.next();
-                if (bundle.getInfo().getBundleId() == id)
-                {
-                    return bundle;
-                }
+                return bundle;
             }
         }
 
@@ -2557,7 +2556,7 @@ ex.printStackTrace();
                 (m_uninstalledBundles != null) && (i < m_uninstalledBundles.length);
                 i++)
             {
-                if (m_uninstalledBundles[i].getInfo().getBundleId() == id)
+                if (m_uninstalledBundles[i].getBundleId() == id)
                 {
                     return m_uninstalledBundles[i];
                 }
@@ -2579,24 +2578,6 @@ ex.printStackTrace();
     **/
     protected Bundle[] getBundles()
     {
-        if (m_comparator == null)
-        {
-            m_comparator = new Comparator() {
-                public int compare(Object o1, Object o2)
-                {
-                    Bundle b1 = (Bundle) o1;
-                    Bundle b2 = (Bundle) o2;
-                    if (b1.getBundleId() > b2.getBundleId())
-                        return 1;
-                    else if (b1.getBundleId() < b2.getBundleId())
-                        return -1;
-                    return 0;
-                }
-            };
-        }
-
-        Bundle[] bundles = null;
-
         synchronized (m_installedBundleLock_Priority2)
         {
             if (m_installedBundleMap.size() == 0)
@@ -2604,17 +2585,9 @@ ex.printStackTrace();
                 return null;
             }
 
-            bundles = new Bundle[m_installedBundleMap.size()];
-            int counter = 0;
-            for (Iterator i = m_installedBundleMap.values().iterator(); i.hasNext(); )
-            {
-                bundles[counter++] = (Bundle) i.next();
-            }
+            return (Bundle[]) m_installedBundleIndex.values().toArray(
+                new Bundle[m_installedBundleIndex.size()]);
         }
-
-        Arrays.sort(bundles, m_comparator);
-
-        return bundles;
     }
 
     protected void addBundleListener(Bundle bundle, BundleListener l)
@@ -2884,7 +2857,7 @@ ex.printStackTrace();
             }
             
             return m_cache.getArchive(
-                bundle.getInfo().getBundleId()).getDataFile(s);
+                bundle.getBundleId()).getDataFile(s);
         }
         catch (Exception ex)
         {
@@ -3425,7 +3398,7 @@ ex.printStackTrace();
             Bundle[] bundles = getBundles();
             for (int i = 0; (bundles != null) && (i < bundles.length); i++)
             {
-                long id = ((FelixBundle) bundles[i]).getInfo().getBundleId();
+                long id = ((FelixBundle) bundles[i]).getBundleId();
                 String sym = (String) ((FelixBundle) bundles[i])
                     .getInfo().getCurrentHeader().get(Constants.BUNDLE_SYMBOLICNAME);
                 Version ver = Version.parseVersion((String) ((FelixBundle) bundles[i])
@@ -3601,7 +3574,7 @@ ex.printStackTrace();
         }
 
         // Remove the bundle from the cache.
-        m_cache.remove(m_cache.getArchive(bundle.getInfo().getBundleId()));
+        m_cache.remove(m_cache.getArchive(bundle.getBundleId()));
     }
 
     //
