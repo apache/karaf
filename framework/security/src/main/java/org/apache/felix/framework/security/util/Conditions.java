@@ -144,7 +144,6 @@ public final class Conditions
                 synchronized (m_conditionInfos)
                 {
                     condition = m_conditions[i];
-                    
                 }
                 
                 if (condition == null)
