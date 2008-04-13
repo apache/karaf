@@ -183,7 +183,7 @@ public class ContentLoaderImpl implements IContentLoader
 
         // Special case "/" so that it returns a root URLs for
         // each bundle class path entry...this isn't very
-        // clean or meaninful, but the Spring guys want it.
+        // clean or meaningful, but the Spring guys want it.
         if (name.equals("/"))
         {
             for (int i = 0; i < getClassPath().length; i++)
