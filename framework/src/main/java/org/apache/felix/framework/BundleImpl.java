@@ -27,6 +27,7 @@ import org.osgi.framework.*;
 
 class BundleImpl extends FelixBundle
 {
+    private final long m_id;
     private Felix m_felix = null;
     private BundleInfo m_info = null;
 
@@ -34,6 +35,7 @@ class BundleImpl extends FelixBundle
     {
         m_felix = felix;
         m_info = info;
+        m_id = info.getBundleId();
     }
 
     /* package private */ BundleInfo getInfo()
@@ -57,7 +59,7 @@ class BundleImpl extends FelixBundle
 
     public long getBundleId()
     {
-        return m_info.getBundleId();
+        return m_id;
     }
 
     public URL getEntry(String name)
