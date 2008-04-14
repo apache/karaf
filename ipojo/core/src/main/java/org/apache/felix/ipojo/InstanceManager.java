@@ -140,7 +140,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @throws ConfigurationException : occurs if the metadata are not correct
      */
     public void configure(Element metadata, Dictionary configuration) throws ConfigurationException {
-        m_className = metadata.getAttribute("className");
+        m_className = metadata.getAttribute("classname");
 
         // Add the name
         m_name = (String) configuration.get("name");

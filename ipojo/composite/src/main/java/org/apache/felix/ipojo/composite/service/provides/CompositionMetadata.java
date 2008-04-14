@@ -252,7 +252,7 @@ public class CompositionMetadata {
      */
     protected Element buildMetadata(String name) {
         Element elem = new Element("component", "");
-        Attribute className = new Attribute("className", m_name);
+        Attribute className = new Attribute("classname", m_name);
         Attribute factory = new Attribute("factory", "false");
         elem.addAttribute(className);
         elem.addAttribute(factory);

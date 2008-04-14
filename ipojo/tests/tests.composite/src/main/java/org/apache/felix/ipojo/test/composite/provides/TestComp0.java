@@ -72,6 +72,7 @@ public class TestComp0 extends OSGiTestCase {
         try {
             under = factory.createComponentInstance(props2);
         } catch(Exception e) {
+            e.printStackTrace();
             fail("Cannot create an instance : " + e.getMessage());
         }
     }

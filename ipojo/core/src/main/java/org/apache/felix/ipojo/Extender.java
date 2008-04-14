@@ -152,7 +152,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
 
         for (int i = 0; i < toRemove.size(); i++) {
             ManagedAbstractFactoryType mft = (ManagedAbstractFactoryType) toRemove.get(i);
-            m_logger.log(Logger.WARNING, "The factory type available: " + mft.m_type + " is no more available");
+            m_logger.log(Logger.INFO, "The factory type: " + mft.m_type + " is no more available");
             mft.m_bundle = null;
             mft.m_clazz = null;
             mft.m_created = null;

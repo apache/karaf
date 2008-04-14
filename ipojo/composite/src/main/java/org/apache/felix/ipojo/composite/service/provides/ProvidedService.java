@@ -112,10 +112,11 @@ public class ProvidedService implements DependencyStateListener {
         // Create the factory
         try {
             m_factory = new ComponentFactory(m_context, clazz, metadata);
+            m_factory.start();
         } catch (ConfigurationException e) {
             // Should not happen.
+            m_manager.getFactory().getLogger().log(Logger.ERROR, "A factory cannot be created", e);
         }
-        m_factory.start();
 
         try {
             Class spec = DependencyModel.loadSpecification(m_composition.getSpecificationMetadata().getName(), m_context);

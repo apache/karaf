@@ -34,13 +34,13 @@ public class CheckServiceHandler extends PrimitiveHandler implements CheckServic
 	ServiceRegistration sr;
 	boolean isValid;
 	int changes = 0;
-	static final String NAMESPACE = org.apache.felix.ipojo.test.handler.CheckServiceHandler.class.getName();
+	static final String NAMESPACE = "org.apache.felix.ipojo.test.handler.checkservice";
 	
 	Properties props = new Properties();
 
 	public void configure(Element metadata, Dictionary configuration) {
-		Element[] meta = metadata.getElements("Check", NAMESPACE);
-		if(meta.length == 0) { return;	}		
+		Element[] meta = metadata.getElements("check", NAMESPACE);
+		if(meta == null) { return;	}		
 		// Get handler props 
 		props.put("instance.name", configuration.get("name"));
 		if(configuration.get("csh.simple") != null) { props.put("Simple", configuration.get("csh.simple")); }

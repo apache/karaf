@@ -1,5 +1,5 @@
 <ipojo
-	xmlns:cs="org.apache.felix.ipojo.test.handler.CheckServiceHandler">
+	xmlns:cs="org.apache.felix.ipojo.test.handler.checkservice">
 	<component classname="org.apache.felix.ipojo.test.log.LogImpl"
 		factory="true" name="log">
 		<provides />
@@ -1077,7 +1077,7 @@
 	<handler
 		classname="org.apache.felix.ipojo.test.handler.CheckServiceHandler"
 		name="check"
-		namespace="org.apache.felix.ipojo.test.handler.CheckServiceHandler"
+		namespace="org.apache.felix.ipojo.test.handler.checkservice"
 		architecture="false">
 		<controller field="isValid" />
 	</handler>

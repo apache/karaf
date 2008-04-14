@@ -107,7 +107,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
      * @throws ConfigurationException occurs when the element describing the factory is malformed.
      */
     public void check(Element element) throws ConfigurationException {
-        m_classname = element.getAttribute("className");
+        m_classname = element.getAttribute("classname");
         if (m_classname == null) { throw new ConfigurationException("A component needs a class name : " + element); }
     }
 
@@ -215,7 +215,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
         if (name == null) { // No factory name, try with factory attribute
             name = m_componentMetadata.getAttribute("factory");
             if (name == null || name.equalsIgnoreCase("true") || name.equalsIgnoreCase("false")) { // Avoid boolean case
-                name = m_componentMetadata.getAttribute("className");
+                name = m_componentMetadata.getAttribute("classname");
             }
         }
         return name;
