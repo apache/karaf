@@ -304,5 +304,23 @@ public class Utils {
             return new Object[0];
         }
     }
+    
+    public static boolean contains(String string, String[] array) {
+        for (int i = 0; array != null && i < array.length; i++) {
+            if (array[i] != null  && array[i].equals(string)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean contains(int value, int[] array) {
+        for (int i = 0; array != null && i < array.length; i++) {
+            if (array[i] == value) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

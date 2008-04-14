@@ -304,8 +304,8 @@ public class ComponentDesc extends OSGiTestCase {
 		
 		String[] specs = (String[]) sr_foobarProvider.getProperty("component.providedServiceSpecifications");
 		assertEquals("Check component.providedServiceSpecifications length", specs.length, 2);
-		assertEquals("Check component.providedServiceSpecifications 1", FooService.class.getName(), specs[1]);
-		assertEquals("Check component.providedServiceSpecifications 2", BarService.class.getName(), specs[0]);
+		assertTrue("Check component.providedServiceSpecifications 1", Utils.contains(FooService.class.getName(), specs));
+		assertTrue("Check component.providedServiceSpecifications 2", Utils.contains(BarService.class.getName(), specs));
 		
 		PropertyDescription[] pd = (PropertyDescription[]) sr_foobarProvider.getProperty("component.properties");
 		assertEquals("Check component.properties length", pd.length, 0);
@@ -318,8 +318,8 @@ public class ComponentDesc extends OSGiTestCase {
 		
         Element[] specs2 = cd.getElements("provides");
         assertEquals("Check specs length", specs2.length, 2);
-        assertEquals("Check specs", FooService.class.getName(), specs2[1].getAttribute("specification"));
-        assertEquals("Check specs", BarService.class.getName(), specs2[0].getAttribute("specification"));
+        assertTrue("Check specs", containsSpecification(FooService.class.getName(), specs2));
+        assertTrue("Check specs", containsSpecification(BarService.class.getName(), specs2));
         
         Element[] pd2 = cd.getElements("property");
         assertNull("Check props null", pd2);
@@ -328,6 +328,15 @@ public class ComponentDesc extends OSGiTestCase {
         ComponentTypeDescription desc = (ComponentTypeDescription) sr_foobarProvider.getProperty("component.description");
 		assertNotNull("check description equality", desc);
 
+	}
+	
+	private boolean containsSpecification(String value, Element[] array) {
+	    for (int i = 0; array != null && i < array.length; i++) {
+            if (array[i] != null && array[i].containsAttribute("specification") && array[i].getAttribute("specification").equals(value)) {
+                return true;
+            }
+        }
+        return false;
 	}
 	
 	
