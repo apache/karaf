@@ -121,9 +121,10 @@ class ServiceReferenceImpl implements ServiceReference
         // Get the package.
         String pkgName =
             Util.getClassPackage(className);
-        IModule current = ((FelixBundle) requester).getInfo().getCurrentModule();
+        IModule requesterModule = 
+            ((FelixBundle) requester).getInfo().getCurrentModule();
         // Get package wiring from service requester.
-        IWire requesterWire = Util.getWire(current, pkgName);
+        IWire requesterWire = Util.getWire(requesterModule, pkgName);
 
         // There are three situations that may occur here:
         //   1. The requester does not have a wire for the package.
@@ -146,7 +147,9 @@ class ServiceReferenceImpl implements ServiceReference
         }
 
         // Get package wiring from service provider.
-        IWire providerWire = Util.getWire(current, pkgName);
+        IModule providerModule = 
+            ((FelixBundle) m_bundle).getInfo().getCurrentModule();
+        IWire providerWire = Util.getWire(providerModule, pkgName);
         
         // Case 2: Only include service reference if the service
         // object uses the same class as the requester.
@@ -160,7 +163,7 @@ class ServiceReferenceImpl implements ServiceReference
                 try
                 {
                     // Load the class from the requesting bundle.
-                    Class requestClass = current.getClass(className);
+                    Class requestClass = requesterModule.getClass(className);
                     // Get the service registration and ask it to check
                     // if the service object is assignable to the requesting
                     // bundle's class.
@@ -177,7 +180,7 @@ class ServiceReferenceImpl implements ServiceReference
                 // O.k. the provider is the exporter of the requester's package, now check
                 // if the requester is wired to the latest version of the provider, if so
                 // then allow else don't (the provider has been updated but not refreshed).
-                allow = current == requesterWire.getExporter();
+                allow = providerModule == requesterWire.getExporter();
             }
         }
         // Case 3: Include service reference if the wires have the

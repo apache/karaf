@@ -257,7 +257,7 @@ public class Parser
         switch (kind)
         {
             case SIMPLE :
-                if ("objectClass".equals(attr.toString()) && (op == '='))
+                if ((op == '=') && "objectClass".equalsIgnoreCase(attr.toString()))
                 {
                     program.add(new ObjectClassOperator((String) pieces.get(0)));
                     return true;
