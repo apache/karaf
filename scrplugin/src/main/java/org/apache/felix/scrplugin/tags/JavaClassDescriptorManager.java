@@ -80,7 +80,7 @@ public class JavaClassDescriptorManager {
     throws MojoFailureException, MojoExecutionException {
         this.log = log;
         this.project = project;
-        this.classloader = this.getCompileClassLoader(project);
+        this.classloader = this.getCompileClassLoader();
 
         // get all the class sources through qdox
         this.log.debug("Setting up QDox");
@@ -241,9 +241,9 @@ public class JavaClassDescriptorManager {
         return list;
     }
 
-    protected ClassLoader getCompileClassLoader(MavenProject project)
+    protected ClassLoader getCompileClassLoader()
     throws MojoFailureException {
-        List artifacts = project.getCompileArtifacts();
+        List artifacts = this.getProject().getCompileArtifacts();
         URL[] path = new URL[artifacts.size() + 1];
         int i = 0;
         for (Iterator ai=artifacts.iterator(); ai.hasNext(); ) {
