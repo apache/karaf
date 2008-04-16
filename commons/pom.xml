@@ -42,23 +42,20 @@
         <module>commons-attributes-compiler</module>
         <module>commons-beanutils</module>
         <module>commons-codec</module>
-        <module>commons-collections</module>
         <module>commons-configuration</module>
         <module>commons-digester</module>
         <module>commons-el</module>
         <module>commons-email</module>
         <module>commons-fileupload</module>
         <module>commons-httpclient</module>
-        <module>commons-io</module>
         <module>commons-jxpath</module>
-        <module>commons-lang</module>
         <module>commons-logging</module>
         <module>commons-validator</module>
         <module>dom4j</module>
         <module>ehcache</module>
         <module>hibernate</module>
         <module>hsqldb</module>
-	<module>jline</module>
+	    <module>jline</module>
         <module>jms</module>
         <!-- <module>jmxtools</module>  -->
         <module>jsp-api</module>
