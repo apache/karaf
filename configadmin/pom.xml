@@ -61,6 +61,7 @@
                         <Bundle-SymbolicName>
                             ${artifactId}
                         </Bundle-SymbolicName>
+                        <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
                         <Export-Package>
                             org.apache.felix.cm;
                             org.apache.felix.cm.file;version=1.0,

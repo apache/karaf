@@ -64,6 +64,7 @@
             <Bundle-Url>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</Bundle-Url>
             <Bundle-Source>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</Bundle-Source>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Service>org.osgi.service.obr.RepositoryAdmin</Export-Service>
           </instructions>
         </configuration>

@@ -78,6 +78,7 @@
             <Bundle-Name>MOSGi Bundles management tab for the JMX console</Bundle-Name>
             <Bundle-Description>MOSGi Bundles management tab for the JMX console</Bundle-Description>
 	    <Bundle-Activator>org.apache.felix.mosgi.managedelements.bundlesprobes.tab.BundlesProbesTabUI</Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Package>${pom.artifactId}</Export-Package>
           </instructions>
         </configuration>

@@ -78,6 +78,7 @@
             <Bundle-Description>MOSGi JMX MBean for OSGi gateway status</Bundle-Description>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 	    <Bundle-Activator>org.apache.felix.mosgi.managedelements.osgiprobes.OsgiProbes</Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Package>${pom.artifactId}</Export-Package>
           </instructions>
         </configuration>

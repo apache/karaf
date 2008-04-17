@@ -71,6 +71,7 @@
             <Bundle-Name>MOSGi JMX rmiregistry</Bundle-Name>
             <Bundle-Description>MOSGi JMX rmiregistry</Bundle-Description>
 	    <Bundle-Activator>org.apache.felix.mosgi.jmx.registry.mx4j.tools.naming.NamingService</Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Package>${pom.artifactId}.mx4j.tools.naming</Export-Package>
 	    <DynamicImport-Package>*</DynamicImport-Package>
           </instructions>

@@ -49,7 +49,7 @@
         <configuration>
           <instructions>
             <Bundle-Name>${pom.name}</Bundle-Name>
-            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Bundle-Author><![CDATA[Matteo Demuru <demuru@apache.org>,Francesco Furfari <furfari@apache.org>,Stefano "Kismet" Lenzi <lenzi@apache.org>]]></Bundle-Author>
             <Bundle-Description>
                	A library used to extend the integration between UPnP and OSGi that is not part of the standard. Also services that allow to change the beahviour of the UPnP Base Driver

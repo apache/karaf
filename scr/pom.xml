@@ -65,9 +65,7 @@
                         <Bundle-SymbolicName>
                             ${artifactId}
                         </Bundle-SymbolicName>
-                        <Bundle-Vendor>
-                            Apache Software Foundation
-                        </Bundle-Vendor>
+                        <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
                         <Bundle-Activator>
                             org.apache.felix.scr.impl.Activator
                         </Bundle-Activator>

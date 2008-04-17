@@ -65,6 +65,7 @@
                         <Bundle-SymbolicName>
                             ${artifactId}
                         </Bundle-SymbolicName>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
                         <Export-Package>
                             org.apache.felix.metatype,
                             org.osgi.service.metatype; version=1.1

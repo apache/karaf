@@ -91,6 +91,7 @@
             <Bundle-Description>MOSGi JMX-MX4J RMI Connector</Bundle-Description>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 	    <Bundle-Activator>org.apache.felix.mosgi.jmx.rmiconnector.RmiConnectorActivator</Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Package>org.apache.felix.mosgi.jmx.rmiconnector.mx4j.remote.provider.rmi </Export-Package>
 	    <Private-Package>${pom.artifactId}.*</Private-Package>
           </instructions>

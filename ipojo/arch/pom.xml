@@ -61,6 +61,7 @@
 						<Bundle-SymbolicName>
 							${pom.artifactId}
 						</Bundle-SymbolicName>
+             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
 						<Private-Package>
 							org.apache.felix.ipojo.arch
 						</Private-Package>

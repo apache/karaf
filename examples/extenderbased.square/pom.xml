@@ -57,6 +57,7 @@
             <Extension-Icon>org/apache/felix/example/extenderbased/square/square.png</Extension-Icon>
             <Extension-Class>org.apache.felix.example.extenderbased.square.Square</Extension-Class>
             <Private-Package>org.apache.felix.example.extenderbased.square.*</Private-Package>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
           </instructions>
         </configuration>
       </plugin>

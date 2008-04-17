@@ -52,7 +52,7 @@
           <instructions>
             <Bundle-Name>Service Binder</Bundle-Name>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Bundle-Vendor>Apache Felix</Bundle-Vendor>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <!--<Bundle-Version>1.1.2</Bundle-Version>-->
             <Bundle-Description>
               This bundle provides a mechanism to automate service dependency management.

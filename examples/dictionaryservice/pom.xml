@@ -47,7 +47,7 @@ under the License.
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Name>Example English Dictionary</Bundle-Name>
-            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Bundle-Description>
               A bundle that registersan English dictionary service.
             </Bundle-Description>

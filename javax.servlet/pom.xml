@@ -39,6 +39,7 @@
         <configuration>
           <instructions>
             <Bundle-Copyright>Copyright 1999,2005 The Apache Software Foundation</Bundle-Copyright>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Bundle-Category>servlet</Bundle-Category>
             <Export-Package>javax.servlet;specification-version="2.1",javax.servlet.http;specification-version="2.1"</Export-Package>
             <Import-Package>!javax.servlet.*,*</Import-Package>

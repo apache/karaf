@@ -53,6 +53,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Package>org.osgi.service.permissionadmin;-split-package:=merge-first, org.osgi.service.condpermadmin;-split-package:=merge-first</Export-Package>
             <Private-Package>org.apache.felix.framework.*</Private-Package>
             <Import-Package>!*</Import-Package>

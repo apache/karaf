@@ -64,7 +64,7 @@
 				<configuration>
 					<instructions>
 						<Bundle-Name>iPOJO Ant Task</Bundle-Name>
-						<Bundle-Vendor>Clement ESCOFFIER</Bundle-Vendor>
+                        <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
 						<Bundle-Description>
 							iPOJO Ant Task
 						</Bundle-Description>

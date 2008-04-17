@@ -55,7 +55,7 @@
             <Bundle-SymbolicName>org.apache.felix.dependencymanager</Bundle-SymbolicName>
             <Bundle-Name>Apache Felix Dependency Manager</Bundle-Name>
             <Bundle-Description>A bundle that provides a run-time service dependency manager.</Bundle-Description>
-            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Package>org.apache.felix.dependencymanager</Export-Package>
             <Import-Package>!org.apache.felix.dependencymanager,*</Import-Package>
           </instructions>

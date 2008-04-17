@@ -85,6 +85,7 @@
             <Bundle-Description>MOSGi JMX MBean for obr interaction</Bundle-Description>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 	    <Bundle-Activator>org.apache.felix.mosgi.managedelements.obrprobe.ObrProbe</Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Package>${pom.artifactId}</Export-Package>
           </instructions>
         </configuration>

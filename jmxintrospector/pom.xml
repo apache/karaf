@@ -59,6 +59,7 @@
                             org.objectweb.asm.util;resolution:=optional,
                             *
                         </Import-Package>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
                     </instructions>
                 </configuration>
             </plugin>

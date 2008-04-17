@@ -76,7 +76,8 @@
           <instructions>
             <Bundle-Name>MOSGi JMX MBean for OSGi bundles management</Bundle-Name>
             <Bundle-Description>MOSGi JMX MBean for OSGi bundles management</Bundle-Description>
-	    <Bundle-Activator>org.apache.felix.mosgi.managedelements.bundlesprobes.BundlesProbes</Bundle-Activator>
+   	    <Bundle-Activator>org.apache.felix.mosgi.managedelements.bundlesprobes.BundlesProbes</Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Package>${pom.artifactId}</Export-Package>
           </instructions>
         </configuration>

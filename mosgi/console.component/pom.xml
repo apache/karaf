@@ -66,6 +66,7 @@
             <Bundle-Description>MOSGi JMX Console main GUI component</Bundle-Description>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 	    <Bundle-Activator>org.apache.felix.mosgi.console.component.Activator</Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
 	    <Private-Package>${pom.artifactId}</Private-Package>
 
           </instructions>

@@ -66,6 +66,7 @@
             <Bundle-Description>MOSGi JMX remote logger</Bundle-Description>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 	    <Bundle-Activator>org.apache.felix.mosgi.jmx.remotelogger.Logger</Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
 	    <Private-Package>${pom.artifactId}.*</Private-Package>
           </instructions>
         </configuration>

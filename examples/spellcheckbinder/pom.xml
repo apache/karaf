@@ -66,7 +66,7 @@ under the License.
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Metadata-Location>metadata.xml</Metadata-Location>
             <Bundle-Name>Example Spell Check w/ Service Binder</Bundle-Name>
-            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Bundle-Description>
               A bundle that registers a spell checking service based on service binder.
             </Bundle-Description>

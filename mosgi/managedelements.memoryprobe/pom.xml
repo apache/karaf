@@ -84,6 +84,7 @@
             <Bundle-Description>MOSGi JMX MBean for memory supervision</Bundle-Description>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 	    <Bundle-Activator>org.apache.felix.mosgi.managedelements.memoryprobe.MemoryProbe</Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
 	    <Private-Package>${pom.artifactId}</Private-Package>
           </instructions>
         </configuration>

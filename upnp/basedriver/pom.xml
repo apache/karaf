@@ -67,9 +67,7 @@
             <Bundle-Activator>
               org.apache.felix.upnp.basedriver.Activator
             </Bundle-Activator>
-            <Bundle-Vendor>
-              Apache Software Foundation
-            </Bundle-Vendor>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Bundle-Author>
               <![CDATA[Matteo Demuru <demuru@apache.org>,Francesco Furfari <furfari@apache.org>,Stefano "Kismet" Lenzi <lenzi@apache.org>]]>
             </Bundle-Author>

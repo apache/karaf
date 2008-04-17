@@ -53,7 +53,7 @@ under the License.
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Name>Example Dynamic Dictionary Client</Bundle-Name>
-            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Bundle-Description>
               A client bundle with more complex requirements for the dictionary.
             </Bundle-Description>

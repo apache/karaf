@@ -54,6 +54,7 @@
           <instructions>
             <Bundle-Activator>${pom.artifactId}.Activator</Bundle-Activator>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Import-Service>
             	org.osgi.service.event.EventAdmin,
        		org.osgi.service.event.EventHandler

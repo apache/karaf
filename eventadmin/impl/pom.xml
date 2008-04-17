@@ -54,10 +54,11 @@
           <instructions>
             <Bundle-SymbolicName>
               ${pom.artifactId} 
-	    </Bundle-SymbolicName>
-  	    <Bundle-Activator>
+	        </Bundle-SymbolicName>
+  	        <Bundle-Activator>
               ${pom.artifactId}.impl.Activator
             </Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <DynamicImport-Package>
               org.osgi.service.log
             </DynamicImport-Package>

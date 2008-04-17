@@ -52,8 +52,8 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <bundleName>EventAdmin Bridge WireAdmin</bundleName>
-            <bundleVendor>Apache Software Foundation</bundleVendor>
+            <Bundle-Name>EventAdmin Bridge WireAdmin</Bundle-Name>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Bundle-Activator>${pom.artifactId}.Activator</Bundle-Activator>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Private-Package>${pom.artifactId}.*</Private-Package>

@@ -86,7 +86,7 @@ under the License.
               org.apache.felix.examples.dictionaryservice.itest.*
             </Private-Package>
             <Bundle-Name>Example Dictionary Integration Test</Bundle-Name>
-            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Bundle-Description>
               A bundle using the dictionary service to test it.
             </Bundle-Description>

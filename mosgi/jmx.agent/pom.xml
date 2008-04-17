@@ -73,6 +73,7 @@
             <Bundle-Description>MOSGi JMX-MX4J Agent Service</Bundle-Description>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 	    <Bundle-Activator>org.apache.felix.mosgi.jmx.agent.AgentActivator</Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Package>${pom.artifactId},
               org.apache.felix.mosgi.jmx.agent.mx4j.server,
               org.apache.felix.mosgi.jmx.agent.mx4j.server.interceptor,

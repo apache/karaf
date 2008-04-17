@@ -47,6 +47,7 @@ under the License.
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Name>Example Service Listener</Bundle-Name>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Bundle-Description>
               Bundle listening for service events: displays a message on startup and when service events occur.
             </Bundle-Description>

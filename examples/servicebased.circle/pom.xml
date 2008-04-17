@@ -55,6 +55,7 @@
           <instructions>
             <Private-Package>org.apache.felix.example.servicebased.circle.*</Private-Package>
             <Bundle-Activator>org.apache.felix.example.servicebased.circle.Activator</Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
           </instructions>
         </configuration>
       </plugin>

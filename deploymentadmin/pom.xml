@@ -60,11 +60,11 @@
           <instructions>
             <Bundle-SymbolicName>org.apache.felix.deploymentadmin</Bundle-SymbolicName>
             <Bundle-Activator>org.apache.felix.deploymentadmin.Activator</Bundle-Activator>
-	    <Bundle-Name>Apache Felix Deployment Admin</Bundle-Name>
+            <Bundle-Name>Apache Felix Deployment Admin</Bundle-Name>
             <Bundle-Description>A bundle that implements the Deployment Admin.</Bundle-Description>
-            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
-	    <Private-Package>org.apache.felix.deploymentadmin.spi</Private-Package>
-	    <Export-Package>org.apache.felix.deploymentadmin,org.osgi.service.deploymentadmin.*;version="1.0.0"</Export-Package>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
+            <Private-Package>org.apache.felix.deploymentadmin.spi</Private-Package>
+            <Export-Package>org.apache.felix.deploymentadmin,org.osgi.service.deploymentadmin.*;version="1.0.0"</Export-Package>
           </instructions>
         </configuration>
       </plugin>

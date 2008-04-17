@@ -78,6 +78,7 @@
             <Bundle-Description>MOSGi JMX-MX4J http connector</Bundle-Description>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 	    <Bundle-Activator>org.apache.felix.mosgi.jmx.httpconnector.HttpConnectorActivator</Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
 	    <Private-Package>${pom.artifactId}.*</Private-Package>
           </instructions>
         </configuration>

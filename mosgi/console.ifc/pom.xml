@@ -58,6 +58,7 @@
             <Bundle-Name>MOSGi JMX Console  Ifc</Bundle-Name>
             <Bundle-Description>MOSGi JMX Console Ifc</Bundle-Description>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Package>${pom.artifactId}</Export-Package>
           </instructions>
         </configuration>

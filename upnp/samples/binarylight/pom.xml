@@ -40,7 +40,7 @@
         <configuration>
           <instructions>
             <Bundle-Name>${pom.name}</Bundle-Name>
-            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Bundle-Author>Matteo Demuru &lt;demuru@apache.org&gt;,Francesco Furfari &lt;furfari@apache.org&gt;,Stefano "Kismet" Lenzi &lt;lenzi@apache.org&gt;</Bundle-Author>
             <Bundle-Description>Standardized BinaryLight DCPs to test UPnP Base Driver</Bundle-Description>
             <Bundle-SymbolicName>org.apache.felix.upnp.sample.binaryLight</Bundle-SymbolicName>

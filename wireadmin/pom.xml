@@ -52,7 +52,7 @@
         <configuration>
           <instructions>
             <Bundle-Name>WireAdmin</Bundle-Name>
-            <Bundle-Vendor>Apache Felix</Bundle-Vendor>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Bundle-Description>
               Implementation of the WireAdmin Service.
             </Bundle-Description>

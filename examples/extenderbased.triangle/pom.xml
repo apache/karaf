@@ -57,6 +57,7 @@
             <Extension-Icon>org/apache/felix/example/extenderbased/triangle/triangle.png</Extension-Icon>
             <Extension-Class>org.apache.felix.example.extenderbased.triangle.Triangle</Extension-Class>
             <Private-Package>org.apache.felix.example.extenderbased.triangle.*</Private-Package>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
           </instructions>
         </configuration>
       </plugin>

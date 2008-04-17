@@ -90,6 +90,7 @@
                         <Private-Package>
                             org.apache.felix.jmood.*
                         </Private-Package>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
                     </instructions>
                 </configuration>
             </plugin>

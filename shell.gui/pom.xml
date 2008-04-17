@@ -49,6 +49,7 @@
             <Bundle-Description>A simple plugin-oriented GUI shell.</Bundle-Description>
             <Bundle-Activator>org.apache.felix.shell.gui.impl.Activator</Bundle-Activator>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Package>org.apache.felix.shell.gui; specification-version="1.0.0"</Export-Package>
             <Private-Package>org.apache.felix.shell.gui.impl</Private-Package>
           </instructions>

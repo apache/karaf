@@ -67,6 +67,7 @@
             <Bundle-Description>A simple set of plugins for the ShellGUI bundle.</Bundle-Description>
             <Bundle-Activator>org.apache.felix.shell.gui.plugin.Activator</Bundle-Activator>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Service>org.apache.felix.shell.gui.Plugin</Export-Service>
             <Import-Service>org.apache.felix.shell.ShellService,org.apache.felix.bundlerepository.RepostioryAdmin</Import-Service>
             <Private-Package>org.apache.felix.shell.gui.plugin.*</Private-Package>

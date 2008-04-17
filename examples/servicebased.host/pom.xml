@@ -53,6 +53,7 @@
             <Export-Package>org.apache.felix.example.servicebased.host.service.*</Export-Package>
             <Private-Package>org.apache.felix.example.servicebased.host.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.apache.felix.main,org.osgi.*</Private-Package>
             <Bundle-Activator>org.apache.felix.example.servicebased.host.Activator</Bundle-Activator>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
           </instructions>
         </configuration>
       </plugin>

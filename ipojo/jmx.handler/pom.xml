@@ -63,6 +63,7 @@
 						<Bundle-SymbolicName>
 							ipojo.jmx.handler
 						</Bundle-SymbolicName>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
 					</instructions>
 				</configuration>
 			</plugin>

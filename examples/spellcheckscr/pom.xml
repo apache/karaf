@@ -69,7 +69,7 @@
             <Import-Package>*</Import-Package>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Description>${description}</Bundle-Description>
-            <Bundle-Vendor>Apache Software Foundation</Bundle-Vendor>
+            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Service-Component>OSGI-INF/component.xml</Service-Component>
           </instructions>
         </configuration>
