@@ -17,6 +17,7 @@
 package org.apache.geronimo.gshell.spring;
 
 import org.apache.geronimo.gshell.ansi.Renderer;
+import org.apache.geronimo.gshell.branding.Branding;
 import org.apache.geronimo.gshell.console.Console;
 import org.apache.geronimo.gshell.layout.LayoutManager;
 import org.apache.geronimo.gshell.layout.model.Node;
@@ -31,22 +32,35 @@ public class Prompter implements Console.Prompter {
     private Renderer renderer = new Renderer();
     private ShellInfo shellInfo;
     private Environment env;
+    private Branding branding;
 
     public Prompter(ShellInfo shellInfo, Environment env) {
-        this.shellInfo = shellInfo;
-        this.env = env;
+    	this.shellInfo = shellInfo;
+    	this.env = env;
     }
+
+    public Branding getBranding() {
+		return branding;
+	}
+
+	public void setBranding(Branding branding) {
+		this.branding = branding;
+	}
+
 
     public String prompt() {
         String userName = shellInfo.getUserName();
         String hostName = shellInfo.getLocalHost().getHostName();
 
         Node start = (Node) env.getVariables().get(LayoutManager.CURRENT_NODE);
-        String path = "/";
+        String path = "";
         if (start != null) {
             path = start.getPath();
+            path = path.replace('/', ' ');
         }
 
-        return renderer.render("@|bold " + userName + "|@" + hostName + ":@|bold " + path + "|> ");
+        // return renderer.render("@|bold " + userName + "|@" + hostName + ":@|bold " + path + "|> ");
+        // I think a simpler prompt would be best.
+        return renderer.render("@|bold "+branding.getName()+path+"|> ");
     }
 }

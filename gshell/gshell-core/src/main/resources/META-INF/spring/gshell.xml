@@ -83,6 +83,7 @@
     <bean id="prompter" class="org.apache.geronimo.gshell.spring.Prompter">
         <constructor-arg ref="shellInfo" />
         <constructor-arg ref="environment" />
+        <property name="branding" ref="branding" />
     </bean>
 
 </beans>
