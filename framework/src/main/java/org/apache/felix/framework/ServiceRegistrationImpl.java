@@ -253,7 +253,19 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
     private Object getFactoryUnchecked(Bundle bundle)
     {
-        return m_factory.getService(bundle, this);
+        Object svcObj = m_factory.getService(bundle, this);
+        if (svcObj != null)
+        {
+            for (int i = 0; i < m_classes.length; i++)
+            {
+                Class clazz = Util.loadClassUsingClass(svcObj.getClass(), m_classes[i]);
+                if ((clazz == null) || !clazz.isAssignableFrom(svcObj.getClass()))
+                {
+                    return null;
+                }
+            }
+        }
+        return svcObj;
     }
 
     private void ungetFactoryUnchecked(Bundle bundle, Object svcObj)
