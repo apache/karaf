@@ -1,3 +1,37 @@
+Changes from 1.0.3 to 1.0.4
+___________________________
+
+* [2008-04-18] Check that the returned object from a service factory is an 
+  instance of all classes named when the service was registered. (FELIX-540)
+* [2008-04-13] Fix an issue when logging messages while holding framework 
+  internal locks that could lead to a deadlock. For now we just disable 
+  logging to log services inside the framework. (FELIX-536)
+* [2008-04-13] Implemented various small performance improvments e.g.,
+  we now cache filters and create an index for objectclass to improve 
+  service lookup performance and don't use the BundleInfo to get the 
+  bundle id but the BundleImpl directly. Furthermore, we added an index to 
+  get bundles by id. 
+* [2008-04-04] Fix an NoClassDefFoundError when trying to query the 
+  framework classloader for whether a class is available or not. 
+* [2008-03-19] Don't try to resolve extension bundles and fix a 
+  classcastexception that could happen if more then one framework is around 
+  and both have extensions installed. Furthermore, make extension bundles 
+  use the system bundle context.
+* [2008-03-07] Bundle.getResource does now check for AdminPermission. 
+  (FELIX-150)
+* [2008-03-06] Make urlhandlers work when a handler factory is already set. 
+  Furthermore, it is now possible to have more then one framework running 
+  in more then one classloader. (FELIX-38).
+* [2008-03-05] Make LDAP filter reentrant.
+* [2008-02-29] Refactored the IContent abstraction from the module loader 
+  layer to provide more generic access to the content of the module. This 
+  makes it possible that a bundle's class path could span multiple module's, 
+  which will be necessary for fragments. (FELIX-29)
+* [2008-02-27] Applied a patch to disable the class loading diagnostic message
+  when the logger is not at the DEBUG level. (FELIX-500)
+* [2008-02-15] Modified the service registry to use more fine-grained locking 
+  to avoid callbacks to service factories while holding locks. (FELIX-489)
+
 Changes from 1.0.1 to 1.0.3
 ---------------------------
 
