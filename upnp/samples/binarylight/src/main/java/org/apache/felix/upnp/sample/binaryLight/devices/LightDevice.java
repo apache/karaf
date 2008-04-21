@@ -86,7 +86,7 @@ public class LightDevice implements UPnPDevice {
 		dictionary.put(UPnPDevice.MODEL_DESCRIPTION,"A BinaryLight device to test OSGi to UPnP service export");
 		dictionary.put(UPnPDevice.MODEL_NAME,"Lucciola");
 		dictionary.put(UPnPDevice.MODEL_NUMBER,"1.0");
-		dictionary.put(UPnPDevice.MODEL_URL,"http://felix.apache.org/site/upnp-example-binarylight.html");
+		dictionary.put(UPnPDevice.MODEL_URL,"http://felix.apache.org/site/upnp-examples.html");
 		String port = context.getProperty("org.osgi.service.http.port");
         InetAddress inet;
 		try {
