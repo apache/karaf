@@ -52,7 +52,7 @@ under the License.
       <modules>
           <module>eventlistener</module>
           <module>dictionaryservice</module>
-          <module>dictionaryservice.itest</module>
+<!--          <module>dictionaryservice.itest</module> -->
           <module>frenchdictionary</module>
           <module>dictionaryclient</module>
           <module>dictionaryclient2</module>
