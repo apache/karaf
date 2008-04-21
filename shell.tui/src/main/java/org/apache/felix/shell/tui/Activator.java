@@ -83,13 +83,10 @@ public class Activator implements BundleActivator
         // since one might already be available.
         initializeService();
 
-        synchronized (this)
-        {
-            // Start impl thread.
-            m_thread = new Thread(
-                m_runnable = new ShellTuiRunnable(),
-                "Felix Shell TUI");
-        }
+        // Start impl thread.
+        m_thread = new Thread(
+            m_runnable = new ShellTuiRunnable(),
+            "Felix Shell TUI");
         m_thread.start();
     }
 
@@ -110,19 +107,16 @@ public class Activator implements BundleActivator
 
     public void stop(BundleContext context)
     {
-        synchronized (this)
+        if (m_runnable != null)
         {
-            if (m_runnable != null)
-            {
-                m_runnable.stop();
-                m_thread.interrupt();
-            }
+            m_runnable.stop();
+            m_thread.interrupt();
         }
     }
 
     private class ShellTuiRunnable implements Runnable
     {
-        private volatile boolean stop = false;
+        private boolean stop = false;
 
         public void stop()
         {
@@ -133,21 +127,14 @@ public class Activator implements BundleActivator
         {
             String line = null;
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+
             while (!stop)
             {
                 System.out.print("-> ");
 
                 try
                 {
-                    while (!in.ready())
-                    {
-                        Thread.sleep(20);
-                    }
                     line = in.readLine();
-                }
-                catch (InterruptedException ex)
-                {
-                    continue;
                 }
                 catch (IOException ex)
                 {
