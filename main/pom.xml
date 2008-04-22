@@ -32,7 +32,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.framework</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.0.4</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -47,7 +47,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.0.1</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -58,7 +58,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell.tui</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.0.1</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -69,7 +69,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.bundlerepository</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.0.3</version>
       <exclusions>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
@@ -105,7 +105,7 @@
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Private-Package>org.apache.felix.main.*,org.apache.felix.moduleloader.*;-split-package:=merge-first,org.apache.felix.framework.*;-split-package:=merge-first,org.osgi.framework;-split-package:=merge-first,org.osgi.service.packageadmin;-split-package:=merge-first,org.osgi.service.startlevel;-split-package:=merge-first,org.osgi.service.url;-split-package:=merge-first,org.osgi.util.tracker;-split-package:=merge-first</Private-Package>
             <Import-Package>!*</Import-Package>
-            <Include-Resource>{src/main/resources/}</Include-Resource>
+            <Include-Resource>META-INF/LICENSE=LICENSE,META-INF/NOTICE=NOTICE,{src/main/resources/}</Include-Resource>
             <!-- Include these properties here because we want them
                  substituted in the default.properties resource file
                  so that we only have to maintain one set of properties
@@ -131,7 +131,7 @@
                 <artifactItem>
                   <groupId>${pom.groupId}</groupId>
                   <artifactId>org.apache.felix.framework</artifactId>
-                  <version>1.1.0-SNAPSHOT</version>
+                  <version>1.0.4</version>
                 </artifactItem>
               </artifactItems>
             </configuration>
@@ -147,7 +147,7 @@
                   <artifactItem>
                      <groupId>${pom.groupId}</groupId>
                      <artifactId>org.apache.felix.shell</artifactId>
-                     <version>1.1.0-SNAPSHOT</version>
+                     <version>1.0.1</version>
                      <type>jar</type>
                      <overWrite>true</overWrite>
                      <outputDirectory>${project.build.directory}/bundle</outputDirectory >
@@ -155,7 +155,7 @@
                    <artifactItem>
                      <groupId>${pom.groupId}</groupId>
                      <artifactId>org.apache.felix.shell.tui</artifactId>
-                     <version>1.1.0-SNAPSHOT</version>
+                     <version>1.0.1</version>
                      <type>jar</type>
                      <overWrite>true</overWrite>
                      <outputDirectory>${project.build.directory}/bundle</outputDirectory >
@@ -163,7 +163,7 @@
                    <artifactItem>
                      <groupId>${pom.groupId}</groupId>
                      <artifactId>org.apache.felix.bundlerepository</artifactId>
-                     <version>1.1.0-SNAPSHOT</version>
+                     <version>1.0.3</version>
                      <type>jar</type>
                      <overWrite>true</overWrite>
                      <outputDirectory>${project.build.directory}/bundle</outputDirectory >
