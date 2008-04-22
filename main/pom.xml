@@ -1,21 +1,3 @@
-<!--
- Licensed to the Apache Software Foundation (ASF) under one
- or more contributor license agreements.  See the NOTICE file
- distributed with this work for additional information
- regarding copyright ownership.  The ASF licenses this file
- to you under the Apache License, Version 2.0 (the
- "License"); you may not use this file except in compliance
- with the License.  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing,
- software distributed under the License is distributed on an
- "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- KIND, either express or implied.  See the License for the
- specific language governing permissions and limitations
- under the License.
--->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
  <parent>
     <groupId>org.apache.felix</groupId>
@@ -27,7 +9,7 @@
   <packaging>bundle</packaging>
   <name>Apache Felix Main</name>
   <artifactId>org.apache.felix.main</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>1.0.4</version>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
@@ -87,7 +69,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <property name="install.home" value="${basedir.absolutePath}"/>
+    <property name="install.home" value="${basedir.absolutePath}" />
   </properties>
   <build>
     <plugins>
@@ -150,7 +132,7 @@
                      <version>1.0.1</version>
                      <type>jar</type>
                      <overWrite>true</overWrite>
-                     <outputDirectory>${project.build.directory}/bundle</outputDirectory >
+                     <outputDirectory>${project.build.directory}/bundle</outputDirectory>
                    </artifactItem>
                    <artifactItem>
                      <groupId>${pom.groupId}</groupId>
@@ -158,7 +140,7 @@
                      <version>1.0.1</version>
                      <type>jar</type>
                      <overWrite>true</overWrite>
-                     <outputDirectory>${project.build.directory}/bundle</outputDirectory >
+                     <outputDirectory>${project.build.directory}/bundle</outputDirectory>
                    </artifactItem>
                    <artifactItem>
                      <groupId>${pom.groupId}</groupId>
@@ -166,7 +148,7 @@
                      <version>1.0.3</version>
                      <type>jar</type>
                      <overWrite>true</overWrite>
-                     <outputDirectory>${project.build.directory}/bundle</outputDirectory >
+                     <outputDirectory>${project.build.directory}/bundle</outputDirectory>
                    </artifactItem>
                  </artifactItems>
             </configuration>
@@ -180,17 +162,14 @@
             <phase>install</phase>
             <configuration>
               <tasks>
-                <delete dir="${basedir}/bin"/>
-                <mkdir dir="${basedir}/bin"/>
-                <delete dir="${basedir}/conf"/>
-                <mkdir dir="${basedir}/conf"/>
-                <delete dir="${basedir}/bundle"/>
-                <copy file="${basedir}/target/org.apache.felix.main-${pom.version}.jar"
-                     tofile="${basedir}/bin/felix.jar"/>
-                <copy file="${basedir}/target/classes/config.properties"
-                     todir="${basedir}/conf"/>
-                <move file="${basedir}/target/bundle"
-                     todir="${basedir}"/>
+                <delete dir="${basedir}/bin" />
+                <mkdir dir="${basedir}/bin" />
+                <delete dir="${basedir}/conf" />
+                <mkdir dir="${basedir}/conf" />
+                <delete dir="${basedir}/bundle" />
+                <copy file="${basedir}/target/org.apache.felix.main-${pom.version}.jar" tofile="${basedir}/bin/felix.jar" />
+                <copy file="${basedir}/target/classes/config.properties" todir="${basedir}/conf" />
+                <move file="${basedir}/target/bundle" todir="${basedir}" />
               </tasks>
             </configuration>
             <goals>
@@ -207,4 +186,10 @@
       </resource>
     </resources> 
   </build>
+
+  <scm>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.main-1.0.4</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.main-1.0.4</developerConnection>
+    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.main-1.0.4</url>
+  </scm>
 </project>
