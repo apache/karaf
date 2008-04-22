@@ -40,8 +40,8 @@ public class JunitCommand implements Command {
 
     private OSGiJunitRunner runner;
 
-    private List<String> getNamesFromTests(List<Test> list) {
-        List<String> names = new ArrayList<String>(list.size());
+    private List getNamesFromTests(List list) {
+        List names = new ArrayList(list.size());
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i) instanceof TestCase) {
                 names.add(((TestCase) list.get(i)).getName());
@@ -59,7 +59,7 @@ public class JunitCommand implements Command {
 
     public void execute(String line, PrintStream out, PrintStream err) {
         line = line.substring(getName().length()).trim();
-        List<TestResult> tr = null;
+        List tr = null;
         if (line.equals("all")) {
             if (runner.getTests() == null) {
                 err.println("No tests to execute");
@@ -71,12 +71,12 @@ public class JunitCommand implements Command {
         } else {
             try {
                 Long bundleId = new Long(line);
-                if (runner.getTests(bundleId) == null) {
+                if (runner.getTests(bundleId.longValue()) == null) {
                     err.println("No tests to execute");
                     return;
                 } else {
-                    out.println("Executing " + getNamesFromTests(runner.getTests(bundleId)));
-                    tr = runner.run(bundleId);
+                    out.println("Executing " + getNamesFromTests(runner.getTests(bundleId.longValue())));
+                    tr = runner.run(bundleId.longValue());
                 }
             } catch (NumberFormatException e) {
                 err.println("Unable to parse id " + line);
@@ -84,9 +84,9 @@ public class JunitCommand implements Command {
             }
         }
 
-        ListIterator<TestResult> it = tr.listIterator();
+        ListIterator it = tr.listIterator();
         while (it.hasNext()) {
-            TestResult result = it.next();
+            TestResult result = (TestResult) it.next();
             if (result.failureCount() != 0) {
                 TestFailure fail = (TestFailure) result.failures().nextElement();
                 out.println(fail.trace());

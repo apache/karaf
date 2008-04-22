@@ -46,8 +46,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
+					<source>1.4</source>
+					<target>1.4</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -70,6 +70,7 @@
 						<Export-Package>
 							org.apache.felix.ipojo.junit4osgi, junit.*
 						</Export-Package>
+						<Import-Package>!javax.swing*, *</Import-Package>
 						<Test-Suite>
 							org.apache.felix.ipojo.junit4osgi.test.TestTestCase,
 							org.apache.felix.ipojo.junit4osgi.test.TestOSGiTestCase,

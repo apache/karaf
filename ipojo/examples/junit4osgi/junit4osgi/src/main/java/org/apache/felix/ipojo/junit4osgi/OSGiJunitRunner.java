@@ -40,27 +40,27 @@ public interface OSGiJunitRunner {
      * Run the tests.
      * @return the list of TestResult.
      */
-    List<TestResult>  run();
+    List/*<TestResult>*/  run();
     
     /**
      * Run the tests from the given bundle.
      * @param bundleId : bundle containing the tests. 
-     * @return the list of the results.
+     * @return the list of the test results.
      */
-    List<TestResult> run(long bundleId);
+    List/*<TestResult>*/ run(long bundleId);
     
     /**
      * Get the list of available test suites.
-     * @return the list of test suites.
+     * @return the list of Test objects.
      */
-    List<Test> getTests();
+    List/*<Test>*/ getTests();
     
     /**
      * Get the tests from the given bundle. 
      * @param bundleId : bundle id.
-     * @return the list of test suites contained in the given bundle.
+     * @return the list of Test contained in the given bundle.
      */
-    List<Test> getTests(long bundleId);
+    List/*<Test>*/ getTests(long bundleId);
     
     /**
      * Run the given test.

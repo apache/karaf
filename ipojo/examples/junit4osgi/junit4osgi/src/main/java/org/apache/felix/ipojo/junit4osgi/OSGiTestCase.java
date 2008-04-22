@@ -39,7 +39,7 @@ public class OSGiTestCase extends TestCase {
      */
     static public void assertEquals(String message, double expected, double actual) {
         if (Double.compare(expected, actual) != 0) {
-            fail(formatEqualsMessage(message, expected, actual));
+            fail(formatEqualsMessage(message, new Double(expected), new Double(actual)));
         }
     }
 
@@ -103,7 +103,7 @@ public class OSGiTestCase extends TestCase {
         for (int i = 0; i < array.length; i++) {
             bytes[i] = new Byte(array[i]);
         }
-        fail(formatContainsMessage(message, bytes, txt));
+        fail(formatContainsMessage(message, bytes, new Integer(txt)));
     }
 
     static public void assertContains(String message, short[] array, int txt) {
@@ -116,7 +116,7 @@ public class OSGiTestCase extends TestCase {
         for (int i = 0; i < array.length; i++) {
             bytes[i] = new Short(array[i]);
         }
-        fail(formatContainsMessage(message, bytes, txt));
+        fail(formatContainsMessage(message, bytes, new Integer(txt)));
     }
 
     static public void assertContains(String message, int[] array, int txt) {
@@ -129,7 +129,7 @@ public class OSGiTestCase extends TestCase {
         for (int i = 0; i < array.length; i++) {
             bytes[i] = new Integer(array[i]);
         }
-        fail(formatContainsMessage(message, bytes, txt));
+        fail(formatContainsMessage(message, bytes, new Integer(txt)));
     }
 
     static public void assertContains(String message, long[] array, long txt) {
@@ -142,7 +142,7 @@ public class OSGiTestCase extends TestCase {
         for (int i = 0; i < array.length; i++) {
             bytes[i] = new Long(array[i]);
         }
-        fail(formatContainsMessage(message, bytes, txt));
+        fail(formatContainsMessage(message, bytes, new Long(txt)));
     }
 
     static public void assertContains(String message, float[] array, float txt) {
@@ -155,7 +155,7 @@ public class OSGiTestCase extends TestCase {
         for (int i = 0; i < array.length; i++) {
             bytes[i] = new Float(array[i]);
         }
-        fail(formatContainsMessage(message, bytes, txt));
+        fail(formatContainsMessage(message, bytes, new Float(txt)));
     }
 
     static public void assertContains(String message, double[] array, double txt) {
@@ -168,7 +168,7 @@ public class OSGiTestCase extends TestCase {
         for (int i = 0; i < array.length; i++) {
             bytes[i] = new Double(array[i]);
         }
-        fail(formatContainsMessage(message, bytes, txt));
+        fail(formatContainsMessage(message, bytes, new Double(txt)));
     }
 
     static public void assertContains(String message, char[] array, char txt) {
@@ -181,7 +181,7 @@ public class OSGiTestCase extends TestCase {
         for (int i = 0; i < array.length; i++) {
             bytes[i] = new Character(array[i]);
         }
-        fail(formatContainsMessage(message, bytes, txt));
+        fail(formatContainsMessage(message, bytes, new Character(txt)));
     }
 
 }

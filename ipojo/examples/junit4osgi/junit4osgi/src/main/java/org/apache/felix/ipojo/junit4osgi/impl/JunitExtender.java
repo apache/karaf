@@ -37,6 +37,7 @@ import junit.framework.TestSuite;
 import org.apache.felix.ipojo.junit4osgi.OSGiJunitRunner;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestSuite;
+import org.apache.felix.ipojo.parser.ParseUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -48,17 +49,17 @@ public class JunitExtender implements OSGiJunitRunner {
 
     public static final String SUITE_METHODNAME = "suite";
 
-    private Map<Bundle, List<Class>> m_suites = new HashMap<Bundle, List<Class>>();
+    private Map/*<Bundle, List<Class>>*/ m_suites = new HashMap/*<Bundle, List<Class>>*/();
 
     private ResultPrinter m_printer = new ResultPrinter(System.out);
 
     void onBundleArrival(Bundle bundle, String header) {
-        String[] tss = header.split(",");
+        String[] tss = ParseUtils.split(header, ",");
         for (int i = 0; i < tss.length; i++) {
             try {
                 if (tss[i].length() != 0) {
                     System.out.println("Loading " + tss[i]);
-                    Class<? extends Test> clazz = bundle.loadClass(tss[i].trim());
+                    Class/*<? extends Test>*/ clazz = bundle.loadClass(tss[i].trim());
                     addTestSuite(bundle, clazz);
                 }
             } catch (ClassNotFoundException e) {
@@ -67,10 +68,10 @@ public class JunitExtender implements OSGiJunitRunner {
         }
     }
 
-    private synchronized void addTestSuite(Bundle bundle, Class<? extends Test> test) {
-        List<Class> list = m_suites.get(bundle);
+    private synchronized void addTestSuite(Bundle bundle, Class/*<? extends Test>*/ test) {
+        List/*<Class>*/ list = (List) m_suites.get(bundle);
         if (list == null) {
-            list = new ArrayList<Class>();
+            list = new ArrayList/*<Class>*/();
             list.add(test);
             m_suites.put(bundle, list);
         } else {
@@ -90,15 +91,15 @@ public class JunitExtender implements OSGiJunitRunner {
         m_printer = new ResultPrinter(pw);
     }
 
-    public synchronized List<TestResult> run() {
-        List<TestResult> results = new ArrayList<TestResult>(m_suites.size());
-        Iterator<Entry<Bundle, List<Class>>> it = m_suites.entrySet().iterator();
+    public synchronized List/*<TestResult>*/ run() {
+        List/*<TestResult>*/ results = new ArrayList/*<TestResult>*/(m_suites.size());
+        Iterator/*<Entry<Bundle, List<Class>>>*/ it = m_suites.entrySet().iterator();
         while (it.hasNext()) {
-            Entry<Bundle, List<Class>> entry = it.next();
-            Bundle bundle = entry.getKey();
-            List<Class> list = m_suites.get(bundle);
+            Entry/*<Bundle, List<Class>>*/ entry = (Entry) it.next();
+            Bundle bundle = (Bundle) entry.getKey();
+            List/*<Class>*/ list = (List) m_suites.get(bundle);
             for (int i = 0; i < list.size(); i++) {
-                Test test = createTestFromClass(list.get(i), bundle);
+                Test test = createTestFromClass((Class)list.get(i), bundle);
                 TestResult tr = doRun(test);
                 results.add(tr);
             }
@@ -120,7 +121,7 @@ public class JunitExtender implements OSGiJunitRunner {
         return result;
     }
 
-    private Test createTestFromClass(Class<?> clazz, Bundle bundle) {
+    private Test createTestFromClass(Class/*<?>*/ clazz, Bundle bundle) {
         Method suiteMethod = null;
         boolean bc = false;
         try {
@@ -166,15 +167,15 @@ public class JunitExtender implements OSGiJunitRunner {
         return test;
     }
 
-    public synchronized List<Test> getTests() {
-        List<Test> results = new ArrayList<Test>();
-        Iterator<Entry<Bundle, List<Class>>> it = m_suites.entrySet().iterator();
+    public synchronized List/*<Test>*/ getTests() {
+        List/*<Test>*/ results = new ArrayList/*<Test>*/();
+        Iterator/*<Entry<Bundle, List<Class>>>*/ it = m_suites.entrySet().iterator();
         while (it.hasNext()) {
-            Entry<Bundle, List<Class>> entry = it.next();
-            Bundle bundle = entry.getKey();
-            List<Class> list = m_suites.get(bundle);
+            Entry/*<Bundle, List<Class>>*/ entry = (Entry) it.next();
+            Bundle bundle = (Bundle) entry.getKey();
+            List/*<Class>*/ list = (List) m_suites.get(bundle);
             for (int i = 0; i < list.size(); i++) {
-                Test test = createTestFromClass(list.get(i), bundle);
+                Test test = createTestFromClass((Class) list.get(i), bundle);
                 results.add(test);
             }
         }
@@ -185,16 +186,16 @@ public class JunitExtender implements OSGiJunitRunner {
         return doRun(test);
     }
 
-    public synchronized List<Test> getTests(long bundleId) {
-        Iterator<Entry<Bundle, List<Class>>> it = m_suites.entrySet().iterator();
+    public synchronized List/*<Test>*/ getTests(long bundleId) {
+        Iterator/*<Entry<Bundle, List<Class>>>*/ it = m_suites.entrySet().iterator();
         while (it.hasNext()) {
-            Entry<Bundle, List<Class>> entry = it.next();
-            Bundle bundle = entry.getKey();
+            Entry/*<Bundle, List<Class>>*/ entry = (Entry) it.next();
+            Bundle bundle = (Bundle) entry.getKey();
             if (bundle.getBundleId() == bundleId) {
-                List<Test> results = new ArrayList<Test>();
-                List<Class> list = m_suites.get(bundle);
+                List/*<Test>*/ results = new ArrayList/*<Test>*/();
+                List/*<Class>*/ list = (List) m_suites.get(bundle);
                 for (int i = 0; i < list.size(); i++) {
-                    Test test = createTestFromClass(list.get(i), bundle);
+                    Test test = createTestFromClass((Class) list.get(i), bundle);
                     results.add(test);
                 }
                 return results;
@@ -203,16 +204,16 @@ public class JunitExtender implements OSGiJunitRunner {
         return null;
     }
 
-    public synchronized List<TestResult> run(long bundleId) {
-        Iterator<Entry<Bundle, List<Class>>> it = m_suites.entrySet().iterator();
+    public synchronized List/*<TestResult>*/ run(long bundleId) {
+        Iterator/*<Entry<Bundle, List<Class>>>*/ it = m_suites.entrySet().iterator();
         while (it.hasNext()) {
-            Entry<Bundle, List<Class>> entry = it.next();
-            Bundle bundle = entry.getKey();
+            Entry/*<Bundle, List<Class>>*/ entry = (Entry) it.next();
+            Bundle bundle = (Bundle) entry.getKey();
             if (bundle.getBundleId() == bundleId) {
-                List<TestResult> results = new ArrayList<TestResult>();
-                List<Class> list = m_suites.get(bundle);
+                List/*<TestResult>*/ results = new ArrayList/*<TestResult>*/();
+                List/*<Class>*/ list = (List) m_suites.get(bundle);
                 for (int i = 0; i < list.size(); i++) {
-                    Test test = createTestFromClass(list.get(i), bundle);
+                    Test test = createTestFromClass((Class) list.get(i), bundle);
                     TestResult tr = doRun(test);
                     results.add(tr);
                 }

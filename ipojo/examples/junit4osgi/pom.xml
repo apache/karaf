@@ -23,6 +23,11 @@
   <version>0.7.6-SNAPSHOT</version>
   <name>Apache Felix iPOJO Junit4OSGi</name>
   <packaging>pom</packaging>
+  
+  <modules>
+		<module>junit4osgi</module>
+		<module>felix-command</module>
+  </modules>
 
   <profiles>
 	<profile>
@@ -31,8 +36,6 @@
 			<jdk>1.5</jdk>
 		</activation>
 		<modules>
-			<module>junit4osgi</module>
-			<module>felix-command</module>
 			<module>swing-runner</module>
 			<module>immediate-launcher</module>
 		</modules>
@@ -43,8 +46,6 @@
 			<jdk>1.6</jdk>
 		</activation>
 		<modules>
-			<module>junit4osgi</module>
-			<module>felix-command</module>
 			<module>swing-runner</module>
 			<module>immediate-launcher</module>
 		</modules>
