@@ -31,7 +31,7 @@
     <artifactId>org.apache.servicemix.kernel.gshell.obr</artifactId>
     <packaging>bundle</packaging>
     <version>1.0-m3-SNAPSHOT</version>
-    <name>ServiceMix Kernel :: GShell OBR Commands</name>
+    <name>Apache ServiceMix Kernel :: GShell OBR Commands</name>
 
     <description>
         Provides the OBR GShell commands

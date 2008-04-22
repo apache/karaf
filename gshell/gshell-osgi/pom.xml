@@ -31,7 +31,7 @@
     <artifactId>org.apache.servicemix.kernel.gshell.osgi</artifactId>
     <packaging>bundle</packaging>
     <version>1.0-m3-SNAPSHOT</version>
-    <name>ServiceMix Kernel :: GShell OSGi Commands</name>
+    <name>Apache ServiceMix Kernel :: GShell OSGi Commands</name>
 
     <description>
         Provides the OSGi GShell commands

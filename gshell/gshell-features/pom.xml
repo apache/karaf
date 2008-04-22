@@ -31,7 +31,7 @@
     <artifactId>org.apache.servicemix.kernel.gshell.features</artifactId>
     <packaging>bundle</packaging>
     <version>1.0-m3-SNAPSHOT</version>
-    <name>ServiceMix Kernel :: GShell Features</name>
+    <name>Apache ServiceMix Kernel :: GShell Features</name>
 
     <description>
         Provides Features in GShell

@@ -31,7 +31,7 @@
     <artifactId>org.apache.servicemix.kernel.main</artifactId>
     <packaging>bundle</packaging>
     <version>1.0-m3-SNAPSHOT</version>
-    <name>ServiceMix Kernel :: Main</name>
+    <name>Apache ServiceMix Kernel :: Main</name>
 
     <dependencies>
         <dependency>

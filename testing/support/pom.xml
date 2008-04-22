@@ -31,7 +31,7 @@
   <artifactId>org.apache.servicemix.kernel.testing.support</artifactId>
   <packaging>bundle</packaging>
   <version>1.0-m3-SNAPSHOT</version>
-  <name>ServiceMix Kernel :: Testing - Support</name>
+  <name>Apache ServiceMix Kernel :: Testing - Support</name>
 
   <dependencies>
       <dependency>
@@ -106,11 +106,6 @@
           <version>${geronimo.servlet.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.apache.geronimo.specs</groupId>
-          <artifactId>geronimo-stax-api_1.0_spec</artifactId>
-          <version>${geronimo.stax.version}</version>
-      </dependency>
-      <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.aopalliance-1.0</artifactId>
           <version>${pom.version}</version>
@@ -139,6 +134,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Import-Package>org.apache.felix*;resolution:=optional,*</Import-Package>
             <Export-Package>${pom.artifactId}</Export-Package>
           </instructions>
         </configuration>

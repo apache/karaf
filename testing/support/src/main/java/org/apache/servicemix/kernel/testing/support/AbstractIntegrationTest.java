@@ -30,7 +30,6 @@ import org.osgi.framework.ServiceListener;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.osgi.test.AbstractConfigurableBundleCreatorTests;
-import org.springframework.osgi.test.platform.Platforms;
 import org.springframework.osgi.test.provisioning.ArtifactLocator;
 import org.springframework.osgi.util.OsgiFilterUtils;
 import org.springframework.osgi.util.OsgiListenerUtils;
@@ -41,7 +40,15 @@ public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTe
 
     static {
         try {
+            File f = new File("target/smx4");
+            f.mkdirs();
+            System.setProperty("servicemix.home", f.getAbsolutePath());
+            System.setProperty("servicemix.base", f.getAbsolutePath());
+            System.setProperty("org.apache.servicemix.filemonitor.configDir", new File(f, "etc").getAbsolutePath());
+            System.setProperty("org.apache.servicemix.filemonitor.monitorDir", new File(f, "deploy").getAbsolutePath());
+            System.setProperty("org.apache.servicemix.filemonitor.generatedJarDir", new File(f, "data/generate-bundles").getAbsolutePath());
             System.setProperty("bundles.configuration.location", new File("src/test/conf").getAbsolutePath());
+            System.setProperty("org.osgi.vendor.framework", "org.apache.servicemix.kernel.testing.support");
             PropertyConfigurator.configure("target/test-classes/log4j.properties");
         } catch (Throwable t) {}
     }
@@ -54,7 +61,7 @@ public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTe
         if (logger.isTraceEnabled())
             logger.trace("system property [" + OSGI_FRAMEWORK_SELECTOR + "] has value=" + systemProperty);
 
-        return (systemProperty == null ? Platforms.FELIX : systemProperty);
+        return (systemProperty == null ? SmxKernelPlatform.class.getName() : systemProperty);
     }
 
     protected String getBundle(String groupId, String artifactId) {

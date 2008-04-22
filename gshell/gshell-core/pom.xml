@@ -31,7 +31,7 @@
     <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
     <packaging>bundle</packaging>
     <version>1.0-m3-SNAPSHOT</version>
-    <name>ServiceMix Kernel :: GShell Core</name>
+    <name>Apache ServiceMix Kernel :: GShell Core</name>
 
     <description>
         Provides the OSGi GShell integration
@@ -43,6 +43,7 @@
             com.thoughtworks.xstream*;resolution:=optional,
             junit.framework*;resolution:=optional,
             org.codehaus.plexus*;resolution:=optional,
+            org.apache.maven*;resolution:=optional,
             org.apache.mina*;resolution:=optional,
             *
         </gshell.osgi.import>

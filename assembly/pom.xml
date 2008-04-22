@@ -31,7 +31,7 @@
     <artifactId>apache-servicemix-kernel</artifactId>
     <packaging>pom</packaging>
     <version>1.0-m3-SNAPSHOT</version>
-    <name>ServiceMix Kernel :: Assembly</name>
+    <name>Apache ServiceMix Kernel :: Assembly</name>
 
     <dependencies>
         <dependency>
@@ -173,11 +173,6 @@
           <groupId>org.apache.geronimo.specs</groupId>
           <artifactId>geronimo-servlet_2.5_spec</artifactId>
           <version>${geronimo.servlet.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.geronimo.specs</groupId>
-          <artifactId>geronimo-stax-api_1.0_spec</artifactId>
-          <version>${geronimo.stax.version}</version>
       </dependency>
     </dependencies>
     <build>

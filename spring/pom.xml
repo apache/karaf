@@ -31,7 +31,7 @@
   <artifactId>org.apache.servicemix.kernel.spring</artifactId>
   <packaging>bundle</packaging>
   <version>1.0-m3-SNAPSHOT</version>
-  <name>ServiceMix Kernel :: Spring Deployer</name>
+  <name>Apache ServiceMix Kernel :: Spring Deployer</name>
 
   <description>This deployer transforms a plain spring xml file to a deployable bundle</description>
 

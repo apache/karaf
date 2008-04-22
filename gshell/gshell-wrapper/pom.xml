@@ -31,7 +31,7 @@
     <artifactId>org.apache.servicemix.kernel.gshell.wrapper</artifactId>
     <packaging>bundle</packaging>
     <version>1.0-m3-SNAPSHOT</version>
-    <name>ServiceMix Kernel :: GShell Service Wrapper</name>
+    <name>Apache ServiceMix Kernel :: GShell Service Wrapper</name>
 
     <description>
         Provides the Service Wrapper GShell integration

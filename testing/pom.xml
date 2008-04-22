@@ -31,7 +31,7 @@
     <artifactId>testing</artifactId>
     <packaging>pom</packaging>
     <version>1.0-m3-SNAPSHOT</version>
-    <name>ServiceMix Kernel :: Testing</name>
+    <name>Apache ServiceMix Kernel :: Testing</name>
 
     <modules>
         <module>depends-maven-plugin</module>

@@ -31,6 +31,7 @@ import org.apache.geronimo.gshell.layout.model.Node;
 import org.apache.geronimo.gshell.registry.DefaultCommandRegistry;
 import org.apache.geronimo.gshell.registry.DuplicateRegistrationException;
 import org.apache.geronimo.gshell.registry.NotRegisteredException;
+import org.apache.geronimo.gshell.registry.RegistryException;
 import org.apache.geronimo.gshell.shell.Environment;
 
 /**
@@ -54,7 +55,7 @@ public class SpringCommandRegistry extends DefaultCommandRegistry implements Lay
         this.env = env;
     }
 
-    public void register(final Command command, Map<String, ?> properties) throws DuplicateRegistrationException {
+    public void register(final Command command, Map<String, ?> properties) throws RegistryException {
         // Find command name
         String name = command.getId();
         if (name.lastIndexOf(':') >= 0) {
@@ -112,7 +113,7 @@ public class SpringCommandRegistry extends DefaultCommandRegistry implements Lay
         }
     }
 
-    public void unregister(final Command command, Map<String, ?> properties) throws NotRegisteredException {
+    public void unregister(final Command command, Map<String, ?> properties) throws RegistryException {
         // Find command name
         String name = command.getId();
         if (name.lastIndexOf(':') >= 0) {

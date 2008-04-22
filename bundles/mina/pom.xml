@@ -34,7 +34,7 @@
     <artifactId>org.apache.servicemix.bundles.mina-1.1.6</artifactId>
     <packaging>bundle</packaging>
     <version>1.0-m3-SNAPSHOT</version>
-    <name>ServiceMix OSGI Common Bundles: ${pkgArtifactId}-${pkgVersion}</name>
+    <name>Apache ServiceMix OSGI Common Bundles: ${pkgArtifactId}-${pkgVersion}</name>
     <description>
         This bundle simply wraps ${pkgArtifactId}-${pkgVersion}.jar.
     </description>
