@@ -318,7 +318,9 @@ public class Property implements FieldInterceptor {
         if (Character.TYPE.equals(type)) { return new Character(strValue.charAt(0)); }
 
         // Array :
-        if (type.isArray()) { return createArrayObject(type.getComponentType(), ParseUtils.parseArrays(strValue)); }
+        if (type.isArray()) {
+            return createArrayObject(type.getComponentType(), ParseUtils.parseArrays(strValue)); 
+        }
         // Else it is a neither a primitive type neither a String -> create
         // the object by calling a constructor with a string in argument.
         try {

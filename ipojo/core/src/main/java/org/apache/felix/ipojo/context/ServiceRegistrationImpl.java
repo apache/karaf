@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.InstanceManager;
@@ -155,7 +156,6 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 
     /**
      * Look for a property in the service properties.
-     * 
      * @param key : property key
      * @return the object associated with the key or null if the key is not
      * present.
@@ -179,6 +179,22 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
             return (String[]) m_list.toArray(new String[m_list.size()]);
         }
     }
+    
+    /**
+     * Gets the published properties.
+     * @return the dictionary containing each published properties.
+     */
+    protected Dictionary getProperties() {
+        synchronized (m_propMap) {
+            Dictionary dict = new Properties();
+            Iterator keys = m_propMap.keySet().iterator();
+            while (keys.hasNext()) {
+                String key = (String) keys.next();
+                dict.put(key, m_propMap.get(key));
+            }
+            return dict;
+        }
+    }
 
     /**
      * Get the service object.
@@ -196,7 +212,6 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 
     /**
      * Initialize properties.
-     * 
      * @param dict : service properties to publish.
      */
     private void initializeProperties(Dictionary dict) {

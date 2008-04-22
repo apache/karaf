@@ -200,8 +200,10 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
      * Stop all the instance managers.
      */
     public synchronized void stopping() {
-        m_tracker.close();
-        m_tracker = null;
+        if (m_tracker != null) {
+            m_tracker.close();
+            m_tracker = null;
+        }
         m_classLoader = null;
         m_clazz = null;
     }

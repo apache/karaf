@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.felix.ipojo.ConfigurationException;
+import org.apache.felix.ipojo.context.ServiceReferenceImpl;
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
@@ -240,10 +241,31 @@ public abstract class DependencyModel implements TrackerCustomizer {
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
      */
     public void addedService(ServiceReference ref) {
-        if ((m_filter == null || m_filter.match(ref)) && match(ref)) {
+        if (matchAgainstFilter(ref) && match(ref)) {
             manageArrival(ref);
         }
         // Do not store the service if it doesn't match.
+    }
+    
+    /**
+     * Check if the given service reference match the current filter.
+     * This method aims to avoid calling {@link Filter#match(ServiceReference)} 
+     * method when manipulating a composite reference. In fact, this method throws
+     * a {@link ClassCastException} on Equinox.
+     * @param ref : the service reference to check.
+     * @return true if the service reference matches.
+     */
+    private boolean matchAgainstFilter(ServiceReference ref) {
+        boolean match = true;
+        if (m_filter != null) {
+            if (ref instanceof ServiceReferenceImpl) {
+                // Can't use the match(ref) as it throw a class cast exception on Equinox.
+                match = m_filter.match(((ServiceReferenceImpl) ref).getProperties());
+            } else { // Non composite reference.
+                match = m_filter.match(ref);
+            }
+        }
+        return match;
     }
 
     /**
@@ -346,7 +368,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     public void modifiedService(ServiceReference ref, Object arg1) {
         if (m_matchingRefs.contains(ref)) {
             // It's a used service. Check if the service always match.
-            if (!(m_filter == null || m_filter.match(ref)) && match(ref)) {
+            if (!matchAgainstFilter(ref) && match(ref)) {
                 // The service does not match anymore. Call removedService.
                 manageDeparture(ref, arg1);
             } else {
@@ -354,7 +376,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
             }
         } else {
             // The service was not used. Check if it matches.
-            if ((m_filter == null || m_filter.match(ref)) && match(ref)) {
+            if (matchAgainstFilter(ref) && match(ref)) {
                 manageArrival(ref);
             }
             // Else, the service does not match.
@@ -522,7 +544,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
                     // Compute matching services.
                     List matching = new ArrayList();
                     for (int i = 0; i < refs.length; i++) {
-                        if (m_filter == null || m_filter.match(refs[i]) && match(refs[i])) {
+                        if (matchAgainstFilter(refs[i]) && match(refs[i])) {
                             matching.add(refs[i]);
                         }
                     }

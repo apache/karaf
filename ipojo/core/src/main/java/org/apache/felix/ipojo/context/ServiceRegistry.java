@@ -177,7 +177,8 @@ public class ServiceRegistry {
                 if (info.m_filter == null) {
                     info.m_listener.serviceChanged(event);
                 }
-                if (info.m_filter != null && info.m_filter.match(ref)) {
+                Dictionary props = ((ServiceReferenceImpl) ref).getProperties();
+                if (info.m_filter != null && info.m_filter.match(props)) {
                     info.m_listener.serviceChanged(event);
                 }
             }
@@ -210,15 +211,16 @@ public class ServiceRegistry {
                 boolean matched = false;
 
                 // If className is null, then look at filter only.
-                if ((className == null) && ((filter == null) || filter.match(reg.getReference()))) {
+                if ((className == null) && ((filter == null) || filter.match(reg.getProperties()))) {
                     matched = true;
                 } else if (className != null) {
                     // If className is not null, then first match the
                     // objectClass property before looking at the
                     // filter.
-                    String[] objectClass = (String[]) ((ServiceRegistrationImpl) reg).getProperty(Constants.OBJECTCLASS);
+                    Dictionary props = ((ServiceRegistrationImpl) reg).getProperties();
+                    String[] objectClass = (String[]) props.get(Constants.OBJECTCLASS);
                     for (int classIdx = 0; classIdx < objectClass.length; classIdx++) {
-                        if (objectClass[classIdx].equals(className) && ((filter == null) || filter.match(reg.getReference()))) {
+                        if (objectClass[classIdx].equals(className) && ((filter == null) || filter.match(props))) {
                             matched = true;
                             break;
                         }

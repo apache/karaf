@@ -210,6 +210,22 @@ public class ManifestMetadataParser {
         }
         return parser.m_elements[0];
     }
+    
+    /**
+     * Parse the metadata from the given header string.
+     * @param header : the header to parse
+     * @return Element : the root element resulting of the parsing
+     * @throws ParseException : if any error occurs
+     */
+    public static Element parseHeaderMetadata(String header) throws ParseException {
+        ManifestMetadataParser parser = new ManifestMetadataParser();
+        parser.addElement(new Element("iPOJO", ""));
+        parser.parseElements(header);
+        if (parser.m_elements.length != 1) {
+            throw new ParseException("Error in parsing, root element not found : " + header);
+        }
+        return parser.m_elements[0];
+    }
 
     /**
      * Parse the given string.

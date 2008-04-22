@@ -36,6 +36,10 @@ public final class ParseUtils {
      * @return the resulting string array
      */
     public static String[] parseArrays(String str) {
+        if (str.length() == 0) {
+            return new String[0];
+        }
+        
         // Remove { and }
         if (str.charAt(0) == '{' && str.charAt(str.length() - 1) == '}') {
             String internal = (str.substring(1, str.length() - 1)).trim();

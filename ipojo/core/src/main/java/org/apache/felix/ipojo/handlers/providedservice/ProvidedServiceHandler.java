@@ -506,7 +506,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             try {
                 all = computeInterfaces(serviceSpecification, parent, desc.getBundleContext().getBundle());
             } catch (ClassNotFoundException e) {
-                throw new ConfigurationException("A interface cannot be loaded : " + e.getMessage());
+                throw new ConfigurationException("An interface cannot be loaded : " + e.getMessage());
             }
             
             String serviceSpecificationStr = provides[i].getAttribute("interface");
@@ -540,7 +540,6 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             }
             
             specs.append('}');
-            
             provides[i].addAttribute(new Attribute("interface", specs.toString())); // Add interface attribute to avoid checking in the configure method
 
             Element[] props = provides[i].getElements("property");

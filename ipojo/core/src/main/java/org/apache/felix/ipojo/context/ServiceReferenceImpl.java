@@ -18,6 +18,8 @@
  */
 package org.apache.felix.ipojo.context;
 
+import java.util.Dictionary;
+
 import org.apache.felix.ipojo.ComponentInstance;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -86,6 +88,10 @@ public class ServiceReferenceImpl implements ServiceReference {
      */
     public String[] getPropertyKeys() {
         return m_registration.getPropertyKeys();
+    }
+    
+    public Dictionary getProperties() {
+        return m_registration.getProperties();
     }
 
 

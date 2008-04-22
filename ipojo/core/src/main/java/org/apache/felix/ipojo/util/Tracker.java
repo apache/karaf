@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.felix.ipojo.context.ServiceReferenceImpl;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -607,8 +608,15 @@ public class Tracker implements TrackerCustomizer {
             switch (event.getType()) {
                 case ServiceEvent.REGISTERED:
                 case ServiceEvent.MODIFIED:
-                    if (m_listenerFilter == null) { // user supplied filter 
-                        if (m_filter.match(reference)) {
+                    if (m_listenerFilter == null) { // user supplied filter
+                        boolean match = true;
+                        if (reference instanceof ServiceReferenceImpl) {
+                            // Can't use the match(ref) as it throw a class cast exception on Equinox.
+                            match = m_filter.match(((ServiceReferenceImpl) reference).getProperties());
+                        } else { // Non compute reference.
+                            match = m_filter.match(reference);
+                        }
+                        if (match) {
                             track(reference); // Arrival
                         } else {
                             untrack(reference); // Departure

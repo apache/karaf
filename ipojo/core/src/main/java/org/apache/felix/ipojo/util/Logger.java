@@ -244,7 +244,8 @@ public class Logger {
         
         // If null, look in bundle manifest
         if (level == null) {
-            level = (String) context.getBundle().getHeaders().get(IPOJO_LOG_LEVEL);
+            String key = IPOJO_LOG_LEVEL.replace('.', '-');
+            level = (String) context.getBundle().getHeaders().get(key);
         }
         
         if (level != null) {
