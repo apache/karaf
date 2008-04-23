@@ -277,8 +277,13 @@ public final class ObrDeploy extends AbstractMojo
 
     private void updateRemoteBundleMetadata( Artifact artifact, ObrUpdate update ) throws MojoExecutionException
     {
-        if ( !"bundle".equals( artifact.getType() ) || null == artifact.getFile() || artifact.getFile().isDirectory() )
+        if ( !"bundle".equals( artifact.getType() ) )
         {
+            return;
+        }
+        else if ( null == artifact.getFile() || artifact.getFile().isDirectory() )
+        {
+            getLog().error( "No artifact found, try \"mvn install bundle:deploy\"" );
             return;
         }
 
