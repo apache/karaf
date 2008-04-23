@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
@@ -88,6 +89,13 @@ public class BundleAllPlugin extends ManifestPlugin
      * @readonly
      */
     private List remoteRepositories;
+
+    /**
+     * Import-Package to be used when wrapping dependencies.
+     *
+     * @parameter expression="${wrapImportPackage}" default-value="*"
+     */
+    private String wrapImportPackage;
 
     /**
      * @component
@@ -331,7 +339,7 @@ public class BundleAllPlugin extends ManifestPlugin
         try
         {
             Map instructions = new HashMap();
-            instructions.put( Analyzer.EXPORT_PACKAGE, "*" );
+            instructions.put( Analyzer.IMPORT_PACKAGE, wrapImportPackage );
 
             project.getArtifact().setFile( getFile( artifact ) );
             File outputFile = getOutputFile( artifact );
@@ -347,7 +355,7 @@ public class BundleAllPlugin extends ManifestPlugin
                 //                    + " to the same file, try cleaning: " + outputFile );
             }
 
-            Analyzer analyzer = getAnalyzer( project, getClasspath( project ) );
+            Analyzer analyzer = getAnalyzer( project, instructions, new Properties(), getClasspath( project ) );
 
             Jar osgiJar = new Jar( project.getArtifactId(), project.getArtifact().getFile() );
 
