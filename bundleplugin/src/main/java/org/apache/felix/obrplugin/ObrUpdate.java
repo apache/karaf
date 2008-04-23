@@ -265,7 +265,7 @@ public class ObrUpdate
     {
         m_logger.info( "Writing OBR metadata" );
 
-        writeToFile( m_repositoryXml, m_repositoryDoc.getDocumentElement() );
+        writeToFile( m_repositoryXml, m_repositoryDoc );
     }
 
 
