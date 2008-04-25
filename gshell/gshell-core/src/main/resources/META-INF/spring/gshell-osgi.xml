@@ -54,6 +54,12 @@
       </osgi:service-properties>
     </osgi:service>
 
+    <osgi:service ref="history-cmd" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+      	<entry key="alias" value="history"/>
+      </osgi:service-properties>
+    </osgi:service>
+
     <osgi:service ref="info" interface="org.apache.geronimo.gshell.command.Command">
     </osgi:service>
 

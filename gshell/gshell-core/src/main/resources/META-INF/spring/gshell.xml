@@ -56,6 +56,7 @@
         <constructor-arg ref="terminal" />
         <constructor-arg ref="environment" />
         <constructor-arg ref="io" />
+        <constructor-arg ref="history" />
         <property name="prompter" ref="prompter" />
     </bean>
 
@@ -79,6 +80,10 @@
     </bean>
 
     <bean id="io" class="org.apache.geronimo.gshell.spring.ProxyIO" />
+
+    <bean id="history" class="org.apache.geronimo.gshell.console.FileHistory">
+        <constructor-arg ref="branding" />
+    </bean>
 
     <bean id="prompter" class="org.apache.geronimo.gshell.spring.Prompter">
         <constructor-arg ref="shellInfo" />

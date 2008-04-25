@@ -40,6 +40,10 @@
         <constructor-arg ref="branding" />
     </bean>
 
+    <bean id="history-cmd" class="org.apache.geronimo.gshell.commands.builtins.HistoryCommand">
+        <constructor-arg ref="history" />
+    </bean>
+
     <bean id="info" class="org.apache.geronimo.gshell.commands.builtins.InfoCommand">
         <constructor-arg ref="branding" />
     </bean>
