@@ -58,4 +58,10 @@ public @interface Component {
      * default: false
      */
     boolean propagation() default false;
+    
+    /**
+     * Set the Managed Service PID.
+     * default no PID (i.e. the managed service will not be exposed).
+     */
+    String managedservice() default "";
 }

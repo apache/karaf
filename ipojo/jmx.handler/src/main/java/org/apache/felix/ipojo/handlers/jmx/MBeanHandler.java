@@ -191,7 +191,7 @@ public class MBeanHandler extends PrimitiveHandler {
 
     /** 
      * getterCallback : call when a POJO member is modified by the MBean.
-     * @pojo : pojo object.
+     * @param pojo : pojo object.
      * @param fieldName : name of the modified field 
      * @param value     : old value of the field
      * @return          : new value of the field

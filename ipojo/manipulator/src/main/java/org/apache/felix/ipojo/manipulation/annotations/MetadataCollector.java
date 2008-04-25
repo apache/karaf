@@ -295,6 +295,16 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
          * Does the component propagate configuration to provided services?
          */
         private String m_propagation;
+        
+        /**
+         * Managed Service PID.
+         */
+        private String m_managedservice;
+        
+        /**
+         * Element properties.
+         */
+        private Element m_props;
 
         /**
          * Visit @component annotation attribute.
@@ -323,6 +333,10 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
                 m_propagation = arg1.toString();
                 return;
             }
+            if (arg0.equals("managedservice")) {
+                m_managedservice = arg1.toString();
+                return;
+            }
         }
 
         /**
@@ -347,10 +361,20 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
                 m_elem.addAttribute(new Attribute("immediate", m_immediate));
             }
             if (m_propagation != null) {
-                Element props = new Element("properties", "");
-                props.addAttribute(new Attribute("propagation", m_propagation));
-                getIds().put("properties", props);
-                getElements().put(props, null);
+                if (m_props == null) {
+                    m_props = new Element("properties", "");
+                    getElements().put(m_props, null);
+                    getIds().put("properties", m_props);
+                }
+                m_props.addAttribute(new Attribute("propagation", m_propagation));
+            }
+            if (m_managedservice != null) {
+                if (m_props == null) {
+                    m_props = new Element("properties", "");
+                    getElements().put(m_props, null);
+                    getIds().put("properties", m_props);
+                }
+                m_props.addAttribute(new Attribute("pid", m_managedservice));
             }
         }        
     }

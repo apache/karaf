@@ -40,11 +40,29 @@ public @interface Requires {
      */
     boolean optional() default false;
     
-    
     /**
      * Set the dependency id.
      * Default : empty
      */
     String id() default "";
-
+    
+    /**
+     * Enable / Disable nullable pattern.
+     * Default : true
+     */
+    boolean nullable() default true;
+    
+    /**
+     * Set the default-implementation to use if the dependency is optional,
+     * and no providers are available.
+     * Default : no default-implementation
+     */
+    String defaultimplementation() default "";
+    
+    /**
+     * Set the binding policy.
+     * Acceptable policy are dynamic, static and dynamic-priority.
+     * Default: dynamic.
+     */
+    String policy() default "dynamic";
 }

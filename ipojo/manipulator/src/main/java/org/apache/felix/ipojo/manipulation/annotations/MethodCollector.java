@@ -187,6 +187,11 @@ public class MethodCollector extends EmptyVisitor {
          * Bind or Unbind method?
          */
         private String m_type;
+        
+        /**
+         * Binding policy.
+         */
+        private String m_policy;
 
         /**
          * Constructor.
@@ -219,6 +224,10 @@ public class MethodCollector extends EmptyVisitor {
             }
             if (arg0.equals("specification")) {
                 m_specification = arg1.toString();
+                return;
+            }
+            if (arg0.equals("policy")) {
+                m_policy = arg1.toString();
                 return;
             }
             if (arg0.equals("id")) {
@@ -259,6 +268,9 @@ public class MethodCollector extends EmptyVisitor {
                 }
                 if (m_optional != null) {
                     req.addAttribute(new Attribute("optional", m_optional));
+                }
+                if (m_policy != null) {
+                    req.addAttribute(new Attribute("policy", m_policy));
                 }
                 if (m_id != null) {
                     req.addAttribute(new Attribute("id", m_id));

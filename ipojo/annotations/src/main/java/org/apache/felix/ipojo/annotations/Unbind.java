@@ -58,5 +58,12 @@ public @interface Unbind {
      * Default : empty.
      */
     String id() default "";
+    
+    /**
+     * Set the binding policy.
+     * Acceptable policy are dynamic, static and dynamic-priority.
+     * Default: dynamic.
+     */
+    String policy() default "dynamic";
 
 }

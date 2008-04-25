@@ -136,6 +136,21 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
         private String m_id;
         
         /**
+         * Binding policy.
+         */
+        private String m_policy;
+        
+        /**
+         * Default-Implementation attribute.
+         */
+        private String m_defaultImplementation;
+        
+        /**
+         * Enable or Disable Nullable pattern. 
+         */
+        private String m_nullable;
+        
+        /**
          * Constructor.
          * @param name : field name.
          */
@@ -156,6 +171,18 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
             }
             if (arg0.equals("optional")) {
                 m_optional = arg1.toString();
+                return;
+            }
+            if (arg0.equals("nullable")) {
+                m_nullable = arg1.toString();
+                return;
+            }
+            if (arg0.equals("policy")) {
+                m_policy = arg1.toString();
+                return;
+            }
+            if (arg0.equals("defaultimplementation")) {
+                m_defaultImplementation = arg1.toString();
                 return;
             }
             if (arg0.equals("specification")) {
@@ -197,6 +224,15 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
             }
             if (m_optional != null) {
                 req.addAttribute(new Attribute("optional", m_optional));
+            }
+            if (m_nullable != null) {
+                req.addAttribute(new Attribute("nullable", m_nullable));
+            }
+            if (m_defaultImplementation != null) {
+                req.addAttribute(new Attribute("default-implementation", m_defaultImplementation));
+            }
+            if (m_policy != null) {
+                req.addAttribute(new Attribute("policy", m_policy));
             }
             if (m_id != null) {
                 req.addAttribute(new Attribute("id", m_id));

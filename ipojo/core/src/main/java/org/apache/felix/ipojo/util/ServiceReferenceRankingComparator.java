@@ -70,9 +70,9 @@ public class ServiceReferenceRankingComparator implements Comparator {
                 }
 
             } else if (rank1 > rank2) {
-                return 1;
-            } else {
                 return -1;
+            } else {
+                return 1;
             }
 
         } else {

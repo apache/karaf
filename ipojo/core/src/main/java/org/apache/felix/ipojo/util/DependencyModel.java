@@ -112,7 +112,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     /**
      * Binding policy of the dependency.
      */
-    private int m_policy = DYNAMIC_BINDING_POLICY; // Is notas we have to handler policy change in a future version.
+    private int m_policy = DYNAMIC_BINDING_POLICY;
 
     /**
      * Service tracker used by this dependency.
@@ -460,7 +460,17 @@ public abstract class DependencyModel implements TrackerCustomizer {
      * @param ref : modified service reference.
      */
     public void onServiceModification(ServiceReference ref) {
-        // Do nothing by default.
+        if (m_policy == DYNAMIC_PRIORITY_BINDING_POLICY) {
+            // Check that the order has changed or not.
+            int indexBefore = m_matchingRefs.indexOf(ref);
+            Collections.sort(m_matchingRefs, m_comparator);
+            if (indexBefore != m_matchingRefs.indexOf(ref) && ! m_aggregate) {
+                // The order has changed during the sort.
+                onServiceDeparture((ServiceReference) m_matchingRefs.get(1));
+                onServiceArrival(ref);
+            }
+            
+        }
     }
 
     /**

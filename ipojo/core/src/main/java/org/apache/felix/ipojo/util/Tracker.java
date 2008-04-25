@@ -222,7 +222,6 @@ public class Tracker implements TrackerCustomizer {
         try {
             m_context.removeServiceListener(outgoing);
         } catch (IllegalStateException e) { //NOPMD
-            //System.err.println("Context stopped");
             /* In case the context was stopped. */
         }
         if (references != null) {
