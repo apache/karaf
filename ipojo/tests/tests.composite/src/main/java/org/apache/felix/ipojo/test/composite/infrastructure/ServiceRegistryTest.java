@@ -28,7 +28,7 @@ import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.context.ServiceRegistry;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
-import org.apache.felix.ipojo.test.scenarios.service.BarService;
+import org.apache.felix.ipojo.test.composite.service.BarService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;

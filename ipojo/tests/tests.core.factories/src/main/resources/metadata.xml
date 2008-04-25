@@ -1,0 +1,69 @@
+<ipojo>
+	<!-- Simple provider  -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="Factories-FooProviderType-1" architecture="true">
+		<provides />
+	</component>
+	
+	<!-- Provider providing 2 services -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
+		factory="Factories-FooBarProviderType-1" architecture="true">
+		<provides />
+	</component>
+	
+	<!-- Provider with dynamic property -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
+		name="Factories-FooProviderType-Dyn" architecture="true">
+		<provides>
+			<property name="int" field="intProp" value="2" />
+			<property name="boolean" field="boolProp" value="false" />
+			<property name="string" field="strProp" value="foo" />
+			<property name="strAProp" field="strAProp"
+				value="{foo, bar}" />
+			<property name="intAProp" field="intAProp" value="{ 1,2,3}" />
+		</provides>
+	</component>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		name="Factories-FooProviderType-2" architecture="true">
+		<provides>
+			<property name="int" type="int" value="2" />
+			<property name="long" type="long" value="40" />
+			<property name="string" type="java.lang.String" value="foo" />
+			<property name="strAProp" type="java.lang.String[]"
+				value="{foo, bar}" />
+			<property name="intAProp" type="int[]" value="{1,2,3}" />
+		</provides>
+	</component>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn2"
+		name="Factories-FooProviderType-Dyn2" factory="true" architecture="true">
+		<provides>
+			<property name="int" field="intProp" value="4" />
+			<property name="boolean" field="boolProp" />
+			<property name="string" field="strProp" />
+			<property name="strAProp" field="strAProp" />
+			<property name="intAProp" field="intAProp"
+				value="{1, 2,3 }" />
+		</provides>
+	</component>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="Factories-FooProviderType-3" architecture="true">
+		<provides>
+			<property name="foo" field="m_foo" />
+			<property name="bar" field="m_bar" />
+			<property name="baz" type="java.lang.String" />
+		</provides>
+		<properties propagation="true">
+			<property name="foo" field="m_foo" />
+			<property name="bar" field="m_bar" />
+		</properties>
+	</component>
+</ipojo>

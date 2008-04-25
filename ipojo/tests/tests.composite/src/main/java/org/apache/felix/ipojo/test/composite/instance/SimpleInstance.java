@@ -27,8 +27,8 @@ import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.test.composite.service.FooService;
 import org.apache.felix.ipojo.test.composite.util.Utils;
-import org.apache.felix.ipojo.test.scenarios.service.FooService;
 import org.osgi.framework.ServiceReference;
 
 public class SimpleInstance extends OSGiTestCase {
@@ -39,8 +39,8 @@ public class SimpleInstance extends OSGiTestCase {
 	
 	
 	public void setUp() {
-        fooFactory1 = (ComponentFactory) Utils.getFactoryByName(context, "FooProviderType-1");
-        fooFactory2 = (ComponentFactory) Utils.getFactoryByName(context, "FooProviderType-Dyn2");
+        fooFactory1 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooProviderType-1");
+        fooFactory2 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooProviderType-Dyn2");
         compoFactory = (ComponentFactory) Utils.getFactoryByName(context, "composite.inst.1");
 		Factory fact = Utils.getFactoryByName(context, "composite.empty");
 		Properties props = new Properties();
@@ -59,14 +59,15 @@ public class SimpleInstance extends OSGiTestCase {
 	
 	public void testCreation() {
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("name", "under-A");
 		ComponentInstance under = null;
 		try {
 			under = compoFactory.createComponentInstance(props);
 		} catch(Exception e) {
 		    e.printStackTrace();
 			fail("Cannot instantiate under from " + compoFactory.getName() + " -> " + e.getMessage());
-		}
+		}      
+		
 		assertTrue("Check instance validity", under.getState() == ComponentInstance.VALID);
 		under.dispose();
 	}
@@ -203,9 +204,9 @@ public class SimpleInstance extends OSGiTestCase {
 		assertEquals("Check instance name" , id.getName(), "under");
 		assertEquals("Check component type name" , id.getComponentDescription().getName(), "composite.bar.1");
 		
-		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(context, "FooBarProviderType-1");
-		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(context, "FooBarProviderType-2");
-		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(context, "FooBarProviderType-3");
+		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-1");
+		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-2");
+		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-3");
 		
 		fact1.stop();
 		assertTrue("Check instance validity - 2", under.getState() == ComponentInstance.VALID);

@@ -1,0 +1,94 @@
+<ipojo>
+	<!-- Simple provider  used for manipulation analysis -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="Manipulation-FooProviderType-1" architecture="true">
+		<provides />
+	</component>
+	
+	<!-- Non lazzy service provider, to check instantiation -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="Manipulation-ImmediateFooProviderType" immediate="true"
+		architecture="true">
+		<provides />
+	</component>
+	
+	<!-- Provider providing 2 services -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
+		factory="Manipulation-FooBarProviderType-1" architecture="true">
+		<provides />
+	</component>
+	
+	<!-- Provider with dynamic property -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
+		name="Manipulation-FooProviderType-Dyn" architecture="true">
+		<provides>
+			<property name="int" field="intProp" value="2" />
+			<property name="boolean" field="boolProp" value="false" />
+			<property name="string" field="strProp" value="foo" />
+			<property name="strAProp" field="strAProp"
+				value="{foo, bar}" />
+			<property name="intAProp" field="intAProp" value="{ 1,2,3}" />
+		</provides>
+	</component>
+	
+	<!-- Manipulation -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.Manipulation23Tester"
+		factory="Manipulation-PrimitiveManipulationTester" architecture="true">
+		<provides />
+	</component>
+
+	<!-- Manipulation with numbers -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.A123.Manipulation23Tester"
+		factory="Manipulation-PrimitiveManipulationTesterA" architecture="true">
+		<provides />
+	</component>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="Manipulation-SimpleMultipleCheckServiceProvider" architecture="true">
+		<requires field="fs" />
+		<provides />
+	</component>
+	
+	<!-- Type checking different creation policy -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="Manipulation-FooProviderType-1-Sing" factory-method="singleton"
+		architecture="true">
+		<provides />
+	</component>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="Manipulation-FooProviderType-1-Sev" factory-method="several"
+		architecture="true">
+		<provides />
+	</component>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="Manipulation-FooProviderType-1-SingM" factory-method="singleton"
+		architecture="true">
+		<provides factory="method" />
+	</component>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="Manipulation-FooProviderType-1-SevM" factory-method="several"
+		architecture="true">
+		<provides factory="method" />
+	</component>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="Manipulation-ImmediateFooProviderTypeSingleton" immediate="true"
+		factory-method="singleton" architecture="true">
+		<provides />
+	</component>
+</ipojo>

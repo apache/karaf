@@ -1,0 +1,783 @@
+<ipojo>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="FooProviderType-1" architecture="true">
+		<provides />
+	</component>
+	
+	<!--  Simple Dependencies -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="SimpleCheckServiceProvider" architecture="true">
+		<requires field="fs" />
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="VoidCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="voidBind" />
+			<callback type="unbind" method="voidUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="ObjectCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="RefCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="BothCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="DoubleCheckServiceProvider" architecture="true">
+		<requires>
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<requires field="fs" />
+		<provides />
+	</component>
+
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="MObjectCheckServiceProvider" architecture="true">
+		<requires>
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="MRefCheckServiceProvider" architecture="true">
+		<requires
+			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="MBothCheckServiceProvider" architecture="true">
+		<requires>
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<!-- Simple & Optional Dependencies -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="SimpleOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" />
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="SimpleOptionalNoNullableCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" nullable="false" />
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="VoidOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true">
+			<callback type="bind" method="voidBind" />
+			<callback type="unbind" method="voidUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="VoidOptionalNoNullableCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" nullable="false">
+			<callback type="bind" method="voidBind" />
+			<callback type="unbind" method="voidUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="ObjectOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="ObjectOptionalNoNullableCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" nullable="false">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="RefOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="RefOptionalNoNullableCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" nullable="false">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="BothOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="BothOptionalNoNullableCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" nullable="false">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="MObjectOptionalCheckServiceProvider" architecture="true">
+		<requires optional="true">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="MRefOptionalCheckServiceProvider" architecture="true">
+		<requires
+			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			optional="true">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="MBothOptionalCheckServiceProvider" architecture="true">
+		<requires
+			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			optional="true">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<!-- Simple & Optional Dependencies with default-implementation -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="DISimpleOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true"
+			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl" />
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="DIVoidOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true"
+			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
+			<callback type="bind" method="voidBind" />
+			<callback type="unbind" method="voidUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="DIObjectOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true"
+			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="DIRefOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true"
+			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="DIBothOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true"
+			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="DIMObjectOptionalCheckServiceProvider" architecture="true">
+		<requires optional="true"
+			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="DIMRefOptionalCheckServiceProvider" architecture="true">
+		<requires
+			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			optional="true"
+			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="DIMBothOptionalCheckServiceProvider" architecture="true">
+		<requires
+			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			optional="true"
+			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<!--  Multiple Dependencies -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="SimpleMultipleCheckServiceProvider" architecture="true">
+		<requires field="fs" />
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="VoidMultipleCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="voidBind" />
+			<callback type="unbind" method="voidUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="ObjectMultipleCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="RefMultipleCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="BothMultipleCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodMultipleCheckService"
+		factory="MObjectMultipleCheckServiceProvider" architecture="true">
+		<requires aggregate="true">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodMultipleCheckService"
+		factory="MRefMultipleCheckServiceProvider" architecture="true">
+		<requires
+			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			aggregate="true">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodMultipleCheckService"
+		factory="MBothMultipleCheckServiceProvider" architecture="true">
+		<requires aggregate="true">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<!-- Multiple & Optional Dependencies -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="SimpleOptionalMultipleCheckServiceProvider"
+		architecture="true">
+		<requires field="fs" optional="true" />
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="VoidOptionalMultipleCheckServiceProvider"
+		architecture="true">
+		<requires field="fs" optional="true">
+			<callback type="bind" method="voidBind" />
+			<callback type="unbind" method="voidUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="ObjectOptionalMultipleCheckServiceProvider"
+		architecture="true">
+		<requires field="fs" optional="true">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="RefOptionalMultipleCheckServiceProvider"
+		architecture="true">
+		<requires field="fs" optional="true">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodMultipleCheckService"
+		factory="MObjectOptionalMultipleCheckServiceProvider"
+		architecture="true">
+		<requires aggregate="true" optional="true">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodMultipleCheckService"
+		factory="MRefOptionalMultipleCheckServiceProvider"
+		architecture="true">
+		<requires
+			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			aggregate="true" optional="true">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<!-- Static Dependencies -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="StaticSimpleCheckServiceProvider" architecture="true">
+		<requires field="fs" policy="static" />
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="StaticVoidCheckServiceProvider" architecture="true">
+		<requires field="fs" policy="static">
+			<callback type="bind" method="voidBind" />
+			<callback type="unbind" method="voidUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="StaticObjectCheckServiceProvider" architecture="true">
+		<requires field="fs" policy="static">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="StaticRefCheckServiceProvider" architecture="true">
+		<requires field="fs" policy="static">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="StaticBothCheckServiceProvider" architecture="true">
+		<requires field="fs" policy="static">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="StaticMObjectCheckServiceProvider" architecture="true">
+		<requires policy="static">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="StaticMRefCheckServiceProvider" architecture="true">
+		<requires
+			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			policy="static">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="StaticMBothCheckServiceProvider" architecture="true">
+		<requires policy="static">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<!-- Static Simple & Optional Dependencies -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="StaticSimpleOptionalCheckServiceProvider"
+		architecture="true">
+		<requires field="fs" optional="true" policy="static" />
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="StaticVoidOptionalCheckServiceProvider"
+		architecture="true">
+		<requires field="fs" optional="true" policy="static">
+			<callback type="bind" method="voidBind" />
+			<callback type="unbind" method="voidUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="StaticObjectOptionalCheckServiceProvider"
+		architecture="true">
+		<requires field="fs" optional="true" policy="static">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="StaticRefOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" policy="static">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="StaticBothOptionalCheckServiceProvider"
+		architecture="true">
+		<requires field="fs" optional="true" policy="static">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="StaticMObjectOptionalCheckServiceProvider"
+		architecture="true">
+		<requires optional="true" policy="static">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="StaticMRefOptionalCheckServiceProvider"
+		architecture="true">
+		<requires
+			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			optional="true" policy="static">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		factory="StaticMBothOptionalCheckServiceProvider"
+		architecture="true">
+		<requires
+			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			optional="true" policy="static">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<!--  Static Multiple Dependencies -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="StaticSimpleMultipleCheckServiceProvider"
+		architecture="true">
+		<requires field="fs" policy="static" />
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="StaticVoidMultipleCheckServiceProvider"
+		architecture="true">
+		<requires field="fs" policy="static">
+			<callback type="bind" method="voidBind" />
+			<callback type="unbind" method="voidUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="StaticObjectMultipleCheckServiceProvider"
+		architecture="true">
+		<requires field="fs" policy="static">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="StaticRefMultipleCheckServiceProvider" architecture="true">
+		<requires field="fs" policy="static">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		factory="StaticBothMultipleCheckServiceProvider"
+		architecture="true">
+		<requires field="fs" policy="static">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodMultipleCheckService"
+		factory="StaticMObjectMultipleCheckServiceProvider"
+		architecture="true">
+		<requires aggregate="true" policy="static">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodMultipleCheckService"
+		factory="StaticMRefMultipleCheckServiceProvider"
+		architecture="true">
+		<requires
+			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			aggregate="true" policy="static">
+			<callback type="bind" method="refBind" />
+			<callback type="unbind" method="refUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MethodMultipleCheckService"
+		factory="StaticMBothMultipleCheckServiceProvider"
+		architecture="true">
+		<requires aggregate="true" policy="static">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+	
+	<!--  Simple Filter Dependencies -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FilterCheckProvider"
+		factory="SimpleFilterCheckServiceProvider" architecture="true">
+		<provides>
+			<property field="m_toto" name="toto" value="A" />
+		</provides>
+	</component>
+
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FilterCheckSubscriber"
+		factory="SimpleFilterCheckServiceSubscriber" architecture="true">
+		<requires field="m_foo" filter="(toto=B)" id="id1">
+			<callback type="bind" method="Bind" />
+			<callback type="unbind" method="Unbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FilterCheckSubscriber"
+		factory="SimpleFilterCheckServiceSubscriber2" architecture="true">
+		<requires field="m_foo" id="id2">
+			<callback type="bind" method="Bind" />
+			<callback type="unbind" method="Unbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<!--  Optional Simple Filter Dependencies -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FilterCheckSubscriber"
+		factory="OptionalSimpleFilterCheckServiceSubscriber"
+		architecture="true">
+		<requires field="m_foo" filter="(toto=B)" id="id1"
+			optional="true">
+			<callback type="bind" method="Bind" />
+			<callback type="unbind" method="Unbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FilterCheckSubscriber"
+		factory="OptionalSimpleFilterCheckServiceSubscriber2"
+		architecture="true">
+		<requires field="m_foo" id="id2" optional="true">
+			<callback type="bind" method="Bind" />
+			<callback type="unbind" method="Unbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<!-- Aggregate filter Dependencies-->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleFilterCheckSubscriber"
+		factory="MultipleFilterCheckServiceSubscriber" architecture="true">
+		<requires field="m_foo" filter="(toto=B)" id="id1">
+			<callback type="bind" method="Bind" />
+			<callback type="unbind" method="Unbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleFilterCheckSubscriber"
+		factory="MultipleFilterCheckServiceSubscriber2" architecture="true">
+		<requires field="m_foo" id="id2">
+			<callback type="bind" method="Bind" />
+			<callback type="unbind" method="Unbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<!--  Optional Aggregate Filter Dependencies -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleFilterCheckSubscriber"
+		factory="OptionalMultipleFilterCheckServiceSubscriber"
+		architecture="true">
+		<requires field="m_foo" filter="(toto=B)" id="id1"
+			optional="true">
+			<callback type="bind" method="Bind" />
+			<callback type="unbind" method="Unbind" />
+		</requires>
+		<provides />
+	</component>
+
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.MultipleFilterCheckSubscriber"
+		factory="OptionalMultipleFilterCheckServiceSubscriber2"
+		architecture="true">
+		<requires field="m_foo" id="id2" optional="true">
+			<callback type="bind" method="Bind" />
+			<callback type="unbind" method="Unbind" />
+		</requires>
+		<provides />
+	</component>
+	
+	
+	<!-- Dynamic-Priority -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.RankedFooProviderType1"
+		factory="RankedFooProviderType" architecture="true">
+		<provides>
+			<property field="m_grade" name="service.ranking"/>
+		</provides>
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.DynCheckServiceProvider"
+		factory="DPSimpleCheckServiceProvider" architecture="true">
+		<requires field="fs" policy="dynamic-priority" />
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.DynCheckServiceProvider"
+		factory="DPObjectCheckServiceProvider" architecture="true">
+		<requires field="fs" policy="dynamic-priority">
+			<callback type="bind" method="objectBind" />
+			<callback type="unbind" method="objectUnbind" />
+		</requires>
+		<provides />
+	</component>
+</ipojo>

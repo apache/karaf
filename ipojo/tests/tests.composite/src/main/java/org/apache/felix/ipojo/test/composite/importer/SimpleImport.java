@@ -24,8 +24,8 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.test.composite.service.FooService;
 import org.apache.felix.ipojo.test.composite.util.Utils;
-import org.apache.felix.ipojo.test.scenarios.service.FooService;
 import org.osgi.framework.ServiceReference;
 
 public class SimpleImport extends OSGiTestCase {
@@ -34,7 +34,7 @@ public class SimpleImport extends OSGiTestCase {
 	Factory fooProvider;
 
 	public void setUp() {
-		fooProvider = Utils.getFactoryByName(context, "FooProviderType-1");
+		fooProvider = Utils.getFactoryByName(context, "COMPO-FooProviderType-1");
 		assertNotNull("Check fooProvider availability", fooProvider);
 		
 		Properties p = new Properties();

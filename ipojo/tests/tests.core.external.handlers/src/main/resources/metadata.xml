@@ -1,0 +1,24 @@
+<ipojo
+	xmlns:cs="org.apache.felix.ipojo.test.handler.checkservice">
+	<handler
+		classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceHandler"
+		name="check"
+		namespace="org.apache.felix.ipojo.test.handler.checkservice"
+		architecture="false">
+		<controller field="isValid" />
+	</handler>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="HANDLER-HandlerTester" architecture="true">
+		<cs:check />
+	</component>
+	<instance name="HandlerTest-2" component="HANDLER-HandlerTester">
+		<property name="csh.simple" value="Simple" />
+		<property name="csh.map">
+			<property name="a" value="a" />
+			<property name="b" value="b" />
+			<property name="c" value="c" />
+		</property>
+	</instance>
+	
+</ipojo>

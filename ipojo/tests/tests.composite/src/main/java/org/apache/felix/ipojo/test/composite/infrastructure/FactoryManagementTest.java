@@ -30,8 +30,8 @@ import org.apache.felix.ipojo.UnacceptableConfiguration;
 import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.test.composite.service.CheckService;
 import org.apache.felix.ipojo.test.composite.util.Utils;
-import org.apache.felix.ipojo.test.scenarios.service.CheckService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -217,7 +217,7 @@ public class FactoryManagementTest extends OSGiTestCase {
 		
 		ServiceContext sc2 = Utils.getServiceContext(empty2);
 		
-		Factory fact1 = Utils.getFactoryByName(sc2, "SimpleCheckServiceProvider");
+		Factory fact1 = Utils.getFactoryByName(sc2, "COMPO-SimpleCheckServiceProvider");
 		Properties props = new Properties();
 		props.put("name", "client");
 		ComponentInstance client = null;
@@ -225,7 +225,7 @@ public class FactoryManagementTest extends OSGiTestCase {
 			client = fact1.createComponentInstance(props);
 		} catch (Exception e) { e.printStackTrace(); fail("Cannot instantiate the client : " + e.getMessage()); }
 		
-		Factory fact2 = Utils.getFactoryByName(sc2, "FooProviderType-1");
+		Factory fact2 = Utils.getFactoryByName(sc2, "COMPO-FooProviderType-1");
 		Properties props2 = new Properties();
 		props2.put("name", "provider");
 		ComponentInstance provider = null;

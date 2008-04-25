@@ -23,9 +23,10 @@ import java.util.Properties;
 import org.apache.felix.ipojo.ComponentFactory;
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.ServiceContext;
+import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.test.composite.service.FooService;
 import org.apache.felix.ipojo.test.composite.util.Utils;
-import org.apache.felix.ipojo.test.scenarios.service.FooService;
 import org.osgi.framework.ServiceReference;
 
 public class ConfigurableInstantiation extends OSGiTestCase {
@@ -45,13 +46,14 @@ public class ConfigurableInstantiation extends OSGiTestCase {
 	
 	public void testAccept() {
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("name", "under-A");
 		ComponentInstance under = null;
 		try {
 			under = acceptF.createComponentInstance(props);
 		} catch(Exception e) {
 			fail("Cannot instantiate under : " + e.getMessage());
 		}
+		
 		assertTrue("Check instance validity", under.getState() == ComponentInstance.VALID);
 		ServiceContext sc = Utils.getServiceContext(under);
 		ServiceReference ref = sc.getServiceReference(FooService.class.getName());

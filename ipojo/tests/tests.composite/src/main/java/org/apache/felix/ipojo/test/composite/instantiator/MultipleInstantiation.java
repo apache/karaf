@@ -27,8 +27,8 @@ import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.test.composite.service.BarService;
 import org.apache.felix.ipojo.test.composite.util.Utils;
-import org.apache.felix.ipojo.test.scenarios.service.BarService;
 import org.osgi.framework.ServiceReference;
 
 public class MultipleInstantiation extends OSGiTestCase {
@@ -128,9 +128,9 @@ public class MultipleInstantiation extends OSGiTestCase {
 		ServiceContext sc = Utils.getServiceContext(under);
 		assertTrue("Check instance validity - 1", under.getState() == ComponentInstance.VALID);
 		
-		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(context, "FooBarProviderType-1");
-		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(context, "FooBarProviderType-2");
-		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(context, "FooBarProviderType-3");
+		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-1");
+		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-2");
+		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-3");
 		
 		fact1.stop();
 		assertTrue("Check instance validity - 2", under.getState() == ComponentInstance.VALID);
@@ -166,9 +166,9 @@ public class MultipleInstantiation extends OSGiTestCase {
 		assertTrue("Check instance validity - 1", under.getState() == ComponentInstance.VALID);
 		ServiceContext sc2 = Utils.getServiceContext(under);
 		
-		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(context, "FooBarProviderType-1");
-		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(context, "FooBarProviderType-2");
-		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(context, "FooBarProviderType-3");
+		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-1");
+		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-2");
+		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-3");
 		
 		fact1.stop();
 		assertTrue("Check instance validity - 2", under.getState() == ComponentInstance.VALID);
@@ -211,9 +211,9 @@ public class MultipleInstantiation extends OSGiTestCase {
 		assertEquals("Check instance name" , id.getName(), "under");
 		assertEquals("Check component type name" , id.getComponentDescription().getName(), "composite.bar.2");
 		
-		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(context, "FooBarProviderType-1");
-		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(context, "FooBarProviderType-2");
-		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(context, "FooBarProviderType-3");
+		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-1");
+		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-2");
+		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-3");
 		
 		fact1.stop();
 		assertTrue("Check instance validity - 2", under.getState() == ComponentInstance.VALID);

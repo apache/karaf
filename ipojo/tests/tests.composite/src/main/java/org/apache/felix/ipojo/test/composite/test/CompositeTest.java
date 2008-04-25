@@ -24,10 +24,10 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.test.composite.service.BazService;
+import org.apache.felix.ipojo.test.composite.service.CheckService;
+import org.apache.felix.ipojo.test.composite.service.FooService;
 import org.apache.felix.ipojo.test.composite.util.Utils;
-import org.apache.felix.ipojo.test.scenarios.service.BazService;
-import org.apache.felix.ipojo.test.scenarios.service.CheckService;
-import org.apache.felix.ipojo.test.scenarios.service.FooService;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 

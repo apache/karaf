@@ -1,26 +1,98 @@
 <ipojo xmlns:cs="org.apache.felix.ipojo.test.composite.handler.CheckServiceHandler">
+	<!-- Used component type -->
+	<component
+		className="org.apache.felix.ipojo.test.composite.component.FooProviderType1"
+		factory="COMPO-FooProviderType-1" architecture="true">
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.composite.component.FooProviderType1"
+		name="COMPO-FooProviderType-2" architecture="true">
+		<provides>
+			<property name="int" type="int" value="2" />
+			<property name="long" type="long" value="40" />
+			<property name="string" type="java.lang.String" value="foo" />
+			<property name="strAProp" type="java.lang.String[]"
+				value="{foo, bar}" />
+			<property name="intAProp" type="int[]" value="{1,2,3}" />
+		</provides>
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.composite.component.FooProviderTypeDyn"
+		name="COMPO-FooProviderType-Dyn" architecture="true">
+		<provides>
+			<property name="int" field="intProp" value="2" />
+			<property name="boolean" field="boolProp" value="false" />
+			<property name="string" field="strProp" value="foo" />
+			<property name="strAProp" field="strAProp"
+				value="{foo, bar}" />
+			<property name="intAProp" field="intAProp" value="{ 1,2,3}" />
+		</provides>
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.composite.component.FooProviderTypeDyn2"
+		name="COMPO-FooProviderType-Dyn2" factory="true" architecture="true">
+		<provides>
+			<property name="int" field="intProp" value="4" />
+			<property name="boolean" field="boolProp" />
+			<property name="string" field="strProp" />
+			<property name="strAProp" field="strAProp" />
+			<property name="intAProp" field="intAProp"
+				value="{1, 2,3 }" />
+		</provides>
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.composite.component.CheckServiceProvider"
+		factory="COMPO-SimpleCheckServiceProvider" architecture="true">
+		<requires field="fs" />
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
+		factory="COMPO-FooBarProviderType-1" architecture="true">
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
+		factory="COMPO-FooBarProviderType-2" architecture="true">
+		<provides
+			interface="{org.apache.felix.ipojo.test.composite.service.FooService, org.apache.felix.ipojo.test.composite.service.BarService }" />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
+		factory="COMPO-FooBarProviderType-3" architecture="true">
+		<provides
+			interface="{org.apache.felix.ipojo.test.composite.service.FooService}">
+			<property name="baz" type="java.lang.String" value="foo" />
+		</provides>
+		<provides
+			interface="{org.apache.felix.ipojo.test.composite.service.BarService}">
+			<property name="baz" type="java.lang.String" value="bar" />
+		</provides>
+	</component>
+	
 	<!--  Composite -->
 	<composite name="composite.empty" factory="true" architecture="true">
 	</composite>
 	
 	<composite name="composite.bar.1" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.scenarios.service.BarService"/>
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService"/>
 	</composite>
 	
 	<composite name="composite.bar.2" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.scenarios.service.BarService" aggregate="true"/>
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService" aggregate="true"/>
 	</composite>
 	
 	<composite name="composite.bar.3" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.scenarios.service.BarService" optional="true"/>
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService" optional="true"/>
 	</composite>
 	
 	<composite name="composite.bar.4" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.scenarios.service.FooService" aggregate="true" optional="true"/>
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.FooService" aggregate="true" optional="true"/>
 	</composite>
 	
 	<composite name="composite.bar.5-accept" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.scenarios.service.FooService">
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.FooService">
 			<property name="boolean" value="true"/>
 			<property name="string" value="foo"/>
 			<property name="strAprop" value="{foo, bar, baz}"/>
@@ -29,7 +101,7 @@
 	</composite>
 	
 	<composite name="composite.bar.5-refuse1" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.scenarios.service.BarService">
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService">
 			<property name="foo" value="bar"/>
 			<property name="boolean" value="true"/>
 			<property name="string" value="foo"/>
@@ -39,15 +111,15 @@
 	</composite>
 	
 	<composite name="composite.bar.5-refuse2" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.scenarios.service.BarService">
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService">
 			<property name="string" value="foo"/>
 			<property name="strAprop" value="{foo, bar, baz}"/>
 		</subservice>
 	</composite>
 	
 	<composite name="composite.inst.1" factory="true" architecture="true">
-		<instance component="FooProviderType-1" /> <!-- name="FooProv"  -->
-		<instance component="FooProviderType-Dyn2">
+		<instance component="COMPO-FooProviderType-1" /> <!-- name="FooProv"  -->
+		<instance component="COMPO-FooProviderType-Dyn2">
 			<property name="boolean" value="true"/>
 			<property name="string" value="foo"/>
 			<property name="strAProp" value="{a,b,c}"/>
@@ -55,23 +127,23 @@
 	</composite>
 	
 	<composite name="composite.requires.1" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.scenarios.service.FooService" scope="composite"/>
+		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.FooService" scope="composite"/>
 	</composite>
 	
 	<composite name="composite.requires.2" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.scenarios.service.FooService" aggregate="true" scope="composite"/>
+		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.FooService" aggregate="true" scope="composite"/>
 	</composite>
 	
 	<composite name="composite.requires.3" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.scenarios.service.FooService" optional="true" scope="composite"/>
+		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.FooService" optional="true" scope="composite"/>
 	</composite>
 	
 	<composite name="composite.requires.4" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.scenarios.service.FooService" optional="true" aggregate="true" scope="composite"/>
+		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.FooService" optional="true" aggregate="true" scope="composite"/>
 	</composite>
 	
 	<composite name="composite.requires.5" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.scenarios.service.FooService" filter="(&amp;(int=2)(long=40))" scope="composite"/>
+		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.FooService" filter="(&amp;(int=2)(long=40))" scope="composite"/>
 	</composite>
 	
 	<component className="org.apache.felix.ipojo.test.composite.component.BazProviderType1" factory="BazProviderType" scope="composite">
@@ -79,28 +151,28 @@
 	</component>
 	
 	<composite name="composite.export.1" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.scenarios.service.BazService" aggregate="true" optional="true" filter="(!(instance.name=export))" scope="composite"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.scenarios.service.BazService"/>
+		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.BazService" aggregate="true" optional="true" filter="(!(instance.name=export))" scope="composite"/>
+		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService"/>
 	</composite>
 	
 	<composite name="composite.export.2" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.scenarios.service.BazService" scope="composite" aggregate="true" optional="true" filter="(!(instance.name=export))"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.scenarios.service.BazService" optional="true"/>
+		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.BazService" scope="composite" aggregate="true" optional="true" filter="(!(instance.name=export))"/>
+		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService" optional="true"/>
 	</composite>
 	
 	<composite name="composite.export.3" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.scenarios.service.BazService" scope="composite" aggregate="true" optional="true" filter="(!(instance.name=export))"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.scenarios.service.BazService" aggregate="true"/>
+		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.BazService" scope="composite" aggregate="true" optional="true" filter="(!(instance.name=export))"/>
+		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService" aggregate="true"/>
 	</composite>
 	
 	<composite name="composite.export.4" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.scenarios.service.BazService" aggregate="true" optional="true" filter="(!(instance.name=export))" scope="composite"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.scenarios.service.BazService" aggregate="true" optional="true"/>
+		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.BazService" aggregate="true" optional="true" filter="(!(instance.name=export))" scope="composite"/>
+		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService" aggregate="true" optional="true"/>
 	</composite>
 	
 	<composite name="composite.export.5" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.scenarios.service.BazService" aggregate="true" optional="true" filter="(!(instance.name=export))" scope="composite"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.scenarios.service.BazService" filter="(instance.name=foo1)"/>
+		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.BazService" aggregate="true" optional="true" filter="(!(instance.name=export))" scope="composite"/>
+		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService" filter="(instance.name=foo1)"/>
 	</composite>
 	
 	<component className="org.apache.felix.ipojo.test.composite.component.Baz2CheckProvider" factory="Baz2CheckProvider" architecture="true">
@@ -109,27 +181,27 @@
 	</component>
 
 	<composite name="composite.test.3" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.scenarios.service.BazService" aggregate="true" filter="(factory.name=BazProviderType)"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.scenarios.service.BazService"/>
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BazService" aggregate="true" filter="(factory.name=BazProviderType)"/>
+		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService"/>
 	</composite>
 	
 	<composite name="composite.test.2" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.scenarios.service.CheckService" filter="(factory.name=Baz2CheckProvider)"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.scenarios.service.CheckService"/>
-		<subservice action="import" specification="org.apache.felix.ipojo.test.scenarios.service.BazService" scope="composite"/>
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.CheckService" filter="(factory.name=Baz2CheckProvider)"/>
+		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.CheckService"/>
+		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.BazService" scope="composite"/>
 	</composite>
 	
 	<composite name="composite.test.1" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.scenarios.service.BazService" filter="(factory.name=composite.test.3)" />
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.scenarios.service.CheckService" filter="(factory.name=composite.test.2)"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.scenarios.service.CheckService"/>
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BazService" filter="(factory.name=composite.test.3)" />
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.CheckService" filter="(factory.name=composite.test.2)"/>
+		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.CheckService"/>
 	</composite>
 
 	<composite name="composite.instantiator" architecture="true">
-				<subservice action="instantiate" specification="org.apache.felix.ipojo.test.scenarios.service.BazService" filter="(factory.name=composite.test.3)"/>
-				<subservice action="instantiate" specification="org.apache.felix.ipojo.test.scenarios.service.FooService"/>
-				<provides action="export" specification="org.apache.felix.ipojo.test.scenarios.service.BazService"/>
-				<provides action="export" specification="org.apache.felix.ipojo.test.scenarios.service.FooService"/>
+				<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BazService" filter="(factory.name=composite.test.3)"/>
+				<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.FooService"/>
+				<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService"/>
+				<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.FooService"/>
 	</composite>
 
 	<!-- Test composition provides -->

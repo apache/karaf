@@ -23,26 +23,18 @@
   <version>0.7.6-SNAPSHOT</version>
   <name>Apache Felix iPOJO Tests</name>
   <packaging>pom</packaging>
-  <profiles>
-      <profile>
-              <id>java5</id>
-              <activation>
-                      <jdk>1.5</jdk>
-              </activation>
-              <modules>
-                     <module>tests.core</module>
-					<module>tests.composite</module>
-              </modules>
-      </profile>
-      <profile>
-              <id>java6</id>
-              <activation>
-                      <jdk>1.6</jdk>
-              </activation>
-              <modules>
-                      <module>tests.core</module>
-					  <module>tests.composite</module>
-              </modules>
-      </profile>
-</profiles>  
+  
+  <modules>
+    <module>tests.core.manipulation</module>
+	<module>tests.core.factories</module>
+	<module>tests.core.lifecycle.controller</module>
+	<module>tests.core.service.providing</module>
+	<module>tests.core.lifecycle.callback</module>
+	<module>tests.core.service.dependency</module>
+	<module>tests.core.configuration</module>
+	<module>tests.core.external.handlers</module>
+	<module>tests.core.bad.configurations</module>
+	<module>tests.composite</module>
+   </modules>
+  
 </project>

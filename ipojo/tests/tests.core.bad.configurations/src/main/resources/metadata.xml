@@ -1,0 +1,31 @@
+<ipojo>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
+		factory="BAD-CallbackCheckService" architecture="true">
+		<requires field="fs" />
+		<provides />
+		<callback transition="validate" method="start" />
+		<callback transition="invalidate" method="stop" />
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.LifecycleControllerTest"
+		name="BAD-lcTest">
+		<provides />
+		<controller field="m_state" />
+		<properties>
+			<property name="conf" field="m_conf" method="setConf" />
+		</properties>
+	</component>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		factory="BAD-BothCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="bothBind" />
+			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+	
+</ipojo>

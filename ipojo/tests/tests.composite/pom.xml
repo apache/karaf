@@ -54,11 +54,6 @@
 			<artifactId>org.apache.felix.ipojo.junit4osgi</artifactId>
 			<version>0.7.6-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>ipojo.tests</groupId>
-			<artifactId>tests.core</artifactId>
-			<version>0.7.6-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -81,9 +76,6 @@
 						<Test-Suite>
 							org.apache.felix.ipojo.test.composite.CompositeTestSuite
 						</Test-Suite>
-						<Import-Package>
-							org.apache.felix.ipojo.test.scenarios.service,*
-						</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>

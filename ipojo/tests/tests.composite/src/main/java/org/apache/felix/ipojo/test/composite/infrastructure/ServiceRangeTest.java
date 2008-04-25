@@ -24,9 +24,9 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.test.composite.service.CheckService;
+import org.apache.felix.ipojo.test.composite.service.FooService;
 import org.apache.felix.ipojo.test.composite.util.Utils;
-import org.apache.felix.ipojo.test.scenarios.service.CheckService;
-import org.apache.felix.ipojo.test.scenarios.service.FooService;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
@@ -53,7 +53,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 	public void testLevelOne1() {
 		ServiceContext sc2 = Utils.getServiceContext(empty);
 		
-		Factory fact1 = Utils.getFactoryByName(sc2, "SimpleCheckServiceProvider");
+		Factory fact1 = Utils.getFactoryByName(sc2, "COMPO-SimpleCheckServiceProvider");
 		Properties props = new Properties();
 		props.put("name", "client");
 		ComponentInstance client = null;
@@ -61,7 +61,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 			client = fact1.createComponentInstance(props);
 		} catch(Exception e) { fail("Cannot instantiate the client : " + e.getMessage()); }
 		
-		Factory fact2 = Utils.getFactoryByName(sc2, "FooProviderType-1");
+		Factory fact2 = Utils.getFactoryByName(sc2, "COMPO-FooProviderType-1");
 		Properties props2 = new Properties();
 		props2.put("name", "provider");
 		ComponentInstance provider = null;
@@ -105,7 +105,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 	public void testLevelOne2() {
 		ServiceContext sc2 = Utils.getServiceContext(empty);
 		
-		Factory fact1 = Utils.getFactoryByName(sc2, "SimpleCheckServiceProvider");
+		Factory fact1 = Utils.getFactoryByName(sc2, "COMPO-SimpleCheckServiceProvider");
 		Properties props = new Properties();
 		props.put("name", "client");
 		ComponentInstance client = null;
@@ -113,7 +113,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 			client = fact1.createComponentInstance(props, sc2);
 		} catch(Exception e) { fail("Cannot instantiate the client : " + e.getMessage()); }
 		
-		Factory fact2 = Utils.getFactoryByName(sc2, "FooProviderType-1");
+		Factory fact2 = Utils.getFactoryByName(sc2, "COMPO-FooProviderType-1");
 		Properties props2 = new Properties();
 		props2.put("name", "provider");
 		ComponentInstance provider = null;
@@ -157,7 +157,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 	public void testLevelOne3() {
 		ServiceContext sc2 = Utils.getServiceContext(empty);
 		
-		Factory fact1 = Utils.getFactoryByName(context, "SimpleCheckServiceProvider");
+		Factory fact1 = Utils.getFactoryByName(context, "COMPO-SimpleCheckServiceProvider");
 		Properties props = new Properties();
 		props.put("name", "client");
 		ComponentInstance client = null;
@@ -165,7 +165,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 			client = fact1.createComponentInstance(props, sc2);
 		} catch(Exception e) { fail("Cannot instantiate the client : " + e.getMessage()); }
 		
-		Factory fact2 = Utils.getFactoryByName(context, "FooProviderType-1");
+		Factory fact2 = Utils.getFactoryByName(context, "COMPO-FooProviderType-1");
 		Properties props2 = new Properties();
 		props2.put("name", "provider");
 		ComponentInstance provider = null;
@@ -220,7 +220,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 		
 		ServiceContext sc2 = Utils.getServiceContext(empty2);
 		
-		Factory fact1 = Utils.getFactoryByName(sc2, "SimpleCheckServiceProvider");
+		Factory fact1 = Utils.getFactoryByName(sc2, "COMPO-SimpleCheckServiceProvider");
 		Properties props = new Properties();
 		props.put("name", "client");
 		ComponentInstance client = null;
@@ -228,7 +228,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 			client = fact1.createComponentInstance(props);
 		} catch(Exception e) { fail("Cannot instantiate the client : " + e.getMessage()); }
 		
-		Factory fact2 = Utils.getFactoryByName(sc2, "FooProviderType-1");
+		Factory fact2 = Utils.getFactoryByName(sc2, "COMPO-FooProviderType-1");
 		Properties props2 = new Properties();
 		props2.put("name", "provider");
 		ComponentInstance provider = null;
@@ -288,7 +288,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 		
 		ServiceContext sc2 = Utils.getServiceContext(empty2);
 		
-		Factory fact1 = Utils.getFactoryByName(sc1, "SimpleCheckServiceProvider");
+		Factory fact1 = Utils.getFactoryByName(sc1, "COMPO-SimpleCheckServiceProvider");
 		Properties props = new Properties();
 		props.put("name", "client");
 		ComponentInstance client = null;
@@ -296,7 +296,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 			client = fact1.createComponentInstance(props, sc2);
 		} catch(Exception e) { fail("Cannot instantiate the client : " + e.getMessage()); }
 		
-		Factory fact2 = Utils.getFactoryByName(sc1, "FooProviderType-1");
+		Factory fact2 = Utils.getFactoryByName(sc1, "COMPO-FooProviderType-1");
 		Properties props2 = new Properties();
 		props2.put("name", "provider");
 		ComponentInstance provider = null;
@@ -356,7 +356,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 		
 		ServiceContext sc2 = Utils.getServiceContext(empty2);
 		
-		Factory fact1 = Utils.getFactoryByName(context, "SimpleCheckServiceProvider");
+		Factory fact1 = Utils.getFactoryByName(context, "COMPO-SimpleCheckServiceProvider");
 		Properties props = new Properties();
 		props.put("name", "client");
 		ComponentInstance client = null;
@@ -364,7 +364,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 			client = fact1.createComponentInstance(props, sc2);
 		} catch(Exception e) { fail("Cannot instantiate the client : " + e.getMessage()); }
 		
-		Factory fact2 = Utils.getFactoryByName(context, "FooProviderType-1");
+		Factory fact2 = Utils.getFactoryByName(context, "COMPO-FooProviderType-1");
 		Properties props2 = new Properties();
 		props2.put("name", "provider");
 		ComponentInstance provider = null;
@@ -424,7 +424,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 		
 		ServiceContext sc2 = Utils.getServiceContext(empty2);
 		
-		Factory fact1 = Utils.getFactoryByName(sc2, "SimpleCheckServiceProvider");
+		Factory fact1 = Utils.getFactoryByName(sc2, "COMPO-SimpleCheckServiceProvider");
 		Properties props = new Properties();
 		props.put("name", "client");
 		ComponentInstance client = null;
@@ -432,7 +432,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 			client = fact1.createComponentInstance(props, sc2);
 		} catch(Exception e) { fail("Cannot instantiate the client : " + e.getMessage()); }
 		
-		Factory fact2 = Utils.getFactoryByName(sc2, "FooProviderType-1");
+		Factory fact2 = Utils.getFactoryByName(sc2, "COMPO-FooProviderType-1");
 		Properties props2 = new Properties();
 		props2.put("name", "provider");
 		ComponentInstance provider = null;

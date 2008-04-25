@@ -20,7 +20,7 @@ package org.apache.felix.ipojo.test.composite.component;
 
 import java.util.Properties;
 
-import org.apache.felix.ipojo.test.scenarios.service.BazService;
+import org.apache.felix.ipojo.test.composite.service.BazService;
 
 public class BazProviderType1 implements BazService {
 	

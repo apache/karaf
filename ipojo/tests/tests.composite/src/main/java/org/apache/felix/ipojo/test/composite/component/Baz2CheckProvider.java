@@ -20,9 +20,9 @@ package org.apache.felix.ipojo.test.composite.component;
 
 import java.util.Properties;
 
-import org.apache.felix.ipojo.test.scenarios.service.BazService;
-import org.apache.felix.ipojo.test.scenarios.service.CheckService;
-import org.apache.felix.ipojo.test.scenarios.service.FooService;
+import org.apache.felix.ipojo.test.composite.service.BazService;
+import org.apache.felix.ipojo.test.composite.service.CheckService;
+import org.apache.felix.ipojo.test.composite.service.FooService;
 import org.osgi.framework.ServiceReference;
 
 public class Baz2CheckProvider implements CheckService {

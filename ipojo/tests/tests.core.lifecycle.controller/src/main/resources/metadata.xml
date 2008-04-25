@@ -1,0 +1,21 @@
+<ipojo>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.LifecycleControllerTest"
+		name="LFC-Test">
+		<provides />
+		<controller field="m_state" />
+		<properties>
+			<property name="conf" field="m_conf" method="setConf" />
+		</properties>
+	</component>
+
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.LifecycleControllerTest"
+		name="LFC-Test-Immediate" immediate="true" architecture="true">
+		<provides />
+		<controller field="m_state" />
+		<properties>
+			<property name="conf" field="m_conf" method="setConf" />
+		</properties>
+	</component>
+</ipojo>

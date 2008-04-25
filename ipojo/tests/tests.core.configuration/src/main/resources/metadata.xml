@@ -1,0 +1,148 @@
+<ipojo>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
+		factory="CONFIG-FooProviderType-Conf" architecture="true">
+		<provides />
+		<properties propagation="false">
+			<property name="int" field="intProp" value="2" />
+			<property name="boolean" field="boolProp" value="false" />
+			<property name="string" field="strProp" value="foo" />
+			<property name="strAProp" field="strAProp"
+				value="{foo, bar}" />
+			<property name="intAProp" field="intAProp" value="{1,2, 3}" />
+		</properties>
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="CONFIG-FooProviderType-3" architecture="true">
+		<provides>
+			<property name="foo" field="m_foo" />
+			<property name="bar" field="m_bar" />
+			<property name="baz" type="java.lang.String" />
+		</provides>
+		<properties propagation="true">
+			<property name="foo" field="m_foo" />
+			<property name="bar" field="m_bar" />
+		</properties>
+	</component>
+	<!-- Configuration Management Test -->
+	<component factory="CONFIG-FieldConfigurableCheckService"
+		className="org.apache.felix.ipojo.test.scenarios.component.ConfigurableCheckServiceProvider"
+		architecture="true">
+		<provides />
+		<properties propagation="true">
+			<property field="b" />
+			<property field="s" />
+			<property field="i" />
+			<property field="l" />
+			<property field="d" />
+			<property field="f" />
+			<property field="c" />
+			<property field="bool" />
+			<property field="bs" />
+			<property field="ss" />
+			<property field="is" />
+			<property field="ls" />
+			<property field="ds" />
+			<property field="fs" />
+			<property field="cs" />
+			<property field="bools" />
+			<property field="string" />
+			<property field="strings" />
+		</properties>
+	</component>
+
+	<component factory="CONFIG-BothConfigurableCheckService"
+		className="org.apache.felix.ipojo.test.scenarios.component.ConfigurableCheckServiceProvider"
+		architecture="true">
+		<provides />
+		<properties propagation="true">
+			<property field="b" method="updateB" />
+			<property field="s" method="updateS" />
+			<property field="i" method="updateI" />
+			<property field="l" method="updateL" />
+			<property field="d" method="updateD" />
+			<property field="f" method="updateF" />
+			<property field="c" method="updateC" />
+			<property field="bool" method="updateBool" />
+			<property field="bs" method="updateBs" />
+			<property field="ss" method="updateSs" />
+			<property field="is" method="updateIs" />
+			<property field="ls" method="updateLs" />
+			<property field="ds" method="updateDs" />
+			<property field="fs" method="updateFs" />
+			<property field="cs" method="updateCs" />
+			<property field="bools" method="updateBools" />
+			<property field="string" method="updateString" />
+			<property field="strings" method="updateStrings" />
+		</properties>
+	</component>
+
+	<component factory="CONFIG-MethodConfigurableCheckService"
+		className="org.apache.felix.ipojo.test.scenarios.component.ConfigurableCheckServiceProvider"
+		architecture="true">
+		<provides />
+		<properties propagation="true">
+			<property method="updateB" name="b" />
+			<property method="updateS" name="s" />
+			<property method="updateI" name="i" />
+			<property method="updateL" name="l" />
+			<property method="updateD" name="d" />
+			<property method="updateF" name="f" />
+			<property method="updateC" name="c" />
+			<property method="updateBool" name="bool" />
+			<property method="updateBs" name="bs" />
+			<property method="updateSs" name="ss" />
+			<property method="updateIs" name="is" />
+			<property method="updateLs" name="ls" />
+			<property method="updateDs" name="ds" />
+			<property method="updateFs" name="fs" />
+			<property method="updateCs" name="cs" />
+			<property method="updateBools" name="bools" />
+			<property method="updateString" name="string" />
+			<property method="updateStrings" name="strings" />
+		</properties>
+	</component>
+
+	<component factory="CONFIG-ParentMethodConfigurableCheckService"
+		className="org.apache.felix.ipojo.test.scenarios.component.ParentConfigurableCheckServiceProvider"
+		architecture="true">
+		<provides />
+		<properties propagation="true">
+			<property method="updateB" name="b" />
+			<property method="updateS" name="s" />
+			<property method="updateI" name="i" />
+			<property method="updateL" name="l" />
+			<property method="updateD" name="d" />
+			<property method="updateF" name="f" />
+			<property method="updateC" name="c" />
+			<property method="updateBool" name="bool" />
+			<property method="updateBs" name="bs" />
+			<property method="updateSs" name="ss" />
+			<property method="updateIs" name="is" />
+			<property method="updateLs" name="ls" />
+			<property method="updateDs" name="ds" />
+			<property method="updateFs" name="fs" />
+			<property method="updateCs" name="cs" />
+			<property method="updateBools" name="bools" />
+			<property method="updateString" name="string" type="string" />
+			<property method="updateStrings" name="strings"
+				type="java.lang.String[]" />
+		</properties>
+	</component>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		factory="CONFIG-FooProviderType-4" architecture="true">
+		<provides>
+			<property name="foo" field="m_foo" />
+			<property name="bar" field="m_bar" />
+			<property name="baz" type="java.lang.String" />
+		</provides>
+		<properties propagation="true" pid="FooProvider-3">
+			<property name="foo" field="m_foo" />
+			<property name="bar" field="m_bar" />
+		</properties>
+	</component>
+	
+</ipojo>
