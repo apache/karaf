@@ -16,20 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo.test.composite;
+package org.apache.felix.ipojo.test.scenarios.annotations.service;
 
-import junit.framework.Test;
+import java.util.Properties;
 
-import org.apache.felix.ipojo.junit4osgi.OSGiTestSuite;
-import org.apache.felix.ipojo.test.composite.infrastructure.InfrastructureTestSuite;
-import org.osgi.framework.BundleContext;
-
-public class CompositeTestSuite {
+public interface CheckService {
     
-    public static Test suite(BundleContext bc) {
-        OSGiTestSuite ots = new OSGiTestSuite("iPOJO Composites Test Suite", bc);    
-        ots.addTest(InfrastructureTestSuite.suite(bc));
-        return ots;
-    }
+    public static final String foo = "foo";
+	
+	public boolean check();
+	
+	public Properties getProps();
 
 }

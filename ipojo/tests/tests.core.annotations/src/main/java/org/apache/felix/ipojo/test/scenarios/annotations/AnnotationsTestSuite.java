@@ -16,20 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo.test.composite;
+package org.apache.felix.ipojo.test.scenarios.annotations;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestSuite;
-import org.apache.felix.ipojo.test.composite.infrastructure.InfrastructureTestSuite;
 import org.osgi.framework.BundleContext;
 
-public class CompositeTestSuite {
-    
+public class AnnotationsTestSuite extends TestSuite {
+
     public static Test suite(BundleContext bc) {
-        OSGiTestSuite ots = new OSGiTestSuite("iPOJO Composites Test Suite", bc);    
-        ots.addTest(InfrastructureTestSuite.suite(bc));
+        OSGiTestSuite ots = new OSGiTestSuite("Annotations Test Suite", bc);
+        ots.addTestSuite(ServiceProdiving.class);
+        ots.addTestSuite(LifecycleController.class);
+        ots.addTestSuite(LifecycleCallbacks.class);
+        ots.addTestSuite(Properties.class);
+        ots.addTestSuite(Architecture.class);
+        ots.addTestSuite(Factory.class);
+        ots.addTestSuite(Dependency.class);
+        ots.addTestSuite(OptionalDependency.class);
+        ots.addTestSuite(AggregateDependency.class);
+        ots.addTestSuite(PolicyDependency.class);
+        ots.addTestSuite(FilteredDependency.class);
+        ots.addTestSuite(RankedDependency.class);
         return ots;
     }
 
 }
+

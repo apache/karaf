@@ -1,0 +1,54 @@
+<ipojo xmlns:cs="org.apache.felix.ipojo.test.composite.handler.CheckServiceHandler">	
+	<composite name="composite.bar.1" architecture="true">
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService"/>
+	</composite>
+	
+	<composite name="composite.bar.2" architecture="true">
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService" aggregate="true"/>
+	</composite>
+	
+	<composite name="composite.bar.3" architecture="true">
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService" optional="true"/>
+	</composite>
+	
+	<composite name="composite.bar.4" architecture="true">
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.FooService" aggregate="true" optional="true"/>
+	</composite>
+	
+	<composite name="composite.bar.5-accept" architecture="true">
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.FooService">
+			<property name="boolean" value="true"/>
+			<property name="string" value="foo"/>
+			<property name="strAprop" value="{foo, bar, baz}"/>
+			<property name="int" value="5"/>
+		</subservice>
+	</composite>
+	
+	<composite name="composite.bar.5-refuse1" architecture="true">
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService">
+			<property name="foo" value="bar"/>
+			<property name="boolean" value="true"/>
+			<property name="string" value="foo"/>
+			<property name="strAprop" value="{foo, bar, baz}"/>
+			<property name="int" value="5"/>
+		</subservice>
+	</composite>
+	
+	<composite name="composite.bar.5-refuse2" architecture="true">
+		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService">
+			<property name="string" value="foo"/>
+			<property name="strAprop" value="{foo, bar, baz}"/>
+		</subservice>
+	</composite>
+
+    <!-- Instance of a specified component -->
+	<composite name="composite.inst.1" factory="true" architecture="true">
+		<instance component="COMPO-FooProviderType-1" /> <!-- name="FooProv"  -->
+		<instance component="COMPO-FooProviderType-Dyn2">
+			<property name="boolean" value="true"/>
+			<property name="string" value="foo"/>
+			<property name="strAProp" value="{a,b,c}"/>
+		</instance>
+	</composite>
+
+</ipojo>

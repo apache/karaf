@@ -71,223 +71,37 @@
 		</provides>
 	</component>
 	
-	<!--  Composite -->
-	<composite name="composite.empty" factory="true" architecture="true">
-	</composite>
-	
-	<composite name="composite.bar.1" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService"/>
-	</composite>
-	
-	<composite name="composite.bar.2" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService" aggregate="true"/>
-	</composite>
-	
-	<composite name="composite.bar.3" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService" optional="true"/>
-	</composite>
-	
-	<composite name="composite.bar.4" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.FooService" aggregate="true" optional="true"/>
-	</composite>
-	
-	<composite name="composite.bar.5-accept" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.FooService">
-			<property name="boolean" value="true"/>
-			<property name="string" value="foo"/>
-			<property name="strAprop" value="{foo, bar, baz}"/>
-			<property name="int" value="5"/>
-		</subservice>
-	</composite>
-	
-	<composite name="composite.bar.5-refuse1" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService">
-			<property name="foo" value="bar"/>
-			<property name="boolean" value="true"/>
-			<property name="string" value="foo"/>
-			<property name="strAprop" value="{foo, bar, baz}"/>
-			<property name="int" value="5"/>
-		</subservice>
-	</composite>
-	
-	<composite name="composite.bar.5-refuse2" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BarService">
-			<property name="string" value="foo"/>
-			<property name="strAprop" value="{foo, bar, baz}"/>
-		</subservice>
-	</composite>
-	
-	<composite name="composite.inst.1" factory="true" architecture="true">
-		<instance component="COMPO-FooProviderType-1" /> <!-- name="FooProv"  -->
-		<instance component="COMPO-FooProviderType-Dyn2">
-			<property name="boolean" value="true"/>
-			<property name="string" value="foo"/>
-			<property name="strAProp" value="{a,b,c}"/>
-		</instance>
-	</composite>
-	
-	<composite name="composite.requires.1" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.FooService" scope="composite"/>
-	</composite>
-	
-	<composite name="composite.requires.2" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.FooService" aggregate="true" scope="composite"/>
-	</composite>
-	
-	<composite name="composite.requires.3" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.FooService" optional="true" scope="composite"/>
-	</composite>
-	
-	<composite name="composite.requires.4" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.FooService" optional="true" aggregate="true" scope="composite"/>
-	</composite>
-	
-	<composite name="composite.requires.5" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.FooService" filter="(&amp;(int=2)(long=40))" scope="composite"/>
-	</composite>
-	
-	<component className="org.apache.felix.ipojo.test.composite.component.BazProviderType1" factory="BazProviderType" scope="composite">
-		<provides/>
+	<component
+		className="org.apache.felix.ipojo.test.composite.component.BazProviderType1"
+		factory="BazProviderType" scope="composite">
+		<provides />
 	</component>
 	
-	<composite name="composite.export.1" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.BazService" aggregate="true" optional="true" filter="(!(instance.name=export))" scope="composite"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService"/>
-	</composite>
+	<component
+		classname="org.apache.felix.ipojo.test.composite.component.TataProvider"
+		factory="tata">
+		<provides />
+	</component>
+
+	<component
+		classname="org.apache.felix.ipojo.test.composite.component.TotoProvider"
+		factory="toto" architecture="true">
+		<provides />
+	</component>
+
+	<component
+		classname="org.apache.felix.ipojo.test.composite.component.TotoProviderGlue"
+		factory="totoglue">
+		<requires field="m_toto" scope="composite" />
+	</component>
 	
-	<composite name="composite.export.2" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.BazService" scope="composite" aggregate="true" optional="true" filter="(!(instance.name=export))"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService" optional="true"/>
-	</composite>
-	
-	<composite name="composite.export.3" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.BazService" scope="composite" aggregate="true" optional="true" filter="(!(instance.name=export))"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService" aggregate="true"/>
-	</composite>
-	
-	<composite name="composite.export.4" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.BazService" aggregate="true" optional="true" filter="(!(instance.name=export))" scope="composite"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService" aggregate="true" optional="true"/>
-	</composite>
-	
-	<composite name="composite.export.5" architecture="true">
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.BazService" aggregate="true" optional="true" filter="(!(instance.name=export))" scope="composite"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService" filter="(instance.name=foo1)"/>
+	<!--  Composite -->
+	<composite name="composite.empty" factory="true" architecture="true">
 	</composite>
 	
 	<component className="org.apache.felix.ipojo.test.composite.component.Baz2CheckProvider" factory="Baz2CheckProvider" architecture="true">
 		<requires field="fs" scope="composite"/>
 		<provides/>
 	</component>
-
-	<composite name="composite.test.3" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BazService" aggregate="true" filter="(factory.name=BazProviderType)"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService"/>
-	</composite>
-	
-	<composite name="composite.test.2" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.CheckService" filter="(factory.name=Baz2CheckProvider)"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.CheckService"/>
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.BazService" scope="composite"/>
-	</composite>
-	
-	<composite name="composite.test.1" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BazService" filter="(factory.name=composite.test.3)" />
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.CheckService" filter="(factory.name=composite.test.2)"/>
-		<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.CheckService"/>
-	</composite>
-
-	<composite name="composite.instantiator" architecture="true">
-				<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.BazService" filter="(factory.name=composite.test.3)"/>
-				<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.FooService"/>
-				<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.BazService"/>
-				<provides action="export" specification="org.apache.felix.ipojo.test.composite.service.FooService"/>
-	</composite>
-
-	<!-- Test composition provides -->
-	<component classname="org.apache.felix.ipojo.test.composite.component.TataProvider" factory="tata">
-		<provides/>
-	</component>
-	
-	<component classname="org.apache.felix.ipojo.test.composite.component.TotoProvider" factory="toto" architecture="true">
-		<provides/>
-	</component>
-	
-	<component classname="org.apache.felix.ipojo.test.composite.component.TotoProviderGlue" factory="totoglue">
-		<requires field="m_toto" scope="composite"/>
-	</component>
-	
-	<composite name="comp-0" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.Tata"/>
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.Toto"/>
-		<provides action="implement" specification="org.apache.felix.ipojo.test.composite.service.Tota"/>
-	</composite>
-	
-	<composite name="comp-1" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.Tata"/>
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.Toto"/>
-		<provides action="implement" specification="org.apache.felix.ipojo.test.composite.service.Tota">
-			<delegation method="tataInt" policy="One"/>
-			<delegation method="toto1" policy="All"/>
-		</provides>
-	</composite>
-
-	<composite name="comp-2" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.Tata" aggregate="true"/>
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.Toto" aggregate="true"/>
-		<provides action="implement" specification="org.apache.felix.ipojo.test.composite.service.Tota">
-			<delegation method="tataInt" policy="One"/>
-			<delegation method="toto1" policy="All"/>
-		</provides>
-	</composite>	
-	
-	<composite name="comp-3" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.Tata"/>
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.Toto" optional="true"/>
-		<provides action="implement" specification="org.apache.felix.ipojo.test.composite.service.Tota">
-		</provides>
-	</composite>
-	
-	<composite name="comp-4" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.Tata"/>
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.Toto" optional="true"/>
-		<provides action="implement" specification="org.apache.felix.ipojo.test.composite.service.Tota">
-			<delegation method="tataInt" policy="One"/>
-			<delegation method="toto1" policy="All"/>
-		</provides>
-	</composite>		
-	
-	<composite name="comp-5" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.Tata" aggregate="true"/>
-		<!-- <subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.Toto" aggregate ="true" optional="true"/> -->
-		<provides action="implement" specification="org.apache.felix.ipojo.test.composite.service.Tota">
-			<delegation method="tataInt" policy="One"/>
-			<delegation method="toto1" policy="All"/>
-		</provides>
-	</composite>	
-	
-	<composite name="comp-6" architecture="true">
-		<subservice action="instantiate" specification="org.apache.felix.ipojo.test.composite.service.Tata" aggregate="true"/>
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.Toto" aggregate="true" optional="true"/>
-		<provides action="implement" specification="org.apache.felix.ipojo.test.composite.service.Toto">
-			<delegation method="toto1" policy="All"/>
-		</provides>
- 		<provides action="implement" specification="org.apache.felix.ipojo.test.composite.service.Tata">
-			<delegation method="tataInt" policy="One"/>
-		</provides>
-	</composite>
-	
-	<composite name="comp-7" architecture="true">
-		<instance component="tata"/>
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.Toto"/>
-		<provides action="implement" specification="org.apache.felix.ipojo.test.composite.service.Tota"/>
-	</composite>
-	
-	<composite name="comp-8" architecture="true">
-		<instance component="tata"/>
-		<instance component="totoglue"/>
-		<subservice action="import" specification="org.apache.felix.ipojo.test.composite.service.Toto"/>
-		<provides action="implement" specification="org.apache.felix.ipojo.test.composite.service.Tota"/>
-	</composite>
 	
 </ipojo>

@@ -22,8 +22,6 @@ import junit.framework.Test;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestSuite;
 import org.apache.felix.ipojo.test.scenarios.service.dependency.di.DefaultImplementationTestSuite;
-import org.apache.felix.ipojo.test.scenarios.service.dependency.dynamic.priority.DynamicPriorityDependencyTestSuite;
-import org.apache.felix.ipojo.test.scenarios.service.dependency.statics.StaticDependencyTestSuite;
 import org.osgi.framework.BundleContext;
 
 public class DependencyTestSuite {
@@ -47,14 +45,8 @@ public class DependencyTestSuite {
         ots.addTestSuite(MethodDelayedOptionalDependencies.class);
         ots.addTestSuite(MethodDelayedMultipleDependencies.class);
         ots.addTestSuite(MethodDelayedOptionalMultipleDependencies.class);
-        ots.addTestSuite(SimpleFilterDependencies.class);
-        ots.addTestSuite(OptionalSimpleFilterDependencies.class);
-        ots.addTestSuite(MultipleFilterDependencies.class);
-        ots.addTestSuite(OptionalMultipleFilterDependencies.class);
-        ots.addTest(StaticDependencyTestSuite.suite(bc));
         ots.addTest(DefaultImplementationTestSuite.suite(bc));
         ots.addTestSuite(DependencyArchitectureTest.class);
-        ots.addTest(DynamicPriorityDependencyTestSuite.suite(bc));
 		return ots;
 	}
 

@@ -1,0 +1,82 @@
+<ipojo
+	xmlns:cs="org.apache.felix.ipojo.test.composite.handler.CheckServiceHandler">
+	<composite name="composite.requires.1" architecture="true">
+		<subservice action="import"
+			specification="org.apache.felix.ipojo.test.composite.service.FooService"
+			scope="composite" />
+	</composite>
+
+	<composite name="composite.requires.2" architecture="true">
+		<subservice action="import"
+			specification="org.apache.felix.ipojo.test.composite.service.FooService"
+			aggregate="true" scope="composite" />
+	</composite>
+
+	<composite name="composite.requires.3" architecture="true">
+		<subservice action="import"
+			specification="org.apache.felix.ipojo.test.composite.service.FooService"
+			optional="true" scope="composite" />
+	</composite>
+
+	<composite name="composite.requires.4" architecture="true">
+		<subservice action="import"
+			specification="org.apache.felix.ipojo.test.composite.service.FooService"
+			optional="true" aggregate="true" scope="composite" />
+	</composite>
+
+	<composite name="composite.requires.5" architecture="true">
+		<subservice action="import"
+			specification="org.apache.felix.ipojo.test.composite.service.FooService"
+			filter="(&amp;(int=2)(long=40))" scope="composite" />
+	</composite>
+
+	<composite name="composite.export.1" architecture="true">
+		<subservice action="import"
+			specification="org.apache.felix.ipojo.test.composite.service.BazService"
+			aggregate="true" optional="true" filter="(!(instance.name=export))"
+			scope="composite" />
+		<provides action="export"
+			specification="org.apache.felix.ipojo.test.composite.service.BazService" />
+	</composite>
+
+	<composite name="composite.export.2" architecture="true">
+		<subservice action="import"
+			specification="org.apache.felix.ipojo.test.composite.service.BazService"
+			scope="composite" aggregate="true" optional="true"
+			filter="(!(instance.name=export))" />
+		<provides action="export"
+			specification="org.apache.felix.ipojo.test.composite.service.BazService"
+			optional="true" />
+	</composite>
+
+	<composite name="composite.export.3" architecture="true">
+		<subservice action="import"
+			specification="org.apache.felix.ipojo.test.composite.service.BazService"
+			scope="composite" aggregate="true" optional="true"
+			filter="(!(instance.name=export))" />
+		<provides action="export"
+			specification="org.apache.felix.ipojo.test.composite.service.BazService"
+			aggregate="true" />
+	</composite>
+
+	<composite name="composite.export.4" architecture="true">
+		<subservice action="import"
+			specification="org.apache.felix.ipojo.test.composite.service.BazService"
+			aggregate="true" optional="true" filter="(!(instance.name=export))"
+			scope="composite" />
+		<provides action="export"
+			specification="org.apache.felix.ipojo.test.composite.service.BazService"
+			aggregate="true" optional="true" />
+	</composite>
+
+	<composite name="composite.export.5" architecture="true">
+		<subservice action="import"
+			specification="org.apache.felix.ipojo.test.composite.service.BazService"
+			aggregate="true" optional="true" filter="(!(instance.name=export))"
+			scope="composite" />
+		<provides action="export"
+			specification="org.apache.felix.ipojo.test.composite.service.BazService"
+			filter="(instance.name=foo1)" />
+	</composite>
+
+</ipojo>

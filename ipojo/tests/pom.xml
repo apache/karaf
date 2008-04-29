@@ -31,10 +31,36 @@
 	<module>tests.core.service.providing</module>
 	<module>tests.core.lifecycle.callback</module>
 	<module>tests.core.service.dependency</module>
+	<module>tests.core.service.dependency.bindingpolicy</module>
+	<module>tests.core.service.dependency.filter</module>
 	<module>tests.core.configuration</module>
 	<module>tests.core.external.handlers</module>
 	<module>tests.core.bad.configurations</module>
 	<module>tests.composite</module>
+	<module>tests.composite.service.import-export</module>
+	<module>tests.composite.service.instance</module>
+	<module>tests.composite.service.providing</module>
    </modules>
+   
+   <profiles>
+	<profile>
+		<id>java5</id>
+		<activation>
+			<jdk>1.5</jdk>
+		</activation>
+		<modules>
+			<module>tests.core.annotations</module>
+		</modules>
+	</profile>
+	<profile>
+		<id>java6</id>
+		<activation>
+			<jdk>1.6</jdk>
+		</activation>
+		<modules>
+			<module>tests.core.annotations</module>
+		</modules>
+	</profile>
+  </profiles>
   
 </project>

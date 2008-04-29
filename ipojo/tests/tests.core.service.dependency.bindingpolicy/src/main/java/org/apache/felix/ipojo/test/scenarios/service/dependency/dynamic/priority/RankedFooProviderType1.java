@@ -16,20 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo.test.composite;
+package org.apache.felix.ipojo.test.scenarios.service.dependency.dynamic.priority;
 
-import junit.framework.Test;
+import java.util.Properties;
 
-import org.apache.felix.ipojo.junit4osgi.OSGiTestSuite;
-import org.apache.felix.ipojo.test.composite.infrastructure.InfrastructureTestSuite;
-import org.osgi.framework.BundleContext;
+import org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService;
 
-public class CompositeTestSuite {
+public class RankedFooProviderType1 implements FooService {	
+	private int m_grade;
     
-    public static Test suite(BundleContext bc) {
-        OSGiTestSuite ots = new OSGiTestSuite("iPOJO Composites Test Suite", bc);    
-        ots.addTest(InfrastructureTestSuite.suite(bc));
-        return ots;
-    }
+    
+	public boolean foo() {
+	    m_grade = m_grade + 2;
+		return true;
+	}
 
+	public Properties fooProps() {
+		Properties p = new Properties();
+		p.put("grade", new Integer(m_grade));
+
+		return p;
+	}
+        
+	public boolean getBoolean() { return true; }
+
+	public double getDouble() { return 1.0; }
+
+	public int getInt() { 
+	    return m_grade; }
+
+	public long getLong() { return 1; }
+
+	public Boolean getObject() { return new Boolean(true); }
+	
 }
