@@ -20,6 +20,7 @@ package org.apache.felix.ipojo.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
+import java.util.Comparator;
 
 /**
  * This annotation declares a service requirement.
@@ -55,9 +56,10 @@ public @interface Requires {
     /**
      * Set the default-implementation to use if the dependency is optional,
      * and no providers are available.
+     * The class must implement the required service interface.
      * Default : no default-implementation
      */
-    String defaultimplementation() default "";
+    Class defaultimplementation() default Class.class;
     
     /**
      * Set the binding policy.
@@ -65,4 +67,10 @@ public @interface Requires {
      * Default: dynamic.
      */
     String policy() default "dynamic";
+    
+    /**
+     * Set the comparator.
+     * The indicated class must implement {@link Comparator}
+     */
+    Class comparator() default Comparator.class;
 }

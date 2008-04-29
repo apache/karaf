@@ -22,6 +22,7 @@ import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 /**
@@ -151,6 +152,11 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
         private String m_nullable;
         
         /**
+         * Comparator.
+         */
+        private String m_comparator;
+        
+        /**
          * Constructor.
          * @param name : field name.
          */
@@ -182,7 +188,8 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
                 return;
             }
             if (arg0.equals("defaultimplementation")) {
-                m_defaultImplementation = arg1.toString();
+                Type type = Type.getType(arg1.toString());
+                m_defaultImplementation = type.getClassName();
                 return;
             }
             if (arg0.equals("specification")) {
@@ -191,6 +198,11 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
             }
             if (arg0.equals("id")) {
                 m_id = arg1.toString();
+                return;
+            }
+            if (arg0.equals("comparator")) {
+                Type type = Type.getType(arg1.toString());
+                m_comparator = type.getClassName();
                 return;
             }
         }
@@ -236,6 +248,9 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
             }
             if (m_id != null) {
                 req.addAttribute(new Attribute("id", m_id));
+            }
+            if (m_comparator != null) {
+                req.addAttribute(new Attribute("comparator", m_comparator));
             }
             
             if (m_id != null) { 

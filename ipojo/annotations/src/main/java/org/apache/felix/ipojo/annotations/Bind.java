@@ -20,6 +20,7 @@ package org.apache.felix.ipojo.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
+import java.util.Comparator;
 
 /**
  * This annotation declares a bind method.
@@ -64,5 +65,11 @@ public @interface Bind {
      * Default: dynamic.
      */
     String policy() default "dynamic";
+    
+    /**
+     * Set the comparator.
+     * The indicated class must implement {@link Comparator}
+     */
+    Class comparator() default Comparator.class;
 
 }

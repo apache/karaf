@@ -32,7 +32,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * Abstract dependency model. This class is the parent class of every service dependency. It manages the most part of dependency management. This
- * class creates an insterface between the service tracker and the concrete dependency.
+ * class creates an interface between the service tracker and the concrete dependency.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public abstract class DependencyModel implements TrackerCustomizer {

@@ -557,7 +557,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                 // Check type if not already set
                 if (type == null) {
                     if (field == null) {
-                        throw new ConfigurationException("The property " + name + " has neither type neither field.");
+                        throw new ConfigurationException("The property " + name + " has neither type nor field.");
                     }
                     FieldMetadata fieldMeta = manipulation.getField(field);
                     if (fieldMeta == null) {

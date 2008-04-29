@@ -21,6 +21,7 @@ package org.apache.felix.ipojo.manipulation.annotations;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 /**
@@ -192,6 +193,11 @@ public class MethodCollector extends EmptyVisitor {
          * Binding policy.
          */
         private String m_policy;
+        
+        /**
+         * Comparator.
+         */
+        private String m_comparator;
 
         /**
          * Constructor.
@@ -234,6 +240,12 @@ public class MethodCollector extends EmptyVisitor {
                 m_id = arg1.toString();
                 return;
             }
+            if (arg0.equals("comparator")) {
+                Type type = Type.getType(arg1.toString());
+                m_comparator = type.getClassName();
+                return;
+            }
+            
         }
 
         /**
@@ -275,6 +287,71 @@ public class MethodCollector extends EmptyVisitor {
                 if (m_id != null) {
                     req.addAttribute(new Attribute("id", m_id));
                 }
+                if (m_comparator != null) {
+                    req.addAttribute(new Attribute("comparator", m_comparator));
+                }
+            } else {
+                String itf = req.getAttribute("interface");
+                String aggregate = req.getAttribute("aggregate");
+                String optional = req.getAttribute("optional");
+                String filter = req.getAttribute("filter");
+                String policy = req.getAttribute("policy");
+                String comparator = req.getAttribute("comparator");
+                
+                if (m_specification != null) {
+                    if (itf == null) {
+                        req.addAttribute(new Attribute("interface", m_specification));
+                    } else if (! m_specification.equals(itf)) {
+                        System.err.println("The required specification is not the same than previouly : " + m_specification + " & " + itf);
+                        return;
+                    }
+                }
+                
+                if (m_optional != null) {
+                    if (optional == null) {
+                        req.addAttribute(new Attribute("optional", m_optional));
+                    } else if (! m_optional.equals(optional)) {
+                        System.err.println("The optional attribute is not always the same");
+                        return;
+                    }
+                }
+                
+                if (m_aggregate != null) {
+                    if (aggregate == null) {
+                        req.addAttribute(new Attribute("aggregate", m_aggregate));
+                    } else if (! m_aggregate.equals(aggregate)) {
+                        System.err.println("The aggregate attribute is not always the same");
+                        return;
+                    }
+                }
+                
+                if (m_filter != null) {
+                    if (filter == null) {
+                        req.addAttribute(new Attribute("filter", m_filter));
+                    } else if (! m_filter.equals(filter)) {
+                        System.err.println("The filter attribute is not always the same");
+                        return;
+                    }
+                }
+                
+                if (m_policy != null) {
+                    if (policy == null) {
+                        req.addAttribute(new Attribute("policy", m_policy));
+                    } else if (! m_policy.equals(policy)) {
+                        System.err.println("The policy attribute is not always the same");
+                        return;
+                    }
+                }
+                
+                if (m_comparator != null) {
+                    if (comparator == null) {
+                        req.addAttribute(new Attribute("comparator", m_comparator));
+                    } else if (! m_comparator.equals(policy)) {
+                        System.err.println("The comparator attribute is not always the same");
+                        return;
+                    }
+                }
+                
             }
             Element method = new Element("callback", "");
             method.addAttribute(new Attribute("method", m_name));
