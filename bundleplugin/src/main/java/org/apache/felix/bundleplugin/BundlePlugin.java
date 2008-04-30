@@ -362,12 +362,6 @@ public class BundlePlugin extends AbstractMojo
         // update BND instructions to add included Maven resources
         includeMavenResources( currentProject, properties, getLog() );
 
-        if ( null != classifier && classifier.trim().length() > 0 )
-        {
-            String bundleVersion = properties.getProperty( Analyzer.BUNDLE_VERSION );
-            properties.put( Analyzer.BUNDLE_VERSION, bundleVersion + '-' + classifier );
-        }
-
         if ( !properties.containsKey( Analyzer.EXPORT_PACKAGE ) && !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
         {
             String bsn = properties.getProperty( Analyzer.BUNDLE_SYMBOLICNAME );
@@ -820,6 +814,8 @@ public class BundlePlugin extends AbstractMojo
         properties.put( "project.baseDir", baseDir );
         properties.put( "project.build.directory", getBuildDirectory() );
         properties.put( "project.build.outputdirectory", getOutputDirectory() );
+
+        properties.put( "classifier", classifier == null ? "" : classifier );
 
         return properties;
     }
