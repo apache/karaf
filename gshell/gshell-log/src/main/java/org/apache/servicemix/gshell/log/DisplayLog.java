@@ -71,6 +71,11 @@ public class DisplayLog extends OsgiCommandSupport {
                 pc.format(sb, event);
             }
             io.out.print(sb.toString());
+            if (event.getThrowableStrRep() != null) {
+                for (String r : event.getThrowableStrRep()) {
+                    io.out.println(r);
+                }
+            }
         }
         io.out.println();
         
