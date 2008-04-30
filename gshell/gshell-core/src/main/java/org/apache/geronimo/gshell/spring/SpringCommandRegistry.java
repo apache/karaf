@@ -160,10 +160,9 @@ public class SpringCommandRegistry extends DefaultCommandRegistry implements Lay
         if (node instanceof GroupNode) {
             if (s.startsWith(ALIAS_PREFIX)) {
                 s = s.substring(ALIAS_PREFIX.length());
-                for (Node n : ((GroupNode) node).nodes()) {
-                    if (n instanceof CommandNode && ((CommandNode) n).getId().equals(s)) {
-                        return n;
-                    }
+                Node n = recursiveFind((GroupNode) node, s);
+                if (n != null) {
+                    return n;
                 }
                 throw new NotFoundException(s);
             }
@@ -178,6 +177,20 @@ public class SpringCommandRegistry extends DefaultCommandRegistry implements Lay
         } else {
             throw new NotFoundException(s);
         }
+    }
+
+    private Node recursiveFind(GroupNode groupNode, String s) {
+        for (Node n : groupNode.nodes()) {
+            if (n instanceof CommandNode && ((CommandNode) n).getId().equals(s)) {
+                return n;
+            } else if (n instanceof GroupNode) {
+                Node n2 = recursiveFind((GroupNode) n, s);
+                if (n2 != null) {
+                    return n2;
+                }
+            }
+        }
+        return null;
     }
 
     public Node findNode(String path, String searchPath) throws NotFoundException {
