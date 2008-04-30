@@ -133,6 +133,7 @@
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.mina-${mina.version}</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.core</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.osgi</include>
+                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.log</include>
 
 		        <!-- OBR + GShell command -->
                 <include>org.apache.felix:org.apache.felix.bundlerepository</include>

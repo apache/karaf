@@ -80,7 +80,7 @@
       <jline.version>0.9.93</jline.version>
       <log4j.version>1.2.14</log4j.version>
       <mina.version>1.1.6</mina.version>
-      <pax.logging.version>1.0.0</pax.logging.version>
+      <pax.logging.version>1.1-SNAPSHOT</pax.logging.version>
       <pax.url.version>0.3.0</pax.url.version>
       <servicemix.legal.version>1.0</servicemix.legal.version>
       <servicemix.spec.version>1.0-SNAPSHOT</servicemix.spec.version>
@@ -102,11 +102,19 @@
            <name>Apache ServiceMix Repository</name>
            <url>http://svn.apache.org/repos/asf/servicemix/m2-repo</url>
        </repository>
-       <!-- Spring Milestone repo -->
+       <!-- OPS4J repo -->
        <repository>
            <id>ops4j</id>
            <name>OPS4j Repository</name>
            <url>http://repository.ops4j.org/maven2</url>
+       </repository>
+       <!-- OPS4J snapshots repo -->
+       <repository>
+           <id>ops4j-snapshots</id>
+           <name>OPS4j Snapshots Repository</name>
+           <url>http://repository.ops4j.org/mvn-snapshots</url>
+           <releases><enabled>false</enabled></releases>
+           <snapshots><enabled>true</enabled></snapshots>
        </repository>
    </repositories>
 

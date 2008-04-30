@@ -39,6 +39,7 @@
         <module>gshell-obr</module>
         <module>gshell-wrapper</module>
         <module>gshell-features</module>
+        <module>gshell-log</module>
     </modules>
 
 </project>

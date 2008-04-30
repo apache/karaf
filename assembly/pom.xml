@@ -109,6 +109,11 @@
           <artifactId>org.apache.servicemix.kernel.gshell.osgi</artifactId>
           <version>${pom.version}</version>
       </dependency>
+      <dependency>
+          <groupId>org.apache.servicemix.kernel.gshell</groupId>
+          <artifactId>org.apache.servicemix.kernel.gshell.log</artifactId>
+          <version>${pom.version}</version>
+      </dependency>
         <dependency>
             <groupId>org.apache.servicemix.kernel.gshell</groupId>
             <artifactId>org.apache.servicemix.kernel.gshell.features</artifactId>
