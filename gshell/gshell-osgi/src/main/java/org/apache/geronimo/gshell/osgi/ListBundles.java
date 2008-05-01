@@ -31,7 +31,7 @@ import org.osgi.service.startlevel.StartLevel;
  * Time: 9:44:20 AM
  * To change this template use File | Settings | File Templates.
  */
-@CommandComponent(id="osgi:listBundles", description="List bundles")
+@CommandComponent(id="osgi:list-bundles", description="List bundles")
 public class ListBundles extends OsgiCommandSupport {
 
     @Option(name = "-l", description = "Show locations")

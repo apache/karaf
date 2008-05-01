@@ -29,7 +29,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * Time: 12:37:30 PM
  * To change this template use File | Settings | File Templates.
  */
-@CommandComponent(id="osgi:bundleLevel", description="Get or set the start level of a given bundle")
+@CommandComponent(id="osgi:bundle-level", description="Get or set the start level of a given bundle")
 public class BundleLevel extends BundleCommand {
 
     @Argument(required = false, index = 1)

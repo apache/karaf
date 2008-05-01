@@ -30,7 +30,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * Time: 12:37:30 PM
  * To change this template use File | Settings | File Templates.
  */
-@CommandComponent(id="osgi:startLevel", description="Get or set the start level")
+@CommandComponent(id="osgi:start-level", description="Get or set the start level")
 public class StartLevel extends OsgiCommandSupport {
 
     @Argument(required = false, index = 0)
