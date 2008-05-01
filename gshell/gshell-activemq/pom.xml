@@ -68,6 +68,12 @@
             <artifactId>activemq-optional</artifactId>
             <version>5.2-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-console</artifactId>
+            <version>5.2-SNAPSHOT</version>
+        </dependency>
         
     </dependencies>
 

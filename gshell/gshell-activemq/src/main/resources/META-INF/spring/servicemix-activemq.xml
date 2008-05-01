@@ -35,8 +35,6 @@
 	
     <!-- wrapper commands -->
     <bean id="create-broker" class="org.apache.servicemix.kernel.gshell.activemq.CreateBrokerCommand" />
-    <bean id="destroy-broker" class="org.apache.servicemix.kernel.gshell.activemq.DestroyBrokerCommand" />
-    
     <osgi:service ref="create-broker" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
         <entry key="shell" value="activemq"/>
@@ -44,11 +42,27 @@
       </osgi:service-properties>
     </osgi:service>
 
+    <bean id="destroy-broker" class="org.apache.servicemix.kernel.gshell.activemq.DestroyBrokerCommand" />
     <osgi:service ref="destroy-broker" interface="org.apache.geronimo.gshell.command.Command">
       <osgi:service-properties>
         <entry key="shell" value="activemq"/>
       	<entry key="name" value="destroy-broker"/>
       </osgi:service-properties>
     </osgi:service>
+
+    <!-- This is a bit experimental still.. basically we are bridging to ActiveMQ commands implemented in the activemq-core bundle.     
+    <bean id="list" class="org.apache.servicemix.kernel.gshell.activemq.AdministrationCommand">
+    	<property name="id" value="activemq:list"/>
+    	<property name="description" value="lists stuff"/>
+    	<property name="command"><bean class="org.apache.activemq.console.command.ListCommand"/></property>
+    </bean>
+    <osgi:service ref="list" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="activemq"/>
+      	<entry key="name" value="list"/>
+      </osgi:service-properties>
+    </osgi:service>     
+    -->
+
     
 </beans>

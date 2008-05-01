@@ -25,7 +25,7 @@
     <!-- Allows us to use system properties as variables in this configuration file -->
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
-    <broker xmlns="http://activemq.apache.org/schema/core" brokerName="localhost" dataDirectory="${servicemix.base}/data/activemq/localhost">
+    <broker xmlns="http://activemq.apache.org/schema/core" brokerName="${name}" dataDirectory="${servicemix.base}/data/activemq/${name}">
 
         <!-- Destination specific policies using destination names or wildcards -->
         <destinationPolicy>
@@ -56,7 +56,7 @@
         </networkConnectors>
 
         <persistenceAdapter>
-            <amqPersistenceAdapter syncOnWrite="false" directory="${servicemix.base}/data/activemq/localhost" maxFileLength="20 mb"/>
+            <amqPersistenceAdapter syncOnWrite="false" directory="${servicemix.base}/data/activemq/${name}" maxFileLength="20 mb"/>
         </persistenceAdapter>
 
         <!-- Use the following if you wish to configure the journal with JDBC -->
