@@ -50,10 +50,9 @@
       </osgi:service-properties>
     </osgi:service>
 
-    <!-- This is a bit experimental still.. basically we are bridging to ActiveMQ commands implemented in the activemq-core bundle.     
     <bean id="list" class="org.apache.servicemix.kernel.gshell.activemq.AdministrationCommand">
     	<property name="id" value="activemq:list"/>
-    	<property name="description" value="lists stuff"/>
+    	<property name="description" value="Lists all available brokers in the specified JMX context"/>
     	<property name="command"><bean class="org.apache.activemq.console.command.ListCommand"/></property>
     </bean>
     <osgi:service ref="list" interface="org.apache.geronimo.gshell.command.Command">
@@ -62,7 +61,53 @@
       	<entry key="name" value="list"/>
       </osgi:service-properties>
     </osgi:service>     
-    -->
 
+    <bean id="query" class="org.apache.servicemix.kernel.gshell.activemq.AdministrationCommand">
+    	<property name="id" value="activemq:query"/>
+    	<property name="description" value="Display selected broker component's attributes and statistics"/>
+    	<property name="command"><bean class="org.apache.activemq.console.command.QueryCommand"/></property>
+    </bean>
+    <osgi:service ref="query" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="activemq"/>
+      	<entry key="name" value="query"/>
+      </osgi:service-properties>
+    </osgi:service>     
+
+    <bean id="browse" class="org.apache.servicemix.kernel.gshell.activemq.AdministrationCommand">
+    	<property name="id" value="activemq:browse"/>
+    	<property name="description" value="Display selected messages in a specified destination"/>
+    	<property name="command"><bean class="org.apache.activemq.console.command.AmqBrowseCommand"/></property>
+    </bean>
+    <osgi:service ref="browse" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="activemq"/>
+      	<entry key="name" value="browse"/>
+      </osgi:service-properties>
+    </osgi:service>     
     
+    <bean id="purge" class="org.apache.servicemix.kernel.gshell.activemq.AdministrationCommand">
+    	<property name="id" value="activemq:purge"/>
+    	<property name="description" value="Delete selected destination's messages that matches the message selector"/>
+    	<property name="command"><bean class="org.apache.activemq.console.command.PurgeCommand"/></property>
+    </bean>
+    <osgi:service ref="purge" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="activemq"/>
+      	<entry key="name" value="purge"/>
+      </osgi:service-properties>
+    </osgi:service>     
+    
+    <bean id="bstat" class="org.apache.servicemix.kernel.gshell.activemq.AdministrationCommand">
+    	<property name="id" value="activemq:bstat"/>
+    	<property name="description" value="Displays useful broker statistics"/>
+    	<property name="command"><bean class="org.apache.activemq.console.command.BstatCommand"/></property>
+    </bean>
+    <osgi:service ref="bstat" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="activemq"/>
+      	<entry key="name" value="bstat"/>
+      </osgi:service-properties>
+    </osgi:service>
+        
 </beans>

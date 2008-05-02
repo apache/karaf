@@ -16,6 +16,7 @@
  */
 package org.apache.servicemix.kernel.gshell.activemq;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.activemq.console.formatter.CommandShellOutputFormatter;
@@ -40,10 +41,29 @@ public class AdministrationCommand implements Command
 		context2.setFormatter(new CommandShellOutputFormatter(context.getIO().outputStream));
 		try {
 			command.setCommandContext(context2);
-			command.execute(Arrays.asList(args));
+			command.execute(new ArrayList<String>(Arrays.asList(args)));
 		} catch (Throwable e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Throwable cur = e;
+			while( cur.getCause()!=null ) {
+				cur = cur.getCause();
+			}
+			if( cur instanceof java.net.ConnectException ){
+				context2.print(
+						"\n"+
+						"Could not connect to JMX server.  This command requires that the remote JMX server be enabled.\n"+
+						"This is typically done by adding the following JVM arguments: \n" +
+						"   -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.authenticate=false \n" +
+						"   -Dcom.sun.management.jmxremote.ssl=false \n" +
+						"\n" +
+						"The connection error was: "+cur+"\n");
+			} else {
+				if( e instanceof Exception ) {
+					throw (Exception)e;
+				} else {
+					throw new RuntimeException(e);
+				}
+				
+			}
 		}
 		return SUCCESS;
 	}
