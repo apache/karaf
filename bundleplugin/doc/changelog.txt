@@ -1,3 +1,15 @@
+Changes from 1.4.0 to 1.4.1
+---------------------------
+
+ * [2008-04-30] FELIX-543: add switch to prevent classifier being appended to Bundle-Version
+ * [2008-04-23] FELIX-541: allow repository.xml to reference to xsl file
+ * [2008-04-23] FELIX-531: Allow the import package scope to be set for the bundleall goal in the maven-bundle-plugin
+ * [2008-04-23] FELIX-523: Update bundleplugin to use BND 0.0.255
+ * [2008-04-01] FELIX-526: Allow a mechanism to give preference to local resources over the ones from embedded jars
+ * [2008-03-24] FELIX-519: maven-bundle-plugin should issue a WARNING for unsupported packaging types
+ * [2008-03-16] FELIX-517: Replacement of {maven-dependencies} in Include-Resource and Bundle-ClassPath can strip Windows path separators
+ * [2008-03-03] FELIX-505: maven-bundle-plugin:bundleall modifies dependencies that are already bundles
+
 Changes from 1.2.1 to 1.4.0
 ---------------------------
 
