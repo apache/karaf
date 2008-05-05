@@ -22,10 +22,10 @@ import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import org.apache.felix.ipojo.IPojoFactory;
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.HandlerFactory;
+import org.apache.felix.ipojo.IPojoFactory;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.shell.Command;
