@@ -425,7 +425,7 @@ public class Pojoization {
     private void setImports(Attributes att) {
         Map imports = parseHeader(att.getValue("Import-Package"));
         Map ver = new TreeMap();
-        ver.put("version", "0.7.6");
+        ver.put("version", "0.8.0");
         if (!imports.containsKey("org.apache.felix.ipojo")) {
             imports.put("org.apache.felix.ipojo", ver);
         }

@@ -28,7 +28,7 @@
 	<name>Apache Felix iPOJO</name>
 	<artifactId>org.apache.felix.ipojo</artifactId>
 	<groupId>org.apache.felix</groupId>
-	<version>0.7.6-SNAPSHOT</version>
+	<version>0.8.0-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -43,12 +43,12 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.metadata</artifactId>
-			<version>0.7.6-SNAPSHOT</version>
+			<version>0.8.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.manipulator</artifactId>
-			<version>0.7.6-SNAPSHOT</version>
+			<version>0.8.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -61,7 +61,9 @@
 				<configuration>
 					<instructions>
 						<Bundle-Name>iPOJO</Bundle-Name>
-                        <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
+						<Bundle-Vendor>
+							The Apache Software Foundation
+						</Bundle-Vendor>
 						<Bundle-Description>
 							iPOJO Core Framework
 						</Bundle-Description>
@@ -83,23 +85,27 @@
 							org.apache.felix.ipojo.handlers.lifecycle.controller
 						</Private-Package>
 						<Export-Package>
-							org.apache.felix.ipojo; version="0.7.6",
+							org.apache.felix.ipojo; version="0.8.0",
 							org.apache.felix.ipojo.metadata;
-							version="0.7.6",
+							version="0.8.0",
 							org.apache.felix.ipojo.architecture;
-							version="0.7.6",
+							version="0.8.0",
 							org.apache.felix.ipojo.parser;
-							version="0.7.6",
+							version="0.8.0",
 							org.apache.felix.ipojo.util;
-							version="0.7.6",
+							version="0.8.0",
 							org.apache.felix.ipojo.handlers.dependency;
-							version="0.7.6",
+							version="0.8.0",
 							org.apache.felix.ipojo.handlers.providedservice;
-							version="0.7.6",
+							version="0.8.0",
 							org.apache.felix.ipojo.context;
-							version="0.7.6", org.osgi.service.cm,
+							version="0.8.0", org.osgi.service.cm,
 							org.osgi.service.log
 						</Export-Package>
+						<Include-Resource>
+							META-INF/LICENCE=LICENSE,
+							META-INF/NOTICE=NOTICE
+						</Include-Resource>
 						<_donotcopy>
 							(CVS|.svn|.+.bak|~.+|metadata.xml)
 						</_donotcopy>
@@ -109,7 +115,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-ipojo-plugin</artifactId>
-				<version>0.7.6-SNAPSHOT</version>
+				<version>0.8.0-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>

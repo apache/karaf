@@ -22,22 +22,22 @@
 	<name>iPOJO Composite (Service Instance) Test Suite</name>
 	<artifactId>tests.composite.service.instance</artifactId>
 	<groupId>ipojo.tests</groupId>
-	<version>0.7.6-SNAPSHOT</version>
+	<version>0.8.0-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo</artifactId>
-			<version>0.7.6-SNAPSHOT</version>
+			<version>0.8.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.composite</artifactId>
-			<version>0.7.6-SNAPSHOT</version>
+			<version>0.8.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.metadata</artifactId>
-			<version>0.7.6-SNAPSHOT</version>
+			<version>0.8.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -52,12 +52,12 @@
 		<dependency>
 			<groupId>ipojo.examples</groupId>
 			<artifactId>org.apache.felix.ipojo.junit4osgi</artifactId>
-			<version>0.7.6-SNAPSHOT</version>
+			<version>0.8.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ipojo.tests</groupId>
 			<artifactId>tests.composite</artifactId>
-			<version>0.7.6-SNAPSHOT</version>
+			<version>0.8.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -84,7 +84,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-ipojo-plugin</artifactId>
-				<version>0.7.6-SNAPSHOT</version>
+				<version>0.8.0-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>

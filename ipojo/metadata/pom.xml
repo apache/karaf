@@ -26,7 +26,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.apache.felix.ipojo.metadata</artifactId>
 	<groupId>org.apache.felix</groupId>
-	<version>0.7.6-SNAPSHOT</version>
+	<version>0.8.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 	<name>Apache Felix iPOJO Metadata</name>
 	<build>
@@ -39,13 +39,19 @@
 				<configuration>
 					<instructions>
 						<Bundle-Name>iPOJO Metadata</Bundle-Name>
-                        <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
+						<Bundle-Vendor>
+							The Apache Software Foundation
+						</Bundle-Vendor>
 						<Bundle-Description>
 							iPOJO Metadata
 						</Bundle-Description>
 						<Export-Package>
 							org.apache.felix.ipojo.metadata
 						</Export-Package>
+						<Include-Resource>
+							META-INF/LICENCE=LICENSE,
+							META-INF/NOTICE=NOTICE
+						</Include-Resource>
 					</instructions>
 				</configuration>
 			</plugin>
