@@ -126,11 +126,6 @@
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.xstream-1.2.2</artifactId>
-          <version>${pom.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.aopalliance-1.0</artifactId>
           <version>${pom.version}</version>
       </dependency>

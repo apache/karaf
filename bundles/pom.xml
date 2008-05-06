@@ -40,7 +40,6 @@
         <module>cglib</module>
         <module>junit</module>
         <module>mina</module>
-        <module>xstream</module>
     </modules>
 
     <properties>

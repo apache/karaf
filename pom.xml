@@ -67,7 +67,7 @@
       <commons.io.version>1.3.2</commons.io.version>
       <commons.logging.version>1.1.1</commons.logging.version>
       <felix.configadmin.version>1.0.0</felix.configadmin.version>
-      <felix.main.version>1.0.3</felix.main.version>
+      <felix.main.version>1.0.4</felix.main.version>
       <felix.plugin.version>1.4.0</felix.plugin.version>
       <felix.framework.version>1.1.0-r631613</felix.framework.version>
       <felix.osgi.version>1.0.0</felix.osgi.version>
@@ -83,10 +83,8 @@
       <pax.logging.version>1.1-SNAPSHOT</pax.logging.version>
       <pax.url.version>0.3.0</pax.url.version>
       <servicemix.legal.version>1.0</servicemix.legal.version>
-      <servicemix.spec.version>1.0-SNAPSHOT</servicemix.spec.version>
-      <spring.osgi.version>1.0.1</spring.osgi.version>
-      <spring.version>2.5.1</spring.version>
-      <xstream.version>1.2.2</xstream.version>
+      <spring.osgi.version>1.0.2</spring.osgi.version>
+      <spring.version>2.5.2</spring.version>
   </properties>
 
    <repositories>
@@ -454,6 +452,7 @@
                   <plugin>
                       <groupId>org.apache.maven.plugins</groupId>
                       <artifactId>maven-javadoc-plugin</artifactId>
+                      <version>2.4</version>
                       <executions>
                           <execution>
                               <id>attach-javadocs</id>
