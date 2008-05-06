@@ -34,7 +34,6 @@
     <name>Apache ServiceMix Kernel :: GShell</name>
 
     <modules>
-        <module>gshell-activemq</module>
         <module>gshell-core</module>
         <module>gshell-osgi</module>
         <module>gshell-obr</module>
