@@ -113,11 +113,6 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         RepositoryImpl repo = new RepositoryImpl(url);
         repositories.put(url, repo);
         features = null;
-        try {
-            repo.load();
-        } catch (IOException e) {
-            LOGGER.warn("Error loading features repository from url '" + url, e);
-        }
     }
 
     public void removeRepository(URL url) {
@@ -126,7 +121,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public void internalRemoveRepository(URL url) {
-        Repository repo = repositories.remove(url);
+        repositories.remove(url);
         features = null;
     }
 
@@ -216,7 +211,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         saveState();
     }
 
-    public String[] listFeatures() {
+    public String[] listFeatures() throws Exception {
         Collection<String> features = new ArrayList<String>();
         for (Repository repo : repositories.values()) {
             for (Feature f : repo.getFeatures()) {
@@ -230,11 +225,11 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         return installed.keySet().toArray(new String[installed.size()]);
     }
 
-    protected Feature getFeature(String name) {
+    protected Feature getFeature(String name) throws Exception {
         return getFeatures().get(name);
     }
 
-    protected Map<String, Feature> getFeatures() {
+    protected Map<String, Feature> getFeatures() throws Exception {
         if (features == null) {
             Map<String, Feature> map = new HashMap<String, Feature>();
             for (Repository repo : repositories.values()) {

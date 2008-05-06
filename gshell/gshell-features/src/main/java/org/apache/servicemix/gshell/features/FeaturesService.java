@@ -33,7 +33,7 @@ public interface FeaturesService {
 
     void uninstallFeature(String name) throws Exception;
 
-    String[] listFeatures();
+    String[] listFeatures() throws Exception;
 
     String[] listInstalledFeatures();
 

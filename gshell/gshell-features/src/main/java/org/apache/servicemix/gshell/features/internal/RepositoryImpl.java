@@ -43,7 +43,7 @@ import org.xml.sax.SAXException;
 public class RepositoryImpl implements Repository {
 
     private URL url;
-    private List<Feature> features = new ArrayList<Feature>();
+    private List<Feature> features;
 
     public RepositoryImpl(URL url) {
         this.url = url;
@@ -53,7 +53,10 @@ public class RepositoryImpl implements Repository {
         return url;
     }
 
-    public Feature[] getFeatures() {
+    public Feature[] getFeatures() throws Exception {
+        if (features == null) {
+            load();
+        }
         return features.toArray(new Feature[features.size()]);
     }
 
