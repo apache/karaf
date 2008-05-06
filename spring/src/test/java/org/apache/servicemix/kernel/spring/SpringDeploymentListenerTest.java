@@ -19,7 +19,6 @@ package org.apache.servicemix.kernel.spring;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
