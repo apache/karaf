@@ -137,10 +137,6 @@ public class UpdateCommandImpl implements Command
 
     private String absoluteLocation(String location)
     {
-        if (!location.endsWith(".jar"))
-        {
-            location = location + ".jar";
-        }
         try
         {
             new URL(location);
@@ -167,13 +163,12 @@ public class UpdateCommandImpl implements Command
 
                 String theURL = baseURL + location;
                 new URL(theURL);
-
+                location = theURL;
             }
             catch (Exception ex2)
             {
-                return null;
+                // Just fall through and return the original location.
             }
-            location = baseURL + location;
         }
         return location;
     }
