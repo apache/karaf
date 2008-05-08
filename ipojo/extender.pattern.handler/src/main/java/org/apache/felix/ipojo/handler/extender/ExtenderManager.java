@@ -19,22 +19,19 @@
 package org.apache.felix.ipojo.handler.extender;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.util.Callback;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.SynchronousBundleListener;
 
 /**
  * Track and manage extensions.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ExtenderManager implements SynchronousBundleListener {
+public class ExtenderManager extends BundleTracker {
     
     /**
      * Looked extension.
@@ -57,14 +54,9 @@ public class ExtenderManager implements SynchronousBundleListener {
     private PrimitiveHandler m_handler;
     
     /**
-     * Bundle context. 
+     * Set of managed bundles.
      */
-    private BundleContext m_context;
-    
-    /**
-     * List of managed bundles. 
-     */
-    private List m_bundles = new ArrayList();
+    private Set m_bundles = new HashSet();
     
     /**
      * Constructor.
@@ -74,40 +66,27 @@ public class ExtenderManager implements SynchronousBundleListener {
      * @param unbind : onDeparture method.
      */
     public ExtenderManager(ExtenderModelHandler handler, String extension, String bind, String unbind) {
+        super(handler.getInstanceManager().getContext());
         m_handler = handler;
         m_onArrival = new Callback(bind, new Class[] {Bundle.class, String.class}, false, m_handler.getInstanceManager());
         m_onDeparture = new Callback(unbind, new Class[] {Bundle.class}, false, m_handler.getInstanceManager());
         m_extension = extension;
-        m_context = handler.getInstanceManager().getContext();
     }
-    
+
+
     /**
-     * Start method.
-     * Look for already presents bundle and register a (synchronous) bundle listener.
+     * A bundle arrives.
+     * Checks if the bundle match with the looked extension, if so call the arrival callback.
+     * @param bundle : arriving bundle.
+     * @see org.apache.felix.ipojo.handler.extender.BundleTracker#addedBundle(org.osgi.framework.Bundle)
      */
-    public void start() {
-        synchronized (this) {
-            // listen to any changes in bundles.
-            m_context.addBundleListener(this);
-            // compute already started bundles.
-            for (int i = 0; i < m_context.getBundles().length; i++) {
-                if (m_context.getBundles()[i].getState() == Bundle.ACTIVE) {
-                    onArrival(m_context.getBundles()[i]);
-                }
-            }
-        }
-    }
-    
-    /**
-     * Manage a bundle arrival:
-     * Check the extension and manage it if present.
-     * @param bundle : bundle.
-     */
-    private void onArrival(Bundle bundle) {
+    protected void addedBundle(Bundle bundle) {
         Dictionary headers = bundle.getHeaders();
         String header = (String) headers.get(m_extension);
         if (header != null) {
-            m_bundles.add(bundle);
+            synchronized (this) {
+                m_bundleSet.add(bundle);
+            }
             try {
                 m_onArrival.call(new Object[] {bundle, header});
             } catch (NoSuchMethodException e) {
@@ -124,40 +103,18 @@ public class ExtenderManager implements SynchronousBundleListener {
     }
 
     /**
-     * Stop method.
-     * Remove the bundle listener. 
+     * A bundle is stopping.
+     * Check if the bundle was managed, if so call the remove departure callback.
+     * @param bundle : leaving bundle.
+     * @see org.apache.felix.ipojo.handler.extender.BundleTracker#removedBundle(org.osgi.framework.Bundle)
      */
-    public void stop() {
-        m_context.removeBundleListener(this);
-        m_bundles.clear();
-    }
-
-    /**
-     * Bundle listener.
-     * @param event : event.
-     * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.BundleEvent)
-     */
-    public void bundleChanged(BundleEvent event) {
-        switch (event.getType()) {
-            case BundleEvent.STARTED:
-                onArrival(event.getBundle());
-                break;
-            case BundleEvent.STOPPING:
-                onDeparture(event.getBundle());
-                break;
-            default: 
-                break;
+    protected void removedBundle(Bundle bundle) {
+        boolean contained;
+        synchronized (this) {
+            contained = m_bundles.remove(bundle); // Stack confinement
         }
         
-    }
-
-    /**
-     * Manage a bundle departure.
-     * If the bundle was managed, invoke the OnDeparture callback, and remove the bundle from the list.
-     * @param bundle : bundle.
-     */
-    private void onDeparture(Bundle bundle) {
-        if (m_bundles.contains(bundle)) {
+        if (contained) {
             try {
                 m_onDeparture.call(new Object[] {bundle});
             } catch (NoSuchMethodException e) {

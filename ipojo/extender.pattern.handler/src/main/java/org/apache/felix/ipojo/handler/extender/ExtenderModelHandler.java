@@ -41,6 +41,7 @@ public class ExtenderModelHandler extends PrimitiveHandler {
     
     /**
      * Extension manager list.
+     * Immutable once set.
      */
     private List m_managers = new ArrayList(1);
 
@@ -77,7 +78,7 @@ public class ExtenderModelHandler extends PrimitiveHandler {
      */
     public void start() {
         for (int i = 0; i < m_managers.size(); i++) {
-            ((ExtenderManager) m_managers.get(i)).start();
+            ((ExtenderManager) m_managers.get(i)).open();
         }
     }
 
@@ -87,7 +88,7 @@ public class ExtenderModelHandler extends PrimitiveHandler {
      */
     public void stop() {
         for (int i = 0; i < m_managers.size(); i++) {
-            ((ExtenderManager) m_managers.get(i)).stop();
+            ((ExtenderManager) m_managers.get(i)).close();
         } 
     }
 
