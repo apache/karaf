@@ -202,7 +202,14 @@ public class Main
                 System.exit(-1);
             }
             System.out.println("");
-            if (profileName.length() != 0)
+
+            // On some platforms readLine() can return null, such as when
+            // control-C is pressed, so check for that case.
+            if (profileName == null)
+            {
+                profileName = "";
+            }
+            else if (profileName.length() != 0)
             {
                 configProps.setProperty(BundleCache.CACHE_PROFILE_PROP, profileName);
             }
