@@ -2317,6 +2317,8 @@ ex.printStackTrace();
                     archive.getRevisionCount() - 1).getManifestHeader())));
 
                 verifyExecutionEnvironment(bundle);
+                
+                checkFragment(bundle);
 
                 addSecurity(bundle);
 
@@ -2448,6 +2450,21 @@ ex.printStackTrace();
                     throw new BundleException("Execution Environment not supported: " + bundleEnvironment);
                 }
             }
+        }
+    }
+
+    /**
+     * Checks whether bundle is a fragment bundle, and if so, logs a warning as fragment bundles
+     * are not yet supported by Felix.
+     * @param bundle The bundle to verify
+    **/
+    private void checkFragment(FelixBundle bundle)
+    {
+        String fragmentHost = (String) bundle.getInfo().getCurrentHeader().get(Constants.FRAGMENT_HOST);
+        if (fragmentHost != null)
+        {
+            m_logger.log(Logger.LOG_WARNING, "Bundle " + bundle.getBundleId()
+                + " is a fragment bundle. Fragment bundles are not yet supported!");
         }
     }
 
