@@ -87,6 +87,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         {
             initialize();
         }
+
         return new ResolverImpl(m_context, this);
     }
 
@@ -105,6 +106,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         catch (InvalidSyntaxException ex)
         {
             System.err.println(ex);
+            return new Resource[0];
         }
 
         Resource[] resources = null;
