@@ -98,7 +98,16 @@ public class LocalRepositoryImpl implements Repository
         // convert the bundle headers to the appropriate resource metadata.
         for (int i = 0; (bundles != null) && (i < bundles.length); i++)
         {
-            m_localResourceList.add(new LocalResourceImpl(bundles[i]));
+            try
+            {
+                m_localResourceList.add(new LocalResourceImpl(bundles[i]));
+            }
+            catch (InvalidSyntaxException ex)
+            {
+                // This should never happen since we are generating filters,
+                // but ignore the resource if it does occur.
+                System.err.println(ex);
+            }
         }
     }
 
@@ -106,12 +115,13 @@ public class LocalRepositoryImpl implements Repository
     {
         private Bundle m_bundle = null;
 
-        LocalResourceImpl(Bundle bundle)
+        LocalResourceImpl(Bundle bundle) throws InvalidSyntaxException
         {
             this(null, bundle);
         }
 
         LocalResourceImpl(ResourceImpl resource, Bundle bundle)
+            throws InvalidSyntaxException
         {
             super(resource);
             m_bundle = bundle;
@@ -123,7 +133,7 @@ public class LocalRepositoryImpl implements Repository
             return m_bundle;
         }
 
-        private void initialize()
+        private void initialize() throws InvalidSyntaxException
         {
             Dictionary dict = m_bundle.getHeaders();
 
@@ -232,6 +242,7 @@ public class LocalRepositoryImpl implements Repository
         }
 
         private void convertImportPackageToRequirement(Dictionary dict)
+            throws InvalidSyntaxException
         {
             String target = (String) dict.get(Constants.IMPORT_PACKAGE);
             if (target != null)
@@ -271,13 +282,14 @@ public class LocalRepositoryImpl implements Repository
                             + imports[impIdx].getName() + ")"
                             + low + ")");
                     }
-                    
+
                     addRequire(req);
                 }
             }
         }
 
         private void convertImportServiceToRequirement(Dictionary dict)
+            throws InvalidSyntaxException
         {
             String target = (String) dict.get(Constants.IMPORT_SERVICE);
             if (target != null)

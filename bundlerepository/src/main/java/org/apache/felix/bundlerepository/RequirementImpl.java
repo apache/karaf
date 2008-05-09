@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -52,17 +52,9 @@ public class RequirementImpl implements Requirement
         return m_filter.toString();
     }
 
-    public synchronized void setFilter(String filter)
+    public synchronized void setFilter(String filter) throws InvalidSyntaxException
     {
-        try
-        {
-            m_filter = RepositoryAdminImpl.m_context.createFilter(filter);
-        }
-        catch (InvalidSyntaxException ex)
-        {
-            m_filter = null;
-            System.err.println(ex);
-        }
+        m_filter = RepositoryAdminImpl.m_context.createFilter(filter);
     }
 
     public synchronized boolean isSatisfied(Capability capability)
