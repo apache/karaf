@@ -6,6 +6,4 @@
    This product contains software developed by
    The Apache Software Foundation (http://www.apache.org/).
 
-   This product contains software developed by
-   Open Participation Software for Java (http://www.ops4j.org/).
 

@@ -23,7 +23,9 @@ import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.text.DateFormat;
 
-
+/**
+ * Copied from log4j
+ */
 /**
    Formats a {@link Date} in the format "HH:mm:ss,SSS" for example,
    "15:49:37,459".

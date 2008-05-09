@@ -22,8 +22,10 @@ import java.util.Date;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
 
+/**
+ * Copied from log4j
+ */
 // Contributors: Arndt Schoenewald <arndt@ibm23093i821.mc.schoenewald.de>
-
 /**
    Formats a {@link Date} in the format "yyyy-MM-dd HH:mm:ss,SSS" for example
    "1999-11-27 15:49:37,459".

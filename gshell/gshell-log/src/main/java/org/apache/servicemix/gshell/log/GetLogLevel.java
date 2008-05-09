@@ -32,10 +32,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.Configuration;
 
 /**
- * User: ewoodman
- * Date: March 3, 2008
- * Time: 11:10:10 AM
- * To change this template use File | Settings | File Templates.
+ * Get the log level for a given logger
  */
 @CommandComponent(id = "log:get", description = "Show Log Level")
 public class GetLogLevel extends OsgiCommandSupport {
@@ -51,7 +48,7 @@ public class GetLogLevel extends OsgiCommandSupport {
 
     protected Object doExecute() throws Exception {
         ConfigurationAdmin cfgAdmin = getConfigAdmin();
-        Configuration cfg = cfgAdmin.getConfiguration(CONFIGURATION_PID);
+        Configuration cfg = cfgAdmin.getConfiguration(CONFIGURATION_PID, null);
         Dictionary props = cfg.getProperties();
 
         if (ROOT_LOGGER.equalsIgnoreCase(this.logger)) {

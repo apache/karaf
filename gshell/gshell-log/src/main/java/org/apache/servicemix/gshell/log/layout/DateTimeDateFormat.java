@@ -24,6 +24,9 @@ import java.text.ParsePosition;
 import java.text.DateFormatSymbols;
 
 /**
+ * Copied from log4j
+ */
+/**
    Formats a {@link Date} in the format "dd MMM yyyy HH:mm:ss,SSS" for example,
    "06 Nov 1994 15:49:37,459".
 

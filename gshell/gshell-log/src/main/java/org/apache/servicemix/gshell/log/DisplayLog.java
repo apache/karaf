@@ -23,6 +23,9 @@ import org.apache.servicemix.gshell.log.layout.PatternConverter;
 import org.apache.servicemix.gshell.log.layout.PatternParser;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
+/**
+ * Displays the last log entries
+ */
 @CommandComponent(id = "log:display", description = "Display log entries")
 public class DisplayLog extends OsgiCommandSupport {
 

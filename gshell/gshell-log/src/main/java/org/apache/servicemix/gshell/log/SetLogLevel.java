@@ -27,10 +27,7 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.framework.ServiceReference;
 
 /**
- * User: ewoodman
- * Date: March 3, 2008
- * Time: 11:10:10 AM
- * To change this template use File | Settings | File Templates.
+ * Set the log level for a given logger
  */
 @CommandComponent(id = "log:set", description = "Change the log level")
 public class SetLogLevel extends OsgiCommandSupport {
@@ -72,7 +69,7 @@ public class SetLogLevel extends OsgiCommandSupport {
         }
 
         ConfigurationAdmin cfgAdmin = getConfigAdmin();
-        Configuration cfg = cfgAdmin.getConfiguration(CONFIGURATION_PID);
+        Configuration cfg = cfgAdmin.getConfiguration(CONFIGURATION_PID, null);
         Dictionary props = cfg.getProperties();
 
         String logger = this.logger;

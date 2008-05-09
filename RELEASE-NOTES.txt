@@ -15,6 +15,42 @@
  * limitations under the License.
  */
 
+                  Apache ServiceMix Kernel 1.0-m3
+                  ================================
+
+This third milestone of Apache ServiceMix Kernel brings a lot of new features:
+  * a provisioning system to install applications easily
+  * a log shell to visualize the logging output and change log levels
+  * pipe support on commands
+  * a bunch of new commands: history, grep, cat, ava, exec, sleep
+
+Note that this milestone does not include the latest spring version because 
+the latest ones have wrong OSGi manifest headers and do not work.
+
+** Bug
+    * [SMX4KNL-22] - The console can not be reloaded at runtime
+    * [SMX4KNL-29] - Shell commands are not unregistered automatically when the last command is unregistered
+    * [SMX4KNL-31] - Aliases do not work when inside a subshell
+
+** Improvement
+    * [SMX4KNL-5] - Show gshell sub-shell name in prompt
+    * [SMX4KNL-6] - Error Message improvement on Gshell console.
+    * [SMX4KNL-10] - Handle dependant features correctly
+    * [SMX4KNL-21] - Allow pipes in command syntax
+    * [SMX4KNL-25] - Feature commands enhancement.
+    * [SMX4KNL-32] - Lazy load feature repositories to avoid delay when the url can not be accessed or things like that
+
+** New Feature
+    * [SMX4KNL-1] - Implements a log command
+    * [SMX4KNL-11] - Provisioning system
+    * [SMX4KNL-20] - Adding a new OBR command to reload the repository url's
+    * [SMX4KNL-23] - Add a grep command
+    * [SMX4KNL-24] - Add a few utils commands: cat, java, exec, sleep
+    * [SMX4KNL-26] - Spring URL handler to wrap xml spring files into bundles for direct installation.
+    * [SMX4KNL-27] - Include an implementation of the Preferences service
+    * [SMX4KNL-30] - Create an history command to be able to browse previous commands easily
+
+
                   Apache ServiceMix Kernel 1.0-m2
                   ================================
 

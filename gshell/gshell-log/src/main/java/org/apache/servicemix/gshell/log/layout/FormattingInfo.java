@@ -18,6 +18,9 @@ package org.apache.servicemix.gshell.log.layout;
 
 
 /**
+ * Copied from log4j
+ */
+/**
    FormattingInfo instances contain the information obtained when parsing
    formatting modifiers in conversion modifiers.
 
