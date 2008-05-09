@@ -37,7 +37,7 @@ public class RequirementImpl implements Requirement
     {
     }
 
-    public String getName()
+    public synchronized String getName()
     {
         return m_name;
     }
@@ -47,7 +47,7 @@ public class RequirementImpl implements Requirement
         m_name = name;
     }
 
-    public String getFilter()
+    public synchronized String getFilter()
     {
         return m_filter.toString();
     }
@@ -63,7 +63,7 @@ public class RequirementImpl implements Requirement
         return m_filter.match(m_dict);
     }
 
-    public boolean isExtend()
+    public synchronized boolean isExtend()
     {
         return m_extend;
     }
@@ -73,7 +73,7 @@ public class RequirementImpl implements Requirement
         m_extend = Boolean.valueOf(s).booleanValue();
     }
 
-    public boolean isMultiple()
+    public synchronized boolean isMultiple()
     {
         return m_multiple;
     }
@@ -83,7 +83,7 @@ public class RequirementImpl implements Requirement
         m_multiple = Boolean.valueOf(s).booleanValue();
     }
 
-    public boolean isOptional()
+    public synchronized boolean isOptional()
     {
         return m_optional;
     }
@@ -93,7 +93,7 @@ public class RequirementImpl implements Requirement
         m_optional = Boolean.valueOf(s).booleanValue();
     }
 
-    public String getComment()
+    public synchronized String getComment()
     {
         return m_comment;
     }
@@ -118,7 +118,7 @@ public class RequirementImpl implements Requirement
         return false;
     }
 
-    public int hashCode()
+    public synchronized int hashCode()
     {
         return m_filter.toString().hashCode();
     }
