@@ -30,7 +30,7 @@
   <groupId>org.apache.servicemix.kernel</groupId>
   <artifactId>kernel</artifactId>
   <packaging>pom</packaging>
-  <version>1.0-m3-SNAPSHOT</version>
+  <version>1.0-m3</version>
   <name>Apache ServiceMix Kernel</name>
   <inceptionYear>2007</inceptionYear>
 
@@ -45,9 +45,9 @@
   </modules>
 
   <scm>
-      <connection>scm:svn:http://svn.apache.org/repos/asf/servicemix/smx4/kernel/trunk</connection>
-      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/servicemix/smx4/kernel/trunk</developerConnection>
-      <url>http://svn.apache.org/viewvc/servicemix/smx4/kernel/trunk/</url>
+      <connection>scm:svn:http://svn.apache.org/repos/asf/servicemix/smx4/kernel/tags/kernel-1.0-m3</connection>
+      <developerConnection>scm:svn:https://svn.apache.org/repos/asf/servicemix/smx4/kernel/tags/kernel-1.0-m3</developerConnection>
+      <url>http://svn.apache.org/viewvc/servicemix/smx4/kernel/tags/kernel-1.0-m3</url>
 
   </scm>
   <issueManagement>

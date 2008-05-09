@@ -24,13 +24,13 @@
     <parent>
         <groupId>org.apache.servicemix.kernel.gshell</groupId>
         <artifactId>gshell</artifactId>
-        <version>1.0-m3-SNAPSHOT</version>
+        <version>1.0-m3</version>
     </parent>
 
     <groupId>org.apache.servicemix.kernel.gshell</groupId>
     <artifactId>org.apache.servicemix.kernel.gshell.log</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0-m3-SNAPSHOT</version>
+    <version>1.0-m3</version>
     <name>Apache ServiceMix Kernel :: GShell Log Commands</name>
 
     <description>

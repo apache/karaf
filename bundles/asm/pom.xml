@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.servicemix.kernel.bundles</groupId>
         <artifactId>bundles</artifactId>
-        <version>1.0-m3-SNAPSHOT</version>
+        <version>1.0-m3</version>
     </parent>
 
     <groupId>org.apache.servicemix.bundles</groupId>
@@ -33,7 +33,7 @@
     -->
     <artifactId>org.apache.servicemix.bundles.asm-2.2.3</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0-m3-SNAPSHOT</version>
+    <version>1.0-m3</version>
     <name>Apache ServiceMix OSGI Common Bundles: ${pkgArtifactId}-${pkgVersion}</name>
     <description>
         This bundle simply wraps ${pkgArtifactId}-${pkgVersion}.jar.
