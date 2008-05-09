@@ -43,40 +43,6 @@ public class RepositoryAdminImpl implements RepositoryAdmin
     public RepositoryAdminImpl(BundleContext context)
     {
         m_context = context;
-
-        // Get repository URLs.
-        String urlStr = m_context.getProperty(REPOSITORY_URL_PROP);
-        if (urlStr != null)
-        {
-            StringTokenizer st = new StringTokenizer(urlStr);
-            if (st.countTokens() > 0)
-            {
-                while (st.hasMoreTokens())
-                {
-                    try
-                    {
-                        m_urlList.add(new URL(st.nextToken()));
-                    }
-                    catch (MalformedURLException ex)
-                    {
-                        System.err.println("RepositoryAdminImpl: " + ex);
-                    }
-                }
-            }
-        }
-
-        // Use the default URL if none were specified.
-        if (m_urlList.size() == 0)
-        {
-            try
-            {
-                m_urlList.add(new URL(DEFAULT_REPOSITORY_URL));
-            }
-            catch (MalformedURLException ex)
-            {
-                System.err.println("RepositoryAdminImpl: " + ex);
-            }
-        }
     }
 
     public synchronized Repository addRepository(URL url) throws Exception
@@ -121,7 +87,6 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         {
             initialize();
         }
-
         return new ResolverImpl(m_context, this);
     }
 
@@ -168,6 +133,45 @@ public class RepositoryAdminImpl implements RepositoryAdmin
     private void initialize()
     {
         m_initialized = true;
+
+        // Initialize the repository URL list if it is currently empty.
+        if (m_urlList.size() == 0)
+        {
+            // First check the repository URL config property.
+            String urlStr = m_context.getProperty(REPOSITORY_URL_PROP);
+            if (urlStr != null)
+            {
+                StringTokenizer st = new StringTokenizer(urlStr);
+                if (st.countTokens() > 0)
+                {
+                    while (st.hasMoreTokens())
+                    {
+                        try
+                        {
+                            m_urlList.add(new URL(st.nextToken()));
+                        }
+                        catch (MalformedURLException ex)
+                        {
+                            System.err.println("RepositoryAdminImpl: " + ex);
+                        }
+                    }
+                }
+            }
+
+            // If no repository URLs are specified, then use the default one.
+            if (m_urlList.size() == 0)
+            {
+                try
+                {
+                    m_urlList.add(new URL(DEFAULT_REPOSITORY_URL));
+                }
+                catch (MalformedURLException ex)
+                {
+                    System.err.println("RepositoryAdminImpl: " + ex);
+                }
+            }
+        }
+
         m_repoMap.clear();
 
         for (int i = 0; i < m_urlList.size(); i++)
