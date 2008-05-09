@@ -24,13 +24,13 @@
   <parent>
       <groupId>org.apache.servicemix.kernel</groupId>
       <artifactId>kernel</artifactId>
-      <version>1.0-m3</version>
+      <version>1.0-m4-SNAPSHOT</version>
   </parent>
 
   <groupId>org.apache.servicemix.kernel</groupId>
   <artifactId>org.apache.servicemix.kernel.filemonitor</artifactId>
   <packaging>bundle</packaging>
-  <version>1.0-m3</version>
+  <version>1.0-m4-SNAPSHOT</version>
   <name>Apache ServiceMix Kernel :: File Monitor</name>
 
   <description>This bundle monitors the deploy directory for new OSGi bundles in jar form, expanded form or for configuration file changes and undeploys/redeploys them</description>
