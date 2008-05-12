@@ -393,8 +393,8 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @return the service object or a nullable / default implementation if defined.
      * @see org.apache.felix.ipojo.FieldInterceptor#onGet(java.lang.Object, java.lang.String, java.lang.Object)
      */
-    public Object onGet(Object pojo, String fieldName, Object value) {
-     // Initialize the thread local object is not already touched.
+    public Object onGet(Object pojo, String fieldName, Object value) {        
+     //     Initialize the thread local object is not already touched.
         Usage usage = (Usage) m_usage.get();
         if (usage.m_stack == 0) { // uninitialized usage.
             ServiceReference[] refs = super.getServiceReferences();
@@ -441,7 +441,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @param value : set value.
      * @see org.apache.felix.ipojo.FieldInterceptor#onSet(java.lang.Object, java.lang.String, java.lang.Object)
      */
-    public void onSet(Object pojo, String fieldName, Object value) {
+    public void onSet(Object pojo, String fieldName, Object value) {        
         // Nothing to do.
     }
 
@@ -482,8 +482,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @see org.apache.felix.ipojo.MethodInterceptor#onExit(java.lang.Object, java.lang.reflect.Method, java.lang.Object)
      */
     public void onExit(Object pojo, Method method, Object returnedObj) {
-        // Nothing to do  : wait onFinally
-        
+        // Nothing to do  : wait onFinally        
     }
 
     /**

@@ -18,7 +18,9 @@
  */
 package org.apache.felix.ipojo;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.BundleContext;
@@ -32,6 +34,7 @@ public class HandlerManager extends InstanceManager {
 
     /**
      * Handler object (contained).
+     * Immutable once set.
      */
     private Handler m_handler;
 
@@ -74,6 +77,7 @@ public class HandlerManager extends InstanceManager {
     /**
      * Create the handler object.
      * This method does nothing if the object is already created.
+     * This method does not need locking protocol as only one thread (the creator thread) can create an instance.
      */
     private void createHandlerObject() {
         if (m_handler != null) { return; }
@@ -83,14 +87,20 @@ public class HandlerManager extends InstanceManager {
     /**
      * Start the instance manager.
      */
-    public synchronized void start() {
-        if (m_state != STOPPED) { return; } // Instance already started
+    public void start() {
+        synchronized (this) {
+            if (m_state != STOPPED) { 
+                return; // Instance already started
+            } else { 
+                m_state = -2; // Temporary starting state, avoiding concurrent starts.
+            }
+        }
 
         for (int i = 0; i < m_handlers.length; i++) {
             m_handlers[i].addInstanceStateListener(this);
             m_handlers[i].start();
         }
-
+        
         m_handler.start(); // Call the handler start method.
 
         for (int i = 0; i < m_handlers.length; i++) {
@@ -104,13 +114,21 @@ public class HandlerManager extends InstanceManager {
         } else {
             setState(INVALID);
         }
+        
+        // Now, the state is necessary different from the temporary state.
     }
 
     /**
      * Stop the instance manager.
      */
-    public synchronized void stop() {
-        if (m_state == STOPPED) { return; } // Instance already stopped
+    public void stop() {
+        synchronized (this) {
+            if (m_state == STOPPED) { 
+                return; // Instance already stopped
+            } else {
+                m_state = -2; // Temporary state avoiding concurrent stopping. 
+            }
+        }
 
         setState(INVALID);
 
@@ -124,10 +142,17 @@ public class HandlerManager extends InstanceManager {
             m_handlers[i].stop();
         }
 
-        m_state = STOPPED;
-        if (m_listeners != null) {
-            for (int i = 0; i < m_listeners.size(); i++) {
-                ((InstanceStateListener) m_listeners.get(i)).stateChanged(this, STOPPED);
+        List listeners = null;
+        synchronized (this) {
+            m_state = STOPPED;
+            if (m_listeners != null) {
+                listeners = new ArrayList(m_listeners); // Stack confinement.
+            }
+        }
+        
+        if (listeners != null) {
+            for (int i = 0; i < listeners.size(); i++) {
+                ((InstanceStateListener) listeners.get(i)).stateChanged(this, STOPPED);
             }
         }
     }
@@ -136,7 +161,7 @@ public class HandlerManager extends InstanceManager {
      * Dispose the instance.
      * @see org.apache.felix.ipojo.ComponentInstance#dispose()
      */
-    public synchronized void dispose() {
+    public void dispose() {
         super.dispose();
         m_handler = null;
     }
@@ -157,16 +182,22 @@ public class HandlerManager extends InstanceManager {
      * @param newState : new state
      * @see org.apache.felix.ipojo.InstanceStateListener#stateChanged(org.apache.felix.ipojo.ComponentInstance, int)
      */
-    public synchronized void stateChanged(ComponentInstance instance, int newState) {
-        if (m_state <= STOPPED) { return; }
-
+    public void stateChanged(ComponentInstance instance, int newState) {
+        int state;
+        synchronized (this) {
+            if (m_state <= STOPPED) { 
+                return;
+            } else {
+                state = m_state; // Stack confinement
+            }
+        }
         // Update the component state if necessary
-        if (newState == INVALID && m_state == VALID) {
+        if (newState == INVALID && state == VALID) {
             // Need to update the state to UNRESOLVED
             setState(INVALID);
             return;
         }
-        if (newState == VALID && m_state == INVALID) {
+        if (newState == VALID && state == INVALID) {
             // An handler becomes valid => check if all handlers are valid
             if (!m_handler.getValidity()) { return; }
             for (int i = 0; i < m_handlers.length; i++) {

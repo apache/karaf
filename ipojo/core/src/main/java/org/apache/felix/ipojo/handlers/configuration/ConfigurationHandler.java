@@ -321,7 +321,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
      * @param configuration : the new configuration
      * @see org.apache.felix.ipojo.Handler#reconfigure(java.util.Dictionary)
      */
-    public synchronized void reconfigure(Dictionary configuration) {      
+    public synchronized void reconfigure(Dictionary configuration) {   
         Properties props = reconfigureProperties(configuration);
         propagate(props, m_propagatedFromInstance);
         m_propagatedFromInstance = props;

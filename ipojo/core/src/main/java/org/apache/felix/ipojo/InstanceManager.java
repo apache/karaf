@@ -54,7 +54,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     /**
      * Handler list.
      */
-    protected HandlerManager[] m_handlers = null;
+    protected final HandlerManager[] m_handlers;
 
     /**
      * Component state (STOPPED at the beginning).
@@ -69,25 +69,28 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     /**
      * Parent factory (ComponentFactory).
      */
-    private ComponentFactory m_factory;
+    private final ComponentFactory m_factory;
 
     /**
      * The context of the component.
      */
-    private BundleContext m_context;
+    private final BundleContext m_context;
 
     /**
      * Map [field, field interceptor list] storing handlers interested by the field.
+     * Once configured, this map can't change.
      */
     private Map m_fieldRegistration;
 
     /**
      * Map [method identifier, method interceptor list] storing handlers interested by the method.
+     * Once configure this map can't change.
      */
     private Map m_methodRegistration;
 
     /**
      * Manipulated class.
+     * Once set, this field doesn't change.
      */
     private Class m_clazz;
 
@@ -98,6 +101,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
 
     /**
      * Factory method. Contains the name of the static method used to create POJO objects.
+     * Once set, this field is immutable.
      */
     private String m_factoryMethod = null;
 
@@ -164,12 +168,14 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         InstanceDescription desc =
                 new InstanceDescription(m_name, componentState, getContext().getBundle().getBundleId(), m_factory.getComponentDescription());
 
-        if (m_pojoObjects != null) {
-            String[] objects = new String[m_pojoObjects.size()];
-            for (int i = 0; i < m_pojoObjects.size(); i++) {
-                objects[i] = m_pojoObjects.get(i).toString();
+        synchronized (this) { // Must be synchronized, it access to the m_pojoObjects list.
+            if (m_pojoObjects != null) {
+                String[] objects = new String[m_pojoObjects.size()];
+                for (int i = 0; i < m_pojoObjects.size(); i++) {
+                    objects[i] = m_pojoObjects.get(i).toString();
+                }
+                desc.setCreatedObjects(objects);
             }
-            desc.setCreatedObjects(objects);
         }
 
         Handler[] handlers = getRegistredHandlers();
@@ -181,6 +187,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
 
     /**
      * Get the list of handlers plugged on the instance.
+     * This method does not need a synchronized block as the handler set is constant.
      * @return the handler array of plugged handlers.
      */
     public Handler[] getRegistredHandlers() {
@@ -193,6 +200,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
 
     /**
      * Return a specified handler.
+     * This must does not need a synchronized block as the handler set is constant.
      * @param name : class name of the handler to find or its qualified name (namespace:name)
      * @return : the handler, or null if not found
      */
@@ -262,11 +270,15 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     /**
      * Start the instance manager.
      */
-    public synchronized void start() {
-        if (m_state != STOPPED) { // Instance already started
-            return;
+    public void start() {
+        synchronized (this) {
+            if (m_state != STOPPED) { // Instance already started
+                return;
+            } else {
+                m_state = -2; // Temporary state.
+            }
         }
-
+        
         for (int i = 0; i < m_handlers.length; i++) {
             m_handlers[i].addInstanceStateListener(this);
             try {
@@ -277,13 +289,12 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                 throw e;
             }
         }
-
+        
         for (int i = 0; i < m_handlers.length; i++) {
             if (m_handlers[i].getState() != VALID) {
                 setState(INVALID);
                 return;
             }
-
         }
         setState(VALID);
     }
@@ -291,26 +302,35 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     /**
      * Stop the instance manager.
      */
-    public synchronized void stop() {
-        if (m_state == STOPPED) {
-            return;
-        } // Instance already stopped
-
-        setState(INVALID);
-
-        m_state = STOPPED;
+    public void stop() {
+        List listeners = null;
+        synchronized (this) {
+            if (m_state == STOPPED) { // Instance already stopped
+                return;
+            } 
+            m_stateQueue.clear();
+            m_inTransition = false;
+        }
+        
+        setState(INVALID); // Must be called outside a synchronized block.
 
         // Stop all the handlers
         for (int i = m_handlers.length - 1; i > -1; i--) {
             m_handlers[i].removeInstanceStateListener(this);
             m_handlers[i].stop();
         }
+        
+        synchronized (this) {
+            m_state = STOPPED;
+            if (m_listeners != null) {
+                listeners = new ArrayList(m_listeners); // Stack confinement
+            }
+            m_pojoObjects = null;
+        }
 
-        m_pojoObjects = null;
-
-        if (m_listeners != null) {
-            for (int i = 0; i < m_listeners.size(); i++) {
-                ((InstanceStateListener) m_listeners.get(i)).stateChanged(this, STOPPED);
+        if (listeners != null) {
+            for (int i = 0; i < listeners.size(); i++) {
+                ((InstanceStateListener) listeners.get(i)).stateChanged(this, STOPPED);
             }
         }
     }
@@ -319,29 +339,40 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * Dispose the instance.
      * @see org.apache.felix.ipojo.ComponentInstance#dispose()
      */
-    public synchronized void dispose() {
-        if (m_state > STOPPED) { // Valid or invalid
-            stop();
+    public void dispose() {
+        List listeners = null;
+        int state = -2;
+        synchronized (this) {
+            state = m_state; // Stack confinement
+            if (m_listeners != null) {
+                listeners = new ArrayList(m_listeners); // Stack confinement
+            }
+            m_listeners = null;
+        }
+        
+        if (state > STOPPED) { // Valid or invalid
+            stop(); // Does not hold the lock.
+        }
+        
+        synchronized (this) {
+            m_state = DISPOSED;
         }
 
-        m_state = DISPOSED;
-
-        for (int i = 0; m_listeners != null && i < m_listeners.size(); i++) {
-            ((InstanceStateListener) m_listeners.get(i)).stateChanged(this, DISPOSED);
+        for (int i = 0; listeners != null && i < listeners.size(); i++) {
+            ((InstanceStateListener) listeners.get(i)).stateChanged(this, DISPOSED);
         }
-        m_listeners = null;
 
         for (int i = m_handlers.length - 1; i > -1; i--) {
             m_handlers[i].dispose();
         }
 
-        m_handlers = new HandlerManager[0];
-        m_factory.disposed(this);
-        m_fields.clear();
-        m_fieldRegistration = new HashMap();
-        m_methodRegistration = new HashMap();
-        m_clazz = null;
-        m_inTransition = false;
+        synchronized (this) {
+            m_factory.disposed(this);
+            m_fields.clear();
+            m_fieldRegistration = new HashMap();
+            m_methodRegistration = new HashMap();
+            m_clazz = null;
+        }
     }
 
     /**
@@ -350,54 +381,64 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * finished.
      * @param state : the new state
      */
-    public synchronized void setState(int state) {
-        if (m_inTransition) {
-            m_stateQueue.add(new Integer(state));
-            return;
+    public void setState(int state) {
+        int originalState = -2;
+        List listeners = null;
+        synchronized (this) {
+            if (m_inTransition) {
+                m_stateQueue.add(new Integer(state));
+                return;
+            }
+
+            if (m_state != state) {
+                m_inTransition = true;
+                originalState = m_state; // Stack confinement.
+                m_state = state;
+                if (m_listeners != null) {
+                    listeners = new ArrayList(m_listeners); // Stack confinement.
+                }
+            }
         }
 
-        if (m_state != state) {
-            m_inTransition = true;
-
-            if (state > m_state) {
+        // This section can be executed only by one thread at the same time. The m_inTransition pseudo semaphore block access to this section.
+        if (m_inTransition) { // Check that we are really changing.
+            if (state > originalState) {
                 // The state increases (Stopped = > IV, IV => V) => invoke handlers from the higher priority to the lower
-                m_state = state;
                 try {
                     for (int i = 0; i < m_handlers.length; i++) {
                         m_handlers[i].getHandler().stateChanged(state);
                     }
                 } catch (IllegalStateException e) {
                     // When an illegal state exception happens, the instance manager must be stopped immediately.
-                    m_stateQueue.clear();
                     stop();
                     return;
                 }
             } else {
                 // The state decreases (V => IV, IV = > Stopped, Stopped => Disposed)
-                m_state = state;
                 try {
                     for (int i = m_handlers.length - 1; i > -1; i--) {
                         m_handlers[i].getHandler().stateChanged(state);
                     }
                 } catch (IllegalStateException e) {
                     // When an illegal state exception happens, the instance manager must be stopped immediately.
-                    m_stateQueue.clear();
                     stop();
                     return;
                 }
             }
+        }
 
-            if (m_listeners != null) {
-                for (int i = 0; i < m_listeners.size(); i++) {
-                    ((InstanceStateListener) m_listeners.get(i)).stateChanged(this, state);
-                }
+        if (listeners != null) {
+            for (int i = 0; i < listeners.size(); i++) {
+                ((InstanceStateListener) listeners.get(i)).stateChanged(this, state);
             }
         }
 
-        m_inTransition = false;
-        if (!m_stateQueue.isEmpty()) {
-            int newState = ((Integer) (m_stateQueue.remove(0))).intValue();
-            setState(newState);
+        synchronized (this) {
+            m_inTransition = false;
+            if (!m_stateQueue.isEmpty()) {
+                int newState = ((Integer) (m_stateQueue.remove(0))).intValue();
+                setState(newState);
+            }
         }
     }
 
@@ -406,7 +447,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @return the actual state of the component instance.
      * @see org.apache.felix.ipojo.ComponentInstance#getState()
      */
-    public int getState() {
+    public synchronized int getState() {
         return m_state;
     }
 
@@ -415,7 +456,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @return true if the instance is started.
      * @see org.apache.felix.ipojo.ComponentInstance#isStarted()
      */
-    public boolean isStarted() {
+    public synchronized boolean isStarted() {
         return m_state > STOPPED;
     }
 
@@ -428,9 +469,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         if (m_listeners == null) {
             m_listeners = new ArrayList();
         }
-        synchronized (m_listeners) {
-            m_listeners.add(listener);
-        }
+        m_listeners.add(listener);
     }
 
     /**
@@ -440,11 +479,9 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      */
     public synchronized void removeInstanceStateListener(InstanceStateListener listener) {
         if (m_listeners != null) {
-            synchronized (m_listeners) {
-                m_listeners.remove(listener);
-                if (m_listeners.isEmpty()) {
-                    m_listeners = null;
-                }
+            m_listeners.remove(listener);
+            if (m_listeners.isEmpty()) {
+                m_listeners = null;
             }
         }
     }
@@ -475,7 +512,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * Get the array of object created by the instance.
      * @return the created instance of the component instance.
      */
-    public Object[] getPojoObjects() {
+    public synchronized Object[] getPojoObjects() {
         if (m_pojoObjects == null) {
             return null;
         }
@@ -491,8 +528,8 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
             load();
         }
 
+        // The following code doesn't need to be synchronized as is deal only with immutable fields.
         Object instance = null;
-
         if (m_factoryMethod == null) {
             // No factory-method, we use the constructor.
             try {
@@ -627,19 +664,21 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
             }
 
         }
+        
+        
 
-        // Register the new instance in not already present.
-        if (m_pojoObjects == null) {
-            m_pojoObjects = new ArrayList(1);
-        }
-        if (!m_pojoObjects.contains(instance)) {
-            m_pojoObjects.add(instance);
-            // Call createInstance on Handlers :
-            for (int i = 0; i < m_handlers.length; i++) {
-                ((PrimitiveHandler) m_handlers[i].getHandler()).onCreation(instance);
+        // Add the new instance in the instance list.
+        synchronized (this) {
+            if (m_pojoObjects == null) {
+                m_pojoObjects = new ArrayList(1);
             }
+            m_pojoObjects.add(instance);
         }
-
+        // Call createInstance on Handlers :
+        for (int i = 0; i < m_handlers.length; i++) {
+            ((PrimitiveHandler) m_handlers[i].getHandler()).onCreation(instance);
+        }
+        
         return instance;
     }
 
@@ -647,15 +686,25 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * Get the first object created by the instance. If no object created, create and return one object.
      * @return the instance of the component instance to use for singleton component
      */
-    public synchronized Object getPojoObject() {
-        if (m_pojoObjects == null) {
-            return createPojoObject();
+    public Object getPojoObject() {
+        Object pojo = null;
+        synchronized (this) {
+            if (m_pojoObjects != null) {
+                pojo = m_pojoObjects.get(0); // Stack confinement
+            }
         }
-        return m_pojoObjects.get(0);
+        
+        if (pojo == null) {
+            return createPojoObject(); // This method must be called without the lock.
+        } else {
+            return pojo;
+        }
     }
 
     /**
      * Get the manipulated class.
+     * The method does not need to be synchronized.
+     * Reassigning the internal class will use the same class object.
      * @return the manipulated class
      */
     public Class getClazz() {
@@ -743,13 +792,17 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @param fieldName : the field name on which the GETFIELD instruction is called
      * @return the value decided by the last asked handler (throw a warning if two fields decide two different values)
      */
-    public Object onGet(Object pojo, String fieldName) {
-        Object initialValue = m_fields.get(fieldName);
+    public Object  onGet(Object pojo, String fieldName) {
+        Object initialValue = null;
+        synchronized (this) { // Stack confinement.
+            initialValue = m_fields.get(fieldName);
+        }
         Object result = initialValue;
         // Get the list of registered handlers
 
-        FieldInterceptor[] list = (FieldInterceptor[]) m_fieldRegistration.get(fieldName);
+        FieldInterceptor[] list = (FieldInterceptor[]) m_fieldRegistration.get(fieldName); // Immutable list.
         for (int i = 0; list != null && i < list.length; i++) {
+            // Call onGet outside of a synchronized block.
             Object handlerResult = list[i].onGet(null, fieldName, initialValue);
             if (handlerResult == initialValue) {
                 continue; // Non-binding case (default implementation).
@@ -768,7 +821,10 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
 
         if ((result != null && !result.equals(initialValue)) || (result == null && initialValue != null)) {
             // A change occurs => notify the change
-            m_fields.put(fieldName, result);
+            synchronized (this) {
+                m_fields.put(fieldName, result);
+            }
+            // Call onset outside of a synchronized block.
             for (int i = 0; list != null && i < list.length; i++) {
                 list[i].onSet(null, fieldName, result);
             }
@@ -784,13 +840,13 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @param args : argument array
      */
     public void onEntry(Object pojo, String methodId, Object[] args) {
-        if (m_methodRegistration == null) {
+        if (m_methodRegistration == null) { // Immutable field.
             return;
         }
         MethodInterceptor[] list = (MethodInterceptor[]) m_methodRegistration.get(methodId);
         Method method = getMethodById(methodId);
         for (int i = 0; list != null && i < list.length; i++) {
-            list[i].onEntry(pojo, method, args);
+            list[i].onEntry(pojo, method, args); // Outside a synchronized block.
         }
     }
 
@@ -842,6 +898,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @return : the method object or null if the method cannot be found.
      */
     private Method getMethodById(String methodId) {
+        // Not necessary synchronized as recomputing the methodID will give the same Method twice.
         Method method = (Method) m_methods.get(methodId);
         if (method == null) {
             Method[] mets = m_clazz.getDeclaredMethods();
@@ -873,12 +930,17 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @param objectValue : the value of the field
      */
     public void onSet(Object pojo, String fieldName, Object objectValue) {
-        Object value = m_fields.get(fieldName);
+        Object value = null; // Stack confinement
+        synchronized (this) {
+            value = m_fields.get(fieldName);
+        }
         if ((value != null && !value.equals(objectValue)) || (value == null && objectValue != null)) {
-            m_fields.put(fieldName, objectValue);
+            synchronized (this) {
+                m_fields.put(fieldName, objectValue);
+            }
             FieldInterceptor[] list = (FieldInterceptor[]) m_fieldRegistration.get(fieldName);
             for (int i = 0; list != null && i < list.length; i++) {
-                list[i].onSet(null, fieldName, objectValue);
+                list[i].onSet(null, fieldName, objectValue); // Outside a synchronized block.
             }
         }
     }
@@ -889,15 +951,15 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @see org.apache.felix.ipojo.ComponentInstance#getContext()
      */
     public BundleContext getContext() {
-        return m_context;
+        return m_context; // Immutable
     }
 
     public BundleContext getGlobalContext() {
-        return ((IPojoContext) m_context).getGlobalContext();
+        return ((IPojoContext) m_context).getGlobalContext(); // Immutable
     }
 
     public ServiceContext getLocalServiceContext() {
-        return ((IPojoContext) m_context).getServiceContext();
+        return ((IPojoContext) m_context).getServiceContext(); // Immutable
     }
 
     /**
@@ -906,7 +968,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @see org.apache.felix.ipojo.ComponentInstance#getInstanceName()
      */
     public String getInstanceName() {
-        return m_name;
+        return m_name; // Immutable
     }
 
     /**
@@ -918,19 +980,24 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         for (int i = 0; i < m_handlers.length; i++) {
             m_handlers[i].getHandler().reconfigure(configuration);
         }
-        if (m_state == INVALID) {
-            // Try to revalidate the instance ofter reconfiguration
-            for (int i = 0; i < m_handlers.length; i++) {
-                if (m_handlers[i].getState() != VALID) {
-                    return;
+        // We synchronized the state computation.
+        synchronized (this) {
+            if (m_state == INVALID) {
+                // Try to revalidate the instance after reconfiguration
+                for (int i = 0; i < m_handlers.length; i++) {
+                    if (m_handlers[i].getState() != VALID) {
+                        return;
+                    }
                 }
+                setState(VALID);
             }
-            setState(VALID);
         }
     }
 
     /**
      * Get the implementation class of the component type.
+     * This method does not need to be synchronized as the
+     * class name is constant once set. 
      * @return the class name of the component type.
      */
     public String getClassName() {
@@ -943,18 +1010,23 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @param newState : new state
      * @see org.apache.felix.ipojo.InstanceStateListener#stateChanged(org.apache.felix.ipojo.ComponentInstance, int)
      */
-    public synchronized void stateChanged(ComponentInstance instance, int newState) {
-        if (m_state <= STOPPED) {
-            return;
+    public void stateChanged(ComponentInstance instance, int newState) {
+        int state;
+        synchronized (this) {
+            if (m_state <= STOPPED) {
+                return;
+            } else {
+                state = m_state; // Stack confinement
+            }
         }
 
         // Update the component state if necessary
-        if (newState == INVALID && m_state == VALID) {
+        if (newState == INVALID && state == VALID) {
             // Need to update the state to UNRESOLVED
             setState(INVALID);
             return;
         }
-        if (newState == VALID && m_state == INVALID) {
+        if (newState == VALID && state == INVALID) {
             // An handler becomes valid => check if all handlers are valid
             for (int i = 0; i < m_handlers.length; i++) {
                 if (m_handlers[i].getState() != VALID) {

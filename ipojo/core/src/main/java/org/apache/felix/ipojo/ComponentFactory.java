@@ -49,28 +49,32 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * Tracker used to track required handler factories.
+     * Immutable once set.
      */
     protected Tracker m_tracker;
 
     /**
      * Class loader to delegate loading.
+     * Immutable once set.
      */
-    private FactoryClassloader m_classLoader = null;
+    private FactoryClassloader m_classLoader;
 
     /**
      * Component Implementation class.
      */
-    private byte[] m_clazz = null;
+    private byte[] m_clazz;
 
     /**
      * Component Implementation Class Name.
+     * Immutable once set.
      */
-    private String m_classname = null;
+    private String m_classname;
 
     /**
      * Manipulation Metadata of the internal POJO.
+     * Immutable once set.
      */
-    private PojoMetadata m_manipulation = null;
+    private PojoMetadata m_manipulation;
 
     /**
      * Create a instance manager factory. The class is given in parameter. The
@@ -101,8 +105,9 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * Check method : allow a factory to check if given element are correct.
+     * Check method : allows a factory to check if given element is well-formed.
      * A component factory metadata are correct if they contain the 'classname' attribute.
+     * As this method is called from the (single-thread) constructor, no synchronization is needed.
      * @param element : the metadata
      * @throws ConfigurationException occurs when the element describing the factory is malformed.
      */
@@ -111,12 +116,19 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
         if (m_classname == null) { throw new ConfigurationException("A component needs a class name : " + element); }
     }
 
+    /**
+     * Gets the class name.
+     * No synchronization needed, the classname is immutable.
+     * @return the class name.
+     * @see org.apache.felix.ipojo.IPojoFactory#getClassName()
+     */
     public String getClassName() {
         return m_classname;
     }
 
     /**
-     * Create a primitive instance.
+     * Creates a primitive instance.
+     * This method is called when holding the lock.
      * @param config : instance configuration
      * @param context : service context.
      * @param handlers : handler to use
@@ -139,13 +151,14 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * Define a class.
+     * Defines a class.
+     * This method need to be synchronized to avoid that the classloader is created twice.
      * @param name : qualified name of the class
      * @param clazz : byte array of the class
      * @param domain : protection domain of the class
      * @return the defined class object
      */
-    public Class defineClass(String name, byte[] clazz, ProtectionDomain domain) {
+    public synchronized Class defineClass(String name, byte[] clazz, ProtectionDomain domain) {
         if (m_classLoader == null) {
             m_classLoader = new FactoryClassloader();
         }
@@ -153,63 +166,64 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * Return the URL of a resource.
+     * Returns the URL of a resource.
      * @param resName : resource name
      * @return the URL of the resource
      */
     public URL getResource(String resName) {
+        //No synchronization needed, the context is immutable and the call is managed by the underlying framework.
         return m_context.getBundle().getResource(resName);
     }
 
     /**
-     * Load a class.
+     * Loads a class.
      * @param className : name of the class to load
      * @return the resulting Class object
      * @throws ClassNotFoundException 
      * @throws ClassNotFoundException : happen when the class is not found
      */
     public Class loadClass(String className) throws ClassNotFoundException {
-        if (m_clazz != null && className.equals(m_classname)) {
-            // Used the factory classloader to load the component implementation
-            // class
-            if (m_classLoader == null) {
-                m_classLoader = new FactoryClassloader();
-            }
-            return m_classLoader.defineClass(m_classname, m_clazz, null);
+        if (m_clazz != null && m_classname.equals(className)) {  // Immutable fields.
+            return defineClass(className, m_clazz, null);
         }
         return m_context.getBundle().loadClass(className);
     }
 
     /**
-     * Start the factory.
+     * Starts the factory.
+     * This method is called with the lock.
      */
-    public synchronized void starting() {
-        if (m_requiredHandlers.size() != 0) {
-            try {
-                String filter = "(&(" + Handler.HANDLER_TYPE_PROPERTY + "=" + PrimitiveHandler.HANDLER_TYPE + ")" + "(factory.state=1)" + ")";
-                m_tracker = new Tracker(m_context, m_context.createFilter(filter), this);
-                m_tracker.open();
-            } catch (InvalidSyntaxException e) {
-                m_logger.log(Logger.ERROR, "A factory filter is not valid: " + e.getMessage());
-                stop();
+    public void starting() {
+        if (m_tracker != null) {
+            return; // Already started
+        } else {
+            if (m_requiredHandlers.size() != 0) {
+                try {
+                    String filter = "(&(" + Handler.HANDLER_TYPE_PROPERTY + "=" + PrimitiveHandler.HANDLER_TYPE + ")" + "(factory.state=1)" + ")";
+                    m_tracker = new Tracker(m_context, m_context.createFilter(filter), this);
+                    m_tracker.open();
+                } catch (InvalidSyntaxException e) {
+                    m_logger.log(Logger.ERROR, "A factory filter is not valid: " + e.getMessage()); //Holding the lock should not be an issue here.
+                    stop();
+                }
             }
         }
     }
 
     /**
-     * Stop all the instance managers.
+     * Stops all the instance managers.
+     * This method is called with the lock.
      */
-    public synchronized void stopping() {
+    public void stopping() {
         if (m_tracker != null) {
             m_tracker.close();
             m_tracker = null;
         }
-        m_classLoader = null;
-        m_clazz = null;
     }
 
     /**
-     * Compute the factory name.
+     * Computes the factory name.
+     * This method does not manipulate any non-immutable fields, so does not need to be synchronized. 
      * @return the factory name.
      */
     public String getFactoryName() {
@@ -224,7 +238,8 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * Compute required handlers.
+     * Computes required handlers.
+     * This method does not manipulate any non-immutable fields, so does not need to be synchronized.
      * @return the required handler list.
      */
     public List getRequiredHandlerList() {
@@ -259,11 +274,12 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     /**
      * A new handler factory is detected.
      * Test if the factory can be used or not.
+     * This method need to be synchronized as it accesses to the content of required handlers.
      * @param reference : the new service reference.
      * @return true if the given factory reference match with a required handler.
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
-    public boolean addingService(ServiceReference reference) {
+    public synchronized boolean addingService(ServiceReference reference) {        
         for (int i = 0; i < m_requiredHandlers.size(); i++) {
             RequiredHandler req = (RequiredHandler) m_requiredHandlers.get(i);
             if (req.getReference() == null && match(req, reference)) {
@@ -271,6 +287,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
                 req.setReference(reference);
                 // If the priority has changed, sort the list.
                 if (oldP != req.getLevel()) {
+                    // Manipulate the list.
                     Collections.sort(m_requiredHandlers);
                 }
                 return true;
@@ -280,11 +297,12 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * A matching service has been added to the tracker, we can no compute the factory state.
+     * A matching service has been added to the tracker, we can no compute the factory state. This method is synchronized to avoid concurrent calls to
+     * method modifying the factory state.
      * @param reference : added reference.
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
      */
-    public void addedService(ServiceReference reference) {
+    public synchronized void addedService(ServiceReference reference) {
         if (m_state == INVALID) {
             computeFactoryState();
         }
@@ -292,11 +310,12 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * A used factory disappears.
+     * This method is synchronized to avoid concurrent calls to method modifying the factory state.
      * @param reference : service reference.
      * @param service : factory object.
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
-    public void removedService(ServiceReference reference, Object service) {
+    public synchronized void removedService(ServiceReference reference, Object service) {
         // Look for the implied reference and invalid the handler identifier
         for (int i = 0; i < m_requiredHandlers.size(); i++) {
             RequiredHandler req = (RequiredHandler) m_requiredHandlers.get(i);
@@ -324,8 +343,10 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
      * @return manipulation metadata of this component type.
      */
     public PojoMetadata getPojoMetadata() {
-        if (m_manipulation == null) {
-            m_manipulation = new PojoMetadata(m_componentMetadata);
+        synchronized (this) {
+            if (m_manipulation == null) {
+                m_manipulation = new PojoMetadata(m_componentMetadata);
+            }
         }
         return m_manipulation;
     }

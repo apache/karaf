@@ -19,7 +19,6 @@
 package org.apache.felix.ipojo;
 
 import java.util.Dictionary;
-import java.util.Properties;
 
 import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.metadata.Element;
@@ -41,24 +40,23 @@ public class HandlerFactory extends ComponentFactory implements Factory {
 
     /**
      * Handler type (composite|primitive).
-     * Default: handler.
      */
-    private String m_type = "primitive";
+    private final String m_type;
 
     /**
-     * Default iPOJO Namespace.
+     * iPOJO Handler Namespace.
+     * (Set the the iPOJO default namespace is not specified)
      */
-    private String m_namespace = IPOJO_NAMESPACE;
+    private final String m_namespace;
 
     /**
-     * Get the handler start level.
-     * Lower level are priority are configured and started before higher level, and are stopped after.
-     * 
+     * Handler start level.
+     * Lower level are priority are configured and started before higher level, and are stopped after. 
      */
-    private int m_level = Integer.MAX_VALUE;
+    private final int m_level;
 
     /**
-     * Create a composite factory.
+     * Creates a handler factory.
      * @param context : bundle context
      * @param metadata : metadata of the component to create
      * @throws ConfigurationException occurs when the element describing the factory is malformed.
@@ -74,17 +72,23 @@ public class HandlerFactory extends ComponentFactory implements Factory {
         String type = metadata.getAttribute("type");
         if (type != null) {
             m_type = type;
+        } else {
+            m_type = "primitive"; // Set to primitive if not specified.
         }
 
         String level = metadata.getAttribute("level");
         if (level != null) {
             m_level = new Integer(level).intValue();
+        } else {
+            m_level = Integer.MAX_VALUE; // Set to max if not specified.
         }
 
         // Get the namespace
         String namespace = metadata.getAttribute("namespace");
         if (namespace != null) {
             m_namespace = namespace.toLowerCase();
+        } else {
+            m_namespace = IPOJO_NAMESPACE; // Set to the iPOJO default namespace if not specified.
         }
     }
 
@@ -109,11 +113,12 @@ public class HandlerFactory extends ComponentFactory implements Factory {
     }
 
     /**
-     * Stop the factory.
+     * Stops the factory.
      * This method does not disposed created instances.
      * These instances will be disposed by the instance managers.
+     * This method is called with the lock.
      */
-    public synchronized void stopping() {
+    public void stopping() {
         if (m_tracker != null) {
             m_tracker.close();
             m_tracker = null;
@@ -121,20 +126,8 @@ public class HandlerFactory extends ComponentFactory implements Factory {
     }
 
     /**
-     * Compute factory service properties.
-     * This method add three mandatory handler factory properties (name, namespace and type)
-     * @return the properties.
-     * @see org.apache.felix.ipojo.ComponentFactory#getProperties()
-     */
-    protected Properties getProperties() {
-        Properties props = new Properties();
-
-        return props;
-    }
-
-    /**
-     * Create an instance. The given configuration needs to contain the 'name'
-     * property.
+     * Creates an instance. The given configuration needs to contain the 'name'
+     * property. This method is called when holding the lock.
      * @param configuration : configuration of the created instance.
      * @param context : the service context to push for this instance.
      * @param handlers : handler array to used.

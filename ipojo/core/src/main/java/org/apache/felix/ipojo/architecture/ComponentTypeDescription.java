@@ -47,7 +47,7 @@ public class ComponentTypeDescription {
     /**
      * Represented factory.
      */
-    private Factory m_factory;
+    private final Factory m_factory;
     
     /**
      * Constructor.
