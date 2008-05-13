@@ -503,7 +503,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         if (m_isPublic) {
             // Exposition of the factory service
             m_sr =
-                    m_context.registerService(new String[] { Factory.class.getName(), ManagedServiceFactory.class.getName() }, this, m_componentDesc
+                    m_context.registerService(m_componentDesc.getFactoryInterfacesToPublish(), this, m_componentDesc
                             .getPropertiesToPublish());
         }
     }

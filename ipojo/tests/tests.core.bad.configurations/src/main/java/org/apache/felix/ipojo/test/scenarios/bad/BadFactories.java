@@ -20,7 +20,7 @@ package org.apache.felix.ipojo.test.scenarios.bad;
 
 import org.apache.felix.ipojo.ComponentFactory;
 import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.HandlerFactory;
+import org.apache.felix.ipojo.HandlerManagerFactory;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
@@ -56,7 +56,7 @@ public class BadFactories extends OSGiTestCase {
     
     public void testBadHandlerFactory1() {
         try {
-            new HandlerFactory(context, getElementHandlerFactoryWithNoClassName());
+            new HandlerManagerFactory(context, getElementHandlerFactoryWithNoClassName());
             fail("An handler factory with no class name must be rejected");
         } catch (ConfigurationException e) {
           // OK.   
@@ -65,7 +65,7 @@ public class BadFactories extends OSGiTestCase {
     
     public void testBadHandlerFactory2() {
         try {
-            new HandlerFactory(context, getElementHandlerFactoryWithNoName());
+            new HandlerManagerFactory(context, getElementHandlerFactoryWithNoName());
             fail("An handler factory with no name must be rejected");
         } catch (ConfigurationException e) {
           // OK.   

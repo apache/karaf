@@ -28,14 +28,13 @@ import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.ServiceContext;
+import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ManifestMetadataParser;
 import org.apache.felix.ipojo.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ManagedServiceFactory;
-
-import org.apache.felix.ipojo.metadata.Element;
 
 public class Utils {
     
@@ -82,7 +81,7 @@ public class Utils {
     public static HandlerFactory getHandlerFactoryByName(BundleContext bc, String factoryName) {
         ServiceReference[] refs;
         try {
-            refs = bc.getServiceReferences(Factory.class.getName(), "(" + Handler.HANDLER_NAME_PROPERTY + "=" + factoryName + ")");
+            refs = bc.getServiceReferences(HandlerFactory.class.getName(), "(" + Handler.HANDLER_NAME_PROPERTY + "=" + factoryName + ")");
             if (refs == null) {
                 System.err.println("Cannot get the factory " + factoryName);
                 return null;

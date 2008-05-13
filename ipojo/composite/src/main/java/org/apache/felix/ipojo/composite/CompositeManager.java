@@ -49,17 +49,17 @@ public class CompositeManager implements ComponentInstance, InstanceStateListene
     /**
      * The context of the component.
      */
-    private BundleContext m_context;
+    private final BundleContext m_context;
 
     /**
      * Parent factory (ComponentFactory).
      */
-    private CompositeFactory m_factory;
+    private final CompositeFactory m_factory;
 
     /**
      * Composite Handler list.
      */
-    private HandlerManager[] m_handlers = new HandlerManager[0];
+    private HandlerManager[] m_handlers;
 
     /**
      * Instance State Listener List.

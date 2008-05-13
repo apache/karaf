@@ -27,6 +27,7 @@ import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.service.cm.ManagedServiceFactory;
 
 /**
  * Component Type description.
@@ -58,7 +59,7 @@ public class ComponentTypeDescription {
     }
 
     /**
-     * Get a printable form of the current component type description.
+     * Gets a printable form of the current component type description.
      * @return printable form of the component type description
      * @see java.lang.Object#toString()
      */
@@ -67,7 +68,7 @@ public class ComponentTypeDescription {
     }
 
     /**
-     * Get the implementation class of this component type.
+     * Gets the implementation class of this component type.
      * @return the component type implementation class name.
      */
     public String getClassName() {
@@ -75,7 +76,7 @@ public class ComponentTypeDescription {
     }
 
     /**
-     * Get component-type properties.
+     * Gets component-type properties.
      * @return the list of configuration properties accepted by the component type type.
      */
     public PropertyDescription[] getProperties() {
@@ -83,7 +84,7 @@ public class ComponentTypeDescription {
     }
 
     /**
-     * Add a String property in the component type.
+     * Adds a String property in the component type.
      * @param name : property name.
      * @param value : property value.
      */
@@ -92,7 +93,7 @@ public class ComponentTypeDescription {
     }
     
     /**
-     * Add a String property in the component type.
+     * Adds a String property in the component type.
      * @param name : property name.
      * @param value : property value.
      * @param immutable : the property is immutable.
@@ -103,7 +104,7 @@ public class ComponentTypeDescription {
     }
 
     /**
-     * Add a configuration properties to the component type.
+     * Adds a configuration properties to the component type.
      * @param pd : the property to add
      */
     public void addProperty(PropertyDescription pd) { //NOPMD remove the instance name of the 'name' property.
@@ -125,7 +126,7 @@ public class ComponentTypeDescription {
     }
 
     /**
-     * Get the list of provided service offered by instances of this type.
+     * Gets the list of provided service offered by instances of this type.
      * @return the list of the provided service.
      */
     public String[] getprovidedServiceSpecification() {
@@ -133,7 +134,7 @@ public class ComponentTypeDescription {
     }
 
     /**
-     * Add a provided service to the component type.
+     * Adds a provided service to the component type.
      * @param serviceSpecification : the provided service to add (interface name)
      */
     public void addProvidedServiceSpecification(String serviceSpecification) {
@@ -144,7 +145,7 @@ public class ComponentTypeDescription {
     }
 
     /**
-     * Return the component-type name.
+     * Returns the component-type name.
      * @return the name of this component type
      */
     public String getName() {
@@ -152,7 +153,7 @@ public class ComponentTypeDescription {
     }
     
     /**
-     * Compute the default service properties to publish : 
+     * Computes the default service properties to publish : 
      * factory.name, service.pid, component.providedServiceSpecification, component.properties, component.description, factory.State.
      * @return : the dictionary of properties to publish.
      */
@@ -180,10 +181,17 @@ public class ComponentTypeDescription {
 
     }
     
-    
-
     /**
-     * Get the component type description.
+     * Gets the interfaces published by the factory.
+     * By default publish both {@link Factory} and {@link ManagedServiceFactory}.
+     * @return : the list of interface published by the factory.
+     */
+    public String[] getFactoryInterfacesToPublish() {
+        return new String[] {Factory.class.getName(), ManagedServiceFactory.class.getName()};
+    }
+    
+    /**
+     * Gets the component type description.
      * @return : the description
      */
     public Element getDescription() {

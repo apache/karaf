@@ -30,6 +30,7 @@ import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.HandlerManager;
+import org.apache.felix.ipojo.HandlerManagerFactory;
 import org.apache.felix.ipojo.MissingHandlerException;
 import org.apache.felix.ipojo.PolicyServiceContext;
 import org.apache.felix.ipojo.UnacceptableConfiguration;

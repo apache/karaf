@@ -43,7 +43,7 @@ public class ArchCommandImpl implements Command {
     private Factory[] m_factories;
     
     /** Handler Factories. */
-    private Factory[] m_handlers;
+    private HandlerFactory[] m_handlers;
 
     /**
      * Get the command name.
@@ -212,15 +212,14 @@ public class ArchCommandImpl implements Command {
      */
     private void printHandlers(PrintStream out) {
         for (int i = 0; i < m_handlers.length; i++) {
-            HandlerFactory hf = (HandlerFactory) m_handlers[i];
-            String name = hf.getHandlerName();
-            if ("composite".equals(hf.getType())) {
+            String name = m_handlers[i].getHandlerName();
+            if ("composite".equals(m_handlers[i].getType())) {
                 name = name + " [composite]";
             }
-            if (hf.getMissingHandlers().size() == 0) {
+            if (m_handlers[i].getMissingHandlers().size() == 0) {
                 out.println("Handler " + name + " (VALID)");
             } else {
-                out.println("Handler " + name + " (INVALID : " + hf.getMissingHandlers() + ")");
+                out.println("Handler " + name + " (INVALID : " + m_handlers[i].getMissingHandlers() + ")");
             }
         }
     }

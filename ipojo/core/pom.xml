@@ -72,7 +72,7 @@
 						</Bundle-Activator>
 						<IPOJO-Extension>
 							component:org.apache.felix.ipojo.ComponentFactory,
-							handler:org.apache.felix.ipojo.HandlerFactory
+							handler:org.apache.felix.ipojo.HandlerManagerFactory
 						</IPOJO-Extension>
 						<Import-Package>
 							org.osgi.framework, org.osgi.service.cm,

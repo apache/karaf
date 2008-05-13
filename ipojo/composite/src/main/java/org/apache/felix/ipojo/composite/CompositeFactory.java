@@ -25,8 +25,8 @@ import java.util.List;
 import org.apache.felix.ipojo.ComponentFactory;
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.Handler;
+import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.HandlerManager;
 import org.apache.felix.ipojo.IPojoContext;
 import org.apache.felix.ipojo.MissingHandlerException;
@@ -118,7 +118,7 @@ public class CompositeFactory extends ComponentFactory implements TrackerCustomi
     public synchronized void starting() {
         if (m_requiredHandlers.size() != 0) {
             try {
-                String filter = "(&(" + Constants.OBJECTCLASS + "=" + Factory.class.getName() + ")"
+                String filter = "(&(" + Constants.OBJECTCLASS + "=" + HandlerFactory.class.getName() + ")"
                     + "(" + Handler.HANDLER_TYPE_PROPERTY + "=" + CompositeHandler.HANDLER_TYPE + ")" 
                     + "(factory.state=1)"
                     + ")";

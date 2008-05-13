@@ -22,6 +22,7 @@ import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.HandlerFactory;
+import org.apache.felix.ipojo.HandlerManagerFactory;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.test.scenarios.eh.service.CheckService;
@@ -158,7 +159,7 @@ public class HandlerTest extends OSGiTestCase {
         assertEquals("Check validity", arch.getInstanceDescription().getState(), ComponentInstance.VALID);
         
         // Kill the handler factory
-        HandlerFactory f = (HandlerFactory) Utils.getHandlerFactoryByName(context, "check");
+        HandlerManagerFactory f = (HandlerManagerFactory) Utils.getHandlerFactoryByName(context, "check");
         f.stop();
         
         sr = Utils.getServiceReferenceByName(context, CheckService.class.getName(), "HandlerTest-1");
