@@ -443,7 +443,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
         // getBundleContext (OSGi 4.1)
         Method meth = null;
         try {
-            meth = bundle.getClass().getMethod("getBundleContext", new Class[0]);
+            meth = bundle.getClass().getMethod("getBundleContext", new Class[0]); // This method is public and is specified in the Bundle interface.
         } catch (SecurityException e) {
             // Nothing do to, will try the Equinox method
         } catch (NoSuchMethodException e) {
@@ -490,10 +490,10 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
                 try {
                     return (BundleContext) fields[i].get(bundle);
                 } catch (IllegalArgumentException e) {
-                    m_logger.log(Logger.ERROR, "Cannot get the BundleContext by invoking " + meth.getName(), e);
+                    m_logger.log(Logger.ERROR, "Cannot get the BundleContext by invoking " + fields[i].getName(), e);
                     return null;
                 } catch (IllegalAccessException e) {
-                    m_logger.log(Logger.ERROR, "Cannot get the BundleContext by invoking " + meth.getName(), e);
+                    m_logger.log(Logger.ERROR, "Cannot get the BundleContext by invoking " + fields[i].getName(), e);
                     return null;
                 }
             }
