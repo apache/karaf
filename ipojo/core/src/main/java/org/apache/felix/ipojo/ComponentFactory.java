@@ -67,12 +67,14 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     /**
      * Component Implementation Class Name.
      * Immutable once set.
+     * This attribute is set during the construction of the factory.
      */
     private String m_classname;
 
     /**
      * Manipulation Metadata of the internal POJO.
      * Immutable once set.
+     * This attribute is set during the construction of the factory.
      */
     private PojoMetadata m_manipulation;
 
@@ -114,6 +116,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     public void check(Element element) throws ConfigurationException {
         m_classname = element.getAttribute("classname");
         if (m_classname == null) { throw new ConfigurationException("A component needs a class name : " + element); }
+        m_manipulation = new PojoMetadata(m_componentMetadata);
     }
 
     /**
@@ -339,15 +342,9 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * Returns manipulation metadata of this component type.
-     * The returned object is computed at the first call and then is cached.
      * @return manipulation metadata of this component type.
      */
     public PojoMetadata getPojoMetadata() {
-        synchronized (this) {
-            if (m_manipulation == null) {
-                m_manipulation = new PojoMetadata(m_componentMetadata);
-            }
-        }
         return m_manipulation;
     }
 

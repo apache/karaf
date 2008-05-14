@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.parser;
 
+import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.metadata.Element;
 
 /**
@@ -54,9 +55,14 @@ public class PojoMetadata {
      * Manipulation Metadata object are created from component type metadata by
      * parsing manipulation metadata.
      * @param metadata : component type metadata
+     * @throws ConfigurationException : the manipulation metadata cannot be found
      */
-    public PojoMetadata(Element metadata) {
-        Element manip = metadata.getElements("manipulation", "")[0];
+    public PojoMetadata(Element metadata) throws ConfigurationException {
+        Element[] elems = metadata.getElements("manipulation", "");
+        if (elems == null) {
+            throw new ConfigurationException("The component " + metadata/*.getAttribute("classname")*/ + " has no manipulation metadata"); 
+        }
+        Element manip = elems[0];
         m_super = manip.getAttribute("super");
         Element[] fields = manip.getElements("field");
         for (int i = 0; fields != null && i < fields.length; i++) {
