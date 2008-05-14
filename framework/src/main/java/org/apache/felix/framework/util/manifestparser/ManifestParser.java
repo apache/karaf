@@ -21,23 +21,23 @@ package org.apache.felix.framework.util.manifestparser;
 import java.util.*;
 
 import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.cache.BundleRevision;
-import org.apache.felix.framework.util.*;
+import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.framework.util.VersionRange;
 import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IRequirement;
 import org.osgi.framework.*;
 
 public class ManifestParser
 {
-    private Logger m_logger = null;
-    private Map m_configMap = null;
-    private Map m_headerMap = null;
-    private String m_bundleSymbolicName = null;
-    private Version m_bundleVersion = null;
-    private ICapability[] m_capabilities = null;
-    private IRequirement[] m_requirements = null;
-    private IRequirement[] m_dynamicRequirements = null;
-    private R4LibraryClause[] m_libraryHeaders = null;
+    private Logger m_logger;
+    private Map m_configMap;
+    private Map m_headerMap;
+    private String m_bundleSymbolicName;
+    private Version m_bundleVersion;
+    private ICapability[] m_capabilities;
+    private IRequirement[] m_requirements;
+    private IRequirement[] m_dynamicRequirements;
+    private R4LibraryClause[] m_libraryHeaders;
     private boolean m_libraryHeadersOptional = false;
 
     public ManifestParser(Logger logger, Map configMap, Map headerMap)
@@ -313,7 +313,7 @@ public class ManifestParser
                             clause.getLibraryEntries()[i],
                             clause.getOSNames(), clause.getProcessors(), clause.getOSVersions(),
                             clause.getLanguages(), clause.getSelectionFilter());
-                    } 
+                    }
                 }
                 if (current < libraries.length)
                 {
@@ -731,14 +731,14 @@ public class ManifestParser
                     newAttrs);
             }
         }
-        
-        if (parseExtensionBundleHeader((String) 
+
+        if (parseExtensionBundleHeader((String)
             m_headerMap.get(Constants.FRAGMENT_HOST)) != null)
         {
             checkExtensionBundle();
         }
     }
-    
+
     private void checkExtensionBundle() throws BundleException
     {
         if (m_headerMap.containsKey(Constants.IMPORT_PACKAGE) ||
@@ -826,7 +826,7 @@ public class ManifestParser
                 R4Attribute[] newAttrs = new R4Attribute[attrs.length + 1];
                 newAttrs[0] = new R4Attribute(
                     ICapability.PACKAGE_PROPERTY,
-                    (String) clauses[clauseIdx][CLAUSE_PATHS_INDEX][pathIdx], false);
+                    clauses[clauseIdx][CLAUSE_PATHS_INDEX][pathIdx], false);
                 System.arraycopy(attrs, 0, newAttrs, 1, attrs.length);
 
                 // Create package capability and add to capability list.
@@ -919,7 +919,7 @@ public class ManifestParser
                 R4Attribute[] newAttrs = new R4Attribute[attrs.length + 1];
                 newAttrs[0] = new R4Attribute(
                     ICapability.PACKAGE_PROPERTY,
-                    (String) clauses[clauseIdx][CLAUSE_PATHS_INDEX][pathIdx], false);
+                    clauses[clauseIdx][CLAUSE_PATHS_INDEX][pathIdx], false);
                 System.arraycopy(attrs, 0, newAttrs, 1, attrs.length);
 
                 // Create package requirement and add to requirement list.
@@ -974,7 +974,7 @@ public class ManifestParser
                 R4Attribute[] newAttrs = new R4Attribute[attrs.length + 1];
                 newAttrs[0] = new R4Attribute(
                     Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE,
-                    (String) clauses[clauseIdx][CLAUSE_PATHS_INDEX][pathIdx], false);
+                    clauses[clauseIdx][CLAUSE_PATHS_INDEX][pathIdx], false);
                 System.arraycopy(attrs, 0, newAttrs, 1, attrs.length);
 
                 // Create package requirement and add to requirement list.

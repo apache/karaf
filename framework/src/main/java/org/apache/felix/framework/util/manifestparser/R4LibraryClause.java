@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,17 +22,18 @@ import java.util.*;
 
 import org.apache.felix.framework.FilterImpl;
 import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.util.*;
+import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.framework.util.VersionRange;
 import org.osgi.framework.*;
 
 public class R4LibraryClause
 {
-    private String[] m_libraryEntries = null;
-    private String[] m_osnames = null;
-    private String[] m_processors = null;
-    private String[] m_osversions = null;
-    private String[] m_languages = null;
-    private String m_selectionFilter = null;
+    private final String[] m_libraryEntries;
+    private final String[] m_osnames;
+    private final String[] m_processors;
+    private final String[] m_osversions;
+    private final String[] m_languages;
+    private final String m_selectionFilter;
 
     public R4LibraryClause(String[] libraryEntries, String[] osnames,
         String[] processors, String[] osversions, String[] languages,
@@ -134,7 +135,7 @@ public class R4LibraryClause
 
     private boolean checkOSNames(String currentOSName, String[] osnames)
     {
-        boolean win32 = currentOSName.startsWith("win") && 
+        boolean win32 = currentOSName.startsWith("win") &&
             (currentOSName.equals("windows95") ||
             currentOSName.equals("windows98") ||
             currentOSName.equals("windowsnt") ||
@@ -145,7 +146,7 @@ public class R4LibraryClause
 
         for (int i = 0; (osnames != null) && (i < osnames.length); i++)
         {
-            if (osnames[i].equals(currentOSName) || 
+            if (osnames[i].equals(currentOSName) ||
                 ("win32".equals(osnames[i]) && win32))
             {
                 return true;

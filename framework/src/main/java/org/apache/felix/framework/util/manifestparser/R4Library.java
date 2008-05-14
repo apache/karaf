@@ -22,12 +22,12 @@ import org.osgi.framework.Constants;
 
 public class R4Library
 {
-    private String m_libraryFile = null;
-    private String[] m_osnames = null;
-    private String[] m_processors = null;
-    private String[] m_osversions = null;
-    private String[] m_languages = null;
-    private String m_selectionFilter = null;
+    private String m_libraryFile;
+    private String[] m_osnames;
+    private String[] m_processors;
+    private String[] m_osversions;
+    private String[] m_languages;
+    private String m_selectionFilter;
 
     public R4Library(
         String libraryFile, String[] osnames, String[] processors, String[] osversions,

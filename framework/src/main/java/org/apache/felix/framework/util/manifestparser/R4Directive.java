@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,9 +20,9 @@ package org.apache.felix.framework.util.manifestparser;
 
 public class R4Directive
 {
-    private String m_name = "";
-    private String m_value = "";
-    
+    private final String m_name;
+    private final String m_value;
+
     public R4Directive(String name, String value)
     {
         m_name = name;

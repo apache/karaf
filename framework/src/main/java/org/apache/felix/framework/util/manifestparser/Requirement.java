@@ -27,14 +27,14 @@ import org.osgi.framework.*;
 
 public class Requirement implements IRequirement
 {
-    private String m_namespace = null;
-    private R4Directive[] m_directives = null;
-    private R4Attribute[] m_attributes = null;
+    private final String m_namespace;
+    private R4Directive[] m_directives;
+    private R4Attribute[] m_attributes;
     private boolean m_isOptional = false;
 
-    private String m_pkgName = null;
-    private VersionRange m_pkgVersionRange = null;
-    private Filter m_filter = null;
+    private String m_pkgName;
+    private VersionRange m_pkgVersionRange;
+    private Filter m_filter;
 
     public Requirement(String namespace, String filterStr) throws InvalidSyntaxException
     {

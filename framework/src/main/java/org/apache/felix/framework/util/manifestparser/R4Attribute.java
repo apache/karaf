@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,10 +20,10 @@ package org.apache.felix.framework.util.manifestparser;
 
 public class R4Attribute
 {
-    private String m_name = "";
-    private Object m_value = null;
-    private boolean m_isMandatory = false;
-    
+    private final String m_name;
+    private final Object m_value;
+    private final boolean m_isMandatory;
+
     public R4Attribute(String name, Object value, boolean isMandatory)
     {
         m_name = name;

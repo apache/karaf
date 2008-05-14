@@ -27,16 +27,16 @@ import org.osgi.framework.Version;
 
 public class Capability implements ICapability
 {
-    private String m_namespace = null;
-    private R4Directive[] m_directives = null;
-    private R4Attribute[] m_attributes = null;
-    private Map m_attrMap = null;
+    private String m_namespace;
+    private R4Directive[] m_directives;
+    private R4Attribute[] m_attributes;
+    private Map m_attrMap;
     private String[] m_uses = new String[0];
-    private String[][] m_includeFilter = null;
-    private String[][] m_excludeFilter = null;
+    private String[][] m_includeFilter;
+    private String[][] m_excludeFilter;
 
     // Cached properties for performance reasons.
-    private String m_pkgName = null;
+    private String m_pkgName;
     private Version m_pkgVersion = Version.emptyVersion;
 
     public Capability(String namespace, R4Directive[] dirs, R4Attribute[] attrs)
@@ -431,7 +431,7 @@ loop:   for (;;)
 
 loop:   for (int i = 0; i < len; i++)
         {
-            String piece = (String) pieces[i];
+            String piece = pieces[i];
             int index = 0;
             if (i == len - 1)
             {
