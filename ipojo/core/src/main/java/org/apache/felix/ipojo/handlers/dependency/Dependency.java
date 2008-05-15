@@ -46,20 +46,22 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
     /**
      * Reference on the Dependency Handler.
      */
-    private DependencyHandler m_handler;
+    private final DependencyHandler m_handler;
 
     /**
      * Field of the dependency.
      */
-    private String m_field;
+    private final String m_field;
 
     /**
      * List of dependency callback.
+     * Immutable once set.
      */
     private DependencyCallback[] m_callbacks;
 
     /**
      * Is the dependency a service level dependency.
+     * Immutable once set.
      */
     private boolean m_isServiceLevelRequirement;
 
@@ -76,25 +78,27 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
     /**
      * Thread Local.
      */
-    private ServiceUsage m_usage;
+    private final ServiceUsage m_usage;
 
     /**
      * Nullable object.
+     * Immutable once set.
      */
     private Object m_nullable;
 
     /**
      * Default-Implementation.
      */
-    private String m_di;
+    private final String m_di;
     
     /**
      * Is the Nullable pattern enable?
      */
-    private boolean m_supportNullable;
+    private final boolean m_supportNullable;
 
     /**
      * Id of the dependency.
+     * Immutable once set.
      */
     private String m_id;
 
@@ -117,9 +121,11 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
     public Dependency(DependencyHandler handler, String field, Class spec, Filter filter, boolean isOptional, boolean isAggregate, boolean nullable, String identity, BundleContext context, int policy, Comparator cmp, String defaultImplem) {
         super(spec, isAggregate, isOptional, filter, cmp, policy, context, handler);
         m_handler = handler;
+        m_field = field;
         if (field != null) {
-            m_field = field;
             m_usage = new ServiceUsage();
+        } else {
+            m_usage = null;
         }
         
         m_supportNullable = nullable;
@@ -138,7 +144,8 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
     /**
      * Set the specification of the current dependency.
      * In order to store the id of the dependency, this
-     * method is override.
+     * method is override. This method is called during the 
+     * configuration.
      * @param spec : request service Class
      * @see org.apache.felix.ipojo.util.DependencyModel#setSpecification(java.lang.Class)
      */
@@ -155,6 +162,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
 
     /**
      * Add a callback to the dependency.
+     * This method is called during the configuration.
      * @param callback : callback to add
      */
     protected void addDependencyCallback(DependencyCallback callback) {
@@ -172,7 +180,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * Stop the current dependency.
      * @see org.apache.felix.ipojo.util.DependencyModel#stop()
      */
-    public void stop() {
+    public synchronized void stop() {
         m_isStarted = false;
         super.stop();
     }
@@ -197,30 +205,32 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * Call the bind method.
      * @param pojo : pojo instance on which calling the bind method.
      */
-    protected synchronized void onObjectCreation(Object pojo) {
-        if (!m_isStarted) { return; }
+    protected void onObjectCreation(Object pojo) {
+        ServiceReference[] refs;
+        synchronized (this) {
+            if (!m_isStarted) { return; }
 
-        // We are notified of an instance creation, we have to freeze when the static policy is used
-        if (getBindingPolicy() == STATIC_BINDING_POLICY) {
-            m_isFrozen = true;
+            // We are notified of an instance creation, we have to freeze when the static policy is used
+            if (getBindingPolicy() == STATIC_BINDING_POLICY) {
+                m_isFrozen = true;
+            }
+
+            // Check optional case : nullable object case : do not call bind on nullable object
+            if (isOptional() && getSize() == 0) { return; }
+            
+            refs = getServiceReferences(); // Stack confinement.
         }
 
-        // Check optional case : nullable object case : do not call bind on nullable object
-        if (isOptional() && getSize() == 0) { return; }
-
         // Call bind callback.
-        for (int j = 0; m_callbacks != null && j < m_callbacks.length; j++) {
+        for (int j = 0; m_callbacks != null && j < m_callbacks.length; j++) { // The array is constant.
             if (m_callbacks[j].getMethodType() == DependencyCallback.BIND) {
                 if (isAggregate()) {
-                    ServiceReference[] refs = getServiceReferences();
                     for (int i = 0; i < refs.length; i++) {
                         invokeCallback(m_callbacks[j], refs[i], pojo);
                     }
                 } else {
-                    ServiceReference ref = getServiceReference();
-                    if (ref != null) {
-                        invokeCallback(m_callbacks[j], ref, pojo);
-                    }
+                    // Take the first reference.
+                    invokeCallback(m_callbacks[j], refs[0], pojo);
                 }
             }
         }
@@ -292,9 +302,15 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                 if (m_supportNullable) {
                     // To load the proxy we use the POJO class loader. Indeed, this classloader imports iPOJO (so can access to Nullable) and has
                     // access to the service specification.
-                    m_nullable =
+                    try { 
+                        m_nullable =
                             Proxy.newProxyInstance(getHandler().getInstanceManager().getClazz().getClassLoader(), new Class[] {
                                     getSpecification(), Nullable.class }, new NullableObject()); // NOPMD
+                    } catch (NoClassDefFoundError e) {
+                        // A NoClassDefFoundError is thrown if the specification uses a class not accessible by the actual instance.
+                        // It generally comes from a missing import.
+                        throw new IllegalStateException("Cannot create the Nullable object, a referenced class cannot be loaded: " + e.getMessage());
+                    }
                 }
             } else {
                 // Create the default-implementation object.
