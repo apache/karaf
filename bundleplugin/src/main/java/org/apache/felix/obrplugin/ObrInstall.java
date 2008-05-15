@@ -55,7 +55,7 @@ public final class ObrInstall extends AbstractMojo
      * @parameter
      */
     private List supportedProjectTypes = Arrays.asList( new String[]
-        { "bundle" } );
+        { "jar", "bundle" } );
 
     /**
      * Local Repository.
@@ -156,7 +156,7 @@ public final class ObrInstall extends AbstractMojo
 
     private void updateLocalBundleMetadata( Artifact artifact, ObrUpdate update ) throws MojoExecutionException
     {
-        if ( !"bundle".equals( artifact.getType() ) )
+        if ( !supportedProjectTypes.contains( artifact.getType() ) )
         {
             return;
         }

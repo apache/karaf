@@ -74,7 +74,7 @@ public final class ObrDeploy extends AbstractMojo
      * @parameter
      */
     private List supportedProjectTypes = Arrays.asList( new String[]
-        { "bundle" } );
+        { "jar", "bundle" } );
 
     /**
      * @parameter expression="${project.distributionManagementArtifactRepository}"
@@ -277,7 +277,7 @@ public final class ObrDeploy extends AbstractMojo
 
     private void updateRemoteBundleMetadata( Artifact artifact, ObrUpdate update ) throws MojoExecutionException
     {
-        if ( !"bundle".equals( artifact.getType() ) )
+        if ( !supportedProjectTypes.contains( artifact.getType() ) )
         {
             return;
         }
