@@ -62,8 +62,7 @@ function displayConfigForm(obj) {
     innerHtml += '<input type="submit" class="submit" name="delete" value="Delete" onClick="return confirmDelete();"/>';
     if (obj.isFactory) {
         innerHtml += '&nbsp;&nbsp;&nbsp;';
-        innerHtml += '<input type="submit" class="submit" name="create" value="Create Configuration" onClick="return promptContext(this);" />';
-        innerHtml += '<input type="hidden" name="sling.context" value="" />';
+        innerHtml += '<input type="submit" class="submit" name="create" value="Create Configuration"/>';
     }
     innerHtml += '</td></tr>';
     innerHtml += '</table>';
@@ -213,17 +212,4 @@ function removeValue(vidx) {
 
 function confirmDelete() {
     return confirm("Are you sure to delete this configuration ?");
-}
-
-function promptContext(form) {
-    var result = prompt("Please give a Sling Context for the new configuration");
-    // alert("You entered: [" + result + "] for form [" + form + "/" + form.form + "]");
-    
-    // set the hidden sling.context input field with the value
-    if (result != null) {
-        form.form["sling.context"].value = result;
-        return true;
-    }
-    
-    return false;
 }

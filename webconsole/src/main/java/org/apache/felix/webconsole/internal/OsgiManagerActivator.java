@@ -24,15 +24,15 @@ import org.osgi.framework.BundleContext;
 
 public class OsgiManagerActivator implements BundleActivator {
 
-    private OsgiManager slingManager;
+    private OsgiManager osgiManager;
     
     public void start(BundleContext bundleContext) {
-        slingManager = new OsgiManager(bundleContext);
+        osgiManager = new OsgiManager(bundleContext);
     }
 
     public void stop(BundleContext arg0) {
-        if (slingManager != null) {
-            slingManager.dispose();
+        if (osgiManager != null) {
+            osgiManager.dispose();
         }
     }
 

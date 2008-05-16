@@ -27,26 +27,26 @@ import org.osgi.service.cm.ManagedService;
 
 class ConfigurationListener implements ManagedService {
 
-    private final OsgiManager slingManager;
+    private final OsgiManager osgiManager;
 
-    static ServiceRegistration create(OsgiManager slingManager) {
-        ConfigurationListener cl = new ConfigurationListener(slingManager);
+    static ServiceRegistration create(OsgiManager osgiManager) {
+        ConfigurationListener cl = new ConfigurationListener(osgiManager);
 
         Dictionary props = new Hashtable();
         props.put(Constants.SERVICE_VENDOR, "The Apache Software Foundation");
         props.put(Constants.SERVICE_DESCRIPTION,
-            "Sling Management Console Configuration Receiver");
-        props.put(Constants.SERVICE_PID, slingManager.getClass().getName());
+            "OSGi Management Console Configuration Receiver");
+        props.put(Constants.SERVICE_PID, osgiManager.getClass().getName());
 
-        return slingManager.getBundleContext().registerService(
+        return osgiManager.getBundleContext().registerService(
             ManagedService.class.getName(), cl, props);
     }
 
-    private ConfigurationListener(OsgiManager slingManager) {
-        this.slingManager = slingManager;
+    private ConfigurationListener(OsgiManager osgiManager) {
+        this.osgiManager = osgiManager;
     }
 
     public void updated(Dictionary config) {
-        slingManager.updateConfiguration(config);
+        osgiManager.updateConfiguration(config);
     }
 }

@@ -96,8 +96,6 @@ public class ConfigurationRender extends BaseManagementPlugin implements Render 
         pw.println();
 
         this.printSystemProperties(pw);
-        this.printRawFrameworkProperties(pw);
-        this.printAssemblies(pw);
         this.printBundles(pw);
         this.printServices(pw);
         this.printPreferences(pw);
@@ -151,57 +149,36 @@ public class ConfigurationRender extends BaseManagementPlugin implements Render 
         pw.println();
     }
 
-    private void printRawFrameworkProperties(PrintWriter pw) {
-        pw.println("*** Raw Framework properties:");
-
-        File file = new File(getBundleContext().getProperty("sling.home"),
-            "sling.properties");
-        if (file.exists()) {
-            Properties props = new Properties();
-            InputStream ins = null;
-            try {
-                ins = new FileInputStream(file);
-                props.load(ins);
-            } catch (IOException ioe) {
-                // handle or ignore
-            } finally {
-                IOUtils.closeQuietly(ins);
-            }
-
-            SortedSet keys = new TreeSet(props.keySet());
-            for (Iterator ki = keys.iterator(); ki.hasNext();) {
-                Object key = ki.next();
-                this.infoLine(pw, null, (String) key, props.get(key));
-            }
-
-        } else {
-            pw.println("  No Framework properties in " + file);
-        }
-
-        pw.println();
-    }
-
-    private void printAssemblies(PrintWriter pw) {
-        pw.println("*** Assemblies:");
-
-        Bundle[] bundles = getBundleContext().getBundles();
-        SortedSet keys = new TreeSet();
-        for (int i = 0; i < bundles.length; i++) {
-            if (bundles[i].getHeaders().get("Assembly-Bundles") != null) {
-                keys.add(this.getBundleString(bundles[i], false));
-            }
-        }
-
-        if (keys.isEmpty()) {
-            pw.println("  No Assemblies installed");
-        } else {
-            for (Iterator ki = keys.iterator(); ki.hasNext();) {
-                this.infoLine(pw, null, null, ki.next());
-            }
-        }
-
-        pw.println();
-    }
+    // This is Sling stuff, we comment it out for now
+//    private void printRawFrameworkProperties(PrintWriter pw) {
+//        pw.println("*** Raw Framework properties:");
+//
+//        File file = new File(getBundleContext().getProperty("sling.home"),
+//            "sling.properties");
+//        if (file.exists()) {
+//            Properties props = new Properties();
+//            InputStream ins = null;
+//            try {
+//                ins = new FileInputStream(file);
+//                props.load(ins);
+//            } catch (IOException ioe) {
+//                // handle or ignore
+//            } finally {
+//                IOUtils.closeQuietly(ins);
+//            }
+//
+//            SortedSet keys = new TreeSet(props.keySet());
+//            for (Iterator ki = keys.iterator(); ki.hasNext();) {
+//                Object key = ki.next();
+//                this.infoLine(pw, null, (String) key, props.get(key));
+//            }
+//
+//        } else {
+//            pw.println("  No Framework properties in " + file);
+//        }
+//
+//        pw.println();
+//    }
 
     private void printBundles(PrintWriter pw) {
         pw.println("*** Bundles:");

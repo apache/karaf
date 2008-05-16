@@ -64,30 +64,14 @@ public class BundleListRender extends BaseManagementPlugin implements Render {
     // }
     // }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.apache.sling.manager.web.internal.Render#getName()
-     */
     public String getName() {
         return NAME;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.apache.sling.manager.web.internal.Render#getLabel()
-     */
     public String getLabel() {
         return LABEL;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.apache.sling.manager.web.internal.internal.Render#render(javax.servlet.http.HttpServletRequest,
-     *      javax.servlet.http.HttpServletResponse)
-     */
     public void render(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 

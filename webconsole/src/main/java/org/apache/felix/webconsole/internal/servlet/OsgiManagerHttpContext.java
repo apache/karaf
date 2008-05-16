@@ -74,7 +74,7 @@ final class OsgiManagerHttpContext implements HttpContext {
     /**
      * Checks the <code>Authorization</code> header of the request for Basic
      * authentication user name and password. If contained, the credentials are
-     * compared to the user name and password set for the Sling Console.
+     * compared to the user name and password set for the OSGi Console.
      * <p>
      * If no user name is set, the <code>Authorization</code> header is
      * ignored and the client is assumed to be authenticated.

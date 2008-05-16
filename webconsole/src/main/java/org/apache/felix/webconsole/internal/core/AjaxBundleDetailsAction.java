@@ -94,11 +94,6 @@ public class AjaxBundleDetailsAction extends BundleAction {
         return NAME;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.sling.manager.web.internal.Action#performAction(javax.servlet.http.HttpServletRequest)
-     */
     public boolean performAction(HttpServletRequest request,
             HttpServletResponse response) throws IOException {
         JSONObject result = null;
@@ -342,7 +337,6 @@ public class AjaxBundleDetailsAction extends BundleAction {
             StringBuffer val = new StringBuffer();
 
             appendProperty(val, refs[i], Constants.OBJECTCLASS, "Types");
-            appendProperty(val, refs[i], "sling.context", "Sling Context");
             appendProperty(val, refs[i], Constants.SERVICE_PID, "PID");
             appendProperty(val, refs[i], ConfigurationAdmin.SERVICE_FACTORYPID,
                 "Factory PID");

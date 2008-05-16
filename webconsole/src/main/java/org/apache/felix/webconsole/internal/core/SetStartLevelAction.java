@@ -40,11 +40,6 @@ public class SetStartLevelAction extends BaseManagementPlugin implements Action 
         return LABEL;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.sling.manager.web.internal.Action#performAction(javax.servlet.http.HttpServletRequest)
-     */
     public boolean performAction(HttpServletRequest request,
             HttpServletResponse response) {
 

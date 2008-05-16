@@ -71,7 +71,7 @@ import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * The <code>Sling Manager</code> TODO
+ * The <code>OSGi Manager</code> TODO
  *
  * @scr.component ds="no" label="%manager.name"
  *                description="%manager.description"
@@ -99,7 +99,7 @@ public class OsgiManager extends GenericServlet {
     private static final String PROP_DEFAULT_RENDER = "default.render";
 
     /**
-     * @scr.property value="Sling Management Console"
+     * @scr.property value="OSGi Management Console"
      */
     private static final String PROP_REALM = "realm";
 
@@ -390,25 +390,25 @@ public class OsgiManager extends GenericServlet {
 
     private static class HttpServiceTracker extends ServiceTracker {
 
-        private final OsgiManager slingManager;
+        private final OsgiManager osgiManager;
 
-        HttpServiceTracker(OsgiManager slingManager) {
-            super(slingManager.getBundleContext(), HttpService.class.getName(),
+        HttpServiceTracker(OsgiManager osgiManager) {
+            super(osgiManager.getBundleContext(), HttpService.class.getName(),
                 null);
-            this.slingManager = slingManager;
+            this.osgiManager = osgiManager;
         }
 
         public Object addingService(ServiceReference reference) {
             Object operation = super.addingService(reference);
             if (operation instanceof HttpService) {
-                slingManager.bindHttpService((HttpService) operation);
+                osgiManager.bindHttpService((HttpService) operation);
             }
             return operation;
         }
 
         public void removedService(ServiceReference reference, Object service) {
             if (service instanceof HttpService) {
-                slingManager.unbindHttpService((HttpService) service);
+                osgiManager.unbindHttpService((HttpService) service);
             }
 
             super.removedService(reference, service);
@@ -417,24 +417,24 @@ public class OsgiManager extends GenericServlet {
 
     private static class OperationServiceTracker extends ServiceTracker {
 
-        private final OsgiManager slingManager;
+        private final OsgiManager osgiManager;
 
-        OperationServiceTracker(OsgiManager slingManager) {
-            super(slingManager.getBundleContext(), Action.SERVICE, null);
-            this.slingManager = slingManager;
+        OperationServiceTracker(OsgiManager osgiManager) {
+            super(osgiManager.getBundleContext(), Action.SERVICE, null);
+            this.osgiManager = osgiManager;
         }
 
         public Object addingService(ServiceReference reference) {
             Object operation = super.addingService(reference);
             if (operation instanceof Action) {
-                slingManager.bindOperation((Action) operation);
+                osgiManager.bindOperation((Action) operation);
             }
             return operation;
         }
 
         public void removedService(ServiceReference reference, Object service) {
             if (service instanceof Action) {
-                slingManager.bindOperation((Action) service);
+                osgiManager.bindOperation((Action) service);
             }
 
             super.removedService(reference, service);
@@ -443,24 +443,24 @@ public class OsgiManager extends GenericServlet {
 
     private static class RenderServiceTracker extends ServiceTracker {
 
-        private final OsgiManager slingManager;
+        private final OsgiManager osgiManager;
 
-        RenderServiceTracker(OsgiManager slingManager) {
-            super(slingManager.getBundleContext(), Render.SERVICE, null);
-            this.slingManager = slingManager;
+        RenderServiceTracker(OsgiManager osgiManager) {
+            super(osgiManager.getBundleContext(), Render.SERVICE, null);
+            this.osgiManager = osgiManager;
         }
 
         public Object addingService(ServiceReference reference) {
             Object operation = super.addingService(reference);
             if (operation instanceof Render) {
-                slingManager.bindRender((Render) operation);
+                osgiManager.bindRender((Render) operation);
             }
             return operation;
         }
 
         public void removedService(ServiceReference reference, Object service) {
             if (service instanceof Render) {
-                slingManager.bindRender((Render) service);
+                osgiManager.bindRender((Render) service);
             }
 
             super.removedService(reference, service);
@@ -472,7 +472,7 @@ public class OsgiManager extends GenericServlet {
 
         // get authentication details
         String realm = this.getProperty(config, PROP_REALM,
-            "Sling Management Console");
+            "OSGi Management Console");
         String userId = this.getProperty(config, PROP_USER_NAME, null);
         String password = this.getProperty(config, PROP_PASSWORD, null);
 
@@ -483,7 +483,6 @@ public class OsgiManager extends GenericServlet {
 
             Dictionary servletConfig = toStringConfig(config);
 
-            // rest of sling
             httpService.registerServlet(this.webManagerRoot, this,
                 servletConfig, httpContext);
             httpService.registerResources(this.webManagerRoot + "/res", "/res",

@@ -85,16 +85,16 @@ public class Util {
         + "</p>" + "</div>";
 
     /** The name of the request attribute containig the map of FileItems from the POST request */
-    public static final String ATTR_FILEUPLOAD = "org.apache.sling.webmanager.fileupload";
+    public static final String ATTR_FILEUPLOAD = "org.apache.felix.webconsole.fileupload";
 
     public static PrintWriter startHtml(HttpServletResponse resp, String pageTitle) throws IOException {
         resp.setContentType("text/html; utf-8");
 
         PrintWriter pw = resp.getWriter();
 
-        String adminTitle = "Sling Management Console"; // ServletEngine.VERSION.getFullProductName();
-        String productName = "Sling"; // ServletEngine.VERSION.getShortProductName();
-        String productWeb = "http://incubator.apache.org/sling";
+        String adminTitle = "OSGi Management Console"; // ServletEngine.VERSION.getFullProductName();
+        String productName = "Felix"; // ServletEngine.VERSION.getShortProductName();
+        String productWeb = "http://felix.apache.org";
         String vendorName = "http://www.apache.org"; // ServletEngine.VERSION.getVendorWeb();
         String vendorWeb = "http://www.apache.org"; // ServletEngine.VERSION.getVendorWeb();
 

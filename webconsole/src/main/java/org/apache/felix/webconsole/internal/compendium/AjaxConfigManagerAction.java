@@ -61,12 +61,6 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements
         return NAME;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.sling.manager.web.internal.Action#performAction(javax.servlet.http.HttpServletRequest,
-     *      javax.servlet.http.HttpServletResponse)
-     */
     public boolean performAction(HttpServletRequest request,
             HttpServletResponse response) throws IOException {
 
@@ -176,11 +170,7 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements
 
         if (ocd != null) {
 
-            String name = ocd.getName();
-            if (props.get("sling.context") != null) {
-                name += " (" + props.get("sling.context") + ")";
-            }
-            json.put("title", name);
+            json.put("title", ocd.getName());
 
             if (ocd.getDescription() != null) {
                 json.put("description", ocd.getDescription());
@@ -306,17 +296,6 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements
             // pid is a factory PID and we have to create a new configuration
             // we should actually also display that one !
             Configuration config = ca.createFactoryConfiguration(pid, null);
-
-            // add sling context into the configuration
-            if (request.getParameter("sling.context") != null) {
-                Dictionary props = config.getProperties();
-                if (props == null) {
-                    props = new Hashtable();
-                }
-                props.put("sling.context",
-                    request.getParameter("sling.context"));
-                config.update(props);
-            }
 
             // request.setAttribute(ATTR_REDIRECT_PARAMETERS, "pid=" +
             // config.getPid());

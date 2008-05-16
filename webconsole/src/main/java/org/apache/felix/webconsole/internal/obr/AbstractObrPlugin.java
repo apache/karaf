@@ -18,8 +18,6 @@
  */
 package org.apache.felix.webconsole.internal.obr;
 
-//import org.apache.sling.osgi.assembly.installer.BundleRepositoryAdmin;
-//import org.apache.sling.osgi.assembly.installer.InstallerService;
 import org.apache.felix.webconsole.internal.BaseManagementPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;

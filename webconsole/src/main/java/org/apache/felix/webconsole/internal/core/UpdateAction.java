@@ -54,11 +54,6 @@ public class UpdateAction extends BundleAction {
         return LABEL;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.apache.sling.manager.web.internal.internal.Action#performAction(javax.servlet.http.HttpServletRequest)
-     */
     public boolean performAction(HttpServletRequest request,
             HttpServletResponse response) {
 

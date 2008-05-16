@@ -36,12 +36,6 @@ public class RefreshPackagesAction extends BundleAction {
         return LABEL;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.sling.manager.web.internal.Action#performAction(javax.servlet.http.HttpServletRequest,
-     *      javax.servlet.http.HttpServletResponse)
-     */
     public boolean performAction(HttpServletRequest request,
             HttpServletResponse response) {
 

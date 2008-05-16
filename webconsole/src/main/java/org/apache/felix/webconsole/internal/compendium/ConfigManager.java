@@ -106,18 +106,12 @@ public class ConfigManager extends ConfigManagerBase implements Render {
                 Object factoryPid = refs[i].getProperty(Constants.SERVICE_PID);
                 if (factoryPid instanceof String) {
                     String pid = (String) factoryPid;
-                    Object slingContext = refs[i].getProperty("sling.context");
                     String name;
                     ObjectClassDefinition ocd = this.getObjectClassDefinition(
                         refs[i].getBundle(), pid, locale);
                     if (ocd != null) {
                         name = ocd.getName() + " (";
-                        if (slingContext != null) {
-                            name += slingContext + ", ";
-                        }
                         name += pid + ")";
-                    } else if (slingContext != null) {
-                        name = pid + " (" + slingContext + ")";
                     } else {
                         name = pid;
                     }
@@ -141,9 +135,6 @@ public class ConfigManager extends ConfigManagerBase implements Render {
                 }
 
                 Dictionary props = cfgs[i].getProperties();
-                Object slingContext = (props != null)
-                        ? props.get("sling.context")
-                        : null;
 
                 // insert and entry for the pid
                 ObjectClassDefinition ocd = this.getObjectClassDefinition(
@@ -151,16 +142,11 @@ public class ConfigManager extends ConfigManagerBase implements Render {
                 String name;
                 if (ocd != null) {
                     name = ocd.getName() + " (";
-                    if (slingContext != null) {
-                        name += slingContext + ", ";
-                    }
                     name += pid + ")";
 
                     // remove from the list of known pids
                     metaDataPids.remove(pid);
 
-                } else if (slingContext != null) {
-                    name = pid + " (" + slingContext + ")";
                 } else {
                     name = pid;
                 }
