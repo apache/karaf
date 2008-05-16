@@ -17,33 +17,35 @@
     specific language governing permissions and limitations
     under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.apache.sling</groupId>
-        <artifactId>sling</artifactId>
-        <version>1-incubator-SNAPSHOT</version>
-        <relativePath>../../parent/pom.xml</relativePath>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>felix</artifactId>
+        <version>1.0.2</version>
+        <relativePath>../pom/pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.sling.osgi.console.web</artifactId>
+    <artifactId>org.apache.felix.webconsole</artifactId>
     <packaging>bundle</packaging>
-    <version>2.0.0-incubator-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
 
-    <name>Sling - Sling Management Console</name>
-    <description>Sling Management Console Servlet</description>
+    <name>Apache Felix Web Management Console</name>
+    <description>
+        Web Based Management Console for OSGi Frameworks
+    </description>
 
     <scm>
         <connection>
-            scm:svn:http://svn.apache.org/repos/asf/incubator/sling/trunk/osgi/console-web
+            scm:svn:http://svn.apache.org/repos/asf/felix/trunk/webconsole
         </connection>
         <developerConnection>
-            scm:svn:https://svn.apache.org/repos/asf/incubator/sling/trunk/osgi/console-web
+            scm:svn:https://svn.apache.org/repos/asf/felix/trunk/webconsole
         </developerConnection>
-        <url>
-            http://svn.apache.org/viewvc/incubator/sling/trunk/osgi/console-web
-        </url>
+        <url>http://svn.apache.org/viewvc/felix/trunk/webconsole</url>
     </scm>
 
     <build>
@@ -59,14 +61,14 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>
-                            org.apache.sling.osgi.console.web.internal.SlingManagerActivator
+                            org.apache.sling.felix.webconsole.internal.OsgiManagerActivator
                         </Bundle-Activator>
                         <Export-Package>
-                            org.apache.sling.osgi.console.web,
+                            org.apache.sling.felix.webconsole,
                         </Export-Package>
                         <Private-Package>
-                            !org.apache.sling.osgi.console.web,
-                            org.apache.sling.osgi.console.web.*,
+                            !org.apache.sling.felix.webconsole,
+                            org.apache.sling.felix.webconsole.*,
 
                             <!-- File Upload functionality -->
                             org.apache.commons.fileupload,
@@ -79,13 +81,13 @@
                             org.apache.commons.io.output,
 
                             <!-- Required for JSON data transfer -->
-                            org.apache.sling.commons.json,
+                            org.json,
 
                             <!-- Import/Export-Package parsing -->
                             org.apache.felix.bundlerepository
                         </Private-Package>
                         <Import-Package>
-                            org.apache.sling.*; org.apache.felix.*;
+                            org.apache.felix.*;
                             org.osgi.service.obr;resolution:=optional,*
                         </Import-Package>
                     </instructions>
@@ -98,40 +100,55 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
+            <version>2.4</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- This adds commons-io transitively -->
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
+            <version>1.1.1</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <version>1.0.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.compendium</artifactId>
+            <version>1.0.1</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>javax.servlet</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.commons.json</artifactId>
-            <version>2.0.0-incubator-SNAPSHOT</version>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20070829</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr</artifactId>
+            <version>1.0.0</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.bundlerepository</artifactId>
+            <version>1.0.3</version>
             <scope>compile</scope>
         </dependency>
 
