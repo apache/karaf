@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+    
+    http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.apache.sling</groupId>
+        <artifactId>sling</artifactId>
+        <version>1-incubator-SNAPSHOT</version>
+        <relativePath>../../parent/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>org.apache.sling.osgi.console.web</artifactId>
+    <packaging>bundle</packaging>
+    <version>2.0.0-incubator-SNAPSHOT</version>
+
+    <name>Sling - Sling Management Console</name>
+    <description>Sling Management Console Servlet</description>
+
+    <scm>
+        <connection>
+            scm:svn:http://svn.apache.org/repos/asf/incubator/sling/trunk/osgi/console-web
+        </connection>
+        <developerConnection>
+            scm:svn:https://svn.apache.org/repos/asf/incubator/sling/trunk/osgi/console-web
+        </developerConnection>
+        <url>
+            http://svn.apache.org/viewvc/incubator/sling/trunk/osgi/console-web
+        </url>
+    </scm>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Activator>
+                            org.apache.sling.osgi.console.web.internal.SlingManagerActivator
+                        </Bundle-Activator>
+                        <Export-Package>
+                            org.apache.sling.osgi.console.web,
+                        </Export-Package>
+                        <Private-Package>
+                            !org.apache.sling.osgi.console.web,
+                            org.apache.sling.osgi.console.web.*,
+
+                            <!-- File Upload functionality -->
+                            org.apache.commons.fileupload,
+                            org.apache.commons.fileupload.disk,
+                            org.apache.commons.fileupload.servlet,
+
+                            <!-- Required by FileUpload and Util -->
+                            org.apache.commons.io,
+                            org.apache.commons.io.filefilter,
+                            org.apache.commons.io.output,
+
+                            <!-- Required for JSON data transfer -->
+                            org.apache.sling.commons.json,
+
+                            <!-- Import/Export-Package parsing -->
+                            org.apache.felix.bundlerepository
+                        </Private-Package>
+                        <Import-Package>
+                            org.apache.sling.*; org.apache.felix.*;
+                            org.osgi.service.obr;resolution:=optional,*
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+        </dependency>
+
+        <!-- This adds commons-io transitively -->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.commons.json</artifactId>
+            <version>2.0.0-incubator-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.bundlerepository</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+    </dependencies>
+</project>
