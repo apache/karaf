@@ -78,6 +78,7 @@ public class AntPlugin extends BundlePlugin
 
             // modify build template
             String buildXml = IOUtil.toString( getClass().getResourceAsStream( BUILD_XML ) );
+            buildXml = StringUtils.replace( buildXml, "BND_VERSION", builder.getVersion() );
             buildXml = StringUtils.replace( buildXml, "ARTIFACT_ID", artifactId );
 
             FileUtils.fileWrite( baseDir + BUILD_XML, buildXml );

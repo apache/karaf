@@ -20,7 +20,7 @@
     <echo message="Please run: $ant -projecthelp"/>
   </target>
 
-  <property name="bnd.version" value="0.0.238"/>
+  <property name="bnd.version" value="BND_VERSION"/>
 
   <target name="get-bnd"
           depends="test-offline"
@@ -34,13 +34,12 @@
          ignoreerrors="true"/>
   </target>
 
-  <taskdef resource="aQute/bnd/ant/taskdef.properties">
-    <classpath>
-      <pathelement location="${maven.repo.local}/biz/aQute/bnd/${bnd.version}/bnd-${bnd.version}.jar"/>
-    </classpath>
-  </taskdef>
-
   <target name="package" depends="compile,test,get-bnd" description="Package the bundle">
+    <taskdef resource="aQute/bnd/ant/taskdef.properties">
+      <classpath>
+        <pathelement location="${maven.repo.local}/biz/aQute/bnd/${bnd.version}/bnd-${bnd.version}.jar"/>
+      </classpath>
+    </taskdef>
     <pathconvert property="bnd.classpath" refid="build.classpath" pathsep=","/>
     <bnd files="maven-build.bnd" classpath="${maven.build.outputDir},${bnd.classpath}"/>
   </target>
