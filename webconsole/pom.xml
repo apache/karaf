@@ -61,14 +61,14 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>
-                            org.apache.sling.felix.webconsole.internal.OsgiManagerActivator
+                            org.apache.felix.webconsole.internal.OsgiManagerActivator
                         </Bundle-Activator>
                         <Export-Package>
-                            org.apache.sling.felix.webconsole,
+                            org.apache.felix.webconsole,
                         </Export-Package>
                         <Private-Package>
-                            !org.apache.sling.felix.webconsole,
-                            org.apache.sling.felix.webconsole.*,
+                            !org.apache.felix.webconsole,
+                            org.apache.felix.webconsole.*,
 
                             <!-- File Upload functionality -->
                             org.apache.commons.fileupload,
