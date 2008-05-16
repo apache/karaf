@@ -81,7 +81,7 @@ public class Util {
         + "{0}<br>{12}"
         + "</h1>"
         + "<p>"
-        + "<a target=\"_blank\" href=\"{13}\" title=\"{11}\"><img src=\"res/imgs/Sling.png\" width=\"175\" height=\"100\" border=\"0\"></a>"
+        + "<a target=\"_blank\" href=\"{13}\" title=\"{11}\"><img src=\"res/imgs/logo.png\" width=\"165\" height=\"63\" border=\"0\"></a>"
         + "</p>" + "</div>";
 
     /** The name of the request attribute containig the map of FileItems from the POST request */
