@@ -60,6 +60,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
+                        <Bundle-SymbolicName>
+                            ${artifactId}
+                        </Bundle-SymbolicName>
+                        <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
                         <Bundle-Activator>
                             org.apache.felix.webconsole.internal.OsgiManagerActivator
                         </Bundle-Activator>
