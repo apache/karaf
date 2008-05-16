@@ -26,7 +26,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.apache.felix.ipojo.metadata</artifactId>
 	<groupId>org.apache.felix</groupId>
-	<version>0.8.0</version>
+	<version>0.9.0</version>
 	<packaging>bundle</packaging>
 	<name>Apache Felix iPOJO Metadata</name>
 	<build>
@@ -57,10 +57,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.ipojo.metadata-0.8.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.ipojo.metadata-0.8.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.ipojo.metadata-0.8.0</url>
-  </scm>
 </project>
