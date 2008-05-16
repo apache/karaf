@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.test.scenarios.manipulation;
 
+import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.FieldMetadata;
@@ -62,8 +63,13 @@ public class ManipulationMetadataAPI extends OSGiTestCase {
 		
 		Element manip = getMetadataForComponent(elem, "Manipulation-FooProviderType-1");
         assertNotNull("Check manipulation metadata not null for " + "Manipulation-FooProviderType-1", manip);
-        PojoMetadata mm = new PojoMetadata(manip);
-        assertNotNull("Check mm not null", mm);
+        PojoMetadata mm;
+        try {
+            mm = new PojoMetadata(manip);
+            assertNotNull("Check mm not null", mm);
+        } catch (ConfigurationException e) {
+            fail("The creation of pojo metadata has failed");
+        }
 	}
 	
 	public void testInterface() {
@@ -272,7 +278,12 @@ public class ManipulationMetadataAPI extends OSGiTestCase {
         
         Element manip = getMetadataForComponent(elem, comp_name);
         assertNotNull("Check manipulation metadata not null for " + comp_name, manip);
-        return new PojoMetadata(manip);
+        try {
+            return new PojoMetadata(manip);
+        } catch (ConfigurationException e) {
+            fail("The creation of pojo metadata for " + comp_name + " has failed");
+            return null;
+        }
     }	
 
 }

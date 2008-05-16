@@ -1,0 +1,276 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<HTML>
+  
+ 
+<HEAD>
+    <TITLE>Apache Felix - Providing OSGi services</TITLE>
+    <LINK rel="stylesheet" href="http://felix.apache.org/site/media.data/site.css" type="text/css" media="all">
+    <META http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  </HEAD>
+  <BODY>
+    <DIV class="title"><DIV class="logo"><A href="http://felix.apache.org/site/index.html"><IMG border="0" alt="Apache Felix" src="http://felix.apache.org/site/media.data/logo.png"></A></DIV><DIV class="header"><A href="http://www.apache.org/"><IMG border="0" alt="Apache" src="http://felix.apache.org/site/media.data/apache.png"></A></DIV></DIV>
+    <DIV class="menu">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <UL>
+	<LI><A href="http://felix.apache.org/site/news.html" title="news">news</A></LI>
+	<LI><A href="http://felix.apache.org/site/license.html" title="license">license</A></LI>
+	<LI><SPAN class="nobr"><A href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</A></LI>
+	<LI><A href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</A></LI>
+	<LI><A href="http://felix.apache.org/site/contributing.html" title="Contributing">contributing</A></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN>
+<!-- ApacheCon Ad -->
+<IFRAME src="http://www.apache.org/ads/button.html" style="border-width:0; float: left" frameborder="0" scrolling="no" width="135" height="135"></IFRAME>
+<P style="height: 100px">
+<!-- ApacheCon Ad --></LI>
+</UL>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </DIV>
+    <DIV class="main">
+<TABLE class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><TBODY><TR>
+<TD class="confluenceTd" valign="top" width="80%">
+<H1><A name="ProvidingOSGiservices-ProvidingOSGiservices"></A>Providing OSGi services</H1>
+
+<P>This handler allows publishing OSGi services. It manages:</P>
+<UL>
+	<LI>service publication</LI>
+	<LI>service object creation</LI>
+	<LI>service un-registration</LI>
+	<LI>configuration property      propagation</LI>
+</UL>
+
+
+<P><IMG src="http://felix.apache.org/site/providing-osgi-services.data/ps-simple.png" handler="" overview="" align="absmiddle" border="0"></P>
+
+<H1><A name="ProvidingOSGiservices-Asimpleexample"></A><B>A simple example</B></H1>
+
+<P>The following code snippet shows a simple class implementing the FooService interface:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class FooProviderType1 <SPAN class="code-keyword">implements</SPAN> FooService {
+            <SPAN class="code-keyword">private</SPAN> <SPAN class="code-object">String</SPAN> m_foo = <SPAN class="code-quote">&quot;foo&quot;</SPAN>;
+
+            <SPAN class="code-keyword">public</SPAN> void foo() {
+                        <SPAN class="code-object">System</SPAN>.out.println(<SPAN class="code-quote">&quot;foo  &quot;</SPAN> + m_foo);
+            }
+
+}</PRE>
+</DIV></DIV>
+<P>To provide a service, the implementation class <B>NEEDS</B> to implement the service interface. By the way, it guaranties that each methods of the service interface are implemented.</P>
+
+<P>To provide the service, the component type needs to declare the providing:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;component className=<SPAN class="code-quote">&quot;...FooProviderType1&quot;</SPAN>&gt;</SPAN>
+            <SPAN class="code-tag">&lt;provides/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
+</DIV></DIV>
+<P><IMG src="http://felix.apache.org/site/providing-osgi-services.data/ps-foo.png" align="absmiddle" border="0"></P>
+
+<P>The &lt;provides/&gt; element suffice to declare that each instance of this type will provide the FooService. Indeed, the provided interface can be discovered by analyzing the implementation class. By default, all implemented interface are published in the same service registration. IPOJO looks down the entire inheritance tree.</P>
+
+<H1><A name="ProvidingOSGiservices-ServicePublication"></A><B>Service Publication</B></H1>
+
+<P>The provided service handler manages the service publication and providing. For each declared <EM>provides</EM>, the handler register a service. The service is published as long as the instance is valid. If the instance becomes invalid, the service is removed from the service registry.</P>
+
+<P>By default, it publishes all interfaces implemented by the implementation class of the component class. It collects all super-interfaces (interfaces implemented by implemented interfaces and by super class). However it is possible to set exposed interface with the <EM>interface</EM> attribute to avoid to exposes all collected interfaces.</P>
+
+<P>The following xml snippet is equivalent to the previous example:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;component className=<SPAN class="code-quote">&quot;...FooProviderType1&quot;</SPAN>&gt;</SPAN>
+            <SPAN class="code-tag">&lt;provides interface=<SPAN class="code-quote">&quot;...FooService &quot;</SPAN>/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>If the implementation class implements several interfaces, all these interfaces are published by default in the same service publication. You can use the interface attribute to set exactly published interfaces. If you want to publish several interfaces, you can use the following syntax:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;component className=<SPAN class="code-quote">&quot;...FooProviderType1&quot;</SPAN>&gt;</SPAN>
+            <SPAN class="code-tag">&lt;provides interface=<SPAN class="code-quote">&quot;{...FooService, ...BarService}&quot;</SPAN>/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
+</DIV></DIV>
+<P><IMG src="http://felix.apache.org/site/providing-osgi-services.data/ps-foobar.png" align="absmiddle" border="0"></P>
+
+<P><EM>Note</EM>: if you use the interface attribute, the handler check that all declared interface are really implemented by the implementation class. If an interface is not implemented, the handler throws an error.</P>
+
+<P><EM>Note</EM>: if the implementation class does not implement any interface, you cannot provide a service. In this case, the handler throws an error.</P>
+
+<H1><A name="ProvidingOSGiservices-ServiceProperties"></A><B>Service Properties</B></H1>
+
+<P>The handler can manage service properties. Service properties are attached to published service and allow consumer filtering providers. A property can be attached to a field (contained in the component implementation class), and so by handle dynamically.</P>
+
+<P>Let's take a new example very closed of the last one:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class FooProviderType1 <SPAN class="code-keyword">implements</SPAN> FooService {
+	<SPAN class="code-keyword">private</SPAN> <SPAN class="code-object">String</SPAN> m_foo;
+	<SPAN class="code-keyword">public</SPAN> void foo() {
+		<SPAN class="code-object">System</SPAN>.out.println(<SPAN class="code-quote">&quot;foo  &quot;</SPAN> + m_foo);
+                m_foo = <SPAN class="code-quote">&quot;bar&quot;</SPAN>;
+	}
+}</PRE>
+</DIV></DIV>
+<P>Remark that the m_foo field does not have any value. The following snippet shows a component publishing the <EM>FooService</EM>with two properties:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;component className=<SPAN class="code-quote">&quot;...FooProviderType1&quot;</SPAN>&gt;</SPAN>
+            <SPAN class="code-tag">&lt;provides&gt;</SPAN>
+                        <SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;foo&quot;</SPAN> field=<SPAN class="code-quote">&quot;m_foo&quot;</SPAN> value=<SPAN class="code-quote">&quot;Foo&quot;</SPAN>&gt;</SPAN>
+                        <SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;intProps&quot;</SPAN> type=<SPAN class="code-quote">&quot;int&quot;</SPAN> value=<SPAN class="code-quote">&quot;5&quot;</SPAN>&gt;</SPAN>
+            <SPAN class="code-tag">&lt;/provides&gt;</SPAN>
+<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>The first declared property will be attached to the _m_foo_ field. This property is published with the name <EM>foo</EM>. This property has a default value &quot;Foo&quot;. This value will be injected in the _m_foo_ field, when this field asks for a value. A property with a field attribute does not need to declare a type (the type can be discovered by analyzing the implementation class).</P>
+
+<P>The second property is published with the name <EM>intProps</EM>. This property is not attached to a field, so, we need to declare the property type. All primitive types or objects can be used has property type (for object, the qualified name of the class is used as java.lang.String).</P>
+
+<P><IMG src="http://felix.apache.org/site/providing-osgi-services.data/ps-foo2.png" align="absmiddle" border="0"></P>
+
+<P>The implementation class set a new value to the _m_foo_ field in the code. When this action occurs, the handler will modify the service publication to update the <EM>foo</EM> property published value. If a published property value becomes <EM>null</EM>, the property is unpublished since it has a new value.</P>
+
+<P><IMG src="http://felix.apache.org/site/providing-osgi-services.data/ps-foo3.png" align="absmiddle" border="0"></P>
+
+<P>If property does not have default value, the instance configuration needs to set a value for each unvalued property. Moreover, the instance can override the property value. The following xml snippet shows the declaration of an instance overriding the property values:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;instance component=<SPAN class="code-quote">&quot;...FooProviderType1&quot;</SPAN> name=<SPAN class="code-quote">&quot;myFooServiceProvider&quot;</SPAN>&gt;</SPAN>
+            <SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;foo&quot;</SPAN> value=<SPAN class="code-quote">&quot;baz&quot;</SPAN>/&gt;</SPAN>
+            <SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;intProps&quot;</SPAN> value=<SPAN class="code-quote">&quot;2&quot;</SPAN>/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/instance&gt;</SPAN></PRE>
+</DIV></DIV>
+<P><IMG src="http://felix.apache.org/site/providing-osgi-services.data/ps-foo4.png" align="absmiddle" border="0"></P>
+
+<P>Properties can be attached to a method too. When a property receive a new value, this method is called with the new value in parameter. For example, when the foo property receive a new value (at instance creation or when the instance is reconfigured), the <EM>fooMethod</EM> is called. The <EM>fooMethod</EM> must have only one argument of the Foo type (String in the example).</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;component className=<SPAN class="code-quote">&quot;...FooProviderType1&quot;</SPAN>&gt;</SPAN>
+            <SPAN class="code-tag">&lt;provides&gt;</SPAN>
+                        <SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;foo&quot;</SPAN> method=<SPAN class="code-quote">&quot;fooMethod&quot;</SPAN> value=<SPAN class="code-quote">&quot;Foo&quot;</SPAN>&gt;</SPAN>
+                        <SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;intProps&quot;</SPAN> type=<SPAN class="code-quote">&quot;int&quot;</SPAN> value=<SPAN class="code-quote">&quot;5&quot;</SPAN>&gt;</SPAN>
+            <SPAN class="code-tag">&lt;/provides&gt;</SPAN>
+<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
+</DIV></DIV>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class FooProviderType1 <SPAN class="code-keyword">implements</SPAN> FooService {
+	<SPAN class="code-keyword">private</SPAN> <SPAN class="code-object">String</SPAN> m_foo;
+	<SPAN class="code-keyword">public</SPAN> void foo() {
+		<SPAN class="code-object">System</SPAN>.out.println(<SPAN class="code-quote">&quot;foo  &quot;</SPAN> + m_foo);
+	}	        void fooMethod(<SPAN class="code-object">String</SPAN> newFoo) {
+		m_foo = newFoo;
+	}</PRE>
+</DIV></DIV>
+<P>A property can declare both a field and a method. In this case, the field receive the value and then the method is called.&nbsp;</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java">&lt;component className=<SPAN class="code-quote">&quot;...FooProviderType1&quot;</SPAN>&gt;
+            &lt;provides&gt;
+                        &lt;property name=<SPAN class="code-quote">&quot;foo&quot;</SPAN> method=<SPAN class="code-quote">&quot;fooMethod&quot;</SPAN> field=<SPAN class="code-quote">&quot;m_foo&quot;</SPAN> value=<SPAN class="code-quote">&quot;Foo&quot;</SPAN>&gt;
+                        &lt;property name=<SPAN class="code-quote">&quot;intProps&quot;</SPAN> type=<SPAN class="code-quote">&quot;<SPAN class="code-object">int</SPAN>&quot;</SPAN> value=<SPAN class="code-quote">&quot;5&quot;</SPAN>&gt;
+            &lt;/provides&gt;
+&lt;/component&gt;</PRE>
+</DIV></DIV>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class FooProviderType1 <SPAN class="code-keyword">implements</SPAN> FooService {
+	<SPAN class="code-keyword">private</SPAN> <SPAN class="code-object">String</SPAN> m_foo;
+	<SPAN class="code-keyword">public</SPAN> void foo() {
+		<SPAN class="code-object">System</SPAN>.out.println(<SPAN class="code-quote">&quot;foo  &quot;</SPAN> + m_foo);
+	}	void fooMethod(<SPAN class="code-object">String</SPAN> newFoo) {
+		<SPAN class="code-object">System</SPAN>.out.println(<SPAN class="code-quote">&quot;Update foo : &quot;</SPAN> + m_foo);
+	}</PRE>
+</DIV></DIV>
+
+<H1><A name="ProvidingOSGiservices-Advancedfeatures"></A>Advanced features</H1>
+
+
+<H2><A name="ProvidingOSGiservices-ServiceServing%26ObjectCreation"></A><B>Service Serving &amp; Object Creation</B></H2>
+
+<P>When a consumer requires the published service, the handler sends an object (instance) of the implementation class. By default, it is always the same instance. If no instance already exists, an instance is created.</P>
+
+<P>However, the handler supports the OSGi <EM>Service Factory</EM>. In this case, for each requester bundle, the handler sends a new object. To activate this policy, add the <EM>factory</EM> attribute in the <EM>provides</EM> element:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;provides factory=<SPAN class="code-quote">&quot;SERVICE&quot;</SPAN>/&gt;</SPAN></PRE>
+</DIV></DIV>
+
+<H2><A name="ProvidingOSGiservices-SeveralServiceProviding"></A><B>Several Service Providing</B></H2>
+
+<P>You can declare several <EM>provides</EM> inside the same component. All this provided service will be manage by the same handler but separately. Several services will be published (with different service registrations). This case is useful when service properties are different for the different services.</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java">&lt;component className=<SPAN class="code-quote">&quot;...FooProviderType1&quot;</SPAN>&gt;
+                &lt;provides <SPAN class="code-keyword">interface</SPAN>=<SPAN class="code-quote">&quot;...Foo&quot;</SPAN>/&gt;
+                &lt;provides <SPAN class="code-keyword">interface</SPAN>=<SPAN class="code-quote">&quot;...Bar&quot;</SPAN>&gt;
+                               &lt;property name=<SPAN class="code-quote">&quot;foo&quot;</SPAN> value=<SPAN class="code-quote">&quot;baz&quot;</SPAN>/&gt;
+                &lt;/provides&gt;
+&lt;/component&gt;</PRE>
+</DIV></DIV>
+<P><IMG src="http://felix.apache.org/site/providing-osgi-services.data/ps-foobar2.png" align="absmiddle" border="0"></P>
+
+<H2><A name="ProvidingOSGiservices-ServicePropertyPropagation"></A><B>Service Property Propagation</B></H2>
+
+<P>The configuration handler has the possibility to propagate received properties to service publication. So, when the propagation is activated, all properties received by the configuration handler will be propagated to all published service. If some properties are mapped on methods, these methods are invoked with the new value in argument.</P>
+
+<P><IMG src="http://felix.apache.org/site/providing-osgi-services.data/ps-propagation.png" align="absmiddle" border="0"></P>
+
+<H2><A name="ProvidingOSGiservices-Instancereconfiguration"></A><B>Instance reconfiguration</B></H2>
+
+<P>The handler supports instance reconfiguration. When an instance is dynamically reconfigured, if the new configuration updates property values, these value are take into account (both for field, and service publication). If some of these properties have methods, these methods are invoked with the new value in argument.</P>
+</TD>
+<TD class="confluenceTd" valign="top" width="20%">
+<FORM method="get" class="confluence-searchbox marginlessForm " action="http://felix.apache.org/confluence/dosearchsite.action">
+    <INPUT type="hidden" name="searchQuery.spaceKey" value="FELIX">
+    <INPUT type="text" name="searchQuery.queryString">
+    <INPUT type="submit" value="Search">
+</FORM>
+<HR>
+<H6><A name="ProvidingOSGiservices-Overview"></A><B>Overview</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-2.html" title="Apache Felix iPOJO-2">Home Page</A></LI>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-feature-overview.html" title="Apache Felix iPOJO Feature Overview">iPOJO Feature Overview</A></LI>
+	<LI><A href="http://felix.apache.org/site/download.html" title="Download">Download &amp; Install </A></LI>
+</UL>
+
+
+<H6><A name="ProvidingOSGiservices-GettingStarted"></A><B>Getting Started</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/ipojo-in-10-minutes.html" title="iPOJO in 10 minutes">iPOJO in 10 minutes</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-hello-word-maven-based-tutorial.html" title="iPOJO Hello Word (Maven-Based) tutorial">iPOJO Hello Word &#40;Maven&#45;Based&#41; tutorial</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-advanced-tutorial.html" title="iPOJO Advanced Tutorial">iPOJO Advanced Tutorial</A></LI>
+</UL>
+
+
+<H6><A name="ProvidingOSGiservices-UserGuide"></A><B>User Guide</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/describing-components.html" title="Describing components">Describing components</A></LI>
+	<LI><A href="http://felix.apache.org/site/how-to-use-ipojo-annotations.html" title="How to use iPOJO Annotations">How to use iPOJO Annotations</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-advanced-topics.html" title="iPOJO Advanced Topics">Advanced Topics</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-faq.html" title="iPOJO FAQ">FAQ</A></LI>
+</UL>
+
+
+<H6><A name="ProvidingOSGiservices-Tools"></A><B>Tools</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/ipojo-eclipse-plug-in.html" title="iPOJO Eclipse Plug-in">iPOJO Eclipse Plug&#45;in</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-ant-task.html" title="iPOJO Ant Task">iPOJO Ant Task</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-maven-plug-in.html" title="iPOJO Maven Plug-in">iPOJO Maven Plug&#45;in</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-concepts-overview.html" title="iPOJO Concepts Overview">iPOJO concepts overview</A></LI>
+</UL>
+
+
+<H6><A name="ProvidingOSGiservices-DeveloperGuide"></A><B>Developer Guide</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/how-to-write-your-own-handler.html" title="How to write your own handler">How to write your own handler</A></LI>
+	<LI><A href="http://felix.apache.org/site/how-to-use-ipojo-manipulation-metadata.html" title="How to use iPOJO Manipulation Metadata">How to use iPOJO Manipulation Metadata</A></LI>
+</UL>
+
+
+<H6><A name="ProvidingOSGiservices-Misc%26Contact"></A><B>Misc &amp; Contact</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-issuestracker.html" title="apache-felix-ipojo-issuestracker">Issues Tracker</A></LI>
+	<LI><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/pages/createpage.action?spaceKey=FELIX&amp;title=Supported%20JVMs&amp;linkCreation=true&amp;fromPageId=82824" title="Create Page: Supported JVMs" class="createlink">Supported JVMs<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/plus.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/pages/createpage.action?spaceKey=FELIX&amp;title=Supported%20OSGi%20Implementations&amp;linkCreation=true&amp;fromPageId=82824" title="Create Page: Supported OSGi Implementations" class="createlink">Supported OSGi Implementations<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/plus.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/future-ideas.html" title="Future Ideas">Future Ideas</A></LI>
+	<LI><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/pages/createpage.action?spaceKey=FELIX&amp;title=Contact&amp;linkCreation=true&amp;fromPageId=82824" title="Create Page: Contact" class="createlink">Contact<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/plus.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/related-works.html" title="Related Works">Related Works</A></LI>
+	<LI><A href="http://felix.apache.org/site/article-presentations.html" title="Article & Presentations">Article &amp; Presentations</A></LI>
+</UL>
+
+
+<HR>
+<DIV class="" align="center">
+<P><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/createrssfeed.action?types=blogpost&amp;statuses=created&amp;statuses=modified&amp;spaces=FELIX&amp;labelString=iPOJO&amp;rssType=atom&amp;maxResults=10&amp;timeSpan=5&amp;publicFeed=true&amp;title=iPOJO%20Atom%20Feed" title="Stay tuned!" rel="nofollow"><IMG src="http://cwiki.apache.org/confluence/images/icons/feed-icon-32x32.png" align="absmiddle" border="0"><SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P></DIV></TD></TR></TBODY></TABLE>
+    </DIV>
+  </BODY>
+
+ 
+</HTML>

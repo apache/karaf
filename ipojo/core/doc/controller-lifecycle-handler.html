@@ -1,0 +1,141 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<HTML>
+  
+ 
+<HEAD>
+    <TITLE>Apache Felix - Controller Lifecycle Handler</TITLE>
+    <LINK rel="stylesheet" href="http://felix.apache.org/site/media.data/site.css" type="text/css" media="all">
+    <META http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  </HEAD>
+  <BODY>
+    <DIV class="title"><DIV class="logo"><A href="http://felix.apache.org/site/index.html"><IMG border="0" alt="Apache Felix" src="http://felix.apache.org/site/media.data/logo.png"></A></DIV><DIV class="header"><A href="http://www.apache.org/"><IMG border="0" alt="Apache" src="http://felix.apache.org/site/media.data/apache.png"></A></DIV></DIV>
+    <DIV class="menu">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <UL>
+	<LI><A href="http://felix.apache.org/site/news.html" title="news">news</A></LI>
+	<LI><A href="http://felix.apache.org/site/license.html" title="license">license</A></LI>
+	<LI><SPAN class="nobr"><A href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</A></LI>
+	<LI><A href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</A></LI>
+	<LI><A href="http://felix.apache.org/site/contributing.html" title="Contributing">contributing</A></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN>
+<!-- ApacheCon Ad -->
+<IFRAME src="http://www.apache.org/ads/button.html" style="border-width:0; float: left" frameborder="0" scrolling="no" width="135" height="135"></IFRAME>
+<P style="height: 100px">
+<!-- ApacheCon Ad --></LI>
+</UL>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </DIV>
+    <DIV class="main">
+<TABLE class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><TBODY><TR>
+<TD class="confluenceTd" valign="top" width="80%">
+<P>The controller lifecycle handler allows a component implementation to participate to the instance lifecycle. This handler allows you checking instances configuration (file existence for instance).</P>
+
+<H2><A name="ControllerLifecycleHandler-iPOJOInstanceLifecycle%26Lifecyclecontroller"></A>iPOJO Instance Lifecycle &amp; Lifecycle controller</H2>
+
+<P>Once started, iPOJO instances can be either valid or invalid. The decision comes from handlers. An instance is valid if every plugged handler are valid. As soos as one handler becomes invalid, the instance becomes invalid.</P>
+
+<P>The lifecycle controller just monitors a field inside the POJO class. When this field becomes 'false', the handler becomes invalid. When the field get the 'true' value, the handler becomes valid.</P>
+
+<H2><A name="ControllerLifecycleHandler-Anexemple"></A>An exemple</H2>
+
+<P>Imagine the following component :</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class LifecycleControllerTest {
+
+    <SPAN class="code-keyword">private</SPAN> <SPAN class="code-object">boolean</SPAN> m_state;
+    <SPAN class="code-keyword">private</SPAN> <SPAN class="code-object">String</SPAN> m_conf;
+
+    <SPAN class="code-keyword">public</SPAN> void setConf(<SPAN class="code-object">String</SPAN> newConf) {
+        <SPAN class="code-object">System</SPAN>.out.println(<SPAN class="code-quote">&quot;setConf : &quot;</SPAN> + newConf);
+        <SPAN class="code-keyword">if</SPAN> (newConf.equals(<SPAN class="code-quote">&quot;foo&quot;</SPAN>)) {
+            m_state = <SPAN class="code-keyword">true</SPAN>;
+        } <SPAN class="code-keyword">else</SPAN> {
+            m_state = <SPAN class="code-keyword">false</SPAN>;
+        }
+    }
+}</PRE>
+</DIV></DIV>
+<P>with the following metadata :</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.test.scenarios.component.LifecycleControllerTest&quot;</SPAN> name=<SPAN class="code-quote">&quot;lcTest&quot;</SPAN> immediate=<SPAN class="code-quote">&quot;true&quot;</SPAN> architecture=<SPAN class="code-quote">&quot;true&quot;</SPAN>&gt;</SPAN>
+		<SPAN class="code-tag">&lt;controller field=<SPAN class="code-quote">&quot;m_state&quot;</SPAN>/&gt;</SPAN>
+		<SPAN class="code-tag">&lt;properties&gt;</SPAN>
+			<SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;conf&quot;</SPAN> field=<SPAN class="code-quote">&quot;m_conf&quot;</SPAN> method=<SPAN class="code-quote">&quot;setConf&quot;</SPAN>/&gt;</SPAN>
+		<SPAN class="code-tag">&lt;/properties&gt;</SPAN>
+<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>This component declares the 'm_state' field as a lifecycle controller (&lt;controller/&gt; element)</P>
+
+
+<P>The component requires the 'conf' property. iPOJO checks if this property is inside the pushed configuration, but cannot checks if the configuration is correct according to the component. When the instance is created, the setConf method is called with the pushed value. If the given 'conf' property is &quot;foo&quot; the 'm_state' field (i.e. the controller) becomes true. Else, the 'm_state' receives the false value. It means that the lifecycle controller handler becomes invalid and as a consequence, the instance becomes invalid.</P>
+</TD>
+<TD class="confluenceTd" valign="top" width="20%">
+<FORM method="get" class="confluence-searchbox marginlessForm " action="http://felix.apache.org/confluence/dosearchsite.action">
+    <INPUT type="hidden" name="searchQuery.spaceKey" value="FELIX">
+    <INPUT type="text" name="searchQuery.queryString">
+    <INPUT type="submit" value="Search">
+</FORM>
+<HR>
+<H6><A name="ControllerLifecycleHandler-Overview"></A><B>Overview</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-2.html" title="Apache Felix iPOJO-2">Home Page</A></LI>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-feature-overview.html" title="Apache Felix iPOJO Feature Overview">iPOJO Feature Overview</A></LI>
+	<LI><A href="http://felix.apache.org/site/download.html" title="Download">Download &amp; Install </A></LI>
+</UL>
+
+
+<H6><A name="ControllerLifecycleHandler-GettingStarted"></A><B>Getting Started</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/ipojo-in-10-minutes.html" title="iPOJO in 10 minutes">iPOJO in 10 minutes</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-hello-word-maven-based-tutorial.html" title="iPOJO Hello Word (Maven-Based) tutorial">iPOJO Hello Word &#40;Maven&#45;Based&#41; tutorial</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-advanced-tutorial.html" title="iPOJO Advanced Tutorial">iPOJO Advanced Tutorial</A></LI>
+</UL>
+
+
+<H6><A name="ControllerLifecycleHandler-UserGuide"></A><B>User Guide</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/describing-components.html" title="Describing components">Describing components</A></LI>
+	<LI><A href="http://felix.apache.org/site/how-to-use-ipojo-annotations.html" title="How to use iPOJO Annotations">How to use iPOJO Annotations</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-advanced-topics.html" title="iPOJO Advanced Topics">Advanced Topics</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-faq.html" title="iPOJO FAQ">FAQ</A></LI>
+</UL>
+
+
+<H6><A name="ControllerLifecycleHandler-Tools"></A><B>Tools</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/ipojo-eclipse-plug-in.html" title="iPOJO Eclipse Plug-in">iPOJO Eclipse Plug&#45;in</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-ant-task.html" title="iPOJO Ant Task">iPOJO Ant Task</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-maven-plug-in.html" title="iPOJO Maven Plug-in">iPOJO Maven Plug&#45;in</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-concepts-overview.html" title="iPOJO Concepts Overview">iPOJO concepts overview</A></LI>
+</UL>
+
+
+<H6><A name="ControllerLifecycleHandler-DeveloperGuide"></A><B>Developer Guide</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/how-to-write-your-own-handler.html" title="How to write your own handler">How to write your own handler</A></LI>
+	<LI><A href="http://felix.apache.org/site/how-to-use-ipojo-manipulation-metadata.html" title="How to use iPOJO Manipulation Metadata">How to use iPOJO Manipulation Metadata</A></LI>
+</UL>
+
+
+<H6><A name="ControllerLifecycleHandler-Misc%26Contact"></A><B>Misc &amp; Contact</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-issuestracker.html" title="apache-felix-ipojo-issuestracker">Issues Tracker</A></LI>
+	<LI><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/pages/createpage.action?spaceKey=FELIX&amp;title=Supported%20JVMs&amp;linkCreation=true&amp;fromPageId=82824" title="Create Page: Supported JVMs" class="createlink">Supported JVMs<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/plus.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/pages/createpage.action?spaceKey=FELIX&amp;title=Supported%20OSGi%20Implementations&amp;linkCreation=true&amp;fromPageId=82824" title="Create Page: Supported OSGi Implementations" class="createlink">Supported OSGi Implementations<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/plus.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/future-ideas.html" title="Future Ideas">Future Ideas</A></LI>
+	<LI><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/pages/createpage.action?spaceKey=FELIX&amp;title=Contact&amp;linkCreation=true&amp;fromPageId=82824" title="Create Page: Contact" class="createlink">Contact<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/plus.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/related-works.html" title="Related Works">Related Works</A></LI>
+	<LI><A href="http://felix.apache.org/site/article-presentations.html" title="Article & Presentations">Article &amp; Presentations</A></LI>
+</UL>
+
+
+<HR>
+<DIV class="" align="center">
+<P><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/createrssfeed.action?types=blogpost&amp;statuses=created&amp;statuses=modified&amp;spaces=FELIX&amp;labelString=iPOJO&amp;rssType=atom&amp;maxResults=10&amp;timeSpan=5&amp;publicFeed=true&amp;title=iPOJO%20Atom%20Feed" title="Stay tuned!" rel="nofollow"><IMG src="http://cwiki.apache.org/confluence/images/icons/feed-icon-32x32.png" align="absmiddle" border="0"><SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P></DIV></TD></TR></TBODY></TABLE>
+    </DIV>
+  </BODY>
+
+ 
+</HTML>

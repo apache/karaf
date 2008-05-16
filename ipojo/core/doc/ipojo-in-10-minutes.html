@@ -1,0 +1,512 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<HTML>
+  
+ 
+<HEAD>
+    <TITLE>Apache Felix - iPOJO in 10 minutes</TITLE>
+    <LINK rel="stylesheet" href="http://felix.apache.org/site/media.data/site.css" type="text/css" media="all">
+    <META http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  </HEAD>
+  <BODY>
+    <DIV class="title"><DIV class="logo"><A href="http://felix.apache.org/site/index.html"><IMG border="0" alt="Apache Felix" src="http://felix.apache.org/site/media.data/logo.png"></A></DIV><DIV class="header"><A href="http://www.apache.org/"><IMG border="0" alt="Apache" src="http://felix.apache.org/site/media.data/apache.png"></A></DIV></DIV>
+    <DIV class="menu">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <UL>
+	<LI><A href="http://felix.apache.org/site/news.html" title="news">news</A></LI>
+	<LI><A href="http://felix.apache.org/site/license.html" title="license">license</A></LI>
+	<LI><SPAN class="nobr"><A href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</A></LI>
+	<LI><A href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</A></LI>
+	<LI><A href="http://felix.apache.org/site/contributing.html" title="Contributing">contributing</A></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN>
+<!-- ApacheCon Ad -->
+<IFRAME src="http://www.apache.org/ads/button.html" style="border-width:0; float: left" frameborder="0" scrolling="no" width="135" height="135"></IFRAME>
+<P style="height: 100px">
+<!-- ApacheCon Ad --></LI>
+</UL>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </DIV>
+    <DIV class="main">
+<TABLE class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><TBODY><TR>
+<TD class="confluenceTd" valign="top" width="80%">
+<H1><A name="iPOJOin10minutes-iPOJOin10minutes"></A>iPOJO in 10 minutes</H1>
+
+<P><EM>This page presents how to use the</EM> <EM>iPOJO</EM> <EM>runtime and its associated service component model. The concepts of the service component model are introduced, followed by a simple example that demonstrates the features of iPOJO.</EM></P>
+
+<H2><A name="iPOJOin10minutes-Introduction"></A>Introduction</H2>
+
+<P>iPOJO aims to simplify service-oriented programming on OSGi frameworks; the name iPOJO is an abbreviation for <EM>injected POJO</EM>. iPOJO provides a new way to develop OSGi service components with the main goal being to simplify service component implementation by transparently managing the dynamics of the environment as well as other non-functional requirements. The iPOJO framework allows developers to more clearly separate functional code (i.e., the POJO) from the non-functional code (i.e., dependency management, service provision, configuration, etc.). iPOJO combines the functional and non-functional aspects at run time. To achieve this, iPOJO provides a simple and extensible service component model based on POJOs.</P>
+
+<H2><A name="iPOJOin10minutes-ThePOJOconcept"></A>The POJO concept</H2>
+
+<P>POJO is an acronym for Plain Old Java Object, but it embodies a concept that the simpler and less intrusive the design of a given framework, the better. The name is used to emphasize that a given object is not somehow special, but is an ordinary Java Object. Martin Fowler, Rebecca Parsons and Josh Mackenzie coined the term POJO in September 2000: &quot;We wondered why people were so against using regular objects in their systems and concluded that it was because simple objects lacked a fancy name. So we gave them one, and it's caught on very nicely.&quot; From the developer's perspective, the iPOJO framework strives to only require POJOs in as much as it is possible.</P>
+
+<H2><A name="iPOJOin10minutes-iPOJOservicecomponentoverview"></A>iPOJO service component overview</H2>
+
+<P>A service component is able to provide and/or require services, where a service is an object that implements a given service interface embodied as a Java interface. In addition, iPOJO introduces a callback concept to notify a component about various state changes.</P>
+
+<P>The component is the central concept in iPOJO. In the core iPOJO model, a component describes service dependencies, provided services, and callbacks; this information is recorded in the component's metadata. Then, the second important concept in iPOJO is component instances. A component instances is a special <EM>version</EM> of the component. By merging component metadata and instance configuration, the iPOJO runtime is able to manage the component, i.e., manage its life cycle, inject required services, publish provided services, discover needed services.</P>
+
+<H2><A name="iPOJOin10minutes-Asimpleexample"></A>A simple example</H2>
+
+<P>In this tutorial we will present how to:</P>
+<UL>
+	<LI>Publish an OSGi service</LI>
+	<LI>Require an OSGi service</LI>
+	<LI>Use lifecycle callbacks to activate and deactivate components</LI>
+</UL>
+
+
+<H3><A name="iPOJOin10minutes-PresentationoftheSpellapplication"></A>Presentation of the <EM>Spell</EM> application</H3>
+
+<P>To illustrate iPOJO features, we will implement a very simple application. This application is composed by three components:</P>
+<UL>
+	<LI>A component implementing a dictionary service</LI>
+	<LI>A component requiring the dictionary service and providing a spellchecker service</LI>
+	<LI>A component requiring the spellchecker and providing an user interface</LI>
+</UL>
+
+
+<P><IMG src="http://felix.apache.org/site/ipojo-in-10-minutes.data/spell.png" align="absmiddle" border="0"></P>
+
+<H3><A name="iPOJOin10minutes-Preparingthetutorial"></A>Preparing the tutorial</H3>
+
+<P>This tutorial is based on Ant. So, you need to have the Ant program accessible in your path (see <SPAN class="nobr"><A href="http://ant.apache.org/" title="Visit page outside Confluence" rel="nofollow">here<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN> to download and install Ant). Download the tutorial archive available <SPAN class="nobr"><A href="http://felix.apache.org/site/ipojo-in-10-minutes.data/tutorial.zip" title="tutorial.zip attached to iPOJO in 10 minutes">here<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/link_attachment_7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN> and then unzip it. The archive is composed by seven directories:</P>
+<UL>
+	<LI>spell.services contains service interfaces used by the applications</LI>
+	<LI>spell.english contains an implementation of the Dictionary service (containing English words)</LI>
+	<LI>spell.checker contains an implementation of a Spell Checker. The spell checker requires a dictionary service and check if an input passage is correct (according to the words contained in the dictionary).</LI>
+	<LI>spell.gui contains a very simple user interface. This component uses a spell checker service. Then the user can interact with the spell checker with this user interface.</LI>
+	<LI>The task directory contains Ant tasks used to build the project</LI>
+	<LI>The solution directory contains an already developed version of the application.</LI>
+	<LI>Finally, the felix folder contains a configured version of the Felix runtime</LI>
+</UL>
+
+
+<H3><A name="iPOJOin10minutes-Thespell.servicesproject"></A>The spell.services project</H3>
+
+<P>The spell.services project contains only service interfaces. It is not an iPOJO powered bundle.</P>
+
+<P>Go inside the Spell.services directory and create the file &quot;src/spell/services/DictionaryService.java&quot; for the following <EM>Dictionary</EM> service interface:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">package</SPAN> spell.services;
+/**
+ * A simple service <SPAN class="code-keyword">interface</SPAN> that defines a dictionary service.
+ * A dictionary service simply verifies the existence of a word.
+**/
+<SPAN class="code-keyword">public</SPAN> <SPAN class="code-keyword">interface</SPAN> DictionaryService {
+    /**
+     * Check <SPAN class="code-keyword">for</SPAN> the existence of a word.
+     * @param word the word to be checked.
+     * @<SPAN class="code-keyword">return</SPAN> <SPAN class="code-keyword">true</SPAN> <SPAN class="code-keyword">if</SPAN> the word is in the dictionary,
+     *         <SPAN class="code-keyword">false</SPAN> otherwise.
+     **/
+    <SPAN class="code-keyword">public</SPAN> <SPAN class="code-object">boolean</SPAN> checkWord(<SPAN class="code-object">String</SPAN> word);
+}</PRE>
+</DIV></DIV>
+<P>Then, create the file &quot;src/spell/services/SpellChecker.java&quot; for the following <EM>Spell Checker</EM> service interface:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">package</SPAN> spell.services;
+/**
+ * A simple service <SPAN class="code-keyword">interface</SPAN> that defines a spell checker service.
+ * A spell checker service checks the spelling of all words in a
+ * given passage. A passage is any number of words separated by
+ * a space character and the following punctuation marks: comma,
+ * period, exclamation mark, question mark, semi-colon, and colon.
+**/
+<SPAN class="code-keyword">public</SPAN> <SPAN class="code-keyword">interface</SPAN> SpellChecker {
+    /**
+     * Checks a given passage <SPAN class="code-keyword">for</SPAN> spelling errors. A passage is any
+     * number of words separated by a space and any of the following
+     * punctuation marks: comma (,), period (.), exclamation mark (!),
+     * question mark (?), semi-colon (;), and colon(:).
+     * @param passage the passage to spell check.
+     * @<SPAN class="code-keyword">return</SPAN> An array of misspelled words or <SPAN class="code-keyword">null</SPAN> <SPAN class="code-keyword">if</SPAN> no
+     *         words are misspelled.
+    **/
+    <SPAN class="code-keyword">public</SPAN> <SPAN class="code-object">String</SPAN>[] check(<SPAN class="code-object">String</SPAN> passage);
+}</PRE>
+</DIV></DIV>
+<P>Once created, you can build the project by launching Ant from the project directory.</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java">$ ant
+Buildfile: build.xml
+clean:
+compile:
+    [mkdir] Created dir: d:\clement\workspaces\sandbox\ipojo\examples\tutorial-ant\spell.services\output
+    [mkdir] Created dir: d:\clement\workspaces\sandbox\ipojo\examples\tutorial-ant\spell.services\output\classes
+    [javac] Compiling 2 source files to d:\clement\workspaces\sandbox\ipojo\examples\tutorial-ant\spell.services\
+            output\classes
+<SPAN class="code-keyword">package</SPAN>:
+      [bnd] spell.services 2
+BUILD SUCCESSFUL
+Total time: 0 seconds</PRE>
+</DIV></DIV>
+<P>The created bundle is inside the output directory (spell.services.jar). The build process use <SPAN class="nobr"><A href="http://www.aqute.biz/Code/Bnd" title="Visit page outside Confluence" rel="nofollow">BND<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN>. The bundle manifest is described in the spell.services.bnd file.<BR>
+Once this project is done, we are able to implement a Dictionary service.</P>
+
+<H3><A name="iPOJOin10minutes-Thespell.englishproject%3AProvidinganOSGiservice"></A>The spell.english project: Providing an OSGi service</H3>
+
+<P>The spell.english project is a simple dictionary implementation of the Dictionary service. It contains few English words. This implementation is an iPOJO component.<BR>
+The first step is to implement the service. Create the &quot;src/spell.english/EnglishDictionary.java&quot; file for the following <EM>Dictionary service</EM> implementation:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">package</SPAN> spell.english;
+<SPAN class="code-keyword">import</SPAN> spell.services.DictionaryService;
+/**
+ * An implementation of the Dictionary service containing English words
+ * see DictionaryService <SPAN class="code-keyword">for</SPAN> details of the service.
+ **/
+<SPAN class="code-keyword">public</SPAN> class EnglishDictionary <SPAN class="code-keyword">implements</SPAN> DictionaryService {
+    <SPAN class="code-comment">// The set of words contained in the dictionary.
+</SPAN>    <SPAN class="code-object">String</SPAN>[] m_dictionary = { <SPAN class="code-quote">&quot;welcome&quot;</SPAN>, <SPAN class="code-quote">&quot;to&quot;</SPAN>, <SPAN class="code-quote">&quot;the&quot;</SPAN>, <SPAN class="code-quote">&quot;ipojo&quot;</SPAN>, <SPAN class="code-quote">&quot;tutorial&quot;</SPAN> };
+    /**
+     * Implements DictionaryService.checkWord(). Determines
+     * <SPAN class="code-keyword">if</SPAN> the passed in word is contained in the dictionary.
+     * @param word the word to be checked.
+     * @<SPAN class="code-keyword">return</SPAN> <SPAN class="code-keyword">true</SPAN> <SPAN class="code-keyword">if</SPAN> the word is in the dictionary,
+     *         <SPAN class="code-keyword">false</SPAN> otherwise.
+     **/
+    <SPAN class="code-keyword">public</SPAN> <SPAN class="code-object">boolean</SPAN> checkWord(<SPAN class="code-object">String</SPAN> word) {
+        word = word.toLowerCase();
+        <SPAN class="code-comment">// This is very inefficient
+</SPAN>        <SPAN class="code-keyword">for</SPAN> (<SPAN class="code-object">int</SPAN> i = 0; i &lt; m_dictionary.length; i++) {
+            <SPAN class="code-keyword">if</SPAN> (m_dictionary[i].equals(word)) {
+                <SPAN class="code-keyword">return</SPAN> <SPAN class="code-keyword">true</SPAN>;
+            }
+        }
+        <SPAN class="code-keyword">return</SPAN> <SPAN class="code-keyword">false</SPAN>;
+    }
+}</PRE>
+</DIV></DIV>
+<P>Notice that this class does not contains neither OSGi nor iPOJO specific code. It is just an implementation of the Dictionary Service interface.<BR>
+Once created, we need to describe this component to ask iPOJO to manage it. To achieve this, create the &quot;metadata.xml&quot; file in the spell.english directory:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;ipojo&gt;</SPAN>
+<SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;spell.english.EnglishDictionary&quot;</SPAN>&gt;</SPAN>
+	<SPAN class="code-tag">&lt;provides/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/component&gt;</SPAN>
+<SPAN class="code-tag">&lt;instance component=<SPAN class="code-quote">&quot;spell.english.EnglishDictionary&quot;</SPAN>/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/ipojo&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>This file describes the Dictionary service implementation. First it creates a <EM>component</EM>. This component has a <EM>classname</EM>attribute containing the implementation class name. The <EM>'provides'</EM> element indicates that the component provide a service. Provided service interfaces are computed by iPOJO, so it is not necessary to indicate them. The <EM>instance</EM> element asks iPOJO to create an instance of the described component when the bundle starts. The relation between components and instances is the same than between classes and objects in the object oriented programming. The <EM>component</EM> attribute indicates which component needs to be instantiated. By default, component type name is the implementation class (i.e. the classname attribute).</P>
+
+<P>Then, we are able to create the bundle. In the spell.english directory launch the ant command:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java">$ ant
+Buildfile: build.xml
+clean:
+   [delete] Deleting directory d:\clement\workspaces\sandbox\ipojo\examples\tutorial-ant\spell.english\output\classes
+   [delete] Deleting directory d:\clement\workspaces\sandbox\ipojo\examples\tutorial-ant\spell.english\output
+buildclasspath:
+compile:
+    [mkdir] Created dir: d:\clement\workspaces\sandbox\ipojo\examples\tutorial-ant\spell.english\output
+    [mkdir] Created dir: d:\clement\workspaces\sandbox\ipojo\examples\tutorial-ant\spell.english\output\classes
+    [javac] Compiling 1 source file to d:\clement\workspaces\sandbox\ipojo\examples\tutorial-ant\spell.english\output
+            \classes
+<SPAN class="code-keyword">package</SPAN>:
+      [bnd] spell.english 1
+    [ipojo] Input Bundle File : d:\clement\workspaces\sandbox\ipojo\examples\tutorial-ant\spell.english\output
+            \spell.english.jar
+    [ipojo] Metadata File : d:\clement\workspaces\sandbox\ipojo\examples\tutorial-ant\spell.english\metadata.xml
+    [ipojo] Start bundle manipulation
+    [ipojo] Bundle manipulation - SUCCESS
+    [ipojo] Output File : d:\clement\workspaces\sandbox\ipojo\examples\tutorial-ant\spell.english\output
+            \spell.english.jar
+BUILD SUCCESSFUL
+Total time: 1 second</PRE>
+</DIV></DIV>
+<P>The created bundle is inside the output directory (spell.english.jar). The build process is based on BND and on the iPOJO Ant task. The manifest of the bundle is described in the spell.english.bnd file.</P>
+
+<H3><A name="iPOJOin10minutes-Thespell.checkerproject%3ARequiringanOSGiservice"></A>The spell.checker project: Requiring an OSGi service</H3>
+
+<P>The spell.checker project aims to provide a<EM>spell checker</EM> service. However, to serve this service, this implementation requires a <EM>dictionary</EM> service. During this step, we will create an iPOJO component requiring a Dictionary service and providing the Spell Checker service.</P>
+
+<P>First create the file &quot;src/spell/checker/SpellCheck.java&quot; in the spell.checker directory for the following <EM>Check Speller service</EM>implementation:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">package</SPAN> spell.check;
+<SPAN class="code-keyword">import</SPAN> java.util.ArrayList;
+<SPAN class="code-keyword">import</SPAN> java.util.List;
+<SPAN class="code-keyword">import</SPAN> java.util.StringTokenizer;
+<SPAN class="code-keyword">import</SPAN> spell.services.DictionaryService;
+<SPAN class="code-keyword">import</SPAN> spell.services.SpellChecker;
+<SPAN class="code-keyword">public</SPAN> class SpellCheck <SPAN class="code-keyword">implements</SPAN> SpellChecker {
+    <SPAN class="code-keyword">private</SPAN> DictionaryService m_dictionary;
+    /**
+     * Implements SpellChecker.check(). Checks the given passage <SPAN class="code-keyword">for</SPAN> misspelled words.
+     * @param passage the passage to spell check.
+     * @<SPAN class="code-keyword">return</SPAN> An array of misspelled words or <SPAN class="code-keyword">null</SPAN> <SPAN class="code-keyword">if</SPAN> no words are misspelled.
+     */
+    <SPAN class="code-keyword">public</SPAN> <SPAN class="code-object">String</SPAN>[] check(<SPAN class="code-object">String</SPAN> passage) {
+        <SPAN class="code-comment">// No misspelled words <SPAN class="code-keyword">for</SPAN> an empty string.
+</SPAN>        <SPAN class="code-keyword">if</SPAN> ((passage == <SPAN class="code-keyword">null</SPAN>) || (passage.length() == 0)) { <SPAN class="code-keyword">return</SPAN> <SPAN class="code-keyword">null</SPAN>; }
+        List errorList = <SPAN class="code-keyword">new</SPAN> ArrayList();
+        <SPAN class="code-comment">// Tokenize the passage using spaces and punctuation.
+</SPAN>        StringTokenizer st = <SPAN class="code-keyword">new</SPAN> StringTokenizer(passage, <SPAN class="code-quote">&quot; ,.!?;:&quot;</SPAN>);
+        <SPAN class="code-comment">// Loop through each word in the passage.
+</SPAN>        <SPAN class="code-keyword">while</SPAN> (st.hasMoreTokens()) {
+            <SPAN class="code-object">String</SPAN> word = st.nextToken();
+            <SPAN class="code-comment">// Check the current word.
+</SPAN>            <SPAN class="code-keyword">if</SPAN> (! m_dictionary.checkWord(word)) {
+                <SPAN class="code-comment">// If the word is not correct, then add it
+</SPAN>                <SPAN class="code-comment">// to the incorrect word list.
+</SPAN>                errorList.add(word);
+            }
+        }
+        <SPAN class="code-comment">// Return <SPAN class="code-keyword">null</SPAN> <SPAN class="code-keyword">if</SPAN> no words are incorrect.
+</SPAN>        <SPAN class="code-keyword">if</SPAN> (errorList.size() == 0) { <SPAN class="code-keyword">return</SPAN> <SPAN class="code-keyword">null</SPAN>; }
+        <SPAN class="code-comment">// Return the array of incorrect words.
+</SPAN>        <SPAN class="code-keyword">return</SPAN> (<SPAN class="code-object">String</SPAN>[]) errorList.toArray(<SPAN class="code-keyword">new</SPAN> <SPAN class="code-object">String</SPAN>[errorList.size()]);
+    }
+}</PRE>
+</DIV></DIV>
+<P>This class implements the SpellChecker service interface as it will provide it. Moreover, it has a <EM>special</EM> field &quot;_m_dictionary_&quot;. This field represents the required service. iPOJO will inject a Dictionary service when needed. So, the class can use it directly. Notice that this class as no OSGi specific code, both the service providing and the requiring are managed by iPOJO. If the used dictionary service leaves, iPOJO will try to find another provider. If no more providers are available, the instance is invalidated, and the provided service is withdrawn from the service registry.</P>
+
+<P>Once implemented, we need to describe this component. Create the &quot;metadata.xml&quot; file in the spell.checker directory for the following component descriptor:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;ipojo&gt;</SPAN>
+<SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;spell.check.SpellCheck&quot;</SPAN>&gt;</SPAN>
+	<SPAN class="code-tag">&lt;requires field=<SPAN class="code-quote">&quot;m_dictionary&quot;</SPAN>/&gt;</SPAN>
+	<SPAN class="code-tag">&lt;provides/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/component&gt;</SPAN>
+<SPAN class="code-tag">&lt;instance component=<SPAN class="code-quote">&quot;spell.check.SpellCheck&quot;</SPAN>/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/ipojo&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>This description contains a '<EM>requires'</EM> element. This element indicates to iPOJO to manage the service dependency. The <EM>field</EM> attributes describe in which member of the class the service need to be injected. It is not necessary to write the required service as it is computed by iPOJO. Notice that iPOJO can inject required service by invoking methods too.</P>
+
+<P>Finally, we are able to build the bundle. As for previous projects, launch Ant from the project directory.</P>
+
+<H3><A name="iPOJOin10minutes-Thespell.check.guiproject"></A>The spell.check.gui project</H3>
+
+<P>The spell.check.gui project contains a very simple user interface (in Swing) allowing a user to interact with a <EM>spell checker</EM> service.</P>
+
+<P>Create the &quot;src\spell\gui\SpellCheckerGui.java&quot; for the following implementation:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">package</SPAN> spell.gui;
+<SPAN class="code-keyword">import</SPAN> javax.swing.JButton;
+<SPAN class="code-keyword">import</SPAN> javax.swing.JFrame;
+<SPAN class="code-keyword">import</SPAN> javax.swing.JLabel;
+<SPAN class="code-keyword">import</SPAN> javax.swing.JTextField;
+<SPAN class="code-keyword">import</SPAN> spell.services.SpellChecker;
+/**
+ * A very simple Gui interacting with the CheckSpeller service
+ */
+<SPAN class="code-keyword">public</SPAN> class SpellCheckerGui <SPAN class="code-keyword">extends</SPAN> JFrame {
+    /**
+     * Swing component where the user write the passage to check.
+     */
+    <SPAN class="code-keyword">private</SPAN> JTextField m_passage = <SPAN class="code-keyword">null</SPAN>;
+
+    /**
+     * Check button
+     */
+    <SPAN class="code-keyword">private</SPAN> JButton m_checkButton = <SPAN class="code-keyword">null</SPAN>;
+
+    /**
+     * Area where the result is displayed.
+     */
+    <SPAN class="code-keyword">private</SPAN> JLabel m_result = <SPAN class="code-keyword">null</SPAN>;
+    /**
+     * Service dependency on the SpellChecker.
+     */
+    <SPAN class="code-keyword">private</SPAN> SpellChecker m_checker;
+
+    /**
+     * Constructor.
+     * Initialize the GUI.
+     */
+    <SPAN class="code-keyword">public</SPAN> SpellCheckerGui() {
+        <SPAN class="code-keyword">super</SPAN>();
+        initComponents();
+        <SPAN class="code-keyword">this</SPAN>.setTitle(<SPAN class="code-quote">&quot;Spellchecker Gui&quot;</SPAN>);
+    }
+    /**
+     * Initialize the Swing Gui.
+     */
+    <SPAN class="code-keyword">private</SPAN> void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+        m_checkButton = <SPAN class="code-keyword">new</SPAN> javax.swing.JButton();
+        m_result = <SPAN class="code-keyword">new</SPAN> javax.swing.JLabel();
+        m_passage = <SPAN class="code-keyword">new</SPAN> javax.swing.JTextField();
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        getContentPane().setLayout(<SPAN class="code-keyword">new</SPAN> java.awt.GridBagLayout());
+        m_checkButton.setText(<SPAN class="code-quote">&quot;Check&quot;</SPAN>);
+        m_checkButton.addActionListener(<SPAN class="code-keyword">new</SPAN> java.awt.event.ActionListener() {
+            <SPAN class="code-keyword">public</SPAN> void actionPerformed(java.awt.event.ActionEvent e) {
+                check();
+            }
+        });
+        gridBagConstraints = <SPAN class="code-keyword">new</SPAN> java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.insets = <SPAN class="code-keyword">new</SPAN> java.awt.Insets(2, 2, 2, 2);
+        getContentPane().add(m_checkButton, gridBagConstraints);
+        m_result.setPreferredSize(<SPAN class="code-keyword">new</SPAN> java.awt.Dimension(175, 20));
+        gridBagConstraints = <SPAN class="code-keyword">new</SPAN> java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = <SPAN class="code-keyword">new</SPAN> java.awt.Insets(2, 2, 2, 2);
+        getContentPane().add(m_result, gridBagConstraints);
+        m_passage.setPreferredSize(<SPAN class="code-keyword">new</SPAN> java.awt.Dimension(175, 20));
+        gridBagConstraints = <SPAN class="code-keyword">new</SPAN> java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = <SPAN class="code-keyword">new</SPAN> java.awt.Insets(2, 2, 2, 2);
+        getContentPane().add(m_passage, gridBagConstraints);
+        pack();
+    }
+    /**
+     * Check Button action.
+     * Collects the user input and checks it.
+     */
+    <SPAN class="code-keyword">private</SPAN> void check() {
+        <SPAN class="code-object">String</SPAN>[] result = m_checker.check(m_passage.getText());
+        <SPAN class="code-keyword">if</SPAN> (result != <SPAN class="code-keyword">null</SPAN>) {
+            m_result.setText(result.length + <SPAN class="code-quote">&quot; word(s) are mispelled&quot;</SPAN>);
+        } <SPAN class="code-keyword">else</SPAN> {
+            m_result.setText(<SPAN class="code-quote">&quot;All words are correct&quot;</SPAN>);
+        }
+    }
+    /**
+     * Start callback.
+     * This method will be called when the instance becomes valid.
+     * It set the Gui visibility to <SPAN class="code-keyword">true</SPAN>.
+     */
+    <SPAN class="code-keyword">public</SPAN> void start() {
+        <SPAN class="code-keyword">this</SPAN>.setVisible(<SPAN class="code-keyword">true</SPAN>);
+    }
+    /**
+     * Stop callback.
+     *  This method will be called when the instance becomes invalid or stops.
+     *  It deletes the Gui.
+     */
+    <SPAN class="code-keyword">public</SPAN> void stop() {
+        <SPAN class="code-keyword">this</SPAN>.dispose();
+    }
+}</PRE>
+</DIV></DIV>
+<P>Look at the three last methods. The <EM>check</EM> methods collect the user input and use a <EM>Check speller</EM> service to check this input. This method is called when the button is pressed by the user. The <EM>start</EM> and <EM>stop</EM> methods are lifecycle callbacks. As we need to display the user interface when the instance is created and to delete it when the instance stops, we need a way to be notified when we need to execute these actions. iPOJO provide an easy way to do this. The component provides two callback methods for its activation and deactivation, start and stop, respectively. Callbacks are used when the component needs to be informed about a component state change. In iPOJO, the component state is either <B>INVALID</B> (i.e., not all of the component's constraints are satisfied) or <B>VALID</B> (i.e., all of the component's constraints are satisfied). In this example, the start callback method set the GUI visibility to true; the stop callback method deletes the GUI. The component metadata will instruct iPOJO to invoke these methods when the component's state changes to <B>VALID</B> or <B>INVALID</B> respectively.</P>
+
+<P>Create the <EM>metadata.xml</EM> file in the spell.chercker.gui directory with the following content:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;ipojo&gt;</SPAN>
+<SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;spell.gui.SpellCheckerGui&quot;</SPAN>&gt;</SPAN>
+	<SPAN class="code-tag">&lt;requires field=<SPAN class="code-quote">&quot;m_checker&quot;</SPAN>/&gt;</SPAN>
+	<SPAN class="code-tag">&lt;callback transition=<SPAN class="code-quote">&quot;validate&quot;</SPAN> method=<SPAN class="code-quote">&quot;start&quot;</SPAN>/&gt;</SPAN>
+	<SPAN class="code-tag">&lt;callback transition=<SPAN class="code-quote">&quot;invalidate&quot;</SPAN> method=<SPAN class="code-quote">&quot;stop&quot;</SPAN>/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/component&gt;</SPAN>
+<SPAN class="code-tag">&lt;instance component=<SPAN class="code-quote">&quot;spell.gui.SpellCheckerGui&quot;</SPAN>/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/ipojo&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>The component element again has the '<EM>classname'</EM> attribute that refers to the component implementation class. The '<EM>requires</EM>' element describes the <EM>Check Speller</EM> service dependency by simply specifying its associated component field. The '<EM>callback'</EM> elements describe which method to invoke when the component's state changes. Then the <EM>'instance'</EM> element asks iPOJO to create an instance of the component.</P>
+
+<P>Once this file is created, you can compile the project by launching <EM>ant</EM> in the spell.checker.gui directory.</P>
+
+<H2><A name="iPOJOin10minutes-Runningtheapplication"></A>Running the application</H2>
+
+<P>To run the example, start Felix. A distribution of Felix is provided in the felix directory. This version is configured to launch iPOJO automatically. From the Felix directory, launch the following command to start the framework. Then enter a profile name.</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java">java -jar bin/felix.jar</PRE>
+</DIV></DIV>
+<P>You can check installed bundles by using the '_ps'_command:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java">-&gt; ps
+START LEVEL 1
+   ID   State        Level  Name
+[   0] [Active     ] [   0] <SPAN class="code-object">System</SPAN> Bundle (1.0.3)
+[   1] [Active     ] [   1] Apache Felix Shell Service (1.0.0)
+[   2] [Active     ] [   1] Apache Felix Shell TUI (1.0.0)
+[   3] [Active     ] [   1] Apache Felix Bundle Repository (1.0.2)
+[   4] [Active     ] [   1] iPOJO (0.7.6.SNAPSHOT)
+-&gt;</PRE>
+</DIV></DIV>
+<P>iPOJO runtime is the bundle 4. Once started, install the four created bundles as above:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java">start file:../spell.services/output/spell.services.jar
+start file:../spell.english/output/spell.english.jar
+start file:../spell.checker/output/spell.checker.jar
+start file:../spell.checker.gui/output/spell.checker.gui.jar</PRE>
+</DIV></DIV>
+<P>When starting the GUI bundle, the user interface appears. Indeed, the <EM>Check Speller</EM> service is provided. You can interact with this service by entering a passage and clicking on the check button:<BR>
+<IMG src="http://felix.apache.org/site/ipojo-in-10-minutes.data/ss.png" align="absmiddle" border="0"><BR>
+Then, stop the <EM>Dictionary</EM>service provider (with the <EM>stop 6</EM>) command. The GUI disappears. Indeed, Spell Checker service cannot be provided as it depends on the Dictionary service.<BR>
+<IMG src="http://felix.apache.org/site/ipojo-in-10-minutes.data/spell2.png" align="absmiddle" border="0"><BR>
+Then, restart the Dictionary service provider with the <EM>start 6</EM> command. The GUI reappears immediately. You can try to stop the <EM>check speller</EM> service provider without stopping the <EM>dictionary</EM> service provider with the <EM>stop 7</EM> command. As for the last manipulation, the GUI disappears.<BR>
+<IMG src="http://felix.apache.org/site/ipojo-in-10-minutes.data/spell3.png" align="absmiddle" border="0"></P>
+
+<H2><A name="iPOJOin10minutes-Conclusion"></A>Conclusion</H2>
+
+<P>We saw how to use easily iPOJO to build service-oriented component. In this tutorial, we have demonstrated how to:</P>
+<UL>
+	<LI>Publish OSGi services</LI>
+	<LI>Require OSGi services</LI>
+	<LI>Use lifecycle callbacks to activate and deactivate components</LI>
+</UL>
+
+
+<P>iPOJO provides a lot of others features that you can try in the others available tutorials. Subscribe to the Felix users mailing list by sending a message to users-subscribe@felix.apache.org; after subscribing, email questions or feedback to users@felix.apache.org.</P>
+</TD>
+<TD class="confluenceTd" valign="top" width="20%">
+<H6><A name="iPOJOin10minutes-Overview"></A><B>Overview</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo.html" title="Apache Felix iPOJO">Home Page</A></LI>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-feature-overview.html" title="Apache Felix iPOJO Feature Overview">iPOJO Feature Overview</A></LI>
+	<LI><A href="http://felix.apache.org/site/download.html" title="Download">Download &amp; Install </A></LI>
+</UL>
+
+
+<H6><A name="iPOJOin10minutes-GettingStarted"></A><B>Getting Started</B></H6>
+<UL>
+	<LI><A href="#" title="iPOJO in 10 minutes">iPOJO in 10 minutes</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-hello-word-maven-based-tutorial.html" title="iPOJO Hello Word (Maven-Based) tutorial">iPOJO Hello Word &#40;Maven&#45;Based&#41; tutorial</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-advanced-tutorial.html" title="iPOJO Advanced Tutorial">iPOJO Advanced Tutorial</A></LI>
+</UL>
+
+
+<H6><A name="iPOJOin10minutes-UserGuide"></A><B>User Guide</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/describing-components.html" title="Describing components">Describing components</A></LI>
+	<LI><A href="http://felix.apache.org/site/how-to-use-ipojo-annotations.html" title="How to use iPOJO Annotations">How to use iPOJO Annotations</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-advanced-topics.html" title="iPOJO Advanced Topics">Advanced Topics</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-faq.html" title="iPOJO FAQ">FAQ</A></LI>
+</UL>
+
+
+<H6><A name="iPOJOin10minutes-Tools"></A><B>Tools</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/ipojo-eclipse-plug-in.html" title="iPOJO Eclipse Plug-in">iPOJO Eclipse Plug&#45;in</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-ant-task.html" title="iPOJO Ant Task">iPOJO Ant Task</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-maven-plug-in.html" title="iPOJO Maven Plug-in">iPOJO Maven Plug&#45;in</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-concepts-overview.html" title="iPOJO Concepts Overview">iPOJO concepts overview</A></LI>
+</UL>
+
+
+<H6><A name="iPOJOin10minutes-DeveloperGuide"></A><B>Developer Guide</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/how-to-write-your-own-handler.html" title="How to write your own handler">How to write your own handler</A></LI>
+	<LI><A href="http://felix.apache.org/site/how-to-use-ipojo-manipulation-metadata.html" title="How to use iPOJO Manipulation Metadata">How to use iPOJO Manipulation Metadata</A></LI>
+</UL>
+
+
+<H6><A name="iPOJOin10minutes-Misc%26Contact"></A><B>Misc &amp; Contact</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-issuestracker.html" title="apache-felix-ipojo-issuestracker">Issues Tracker</A></LI>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-supportedvms.html" title="apache-felix-ipojo-supportedVMs">Supported JVMs</A></LI>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-supportedosgi.html" title="apache-felix-ipojo-supportedOSGi">Supported OSGi Implementations</A></LI>
+	<LI><A href="http://felix.apache.org/site/future-ideas.html" title="Future Ideas">Future Ideas</A></LI>
+	<LI><A href="http://felix.apache.org/site/contact.html" title="Contact">Contact</A></LI>
+	<LI><A href="http://felix.apache.org/site/related-works.html" title="Related Works">Related Works</A></LI>
+	<LI><A href="http://felix.apache.org/site/article-presentations.html" title="Article & Presentations">Article &amp; Presentations</A></LI>
+</UL>
+
+
+<HR>
+<DIV class="" align="center">
+<P><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/createrssfeed.action?types=blogpost&amp;statuses=created&amp;statuses=modified&amp;spaces=FELIX&amp;labelString=iPOJO&amp;rssType=atom&amp;maxResults=10&amp;timeSpan=5&amp;publicFeed=true&amp;title=iPOJO%20Atom%20Feed" title="Stay tuned!" rel="nofollow"><IMG src="http://cwiki.apache.org/confluence/images/icons/feed-icon-32x32.png" align="absmiddle" border="0"><SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P></DIV></TD></TR></TBODY></TABLE>
+    </DIV>
+  </BODY>
+
+ 
+</HTML>

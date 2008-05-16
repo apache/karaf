@@ -1,0 +1,193 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<HTML>
+  
+ 
+<HEAD>
+    <TITLE>Apache Felix - Apache Felix iPOJO Feature Overview</TITLE>
+    <LINK rel="stylesheet" href="http://felix.apache.org/site/media.data/site.css" type="text/css" media="all">
+    <META http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  </HEAD>
+  <BODY>
+    <DIV class="title"><DIV class="logo"><A href="http://felix.apache.org/site/index.html"><IMG border="0" alt="Apache Felix" src="http://felix.apache.org/site/media.data/logo.png"></A></DIV><DIV class="header"><A href="http://www.apache.org/"><IMG border="0" alt="Apache" src="http://felix.apache.org/site/media.data/apache.png"></A></DIV></DIV>
+    <DIV class="menu">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <UL>
+	<LI><A href="http://felix.apache.org/site/news.html" title="news">news</A></LI>
+	<LI><A href="http://felix.apache.org/site/license.html" title="license">license</A></LI>
+	<LI><SPAN class="nobr"><A href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</A></LI>
+	<LI><A href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</A></LI>
+	<LI><A href="http://felix.apache.org/site/contributing.html" title="Contributing">contributing</A></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN>
+<!-- ApacheCon Ad -->
+<IFRAME src="http://www.apache.org/ads/button.html" style="border-width:0; float: left" frameborder="0" scrolling="no" width="135" height="135"></IFRAME>
+<P style="height: 100px">
+<!-- ApacheCon Ad --></LI>
+</UL>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </DIV>
+    <DIV class="main">
+<TABLE class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><TBODY><TR>
+<TD class="confluenceTd" valign="top" width="80%">
+<H1><A name="ApacheFelixiPOJOFeatureOverview-ApacheFelixiPOJOFeatureOverview"></A>Apache Felix iPOJO Feature Overview</H1>
+
+<P>This page is an attempt to put all of the features and benefits of iPOJO into a single high-level list so that it is easy to see why you will want to use iPOJO for your applications. This list is not exhaustive, but represents the set of features that are potentially most likely to be needed or are unique.</P>
+
+<H2><A name="ApacheFelixiPOJOFeatureOverview-CoreFeatures"></A>Core Features</H2>
+
+<UL>
+	<LI><B>POJO-based approach</B> &#45; Most      components can simply be POJOs and need not have iPOJO&#45; or OSGi-specific      API in them.</LI>
+	<LI><B>Simple service provisioning</B> &#45; iPOJO manages all aspects of providing an OSGi      service.
+	<UL>
+		<LI><B>Service property management</B>
+		<UL class="alternate" type="square">
+			<LI>Can be controlled by configuration properties.</LI>
+			<LI>Can be mapped to member fields and        automatically updated by the component instance at run time by just        changing the member field value.</LI>
+		</UL>
+		</LI>
+		<LI><B>Service life cycle participation</B> &#45; The component instance can participate in the       service life cycle by declaring a boolean member field that indicates       when the service is actually valid (normally a service is assumed to be       valid if the component instance's dependencies are satisfied).</LI>
+	</UL>
+	</LI>
+	<LI><B>Rich service dependency model</B> &#45; Automatically manages a full spectrum of      service dependencies.
+	<UL>
+		<LI><B>Optional/mandatory</B> service dependencies.</LI>
+		<LI><B>Singular/aggregate</B> service dependencies.</LI>
+		<LI><B>Default service implementations</B> &#45; The component can provide default       implementations of dependent services if no providers are available.</LI>
+		<LI><B>Member field or method injection</B> &#45; Also supported in combination.
+		<UL class="alternate" type="square">
+			<LI>Member field injection does not require        cluttering component code with bind/unbind methods.</LI>
+			<LI>Member method injection supports various method        signatures
+			<UL class="alternate" type="square">
+				<LI>method() &#45; Acts as a simple event-callback mechanism.</LI>
+				<LI>method(&lt;service-interface&gt;         svc) &#45; Receives the service object cast to the         appropriate interface.</LI>
+				<LI>method(ServiceReference         ref) &#45; Receives the OSGi ServiceReference for the service object.</LI>
+				<LI>method(ServiceReference         ref, &lt;service-interface&gt; svc) &#45; Receives the OSGi ServiceReference and the service object cast to the         appropriate interface.</LI>
+			</UL>
+			</LI>
+		</UL>
+		</LI>
+		<LI><B>Binding policies</B> &#45;       Allow components to control how/when their dependencies are bound.
+		<UL class="alternate" type="square">
+			<LI><B>Static</B> &#45; Static dependencies <B>cannot</B> change        without invalidating the component instance, so injected services        typically do not change at run time and service departures typically        result in the component instance being destroyed and potentially        recreated.</LI>
+			<LI><B>Dynamic</B> &#45; Dynamic dependencies <B>can</B> change        without invalidating the component instance, so injected services can        change at run time, but <B>do not</B> change with respect to service        priority changes (i.e., they do not automatically switch if a higher        priority service appears).</LI>
+			<LI><B>Dynamic priority</B> &#45; Dynamic priority dependencies <B>can</B> change without invalidating the component instance and <B>do</B> dynamically update based on service priority rankings at run time.</LI>
+		</UL>
+		</LI>
+	</UL>
+	</LI>
+	<LI><B>Configuration property management</B> &#45; Integrated with OSGi Configuration Admin      service.
+	<UL>
+		<LI><B>Member field/member method injection</B> &#45; Also supported in combination.</LI>
+		<LI><B>Service property propagation</B> &#45; Configuration properties can be configured to       update service properties if the component instance is providing a       service.</LI>
+	</UL>
+	</LI>
+	<LI><B>Sophisticated concurrency handling</B> &#45; Externalizes concurrency issues so that      component code does not need to worry about services changing while they      are in use (i.e., no locking protocol in component code).</LI>
+	<LI><B>Deferred instance creation</B> &#45; POJO instances are not created until they      are actually needed, thus reducing start-up overhead.</LI>
+	<LI><B>Introspection support</B> &#45;      Supports introspecting a component instance and the state of its      dependencies.
+	<UL>
+		<LI>Interactive introspection is supported by an arch command for Felix' shell.</LI>
+	</UL>
+	</LI>
+	<LI><B>Extensible</B> &#45; All      iPOJO features are implemented via a set of handlers, which is an      extensibility mechanism open to developers by which they can support      custom functionality (e.g., exporting a provided service remotely, etc.).</LI>
+</UL>
+
+
+<H2><A name="ApacheFelixiPOJOFeatureOverview-Advanced%2FExperimentalFeatures"></A>Advanced/Experimental Features</H2>
+
+<UL>
+	<LI><B>Composite model</B> &#45;      iPOJO supports a flexible architectural-like model for composing services.
+	<UL>
+		<LI><B>Flexible composites</B> &#45; A       composite is an abstract component implementation.
+		<UL class="alternate" type="square">
+			<LI><B>Sub-services and sub-components</B> &#45; Unlike traditional component composition, an        iPOJO composite can be described in terms of services in addition to        sub-components; thus sub-service implementation selection is deferred        until run time.</LI>
+			<LI><B>Optional/mandatory</B> sub-services and/or sub-components.</LI>
+			<LI><B>Singular/aggregate</B> sub-services and/or sub-components.</LI>
+		</UL>
+		</LI>
+		<LI><B>Hierarchical</B> &#45; A       composite component may contain other composite components.
+		<UL class="alternate" type="square">
+			<LI><B>Composite scoping</B> &#45; A composite acts as a scoping mechanism        where sub-services/sub-components are not visible externally and        external services are not visible internally.</LI>
+		</UL>
+		</LI>
+		<LI><B>Service dependencies</B> &#45; A       composite has the full expressive capabilities of primitive components       when it comes to service dependencies (see above description of service       dependencies in core features).
+		<UL class="alternate" type="square">
+			<LI>For a composite, a service dependency        effectively imports an external service into the composite scope from        its parent composite (which may be the OSGi service registry in the root        case).</LI>
+		</UL>
+		</LI>
+		<LI><B>Composite is just a component</B> &#45; Composites can be instantiated and       automatically managed just like a primitive component.</LI>
+	</UL>
+	</LI>
+</UL>
+
+</TD>
+<TD class="confluenceTd" valign="top" width="20%">
+<FORM method="get" class="confluence-searchbox marginlessForm " action="http://felix.apache.org/confluence/dosearchsite.action">
+    <INPUT type="hidden" name="searchQuery.spaceKey" value="FELIX">
+    <INPUT type="text" name="searchQuery.queryString">
+    <INPUT type="submit" value="Search">
+</FORM>
+<HR>
+<H6><A name="ApacheFelixiPOJOFeatureOverview-Overview"></A><B>Overview</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-2.html" title="Apache Felix iPOJO-2">Home Page</A></LI>
+	<LI><A href="#" title="Apache Felix iPOJO Feature Overview">iPOJO Feature Overview</A></LI>
+	<LI><A href="http://felix.apache.org/site/download.html" title="Download">Download &amp; Install </A></LI>
+</UL>
+
+
+<H6><A name="ApacheFelixiPOJOFeatureOverview-GettingStarted"></A><B>Getting Started</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/ipojo-in-10-minutes.html" title="iPOJO in 10 minutes">iPOJO in 10 minutes</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-hello-word-maven-based-tutorial.html" title="iPOJO Hello Word (Maven-Based) tutorial">iPOJO Hello Word &#40;Maven&#45;Based&#41; tutorial</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-advanced-tutorial.html" title="iPOJO Advanced Tutorial">iPOJO Advanced Tutorial</A></LI>
+</UL>
+
+
+<H6><A name="ApacheFelixiPOJOFeatureOverview-UserGuide"></A><B>User Guide</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/describing-components.html" title="Describing components">Describing components</A></LI>
+	<LI><A href="http://felix.apache.org/site/how-to-use-ipojo-annotations.html" title="How to use iPOJO Annotations">How to use iPOJO Annotations</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-advanced-topics.html" title="iPOJO Advanced Topics">Advanced Topics</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-faq.html" title="iPOJO FAQ">FAQ</A></LI>
+</UL>
+
+
+<H6><A name="ApacheFelixiPOJOFeatureOverview-Tools"></A><B>Tools</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/ipojo-eclipse-plug-in.html" title="iPOJO Eclipse Plug-in">iPOJO Eclipse Plug&#45;in</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-ant-task.html" title="iPOJO Ant Task">iPOJO Ant Task</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-maven-plug-in.html" title="iPOJO Maven Plug-in">iPOJO Maven Plug&#45;in</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-concepts-overview.html" title="iPOJO Concepts Overview">iPOJO concepts overview</A></LI>
+</UL>
+
+
+<H6><A name="ApacheFelixiPOJOFeatureOverview-DeveloperGuide"></A><B>Developer Guide</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/how-to-write-your-own-handler.html" title="How to write your own handler">How to write your own handler</A></LI>
+	<LI><A href="http://felix.apache.org/site/how-to-use-ipojo-manipulation-metadata.html" title="How to use iPOJO Manipulation Metadata">How to use iPOJO Manipulation Metadata</A></LI>
+</UL>
+
+
+<H6><A name="ApacheFelixiPOJOFeatureOverview-Misc%26Contact"></A><B>Misc &amp; Contact</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-issuestracker.html" title="apache-felix-ipojo-issuestracker">Issues Tracker</A></LI>
+	<LI><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/pages/createpage.action?spaceKey=FELIX&amp;title=Supported%20JVMs&amp;linkCreation=true&amp;fromPageId=82824" title="Create Page: Supported JVMs" class="createlink">Supported JVMs<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/plus.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/pages/createpage.action?spaceKey=FELIX&amp;title=Supported%20OSGi%20Implementations&amp;linkCreation=true&amp;fromPageId=82824" title="Create Page: Supported OSGi Implementations" class="createlink">Supported OSGi Implementations<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/plus.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/future-ideas.html" title="Future Ideas">Future Ideas</A></LI>
+	<LI><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/pages/createpage.action?spaceKey=FELIX&amp;title=Contact&amp;linkCreation=true&amp;fromPageId=82824" title="Create Page: Contact" class="createlink">Contact<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/plus.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/related-works.html" title="Related Works">Related Works</A></LI>
+	<LI><A href="http://felix.apache.org/site/article-presentations.html" title="Article & Presentations">Article &amp; Presentations</A></LI>
+</UL>
+
+
+<HR>
+<DIV class="" align="center">
+<P><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/createrssfeed.action?types=blogpost&amp;statuses=created&amp;statuses=modified&amp;spaces=FELIX&amp;labelString=iPOJO&amp;rssType=atom&amp;maxResults=10&amp;timeSpan=5&amp;publicFeed=true&amp;title=iPOJO%20Atom%20Feed" title="Stay tuned!" rel="nofollow"><IMG src="http://cwiki.apache.org/confluence/images/icons/feed-icon-32x32.png" align="absmiddle" border="0"><SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P></DIV></TD></TR></TBODY></TABLE>
+
+
+    </DIV>
+  </BODY>
+
+ 
+</HTML>

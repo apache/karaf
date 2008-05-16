@@ -1,0 +1,203 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<HTML>
+  
+ 
+<HEAD>
+    <TITLE>Apache Felix - Lifecycle Callback Handler</TITLE>
+    <LINK rel="stylesheet" href="http://felix.apache.org/site/media.data/site.css" type="text/css" media="all">
+    <META http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  </HEAD>
+  <BODY>
+    <DIV class="title"><DIV class="logo"><A href="http://felix.apache.org/site/index.html"><IMG border="0" alt="Apache Felix" src="http://felix.apache.org/site/media.data/logo.png"></A></DIV><DIV class="header"><A href="http://www.apache.org/"><IMG border="0" alt="Apache" src="http://felix.apache.org/site/media.data/apache.png"></A></DIV></DIV>
+    <DIV class="menu">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <UL>
+	<LI><A href="http://felix.apache.org/site/news.html" title="news">news</A></LI>
+	<LI><A href="http://felix.apache.org/site/license.html" title="license">license</A></LI>
+	<LI><SPAN class="nobr"><A href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</A></LI>
+	<LI><A href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</A></LI>
+	<LI><A href="http://felix.apache.org/site/contributing.html" title="Contributing">contributing</A></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN>
+<!-- ApacheCon Ad -->
+<IFRAME src="http://www.apache.org/ads/button.html" style="border-width:0; float: left" frameborder="0" scrolling="no" width="135" height="135"></IFRAME>
+<P style="height: 100px">
+<!-- ApacheCon Ad --></LI>
+</UL>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </DIV>
+    <DIV class="main">
+<TABLE class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><TBODY><TR>
+<TD class="confluenceTd" valign="top" width="80%">
+<H1><A name="LifecycleCallbackHandler-Lifecyclecallbacks"></A>Life cycle callbacks</H1>
+
+<P>It is often necessary to create a POJO object as soon the instance becomes valid. Moreover, it is also often needed to be able to stop it nicely. The lifecycle callback handler allows invoking methods (callbacks) on the instance when instance's state changed. For example, it allows invoking a <EM>start</EM>method when the instance becomes valid and a <EM>stop</EM> method when the instance becomes invalid. Moreover, this handler allows the creation of <EM>immediate</EM>component. This page presents how to use this handler.</P>
+
+<H2><A name="LifecycleCallbackHandler-InstanceLifecycle"></A>Instance Lifecycle</H2>
+
+<P>IPOJO instances have a very simple lifecycle. This lifecycle contains two states: INVALID and VALID. Once an instance is created, this instance can only be valid if all its plugged handlers are valid. For example, an instance requiring a service (and so using the dependency handler) cannot be valid if the required service is unavailable. Indeed, the dependency handler will be invalid.</P>
+
+<P>An instance starts and stops in the invalid state.</P>
+
+<P><IMG src="http://felix.apache.org/site/lifecycle-callback-handler.data/lifecycle.png" align="absmiddle" border="0"></P>
+
+<H1><A name="LifecycleCallbackHandler-Lifecyclecallback"></A>Lifecycle callback</H1>
+
+<P>This handler supports two kinds of callback. The INVALID=&gt;VALID callback are invoked when the instance becomes valid (at starting or when an event allows the instance to become valid). The VALID=&gt;INVALID callback are invoked when the instance becomes invalid (at stopping or when an event invalids the instance).</P>
+
+<P><IMG src="http://felix.apache.org/site/lifecycle-callback-handler.data/callback.png" align="absmiddle" border="0"></P>
+
+<P><IMG src="http://felix.apache.org/site/lifecycle-callback-handler.data/callbackOnTransition.png" align="absmiddle" border="0"></P>
+
+<H2><A name="LifecycleCallbackHandler-Anexample"></A>An example</H2>
+
+<P>Let's take an example. The following class requires a FooService and has two lifecycle callbacks: start and stop.</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class Foo {
+              FooService fs;
+              <SPAN class="code-keyword">private</SPAN> void start() {
+                       <SPAN class="code-comment">// Starting method
+</SPAN>                       <SPAN class="code-comment">//...
+</SPAN>                       fs.foo();
+                       <SPAN class="code-comment">//...
+</SPAN>                }
+                <SPAN class="code-keyword">protected</SPAN> void stop() {
+                        <SPAN class="code-comment">// Stopping method
+</SPAN>			<SPAN class="code-keyword">if</SPAN>(fs!=<SPAN class="code-keyword">null</SPAN>) { fs.foo(); }
+                }
+}</PRE>
+</DIV></DIV>
+<P>For this class, we define the following component type:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;component className=<SPAN class="code-quote">&quot;...Foo&quot;</SPAN>&gt;</SPAN>
+       <SPAN class="code-tag">&lt;dependency field=<SPAN class="code-quote">&quot;fs&quot;</SPAN>/&gt;</SPAN>
+       <SPAN class="code-tag">&lt;callback transition=<SPAN class="code-quote">&quot;validate&quot;</SPAN> method=<SPAN class="code-quote">&quot;start&quot;</SPAN>/&gt;</SPAN>
+       <SPAN class="code-tag">&lt;callback transition=<SPAN class="code-quote">&quot;invalidate&quot;</SPAN> method=<SPAN class="code-quote">&quot;stop&quot;</SPAN>/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>When an instance of this component type is created, the start method is called as soon as the <EM>Foo</EM> Service (service requirement) becomes available. If the <EM>Foo</EM> Service is no more available or when the instance is stopped, the stop method is called.</P>
+
+<P>The invoked methods have no argument, but could be private, protected or public. Public methods can be in parent classes too. Moreover, the INVALID=&gt;VALID (validate) method can use service dependencies (the instance becomes valid means that all required services are available); however, in the stop method (invalidate) it is possible that one of these dependency can be <EM>null</EM>. Indeed, the departure of a service can be the cause of the instance invalidation.</P>
+
+<H2><A name="LifecycleCallbackHandler-Managingthreads"></A>Managing threads</H2>
+
+<P>One usage of lifecycle callback is when the instance needs to create threads. Indeed, the thread can be created in the validate callback, and stopped in the invalidate method. The next class shows an example of a class handling a thread by using lifecycle callbacks.</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class HelloRequesterImpl <SPAN class="code-keyword">implements</SPAN> <SPAN class="code-object">Runnable</SPAN> {
+
+    <SPAN class="code-keyword">final</SPAN> <SPAN class="code-keyword">static</SPAN> <SPAN class="code-object">int</SPAN> DELAY=10000;
+    HelloService\[\] m_hello;&amp;nbsp; <SPAN class="code-comment">// Service Dependency
+</SPAN>    <SPAN class="code-object">boolean</SPAN> end;
+
+    <SPAN class="code-keyword">public</SPAN> void run() {
+      <SPAN class="code-keyword">while</SPAN> (\!end) {
+        <SPAN class="code-keyword">try</SPAN> {
+        <SPAN class="code-keyword">synchronized</SPAN> (<SPAN class="code-keyword">this</SPAN>) {
+          <SPAN class="code-keyword">for</SPAN>(<SPAN class="code-object">int</SPAN> i = 0; i &lt; m_hello.length; i++) {
+            <SPAN class="code-object">System</SPAN>.out.println(m_hello\[i\].sayHello(<SPAN class="code-quote">&quot;Clement&quot;</SPAN>));
+          }
+        }
+        <SPAN class="code-object">Thread</SPAN>.sleep(DELAY);
+        } <SPAN class="code-keyword">catch</SPAN> (InterruptedException ie) {
+             /\* will recheck quit \*/
+        }
+  }
+}
+
+<SPAN class="code-keyword">public</SPAN> void starting() {
+      <SPAN class="code-object">Thread</SPAN> T = <SPAN class="code-keyword">new</SPAN> <SPAN class="code-object">Thread</SPAN>(<SPAN class="code-keyword">this</SPAN>);
+      end = <SPAN class="code-keyword">false</SPAN>;
+      T.start();
+}
+
+<SPAN class="code-keyword">public</SPAN> void stopping() { end = <SPAN class="code-keyword">true</SPAN>; }</PRE>
+</DIV></DIV>
+<P>For this component type, the metadata are :</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;component className=<SPAN class="code-quote">&quot;... HelloRequesterImpl&quot;</SPAN>&gt;</SPAN>
+		<SPAN class="code-tag">&lt;dependency field=<SPAN class="code-quote">&quot;HelloService&quot;</SPAN>/&gt;</SPAN>
+		<SPAN class="code-tag">&lt;callback transition=<SPAN class="code-quote">&quot;valdiate&quot;</SPAN> method=<SPAN class="code-quote">&quot;starting&quot;</SPAN>/&gt;</SPAN>
+		<SPAN class="code-tag">&lt;callback transition=<SPAN class="code-quote">&quot;invaldiate&quot;</SPAN> method=<SPAN class="code-quote">&quot;stopping&quot;</SPAN>/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
+</DIV></DIV>
+
+<H2><A name="LifecycleCallbackHandler-Immediatecomponent"></A>Immediate component</H2>
+
+<P>An instance of an immediate component type is instantiated as soon it becomes valid. It means that, when the instance becomes valid, the constructor of the implementation class is called. This can replace the validate callback. However, it stills a difference between the immediate and the validate callback. The constructor is call only once time. The validate callback is re-called each time the instance becomes valid.</P>
+
+<P><IMG src="http://felix.apache.org/site/lifecycle-callback-handler.data/immediate.png" align="absmiddle" border="0"></P>
+
+<P>However as there is no destructor in Java, the invalidate callback is necessary if some actions are needed when stopping.</P>
+
+<H2><A name="LifecycleCallbackHandler-Callbackonseveralobjects"></A>Callback on several objects</H2>
+
+<P>If you instance has created several objects (called the implementation class constructor several times), the callback is called on each object in the creation order.</P></TD>
+<TD class="confluenceTd" valign="top" width="20%">
+<FORM method="get" class="confluence-searchbox marginlessForm " action="http://felix.apache.org/confluence/dosearchsite.action">
+    <INPUT type="hidden" name="searchQuery.spaceKey" value="FELIX">
+    <INPUT type="text" name="searchQuery.queryString">
+    <INPUT type="submit" value="Search">
+</FORM>
+<HR>
+<H6><A name="LifecycleCallbackHandler-Overview"></A><B>Overview</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-2.html" title="Apache Felix iPOJO-2">Home Page</A></LI>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-feature-overview.html" title="Apache Felix iPOJO Feature Overview">iPOJO Feature Overview</A></LI>
+	<LI><A href="http://felix.apache.org/site/download.html" title="Download">Download &amp; Install </A></LI>
+</UL>
+
+
+<H6><A name="LifecycleCallbackHandler-GettingStarted"></A><B>Getting Started</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/ipojo-in-10-minutes.html" title="iPOJO in 10 minutes">iPOJO in 10 minutes</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-hello-word-maven-based-tutorial.html" title="iPOJO Hello Word (Maven-Based) tutorial">iPOJO Hello Word &#40;Maven&#45;Based&#41; tutorial</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-advanced-tutorial.html" title="iPOJO Advanced Tutorial">iPOJO Advanced Tutorial</A></LI>
+</UL>
+
+
+<H6><A name="LifecycleCallbackHandler-UserGuide"></A><B>User Guide</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/describing-components.html" title="Describing components">Describing components</A></LI>
+	<LI><A href="http://felix.apache.org/site/how-to-use-ipojo-annotations.html" title="How to use iPOJO Annotations">How to use iPOJO Annotations</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-advanced-topics.html" title="iPOJO Advanced Topics">Advanced Topics</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-faq.html" title="iPOJO FAQ">FAQ</A></LI>
+</UL>
+
+
+<H6><A name="LifecycleCallbackHandler-Tools"></A><B>Tools</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/ipojo-eclipse-plug-in.html" title="iPOJO Eclipse Plug-in">iPOJO Eclipse Plug&#45;in</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-ant-task.html" title="iPOJO Ant Task">iPOJO Ant Task</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-maven-plug-in.html" title="iPOJO Maven Plug-in">iPOJO Maven Plug&#45;in</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-concepts-overview.html" title="iPOJO Concepts Overview">iPOJO concepts overview</A></LI>
+</UL>
+
+
+<H6><A name="LifecycleCallbackHandler-DeveloperGuide"></A><B>Developer Guide</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/how-to-write-your-own-handler.html" title="How to write your own handler">How to write your own handler</A></LI>
+	<LI><A href="http://felix.apache.org/site/how-to-use-ipojo-manipulation-metadata.html" title="How to use iPOJO Manipulation Metadata">How to use iPOJO Manipulation Metadata</A></LI>
+</UL>
+
+
+<H6><A name="LifecycleCallbackHandler-Misc%26Contact"></A><B>Misc &amp; Contact</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-issuestracker.html" title="apache-felix-ipojo-issuestracker">Issues Tracker</A></LI>
+	<LI><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/pages/createpage.action?spaceKey=FELIX&amp;title=Supported%20JVMs&amp;linkCreation=true&amp;fromPageId=82824" title="Create Page: Supported JVMs" class="createlink">Supported JVMs<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/plus.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/pages/createpage.action?spaceKey=FELIX&amp;title=Supported%20OSGi%20Implementations&amp;linkCreation=true&amp;fromPageId=82824" title="Create Page: Supported OSGi Implementations" class="createlink">Supported OSGi Implementations<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/plus.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/future-ideas.html" title="Future Ideas">Future Ideas</A></LI>
+	<LI><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/pages/createpage.action?spaceKey=FELIX&amp;title=Contact&amp;linkCreation=true&amp;fromPageId=82824" title="Create Page: Contact" class="createlink">Contact<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/plus.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/related-works.html" title="Related Works">Related Works</A></LI>
+	<LI><A href="http://felix.apache.org/site/article-presentations.html" title="Article & Presentations">Article &amp; Presentations</A></LI>
+</UL>
+
+
+<HR>
+<DIV class="" align="center">
+<P><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/createrssfeed.action?types=blogpost&amp;statuses=created&amp;statuses=modified&amp;spaces=FELIX&amp;labelString=iPOJO&amp;rssType=atom&amp;maxResults=10&amp;timeSpan=5&amp;publicFeed=true&amp;title=iPOJO%20Atom%20Feed" title="Stay tuned!" rel="nofollow"><IMG src="http://cwiki.apache.org/confluence/images/icons/feed-icon-32x32.png" align="absmiddle" border="0"><SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P></DIV></TD></TR></TBODY></TABLE>
+    </DIV>
+  </BODY>
+
+ 
+</HTML>

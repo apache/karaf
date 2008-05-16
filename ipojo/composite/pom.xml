@@ -66,7 +66,9 @@
 				<configuration>
 					<instructions>
 						<Bundle-Name>iPOJO Composite</Bundle-Name>
-						<Bundle-Vendor>Clement ESCOFFIER</Bundle-Vendor>
+						<Bundle-Vendor>
+							The Apache Software Foundation
+						</Bundle-Vendor>
 						<Bundle-Description>
 							iPOJO Composititon Framework
 						</Bundle-Description>
@@ -92,6 +94,10 @@
 							org.apache.felix.ipojo.composite;
 							version="0.8.0"
 						</Export-Package>
+						<Include-Resource>
+							META-INF/LICENCE=LICENSE,
+							META-INF/NOTICE=NOTICE
+						</Include-Resource>
 						<IPOJO-Extension>
 							composite:org.apache.felix.ipojo.composite.CompositeFactory
 						</IPOJO-Extension>
