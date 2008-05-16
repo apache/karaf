@@ -148,6 +148,7 @@
         <module>../servicebinder</module>
         <module>../wireadmin</module>
         <module>../prefs</module>
+        <module>../webconsole</module>
         
         <module>../ipojo</module>
 
