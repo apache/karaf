@@ -284,9 +284,15 @@ public class InstallAction extends BundleAction {
                 doRun(bundleStream);
 
                 if (refreshPackages) {
-                    PackageAdmin pa = installAction.getPackageAdmin();
-                    if (pa != null) {
-                        pa.refreshPackages(null);
+                    try {
+                        PackageAdmin pa = installAction.getPackageAdmin();
+                        if (pa != null) {
+                            pa.refreshPackages(null);
+                        }
+                    } catch (IllegalStateException ise) {
+                        // This exception is expected if the webconsole bundle
+                        // itself has just been updated. For now, we just
+                        // ignore this exception
                     }
                 }
             } catch (IOException ioe) {
