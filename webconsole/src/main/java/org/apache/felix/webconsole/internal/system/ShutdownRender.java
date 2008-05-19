@@ -16,6 +16,7 @@
  */
 package org.apache.felix.webconsole.internal.system;
 
+
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -24,33 +25,40 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.Render;
 
-public class ShutdownRender implements Render {
+
+public class ShutdownRender implements Render
+{
 
     public static final String NAME = "shutdown";
     public static final String LABEL = null; // hide from navigation
 
-    public String getName() {
+
+    public String getName()
+    {
         return NAME;
     }
 
-    public String getLabel() {
+
+    public String getLabel()
+    {
         return LABEL;
     }
 
-    public void render(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+
+    public void render( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
 
         PrintWriter pw = response.getWriter();
 
-        pw.println("<tr>");
-        pw.println("<td colspan='2' class='techcontentcell'>");
-        pw.println("<table class='content' cellpadding='0' cellspacing='0' width='100%'>");
-        pw.println("<tr class='content'>");
-        pw.println("<th class='content important'>Server terminated</th>");
-        pw.println("</tr>");
-        pw.println("</table>");
-        pw.println("</td>");
-        pw.println("</tr>");
+        pw.println( "<tr>" );
+        pw.println( "<td colspan='2' class='techcontentcell'>" );
+        pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
+        pw.println( "<tr class='content'>" );
+        pw.println( "<th class='content important'>Server terminated</th>" );
+        pw.println( "</tr>" );
+        pw.println( "</table>" );
+        pw.println( "</td>" );
+        pw.println( "</tr>" );
     }
 
 }

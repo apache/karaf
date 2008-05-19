@@ -16,17 +16,24 @@
  */
 package org.apache.felix.webconsole.internal.obr;
 
+
 import org.apache.felix.webconsole.Action;
 
-public abstract class InstallFromRepoAction extends AbstractObrPlugin implements Action {
+
+public abstract class InstallFromRepoAction extends AbstractObrPlugin implements Action
+{
 
     public static final String NAME = "installFromOBR";
 
-    public String getName() {
+
+    public String getName()
+    {
         return NAME;
     }
 
-    public String getLabel() {
+
+    public String getLabel()
+    {
         return NAME;
     }
 

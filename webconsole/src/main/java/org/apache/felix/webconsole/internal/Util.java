@@ -16,6 +16,7 @@
  */
 package org.apache.felix.webconsole.internal;
 
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -30,10 +31,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.webconsole.Render;
 
+
 /**
  * The <code>Util</code> TODO
  */
-public class Util {
+public class Util
+{
 
     /** web apps subpage */
     public static final String PAGE_WEBAPPS = "/webapps";
@@ -87,8 +90,10 @@ public class Util {
     /** The name of the request attribute containig the map of FileItems from the POST request */
     public static final String ATTR_FILEUPLOAD = "org.apache.felix.webconsole.fileupload";
 
-    public static PrintWriter startHtml(HttpServletResponse resp, String pageTitle) throws IOException {
-        resp.setContentType("text/html; utf-8");
+
+    public static PrintWriter startHtml( HttpServletResponse resp, String pageTitle ) throws IOException
+    {
+        resp.setContentType( "text/html; utf-8" );
 
         PrintWriter pw = resp.getWriter();
 
@@ -102,69 +107,90 @@ public class Util {
         long totalMem = Runtime.getRuntime().totalMemory() / 1024;
         long usedMem = totalMem - freeMem;
 
-        String header = MessageFormat.format(HEADER, new Object[] {
-            adminTitle,
-            "1.0.0-SNAPSHOT", // ServletEngine.VERSION.getFullVersion(),
-            System.getProperty("java.runtime.version"),
-            System.getProperty("java.runtime.name"),
-            System.getProperty("java.vm.name"),
-            System.getProperty("java.vm.version"),
-            System.getProperty("java.vm.info"), new Long(totalMem),
-            new Long(usedMem), new Long(freeMem), vendorWeb, productName,
-            pageTitle, productWeb, vendorName});
-        pw.println(header);
+        String header = MessageFormat.format( HEADER, new Object[]
+            {
+                adminTitle,
+                "1.0.0-SNAPSHOT", // ServletEngine.VERSION.getFullVersion(),
+                System.getProperty( "java.runtime.version" ), System.getProperty( "java.runtime.name" ),
+                System.getProperty( "java.vm.name" ), System.getProperty( "java.vm.version" ),
+                System.getProperty( "java.vm.info" ), new Long( totalMem ), new Long( usedMem ), new Long( freeMem ),
+                vendorWeb, productName, pageTitle, productWeb, vendorName } );
+        pw.println( header );
         return pw;
     }
 
-    public static void navigation(PrintWriter pw, Collection renders, String current, boolean disabled) {
-        pw.println("<p id='technav'>");
+
+    public static void navigation( PrintWriter pw, Collection renders, String current, boolean disabled )
+    {
+        pw.println( "<p id='technav'>" );
 
         SortedMap map = new TreeMap();
-        for (Iterator ri=renders.iterator(); ri.hasNext(); ) {
-            Render render = (Render) ri.next();
-            if (render.getLabel() == null) {
+        for ( Iterator ri = renders.iterator(); ri.hasNext(); )
+        {
+            Render render = ( Render ) ri.next();
+            if ( render.getLabel() == null )
+            {
                 // ignore renders without a label
-            } else if (disabled || current.equals(render.getName())) {
-                map.put(render.getLabel(), "<span class='technavat'>" + render.getLabel() + "</span>");
-            } else {
-                map.put(render.getLabel(), "<a href='" + render.getName() + "'>" + render.getLabel() + "</a></li>");
+            }
+            else if ( disabled || current.equals( render.getName() ) )
+            {
+                map.put( render.getLabel(), "<span class='technavat'>" + render.getLabel() + "</span>" );
+            }
+            else
+            {
+                map.put( render.getLabel(), "<a href='" + render.getName() + "'>" + render.getLabel() + "</a></li>" );
             }
         }
 
-        for (Iterator li=map.values().iterator(); li.hasNext(); ) {
-            pw.println(li.next());
+        for ( Iterator li = map.values().iterator(); li.hasNext(); )
+        {
+            pw.println( li.next() );
         }
 
-        pw.println("</p>");
+        pw.println( "</p>" );
     }
 
-    public static void endHhtml(PrintWriter pw) {
-        pw.println("</body>");
-        pw.println("</html>");
+
+    public static void endHhtml( PrintWriter pw )
+    {
+        pw.println( "</body>" );
+        pw.println( "</html>" );
     }
 
-    public static void startScript(PrintWriter pw) {
-        pw.println("<script type='text/javascript'>");
-        pw.println("// <![CDATA[");
+
+    public static void startScript( PrintWriter pw )
+    {
+        pw.println( "<script type='text/javascript'>" );
+        pw.println( "// <![CDATA[" );
     }
 
-    public static void endScript(PrintWriter pw) {
-        pw.println("// ]]>");
-        pw.println("</script>");
+
+    public static void endScript( PrintWriter pw )
+    {
+        pw.println( "// ]]>" );
+        pw.println( "</script>" );
     }
 
-    public static void spool(String res, HttpServletResponse resp) throws IOException {
-        InputStream ins = getResource(res);
-        if (ins != null) {
-            try {
-                IOUtils.copy(ins, resp.getOutputStream());
-            } finally {
-                IOUtils.closeQuietly(ins);
+
+    public static void spool( String res, HttpServletResponse resp ) throws IOException
+    {
+        InputStream ins = getResource( res );
+        if ( ins != null )
+        {
+            try
+            {
+                IOUtils.copy( ins, resp.getOutputStream() );
+            }
+            finally
+            {
+                IOUtils.closeQuietly( ins );
             }
         }
     }
 
-    private static InputStream getResource(String resource) {
-        return Util.class.getResourceAsStream(resource);
+
+    private static InputStream getResource( String resource )
+    {
+        return Util.class.getResourceAsStream( resource );
     }
 }

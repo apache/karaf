@@ -16,25 +16,31 @@
  */
 package org.apache.felix.webconsole;
 
+
 import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public interface Action {
+
+public interface Action
+{
 
     static final String SERVICE = Action.class.getName();
-    
+
     /**
      * The name of a request attribute, which may be set by performAction if
      * redirecting.
      */
-    static final String ATTR_REDIRECT_PARAMETERS= "redirectParameters";
+    static final String ATTR_REDIRECT_PARAMETERS = "redirectParameters";
+
 
     String getName();
 
+
     String getLabel();
+
 
     /**
      * Performs the action the request data optionally sending a response to
@@ -53,7 +59,7 @@ public interface Action {
      *      processing the action. The <code>rootCause</code> of the exception
      *      should contain the cause of the error.
      */
-    boolean performAction(HttpServletRequest request,
-        HttpServletResponse response) throws IOException, ServletException;
+    boolean performAction( HttpServletRequest request, HttpServletResponse response ) throws IOException,
+        ServletException;
 
 }

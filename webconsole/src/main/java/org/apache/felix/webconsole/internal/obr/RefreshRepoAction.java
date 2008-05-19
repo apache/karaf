@@ -16,72 +16,79 @@
  */
 package org.apache.felix.webconsole.internal.obr;
 
+
 import org.apache.felix.webconsole.Action;
 
-public abstract class RefreshRepoAction extends AbstractObrPlugin implements Action {
+
+public abstract class RefreshRepoAction extends AbstractObrPlugin implements Action
+{
 
     public static final String NAME = "refreshOBR";
 
     public static final String PARAM_REPO = "repository";
 
-    public String getName() {
+
+    public String getName()
+    {
         return NAME;
     }
 
-    public String getLabel() {
+
+    public String getLabel()
+    {
         return NAME;
     }
-/*
-    public boolean performAction(HttpServletRequest request,
-            HttpServletResponse response) {
+    /*
+        public boolean performAction(HttpServletRequest request,
+                HttpServletResponse response) {
 
-        BundleRepositoryAdmin repoAdmin = getBundleRepositoryAdmin();
-        if (repoAdmin != null) {
-            String repositoryURL = request.getParameter("repository");
-            Iterator<Repository> repos = repoAdmin.getRepositories();
-            Repository repo = this.getRepository(repos, repositoryURL);
+            BundleRepositoryAdmin repoAdmin = getBundleRepositoryAdmin();
+            if (repoAdmin != null) {
+                String repositoryURL = request.getParameter("repository");
+                Iterator<Repository> repos = repoAdmin.getRepositories();
+                Repository repo = this.getRepository(repos, repositoryURL);
 
-            URL repoURL = null;
-            if (repo != null) {
-                repoURL = repo.getURL();
-            } else {
-                try {
-                    repoURL = new URL(repositoryURL);
-                } catch (Throwable t) {
-                    // don't care, just ignore
+                URL repoURL = null;
+                if (repo != null) {
+                    repoURL = repo.getURL();
+                } else {
+                    try {
+                        repoURL = new URL(repositoryURL);
+                    } catch (Throwable t) {
+                        // don't care, just ignore
+                    }
+                }
+
+                // log.log(LogService.LOG_DEBUG, "Refreshing " + repo.getURL());
+                if (repoURL != null) {
+                    try {
+                        repoAdmin.addRepository(repoURL);
+                    } catch (Exception e) {
+                        // TODO: log.log(LogService.LOG_ERROR, "Cannot refresh
+                        // Repository " + repo.getURL());
+                    }
                 }
             }
 
-            // log.log(LogService.LOG_DEBUG, "Refreshing " + repo.getURL());
-            if (repoURL != null) {
-                try {
-                    repoAdmin.addRepository(repoURL);
-                } catch (Exception e) {
-                    // TODO: log.log(LogService.LOG_ERROR, "Cannot refresh
-                    // Repository " + repo.getURL());
-                }
-            }
+            return true;
         }
 
-        return true;
-    }
+        // ---------- internal -----------------------------------------------------
 
-    // ---------- internal -----------------------------------------------------
+        private Repository getRepository(Iterator<Repository> repos,
+                String repositoryUrl) {
+            if (repositoryUrl == null || repositoryUrl.length() == 0) {
+                return null;
+            }
 
-    private Repository getRepository(Iterator<Repository> repos,
-            String repositoryUrl) {
-        if (repositoryUrl == null || repositoryUrl.length() == 0) {
+            while (repos.hasNext()) {
+                Repository repo = repos.next();
+                if (repositoryUrl.equals(repo.getURL().toString())) {
+                    return repo;
+                }
+            }
+
             return null;
         }
-
-        while (repos.hasNext()) {
-            Repository repo = repos.next();
-            if (repositoryUrl.equals(repo.getURL().toString())) {
-                return repo;
-            }
-        }
-
-        return null;
-    }
-*/
+    */
 }

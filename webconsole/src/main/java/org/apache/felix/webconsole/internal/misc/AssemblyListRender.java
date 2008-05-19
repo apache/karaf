@@ -16,33 +16,44 @@
  */
 package org.apache.felix.webconsole.internal.misc;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.felix.webconsole.internal.core.BundleListRender;
 import org.osgi.framework.Bundle;
 
-public class AssemblyListRender extends BundleListRender {
+
+public class AssemblyListRender extends BundleListRender
+{
 
     public static final String NAME = "assemblyList";
     public static final String LABEL = "Assemblies";
 
-    public String getName() {
+
+    public String getName()
+    {
         return NAME;
     }
 
-    public String getLabel() {
+
+    public String getLabel()
+    {
         return LABEL;
     }
 
-    protected Bundle[] getBundles() {
+
+    protected Bundle[] getBundles()
+    {
         Bundle[] bundles = this.getBundleContext().getBundles();
         List assList = new ArrayList();
-        for (int i=0; i < bundles.length; i++) {
-            if (bundles[i].getHeaders().get("Assembly-Bundles") != null) {
-                assList.add(bundles[i]);
+        for ( int i = 0; i < bundles.length; i++ )
+        {
+            if ( bundles[i].getHeaders().get( "Assembly-Bundles" ) != null )
+            {
+                assList.add( bundles[i] );
             }
         }
-        return (Bundle[]) assList.toArray(new Bundle[assList.size()]);
+        return ( Bundle[] ) assList.toArray( new Bundle[assList.size()] );
     }
 }

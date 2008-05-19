@@ -16,6 +16,7 @@
  */
 package org.apache.felix.webconsole.internal.core;
 
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -23,32 +24,45 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.log.LogService;
 
+
 /**
  * The <code>StopAction</code> TODO
  */
-public class StopAction extends BundleAction {
+public class StopAction extends BundleAction
+{
 
     public static final String NAME = "stop";
     public static final String LABEL = "Stop";
 
-    public String getName() {
+
+    public String getName()
+    {
         return NAME;
     }
 
-    public String getLabel() {
+
+    public String getLabel()
+    {
         return LABEL;
     }
 
-    public boolean performAction(HttpServletRequest request, HttpServletResponse response) {
 
-        long bundleId = this.getBundleId(request);
-        if (bundleId > 0) { // cannot stop system bundle !!
-            Bundle bundle = this.getBundleContext().getBundle(bundleId);
-            if (bundle != null) {
-                try {
+    public boolean performAction( HttpServletRequest request, HttpServletResponse response )
+    {
+
+        long bundleId = this.getBundleId( request );
+        if ( bundleId > 0 )
+        { // cannot stop system bundle !!
+            Bundle bundle = this.getBundleContext().getBundle( bundleId );
+            if ( bundle != null )
+            {
+                try
+                {
                     bundle.stop();
-                } catch (BundleException be) {
-                    getLog().log(LogService.LOG_ERROR, "Cannot stop", be);
+                }
+                catch ( BundleException be )
+                {
+                    getLog().log( LogService.LOG_ERROR, "Cannot stop", be );
                 }
 
             }
@@ -57,4 +71,3 @@ public class StopAction extends BundleAction {
         return true;
     }
 }
-

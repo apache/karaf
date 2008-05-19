@@ -18,6 +18,7 @@
  */
 package org.apache.felix.webconsole.internal.compendium;
 
+
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,156 +37,187 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentConstants;
 
-public class ComponentConfigurationPrinter extends AbstractScrPlugin implements
-        ConfigurationPrinter {
+
+public class ComponentConfigurationPrinter extends AbstractScrPlugin implements ConfigurationPrinter
+{
 
     private ServiceRegistration registration;
 
-    public void setBundleContext(BundleContext bundleContext) {
-        super.setBundleContext(bundleContext);
 
-        registration = bundleContext.registerService(
-            ConfigurationPrinter.SERVICE, this, null);
+    public void setBundleContext( BundleContext bundleContext )
+    {
+        super.setBundleContext( bundleContext );
+
+        registration = bundleContext.registerService( ConfigurationPrinter.SERVICE, this, null );
     }
 
-    public String getTitle() {
+
+    public String getTitle()
+    {
         return "Declarative Services Components";
     }
 
-    public void printConfiguration(PrintWriter pw) {
+
+    public void printConfiguration( PrintWriter pw )
+    {
         ScrService scrService = getScrService();
-        if (scrService != null) {
+        if ( scrService != null )
+        {
             Component[] components = scrService.getComponents();
 
-            if (components == null || components.length == 0) {
+            if ( components == null || components.length == 0 )
+            {
 
-                pw.println("  No Components Registered");
+                pw.println( "  No Components Registered" );
 
-            } else {
+            }
+            else
+            {
 
                 // order components by id
                 TreeMap componentMap = new TreeMap();
-                for (int i=0; i < components.length; i++) {
+                for ( int i = 0; i < components.length; i++ )
+                {
                     Component component = components[1];
-                    componentMap.put(new Long(component.getId()), component);
+                    componentMap.put( new Long( component.getId() ), component );
                 }
 
                 // render components
-                for (Iterator ci = componentMap.values().iterator(); ci.hasNext();) {
-                    Component component = (Component) ci.next();
-                    component(pw, component);
+                for ( Iterator ci = componentMap.values().iterator(); ci.hasNext(); )
+                {
+                    Component component = ( Component ) ci.next();
+                    component( pw, component );
                 }
             }
-        } else {
-            pw.println("  Apache Felix Declarative Service not installed");
+        }
+        else
+        {
+            pw.println( "  Apache Felix Declarative Service not installed" );
         }
     }
 
-    private void component(PrintWriter pw, Component component) {
 
-        pw.print(component.getId());
-        pw.print("=[");
-        pw.print(component.getName());
-        pw.println("]");
+    private void component( PrintWriter pw, Component component )
+    {
 
-        pw.println("  Bundle" + component.getBundle().getSymbolicName() + " ("
-            + component.getBundle().getBundleId() + ")");
-        pw.println("  State="
-            + ComponentRenderAction.toStateString(component.getState()));
-        pw.println("  DefaultState="
-            + (component.isDefaultEnabled() ? "enabled" : "disabled"));
-        pw.println("  Activation="
-            + (component.isImmediate() ? "immediate" : "delayed"));
+        pw.print( component.getId() );
+        pw.print( "=[" );
+        pw.print( component.getName() );
+        pw.println( "]" );
 
-        listServices(pw, component);
-        listReferences(pw, component);
-        listProperties(pw, component);
+        pw.println( "  Bundle" + component.getBundle().getSymbolicName() + " (" + component.getBundle().getBundleId()
+            + ")" );
+        pw.println( "  State=" + ComponentRenderAction.toStateString( component.getState() ) );
+        pw.println( "  DefaultState=" + ( component.isDefaultEnabled() ? "enabled" : "disabled" ) );
+        pw.println( "  Activation=" + ( component.isImmediate() ? "immediate" : "delayed" ) );
+
+        listServices( pw, component );
+        listReferences( pw, component );
+        listProperties( pw, component );
 
         pw.println();
     }
 
-    private void listServices(PrintWriter pw, Component component) {
+
+    private void listServices( PrintWriter pw, Component component )
+    {
         String[] services = component.getServices();
-        if (services == null) {
+        if ( services == null )
+        {
             return;
         }
 
-        pw.println("  ServiceType="
-            + (component.isServiceFactory() ? "service factory" : "service"));
+        pw.println( "  ServiceType=" + ( component.isServiceFactory() ? "service factory" : "service" ) );
 
         StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < services.length; i++) {
-            if (i > 0) {
-                buf.append(", ");
+        for ( int i = 0; i < services.length; i++ )
+        {
+            if ( i > 0 )
+            {
+                buf.append( ", " );
             }
-            buf.append(services[i]);
+            buf.append( services[i] );
         }
 
-        pw.println("  Services=" + buf);
+        pw.println( "  Services=" + buf );
     }
 
-    private void listReferences(PrintWriter pw, Component component) {
+
+    private void listReferences( PrintWriter pw, Component component )
+    {
         Reference[] refs = component.getReferences();
-        if (refs != null) {
-            for (int i = 0; i < refs.length; i++) {
+        if ( refs != null )
+        {
+            for ( int i = 0; i < refs.length; i++ )
+            {
 
-                pw.println("  Reference=" + refs[i].getName() + ", "
-                    + (refs[i].isSatisfied() ? "Satisfied" : "Unsatisfied"));
+                pw.println( "  Reference=" + refs[i].getName() + ", "
+                    + ( refs[i].isSatisfied() ? "Satisfied" : "Unsatisfied" ) );
 
-                pw.println("    Service Name: " + refs[i].getServiceName());
+                pw.println( "    Service Name: " + refs[i].getServiceName() );
 
-                if (refs[i].getTarget() != null) {
-                    pw.println("  Target Filter: " + refs[i].getTarget());
+                if ( refs[i].getTarget() != null )
+                {
+                    pw.println( "  Target Filter: " + refs[i].getTarget() );
                 }
 
-                pw.println("    Multiple: "
-                    + (refs[i].isMultiple() ? "multiple" : "single"));
-                pw.println("    Optional: "
-                    + (refs[i].isOptional() ? "optional" : "mandatory"));
-                pw.println("    Policy: "
-                    + (refs[i].isStatic() ? "static" : "dynamic"));
+                pw.println( "    Multiple: " + ( refs[i].isMultiple() ? "multiple" : "single" ) );
+                pw.println( "    Optional: " + ( refs[i].isOptional() ? "optional" : "mandatory" ) );
+                pw.println( "    Policy: " + ( refs[i].isStatic() ? "static" : "dynamic" ) );
 
                 // list bound services
                 ServiceReference[] boundRefs = refs[i].getServiceReferences();
-                if (boundRefs != null && boundRefs.length > 0) {
-                    for (int j = 0; j < boundRefs.length; j++) {
-                        pw.print("    Bound Service: ID ");
-                        pw.print(boundRefs[j].getProperty(Constants.SERVICE_ID));
+                if ( boundRefs != null && boundRefs.length > 0 )
+                {
+                    for ( int j = 0; j < boundRefs.length; j++ )
+                    {
+                        pw.print( "    Bound Service: ID " );
+                        pw.print( boundRefs[j].getProperty( Constants.SERVICE_ID ) );
 
-                        String name = (String) boundRefs[j].getProperty(ComponentConstants.COMPONENT_NAME);
-                        if (name == null) {
-                            name = (String) boundRefs[j].getProperty(Constants.SERVICE_PID);
-                            if (name == null) {
-                                name = (String) boundRefs[j].getProperty(Constants.SERVICE_DESCRIPTION);
+                        String name = ( String ) boundRefs[j].getProperty( ComponentConstants.COMPONENT_NAME );
+                        if ( name == null )
+                        {
+                            name = ( String ) boundRefs[j].getProperty( Constants.SERVICE_PID );
+                            if ( name == null )
+                            {
+                                name = ( String ) boundRefs[j].getProperty( Constants.SERVICE_DESCRIPTION );
                             }
                         }
-                        if (name != null) {
-                            pw.print(" (");
-                            pw.print(name);
-                            pw.print(")");
+                        if ( name != null )
+                        {
+                            pw.print( " (" );
+                            pw.print( name );
+                            pw.print( ")" );
                         }
                     }
-                } else {
-                    pw.print("    No Services bound");
+                }
+                else
+                {
+                    pw.print( "    No Services bound" );
                 }
                 pw.println();
             }
         }
     }
 
-    private void listProperties(PrintWriter pw, Component component) {
-        Dictionary props = component.getProperties();
-        if (props != null) {
 
-            pw.println("  Properties=");
-            TreeSet keys = new TreeSet(Collections.list(props.keys()));
-            for (Iterator ki = keys.iterator(); ki.hasNext();) {
-                String key = (String) ki.next();
-                Object value = props.get(key);
-                if (value.getClass().isArray()) {
-                    value = Arrays.asList((Object[]) value);
+    private void listProperties( PrintWriter pw, Component component )
+    {
+        Dictionary props = component.getProperties();
+        if ( props != null )
+        {
+
+            pw.println( "  Properties=" );
+            TreeSet keys = new TreeSet( Collections.list( props.keys() ) );
+            for ( Iterator ki = keys.iterator(); ki.hasNext(); )
+            {
+                String key = ( String ) ki.next();
+                Object value = props.get( key );
+                if ( value.getClass().isArray() )
+                {
+                    value = Arrays.asList( ( Object[] ) value );
                 }
-                pw.println("    " + key + "=" + value);
+                pw.println( "    " + key + "=" + value );
             }
         }
 

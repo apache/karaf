@@ -16,25 +16,34 @@
  */
 package org.apache.felix.webconsole.internal.system;
 
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.Action;
 
-public class GCAction implements Action {
+
+public class GCAction implements Action
+{
 
     public static final String NAME = "gc";
     public static final String LABEL = "Collect Garbage";
 
-    public String getName() {
+
+    public String getName()
+    {
         return NAME;
     }
 
-    public String getLabel() {
+
+    public String getLabel()
+    {
         return LABEL;
     }
 
-    public boolean performAction(HttpServletRequest request, HttpServletResponse response) {
+
+    public boolean performAction( HttpServletRequest request, HttpServletResponse response )
+    {
         System.gc();
         return false;
     }

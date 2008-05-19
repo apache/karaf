@@ -18,37 +18,52 @@
  */
 package org.apache.felix.webconsole.internal.servlet;
 
+
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class Logger {
+
+public class Logger
+{
 
     private ServiceTracker logTracker;
 
-    Logger(BundleContext bundleContext) {
-        logTracker = new ServiceTracker(bundleContext,
-            LogService.class.getName(), null);
+
+    Logger( BundleContext bundleContext )
+    {
+        logTracker = new ServiceTracker( bundleContext, LogService.class.getName(), null );
         logTracker.open();
     }
 
-    void dispose() {
-        if (logTracker != null) {
+
+    void dispose()
+    {
+        if ( logTracker != null )
+        {
             logTracker.close();
         }
     }
 
-    public void log(int logLevel, String message) {
-        log(logLevel, message, null);
+
+    public void log( int logLevel, String message )
+    {
+        log( logLevel, message, null );
     }
 
-    public void log(int logLevel, String message, Throwable t) {
+
+    public void log( int logLevel, String message, Throwable t )
+    {
         Object log = logTracker.getService();
-        if (log != null) {
-            ((LogService) log).log(logLevel, message, t);
-        } else {
+        if ( log != null )
+        {
+            ( ( LogService ) log ).log( logLevel, message, t );
+        }
+        else
+        {
             String level;
-            switch (logLevel) {
+            switch ( logLevel )
+            {
                 case LogService.LOG_DEBUG:
                     level = "*DEBUG*";
                     break;
@@ -66,13 +81,15 @@ public class Logger {
                     break;
             }
 
-            if (message == null && t != null) {
+            if ( message == null && t != null )
+            {
                 message = t.getMessage();
             }
 
-            System.out.println(level + " " + message);
-            if (t != null) {
-                t.printStackTrace(System.out);
+            System.out.println( level + " " + message );
+            if ( t != null )
+            {
+                t.printStackTrace( System.out );
             }
         }
     }

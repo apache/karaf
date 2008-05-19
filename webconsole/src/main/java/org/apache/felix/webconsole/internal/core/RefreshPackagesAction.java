@@ -16,30 +16,38 @@
  */
 package org.apache.felix.webconsole.internal.core;
 
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 
 /**
  * The <code>RefreshPackagesAction</code> TODO
  */
-public class RefreshPackagesAction extends BundleAction {
+public class RefreshPackagesAction extends BundleAction
+{
 
     public static final String NAME = "refreshPackages";
 
     public static final String LABEL = "Refresh Packages";
 
-    public String getName() {
+
+    public String getName()
+    {
         return NAME;
     }
 
-    public String getLabel() {
+
+    public String getLabel()
+    {
         return LABEL;
     }
 
-    public boolean performAction(HttpServletRequest request,
-            HttpServletResponse response) {
 
-        getPackageAdmin().refreshPackages(null);
+    public boolean performAction( HttpServletRequest request, HttpServletResponse response )
+    {
+
+        getPackageAdmin().refreshPackages( null );
 
         return true;
     }

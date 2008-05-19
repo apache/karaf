@@ -18,13 +18,16 @@
  */
 package org.apache.felix.webconsole.internal;
 
+
 import org.apache.felix.webconsole.internal.servlet.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class BaseManagementPlugin {
+
+public class BaseManagementPlugin
+{
 
     private BundleContext bundleContext;
     private Logger log;
@@ -33,42 +36,55 @@ public class BaseManagementPlugin {
 
     private ServiceTracker packageAdmin;
 
-    protected BaseManagementPlugin() {
+
+    protected BaseManagementPlugin()
+    {
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
+
+    public void setBundleContext( BundleContext bundleContext )
+    {
         this.bundleContext = bundleContext;
     }
-    
-    public void setLogger(Logger log) {
+
+
+    public void setLogger( Logger log )
+    {
         this.log = log;
     }
 
-    protected BundleContext getBundleContext() {
+
+    protected BundleContext getBundleContext()
+    {
         return bundleContext;
     }
-    
-    protected Logger getLog() {
+
+
+    protected Logger getLog()
+    {
         return log;
     }
-    
-    protected StartLevel getStartLevel() {
-        if (startLevelService == null) {
-            startLevelService = new ServiceTracker(getBundleContext(),
-                StartLevel.class.getName(), null);
+
+
+    protected StartLevel getStartLevel()
+    {
+        if ( startLevelService == null )
+        {
+            startLevelService = new ServiceTracker( getBundleContext(), StartLevel.class.getName(), null );
             startLevelService.open();
         }
-        return (StartLevel) startLevelService.getService();
+        return ( StartLevel ) startLevelService.getService();
     }
 
-    protected PackageAdmin getPackageAdmin() {
-        if (packageAdmin == null) {
-            packageAdmin = new ServiceTracker(getBundleContext(),
-                PackageAdmin.class.getName(), null);
+
+    protected PackageAdmin getPackageAdmin()
+    {
+        if ( packageAdmin == null )
+        {
+            packageAdmin = new ServiceTracker( getBundleContext(), PackageAdmin.class.getName(), null );
             packageAdmin.open();
         }
-        return (PackageAdmin) packageAdmin.getService();
+        return ( PackageAdmin ) packageAdmin.getService();
     }
-
 
 }

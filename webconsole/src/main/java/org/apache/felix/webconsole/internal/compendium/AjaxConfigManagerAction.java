@@ -16,6 +16,7 @@
  */
 package org.apache.felix.webconsole.internal.compendium;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -45,202 +46,249 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.ObjectClassDefinition;
 
+
 /**
  * The <code>AjaxConfigManagerAction</code> TODO
  */
-public class AjaxConfigManagerAction extends ConfigManagerBase implements
-        Action {
+public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
+{
 
     public static final String NAME = "ajaxConfigManager";
 
-    public String getName() {
+
+    public String getName()
+    {
         return NAME;
     }
 
-    public String getLabel() {
+
+    public String getLabel()
+    {
         return NAME;
     }
 
-    public boolean performAction(HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
+
+    public boolean performAction( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
 
         // should actually apply the configuration before redirecting
-        if (request.getParameter("apply") != null) {
-            return applyConfiguration(request);
+        if ( request.getParameter( "apply" ) != null )
+        {
+            return applyConfiguration( request );
         }
 
         JSONObject result = new JSONObject();
 
-        String pid = request.getParameter(ConfigManager.PID);
+        String pid = request.getParameter( ConfigManager.PID );
         boolean isFactory = pid == null;
-        if (isFactory) {
-            pid = request.getParameter("factoryPid");
+        if ( isFactory )
+        {
+            pid = request.getParameter( "factoryPid" );
         }
 
-        if (pid != null) {
-            try {
-                this.configForm(result, pid, isFactory, getLocale(request));
-            } catch (Exception e) {
+        if ( pid != null )
+        {
+            try
+            {
+                this.configForm( result, pid, isFactory, getLocale( request ) );
+            }
+            catch ( Exception e )
+            {
                 // add message
             }
         }
 
         // send the result
-        response.setContentType("text/javascript");
-        response.getWriter().print(result.toString());
+        response.setContentType( "text/javascript" );
+        response.getWriter().print( result.toString() );
 
         return false;
     }
 
-    private void configForm(JSONObject json, String pid, boolean isFactory,
-            Locale loc) throws IOException, JSONException {
-        String locale = (loc == null) ? null : loc.toString();
+
+    private void configForm( JSONObject json, String pid, boolean isFactory, Locale loc ) throws IOException,
+        JSONException
+    {
+        String locale = ( loc == null ) ? null : loc.toString();
 
         ConfigurationAdmin ca = this.getConfigurationAdmin();
-        if (ca == null) {
+        if ( ca == null )
+        {
             // should print message
             return;
         }
 
         Configuration config = null;
-        try {
-            Configuration[] configs = ca.listConfigurations("("
-                + Constants.SERVICE_PID + "=" + pid + ")");
-            if (configs != null && configs.length > 0) {
+        try
+        {
+            Configuration[] configs = ca.listConfigurations( "(" + Constants.SERVICE_PID + "=" + pid + ")" );
+            if ( configs != null && configs.length > 0 )
+            {
                 config = configs[0];
             }
-        } catch (InvalidSyntaxException ise) {
+        }
+        catch ( InvalidSyntaxException ise )
+        {
             // should print message
             return;
         }
 
-        json.put(ConfigManager.PID, pid);
-        json.put("isFactory", isFactory);
+        json.put( ConfigManager.PID, pid );
+        json.put( "isFactory", isFactory );
 
         Dictionary props = null;
         ObjectClassDefinition ocd;
-        if (config != null) {
+        if ( config != null )
+        {
             props = config.getProperties();
-            ocd = this.getObjectClassDefinition(config, locale);
-        } else {
-            ocd = this.getObjectClassDefinition(pid, locale);
+            ocd = this.getObjectClassDefinition( config, locale );
+        }
+        else
+        {
+            ocd = this.getObjectClassDefinition( pid, locale );
         }
 
-        props = this.mergeWithMetaType(props, ocd, json);
+        props = this.mergeWithMetaType( props, ocd, json );
 
-        if (props != null) {
+        if ( props != null )
+        {
             JSONObject properties = new JSONObject();
-            for (Enumeration pe = props.keys(); pe.hasMoreElements();) {
+            for ( Enumeration pe = props.keys(); pe.hasMoreElements(); )
+            {
                 Object key = pe.nextElement();
 
                 // ignore well known special properties
-                if (!key.equals(Constants.SERVICE_PID)
-                    && !key.equals(Constants.SERVICE_DESCRIPTION)
-                    && !key.equals(Constants.SERVICE_ID)
-                    && !key.equals(Constants.SERVICE_RANKING)
-                    && !key.equals(Constants.SERVICE_VENDOR)
-                    && !key.equals(ConfigurationAdmin.SERVICE_BUNDLELOCATION)
-                    && !key.equals(ConfigurationAdmin.SERVICE_FACTORYPID)) {
-                    properties.put(String.valueOf(key), props.get(key));
+                if ( !key.equals( Constants.SERVICE_PID ) && !key.equals( Constants.SERVICE_DESCRIPTION )
+                    && !key.equals( Constants.SERVICE_ID ) && !key.equals( Constants.SERVICE_RANKING )
+                    && !key.equals( Constants.SERVICE_VENDOR )
+                    && !key.equals( ConfigurationAdmin.SERVICE_BUNDLELOCATION )
+                    && !key.equals( ConfigurationAdmin.SERVICE_FACTORYPID ) )
+                {
+                    properties.put( String.valueOf( key ), props.get( key ) );
                 }
 
             }
 
-            json.put("title", pid);
-            json.put(
-                "description",
-                "Please enter configuration properties for this configuration in the field below. This configuration has no associated description");
+            json.put( "title", pid );
+            json
+                .put(
+                    "description",
+                    "Please enter configuration properties for this configuration in the field below. This configuration has no associated description" );
 
-            json.put("propertylist", "properties");
-            json.put("properties", properties);
+            json.put( "propertylist", "properties" );
+            json.put( "properties", properties );
 
         }
 
-        if (config != null) {
-            this.addConfigurationInfo(config, json, locale);
+        if ( config != null )
+        {
+            this.addConfigurationInfo( config, json, locale );
         }
     }
 
-    private Dictionary mergeWithMetaType(Dictionary props,
-            ObjectClassDefinition ocd, JSONObject json) throws JSONException {
 
-        if (props == null) {
+    private Dictionary mergeWithMetaType( Dictionary props, ObjectClassDefinition ocd, JSONObject json )
+        throws JSONException
+    {
+
+        if ( props == null )
+        {
             props = new Hashtable();
         }
 
-        if (ocd != null) {
+        if ( ocd != null )
+        {
 
-            json.put("title", ocd.getName());
+            json.put( "title", ocd.getName() );
 
-            if (ocd.getDescription() != null) {
-                json.put("description", ocd.getDescription());
+            if ( ocd.getDescription() != null )
+            {
+                json.put( "description", ocd.getDescription() );
             }
 
-            AttributeDefinition[] ad = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
-            if (ad != null) {
+            AttributeDefinition[] ad = ocd.getAttributeDefinitions( ObjectClassDefinition.ALL );
+            if ( ad != null )
+            {
 
                 JSONArray propertyList = new JSONArray();
 
-                for (int i = 0; i < ad.length; i++) {
+                for ( int i = 0; i < ad.length; i++ )
+                {
                     JSONObject entry = new JSONObject();
 
-                    Object value = props.get(ad[i].getID());
-                    if (value == null) {
+                    Object value = props.get( ad[i].getID() );
+                    if ( value == null )
+                    {
                         value = ad[i].getDefaultValue();
-                        if (value == null) {
-                            if (ad[i].getCardinality() == 0) {
+                        if ( value == null )
+                        {
+                            if ( ad[i].getCardinality() == 0 )
+                            {
                                 value = "";
-                            } else {
+                            }
+                            else
+                            {
                                 value = new String[0];
                             }
                         }
                     }
 
-                    entry.put("name", ad[i].getName());
+                    entry.put( "name", ad[i].getName() );
 
-                    if (ad[i].getOptionLabels() != null
-                        && ad[i].getOptionLabels().length > 0) {
+                    if ( ad[i].getOptionLabels() != null && ad[i].getOptionLabels().length > 0 )
+                    {
                         JSONObject type = new JSONObject();
-                        type.put("labels",
-                            Arrays.asList(ad[i].getOptionLabels()));
-                        type.put("values",
-                            Arrays.asList(ad[i].getOptionValues()));
-                        entry.put("type", type);
-                    } else {
-                        entry.put("type", ad[i].getType());
+                        type.put( "labels", Arrays.asList( ad[i].getOptionLabels() ) );
+                        type.put( "values", Arrays.asList( ad[i].getOptionValues() ) );
+                        entry.put( "type", type );
+                    }
+                    else
+                    {
+                        entry.put( "type", ad[i].getType() );
                     }
 
-                    if (ad[i].getCardinality() == 0) {
+                    if ( ad[i].getCardinality() == 0 )
+                    {
                         // scalar
-                        if (value instanceof Vector) {
-                            value = ((Vector) value).get(0);
-                        } else if (value.getClass().isArray()) {
-                            value = Array.get(value, 0);
+                        if ( value instanceof Vector )
+                        {
+                            value = ( ( Vector ) value ).get( 0 );
                         }
-                        entry.put("value", value);
-                    } else {
-                        if (value instanceof Vector) {
-                            value = new JSONArray((Vector) value);
-                        } else if (value.getClass().isArray()) {
-                            value = new JSONArray(
-                                Arrays.asList((Object[]) value));
-                        } else {
+                        else if ( value.getClass().isArray() )
+                        {
+                            value = Array.get( value, 0 );
+                        }
+                        entry.put( "value", value );
+                    }
+                    else
+                    {
+                        if ( value instanceof Vector )
+                        {
+                            value = new JSONArray( ( Vector ) value );
+                        }
+                        else if ( value.getClass().isArray() )
+                        {
+                            value = new JSONArray( Arrays.asList( ( Object[] ) value ) );
+                        }
+                        else
+                        {
                             JSONArray tmp = new JSONArray();
-                            tmp.put(value);
+                            tmp.put( value );
                             value = tmp;
                         }
-                        entry.put("values", value);
+                        entry.put( "values", value );
                     }
 
-                    if (ad[i].getDescription() != null) {
-                        entry.put("description", ad[i].getDescription());
+                    if ( ad[i].getDescription() != null )
+                    {
+                        entry.put( "description", ad[i].getDescription() );
                     }
 
-                    json.put(ad[i].getID(), entry);
-                    propertyList.put(ad[i].getID());
+                    json.put( ad[i].getID(), entry );
+                    propertyList.put( ad[i].getID() );
                 }
 
-                json.put("propertylist", propertyList);
+                json.put( "propertylist", propertyList );
             }
 
             // nothing more to display
@@ -250,149 +298,182 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements
         return props;
     }
 
-    private void addConfigurationInfo(Configuration config, JSONObject json,
-            String locale) throws JSONException {
 
-        if (config.getFactoryPid() != null) {
-            json.put("factoryPID", config.getFactoryPid());
+    private void addConfigurationInfo( Configuration config, JSONObject json, String locale ) throws JSONException
+    {
+
+        if ( config.getFactoryPid() != null )
+        {
+            json.put( "factoryPID", config.getFactoryPid() );
         }
 
         String location;
-        if (config.getBundleLocation() == null) {
+        if ( config.getBundleLocation() == null )
+        {
             location = "None";
-        } else {
-            Bundle bundle = this.getBundle(config.getBundleLocation());
+        }
+        else
+        {
+            Bundle bundle = this.getBundle( config.getBundleLocation() );
 
-            Dictionary headers = bundle.getHeaders(locale);
-            String name = (String) headers.get(Constants.BUNDLE_NAME);
-            if (name == null) {
+            Dictionary headers = bundle.getHeaders( locale );
+            String name = ( String ) headers.get( Constants.BUNDLE_NAME );
+            if ( name == null )
+            {
                 location = bundle.getSymbolicName();
-            } else {
+            }
+            else
+            {
                 location = name + " (" + bundle.getSymbolicName() + ")";
             }
 
-            Version v = Version.parseVersion((String) headers.get(Constants.BUNDLE_VERSION));
+            Version v = Version.parseVersion( ( String ) headers.get( Constants.BUNDLE_VERSION ) );
             location += ", Version " + v.toString();
         }
-        json.put("bundleLocation", location);
+        json.put( "bundleLocation", location );
     }
 
-    private boolean applyConfiguration(HttpServletRequest request)
-            throws IOException {
+
+    private boolean applyConfiguration( HttpServletRequest request ) throws IOException
+    {
 
         ConfigurationAdmin ca = this.getConfigurationAdmin();
-        if (ca == null) {
+        if ( ca == null )
+        {
             return false;
         }
 
-        String pid = request.getParameter("pid");
+        String pid = request.getParameter( "pid" );
 
-        if (request.getParameter("delete") != null) {
+        if ( request.getParameter( "delete" ) != null )
+        {
             // TODO: should log this here !!
-            Configuration config = ca.getConfiguration(pid, null);
+            Configuration config = ca.getConfiguration( pid, null );
             config.delete();
             return true;
-        } else if (request.getParameter("create") != null) {
+        }
+        else if ( request.getParameter( "create" ) != null )
+        {
             // pid is a factory PID and we have to create a new configuration
             // we should actually also display that one !
-            Configuration config = ca.createFactoryConfiguration(pid, null);
+            Configuration config = ca.createFactoryConfiguration( pid, null );
 
             // request.setAttribute(ATTR_REDIRECT_PARAMETERS, "pid=" +
             // config.getPid());
             return true;
         }
 
-        String propertyList = request.getParameter("propertylist");
-        if (propertyList == null) {
-            String propertiesString = request.getParameter("properties");
+        String propertyList = request.getParameter( "propertylist" );
+        if ( propertyList == null )
+        {
+            String propertiesString = request.getParameter( "properties" );
 
-            if (propertiesString != null) {
-                byte[] propBytes = propertiesString.getBytes("ISO-8859-1");
-                ByteArrayInputStream bin = new ByteArrayInputStream(propBytes);
+            if ( propertiesString != null )
+            {
+                byte[] propBytes = propertiesString.getBytes( "ISO-8859-1" );
+                ByteArrayInputStream bin = new ByteArrayInputStream( propBytes );
                 Properties props = new Properties();
-                props.load(bin);
+                props.load( bin );
 
-                Configuration config = ca.getConfiguration(pid, null);
-                config.update(props);
+                Configuration config = ca.getConfiguration( pid, null );
+                config.update( props );
             }
-        } else {
-            Configuration config = ca.getConfiguration(pid, null);
+        }
+        else
+        {
+            Configuration config = ca.getConfiguration( pid, null );
             Dictionary props = config.getProperties();
-            if (props == null) {
+            if ( props == null )
+            {
                 props = new Hashtable();
             }
 
-            Map adMap = (Map) this.getAttributeDefinitionMap(config, null);
-            if (adMap != null) {
-                StringTokenizer propTokens = new StringTokenizer(propertyList,
-                    ",");
-                while (propTokens.hasMoreTokens()) {
+            Map adMap = ( Map ) this.getAttributeDefinitionMap( config, null );
+            if ( adMap != null )
+            {
+                StringTokenizer propTokens = new StringTokenizer( propertyList, "," );
+                while ( propTokens.hasMoreTokens() )
+                {
                     String propName = propTokens.nextToken();
-                    AttributeDefinition ad = (AttributeDefinition) adMap.get(propName);
-                    if (ad == null
-                        || (ad.getCardinality() == 0 && ad.getType() == AttributeDefinition.STRING)) {
-                        String prop = request.getParameter(propName);
-                        if (prop != null) {
-                            props.put(propName, prop);
+                    AttributeDefinition ad = ( AttributeDefinition ) adMap.get( propName );
+                    if ( ad == null || ( ad.getCardinality() == 0 && ad.getType() == AttributeDefinition.STRING ) )
+                    {
+                        String prop = request.getParameter( propName );
+                        if ( prop != null )
+                        {
+                            props.put( propName, prop );
                         }
-                    } else if (ad.getCardinality() == 0) {
+                    }
+                    else if ( ad.getCardinality() == 0 )
+                    {
                         // scalar of non-string
-                        String prop = request.getParameter(propName);
-                        props.put(propName, this.toType(ad.getType(), prop));
-                    } else {
+                        String prop = request.getParameter( propName );
+                        props.put( propName, this.toType( ad.getType(), prop ) );
+                    }
+                    else
+                    {
                         // array or vector of any type
                         Vector vec = new Vector();
 
-                        String[] properties = request.getParameterValues(propName);
-                        if (properties != null) {
-                            for (int i = 0; i < properties.length; i++) {
-                                vec.add(this.toType(ad.getType(), properties[i]));
+                        String[] properties = request.getParameterValues( propName );
+                        if ( properties != null )
+                        {
+                            for ( int i = 0; i < properties.length; i++ )
+                            {
+                                vec.add( this.toType( ad.getType(), properties[i] ) );
                             }
                         }
 
                         // but ensure size
-                        int maxSize = Math.abs(ad.getCardinality());
-                        if (vec.size() > maxSize) {
-                            vec.setSize(maxSize);
+                        int maxSize = Math.abs( ad.getCardinality() );
+                        if ( vec.size() > maxSize )
+                        {
+                            vec.setSize( maxSize );
                         }
 
-                        if (ad.getCardinality() < 0) {
+                        if ( ad.getCardinality() < 0 )
+                        {
                             // keep the vector
-                            props.put(propName, vec);
-                        } else {
+                            props.put( propName, vec );
+                        }
+                        else
+                        {
                             // convert to an array
-                            props.put(propName, this.toArray(ad.getType(), vec));
+                            props.put( propName, this.toArray( ad.getType(), vec ) );
                         }
                     }
                 }
             }
 
-            config.update(props);
+            config.update( props );
         }
 
         // request.setAttribute(ATTR_REDIRECT_PARAMETERS, "pid=" + pid);
         return true;
     }
 
-    private Object toType(int type, String value) {
-        switch (type) {
+
+    private Object toType( int type, String value )
+    {
+        switch ( type )
+        {
             case AttributeDefinition.BOOLEAN:
-                return Boolean.valueOf(value);
+                return Boolean.valueOf( value );
             case AttributeDefinition.BYTE:
-                return Byte.valueOf(value);
+                return Byte.valueOf( value );
             case AttributeDefinition.CHARACTER:
-                char c = (value.length() > 0) ? value.charAt(0) : 0;
-                return new Character(c);
+                char c = ( value.length() > 0 ) ? value.charAt( 0 ) : 0;
+                return new Character( c );
             case AttributeDefinition.DOUBLE:
-                return Double.valueOf(value);
+                return Double.valueOf( value );
             case AttributeDefinition.FLOAT:
-                return Float.valueOf(value);
+                return Float.valueOf( value );
             case AttributeDefinition.LONG:
-                return Long.valueOf(value);
+                return Long.valueOf( value );
             case AttributeDefinition.INTEGER:
-                return Integer.valueOf(value);
+                return Integer.valueOf( value );
             case AttributeDefinition.SHORT:
-                return Short.valueOf(value);
+                return Short.valueOf( value );
 
             default:
                 // includes AttributeDefinition.STRING
@@ -400,16 +481,20 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements
         }
     }
 
-    private Object toArray(int type, Vector values) {
+
+    private Object toArray( int type, Vector values )
+    {
         int size = values.size();
 
         // short cut for string array
-        if (type == AttributeDefinition.STRING) {
-            return values.toArray(new String[size]);
+        if ( type == AttributeDefinition.STRING )
+        {
+            return values.toArray( new String[size] );
         }
 
         Object array;
-        switch (type) {
+        switch ( type )
+        {
             case AttributeDefinition.BOOLEAN:
                 array = new boolean[size];
             case AttributeDefinition.BYTE:
@@ -431,8 +516,9 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements
                 array = new String[size];
         }
 
-        for (int i = 0; i < size; i++) {
-            Array.set(array, i, values.get(i));
+        for ( int i = 0; i < size; i++ )
+        {
+            Array.set( array, i, values.get( i ) );
         }
 
         return array;

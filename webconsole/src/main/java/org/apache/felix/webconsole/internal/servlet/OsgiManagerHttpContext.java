@@ -16,6 +16,7 @@
  */
 package org.apache.felix.webconsole.internal.servlet;
 
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -26,7 +27,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 
-final class OsgiManagerHttpContext implements HttpContext {
+
+final class OsgiManagerHttpContext implements HttpContext
+{
 
     private static final String HEADER_WWW_AUTHENTICATE = "WWW-Authenticate";
 
@@ -52,24 +55,32 @@ final class OsgiManagerHttpContext implements HttpContext {
 
     private final HttpContext base;
 
-    OsgiManagerHttpContext(HttpService httpService, String realm, String userId, String password) {
+
+    OsgiManagerHttpContext( HttpService httpService, String realm, String userId, String password )
+    {
         this.base = httpService.createDefaultHttpContext();
         this.realm = realm;
         this.userId = userId;
-        this.user = encode(userId, password);
+        this.user = encode( userId, password );
     }
 
-    public String getMimeType(String name) {
-        return this.base.getMimeType(name);
+
+    public String getMimeType( String name )
+    {
+        return this.base.getMimeType( name );
     }
 
-    public URL getResource(String name) {
-        URL url = this.base.getResource(name);
-        if (url == null && name.endsWith("/")) {
-            return this.base.getResource(name.substring(0, name.length() - 1));
+
+    public URL getResource( String name )
+    {
+        URL url = this.base.getResource( name );
+        if ( url == null && name.endsWith( "/" ) )
+        {
+            return this.base.getResource( name.substring( 0, name.length() - 1 ) );
         }
         return url;
     }
+
 
     /**
      * Checks the <code>Authorization</code> header of the request for Basic
@@ -86,34 +97,37 @@ final class OsgiManagerHttpContext implements HttpContext {
      * @return <code>true</code> if authentication is required and not
      *         satisfied by the request.
      */
-    public boolean handleSecurity(HttpServletRequest request,
-            HttpServletResponse response) {
+    public boolean handleSecurity( HttpServletRequest request, HttpServletResponse response )
+    {
 
         // don't care for authentication if no user name is configured
-        if (this.user == null) {
+        if ( this.user == null )
+        {
             return true;
         }
 
         // Return immediately if the header is missing
-        String authHeader = request.getHeader(HEADER_AUTHORIZATION);
-        if (authHeader != null && authHeader.length() > 0) {
+        String authHeader = request.getHeader( HEADER_AUTHORIZATION );
+        if ( authHeader != null && authHeader.length() > 0 )
+        {
 
             // Get the authType (Basic, Digest) and authInfo (user/password)
             // from
             // the header
             authHeader = authHeader.trim();
-            int blank = authHeader.indexOf(' ');
-            if (blank > 0) {
-                String authType = authHeader.substring(0, blank);
-                String authInfo = authHeader.substring(blank).trim();
+            int blank = authHeader.indexOf( ' ' );
+            if ( blank > 0 )
+            {
+                String authType = authHeader.substring( 0, blank );
+                String authInfo = authHeader.substring( blank ).trim();
 
                 // Check whether authorization type matches
-                if (authType.equalsIgnoreCase(AUTHENTICATION_SCHEME_BASIC)
-                    && this.user.equals(authInfo)) {
+                if ( authType.equalsIgnoreCase( AUTHENTICATION_SCHEME_BASIC ) && this.user.equals( authInfo ) )
+                {
 
                     // as per the spec, set attributes
-                    request.setAttribute(HttpContext.AUTHENTICATION_TYPE, "");
-                    request.setAttribute(HttpContext.REMOTE_USER, this.userId);
+                    request.setAttribute( HttpContext.AUTHENTICATION_TYPE, "" );
+                    request.setAttribute( HttpContext.REMOTE_USER, this.userId );
 
                     // succeed
                     return true;
@@ -122,13 +136,15 @@ final class OsgiManagerHttpContext implements HttpContext {
         }
 
         // request authentication
-        response.setHeader(HEADER_WWW_AUTHENTICATE, AUTHENTICATION_SCHEME_BASIC
-            + " realm=\"" + this.realm + "\"");
-        try {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-        } catch (IOException ioe) {
+        response.setHeader( HEADER_WWW_AUTHENTICATE, AUTHENTICATION_SCHEME_BASIC + " realm=\"" + this.realm + "\"" );
+        try
+        {
+            response.sendError( HttpServletResponse.SC_UNAUTHORIZED );
+        }
+        catch ( IOException ioe )
+        {
             // failed sending the error, fall back to setting the status
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
         }
 
         // inform HttpService that authentication failed
@@ -145,21 +161,27 @@ final class OsgiManagerHttpContext implements HttpContext {
      * @return The Base64 encoded username/password pair or <code>null</code>
      *         if <code>user</code> is <code>null</code> or empty.
      */
-    public static String encode(String user, String password) {
+    public static String encode( String user, String password )
+    {
 
         /* check arguments */
-        if (user == null || user.length() == 0) return null;
+        if ( user == null || user.length() == 0 )
+            return null;
 
         String srcString = user + ":";
-        if (password != null && password.length() > 0) {
+        if ( password != null && password.length() > 0 )
+        {
             srcString += password;
         }
 
         // need bytes
         byte[] src;
-        try {
-            src = srcString.getBytes("ISO-8859-1");
-        } catch (UnsupportedEncodingException uee) {
+        try
+        {
+            src = srcString.getBytes( "ISO-8859-1" );
+        }
+        catch ( UnsupportedEncodingException uee )
+        {
             // we do not expect this, the API presribes ISO-8859-1 to be present
             // anyway, fallback to platform default
             src = srcString.getBytes();
@@ -168,7 +190,7 @@ final class OsgiManagerHttpContext implements HttpContext {
         int srcsize = src.length;
         int tbllen = base64Table.length();
 
-        StringBuffer result = new StringBuffer(srcsize);
+        StringBuffer result = new StringBuffer( srcsize );
 
         /* encode */
         int tblpos = 0;
@@ -177,12 +199,17 @@ final class OsgiManagerHttpContext implements HttpContext {
         int inpos = 0;
         int pos = 0;
 
-        while (inpos <= srcsize) {
+        while ( inpos <= srcsize )
+        {
 
-            if (bitsread < 0) {
-                if (inpos < srcsize) {
+            if ( bitsread < 0 )
+            {
+                if ( inpos < srcsize )
+                {
                     pos = src[inpos++];
-                } else {
+                }
+                else
+                {
                     // inpos++;
                     // pos = 0;
                     break;
@@ -192,34 +219,40 @@ final class OsgiManagerHttpContext implements HttpContext {
 
             tblpos = 0;
             bitpos = tbllen / 2;
-            while (bitpos > 0) {
-                if (bitsread < 0) {
-                    pos = (inpos < srcsize) ? src[inpos] : '\0';
+            while ( bitpos > 0 )
+            {
+                if ( bitsread < 0 )
+                {
+                    pos = ( inpos < srcsize ) ? src[inpos] : '\0';
                     inpos++;
                     bitsread = 7;
                 }
 
                 /* test if bit at pos <bitpos> in <pos> is set.. */
-                if (((1 << bitsread) & pos) != 0) tblpos += bitpos;
+                if ( ( ( 1 << bitsread ) & pos ) != 0 )
+                    tblpos += bitpos;
 
                 bitpos /= 2;
                 bitsread--;
             }
 
             // got one
-            result.append(base64Table.charAt(tblpos));
+            result.append( base64Table.charAt( tblpos ) );
         }
 
         /* add the padding bytes */
-        while (bitsread != -1) {
+        while ( bitsread != -1 )
+        {
             bitpos = tbllen / 2;
-            while (bitpos > 0) {
-                if (bitsread < 0) bitsread = 7;
+            while ( bitpos > 0 )
+            {
+                if ( bitsread < 0 )
+                    bitsread = 7;
                 bitpos /= 2;
                 bitsread--;
             }
 
-            result.append(base64Pad);
+            result.append( base64Pad );
         }
 
         return result.toString();

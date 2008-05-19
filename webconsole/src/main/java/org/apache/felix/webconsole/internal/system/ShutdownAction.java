@@ -16,6 +16,7 @@
  */
 package org.apache.felix.webconsole.internal.system;
 
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,37 +25,51 @@ import org.apache.felix.webconsole.internal.BaseManagementPlugin;
 import org.osgi.framework.BundleException;
 import org.osgi.service.log.LogService;
 
-public class ShutdownAction extends BaseManagementPlugin implements Action {
+
+public class ShutdownAction extends BaseManagementPlugin implements Action
+{
 
     public static final String NAME = "shutdown";
 
-    public String getName() {
+
+    public String getName()
+    {
         return NAME;
     }
 
-    public String getLabel() {
+
+    public String getLabel()
+    {
         return NAME;
     }
 
-    public boolean performAction(HttpServletRequest request,
-            HttpServletResponse response) {
+
+    public boolean performAction( HttpServletRequest request, HttpServletResponse response )
+    {
         // simply terminate VM in case of shutdown :-)
-        Thread t = new Thread("Stopper") {
-            public void run() {
-                try {
-                    Thread.sleep(2000L);
-                } catch (InterruptedException ie) {
+        Thread t = new Thread( "Stopper" )
+        {
+            public void run()
+            {
+                try
+                {
+                    Thread.sleep( 2000L );
+                }
+                catch ( InterruptedException ie )
+                {
                     // ignore
                 }
 
-                getLog().log(LogService.LOG_INFO, "Shutting down server now!");
+                getLog().log( LogService.LOG_INFO, "Shutting down server now!" );
 
                 // stopping bundle 0 (system bundle) stops the framework
-                try {
-                    getBundleContext().getBundle(0).stop();
-                } catch (BundleException be) {
-                    getLog().log(LogService.LOG_ERROR,
-                        "Problem stopping Framework", be);
+                try
+                {
+                    getBundleContext().getBundle( 0 ).stop();
+                }
+                catch ( BundleException be )
+                {
+                    getLog().log( LogService.LOG_ERROR, "Problem stopping Framework", be );
                 }
             }
         };

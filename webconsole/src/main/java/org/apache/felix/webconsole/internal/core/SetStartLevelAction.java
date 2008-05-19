@@ -16,6 +16,7 @@
  */
 package org.apache.felix.webconsole.internal.core;
 
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -23,46 +24,61 @@ import org.apache.felix.webconsole.Action;
 import org.apache.felix.webconsole.internal.BaseManagementPlugin;
 import org.osgi.service.startlevel.StartLevel;
 
+
 /**
  * The <code>SetStartLevelAction</code> TODO
  */
-public class SetStartLevelAction extends BaseManagementPlugin implements Action {
+public class SetStartLevelAction extends BaseManagementPlugin implements Action
+{
 
     public static final String NAME = "setStartLevel";
 
     public static final String LABEL = "Set Start Level";
 
-    public String getName() {
+
+    public String getName()
+    {
         return NAME;
     }
 
-    public String getLabel() {
+
+    public String getLabel()
+    {
         return LABEL;
     }
 
-    public boolean performAction(HttpServletRequest request,
-            HttpServletResponse response) {
+
+    public boolean performAction( HttpServletRequest request, HttpServletResponse response )
+    {
 
         StartLevel sl = getStartLevel();
-        if (sl != null) {
-            int bundleSL = this.getParameterInt(request, "bundleStartLevel");
-            if (bundleSL > 0 && bundleSL != sl.getInitialBundleStartLevel()) {
-                sl.setInitialBundleStartLevel(bundleSL);
+        if ( sl != null )
+        {
+            int bundleSL = this.getParameterInt( request, "bundleStartLevel" );
+            if ( bundleSL > 0 && bundleSL != sl.getInitialBundleStartLevel() )
+            {
+                sl.setInitialBundleStartLevel( bundleSL );
             }
 
-            int systemSL = this.getParameterInt(request, "systemStartLevel");
-            if (systemSL > 0 && systemSL != sl.getStartLevel()) {
-                sl.setStartLevel(systemSL);
+            int systemSL = this.getParameterInt( request, "systemStartLevel" );
+            if ( systemSL > 0 && systemSL != sl.getStartLevel() )
+            {
+                sl.setStartLevel( systemSL );
             }
         }
 
         return true;
     }
 
-    private int getParameterInt(HttpServletRequest request, String name) {
-        try {
-            return Integer.parseInt(request.getParameter(name));
-        } catch (NumberFormatException nfe) {
+
+    private int getParameterInt( HttpServletRequest request, String name )
+    {
+        try
+        {
+            return Integer.parseInt( request.getParameter( name ) );
+        }
+        catch ( NumberFormatException nfe )
+        {
             // don't care
         }
 

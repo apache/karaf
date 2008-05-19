@@ -16,6 +16,7 @@
  */
 package org.apache.felix.webconsole.internal.compendium;
 
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -41,8 +42,9 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
 
-public class ComponentRenderAction extends AbstractScrPlugin implements Render,
-        Action {
+
+public class ComponentRenderAction extends AbstractScrPlugin implements Render, Action
+{
 
     public static final String NAME = "components";
 
@@ -58,30 +60,42 @@ public class ComponentRenderAction extends AbstractScrPlugin implements Render,
 
     public static final String OPERATION_DISABLE = "disable";
 
-    public String getName() {
+
+    public String getName()
+    {
         return NAME;
     }
 
-    public String getLabel() {
+
+    public String getLabel()
+    {
         return LABEL;
     }
 
-    public boolean performAction(HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
+
+    public boolean performAction( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
 
         ScrService scrService = getScrService();
-        if (scrService != null) {
+        if ( scrService != null )
+        {
 
-            long componentId = getComponentId(request);
-            Component component = scrService.getComponent(componentId);
+            long componentId = getComponentId( request );
+            Component component = scrService.getComponent( componentId );
 
-            if (component != null) {
-                String op = request.getParameter(OPERATION);
-                if (OPERATION_DETAILS.equals(op)) {
-                    return sendAjaxDetails(component, response);
-                } else if (OPERATION_ENABLE.equals(op)) {
+            if ( component != null )
+            {
+                String op = request.getParameter( OPERATION );
+                if ( OPERATION_DETAILS.equals( op ) )
+                {
+                    return sendAjaxDetails( component, response );
+                }
+                else if ( OPERATION_ENABLE.equals( op ) )
+                {
                     component.enable();
-                } else if (OPERATION_DISABLE.equals(op)) {
+                }
+                else if ( OPERATION_DISABLE.equals( op ) )
+                {
                     component.disable();
                 }
             }
@@ -91,306 +105,339 @@ public class ComponentRenderAction extends AbstractScrPlugin implements Render,
         return true;
     }
 
-    public void render(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+
+    public void render( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
 
         PrintWriter pw = response.getWriter();
 
-        this.header(pw);
+        this.header( pw );
 
-        pw.println("<tr class='content'>");
-        pw.println("<td colspan='5' class='content'>&nbsp;</th>");
-        pw.println("</tr>");
+        pw.println( "<tr class='content'>" );
+        pw.println( "<td colspan='5' class='content'>&nbsp;</th>" );
+        pw.println( "</tr>" );
 
-        this.tableHeader(pw);
+        this.tableHeader( pw );
 
         ScrService scrService = getScrService();
-        if (scrService == null) {
-            pw.println("<tr class='content'>");
-            pw.println("<td class='content' colspan='5'>Apache Felix Declarative Service required for this function</td>");
-            pw.println("</tr>");
-        } else {
+        if ( scrService == null )
+        {
+            pw.println( "<tr class='content'>" );
+            pw
+                .println( "<td class='content' colspan='5'>Apache Felix Declarative Service required for this function</td>" );
+            pw.println( "</tr>" );
+        }
+        else
+        {
             Component[] components = scrService.getComponents();
-            if (components == null || components.length == 0) {
-                pw.println("<tr class='content'>");
-                pw.println("<td class='content' colspan='5'>No "
-                    + this.getLabel() + " installed currently</td>");
-                pw.println("</tr>");
+            if ( components == null || components.length == 0 )
+            {
+                pw.println( "<tr class='content'>" );
+                pw.println( "<td class='content' colspan='5'>No " + this.getLabel() + " installed currently</td>" );
+                pw.println( "</tr>" );
 
-            } else {
+            }
+            else
+            {
 
                 // order components by id
                 TreeMap componentMap = new TreeMap();
-                for (int i=0; i < components.length; i++) {
+                for ( int i = 0; i < components.length; i++ )
+                {
                     Component component = components[i];
-                    componentMap.put(component.getName(), component);
+                    componentMap.put( component.getName(), component );
                 }
 
                 // render components
                 long previousComponent = -1;
-                for (Iterator ci = componentMap.values().iterator(); ci.hasNext();) {
-                    Component component = (Component) ci.next();
-                    if (previousComponent >= 0) {
+                for ( Iterator ci = componentMap.values().iterator(); ci.hasNext(); )
+                {
+                    Component component = ( Component ) ci.next();
+                    if ( previousComponent >= 0 )
+                    {
                         // prepare for injected table information row
-                        pw.println("<tr id='component" + previousComponent
-                            + "'></tr>");
+                        pw.println( "<tr id='component" + previousComponent + "'></tr>" );
                     }
 
-                    component(pw, component);
+                    component( pw, component );
 
                     previousComponent = component.getId();
                 }
 
-                if (previousComponent >= 0) {
+                if ( previousComponent >= 0 )
+                {
                     // prepare for injected table information row
-                    pw.println("<tr id='component" + previousComponent
-                        + "'></tr>");
+                    pw.println( "<tr id='component" + previousComponent + "'></tr>" );
                 }
             }
         }
 
-        pw.println("<tr class='content'>");
-        pw.println("<td colspan='5' class='content'>&nbsp;</th>");
-        pw.println("</tr>");
+        pw.println( "<tr class='content'>" );
+        pw.println( "<td colspan='5' class='content'>&nbsp;</th>" );
+        pw.println( "</tr>" );
 
-        this.footer(pw);
+        this.footer( pw );
     }
 
-    private void header(PrintWriter pw) {
-        Util.startScript(pw);
-        pw.println("function showDetails(componentId) {");
-        pw.println("    var span = document.getElementById('component' + componentId);");
-        pw.println("    if (!span) {");
-        pw.println("        return;");
-        pw.println("    }");
-        pw.println("    if (span.innerHTML) {");
-        pw.println("        span.innerHTML = '';");
-        pw.println("        return;");
-        pw.println("    }");
-        pw.println("    var parm = '?" + Util.PARAM_ACTION + "=" + NAME + "&"
-            + OPERATION + "=" + OPERATION_DETAILS + "&" + COMPONENT_ID
-            + "=' + componentId;");
-        pw.println("    sendRequest('GET', parm, displayComponentDetails);");
-        pw.println("}");
-        pw.println("function displayComponentDetails(obj) {");
-        pw.println("    var span = document.getElementById('component' + obj."
-            + COMPONENT_ID + ");");
-        pw.println("    if (!span) {");
-        pw.println("        return;");
-        pw.println("    }");
-        pw.println("    var innerHtml = '<td class=\"content\">&nbsp;</td><td class=\"content\" colspan=\"4\"><table broder=\"0\">';");
-        pw.println("    var props = obj.props;");
-        pw.println("    for (var i=0; i < props.length; i++) {");
-        pw.println("        innerHtml += '<tr><td valign=\"top\" noWrap>' + props[i].key + '</td><td valign=\"top\">' + props[i].value + '</td></tr>';");
-        pw.println("    }");
-        pw.println("    innerHtml += '</table></td>';");
-        pw.println("    span.innerHTML = innerHtml;");
-        pw.println("}");
-        Util.endScript(pw);
 
-        pw.println("<table class='content' cellpadding='0' cellspacing='0' width='100%'>");
+    private void header( PrintWriter pw )
+    {
+        Util.startScript( pw );
+        pw.println( "function showDetails(componentId) {" );
+        pw.println( "    var span = document.getElementById('component' + componentId);" );
+        pw.println( "    if (!span) {" );
+        pw.println( "        return;" );
+        pw.println( "    }" );
+        pw.println( "    if (span.innerHTML) {" );
+        pw.println( "        span.innerHTML = '';" );
+        pw.println( "        return;" );
+        pw.println( "    }" );
+        pw.println( "    var parm = '?" + Util.PARAM_ACTION + "=" + NAME + "&" + OPERATION + "=" + OPERATION_DETAILS
+            + "&" + COMPONENT_ID + "=' + componentId;" );
+        pw.println( "    sendRequest('GET', parm, displayComponentDetails);" );
+        pw.println( "}" );
+        pw.println( "function displayComponentDetails(obj) {" );
+        pw.println( "    var span = document.getElementById('component' + obj." + COMPONENT_ID + ");" );
+        pw.println( "    if (!span) {" );
+        pw.println( "        return;" );
+        pw.println( "    }" );
+        pw
+            .println( "    var innerHtml = '<td class=\"content\">&nbsp;</td><td class=\"content\" colspan=\"4\"><table broder=\"0\">';" );
+        pw.println( "    var props = obj.props;" );
+        pw.println( "    for (var i=0; i < props.length; i++) {" );
+        pw
+            .println( "        innerHtml += '<tr><td valign=\"top\" noWrap>' + props[i].key + '</td><td valign=\"top\">' + props[i].value + '</td></tr>';" );
+        pw.println( "    }" );
+        pw.println( "    innerHtml += '</table></td>';" );
+        pw.println( "    span.innerHTML = innerHtml;" );
+        pw.println( "}" );
+        Util.endScript( pw );
+
+        pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
     }
 
-    private void tableHeader(PrintWriter pw) {
 
-        pw.println("<tr class='content'>");
-        pw.println("<th class='content'>ID</th>");
-        pw.println("<th class='content' width='100%'>Name</th>");
-        pw.println("<th class='content'>Status</th>");
-        pw.println("<th class='content' colspan='2'>Actions</th>");
-        pw.println("</tr>");
+    private void tableHeader( PrintWriter pw )
+    {
+
+        pw.println( "<tr class='content'>" );
+        pw.println( "<th class='content'>ID</th>" );
+        pw.println( "<th class='content' width='100%'>Name</th>" );
+        pw.println( "<th class='content'>Status</th>" );
+        pw.println( "<th class='content' colspan='2'>Actions</th>" );
+        pw.println( "</tr>" );
     }
 
-    private void footer(PrintWriter pw) {
-        pw.println("</table>");
+
+    private void footer( PrintWriter pw )
+    {
+        pw.println( "</table>" );
     }
 
-    private void component(PrintWriter pw, Component component) {
+
+    private void component( PrintWriter pw, Component component )
+    {
         String name = component.getName();
 
-        pw.println("<tr>");
-        pw.println("<td class='content right'>" + component.getId() + "</td>");
-        pw.println("<td class='content'><a href='javascript:showDetails("
-            + component.getId() + ")'>" + name + "</a></td>");
-        pw.println("<td class='content center'>"
-            + toStateString(component.getState()) + "</td>");
+        pw.println( "<tr>" );
+        pw.println( "<td class='content right'>" + component.getId() + "</td>" );
+        pw.println( "<td class='content'><a href='javascript:showDetails(" + component.getId() + ")'>" + name
+            + "</a></td>" );
+        pw.println( "<td class='content center'>" + toStateString( component.getState() ) + "</td>" );
 
         boolean enabled = component.getState() == Component.STATE_DISABLED;
-        this.actionForm(pw, enabled, component.getId(), OPERATION_ENABLE,
-            "Enable");
+        this.actionForm( pw, enabled, component.getId(), OPERATION_ENABLE, "Enable" );
 
-        enabled = component.getState() != Component.STATE_DISABLED
-            && component.getState() != Component.STATE_DESTROYED;
-        this.actionForm(pw, enabled, component.getId(), OPERATION_DISABLE,
-            "Disable");
+        enabled = component.getState() != Component.STATE_DISABLED && component.getState() != Component.STATE_DESTROYED;
+        this.actionForm( pw, enabled, component.getId(), OPERATION_DISABLE, "Disable" );
 
-        pw.println("</tr>");
+        pw.println( "</tr>" );
     }
 
-    private void actionForm(PrintWriter pw, boolean enabled, long componentId,
-            String op, String opLabel) {
-        pw.println("<form name='form" + componentId + "' method='post'>");
-        pw.println("<td class='content' align='right'>");
-        pw.println("<input type='hidden' name='" + Util.PARAM_ACTION
-            + "' value='" + NAME + "' />");
-        pw.println("<input type='hidden' name='" + OPERATION + "' value='" + op
-            + "' />");
-        pw.println("<input type='hidden' name='" + COMPONENT_ID + "' value='"
-            + componentId + "' />");
-        pw.println("<input class='submit' type='submit' value='" + opLabel
-            + "'" + (enabled ? "" : "disabled") + " />");
-        pw.println("</td>");
-        pw.println("</form>");
+
+    private void actionForm( PrintWriter pw, boolean enabled, long componentId, String op, String opLabel )
+    {
+        pw.println( "<form name='form" + componentId + "' method='post'>" );
+        pw.println( "<td class='content' align='right'>" );
+        pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + NAME + "' />" );
+        pw.println( "<input type='hidden' name='" + OPERATION + "' value='" + op + "' />" );
+        pw.println( "<input type='hidden' name='" + COMPONENT_ID + "' value='" + componentId + "' />" );
+        pw.println( "<input class='submit' type='submit' value='" + opLabel + "'" + ( enabled ? "" : "disabled" )
+            + " />" );
+        pw.println( "</td>" );
+        pw.println( "</form>" );
     }
 
-    private boolean sendAjaxDetails(Component component,
-            HttpServletResponse response) throws IOException {
+
+    private boolean sendAjaxDetails( Component component, HttpServletResponse response ) throws IOException
+    {
         JSONObject result = null;
-        try {
-            if (component != null) {
+        try
+        {
+            if ( component != null )
+            {
 
                 JSONArray props = new JSONArray();
-                keyVal(props, "Bundle", component.getBundle().getSymbolicName()
-                    + " (" + component.getBundle().getBundleId() + ")");
-                keyVal(props, "Default State", component.isDefaultEnabled()
-                        ? "enabled"
-                        : "disabled");
-                keyVal(props, "Activation", component.isImmediate()
-                        ? "immediate"
-                        : "delayed");
+                keyVal( props, "Bundle", component.getBundle().getSymbolicName() + " ("
+                    + component.getBundle().getBundleId() + ")" );
+                keyVal( props, "Default State", component.isDefaultEnabled() ? "enabled" : "disabled" );
+                keyVal( props, "Activation", component.isImmediate() ? "immediate" : "delayed" );
 
-                listServices(props, component);
-                listReferences(props, component);
-                listProperties(props, component);
+                listServices( props, component );
+                listReferences( props, component );
+                listProperties( props, component );
 
                 result = new JSONObject();
-                result.put(ComponentRenderAction.COMPONENT_ID,
-                    component.getId());
-                result.put("props", props);
+                result.put( ComponentRenderAction.COMPONENT_ID, component.getId() );
+                result.put( "props", props );
             }
-        } catch (Exception exception) {
+        }
+        catch ( Exception exception )
+        {
             // create an empty result on problems
             result = new JSONObject();
         }
 
         // send the result
-        response.setContentType("text/javascript");
-        response.getWriter().print(result.toString());
+        response.setContentType( "text/javascript" );
+        response.getWriter().print( result.toString() );
 
         return false;
     }
 
-    private void listServices(JSONArray props, Component component) {
+
+    private void listServices( JSONArray props, Component component )
+    {
         String[] services = component.getServices();
-        if (services == null) {
+        if ( services == null )
+        {
             return;
         }
 
-        keyVal(props, "Service Type", component.isServiceFactory()
-                ? "service factory"
-                : "service");
+        keyVal( props, "Service Type", component.isServiceFactory() ? "service factory" : "service" );
 
         StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < services.length; i++) {
-            if (i > 0) {
-                buf.append("<br />");
+        for ( int i = 0; i < services.length; i++ )
+        {
+            if ( i > 0 )
+            {
+                buf.append( "<br />" );
             }
-            buf.append(services[i]);
+            buf.append( services[i] );
         }
 
-        keyVal(props, "Services", buf.toString());
+        keyVal( props, "Services", buf.toString() );
     }
 
-    private void listReferences(JSONArray props, Component component) {
+
+    private void listReferences( JSONArray props, Component component )
+    {
         Reference[] refs = component.getReferences();
-        if (refs != null) {
-            for (int i = 0; i < refs.length; i++) {
+        if ( refs != null )
+        {
+            for ( int i = 0; i < refs.length; i++ )
+            {
                 StringBuffer buf = new StringBuffer();
-                buf.append(refs[i].isSatisfied() ? "Satisfied" : "Unsatisfied").append(
-                    "<br />");
-                buf.append("Service Name: ").append(refs[i].getServiceName()).append(
-                    "<br />");
-                if (refs[i].getTarget() != null) {
-                    buf.append("Target Filter: ").append(refs[i].getTarget()).append(
-                        "<br />");
+                buf.append( refs[i].isSatisfied() ? "Satisfied" : "Unsatisfied" ).append( "<br />" );
+                buf.append( "Service Name: " ).append( refs[i].getServiceName() ).append( "<br />" );
+                if ( refs[i].getTarget() != null )
+                {
+                    buf.append( "Target Filter: " ).append( refs[i].getTarget() ).append( "<br />" );
                 }
-                buf.append("Multiple: ").append(
-                    refs[i].isMultiple() ? "multiple" : "single").append(
-                    "<br />");
-                buf.append("Optional: ").append(
-                    refs[i].isOptional() ? "optional" : "mandatory").append(
-                    "<br />");
-                buf.append("Policy: ").append(
-                    refs[i].isStatic() ? "static" : "dynamic").append("<br />");
+                buf.append( "Multiple: " ).append( refs[i].isMultiple() ? "multiple" : "single" ).append( "<br />" );
+                buf.append( "Optional: " ).append( refs[i].isOptional() ? "optional" : "mandatory" ).append( "<br />" );
+                buf.append( "Policy: " ).append( refs[i].isStatic() ? "static" : "dynamic" ).append( "<br />" );
 
                 // list bound services
                 ServiceReference[] boundRefs = refs[i].getServiceReferences();
-                if (boundRefs != null && boundRefs.length > 0) {
-                    for (int j = 0; j < boundRefs.length; j++) {
-                        buf.append("Bound Service ID ");
-                        buf.append(boundRefs[j].getProperty(Constants.SERVICE_ID));
+                if ( boundRefs != null && boundRefs.length > 0 )
+                {
+                    for ( int j = 0; j < boundRefs.length; j++ )
+                    {
+                        buf.append( "Bound Service ID " );
+                        buf.append( boundRefs[j].getProperty( Constants.SERVICE_ID ) );
 
-                        String name = (String) boundRefs[j].getProperty(ComponentConstants.COMPONENT_NAME);
-                        if (name == null) {
-                            name = (String) boundRefs[j].getProperty(Constants.SERVICE_PID);
-                            if (name == null) {
-                                name = (String) boundRefs[j].getProperty(Constants.SERVICE_DESCRIPTION);
+                        String name = ( String ) boundRefs[j].getProperty( ComponentConstants.COMPONENT_NAME );
+                        if ( name == null )
+                        {
+                            name = ( String ) boundRefs[j].getProperty( Constants.SERVICE_PID );
+                            if ( name == null )
+                            {
+                                name = ( String ) boundRefs[j].getProperty( Constants.SERVICE_DESCRIPTION );
                             }
                         }
-                        if (name != null) {
-                            buf.append(" (");
-                            buf.append(name);
-                            buf.append(")");
+                        if ( name != null )
+                        {
+                            buf.append( " (" );
+                            buf.append( name );
+                            buf.append( ")" );
                         }
                     }
-                } else {
-                    buf.append("No Services bound");
                 }
-                buf.append("<br />");
+                else
+                {
+                    buf.append( "No Services bound" );
+                }
+                buf.append( "<br />" );
 
-                keyVal(props, "Reference " + refs[i].getName(), buf.toString());
+                keyVal( props, "Reference " + refs[i].getName(), buf.toString() );
             }
         }
     }
 
-    private void listProperties(JSONArray jsonProps, Component component) {
+
+    private void listProperties( JSONArray jsonProps, Component component )
+    {
         Dictionary props = component.getProperties();
-        if (props != null) {
+        if ( props != null )
+        {
             StringBuffer buf = new StringBuffer();
-            TreeSet keys = new TreeSet(Collections.list(props.keys()));
-            for (Iterator ki = keys.iterator(); ki.hasNext();) {
-                String key = (String) ki.next();
-                buf.append(key).append(" = ");
+            TreeSet keys = new TreeSet( Collections.list( props.keys() ) );
+            for ( Iterator ki = keys.iterator(); ki.hasNext(); )
+            {
+                String key = ( String ) ki.next();
+                buf.append( key ).append( " = " );
 
-                Object prop = props.get(key);
-                if (prop.getClass().isArray()) {
-                    prop = Arrays.asList((Object[]) prop);
+                Object prop = props.get( key );
+                if ( prop.getClass().isArray() )
+                {
+                    prop = Arrays.asList( ( Object[] ) prop );
                 }
-                buf.append(prop);
-                if (ki.hasNext()) {
-                    buf.append("<br />");
+                buf.append( prop );
+                if ( ki.hasNext() )
+                {
+                    buf.append( "<br />" );
                 }
             }
-            keyVal(jsonProps, "Properties", buf.toString());
+            keyVal( jsonProps, "Properties", buf.toString() );
         }
 
     }
 
-    private void keyVal(JSONArray props, String key, Object value) {
-        if (key != null && value != null) {
-            try {
+
+    private void keyVal( JSONArray props, String key, Object value )
+    {
+        if ( key != null && value != null )
+        {
+            try
+            {
                 JSONObject obj = new JSONObject();
-                obj.put("key", key);
-                obj.put("value", value);
-                props.put(obj);
-            } catch (JSONException je) {
+                obj.put( "key", key );
+                obj.put( "value", value );
+                props.put( obj );
+            }
+            catch ( JSONException je )
+            {
                 // don't care
             }
         }
     }
 
-    static String toStateString(int state) {
-        switch (state) {
+
+    static String toStateString( int state )
+    {
+        switch ( state )
+        {
             case Component.STATE_DISABLED:
                 return "disabled";
             case Component.STATE_ENABLED:
@@ -410,16 +457,22 @@ public class ComponentRenderAction extends AbstractScrPlugin implements Render,
             case Component.STATE_DESTROYED:
                 return "destroyed";
             default:
-                return String.valueOf(state);
+                return String.valueOf( state );
         }
     }
 
-    protected long getComponentId(HttpServletRequest request) {
-        String componentIdPar = request.getParameter(ComponentRenderAction.COMPONENT_ID);
-        if (componentIdPar != null) {
-            try {
-                return Long.parseLong(componentIdPar);
-            } catch (NumberFormatException nfe) {
+
+    protected long getComponentId( HttpServletRequest request )
+    {
+        String componentIdPar = request.getParameter( ComponentRenderAction.COMPONENT_ID );
+        if ( componentIdPar != null )
+        {
+            try
+            {
+                return Long.parseLong( componentIdPar );
+            }
+            catch ( NumberFormatException nfe )
+            {
                 // TODO: log
             }
         }

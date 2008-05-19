@@ -16,6 +16,7 @@
  */
 package org.apache.felix.webconsole.internal.servlet;
 
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Dictionary;
@@ -70,13 +71,15 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
+
 /**
  * The <code>OSGi Manager</code> TODO
  *
  * @scr.component ds="no" label="%manager.name"
  *                description="%manager.description"
  */
-public class OsgiManager extends GenericServlet {
+public class OsgiManager extends GenericServlet
+{
 
     /** Pseudo class version ID to keep the IDE quite. */
     private static final long serialVersionUID = 1L;
@@ -119,15 +122,12 @@ public class OsgiManager extends GenericServlet {
      */
     private static final String DEFAULT_MANAGER_ROOT = "/system/console";
 
-    private static final Class[] PLUGIN_CLASSES = {
-        AjaxConfigManagerAction.class, ComponentConfigurationPrinter.class,
-        ComponentRenderAction.class, ConfigManager.class,
-        AjaxBundleDetailsAction.class, BundleListRender.class,
-        InstallAction.class, RefreshPackagesAction.class,
-        SetStartLevelAction.class, StartAction.class, StopAction.class,
-        UninstallAction.class, UpdateAction.class,
-        ConfigurationRender.class, GCAction.class,
-        ShutdownAction.class, ShutdownRender.class, VMStatRender.class };
+    private static final Class[] PLUGIN_CLASSES =
+        { AjaxConfigManagerAction.class, ComponentConfigurationPrinter.class, ComponentRenderAction.class,
+            ConfigManager.class, AjaxBundleDetailsAction.class, BundleListRender.class, InstallAction.class,
+            RefreshPackagesAction.class, SetStartLevelAction.class, StartAction.class, StopAction.class,
+            UninstallAction.class, UpdateAction.class, ConfigurationRender.class, GCAction.class, ShutdownAction.class,
+            ShutdownRender.class, VMStatRender.class };
 
     private BundleContext bundleContext;
 
@@ -155,65 +155,83 @@ public class OsgiManager extends GenericServlet {
 
     private Dictionary configuration;
 
-    public OsgiManager(BundleContext bundleContext) {
+
+    public OsgiManager( BundleContext bundleContext )
+    {
 
         this.bundleContext = bundleContext;
-        this.log = new Logger(bundleContext);
+        this.log = new Logger( bundleContext );
 
-        updateConfiguration(null);
+        updateConfiguration( null );
 
-        try {
-            this.configurationListener = ConfigurationListener.create(this);
-        } catch (Throwable t) {
+        try
+        {
+            this.configurationListener = ConfigurationListener.create( this );
+        }
+        catch ( Throwable t )
+        {
             // might be caused by CM not available
         }
 
         // track renders and operations
-        operationsTracker = new OperationServiceTracker(this);
+        operationsTracker = new OperationServiceTracker( this );
         operationsTracker.open();
-        rendersTracker = new RenderServiceTracker(this);
+        rendersTracker = new RenderServiceTracker( this );
         rendersTracker.open();
-        httpServiceTracker = new HttpServiceTracker(this);
+        httpServiceTracker = new HttpServiceTracker( this );
         httpServiceTracker.open();
 
-        for (int i=0; i < PLUGIN_CLASSES.length; i++) {
+        for ( int i = 0; i < PLUGIN_CLASSES.length; i++ )
+        {
             Class pluginClass = PLUGIN_CLASSES[i];
-            try {
+            try
+            {
                 Object plugin = pluginClass.newInstance();
-                if (plugin instanceof BaseManagementPlugin) {
-                    ((BaseManagementPlugin) plugin).setBundleContext(bundleContext);
-                    ((BaseManagementPlugin) plugin).setLogger(log);
+                if ( plugin instanceof BaseManagementPlugin )
+                {
+                    ( ( BaseManagementPlugin ) plugin ).setBundleContext( bundleContext );
+                    ( ( BaseManagementPlugin ) plugin ).setLogger( log );
                 }
-                if (plugin instanceof Action) {
-                    bindOperation((Action) plugin);
+                if ( plugin instanceof Action )
+                {
+                    bindOperation( ( Action ) plugin );
                 }
-                if (plugin instanceof Render) {
-                    bindRender((Render) plugin);
+                if ( plugin instanceof Render )
+                {
+                    bindRender( ( Render ) plugin );
                 }
-            } catch (Throwable t) {
+            }
+            catch ( Throwable t )
+            {
                 // todo: log
             }
         }
     }
 
-    public void dispose() {
 
-        if (configurationListener != null) {
+    public void dispose()
+    {
+
+        if ( configurationListener != null )
+        {
             configurationListener.unregister();
             configurationListener = null;
         }
 
-        if (operationsTracker != null) {
+        if ( operationsTracker != null )
+        {
             operationsTracker.close();
             operationsTracker = null;
         }
 
-        if (rendersTracker != null) {
+        if ( rendersTracker != null )
+        {
             rendersTracker.close();
             rendersTracker = null;
         }
 
-        if (httpServiceTracker != null) {
+        if ( httpServiceTracker != null )
+        {
             httpServiceTracker.close();
             httpServiceTracker = null;
         }
@@ -223,35 +241,39 @@ public class OsgiManager extends GenericServlet {
         this.operations.clear();
         this.renders.clear();
 
-        if (log != null) {
+        if ( log != null )
+        {
             log.dispose();
         }
 
         this.bundleContext = null;
     }
 
-    public void service(ServletRequest req, ServletResponse res)
-            throws ServletException, IOException {
 
-        HttpServletRequest request = (HttpServletRequest) req;
-        HttpServletResponse response = (HttpServletResponse) res;
+    public void service( ServletRequest req, ServletResponse res ) throws ServletException, IOException
+    {
+
+        HttpServletRequest request = ( HttpServletRequest ) req;
+        HttpServletResponse response = ( HttpServletResponse ) res;
 
         // handle the request action, terminate if done
-        if (this.handleAction(request, response)) {
+        if ( this.handleAction( request, response ) )
+        {
             return;
         }
 
         // check whether we are not at .../{webManagerRoot}
-        if (request.getRequestURI().endsWith(this.webManagerRoot)) {
-            response.sendRedirect(request.getRequestURI() + "/"
-                + this.defaultRender.getName());
+        if ( request.getRequestURI().endsWith( this.webManagerRoot ) )
+        {
+            response.sendRedirect( request.getRequestURI() + "/" + this.defaultRender.getName() );
             return;
         }
 
         // otherwise we render the response
-        Render render = this.getRender(request);
-        if (render == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        Render render = this.getRender( request );
+        if ( render == null )
+        {
+            response.sendError( HttpServletResponse.SC_NOT_FOUND );
             return;
         }
 
@@ -260,47 +282,56 @@ public class OsgiManager extends GenericServlet {
         // account:
         // Boolean.valueOf(request.getParameter("disabled")).booleanValue();
 
-        PrintWriter pw = Util.startHtml(response, render.getLabel());
-        Util.navigation(pw, this.renders.values(), current, disabled);
+        PrintWriter pw = Util.startHtml( response, render.getLabel() );
+        Util.navigation( pw, this.renders.values(), current, disabled );
 
-        render.render(request, response);
+        render.render( request, response );
 
-        Util.endHhtml(pw);
+        Util.endHhtml( pw );
     }
 
-    protected boolean handleAction(HttpServletRequest req,
-            HttpServletResponse resp) throws IOException {
+
+    protected boolean handleAction( HttpServletRequest req, HttpServletResponse resp ) throws IOException
+    {
         // check action
-        String actionName = this.getParameter(req, Util.PARAM_ACTION);
-        if (actionName != null) {
-            Action action = (Action) this.operations.get(actionName);
-            if (action != null) {
+        String actionName = this.getParameter( req, Util.PARAM_ACTION );
+        if ( actionName != null )
+        {
+            Action action = ( Action ) this.operations.get( actionName );
+            if ( action != null )
+            {
                 boolean redirect = true;
-                try {
-                    redirect = action.performAction(req, resp);
-                } catch (IOException ioe) {
-                    this.log(ioe.getMessage(), ioe);
-                } catch (ServletException se) {
-                    this.log(se.getMessage(), se.getRootCause());
+                try
+                {
+                    redirect = action.performAction( req, resp );
+                }
+                catch ( IOException ioe )
+                {
+                    this.log( ioe.getMessage(), ioe );
+                }
+                catch ( ServletException se )
+                {
+                    this.log( se.getMessage(), se.getRootCause() );
                 }
 
                 // maybe overwrite redirect
-                if (PARAM_NO_REDIRECT_AFTER_ACTION.equals(getParameter(req,
-                    PARAM_NO_REDIRECT_AFTER_ACTION))) {
-                    resp.setStatus(HttpServletResponse.SC_OK);
-                    resp.setContentType("text/html");
-                    resp.getWriter().println("Ok");
+                if ( PARAM_NO_REDIRECT_AFTER_ACTION.equals( getParameter( req, PARAM_NO_REDIRECT_AFTER_ACTION ) ) )
+                {
+                    resp.setStatus( HttpServletResponse.SC_OK );
+                    resp.setContentType( "text/html" );
+                    resp.getWriter().println( "Ok" );
                     return true;
                 }
 
-                if (redirect) {
+                if ( redirect )
+                {
                     String uri = req.getRequestURI();
                     // Object pars =
                     // req.getAttribute(Action.ATTR_REDIRECT_PARAMETERS);
                     // if (pars instanceof String) {
                     // uri += "?" + pars;
                     // }
-                    resp.sendRedirect(uri);
+                    resp.sendRedirect( uri );
                 }
                 return true;
             }
@@ -309,72 +340,89 @@ public class OsgiManager extends GenericServlet {
         return false;
     }
 
-    protected Render getRender(HttpServletRequest request) {
+
+    protected Render getRender( HttpServletRequest request )
+    {
 
         String page = request.getRequestURI();
 
         // remove trailing slashes
-        while (page.endsWith("/")) {
-            page = page.substring(0, page.length() - 1);
+        while ( page.endsWith( "/" ) )
+        {
+            page = page.substring( 0, page.length() - 1 );
         }
 
         // take last part of the name
-        int lastSlash = page.lastIndexOf('/');
-        if (lastSlash >= 0) {
-            page = page.substring(lastSlash + 1);
+        int lastSlash = page.lastIndexOf( '/' );
+        if ( lastSlash >= 0 )
+        {
+            page = page.substring( lastSlash + 1 );
         }
 
-        Render render = (Render) this.renders.get(page);
-        return (render == null) ? this.defaultRender : render;
+        Render render = ( Render ) this.renders.get( page );
+        return ( render == null ) ? this.defaultRender : render;
     }
 
-    private String getParameter(HttpServletRequest request, String name) {
+
+    private String getParameter( HttpServletRequest request, String name )
+    {
         // just get the parameter if not a multipart/form-data POST
-        if (!ServletFileUpload.isMultipartContent(new ServletRequestContext(
-            request))) {
-            return request.getParameter(name);
+        if ( !ServletFileUpload.isMultipartContent( new ServletRequestContext( request ) ) )
+        {
+            return request.getParameter( name );
         }
 
         // check, whether we alread have the parameters
-        Map params = (Map) request.getAttribute(Util.ATTR_FILEUPLOAD);
-        if (params == null) {
+        Map params = ( Map ) request.getAttribute( Util.ATTR_FILEUPLOAD );
+        if ( params == null )
+        {
             // parameters not read yet, read now
             // Create a factory for disk-based file items
             DiskFileItemFactory factory = new DiskFileItemFactory();
-            factory.setSizeThreshold(256000);
+            factory.setSizeThreshold( 256000 );
 
             // Create a new file upload handler
-            ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setSizeMax(-1);
+            ServletFileUpload upload = new ServletFileUpload( factory );
+            upload.setSizeMax( -1 );
 
             // Parse the request
             params = new HashMap();
-            try {
-                List items = upload.parseRequest(request);
-                for (Iterator fiter=items.iterator(); fiter.hasNext(); ) {
-                    FileItem fi = (FileItem) fiter.next();
-                    FileItem[] current = (FileItem[]) params.get(fi.getFieldName());
-                    if (current == null) {
-                        current = new FileItem[] { fi };
-                    } else {
+            try
+            {
+                List items = upload.parseRequest( request );
+                for ( Iterator fiter = items.iterator(); fiter.hasNext(); )
+                {
+                    FileItem fi = ( FileItem ) fiter.next();
+                    FileItem[] current = ( FileItem[] ) params.get( fi.getFieldName() );
+                    if ( current == null )
+                    {
+                        current = new FileItem[]
+                            { fi };
+                    }
+                    else
+                    {
                         FileItem[] newCurrent = new FileItem[current.length + 1];
-                        System.arraycopy(current, 0, newCurrent, 0,
-                            current.length);
+                        System.arraycopy( current, 0, newCurrent, 0, current.length );
                         newCurrent[current.length] = fi;
                         current = newCurrent;
                     }
-                    params.put(fi.getFieldName(), current);
+                    params.put( fi.getFieldName(), current );
                 }
-            } catch (FileUploadException fue) {
+            }
+            catch ( FileUploadException fue )
+            {
                 // TODO: log
             }
-            request.setAttribute(Util.ATTR_FILEUPLOAD, params);
+            request.setAttribute( Util.ATTR_FILEUPLOAD, params );
         }
 
-        FileItem[] param = (FileItem[]) params.get(name);
-        if (param != null) {
-            for (int i = 0; i < param.length; i++) {
-                if (param[i].isFormField()) {
+        FileItem[] param = ( FileItem[] ) params.get( name );
+        if ( param != null )
+        {
+            for ( int i = 0; i < param.length; i++ )
+            {
+                if ( param[i].isFormField() )
+                {
                     return param[i].getString();
                 }
             }
@@ -384,187 +432,244 @@ public class OsgiManager extends GenericServlet {
         return null;
     }
 
-    BundleContext getBundleContext() {
+
+    BundleContext getBundleContext()
+    {
         return bundleContext;
     }
 
-    private static class HttpServiceTracker extends ServiceTracker {
+    private static class HttpServiceTracker extends ServiceTracker
+    {
 
         private final OsgiManager osgiManager;
 
-        HttpServiceTracker(OsgiManager osgiManager) {
-            super(osgiManager.getBundleContext(), HttpService.class.getName(),
-                null);
+
+        HttpServiceTracker( OsgiManager osgiManager )
+        {
+            super( osgiManager.getBundleContext(), HttpService.class.getName(), null );
             this.osgiManager = osgiManager;
         }
 
-        public Object addingService(ServiceReference reference) {
-            Object operation = super.addingService(reference);
-            if (operation instanceof HttpService) {
-                osgiManager.bindHttpService((HttpService) operation);
+
+        public Object addingService( ServiceReference reference )
+        {
+            Object operation = super.addingService( reference );
+            if ( operation instanceof HttpService )
+            {
+                osgiManager.bindHttpService( ( HttpService ) operation );
             }
             return operation;
         }
 
-        public void removedService(ServiceReference reference, Object service) {
-            if (service instanceof HttpService) {
-                osgiManager.unbindHttpService((HttpService) service);
+
+        public void removedService( ServiceReference reference, Object service )
+        {
+            if ( service instanceof HttpService )
+            {
+                osgiManager.unbindHttpService( ( HttpService ) service );
             }
 
-            super.removedService(reference, service);
+            super.removedService( reference, service );
         }
     }
 
-    private static class OperationServiceTracker extends ServiceTracker {
+    private static class OperationServiceTracker extends ServiceTracker
+    {
 
         private final OsgiManager osgiManager;
 
-        OperationServiceTracker(OsgiManager osgiManager) {
-            super(osgiManager.getBundleContext(), Action.SERVICE, null);
+
+        OperationServiceTracker( OsgiManager osgiManager )
+        {
+            super( osgiManager.getBundleContext(), Action.SERVICE, null );
             this.osgiManager = osgiManager;
         }
 
-        public Object addingService(ServiceReference reference) {
-            Object operation = super.addingService(reference);
-            if (operation instanceof Action) {
-                osgiManager.bindOperation((Action) operation);
+
+        public Object addingService( ServiceReference reference )
+        {
+            Object operation = super.addingService( reference );
+            if ( operation instanceof Action )
+            {
+                osgiManager.bindOperation( ( Action ) operation );
             }
             return operation;
         }
 
-        public void removedService(ServiceReference reference, Object service) {
-            if (service instanceof Action) {
-                osgiManager.bindOperation((Action) service);
+
+        public void removedService( ServiceReference reference, Object service )
+        {
+            if ( service instanceof Action )
+            {
+                osgiManager.bindOperation( ( Action ) service );
             }
 
-            super.removedService(reference, service);
+            super.removedService( reference, service );
         }
     }
 
-    private static class RenderServiceTracker extends ServiceTracker {
+    private static class RenderServiceTracker extends ServiceTracker
+    {
 
         private final OsgiManager osgiManager;
 
-        RenderServiceTracker(OsgiManager osgiManager) {
-            super(osgiManager.getBundleContext(), Render.SERVICE, null);
+
+        RenderServiceTracker( OsgiManager osgiManager )
+        {
+            super( osgiManager.getBundleContext(), Render.SERVICE, null );
             this.osgiManager = osgiManager;
         }
 
-        public Object addingService(ServiceReference reference) {
-            Object operation = super.addingService(reference);
-            if (operation instanceof Render) {
-                osgiManager.bindRender((Render) operation);
+
+        public Object addingService( ServiceReference reference )
+        {
+            Object operation = super.addingService( reference );
+            if ( operation instanceof Render )
+            {
+                osgiManager.bindRender( ( Render ) operation );
             }
             return operation;
         }
 
-        public void removedService(ServiceReference reference, Object service) {
-            if (service instanceof Render) {
-                osgiManager.bindRender((Render) service);
+
+        public void removedService( ServiceReference reference, Object service )
+        {
+            if ( service instanceof Render )
+            {
+                osgiManager.bindRender( ( Render ) service );
             }
 
-            super.removedService(reference, service);
+            super.removedService( reference, service );
         }
     }
 
-    protected synchronized void bindHttpService(HttpService httpService) {
+
+    protected synchronized void bindHttpService( HttpService httpService )
+    {
         Dictionary config = getConfiguration();
 
         // get authentication details
-        String realm = this.getProperty(config, PROP_REALM,
-            "OSGi Management Console");
-        String userId = this.getProperty(config, PROP_USER_NAME, null);
-        String password = this.getProperty(config, PROP_PASSWORD, null);
+        String realm = this.getProperty( config, PROP_REALM, "OSGi Management Console" );
+        String userId = this.getProperty( config, PROP_USER_NAME, null );
+        String password = this.getProperty( config, PROP_PASSWORD, null );
 
         // register the servlet and resources
-        try {
-            HttpContext httpContext = new OsgiManagerHttpContext(httpService, realm,
-                userId, password);
+        try
+        {
+            HttpContext httpContext = new OsgiManagerHttpContext( httpService, realm, userId, password );
 
-            Dictionary servletConfig = toStringConfig(config);
+            Dictionary servletConfig = toStringConfig( config );
 
-            httpService.registerServlet(this.webManagerRoot, this,
-                servletConfig, httpContext);
-            httpService.registerResources(this.webManagerRoot + "/res", "/res",
-                httpContext);
+            httpService.registerServlet( this.webManagerRoot, this, servletConfig, httpContext );
+            httpService.registerResources( this.webManagerRoot + "/res", "/res", httpContext );
 
-        } catch (Exception e) {
-            log.log(LogService.LOG_ERROR, "Problem setting up", e);
+        }
+        catch ( Exception e )
+        {
+            log.log( LogService.LOG_ERROR, "Problem setting up", e );
         }
 
         this.httpService = httpService;
     }
 
-    protected synchronized void unbindHttpService(HttpService httpService) {
-        httpService.unregister(this.webManagerRoot + "/res");
-        httpService.unregister(this.webManagerRoot);
 
-        if (this.httpService == httpService) {
+    protected synchronized void unbindHttpService( HttpService httpService )
+    {
+        httpService.unregister( this.webManagerRoot + "/res" );
+        httpService.unregister( this.webManagerRoot );
+
+        if ( this.httpService == httpService )
+        {
             this.httpService = null;
         }
     }
 
-    protected void bindOperation(Action operation) {
-        this.operations.put(operation.getName(), operation);
+
+    protected void bindOperation( Action operation )
+    {
+        this.operations.put( operation.getName(), operation );
     }
 
-    protected void unbindOperation(Action operation) {
-        this.operations.remove(operation.getName());
+
+    protected void unbindOperation( Action operation )
+    {
+        this.operations.remove( operation.getName() );
     }
 
-    protected void bindRender(Render render) {
-        this.renders.put(render.getName(), render);
 
-        if (this.defaultRender == null) {
+    protected void bindRender( Render render )
+    {
+        this.renders.put( render.getName(), render );
+
+        if ( this.defaultRender == null )
+        {
             this.defaultRender = render;
-        } else if (render.getName().equals(this.defaultRenderName)) {
+        }
+        else if ( render.getName().equals( this.defaultRenderName ) )
+        {
             this.defaultRender = render;
         }
     }
 
-    protected void unbindRender(Render render) {
-        this.renders.remove(render.getName());
 
-        if (this.defaultRender == render) {
-            if (this.renders.isEmpty()) {
+    protected void unbindRender( Render render )
+    {
+        this.renders.remove( render.getName() );
+
+        if ( this.defaultRender == render )
+        {
+            if ( this.renders.isEmpty() )
+            {
                 this.defaultRender = null;
-            } else {
-                this.defaultRender = (Render) renders.values().iterator().next();
+            }
+            else
+            {
+                this.defaultRender = ( Render ) renders.values().iterator().next();
             }
         }
     }
 
-    private Dictionary getConfiguration() {
+
+    private Dictionary getConfiguration()
+    {
         return configuration;
     }
 
-    void updateConfiguration(Dictionary config) {
-        if (config == null) {
+
+    void updateConfiguration( Dictionary config )
+    {
+        if ( config == null )
+        {
             config = new Hashtable();
         }
 
         configuration = config;
 
-        defaultRenderName = (String) config.get(PROP_DEFAULT_RENDER);
-        if (defaultRenderName != null && renders.get(defaultRenderName) != null) {
-            defaultRender = (Render) renders.get(defaultRenderName);
+        defaultRenderName = ( String ) config.get( PROP_DEFAULT_RENDER );
+        if ( defaultRenderName != null && renders.get( defaultRenderName ) != null )
+        {
+            defaultRender = ( Render ) renders.get( defaultRenderName );
         }
 
         // get the web manager root path
-        webManagerRoot = this.getProperty(config, PROP_MANAGER_ROOT, DEFAULT_MANAGER_ROOT);
-        if (!webManagerRoot.startsWith("/")) {
+        webManagerRoot = this.getProperty( config, PROP_MANAGER_ROOT, DEFAULT_MANAGER_ROOT );
+        if ( !webManagerRoot.startsWith( "/" ) )
+        {
             webManagerRoot = "/" + webManagerRoot;
         }
 
         // might update http service registration
         HttpService httpService = this.httpService;
-        if (httpService != null) {
-            synchronized (this) {
-                unbindHttpService(httpService);
-                bindHttpService(httpService);
+        if ( httpService != null )
+        {
+            synchronized ( this )
+            {
+                unbindHttpService( httpService );
+                bindHttpService( httpService );
             }
         }
     }
+
 
     /**
      * Returns the named property from the configuration. If the property does
@@ -576,25 +681,30 @@ public class OsgiManager extends GenericServlet {
      * @return The value of the named property as a string or <code>def</code>
      *         if the property does not exist
      */
-    private String getProperty(Dictionary config, String name,
-            String def) {
-        Object value = config.get(name);
-        if (value instanceof String) {
-            return (String) value;
+    private String getProperty( Dictionary config, String name, String def )
+    {
+        Object value = config.get( name );
+        if ( value instanceof String )
+        {
+            return ( String ) value;
         }
 
-        if (value == null) {
+        if ( value == null )
+        {
             return def;
         }
 
-        return String.valueOf(value);
+        return String.valueOf( value );
     }
 
-    private Dictionary toStringConfig(Dictionary config) {
+
+    private Dictionary toStringConfig( Dictionary config )
+    {
         Dictionary stringConfig = new Hashtable();
-        for (Enumeration ke = config.keys(); ke.hasMoreElements();) {
+        for ( Enumeration ke = config.keys(); ke.hasMoreElements(); )
+        {
             Object key = ke.nextElement();
-            stringConfig.put(key.toString(), String.valueOf(config.get(key)));
+            stringConfig.put( key.toString(), String.valueOf( config.get( key ) ) );
         }
         return stringConfig;
     }

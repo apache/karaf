@@ -16,6 +16,7 @@
  */
 package org.apache.felix.webconsole.internal.core;
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,10 +37,12 @@ import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
+
 /**
  * The <code>InstallAction</code> TODO
  */
-public class InstallAction extends BundleAction {
+public class InstallAction extends BundleAction
+{
 
     public static final String NAME = "install";
 
@@ -54,31 +57,37 @@ public class InstallAction extends BundleAction {
     // set to ask for PackageAdmin.refreshPackages() after install/update
     public static final String FIELD_REFRESH_PACKAGES = "refreshPackages";
 
-    public String getName() {
+
+    public String getName()
+    {
         return NAME;
     }
 
-    public String getLabel() {
+
+    public String getLabel()
+    {
         return LABEL;
     }
 
-    public boolean performAction(HttpServletRequest request,
-            HttpServletResponse response) {
+
+    public boolean performAction( HttpServletRequest request, HttpServletResponse response )
+    {
 
         // get the uploaded data
-        Map params = (Map) request.getAttribute(Util.ATTR_FILEUPLOAD);
-        if (params == null) {
+        Map params = ( Map ) request.getAttribute( Util.ATTR_FILEUPLOAD );
+        if ( params == null )
+        {
             return true;
         }
 
-        FileItem startItem = getFileItem(params, FIELD_START, true);
-        FileItem startLevelItem = getFileItem(params, FIELD_STARTLEVEL, true);
-        FileItem bundleItem = getFileItem(params, FIELD_BUNDLEFILE, false);
-        FileItem refreshPackagesItem = getFileItem(params,
-            FIELD_REFRESH_PACKAGES, true);
+        FileItem startItem = getFileItem( params, FIELD_START, true );
+        FileItem startLevelItem = getFileItem( params, FIELD_STARTLEVEL, true );
+        FileItem bundleItem = getFileItem( params, FIELD_BUNDLEFILE, false );
+        FileItem refreshPackagesItem = getFileItem( params, FIELD_REFRESH_PACKAGES, true );
 
         // don't care any more if not bundle item
-        if (bundleItem == null || bundleItem.getSize() <= 0) {
+        if ( bundleItem == null || bundleItem.getSize() <= 0 )
+        {
             return true;
         }
 
@@ -88,52 +97,63 @@ public class InstallAction extends BundleAction {
         String bundleLocation = "inputstream:";
 
         // convert the start level value
-        if (startLevelItem != null) {
-            try {
-                startLevel = Integer.parseInt(startLevelItem.getString());
-            } catch (NumberFormatException nfe) {
-                getLog().log(
-                    LogService.LOG_INFO,
-                    "Cannot parse start level parameter " + startLevelItem
-                        + " to a number, not setting start level");
+        if ( startLevelItem != null )
+        {
+            try
+            {
+                startLevel = Integer.parseInt( startLevelItem.getString() );
+            }
+            catch ( NumberFormatException nfe )
+            {
+                getLog().log( LogService.LOG_INFO,
+                    "Cannot parse start level parameter " + startLevelItem + " to a number, not setting start level" );
             }
         }
 
         // write the bundle data to a temporary file to ease processing
         File tmpFile = null;
-        try {
+        try
+        {
             // copy the data to a file for better processing
-            tmpFile = File.createTempFile("install", ".tmp");
-            bundleItem.write(tmpFile);
-        } catch (Exception e) {
-            getLog().log(LogService.LOG_ERROR,
-                "Problem accessing uploaded bundle file", e);
+            tmpFile = File.createTempFile( "install", ".tmp" );
+            bundleItem.write( tmpFile );
+        }
+        catch ( Exception e )
+        {
+            getLog().log( LogService.LOG_ERROR, "Problem accessing uploaded bundle file", e );
 
             // remove the tmporary file
-            if (tmpFile != null) {
+            if ( tmpFile != null )
+            {
                 tmpFile.delete();
                 tmpFile = null;
             }
         }
 
         // install or update the bundle now
-        if (tmpFile != null) {
+        if ( tmpFile != null )
+        {
             // start, refreshPackages just needs to exist, don't care for value
             boolean start = startItem != null;
             boolean refreshPackages = refreshPackagesItem != null;
 
             bundleLocation = "inputstream:" + bundleItem.getName();
-            installBundle(bundleLocation, tmpFile, startLevel, start, refreshPackages);
+            installBundle( bundleLocation, tmpFile, startLevel, start, refreshPackages );
         }
 
         return true;
     }
 
-    private FileItem getFileItem(Map params, String name, boolean isFormField) {
-        FileItem[] items = (FileItem[]) params.get(name);
-        if (items != null) {
-            for (int i = 0; i < items.length; i++) {
-                if (items[i].isFormField() == isFormField) {
+
+    private FileItem getFileItem( Map params, String name, boolean isFormField )
+    {
+        FileItem[] items = ( FileItem[] ) params.get( name );
+        if ( items != null )
+        {
+            for ( int i = 0; i < items.length; i++ )
+            {
+                if ( items[i].isFormField() == isFormField )
+                {
                     return items[i];
                 }
             }
@@ -143,13 +163,16 @@ public class InstallAction extends BundleAction {
         return null;
     }
 
-    private void installBundle(String location, File bundleFile,
-            int startLevel, boolean start, boolean refreshPackages) {
-        if (bundleFile != null) {
+
+    private void installBundle( String location, File bundleFile, int startLevel, boolean start, boolean refreshPackages )
+    {
+        if ( bundleFile != null )
+        {
 
             // try to get the bundle name, fail if none
-            String symbolicName = getSymbolicName(bundleFile);
-            if (symbolicName == null) {
+            String symbolicName = getSymbolicName( bundleFile );
+            if ( symbolicName == null )
+            {
                 bundleFile.delete();
                 return;
             }
@@ -157,47 +180,58 @@ public class InstallAction extends BundleAction {
             // check for existing bundle first
             Bundle updateBundle = null;
             Bundle[] bundles = getBundleContext().getBundles();
-            for (int i = 0; i < bundles.length; i++) {
-                if ((bundles[i].getLocation() != null && bundles[i].getLocation().equals(
-                    location))
-                    || (bundles[i].getSymbolicName() != null && bundles[i].getSymbolicName().equals(
-                        symbolicName))) {
+            for ( int i = 0; i < bundles.length; i++ )
+            {
+                if ( ( bundles[i].getLocation() != null && bundles[i].getLocation().equals( location ) )
+                    || ( bundles[i].getSymbolicName() != null && bundles[i].getSymbolicName().equals( symbolicName ) ) )
+                {
                     updateBundle = bundles[i];
                     break;
                 }
             }
 
-            if (updateBundle != null) {
+            if ( updateBundle != null )
+            {
 
-                updateBackground(updateBundle, bundleFile, refreshPackages);
+                updateBackground( updateBundle, bundleFile, refreshPackages );
 
-            } else {
+            }
+            else
+            {
 
-                installBackground(bundleFile, location, startLevel, start,
-                    refreshPackages);
+                installBackground( bundleFile, location, startLevel, start, refreshPackages );
 
             }
         }
     }
 
-    private String getSymbolicName(File bundleFile) {
+
+    private String getSymbolicName( File bundleFile )
+    {
         JarFile jar = null;
-        try {
-            jar = new JarFile(bundleFile);
+        try
+        {
+            jar = new JarFile( bundleFile );
             Manifest m = jar.getManifest();
-            if (m != null) {
-                return m.getMainAttributes().getValue(
-                    Constants.BUNDLE_SYMBOLICNAME);
+            if ( m != null )
+            {
+                return m.getMainAttributes().getValue( Constants.BUNDLE_SYMBOLICNAME );
             }
-        } catch (IOException ioe) {
-            getLog().log(LogService.LOG_WARNING,
-                "Cannot extract symbolic name of bundle file " + bundleFile,
-                ioe);
-        } finally {
-            if (jar != null) {
-                try {
+        }
+        catch ( IOException ioe )
+        {
+            getLog().log( LogService.LOG_WARNING, "Cannot extract symbolic name of bundle file " + bundleFile, ioe );
+        }
+        finally
+        {
+            if ( jar != null )
+            {
+                try
+                {
                     jar.close();
-                } catch (IOException ioe) {
+                }
+                catch ( IOException ioe )
+                {
                     // ignore
                 }
             }
@@ -207,24 +241,26 @@ public class InstallAction extends BundleAction {
         return null;
     }
 
-    private void installBackground(final File bundleFile,
-            final String location, final int startlevel, final boolean doStart,
-            final boolean refreshPackages) {
 
-        Thread t = new InstallHelper(this, "Background Install " + bundleFile,
-            bundleFile, refreshPackages) {
+    private void installBackground( final File bundleFile, final String location, final int startlevel,
+        final boolean doStart, final boolean refreshPackages )
+    {
 
-            protected void doRun(InputStream bundleStream)
-                    throws BundleException {
-                Bundle bundle = getBundleContext().installBundle(location,
-                    bundleStream);
+        Thread t = new InstallHelper( this, "Background Install " + bundleFile, bundleFile, refreshPackages )
+        {
+
+            protected void doRun( InputStream bundleStream ) throws BundleException
+            {
+                Bundle bundle = getBundleContext().installBundle( location, bundleStream );
 
                 StartLevel sl = getStartLevel();
-                if (sl != null) {
-                    sl.setBundleStartLevel(bundle, startlevel);
+                if ( sl != null )
+                {
+                    sl.setBundleStartLevel( bundle, startlevel );
                 }
 
-                if (doStart) {
+                if ( doStart )
+                {
                     bundle.start();
                 }
             }
@@ -233,22 +269,24 @@ public class InstallAction extends BundleAction {
         t.start();
     }
 
-    private void updateBackground(final Bundle bundle, final File bundleFile,
-            final boolean refreshPackages) {
-        Thread t = new InstallHelper(this, "Background Update"
-            + bundle.getSymbolicName() + " (" + bundle.getBundleId() + ")",
-            bundleFile, refreshPackages) {
 
-            protected void doRun(InputStream bundleStream)
-                    throws BundleException {
-                bundle.update(bundleStream);
+    private void updateBackground( final Bundle bundle, final File bundleFile, final boolean refreshPackages )
+    {
+        Thread t = new InstallHelper( this, "Background Update" + bundle.getSymbolicName() + " ("
+            + bundle.getBundleId() + ")", bundleFile, refreshPackages )
+        {
+
+            protected void doRun( InputStream bundleStream ) throws BundleException
+            {
+                bundle.update( bundleStream );
             }
         };
 
         t.start();
     }
 
-    private static abstract class InstallHelper extends Thread {
+    private static abstract class InstallHelper extends Thread
+    {
 
         private final InstallAction installAction;
 
@@ -256,56 +294,78 @@ public class InstallAction extends BundleAction {
 
         private final boolean refreshPackages;
 
-        InstallHelper(InstallAction installAction, String name,
-                File bundleFile, boolean refreshPackages) {
-            super(name);
-            setDaemon(true);
+
+        InstallHelper( InstallAction installAction, String name, File bundleFile, boolean refreshPackages )
+        {
+            super( name );
+            setDaemon( true );
 
             this.installAction = installAction;
             this.bundleFile = bundleFile;
             this.refreshPackages = refreshPackages;
         }
 
-        protected abstract void doRun(InputStream bundleStream)
-                throws BundleException;
 
-        public void run() {
+        protected abstract void doRun( InputStream bundleStream ) throws BundleException;
+
+
+        public void run()
+        {
             // wait some time for the request to settle
-            try {
-                sleep(500L);
-            } catch (InterruptedException ie) {
+            try
+            {
+                sleep( 500L );
+            }
+            catch ( InterruptedException ie )
+            {
                 // don't care
             }
 
             // now deploy the resolved bundles
             InputStream bundleStream = null;
-            try {
-                bundleStream = new FileInputStream(bundleFile);
-                doRun(bundleStream);
+            try
+            {
+                bundleStream = new FileInputStream( bundleFile );
+                doRun( bundleStream );
 
-                if (refreshPackages) {
-                    try {
+                if ( refreshPackages )
+                {
+                    try
+                    {
                         PackageAdmin pa = installAction.getPackageAdmin();
-                        if (pa != null) {
-                            pa.refreshPackages(null);
+                        if ( pa != null )
+                        {
+                            pa.refreshPackages( null );
                         }
-                    } catch (IllegalStateException ise) {
+                    }
+                    catch ( IllegalStateException ise )
+                    {
                         // This exception is expected if the webconsole bundle
                         // itself has just been updated. For now, we just
                         // ignore this exception
                     }
                 }
-            } catch (IOException ioe) {
-                installAction.getLog().log(LogService.LOG_ERROR,
-                    "Cannot install or update bundle from " + bundleFile, ioe);
-            } catch (BundleException be) {
-                installAction.getLog().log(LogService.LOG_ERROR,
-                    "Cannot install or update bundle from " + bundleFile, be);
-            } finally {
-                if (bundleStream != null) {
-                    try {
+            }
+            catch ( IOException ioe )
+            {
+                installAction.getLog().log( LogService.LOG_ERROR, "Cannot install or update bundle from " + bundleFile,
+                    ioe );
+            }
+            catch ( BundleException be )
+            {
+                installAction.getLog().log( LogService.LOG_ERROR, "Cannot install or update bundle from " + bundleFile,
+                    be );
+            }
+            finally
+            {
+                if ( bundleStream != null )
+                {
+                    try
+                    {
                         bundleStream.close();
-                    } catch (IOException ignore) {
+                    }
+                    catch ( IOException ignore )
+                    {
                     }
                 }
                 bundleFile.delete();

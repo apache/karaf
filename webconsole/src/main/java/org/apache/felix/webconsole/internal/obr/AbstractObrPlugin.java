@@ -18,38 +18,43 @@
  */
 package org.apache.felix.webconsole.internal.obr;
 
+
 import org.apache.felix.webconsole.internal.BaseManagementPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class AbstractObrPlugin extends BaseManagementPlugin {
+
+public class AbstractObrPlugin extends BaseManagementPlugin
+{
 
     // track the optional installer service manually
     private ServiceTracker installerService;
 
-    public void setBundleContext(BundleContext bundleContext) {
-        super.setBundleContext(bundleContext);
+
+    public void setBundleContext( BundleContext bundleContext )
+    {
+        super.setBundleContext( bundleContext );
 
     }
-/*
-    protected InstallerService getInstallerService() {
-        if (installerService == null) {
-            try {
-                installerService = new ServiceTracker(getBundleContext(),
-                    InstallerService.class.getName(), null);
-                installerService.open();
-            } catch (Throwable t) {
-                // missing InstallerService class ??
-                return null;
+    /*
+        protected InstallerService getInstallerService() {
+            if (installerService == null) {
+                try {
+                    installerService = new ServiceTracker(getBundleContext(),
+                        InstallerService.class.getName(), null);
+                    installerService.open();
+                } catch (Throwable t) {
+                    // missing InstallerService class ??
+                    return null;
+                }
+
             }
 
+            return (InstallerService) installerService.getService();
         }
 
-        return (InstallerService) installerService.getService();
-    }
-
-    protected BundleRepositoryAdmin getBundleRepositoryAdmin() {
-        InstallerService is = getInstallerService();
-        return (is != null) ? is.getBundleRepositoryAdmin() : null;
-    }*/
+        protected BundleRepositoryAdmin getBundleRepositoryAdmin() {
+            InstallerService is = getInstallerService();
+            return (is != null) ? is.getBundleRepositoryAdmin() : null;
+        }*/
 }

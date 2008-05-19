@@ -18,27 +18,35 @@
  */
 package org.apache.felix.webconsole.internal.compendium;
 
+
 import org.apache.felix.scr.ScrService;
 import org.apache.felix.webconsole.internal.BaseManagementPlugin;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class AbstractScrPlugin extends BaseManagementPlugin {
+
+public class AbstractScrPlugin extends BaseManagementPlugin
+{
 
     private ServiceTracker scrServiceTracker;
 
-    protected ScrService getScrService() {
-        if (scrServiceTracker == null) {
-            try {
-                scrServiceTracker = new ServiceTracker(getBundleContext(),
-                    ScrService.class.getName(), null);
+
+    protected ScrService getScrService()
+    {
+        if ( scrServiceTracker == null )
+        {
+            try
+            {
+                scrServiceTracker = new ServiceTracker( getBundleContext(), ScrService.class.getName(), null );
                 scrServiceTracker.open();
-            } catch (Throwable t) {
+            }
+            catch ( Throwable t )
+            {
                 // missing ScrService class ??
                 return null;
             }
         }
 
-        return (ScrService) scrServiceTracker.getService();
+        return ( ScrService ) scrServiceTracker.getService();
     }
 
 }

@@ -18,6 +18,7 @@
  */
 package org.apache.felix.webconsole.internal.servlet;
 
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -25,28 +26,34 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedService;
 
-class ConfigurationListener implements ManagedService {
+
+class ConfigurationListener implements ManagedService
+{
 
     private final OsgiManager osgiManager;
 
-    static ServiceRegistration create(OsgiManager osgiManager) {
-        ConfigurationListener cl = new ConfigurationListener(osgiManager);
+
+    static ServiceRegistration create( OsgiManager osgiManager )
+    {
+        ConfigurationListener cl = new ConfigurationListener( osgiManager );
 
         Dictionary props = new Hashtable();
-        props.put(Constants.SERVICE_VENDOR, "The Apache Software Foundation");
-        props.put(Constants.SERVICE_DESCRIPTION,
-            "OSGi Management Console Configuration Receiver");
-        props.put(Constants.SERVICE_PID, osgiManager.getClass().getName());
+        props.put( Constants.SERVICE_VENDOR, "The Apache Software Foundation" );
+        props.put( Constants.SERVICE_DESCRIPTION, "OSGi Management Console Configuration Receiver" );
+        props.put( Constants.SERVICE_PID, osgiManager.getClass().getName() );
 
-        return osgiManager.getBundleContext().registerService(
-            ManagedService.class.getName(), cl, props);
+        return osgiManager.getBundleContext().registerService( ManagedService.class.getName(), cl, props );
     }
 
-    private ConfigurationListener(OsgiManager osgiManager) {
+
+    private ConfigurationListener( OsgiManager osgiManager )
+    {
         this.osgiManager = osgiManager;
     }
 
-    public void updated(Dictionary config) {
-        osgiManager.updateConfiguration(config);
+
+    public void updated( Dictionary config )
+    {
+        osgiManager.updateConfiguration( config );
     }
 }

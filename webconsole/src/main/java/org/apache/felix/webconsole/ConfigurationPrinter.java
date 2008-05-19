@@ -18,14 +18,19 @@
  */
 package org.apache.felix.webconsole;
 
+
 import java.io.PrintWriter;
 
-public interface ConfigurationPrinter {
+
+public interface ConfigurationPrinter
+{
 
     static final String SERVICE = ConfigurationPrinter.class.getName();
 
+
     String getTitle();
 
-    void printConfiguration(PrintWriter printWriter);
+
+    void printConfiguration( PrintWriter printWriter );
 
 }

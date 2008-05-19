@@ -16,19 +16,27 @@
  */
 package org.apache.felix.webconsole.internal.core;
 
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.felix.webconsole.Action;
 import org.apache.felix.webconsole.internal.BaseManagementPlugin;
 
-abstract class BundleAction extends BaseManagementPlugin implements Action {
 
-    protected long getBundleId(HttpServletRequest request) {
-        String bundleIdPar = request.getParameter(BundleListRender.BUNDLE_ID);
-        if (bundleIdPar != null) {
-            try {
-                return Long.parseLong(bundleIdPar);
-            } catch (NumberFormatException nfe) {
+abstract class BundleAction extends BaseManagementPlugin implements Action
+{
+
+    protected long getBundleId( HttpServletRequest request )
+    {
+        String bundleIdPar = request.getParameter( BundleListRender.BUNDLE_ID );
+        if ( bundleIdPar != null )
+        {
+            try
+            {
+                return Long.parseLong( bundleIdPar );
+            }
+            catch ( NumberFormatException nfe )
+            {
                 // TODO: log
             }
         }

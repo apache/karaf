@@ -18,20 +18,28 @@
  */
 package org.apache.felix.webconsole.internal;
 
+
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-public class OsgiManagerActivator implements BundleActivator {
+
+public class OsgiManagerActivator implements BundleActivator
+{
 
     private OsgiManager osgiManager;
-    
-    public void start(BundleContext bundleContext) {
-        osgiManager = new OsgiManager(bundleContext);
+
+
+    public void start( BundleContext bundleContext )
+    {
+        osgiManager = new OsgiManager( bundleContext );
     }
 
-    public void stop(BundleContext arg0) {
-        if (osgiManager != null) {
+
+    public void stop( BundleContext arg0 )
+    {
+        if ( osgiManager != null )
+        {
             osgiManager.dispose();
         }
     }
