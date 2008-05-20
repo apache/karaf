@@ -18,16 +18,17 @@
     <license rdf:resource="http://usefulinc.com/doap/licenses/asl20" />
     <name>Apache Felix</name>
     <homepage rdf:resource="http://felix.apache.org" />
-    <asfext:pmc rdf:resource="http://geronimo.apache.org" />
-    <shortdesc>OSGi Framework implementation and related technologies.</shortdesc>
+    <asfext:pmc rdf:resource="http://felix.apache.org" />
+    <shortdesc>OSGi framework implementation and related technologies.</shortdesc>
     <bug-database rdf:resource="https://issues.apache.org/jira/browse/FELIX" />
-    <download-page rdf:resource="http://www.apache.org/dist/felix/" />
+    <download-page rdf:resource="http://felix.apache.org/site/downloads.cgi" />
+    <mailing-list rdf:resource="http://felix.apache.org/site/mailinglists.html" />
     <programming-language>Java</programming-language>
     <category rdf:resource="http://projects.apache.org/category/network-server" />
     <repository>
       <SVNRepository>
         <location rdf:resource="https://svn.apache.org/repos/asf/felix"/>
-        <browse rdf:resource="http://"/>
+        <browse rdf:resource="http://svn.apache.org/viewvc/felix/"/>
       </SVNRepository>
     </repository>
     <maintainer>
