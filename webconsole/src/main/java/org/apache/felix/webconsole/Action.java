@@ -30,8 +30,13 @@ import javax.servlet.http.HttpServletResponse;
  * <p>
  * <strong>NOTE: This interface is just an intermediate solution for making the
  * web console extensible. Future releases of the web console will remove this
- * and the {@link Render} interfaces and use the <code>javax.servlet.Servlet</code>
- * interface with predefined service registration properties instead.</strong>
+ * and the {@link Render} interfaces and use the
+ * <code>javax.servlet.Servlet</code> interface with predefined service
+ * registration properties instead.</strong>
+ * 
+ * @deprecated This interface will be removed when <a
+ *             href="https://issues.apache.org/jira/browse/FELIX-574">FELIX-574</a>
+ *             will be implemented.
  */
 public interface Action
 {

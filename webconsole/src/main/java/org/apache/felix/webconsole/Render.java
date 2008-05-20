@@ -16,13 +16,11 @@
  */
 package org.apache.felix.webconsole;
 
-
 import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 
 /**
  * The <code>Render</code> interface defines a service interface for
@@ -30,21 +28,23 @@ import javax.servlet.http.HttpServletResponse;
  * <p>
  * <strong>NOTE: This interface is just an intermediate solution for making the
  * web console extensible. Future releases of the web console will remove this
- * and the {@link Action} interfaces and use the <code>javax.servlet.Servlet</code>
- * interface with predefined service registration properties instead.</strong>
+ * and the {@link Action} interfaces and use the
+ * <code>javax.servlet.Servlet</code> interface with predefined service
+ * registration properties instead.</strong>
+ * 
+ * @deprecated This interface will be removed when <a
+ *             href="https://issues.apache.org/jira/browse/FELIX-574">FELIX-574</a>
+ *             will be implemented.
  */
-public interface Render
-{
+public interface Render {
 
     static final String SERVICE = Render.class.getName();
 
-
     String getName();
-
 
     String getLabel();
 
-
-    void render( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException;
+    void render(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException;
 
 }
