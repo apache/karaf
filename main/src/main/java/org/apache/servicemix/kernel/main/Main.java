@@ -90,6 +90,11 @@ public class Main implements MainService, BundleActivator
      */
     public static final String ENV_SERVICEMIX_BASE = "SERVICEMIX_BASE";
     
+    /**
+     * Config property which identifies directories which contain bundles to be loaded by SMX
+     *
+     */
+    public static final String BUNDLE_LOCATIONS = "bundle.locations";
 
     private File servicemixHome;
     private File servicemixBase;
@@ -706,6 +711,32 @@ public class Main implements MainService, BundleActivator
         Properties configProps = loadPropertiesFile(configPropURL);
         Properties startupProps = loadPropertiesFile(startupPropURL);
         
+	String locations = configProps.getProperty(BUNDLE_LOCATIONS);
+	
+	if (locations != null) {
+	    StringTokenizer st = new StringTokenizer(locations, "\" ",true);
+	    if (st.countTokens() > 0)
+		{
+		    String location = null;
+		    do
+			{
+			    location = nextLocation(st);
+			    if (location != null)
+				{
+				    File f = new File(location);
+				    if(f.exists() && f.isDirectory()) {
+					bundleDirs.add(f);
+				    } else {
+					System.err.println("Bundle location " + location 
+							   + " does not exist or is not a directory.");
+				    }
+				}
+			}
+		    
+		    while (location != null);
+		}
+	}
+
         // Perform variable substitution for system properties.
         for (Enumeration e = configProps.propertyNames(); e.hasMoreElements(); )
         {
@@ -778,22 +809,23 @@ public class Main implements MainService, BundleActivator
         }
         if( "all".equals( props.getProperty(PROPERTY_AUTO_START,"").trim()) ) {
             props.remove(PROPERTY_AUTO_START);
-            StringBuffer sb = new StringBuffer();
+	    ArrayList<File> jars = new ArrayList<File>();
+
+	    // We should start all the bundles in the system dir.
             for (File bundleDir : bundleDirs) {
-                // We should start all the bundles in the system dir.
-                File[] bundles = bundleDir.listFiles(new FileFilter() {
-                    public boolean accept(File pathname) {
-                        return pathname.toString().endsWith(".jar");
-                    }
-                });                
-                for (int i = 0; bundles!=null && i < bundles.length; i++) {
-                    try {
-                        sb.append("\"").append(bundles[i].toURL().toString()).append("\" ");
-                    } catch (MalformedURLException e) {
-                        System.err.print( "Ignoring " + bundles[i].toString() + " (" + e + ")" );
-                    }
-                }
-			}
+		findJars(bundleDir, jars);
+	    }
+	    
+            StringBuffer sb = new StringBuffer();
+
+	    for (File jar : jars) {
+		try {
+		    sb.append("\"").append(jar.toURL().toString()).append("\" ");
+		} catch (MalformedURLException e) {
+		    System.err.print( "Ignoring " + jar.toString() + " (" + e + ")" );
+		}
+	    }
+
             props.setProperty(PROPERTY_AUTO_START, sb.toString());
         	
         }
@@ -804,6 +836,7 @@ public class Main implements MainService, BundleActivator
         	for (Iterator iterator = startupProps.keySet().iterator(); iterator.hasNext();) {
 				String name = (String) iterator.next();
 				File file = findFile(bundleDirs, name);
+
 				if( file !=null ) {
 					Integer level;
 					try {
@@ -825,24 +858,53 @@ public class Main implements MainService, BundleActivator
 				} else {
 					System.err.println("Bundle listed in "+STARTUP_PROPERTIES_FILE_NAME+" configuration not found: " + name);
 				}
-			}
-        	for (Map.Entry<Integer, StringBuffer> entry : levels.entrySet()) {
-                props.setProperty(PROPERTY_AUTO_START+"."+entry.getKey(), entry.getValue().toString());
-			}
+		}
+        	
+		for (Map.Entry<Integer, StringBuffer> entry : levels.entrySet()) {
+		    props.setProperty(PROPERTY_AUTO_START+"."+entry.getKey(), entry.getValue().toString());
+		}
         }
 
     }
 
-	private static File findFile(ArrayList<File> bundleDirs, String name) {
-        for (File bundleDir : bundleDirs) {
-        	File file = new File(bundleDir, name);
-        	if( file.exists() && !file.isDirectory() ) {
-        		return file;
-        	}
-        }
-        return null;
+    private static File findFile(ArrayList<File> bundleDirs, String name) {
+	for (File bundleDir : bundleDirs) {
+	    File file = findFile(bundleDir, name);
+	    if (file != null) {
+		return file;
+	    }
+	}
+	return null;
+    }
+
+    private static File findFile(File dir, String name) {
+	File theFile = new File(dir, name);
+
+	if( theFile.exists() && !theFile.isDirectory() ) {
+	    return theFile;
+	} 
+
+	for (File file : dir.listFiles()) {
+	    if (file.isDirectory()) {
+		return findFile(file, name);
+	    }
 	}
 
+	return null;
+    }
+
+    private static void findJars (File dir, ArrayList<File> jars) {
+	for (File file : dir.listFiles()) {
+	    if (file.isDirectory()) {
+		findJars(file, jars);
+	    } else {
+		if(file.toString().endsWith(".jar")) {
+		    jars.add(file);
+		}
+	    }
+	}
+    }
+    
     private static final String DELIM_START = "${";
     private static final String DELIM_STOP  = "}";
 
