@@ -24,6 +24,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
+/**
+ * The <code>Action</code> interface defines a service interface for actions
+ * to be plugged into the web console.
+ * <p>
+ * <strong>NOTE: This interface is just an intermediate solution for making the
+ * web console extensible. Future releases of the web console will remove this
+ * and the {@link Render} interfaces and use the <code>javax.servlet.Servlet</code>
+ * interface with predefined service registration properties instead.</strong>
+ */
 public interface Action
 {
 

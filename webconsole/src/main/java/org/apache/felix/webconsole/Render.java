@@ -25,7 +25,13 @@ import javax.servlet.http.HttpServletResponse;
 
 
 /**
- * The <code>Render</code> TODO
+ * The <code>Render</code> interface defines a service interface for
+ * information renderings to be plugged into the web console.
+ * <p>
+ * <strong>NOTE: This interface is just an intermediate solution for making the
+ * web console extensible. Future releases of the web console will remove this
+ * and the {@link Action} interfaces and use the <code>javax.servlet.Servlet</code>
+ * interface with predefined service registration properties instead.</strong>
  */
 public interface Render
 {
