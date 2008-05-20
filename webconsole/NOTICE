@@ -1,8 +1,8 @@
 Apache Felix OSGi Web Console
 Copyright 2007-2008 The Apache Software Foundation
 
-Based on source code originally developed by
-Day Software (http://www.day.com/).
+
+I. Included Software
 
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
@@ -10,3 +10,16 @@ Licensed under the Apache License 2.0.
 
 This product includes software from http://www.json.org.
 Copyright (c) 2002 JSON.org
+
+
+II. Used Software
+
+This product uses software developed at
+The OSGi Alliance (http://www.osgi.org/).
+Copyright 2006 The OSGi Alliance.
+Licensed under the Apache License 2.0.
+
+
+III. License Summary
+- Apache License 2.0
+- JSON License
