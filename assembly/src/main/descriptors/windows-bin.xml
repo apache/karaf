@@ -121,6 +121,9 @@
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.cglib-${cglib.version}</include>
                 <include>org.apache.servicemix.kernel:org.apache.servicemix.kernel.spring</include>
 
+                <!-- JAAS -->
+                <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.config</include>
+
 		        <!-- GShell -->
                 <include>org.apache.geronimo.specs:geronimo-stax-api_1.0_spec</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.mina-${mina.version}</include>

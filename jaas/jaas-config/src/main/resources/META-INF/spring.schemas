@@ -16,5 +16,4 @@
 #    limitations under the License.
 #
 ################################################################################
-
-org.ops4j.pax.logging.DefaultServiceLog.level=ERROR
+http\://servicemix.apache.org/schema/servicemix-jaas.xsd = org/apache/servicemix/kernel/jaas/config/servicemix-jaas.xsd

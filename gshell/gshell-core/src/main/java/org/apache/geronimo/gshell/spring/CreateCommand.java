@@ -47,7 +47,7 @@ public class CreateCommand
     	
     	try {
 			File serviceMixBase = new File(instance).getCanonicalFile();
-			io.out.println("Creating new instance at:@|bold "+serviceMixBase+"|");
+			io.out.println("Creating new instance at: @|bold " + serviceMixBase + "|");
 			
 			mkdir(serviceMixBase, "bin");
 			mkdir(serviceMixBase, "etc");
@@ -56,7 +56,6 @@ public class CreateCommand
 			mkdir(serviceMixBase, "data");
 			
 			copyResourceToDir(serviceMixBase, "etc/config.properties", true);
-			copyResourceToDir(serviceMixBase, "etc/login.conf", true);
 			copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.features.cfg", true);
 			copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.shell.cfg", true);
 			copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.logging.cfg", true);
@@ -83,7 +82,7 @@ public class CreateCommand
 	private void copyResourceToDir(File target, String resource, boolean text) throws Exception {
 		File outFile = new File(target, resource);
 		if( !outFile.exists() ) {
-	        io.out.println("Creating file:@|bold "+outFile.getPath()+"|");
+	        io.out.println("Creating file: @|bold " + outFile.getPath() + "|");
 			InputStream is = CreateCommand.class.getResourceAsStream(resource);
 			try {
 				if( text ) {

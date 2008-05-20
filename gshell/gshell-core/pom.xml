@@ -39,6 +39,7 @@
 
     <properties>
         <gshell.osgi.import>
+            org.apache.servicemix.kernel.jaas.config;resolution:=optional,
             org.apache.servicemix.kernel.main.spi.*;resolution:=optional,
             com.thoughtworks.xstream*;resolution:=optional,
             junit.framework*;resolution:=optional,

@@ -16,5 +16,5 @@
 #    limitations under the License.
 #
 ################################################################################
-
-org.ops4j.pax.logging.DefaultServiceLog.level=ERROR
+http\://servicemix.apache.org/jaas = org.apache.servicemix.kernel.jaas.config.NamespaceHandler
+ 

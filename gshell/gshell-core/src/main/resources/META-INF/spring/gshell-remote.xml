@@ -20,11 +20,14 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:jaas="http://servicemix.apache.org/jaas"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
   http://www.springframework.org/schema/util
-  http://www.springframework.org/schema/util/spring-util.xsd">
+  http://www.springframework.org/schema/util/spring-util.xsd
+  http://servicemix.apache.org/jaas
+  http://servicemix.apache.org/schema/servicemix-jaas.xsd">
 
     <bean id="rshServer" class="org.apache.geronimo.gshell.remote.server.RshServer">
         <constructor-arg ref="timeoutManager" />
@@ -38,8 +41,9 @@
                 </bean>
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.EchoHandler" />
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.SpringExecuteHandler" />
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.LoginHandler" init-method="initialize">
+                <bean class="org.apache.geronimo.gshell.remote.server.handler.SpringLoginHandler" init-method="initialize">
                     <constructor-arg ref="timeoutManager" />
+                    <constructor-arg value="RshServer" />
                 </bean>
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.SpringOpenShellHandler">
                     <constructor-arg ref="shellInfo" />
@@ -92,5 +96,13 @@
             </list>
         </constructor-arg>
     </bean>
+
+    <jaas:config id="RshClient">
+        <jaas:module className="org.apache.geronimo.gshell.remote.client.auth.RemoteLoginModule" flags="required" />
+    </jaas:config>
+
+    <jaas:config id="RshServer">
+        <jaas:module className="org.apache.geronimo.gshell.remote.server.auth.BogusLoginModule" flags="required" />
+    </jaas:config>
 
 </beans>

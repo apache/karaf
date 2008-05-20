@@ -107,7 +107,7 @@ if "%SERVICEMIX_PROFILER%" == "" goto :SERVICEMIX_PROFILER_END
 :SERVICEMIX_PROFILER_END
 
 rem Setup the classpath
-set CLASSPATH=%CLASSPATH%;%SERVICEMIX_HOME%\lib\classworlds-1.0.1.jar
+set CLASSPATH=%CLASSPATH%;%SERVICEMIX_BASE%\conf;$SERVICEMIX_HOME\lib\servicemix-jaas-boot.jar
 
 rem Execute the JVM or the load the profiler
 if "%SERVICEMIX_PROFILER%" == "" goto :EXECUTE
@@ -118,7 +118,7 @@ if "%SERVICEMIX_PROFILER%" == "" goto :EXECUTE
 :EXECUTE
     SET OPTS=-Dservicemix.startLocalConsole=true -Dservicemix.startRemoteShell=true    
     rem Execute the Java Virtual Machine
-    "%JAVA%" %JAVA_OPTS% %OPTS% -Dservicemix.home="%SERVICEMIX_HOME%" -Dservicemix.base="%SERVICEMIX_BASE%" -jar "%SERVICEMIX_HOME%\lib\servicemix.jar" %*
+    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath %CLASSPATH% -Dservicemix.home="%SERVICEMIX_HOME%" -Dservicemix.base="%SERVICEMIX_BASE%" org.apache.servicemix.kernel.main.Main %*
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 

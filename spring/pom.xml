@@ -68,6 +68,7 @@
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Private-Package>org.apache.servicemix.kernel.spring</Private-Package>
+            <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
           </instructions>
         </configuration>
       </plugin>

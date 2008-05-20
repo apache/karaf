@@ -41,6 +41,7 @@
     <module>testing</module>
     <module>gshell</module>
     <module>spring</module>
+    <module>jaas</module>
     <module>assembly</module>
   </modules>
 
@@ -52,7 +53,7 @@
   </scm>
   <issueManagement>
       <system>jira</system>
-      <url>http://issues.apache.org/activemq/browse/SM</url>
+      <url>http://issues.apache.org/activemq/browse/SMX4KNL</url>
   </issueManagement>
 
   <prerequisites>
