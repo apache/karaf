@@ -18,12 +18,22 @@
  */
 package org.apache.servicemix.kernel.main;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.felix.framework.Felix;
@@ -46,27 +56,26 @@ import org.osgi.service.startlevel.StartLevel;
  * is completely static and is only intended to start a single instance of
  * the framework.
  * </p>
-**/
-public class Main implements MainService, BundleActivator
-{
+ */
+public class Main implements MainService, BundleActivator {
     /**
      * The default name used for the system properties file.
-     **/
+     */
     public static final String SYSTEM_PROPERTIES_FILE_NAME = "system.properties";
     /**
      * The default name used for the configuration properties file.
-     **/
+     */
     public static final String CONFIG_PROPERTIES_FILE_NAME = "config.properties";
     /**
      * The default name used for the startup properties file.
-     **/
+     */
     public static final String STARTUP_PROPERTIES_FILE_NAME = "startup.properties";
     /**
      * The property name prefix for the launcher's auto-install property.
-     **/
+     */
     public static final String PROPERTY_AUTO_INSTALL = "felix.auto.install";
     /**
-     * The property for auto-discovering the bundles 
+     * The property for auto-discovering the bundles
      */
     public static final String PROPERTY_AUTO_START = "felix.auto.start";
     /**
@@ -89,10 +98,9 @@ public class Main implements MainService, BundleActivator
      * holds the configuration and data for a ServiceMix instance.
      */
     public static final String ENV_SERVICEMIX_BASE = "SERVICEMIX_BASE";
-    
+
     /**
      * Config property which identifies directories which contain bundles to be loaded by SMX
-     *
      */
     public static final String BUNDLE_LOCATIONS = "bundle.locations";
 
@@ -100,34 +108,34 @@ public class Main implements MainService, BundleActivator
     private File servicemixBase;
     private static Properties m_configProps = null;
     private static Felix m_felix = null;
-	private final String[] args;
-	private int exitCode;
+    private final String[] args;
+    private int exitCode;
 
     public Main(String[] args) {
-		this.args = args;
-	}
+        this.args = args;
+    }
 
-   /**
+    /**
      * Used to instigate auto-install and auto-start configuration
      * property processing via a custom framework activator during
      * framework startup.
+     *
      * @param context The system bundle context.
-     **/
-    public void start(BundleContext context)
-    {
+     */
+    public void start(BundleContext context) {
         Main.processAutoProperties(context);
     }
 
     /**
      * Currently does nothing as part of framework shutdown.
+     *
      * @param context The system bundle context.
-     **/
-    public void stop(BundleContext context)
-    {
+     */
+    public void stop(BundleContext context) {
         // Do nothing.
     }
 
-	/**
+    /**
      * <p>
      * This method performs the main task of constructing an framework instance
      * and starting its execution. The following functions are performed
@@ -181,7 +189,7 @@ public class Main implements MainService, BundleActivator
      *       <a href="cache/DefaultBundleCache.html"><tt>DefaultBundleCache</tt></a>
      *       documentation for more details its configuration options.
      *   </li>
-     *   <li><i><b>Creates and starts a framework instance.</b></i> A 
+     *   <li><i><b>Creates and starts a framework instance.</b></i> A
      *       case insensitive
      *       <a href="util/StringMap.html"><tt>StringMap</tt></a>
      *       is created for the configuration property file and is passed
@@ -203,20 +211,19 @@ public class Main implements MainService, BundleActivator
      * </p>
      * @param args An array of arguments, all of which are ignored.
      * @throws Exception If an error occurs.
-    **/
-    public static void main(String[] args) throws Exception
-    {
-    	
+     **/
+    public static void main(String[] args) throws Exception {
+
         final Main main = new Main(args);
         main.servicemixHome = getServiceMixHome();
         main.servicemixBase = getServiceMixBase(main.servicemixHome);
-        
+
         //System.out.println("ServiceMix Home: "+main.servicemixHome.getPath());
         //System.out.println("ServiceMix Base: "+main.servicemixBase.getPath());
-        
+
         System.setProperty(PROP_SERVICEMIX_HOME, main.servicemixHome.getPath());
         System.setProperty(PROP_SERVICEMIX_BASE, main.servicemixBase.getPath());
-        
+
         // Load system properties.
         main.loadSystemProperties();
 
@@ -230,52 +237,46 @@ public class Main implements MainService, BundleActivator
         String profileDirName = m_configProps.getProperty(BundleCache.CACHE_PROFILE_DIR_PROP);
 
         // A profile directory or name must be specified.
-        if ((profileDirName == null) && (profileName.length() == 0))
-        {
-            System.err.println("Invalid "+CONFIG_PROPERTIES_FILE_NAME+" configuration.  The profile directory was not specified.");
+        if ((profileDirName == null) && (profileName.length() == 0)) {
+            System.err.println("Invalid " + CONFIG_PROPERTIES_FILE_NAME + " configuration.  The profile directory was not specified.");
             System.exit(-1);
         }
-        
+
         // Register the Main class so that other bundles can inspect the command line args.
         final CountDownLatch shutdown = new CountDownLatch(1);
         BundleActivator activator = new BundleActivator() {
             private ServiceRegistration registration;
-            public void start(BundleContext context)
-            {
+
+            public void start(BundleContext context) {
                 registration = context.registerService(MainService.class.getName(), main, null);
             }
 
-            public void stop(BundleContext context)
-            {
-            	registration.unregister();
-            	shutdown.countDown();
+            public void stop(BundleContext context) {
+                registration.unregister();
+                shutdown.countDown();
             }
-        };        
-    	List<BundleActivator> activations = new ArrayList<BundleActivator>();
+        };
+        List<BundleActivator> activations = new ArrayList<BundleActivator>();
         activations.add(activator);
         activations.add(main);
-        
-        try
-        {
+
+        try {
             // Start up the OSGI framework
             m_felix = new Felix(new StringMap(m_configProps, false), activations);
             m_felix.start();
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             System.err.println("Could not create framework: " + ex);
             ex.printStackTrace();
             System.exit(-1);
         }
-        
+
         // Wait for the system to get shutdown.
-        try
-        {
+        try {
             shutdown.await();
             m_felix.stopAndWait();
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             System.err.println("Error occured shutting down framework: " + ex);
             ex.printStackTrace();
         } finally {
@@ -283,115 +284,111 @@ public class Main implements MainService, BundleActivator
         }
     }
 
-	private static File getServiceMixHome() throws IOException {
-		File rc=null;
-		
-		// Use the system property if specified.
-		String path =System.getProperty(PROP_SERVICEMIX_HOME);
-        if (path!= null) {
-        	rc = validateDirectoryExists(path, "Invalid "+PROP_SERVICEMIX_HOME+" system property");
+    private static File getServiceMixHome() throws IOException {
+        File rc = null;
+
+        // Use the system property if specified.
+        String path = System.getProperty(PROP_SERVICEMIX_HOME);
+        if (path != null) {
+            rc = validateDirectoryExists(path, "Invalid " + PROP_SERVICEMIX_HOME + " system property");
         }
-        
+
         if (rc == null) {
-        	path = System.getenv(ENV_SERVICEMIX_HOME);
-        	if( path != null ) {
-            	rc = validateDirectoryExists(path, "Invalid "+ENV_SERVICEMIX_HOME+" environment variable");
-        	}
+            path = System.getenv(ENV_SERVICEMIX_HOME);
+            if (path != null) {
+                rc = validateDirectoryExists(path, "Invalid " + ENV_SERVICEMIX_HOME + " environment variable");
+            }
         }
-        
+
         // Try to figure it out using the jar file this class was loaded from. 
-        if( rc == null ) {
+        if (rc == null) {
             // guess the home from the location of the jar
-            URL url = Main.class.getClassLoader().getResource(Main.class.getName().replace(".", "/")+".class");
+            URL url = Main.class.getClassLoader().getResource(Main.class.getName().replace(".", "/") + ".class");
             if (url != null) {
                 try {
-                    JarURLConnection jarConnection = (JarURLConnection)url.openConnection();
+                    JarURLConnection jarConnection = (JarURLConnection) url.openConnection();
                     url = jarConnection.getJarFileURL();
-    			    rc = new File(new URI(url.toString())).getCanonicalFile().getParentFile().getParentFile();
+                    rc = new File(new URI(url.toString())).getCanonicalFile().getParentFile().getParentFile();
                 } catch (Exception ignored) {
                 }
             }
-    	}
-        
-    	if( rc == null ) {
-    		// Dig into the classpath to guess the location of the jar
-			String classpath = System.getProperty("java.class.path");
-			int index = classpath.toLowerCase().indexOf("servicemix.jar");
-			int start = classpath.lastIndexOf(File.pathSeparator, index) + 1;
-			if (index >= start)
-			{
-			    String jarLocation = classpath.substring(start, index);
-			    rc = new File(jarLocation).getCanonicalFile().getParentFile();
-			}
         }
-    	if( rc == null ) {
-		    throw new IOException("The ServiceMix install directory could not be determined.  Please set the "+PROP_SERVICEMIX_HOME+" system property or the "+ENV_SERVICEMIX_HOME+" environment variable.");
-		}
-    	
-		return rc;
-	}
 
-	private static File validateDirectoryExists(String path, String errPrefix) {
-		File rc;
-		try {
-			rc = new File(path).getCanonicalFile();
-		} catch (IOException e) {
-		    throw new IllegalArgumentException(errPrefix+" '"+path+"' : "+e.getMessage());
-		}
-		if (!rc.exists()) {
-		    throw new IllegalArgumentException(errPrefix+" '"+path+"' : does not exist");
-		}
-		if (!rc.isDirectory()) {
-		    throw new IllegalArgumentException(errPrefix+" '"+path+"' : is not a directory");
-		}
-		return rc;
-	}
-
-	private static File getServiceMixBase(File defaultValue) {
-		File rc=null;
-		
-		String path =System.getProperty(PROP_SERVICEMIX_BASE);
-        if (path!= null) {
-        	rc = validateDirectoryExists(path, "Invalid "+PROP_SERVICEMIX_BASE+" system property");
-        }
-        
         if (rc == null) {
-        	path = System.getenv(ENV_SERVICEMIX_BASE);
-        	if( path != null ) {
-            	rc = validateDirectoryExists(path, "Invalid "+ENV_SERVICEMIX_BASE+" environment variable");
-        	}
+            // Dig into the classpath to guess the location of the jar
+            String classpath = System.getProperty("java.class.path");
+            int index = classpath.toLowerCase().indexOf("servicemix.jar");
+            int start = classpath.lastIndexOf(File.pathSeparator, index) + 1;
+            if (index >= start) {
+                String jarLocation = classpath.substring(start, index);
+                rc = new File(jarLocation).getCanonicalFile().getParentFile();
+            }
+        }
+        if (rc == null) {
+            throw new IOException("The ServiceMix install directory could not be determined.  Please set the " + PROP_SERVICEMIX_HOME + " system property or the " + ENV_SERVICEMIX_HOME + " environment variable.");
         }
 
-    	if( rc == null ) {
-		    rc = defaultValue;
-		}
-    	return rc;
-	}
+        return rc;
+    }
+
+    private static File validateDirectoryExists(String path, String errPrefix) {
+        File rc;
+        try {
+            rc = new File(path).getCanonicalFile();
+        } catch (IOException e) {
+            throw new IllegalArgumentException(errPrefix + " '" + path + "' : " + e.getMessage());
+        }
+        if (!rc.exists()) {
+            throw new IllegalArgumentException(errPrefix + " '" + path + "' : does not exist");
+        }
+        if (!rc.isDirectory()) {
+            throw new IllegalArgumentException(errPrefix + " '" + path + "' : is not a directory");
+        }
+        return rc;
+    }
+
+    private static File getServiceMixBase(File defaultValue) {
+        File rc = null;
+
+        String path = System.getProperty(PROP_SERVICEMIX_BASE);
+        if (path != null) {
+            rc = validateDirectoryExists(path, "Invalid " + PROP_SERVICEMIX_BASE + " system property");
+        }
+
+        if (rc == null) {
+            path = System.getenv(ENV_SERVICEMIX_BASE);
+            if (path != null) {
+                rc = validateDirectoryExists(path, "Invalid " + ENV_SERVICEMIX_BASE + " environment variable");
+            }
+        }
+
+        if (rc == null) {
+            rc = defaultValue;
+        }
+        return rc;
+    }
 
     /**
-     * <p>
+     * <p/>
      * Processes the auto-install and auto-start properties from the
      * specified configuration properties.
      */
-    private static void processAutoProperties(BundleContext context)
-    {
+    private static void processAutoProperties(BundleContext context) {
         // Retrieve the Start Level service, since it will be needed
         // to set the start level of the installed bundles.
         StartLevel sl = (StartLevel) context.getService(
-            context.getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName()));
+                context.getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName()));
 
         // The auto-install property specifies a space-delimited list of
         // bundle URLs to be automatically installed into each new profile;
         // the start level to which the bundles are assigned is specified by
         // appending a ".n" to the auto-install property name, where "n" is
         // the desired start level for the list of bundles.
-        for (Iterator i = m_configProps.keySet().iterator(); i.hasNext(); )
-        {
+        for (Iterator i = m_configProps.keySet().iterator(); i.hasNext();) {
             String key = (String) i.next();
 
             // Ignore all keys that are not the auto-install property.
-            if (!key.startsWith(PROPERTY_AUTO_INSTALL))
-            {
+            if (!key.startsWith(PROPERTY_AUTO_INSTALL)) {
                 continue;
             }
 
@@ -399,34 +396,26 @@ public class Main implements MainService, BundleActivator
             // then assume it is the default bundle start level, otherwise
             // parse the specified start level.
             int startLevel = sl.getInitialBundleStartLevel();
-            if (!key.equals(PROPERTY_AUTO_INSTALL))
-            {
-                try
-                {
+            if (!key.equals(PROPERTY_AUTO_INSTALL)) {
+                try {
                     startLevel = Integer.parseInt(key.substring(key.lastIndexOf('.') + 1));
                 }
-                catch (NumberFormatException ex)
-                {
+                catch (NumberFormatException ex) {
                     System.err.println("Invalid property: " + key);
                 }
             }
 
-            StringTokenizer st = new StringTokenizer(m_configProps.getProperty(key), "\" ",true);
-            if (st.countTokens() > 0)
-            {
+            StringTokenizer st = new StringTokenizer(m_configProps.getProperty(key), "\" ", true);
+            if (st.countTokens() > 0) {
                 String location = null;
-                do
-                {
+                do {
                     location = nextLocation(st);
-                    if (location != null)
-                    {
-                        try
-                        {
+                    if (location != null) {
+                        try {
                             Bundle b = context.installBundle(location, null);
                             sl.setBundleStartLevel(b, startLevel);
                         }
-                        catch (Exception ex)
-                        {
+                        catch (Exception ex) {
                             System.err.println("Auto-properties install: " + ex);
                         }
                     }
@@ -442,13 +431,11 @@ public class Main implements MainService, BundleActivator
         // where "n" is the desired start level for the list of bundles.
         // The following code starts bundles in two passes, first it installs
         // them, then it starts them.
-        for (Iterator i = m_configProps.keySet().iterator(); i.hasNext(); )
-        {
+        for (Iterator i = m_configProps.keySet().iterator(); i.hasNext();) {
             String key = (String) i.next();
 
             // Ignore all keys that are not the auto-start property.
-            if (!key.startsWith(PROPERTY_AUTO_START))
-            {
+            if (!key.startsWith(PROPERTY_AUTO_START)) {
                 continue;
             }
 
@@ -456,34 +443,26 @@ public class Main implements MainService, BundleActivator
             // then assume it is the default bundle start level, otherwise
             // parse the specified start level.
             int startLevel = sl.getInitialBundleStartLevel();
-            if (!key.equals(PROPERTY_AUTO_START))
-            {
-                try
-                {
+            if (!key.equals(PROPERTY_AUTO_START)) {
+                try {
                     startLevel = Integer.parseInt(key.substring(key.lastIndexOf('.') + 1));
                 }
-                catch (NumberFormatException ex)
-                {
+                catch (NumberFormatException ex) {
                     System.err.println("Invalid property: " + key);
                 }
             }
 
-            StringTokenizer st = new StringTokenizer(m_configProps.getProperty(key), "\" ",true);
-            if (st.countTokens() > 0)
-            {
+            StringTokenizer st = new StringTokenizer(m_configProps.getProperty(key), "\" ", true);
+            if (st.countTokens() > 0) {
                 String location = null;
-                do
-                {
+                do {
                     location = nextLocation(st);
-                    if (location != null)
-                    {
-                        try
-                        {
+                    if (location != null) {
+                        try {
                             Bundle b = context.installBundle(location, null);
                             sl.setBundleStartLevel(b, startLevel);
                         }
-                        catch (Exception ex)
-                        {
+                        catch (Exception ex) {
                             System.err.println("Auto-properties install:" + ex);
                         }
                     }
@@ -493,31 +472,23 @@ public class Main implements MainService, BundleActivator
         }
 
         // Now loop through and start the installed bundles.
-        for (Iterator i = m_configProps.keySet().iterator(); i.hasNext(); )
-        {
+        for (Iterator i = m_configProps.keySet().iterator(); i.hasNext();) {
             String key = (String) i.next();
-            if (key.startsWith(PROPERTY_AUTO_START))
-            {
-                StringTokenizer st = new StringTokenizer(m_configProps.getProperty(key), "\" ",true);
-                if (st.countTokens() > 0)
-                {
+            if (key.startsWith(PROPERTY_AUTO_START)) {
+                StringTokenizer st = new StringTokenizer(m_configProps.getProperty(key), "\" ", true);
+                if (st.countTokens() > 0) {
                     String location = null;
-                    do
-                    {
+                    do {
                         location = nextLocation(st);
-                        if (location != null)
-                        {
+                        if (location != null) {
                             // Installing twice just returns the same bundle.
-                            try
-                            {
+                            try {
                                 Bundle b = context.installBundle(location, null);
-                                if (b != null)
-                                {
+                                if (b != null) {
                                     b.start();
                                 }
                             }
-                            catch (Exception ex)
-                            {
+                            catch (Exception ex) {
                                 System.err.println("Auto-properties start: " + ex);
                             }
                         }
@@ -528,46 +499,34 @@ public class Main implements MainService, BundleActivator
         }
     }
 
-    private static String nextLocation(StringTokenizer st)
-    {
+    private static String nextLocation(StringTokenizer st) {
         String retVal = null;
 
-        if (st.countTokens() > 0)
-        {
+        if (st.countTokens() > 0) {
             String tokenList = "\" ";
             StringBuffer tokBuf = new StringBuffer(10);
             String tok = null;
             boolean inQuote = false;
             boolean tokStarted = false;
             boolean exit = false;
-            while ((st.hasMoreTokens()) && (!exit))
-            {
+            while ((st.hasMoreTokens()) && (!exit)) {
                 tok = st.nextToken(tokenList);
-                if (tok.equals("\""))
-                {
-                    inQuote = ! inQuote;
-                    if (inQuote)
-                    {
+                if (tok.equals("\"")) {
+                    inQuote = !inQuote;
+                    if (inQuote) {
                         tokenList = "\"";
-                    }
-                    else
-                    {
+                    } else {
                         tokenList = "\" ";
                     }
 
-                }
-                else if (tok.equals(" "))
-                {
-                    if (tokStarted)
-                    {
+                } else if (tok.equals(" ")) {
+                    if (tokStarted) {
                         retVal = tokBuf.toString();
-                        tokStarted=false;
+                        tokStarted = false;
                         tokBuf = new StringBuffer(10);
                         exit = true;
                     }
-                }
-                else
-                {
+                } else {
                     tokStarted = true;
                     tokBuf.append(tok.trim());
                 }
@@ -575,8 +534,7 @@ public class Main implements MainService, BundleActivator
 
             // Handle case where end of token stream and
             // still got data
-            if ((!exit) && (tokStarted))
-            {
+            if ((!exit) && (tokStarted)) {
                 retVal = tokBuf.toString();
             }
         }
@@ -584,7 +542,7 @@ public class Main implements MainService, BundleActivator
         return retVal;
     }
 
-	/**
+    /**
      * <p>
      * Loads the properties in the system property file associated with the
      * framework installation into <tt>System.setProperty()</tt>. These properties
@@ -597,62 +555,52 @@ public class Main implements MainService, BundleActivator
      * initializing the "<tt>felix.system.properties</tt>" system property to an
      * arbitrary URL.
      * </p>
-    **/
-    private void loadSystemProperties()
-    {
+     */
+    private void loadSystemProperties() {
         // The system properties file is either specified by a system
         // property or it is in the same directory as the Felix JAR file.
         // Try to load it from one of these places.
 
         // See if the property URL was specified as a property.
         URL propURL = null;
-        try
-        {
-        	File file = new File(new File(servicemixBase, "etc"), SYSTEM_PROPERTIES_FILE_NAME);
+        try {
+            File file = new File(new File(servicemixBase, "etc"), SYSTEM_PROPERTIES_FILE_NAME);
             propURL = file.toURL();
         }
-        catch (MalformedURLException ex)
-        {
+        catch (MalformedURLException ex) {
             System.err.print("Main: " + ex);
             return;
         }
-    		
 
         // Read the properties file.
         Properties props = new Properties();
         InputStream is = null;
-        try
-        {
+        try {
             is = propURL.openConnection().getInputStream();
             props.load(is);
             is.close();
-        } 	
-        catch (FileNotFoundException ex)
-        {
+        }
+        catch (FileNotFoundException ex) {
             // Ignore file not found.
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             System.err.println(
-                "Main: Error loading system properties from " + propURL);
+                    "Main: Error loading system properties from " + propURL);
             System.err.println("Main: " + ex);
-            try
-            {
+            try {
                 if (is != null) is.close();
             }
-            catch (IOException ex2)
-            {
+            catch (IOException ex2) {
                 // Nothing we can do.
             }
             return;
         }
 
         // Perform variable substitution on specified properties.
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements(); )
-        {
+        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
             System.setProperty(name,
-                substVars(props.getProperty(name), name, null, null));
+                    substVars(props.getProperty(name), name, null, null));
         }
     }
 
@@ -670,10 +618,10 @@ public class Main implements MainService, BundleActivator
      * properties can be set by initializing the "<tt>felix.config.properties</tt>"
      * system property to an arbitrary URL.
      * </p>
+     *
      * @return A <tt>Properties</tt> instance or <tt>null</tt> if there was an error.
-    **/
-    private Properties loadConfigProperties()
-    {
+     */
+    private Properties loadConfigProperties() {
         // The config properties file is either specified by a system
         // property or it is in the conf/ directory of the Felix
         // installation directory.  Try to load it from one of these
@@ -684,67 +632,60 @@ public class Main implements MainService, BundleActivator
         // See if the property URL was specified as a property.
         URL configPropURL = null;
         URL startupPropURL = null;
-        		
-	    try
-	    {
-	    	File file = new File(new File(servicemixBase, "etc"), CONFIG_PROPERTIES_FILE_NAME);
-	    	configPropURL = file.toURL();
-	    	
-	    	file = new File(new File(servicemixBase, "etc"), STARTUP_PROPERTIES_FILE_NAME);
-	    	startupPropURL = file.toURL();
-	    	
-	    	if ( servicemixBase.equals(servicemixHome) ) {
-	            bundleDirs.add(new File(servicemixHome, "system"));
-	    	} else {
-	            bundleDirs.add(new File(servicemixBase, "system"));
-	            bundleDirs.add(new File(servicemixHome, "system"));
-	    	}
 
-	    }
-	    catch (MalformedURLException ex)
-	    {
-	        System.err.print("Main: " + ex);
-	        return null;
-	    }
-        		
+        try {
+            File file = new File(new File(servicemixBase, "etc"), CONFIG_PROPERTIES_FILE_NAME);
+            configPropURL = file.toURL();
+
+            file = new File(new File(servicemixBase, "etc"), STARTUP_PROPERTIES_FILE_NAME);
+            startupPropURL = file.toURL();
+
+            if (servicemixBase.equals(servicemixHome)) {
+                bundleDirs.add(new File(servicemixHome, "system"));
+            } else {
+                bundleDirs.add(new File(servicemixBase, "system"));
+                bundleDirs.add(new File(servicemixHome, "system"));
+            }
+
+        }
+        catch (MalformedURLException ex) {
+            System.err.print("Main: " + ex);
+            return null;
+        }
+
 
         Properties configProps = loadPropertiesFile(configPropURL);
         Properties startupProps = loadPropertiesFile(startupPropURL);
-        
-	String locations = configProps.getProperty(BUNDLE_LOCATIONS);
-	
-	if (locations != null) {
-	    StringTokenizer st = new StringTokenizer(locations, "\" ",true);
-	    if (st.countTokens() > 0)
-		{
-		    String location = null;
-		    do
-			{
-			    location = nextLocation(st);
-			    if (location != null)
-				{
-				    File f = new File(location);
-				    if(f.exists() && f.isDirectory()) {
-					bundleDirs.add(f);
-				    } else {
-					System.err.println("Bundle location " + location 
-							   + " does not exist or is not a directory.");
-				    }
-				}
-			}
-		    
-		    while (location != null);
-		}
-	}
+
+        String locations = configProps.getProperty(BUNDLE_LOCATIONS);
+
+        if (locations != null) {
+            StringTokenizer st = new StringTokenizer(locations, "\" ", true);
+            if (st.countTokens() > 0) {
+                String location = null;
+                do {
+                    location = nextLocation(st);
+                    if (location != null) {
+                        File f = new File(location);
+                        if (f.exists() && f.isDirectory()) {
+                            bundleDirs.add(f);
+                        } else {
+                            System.err.println("Bundle location " + location
+                                    + " does not exist or is not a directory.");
+                        }
+                    }
+                }
+
+                while (location != null);
+            }
+        }
 
         // Perform variable substitution for system properties.
-        for (Enumeration e = configProps.propertyNames(); e.hasMoreElements(); )
-        {
+        for (Enumeration e = configProps.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
             configProps.setProperty(name,
-                substVars(configProps.getProperty(name), name, null, configProps));
+                    substVars(configProps.getProperty(name), name, null, configProps));
         }
-        
 
         // Mutate properties
         Main.processConfigurationProperties(configProps, startupProps, bundleDirs);
@@ -752,48 +693,40 @@ public class Main implements MainService, BundleActivator
         return configProps;
     }
 
-	private static Properties loadPropertiesFile(URL configPropURL) {
-		// Read the properties file.
+    private static Properties loadPropertiesFile(URL configPropURL) {
+        // Read the properties file.
         Properties configProps = new Properties();
         InputStream is = null;
-        try
-        {
+        try {
             is = configPropURL.openConnection().getInputStream();
             configProps.load(is);
             is.close();
         }
-        catch (FileNotFoundException ex)
-        {
+        catch (FileNotFoundException ex) {
             // Ignore file not found.
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             System.err.println(
-                "Error loading config properties from " + configPropURL);
+                    "Error loading config properties from " + configPropURL);
             System.err.println("Main: " + ex);
-            try
-            {
+            try {
                 if (is != null) is.close();
             }
-            catch (IOException ex2)
-            {
+            catch (IOException ex2) {
                 // Nothing we can do.
             }
             return null;
         }
-		return configProps;
-	}
+        return configProps;
+    }
 
-    private static void copySystemProperties(Properties configProps)
-    {
+    private static void copySystemProperties(Properties configProps) {
         for (Enumeration e = System.getProperties().propertyNames();
-             e.hasMoreElements(); )
-        {
-            String key = (String)e.nextElement();
+             e.hasMoreElements();) {
+            String key = (String) e.nextElement();
             if (key.startsWith("felix.") ||
-                key.equals("org.osgi.framework.system.packages") ||
-                key.equals("org.osgi.framework.bootdelegation"))
-            {
+                    key.equals("org.osgi.framework.system.packages") ||
+                    key.equals("org.osgi.framework.bootdelegation")) {
                 configProps.setProperty(key, System.getProperty(key));
             }
         }
@@ -801,112 +734,112 @@ public class Main implements MainService, BundleActivator
 
     /**
      * Process properties to customize default felix behavior
-     * @param startupProps 
+     *
+     * @param startupProps
      */
     private static void processConfigurationProperties(Properties props, Properties startupProps, ArrayList<File> bundleDirs) {
-        if ( bundleDirs == null) {
-        	return;
+        if (bundleDirs == null) {
+            return;
         }
-        if( "all".equals( props.getProperty(PROPERTY_AUTO_START,"").trim()) ) {
+        if ("all".equals(props.getProperty(PROPERTY_AUTO_START, "").trim())) {
             props.remove(PROPERTY_AUTO_START);
-	    ArrayList<File> jars = new ArrayList<File>();
+            ArrayList<File> jars = new ArrayList<File>();
 
-	    // We should start all the bundles in the system dir.
+            // We should start all the bundles in the system dir.
             for (File bundleDir : bundleDirs) {
-		findJars(bundleDir, jars);
-	    }
-	    
+                findJars(bundleDir, jars);
+            }
+
             StringBuffer sb = new StringBuffer();
 
-	    for (File jar : jars) {
-		try {
-		    sb.append("\"").append(jar.toURL().toString()).append("\" ");
-		} catch (MalformedURLException e) {
-		    System.err.print( "Ignoring " + jar.toString() + " (" + e + ")" );
-		}
-	    }
+            for (File jar : jars) {
+                try {
+                    sb.append("\"").append(jar.toURL().toString()).append("\" ");
+                } catch (MalformedURLException e) {
+                    System.err.print("Ignoring " + jar.toString() + " (" + e + ")");
+                }
+            }
 
             props.setProperty(PROPERTY_AUTO_START, sb.toString());
-        	
-        }
-        else if( STARTUP_PROPERTIES_FILE_NAME.equals( props.getProperty(PROPERTY_AUTO_START,"").trim()) ) {
+
+        } else if (STARTUP_PROPERTIES_FILE_NAME.equals(props.getProperty(PROPERTY_AUTO_START, "").trim())) {
             props.remove(PROPERTY_AUTO_START);
             // We should start the bundles in the startup.properties file.
-        	HashMap<Integer, StringBuffer> levels = new HashMap<Integer, StringBuffer>();
-        	for (Iterator iterator = startupProps.keySet().iterator(); iterator.hasNext();) {
-				String name = (String) iterator.next();
-				File file = findFile(bundleDirs, name);
+            HashMap<Integer, StringBuffer> levels = new HashMap<Integer, StringBuffer>();
+            for (Iterator iterator = startupProps.keySet().iterator(); iterator.hasNext();) {
+                String name = (String) iterator.next();
+                File file = findFile(bundleDirs, name);
 
-				if( file !=null ) {
-					Integer level;
-					try {
-						level = new Integer(startupProps.getProperty(name).trim());
-					} catch (NumberFormatException e1) {
-	                    System.err.print( "Ignoring " + file.toString() + " (run level must be an integer)" );
-	                    continue;
-					}
-					StringBuffer sb = levels.get(level);
-					if (sb==null) {
-						sb = new StringBuffer(256);
-						levels.put(level, sb);
-					}
-	                try {
-	                    sb.append("\"").append(file.toURL().toString()).append("\" ");
-	                } catch (MalformedURLException e) {
-	                    System.err.print( "Ignoring " + file.toString() + " (" + e + ")" );
-	                }
-				} else {
-					System.err.println("Bundle listed in "+STARTUP_PROPERTIES_FILE_NAME+" configuration not found: " + name);
-				}
-		}
-        	
-		for (Map.Entry<Integer, StringBuffer> entry : levels.entrySet()) {
-		    props.setProperty(PROPERTY_AUTO_START+"."+entry.getKey(), entry.getValue().toString());
-		}
+                if (file != null) {
+                    Integer level;
+                    try {
+                        level = new Integer(startupProps.getProperty(name).trim());
+                    } catch (NumberFormatException e1) {
+                        System.err.print("Ignoring " + file.toString() + " (run level must be an integer)");
+                        continue;
+                    }
+                    StringBuffer sb = levels.get(level);
+                    if (sb == null) {
+                        sb = new StringBuffer(256);
+                        levels.put(level, sb);
+                    }
+                    try {
+                        sb.append("\"").append(file.toURL().toString()).append("\" ");
+                    } catch (MalformedURLException e) {
+                        System.err.print("Ignoring " + file.toString() + " (" + e + ")");
+                    }
+                } else {
+                    System.err.println("Bundle listed in " + STARTUP_PROPERTIES_FILE_NAME + " configuration not found: " + name);
+                }
+            }
+
+            for (Map.Entry<Integer, StringBuffer> entry : levels.entrySet()) {
+                props.setProperty(PROPERTY_AUTO_START + "." + entry.getKey(), entry.getValue().toString());
+            }
         }
 
     }
 
     private static File findFile(ArrayList<File> bundleDirs, String name) {
-	for (File bundleDir : bundleDirs) {
-	    File file = findFile(bundleDir, name);
-	    if (file != null) {
-		return file;
-	    }
-	}
-	return null;
+        for (File bundleDir : bundleDirs) {
+            File file = findFile(bundleDir, name);
+            if (file != null) {
+                return file;
+            }
+        }
+        return null;
     }
 
     private static File findFile(File dir, String name) {
-	File theFile = new File(dir, name);
+        File theFile = new File(dir, name);
 
-	if( theFile.exists() && !theFile.isDirectory() ) {
-	    return theFile;
-	} 
+        if (theFile.exists() && !theFile.isDirectory()) {
+            return theFile;
+        }
 
-	for (File file : dir.listFiles()) {
-	    if (file.isDirectory()) {
-		return findFile(file, name);
-	    }
-	}
+        for (File file : dir.listFiles()) {
+            if (file.isDirectory()) {
+                return findFile(file, name);
+            }
+        }
 
-	return null;
+        return null;
     }
 
-    private static void findJars (File dir, ArrayList<File> jars) {
-	for (File file : dir.listFiles()) {
-	    if (file.isDirectory()) {
-		findJars(file, jars);
-	    } else {
-		if(file.toString().endsWith(".jar")) {
-		    jars.add(file);
-		}
-	    }
-	}
+    private static void findJars(File dir, ArrayList<File> jars) {
+        for (File file : dir.listFiles()) {
+            if (file.isDirectory()) {
+                findJars(file, jars);
+            } else {
+                if (file.toString().endsWith(".jar")) {
+                    jars.add(file);
+                }
+            }
+        }
     }
-    
+
     private static final String DELIM_START = "${";
-    private static final String DELIM_STOP  = "}";
+    private static final String DELIM_STOP = "}";
 
     /**
      * <p>
@@ -920,23 +853,22 @@ public class Main implements MainService, BundleActivator
      * are substituted from inner most to outer most. Configuration
      * properties override system properties.
      * </p>
-     * @param val The string on which to perform property substitution.
-     * @param currentKey The key of the property being evaluated used to
-     *        detect cycles.
-     * @param cycleMap Map of variable references used to detect nested cycles.
+     *
+     * @param val         The string on which to perform property substitution.
+     * @param currentKey  The key of the property being evaluated used to
+     *                    detect cycles.
+     * @param cycleMap    Map of variable references used to detect nested cycles.
      * @param configProps Set of configuration properties.
      * @return The value of the specified string after system property substitution.
      * @throws IllegalArgumentException If there was a syntax error in the
-     *         property placeholder syntax or a recursive variable reference.
-    **/
+     *                                  property placeholder syntax or a recursive variable reference.
+     */
     private static String substVars(String val, String currentKey,
-        Map<String, String> cycleMap, Properties configProps)
-        throws IllegalArgumentException
-    {
+                                    Map<String, String> cycleMap, Properties configProps)
+            throws IllegalArgumentException {
         // If there is currently no cycle map, then create
         // one for detecting cycles for this invocation.
-        if (cycleMap == null)
-        {
+        if (cycleMap == null) {
             cycleMap = new HashMap<String, String>();
         }
 
@@ -955,33 +887,27 @@ public class Main implements MainService, BundleActivator
         // by looping until we find a start delimiter that is
         // greater than the stop delimiter we have found.
         int startDelim = val.indexOf(DELIM_START);
-        while (stopDelim >= 0)
-        {
+        while (stopDelim >= 0) {
             int idx = val.indexOf(DELIM_START, startDelim + DELIM_START.length());
-            if ((idx < 0) || (idx > stopDelim))
-            {
+            if ((idx < 0) || (idx > stopDelim)) {
                 break;
-            }
-            else if (idx < stopDelim)
-            {
+            } else if (idx < stopDelim) {
                 startDelim = idx;
             }
         }
 
         // If we do not have a start or stop delimiter, then just
         // return the existing value.
-        if ((startDelim < 0) && (stopDelim < 0))
-        {
+        if ((startDelim < 0) && (stopDelim < 0)) {
             return val;
         }
         // At this point, we found a stop delimiter without a start,
         // so throw an exception.
         else if (((startDelim < 0) || (startDelim > stopDelim))
-            && (stopDelim >= 0))
-        {
+                && (stopDelim >= 0)) {
             throw new IllegalArgumentException(
-                "stop delimiter with no start delimiter: "
-                + val);
+                    "stop delimiter with no start delimiter: "
+                            + val);
         }
 
         // At this point, we have found a variable placeholder so
@@ -989,22 +915,20 @@ public class Main implements MainService, BundleActivator
         // Using the start and stop delimiter indices, extract
         // the first, deepest nested variable placeholder.
         String variable =
-            val.substring(startDelim + DELIM_START.length(), stopDelim);
+                val.substring(startDelim + DELIM_START.length(), stopDelim);
 
         // Verify that this is not a recursive variable reference.
-        if (cycleMap.get(variable) != null)
-        {
+        if (cycleMap.get(variable) != null) {
             throw new IllegalArgumentException(
-                "recursive variable reference: " + variable);
+                    "recursive variable reference: " + variable);
         }
 
         // Get the value of the deepest nested variable placeholder.
         // Try to configuration properties first.
         String substValue = (configProps != null)
-            ? configProps.getProperty(variable, null)
-            : null;
-        if (substValue == null)
-        {
+                ? configProps.getProperty(variable, null)
+                : null;
+        if (substValue == null) {
             // Ignore unknown property values.
             substValue = System.getProperty(variable, "");
         }
@@ -1018,8 +942,8 @@ public class Main implements MainService, BundleActivator
         // the variable, and the trailing characters to get the new
         // value.
         val = val.substring(0, startDelim)
-            + substValue
-            + val.substring(stopDelim + DELIM_STOP.length(), val.length());
+                + substValue
+                + val.substring(stopDelim + DELIM_STOP.length(), val.length());
 
         // Now perform substitution again, since there could still
         // be substitutions to make.
@@ -1029,26 +953,26 @@ public class Main implements MainService, BundleActivator
         return val;
     }
 
-	/* (non-Javadoc)
-	 * @see org.apache.servicemix.main.MainService#getArgs()
-	 */
-	public String[] getArgs() {
-		return args;
-	}
+    /* (non-Javadoc)
+      * @see org.apache.servicemix.main.MainService#getArgs()
+      */
+    public String[] getArgs() {
+        return args;
+    }
 
-	public int getExitCode() {
-		return exitCode;
-	}
+    public int getExitCode() {
+        return exitCode;
+    }
 
-	public void setExitCode(int exitCode) {
-		this.exitCode = exitCode;
-	}
+    public void setExitCode(int exitCode) {
+        this.exitCode = exitCode;
+    }
 
-	public File getServicemixHome() {
-		return servicemixHome;
-	}
+    public File getServicemixHome() {
+        return servicemixHome;
+    }
 
-	public File getServicemixBase() {
-		return servicemixBase;
-	}
+    public File getServicemixBase() {
+        return servicemixBase;
+    }
 }
