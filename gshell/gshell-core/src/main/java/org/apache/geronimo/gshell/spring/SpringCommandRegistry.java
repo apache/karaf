@@ -226,6 +226,9 @@ public class SpringCommandRegistry extends DefaultCommandRegistry implements Lay
                     if (n == null) {
                         n = layout.find(cmdId);
                     }
+                    if (n == null) {
+                        throw new NotFoundException(cmdId);
+                    }
                     CommandContext ctx = commandContext;
                     Command cmd;
                     if (n instanceof CommandNode) {
