@@ -16,25 +16,85 @@
  */
 package org.apache.geronimo.gshell.remote.server.handler;
 
-import org.apache.geronimo.gshell.common.Notification;
+import javax.security.auth.login.LoginContext;
+import javax.security.auth.login.LoginException;
+import javax.security.auth.Subject;
+
 import org.apache.geronimo.gshell.remote.message.LoginMessage;
 import org.apache.geronimo.gshell.whisper.transport.Session;
 import org.apache.geronimo.gshell.remote.server.timeout.TimeoutManager;
+import org.apache.geronimo.gshell.remote.jaas.JaasConfigurationHelper;
+import org.apache.geronimo.gshell.remote.jaas.UsernamePasswordCallbackHandler;
+import org.apache.geronimo.gshell.remote.jaas.Identity;
+import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
+import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 
-public class SpringLoginHandler extends LoginHandler {
+@Component(role=ServerMessageHandler.class, hint="login")
+public class SpringLoginHandler
+    extends ServerMessageHandlerSupport<LoginMessage>
+    implements Initializable
+{
+    @Requirement
+    private TimeoutManager timeoutManager;
 
-    private String defaultRealm;
+    private String defaultRealm = "BogusLogin";
 
-    public SpringLoginHandler(final TimeoutManager timeoutManager, String defaultRealm) {
-        super(timeoutManager);
+    public SpringLoginHandler() {
+        super(LoginMessage.class);
+    }
+
+    public SpringLoginHandler(final TimeoutManager timeoutManager) {
+        this();
+        this.timeoutManager = timeoutManager;
+    }
+
+    public SpringLoginHandler(final TimeoutManager timeoutManager, final String defaultRealm) {
+        this(timeoutManager);
         this.defaultRealm = defaultRealm;
     }
 
-    public void handle(Session session, ServerSessionContext context, LoginMessage message) throws Exception {
-        if (message.getRealm() == null) {
-            message = new LoginMessage(message.getUsername(), message.getPassword(), defaultRealm);
+    public void initialize() throws InitializationException {
+        new JaasConfigurationHelper("server.login.conf").initialize();
+    }
+
+    public void handle(final Session session, final ServerSessionContext context, final LoginMessage message) throws Exception {
+        // Try to cancel the timeout task
+        if (!timeoutManager.cancelTimeout(session)) {
+            log.warn("Aborting login processing; timeout has triggered");
         }
-        super.handle(session, context, message);
+        else {
+            String realm = message.getRealm();
+            if (realm == null) {
+                realm = defaultRealm;
+            }
+
+            String username = message.getUsername();
+            char[] password = message.getPassword();
+
+            try {
+                LoginContext loginContext = new LoginContext(realm, new UsernamePasswordCallbackHandler(username, password));
+                loginContext.login();
+
+                Subject subject = loginContext.getSubject();
+                context.identity = new Identity(subject);
+
+                log.debug("Username: {}, Identity: {}", context.getUsername(), context.identity);
+
+                LoginMessage.Success reply = new LoginMessage.Success(context.identity.getToken());
+                reply.setCorrelationId(message.getId());
+                session.send(reply);
+            }
+            catch (LoginException e) {
+                String reason = e.toString();
+                log.debug("Login failed for user: {}, cause: {}", username, reason);
+
+                LoginMessage.Failure reply = new LoginMessage.Failure(reason);
+                reply.setCorrelationId(message.getId());
+                session.send(reply);
+            }
+        }
     }
 
 }
