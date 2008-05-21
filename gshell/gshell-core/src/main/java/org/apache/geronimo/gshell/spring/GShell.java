@@ -121,6 +121,12 @@ public class GShell implements Runnable, BundleContextAware {
                     } else {
                         mainService.setExitCode(value != null ? 1 : 0);
                     }
+                    log.info("Exiting shell due to terminated command");
+                    try {
+                        getBundleContext().getBundle(0).stop();
+                    } catch (BundleException e2) {
+                        log.info("Caught exception while shutting down framework: " + e2, e2);
+                    }
                 }
             } else {
                 // Otherwise go into a command shell.
