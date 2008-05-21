@@ -117,6 +117,7 @@
             <artifactId>commons-fileupload</artifactId>
             <version>1.1.1</version>
             <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -143,6 +144,7 @@
             <artifactId>json</artifactId>
             <version>20070829</version>
             <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -157,6 +159,7 @@
             <artifactId>org.apache.felix.bundlerepository</artifactId>
             <version>1.0.3</version>
             <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>
