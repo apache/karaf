@@ -49,25 +49,7 @@ public class ExecuteCommand extends OsgiCommandSupport
 
         Process p = builder.start();
 
-        PumpStreamHandler handler = new PumpStreamHandler(io.inputStream, io.outputStream, io.errorStream) {
-            protected Thread createPump(final InputStream in, final OutputStream out, final boolean closeWhenExhausted) {
-                assert in != null;
-                assert out != null;
-                final Thread result = new Thread(new StreamPumper(in, out, closeWhenExhausted)) {
-                    private IO io;
-                    public void start() {
-                        io = ProxyIO.getIO();
-                        super.start();
-                    }
-                    public void run() {
-                        ProxyIO.setIO(io);
-                        super.run();
-                    }
-                };
-                result.setDaemon(true);
-                return result;
-            }
-        };
+        PumpStreamHandler handler = new PumpStreamHandler(io.inputStream, io.outputStream, io.errorStream);
         handler.attach(p);
         handler.start();
 

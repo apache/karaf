@@ -31,7 +31,7 @@ import org.apache.geronimo.gshell.command.IO;
  */
 public class ProxyIO extends IO {
 
-    private static final ThreadLocal<IO> TLS_IO = new ThreadLocal<IO>();
+    private static final ThreadLocal<IO> TLS_IO = new InheritableThreadLocal<IO>();
 
     public ProxyIO() {
         super(new ProxyInputStream() {
