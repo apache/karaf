@@ -82,6 +82,7 @@ public class FileMonitor {
     private boolean loggedConfigAdminWarning;
     private List<Bundle> changedBundles = new ArrayList<Bundle>();
     private List<Bundle> bundlesToStart = new ArrayList<Bundle>();
+    private List<Bundle> bundlesToUpdate = new ArrayList<Bundle>();
     private Map<String, String> artifactToBundle = new HashMap<String, String>();
     private Set<String> pendingArtifacts = new HashSet<String>();
     private ServiceListener listener;
@@ -207,6 +208,7 @@ public class FileMonitor {
     protected synchronized void onFilesChanged(Collection<String> filenames) {
         changedBundles.clear();
         bundlesToStart.clear();
+        bundlesToUpdate.clear();
         Set<File> bundleJarsCreated = new HashSet<File>();
 
         for (Object filename : filenames) {
@@ -352,7 +354,7 @@ public class FileMonitor {
         try {
             Bundle bundle = getBundleForJarFile(file);
             if (bundle != null) {
-                changedBundles.add(bundle);
+                bundlesToUpdate.add(bundle);
             }
             else {
                 bundle = getContext().installBundle(file.getCanonicalFile().toURI().toString(), in);
@@ -499,6 +501,16 @@ public class FileMonitor {
             }
             catch (BundleException e) {
                 LOGGER.warn("Failed to start bundle: " + bundle + ". Reason: " + e, e);
+            }
+        }
+        
+        for (Bundle bundle : bundlesToUpdate) {
+            try {
+                bundle.update();
+                LOGGER.info("Update: " + bundle);
+            }
+            catch (BundleException e) {
+                LOGGER.warn("Failed to update bundle: " + bundle + ". Reason: " + e, e);
             }
         }
     }
