@@ -82,7 +82,6 @@ public class FileMonitor {
     private boolean loggedConfigAdminWarning;
     private List<Bundle> changedBundles = new ArrayList<Bundle>();
     private List<Bundle> bundlesToStart = new ArrayList<Bundle>();
-    private List<Bundle> bundlesToUpdate = new ArrayList<Bundle>();
     private Map<String, String> artifactToBundle = new HashMap<String, String>();
     private Set<String> pendingArtifacts = new HashSet<String>();
     private ServiceListener listener;
@@ -91,6 +90,7 @@ public class FileMonitor {
     public FileMonitor() {
     }
 
+    @SuppressWarnings("unchecked")
     public FileMonitor(FileMonitorActivator activator, Dictionary properties) {
         this.activator = activator;
 
@@ -207,7 +207,6 @@ public class FileMonitor {
     protected synchronized void onFilesChanged(Collection<String> filenames) {
         changedBundles.clear();
         bundlesToStart.clear();
-        bundlesToUpdate.clear();
         Set<File> bundleJarsCreated = new HashSet<File>();
 
         for (Object filename : filenames) {
@@ -346,7 +345,7 @@ public class FileMonitor {
 	}
 
     protected void deployBundle(File file) throws IOException, BundleException {
-        LOGGER.info("Deloying: " + file.getCanonicalPath());
+        LOGGER.info("Deploying: " + file.getCanonicalPath());
 
         InputStream in = new FileInputStream(file);
 
@@ -354,7 +353,6 @@ public class FileMonitor {
             Bundle bundle = getBundleForJarFile(file);
             if (bundle != null) {
                 changedBundles.add(bundle);
-                bundlesToUpdate.add(bundle);
             }
             else {
                 bundle = getContext().installBundle(file.getCanonicalFile().toURI().toString(), in);
@@ -494,16 +492,6 @@ public class FileMonitor {
         }
         changedBundles.clear();
 
-        for (Bundle bundle : bundlesToUpdate) {
-            try {
-                bundle.update();
-                LOGGER.info("Updated: " + bundle);
-
-            }
-            catch (BundleException e) {
-                LOGGER.warn("Failed to update bundle: " + bundle + ". Reason: " + e, e);
-            }
-        }
         for (Bundle bundle : bundlesToStart) {
             try {
                 bundle.start();
@@ -609,6 +597,7 @@ public class FileMonitor {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     protected File getFileValue(Dictionary properties, String key) {
         Object value = properties.get(key);
         if (value instanceof File) {
@@ -620,6 +609,7 @@ public class FileMonitor {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     protected Long getLongValue(Dictionary properties, String key) {
         Object value = properties.get(key);
         if (value instanceof Long) {
