@@ -141,6 +141,12 @@
             <prop key="startLocalConsole">true</prop>
             <prop key="startRemoteShell">true</prop>
             <prop key="remoteShellLocation">tcp://0.0.0.0:8100/</prop>
+            <prop key="clientKeyAlias">servicemix</prop>
+            <prop key="clientKeystore">RshKeystore</prop>
+            <prop key="clientTruststore">RshTruststore</prop>
+            <prop key="serverKeyAlias">servicemix</prop>
+            <prop key="serverKeystore">RshKeystore</prop>
+            <prop key="serverTruststore">RshTruststore</prop>
         </osgix:default-properties>
     </osgix:property-placeholder>
     

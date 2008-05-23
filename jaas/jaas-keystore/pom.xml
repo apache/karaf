@@ -28,56 +28,16 @@
     </parent>
 
     <groupId>org.apache.servicemix.kernel.jaas</groupId>
-    <artifactId>org.apache.servicemix.kernel.jaas.config</artifactId>
+    <artifactId>org.apache.servicemix.kernel.jaas.keystore</artifactId>
     <packaging>bundle</packaging>
     <version>1.0-m4-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: JAAS Config</name>
+    <name>Apache ServiceMix Kernel :: JAAS Keystore</name>
 
     <description>
         Provides the JAAS Config
     </description>
 
     <dependencies>
-        <dependency>
-            <groupId>org.apache.servicemix.kernel.jaas</groupId>
-            <artifactId>org.apache.servicemix.kernel.jaas.boot</artifactId>
-            <version>${pom.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <version>${felix.osgi.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.osgi</groupId>
-            <artifactId>spring-osgi-core</artifactId>
-            <version>${spring.osgi.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>${commons.logging.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>aopalliance</groupId>
-            <artifactId>aopalliance</artifactId>
-            <version>${aopalliance.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jmock</groupId>
-            <artifactId>jmock</artifactId>
-            <version>2.4.0</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -88,11 +48,8 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>
-                            ${artifactId};version=${project.version};-split-package:=merge-first
-                        </Export-Package>
-                        <Import-Package>*</Import-Package>
-                        <Private-Package>${artifactId}.impl</Private-Package>
+                        <Export-Package></Export-Package>
+                        <Import-Package>org.apache.servicemix.kernel.jaas.config</Import-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>
                 </configuration>

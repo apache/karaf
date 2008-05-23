@@ -123,6 +123,7 @@
 
                 <!-- JAAS -->
                 <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.config</include>
+                <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.keystore</include>
 
 		        <!-- GShell -->
                 <include>org.apache.geronimo.specs:geronimo-stax-api_1.0_spec</include>

@@ -36,6 +36,7 @@
     <modules>
         <module>jaas-boot</module>
         <module>jaas-config</module>
+        <module>jaas-keystore</module>
     </modules>
 
 </project>

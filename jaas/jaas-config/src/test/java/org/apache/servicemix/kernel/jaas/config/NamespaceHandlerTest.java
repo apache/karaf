@@ -32,6 +32,7 @@ import org.osgi.framework.Constants;
 import org.jmock.Mockery;
 import org.jmock.Expectations;
 import org.apache.servicemix.kernel.jaas.boot.ProxyLoginModule;
+import org.apache.servicemix.kernel.jaas.config.impl.Config;
 import junit.framework.TestCase;
 
 public class NamespaceHandlerTest extends TestCase {
@@ -52,6 +53,9 @@ public class NamespaceHandlerTest extends TestCase {
             one(bundleContext).registerService(with(any(String[].class)),
                                                with(any(Config.class)),
                                                with(any(Dictionary.class)));
+            one(bundleContext).registerService(with(any(String[].class)),
+                                               with(any(Config.class)),
+                                               with(any(Dictionary.class)));
         }});
         
         AbstractApplicationContext ctx = new ClassPathXmlApplicationContext(new String[] { "classpath:config.xml" }, false) {
@@ -62,6 +66,8 @@ public class NamespaceHandlerTest extends TestCase {
             }
         };
         ctx.refresh();
+
+        // Test realm
         Object obj = ctx.getBean("realm");
         assertNotNull(obj);
         assertTrue(obj instanceof Config);
@@ -88,5 +94,14 @@ public class NamespaceHandlerTest extends TestCase {
         assertEquals("value", options.get("key"));
         assertEquals("org.apache.servicemix.kernel.jaas.config.SimpleLoginModule", options.get(ProxyLoginModule.PROPERTY_MODULE));
         assertEquals("32", options.get(ProxyLoginModule.PROPERTY_BUNDLE));
+
+        // Test keystore
+        obj = ctx.getBean("keystore");
+        assertNotNull(obj);
+        assertTrue(obj instanceof KeystoreInstance);
+        KeystoreInstance ks = (KeystoreInstance) obj;
+        assertEquals("ks", ks.getName());
+        assertEquals(1, ks.getRank());
+        assertNotNull(ks.getPrivateKey("myalias"));
     }
 }

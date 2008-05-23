@@ -118,7 +118,7 @@ public class CreateCommand
 	private void copyFilteredResourceToDir(File target, String resource, HashMap<String, String> props) throws Exception {
 		File outFile = new File(target, resource);
 		if( !outFile.exists() ) {
-	        io.out.println("Creating file:@|bold "+outFile.getPath()+"|");
+	        io.out.println("Creating file: @|bold "+outFile.getPath()+"|");
 			InputStream is = CreateCommand.class.getResourceAsStream(resource);
 			try {
 				// Read it line at a time so that we can use the platform line ending when we write it out.
@@ -172,7 +172,7 @@ public class CreateCommand
 	private void mkdir(File serviceMixBase, String path) {
 		File file = new File(serviceMixBase, path);
 		if( !file.exists() ) {
-	        io.out.println("Creating dir:@|bold "+file.getPath()+"|");
+	        io.out.println("Creating dir:  @|bold "+file.getPath()+"|");
 			file.mkdirs();
 		}
 		

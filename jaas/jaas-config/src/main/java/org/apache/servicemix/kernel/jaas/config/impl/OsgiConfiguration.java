@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.kernel.jaas.config;
+package org.apache.servicemix.kernel.jaas.config.impl;
 
 import java.util.Map;
 import java.util.List;
@@ -23,6 +23,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.AppConfigurationEntry;
+
+import org.apache.servicemix.kernel.jaas.config.JaasRealm;
 
 public class OsgiConfiguration extends Configuration {
 

@@ -20,12 +20,15 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:osgi="http://www.springframework.org/schema/osgi"
        xmlns:jaas="http://servicemix.apache.org/jaas"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd
+  http://www.springframework.org/schema/osgi
+  http://www.springframework.org/schema/osgi/spring-osgi.xsd
   http://servicemix.apache.org/jaas
   http://servicemix.apache.org/schema/servicemix-jaas.xsd">
 
@@ -65,7 +68,15 @@
         </property>
     </bean>
 
-    <bean id="sslContextFactory" class="org.apache.geronimo.gshell.whisper.ssl.BogusSSLContextFactory" />
+    <bean id="sslContextFactory" class="org.apache.geronimo.gshell.whisper.transport.ssl.KeystoreSSLContextFactory">
+        <property name="keystoreManager" ref="keystoreManager" />
+        <property name="clientKeystore" value="${clientKeystore}" />
+        <property name="clientKeyAlias" value="${clientKeyAlias}" />
+        <property name="clientTruststore" value="${clientTruststore}" />
+        <property name="serverKeystore" value="${serverKeystore}" />
+        <property name="serverKeyAlias" value="${serverKeyAlias}" />
+        <property name="serverTruststore" value="${serverTruststore}" />
+     </bean>
 
     <bean id="sslTransportFactory" class="org.apache.geronimo.gshell.whisper.transport.ssl.SpringSslTransportFactory">
         <property name="contextFactory" ref="sslContextFactory" />
@@ -97,11 +108,13 @@
         </constructor-arg>
     </bean>
 
+    <osgi:reference id="keystoreManager" interface="org.apache.servicemix.kernel.jaas.config.KeystoreManager" cardinality="1..1" />
+
     <jaas:config id="RshClient">
         <jaas:module className="org.apache.geronimo.gshell.remote.client.auth.RemoteLoginModule" flags="required" />
     </jaas:config>
 
-    <jaas:config id="RshServer">
+    <jaas:config id="RshServer" rank="-1">
         <jaas:module className="org.apache.geronimo.gshell.remote.server.auth.BogusLoginModule" flags="required" />
     </jaas:config>
 

@@ -14,22 +14,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.kernel.jaas.config;
+package org.apache.servicemix.kernel.jaas.config.impl;
 
-import org.osgi.framework.BundleContext;
-import org.apache.servicemix.kernel.jaas.boot.ProxyLoginModule;
-import org.springframework.osgi.context.BundleContextAware;
+import java.util.Map;
 
-public class ProxyLoginModuleInitializer implements BundleContextAware {
+/**
+ * POJO for a login module.
+ * It contains the class name, flags and a map of options.
+ */
+public class Module {
 
-    private BundleContext bundleContext;
+    private String className;
+    private String flags;
+    private Map<String,String> options;
 
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
+    public String getClassName() {
+        return className;
     }
 
-    public void init() {
-        BundleContext context = bundleContext.getBundle(0).getBundleContext();
-        ProxyLoginModule.init(context);
+    public void setClassName(String className) {
+        this.className = className;
     }
+
+    public String getFlags() {
+        return flags;
+    }
+
+    public void setFlags(String flags) {
+        this.flags = flags;
+    }
+
+    public Map<String, String> getOptions() {
+        return options;
+    }
+
+    public void setOptions(Map<String, String> options) {
+        this.options = options;
+    }
+
 }

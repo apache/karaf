@@ -16,40 +16,24 @@
  */
 package org.apache.servicemix.kernel.jaas.config;
 
-import java.util.Map;
+import java.security.GeneralSecurityException;
 
-/**
- * POJO for a login module.
- * It contains the class name, flags and a map of options.
- */
-public class Module {
+public class KeystoreIsLocked extends GeneralSecurityException {
 
-    private String className;
-    private String flags;
-    private Map<String,String> options;
-
-    public String getClassName() {
-        return className;
+    public KeystoreIsLocked() {
+        super();
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public KeystoreIsLocked(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public String getFlags() {
-        return flags;
+    public KeystoreIsLocked(String msg) {
+        super(msg);
     }
 
-    public void setFlags(String flags) {
-        this.flags = flags;
-    }
-
-    public Map<String, String> getOptions() {
-        return options;
-    }
-
-    public void setOptions(Map<String, String> options) {
-        this.options = options;
+    public KeystoreIsLocked(Throwable cause) {
+        super(cause);
     }
 
 }

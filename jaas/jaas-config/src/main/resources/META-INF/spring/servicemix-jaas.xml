@@ -30,19 +30,32 @@
   http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
     <bean id="config"
-          class="org.apache.servicemix.kernel.jaas.config.OsgiConfiguration"
+          class="org.apache.servicemix.kernel.jaas.config.impl.OsgiConfiguration"
           init-method="init"
           destroy-method="close"/>
+
     <osgi:list id="realms"
                interface="org.apache.servicemix.kernel.jaas.config.JaasRealm"
                cardinality="0..N">
-        <osgi:listener ref="config"
-                       bind-method="register"
-                       unbind-method="unregister" />
+        <osgi:listener ref="config" bind-method="register" unbind-method="unregister" />
     </osgi:list>
 
     <bean id="proxyLoginModuleInitializer"
-          class="org.apache.servicemix.kernel.jaas.config.ProxyLoginModuleInitializer"
+          class="org.apache.servicemix.kernel.jaas.config.impl.ProxyLoginModuleInitializer"
           init-method="init"/>
+
+    <!-- Register the Straight-Through flow -->
+    <bean id="keystoreManager" class="org.apache.servicemix.kernel.jaas.config.impl.OsgiKeystoreManager" />
+    <osgi:service ref="keystoreManager">
+        <osgi:interfaces>
+            <value>org.apache.servicemix.kernel.jaas.config.KeystoreManager</value>
+        </osgi:interfaces>
+    </osgi:service>
+
+    <osgi:list id="keystores"
+               interface="org.apache.servicemix.kernel.jaas.config.KeystoreInstance"
+               cardinality="0..N">
+        <osgi:listener ref="keystoreManager" bind-method="register" unbind-method="unregister" />
+    </osgi:list>
 
 </beans>

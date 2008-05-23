@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.kernel.jaas.config;
+package org.apache.servicemix.kernel.jaas.config.impl;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -22,6 +22,7 @@ import java.util.HashMap;
 import javax.security.auth.login.AppConfigurationEntry;
 
 import org.apache.servicemix.kernel.jaas.boot.ProxyLoginModule;
+import org.apache.servicemix.kernel.jaas.config.JaasRealm;
 import org.springframework.osgi.context.BundleContextAware;
 import org.osgi.framework.BundleContext;
 

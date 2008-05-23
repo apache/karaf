@@ -56,7 +56,6 @@
             org.apache.commons.jexl*,
             org.codehaus.plexus.personality.plexus.lifecycle.phase*;-split-package:=merge-first,
             org.codehaus.plexus.util*,
-            META-INF.spring*
         </gshell.osgi.private>
     </properties>
 
@@ -64,6 +63,11 @@
         <dependency>
             <groupId>org.apache.servicemix.kernel</groupId>
             <artifactId>org.apache.servicemix.kernel.main</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.jaas</groupId>
+            <artifactId>org.apache.servicemix.kernel.jaas.config</artifactId>
             <version>${pom.version}</version>
         </dependency>
         <dependency>

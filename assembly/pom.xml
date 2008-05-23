@@ -183,7 +183,12 @@
           <groupId>org.apache.servicemix.kernel.jaas</groupId>
           <artifactId>org.apache.servicemix.kernel.jaas.config</artifactId>
           <version>${pom.version}</version>
-        </dependency>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.servicemix.kernel.jaas</groupId>
+          <artifactId>org.apache.servicemix.kernel.jaas.keystore</artifactId>
+          <version>${pom.version}</version>
+      </dependency>
     </dependencies>
     <build>
         <resources>

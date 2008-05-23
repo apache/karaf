@@ -131,6 +131,7 @@
 
                 <!-- JAAS -->
                 <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.config</include>
+                <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.keystore</include>
 
                 <!-- GShell -->
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.mina-${mina.version}</include>
