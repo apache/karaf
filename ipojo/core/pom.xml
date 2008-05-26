@@ -85,21 +85,21 @@
 							org.apache.felix.ipojo.handlers.lifecycle.controller
 						</Private-Package>
 						<Export-Package>
-							org.apache.felix.ipojo; version="0.8.0",
+							org.apache.felix.ipojo; version="0.9.0",
 							org.apache.felix.ipojo.metadata;
-							version="0.8.0",
+							version="0.9.0",
 							org.apache.felix.ipojo.architecture;
-							version="0.8.0",
+							version="0.9.0",
 							org.apache.felix.ipojo.parser;
-							version="0.8.0",
+							version="0.9.0",
 							org.apache.felix.ipojo.util;
-							version="0.8.0",
+							version="0.9.0",
 							org.apache.felix.ipojo.handlers.dependency;
-							version="0.8.0",
+							version="0.9.0",
 							org.apache.felix.ipojo.handlers.providedservice;
-							version="0.8.0",
+							version="0.9.0",
 							org.apache.felix.ipojo.context;
-							version="0.8.0", org.osgi.service.cm,
+							version="0.9.0", org.osgi.service.cm,
 							org.osgi.service.log
 						</Export-Package>
 						<Include-Resource>
