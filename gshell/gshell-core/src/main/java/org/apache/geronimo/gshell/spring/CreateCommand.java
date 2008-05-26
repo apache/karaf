@@ -44,39 +44,32 @@ public class CreateCommand
     private String instance = null;
 
     protected Object doExecute() throws Exception {
-    	
-    	try {
-			File serviceMixBase = new File(instance).getCanonicalFile();
-			io.out.println("Creating new instance at: @|bold " + serviceMixBase + "|");
-			
-			mkdir(serviceMixBase, "bin");
-			mkdir(serviceMixBase, "etc");
-			mkdir(serviceMixBase, "system");
-			mkdir(serviceMixBase, "deploy");
-			mkdir(serviceMixBase, "data");
-			
-			copyResourceToDir(serviceMixBase, "etc/config.properties", true);
-			copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.features.cfg", true);
-			copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.shell.cfg", true);
-			copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.logging.cfg", true);
-            copyResourceToDir(serviceMixBase, "etc/startup.properties", true);
-            copyResourceToDir(serviceMixBase, "etc/system.properties", true);
+        File serviceMixBase = new File(instance).getCanonicalFile();
+        io.out.println("Creating new instance at: @|bold " + serviceMixBase + "|");
 
-			HashMap<String, String> props = new HashMap<String, String>();
-			props.put("${servicemix.home}", System.getProperty("servicemix.home"));
-			props.put("${servicemix.base}", serviceMixBase.getPath());
-			if( System.getProperty("os.name").startsWith("Win") ) {
-			    copyFilteredResourceToDir(serviceMixBase, "bin/servicemix.bat", props);
-			} else {
-			    copyFilteredResourceToDir(serviceMixBase, "bin/servicemix", props);
-			    chmod(new File(serviceMixBase, "bin/servicemix"), "a+x");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
+        mkdir(serviceMixBase, "bin");
+        mkdir(serviceMixBase, "etc");
+        mkdir(serviceMixBase, "system");
+        mkdir(serviceMixBase, "deploy");
+        mkdir(serviceMixBase, "data");
 
-        return 0;
+        copyResourceToDir(serviceMixBase, "etc/config.properties", true);
+        copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.features.cfg", true);
+        copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.shell.cfg", true);
+        copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.logging.cfg", true);
+        copyResourceToDir(serviceMixBase, "etc/startup.properties", true);
+        copyResourceToDir(serviceMixBase, "etc/system.properties", true);
+
+        HashMap<String, String> props = new HashMap<String, String>();
+        props.put("${servicemix.home}", System.getProperty("servicemix.home"));
+        props.put("${servicemix.base}", serviceMixBase.getPath());
+        if( System.getProperty("os.name").startsWith("Win") ) {
+            copyFilteredResourceToDir(serviceMixBase, "bin/servicemix.bat", props);
+        } else {
+            copyFilteredResourceToDir(serviceMixBase, "bin/servicemix", props);
+            chmod(new File(serviceMixBase, "bin/servicemix"), "a+x");
+        }
+        return SUCCESS;
     }
 
 	private void copyResourceToDir(File target, String resource, boolean text) throws Exception {
@@ -140,18 +133,20 @@ public class CreateCommand
 	}
 
 	private void safeClose(InputStream is) throws IOException {
-		if( is==null)
+		if (is == null) {
 			return;
-		try {
+        }
+        try {
 			is.close();
 		} catch (Throwable ignore) {
 		}
 	}
 	
 	private void safeClose(OutputStream is) throws IOException {
-		if( is==null)
+		if (is == null) {
 			return;
-		try {
+        }
+        try {
 			is.close();
 		} catch (Throwable ignore) {
 		}
@@ -175,7 +170,6 @@ public class CreateCommand
 	        io.out.println("Creating dir:  @|bold "+file.getPath()+"|");
 			file.mkdirs();
 		}
-		
 	}
 	
 	private int chmod(File serviceFile, String mode) throws Exception {
@@ -183,11 +177,15 @@ public class CreateCommand
 		builder.command("chmod", mode, serviceFile.getCanonicalPath());
         Process p = builder.start();
 
-        PumpStreamHandler handler = new PumpStreamHandler(io.inputStream, io.outputStream, io.errorStream);
-        handler.attach(p);
-        handler.start();
+        // gnodet: Fix SMX4KNL-46: cpu goes to 100% after running the 'admin create' command
+        // Not sure exactly what happens, but commenting the process io redirection seems
+        // to work around the problem.
+        //
+        //PumpStreamHandler handler = new PumpStreamHandler(io.inputStream, io.outputStream, io.errorStream);
+        //handler.attach(p);
+        //handler.start();
         int status = p.waitFor();
-        handler.stop();
+        //handler.stop();
         return status;
 	}
 
