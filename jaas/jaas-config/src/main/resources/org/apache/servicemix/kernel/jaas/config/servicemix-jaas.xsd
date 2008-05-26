@@ -58,9 +58,6 @@
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="beans:identifiedType">
-                    <xs:sequence>
-
-                    </xs:sequence>
                     <xs:attribute name="name" use="optional" type="xs:string" />
                     <xs:attribute name="rank" use="optional" default="0" type="xs:int" />
                     <xs:attribute name="publish" use="optional" default="true" type="xs:boolean" />
