@@ -242,7 +242,7 @@ jre-1.4= \
  org.xml.sax.helpers; \
  version="1.4.0"
 
-jre-1.5= \
+jre-1.5=, \
  javax.accessibility; \
  javax.activity; \
  javax.imageio; \
