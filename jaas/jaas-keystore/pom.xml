@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <!--
@@ -23,13 +24,13 @@
     <parent>
         <groupId>org.apache.servicemix.kernel.jaas</groupId>
         <artifactId>jaas</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0-m4-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.servicemix.kernel.jaas</groupId>
     <artifactId>org.apache.servicemix.kernel.jaas.keystore</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-m4-SNAPSHOT</version>
     <name>Apache ServiceMix Kernel :: JAAS Keystore</name>
 
     <description>
@@ -47,7 +48,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package />
+                        <Export-Package></Export-Package>
                         <Import-Package>org.apache.servicemix.kernel.jaas.config</Import-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>
