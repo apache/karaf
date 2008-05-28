@@ -15,6 +15,35 @@
  * limitations under the License.
  */
 
+
+                  Apache ServiceMix Kernel 1.0-rc1
+                  ================================
+
+This first Release Candidate of Apache ServiceMix Kernel includes a security framework based on
+JAAS allowing authentication using JAAS realms deployed at runtime and also allow keystores and
+trustores to be deployed and accessed through OSGi.  This allow the remote console to be secured
+correctly (if the console is activated in a production environment, we strongly recommand to 
+deploy a custom JAAS realm and new keystores when using the SSL connection).  A few bugs have been
+fixed too.
+
+The number of RCs has not been fixed and it will depend on the feedback we obtain from this release.
+
+** Bug
+    * [SMX4KNL-38] - Fix NullPointerException instead of Command not found in the console
+    * [SMX4KNL-40] - Remote console does not display output
+    * [SMX4KNL-41] - When using the remote command on the client from the command line, the process does not exit correctly
+    * [SMX4KNL-44] - Changed bundles restarted twice
+    * [SMX4KNL-45] - The "log display" command does not display anything when running from an instance that has been created using the "admin create" command
+    * [SMX4KNL-46] - After using the 'admin create' command, cpu goes to 100% until another command is entered
+
+** Improvement
+    * [SMX4KNL-39] - Make bundle locations for SMX configurable
+
+** New Feature
+    * [SMX4KNL-35] - Secure the connection between the client and the kernel in some way
+    * [SMX4KNL-37] - JAAS support
+
+
                   Apache ServiceMix Kernel 1.0-m3
                   ================================
 
