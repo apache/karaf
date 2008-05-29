@@ -35,6 +35,7 @@ import org.osgi.framework.BundleContext;
 public abstract class DependencyActivatorBase implements BundleActivator {
     private BundleContext m_context;
     private DependencyManager m_manager;
+    private Logger m_logger;
     
     /**
      * Initialize the dependency manager. Here you can add all services and their dependencies.
@@ -70,7 +71,8 @@ public abstract class DependencyActivatorBase implements BundleActivator {
      */
     public void start(BundleContext context) throws Exception {
         m_context = context;
-        m_manager = new DependencyManager(context);
+        m_logger = new Logger(context);
+        m_manager = new DependencyManager(context, m_logger);
         init(m_context, m_manager);
     }
 
@@ -93,7 +95,7 @@ public abstract class DependencyActivatorBase implements BundleActivator {
      * @return the new service
      */
     public Service createService() {
-        return new ServiceImpl(m_context);
+        return new ServiceImpl(m_context, m_logger);
     }
     
     /**
@@ -102,7 +104,7 @@ public abstract class DependencyActivatorBase implements BundleActivator {
      * @return the service dependency
      */
     public ServiceDependency createServiceDependency() {
-        return new ServiceDependency(m_context);
+        return new ServiceDependency(m_context, m_logger);
     }
     
     /**
@@ -111,7 +113,7 @@ public abstract class DependencyActivatorBase implements BundleActivator {
      * @return the configuration dependency
      */
     public ConfigurationDependency createConfigurationDependency() {
-    	return new ConfigurationDependency(m_context);
+    	return new ConfigurationDependency(m_context, m_logger);
     }
 
     /**

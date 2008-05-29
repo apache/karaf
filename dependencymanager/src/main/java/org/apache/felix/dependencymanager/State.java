@@ -3,17 +3,19 @@ package org.apache.felix.dependencymanager;
 import java.util.List;
 
 /**
- * Encapsulates the current state of the dependencies of a service.
+ * Encapsulates the current state of the dependencies of a service. A state is
+ * basically an immutable value object.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public final class State {
-	public static final String[] STATES = { "?", "inactive", "waiting for required", "tracking optional" };
-	public static final int INACTIVE = 1;
-	public static final int WAITING_FOR_REQUIRED = 2;
-	public static final int TRACKING_OPTIONAL = 3;
+    private static final String[] STATES = { "?", "inactive", "waiting for required", "tracking optional" };
+    private static final int INACTIVE = 1;
+    private static final int WAITING_FOR_REQUIRED = 2;
+    private static final int TRACKING_OPTIONAL = 3;
 	private final List m_deps;
 	private final int m_state;
+    private String m_stringValue;
 	
 	/**
 	 * Creates a new state instance.
@@ -46,10 +48,6 @@ public final class State {
     	}
 	}
 	
-	public int getState() {
-		return m_state;
-	}
-	
 	public boolean isInactive() {
 		return m_state == INACTIVE;
 	}
@@ -67,13 +65,17 @@ public final class State {
 	}
 	
 	public String toString() {
-		StringBuffer buf = new StringBuffer();
-		buf.append("State[" + STATES[m_state] + "|");
-		List deps = m_deps;
-    	for (int i = 0; i < deps.size(); i++) {
-    		Dependency dep = (Dependency) deps.get(i);
-    		buf.append("(" + dep + (dep.isRequired() ? " R" : " O") + (dep.isAvailable() ? " +" : " -") + ")");
-    	}
-    	return buf.toString();
+	    if (m_stringValue == null) {
+	        // we only need to determine this once, but we do it lazily
+	        StringBuffer buf = new StringBuffer();
+    		buf.append("State[" + STATES[m_state] + "|");
+    		List deps = m_deps;
+        	for (int i = 0; i < deps.size(); i++) {
+        		Dependency dep = (Dependency) deps.get(i);
+        		buf.append("(" + dep + (dep.isRequired() ? " R" : " O") + (dep.isAvailable() ? " +" : " -") + ")");
+        	}
+        	m_stringValue = buf.toString();
+	    }
+        return m_stringValue;
 	}
 }

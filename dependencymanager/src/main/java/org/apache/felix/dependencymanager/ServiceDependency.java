@@ -50,14 +50,17 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
     private boolean m_autoConfig;
     private ServiceReference m_reference;
     private Object m_serviceInstance;
+    private final Logger m_logger;
     
     /**
      * Creates a new service dependency.
      * 
      * @param context the bundle context
+     * @param logger 
      */
-    public ServiceDependency(BundleContext context) {
+    public ServiceDependency(BundleContext context, Logger logger) {
         m_context = context;
+        m_logger = logger;
         m_autoConfig = true;
     }
 
@@ -171,8 +174,9 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
         if ((callbackInstance != null) && (m_callbackAdded != null)) {
             try {
                 invokeCallbackMethod(callbackInstance, m_callbackAdded, reference, serviceInstance);
-            } catch (NoSuchMethodException e) {
-                // silently ignore this
+            }
+            catch (NoSuchMethodException e) {
+                m_logger.log(Logger.LOG_ERROR, "Could not invoke method " + m_callbackAdded + " on " + callbackInstance + ".", e);
             }
         }
     }
@@ -197,7 +201,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
                 invokeCallbackMethod(callbackInstance, m_callbackChanged, reference, serviceInstance);
             }
             catch (NoSuchMethodException e) {
-                // ignore when the service has no such method
+                m_logger.log(Logger.LOG_ERROR, "Could not invoke method " + m_callbackChanged + " on " + callbackInstance + ".", e);
             }
         }
     }
@@ -230,7 +234,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
                 invokeCallbackMethod(callbackInstance, m_callbackRemoved, reference, serviceInstance);
             }
             catch (NoSuchMethodException e) {
-                // ignore when the service has no such method
+                m_logger.log(Logger.LOG_ERROR, "Could not invoke method " + m_callbackRemoved + " on " + callbackInstance + ".", e);
             }
         }
     }
@@ -275,6 +279,9 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
                 currentClazz = currentClazz.getSuperclass();
             }
         }
+        if (!done && currentClazz == null) {
+            throw new NoSuchMethodException(methodName);
+        }
     }
 
     private boolean invokeMethod(Object object, Class clazz, String name, Class[][] signatures, Object[][] parameters, boolean isSuper) {
@@ -289,14 +296,18 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
                         m.invoke(object, parameters[i]);
                     }
                     catch (InvocationTargetException e) {
-                        // thrown by the underlying method, we ignore this exception
-                        // and still return true because we could invoke the method
+                        m_logger.log(Logger.LOG_ERROR, "Exception while invoking method " + m + ".", e);
                     }
+                    // we did find and invoke the method, so we return true
                     return true;
                 }
             }
+            catch (NoSuchMethodException e) {
+                // ignore this and keep looking
+            }
             catch (Exception e) {
-                // ignore any exception and keep looking for a method
+                // could not even try to invoke the method
+                m_logger.log(Logger.LOG_ERROR, "Exception while trying to invoke method " + m + ".", e);
             }
         }
         return false;

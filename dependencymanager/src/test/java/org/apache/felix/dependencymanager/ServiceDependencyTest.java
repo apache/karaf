@@ -24,8 +24,8 @@ public class ServiceDependencyTest extends TestCase {
 		// start the actual test
 		c1.replay();
         c2.replay();
-		DependencyManager dm = new DependencyManager(context);
-		Service service = new ServiceImpl(context).setImplementation(svc);
+		DependencyManager dm = new DependencyManager(context, null);
+		Service service = new ServiceImpl(context, null).setImplementation(svc);
 		dm.add(service);
 		dm.remove(service);
 		// verify the results
@@ -59,8 +59,8 @@ public class ServiceDependencyTest extends TestCase {
 		c1.replay();
         c2.replay();
         c3.replay();
-		DependencyManager dm = new DependencyManager(context);
-		Service service = new ServiceImpl(context)
+		DependencyManager dm = new DependencyManager(context, null);
+		Service service = new ServiceImpl(context, null)
 			.setImplementation(svc)
 			.add(dependency);
 		dm.add(service);

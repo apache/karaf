@@ -31,10 +31,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
 /**
- * TODO copied this from the OSGi specification, but it's not clear if that
- * is allowed or not, for now I modified as little as possible but I might
- * integrate only the parts I want as soon as this code is finished. Perhaps
- * it would be better to borrow the Knopflerfish implementation here.
+ * Copied this from the OSGi specification and made a slight modification.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */

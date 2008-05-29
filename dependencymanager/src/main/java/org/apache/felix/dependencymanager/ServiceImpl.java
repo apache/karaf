@@ -20,6 +20,7 @@ package org.apache.felix.dependencymanager;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -80,9 +81,13 @@ public class ServiceImpl implements Service {
 	private Object m_compositionManager;
 	private String m_compositionManagerGetMethod;
 	private Object m_compositionManagerInstance;
+	
+	// internal logging
+    private final Logger m_logger;
 
-    public ServiceImpl(BundleContext context) {
-    	m_state = new State((List) m_dependencies.clone(), false);
+    public ServiceImpl(BundleContext context, Logger logger) {
+    	m_logger = logger;
+        m_state = new State((List) m_dependencies.clone(), false);
         m_context = context;
         m_callbackInit = "init";
         m_callbackStart = "start";
@@ -352,30 +357,50 @@ public class ServiceImpl implements Service {
 	private void stateListenersStarting() {
 		ServiceStateListener[] list = getListeners();
 		for (int i = 0; i < list.length; i++) {
-			list[i].starting(this);
+		    try {
+		        list[i].starting(this);
+		    }
+		    catch (Throwable t) {
+		        m_logger.log(Logger.LOG_ERROR, "Error invoking listener starting method.", t);
+		    }
 		}
 	}
 
 	private void stateListenersStarted() {
-		ServiceStateListener[] list = getListeners();
-		for (int i = 0; i < list.length; i++) {
-			list[i].started(this);
-		}
-	}
+        ServiceStateListener[] list = getListeners();
+        for (int i = 0; i < list.length; i++) {
+            try {
+                list[i].started(this);
+            }
+            catch (Throwable t) {
+                m_logger.log(Logger.LOG_ERROR, "Error invoking listener started method.", t);
+            }
+        }
+    }
 
-	private void stateListenersStopping() {
-		ServiceStateListener[] list = getListeners();
-		for (int i = 0; i < list.length; i++) {
-			list[i].stopping(this);
-		}
-	}
+    private void stateListenersStopping() {
+        ServiceStateListener[] list = getListeners();
+        for (int i = 0; i < list.length; i++) {
+            try {
+                list[i].stopping(this);
+            }
+            catch (Throwable t) {
+                m_logger.log(Logger.LOG_ERROR, "Error invoking listener stopping method.", t);
+            }
+        }
+    }
 
-	private void stateListenersStopped() {
-		ServiceStateListener[] list = getListeners();
-		for (int i = 0; i < list.length; i++) {
-			list[i].stopped(this);
-		}
-	}
+    private void stateListenersStopped() {
+        ServiceStateListener[] list = getListeners();
+        for (int i = 0; i < list.length; i++) {
+            try {
+                list[i].stopped(this);
+            }
+            catch (Throwable t) {
+                m_logger.log(Logger.LOG_ERROR, "Error invoking listener stopped method.", t);
+            }
+        }
+    }
 
 	private ServiceStateListener[] getListeners() {
 		synchronized (m_stateListeners) {
@@ -443,7 +468,12 @@ public class ServiceImpl implements Service {
                 	Method method = clazz.getDeclaredMethod(name, null);
 	                	if (method != null) {
 	                		method.setAccessible(true);
-	                		method.invoke(m_serviceInstance, null);
+	                		try {
+    	                		method.invoke(m_serviceInstance, null);
+	                		}
+	                		catch (InvocationTargetException e) {
+	                		    m_logger.log(Logger.LOG_ERROR, "Exception while invoking method " + method + ".", e);
+	                		}
 	                		return;
 	                	}
                 	}
@@ -454,7 +484,7 @@ public class ServiceImpl implements Service {
                 }
             }
             catch (Exception e) {
-                throw new RuntimeException(e);
+                m_logger.log(Logger.LOG_ERROR, "Error trying to invoke method named " + name + ".", e);
             }
         }
     }
@@ -512,19 +542,8 @@ public class ServiceImpl implements Service {
 	            try {
 	            	m_serviceInstance = createInstance((Class) m_implementation);
 	            }
-	            catch (InstantiationException e) {
-	                // TODO handle this exception
-	                e.printStackTrace();
-	            }
-	            catch (IllegalAccessException e) {
-	                // TODO handle this exception
-	                e.printStackTrace();
-	            } catch (SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchMethodException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+	            catch (Exception e) {
+	                m_logger.log(Logger.LOG_ERROR, "Could not create service instance of class " + m_implementation + ".", e);
 				}
 	        }
 	        else {
@@ -535,20 +554,9 @@ public class ServiceImpl implements Service {
 		        			try {
 								factory = createInstance((Class) m_instanceFactory);
 							}
-		        			catch (InstantiationException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-		        			catch (IllegalAccessException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (SecurityException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (NoSuchMethodException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+		                    catch (Exception e) {
+		                        m_logger.log(Logger.LOG_ERROR, "Could not create factory instance of class " + m_instanceFactory + ".", e);
+		                    }
 		        		}
 		        		else {
 		        			factory = m_instanceFactory;
@@ -560,21 +568,22 @@ public class ServiceImpl implements Service {
 		        		// could be ???
 		        	}
 		        	if (factory == null) {
-		        		throw new IllegalStateException("Factory cannot be null");
+                        m_logger.log(Logger.LOG_ERROR, "Factory cannot be null.");
 		        	}
 		        	try {
 						Method m = factory.getClass().getDeclaredMethod(m_instanceFactoryCreateMethod, null);
 						m_serviceInstance = m.invoke(factory, null);
 					}
 		        	catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+	                    m_logger.log(Logger.LOG_ERROR, "Could not create service instance using factory " + factory + " method " + m_instanceFactoryCreateMethod + ".", e);
 					}
 	        	}
 	        	if (m_implementation == null) {
-	        		throw new IllegalStateException("Implementation cannot be null");
+                    m_logger.log(Logger.LOG_ERROR, "Implementation cannot be null.");
 	        	}
-	            m_serviceInstance = m_implementation;
+	        	if (m_serviceInstance == null) {
+	        	    m_serviceInstance = m_implementation;
+	        	}
 	        }
 	        // configure the bundle context
 	        configureImplementation(BundleContext.class, m_context);
@@ -704,8 +713,8 @@ public class ServiceImpl implements Service {
 					instances = (Object[]) m.invoke(m_compositionManagerInstance, null);
 				}
 	    		catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+                    m_logger.log(Logger.LOG_ERROR, "Could not obtain instances from the composition manager.", e);
+                    return;
 				}
     		}
     	}
@@ -728,29 +737,8 @@ public class ServiceImpl implements Service {
 		                        }
 		                    }
 		                    catch (Exception e) {
-		                        System.err.println("Exception while trying to set " + fields[j].getName() +
-		                            " of type " + fields[j].getType().getName() +
-		                            " by classloader " + fields[j].getType().getClassLoader() +
-		                            " which should equal type " + clazz.getName() +
-		                            " by classloader " + clazz.getClassLoader() +
-		                            " of type " + serviceClazz.getName() +
-		                            " by classloader " + serviceClazz.getClassLoader() +
-		                            " on " + serviceInstance +
-		                            " by classloader " + serviceInstance.getClass().getClassLoader() +
-		                            "\nDumping stack:"
-		                        );
-		                        e.printStackTrace();
-		                        System.out.println("C: " + clazz);
-		                        System.out.println("I: " + instance);
-		                        System.out.println("I:C: " + instance.getClass().getClassLoader());
-		                        Class[] classes = instance.getClass().getInterfaces();
-		                        for (int k = 0; k < classes.length; k++) {
-		                            Class c = classes[k];
-		                            System.out.println("I:C:I: " + c);
-		                            System.out.println("I:C:I:C: " + c.getClassLoader());
-		                        }
-		                        System.out.println("F: " + fields[j]);
-		                        throw new IllegalStateException("Could not set field " + fields[j].getName() + " on " + serviceInstance);
+		                        m_logger.log(Logger.LOG_ERROR, "Could not set field " + fields[j], e);
+		                        return;
 		                    }
 		                }
 		            }

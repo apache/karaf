@@ -30,16 +30,19 @@ import org.osgi.framework.BundleContext;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class DependencyManager {
-    private BundleContext m_context;
+    private final BundleContext m_context;
+    private final Logger m_logger;
     private List m_services = Collections.synchronizedList(new ArrayList());
 
     /**
      * Creates a new dependency manager.
      * 
      * @param context the bundle context
+     * @param logger 
      */
-    public DependencyManager(BundleContext context) {
+    public DependencyManager(BundleContext context, Logger logger) {
         m_context = context;
+        m_logger = logger;
     }
     
     /**
@@ -70,7 +73,7 @@ public class DependencyManager {
      * @return the new service
      */
     public Service createService() {
-        return new ServiceImpl(m_context);
+        return new ServiceImpl(m_context, m_logger);
     }
     
     /**
@@ -79,7 +82,11 @@ public class DependencyManager {
      * @return the service dependency
      */
     public ServiceDependency createServiceDependency() {
-        return new ServiceDependency(m_context);
+        return new ServiceDependency(m_context, m_logger);
+    }
+    
+    public ConfigurationDependency createConfigurationDependency() {
+        return new ConfigurationDependency(m_context, m_logger);
     }
     
     /**

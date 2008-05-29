@@ -54,19 +54,30 @@ public class ConfigurationDependency implements Dependency, ManagedService {
 	private volatile Service m_service;
 	private Dictionary m_settings;
 	private boolean m_propagate;
+    private final Logger m_logger;
 	
-	public ConfigurationDependency(BundleContext context) {
+	public ConfigurationDependency(BundleContext context, Logger logger) {
 		m_context = context;
+        m_logger = logger;
 	}
 	
 	public synchronized boolean isAvailable() {
 		return m_settings != null;
 	}
 
+	/**
+	 * Will always return <code>true</code> as optional configuration dependencies
+	 * do not make sense. You might as well just implement <code>ManagedService</code>
+	 * yourself in those cases.
+	 */
 	public boolean isRequired() {
 		return true;
 	}
 	
+	/**
+	 * Returns <code>true</code> when configuration properties should be propagated
+	 * as service properties.
+	 */
 	public boolean isPropagated() {
 		return m_propagate;
 	}
@@ -104,11 +115,13 @@ public class ConfigurationDependency implements Dependency, ManagedService {
 				// the "old" configuration to stay in effect
 			}
 			else {
-				throw new IllegalStateException("Could not invoke updated on implementation");
+				m_logger.log(Logger.LOG_ERROR, "Service " + m_service + " with configuration dependency " + this + " does not implement ManagedService.");
+				return;
 			}
 		}
 		else {
-			throw new IllegalStateException("Could not instantiate implementation");
+		    m_logger.log(Logger.LOG_ERROR, "Service " + m_service + " with configuration dependency " + this + " could not be instantiated.");
+		    return;
 		}
 		// if these settings did not cause a configuration exception, we determine
 		// if they have caused the dependency state to change
@@ -128,12 +141,21 @@ public class ConfigurationDependency implements Dependency, ManagedService {
 		}
 	}
 
+	/**
+	 * Sets the <code>service.pid</code> of the configuration you
+	 * are depending on.
+	 */
 	public ConfigurationDependency setPid(String pid) {
 		ensureNotActive();
 		m_pid = pid;
 		return this;
 	}
-	
+
+	/**
+	 * Sets propagation of the configuration properties to the service
+	 * properties. Any additional service properties specified directly
+	 * are merged with these.
+	 */
 	public ConfigurationDependency setPropagate(boolean propagate) {
 		ensureNotActive();
 		m_propagate = propagate;
