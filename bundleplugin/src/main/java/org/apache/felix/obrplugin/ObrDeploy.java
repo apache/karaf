@@ -21,6 +21,7 @@ package org.apache.felix.obrplugin;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -88,6 +89,13 @@ public final class ObrDeploy extends AbstractMojo
      * @parameter expression="${altDeploymentRepository}"
      */
     private String altDeploymentRepository;
+    
+    /**
+     * OBR File deployment repository  Format: id::layout::url
+     * 
+     * @parameter expression="${url}"
+     */
+    private String url;
 
     /**
      * Local Repository.
@@ -139,6 +147,16 @@ public final class ObrDeploy extends AbstractMojo
      * Attached doc artifact
      */
     private Artifact m_docArtifact;
+    
+    /**
+     * Optional URL prefix.
+     * This prefix is used to compute an absoluteURL for the deployed resource.
+     * The resulting URL is computed by appending the relative artifact path to
+     * the prefix. 
+     *
+     * @parameter expression="${prefix}"
+     */
+    private URL prefix;
 
 
     public void execute() throws MojoExecutionException
@@ -205,6 +223,18 @@ public final class ObrDeploy extends AbstractMojo
 
             Config userConfig = new Config();
             userConfig.setRemoteFile( true );
+            
+            // If a prefix is specified, use an absolute URL composed from the prefix.
+            if (prefix != null) 
+            {
+                getLog().info("Prefix used: " + prefix);
+                URI bundleJar =  ObrUtils.getArtifactURI( localRepository, project.getArtifact() );
+                String relative = ObrUtils.getRelativeURI( ObrUtils.toFileURI( mavenRepository ),  bundleJar).toASCIIString();
+                URL resourceURL = new URL(prefix, relative);
+                getLog().info("Bundle URI : " + resourceURL);
+                userConfig.setRemoteBundle(resourceURL.toURI());
+                userConfig.setPathRelative(false);
+            }
 
             update = new ObrUpdate( repositoryXml, obrXmlFile, project, mavenRepository, userConfig, log );
             update.parseRepositoryXml();
@@ -247,15 +277,29 @@ public final class ObrDeploy extends AbstractMojo
 
     private void openRepositoryConnection( RemoteFileManager remoteFile ) throws MojoExecutionException
     {
-        if ( deploymentRepository == null && altDeploymentRepository == null )
+        if ( deploymentRepository == null && altDeploymentRepository == null && url == null)
         {
             String msg = "Deployment failed: repository element was not specified in the pom inside"
-                + " distributionManagement element or in -DaltDeploymentRepository=id::layout::url parameter";
+                + " distributionManagement element or in -DaltDeploymentRepository=id::layout::url " +
+                "or -Durl=id::layout::url parameter";
 
             throw new MojoExecutionException( msg );
         }
+        
+        if (url != null)
+        {
+            getLog().info( "Using obr-specific alternative deployment repository " + url );
 
-        if ( altDeploymentRepository != null )
+            Matcher matcher = ALT_REPO_SYNTAX_PATTERN.matcher( url );
+            if ( !matcher.matches() )
+            {
+                throw new MojoExecutionException( "Invalid syntax for OBR-specific alternative repository \""
+                    + url + "\". Use \"id::layout::url\"." );
+            }
+            
+            remoteFile.connect( matcher.group( 1 ).trim(), matcher.group( 3 ).trim() );
+
+        } else if ( altDeploymentRepository != null )
         {
             getLog().info( "Using alternate deployment repository " + altDeploymentRepository );
 

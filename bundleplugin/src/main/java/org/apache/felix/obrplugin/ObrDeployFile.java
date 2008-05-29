@@ -21,8 +21,11 @@ package org.apache.felix.obrplugin;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -94,6 +97,13 @@ public final class ObrDeployFile extends AbstractFileMojo
      * @parameter expression="${bundleUrl}"
      */
     private String bundleUrl;
+    
+    /**
+     * Optional URL prefix
+     *
+     * @parameter expression="${prefix}" default-value="http://repo1.maven.org/maven2/"
+     */
+    private URL prefix;
 
     /**
      * Local Repository.
@@ -119,13 +129,37 @@ public final class ObrDeployFile extends AbstractFileMojo
      * @component
      */
     private WagonManager m_wagonManager;
+    
+    /**
+     * The Maven project.
+     * 
+     * @parameter expression="${project}"
+     * @readonly
+     */
+    private MavenProject maven_project;
 
 
     public void execute() throws MojoExecutionException
     {
-        MavenProject project = getProject();
-        String projectType = project.getPackaging();
+        // Is a project attached to this build ?
+        MavenProject project = null;
+        URI obrXmlFile = null;
+        if (maven_project == null) 
+        {
+            // No : compute a project from the arguments
+            project = getProject();
+            obrXmlFile = ObrUtils.toFileURI( obrXml );
 
+        } 
+        else 
+        {
+            // Yes : use the attached project and OBR file
+            project = maven_project;
+            obrXmlFile = ObrUtils.findObrXml( project.getResources() );
+        }
+        
+        
+        String projectType = project.getPackaging();
         // ignore unsupported project types, useful when bundleplugin is configured in parent pom
         if ( !supportedProjectTypes.contains( projectType ) )
         {
@@ -151,8 +185,7 @@ public final class ObrDeployFile extends AbstractFileMojo
         Log log = getLog();
         ObrUpdate update;
 
-        RemoteFileManager remoteFile = new RemoteFileManager( m_wagonManager, settings, log );
-        remoteFile.connect( repositoryId, url );
+        RemoteFileManager remoteFile = openConnection();
 
         // ======== LOCK REMOTE OBR ========
         log.info( "LOCK " + remoteFile + '/' + repositoryName );
@@ -168,7 +201,6 @@ public final class ObrDeployFile extends AbstractFileMojo
             String mavenRepository = localRepository.getBasedir();
 
             URI repositoryXml = downloadedRepositoryXml.toURI();
-            URI obrXmlFile = ObrUtils.toFileURI( obrXml );
             URI bundleJar;
 
             if ( null == file )
@@ -182,16 +214,30 @@ public final class ObrDeployFile extends AbstractFileMojo
 
             Config userConfig = new Config();
             userConfig.setRemoteFile( true );
-
+            
             if ( null != bundleUrl )
             {
                 // public URL differs from the bundle file location
-                userConfig.setRemoteBundle( URI.create( bundleUrl ) );
+                URI resourceURL = URI.create( bundleUrl );
+                userConfig.setRemoteBundle( resourceURL );
+                getLog().info("Bundle URI : " + resourceURL);
+
             }
             else if ( null != file )
             {
                 // assume file will be deployed in remote repository, so find the remote relative location
-                userConfig.setRemoteBundle( URI.create( localRepository.pathOf( project.getArtifact() ) ) );
+                URI resourceURL = URI.create( localRepository.pathOf( project.getArtifact() ) );
+                userConfig.setRemoteBundle( resourceURL );
+                getLog().info("Bundle URI : " + resourceURL);
+            } 
+            else 
+            {
+                // assume that we have an already deployed artifact accessible at the public URL composed by : prefix/maven_path
+                getLog().info("Prefix used: " + prefix);
+                String relative = ObrUtils.getRelativeURI( ObrUtils.toFileURI( mavenRepository ),  bundleJar).toASCIIString();
+                URL resourceURL = new URL(prefix, relative);
+                getLog().info("Bundle URI : " + resourceURL);
+                userConfig.setRemoteBundle(resourceURL.toURI());
             }
 
             update = new ObrUpdate( repositoryXml, obrXmlFile, project, mavenRepository, userConfig, log );
@@ -224,5 +270,24 @@ public final class ObrDeployFile extends AbstractFileMojo
                 downloadedRepositoryXml.delete();
             }
         }
+    }
+    
+    private static final Pattern ALT_REPO_SYNTAX_PATTERN = Pattern.compile( "(.+)::(.+)::(.+)" );
+
+    
+    private RemoteFileManager openConnection() throws MojoExecutionException {
+        RemoteFileManager remoteFile = new RemoteFileManager( m_wagonManager, settings, getLog() );
+        Matcher matcher = ALT_REPO_SYNTAX_PATTERN.matcher( url );        
+
+        if ( !matcher.matches() )
+        {
+            remoteFile.connect(repositoryId, url);
+        } 
+        else 
+        {
+            remoteFile.connect( matcher.group( 1 ).trim(), matcher.group( 3 ).trim() );
+        }
+        
+        return remoteFile;
     }
 }
