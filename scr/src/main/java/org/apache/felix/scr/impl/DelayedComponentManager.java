@@ -73,9 +73,8 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
 
     public Object getService( Bundle arg0, ServiceRegistration arg1 )
     {
-        getActivator().log( LogService.LOG_DEBUG, "DelayedComponentServiceFactory.getService()",
-            getComponentMetadata(), null );
-        
+        log( LogService.LOG_DEBUG, "DelayedComponentServiceFactory.getService()", getComponentMetadata(), null );
+
         // When the getServiceMethod is called, the implementation object must be created
         // unless another bundle has already retrievd it
 

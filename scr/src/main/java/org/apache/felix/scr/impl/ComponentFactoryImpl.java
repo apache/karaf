@@ -82,7 +82,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
 
     protected ServiceRegistration registerComponentService()
     {
-        getActivator().log( LogService.LOG_DEBUG, "registering component factory", getComponentMetadata(), null );
+        log( LogService.LOG_DEBUG, "registering component factory", getComponentMetadata(), null );
 
         Dictionary serviceProperties = getProperties();
         return getActivator().getBundleContext().registerService( new String[]
@@ -162,8 +162,8 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
             ComponentManager cm = ( ComponentManager ) m_configuredServices.remove( pid );
             if ( cm != null )
             {
-                getActivator().log( LogService.LOG_DEBUG, "Disposing component after configuration deletion",
-                    getComponentMetadata(), null );
+                log( LogService.LOG_DEBUG, "Disposing component after configuration deletion", getComponentMetadata(),
+                    null );
 
                 disposeComponentManager( cm );
             }
@@ -201,7 +201,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         {
             ( ( ImmediateComponentManager ) cm ).setFactoryProperties( configuration );
         }
-        
+
         // enable synchronously or asynchronously depending on the flag
         if ( cm instanceof AbstractComponentManager )
         {

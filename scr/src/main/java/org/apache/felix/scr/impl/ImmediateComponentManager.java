@@ -112,8 +112,7 @@ class ImmediateComponentManager extends AbstractComponentManager
             }
             catch ( Throwable t )
             {
-                getActivator().log( LogService.LOG_INFO, "Unexpected problem unregistering ManagedService",
-                    getComponentMetadata(), t );
+                log( LogService.LOG_INFO, "Unexpected problem unregistering ManagedService", getComponentMetadata(), t );
             }
         }
 
@@ -188,7 +187,7 @@ class ImmediateComponentManager extends AbstractComponentManager
         catch ( Exception ex )
         {
             // failed to instantiate, return null
-            getActivator().log( LogService.LOG_ERROR, "Error during instantiation of the implementation object",
+            log( LogService.LOG_ERROR, "Error during instantiation of the implementation object",
                 getComponentMetadata(), ex );
             return null;
         }
@@ -203,9 +202,8 @@ class ImmediateComponentManager extends AbstractComponentManager
             DependencyManager dm = ( DependencyManager ) it.next();
             if ( !dm.bind( implementationObject ) )
             {
-                getActivator().log( LogService.LOG_ERROR,
-                    "Cannot create component instance due to failure to bind reference " + dm.getName(),
-                    getComponentMetadata(), null );
+                log( LogService.LOG_ERROR, "Cannot create component instance due to failure to bind reference "
+                    + dm.getName(), getComponentMetadata(), null );
 
                 // make sure, we keep no bindings
                 it = getDependencyManagers();
@@ -231,21 +229,19 @@ class ImmediateComponentManager extends AbstractComponentManager
         catch ( NoSuchMethodException ex )
         {
             // We can safely ignore this one
-            getActivator().log( LogService.LOG_DEBUG, "activate() method is not implemented", getComponentMetadata(),
-                null );
+            log( LogService.LOG_DEBUG, "activate() method is not implemented", getComponentMetadata(), null );
         }
         catch ( IllegalAccessException ex )
         {
             // Ignored, but should it be logged?
-            getActivator().log( LogService.LOG_DEBUG, "activate() method cannot be called", getComponentMetadata(),
-                null );
+            log( LogService.LOG_DEBUG, "activate() method cannot be called", getComponentMetadata(), null );
         }
         catch ( InvocationTargetException ex )
         {
             // 112.5.8 If the activate method throws an exception, SCR must log an error message
             // containing the exception with the Log Service and activation fails
-            getActivator().log( LogService.LOG_ERROR, "The activate method has thrown an exception",
-                getComponentMetadata(), ex.getCause() );
+            log( LogService.LOG_ERROR, "The activate method has thrown an exception", getComponentMetadata(), ex
+                .getCause() );
 
             // make sure, we keep no bindings
             it = getDependencyManagers();
@@ -276,21 +272,19 @@ class ImmediateComponentManager extends AbstractComponentManager
         catch ( NoSuchMethodException ex )
         {
             // We can safely ignore this one
-            getActivator().log( LogService.LOG_DEBUG, "deactivate() method is not implemented", getComponentMetadata(),
-                null );
+            log( LogService.LOG_DEBUG, "deactivate() method is not implemented", getComponentMetadata(), null );
         }
         catch ( IllegalAccessException ex )
         {
             // Ignored, but should it be logged?
-            getActivator().log( LogService.LOG_DEBUG, "deactivate() method cannot be called", getComponentMetadata(),
-                null );
+            log( LogService.LOG_DEBUG, "deactivate() method cannot be called", getComponentMetadata(), null );
         }
         catch ( InvocationTargetException ex )
         {
             // 112.5.12 If the deactivate method throws an exception, SCR must log an error message
             // containing the exception with the Log Service and continue
-            getActivator().log( LogService.LOG_ERROR, "The deactivate method has thrown an exception",
-                getComponentMetadata(), ex.getCause() );
+            log( LogService.LOG_ERROR, "The deactivate method has thrown an exception", getComponentMetadata(), ex
+                .getCause() );
         }
 
         // 2. Unbind any bound services
@@ -396,7 +390,7 @@ class ImmediateComponentManager extends AbstractComponentManager
         // configuration data
         if ( ( getState() & ( STATE_ACTIVE | STATE_FACTORY | STATE_REGISTERED ) ) != 0 )
         {
-            getActivator().log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure from configuration",
+            log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure from configuration",
                 getComponentMetadata(), null );
             reactivate();
         }

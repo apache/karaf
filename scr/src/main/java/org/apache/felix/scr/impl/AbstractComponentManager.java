@@ -69,7 +69,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         m_state = STATE_DISABLED;
         m_dependencyManagers = new ArrayList();
 
-        getActivator().log( LogService.LOG_DEBUG, "Component created", m_componentMetadata, null );
+        log( LogService.LOG_DEBUG, "Component created", m_componentMetadata, null );
     }
 
 
@@ -147,8 +147,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      */
     public final void reconfigure()
     {
-        getActivator().log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure", m_componentMetadata,
-            null );
+        log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure", m_componentMetadata, null );
         reactivate();
     }
 
@@ -259,7 +258,8 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     {
         if ( m_dependencyManagers != null && m_dependencyManagers.size() > 0 )
         {
-            return (org.apache.felix.scr.Reference[] ) m_dependencyManagers.toArray( new Reference[m_dependencyManagers.size()] );
+            return ( org.apache.felix.scr.Reference[] ) m_dependencyManagers
+                .toArray( new Reference[m_dependencyManagers.size()] );
         }
 
         return null;
@@ -310,17 +310,16 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
         if ( getState() == STATE_DESTROYED )
         {
-            getActivator().log( LogService.LOG_ERROR, "Destroyed Component cannot be enabled", m_componentMetadata,
-                null );
+            log( LogService.LOG_ERROR, "Destroyed Component cannot be enabled", m_componentMetadata, null );
             return;
         }
         else if ( getState() != STATE_DISABLED )
         {
-            getActivator().log( LogService.LOG_DEBUG, "Component is already enabled", m_componentMetadata, null );
+            log( LogService.LOG_DEBUG, "Component is already enabled", m_componentMetadata, null );
             return;
         }
 
-        getActivator().log( LogService.LOG_DEBUG, "Enabling component", m_componentMetadata, null );
+        log( LogService.LOG_DEBUG, "Enabling component", m_componentMetadata, null );
 
         try
         {
@@ -342,14 +341,14 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             // enter enabled state before trying to activate
             setState( STATE_ENABLED );
 
-            getActivator().log( LogService.LOG_DEBUG, "Component enabled", m_componentMetadata, null );
+            log( LogService.LOG_DEBUG, "Component enabled", m_componentMetadata, null );
 
             // immediately activate the compopnent, no need to schedule again
             activateInternal();
         }
         catch ( Exception ex )
         {
-            getActivator().log( LogService.LOG_ERROR, "Failed enabling Component", m_componentMetadata, ex );
+            log( LogService.LOG_ERROR, "Failed enabling Component", m_componentMetadata, ex );
 
             // ensure we get back to DISABLED state
             // immediately disable, no need to schedule again
@@ -384,13 +383,13 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             // we cannot activate if the component activator is shutting down
             if ( !isActive() )
             {
-                getActivator().log( LogService.LOG_DEBUG,
-                    "Component cannot be activated because the Activator is being disposed", m_componentMetadata, null );
+                log( LogService.LOG_DEBUG, "Component cannot be activated because the Activator is being disposed",
+                    m_componentMetadata, null );
                 setState( STATE_UNSATISFIED );
                 return;
             }
 
-            getActivator().log( LogService.LOG_DEBUG, "Activating component", m_componentMetadata, null );
+            log( LogService.LOG_DEBUG, "Activating component", m_componentMetadata, null );
 
             // Before creating the implementation object, we are going to
             // test if all the mandatory dependencies are satisfied
@@ -407,8 +406,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
                 if ( !dm.isSatisfied() )
                 {
                     // at least one dependency is not satisfied
-                    getActivator().log( LogService.LOG_INFO, "Dependency not satisfied: " + dm.getName(),
-                        m_componentMetadata, null );
+                    log( LogService.LOG_INFO, "Dependency not satisfied: " + dm.getName(), m_componentMetadata, null );
                     setState( STATE_UNSATISFIED );
                 }
 
@@ -427,7 +425,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             if ( !createComponent() )
             {
                 // component creation failed, not active now
-                getActivator().log( LogService.LOG_ERROR, "Component instance could not be created, activation failed",
+                log( LogService.LOG_ERROR, "Component instance could not be created, activation failed",
                     m_componentMetadata, null );
 
                 // set state to unsatisfied
@@ -449,13 +447,13 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         try
         {
             m_serviceRegistration = registerComponentService();
-            getActivator().log( LogService.LOG_DEBUG, "Component activated", m_componentMetadata, null );
+            log( LogService.LOG_DEBUG, "Component activated", m_componentMetadata, null );
         }
         catch ( IllegalStateException ise )
         {
             // thrown by service registration if the bundle is stopping
             // we just log this at debug level but ignore it
-            getActivator().log( LogService.LOG_DEBUG, "Component activation failed while registering the service",
+            log( LogService.LOG_DEBUG, "Component activation failed while registering the service",
                 m_componentMetadata, ise );
         }
 
@@ -483,7 +481,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             return;
         }
 
-        getActivator().log( LogService.LOG_DEBUG, "Deactivating component", m_componentMetadata, null );
+        log( LogService.LOG_DEBUG, "Deactivating component", m_componentMetadata, null );
 
         // 0.- Remove published services from the registry
         unregisterComponentService();
@@ -498,7 +496,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         // reset to state UNSATISFIED
         setState( STATE_UNSATISFIED );
 
-        getActivator().log( LogService.LOG_DEBUG, "Component deactivated", m_componentMetadata, null );
+        log( LogService.LOG_DEBUG, "Component deactivated", m_componentMetadata, null );
     }
 
 
@@ -510,7 +508,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         // deactivate first, this does nothing if not active/registered/factory
         deactivateInternal();
 
-        getActivator().log( LogService.LOG_DEBUG, "Disabling component", m_componentMetadata, null );
+        log( LogService.LOG_DEBUG, "Disabling component", m_componentMetadata, null );
 
         // close all service listeners now, they are recreated on enable
         // Stop the dependency managers to listen to events...
@@ -525,7 +523,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         // we are now disabled, ready for re-enablement or complete destroyal
         setState( STATE_DISABLED );
 
-        getActivator().log( LogService.LOG_DEBUG, "Component disabled", m_componentMetadata, null );
+        log( LogService.LOG_DEBUG, "Component disabled", m_componentMetadata, null );
     }
 
 
@@ -543,7 +541,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         // this component must not be used any more
         setState( STATE_DESTROYED );
 
-        getActivator().log( LogService.LOG_DEBUG, "Component disposed", m_componentMetadata, null );
+        log( LogService.LOG_DEBUG, "Component disposed", m_componentMetadata, null );
 
         // release references (except component metadata for logging purposes)
         m_activator = null;
@@ -615,7 +613,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     {
         if ( getComponentMetadata().getServiceMetadata() != null )
         {
-            getActivator().log( LogService.LOG_DEBUG, "registering services", getComponentMetadata(), null );
+            log( LogService.LOG_DEBUG, "registering services", getComponentMetadata(), null );
 
             // get a copy of the component properties as service properties
             Dictionary serviceProperties = copyTo( null, getProperties() );
@@ -635,7 +633,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             m_serviceRegistration.unregister();
             m_serviceRegistration = null;
 
-            getActivator().log( LogService.LOG_DEBUG, "unregistering the services", getComponentMetadata(), null );
+            log( LogService.LOG_DEBUG, "unregistering the services", getComponentMetadata(), null );
         }
     }
 
@@ -645,6 +643,16 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     BundleComponentActivator getActivator()
     {
         return m_activator;
+    }
+
+
+    void log( int level, String message, ComponentMetadata metadata, Throwable ex )
+    {
+        BundleComponentActivator activator = getActivator();
+        if ( activator != null )
+        {
+            activator.log( level, message, metadata, ex );
+        }
     }
 
 
@@ -755,7 +763,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     **/
     protected synchronized void setState( int newState )
     {
-        getActivator().log( LogService.LOG_DEBUG,
+        log( LogService.LOG_DEBUG,
             "State transition : " + stateToString( m_state ) + " -> " + stateToString( newState ), m_componentMetadata,
             null );
 

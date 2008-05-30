@@ -92,8 +92,7 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
      */
     public Object getService( Bundle bundle, ServiceRegistration registration )
     {
-        getActivator().log( LogService.LOG_DEBUG, "DelayedServiceFactoryServiceFactory.getService()",
-            getComponentMetadata(), null );
+        log( LogService.LOG_DEBUG, "DelayedServiceFactoryServiceFactory.getService()", getComponentMetadata(), null );
 
         // When the getServiceMethod is called, the implementation object must be created
 
@@ -120,8 +119,7 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
      */
     public void ungetService( Bundle bundle, ServiceRegistration registration, Object service )
     {
-        getActivator().log( LogService.LOG_DEBUG, "DelayedServiceFactoryServiceFactory.ungetService()",
-            getComponentMetadata(), null );
+        log( LogService.LOG_DEBUG, "DelayedServiceFactoryServiceFactory.ungetService()", getComponentMetadata(), null );
 
         // When the ungetServiceMethod is called, the implementation object must be deactivated
 
