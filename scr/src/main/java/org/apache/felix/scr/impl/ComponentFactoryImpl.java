@@ -63,7 +63,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
      */
     public ComponentInstance newInstance( Dictionary dictionary )
     {
-        return ( ComponentInstance ) createComponentManager( dictionary );
+        return ( ComponentInstance ) createComponentManager( dictionary, true );
     }
 
 
@@ -126,7 +126,6 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
 
     //---------- ManagedServiceFactory interface ------------------------------
 
-
     public void updated( String pid, Dictionary configuration )
     {
         ComponentManager cm;
@@ -143,7 +142,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         if ( cm == null )
         {
             // create a new instance with the current configuration
-            cm = createComponentManager( configuration );
+            cm = createComponentManager( configuration, false );
 
             // keep a reference for future updates
             m_configuredServices.put( pid, cm );
@@ -186,11 +185,10 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
      * with the ComponentRegistry. Therefore, any configuration update to these
      * components must be effected by this class !
      */
-    private ComponentManager createComponentManager( Dictionary configuration )
+    private ComponentManager createComponentManager( Dictionary configuration, boolean synchronous )
     {
         long componentId = m_componentRegistry.createComponentId();
-        ComponentManager cm = ManagerFactory.createManager( getActivator(), getComponentMetadata(),
-            componentId );
+        ComponentManager cm = ManagerFactory.createManager( getActivator(), getComponentMetadata(), componentId );
 
         // add the new component to the activators instances
         getActivator().getInstanceReferences().add( cm );
@@ -203,9 +201,16 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         {
             ( ( ImmediateComponentManager ) cm ).setFactoryProperties( configuration );
         }
-
-        // immediately enable this ComponentManager
-        cm.enable();
+        
+        // enable synchronously or asynchronously depending on the flag
+        if ( cm instanceof AbstractComponentManager )
+        {
+            ( ( AbstractComponentManager ) cm ).enable( synchronous );
+        }
+        else
+        {
+            cm.enable();
+        }
 
         return cm;
     }

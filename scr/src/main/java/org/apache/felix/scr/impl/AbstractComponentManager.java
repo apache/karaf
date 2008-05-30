@@ -98,6 +98,31 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
 
     /**
+     * Enables this component and - if satisfied - also activates it
+     * synchronously or asynchronously. If enabling the component fails for
+     * any reason, the component ends up disabled.
+     * <p>
+     * This method ignores the <i>enabled</i> flag of the component metadata
+     * and just enables as requested.
+     * 
+     * @param synchronous If <code>true</code> the component is immediately
+     *      enabled synchronously. Otherwise the component enabled is scheduled
+     *      for asynchronous enabled by calling {@link #enable()}.
+     */
+    protected final void enable( boolean synchronous )
+    {
+        if ( synchronous )
+        {
+            enableInternal();
+        }
+        else
+        {
+            enable();
+        }
+    }
+
+
+    /**
      * Activates this component if satisfied. If any of the dependencies is
      * not met, the component is not activated and remains unsatisifed.
      * <p>
