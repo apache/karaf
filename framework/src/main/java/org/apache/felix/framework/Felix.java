@@ -113,11 +113,11 @@ public class Felix extends FelixBundle
 
     /**
      * Creates a new Felix framework instance with a default logger.
-     * 
+     *
      * @param configMutableMap An map for obtaining configuration properties,
      *        may be <tt>null</tt>.
      * @param activatorList A list of System Bundle activators.
-     * 
+     *
      * @see #Felix(Logger, Map, List)
      */
     public Felix(Map configMutableMap, List activatorList)
@@ -570,7 +570,7 @@ public class Felix extends FelixBundle
     {
         return true;
     }
-    
+
     Object getSignerMatcher()
     {
         return null;
@@ -717,7 +717,7 @@ public class Felix extends FelixBundle
             archives = null;
         }
 
-        // create the system bundle that is responsible for providing specific 
+        // create the system bundle that is responsible for providing specific
         // container related services.
         IContentLoader cl = m_extensionManager;
         cl.setSearchPolicy(
@@ -741,9 +741,9 @@ public class Felix extends FelixBundle
         // 2) install all bundles from cache (will start extension bundles)
         // 3) start the system bundle (will start custom activators)
         // 4) start the other bundles via the start level
-        // it is important to keep this order because bundles are installed 
-        // from added activators in step 3 and extension bundles are started 
-        // in 2 and need the stuff from 1. 
+        // it is important to keep this order because bundles are installed
+        // from added activators in step 3 and extension bundles are started
+        // in 2 and need the stuff from 1.
         m_installedBundleMap.put(
             m_systemBundleInfo.getLocation(), this);
         m_installedBundleIndex.put(new Long(0), this);
@@ -755,7 +755,7 @@ public class Felix extends FelixBundle
         // then activate it.
         m_systemBundleInfo.setBundleContext(
             new BundleContextImpl(m_logger, this, this));
-        
+
         FelixBundle bundle = null;
 
         // Now install all cached bundles.
@@ -828,7 +828,7 @@ ex.printStackTrace();
             }
         }
 
-        // Now that the cached bundles are reloaded, 
+        // Now that the cached bundles are reloaded,
         // activating all custom framework activators.
         try
         {
@@ -845,8 +845,8 @@ ex.printStackTrace();
                     "Unresolved package in System Bundle:"
                     + ex.getRequirement());
             }
-            
-            Felix.m_secureAction.startActivator(m_systemBundleInfo.getActivator(), 
+
+            Felix.m_secureAction.startActivator(m_systemBundleInfo.getActivator(),
                 m_systemBundleInfo.getBundleContext());
         }
         catch (Throwable ex)
@@ -867,7 +867,7 @@ ex.printStackTrace();
         try
         {
             StartLevel sl = (StartLevel) getService(
-                getBundle(0),getServiceReferences((FelixBundle) getBundle(0), 
+                getBundle(0),getServiceReferences((FelixBundle) getBundle(0),
                 StartLevel.class.getName(), null, true)[0]);
             if (sl instanceof StartLevelImpl)
             {
@@ -1457,8 +1457,8 @@ ex.printStackTrace();
             {
                 return (obj instanceof java.security.Permission)
                     ? impliesBundlePermission(
-                    (BundleProtectionDomain) 
-                    bundle.getInfo().getProtectionDomain(), 
+                    (BundleProtectionDomain)
+                    bundle.getInfo().getProtectionDomain(),
                     (java.security.Permission) obj, true)
                     : false;
             }
@@ -1666,7 +1666,7 @@ ex.printStackTrace();
         // to import the necessary packages.
         if (System.getSecurityManager() != null)
         {
-            BundleProtectionDomain pd = (BundleProtectionDomain) 
+            BundleProtectionDomain pd = (BundleProtectionDomain)
                 bundle.getInfo().getProtectionDomain();
 
             IRequirement[] imports =
@@ -1813,7 +1813,7 @@ ex.printStackTrace();
                         info.getBundleId(),
                         archive.getRevisionCount() - 1,
                         info.getCurrentHeader(),
-                        (bundle.getInfo().isExtension() || 
+                        (bundle.getInfo().isExtension() ||
                         m_extensionManager.isExtensionBundle(
                             bundle.getInfo().getCurrentHeader())));
 
@@ -2317,7 +2317,7 @@ ex.printStackTrace();
                     archive.getRevisionCount() - 1).getManifestHeader())));
 
                 verifyExecutionEnvironment(bundle);
-                
+
                 checkFragment(bundle);
 
                 addSecurity(bundle);
@@ -2464,7 +2464,7 @@ ex.printStackTrace();
         if (fragmentHost != null)
         {
             m_logger.log(Logger.LOG_WARNING, "Bundle " + bundle.getBundleId()
-                + " is a fragment bundle. Fragment bundles are not yet supported!");
+                + " is a fragment bundle; fragment are only partially supported!");
         }
     }
 
@@ -2872,7 +2872,7 @@ ex.printStackTrace();
             {
                 return m_systemBundleInfo.getArchive().getDataFile(s);
             }
-            
+
             return m_cache.getArchive(
                 bundle.getBundleId()).getDataFile(s);
         }
@@ -3347,7 +3347,7 @@ ex.printStackTrace();
         // ever be one revision at this point, create the module for
         // the current revision to be safe.
         IModule module = createModule(
-            archive.getId(), archive.getRevisionCount() - 1, headerMap, 
+            archive.getId(), archive.getRevisionCount() - 1, headerMap,
             isExtension);
 
         // Finally, create an return the bundle info.
@@ -3932,7 +3932,7 @@ ex.printStackTrace();
             {
                 try
                 {
-                    Felix.m_secureAction.stopActivator((BundleActivator) 
+                    Felix.m_secureAction.stopActivator((BundleActivator)
                         m_activatorList.get(i), getInfo().getBundleContext());
                 }
                 catch (Throwable throwable)

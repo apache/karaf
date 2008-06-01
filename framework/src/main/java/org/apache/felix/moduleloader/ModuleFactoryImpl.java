@@ -126,11 +126,6 @@ public class ModuleFactoryImpl implements IModuleFactory
         synchronized (this)
         {
             ((ModuleImpl) module).setContentLoader(contentLoader);
-            // Open the module's content loader to initialize it.
-            // TODO: This is not really the best place for this, but at
-            // least it is centralized with the call to IContentLoader.close()
-            // when the module is removed above.
-            contentLoader.open();
         }
     }
 

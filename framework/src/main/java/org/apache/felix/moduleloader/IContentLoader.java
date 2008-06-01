@@ -25,7 +25,6 @@ import java.util.Enumeration;
 
 public interface IContentLoader
 {
-    public void open();
     public void close();
 
     public IContent getContent();

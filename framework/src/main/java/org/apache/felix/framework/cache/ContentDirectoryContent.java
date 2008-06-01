@@ -28,7 +28,6 @@ public class ContentDirectoryContent implements IContent
 {
     private IContent m_content = null;
     private String m_rootPath = null;
-    private boolean m_opened = false;
 
     public ContentDirectoryContent(IContent content, String path)
     {
@@ -38,12 +37,6 @@ public class ContentDirectoryContent implements IContent
             ? path + "/" : path;
     }
 
-    public void open()
-    {
-        m_content.open();
-        m_opened = true;
-    }
-
     public synchronized void close()
     {
         // We do not actually close the associated content
@@ -51,16 +44,10 @@ public class ContentDirectoryContent implements IContent
         // we assume that this will be close manually by
         // the owner of that content.
         m_content = null;
-        m_opened = false;
     }
 
     public synchronized boolean hasEntry(String name) throws IllegalStateException
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("ContentDirectoryContent is not open");
-        }
-
         if ((name.length() > 0) && (name.charAt(0) == '/'))
         {
             name = name.substring(1);
@@ -71,21 +58,11 @@ public class ContentDirectoryContent implements IContent
 
     public synchronized Enumeration getEntries()
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("ContentDirectoryContent is not open");
-        }
-
         return new EntriesEnumeration(m_content.getEntries(), m_rootPath);
     }
 
     public synchronized byte[] getEntryAsBytes(String name) throws IllegalStateException
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("ContentDirectoryContent is not open");
-        }
-
         if ((name.length() > 0) && (name.charAt(0) == '/'))
         {
             name = name.substring(1);
@@ -97,11 +74,6 @@ public class ContentDirectoryContent implements IContent
     public synchronized InputStream getEntryAsStream(String name)
         throws IllegalStateException, IOException
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("ContentDirectoryContent is not open");
-        }
-
         if ((name.length() > 0) && (name.charAt(0) == '/'))
         {
             name = name.substring(1);
@@ -112,11 +84,6 @@ public class ContentDirectoryContent implements IContent
 
     public IContent getEntryAsContent(String name)
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("ContentDirectoryContent is not open");
-        }
-
         if ((name.length() > 0) && (name.charAt(0) == '/'))
         {
             name = name.substring(1);
@@ -127,11 +94,6 @@ public class ContentDirectoryContent implements IContent
 
     public String getEntryAsNativeLibrary(String name)
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("ContentDirectoryContent is not open");
-        }
-
         if ((name.length() > 0) && (name.charAt(0) == '/'))
         {
             name = name.substring(1);

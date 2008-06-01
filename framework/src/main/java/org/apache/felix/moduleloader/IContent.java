@@ -24,17 +24,6 @@ import java.util.Enumeration;
 
 public interface IContent
 {
-
-    /**
-     * <p>
-     * This method must be called before using any other methods on this
-     * interface. If the content is already opened, then subsequent calls
-     * should have no effect. This method is intended to allow the content
-     * to initialize any necessary resources.
-     * </p>
-    **/
-    public void open();
-
     /**
      * <p>
      * This method must be called when the content is no longer needed so

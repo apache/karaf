@@ -21,7 +21,6 @@ package org.apache.felix.framework.searchpolicy;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.net.URL;
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -34,6 +33,7 @@ import java.util.StringTokenizer;
 import org.apache.felix.framework.BundleProtectionDomain;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.CompoundEnumeration;
+import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.SecurityManagerEx;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.Capability;
@@ -42,6 +42,7 @@ import org.apache.felix.framework.util.manifestparser.R4Directive;
 import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.framework.util.manifestparser.Requirement;
 import org.apache.felix.moduleloader.ICapability;
+import org.apache.felix.moduleloader.IContent;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IModuleFactory;
 import org.apache.felix.moduleloader.IRequirement;
@@ -991,6 +992,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         // resolved modules, which can then be used to fire resolved
         // events outside of the synchronized block.
         Map resolvedModuleWireMap = null;
+        Map fragmentMap = null;
 
         // Synchronize on the module manager, because we don't want
         // any modules being added or removed while we are in the
@@ -1002,6 +1004,47 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             {
                 return;
             }
+
+            // The root module is either a host or a fragment. If it is a host,
+            // then we want to go ahead and resolve it. If it is a fragment, then
+            // we want to select a host and resolve the host instead.
+            IModule targetFragment = null;
+// TODO: FRAGMENT - Currently we just make a single selection of the available
+//       fragments or hosts and try to resolve. In case of failure, we do not
+//       backtrack. We will likely want to add backtracking.
+            if (isFragment(rootModule))
+            {
+                targetFragment = rootModule;
+                List hostList = getPotentialHosts(targetFragment);
+                rootModule = (IModule) hostList.get(0);
+String msg = "(FRAGMENT) POSSILE HOST(S): ";
+for (int i = 0; i < hostList.size(); i++)
+{
+    msg += (hostList.get(i).toString() + " ");
+}
+m_logger.log(Logger.LOG_DEBUG, msg);
+            }
+
+            // Get the available fragments for the host.
+            fragmentMap = getPotentialFragments(rootModule);
+
+            // If the resolve was for a specific fragment, then
+            // eliminate all other potential candidate fragments
+            // of the same symbolic name.
+            if (targetFragment != null)
+            {
+                fragmentMap.put(
+                    getBundleSymbolicName(targetFragment),
+                    new IModule[] { targetFragment });
+            }
+for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
+{
+    Map.Entry entry = (Map.Entry) iter.next();
+    String symName = (String) entry.getKey();
+    IModule[] fragments = (IModule[]) entry.getValue();
+    m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: "
+        + rootModule + " -> " + symName + "[" + fragments.length + "] -> " + fragments[0]);
+}
 
             // This variable maps an unresolved module to a list of candidate
             // sets, where there is one candidate set for each requirement that
@@ -1045,6 +1088,28 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             // wires.
             resolvedModuleWireMap = createWires(candidatesMap, rootModule);
 
+            // Attach fragments to root module.
+            if ((fragmentMap != null) && (fragmentMap.size() > 0))
+            {
+                List list = new ArrayList();
+                for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
+                {
+                    Map.Entry entry = (Map.Entry) iter.next();
+                    IModule[] fragments = (IModule[]) entry.getValue();
+                    list.add(fragments[0].getContentLoader().getContent()
+                        .getEntryAsContent(FelixConstants.CLASS_PATH_DOT));
+                }
+                try
+                {
+                    ((ContentLoaderImpl) rootModule.getContentLoader())
+                        .setFragmentContents(
+                            (IContent[]) list.toArray(new IContent[list.size()]));
+                }
+                catch (Exception ex)
+                {
+                    m_logger.log(Logger.LOG_ERROR, "Unable to attach fragments", ex);
+                }
+            }
 //dumpUsedPackages();
         } // End of synchronized block on module manager.
 
@@ -1058,7 +1123,199 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             {
                 fireModuleResolved((IModule) ((Map.Entry) iter.next()).getKey());
             }
+            iter = fragmentMap.entrySet().iterator();
+            while (iter.hasNext())
+            {
+                fireModuleResolved(((IModule[]) ((Map.Entry) iter.next()).getValue())[0]);
+            }
         }
+    }
+
+// TODO: FRAGMENT - Not very efficient.
+    private boolean isFragment(IModule module)
+    {
+        IRequirement[] reqs = module.getDefinition().getRequirements();
+        for (int reqIdx = 0; (reqs != null) && (reqIdx < reqs.length); reqIdx++)
+        {
+            if (reqs[reqIdx].getNamespace().equals(ICapability.HOST_NAMESPACE))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+// TODO: FRAGMENT - Not very efficient.
+    private List getPotentialHosts(IModule fragment)
+        throws ResolveException
+    {
+        List hostList = new ArrayList();
+
+        IRequirement[] reqs = fragment.getDefinition().getRequirements();
+        IRequirement hostReq = null;
+        for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++)
+        {
+            if (reqs[reqIdx].getNamespace().equals(ICapability.HOST_NAMESPACE))
+            {
+                hostReq = reqs[reqIdx];
+                break;
+            }
+        }
+
+        IModule[] modules = m_factory.getModules();
+        for (int modIdx = 0; (hostReq != null) && (modIdx < modules.length); modIdx++)
+        {
+            if (!fragment.equals(modules[modIdx]) && !isResolved(modules[modIdx]))
+            {
+                ICapability[] caps = modules[modIdx].getDefinition().getCapabilities();
+                for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
+                {
+                    if (caps[capIdx].getNamespace().equals(ICapability.HOST_NAMESPACE)
+                        && hostReq.isSatisfied(caps[capIdx]))
+                    {
+                        hostList.add(modules[modIdx]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (hostList.size() == 0)
+        {
+            throw new ResolveException("Unable to resolve.", fragment, hostReq);
+        }
+
+        return hostList;
+    }
+
+// TODO: FRAGMENT - Not very efficient.
+    private Map getPotentialFragments(IModule host)
+    {
+// TODO: FRAGMENT - This should check to make sure that the host allows fragments.
+        Map fragmentMap = new HashMap();
+
+        ICapability[] caps = host.getDefinition().getCapabilities();
+        ICapability bundleCap = null;
+        for (int capIdx = 0; capIdx < caps.length; capIdx++)
+        {
+            if (caps[capIdx].getNamespace().equals(ICapability.HOST_NAMESPACE))
+            {
+                bundleCap = caps[capIdx];
+                break;
+            }
+        }
+
+        IModule[] modules = m_factory.getModules();
+        for (int modIdx = 0; (bundleCap != null) && (modIdx < modules.length); modIdx++)
+        {
+            if (!host.equals(modules[modIdx]))
+            {
+                IRequirement[] reqs = modules[modIdx].getDefinition().getRequirements();
+                for (int reqIdx = 0; (reqs != null) && (reqIdx < reqs.length); reqIdx++)
+                {
+                    if (reqs[reqIdx].getNamespace().equals(ICapability.HOST_NAMESPACE)
+                        && reqs[reqIdx].isSatisfied(bundleCap))
+                    {
+                        indexFragment(fragmentMap, modules[modIdx]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return fragmentMap;
+    }
+
+// TODO: FRAGMENT - Not very efficient.
+    private static String getBundleSymbolicName(IModule module)
+    {
+        ICapability[] caps = module.getDefinition().getCapabilities();
+        for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
+        {
+            if (caps[capIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
+            {
+                return (String)
+                    caps[capIdx].getProperties().get(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
+            }
+        }
+        return null;
+    }
+
+// TODO: FRAGMENT - Not very efficient.
+    private static Version getBundleVersion(IModule module)
+    {
+        ICapability[] caps = module.getDefinition().getCapabilities();
+        for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
+        {
+            if (caps[capIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
+            {
+                return (Version)
+                    caps[capIdx].getProperties().get(Constants.BUNDLE_VERSION_ATTRIBUTE);
+            }
+        }
+        return Version.emptyVersion;
+    }
+
+    private void indexFragment(Map map, IModule module)
+    {
+        String symName = getBundleSymbolicName(module);
+        IModule[] modules = (IModule[]) map.get(symName);
+
+        // We want to add the fragment into the list of matching
+        // fragments in sorted order (descending version and
+        // ascending bundle identifier). Insert using a simple
+        // binary search algorithm.
+        if (modules == null)
+        {
+            modules = new IModule[] { module };
+        }
+        else
+        {
+            Version version = getBundleVersion(module);
+            Version middleVersion = null;
+            int top = 0, bottom = modules.length - 1, middle = 0;
+            while (top <= bottom)
+            {
+                middle = (bottom - top) / 2 + top;
+                middleVersion = getBundleVersion(modules[middle]);
+                // Sort in reverse version order.
+                int cmp = middleVersion.compareTo(version);
+                if (cmp < 0)
+                {
+                    bottom = middle - 1;
+                }
+                else if (cmp == 0)
+                {
+                    // Sort further by ascending bundle ID.
+                    long middleId = Util.getBundleIdFromModuleId(modules[middle].getId());
+                    long exportId = Util.getBundleIdFromModuleId(module.getId());
+                    if (middleId < exportId)
+                    {
+                        top = middle + 1;
+                    }
+                    else
+                    {
+                        bottom = middle - 1;
+                    }
+                }
+                else
+                {
+                    top = middle + 1;
+                }
+            }
+
+            // Ignore duplicates.
+            if ((top >= modules.length) || (modules[top] != module))
+            {
+                IModule[] newMods = new IModule[modules.length + 1];
+                System.arraycopy(modules, 0, newMods, 0, top);
+                System.arraycopy(modules, top, newMods, top + 1, modules.length - top);
+                newMods[top] = module;
+                modules = newMods;
+            }
+        }
+
+        map.put(symName, modules);
     }
 
     private void populateCandidatesMap(Map candidatesMap, IModule module)
@@ -2616,12 +2873,12 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             }
             else
             {
-                int top = 0, bottom = modules.length - 1, middle = 0;
+                Version version = (Version)
+                    capability.getProperties().get(ICapability.VERSION_PROPERTY);
                 Version middleVersion = null;
+                int top = 0, bottom = modules.length - 1, middle = 0;
                 while (top <= bottom)
                 {
-                    Version version = (Version)
-                        capability.getProperties().get(ICapability.VERSION_PROPERTY);
                     middle = (bottom - top) / 2 + top;
                     middleVersion = (Version)
                         getExportPackageCapability(

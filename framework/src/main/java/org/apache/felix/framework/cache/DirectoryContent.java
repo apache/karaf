@@ -22,6 +22,7 @@ import org.apache.felix.moduleloader.*;
 import java.io.*;
 import java.util.*;
 import org.apache.felix.framework.Logger;
+import org.apache.felix.framework.util.FelixConstants;
 
 public class DirectoryContent implements IContent
 {
@@ -33,7 +34,6 @@ public class DirectoryContent implements IContent
     private Object m_revisionLock;
     private File m_rootDir;
     private File m_dir;
-    private boolean m_opened = false;
 
     public DirectoryContent(Logger logger, Object revisionLock, File rootDir, File dir)
     {
@@ -43,23 +43,13 @@ public class DirectoryContent implements IContent
         m_dir = dir;
     }
 
-    public void open()
+    public void close()
     {
-        m_opened = true;
-    }
-
-    public synchronized void close()
-    {
-        m_opened = false;
+        // Nothing to clean up.
     }
 
     public synchronized boolean hasEntry(String name) throws IllegalStateException
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("DirectoryContent is not open");
-        }
-
         if ((name.length() > 0) && (name.charAt(0) == '/'))
         {
             name = name.substring(1);
@@ -70,11 +60,6 @@ public class DirectoryContent implements IContent
 
     public synchronized Enumeration getEntries()
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("JarContent is not open");
-        }
-
         // Wrap entries enumeration to filter non-matching entries.
         Enumeration e = new EntriesEnumeration(m_dir);
 
@@ -84,11 +69,6 @@ public class DirectoryContent implements IContent
 
     public synchronized byte[] getEntryAsBytes(String name) throws IllegalStateException
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("DirectoryContent is not open");
-        }
-
         if ((name.length() > 0) && (name.charAt(0) == '/'))
         {
             name = name.substring(1);
@@ -137,11 +117,6 @@ public class DirectoryContent implements IContent
     public synchronized InputStream getEntryAsStream(String name)
         throws IllegalStateException, IOException
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("DirectoryContent is not open");
-        }
-
         if ((name.length() > 0) && (name.charAt(0) == '/'))
         {
             name = name.substring(1);
@@ -152,9 +127,11 @@ public class DirectoryContent implements IContent
 
     public synchronized IContent getEntryAsContent(String entryName)
     {
-        if (!m_opened)
+        // If the entry name refers to the content itself, then
+        // just return it immediately.
+        if (entryName.equals(FelixConstants.CLASS_PATH_DOT))
         {
-            throw new IllegalStateException("DirectoryContent is not open");
+            return new DirectoryContent(m_logger, m_revisionLock, m_rootDir, m_dir);
         }
 
         // Remove any leading slash, since all bundle class path
@@ -202,11 +179,6 @@ public class DirectoryContent implements IContent
 // TODO: This will need to consider security.
     public synchronized String getEntryAsNativeLibrary(String name)
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("DirectoryContent is not open");
-        }
-
         return BundleCache.getSecureAction().getAbsolutePath(new File(m_rootDir, name));
     }
 

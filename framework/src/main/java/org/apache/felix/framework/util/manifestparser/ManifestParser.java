@@ -102,6 +102,10 @@ public class ManifestParser
                     "Cannot have multiple symbolic names: "
                         + headerMap.get(Constants.BUNDLE_SYMBOLICNAME));
             }
+            // Add a module capability.
+            // TODO: FRAGMENT - Fragment bundles cannot be required, so we
+            //       should not add this capability, but for now we are using
+            //       it to get the symbolic name.
             m_bundleSymbolicName = (String) clauses[0][CLAUSE_PATHS_INDEX][0];
             R4Attribute[] attrs = new R4Attribute[2];
             attrs[0] = new R4Attribute(
@@ -109,6 +113,34 @@ public class ManifestParser
             attrs[1] = new R4Attribute(
                 Constants.BUNDLE_VERSION_ATTRIBUTE, m_bundleVersion, false);
             capList.add(new Capability(ICapability.MODULE_NAMESPACE, null, attrs));
+            // Add a host capability if the bundle is not a fragment. A host
+            // capability is the same as a module capability, but with a
+            // different capability namespace.
+            if (headerMap.get(Constants.FRAGMENT_HOST) == null)
+            {
+                capList.add(new Capability(ICapability.HOST_NAMESPACE, null, attrs));
+            }
+        }
+
+        //
+        // Parse Fragment-Host.
+        //
+        clauses = parseStandardHeader(
+            (String) headerMap.get(Constants.FRAGMENT_HOST));
+        if (clauses.length > 0)
+        {
+            try
+            {
+                reqList.add(
+                    new Requirement(
+                        ICapability.HOST_NAMESPACE,
+                        "(" + Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE
+                            + "=" + clauses[0][CLAUSE_PATHS_INDEX][0] + ")"));
+            }
+            catch (InvalidSyntaxException ex)
+            {
+                ex.printStackTrace();
+            }
         }
 
         //

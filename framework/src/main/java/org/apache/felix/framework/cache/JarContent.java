@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import org.apache.felix.framework.Logger;
+import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.JarFileX;
 import org.apache.felix.moduleloader.IContent;
 
@@ -43,7 +44,6 @@ public class JarContent implements IContent
     private JarFileX m_jarFile = null;
     // TODO: CACHE - It would be nice to eventually remove this legacy flag.
     private final boolean m_legacy;
-    private boolean m_opened = false;
 
     public JarContent(Logger logger, Object revisionLock, File rootDir, File file)
     {
@@ -79,11 +79,6 @@ public class JarContent implements IContent
         }
     }
 
-    public synchronized void open()
-    {
-        m_opened = true;
-    }
-
     public synchronized void close()
     {
         try
@@ -101,16 +96,10 @@ public class JarContent implements IContent
         }
 
         m_jarFile = null;
-        m_opened = false;
     }
 
     public synchronized boolean hasEntry(String name) throws IllegalStateException
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("JarContent is not open");
-        }
-
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
@@ -143,11 +132,6 @@ public class JarContent implements IContent
 
     public synchronized Enumeration getEntries()
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("JarContent is not open");
-        }
-
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
@@ -173,11 +157,6 @@ public class JarContent implements IContent
 
     public synchronized byte[] getEntryAsBytes(String name) throws IllegalStateException
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("JarContent is not open");
-        }
-
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
@@ -249,11 +228,6 @@ public class JarContent implements IContent
     public synchronized InputStream getEntryAsStream(String name)
         throws IllegalStateException, IOException
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("JarContent is not open");
-        }
-
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
@@ -296,11 +270,6 @@ public class JarContent implements IContent
 
     public synchronized IContent getEntryAsContent(String entryName)
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("JarContent is not open");
-        }
-
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
@@ -316,6 +285,13 @@ public class JarContent implements IContent
                 return null;
             }
 
+        }
+
+        // If the entry name refers to the content itself, then
+        // just return it immediately.
+        if (entryName.equals(FelixConstants.CLASS_PATH_DOT))
+        {
+            return new JarContent(m_logger, m_revisionLock, m_rootDir, m_file, m_legacy);
         }
 
         // Remove any leading slash.
@@ -400,11 +376,6 @@ public class JarContent implements IContent
 // TODO: This will need to consider security.
     public synchronized String getEntryAsNativeLibrary(String name)
     {
-        if (!m_opened)
-        {
-            throw new IllegalStateException("JarContent is not open");
-        }
-
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
@@ -488,7 +459,7 @@ public class JarContent implements IContent
         return "JAR " + m_file.getPath();
     }
 
-    public File getFile()
+    public synchronized File getFile()
     {
         return m_file;
     }

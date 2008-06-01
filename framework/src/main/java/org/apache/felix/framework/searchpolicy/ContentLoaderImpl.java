@@ -38,12 +38,13 @@ import org.apache.felix.moduleloader.*;
 
 public class ContentLoaderImpl implements IContentLoader
 {
-    private Logger m_logger = null;
-    private IContent m_content = null;
-    private IContent[] m_contentPath = null;
+    private final Logger m_logger;
+    private final IContent m_content;
+    private IContent[] m_contentPath;
+    private IContent[] m_fragments = null;
     private ISearchPolicy m_searchPolicy = null;
     private IURLPolicy m_urlPolicy = null;
-    private ContentClassLoader m_classLoader = null;
+    private ContentClassLoader m_classLoader;
     private ProtectionDomain m_protectionDomain = null;
     private static SecureAction m_secureAction = new SecureAction();
 
@@ -58,25 +59,7 @@ public class ContentLoaderImpl implements IContentLoader
         return m_logger;
     }
 
-    public void open()
-    {
-        m_content.open();
-        try
-        {
-            initializeContentPath();
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(Logger.LOG_ERROR, "Unable to initialize content path.", ex);
-        }
-
-        for (int i = 0; (m_contentPath != null) && (i < m_contentPath.length); i++)
-        {
-            m_contentPath[i].open();
-        }
-    }
-
-    public void close()
+    public synchronized void close()
     {
         m_content.close();
         for (int i = 0; (m_contentPath != null) && (i < m_contentPath.length); i++)
@@ -90,27 +73,57 @@ public class ContentLoaderImpl implements IContentLoader
         return m_content;
     }
 
-    public IContent[] getClassPath()
+    public synchronized IContent[] getClassPath()
     {
+        if (m_contentPath == null)
+        {
+            try
+            {
+                m_contentPath = initializeContentPath();
+            }
+            catch (Exception ex)
+            {
+                m_logger.log(Logger.LOG_ERROR, "Unable to get module class path.", ex);
+            }
+        }
         return m_contentPath;
     }
 
-    public void setSearchPolicy(ISearchPolicy searchPolicy)
+    public synchronized void setFragmentContents(IContent[] contents) throws Exception
+    {
+        m_fragments = contents;
+// TODO: FRAGMENT - If this is not null, then we probably need to close
+//       the existing contents; this might happen when a resource is loaded
+//       from a bundle that could not be resolved.
+if (m_contentPath != null)
+{
+m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) CONTENT PATH SHOULD BE NULL = " + m_contentPath);
+}
+        m_contentPath = initializeContentPath();
+String msg = "(FRAGMENT) HOST CLASSPATH = ";
+for (int i = 0; i < m_contentPath.length; i++)
+{
+    msg += (m_contentPath[i].toString() + " ");
+}
+m_logger.log(Logger.LOG_DEBUG, msg);
+    }
+
+    public synchronized void setSearchPolicy(ISearchPolicy searchPolicy)
     {
         m_searchPolicy = searchPolicy;
     }
 
-    public ISearchPolicy getSearchPolicy()
+    public synchronized ISearchPolicy getSearchPolicy()
     {
         return m_searchPolicy;
     }
 
-    public void setURLPolicy(IURLPolicy urlPolicy)
+    public synchronized void setURLPolicy(IURLPolicy urlPolicy)
     {
         m_urlPolicy = urlPolicy;
     }
 
-    public IURLPolicy getURLPolicy()
+    public synchronized IURLPolicy getURLPolicy()
     {
         return m_urlPolicy;
     }
@@ -164,11 +177,12 @@ public class ContentLoaderImpl implements IContentLoader
         }
 
         // Check the module class path.
+        IContent[] contentPath = getClassPath();
         for (int i = 0;
             (url == null) &&
-            (i < getClassPath().length); i++)
+            (i < contentPath.length); i++)
         {
-            if (getClassPath()[i].hasEntry(name))
+            if (contentPath[i].hasEntry(name))
             {
                 url = getURLPolicy().createURL(i + 1, name);
             }
@@ -200,9 +214,10 @@ public class ContentLoaderImpl implements IContentLoader
             }
 
             // Check the module class path.
-            for (int i = 0; i < getClassPath().length; i++)
+            IContent[] contentPath = getClassPath();
+            for (int i = 0; i < contentPath.length; i++)
             {
-                if (getClassPath()[i].hasEntry(name))
+                if (contentPath[i].hasEntry(name))
                 {
                     // Use the class path index + 1 for creating the path so
                     // that we can differentiate between module content URLs
@@ -260,7 +275,7 @@ public class ContentLoaderImpl implements IContentLoader
         {
             return m_content.hasEntry(urlPath);
         }
-        return m_contentPath[index - 1].hasEntry(urlPath);
+        return getClassPath()[index - 1].hasEntry(urlPath);
     }
 
     public InputStream getInputStream(int index, String urlPath)
@@ -274,15 +289,27 @@ public class ContentLoaderImpl implements IContentLoader
         {
             return m_content.getEntryAsStream(urlPath);
         }
-        return m_contentPath[index - 1].getEntryAsStream(urlPath);
+        return getClassPath()[index - 1].getEntryAsStream(urlPath);
     }
 
-    public String toString()
+    public synchronized String toString()
     {
         return m_searchPolicy.toString();
     }
 
-    private void initializeContentPath() throws Exception
+    private IContent[] initializeContentPath() throws Exception
+    {
+        List contentList = new ArrayList();
+        calculateContentPath(m_content, contentList, true);
+        for (int i = 0; (m_fragments != null) && (i < m_fragments.length); i++)
+        {
+            calculateContentPath(m_fragments[i], contentList, false);
+        }
+        return (IContent[]) contentList.toArray(new IContent[contentList.size()]);
+    }
+
+    private List calculateContentPath(IContent content, List contentList, boolean searchFragments)
+        throws Exception
     {
         // Creating the content path entails examining the bundle's
         // class path to determine whether the bundle JAR file itself
@@ -294,7 +321,7 @@ public class ContentLoaderImpl implements IContentLoader
         Map headers = null;
         try
         {
-            is = m_content.getEntryAsStream("META-INF/MANIFEST.MF");
+            is = content.getEntryAsStream("META-INF/MANIFEST.MF");
             headers = new StringMap(new Manifest(is).getMainAttributes(), false);
         }
         finally
@@ -305,7 +332,6 @@ public class ContentLoaderImpl implements IContentLoader
         // Find class path meta-data.
         String classPath = (headers == null)
             ? null : (String) headers.get(FelixConstants.BUNDLE_CLASSPATH);
-
         // Parse the class path into strings.
         String[] classPathStrings = ManifestParser.parseDelimitedString(
             classPath, FelixConstants.CLASS_PATH_SEPARATOR);
@@ -316,7 +342,6 @@ public class ContentLoaderImpl implements IContentLoader
         }
 
         // Create the bundles class path.
-        List contentList = new ArrayList();
         for (int i = 0; i < classPathStrings.length; i++)
         {
             // Remove any leading slash, since all bundle class path
@@ -328,16 +353,28 @@ public class ContentLoaderImpl implements IContentLoader
             // Check for the bundle itself on the class path.
             if (classPathStrings[i].equals(FelixConstants.CLASS_PATH_DOT))
             {
-                contentList.add(m_content);
+                contentList.add(content);
             }
             else
             {
-                // Determine if the class path entry is a file or directory
-                // in the bundle JAR file.
-                IContent content = m_content.getEntryAsContent(classPathStrings[i]);
-                if (content != null)
+                // Try to find the embedded class path entry in the current
+                // content.
+                IContent embeddedContent = content.getEntryAsContent(classPathStrings[i]);
+                // If the embedded class path entry was not found, it might be
+                // in one of the fragments if the current content is the bundle,
+                // so try to search the fragments if necessary.
+                for (int fragIdx = 0;
+                    searchFragments && (embeddedContent == null)
+                        && (m_fragments != null) && (fragIdx < m_fragments.length);
+                    fragIdx++)
                 {
-                    contentList.add(content);
+                    embeddedContent = m_fragments[fragIdx].getEntryAsContent(classPathStrings[i]);
+                }
+                // If we found the embedded content, then add it to the
+                // class path content list.
+                if (embeddedContent != null)
+                {
+                    contentList.add(embeddedContent);
                 }
                 else
                 {
@@ -354,9 +391,9 @@ public class ContentLoaderImpl implements IContentLoader
         // "." by default, as per the spec.
         if (contentList.size() == 0)
         {
-            contentList.add(m_content);
+            contentList.add(content);
         }
 
-        m_contentPath = (IContent[]) contentList.toArray(new IContent[contentList.size()]);
+        return contentList;
     }
 }

@@ -23,6 +23,7 @@ import java.util.Map;
 public interface ICapability
 {
     public static final String MODULE_NAMESPACE = "module";
+    public static final String HOST_NAMESPACE = "host";
     public static final String PACKAGE_NAMESPACE = "package";
 
     public static final String PACKAGE_PROPERTY = "package";
