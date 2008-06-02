@@ -504,6 +504,14 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     {
         // CONCURRENCY NOTE: This method is only called from the BundleComponentActivator or by application logic
         // but not by the dependency managers
+        
+        // if the component is already disabled or destroyed, we have
+        // nothing to do
+        if ( ( getState() & ( STATE_DISABLED | STATE_DESTROYED ) ) != 0 )
+        {
+            log( LogService.LOG_DEBUG, "Component already disabled", m_componentMetadata, null );
+            return;
+        }
 
         // deactivate first, this does nothing if not active/registered/factory
         deactivateInternal();
@@ -534,6 +542,13 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     {
         // CONCURRENCY NOTE: This method is only called from the BundleComponentActivator or by application logic
         // but not by the dependency managers
+
+        // if the component is already destroyed, we have nothing to do
+        if ( getState() == STATE_DESTROYED )
+        {
+            log( LogService.LOG_DEBUG, "Component already destroyed", m_componentMetadata, null );
+            return;
+        }
 
         // disable first to clean up correctly
         disableInternal();
