@@ -41,15 +41,18 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 abstract class ConfigManagerBase extends BaseManagementPlugin
 {
+    private static final String CONFIGURATION_ADMIN_NAME = ConfigurationAdmin.class.getName();
+    
+    private static final String META_TYPE_NAME = MetaTypeService.class.getName();
 
     private ServiceTracker configurationAdmin;
 
     private ServiceTracker metaTypeService;
 
 
-    public void setBundleContext( BundleContext bundleContext )
+    public void activate( BundleContext bundleContext )
     {
-        super.setBundleContext( bundleContext );
+        super.activate( bundleContext );
 
         configurationAdmin = new ServiceTracker( bundleContext, ConfigurationAdmin.class.getName(), null );
         configurationAdmin.open();
@@ -73,12 +76,14 @@ abstract class ConfigManagerBase extends BaseManagementPlugin
 
     protected ConfigurationAdmin getConfigurationAdmin()
     {
+        //TODO: getService(CONFIGURATION_ADMIN_NAME)
         return ( ConfigurationAdmin ) configurationAdmin.getService();
     }
 
 
     protected MetaTypeService getMetaTypeService()
     {
+        //TODO: getService(META_TYPE_NAME)
         return ( MetaTypeService ) metaTypeService.getService();
     }
 

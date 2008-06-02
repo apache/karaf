@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.webconsole.internal.servlet;
+package org.apache.felix.webconsole.internal;
 
 
 import org.osgi.framework.BundleContext;
@@ -30,14 +30,14 @@ public class Logger
     private ServiceTracker logTracker;
 
 
-    Logger( BundleContext bundleContext )
+    public Logger( BundleContext bundleContext )
     {
         logTracker = new ServiceTracker( bundleContext, LogService.class.getName(), null );
         logTracker.open();
     }
 
 
-    void dispose()
+    public void dispose()
     {
         if ( logTracker != null )
         {

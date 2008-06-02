@@ -16,39 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.webconsole.internal.obr;
+package org.apache.felix.webconsole.internal;
 
 
-import org.apache.felix.webconsole.internal.BaseManagementPlugin;
-import org.osgi.service.obr.RepositoryAdmin;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
 
-public class AbstractObrPlugin extends BaseManagementPlugin
+public interface OsgiManagerPlugin
 {
 
-    // track the optional installer service manually
-    private ServiceTracker repositoryAdmin;
+    void activate( BundleContext bundleContext );
 
 
-    protected RepositoryAdmin getRepositoryAdmin()
-    {
-        if ( repositoryAdmin == null )
-        {
-            try
-            {
-                repositoryAdmin = new ServiceTracker( getBundleContext(), RepositoryAdmin.class.getName(), null );
-                repositoryAdmin.open();
-            }
-            catch ( Throwable t )
-            {
-                // missing InstallerService class ??
-                return null;
-            }
-
-        }
-
-        return ( RepositoryAdmin ) repositoryAdmin.getService();
-    }
+    void deactivate();
 
 }

@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.felix.webconsole.internal.Util;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -74,7 +74,7 @@ public class InstallAction extends BundleAction
     {
 
         // get the uploaded data
-        Map params = ( Map ) request.getAttribute( Util.ATTR_FILEUPLOAD );
+        Map params = ( Map ) request.getAttribute( AbstractWebConsolePlugin.ATTR_FILEUPLOAD );
         if ( params == null )
         {
             return true;

@@ -19,263 +19,349 @@ package org.apache.felix.webconsole.internal.core;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
 
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.Render;
-import org.apache.felix.webconsole.internal.BaseManagementPlugin;
+import org.apache.felix.bundlerepository.R4Attribute;
+import org.apache.felix.bundlerepository.R4Export;
+import org.apache.felix.bundlerepository.R4Import;
+import org.apache.felix.bundlerepository.R4Package;
+import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONWriter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.obr.Repository;
+import org.osgi.service.obr.RepositoryAdmin;
+import org.osgi.service.obr.Resource;
+import org.osgi.service.packageadmin.ExportedPackage;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
 
 /**
  * The <code>BundleListRender</code> TODO
  */
-public class BundleListRender extends BaseManagementPlugin implements Render
+public class BundleListRender extends BaseWebConsolePlugin
 {
 
-    public static final String NAME = "list";
+    public static final String NAME = "bundles";
 
     public static final String LABEL = "Bundles";
 
     public static final String BUNDLE_ID = "bundleId";
 
-    private static final String INSTALLER_SERVICE_NAME = "org.apache.sling.osgi.assembly.installer.InstallerService";
+    private static final String REPOSITORY_ADMIN_NAME = RepositoryAdmin.class.getName();
 
-    // track the optional installer service manually
-    private ServiceTracker installerService;
+    // bootdelegation property entries. wildcards are converted to package
+    // name prefixes. whether an entry is a wildcard or not is set as a flag
+    // in the bootPkgWildcards array.
+    // see #activate and #isBootDelegated
+    private String[] bootPkgs;
+
+    // a flag for each entry in bootPkgs indicating whether the respective
+    // entry was declared as a wildcard or not
+    // see #activate and #isBootDelegated
+    private boolean[] bootPkgWildcards;
 
 
-    public void setBundleContext( BundleContext bundleContext )
+    public void activate( BundleContext bundleContext )
     {
-        super.setBundleContext( bundleContext );
+        super.activate( bundleContext );
 
-        installerService = new ServiceTracker( bundleContext, INSTALLER_SERVICE_NAME, null );
-        installerService.open();
-    }
-
-
-    // protected void deactivate(ComponentContext context) {
-    // if (installerService != null) {
-    // installerService.close();
-    // installerService = null;
-    // }
-    // }
-
-    public String getName()
-    {
-        return NAME;
+        // bootdelegation property parsing from Apache Felix R4SearchPolicyCore
+        String bootDelegation = bundleContext.getProperty( Constants.FRAMEWORK_BOOTDELEGATION );
+        bootDelegation = ( bootDelegation == null ) ? "java.*" : bootDelegation + ",java.*";
+        StringTokenizer st = new StringTokenizer( bootDelegation, " ," );
+        bootPkgs = new String[st.countTokens()];
+        bootPkgWildcards = new boolean[bootPkgs.length];
+        for ( int i = 0; i < bootPkgs.length; i++ )
+        {
+            bootDelegation = st.nextToken();
+            if ( bootDelegation.endsWith( "*" ) )
+            {
+                bootPkgWildcards[i] = true;
+                bootDelegation = bootDelegation.substring( 0, bootDelegation.length() - 1 );
+            }
+            bootPkgs[i] = bootDelegation;
+        }
     }
 
 
     public String getLabel()
     {
+        return NAME;
+    }
+
+
+    public String getTitle()
+    {
         return LABEL;
     }
 
 
-    public void render( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
+        IOException
+    {
+
+        String info = request.getPathInfo();
+        if ( info.endsWith( ".json" ) )
+        {
+            info = info.substring( 0, info.length() - 5 );
+            if ( getLabel().equals( info.substring( 1 ) ) )
+            {
+                // should return info on all bundles
+            }
+            else
+            {
+                Bundle bundle = getBundle( info );
+                if ( bundle != null )
+                {
+                    // bundle properties
+
+                    response.setContentType( "text/javascript" );
+                    response.setCharacterEncoding( "UTF-8" );
+
+                    PrintWriter pw = response.getWriter();
+                    JSONWriter jw = new JSONWriter( pw );
+                    try
+                    {
+                        performAction( jw, bundle );
+                    }
+                    catch ( JSONException je )
+                    {
+                        throw new IOException( je.toString() );
+                    }
+                }
+            }
+
+            // nothing more to do
+            return;
+        }
+
+        super.doGet( request, response );
+    }
+
+
+    protected void doPost( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException
+    {
+        boolean success = false;
+        Bundle bundle = getBundle( req.getPathInfo() );
+        long bundleId = bundle.getBundleId();
+        if ( bundle != null )
+        {
+            String action = req.getParameter( "action" );
+            if ( "start".equals( action ) )
+            {
+                // start bundle
+                success = true;
+                try
+                {
+                    bundle.start();
+                }
+                catch ( BundleException be )
+                {
+                    // log
+                }
+            }
+            else if ( "stop".equals( action ) )
+            {
+                // stop bundle
+                success = true;
+                try
+                {
+                    bundle.stop();
+                }
+                catch ( BundleException be )
+                {
+                    // log
+                }
+            }
+            else if ( "update".equals( action ) )
+            {
+                // update bundle
+                success = true;
+            }
+            else if ( "uninstall".equals( action ) )
+            {
+                // uninstall bundle
+                success = true;
+                try
+                {
+                    bundle.uninstall();
+                    bundle = null; // bundle has gone !
+                }
+                catch ( BundleException be )
+                {
+                    // log
+                }
+            }
+        }
+
+        if ( success )
+        {
+            // redirect or 200
+            resp.setStatus( HttpServletResponse.SC_OK );
+            JSONWriter jw = new JSONWriter( resp.getWriter() );
+            try
+            {
+                if ( bundle != null )
+                {
+                    bundleInfo( jw, bundle, true );
+                }
+                else
+                {
+                    jw.object();
+                    jw.key( "bundleId" );
+                    jw.value( bundleId );
+                    jw.endObject();
+                }
+            }
+            catch ( JSONException je )
+            {
+                throw new IOException( je.toString() );
+            }
+        }
+        else
+        {
+            super.doPost( req, resp );
+        }
+    }
+
+
+    private Bundle getBundle( String pathInfo )
+    {
+        // only use last part of the pathInfo
+        pathInfo = pathInfo.substring( pathInfo.lastIndexOf( '/' ) + 1 );
+
+        // assume bundle Id
+        long bundleId;
+        try
+        {
+            bundleId = Long.parseLong( pathInfo );
+        }
+        catch ( NumberFormatException nfe )
+        {
+            bundleId = -1;
+        }
+
+        if ( bundleId >= 0 )
+        {
+            return getBundleContext().getBundle( bundleId );
+        }
+
+        return null;
+    }
+
+
+    protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
+        IOException
     {
 
         PrintWriter pw = response.getWriter();
 
-        this.header( pw );
+        String appRoot = request.getContextPath() + request.getServletPath();
+        pw.println( "<script src='" + appRoot + "/res/ui/bundles.js' language='JavaScript'></script>" );
 
-        this.installForm( pw );
-        pw.println( "<tr class='content'>" );
-        pw.println( "<td colspan='7' class='content'>&nbsp;</th>" );
-        pw.println( "</tr>" );
-
-        this.tableHeader( pw );
-
-        Bundle[] bundles = this.getBundles();
-        if ( bundles == null || bundles.length == 0 )
+        Util.startScript( pw );
+        pw.println( "var bundleListData = " );
+        JSONWriter jw = new JSONWriter( pw );
+        try
         {
-            pw.println( "<tr class='content'>" );
-            pw.println( "<td class='content' colspan='6'>No " + this.getLabel() + " installed currently</td>" );
-            pw.println( "</tr>" );
-        }
-        else
-        {
+            jw.object();
+            jw.key( "startlevel" );
+            jw.value( getStartLevel().getInitialBundleStartLevel() );
 
-            sort( bundles );
+            Bundle bundle = getBundle( request.getPathInfo() );
+            Bundle[] bundles = ( bundle != null ) ? new Bundle[]
+                { bundle } : this.getBundles();
+            boolean details = ( bundle != null );
 
-            long previousBundle = -1;
-            for ( int i = 0; i < bundles.length; i++ )
+            if ( bundles != null && bundles.length > 0 )
             {
+                sort( bundles );
 
-                if ( previousBundle >= 0 )
+                jw.key( "bundles" );
+
+                jw.array();
+
+                for ( int i = 0; i < bundles.length; i++ )
                 {
-                    // prepare for injected table information row
-                    pw.println( "<tr id='bundle" + previousBundle + "'></tr>" );
+                    bundleInfo( jw, bundles[i], details );
                 }
 
-                this.bundle( pw, bundles[i] );
+                jw.endArray();
 
-                previousBundle = bundles[i].getBundleId();
             }
 
-            if ( previousBundle >= 0 )
-            {
-                // prepare for injected table information row
-                pw.println( "<tr id='bundle" + previousBundle + "'></tr>" );
-            }
+            jw.endObject();
+
+        }
+        catch ( JSONException je )
+        {
+            throw new IOException( je.toString() );
         }
 
-        pw.println( "<tr class='content'>" );
-        pw.println( "<td colspan='7' class='content'>&nbsp;</th>" );
-        pw.println( "</tr>" );
+        pw.println( ";" );
+        pw.println( "render(bundleListData.startlevel, bundleListData.bundles);" );
+        Util.endScript( pw );
+    }
 
-        this.installForm( pw );
 
-        this.footer( pw );
+    private void bundleInfo( JSONWriter jw, Bundle bundle, boolean details ) throws JSONException
+    {
+        jw.object();
+        jw.key( "bundleId" );
+        jw.value( bundle.getBundleId() );
+        jw.key( "name" );
+        jw.value( getName( bundle ) );
+        jw.key( "state" );
+        jw.value( toStateString( bundle.getState() ) );
+        jw.key( "hasStart" );
+        jw.value( hasStart( bundle ) );
+        jw.key( "hasStop" );
+        jw.value( hasStop( bundle ) );
+        jw.key( "hasUpdate" );
+        jw.value( hasUpdate( bundle ) );
+        jw.key( "hasUninstall" );
+        jw.value( hasUninstall( bundle ) );
+
+        if ( details )
+        {
+            bundleDetails( jw, bundle );
+        }
+
+        jw.endObject();
     }
 
 
     protected Bundle[] getBundles()
     {
         return getBundleContext().getBundles();
-    }
-
-
-    private void header( PrintWriter pw )
-    {
-        Util.startScript( pw );
-        pw.println( "function showDetails(bundleId) {" );
-        pw.println( "    var span = document.getElementById('bundle' + bundleId);" );
-        pw.println( "    if (!span) {" );
-        pw.println( "        return;" );
-        pw.println( "    }" );
-        pw.println( "    if (span.innerHTML) {" );
-        pw.println( "        span.innerHTML = '';" );
-        pw.println( "        return;" );
-        pw.println( "    }" );
-        pw.println( "    var parm = '?" + Util.PARAM_ACTION + "=" + AjaxBundleDetailsAction.NAME + "&" + BUNDLE_ID
-            + "=' + bundleId;" );
-        pw.println( "    sendRequest('GET', parm, displayBundleDetails);" );
-        pw.println( "}" );
-        pw.println( "function displayBundleDetails(obj) {" );
-        pw.println( "    var span = document.getElementById('bundle' + obj." + BUNDLE_ID + ");" );
-        pw.println( "    if (!span) {" );
-        pw.println( "        return;" );
-        pw.println( "    }" );
-        pw
-            .println( "    var innerHtml = '<td class=\"content\">&nbsp;</td><td class=\"content\" colspan=\"6\"><table broder=\"0\">';" );
-        pw.println( "    var props = obj.props;" );
-        pw.println( "    for (var i=0; i < props.length; i++) {" );
-        pw
-            .println( "        innerHtml += '<tr><td valign=\"top\" noWrap>' + props[i].key + '</td><td valign=\"top\">' + props[i].value + '</td></tr>';" );
-        pw.println( "    }" );
-        pw.println( "    innerHtml += '</table></td>';" );
-        pw.println( "    span.innerHTML = innerHtml;" );
-        pw.println( "}" );
-        Util.endScript( pw );
-
-        pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
-    }
-
-
-    private void tableHeader( PrintWriter pw )
-    {
-        // pw.println("<tr class='content'>");
-        // pw.println("<th class='content container' colspan='7'>Installed " +
-        // getLabel() + "</th>");
-        // pw.println("</tr>");
-
-        pw.println( "<tr class='content'>" );
-        pw.println( "<th class='content'>ID</th>" );
-        pw.println( "<th class='content' width='100%'>Name</th>" );
-        pw.println( "<th class='content'>Status</th>" );
-        pw.println( "<th class='content' colspan='4'>Actions</th>" );
-        pw.println( "</tr>" );
-    }
-
-
-    private void footer( PrintWriter pw )
-    {
-        pw.println( "</table>" );
-    }
-
-
-    private void bundle( PrintWriter pw, Bundle bundle )
-    {
-        String name = getName( bundle );
-
-        pw.println( "<tr>" );
-        pw.println( "<td class='content right'>" + bundle.getBundleId() + "</td>" );
-        pw.println( "<td class='content'><a href='javascript:showDetails(" + bundle.getBundleId() + ")'>" + name
-            + "</a></td>" );
-        pw.println( "<td class='content center'>" + this.toStateString( bundle.getState() ) + "</td>" );
-
-        // no buttons for system bundle
-        if ( bundle.getBundleId() == 0 )
-        {
-            pw.println( "<td class='content' colspan='4'>&nbsp;</td>" );
-        }
-        else
-        {
-            boolean enabled = bundle.getState() == Bundle.INSTALLED || bundle.getState() == Bundle.RESOLVED;
-            this.actionForm( pw, enabled, bundle.getBundleId(), StartAction.NAME, StartAction.LABEL );
-
-            enabled = bundle.getState() == Bundle.ACTIVE;
-            this.actionForm( pw, enabled, bundle.getBundleId(), StopAction.NAME, StopAction.LABEL );
-
-            enabled = bundle.getState() != Bundle.UNINSTALLED && this.hasUpdates( bundle );
-            this.actionForm( pw, enabled, bundle.getBundleId(), UpdateAction.NAME, UpdateAction.LABEL );
-
-            enabled = bundle.getState() == Bundle.INSTALLED || bundle.getState() == Bundle.RESOLVED
-                || bundle.getState() == Bundle.ACTIVE;
-            this.actionForm( pw, enabled, bundle.getBundleId(), UninstallAction.NAME, UninstallAction.LABEL );
-        }
-
-        pw.println( "</tr>" );
-    }
-
-
-    private void actionForm( PrintWriter pw, boolean enabled, long bundleId, String action, String actionLabel )
-    {
-        pw.println( "<form name='form" + bundleId + "' method='post'>" );
-        pw.println( "<td class='content' align='right'>" );
-        pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + action + "' />" );
-        pw.println( "<input type='hidden' name='" + BUNDLE_ID + "' value='" + bundleId + "' />" );
-        pw.println( "<input class='submit' type='submit' value='" + actionLabel + "'" + ( enabled ? "" : "disabled" )
-            + " />" );
-        pw.println( "</td>" );
-        pw.println( "</form>" );
-    }
-
-
-    private void installForm( PrintWriter pw )
-    {
-        int startLevel = getStartLevel().getInitialBundleStartLevel();
-
-        pw.println( "<form method='post' enctype='multipart/form-data'>" );
-        pw.println( "<tr class='content'>" );
-        pw.println( "<td class='content'>&nbsp;</td>" );
-        pw.println( "<td class='content'>" );
-        pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + InstallAction.NAME + "' />" );
-        pw.println( "<input class='input' type='file' name='" + InstallAction.FIELD_BUNDLEFILE + "'>" );
-        pw.println( " - Start <input class='checkradio' type='checkbox' name='" + InstallAction.FIELD_START
-            + "' value='start'>" );
-        pw.println( " - Start Level <input class='input' type='input' name='" + InstallAction.FIELD_STARTLEVEL
-            + "' value='" + startLevel + "' width='4'>" );
-        pw.println( "</td>" );
-        pw.println( "<td class='content' align='right' colspan='5' noWrap>" );
-        pw.println( "<input class='submit' style='width:auto' type='submit' value='" + InstallAction.LABEL + "'>" );
-        pw.println( "&nbsp;" );
-        pw.println( "<input class='submit' style='width:auto' type='submit' value='" + RefreshPackagesAction.LABEL
-            + "' onClick='this.form[\"" + Util.PARAM_ACTION + "\"].value=\"" + RefreshPackagesAction.NAME
-            + "\"; return true;'>" );
-        pw.println( "</td>" );
-        pw.println( "</tr>" );
-        pw.println( "</form>" );
     }
 
 
@@ -301,11 +387,24 @@ public class BundleListRender extends BaseManagementPlugin implements Render
     }
 
 
-    private boolean hasUpdates( Bundle bundle )
+    private boolean hasStart( Bundle bundle )
     {
+        return bundle.getState() == Bundle.INSTALLED || bundle.getState() == Bundle.RESOLVED;
+    }
+
+
+    private boolean hasStop( Bundle bundle )
+    {
+        return bundle.getState() == Bundle.ACTIVE;
+    }
+
+
+    private boolean hasUpdate( Bundle bundle )
+    {
+        //        enabled = bundle.getState() != Bundle.UNINSTALLED && this.hasUpdates( bundle );
 
         // no updates if there is no installer service
-        Object isObject = installerService.getService();
+        Object isObject = getService( REPOSITORY_ADMIN_NAME );
         if ( isObject == null )
         {
             return false;
@@ -316,22 +415,36 @@ public class BundleListRender extends BaseManagementPlugin implements Render
         {
             return false;
         }
-        /*
-                Version bundleVersion = Version.parseVersion((String) bundle.getHeaders().get(
-                    Constants.BUNDLE_VERSION));
 
-                BundleRepositoryAdmin repoAdmin = ((InstallerService) isObject).getBundleRepositoryAdmin();
-                for (Iterator<Resource> ri = repoAdmin.getResources(); ri.hasNext();) {
-                    Resource res = ri.next();
-                    if (bundle.getSymbolicName().equals(res.getSymbolicName())) {
-                        if (res.getVersion().compareTo(bundleVersion) > 0) {
-                            return true;
-                        }
+        Version bundleVersion = Version.parseVersion( ( String ) bundle.getHeaders().get( Constants.BUNDLE_VERSION ) );
+
+        RepositoryAdmin repoAdmin = ( RepositoryAdmin ) isObject;
+        Repository[] repositories = repoAdmin.listRepositories();
+        for ( int i = 0; i < repositories.length; i++ )
+        {
+            Resource[] resources = repositories[i].getResources();
+            for ( int j = 0; j < resources.length; j++ )
+            {
+                Resource res = resources[j];
+                if ( bundle.getSymbolicName().equals( res.getSymbolicName() ) )
+                {
+                    if ( res.getVersion().compareTo( bundleVersion ) > 0 )
+                    {
+                        return true;
                     }
                 }
-        */
+            }
+        }
 
         return false;
+    }
+
+
+    private boolean hasUninstall( Bundle bundle )
+    {
+        return bundle.getState() == Bundle.INSTALLED || bundle.getState() == Bundle.RESOLVED
+            || bundle.getState() == Bundle.ACTIVE;
+
     }
 
 
@@ -357,6 +470,476 @@ public class BundleListRender extends BaseManagementPlugin implements Render
             }
         }
         return name;
+    }
+
+
+    public void performAction( JSONWriter jw, Bundle bundle ) throws JSONException
+    {
+        jw.object();
+        jw.key( BUNDLE_ID );
+        jw.value( bundle.getBundleId() );
+
+        bundleDetails( jw, bundle );
+
+        jw.endObject();
+    }
+
+
+    public void bundleDetails( JSONWriter jw, Bundle bundle ) throws JSONException
+    {
+        Dictionary headers = bundle.getHeaders();
+
+        jw.key( "props" );
+        jw.array();
+        keyVal( jw, "Symbolic Name", bundle.getSymbolicName() );
+        keyVal( jw, "Version", headers.get( Constants.BUNDLE_VERSION ) );
+        keyVal( jw, "Location", bundle.getLocation() );
+        keyVal( jw, "Last Modification", new Date( bundle.getLastModified() ) );
+
+        keyVal( jw, "Vendor", headers.get( Constants.BUNDLE_VENDOR ) );
+        keyVal( jw, "Copyright", headers.get( Constants.BUNDLE_COPYRIGHT ) );
+        keyVal( jw, "Description", headers.get( Constants.BUNDLE_DESCRIPTION ) );
+
+        keyVal( jw, "Start Level", getStartLevel( bundle ) );
+
+        if ( bundle.getState() == Bundle.INSTALLED )
+        {
+            listImportExportsUnresolved( jw, bundle );
+        }
+        else
+        {
+            listImportExport( jw, bundle );
+        }
+
+        listServices( jw, bundle );
+
+        jw.endArray();
+    }
+
+
+    private Integer getStartLevel( Bundle bundle )
+    {
+        StartLevel sl = getStartLevel();
+        return ( sl != null ) ? new Integer( sl.getBundleStartLevel( bundle ) ) : null;
+    }
+
+
+    private void listImportExport( JSONWriter jw, Bundle bundle ) throws JSONException
+    {
+        PackageAdmin packageAdmin = getPackageAdmin();
+        if ( packageAdmin == null )
+        {
+            return;
+        }
+
+        Map usingBundles = new TreeMap();
+
+        ExportedPackage[] exports = packageAdmin.getExportedPackages( bundle );
+        if ( exports != null && exports.length > 0 )
+        {
+            // do alphabetical sort
+            Arrays.sort( exports, new Comparator()
+            {
+                public int compare( ExportedPackage p1, ExportedPackage p2 )
+                {
+                    return p1.getName().compareTo( p2.getName() );
+                }
+
+
+                public int compare( Object o1, Object o2 )
+                {
+                    return compare( ( ExportedPackage ) o1, ( ExportedPackage ) o2 );
+                }
+            } );
+
+            StringBuffer val = new StringBuffer();
+            for ( int j = 0; j < exports.length; j++ )
+            {
+                ExportedPackage export = exports[j];
+                printExport( val, export.getName(), export.getVersion() );
+                Bundle[] ubList = export.getImportingBundles();
+                if ( ubList != null )
+                {
+                    for ( int i = 0; i < ubList.length; i++ )
+                    {
+                        Bundle ub = ubList[i];
+                        usingBundles.put( ub.getSymbolicName(), ub );
+                    }
+                }
+            }
+            keyVal( jw, "Exported Packages", val.toString() );
+        }
+        else
+        {
+            keyVal( jw, "Exported Packages", "None" );
+        }
+
+        exports = packageAdmin.getExportedPackages( ( Bundle ) null );
+        if ( exports != null && exports.length > 0 )
+        {
+            // collect import packages first
+            final List imports = new ArrayList();
+            for ( int i = 0; i < exports.length; i++ )
+            {
+                final ExportedPackage ep = exports[i];
+                final Bundle[] importers = ep.getImportingBundles();
+                for ( int j = 0; importers != null && j < importers.length; j++ )
+                {
+                    if ( importers[j].getBundleId() == bundle.getBundleId() )
+                    {
+                        imports.add( ep );
+
+                        break;
+                    }
+                }
+            }
+            // now sort
+            StringBuffer val = new StringBuffer();
+            if ( imports.size() > 0 )
+            {
+                final ExportedPackage[] packages = ( ExportedPackage[] ) imports.toArray( new ExportedPackage[imports
+                    .size()] );
+                Arrays.sort( packages, new Comparator()
+                {
+                    public int compare( ExportedPackage p1, ExportedPackage p2 )
+                    {
+                        return p1.getName().compareTo( p2.getName() );
+                    }
+
+
+                    public int compare( Object o1, Object o2 )
+                    {
+                        return compare( ( ExportedPackage ) o1, ( ExportedPackage ) o2 );
+                    }
+                } );
+                // and finally print out
+                for ( int i = 0; i < packages.length; i++ )
+                {
+                    ExportedPackage ep = packages[i];
+                    printImport( val, ep.getName(), ep.getVersion(), ep );
+                }
+            }
+            else
+            {
+                // add description if there are no imports
+                val.append( "None" );
+            }
+
+            keyVal( jw, "Imported Packages", val.toString() );
+        }
+
+        if ( !usingBundles.isEmpty() )
+        {
+            StringBuffer val = new StringBuffer();
+            for ( Iterator ui = usingBundles.values().iterator(); ui.hasNext(); )
+            {
+                Bundle usingBundle = ( Bundle ) ui.next();
+                val.append( getBundleDescriptor( usingBundle ) );
+                val.append( "<br />" );
+            }
+            keyVal( jw, "Importing Bundles", val.toString() );
+        }
+    }
+
+
+    private void listImportExportsUnresolved( JSONWriter jw, Bundle bundle ) throws JSONException
+    {
+        Dictionary dict = bundle.getHeaders();
+
+        String target = ( String ) dict.get( Constants.EXPORT_PACKAGE );
+        if ( target != null )
+        {
+            R4Package[] pkgs = R4Package.parseImportOrExportHeader( target );
+            if ( pkgs != null && pkgs.length > 0 )
+            {
+                // do alphabetical sort
+                Arrays.sort( pkgs, new Comparator()
+                {
+                    public int compare( R4Package p1, R4Package p2 )
+                    {
+                        return p1.getName().compareTo( p2.getName() );
+                    }
+
+
+                    public int compare( Object o1, Object o2 )
+                    {
+                        return compare( ( R4Package ) o1, ( R4Package ) o2 );
+                    }
+                } );
+
+                StringBuffer val = new StringBuffer();
+                for ( int i = 0; i < pkgs.length; i++ )
+                {
+                    R4Export export = new R4Export( pkgs[i] );
+                    printExport( val, export.getName(), export.getVersion() );
+                }
+                keyVal( jw, "Exported Packages", val.toString() );
+            }
+            else
+            {
+                keyVal( jw, "Exported Packages", "None" );
+            }
+        }
+
+        target = ( String ) dict.get( Constants.IMPORT_PACKAGE );
+        if ( target != null )
+        {
+            R4Package[] pkgs = R4Package.parseImportOrExportHeader( target );
+            if ( pkgs != null && pkgs.length > 0 )
+            {
+                Map imports = new TreeMap();
+                for ( int i = 0; i < pkgs.length; i++ )
+                {
+                    R4Package pkg = pkgs[i];
+                    imports.put( pkg.getName(), new R4Import( pkg ) );
+                }
+
+                // collect import packages first
+                final Map candidates = new HashMap();
+                PackageAdmin packageAdmin = getPackageAdmin();
+                if ( packageAdmin != null )
+                {
+                    ExportedPackage[] exports = packageAdmin.getExportedPackages( ( Bundle ) null );
+                    if ( exports != null && exports.length > 0 )
+                    {
+
+                        for ( int i = 0; i < exports.length; i++ )
+                        {
+                            final ExportedPackage ep = exports[i];
+
+                            R4Import imp = ( R4Import ) imports.get( ep.getName() );
+                            if ( imp != null && imp.isSatisfied( toR4Export( ep ) ) )
+                            {
+                                candidates.put( ep.getName(), ep );
+                            }
+                        }
+                    }
+                }
+
+                // now sort
+                StringBuffer val = new StringBuffer();
+                if ( imports.size() > 0 )
+                {
+                    for ( Iterator ii = imports.values().iterator(); ii.hasNext(); )
+                    {
+                        R4Import r4Import = ( R4Import ) ii.next();
+                        ExportedPackage ep = ( ExportedPackage ) candidates.get( r4Import.getName() );
+
+                        // if there is no matching export, check whether this
+                        // bundle has the package, ignore the entry in this case
+                        if ( ep == null )
+                        {
+                            String path = r4Import.getName().replace( '.', '/' );
+                            if ( bundle.getResource( path ) != null )
+                            {
+                                continue;
+                            }
+                        }
+
+                        printImport( val, r4Import.getName(), r4Import.getVersion(), ep );
+                    }
+                }
+                else
+                {
+                    // add description if there are no imports
+                    val.append( "None" );
+                }
+
+                keyVal( jw, "Imported Packages", val.toString() );
+            }
+        }
+    }
+
+
+    private void listServices( JSONWriter jw, Bundle bundle ) throws JSONException
+    {
+        ServiceReference[] refs = bundle.getRegisteredServices();
+        if ( refs == null || refs.length == 0 )
+        {
+            return;
+        }
+
+        for ( int i = 0; i < refs.length; i++ )
+        {
+            String key = "Service ID " + refs[i].getProperty( Constants.SERVICE_ID );
+
+            StringBuffer val = new StringBuffer();
+
+            appendProperty( val, refs[i], Constants.OBJECTCLASS, "Types" );
+            appendProperty( val, refs[i], Constants.SERVICE_PID, "PID" );
+            appendProperty( val, refs[i], ConfigurationAdmin.SERVICE_FACTORYPID, "Factory PID" );
+            appendProperty( val, refs[i], ComponentConstants.COMPONENT_NAME, "Component Name" );
+            appendProperty( val, refs[i], ComponentConstants.COMPONENT_ID, "Component ID" );
+            appendProperty( val, refs[i], ComponentConstants.COMPONENT_FACTORY, "Component Factory" );
+            appendProperty( val, refs[i], Constants.SERVICE_DESCRIPTION, "Description" );
+            appendProperty( val, refs[i], Constants.SERVICE_VENDOR, "Vendor" );
+
+            keyVal( jw, key, val.toString() );
+        }
+    }
+
+
+    private void appendProperty( StringBuffer dest, ServiceReference ref, String name, String label )
+    {
+        Object value = ref.getProperty( name );
+        if ( value instanceof Object[] )
+        {
+            Object[] values = ( Object[] ) value;
+            dest.append( label ).append( ": " );
+            for ( int j = 0; j < values.length; j++ )
+            {
+                if ( j > 0 )
+                    dest.append( ", " );
+                dest.append( values[j] );
+            }
+            dest.append( "<br />" ); // assume HTML use of result
+        }
+        else if ( value != null )
+        {
+            dest.append( label ).append( ": " ).append( value ).append( "<br />" );
+        }
+    }
+
+
+    private void keyVal( JSONWriter jw, String key, Object value ) throws JSONException
+    {
+        if ( key != null && value != null )
+        {
+            jw.object();
+            jw.key( "key" );
+            jw.value( key );
+            jw.key( "value" );
+            jw.value( value );
+            jw.endObject();
+        }
+    }
+
+
+    private void printExport( StringBuffer val, String name, Version version )
+    {
+        boolean bootDel = isBootDelegated( name );
+        if ( bootDel )
+        {
+            val.append( "<span style=\"color: red\">!! " );
+        }
+
+        val.append( name );
+        val.append( ",version=" );
+        val.append( version );
+
+        if ( bootDel )
+        {
+            val.append( " -- Overwritten by Boot Delegation</span>" );
+        }
+
+        val.append( "<br />" );
+    }
+
+
+    private void printImport( StringBuffer val, String name, Version version, ExportedPackage export )
+    {
+        boolean bootDel = isBootDelegated( name );
+        if ( bootDel || export == null )
+        {
+            val.append( "<span style=\"color: red\">!! " );
+        }
+
+        val.append( name );
+        val.append( ",version=" ).append( version );
+        val.append( " from " );
+
+        if ( export != null )
+        {
+            val.append( getBundleDescriptor( export.getExportingBundle() ) );
+
+            if ( bootDel )
+            {
+                val.append( " -- Overwritten by Boot Delegation</span>" );
+            }
+        }
+        else
+        {
+            val.append( " -- Cannot be resolved" );
+            if ( bootDel )
+            {
+                val.append( " and overwritten by Boot Delegation" );
+            }
+            val.append( "</span>" );
+        }
+
+        val.append( "<br />" );
+    }
+
+
+    // returns true if the package is listed in the bootdelegation property
+    private boolean isBootDelegated( String pkgName )
+    {
+
+        // bootdelegation analysis from Apache Felix R4SearchPolicyCore
+
+        // Only consider delegation if we have a package name, since
+        // we don't want to promote the default package. The spec does
+        // not take a stand on this issue.
+        if ( pkgName.length() > 0 )
+        {
+
+            // Delegate any packages listed in the boot delegation
+            // property to the parent class loader.
+            for ( int i = 0; i < bootPkgs.length; i++ )
+            {
+
+                // A wildcarded boot delegation package will be in the form of
+                // "foo.", so if the package is wildcarded do a startsWith() or
+                // a regionMatches() to ignore the trailing "." to determine if
+                // the request should be delegated to the parent class loader.
+                // If the package is not wildcarded, then simply do an equals()
+                // test to see if the request should be delegated to the parent
+                // class loader.
+                if ( ( bootPkgWildcards[i] && ( pkgName.startsWith( bootPkgs[i] ) || bootPkgs[i].regionMatches( 0,
+                    pkgName, 0, pkgName.length() ) ) )
+                    || ( !bootPkgWildcards[i] && bootPkgs[i].equals( pkgName ) ) )
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    private R4Export toR4Export( ExportedPackage export )
+    {
+        R4Attribute version = new R4Attribute( Constants.VERSION_ATTRIBUTE, export.getVersion().toString(), false );
+        return new R4Export( export.getName(), null, new R4Attribute[]
+            { version } );
+    }
+
+
+    private String getBundleDescriptor( Bundle bundle )
+    {
+        StringBuffer val = new StringBuffer();
+        if ( bundle.getSymbolicName() != null )
+        {
+            // list the bundle name if not null
+            val.append( bundle.getSymbolicName() );
+            val.append( " (" ).append( bundle.getBundleId() );
+            val.append( ")" );
+        }
+        else if ( bundle.getLocation() != null )
+        {
+            // otherwise try the location
+            val.append( bundle.getLocation() );
+            val.append( " (" ).append( bundle.getBundleId() );
+            val.append( ")" );
+        }
+        else
+        {
+            // fallback to just the bundle id
+            // only append the bundle
+            val.append( bundle.getBundleId() );
+        }
+        return val.toString();
     }
 
     // ---------- inner classes ------------------------------------------------

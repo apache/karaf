@@ -69,9 +69,9 @@ public class AjaxBundleDetailsAction extends BundleAction
     private boolean[] bootPkgWildcards;
 
 
-    public void setBundleContext( BundleContext bundleContext )
+    public void activate( BundleContext bundleContext )
     {
-        super.setBundleContext( bundleContext );
+        super.activate( bundleContext );
 
         // bootdelegation property parsing from Apache Felix R4SearchPolicyCore
         String bootDelegation = bundleContext.getProperty( Constants.FRAMEWORK_BOOTDELEGATION );

@@ -19,14 +19,13 @@
 package org.apache.felix.webconsole.internal;
 
 
-import org.apache.felix.webconsole.internal.servlet.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
 
-public class BaseManagementPlugin
+public class BaseManagementPlugin implements OsgiManagerPlugin
 {
 
     private BundleContext bundleContext;
@@ -42,15 +41,31 @@ public class BaseManagementPlugin
     }
 
 
-    public void setBundleContext( BundleContext bundleContext )
+    public void activate( BundleContext bundleContext )
     {
         this.bundleContext = bundleContext;
+        this.log = new Logger( bundleContext );
     }
 
 
-    public void setLogger( Logger log )
+    public void deactivate()
     {
-        this.log = log;
+        if ( log != null )
+        {
+            log.dispose();
+        }
+
+        if ( startLevelService != null )
+        {
+            startLevelService.close();
+            startLevelService = null;
+        }
+
+        if ( packageAdmin != null )
+        {
+            packageAdmin.close();
+            packageAdmin = null;
+        }
     }
 
 

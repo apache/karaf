@@ -17,12 +17,23 @@
 package org.apache.felix.webconsole.internal.obr;
 
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.Render;
 import org.apache.felix.webconsole.internal.Util;
@@ -30,9 +41,12 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
+import org.osgi.service.obr.Repository;
+import org.osgi.service.obr.RepositoryAdmin;
+import org.osgi.service.obr.Resource;
 
 
-public abstract class BundleRepositoryRender extends AbstractObrPlugin implements Render
+public class BundleRepositoryRender extends AbstractObrPlugin implements Render
 {
 
     public static final String NAME = "bundlerepo";
@@ -48,9 +62,9 @@ public abstract class BundleRepositoryRender extends AbstractObrPlugin implement
     private String[] repoURLs;
 
 
-    public void setBundleContext( BundleContext bundleContext )
+    public void activate( BundleContext bundleContext )
     {
-        super.setBundleContext( bundleContext );
+        super.activate( bundleContext );
 
         String urlStr = bundleContext.getProperty( REPOSITORY_PROPERTY );
         List urlList = new ArrayList();
@@ -80,77 +94,83 @@ public abstract class BundleRepositoryRender extends AbstractObrPlugin implement
     }
 
 
-    /*
-        public void render(HttpServletRequest request, HttpServletResponse response)
-                throws IOException {
+    public void render( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
 
-            PrintWriter pw = response.getWriter();
-            this.header(pw);
+        PrintWriter pw = response.getWriter();
+        this.header( pw );
 
-            Iterator<?> repos;
-            BundleRepositoryAdmin repoAdmin = getBundleRepositoryAdmin();
-            if (repoAdmin != null) {
-                repos = repoAdmin.getRepositories();
-            } else {
-                repos = Collections.emptyList().iterator();
-            }
-
-            Set<String> activeURLs = new HashSet<String>();
-            if (!repos.hasNext()) {
-                pw.println("<tr class='content'>");
-                pw.println("<td class='content' colspan='4'>No Active Repositories</td>");
-                pw.println("</tr>");
-            } else {
-                while (repos.hasNext()) {
-                    Repository repo = (Repository) repos.next();
-
-                    activeURLs.add(repo.getURL().toString());
-
-                    pw.println("<tr class='content'>");
-                    pw.println("<td class='content'>" + repo.getName() + "</td>");
-                    pw.println("<td class='content'>" + repo.getURL() + "</td>");
-                    pw.println("<td class='content'>"
-                        + new Date(repo.getLastModified()) + "</td>");
-                    pw.println("<td class='content'>");
-                    pw.println("<form>");
-                    pw.println("<input type='hidden' name='" + Util.PARAM_ACTION
-                        + "' value='" + RefreshRepoAction.NAME + "'>");
-                    pw.println("<input type='hidden' name='"
-                        + RefreshRepoAction.PARAM_REPO + "' value='"
-                        + repo.getURL() + "'>");
-                    pw.println("<input class='submit' type='submit' value='Refresh'>");
-                    pw.println("</form>");
-                    pw.println("</td>");
-                    pw.println("</tr>");
-                }
-            }
-
-            // list any repositories configured but not active
-            for (int i = 0; i < this.repoURLs.length; i++) {
-                if (!activeURLs.contains(this.repoURLs[i])) {
-                    pw.println("<tr class='content'>");
-                    pw.println("<td class='content'>-</td>");
-                    pw.println("<td class='content'>" + this.repoURLs[i] + "</td>");
-                    pw.println("<td class='content'>[inactive, click Refresh to activate]</td>");
-                    pw.println("<td class='content'>");
-                    pw.println("<form>");
-                    pw.println("<input type='hidden' name='" + Util.PARAM_ACTION
-                        + "' value='" + RefreshRepoAction.NAME + "'>");
-                    pw.println("<input type='hidden' name='"
-                        + RefreshRepoAction.PARAM_REPO + "' value='"
-                        + this.repoURLs[i] + "'>");
-                    pw.println("<input class='submit' type='submit' value='Refresh'>");
-                    pw.println("</form>");
-                    pw.println("</td>");
-                    pw.println("</tr>");
-                }
-            }
-
-            this.footer(pw);
-
-            this.listResources(pw);
+        RepositoryAdmin repoAdmin = getRepositoryAdmin();
+        Repository[] repos;
+        if ( repoAdmin != null )
+        {
+            repos = repoAdmin.listRepositories();
         }
-    */
+        else
+        {
+            repos = null;
+        }
+
+        Set activeURLs = new HashSet();
+        if ( repos == null || repos.length == 0 )
+        {
+            pw.println( "<tr class='content'>" );
+            pw.println( "<td class='content' colspan='4'>No Active Repositories</td>" );
+            pw.println( "</tr>" );
+        }
+        else
+        {
+            for ( int i = 0; i < repos.length; i++ )
+            {
+                Repository repo = repos[i];
+
+                activeURLs.add( repo.getURL().toString() );
+
+                pw.println( "<tr class='content'>" );
+                pw.println( "<td class='content'>" + repo.getName() + "</td>" );
+                pw.println( "<td class='content'>" + repo.getURL() + "</td>" );
+                pw.println( "<td class='content'>" + new Date( repo.getLastModified() ) + "</td>" );
+                pw.println( "<td class='content'>" );
+                pw.println( "<form>" );
+                pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + RefreshRepoAction.NAME
+                    + "'>" );
+                pw.println( "<input type='hidden' name='" + RefreshRepoAction.PARAM_REPO + "' value='" + repo.getURL()
+                    + "'>" );
+                pw.println( "<input class='submit' type='submit' value='Refresh'>" );
+                pw.println( "</form>" );
+                pw.println( "</td>" );
+                pw.println( "</tr>" );
+            }
+        }
+
+        // list any repositories configured but not active
+        for ( int i = 0; i < this.repoURLs.length; i++ )
+        {
+            if ( !activeURLs.contains( this.repoURLs[i] ) )
+            {
+                pw.println( "<tr class='content'>" );
+                pw.println( "<td class='content'>-</td>" );
+                pw.println( "<td class='content'>" + this.repoURLs[i] + "</td>" );
+                pw.println( "<td class='content'>[inactive, click Refresh to activate]</td>" );
+                pw.println( "<td class='content'>" );
+                pw.println( "<form>" );
+                pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + RefreshRepoAction.NAME
+                    + "'>" );
+                pw.println( "<input type='hidden' name='" + RefreshRepoAction.PARAM_REPO + "' value='"
+                    + this.repoURLs[i] + "'>" );
+                pw.println( "<input class='submit' type='submit' value='Refresh'>" );
+                pw.println( "</form>" );
+                pw.println( "</td>" );
+                pw.println( "</tr>" );
+            }
+        }
+
+        this.footer( pw );
+
+        this.listResources( pw, repos );
+    }
+
+
     private void header( PrintWriter pw )
     {
         pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
@@ -194,72 +214,86 @@ public abstract class BundleRepositoryRender extends AbstractObrPlugin implement
     }
 
 
-    /*
-        private void listResources(PrintWriter pw) {
-            InstallerService is = getInstallerService();
-            if (is == null) {
-                return;
+    private void listResources( PrintWriter pw, Repository[] repos )
+    {
+
+        Map bundles = this.getBundles();
+
+        SortedSet resSet = new TreeSet( new Comparator()
+        {
+            public int compare( Object arg0, Object arg1 )
+            {
+                return compare( ( Resource ) arg0, ( Resource ) arg1 );
             }
 
-            Map<String, Version> bundles = this.getBundles();
 
-            Iterator<?> resources = is.getBundleRepositoryAdmin().getResources();
-            SortedSet<Resource> resSet = new TreeSet<Resource>(
-                new Comparator<Resource>() {
-                    public int compare(Resource o1, Resource o2) {
-                        if (o1 == o2 || o1.equals(o2)) {
-                            return 0;
-                        }
+            public int compare( Resource o1, Resource o2 )
+            {
+                if ( o1 == o2 || o1.equals( o2 ) )
+                {
+                    return 0;
+                }
 
-                        if (o1.getPresentationName().equals(
-                            o2.getPresentationName())) {
-                            return o1.getVersion().compareTo(o2.getVersion());
-                        }
+                if ( o1.getPresentationName().equals( o2.getPresentationName() ) )
+                {
+                    return o1.getVersion().compareTo( o2.getVersion() );
+                }
 
-                        return o1.getPresentationName().compareTo(
-                            o2.getPresentationName());
-                    }
-                });
+                return o1.getPresentationName().compareTo( o2.getPresentationName() );
+            }
+        } );
 
-            while (resources.hasNext()) {
-                Resource res = (Resource) resources.next();
-                Version ver = bundles.get(res.getSymbolicName());
-                if (ver == null || ver.compareTo(res.getVersion()) < 0) {
-                    resSet.add(res);
+        for ( int i = 0; i < repos.length; i++ )
+        {
+            Resource[] resources = repos[i].getResources();
+            for ( int j = 0; j < resources.length; j++ )
+            {
+                Resource res = resources[j];
+                Version ver = ( Version ) bundles.get( res.getSymbolicName() );
+                if ( ver == null || ver.compareTo( res.getVersion() ) < 0 )
+                {
+                    resSet.add( res );
                 }
             }
-
-            this.resourcesHeader(pw, !resSet.isEmpty());
-
-            for (Resource resource : resSet) {
-                this.printResource(pw, resource);
-            }
-
-            this.resourcesFooter(pw, !resSet.isEmpty());
         }
 
-        private void printResource(PrintWriter pw, Resource res) {
-            pw.println("<tr class='content'>");
-            pw.println("<td class='content' valign='top' align='center'><input class='checkradio' type='checkbox' name='bundle' value='"
-                + res.getSymbolicName() + "," + res.getVersion() + "'></td>");
+        this.resourcesHeader( pw, !resSet.isEmpty() );
 
-            // check whether the resource is an assembly (category name)
-            String style = "";
-            String[] cat = res.getCategories();
-            for (int i = 0; cat != null && i < cat.length; i++) {
-                if ("assembly".equals(cat[i])) {
-                    style = "style='font-weight:bold'";
-                }
-            }
-            pw.println("<td class='content' " + style + ">"
-                + res.getPresentationName() + " (" + res.getSymbolicName()
-                + ")</td>");
-            pw.println("<td class='content' " + style + " valign='top'>"
-                + res.getVersion() + "</td>");
-
-            pw.println("</tr>");
+        for ( Iterator ri = resSet.iterator(); ri.hasNext(); )
+        {
+            Resource resource = ( Resource ) ri.next();
+            this.printResource( pw, resource );
         }
-    */
+
+        this.resourcesFooter( pw, !resSet.isEmpty() );
+    }
+
+
+    private void printResource( PrintWriter pw, Resource res )
+    {
+        pw.println( "<tr class='content'>" );
+        pw
+            .println( "<td class='content' valign='top' align='center'><input class='checkradio' type='checkbox' name='bundle' value='"
+                + res.getSymbolicName() + "," + res.getVersion() + "'></td>" );
+
+        // check whether the resource is an assembly (category name)
+        String style = "";
+        String[] cat = res.getCategories();
+        for ( int i = 0; cat != null && i < cat.length; i++ )
+        {
+            if ( "assembly".equals( cat[i] ) )
+            {
+                style = "style='font-weight:bold'";
+            }
+        }
+        pw.println( "<td class='content' " + style + ">" + res.getPresentationName() + " (" + res.getSymbolicName()
+            + ")</td>" );
+        pw.println( "<td class='content' " + style + " valign='top'>" + res.getVersion() + "</td>" );
+
+        pw.println( "</tr>" );
+    }
+
+
     private void resourcesButtons( PrintWriter pw )
     {
         pw.println( "<tr class='content'>" );

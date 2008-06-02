@@ -42,9 +42,9 @@ public class UpdateAction extends BundleAction
     private ServiceTracker installerService;
 
 
-    public void setBundleContext( BundleContext bundleContext )
+    public void activate( BundleContext bundleContext )
     {
-        super.setBundleContext( bundleContext );
+        super.activate( bundleContext );
 
         installerService = new ServiceTracker( bundleContext, INSTALLER_SERVICE_NAME, null );
         installerService.open();

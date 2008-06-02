@@ -44,9 +44,9 @@ public class ComponentConfigurationPrinter extends AbstractScrPlugin implements 
     private ServiceRegistration registration;
 
 
-    public void setBundleContext( BundleContext bundleContext )
+    public void activate( BundleContext bundleContext )
     {
-        super.setBundleContext( bundleContext );
+        super.activate( bundleContext );
 
         registration = bundleContext.registerService( ConfigurationPrinter.SERVICE, this, null );
     }

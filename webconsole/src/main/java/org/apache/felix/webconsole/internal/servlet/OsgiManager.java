@@ -18,47 +18,38 @@ package org.apache.felix.webconsole.internal.servlet;
 
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import javax.servlet.GenericServlet;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.felix.webconsole.Action;
 import org.apache.felix.webconsole.Render;
-import org.apache.felix.webconsole.internal.BaseManagementPlugin;
+import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.internal.Logger;
+import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.compendium.AjaxConfigManagerAction;
 import org.apache.felix.webconsole.internal.compendium.ComponentConfigurationPrinter;
 import org.apache.felix.webconsole.internal.compendium.ComponentRenderAction;
 import org.apache.felix.webconsole.internal.compendium.ConfigManager;
-import org.apache.felix.webconsole.internal.core.AjaxBundleDetailsAction;
 import org.apache.felix.webconsole.internal.core.BundleListRender;
 import org.apache.felix.webconsole.internal.core.InstallAction;
 import org.apache.felix.webconsole.internal.core.RefreshPackagesAction;
 import org.apache.felix.webconsole.internal.core.SetStartLevelAction;
-import org.apache.felix.webconsole.internal.core.StartAction;
-import org.apache.felix.webconsole.internal.core.StopAction;
-import org.apache.felix.webconsole.internal.core.UninstallAction;
-import org.apache.felix.webconsole.internal.core.UpdateAction;
 import org.apache.felix.webconsole.internal.misc.ConfigurationRender;
+import org.apache.felix.webconsole.internal.obr.BundleRepositoryRender;
 import org.apache.felix.webconsole.internal.system.GCAction;
 import org.apache.felix.webconsole.internal.system.ShutdownAction;
 import org.apache.felix.webconsole.internal.system.ShutdownRender;
@@ -83,6 +74,8 @@ public class OsgiManager extends GenericServlet
 
     /** Pseudo class version ID to keep the IDE quite. */
     private static final long serialVersionUID = 1L;
+
+    public static final String ATTR_LABEL_MAP = OsgiManager.class.getName() + ".labelMap";
 
     /**
      * The name and value of a parameter which will prevent redirection to a
@@ -122,12 +115,17 @@ public class OsgiManager extends GenericServlet
      */
     private static final String DEFAULT_MANAGER_ROOT = "/system/console";
 
+    //    private static final Class[] PLUGIN_CLASSES =
+    //        { AjaxConfigManagerAction.class, ComponentConfigurationPrinter.class, ComponentRenderAction.class,
+    //        ConfigManager.class, AjaxBundleDetailsAction.class, BundleListRender.class, InstallAction.class,
+    //        RefreshPackagesAction.class, SetStartLevelAction.class, StartAction.class, StopAction.class,
+    //        UninstallAction.class, UpdateAction.class, ConfigurationRender.class, GCAction.class, ShutdownAction.class,
+    //        ShutdownRender.class, VMStatRender.class };
     private static final Class[] PLUGIN_CLASSES =
         { AjaxConfigManagerAction.class, ComponentConfigurationPrinter.class, ComponentRenderAction.class,
-            ConfigManager.class, AjaxBundleDetailsAction.class, BundleListRender.class, InstallAction.class,
-            RefreshPackagesAction.class, SetStartLevelAction.class, StartAction.class, StopAction.class,
-            UninstallAction.class, UpdateAction.class, ConfigurationRender.class, GCAction.class, ShutdownAction.class,
-            ShutdownRender.class, VMStatRender.class };
+            ConfigManager.class, BundleListRender.class, InstallAction.class, RefreshPackagesAction.class,
+            SetStartLevelAction.class, ConfigurationRender.class, GCAction.class, ShutdownAction.class,
+            ShutdownRender.class, VMStatRender.class, BundleRepositoryRender.class };
 
     private BundleContext bundleContext;
 
@@ -141,13 +139,17 @@ public class OsgiManager extends GenericServlet
 
     private ServiceTracker rendersTracker;
 
+    private ServiceTracker pluginsTracker;
+
     private ServiceRegistration configurationListener;
+
+    private Map plugins = new HashMap();
+
+    private Map labelMap = new HashMap();
 
     private Map operations = new HashMap();
 
-    private SortedMap renders = new TreeMap();
-
-    private Render defaultRender;
+    private Servlet defaultRender;
 
     private String defaultRenderName;
 
@@ -178,6 +180,8 @@ public class OsgiManager extends GenericServlet
         operationsTracker.open();
         rendersTracker = new RenderServiceTracker( this );
         rendersTracker.open();
+        pluginsTracker = new PluginServiceTracker( this );
+        pluginsTracker.open();
         httpServiceTracker = new HttpServiceTracker( this );
         httpServiceTracker.open();
 
@@ -187,18 +191,25 @@ public class OsgiManager extends GenericServlet
             try
             {
                 Object plugin = pluginClass.newInstance();
-                if ( plugin instanceof BaseManagementPlugin )
+                if ( plugin instanceof OsgiManagerPlugin )
                 {
-                    ( ( BaseManagementPlugin ) plugin ).setBundleContext( bundleContext );
-                    ( ( BaseManagementPlugin ) plugin ).setLogger( log );
+                    ( ( OsgiManagerPlugin ) plugin ).activate( bundleContext );
                 }
-                if ( plugin instanceof Action )
+                if ( plugin instanceof AbstractWebConsolePlugin )
                 {
-                    bindOperation( ( Action ) plugin );
+                    AbstractWebConsolePlugin amp = ( AbstractWebConsolePlugin ) plugin;
+                    bindServlet( amp.getLabel(), amp );
                 }
-                if ( plugin instanceof Render )
+                else
                 {
-                    bindRender( ( Render ) plugin );
+                    if ( plugin instanceof Action )
+                    {
+                        bindOperation( ( Action ) plugin );
+                    }
+                    if ( plugin instanceof Render )
+                    {
+                        bindRender( ( Render ) plugin );
+                    }
                 }
             }
             catch ( Throwable t )
@@ -230,16 +241,33 @@ public class OsgiManager extends GenericServlet
             rendersTracker = null;
         }
 
+        if ( pluginsTracker != null )
+        {
+            pluginsTracker.close();
+            pluginsTracker = null;
+        }
+
         if ( httpServiceTracker != null )
         {
             httpServiceTracker.close();
             httpServiceTracker = null;
         }
 
+        // deactivate any remaining plugins
+        for ( Iterator pi = plugins.values().iterator(); pi.hasNext(); )
+        {
+            Object plugin = pi.next();
+            if ( plugin instanceof OsgiManagerPlugin )
+            {
+                ( ( OsgiManagerPlugin ) plugin ).deactivate();
+            }
+        }
+
         // simply remove all operations, we should not be used anymore
         this.defaultRender = null;
+        this.plugins.clear();
+        this.labelMap.clear();
         this.operations.clear();
-        this.renders.clear();
 
         if ( log != null )
         {
@@ -263,38 +291,45 @@ public class OsgiManager extends GenericServlet
         }
 
         // check whether we are not at .../{webManagerRoot}
-        if ( request.getRequestURI().endsWith( this.webManagerRoot ) )
+        if ( request.getPathInfo() == null )
         {
-            response.sendRedirect( request.getRequestURI() + "/" + this.defaultRender.getName() );
+            String path = request.getRequestURI();
+            if ( !path.endsWith( "/" ) )
+            {
+                path = path.concat( "/" );
+            }
+            path = path.concat( defaultRenderName );
+            response.sendRedirect( path );
             return;
         }
 
-        // otherwise we render the response
-        Render render = this.getRender( request );
-        if ( render == null )
+        String label = request.getPathInfo();
+        int slash = label.indexOf( "/", 1 );
+        if ( slash < 2 )
+        {
+            slash = label.length();
+        }
+
+        label = label.substring( 1, slash );
+        Servlet plugin = ( Servlet ) plugins.get( label );
+        if ( plugin != null )
+        {
+            req.setAttribute( ATTR_LABEL_MAP, labelMap );
+            plugin.service( req, res );
+        }
+        else
         {
             response.sendError( HttpServletResponse.SC_NOT_FOUND );
             return;
         }
 
-        String current = render.getName();
-        boolean disabled = false; // should take action==shutdown into
-        // account:
-        // Boolean.valueOf(request.getParameter("disabled")).booleanValue();
-
-        PrintWriter pw = Util.startHtml( response, render.getLabel() );
-        Util.navigation( pw, this.renders.values(), current, disabled );
-
-        render.render( request, response );
-
-        Util.endHhtml( pw );
     }
 
 
     protected boolean handleAction( HttpServletRequest req, HttpServletResponse resp ) throws IOException
     {
         // check action
-        String actionName = this.getParameter( req, Util.PARAM_ACTION );
+        String actionName = AbstractWebConsolePlugin.getParameter( req, Util.PARAM_ACTION );
         if ( actionName != null )
         {
             Action action = ( Action ) this.operations.get( actionName );
@@ -315,7 +350,8 @@ public class OsgiManager extends GenericServlet
                 }
 
                 // maybe overwrite redirect
-                if ( PARAM_NO_REDIRECT_AFTER_ACTION.equals( getParameter( req, PARAM_NO_REDIRECT_AFTER_ACTION ) ) )
+                if ( PARAM_NO_REDIRECT_AFTER_ACTION.equals( AbstractWebConsolePlugin.getParameter( req,
+                    PARAM_NO_REDIRECT_AFTER_ACTION ) ) )
                 {
                     resp.setStatus( HttpServletResponse.SC_OK );
                     resp.setContentType( "text/html" );
@@ -338,98 +374,6 @@ public class OsgiManager extends GenericServlet
         }
 
         return false;
-    }
-
-
-    protected Render getRender( HttpServletRequest request )
-    {
-
-        String page = request.getRequestURI();
-
-        // remove trailing slashes
-        while ( page.endsWith( "/" ) )
-        {
-            page = page.substring( 0, page.length() - 1 );
-        }
-
-        // take last part of the name
-        int lastSlash = page.lastIndexOf( '/' );
-        if ( lastSlash >= 0 )
-        {
-            page = page.substring( lastSlash + 1 );
-        }
-
-        Render render = ( Render ) this.renders.get( page );
-        return ( render == null ) ? this.defaultRender : render;
-    }
-
-
-    private String getParameter( HttpServletRequest request, String name )
-    {
-        // just get the parameter if not a multipart/form-data POST
-        if ( !ServletFileUpload.isMultipartContent( new ServletRequestContext( request ) ) )
-        {
-            return request.getParameter( name );
-        }
-
-        // check, whether we alread have the parameters
-        Map params = ( Map ) request.getAttribute( Util.ATTR_FILEUPLOAD );
-        if ( params == null )
-        {
-            // parameters not read yet, read now
-            // Create a factory for disk-based file items
-            DiskFileItemFactory factory = new DiskFileItemFactory();
-            factory.setSizeThreshold( 256000 );
-
-            // Create a new file upload handler
-            ServletFileUpload upload = new ServletFileUpload( factory );
-            upload.setSizeMax( -1 );
-
-            // Parse the request
-            params = new HashMap();
-            try
-            {
-                List items = upload.parseRequest( request );
-                for ( Iterator fiter = items.iterator(); fiter.hasNext(); )
-                {
-                    FileItem fi = ( FileItem ) fiter.next();
-                    FileItem[] current = ( FileItem[] ) params.get( fi.getFieldName() );
-                    if ( current == null )
-                    {
-                        current = new FileItem[]
-                            { fi };
-                    }
-                    else
-                    {
-                        FileItem[] newCurrent = new FileItem[current.length + 1];
-                        System.arraycopy( current, 0, newCurrent, 0, current.length );
-                        newCurrent[current.length] = fi;
-                        current = newCurrent;
-                    }
-                    params.put( fi.getFieldName(), current );
-                }
-            }
-            catch ( FileUploadException fue )
-            {
-                // TODO: log
-            }
-            request.setAttribute( Util.ATTR_FILEUPLOAD, params );
-        }
-
-        FileItem[] param = ( FileItem[] ) params.get( name );
-        if ( param != null )
-        {
-            for ( int i = 0; i < param.length; i++ )
-            {
-                if ( param[i].isFormField() )
-                {
-                    return param[i].getString();
-                }
-            }
-        }
-
-        // no valid string parameter, fail
-        return null;
     }
 
 
@@ -543,6 +487,50 @@ public class OsgiManager extends GenericServlet
         }
     }
 
+    private static class PluginServiceTracker extends ServiceTracker
+    {
+
+        private final OsgiManager osgiManager;
+
+
+        PluginServiceTracker( OsgiManager osgiManager )
+        {
+            super( osgiManager.getBundleContext(), WebConsoleConstants.SERVICE_NAME, null );
+            this.osgiManager = osgiManager;
+        }
+
+
+        public Object addingService( ServiceReference reference )
+        {
+            Object label = reference.getProperty( WebConsoleConstants.PLUGIN_LABEL );
+            if ( label instanceof String )
+            {
+                Object operation = super.addingService( reference );
+                if ( operation instanceof Servlet )
+                {
+                    // TODO: check reference properties !!
+                    osgiManager.bindServlet( ( String ) label, ( Servlet ) operation );
+                }
+                return operation;
+            }
+
+            return null;
+        }
+
+
+        public void removedService( ServiceReference reference, Object service )
+        {
+            Object label = reference.getProperty( WebConsoleConstants.PLUGIN_LABEL );
+            if ( label instanceof String )
+            {
+                // TODO: check reference properties !!
+                osgiManager.unbindServlet( ( String ) label );
+            }
+
+            super.removedService( reference, service );
+        }
+    }
+
 
     protected synchronized void bindHttpService( HttpService httpService )
     {
@@ -585,48 +573,85 @@ public class OsgiManager extends GenericServlet
     }
 
 
+    protected void bindServlet( String label, Servlet servlet )
+    {
+        try
+        {
+            servlet.init( getServletConfig() );
+            plugins.put( label, servlet );
+
+            if ( servlet instanceof GenericServlet )
+            {
+                String title = ( ( GenericServlet ) servlet ).getServletName();
+                if ( title != null )
+                {
+                    labelMap.put( label, title );
+                }
+            }
+
+            if ( this.defaultRender == null )
+            {
+                this.defaultRender = servlet;
+            }
+            else if ( label.equals( this.defaultRenderName ) )
+            {
+                this.defaultRender = servlet;
+            }
+        }
+        catch ( ServletException se )
+        {
+            // TODO: log
+        }
+    }
+
+
+    protected void unbindServlet( String label )
+    {
+        Servlet servlet = ( Servlet ) plugins.remove( label );
+        if ( servlet != null )
+        {
+            labelMap.remove( label );
+
+            if ( this.defaultRender == servlet )
+            {
+                if ( this.plugins.isEmpty() )
+                {
+                    this.defaultRender = null;
+                }
+                else
+                {
+                    this.defaultRender = ( Servlet ) plugins.values().iterator().next();
+                }
+            }
+
+            servlet.destroy();
+        }
+    }
+
+
     protected void bindOperation( Action operation )
     {
-        this.operations.put( operation.getName(), operation );
+        operations.put( operation.getName(), operation );
     }
 
 
     protected void unbindOperation( Action operation )
     {
-        this.operations.remove( operation.getName() );
+        operations.remove( operation.getName() );
     }
 
 
     protected void bindRender( Render render )
     {
-        this.renders.put( render.getName(), render );
-
-        if ( this.defaultRender == null )
-        {
-            this.defaultRender = render;
-        }
-        else if ( render.getName().equals( this.defaultRenderName ) )
-        {
-            this.defaultRender = render;
-        }
+        RenderBridge bridge = new RenderBridge( render );
+        bridge.activate( getBundleContext() );
+        bindServlet( render.getName(), bridge );
     }
 
 
     protected void unbindRender( Render render )
     {
-        this.renders.remove( render.getName() );
-
-        if ( this.defaultRender == render )
-        {
-            if ( this.renders.isEmpty() )
-            {
-                this.defaultRender = null;
-            }
-            else
-            {
-                this.defaultRender = ( Render ) renders.values().iterator().next();
-            }
-        }
+        unbindServlet( render.getName() );
     }
 
 
@@ -646,9 +671,9 @@ public class OsgiManager extends GenericServlet
         configuration = config;
 
         defaultRenderName = ( String ) config.get( PROP_DEFAULT_RENDER );
-        if ( defaultRenderName != null && renders.get( defaultRenderName ) != null )
+        if ( defaultRenderName != null && plugins.get( defaultRenderName ) != null )
         {
-            defaultRender = ( Render ) renders.get( defaultRenderName );
+            defaultRender = ( Servlet ) plugins.get( defaultRenderName );
         }
 
         // get the web manager root path
