@@ -81,11 +81,11 @@
       <jline.version>0.9.94</jline.version>
       <log4j.version>1.2.14</log4j.version>
       <mina.version>1.1.6</mina.version>
-      <pax.logging.version>1.1.0</pax.logging.version>
+      <pax.logging.version>1.1.1</pax.logging.version>
       <pax.url.version>0.3.0</pax.url.version>
       <servicemix.legal.version>1.0</servicemix.legal.version>
-      <spring.osgi.version>1.0.2</spring.osgi.version>
-      <spring.version>2.5.2</spring.version>
+      <spring.osgi.version>1.1.0-m2</spring.osgi.version>
+      <spring.version>2.5.4</spring.version>
   </properties>
 
    <repositories>
@@ -114,6 +114,12 @@
            <url>http://repository.ops4j.org/mvn-snapshots</url>
            <releases><enabled>false</enabled></releases>
            <snapshots><enabled>true</enabled></snapshots>
+       </repository>
+       <!-- Spring OSGi milestone -->
+       <repository>
+           <id>spring-maven-milestone</id>
+           <name>Springframework Maven Repository</name>
+           <url>http://s3.amazonaws.com/maven.springframework.org/milestone</url>
        </repository>
    </repositories>
 

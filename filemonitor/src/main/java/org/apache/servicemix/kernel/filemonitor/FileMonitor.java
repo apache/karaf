@@ -80,7 +80,6 @@ public class FileMonitor {
     private Project project = new Project();
     private long scanInterval = 500L;
     private boolean loggedConfigAdminWarning;
-    private List<Bundle> changedBundles = new ArrayList<Bundle>();
     private List<Bundle> bundlesToStart = new ArrayList<Bundle>();
     private List<Bundle> bundlesToUpdate = new ArrayList<Bundle>();
     private Map<String, String> artifactToBundle = new HashMap<String, String>();
@@ -206,7 +205,6 @@ public class FileMonitor {
     //-------------------------------------------------------------------------
 
     protected synchronized void onFilesChanged(Collection<String> filenames) {
-        changedBundles.clear();
         bundlesToStart.clear();
         bundlesToUpdate.clear();
         Set<File> bundleJarsCreated = new HashSet<File>();
@@ -376,7 +374,6 @@ public class FileMonitor {
             LOGGER.warn("Could not find Bundle for file: " + file.getCanonicalPath());
         }
         else {
-            changedBundles.add(bundle);
             bundle.stop();
             bundle.uninstall();
         }
@@ -486,13 +483,15 @@ public class FileMonitor {
     }
 
     protected void refreshPackagesAndStartOrUpdateBundles() {
-        PackageAdmin packageAdmin = getPackageAdmin();
-        if (packageAdmin != null) {
-            Bundle[] bundles = new Bundle[changedBundles.size()];
-            changedBundles.toArray(bundles);
-            packageAdmin.refreshPackages(bundles);
+        for (Bundle bundle : bundlesToUpdate) {
+            try {
+                bundle.update();
+                LOGGER.info("Updated: " + bundle);
+            }
+            catch (BundleException e) {
+                LOGGER.warn("Failed to update bundle: " + bundle + ". Reason: " + e, e);
+            }
         }
-        changedBundles.clear();
 
         for (Bundle bundle : bundlesToStart) {
             try {
@@ -503,15 +502,10 @@ public class FileMonitor {
                 LOGGER.warn("Failed to start bundle: " + bundle + ". Reason: " + e, e);
             }
         }
-        
-        for (Bundle bundle : bundlesToUpdate) {
-            try {
-                bundle.update();
-                LOGGER.info("Update: " + bundle);
-            }
-            catch (BundleException e) {
-                LOGGER.warn("Failed to update bundle: " + bundle + ". Reason: " + e, e);
-            }
+
+        PackageAdmin packageAdmin = getPackageAdmin();
+        if (packageAdmin != null) {
+            packageAdmin.refreshPackages(null);
         }
     }
 

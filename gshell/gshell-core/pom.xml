@@ -39,6 +39,8 @@
 
     <properties>
         <gshell.osgi.import>
+            org.springframework.aop.framework,
+            org.aopalliance.aop,
             org.apache.servicemix.kernel.jaas.config;resolution:=optional,
             org.apache.servicemix.kernel.main.spi.*;resolution:=optional,
             com.thoughtworks.xstream*;resolution:=optional,
