@@ -434,6 +434,12 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
                 return;
             }
 
+            // set the service registration guard before we actually set our
+            // state to satisfied. If we would set this after setting the
+            // state to satisified, there would be a theoretical window
+            // between this state setting and service locking
+            lockServiceRegistration();
+            
             // Validation occurs before the services are provided, otherwhise the
             // service provider's service may be called by a service requester
             // while it is still ACTIVATING
@@ -455,6 +461,11 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             // we just log this at debug level but ignore it
             log( LogService.LOG_DEBUG, "Component activation failed while registering the service",
                 m_componentMetadata, ise );
+        }
+        finally
+        {
+            // reset the service registration guard
+            unlockServiceRegistration();
         }
 
     }
@@ -643,15 +654,109 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
     protected void unregisterComponentService()
     {
-        if ( m_serviceRegistration != null )
+        try
         {
-            m_serviceRegistration.unregister();
-            m_serviceRegistration = null;
+            lockServiceRegistration();
 
-            log( LogService.LOG_DEBUG, "unregistering the services", getComponentMetadata(), null );
+            if ( m_serviceRegistration != null )
+            {
+                m_serviceRegistration.unregister();
+                m_serviceRegistration = null;
+
+                log( LogService.LOG_DEBUG, "unregistering the services", getComponentMetadata(), null );
+            }
+        }
+        finally
+        {
+            unlockServiceRegistration();
         }
     }
 
+    //----------- Service Registration Locking --------------------------------
+    // Implementation note for service registration locking
+    // ----------------------------------------------------
+    // The activateInternal method sets the component state to satisfied (aka
+    // ready) before the component is registered as a service and the internal
+    // service registration field is set.
+    // If now in the time between setting the state to satisified and the
+    // service registration field being set, the component is deactivated --
+    // possibly through reconfiguration -- the service may not be unregistered
+    // because the field is not set, but re-activation of the component may
+    // register the service again thus resulting in two services being
+    // registered, the active and the deactivated. Which of both is being used
+    // is framework implementation dependent but chances are, the wrong is
+    // used resulting in system failure.
+    // To fix this, all access to the service registration field is guarded by
+    // a lock. Only if a thread is able to set the lock flag, can the service
+    // registration field be accessed.
+    // To circumvent the above mentioned situation, the activateInternal method
+    // locks the field _before_ setting the component satisfied. This prevents
+    // the deactivateInternal method from deactivating the component until the
+    // service has been registered and the lock been freed. Only then can the
+    // deactivateInternal method start its deactivation task by unregistering
+    // the service.
+    // See FELIX-550 for more information.
+    
+    // lock object used by service registration locking
+    private Object serviceRegistrationLock = new Object();
+
+    // the field set to the owner of the lock
+    private Thread serviceRegistrationLockOwner;
+
+
+    // locks service registration by waiting for the registration to not
+    // be locked and then locking it
+    private void lockServiceRegistration()
+    {
+        synchronized ( serviceRegistrationLock )
+        {
+            int waitGuard = 10;
+            while ( serviceRegistrationLockOwner != null && waitGuard > 0 )
+            {
+                log( LogService.LOG_DEBUG, "Service Registration already locked by " + serviceRegistrationLockOwner
+                    + ", waiting for release", m_componentMetadata, null );
+
+                // wait at most 10 seconds
+                try
+                {
+                    serviceRegistrationLock.wait( 10L * 1000L );
+                }
+                catch ( InterruptedException ie )
+                {
+                    // don't care
+                }
+                waitGuard--;
+            }
+
+            // timedout waiting for the service registration lock
+            if ( waitGuard <= 0 )
+            {
+                throw new IllegalStateException( "Cannot get the service registration lock !!" );
+            }
+
+            serviceRegistrationLockOwner = Thread.currentThread();
+
+            log( LogService.LOG_DEBUG, "Service Registration acquired by " + serviceRegistrationLockOwner,
+                m_componentMetadata, null );
+        }
+    }
+
+
+    // unlocks the service registration. This should only be called by the
+    // thread actually holding the lock.
+    private void unlockServiceRegistration()
+    {
+        synchronized ( serviceRegistrationLock )
+        {
+            log( LogService.LOG_DEBUG, "Service Registration released by " + serviceRegistrationLockOwner,
+                m_componentMetadata, null );
+
+            serviceRegistrationLockOwner = null;
+
+            // notify threads waiting to lock service registration
+            serviceRegistrationLock.notifyAll();
+        }
+    }
 
     //**********************************************************************************************************
 
@@ -754,7 +859,16 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
     ServiceReference getServiceReference()
     {
-        return ( m_serviceRegistration != null ) ? m_serviceRegistration.getReference() : null;
+        try
+        {
+            lockServiceRegistration();
+            
+            return ( m_serviceRegistration != null ) ? m_serviceRegistration.getReference() : null;
+        }
+        finally
+        {
+            unlockServiceRegistration();
+        }
     }
 
 
