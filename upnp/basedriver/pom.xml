@@ -114,7 +114,7 @@
                 <Private-Package>
                   org.apache.felix.upnp.basedriver.*;-split-package:=merge-first,
                   org.cybergarage.*,
-		  org.kxml2.io, org.xmlpull.v1,
+                  org.kxml2.io, org.xmlpull.v1,
                   org.apache.xerces.impl.dv.util
                 </Private-Package>
               </instructions>
@@ -141,13 +141,13 @@
     <dependency>
       <groupId>it.cnr.isti.domoware.cyberdomo</groupId>
       <artifactId>upnp-stack</artifactId>
-      <version>1.8.0-SNAPSHOT</version>
+      <version>1.8.0</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>it.cnr.isti.domoware.cyberdomo</groupId>
       <artifactId>upnp-stack-jdk13</artifactId>
-      <version>1.8.0-SNAPSHOT</version>
+      <version>1.8.0</version>
       <optional>true</optional>
     </dependency>
   </dependencies>
