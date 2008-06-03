@@ -197,14 +197,15 @@ public class ComponentDescriptorIO {
         IOUtils.addAttribute(ai, "servicefactory", String.valueOf(service.isServicefactory()));
         IOUtils.indent(contentHandler, 2);
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.SERVICE, ComponentDescriptorIO.SERVICE_QNAME, ai);
-        if ( service.getInterfaces() != null ) {
+        if ( service.getInterfaces() != null && service.getInterfaces().size() > 0 ) {
+            IOUtils.newline(contentHandler);
             final Iterator i = service.getInterfaces().iterator();
             while ( i.hasNext() ) {
                 final Interface interf = (Interface)i.next();
                 generateXML(interf, contentHandler);
             }
+            IOUtils.indent(contentHandler, 2);
         }
-        IOUtils.indent(contentHandler, 2);
         contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.SERVICE, ComponentDescriptorIO.SERVICE_QNAME);
         IOUtils.newline(contentHandler);
     }
