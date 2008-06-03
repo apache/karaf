@@ -197,7 +197,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     {
         if ( getState() == STATE_ACTIVATING )
         {
-            log( LogService.LOG_WARNING,
+            log( LogService.LOG_INFO,
                 "Asynchronously deactivating the component to prevent a deadlock while it is being activated",
                 m_componentMetadata, null );
             getActivator().schedule( new Runnable()
