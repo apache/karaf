@@ -25,11 +25,7 @@ import java.util.Map;
 
 import javax.xml.transform.TransformerException;
 
-import org.apache.felix.scrplugin.om.metatype.AttributeDefinition;
-import org.apache.felix.scrplugin.om.metatype.Designate;
-import org.apache.felix.scrplugin.om.metatype.MTObject;
-import org.apache.felix.scrplugin.om.metatype.MetaData;
-import org.apache.felix.scrplugin.om.metatype.OCD;
+import org.apache.felix.scrplugin.om.metatype.*;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
@@ -95,6 +91,7 @@ public class MetaTypeIO {
         IOUtils.addAttribute(ai, "localization", metaData.getLocalization());
 
         contentHandler.startElement(NAMESPACE_URI, METADATA_ELEMENT, METADATA_ELEMENT_QNAME, ai);
+        IOUtils.newline(contentHandler);
 
         final Iterator i = metaData.getDescriptors().iterator();
         while ( i.hasNext() ) {
@@ -107,6 +104,7 @@ public class MetaTypeIO {
         }
         // end wrapper element
         contentHandler.endElement(NAMESPACE_URI, METADATA_ELEMENT, METADATA_ELEMENT_QNAME);
+        IOUtils.newline(contentHandler);
         contentHandler.endPrefixMapping(PREFIX);
         contentHandler.endDocument();
     }
@@ -117,15 +115,21 @@ public class MetaTypeIO {
         IOUtils.addAttribute(ai, "id", ocd.getId());
         IOUtils.addAttribute(ai, "name", ocd.getName());
         IOUtils.addAttribute(ai, "description", ocd.getDescription());
+        IOUtils.indent(contentHandler, 1);
         contentHandler.startElement(NAMESPACE_URI, OCD_ELEMENT, OCD_ELEMENT_QNAME, ai);
 
-        final Iterator i = ocd.getProperties().iterator();
-        while ( i.hasNext() ) {
-            final AttributeDefinition ad = (AttributeDefinition) i.next();
-            generateXML(ad, contentHandler);
+        if ( ocd.getProperties().size() > 0 ) {
+            IOUtils.newline(contentHandler);
+            final Iterator i = ocd.getProperties().iterator();
+            while ( i.hasNext() ) {
+                final AttributeDefinition ad = (AttributeDefinition) i.next();
+                generateXML(ad, contentHandler);
+            }
+            IOUtils.indent(contentHandler, 1);
         }
 
         contentHandler.endElement(NAMESPACE_URI, OCD_ELEMENT, OCD_ELEMENT_QNAME);
+        IOUtils.newline(contentHandler);
     }
 
     protected static void generateXML(AttributeDefinition ad, ContentHandler contentHandler)
@@ -148,38 +152,50 @@ public class MetaTypeIO {
         IOUtils.addAttribute(ai, "name", ad.getName());
         IOUtils.addAttribute(ai, "description", ad.getDescription());
         IOUtils.addAttribute(ai, "cardinality", ad.getCardinality());
+        IOUtils.indent(contentHandler, 2);
         contentHandler.startElement(NAMESPACE_URI, AD_ELEMENT, AD_ELEMENT_QNAME, ai);
 
-        if (ad.getOptions() != null) {
+        if (ad.getOptions() != null && ad.getOptions().size() > 0) {
+            IOUtils.newline(contentHandler);
             for (Iterator oi=ad.getOptions().entrySet().iterator(); oi.hasNext(); ) {
                 final Map.Entry entry = (Map.Entry) oi.next();
                 ai.clear();
                 IOUtils.addAttribute(ai, "value", String.valueOf(entry.getKey()));
                 IOUtils.addAttribute(ai, "label", String.valueOf(entry.getValue()));
+                IOUtils.indent(contentHandler, 3);
                 contentHandler.startElement(NAMESPACE_URI, OPTION_ELEMENT, OPTION_ELEMENT_QNAME, ai);
                 contentHandler.endElement(NAMESPACE_URI, OPTION_ELEMENT, OPTION_ELEMENT_QNAME);
+                IOUtils.newline(contentHandler);
             }
+            IOUtils.indent(contentHandler, 2);
         }
 
         contentHandler.endElement(NAMESPACE_URI, AD_ELEMENT, AD_ELEMENT_QNAME);
+        IOUtils.newline(contentHandler);
     }
 
     protected static void generateXML(Designate designate, ContentHandler contentHandler)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "pid", designate.getPid());
+        IOUtils.indent(contentHandler, 1);
         contentHandler.startElement(NAMESPACE_URI, DESIGNATE_ELEMENT, DESIGNATE_ELEMENT_QNAME, ai);
+        IOUtils.newline(contentHandler);
 
         generateXML(designate.getObject(), contentHandler);
 
+        IOUtils.indent(contentHandler, 1);
         contentHandler.endElement(NAMESPACE_URI, DESIGNATE_ELEMENT, DESIGNATE_ELEMENT_QNAME);
+        IOUtils.newline(contentHandler);
     }
 
     protected static void generateXML(MTObject obj, ContentHandler contentHandler)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "ocdref", obj.getOcdref());
+        IOUtils.indent(contentHandler, 2);
         contentHandler.startElement(NAMESPACE_URI, OBJECT_ELEMENT, OBJECT_ELEMENT_QNAME, ai);
         contentHandler.endElement(NAMESPACE_URI, OBJECT_ELEMENT, OBJECT_ELEMENT_QNAME);
+        IOUtils.newline(contentHandler);
     }
 }

@@ -115,6 +115,7 @@ public class ComponentDescriptorIO {
 
         // wrapper element to generate well formed xml
         contentHandler.startElement("", ComponentDescriptorIO.COMPONENTS, ComponentDescriptorIO.COMPONENTS, new AttributesImpl());
+        IOUtils.newline(contentHandler);
 
         final Iterator i = components.getComponents().iterator();
         while ( i.hasNext() ) {
@@ -123,6 +124,7 @@ public class ComponentDescriptorIO {
         }
         // end wrapper element
         contentHandler.endElement("", ComponentDescriptorIO.COMPONENTS, ComponentDescriptorIO.COMPONENTS);
+        IOUtils.newline(contentHandler);
         contentHandler.endPrefixMapping(PREFIX);
         contentHandler.endDocument();
     }
@@ -141,7 +143,9 @@ public class ComponentDescriptorIO {
         IOUtils.addAttribute(ai, "name", component.getName());
         IOUtils.addAttribute(ai, "factory", component.getFactory());
 
+        IOUtils.indent(contentHandler, 1);
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.COMPONENT, ComponentDescriptorIO.COMPONENT_QNAME, ai);
+        IOUtils.newline(contentHandler);
         generateXML(component.getImplementation(), contentHandler);
         if ( component.getService() != null ) {
             generateXML(component.getService(), contentHandler);
@@ -160,7 +164,9 @@ public class ComponentDescriptorIO {
                 generateXML(reference, contentHandler);
             }
         }
+        IOUtils.indent(contentHandler, 1);
         contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.COMPONENT, ComponentDescriptorIO.COMPONENT_QNAME);
+        IOUtils.newline(contentHandler);
     }
 
     /**
@@ -173,8 +179,10 @@ public class ComponentDescriptorIO {
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "class", implementation.getClassame());
+        IOUtils.indent(contentHandler, 2);
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.IMPLEMENTATION, ComponentDescriptorIO.IMPLEMENTATION_QNAME, ai);
         contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.IMPLEMENTATION, ComponentDescriptorIO.IMPLEMENTATION_QNAME);
+        IOUtils.newline(contentHandler);
     }
 
     /**
@@ -187,6 +195,7 @@ public class ComponentDescriptorIO {
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "servicefactory", String.valueOf(service.isServicefactory()));
+        IOUtils.indent(contentHandler, 2);
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.SERVICE, ComponentDescriptorIO.SERVICE_QNAME, ai);
         if ( service.getInterfaces() != null ) {
             final Iterator i = service.getInterfaces().iterator();
@@ -195,7 +204,9 @@ public class ComponentDescriptorIO {
                 generateXML(interf, contentHandler);
             }
         }
+        IOUtils.indent(contentHandler, 2);
         contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.SERVICE, ComponentDescriptorIO.SERVICE_QNAME);
+        IOUtils.newline(contentHandler);
     }
 
     /**
@@ -208,8 +219,10 @@ public class ComponentDescriptorIO {
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "interface", interf.getInterfacename());
+        IOUtils.indent(contentHandler, 3);
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.INTERFACE, ComponentDescriptorIO.INTERFACE_QNAME, ai);
         contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.INTERFACE, ComponentDescriptorIO.INTERFACE_QNAME);
+        IOUtils.newline(contentHandler);
     }
 
     /**
@@ -237,17 +250,20 @@ public class ComponentDescriptorIO {
                 IOUtils.addAttribute(ai, "cardinality", String.valueOf(property.getCardinality()));
             }
         }
+        IOUtils.indent(contentHandler, 2);
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.PROPERTY, ComponentDescriptorIO.PROPERTY_QNAME, ai);
         if ( property.getMultiValue() != null && property.getMultiValue().length > 0 ) {
             // generate a new line first
             IOUtils.text(contentHandler, "\n");
             for(int i=0; i<property.getMultiValue().length; i++) {
-                IOUtils.text(contentHandler, "    ");
+                IOUtils.indent(contentHandler, 3);
                 IOUtils.text(contentHandler, property.getMultiValue()[i]);
-                IOUtils.text(contentHandler, "\n");
+                IOUtils.newline(contentHandler);
             }
+            IOUtils.indent(contentHandler, 2);
         }
         contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.PROPERTY, ComponentDescriptorIO.PROPERTY_QNAME);
+        IOUtils.newline(contentHandler);
     }
 
     /**
@@ -266,8 +282,10 @@ public class ComponentDescriptorIO {
         IOUtils.addAttribute(ai, "target", reference.getTarget());
         IOUtils.addAttribute(ai, "bind", reference.getBind());
         IOUtils.addAttribute(ai, "unbind", reference.getUnbind());
+        IOUtils.indent(contentHandler, 2);
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.REFERENCE, ComponentDescriptorIO.REFERENCE_QNAME, ai);
         contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.REFERENCE, ComponentDescriptorIO.REFERENCE_QNAME);
+        IOUtils.newline(contentHandler);
     }
 
     /**

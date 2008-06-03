@@ -18,31 +18,15 @@
  */
 package org.apache.felix.scrplugin.xml;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.io.*;
+import java.util.*;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.sax.TransformerHandler;
+import javax.xml.transform.*;
+import javax.xml.transform.sax.*;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
+import org.xml.sax.*;
 import org.xml.sax.helpers.AttributesImpl;
 
 /**
@@ -391,7 +375,7 @@ public class IOUtils {
 
     /**
      * Helper method writing out a string.
-     * @param ch
+     * @param ch    The content handler.
      * @param text
      * @throws SAXException
      */
@@ -401,5 +385,28 @@ public class IOUtils {
             final char[] c = text.toCharArray();
             ch.characters(c, 0, c.length);
         }
+    }
+
+    /**
+     * Helper method to indent the xml elements.
+     * Each level is indented with four spaces.
+     * @param ch    The content handler.
+     * @param level The level of indention.
+     */
+    protected static void indent(ContentHandler ch, int level)
+    throws SAXException {
+        for(int i=0;i<level;i++) {
+            IOUtils.text(ch, "    ");
+        }
+    }
+
+    /**
+     * Helper method to create a new line.
+     * @param ch    The content handler.
+     * @throws SAXException
+     */
+    protected static void newline(ContentHandler ch)
+    throws SAXException {
+        IOUtils.text(ch, "\n");
     }
 }
