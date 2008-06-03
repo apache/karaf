@@ -185,24 +185,53 @@ public class PropertyHandler {
 
     /**
      * Return the name of the property.
+     * The name of the property is derived by:
+     * <ol>
+     *   <li>looking at the attribute {@link Constants.PROPERTY_NAME}</li>
+     *   <li>looking at the attribute {@link Constants.PROPERTY_NAME_REF}</li>
+     *   <li>if the property is specified at a filed and the field is of type string the init value is used.</li>
+     * </ol>
+     *
      * @param property The property tag.
      * @param field    The corresponding field if the property is a tag of a field.
      * @return The name of the property or the defaultName
      */
-    protected String getPropertyName(JavaTag tag, JavaField field) {
-        final String name = tag.getNamedParameter(Constants.PROPERTY_NAME);
-        if (!StringUtils.isEmpty(name)) {
-            return name;
-        }
-        String defaultName = null;
-        if ( field != null && "java.lang.String".equals(field.getType()) ) {
-            final String[] initValues = field.getInitializationExpression();
-            if ( initValues != null && initValues.length == 1 ) {
-                defaultName = initValues[0];
+    protected String getPropertyName(JavaTag tag, JavaField field)
+    throws MojoExecutionException {
+        // check name property
+        String name = tag.getNamedParameter(Constants.PROPERTY_NAME);
+
+        if (StringUtils.isEmpty(name)) {
+            // check name ref propery
+            name = tag.getNamedParameter(Constants.PROPERTY_NAME_REF);
+            if (!StringUtils.isEmpty(name)) {
+                final JavaField refField = this.getReferencedField(tag, name);
+                final String[] values = refField.getInitializationExpression();
+                if ( values == null || values.length == 0 ) {
+                    throw new MojoExecutionException("Referenced field for " + name + " has no values for a property name.");
+                }
+                if ( values.length > 1 ) {
+                    throw new MojoExecutionException("Referenced field " + name + " has more than one value for a property name.");
+                }
+                name = values[0];
+            }
+
+            if (StringUtils.isEmpty(name)) {
+                // check field
+                name = null;
+                if ( field != null && "java.lang.String".equals(field.getType()) ) {
+                    final String[] initValues = field.getInitializationExpression();
+                    if ( initValues != null && initValues.length == 1 ) {
+                        name = initValues[0];
+                    }
+                }
             }
         }
-
-        return defaultName;
+        // final empty check
+        if ( StringUtils.isEmpty(name) ) {
+            name = null;
+        }
+        return name;
     }
 
     protected void setPropertyValueRef(final JavaTag tag, Property property, String valueRef)
@@ -215,20 +244,27 @@ public class PropertyHandler {
         }
     }
 
-    protected String[] getPropertyValueRef(final JavaTag tag, Property prop, String valueRef)
+    protected JavaField getReferencedField(final JavaTag tag, String ref)
     throws MojoExecutionException {
-        int classSep = valueRef.lastIndexOf('.');
+        int classSep = ref.lastIndexOf('.');
         JavaField field = null;
         if ( classSep == -1 ) {
             // local variable
-            field = tag.getJavaClassDescription().getFieldByName(valueRef);
+            field = tag.getJavaClassDescription().getFieldByName(ref);
         }
         if ( field == null ) {
-            field = tag.getJavaClassDescription().getExternalFieldByName(valueRef);
+            field = tag.getJavaClassDescription().getExternalFieldByName(ref);
         }
         if ( field == null ) {
-            throw new MojoExecutionException("Property references unknown field " + valueRef + " in class " + tag.getJavaClassDescription().getName());
+            throw new MojoExecutionException("Property references unknown field " + ref + " in class " + tag.getJavaClassDescription().getName());
         }
+        return field;
+    }
+
+    protected String[] getPropertyValueRef(final JavaTag tag, Property prop, String valueRef)
+    throws MojoExecutionException {
+        final JavaField field = this.getReferencedField(tag, valueRef);
+
         // determine type (if not set explicitly)
         if ( prop.getType() == null ) {
             final String type = field.getType();

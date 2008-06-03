@@ -53,6 +53,8 @@ public class Constants {
 
     public static final String PROPERTY_NAME = "name";
 
+    public static final String PROPERTY_NAME_REF = "nameRef";
+
     public static final String PROPERTY_LABEL = "label";
 
     public static final String PROPERTY_DESCRIPTION = "description";
