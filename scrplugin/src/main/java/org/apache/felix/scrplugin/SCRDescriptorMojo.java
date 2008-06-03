@@ -345,7 +345,13 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
         component.setEnabled(Boolean.valueOf(getBoolean(tag, Constants.COMPONENT_ENABLED, true)));
         component.setFactory(tag.getNamedParameter(Constants.COMPONENT_FACTORY));
-        component.setImmediate(Boolean.valueOf(getBoolean(tag, Constants.COMPONENT_IMMEDIATE, true)));
+        
+        // FELIX-593: immediate attribute does not default to true all the
+        // times hence we only set it if declared in the tag
+        if (tag.getNamedParameter(Constants.COMPONENT_IMMEDIATE) != null) {
+            component.setImmediate(Boolean.valueOf(getBoolean(tag,
+                Constants.COMPONENT_IMMEDIATE, true)));
+        }
 
         // whether metatype information is to generated for the component
         final String metaType = tag.getNamedParameter(Constants.COMPONENT_METATYPE);
