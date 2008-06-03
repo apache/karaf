@@ -201,9 +201,9 @@ public class ComponentMetadata {
      * This method may only be trusted after this instance has been validated
      * by the {@link #validate()} call. Else it will either return the value
      * of an explicitly set "immediate" attribute or return false if a service
-     * element is set or true otherwise. This latter default value deduction
-     * may be unsafe while the descriptor has not been completely read.
-     * 
+     * element or the factory attribute is set or true otherwise. This latter
+     * default value deduction may be unsafe while the descriptor has not been
+     * completely read.
      * 
      * @return a boolean that defines the activation policy
      */
@@ -213,8 +213,8 @@ public class ComponentMetadata {
             return m_immediate.booleanValue();
         }
 
-        // deduce default value from service element presence
-        return m_service == null;
+        // deduce default from service element and factory attribute presence 
+        return m_service == null && m_factory == null;
     }
     
     /**
@@ -265,60 +265,90 @@ public class ComponentMetadata {
     /**
      * Method used to verify if the semantics of this metadata are correct
      */
-    void validate() {
-    	
-        // First check if the properties are valid (and extract property values)
-        Iterator propertyIterator = m_propertyMetaData.iterator();
-    	while ( propertyIterator.hasNext() ) {
-    	    PropertyMetadata propMeta = (PropertyMetadata) propertyIterator.next();
-            propMeta.validate();
-            m_properties.put(propMeta.getName(), propMeta.getValue());
+    void validate()
+    {
+
+        // 112.10 The name of the component is required
+        if ( m_name == null )
+        {
+            throw new ComponentException( "The component name has not been set" );
         }
-    	m_propertyMetaData.clear();
-    	
-    	// Check that the provided services are valid too
-    	if(m_service != null) {
-    		m_service.validate();
-    	}
-    	
-    	// Check that the references are ok
-    	Iterator referenceIterator = m_references.iterator();
-    	while ( referenceIterator.hasNext() ) {
-    		((ReferenceMetadata)referenceIterator.next()).validate();
-    	}
-    	    	
-    	// 112.10 The name of the component is required
-    	if( m_name == null ) {
-    		throw new ComponentException("The component name has not been set");
-    	}
-    	
-    	// 112.10 There must be one implementation element and the class atribute is required
-    	if ( m_implementationClassName == null ) {
-    		throw new ComponentException("The implementation class name has not been set for this component");
-    	}
-    	
-    	// 112.2.3 A delayed component specifies a service, is not specified to be a factory component
-    	// and does not have the immediate attribute of the component element set to true.
-    	if ( m_immediate != null && isImmediate() == false && m_service == null ) {
-            throw new ComponentException( "Component '" + m_name
-                + "' is specified as being delayed but does not provide any service." );
-        }    	
-    	
-    	if ( m_factory != null && isImmediate() == false) {
-    		throw new ComponentException("A factory cannot be a delayed component");
-    	}
-    	
-    	// 112.4.6 The serviceFactory attribute (of a provided service) must not be true if 
-    	// the component is a factory component or an immediate component
-    	if ( m_service != null ) {
-            if ( m_service.isServiceFactory() && ( isFactory() || isImmediate() ) ) {
-                throw new ComponentException( "A ServiceFactory service cannot be a factory or immediate component" );
+
+        // 112.10 There must be one implementation element and the class atribute is required
+        if ( m_implementationClassName == null )
+        {
+            throw validationFailure( "Implementation class name missing" );
+        }
+
+        // Next check if the properties are valid (and extract property values)
+        Iterator propertyIterator = m_propertyMetaData.iterator();
+        while ( propertyIterator.hasNext() )
+        {
+            PropertyMetadata propMeta = ( PropertyMetadata ) propertyIterator.next();
+            propMeta.validate( this );
+            m_properties.put( propMeta.getName(), propMeta.getValue() );
+        }
+        m_propertyMetaData.clear();
+
+        // Check that the provided services are valid too
+        if ( m_service != null )
+        {
+            m_service.validate( this );
+        }
+
+        // Check that the references are ok
+        Iterator referenceIterator = m_references.iterator();
+        while ( referenceIterator.hasNext() )
+        {
+            ( ( ReferenceMetadata ) referenceIterator.next() ).validate( this );
+        }
+
+        // verify value of immediate attribute if set
+        if ( m_immediate != null )
+        {
+            if ( isImmediate() )
+            {
+                // FELIX-593: 112.4.3 clarification, immediate is false for factory
+                if ( isFactory() )
+                {
+                    throw validationFailure( "Factory cannot be immediate" );
+                }
+            }
+            else
+            {
+                // 112.2.3 A delayed component specifies a service, is not specified to be a factory component
+                // and does not have the immediate attribute of the component element set to true.
+                // FELIX-593: 112.4.3 clarification, immediate may be true for factory
+                if ( m_service == null && !isFactory() )
+                {
+                    throw validationFailure( "Delayed must provide a service or be a factory" );
+                }
             }
         }
 
-    	
-    	m_validated = true;
-    	// TODO: put a similar flag on the references and the services
+        // 112.4.6 The serviceFactory attribute (of a provided service) must not be true if 
+        // the component is a factory component or an immediate component
+        if ( m_service != null )
+        {
+            if ( m_service.isServiceFactory() && ( isFactory() || isImmediate() ) )
+            {
+                throw validationFailure( "ServiceFactory cannot be factory or immediate" );
+            }
+        }
+
+        m_validated = true;
+        // TODO: put a similar flag on the references and the services
     }
 
+
+    /**
+     * Returns a <code>ComponentException</code> for this compeonent with the
+     * given explanation for failure.
+     * 
+     * @param reason The explanation for failing to validate this component.
+     */
+    ComponentException validationFailure( String reason )
+    {
+        return new ComponentException( "Component " + getName() + " validation failed: " + reason );
+    }
 }

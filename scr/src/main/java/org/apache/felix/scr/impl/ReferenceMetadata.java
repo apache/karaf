@@ -330,16 +330,16 @@ public class ReferenceMetadata
      *  Method used to verify if the semantics of this metadata are correct
      *
      */
-    void validate()
+    void validate( ComponentMetadata componentMetadata )
     {
         if ( m_name == null )
         {
-            throw new ComponentException( "the name for the reference must be set" );
+            throw componentMetadata.validationFailure( "A name must be declared for the reference" );
         }
 
         if ( m_interface == null )
         {
-            throw new ComponentException( "the interface for the reference must be set" );
+            throw componentMetadata.validationFailure( "An interface must be declared for the reference" );
         }
     }
 

@@ -95,9 +95,12 @@ public class ServiceMetadata {
      * Verify if the semantics of this metadata are correct
      *
      */
-    void validate() {
-    	if(m_provides.size() == 0) {
-    		throw new ComponentException("At least one provided interface must be given");
-    	}
+    void validate( ComponentMetadata componentMetadata )
+    {
+        if ( m_provides.size() == 0 )
+        {
+            throw componentMetadata
+                .validationFailure( "At least one provided interface must be declared in the service element" );
+        }
     }
 }

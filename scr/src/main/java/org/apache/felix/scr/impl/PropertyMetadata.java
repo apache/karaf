@@ -195,11 +195,12 @@ public class PropertyMetadata {
     /**
      * Method used to verify if the semantics of this metadata are correct
      */
-    public void validate(){
-    	if(m_name == null)
-    	{
-    		throw new ComponentException("Property name attribute is mandatory");
-    	}
+    public void validate( ComponentMetadata componentMetadata )
+    {
+        if ( m_name == null )
+        {
+            throw componentMetadata.validationFailure( "Property name attribute is mandatory" );
+        }
     }
     
     private Object toType(String value) {

@@ -188,29 +188,20 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     private ComponentManager createComponentManager( Dictionary configuration, boolean synchronous )
     {
         long componentId = m_componentRegistry.createComponentId();
-        ComponentManager cm = ManagerFactory.createManager( getActivator(), getComponentMetadata(), componentId );
-
+        ImmediateComponentManager cm = new ImmediateComponentManager( getActivator(), getComponentMetadata(),
+            componentId );
+        
         // add the new component to the activators instances
         getActivator().getInstanceReferences().add( cm );
 
         // register with the internal set of created components
         m_createdComponents.put( cm, cm );
 
-        // inject configuration if possible
-        if ( cm instanceof ImmediateComponentManager )
-        {
-            ( ( ImmediateComponentManager ) cm ).setFactoryProperties( configuration );
-        }
+        // inject configuration
+        cm.setFactoryProperties( configuration );
 
         // enable synchronously or asynchronously depending on the flag
-        if ( cm instanceof AbstractComponentManager )
-        {
-            ( ( AbstractComponentManager ) cm ).enable( synchronous );
-        }
-        else
-        {
-            cm.enable();
-        }
+        cm.enable( synchronous );
 
         return cm;
     }
