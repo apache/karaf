@@ -163,7 +163,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     public final void reactivate()
     {
         // synchronously deactivate and schedule activation asynchronously
-        deactivateInternal();
+        deactivate();
 
         getActivator().schedule( new Runnable()
         {
@@ -181,11 +181,37 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      * This method unlike other state change methods immediately takes
      * action and deactivates the component. The reason for this is, that this
      * method is called when a required service is not available any more and
-     * hence the component cannot work.
+     * hence the component cannot work. The exception to this is, that the
+     * deactivation is scheduled for asynchronous execution if the component
+     * is currently activating.
+     * <p>
+     * We must not immediately deactivate while the component is activating
+     * because we might create a deadlock: If this method is called from the
+     * framework service event thread some locks may be held. If at the same
+     * time the activation tries to access referenced services the framework
+     * lock will be tried to be obtained. On the other hand the activation
+     * holds a lock on this instance and the deactivation tries to get that
+     * lock.
      */
     public final void deactivate()
     {
-        deactivateInternal();
+        if ( getState() == STATE_ACTIVATING )
+        {
+            log( LogService.LOG_WARNING,
+                "Asynchronously deactivating the component to prevent a deadlock while it is being activated",
+                m_componentMetadata, null );
+            getActivator().schedule( new Runnable()
+            {
+                public void run()
+                {
+                    deactivateInternal();
+                }
+            } );
+        }
+        else
+        {
+            deactivateInternal();
+        }
     }
 
 
