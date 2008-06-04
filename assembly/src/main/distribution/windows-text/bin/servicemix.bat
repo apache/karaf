@@ -107,7 +107,7 @@ if "%SERVICEMIX_PROFILER%" == "" goto :SERVICEMIX_PROFILER_END
 :SERVICEMIX_PROFILER_END
 
 rem Setup the classpath
-set CLASSPATH=%CLASSPATH%;%SERVICEMIX_BASE%\conf;$SERVICEMIX_HOME\lib\servicemix-jaas-boot.jar
+set CLASSPATH=%CLASSPATH%;%SERVICEMIX_HOME%\lib\servicemix.jar;%SERVICEMIX_HOME%\lib\servicemix-jaas-boot.jar
 
 rem Execute the JVM or the load the profiler
 if "%SERVICEMIX_PROFILER%" == "" goto :EXECUTE
