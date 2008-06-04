@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.servicemix.kernel</groupId>
         <artifactId>kernel</artifactId>
-        <version>1.0.0-rc1</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.servicemix.kernel.jaas</groupId>
     <artifactId>jaas</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-rc1</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>Apache ServiceMix Kernel :: JAAS</name>
 
     <modules>
