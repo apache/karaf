@@ -23,7 +23,7 @@ package org.apache.felix.metatype;
  * The <code>Attribute</code> TODO
  *
  * @author fmeschbe
- * @version $Rev:$, $Date:$
+ * @version $Rev$, $Date$
  */
 public class Attribute
 {
@@ -63,16 +63,25 @@ public class Attribute
                 String[] newContent = new String[content.length + added.length];
                 System.arraycopy( content, 0, newContent, 0, content.length );
                 System.arraycopy( added, 0, newContent, content.length, added.length );
+                content = newContent;
             }
         }
     }
 
 
-    public void addContent( String content )
+    public void addContent( String content, boolean split )
     {
         if ( content != null )
         {
-            addContent( AD.splitList( content ) );
+            if ( split )
+            {
+            	addContent( AD.splitList( content ) );
+            }
+            else
+            {
+            	addContent( new String[] { content } );
+            }
         }
     }
+    
 }

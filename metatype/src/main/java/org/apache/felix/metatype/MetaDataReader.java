@@ -365,7 +365,7 @@ public class MetaDataReader
     {
         Attribute ah = this.createAttribute();
         ah.setAdRef( this.getRequiredAttribute( "adref" ) );
-        ah.addContent( this.getOptionalAttribute( "content" ) );
+        ah.addContent( this.getOptionalAttribute( "content" ), true );
 
         int eventType = this.parser.next();
         while ( eventType != XmlPullParser.END_DOCUMENT )
@@ -374,7 +374,7 @@ public class MetaDataReader
             {
                 if ( "Value".equals( this.parser.getName() ) )
                 {
-                    ah.addContent( this.parser.nextText() );
+                    ah.addContent( this.parser.nextText(), false );
                     eventType = this.parser.getEventType();
                     continue;
                 }
