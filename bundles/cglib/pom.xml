@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <!--
@@ -24,7 +23,7 @@
     <parent>
         <groupId>org.apache.servicemix.kernel.bundles</groupId>
         <artifactId>bundles</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0-rc1</version>
     </parent>
 
     <groupId>org.apache.servicemix.bundles</groupId>
@@ -33,7 +32,7 @@
     -->
     <artifactId>org.apache.servicemix.bundles.cglib-2.1_3</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0-rc1</version>
     <name>Apache ServiceMix OSGI Common Bundles: ${pkgArtifactId}-${pkgVersion}</name>
     <description>
         This bundle simply wraps ${pkgArtifactId}-${pkgVersion}.jar.
