@@ -43,6 +43,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 //import org.apache.felix.bundlerepository.BundleRepository;
 import org.osgi.service.obr.RepositoryAdmin;
@@ -55,12 +56,11 @@ import org.osgi.service.log.LogService;
 public class ObrProbe implements BundleActivator, ObrProbeMBean {
 
   private String version = null;
-  private static String tabNameString = "TabUI:name=ObrProbe";
+  private static final String TAB_NAME_STRING = "TabUI:name=ObrProbe";
 
-  private ObjectName tabName = null;
   private MBeanServer server = null;
   private BundleContext bc = null;
-  private ServiceReference sr = null;
+  private ServiceRegistration sr = null;
 
 
   ////////////////////////////////////////////////////////
@@ -78,20 +78,15 @@ public class ObrProbe implements BundleActivator, ObrProbeMBean {
     this.bc=context;
     this.version=(String)bc.getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
     this.log(LogService.LOG_INFO, "Starting obrProbe MBean " + this.version,null);
-    this.tabName=new ObjectName(tabNameString);
-    this.sr = context.getServiceReference(MBeanServer.class.getName());
-    if (sr!=null){
-      this.connectToAgent(sr);
-    }
+    java.util.Properties p = new java.util.Properties();
+    p.put(org.apache.felix.mosgi.jmx.agent.Constants.OBJECTNAME, TAB_NAME_STRING);
+    this.sr = this.bc.registerService(ObrProbeMBean.class.getName(), this, p);
     this.log(LogService.LOG_INFO, "ObrProbe MBean "+this.version+" started", null);
   }
 
-
   public void stop(BundleContext context) {
     this.log(LogService.LOG_INFO, "Stopping obrprobe MBean "+this.version, null);
-    if (this.server!=null){
-      this.disconnectFromAgent();
-    }
+    this.sr.unregister();
     this.sr=null;
     this.log(LogService.LOG_INFO, "obrProbe MBean "+this.version+" stopped", null);
     this.bc=null;
@@ -101,11 +96,11 @@ public class ObrProbe implements BundleActivator, ObrProbeMBean {
   //       ObrProbeMBean                              //
   ////////////////////////////////////////////////////////
   public void deploy(String location,String version){
-    ServiceReference sr=this.bc.getServiceReference(RepositoryAdmin.class.getName());
+    ServiceReference sref=this.bc.getServiceReference(RepositoryAdmin.class.getName());
 
     System.out.println("Starting "+location+" "+version);
-    if (sr!=null){
-      RepositoryAdmin brs=(RepositoryAdmin)this.bc.getService(sr);
+    if (sref!=null){
+      RepositoryAdmin brs=(RepositoryAdmin)this.bc.getService(sref);
       Resolver resolver=brs.resolver();
       Resource ressource = selectNewestVersion(searchRepository(brs, location, version));
       if (ressource!=null){
@@ -124,45 +119,6 @@ public class ObrProbe implements BundleActivator, ObrProbeMBean {
     }else{
       this.log(LogService.LOG_ERROR, "No BundleRepository Service", null);
     }
-  }
-
-  ////////////////////////////////////////////////////////
-  //       ServiceListener                              //
-  ////////////////////////////////////////////////////////
-  public void serviceChanged(ServiceEvent event) {
-    ServiceReference sr=event.getServiceReference();
-    Object service=bc.getService(sr);
-    if (this.server==null && event.getType()==ServiceEvent.REGISTERED && service instanceof MBeanServer){
-      this.connectToAgent(sr);
-    }
-    if (this.server!=null){
-      if(event.getType()==ServiceEvent.UNREGISTERING && service instanceof MBeanServer){
-        this.disconnectFromAgent();
-      }
-    }
-  }
-
-  private void connectToAgent(ServiceReference sr){
-    this.log(LogService.LOG_INFO, "Registering to agent", null);
-    try{
-      this.server=(MBeanServer)this.bc.getService(sr);
-      this.server.registerMBean(this, tabName);
-    }catch (Exception e){
-      e.printStackTrace();
-    }
-    this.log(LogService.LOG_INFO, "Registered to agent", null);
-  }
-  
-  private void disconnectFromAgent(){
-    this.log(LogService.LOG_INFO, "Unregistering from agent", null);
-    try {
-      server.unregisterMBean(tabName);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    this.server=null;
-    this.bc.ungetService(this.sr);
-    this.log(LogService.LOG_INFO, "Unregistered from agent", null);
   }
 
   private void log(int prio, String message, Throwable t){

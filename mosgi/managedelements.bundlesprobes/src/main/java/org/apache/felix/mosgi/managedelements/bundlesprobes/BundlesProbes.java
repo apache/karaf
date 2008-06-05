@@ -45,19 +45,19 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
-
+import org.osgi.framework.ServiceRegistration;
 
 import org.osgi.service.log.LogService;
 
 public class BundlesProbes extends NotificationBroadcasterSupport implements BundleActivator, BundlesProbesMBean, ServiceListener, BundleListener {
 
   private String version = null;
-  private static String tabNameString = "TabUI:name=BundlesProbes";
+  private static String TAB_NAME_STRING="TabUI:name=BundlesProbes";
 
   private ObjectName tabName = null;
   private MBeanServer server = null;
   private BundleContext bc = null;
-  private ServiceReference sr = null;
+  private ServiceRegistration sr = null;
 
 
   ////////////////////////////////////////////////////////
@@ -73,24 +73,18 @@ public class BundlesProbes extends NotificationBroadcasterSupport implements Bun
   ////////////////////////////////////////////////////////
   public void start(BundleContext context) throws Exception  {
     this.bc=context;
-    this.version=(String)bc.getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
     this.log(LogService.LOG_INFO, "Starting BundlesProbe MBean " + this.version,null);
-    this.tabName=new ObjectName(tabNameString);
-    this.sr = context.getServiceReference(MBeanServer.class.getName());
-    if (sr!=null){
-      this.connectToAgent(sr);
-    }
-		this.log(LogService.LOG_INFO, "BundlesProbes MBean "+this.version+" started", null);
+    java.util.Properties p = new java.util.Properties();
+    p.put(org.apache.felix.mosgi.jmx.agent.Constants.OBJECTNAME, TAB_NAME_STRING);
+    this.sr = this.bc.registerService(BundlesProbesMBean.class.getName(), this, p);
+    this.log(LogService.LOG_INFO, "BundlesProbes MBean "+this.version+" started", null);
   }
 
-
   public void stop(BundleContext context) {
-		this.log(LogService.LOG_INFO, "Stopping BundlesProbes MBean "+this.version, null);
-    if (this.server!=null){
-      this.disconnectFromAgent();
-    }
+    this.log(LogService.LOG_INFO, "Stopping BundlesProbes MBean "+this.version, null);
+    this.sr.unregister();
     this.sr=null;
-		this.log(LogService.LOG_INFO, "BundlesProbes MBean "+this.version+" stopped", null);
+    this.log(LogService.LOG_INFO, "BundlesProbes MBean "+this.version+" stopped", null);
     this.bc=null;
   }
 
@@ -173,16 +167,16 @@ public class BundlesProbes extends NotificationBroadcasterSupport implements Bun
   //       ServiceListener                              //
   ////////////////////////////////////////////////////////
   public void serviceChanged(ServiceEvent event) {
-    ServiceReference sr=event.getServiceReference();
-    Object service=bc.getService(sr);
+    ServiceReference sref=event.getServiceReference();
+    Object service=bc.getService(sref);
     if (this.server==null && event.getType()==ServiceEvent.REGISTERED && service instanceof MBeanServer){
-      this.connectToAgent(sr);
+      //this.connectToAgent(sref);
     }
     if (this.server!=null){
       if(event.getType()==ServiceEvent.UNREGISTERING && service instanceof MBeanServer){
-        this.disconnectFromAgent();
+        //this.disconnectFromAgent();
       }else{
-        this.sendRemoteNotification(ServiceEvent.class.getName(),sr.getBundle().getBundleId(), event.getType(), (String)sr.getBundle().getHeaders().get(Constants.BUNDLE_NAME));
+        this.sendRemoteNotification(ServiceEvent.class.getName(),sref.getBundle().getBundleId(), event.getType(), (String)sref.getBundle().getHeaders().get(Constants.BUNDLE_NAME));
       }
     }
   }
@@ -208,33 +202,6 @@ System.out.println("Evenement bundle "+b.getBundleId()+" : "+event.getType());
     str.append(":");
     str.append(name);
     super.sendNotification(new AttributeChangeNotification(this.tabName, 0, 0,str.toString(),null, "Bundle", null, null));
-  }
-
-  private void connectToAgent(ServiceReference sr){
-    this.log(LogService.LOG_INFO, "Registering to agent", null);
-    try{
-      this.server=(MBeanServer)this.bc.getService(sr);
-      this.server.registerMBean(this, tabName);
-      this.bc.addServiceListener(this);
-      this.bc.addBundleListener(this);
-    }catch (Exception e){
-      e.printStackTrace();
-    }
-    this.log(LogService.LOG_INFO, "Registered to agent", null);
-  }
-  
-  private void disconnectFromAgent(){
-    this.log(LogService.LOG_INFO, "Unregistering from agent", null);
-    this.bc.removeServiceListener(this);
-    this.bc.removeBundleListener(this);
-    try {
-      server.unregisterMBean(tabName);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    this.server=null;
-    this.bc.ungetService(this.sr);
-    this.log(LogService.LOG_INFO, "Unregistered from agent", null);
   }
 
   private void log(int prio, String message, Throwable t){
