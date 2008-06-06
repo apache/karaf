@@ -392,7 +392,7 @@ class ImmediateComponentManager extends AbstractComponentManager
         {
             log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure from configuration",
                 getComponentMetadata(), null );
-            reactivate();
+            reactivateAsynchronous();
         }
     }
 }

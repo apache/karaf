@@ -148,7 +148,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     public final void reconfigure()
     {
         log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure", m_componentMetadata, null );
-        reactivate();
+        reactivateAsynchronous();
     }
 
 
@@ -164,11 +164,31 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     {
         // synchronously deactivate and schedule activation asynchronously
         deactivate();
-
+        
         getActivator().schedule( new Runnable()
         {
             public void run()
             {
+                activateInternal();
+            }
+        } );
+    }
+    
+    
+    /**
+     * Cycles this component by deactivating it and - if still satisfied -
+     * activating it again asynchronously.
+     * <p>
+     * This method schedules the deactivation and reactivation for asynchronous
+     * execution.
+     */
+    public final void reactivateAsynchronous()
+    {
+        getActivator().schedule( new Runnable()
+        {
+            public void run()
+            {
+                deactivateInternal();
                 activateInternal();
             }
         } );
@@ -739,7 +759,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         {
             if ( serviceRegistrationLockOwner != null )
             {
-                log( LogService.LOG_INFO, "Waiting for Service Registration owned " + serviceRegistrationLockOwner,
+                log( LogService.LOG_INFO, "Waiting for Service Registration owned by " + serviceRegistrationLockOwner,
                     m_componentMetadata, null );
 
                 int waitGuard = 10;
@@ -764,6 +784,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
                         + serviceRegistrationLockOwner );
                 }
 
+                log( LogService.LOG_INFO, "Service Registration is now ready", m_componentMetadata, null );
             }
 
             serviceRegistrationLockOwner = Thread.currentThread();
