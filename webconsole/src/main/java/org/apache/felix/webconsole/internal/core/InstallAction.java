@@ -312,14 +312,7 @@ public class InstallAction extends BundleAction
         public void run()
         {
             // wait some time for the request to settle
-            try
-            {
-                sleep( 500L );
-            }
-            catch ( InterruptedException ie )
-            {
-                // don't care
-            }
+            sleepSilently( 500L );
 
             // now deploy the resolved bundles
             InputStream bundleStream = null;
@@ -330,6 +323,9 @@ public class InstallAction extends BundleAction
 
                 if ( refreshPackages )
                 {
+                    // wait for asynchronous bundle start tasks to finish
+                    sleepSilently( 2000L );
+
                     try
                     {
                         PackageAdmin pa = installAction.getPackageAdmin();
@@ -369,6 +365,19 @@ public class InstallAction extends BundleAction
                     }
                 }
                 bundleFile.delete();
+            }
+        }
+
+
+        protected void sleepSilently( long msecs )
+        {
+            try
+            {
+                sleep( msecs );
+            }
+            catch ( InterruptedException ie )
+            {
+                // don't care
             }
         }
     }
