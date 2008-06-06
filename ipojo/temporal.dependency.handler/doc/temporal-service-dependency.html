@@ -1,0 +1,135 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<HTML>
+  
+ 
+<HEAD>
+    <TITLE>Apache Felix - Temporal Service Dependency</TITLE>
+    <LINK rel="stylesheet" href="http://felix.apache.org/site/media.data/site.css" type="text/css" media="all">
+    <META http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  </HEAD>
+  <BODY>
+    <DIV class="title"><DIV class="logo"><A href="http://felix.apache.org/site/index.html"><IMG border="0" alt="Apache Felix" src="http://felix.apache.org/site/media.data/logo.png"></A></DIV><DIV class="header"><A href="http://www.apache.org/"><IMG border="0" alt="Apache" src="http://felix.apache.org/site/media.data/apache.png"></A></DIV></DIV>
+    <DIV class="menu">
+    
+                
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                                
+                        
+            &gt;
+	<LI><A href="http://felix.apache.org/site/news.html" title="news">news</A></LI>
+	<LI><A href="http://felix.apache.org/site/license.html" title="license">license</A></LI>
+	<LI><SPAN class="nobr"><A href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</A></LI>
+	<LI><A href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</A></LI>
+	<LI><A href="http://felix.apache.org/site/contributing.html" title="Contributing">contributing</A></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN>
+<!-- ApacheCon Ad -->
+<IFRAME src="http://www.apache.org/ads/button.html" style="border-width:0; float: left" frameborder="0" scrolling="no" width="135" height="135"></IFRAME>
+<P style="height: 100px">
+<!-- ApacheCon Ad --></LI>
+&lt;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </DIV>
+    <DIV class="main">
+<TABLE class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><TBODY><TR>
+<TD class="confluenceTd" valign="top" width="80%">
+<H1><A name="TemporalServiceDependency-Thetemporaldependencyhandler"></A>The temporal dependency handler</H1>
+<P>Regular service dependencies participate to the instance lifecycle. Moreover, the injected service object is either available or not available. A temporal dependency handler is a little different and provides a different resolution pattern. Indeed, the temporal dependency does not invalidate the instance. Moreover, if not available, the temporal dependency waits (and so blocks the current thread) for a provider. Of course, the maximum waiting time can be specified. If a timeout occurs, the handler throws a runtime exception.</P>
+<H2><A name="TemporalServiceDependency-Usingthehandler"></A>Using the handler</H2>
+<P>First of all, you need to configure the component type to use the handler such as:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;iPOJO <SPAN class="code-keyword">xmlns:temporal</SPAN>=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.handler.temporal&quot;</SPAN>&gt;</SPAN>
+	&lt;component
+		className=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.example.Temporal&quot;</SPAN>&gt;
+		
+                <SPAN class="code-tag">&lt;!-&mdash;Temporal dependency configuration --&gt;</SPAN>
+		&lt;temporal:requires field=<SPAN class="code-quote">&quot;mytemporal&quot;</SPAN>
+                /&gt;
+	<SPAN class="code-tag">&lt;provides /&gt;</SPAN>
+	<SPAN class="code-tag">&lt;/component&gt;</SPAN>
+<SPAN class="code-tag">&lt;/iPOJO&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>Notice that, this handler is an external handler. So, it uses the &quot;org.apache.felix.ipojo.handler.temporal&quot; namespace.<BR>
+Once described, you can implement your component. The specified field will be mapped to the temporal dependency. As for regular field injection, aggregation, targeted service specification (i.e. interface) are discovered automatically. Filter, comparator and binding policy are also supported. However, the optional attribute is not supported. In fact, this attribute is meaningless in the case of a temporal dependency.<BR>
+Using the field in your code will try to find a matching service provider. If a provider is available, the field receives the service object immediately. Else, the thread is stopped and waits for a provider. The default wait time is 3s (you can also specify this time). If no provider is available after this time, the thread throws a RuntimeException. If a provider becomes available during this time, the field receives immediately the value and the execution can continue.</P>
+<H2><A name="TemporalServiceDependency-Configuration"></A>Configuration</H2>
+<P>The handler has only one mandatory attributes:</P>
+<UL>
+	<LI>Field: the implementation field supporting the dependency</LI>
+</UL>
+
+
+<P>The handler supports on specific optional attributes:</P>
+<UL>
+	<LI>Timeout: the maximum time waited in order to find a provider (default: 3s)</LI>
+</UL>
+
+
+<P>The attribute form regular dependencies are also supported.</P>
+<H2><A name="TemporalServiceDependency-Download"></A>Download</H2>
+<P>The handler is available on the <A href="http://felix.apache.org/site/download.html" title="Download">download</A> page.<BR>
+Sources are available on the Felix trunk at the following location: <SPAN class="nobr"><A href="https://svn.apache.org/repos/asf/felix/trunk/ipojo/temporal.dependency.handler" title="Visit page outside Confluence" rel="nofollow">https://svn.apache.org/repos/asf/felix/trunk/ipojo/temporal.dependency.handler<SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P></TD>
+<TD class="confluenceTd" valign="top" width="20%">
+<H6><A name="TemporalServiceDependency-Overview"></A><B>Overview</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo.html" title="Apache Felix iPOJO">Home Page</A></LI>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-feature-overview.html" title="Apache Felix iPOJO Feature Overview">iPOJO Feature Overview</A></LI>
+	<LI><A href="http://felix.apache.org/site/download.html" title="Download">Download &amp; Install </A></LI>
+</UL>
+
+
+<H6><A name="TemporalServiceDependency-GettingStarted"></A><B>Getting Started</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/ipojo-in-10-minutes.html" title="iPOJO in 10 minutes">iPOJO in 10 minutes</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-hello-word-maven-based-tutorial.html" title="iPOJO Hello Word (Maven-Based) tutorial">iPOJO Hello Word &#40;Maven&#45;Based&#41; tutorial</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-advanced-tutorial.html" title="iPOJO Advanced Tutorial">iPOJO Advanced Tutorial</A></LI>
+</UL>
+
+
+<H6><A name="TemporalServiceDependency-UserGuide"></A><B>User Guide</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/describing-components.html" title="Describing components">Describing components</A></LI>
+	<LI><A href="http://felix.apache.org/site/how-to-use-ipojo-annotations.html" title="How to use iPOJO Annotations">How to use iPOJO Annotations</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-advanced-topics.html" title="iPOJO Advanced Topics">Advanced Topics</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-faq.html" title="iPOJO FAQ">FAQ</A></LI>
+</UL>
+
+
+<H6><A name="TemporalServiceDependency-Tools"></A><B>Tools</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/ipojo-eclipse-plug-in.html" title="iPOJO Eclipse Plug-in">iPOJO Eclipse Plug&#45;in</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-ant-task.html" title="iPOJO Ant Task">iPOJO Ant Task</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-maven-plug-in.html" title="iPOJO Maven Plug-in">iPOJO Maven Plug&#45;in</A></LI>
+	<LI><A href="http://felix.apache.org/site/ipojo-concepts-overview.html" title="iPOJO Concepts Overview">iPOJO concepts overview</A></LI>
+</UL>
+
+
+<H6><A name="TemporalServiceDependency-DeveloperGuide"></A><B>Developer Guide</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/how-to-write-your-own-handler.html" title="How to write your own handler">How to write your own handler</A></LI>
+	<LI><A href="http://felix.apache.org/site/how-to-use-ipojo-manipulation-metadata.html" title="How to use iPOJO Manipulation Metadata">How to use iPOJO Manipulation Metadata</A></LI>
+</UL>
+
+
+<H6><A name="TemporalServiceDependency-Misc%26Contact"></A><B>Misc &amp; Contact</B></H6>
+<UL>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-issuestracker.html" title="apache-felix-ipojo-issuestracker">Issues Tracker</A></LI>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-supportedvms.html" title="apache-felix-ipojo-supportedVMs">Supported JVMs</A></LI>
+	<LI><A href="http://felix.apache.org/site/apache-felix-ipojo-supportedosgi.html" title="apache-felix-ipojo-supportedOSGi">Supported OSGi Implementations</A></LI>
+	<LI><A href="http://felix.apache.org/site/future-ideas.html" title="Future Ideas">Future Ideas</A></LI>
+	<LI><A href="http://felix.apache.org/site/contact.html" title="Contact">Contact</A></LI>
+	<LI><A href="http://felix.apache.org/site/related-works.html" title="Related Works">Related Works</A></LI>
+	<LI><A href="http://felix.apache.org/site/article-presentations.html" title="Article & Presentations">Article &amp; Presentations</A></LI>
+</UL>
+
+
+<HR>
+<DIV class="" align="center">
+<P><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/createrssfeed.action?types=blogpost&amp;statuses=created&amp;statuses=modified&amp;spaces=FELIX&amp;labelString=iPOJO&amp;rssType=atom&amp;maxResults=10&amp;timeSpan=5&amp;publicFeed=true&amp;title=iPOJO%20Atom%20Feed" title="Stay tuned!" rel="nofollow"><IMG src="http://cwiki.apache.org/confluence/images/icons/feed-icon-32x32.png" align="absmiddle" border="0"><SUP><IMG class="rendericon" src="http://cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P></DIV></TD></TR></TBODY></TABLE>
+    </DIV>
+  </BODY>
+
+ 
+</HTML>
