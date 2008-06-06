@@ -680,10 +680,11 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
     protected void unregisterComponentService()
     {
+        // outside of try-finally to not trigger inadvertend unlock
+        lockServiceRegistration();
+
         try
         {
-            lockServiceRegistration();
-
             if ( m_serviceRegistration != null )
             {
                 m_serviceRegistration.unregister();
@@ -736,28 +737,33 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     {
         synchronized ( serviceRegistrationLock )
         {
-            int waitGuard = 10;
-            while ( serviceRegistrationLockOwner != null && waitGuard > 0 )
+            if ( serviceRegistrationLockOwner != null )
             {
-                log( LogService.LOG_DEBUG, "Service Registration already locked by " + serviceRegistrationLockOwner
-                    + ", waiting for release", m_componentMetadata, null );
+                log( LogService.LOG_INFO, "Waiting for Service Registration owned " + serviceRegistrationLockOwner,
+                    m_componentMetadata, null );
 
-                // wait at most 10 seconds
-                try
+                int waitGuard = 10;
+                while ( serviceRegistrationLockOwner != null && waitGuard > 0 )
                 {
-                    serviceRegistrationLock.wait( 10L * 1000L );
+                    // wait at most one second
+                    try
+                    {
+                        serviceRegistrationLock.wait( 1000L );
+                    }
+                    catch ( InterruptedException ie )
+                    {
+                        // don't care
+                    }
+                    waitGuard--;
                 }
-                catch ( InterruptedException ie )
-                {
-                    // don't care
-                }
-                waitGuard--;
-            }
 
-            // timedout waiting for the service registration lock
-            if ( waitGuard <= 0 )
-            {
-                throw new IllegalStateException( "Cannot get the service registration lock !!" );
+                // timedout waiting for the service registration lock
+                if ( waitGuard <= 0 )
+                {
+                    throw new IllegalStateException( "Cannot get Service Registration, owned by "
+                        + serviceRegistrationLockOwner );
+                }
+
             }
 
             serviceRegistrationLockOwner = Thread.currentThread();
@@ -774,13 +780,22 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     {
         synchronized ( serviceRegistrationLock )
         {
-            log( LogService.LOG_DEBUG, "Service Registration released by " + serviceRegistrationLockOwner,
-                m_componentMetadata, null );
+            Thread current = Thread.currentThread();
+            if ( serviceRegistrationLockOwner == current )
+            {
+                log( LogService.LOG_DEBUG, "Service Registration released by " + serviceRegistrationLockOwner,
+                    m_componentMetadata, null );
 
-            serviceRegistrationLockOwner = null;
+                serviceRegistrationLockOwner = null;
 
-            // notify threads waiting to lock service registration
-            serviceRegistrationLock.notifyAll();
+                // notify threads waiting to lock service registration
+                serviceRegistrationLock.notifyAll();
+            }
+            else
+            {
+                log( LogService.LOG_DEBUG, "Not releasing Service Registration by " + current + ", owner is "
+                    + serviceRegistrationLockOwner, m_componentMetadata, null );
+            }
         }
     }
 
@@ -885,10 +900,11 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
     ServiceReference getServiceReference()
     {
+        // outside of try-finally to not trigger inadvertend unlock
+        lockServiceRegistration();
+
         try
         {
-            lockServiceRegistration();
-            
             return ( m_serviceRegistration != null ) ? m_serviceRegistration.getReference() : null;
         }
         finally
