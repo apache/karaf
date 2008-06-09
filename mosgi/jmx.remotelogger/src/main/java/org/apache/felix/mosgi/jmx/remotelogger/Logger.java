@@ -20,6 +20,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceEvent;
@@ -44,6 +45,7 @@ import java.util.Vector;
 public class Logger extends NotificationBroadcasterSupport implements LogListener,BundleActivator,ServiceListener, LoggerMBean, Serializable{
 
   private static final String REMOTE_LOGGER_ON_STRING="OSGI:name=Remote Logger";
+  private ServiceRegistration mbean_sr=null;
 
   private String version=null;
   
@@ -96,14 +98,14 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
         if (as[0].equals(LogReaderService.class.getName())){
           this.registerLogReaderService(servicereference);
         }else if (as[0].equals(MBeanServer.class.getName())){
-          this.registerToAgent(servicereference);
+          //this.registerToAgent(servicereference);
         }
 	break;
       case ServiceEvent.UNREGISTERING :
         if (as[0].equals(LogReaderService.class.getName())){
 	  this.unRegisterLogReaderService(servicereference);
         }else if (as[0].equals(MBeanServer.class.getName())){
-          this.unRegisterFromAgent();
+          //this.unRegisterFromAgent();
         }
 	break;
     }
@@ -151,11 +153,11 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
     this.version=(String)bc.getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
     this.bc=bc;
     this.log(LogService.LOG_INFO, "Remote Logger starting "+version);
-    try{
-      this.remoteLoggerON=new ObjectName(Logger.REMOTE_LOGGER_ON_STRING);
-    }catch(MalformedObjectNameException e){
-      throw new BundleException("Logger.Logger:objectName invalid", e);
-    }
+
+    java.util.Properties p = new java.util.Properties();
+    p.put(org.apache.felix.mosgi.jmx.agent.Constants.OBJECTNAME, REMOTE_LOGGER_ON_STRING);
+    this.mbean_sr = this.bc.registerService(LoggerMBean.class.getName(), this, p);
+
     try{
       bc.addServiceListener(this,"(|(objectClass="+LogReaderService.class.getName()+")"+
                                    "(objectClass="+MBeanServer.class.getName()+"))");
@@ -167,10 +169,6 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
       this.registerLogReaderService(sr);
     }
 
-    ServiceReference sr2=bc.getServiceReference(MBeanServer.class.getName());
-    if (sr2!=null){
-      this.registerToAgent(sr2);
-    }
     this.log(LogService.LOG_INFO, "Remote Logger started (logLvl="+logLvl+")"+version);
   }
      
@@ -183,11 +181,13 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
       this.bc.removeServiceListener(this);
     }
     if (this.agent!=null){
-      this.unRegisterFromAgent();
+      //this.unRegisterFromAgent();
     }
     this.agent=null;
     this.lrs=null; 
     this.log(LogService.LOG_INFO, "Remote Logger stopped"+version);
+    this.mbean_sr.unregister();
+    this.mbean_sr=null;
     this.bc=null;
   }
 
@@ -204,23 +204,6 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
     if (sr!=null){
       this.lrs.removeLogListener(this);
       this.lrs=null;
-    }
-  }
-
-  private void registerToAgent(ServiceReference sr){
-    this.agent=(MBeanServer)bc.getService(sr);
-    try{   
-      this.agent.registerMBean(this, this.remoteLoggerON); 
-    }catch(Exception e){
-      e.printStackTrace();
-    }
-  }
-
-  private void unRegisterFromAgent(){
-    try{
-      this.agent.unregisterMBean(this.remoteLoggerON);
-    }catch(Exception e){
-      //e.printStackTrace();
     }
   }
 
