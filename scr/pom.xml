@@ -30,7 +30,7 @@
         Implementation of the Declarative Services specification 1.0
     </description>
     <artifactId>org.apache.felix.scr</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3-SNAPSHOT</version>
     <dependencies>
         <dependency>
             <groupId>${pom.groupId}</groupId>
@@ -90,10 +90,4 @@
             </plugin>
         </plugins>
     </build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.scr-1.0.2</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.scr-1.0.2</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.scr-1.0.2</url>
-  </scm>
 </project>
