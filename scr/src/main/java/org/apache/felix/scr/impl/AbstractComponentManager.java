@@ -53,6 +53,11 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     // The ServiceRegistration
     private ServiceRegistration m_serviceRegistration;
 
+    // lock object used by service registration locking
+    private Object serviceRegistrationLock = new Object();
+
+    // the field set to the owner of the lock
+    private Thread serviceRegistrationLockOwner;
 
     /**
      * The constructor receives both the activator and the metadata
@@ -744,12 +749,6 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     // the service.
     // See FELIX-550 for more information.
     
-    // lock object used by service registration locking
-    private Object serviceRegistrationLock = new Object();
-
-    // the field set to the owner of the lock
-    private Thread serviceRegistrationLockOwner;
-
 
     // locks service registration by waiting for the registration to not
     // be locked and then locking it
@@ -788,9 +787,6 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             }
 
             serviceRegistrationLockOwner = Thread.currentThread();
-
-            log( LogService.LOG_DEBUG, "Service Registration acquired by " + serviceRegistrationLockOwner,
-                m_componentMetadata, null );
         }
     }
 
@@ -804,9 +800,6 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
             Thread current = Thread.currentThread();
             if ( serviceRegistrationLockOwner == current )
             {
-                log( LogService.LOG_DEBUG, "Service Registration released by " + serviceRegistrationLockOwner,
-                    m_componentMetadata, null );
-
                 serviceRegistrationLockOwner = null;
 
                 // notify threads waiting to lock service registration
