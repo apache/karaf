@@ -25,6 +25,7 @@ import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.util.DependencyModel;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
@@ -85,10 +86,10 @@ public class DependencyHandlerDescription extends HandlerDescription {
         Element deps = super.getHandlerInfo();
         for (int i = 0; i < m_dependencies.length; i++) {
             String state = "resolved";
-            if (m_dependencies[i].getState() == 2) {
+            if (m_dependencies[i].getState() == DependencyModel.UNRESOLVED) {
                 state = "unresolved";
             }
-            if (m_dependencies[i].getState() == 3) {
+            if (m_dependencies[i].getState() == DependencyModel.BROKEN) {
                 state = "broken";
             }
             Element dep = new Element("Requires", "");
@@ -100,6 +101,12 @@ public class DependencyHandlerDescription extends HandlerDescription {
             
             if (m_dependencies[i].isOptional()) {
                 dep.addAttribute(new Attribute("Optional", "true"));
+                if (m_dependencies[i].supportsNullable()) {
+                    dep.addAttribute(new Attribute("Nullable", "true"));    
+                }
+                if (m_dependencies[i].getDefaultImplementation() != null) {
+                    dep.addAttribute(new Attribute("Default-Implementation", m_dependencies[i].getDefaultImplementation()));
+                }
             } else {
                 dep.addAttribute(new Attribute("Optional", "false"));
             }
@@ -108,6 +115,18 @@ public class DependencyHandlerDescription extends HandlerDescription {
                 dep.addAttribute(new Attribute("Aggregate", "true"));
             } else {
                 dep.addAttribute(new Attribute("Aggregate", "false"));
+            }
+            
+            String policy = "dynamic";
+            if (m_dependencies[i].getPolicy() == DependencyModel.STATIC_BINDING_POLICY) {
+                policy = "static";
+            } else if (m_dependencies[i].getPolicy() == DependencyModel.DYNAMIC_PRIORITY_BINDING_POLICY) {
+                policy = "dynamic-priority";
+            }
+            dep.addAttribute(new Attribute("Binding-Policy", policy));
+            
+            if (m_dependencies[i].getComparator() != null) {
+                dep.addAttribute(new Attribute("Comparator", m_dependencies[i].getComparator()));
             }
             
             dep.addAttribute(new Attribute("State", state));

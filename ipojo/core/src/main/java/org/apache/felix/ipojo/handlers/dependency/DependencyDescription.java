@@ -43,6 +43,21 @@ public class DependencyDescription {
      * Optional ?
      */
     private boolean m_optional;
+    
+    /**
+     * Binding policy.
+     */
+    private int m_bindingPolicy;
+    
+    /**
+     * Does the dependency use a nullable object?
+     */
+    private boolean m_useNullable;
+    
+    /**
+     * Does the dependency use a default-implementation? 
+     */
+    private String m_defaultImplementation;
 
     /**
      * State (VALID | INVALID).
@@ -53,6 +68,17 @@ public class DependencyDescription {
      * Filter.
      */
     private String m_filter;
+    
+    /**
+     * Is the provider set frozen ?
+     */
+    private boolean m_isFrozen;
+    
+    /**
+     * Comparator used by the dependency.
+     * Null means OSGi default comparator.
+     */
+    private String m_comparator;
 
     /**
      * Set[service reference] of the used service.
@@ -70,15 +96,25 @@ public class DependencyDescription {
      * @param multiple : is the dependency a multiple dependency ?
      * @param optional : is the dependency optional ?
      * @param filter : the filter
+     * @param policy : binding policy
+     * @param nullable : does the dependency support nullable object
+     * @param defaultImpl : does the dependency use a default implementation
+     * @param comparator : does the dependency use a special comparator
+     * @param frozen : is the provider set frozen
      * @param state : the state
      */
-    public DependencyDescription(String itf, boolean multiple, boolean optional, String filter, int state) {
+    public DependencyDescription(String itf, boolean multiple, boolean optional, String filter, int policy, boolean nullable, String defaultImpl, String comparator, boolean frozen, int state) {
         super();
         m_interface = itf;
         m_multiple = multiple;
         m_optional = optional;
         m_filter = filter;
         m_state = state;
+        m_bindingPolicy = policy;
+        m_useNullable = nullable;
+        m_defaultImplementation = defaultImpl;
+        m_comparator = comparator;
+        m_isFrozen = frozen;
     }
 
     public boolean isMultiple() { return m_multiple; }
@@ -90,6 +126,20 @@ public class DependencyDescription {
     public String getInterface() { return m_interface; }
 
     public int getState() { return m_state; }
+    
+    /**
+     * Gets true if the dependency uses Nullable objects.
+     * @return true if the dependency is optional and supports nullable object.
+     */
+    public boolean supportsNullable() { return m_useNullable; }
+    
+    public String getDefaultImplementation() { return m_defaultImplementation; }
+    
+    public int getPolicy() { return m_bindingPolicy; }
+    
+    public String getComparator() { return m_comparator; }
+    
+    public boolean isFrozen() { return m_isFrozen; }
 
     /**
      * Get the service reference list.

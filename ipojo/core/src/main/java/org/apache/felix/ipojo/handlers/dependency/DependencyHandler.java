@@ -434,7 +434,7 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
             Dependency dep = getDependencies()[j];
             // Create & add the dependency description
             DependencyDescription desc =
-                    new DependencyDescription(dep.getSpecification().getName(), dep.isAggregate(), dep.isOptional(), dep.getFilter(), dep.getState());
+                    new DependencyDescription(dep.getSpecification().getName(), dep.isAggregate(), dep.isOptional(), dep.getFilter(), dep.getBindingPolicy(), dep.supportsNullable(), dep.getDefaultImplementation(), dep.getComparator(), dep.isFrozen(), dep.getState());
             desc.setServiceReferences(dep.getServiceReferencesAsList());
             desc.setUsedServices(dep.getUsedServiceReferences());
             dhd.addDependency(desc);

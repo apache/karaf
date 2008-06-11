@@ -723,6 +723,19 @@ public abstract class DependencyModel implements TrackerCustomizer {
         m_comparator = cmp;
         // NOTE: the array will be sorted at the next get.
     }
+    
+    /**
+     * Gets the used comparator name.
+     * Null if no comparator (i.e. OSGi one is used).
+     * @return the comparator class name or null if the dependency doesn't use a comparator.
+     */
+    public String getComparator() {
+        if (m_comparator != null) {
+            return m_comparator.getClass().getName();
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Set the bundle context used by this dependency. This operation is not supported if the tracker is already opened.

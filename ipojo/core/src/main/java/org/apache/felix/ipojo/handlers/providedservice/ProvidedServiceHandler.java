@@ -396,7 +396,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * if the new state is UNRESOLVED.
      * 
      * @param state : the new instance state.
-     * @see org.apache.felix.ipojo.CompositeHandler#stateChanged(int)
+     * @see org.apache.felix.ipojo.Handler#stateChanged(int)
      */
     public void stateChanged(int state) {
         // If the new state is INVALID => unregister all the services

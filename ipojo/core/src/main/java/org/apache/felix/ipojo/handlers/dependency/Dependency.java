@@ -519,5 +519,17 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             }
         }
     }
+    
+    /**
+     * Gets true if the dependency use Nullable objects.
+     * @return true if the dependency is optional and supports nullable objects.
+     */
+    public boolean supportsNullable() {
+        return m_supportNullable;
+    }
+    
+    public String getDefaultImplementation() {
+        return m_di;
+    }
 
 }
