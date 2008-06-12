@@ -63,13 +63,14 @@ public class SpringTransformer {
         m.getMainAttributes().putValue("Manifest-Version", "2");
         m.getMainAttributes().putValue("Bundle-SymbolicName", str[0]);
         m.getMainAttributes().putValue("Bundle-Version", str[1]);
-        m.getMainAttributes().putValue("Spring-Context", "*;publish-context:=true;create-asynchronously:=true");
+        m.getMainAttributes().putValue("Spring-Context", "*;publish-context:=false;create-asynchronously:=true");
         InputStream is = url.openStream();
         String importPkgs = getImportPackages(analyze(is));
         is.close();
         if (importPkgs != null && importPkgs.length() > 0) {
             m.getMainAttributes().putValue("Import-Package", importPkgs);
         }
+        m.getMainAttributes().putValue("DynamicImport-Package", "*");
 
         JarOutputStream out = new JarOutputStream(os);
         ZipEntry e = new ZipEntry(JarFile.MANIFEST_NAME);
