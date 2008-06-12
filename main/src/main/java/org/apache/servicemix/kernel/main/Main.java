@@ -237,7 +237,7 @@ public class Main implements MainService, BundleActivator {
         String profileDirName = m_configProps.getProperty(BundleCache.CACHE_PROFILE_DIR_PROP);
 
         // A profile directory or name must be specified.
-        if ((profileDirName == null) && (profileName.length() == 0)) {
+        if ((profileDirName == null) || (profileName.length() == 0)) {
             System.err.println("Invalid " + CONFIG_PROPERTIES_FILE_NAME + " configuration.  The profile directory was not specified.");
             System.exit(-1);
         }
