@@ -44,9 +44,8 @@ import org.apache.felix.webconsole.internal.compendium.AjaxConfigManagerAction;
 import org.apache.felix.webconsole.internal.compendium.ComponentConfigurationPrinter;
 import org.apache.felix.webconsole.internal.compendium.ComponentRenderAction;
 import org.apache.felix.webconsole.internal.compendium.ConfigManager;
-import org.apache.felix.webconsole.internal.core.BundleListRender;
+import org.apache.felix.webconsole.internal.core.BundlesServlet;
 import org.apache.felix.webconsole.internal.core.InstallAction;
-import org.apache.felix.webconsole.internal.core.RefreshPackagesAction;
 import org.apache.felix.webconsole.internal.core.SetStartLevelAction;
 import org.apache.felix.webconsole.internal.misc.ConfigurationRender;
 import org.apache.felix.webconsole.internal.obr.BundleRepositoryRender;
@@ -90,24 +89,32 @@ public class OsgiManager extends GenericServlet
     private static final String PROP_MANAGER_ROOT = "manager.root";
 
     /**
-     * @scr.property value="list"
+     * @scr.property valueRef="DEFAULT_PAGE"
      */
     private static final String PROP_DEFAULT_RENDER = "default.render";
 
     /**
-     * @scr.property value="OSGi Management Console"
+     * @scr.property valueRef="DEFAULT_REALM"
      */
     private static final String PROP_REALM = "realm";
 
     /**
-     * @scr.property value="admin"
+     * @scr.property valueRef="DEFAULT_USER_NAME"
      */
     private static final String PROP_USER_NAME = "username";
 
     /**
-     * @scr.property value="admin"
+     * @scr.property valueRef="DEFAULT_PASSWORD"
      */
     private static final String PROP_PASSWORD = "password";
+
+    private static final String DEFAULT_PAGE = BundlesServlet.NAME;
+
+    private static final String DEFAULT_REALM = "OSGi Management Console";
+
+    private static final String DEFAULT_USER_NAME = "admin";
+
+    private static final String DEFAULT_PASSWORD = "admin";
 
     /**
      * The default value for the {@link #PROP_MANAGER_ROOT} configuration
@@ -115,17 +122,11 @@ public class OsgiManager extends GenericServlet
      */
     private static final String DEFAULT_MANAGER_ROOT = "/system/console";
 
-    //    private static final Class[] PLUGIN_CLASSES =
-    //        { AjaxConfigManagerAction.class, ComponentConfigurationPrinter.class, ComponentRenderAction.class,
-    //        ConfigManager.class, AjaxBundleDetailsAction.class, BundleListRender.class, InstallAction.class,
-    //        RefreshPackagesAction.class, SetStartLevelAction.class, StartAction.class, StopAction.class,
-    //        UninstallAction.class, UpdateAction.class, ConfigurationRender.class, GCAction.class, ShutdownAction.class,
-    //        ShutdownRender.class, VMStatRender.class };
     private static final Class[] PLUGIN_CLASSES =
         { AjaxConfigManagerAction.class, ComponentConfigurationPrinter.class, ComponentRenderAction.class,
-            ConfigManager.class, BundleListRender.class, InstallAction.class, RefreshPackagesAction.class,
-            SetStartLevelAction.class, ConfigurationRender.class, GCAction.class, ShutdownAction.class,
-            ShutdownRender.class, VMStatRender.class, BundleRepositoryRender.class };
+            ConfigManager.class, BundlesServlet.class, InstallAction.class, SetStartLevelAction.class,
+            ConfigurationRender.class, GCAction.class, ShutdownAction.class, ShutdownRender.class, VMStatRender.class,
+            BundleRepositoryRender.class };
 
     private BundleContext bundleContext;
 
@@ -537,9 +538,9 @@ public class OsgiManager extends GenericServlet
         Dictionary config = getConfiguration();
 
         // get authentication details
-        String realm = this.getProperty( config, PROP_REALM, "OSGi Management Console" );
-        String userId = this.getProperty( config, PROP_USER_NAME, null );
-        String password = this.getProperty( config, PROP_PASSWORD, null );
+        String realm = this.getProperty( config, PROP_REALM, DEFAULT_REALM );
+        String userId = this.getProperty( config, PROP_USER_NAME, DEFAULT_USER_NAME );
+        String password = this.getProperty( config, PROP_PASSWORD, DEFAULT_PASSWORD );
 
         // register the servlet and resources
         try
@@ -670,7 +671,7 @@ public class OsgiManager extends GenericServlet
 
         configuration = config;
 
-        defaultRenderName = ( String ) config.get( PROP_DEFAULT_RENDER );
+        defaultRenderName = getProperty( config, PROP_DEFAULT_RENDER, DEFAULT_PAGE );
         if ( defaultRenderName != null && plugins.get( defaultRenderName ) != null )
         {
             defaultRender = ( Servlet ) plugins.get( defaultRenderName );

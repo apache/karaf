@@ -20,11 +20,11 @@ package org.apache.felix.webconsole.internal.misc;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.felix.webconsole.internal.core.BundleListRender;
+import org.apache.felix.webconsole.internal.core.BundlesServlet;
 import org.osgi.framework.Bundle;
 
 
-public class AssemblyListRender extends BundleListRender
+public class AssemblyListRender extends BundlesServlet
 {
 
     public static final String NAME = "assemblyList";

@@ -32,8 +32,6 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,7 +41,6 @@ import org.apache.felix.bundlerepository.R4Import;
 import org.apache.felix.bundlerepository.R4Package;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.osgi.framework.Bundle;
@@ -54,19 +51,19 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.log.LogService;
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.obr.Resource;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
-import org.osgi.util.tracker.ServiceTracker;
 
 
 /**
- * The <code>BundleListRender</code> TODO
+ * The <code>BundlesServlet</code> TODO
  */
-public class BundleListRender extends BaseWebConsolePlugin
+public class BundlesServlet extends BaseWebConsolePlugin
 {
 
     public static final String NAME = "bundles";
@@ -169,12 +166,18 @@ public class BundleListRender extends BaseWebConsolePlugin
 
     protected void doPost( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException
     {
+        String action = req.getParameter( "action" );
+        if ( "refreshPackages".equals( action ) )
+        {
+            getPackageAdmin().refreshPackages( null );
+        }
+
         boolean success = false;
         Bundle bundle = getBundle( req.getPathInfo() );
         long bundleId = bundle.getBundleId();
+
         if ( bundle != null )
         {
-            String action = req.getParameter( "action" );
             if ( "start".equals( action ) )
             {
                 // start bundle
@@ -185,7 +188,7 @@ public class BundleListRender extends BaseWebConsolePlugin
                 }
                 catch ( BundleException be )
                 {
-                    // log
+                    getLog().log( LogService.LOG_ERROR, "Cannot start", be );
                 }
             }
             else if ( "stop".equals( action ) )
@@ -198,7 +201,7 @@ public class BundleListRender extends BaseWebConsolePlugin
                 }
                 catch ( BundleException be )
                 {
-                    // log
+                    getLog().log( LogService.LOG_ERROR, "Cannot stop", be );
                 }
             }
             else if ( "update".equals( action ) )
@@ -217,9 +220,19 @@ public class BundleListRender extends BaseWebConsolePlugin
                 }
                 catch ( BundleException be )
                 {
-                    // log
+                    getLog().log( LogService.LOG_ERROR, "Cannot uninstall", be );
                 }
             }
+        }
+
+        if ( "refreshPackages".equals( action ) )
+        {
+            success = true;
+            getPackageAdmin().refreshPackages( null );
+
+            // refresh completely
+            bundle = null;
+            bundleId = -1;
         }
 
         if ( success )
@@ -233,11 +246,18 @@ public class BundleListRender extends BaseWebConsolePlugin
                 {
                     bundleInfo( jw, bundle, true );
                 }
-                else
+                else if ( bundleId >= 0 )
                 {
                     jw.object();
                     jw.key( "bundleId" );
                     jw.value( bundleId );
+                    jw.endObject();
+                }
+                else
+                {
+                    jw.object();
+                    jw.key( "reload" );
+                    jw.value( true );
                     jw.endObject();
                 }
             }
@@ -303,7 +323,7 @@ public class BundleListRender extends BaseWebConsolePlugin
 
             if ( bundles != null && bundles.length > 0 )
             {
-                sort( bundles );
+                Util.sort( bundles );
 
                 jw.key( "bundles" );
 
@@ -338,7 +358,7 @@ public class BundleListRender extends BaseWebConsolePlugin
         jw.key( "bundleId" );
         jw.value( bundle.getBundleId() );
         jw.key( "name" );
-        jw.value( getName( bundle ) );
+        jw.value( Util.getName( bundle ) );
         jw.key( "state" );
         jw.value( toStateString( bundle.getState() ) );
         jw.key( "hasStart" );
@@ -448,32 +468,7 @@ public class BundleListRender extends BaseWebConsolePlugin
     }
 
 
-    private void sort( Bundle[] bundles )
-    {
-        Arrays.sort( bundles, BUNDLE_NAME_COMPARATOR );
-    }
-
-
-    private static String getName( Bundle bundle )
-    {
-        String name = ( String ) bundle.getHeaders().get( Constants.BUNDLE_NAME );
-        if ( name == null || name.length() == 0 )
-        {
-            name = bundle.getSymbolicName();
-            if ( name == null )
-            {
-                name = bundle.getLocation();
-                if ( name == null )
-                {
-                    name = String.valueOf( bundle.getBundleId() );
-                }
-            }
-        }
-        return name;
-    }
-
-
-    public void performAction( JSONWriter jw, Bundle bundle ) throws JSONException
+    private void performAction( JSONWriter jw, Bundle bundle ) throws JSONException
     {
         jw.object();
         jw.key( BUNDLE_ID );
@@ -485,7 +480,7 @@ public class BundleListRender extends BaseWebConsolePlugin
     }
 
 
-    public void bundleDetails( JSONWriter jw, Bundle bundle ) throws JSONException
+    private void bundleDetails( JSONWriter jw, Bundle bundle ) throws JSONException
     {
         Dictionary headers = bundle.getHeaders();
 
@@ -942,59 +937,4 @@ public class BundleListRender extends BaseWebConsolePlugin
         return val.toString();
     }
 
-    // ---------- inner classes ------------------------------------------------
-
-    private static final Comparator BUNDLE_NAME_COMPARATOR = new Comparator()
-    {
-        public int compare( Object o1, Object o2 )
-        {
-            return compare( ( Bundle ) o1, ( Bundle ) o2 );
-        }
-
-
-        public int compare( Bundle b1, Bundle b2 )
-        {
-
-            // the same bundles
-            if ( b1 == b2 || b1.getBundleId() == b2.getBundleId() )
-            {
-                return 0;
-            }
-
-            // special case for system bundle, which always is first
-            if ( b1.getBundleId() == 0 )
-            {
-                return -1;
-            }
-            else if ( b2.getBundleId() == 0 )
-            {
-                return 1;
-            }
-
-            // compare the symbolic names
-            int snComp = getName( b1 ).compareToIgnoreCase( getName( b2 ) );
-            if ( snComp != 0 )
-            {
-                return snComp;
-            }
-
-            // same names, compare versions
-            Version v1 = Version.parseVersion( ( String ) b1.getHeaders().get( Constants.BUNDLE_VERSION ) );
-            Version v2 = Version.parseVersion( ( String ) b2.getHeaders().get( Constants.BUNDLE_VERSION ) );
-            int vComp = v1.compareTo( v2 );
-            if ( vComp != 0 )
-            {
-                return vComp;
-            }
-
-            // same version ? Not really, but then, we compare by bundle id
-            if ( b1.getBundleId() < b2.getBundleId() )
-            {
-                return -1;
-            }
-
-            // b1 id must be > b2 id because equality is already checked
-            return 1;
-        }
-    };
 }

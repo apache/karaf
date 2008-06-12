@@ -135,7 +135,7 @@ function installForm( /* int */ startLevel )
     document.write( "<td class='content' align='right' colspan='5' noWrap>" );
     document.write( "<input class='submit' style='width:auto' type='submit' value='Install or Update'>" );
     document.write( "&nbsp;" );
-    document.write( "<input class='submit' style='width:auto' type='submit' value='Refresh Packages' onClick='this.form.action.value=\"refreshPackages\"; return true;'>" );
+    document.write( "<input class='submit' style='width:auto' type='button' value='Refresh Packages' onClick='changeBundle(0, \"refreshPackages\");'>" );
     document.write( "</td>" );
     document.write( "</tr>" );
     document.write( "</form>" );
@@ -151,43 +151,47 @@ function changeBundle(/* long */ bundleId, /* String */ action)
     
 function bundleChanged(obj)
 {
-    var bundleId = obj.bundleId;
-    if (obj.state)
+    if (obj.reload)
     {
-        // has status, so draw the line
-        var span = document.getElementById('bundle' + bundleId);
-        if (span)
-        {
-            span.innerHTML = bundleInternal( obj );
-        }
-        
-        if (obj.props)
-        {
-            var span = document.getElementById('bundle' + bundleId + '_details');
-            if (span && span.innerHTML)
-            {
-                span.innerHTML = bundleDetails( obj.props );
-            }
-        }
-        
+        document.location = document.location;
     }
     else
     {
-        // no status, bundle has been uninstalled
-        var span = document.getElementById('bundle' + bundleId);
-        if (span)
+        var bundleId = obj.bundleId;
+        if (obj.state)
         {
-            span.parentNode.removeChild(span);
+            // has status, so draw the line
+            var span = document.getElementById('bundle' + bundleId);
+            if (span)
+            {
+                span.innerHTML = bundleInternal( obj );
+            }
+            
+            if (obj.props)
+            {
+                var span = document.getElementById('bundle' + bundleId + '_details');
+                if (span && span.innerHTML)
+                {
+                    span.innerHTML = bundleDetails( obj.props );
+                }
+            }
+            
         }
-        var span = document.getElementById('bundle' + bundleId + '_details');
-        if (span)
+        else
         {
-            span.parentNode.removeChild(span);
+            // no status, bundle has been uninstalled
+            var span = document.getElementById('bundle' + bundleId);
+            if (span)
+            {
+                span.parentNode.removeChild(span);
+            }
+            var span = document.getElementById('bundle' + bundleId + '_details');
+            if (span)
+            {
+                span.parentNode.removeChild(span);
+            }
         }
-    }
-    
-    // reload --- should do better and only update the bundle
-    // document.location = document.location;
+    }    
 }
 
     

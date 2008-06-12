@@ -28,7 +28,7 @@ abstract class BundleAction extends BaseManagementPlugin implements Action
 
     protected long getBundleId( HttpServletRequest request )
     {
-        String bundleIdPar = request.getParameter( BundleListRender.BUNDLE_ID );
+        String bundleIdPar = request.getParameter( BundlesServlet.BUNDLE_ID );
         if ( bundleIdPar != null )
         {
             try
