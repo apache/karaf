@@ -286,7 +286,9 @@ public class FileMonitor {
     }
 
     private void reschedule(File file) {
-        pendingArtifacts.add(file.getAbsolutePath());
+        synchronized (pendingArtifacts) {
+            pendingArtifacts.add(file.getAbsolutePath());
+        }
         if (listener == null) {
             try {
                 executor = Executors.newSingleThreadExecutor();
@@ -295,7 +297,12 @@ public class FileMonitor {
                     public void serviceChanged(ServiceEvent event) {
                         executor.execute(new Runnable() {
                             public void run() {
-                                onFilesChanged(pendingArtifacts);
+                                Set<String> files;
+                                synchronized (pendingArtifacts) {
+                                    files = new HashSet<String>(pendingArtifacts);
+                                    pendingArtifacts.clear();
+                                }
+                                onFilesChanged(files);
                             }
                         });
                     }
@@ -380,7 +387,7 @@ public class FileMonitor {
     }
 
     protected Bundle getBundleForJarFile(File file) throws IOException {
-        String absoluteFilePath = file.getAbsolutePath();
+        String absoluteFilePath = file.getAbsoluteFile().toURI().toString();
         Bundle bundles[] = getContext().getBundles();
         for (int i = 0; i < bundles.length; i++) {
             Bundle bundle = bundles[i];
