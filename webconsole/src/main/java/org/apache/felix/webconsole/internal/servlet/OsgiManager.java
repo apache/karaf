@@ -293,7 +293,7 @@ public class OsgiManager extends GenericServlet
         }
 
         // check whether we are not at .../{webManagerRoot}
-        if ( request.getPathInfo() == null )
+        if ( request.getPathInfo() == null || request.getPathInfo().equals( "/" ) )
         {
             String path = request.getRequestURI();
             if ( !path.endsWith( "/" ) )
