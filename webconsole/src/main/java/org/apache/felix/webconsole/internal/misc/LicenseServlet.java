@@ -90,7 +90,7 @@ public class LicenseServlet extends AbstractWebConsolePlugin implements OsgiMana
                 jw.key( "files" );
                 jw.object();
                 findResource( jw, bundle, new String[]
-                    { "LICENSE", "NOTICE" } );
+                    { "README", "DISCLAIMER", "LICENSE", "NOTICE" } );
                 jw.endObject();
 
                 jw.endObject();
