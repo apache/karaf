@@ -21,20 +21,43 @@ function configure() {
     if (!span) {
         return;
     }
-    var select = document.configSelection.pid;
+    var select = document.getElementById('configSelection_pid');
     var pid = select.options[select.selectedIndex].value;
-    var parm = '?action=ajaxConfigManager&' + pid;
+    var parm = '?action=ajaxConfigManager&pid=' + pid;
     sendRequest('GET', parm, displayConfigForm);
 }
 
-function displayConfigForm(obj) {
+
+function create() {
     var span = document.getElementById('configField');
     if (!span) {
         return;
     }
-    var innerHtml = '<tr class="content" id="configField">' + span.innerHTML + '</tr>';
+    var select = document.getElementById('configSelection_factory');
+    var pid = select.options[select.selectedIndex].value;
+    var parm = '?action=ajaxConfigManager&create=true&pid=' + pid;
+    sendRequest('GET', parm, displayConfigForm);
+}
+
+function displayConfigForm(obj) {
+    var span1 = document.getElementById('configField');
+    var span2 = document.getElementById('factoryField');
+    if (!span1 && !span2) {
+        return;
+    }
+    
+    var innerHtml = "";
+    
+    if (span1) {
+        innerHtml += '<tr class="content" id="configField">' + span1.innerHTML + '</tr>';
+    }
+    if (span2) {
+        innerHtml += '<tr class="content" id="factoryField">' + span2.innerHTML + '</tr>';
+    }
+    
     innerHtml += '<tr class="content">';
     innerHtml += '<th colspan="2" class="content" >' + obj.title + '</th></tr>';
+    
     innerHtml += '<tr class="content">';
     innerHtml += '<td class="content">&nbsp;</td>';
     innerHtml += '<td class="content">';
@@ -68,8 +91,10 @@ function displayConfigForm(obj) {
     innerHtml += '</table>';
     innerHtml += '</form>';
     innerHtml += '</td></tr>';
+    
     innerHtml += printConfigurationInfo(obj);
-    span.parentNode.innerHTML = innerHtml;
+    
+    span1.parentNode.innerHTML = innerHtml;
 }
 
 function printTextArea(props) {
@@ -101,6 +126,11 @@ function printForm(obj) {
         	// assume attr.values and multiselect
         	innerHtml += createMultiSelect(prop, attr.values, attr.type, '99%');
             innerHtml += '<br />';
+        } else if (attr.values.length == 0) {
+            var spanElement = createSpan(prop, "", attr.type);
+            innerHtml += '<span id="' + spanElement.id + '">';
+            innerHtml += spanElement.innerHTML;
+            innerHtml += '</span>';
         } else {
             for (var vidx in attr.values) {
                 var spanElement = createSpan(prop, attr.values[vidx], attr.type);
@@ -129,14 +159,22 @@ function printConfigurationInfo(obj) {
     innerHtml += '<tr class="content">';
     innerHtml += '<td class="content">Persistent Identity (PID)</td>';
     innerHtml += '<td class="content">' + obj.pid + '</td></tr>';
+    
     if (obj.factoryPID) {
         innerHtml += '<tr class="content">';
         innerHtml += '<td class="content">Factory Peristent Identifier (Factory PID)</td>';
         innerHtml += '<td class="content">' + obj.factoryPID + '</td></tr>';
     }
+    
+    var binding = obj.bundleLocation;
+    if (!binding) {
+        binding = "Unbound or new configuration";
+    }
+    
     innerHtml += '<tr class="content">';
     innerHtml += '<td class="content">Configuration Binding</td>';
-    innerHtml += '<td class="content">' + obj.bundleLocation + '</td></tr>';
+    innerHtml += '<td class="content">' + binding + '</td></tr>';
+    
     return innerHtml;
 }
 

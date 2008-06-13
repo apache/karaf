@@ -118,17 +118,14 @@ abstract class ConfigManagerBase extends BaseManagementPlugin
         // if the configuration is not bound, search in the bundles
         if ( config.getBundleLocation() == null )
         {
-            ObjectClassDefinition ocd = this.getObjectClassDefinition( config.getPid(), locale );
-            if ( ocd != null )
-            {
-                return ocd;
-            }
-
-            // if none, check whether there might be one for the factory PID
+            // if the configuration is a factory one, use the factory PID
             if ( config.getFactoryPid() != null )
             {
                 return this.getObjectClassDefinition( config.getFactoryPid(), locale );
             }
+
+            // otherwise use the configuration PID
+            return this.getObjectClassDefinition( config.getPid(), locale );
         }
 
         MetaTypeService mts = this.getMetaTypeService();
@@ -140,19 +137,14 @@ abstract class ConfigManagerBase extends BaseManagementPlugin
                 MetaTypeInformation mti = mts.getMetaTypeInformation( bundle );
                 if ( mti != null )
                 {
-                    // try OCD by PID first
-                    ObjectClassDefinition ocd = mti.getObjectClassDefinition( config.getPid(), locale );
-                    if ( ocd != null )
-                    {
-                        return ocd;
-                    }
-
-                    // if none, check whether there might be one for the factory
-                    // PID
+                    // check by factory PID
                     if ( config.getFactoryPid() != null )
                     {
                         return mti.getObjectClassDefinition( config.getFactoryPid(), locale );
                     }
+                    
+                    // otherwise check by configuration PID
+                    return mti.getObjectClassDefinition( config.getPid(), locale );
                 }
             }
         }

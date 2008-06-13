@@ -34,9 +34,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.Action;
+import org.apache.felix.webconsole.internal.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONWriter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -71,26 +73,43 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
     public boolean performAction( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
 
+        // needed multiple times below
+        String pid = request.getParameter( ConfigManager.PID );
+
         // should actually apply the configuration before redirecting
-        if ( request.getParameter( "apply" ) != null )
+        if ( request.getParameter( "create" ) != null && pid != null )
+        {
+            ConfigurationAdmin ca = this.getConfigurationAdmin();
+            if ( ca != null )
+            {
+                Configuration config = ca.createFactoryConfiguration( pid, null );
+                pid = config.getPid();
+            }
+        }
+        else if ( request.getParameter( "apply" ) != null )
         {
             return applyConfiguration( request );
         }
 
-        JSONObject result = new JSONObject();
-
-        String pid = request.getParameter( ConfigManager.PID );
         boolean isFactory = pid == null;
         if ( isFactory )
         {
             pid = request.getParameter( "factoryPid" );
         }
 
+        // send the result
+        response.setContentType( "text/javascript" );
+        response.setCharacterEncoding( "UTF-8" );
+
+        JSONWriter result = new JSONWriter( response.getWriter() );
+
         if ( pid != null )
         {
             try
             {
+                result.object();
                 this.configForm( result, pid, isFactory, getLocale( request ) );
+                result.endObject();
             }
             catch ( Exception e )
             {
@@ -98,15 +117,11 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
             }
         }
 
-        // send the result
-        response.setContentType( "text/javascript" );
-        response.getWriter().print( result.toString() );
-
         return false;
     }
 
 
-    private void configForm( JSONObject json, String pid, boolean isFactory, Locale loc ) throws IOException,
+    private void configForm( JSONWriter json, String pid, boolean isFactory, Locale loc ) throws IOException,
         JSONException
     {
         String locale = ( loc == null ) ? null : loc.toString();
@@ -133,8 +148,10 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
             return;
         }
 
-        json.put( ConfigManager.PID, pid );
-        json.put( "isFactory", isFactory );
+        json.key( ConfigManager.PID );
+        json.value( pid );
+        json.key( "isFactory" );
+        json.value( isFactory );
 
         Dictionary props = null;
         ObjectClassDefinition ocd;
@@ -152,7 +169,18 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
 
         if ( props != null )
         {
-            JSONObject properties = new JSONObject();
+
+            json.key( "title" );
+            json.value( pid );
+            json.key( "description" );
+            json
+                .value( "Please enter configuration properties for this configuration in the field below. This configuration has no associated description" );
+
+            json.key( "propertylist" );
+            json.value( "properties" );
+
+            json.key( "properties" );
+            json.object();
             for ( Enumeration pe = props.keys(); pe.hasMoreElements(); )
             {
                 Object key = pe.nextElement();
@@ -164,19 +192,11 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
                     && !key.equals( ConfigurationAdmin.SERVICE_BUNDLELOCATION )
                     && !key.equals( ConfigurationAdmin.SERVICE_FACTORYPID ) )
                 {
-                    properties.put( String.valueOf( key ), props.get( key ) );
+                    json.key( String.valueOf( key ) );
+                    json.value( props.get( key ) );
                 }
-
             }
-
-            json.put( "title", pid );
-            json
-                .put(
-                    "description",
-                    "Please enter configuration properties for this configuration in the field below. This configuration has no associated description" );
-
-            json.put( "propertylist", "properties" );
-            json.put( "properties", properties );
+            json.endObject();
 
         }
 
@@ -187,7 +207,7 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
     }
 
 
-    private Dictionary mergeWithMetaType( Dictionary props, ObjectClassDefinition ocd, JSONObject json )
+    private Dictionary mergeWithMetaType( Dictionary props, ObjectClassDefinition ocd, JSONWriter json )
         throws JSONException
     {
 
@@ -199,11 +219,13 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
         if ( ocd != null )
         {
 
-            json.put( "title", ocd.getName() );
+            json.key( "title" );
+            json.value( ocd.getName() );
 
             if ( ocd.getDescription() != null )
             {
-                json.put( "description", ocd.getDescription() );
+                json.key( "description" );
+                json.value( ocd.getDescription() );
             }
 
             AttributeDefinition[] ad = ocd.getAttributeDefinitions( ObjectClassDefinition.ALL );
@@ -214,7 +236,8 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
 
                 for ( int i = 0; i < ad.length; i++ )
                 {
-                    JSONObject entry = new JSONObject();
+                    json.key( ad[i].getID() );
+                    json.object();
 
                     Object value = props.get( ad[i].getID() );
                     if ( value == null )
@@ -233,18 +256,22 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
                         }
                     }
 
-                    entry.put( "name", ad[i].getName() );
+                    json.key( "name" );
+                    json.value( ad[i].getName() );
 
+                    json.key( "type" );
                     if ( ad[i].getOptionLabels() != null && ad[i].getOptionLabels().length > 0 )
                     {
-                        JSONObject type = new JSONObject();
-                        type.put( "labels", Arrays.asList( ad[i].getOptionLabels() ) );
-                        type.put( "values", Arrays.asList( ad[i].getOptionValues() ) );
-                        entry.put( "type", type );
+                        json.object();
+                        json.key( "labels" );
+                        json.value( Arrays.asList( ad[i].getOptionLabels() ) );
+                        json.key( "values" );
+                        json.value( Arrays.asList( ad[i].getOptionValues() ) );
+                        json.endObject();
                     }
                     else
                     {
-                        entry.put( "type", ad[i].getType() );
+                        json.value( ad[i].getType() );
                     }
 
                     if ( ad[i].getCardinality() == 0 )
@@ -258,7 +285,8 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
                         {
                             value = Array.get( value, 0 );
                         }
-                        entry.put( "value", value );
+                        json.key( "value" );
+                        json.value( value );
                     }
                     else
                     {
@@ -276,19 +304,22 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
                             tmp.put( value );
                             value = tmp;
                         }
-                        entry.put( "values", value );
+                        json.key( "values" );
+                        json.value( value );
                     }
 
                     if ( ad[i].getDescription() != null )
                     {
-                        entry.put( "description", ad[i].getDescription() );
+                        json.key( "description" );
+                        json.value( ad[i].getDescription() );
                     }
 
-                    json.put( ad[i].getID(), entry );
+                    json.endObject();
                     propertyList.put( ad[i].getID() );
                 }
 
-                json.put( "propertylist", propertyList );
+                json.key( "propertylist" );
+                json.value( propertyList );
             }
 
             // nothing more to display
@@ -299,12 +330,13 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
     }
 
 
-    private void addConfigurationInfo( Configuration config, JSONObject json, String locale ) throws JSONException
+    private void addConfigurationInfo( Configuration config, JSONWriter json, String locale ) throws JSONException
     {
 
         if ( config.getFactoryPid() != null )
         {
-            json.put( "factoryPID", config.getFactoryPid() );
+            json.key( "factoryPID" );
+            json.value( config.getFactoryPid() );
         }
 
         String location;
@@ -330,7 +362,8 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
             Version v = Version.parseVersion( ( String ) headers.get( Constants.BUNDLE_VERSION ) );
             location += ", Version " + v.toString();
         }
-        json.put( "bundleLocation", location );
+        json.key( "bundleLocation" );
+        json.value( location );
     }
 
 
@@ -360,7 +393,7 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
 
             // request.setAttribute(ATTR_REDIRECT_PARAMETERS, "pid=" +
             // config.getPid());
-            return true;
+            return false;
         }
 
         String propertyList = request.getParameter( "propertylist" );
