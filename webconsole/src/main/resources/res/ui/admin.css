@@ -170,6 +170,11 @@ td.content {
     padding: 5px;
 }
 
+td.content img {
+    width: 10px;
+    height: 10px;
+}
+
 td.disabled {
     color: #999999;
 }

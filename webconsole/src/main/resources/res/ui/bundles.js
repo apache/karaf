@@ -91,8 +91,10 @@ function bundle( /* Bundle */ bundle )
    
 /* String */ function bundleInternal( /* Bundle */ bundle )
 {
+    var icon = (bundle.props) ? "down" : "right";
     var theBundle = "<td class='content right'>" + bundle.bundleId + "</td>";
-    theBundle += "<td class='content'><a href='javascript:showDetails(" + bundle.bundleId + ")'>" + bundle.name + "</a></td>";
+    theBundle += "<td class='content'><img src='" + appRoot + "/res/imgs/" + icon + ".gif' onClick='showDetails(" + bundle.bundleId + ")' id='bundle" + bundle.bundleId + "_inline' />";
+    theBundle += " <a href='" + appRoot + "/bundles/" + bundle.bundleId + "'>" + bundle.name + "</a></td>";
     theBundle += "<td class='content center'>" + bundle.state + "</td>";
 
     // no buttons for system bundle
@@ -202,10 +204,12 @@ function showDetails(bundleId) {
         if (span.innerHTML)
         {
             span.innerHTML = '';
+            newLinkValue(bundleId, appRoot + "/res/imgs/right.gif");
         }
         else
         {
-            sendRequest('GET', "bundles/" + bundleId + ".json", displayBundleDetails);
+            sendRequest('GET', appRoot + "/bundles/" + bundleId + ".json", displayBundleDetails);
+            newLinkValue(bundleId, appRoot + "/res/imgs/down.gif");
         }
     }
 }
@@ -216,6 +220,17 @@ function displayBundleDetails(obj) {
     if (span)
     {
         span.innerHTML = bundleDetails( obj.props );
+    }
+}
+
+
+function newLinkValue(bundleId, newLinkValue)
+{
+    
+    var link = document.getElementById("bundle" + bundleId + "_inline");
+    if (link)
+    {
+        link.src = newLinkValue;
     }
 }
 

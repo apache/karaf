@@ -308,6 +308,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
         pw.println( "<script src='" + appRoot + "/res/ui/bundles.js' language='JavaScript'></script>" );
 
         Util.startScript( pw );
+        pw.println( "var appRoot = '" + appRoot + "';" );
         pw.println( "var bundleListData = " );
         JSONWriter jw = new JSONWriter( pw );
         try
