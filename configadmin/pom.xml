@@ -68,7 +68,8 @@
                             org.osgi.service.cm;version=1.2
                         </Export-Package>
                         <Private-Package>
-                            org.apache.felix.cm.impl
+                            org.apache.felix.cm.impl,
+                            org.osgi.util.tracker
                         </Private-Package>
                         <Bundle-Activator>
                             org.apache.felix.cm.impl.ConfigurationManager
