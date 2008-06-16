@@ -30,6 +30,7 @@ import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.StringUtils;
+import org.osgi.service.metatype.MetaTypeService;
 
 /**
  * The <code>SCRDescriptorMojo</code>
@@ -104,7 +105,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         final Components components = new Components();
         final Components abstractComponents = new Components();
         final MetaData metaData = new MetaData();
-        metaData.setLocalization("metatype");
+        metaData.setLocalization(MetaTypeService.METATYPE_DOCUMENTS_LOCATION + "/metatype");
 
         for (int i = 0; i < javaSources.length; i++) {
             this.getLog().debug("Testing source " + javaSources[i].getName());
