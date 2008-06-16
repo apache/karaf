@@ -19,11 +19,7 @@
 package org.apache.felix.webconsole.internal;
 
 
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.startlevel.StartLevel;
-import org.osgi.util.tracker.ServiceTracker;
 
 
 public interface OsgiManagerPlugin
