@@ -51,11 +51,10 @@ public class DefaultMetaTypeProvider implements MetaTypeProvider
 {
 
     private final Bundle bundle;
-
-    private String localePrefix;
+    private final String localePrefix;
+    
     private Map objectClassDefinitions;
     private Map designates;
-
     private Map locales;
 
 
@@ -83,19 +82,16 @@ public class DefaultMetaTypeProvider implements MetaTypeProvider
             designates = Collections.unmodifiableMap( copy );
         }
 
-        localePrefix = metadata.getLocalePrefix();
-        if ( localePrefix == null )
+        String metaDataLocalePrefix = metadata.getLocalePrefix();
+        if ( metaDataLocalePrefix == null )
         {
-            localePrefix = ( String ) bundle.getHeaders().get( Constants.BUNDLE_LOCALIZATION );
-            if ( localePrefix == null )
+            metaDataLocalePrefix = ( String ) bundle.getHeaders().get( Constants.BUNDLE_LOCALIZATION );
+            if ( metaDataLocalePrefix == null )
             {
-                localePrefix = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+                metaDataLocalePrefix = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
             }
         }
-        else
-        {
-            localePrefix = MetaTypeService.METATYPE_DOCUMENTS_LOCATION + "/" + localePrefix;
-        }
+        this.localePrefix = metaDataLocalePrefix;
     }
 
 
