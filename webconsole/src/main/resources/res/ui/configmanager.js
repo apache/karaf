@@ -83,10 +83,6 @@ function displayConfigForm(obj) {
     innerHtml += '<input type="reset" class="submit" name="reset" value="Reset" />';
     innerHtml += '&nbsp;&nbsp;&nbsp;';
     innerHtml += '<input type="submit" class="submit" name="delete" value="Delete" onClick="return confirmDelete();"/>';
-    if (obj.isFactory) {
-        innerHtml += '&nbsp;&nbsp;&nbsp;';
-        innerHtml += '<input type="submit" class="submit" name="create" value="Create Configuration"/>';
-    }
     innerHtml += '</td></tr>';
     innerHtml += '</table>';
     innerHtml += '</form>';

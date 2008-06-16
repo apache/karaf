@@ -34,10 +34,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.Action;
-import org.apache.felix.webconsole.internal.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.json.JSONWriter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -75,14 +73,23 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
 
         // needed multiple times below
         String pid = request.getParameter( ConfigManager.PID );
+        ConfigurationAdmin ca = this.getConfigurationAdmin();
+
+        // ignore this request if the pid and/or configuration admin is missing
+        if (pid == null || ca == null) {
+            // should log this here !!
+            return true;
+        }
+        
+        // the configuration to operate on (to be created or "missing")
+        Configuration config = null;
 
         // should actually apply the configuration before redirecting
         if ( request.getParameter( "create" ) != null && pid != null )
         {
-            ConfigurationAdmin ca = this.getConfigurationAdmin();
             if ( ca != null )
             {
-                Configuration config = ca.createFactoryConfiguration( pid, null );
+                config = ca.createFactoryConfiguration( pid, null );
                 pid = config.getPid();
             }
         }
@@ -91,12 +98,24 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
             return applyConfiguration( request );
         }
 
-        boolean isFactory = pid == null;
-        if ( isFactory )
-        {
-            pid = request.getParameter( "factoryPid" );
+        if (config == null) {
+            try
+            {
+                // we use listConfigurations to not create configuration
+                // objects persistently without the user providing actual
+                // configuration
+                Configuration[] configs = ca.listConfigurations( "(" + Constants.SERVICE_PID + "=" + pid + ")" );
+                if ( configs != null && configs.length > 0 )
+                {
+                    config = configs[0];
+                }
+            }
+            catch ( InvalidSyntaxException ise )
+            {
+                // should print message
+            }
         }
-
+        
         // send the result
         response.setContentType( "text/javascript" );
         response.setCharacterEncoding( "UTF-8" );
@@ -108,7 +127,7 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
             try
             {
                 result.object();
-                this.configForm( result, pid, isFactory, getLocale( request ) );
+                this.configForm( result, pid, config, getLocale( request ) );
                 result.endObject();
             }
             catch ( Exception e )
@@ -121,37 +140,13 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
     }
 
 
-    private void configForm( JSONWriter json, String pid, boolean isFactory, Locale loc ) throws IOException,
+    private void configForm( JSONWriter json, String pid, Configuration config, Locale loc ) throws IOException,
         JSONException
     {
         String locale = ( loc == null ) ? null : loc.toString();
 
-        ConfigurationAdmin ca = this.getConfigurationAdmin();
-        if ( ca == null )
-        {
-            // should print message
-            return;
-        }
-
-        Configuration config = null;
-        try
-        {
-            Configuration[] configs = ca.listConfigurations( "(" + Constants.SERVICE_PID + "=" + pid + ")" );
-            if ( configs != null && configs.length > 0 )
-            {
-                config = configs[0];
-            }
-        }
-        catch ( InvalidSyntaxException ise )
-        {
-            // should print message
-            return;
-        }
-
         json.key( ConfigManager.PID );
         json.value( pid );
-        json.key( "isFactory" );
-        json.value( isFactory );
 
         Dictionary props = null;
         ObjectClassDefinition ocd;
@@ -384,16 +379,6 @@ public class AjaxConfigManagerAction extends ConfigManagerBase implements Action
             Configuration config = ca.getConfiguration( pid, null );
             config.delete();
             return true;
-        }
-        else if ( request.getParameter( "create" ) != null )
-        {
-            // pid is a factory PID and we have to create a new configuration
-            // we should actually also display that one !
-            Configuration config = ca.createFactoryConfiguration( pid, null );
-
-            // request.setAttribute(ATTR_REDIRECT_PARAMETERS, "pid=" +
-            // config.getPid());
-            return false;
         }
 
         String propertyList = request.getParameter( "propertylist" );
