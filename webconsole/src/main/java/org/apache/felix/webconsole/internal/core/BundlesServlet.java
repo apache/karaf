@@ -41,6 +41,7 @@ import org.apache.felix.bundlerepository.R4Import;
 import org.apache.felix.bundlerepository.R4Package;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
+import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.osgi.framework.Bundle;
@@ -304,11 +305,10 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
         PrintWriter pw = response.getWriter();
 
-        String appRoot = request.getContextPath() + request.getServletPath();
+        String appRoot = (String) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
         pw.println( "<script src='" + appRoot + "/res/ui/bundles.js' language='JavaScript'></script>" );
 
         Util.startScript( pw );
-        pw.println( "var appRoot = '" + appRoot + "';" );
         pw.println( "var bundleListData = " );
         JSONWriter jw = new JSONWriter( pw );
         try

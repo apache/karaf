@@ -38,6 +38,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
+import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -56,7 +57,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         + "<html>"
         + "<head>"
         + "<meta http-equiv=\"Content-Type\" content=\"text/html; utf-8\">"
-        + "<link rel=\"icon\" href=\"res/imgs/favicon.ico\">"
+        + "<link rel=\"icon\" href=\"{15}/res/imgs/favicon.ico\">"
         + "<title>{0} - {12}</title>"
         + "<script src=\"{15}/res/ui/admin.js\" language=\"JavaScript\"></script>"
         + "<script language=\"JavaScript\">"
@@ -67,6 +68,8 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         + "ABOUT_MEM=\"{7} KB\";"
         + "ABOUT_USED=\"{8} KB\";"
         + "ABOUT_FREE=\"{9} KB\";"
+        + "appRoot = \"{15}\";"
+        + "pluginRoot = appRoot + \"/{16}\";"
         + "</script>"
         + "<link href=\"{15}/res/ui/admin.css\" rel=\"stylesheet\" type=\"text/css\">"
         + "</head>"
@@ -171,15 +174,14 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         long totalMem = Runtime.getRuntime().totalMemory() / 1024;
         long usedMem = totalMem - freeMem;
 
-        String appRoot = request.getContextPath() + request.getServletPath();
-
         String header = MessageFormat.format( HEADER, new Object[]
             { adminTitle, adminVersion, System.getProperty( "java.runtime.version" ),
                 System.getProperty( "java.runtime.name" ), System.getProperty( "java.vm.name" ),
                 System.getProperty( "java.vm.version" ), System.getProperty( "java.vm.info" ), new Long( totalMem ),
                 new Long( usedMem ), new Long( freeMem ), vendorWeb, productName, getTitle(), productWeb, vendorName,
-                appRoot } );
+                ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT ), getLabel() } );
         pw.println( header );
+
         return pw;
     }
 
@@ -195,7 +197,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         }
 
         boolean disabled = false;
-
+        String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
         Map labelMap = ( Map ) request.getAttribute( OsgiManager.ATTR_LABEL_MAP );
         if ( labelMap != null )
         {
@@ -216,7 +218,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
                 }
                 else
                 {
-                    map.put( labelMapEntry.getValue(), "<a href='" + labelMapEntry.getKey() + "'>"
+                    map.put( labelMapEntry.getValue(), "<a href='" + appRoot + "/" + labelMapEntry.getKey() + "'>"
                         + labelMapEntry.getValue() + "</a></li>" );
                 }
             }
