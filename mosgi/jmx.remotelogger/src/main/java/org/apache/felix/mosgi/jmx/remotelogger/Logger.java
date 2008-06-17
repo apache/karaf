@@ -57,7 +57,6 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
   private static final String[] LOG_LVL=new String[] {"","ERROR  ","WARNING ","INFO   ","DEBUG  "};
   private Integer logLvl=new Integer(4);
 
-  private MBeanServer agent=null;
   private ObjectName remoteLoggerON=null;
 
   /////////////////////////////////
@@ -97,15 +96,11 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
       case ServiceEvent.REGISTERED :
         if (as[0].equals(LogReaderService.class.getName())){
           this.registerLogReaderService(servicereference);
-        }else if (as[0].equals(MBeanServer.class.getName())){
-          //this.registerToAgent(servicereference);
         }
 	break;
       case ServiceEvent.UNREGISTERING :
         if (as[0].equals(LogReaderService.class.getName())){
 	  this.unRegisterLogReaderService(servicereference);
-        }else if (as[0].equals(MBeanServer.class.getName())){
-          //this.unRegisterFromAgent();
         }
 	break;
     }
@@ -120,7 +115,7 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
 
   public void logged(LogEntry log, boolean oldLog){
     synchronized (logMutex){
-      if (log.getLevel() <= logLvl.intValue() & this.agent!=null) {
+      if (log.getLevel() <= logLvl.intValue() ) {
         String reg=new String("*");
         StringBuffer message=new StringBuffer();
         try{
@@ -155,6 +150,11 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
     this.log(LogService.LOG_INFO, "Remote Logger starting "+version);
 
     java.util.Properties p = new java.util.Properties();
+    try {
+      this.remoteLoggerON = new ObjectName(Logger.REMOTE_LOGGER_ON_STRING);
+    } catch (MalformedObjectNameException mne) {
+      throw new BundleException("Logger.Logger:objectName invalid", mne);
+    }
     p.put(org.apache.felix.mosgi.jmx.agent.Constants.OBJECTNAME, REMOTE_LOGGER_ON_STRING);
     this.mbean_sr = this.bc.registerService(LoggerMBean.class.getName(), this, p);
 
@@ -180,10 +180,6 @@ public class Logger extends NotificationBroadcasterSupport implements LogListene
       this.lrs.removeLogListener(this);
       this.bc.removeServiceListener(this);
     }
-    if (this.agent!=null){
-      //this.unRegisterFromAgent();
-    }
-    this.agent=null;
     this.lrs=null; 
     this.log(LogService.LOG_INFO, "Remote Logger stopped"+version);
     this.mbean_sr.unregister();
