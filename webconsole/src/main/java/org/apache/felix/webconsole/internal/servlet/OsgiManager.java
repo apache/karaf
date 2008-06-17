@@ -40,7 +40,6 @@ import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.Logger;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
-import org.apache.felix.webconsole.internal.compendium.AjaxConfigManagerAction;
 import org.apache.felix.webconsole.internal.compendium.ComponentConfigurationPrinter;
 import org.apache.felix.webconsole.internal.compendium.ComponentRenderAction;
 import org.apache.felix.webconsole.internal.compendium.ConfigManager;
@@ -76,6 +75,8 @@ public class OsgiManager extends GenericServlet
     private static final long serialVersionUID = 1L;
 
     public static final String ATTR_LABEL_MAP = OsgiManager.class.getName() + ".labelMap";
+
+    public static final String ATTR_APP_ROOT = OsgiManager.class.getName() + ".appRoot";
 
     /**
      * The name and value of a parameter which will prevent redirection to a
@@ -124,10 +125,10 @@ public class OsgiManager extends GenericServlet
     private static final String DEFAULT_MANAGER_ROOT = "/system/console";
 
     private static final Class[] PLUGIN_CLASSES =
-        { AjaxConfigManagerAction.class, ComponentConfigurationPrinter.class, ComponentRenderAction.class,
-            ConfigManager.class, BundlesServlet.class, InstallAction.class, SetStartLevelAction.class,
-            ConfigurationRender.class, GCAction.class, ShutdownAction.class, ShutdownRender.class, VMStatRender.class,
-            BundleRepositoryRender.class, LicenseServlet.class };
+        { ComponentConfigurationPrinter.class, ComponentRenderAction.class, ConfigManager.class, BundlesServlet.class,
+            InstallAction.class, SetStartLevelAction.class, ConfigurationRender.class, GCAction.class,
+            ShutdownAction.class, ShutdownRender.class, VMStatRender.class, BundleRepositoryRender.class,
+            LicenseServlet.class };
 
     private BundleContext bundleContext;
 
@@ -317,6 +318,8 @@ public class OsgiManager extends GenericServlet
         if ( plugin != null )
         {
             req.setAttribute( ATTR_LABEL_MAP, labelMap );
+            req.setAttribute( ATTR_APP_ROOT, request.getContextPath() + request.getServletPath() );
+            
             plugin.service( req, res );
         }
         else

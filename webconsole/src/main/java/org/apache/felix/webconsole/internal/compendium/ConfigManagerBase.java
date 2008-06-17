@@ -23,68 +23,37 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.felix.webconsole.internal.BaseManagementPlugin;
+import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.service.metatype.ObjectClassDefinition;
-import org.osgi.util.tracker.ServiceTracker;
 
 
 /**
  * The <code>ConfigManagerBase</code> TODO
  * 
  */
-abstract class ConfigManagerBase extends BaseManagementPlugin
+abstract class ConfigManagerBase extends BaseWebConsolePlugin
 {
     private static final String CONFIGURATION_ADMIN_NAME = ConfigurationAdmin.class.getName();
-    
+
     private static final String META_TYPE_NAME = MetaTypeService.class.getName();
-
-    private ServiceTracker configurationAdmin;
-
-    private ServiceTracker metaTypeService;
-
-
-    public void activate( BundleContext bundleContext )
-    {
-        super.activate( bundleContext );
-
-        configurationAdmin = new ServiceTracker( bundleContext, ConfigurationAdmin.class.getName(), null );
-        configurationAdmin.open();
-        metaTypeService = new ServiceTracker( bundleContext, MetaTypeService.class.getName(), null );
-        metaTypeService.open();
-    }
-
-
-    public void destroy()
-    {
-        if ( configurationAdmin != null )
-        {
-            configurationAdmin.close();
-        }
-        if ( metaTypeService != null )
-        {
-            metaTypeService.close();
-        }
-    }
 
 
     protected ConfigurationAdmin getConfigurationAdmin()
     {
-        //TODO: getService(CONFIGURATION_ADMIN_NAME)
-        return ( ConfigurationAdmin ) configurationAdmin.getService();
+        return ( ConfigurationAdmin ) getService( CONFIGURATION_ADMIN_NAME );
     }
 
 
     protected MetaTypeService getMetaTypeService()
     {
-        //TODO: getService(META_TYPE_NAME)
-        return ( MetaTypeService ) metaTypeService.getService();
+        //TODO: 
+        return ( MetaTypeService ) getService( META_TYPE_NAME );
     }
 
 
@@ -142,7 +111,7 @@ abstract class ConfigManagerBase extends BaseManagementPlugin
                     {
                         return mti.getObjectClassDefinition( config.getFactoryPid(), locale );
                     }
-                    
+
                     // otherwise check by configuration PID
                     return mti.getObjectClassDefinition( config.getPid(), locale );
                 }

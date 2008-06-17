@@ -23,8 +23,8 @@ function configure() {
     }
     var select = document.getElementById('configSelection_pid');
     var pid = select.options[select.selectedIndex].value;
-    var parm = '?action=ajaxConfigManager&pid=' + pid;
-    sendRequest('GET', parm, displayConfigForm);
+    var parm = pluginRoot + '/' + pid;
+    sendRequest('POST', parm, displayConfigForm);
 }
 
 
@@ -35,8 +35,8 @@ function create() {
     }
     var select = document.getElementById('configSelection_factory');
     var pid = select.options[select.selectedIndex].value;
-    var parm = '?action=ajaxConfigManager&create=true&pid=' + pid;
-    sendRequest('GET', parm, displayConfigForm);
+    var parm = pluginRoot + '/' + pid + '?create=true';
+    sendRequest('POST', parm, displayConfigForm);
 }
 
 function displayConfigForm(obj) {
@@ -61,9 +61,15 @@ function displayConfigForm(obj) {
     innerHtml += '<tr class="content">';
     innerHtml += '<td class="content">&nbsp;</td>';
     innerHtml += '<td class="content">';
-    innerHtml += '<form method="post">';
+    innerHtml += '<form method="post" action="' + pluginRoot + '/' + obj.pid + '">';
     innerHtml += '<input type="hidden" name="apply" value="true" />';
-    innerHtml += '<input type="hidden" name="pid" value="' + obj.pid + '" />';
+    
+    // add the factory PID as a hidden form field if present
+    if (obj.factoryPid)
+    {
+        innerHtml += '<input type="hidden" name="factoryPid" value="' + obj.factoryPid + '" />';
+    }
+    
     innerHtml += '<input type="hidden" name="action" value="ajaxConfigManager" />';
     innerHtml += '<table border="0" width="100%">';
     if (obj.description) {
