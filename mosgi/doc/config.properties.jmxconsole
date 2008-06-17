@@ -20,16 +20,32 @@ felix.auto.start.1= \
  file:../mosgi/console.gui/target/org.apache.felix.mosgi.console.gui-0.9.0-SNAPSHOT.jar \
  file:../mosgi/console.component/target/org.apache.felix.mosgi.console.component-0.9.0-SNAPSHOT.jar
 
+# file:/home/dni/gforge/mosgi/tosgi/src/murmi/target/fr.inria.amazones.murmi-0.1.jar \
+# file:/home/dni/gforge/mosgi/ws/src/ws/target/fr.inria.amazones.ws-0.1.jar \
+
 #possible values : both treeonly tableonly none (default=both)
 mosgi.jmxconsole.remotelogger.componentfilter=both
 
-mosgi.jmxconsole.ip.1=127.0.0.1
-mosgi.jmxconsole.profile.1=core
-#mosgi.jmxconsole.rmiport.core=1100
+mosgi.jmxconsole.protocol.murmi.package=fr.inria.amazones.remote.provider
+mosgi.jmxconsole.protocol.ws.package=fr.inria.amazones.remote.provider
 
-#mosgi.jmxconsole.ip.2=127.0.0.1
-#mosgi.jmxconsole.profile.2=core2
-#mosgi.jmxconsole.rmiport.core2=1200
+# OLD :
+# mosgi.jmxconsole.ip.1=127.0.0.1
+# mosgi.jmxconsole.profile.1=core
+# mosgi.jmxconsole.rmiport.core=1099
+
+# NEW :
+mosgi.jmxconsole.id.1.nickname=main
+mosgi.jmxconsole.id.1.profile=core
+mosgi.jmxconsole.id.1.host=127.0.0.1
+mosgi.jmxconsole.id.1.protocol=rmi
+mosgi.jmxconsole.id.1.port=1099
+#mosgi.jmxconsole.id.1.jmxserviceurl=service:jmx:rmi:///jndi/rmi://127.0.0.1:1099/core
+
+mosgi.jmxconsole.id.2.profile=core2
+mosgi.jmxconsole.id.2.host=127.0.0.1
+mosgi.jmxconsole.id.2.protocol=rmi
+mosgi.jmxconsole.id.2.port=1100
 
 felix.startlevel.framework=1
 felix.startlevel.bundle=1
@@ -230,6 +246,9 @@ jre-1.4= \
  version="1.4.0"
 
 jre-1.5=, \
+ org.apache.log.output.io; \
+ javax.servlet; \
+ javax.management.remote; \
  javax.accessibility; \
  javax.activity; \
  javax.imageio; \

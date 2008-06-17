@@ -128,11 +128,11 @@ System.out.println("))"+id+":"+type+":"+ this.eventName.get(new Integer(type)));
     if (this.mbsc!=null){
       try{
         mbsc.removeNotificationListener(this.osgiON, this);
-        this.mbsc=null;
-        this.removeAll();
       }catch(Exception e){
         e.printStackTrace();
       }
+      this.mbsc=null;
+      this.removeAll();
     }
   }
 

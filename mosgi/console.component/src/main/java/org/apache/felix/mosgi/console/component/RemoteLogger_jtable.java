@@ -129,7 +129,7 @@ public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlug
         MBeanServerConnection mbs=(MBeanServerConnection)e.getNewValue();
         if (nodes.get(mbs)==null){
 	  //System.out.println("Ajout d'un listener " +mbs);
-          ((MBeanServerConnection)e.getNewValue()).addNotificationListener(new ObjectName("OSGI:name=Remote Logger"), this, null, e.getOldValue());
+          ((MBeanServerConnection)e.getNewValue()).addNotificationListener(Activator.REMOTE_LOGGER_ON, this, null, e.getOldValue());
           nodes.put(mbs, "ok");
         }
       }catch(Exception ex){
@@ -137,6 +137,9 @@ public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlug
       }
     }
   }
+
+  private static final DateFormat dateF = DateFormat.getDateInstance(DateFormat.SHORT);
+  private static final DateFormat timeF = DateFormat.getTimeInstance(DateFormat.MEDIUM);
 
   public void handleNotification(Notification notification, Object handback) {
     StringTokenizer st = new StringTokenizer(notification.getMessage(),"*");
@@ -147,8 +150,8 @@ public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlug
     if (ts!=0){ // means it's not an old log
       Date d=new Date(ts);
       //DateFormat dateFormat = new SimpleDateFormat("hh'h'mm dd-MM-yy");
-      date=DateFormat.getDateInstance(DateFormat.SHORT).format(d);
-      time=DateFormat.getTimeInstance(DateFormat.MEDIUM).format(d);
+      date = dateF.format(d);
+      time = timeF.format(d);
     }
     String id=st.nextToken();
     String name=st.nextToken();

@@ -20,8 +20,19 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.apache.felix.mosgi.console.ifc.CommonPlugin;
 import java.lang.String;
+import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
 
 public class Activator implements BundleActivator {
+
+  public static ObjectName REMOTE_LOGGER_ON = null;
+  static {
+    try {
+      REMOTE_LOGGER_ON = new ObjectName("OSGI:name=Remote Logger");
+    } catch (MalformedObjectNameException mone) {
+      //
+    }
+  }
   
   public void start(BundleContext context) throws Exception{ 
     String propVal=new String("both");

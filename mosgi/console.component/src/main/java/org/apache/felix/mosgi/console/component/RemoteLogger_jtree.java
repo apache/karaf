@@ -190,19 +190,21 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
       try {
         MBeanServerConnection mbsc=(MBeanServerConnection)e.getNewValue();
 	if ( !ht_connectedGateway.containsValue(mbsc) ) {
-	  String connString=(String) e.getOldValue();
-	  mbsc.addNotificationListener(new ObjectName("OSGI:name=Remote Logger"), this, null, connString);
+	  String jmxsurl = (String) e.getOldValue();
+	  mbsc.addNotificationListener(Activator.REMOTE_LOGGER_ON, this, null, jmxsurl);
+	  // At gateway connection time : add into the tree a "port/profileName" node under an "ip" node
+	  String ref = jmxsurl.substring(jmxsurl.lastIndexOf(":")+1);
+	  String ip_tmp = jmxsurl.substring(0, jmxsurl.lastIndexOf(":"));
+	  String ip = ip_tmp.substring(ip_tmp.lastIndexOf("/")+1);
+	  String connString = jmxsurl.substring(ip_tmp.lastIndexOf("/")+1);
 	  ht_connectedGateway.put(connString, mbsc);
-	  // At gateway connection time : add into the tree an rmiport/profileName node under an ip node
-          String ip=connString.split(":")[0];
-          String ref=connString.split(":")[1];
           DefaultMutableTreeNode dmtn_ip=createIfNeed(ip, rootNode);
           DefaultMutableTreeNode dmtn_ref=createIfNeed(ref, dmtn_ip);
-          Integer lL=this.getLogLvl(connString);
+          Integer lL = this.getLogLvl(connString);
           ht_logLvl.put(dmtn_ref, lL);
           // ask for old log management choice :
           if (oldLogChoice==OLDLOG_THIS_TIME | oldLogChoice==OLDLOG_NOT_THIS_TIME) {
-            JOptionPane jop = new JOptionPane("Do you want old log from gateway :\n"+connString+" ?", JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, new String[] {OLDLOG_THIS_TIME, OLDLOG_NOT_THIS_TIME, OLDLOG_ALWAYS, OLDLOG_NEVER}, OLDLOG_THIS_TIME);
+            JOptionPane jop = new JOptionPane("Do you want old log from gateway :\n"+jmxsurl+" ?", JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, new String[] {OLDLOG_THIS_TIME, OLDLOG_NOT_THIS_TIME, OLDLOG_ALWAYS, OLDLOG_NEVER}, OLDLOG_THIS_TIME);
             JDialog dialog = jop.createDialog(jp, "Old log management");
 	    //dialog.setModal(true);
 	    dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
@@ -213,7 +215,7 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
 	    }
 	  } 
           if (oldLogChoice==OLDLOG_THIS_TIME | oldLogChoice==OLDLOG_ALWAYS) {
-            mbsc.invoke(new ObjectName("OSGI:name=Remote Logger"), "sendOldLog", new Object[]{}, new String[]{});
+            mbsc.invoke(Activator.REMOTE_LOGGER_ON, "sendOldLog", new Object[]{}, new String[]{});
 	  }
         }
       } catch(Exception ex){
@@ -222,22 +224,23 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
     }
   }
  
+  private static final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy");
+  private static final DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss:SSS");
   ///////////////////////////////////////////////////
   //       NotificationListener implementation     //  
   ///////////////////////////////////////////////////
   public void handleNotification(Notification notification, Object handback) {
-    StringTokenizer st=new StringTokenizer(handback.toString(), ":");
-    String ip=st.nextToken();
-    String ref=st.nextToken();
+    String jmxsurl = handback.toString();
+    String ref = jmxsurl.substring(jmxsurl.lastIndexOf(":")+1);
+    String ip_tmp = jmxsurl.substring(0, jmxsurl.lastIndexOf(":"));
+    String ip = ip_tmp.substring(ip_tmp.lastIndexOf("/")+1);
   
-    st = new StringTokenizer(notification.getMessage(), "*");
+    StringTokenizer st = new StringTokenizer(notification.getMessage(), "*");
     long ts=notification.getTimeStamp();
     String time=JtreeCellRenderer.UNKNOWN_TIME;
     String date=JtreeCellRenderer.UNKNOWN_DATE;
     if (ts!=0) {
       Date timeDate=new Date(ts);
-      DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy");
-      DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss:SSS");
       // if I use local date format there are indentations problems
       //DateFormat df = DateFormat.getTimeInstance(DateFormat.MEDIUM);
       //DateFormat df2 = DateFormat.getDateInstance(DateFormat.SHORT);
@@ -279,7 +282,7 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
     Integer val=new Integer(0);
     try {
       MBeanServerConnection mb=(MBeanServerConnection) ht_connectedGateway.get(connString);
-      val=(Integer) mb.getAttribute(new ObjectName("OSGI:name=Remote Logger"), "LogLvl");
+      val=(Integer) mb.getAttribute(Activator.REMOTE_LOGGER_ON, "LogLvl");
     } catch (Exception exc) {
       exc.printStackTrace();
     }
@@ -288,12 +291,12 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
 
   private void setLogLvl(TreePath tp) {
     Object[] o=tp.getPath();
-    String connS=""+o[1]+":"+o[2];
-    MBeanServerConnection mb=(MBeanServerConnection) ht_connectedGateway.get(connS);
+    String connString = o[1]+":"+o[2];
     try {
-      Integer curentVal=(Integer) mb.getAttribute(new ObjectName("OSGI:name=Remote Logger"), "LogLvl");
+      MBeanServerConnection mb=(MBeanServerConnection) ht_connectedGateway.get(connString);
+      Integer curentVal=(Integer) mb.getAttribute(Activator.REMOTE_LOGGER_ON, "LogLvl");
 
-      JOptionPane jop = new JOptionPane("Select a log level for \""+connS+"\" :", JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, LOG_LVL, LOG_LVL[curentVal.intValue()-1]);
+      JOptionPane jop = new JOptionPane("Select a log level for \""+connString+"\" :", JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, LOG_LVL, LOG_LVL[curentVal.intValue()-1]);
       JDialog dialog = jop.createDialog(jp, "Log level");
       dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
       dialog.show();
@@ -304,11 +307,11 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
       else if (choice.equals("Info")) {newVal=new Integer(3);}
       else if (choice.equals("Debug")) {newVal=new Integer(4);}
 
-      mb.setAttribute(new ObjectName("OSGI:name=Remote Logger"), new Attribute("LogLvl", newVal));
+      mb.setAttribute(Activator.REMOTE_LOGGER_ON, new Attribute("LogLvl", newVal));
       DefaultMutableTreeNode ddmmttnn=(DefaultMutableTreeNode) tp.getLastPathComponent();
       ht_logLvl.put(ddmmttnn, newVal);
     } catch (Exception ex) {
-      JOptionPane.showMessageDialog(jp,"Error with \""+connS+"\" :\n"+ex, "Error :", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(jp,"Error with \""+connString+"\" :\n"+ex, "Error :", JOptionPane.ERROR_MESSAGE);
       ex.printStackTrace();
     }
   }

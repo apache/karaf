@@ -1,5 +1,5 @@
 #!/bin/sh
-
+rm -rf ~/.felix/core
 
 echo "cd into felix directory"
 cd ../../main
