@@ -189,12 +189,15 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     protected void renderTopNavigation( HttpServletRequest request, PrintWriter pw )
     {
         // assume pathInfo to not be null, else this would not be called
+        boolean linkToCurrent = true;
         String current = request.getPathInfo();
         int slash = current.indexOf( "/", 1 );
-        if ( slash > 1 )
+        if ( slash < 0 )
         {
-            current = current.substring( 1, slash );
+            slash = current.length();
+            linkToCurrent = false;
         }
+        current = current.substring( 1, slash );
 
         boolean disabled = false;
         String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
@@ -213,8 +216,16 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
                 }
                 else if ( disabled || current.equals( labelMapEntry.getKey() ) )
                 {
-                    map.put( labelMapEntry.getValue(), "<span class='technavat'>" + labelMapEntry.getValue()
-                        + "</span>" );
+                    if ( linkToCurrent )
+                    {
+                        map.put( labelMapEntry.getValue(), "<a class='technavat' href='" + appRoot + "/"
+                            + labelMapEntry.getKey() + "'>" + labelMapEntry.getValue() + "</a></li>" );
+                    }
+                    else
+                    {
+                        map.put( labelMapEntry.getValue(), "<span class='technavat'>" + labelMapEntry.getValue()
+                            + "</span>" );
+                    }
                 }
                 else
                 {
