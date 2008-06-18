@@ -175,10 +175,20 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
   public void actionPerformed(ActionEvent ae) {
     Object object = ae.getSource();
     if ( object == jb_addNode ) { // Add a new node into tree
-      Gateway g = Gateway.newGateway();
-      if ( g != null ) {
+      DefaultMutableTreeNode node = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
+      Gateway selectedGateway = null;
+      if ( node != null && node != top) {
+        selectedGateway = (Gateway) node.getUserObject();
+      }
+      Gateway newGateway = null;
+      try {
+        newGateway = Gateway.newGateway(selectedGateway);
+      } catch (Exception exep) {
+        JOptionPane.showMessageDialog(null, "Gateway creation error:\n "+exep.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+      }
+      if ( newGateway != null ) {
         TreePath tp = tree.getSelectionPath();
-        this.createTreeNode(g);
+        this.createTreeNode(newGateway);
         dtm.reload(top);
         isAllNodesConnected = false;
         tree.setSelectionPath(tp);
@@ -188,7 +198,7 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
       if ( node != top) {
         Gateway g = (Gateway) node.getUserObject();
         if ( !node.equals(top) ){
-	  if( JOptionPane.showConfirmDialog(null, "Sure we remove this gateway \""+g.getName()+"\" ?\n "+g.toString()) == JOptionPane.YES_OPTION ) {
+	  if( JOptionPane.showConfirmDialog(null, "Sure we remove this gateway \""+g.getNickname()+"\" ?\n "+g.toString()) == JOptionPane.YES_OPTION ) {
             g.disconnect(this);
 	    dtm.removeNodeFromParent(node);
 	    System.out.println("Remove node : "+g);
@@ -271,8 +281,9 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
       String packages = bc.getProperty("mosgi.jmxconsole.protocol."+protoName+".package");
       if ( packages == null ) {
         packages = "";
+      } else {
+        System.out.println("Protocol provider package for \""+protoName+"\" is prefixed with \""+packages+"\"");
       }
-      System.out.println("Protocol provider package for \""+protoName+"\" = "+packages);
       PROTOCOL_PACKAGE_PROVIDER.put(protoName, packages);
       return packages;
     }

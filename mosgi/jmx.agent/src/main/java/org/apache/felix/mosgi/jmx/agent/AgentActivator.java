@@ -56,17 +56,10 @@ public class AgentActivator implements BundleActivator, ServiceListener {
     AgentActivator.bc=context;
     this.version=(String)bc.getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
     AgentActivator.log(LogService.LOG_INFO, "Starting JMX Agent "+version,null);
-    String profile=bc.getProperty(BundleCache.CACHE_PROFILE_PROP);
-    if (profile==null){
-      profile=System.getProperty(BundleCache.CACHE_PROFILE_PROP);
-     }
-    String virtual=bc.getProperty("mosgi.jmxconsole.core."+profile);
     StringTokenizer st=new StringTokenizer(System.getProperty("java.version"), ".");
     st.nextToken();
-    int minor=Integer.parseInt(st.nextToken());
-
-    System.out.println("VIRTUAL OOOO "+virtual+" : "+profile);
-    this.startAgent(virtual, minor);
+    int minorVersion = Integer.parseInt(st.nextToken());
+    this.startAgent(minorVersion);
     this.registerExistingMBeans();
     bc.addServiceListener(this);
   }
@@ -110,11 +103,9 @@ public class AgentActivator implements BundleActivator, ServiceListener {
     }
   }
 
-  private void startAgent(String virtual, int minor){
-    if (virtual==null && minor >=5){
-      Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
-      //this.server= ManagementFactory.getPlatformMBeanServer();
-      this.server = MBeanServerFactory.createMBeanServer();
+  private void startAgent(int minor){
+    if ( minor >= 5 ){
+      this.server = java.lang.management.ManagementFactory.getPlatformMBeanServer();
       AgentActivator.log(LogService.LOG_DEBUG, "A jdk1.5 agent started "+this.server,null);
     }else {
       Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());

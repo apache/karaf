@@ -1,5 +1,6 @@
 #!/bin/sh
-rm -rf ~/.felix/jmxconsole
+
+#rm -rf ~/.felix/jmxconsole
 
 echo "cd into felix directory"
 cd ../../main

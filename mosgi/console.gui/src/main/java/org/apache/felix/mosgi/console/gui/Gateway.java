@@ -34,25 +34,20 @@ import java.net.MalformedURLException;
 public class Gateway extends JMXServiceURL {
 
   private static final String JMX_SERVICE = "service:jmx:";
+  private static final String DEFAULT_JMXSURL = JMX_SERVICE+"rmi:///jndi/rmi://127.0.0.1:1099/core";
 
-  private static final String DEFAULT_PROFILE  = "core";
-  private static final String DEFAULT_HOST     = "127.0.0.1";
-  private static final String DEFAULT_PROTOCOL = "rmi";
-  private static final String DEFAULT_PORT     = "1099";
-
-  private static Hashtable HT_GATEWAY = new Hashtable(); // used to manage virtuals gateways
+  private static Hashtable HT_GATEWAY = new Hashtable();
 
   private JMXConnector jmxc;
   private MBeanServerConnection mbsc;
 
-  private String nickname; // used to manage virtuals gateways
-  private String name; // name for the GUI = this.nickname+" : "+this.toString()
+  private String nickname;
   private Gateway parentGateway;
   private String toolTipText;
   private boolean isConnected;
   
-  public String getName() {
-    return this.name;
+  public String getNickname() {
+    return this.nickname;
   }
 
   public MBeanServerConnection getMbsc() {
@@ -72,11 +67,10 @@ public class Gateway extends JMXServiceURL {
   }
 
   // The constructor (private)
-  private Gateway(String nickname, String surl, Gateway vosgi) throws MalformedURLException {
+  private Gateway(String nickname, String surl, Gateway parent) throws MalformedURLException {
     super(surl);
     this.nickname = nickname;
-    this.name = nickname+" : \""+this.toString().substring(JMX_SERVICE.length())+"\"";
-    this.parentGateway = vosgi;
+    this.parentGateway = parent;
     this.isConnected = false;
     this.toolTipText = "<html><B>\""+nickname+"\" JMXServiceURL =<br>"+
       "- protocol=</B>"+this.getProtocol()+"<br><B>"+
@@ -88,6 +82,9 @@ public class Gateway extends JMXServiceURL {
 
   // Intermediate private Gateway creator
   private static Gateway newGateway(String nickname, String serviceURL, String parent_gateway) throws Exception {
+    if ( !serviceURL.startsWith(JMX_SERVICE) ) {
+      serviceURL = JMX_SERVICE+serviceURL;
+    }
     if ( serviceURL.contains("null") ) {
       throw new Exception("Invalid service URL \""+serviceURL+"\"");
     }
@@ -100,81 +97,56 @@ public class Gateway extends JMXServiceURL {
       }
     }
 
-    Gateway newGateway = new Gateway(nickname, serviceURL, vosgiGateway);
-    return newGateway;
+    return new Gateway(nickname, serviceURL, vosgiGateway);
   }
 
   // Creation of Gateways from the config properties file
   public static Gateway[] newGateways(BundleContext bc) {
+    String str_jmxsurl, nickname, str_parent;
     Vector v_gateways = new Vector();
-    String protocol, host, profile, port, nickname, parent_gateway;
-    int port_int;
 
     int i = 1;
-    profile = bc.getProperty("mosgi.jmxconsole.id."+i+".profile");
-    if ( profile == null) { profile = DEFAULT_PROFILE; }
-  
-    while ( profile != null ) {
-      host = bc.getProperty("mosgi.jmxconsole.id."+i+".host");
-      if ( host == null ) { host = DEFAULT_HOST; }
-      protocol = bc.getProperty("mosgi.jmxconsole.id."+i+".protocol");
-      if ( protocol == null ) { protocol = DEFAULT_PROTOCOL; }
-      port = bc.getProperty("mosgi.jmxconsole.id."+i+".port");
-      if ( port == null ) { port = DEFAULT_PORT; }
-      try {
-        port_int = Integer.parseInt(port);
-      } catch (Exception exep) { try { port_int = Integer.parseInt(DEFAULT_PORT); } catch (Exception e) {} }
-      String serviceURL = JMX_SERVICE+protocol+":///jndi/"+"rmi"+"://"+host+":"+port+"/"+profile;
-      parent_gateway = bc.getProperty("mosgi.jmxconsole.id."+i+".virtual");
-      Gateway g = null;
-      nickname =  bc.getProperty("mosgi.jmxconsole.id."+i+".nickname");
+    str_jmxsurl = bc.getProperty("mosgi.jmxconsole.id."+i+".jmxsurl");
+    if ( str_jmxsurl == null ) { str_jmxsurl = DEFAULT_JMXSURL; }
+
+    while ( str_jmxsurl != null) {
+      nickname = bc.getProperty("mosgi.jmxconsole.id."+i+".nickname");
       if (nickname == null ) { nickname = ""+i; };
+      str_parent = bc.getProperty("mosgi.jmxconsole.id."+i+".parent");
+      Gateway g = null;
       try {
-        g = Gateway.newGateway(nickname, serviceURL, parent_gateway);
+        g = Gateway.newGateway(nickname, str_jmxsurl, str_parent);
         if ( g != null ) {
           v_gateways.addElement(g);
         }
       } catch (Exception exep) {
-        System.out.println(""+exep);
+        System.out.println("Gateway creation error:\n "+exep.toString());
       }
-      i++;
-      profile = bc.getProperty("mosgi.jmxconsole.id."+i+".profile");
+      str_jmxsurl = bc.getProperty("mosgi.jmxconsole.id."+(++i)+".jmxsurl");
     }
+
     Gateway[] gateways=new Gateway[v_gateways.size()];
     v_gateways.toArray(gateways);
     return gateways;
   }
 
   // GUI gateway creator
-  public static Gateway newGateway() {
+  public static Gateway newGateway(Gateway ref) throws Exception {
     String nickname = JOptionPane.showInputDialog("Profil nickname", "");
-    if ( nickname == null) return null; // should check nickname is unique
-    String host = JOptionPane.showInputDialog("Host", DEFAULT_HOST);
-    if ( host == null ) return null;
-    String protocol = JOptionPane.showInputDialog("Protocol", DEFAULT_PROTOCOL);
-    if ( protocol==null ) return null;
-    String port = JOptionPane.showInputDialog("Port", DEFAULT_PORT);
-    try { Integer.parseInt(port); } catch (Exception ex) { return null; }
-    String profile = JOptionPane.showInputDialog("OSGi profil name", "");
-    if (profile==null) return null;
+    if ( nickname == null) return null;
+    String gateway_ref = ref!=null?ref+"":"";
+    String str_jmxsurl = JOptionPane.showInputDialog("JMX service URL", gateway_ref);
+    if ( str_jmxsurl == null) return null;
     Object gateway_list[] = HT_GATEWAY.keySet().toArray();
     Object gateway_list2[] = new Object[gateway_list.length+1];
     System.arraycopy(gateway_list, 0, gateway_list2, 1, gateway_list.length);
     gateway_list2[0] = "None";
     java.util.Arrays.sort(gateway_list);
-    int val = JOptionPane.showOptionDialog(new javax.swing.JFrame(), "Virtual of", "Is it a virtual gateway ?", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, gateway_list2, gateway_list2[0]);
-    String virtual = "";
-    if ( val != JOptionPane.CLOSED_OPTION ) { virtual = ""+gateway_list2[val]; }
-    if ( val == 0 ) { virtual = ""; }
-    String serviceURL = JMX_SERVICE+protocol+":///jndi/"+protocol+"://"+host+":"+port+"/"+profile;
-    Gateway g = null;
-    try { 
-      g = Gateway.newGateway(nickname, serviceURL, virtual);
-    } catch (Exception exep) {
-      System.out.println(""+exep);
-      return null;
-    }
-    return g;
+    int val = JOptionPane.showOptionDialog(new javax.swing.JFrame(), "Link to another gateway ?", "Gateway association", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, gateway_list2, gateway_list2[0]);
+    String str_parent = "";
+    if ( val != JOptionPane.CLOSED_OPTION ) { str_parent = ""+gateway_list2[val]; }
+    if ( val == 0 ) { str_parent = ""; }
+    return Gateway.newGateway(nickname, str_jmxsurl, str_parent);
   }
 
   public boolean connect(NotificationListener notificationListener) {

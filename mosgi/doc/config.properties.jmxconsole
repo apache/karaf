@@ -35,17 +35,14 @@ mosgi.jmxconsole.protocol.ws.package=fr.inria.amazones.remote.provider
 # mosgi.jmxconsole.rmiport.core=1099
 
 # NEW :
-mosgi.jmxconsole.id.1.nickname=main
-mosgi.jmxconsole.id.1.profile=core
-mosgi.jmxconsole.id.1.host=127.0.0.1
-mosgi.jmxconsole.id.1.protocol=rmi
-mosgi.jmxconsole.id.1.port=1099
-#mosgi.jmxconsole.id.1.jmxserviceurl=service:jmx:rmi:///jndi/rmi://127.0.0.1:1099/core
+# mosgi.jmxconsole.id.<number>.nickname is the gateway nickname used by the GUI (default value is the gateway <number>)
+# mosgi.jmxconsole.id.<number>.jmxsurl is the string used to create the JMXServiceURL. This string must look like this : service:jmx:<protocol>:<sap>, <protocol> ie. "rmi", <sap> ie. "///jndi/rmi://127.0.0.1:1099/core"
+# More details on the JMXServiceURL class javadoc
+mosgi.jmxconsole.id.1.jmxsurl=service:jmx:rmi:///jndi/rmi://127.0.0.1:1099/core
+mosgi.jmxconsole.id.1.nickname=core std (rmi)
 
-mosgi.jmxconsole.id.2.profile=core2
-mosgi.jmxconsole.id.2.host=127.0.0.1
-mosgi.jmxconsole.id.2.protocol=rmi
-mosgi.jmxconsole.id.2.port=1100
+mosgi.jmxconsole.id.2.jmxsurl=service:jmx:ws://127.0.0.1:1100/core2
+mosgi.jmxconsole.id.2.nickname=core 2 (web service connector)
 
 felix.startlevel.framework=1
 felix.startlevel.bundle=1

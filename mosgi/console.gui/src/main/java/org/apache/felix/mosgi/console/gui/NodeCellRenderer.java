@@ -42,7 +42,7 @@ public class NodeCellRenderer extends DefaultTreeCellRenderer {
     Object o = ((DefaultMutableTreeNode) value).getUserObject();
     if ( !o.equals(NodesTree.TOP_NAME) ) {
       Gateway g = (Gateway) o;
-      super.getTreeCellRendererComponent(tree, g.getName(), sel, expanded, leaf, row, hasFocus);
+      super.getTreeCellRendererComponent(tree, g.getNickname(), sel, expanded, leaf, row, hasFocus);
       if ( g.isConnected() ) {
         setIcon(iconConnected);
       } else {
