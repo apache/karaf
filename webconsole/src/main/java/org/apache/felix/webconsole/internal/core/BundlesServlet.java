@@ -179,7 +179,11 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
         if ( bundle != null )
         {
-            if ( "start".equals( action ) )
+            if ( action == null )
+            {
+                success = true;
+            }
+            else if ( "start".equals( action ) )
             {
                 // start bundle
                 success = true;
@@ -305,7 +309,8 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
         PrintWriter pw = response.getWriter();
 
-        String appRoot = (String) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
+        String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
+        pw.println( "<script src='" + appRoot + "/res/ui/datatable.js' language='JavaScript'></script>" );
         pw.println( "<script src='" + appRoot + "/res/ui/bundles.js' language='JavaScript'></script>" );
 
         Util.startScript( pw );
@@ -314,8 +319,12 @@ public class BundlesServlet extends BaseWebConsolePlugin
         try
         {
             jw.object();
-            jw.key( "startlevel" );
+
+            jw.key( "startLevel" );
             jw.value( getStartLevel().getInitialBundleStartLevel() );
+
+            jw.key( "numActions" );
+            jw.value( 4 );
 
             Bundle bundle = getBundle( request.getPathInfo() );
             Bundle[] bundles = ( bundle != null ) ? new Bundle[]
@@ -326,7 +335,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
             {
                 Util.sort( bundles );
 
-                jw.key( "bundles" );
+                jw.key( "data" );
 
                 jw.array();
 
@@ -338,6 +347,11 @@ public class BundlesServlet extends BaseWebConsolePlugin
                 jw.endArray();
 
             }
+            else
+            {
+                jw.key( "error" );
+                jw.value( "No Bundles installed currently" );
+            }
 
             jw.endObject();
 
@@ -348,7 +362,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
         }
 
         pw.println( ";" );
-        pw.println( "render(bundleListData.startlevel, bundleListData.bundles);" );
+        pw.println( "renderBundle( bundleListData );" );
         Util.endScript( pw );
     }
 
@@ -356,20 +370,31 @@ public class BundlesServlet extends BaseWebConsolePlugin
     private void bundleInfo( JSONWriter jw, Bundle bundle, boolean details ) throws JSONException
     {
         jw.object();
-        jw.key( "bundleId" );
+        jw.key( "id" );
         jw.value( bundle.getBundleId() );
         jw.key( "name" );
         jw.value( Util.getName( bundle ) );
         jw.key( "state" );
         jw.value( toStateString( bundle.getState() ) );
-        jw.key( "hasStart" );
-        jw.value( hasStart( bundle ) );
-        jw.key( "hasStop" );
-        jw.value( hasStop( bundle ) );
-        jw.key( "hasUpdate" );
-        jw.value( hasUpdate( bundle ) );
-        jw.key( "hasUninstall" );
-        jw.value( hasUninstall( bundle ) );
+
+        jw.key( "actions" );
+        jw.array();
+
+        if ( bundle.getBundleId() == 0 )
+        {
+            jw.value( false );
+            jw.value( false );
+            jw.value( false );
+            jw.value( false );
+        }
+        else
+        {
+            action( jw, hasStart( bundle ), "start", "Start" );
+            action( jw, hasStop( bundle ), "stop", "Stop" );
+            action( jw, hasUpdate( bundle ), "update", "Update" );
+            action( jw, hasUninstall( bundle ), "uninstall", "Uninstall" );
+        }
+        jw.endArray();
 
         if ( details )
         {
@@ -405,6 +430,19 @@ public class BundlesServlet extends BaseWebConsolePlugin
             default:
                 return "Unknown: " + bundleState;
         }
+    }
+
+
+    private void action( JSONWriter jw, boolean enabled, String op, String opLabel ) throws JSONException
+    {
+        jw.object();
+        jw.key( "enabled" );
+        jw.value( enabled );
+        jw.key( "name" );
+        jw.value( opLabel );
+        jw.key( "link" );
+        jw.value( op );
+        jw.endObject();
     }
 
 

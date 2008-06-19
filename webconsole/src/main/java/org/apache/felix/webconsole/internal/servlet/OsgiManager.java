@@ -41,7 +41,7 @@ import org.apache.felix.webconsole.internal.Logger;
 import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.compendium.ComponentConfigurationPrinter;
-import org.apache.felix.webconsole.internal.compendium.ComponentRenderAction;
+import org.apache.felix.webconsole.internal.compendium.ComponentsServlet;
 import org.apache.felix.webconsole.internal.compendium.ConfigManager;
 import org.apache.felix.webconsole.internal.core.BundlesServlet;
 import org.apache.felix.webconsole.internal.core.InstallAction;
@@ -125,7 +125,7 @@ public class OsgiManager extends GenericServlet
     private static final String DEFAULT_MANAGER_ROOT = "/system/console";
 
     private static final Class[] PLUGIN_CLASSES =
-        { ComponentConfigurationPrinter.class, ComponentRenderAction.class, ConfigManager.class, BundlesServlet.class,
+        { ComponentConfigurationPrinter.class, ComponentsServlet.class, ConfigManager.class, BundlesServlet.class,
             InstallAction.class, SetStartLevelAction.class, ConfigurationRender.class, GCAction.class,
             ShutdownAction.class, ShutdownRender.class, VMStatRender.class, BundleRepositoryRender.class,
             LicenseServlet.class };

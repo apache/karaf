@@ -107,7 +107,7 @@ public class ComponentConfigurationPrinter extends AbstractScrPlugin implements 
 
         pw.println( "  Bundle" + component.getBundle().getSymbolicName() + " (" + component.getBundle().getBundleId()
             + ")" );
-        pw.println( "  State=" + ComponentRenderAction.toStateString( component.getState() ) );
+        pw.println( "  State=" + ComponentsServlet.toStateString( component.getState() ) );
         pw.println( "  DefaultState=" + ( component.isDefaultEnabled() ? "enabled" : "disabled" ) );
         pw.println( "  Activation=" + ( component.isImmediate() ? "immediate" : "delayed" ) );
 
