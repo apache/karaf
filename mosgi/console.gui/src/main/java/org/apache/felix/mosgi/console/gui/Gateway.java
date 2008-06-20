@@ -36,7 +36,7 @@ public class Gateway extends JMXServiceURL {
   private static final String JMX_SERVICE = "service:jmx:";
   private static final String DEFAULT_JMXSURL = JMX_SERVICE+"rmi:///jndi/rmi://127.0.0.1:1099/core";
 
-  private static Hashtable HT_GATEWAY = new Hashtable();
+  protected static Hashtable HT_GATEWAY = new Hashtable();
 
   private JMXConnector jmxc;
   private MBeanServerConnection mbsc;
@@ -82,6 +82,9 @@ public class Gateway extends JMXServiceURL {
 
   // Intermediate private Gateway creator
   private static Gateway newGateway(String nickname, String serviceURL, String parent_gateway) throws Exception {
+    if ( HT_GATEWAY.containsKey(nickname) ) {
+      throw new Exception("Gateway nickname \""+nickname+"\" even exist.");
+    }
     if ( !serviceURL.startsWith(JMX_SERVICE) ) {
       serviceURL = JMX_SERVICE+serviceURL;
     }
@@ -134,6 +137,9 @@ public class Gateway extends JMXServiceURL {
   public static Gateway newGateway(Gateway ref) throws Exception {
     String nickname = JOptionPane.showInputDialog("Profil nickname", "");
     if ( nickname == null) return null;
+    if ( HT_GATEWAY.containsKey(nickname) ) {
+      throw new Exception("Gateway nickname \""+nickname+"\" even exist.");
+    }
     String gateway_ref = ref!=null?ref+"":"";
     String str_jmxsurl = JOptionPane.showInputDialog("JMX service URL", gateway_ref);
     if ( str_jmxsurl == null) return null;
@@ -142,10 +148,12 @@ public class Gateway extends JMXServiceURL {
     System.arraycopy(gateway_list, 0, gateway_list2, 1, gateway_list.length);
     gateway_list2[0] = "None";
     java.util.Arrays.sort(gateway_list);
-    int val = JOptionPane.showOptionDialog(new javax.swing.JFrame(), "Link to another gateway ?", "Gateway association", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, gateway_list2, gateway_list2[0]);
-    String str_parent = "";
-    if ( val != JOptionPane.CLOSED_OPTION ) { str_parent = ""+gateway_list2[val]; }
-    if ( val == 0 ) { str_parent = ""; }
+    Object val = JOptionPane.showInputDialog(new javax.swing.JFrame(), "Link to another gateway ?", "Gateway association", JOptionPane.QUESTION_MESSAGE, null, gateway_list2, gateway_list2[0]);
+    if ( val == null) return null;
+    if ( val.toString().equals("None") ) {
+      val = new String("");
+    }
+    String str_parent = val.toString();
     return Gateway.newGateway(nickname, str_jmxsurl, str_parent);
   }
 

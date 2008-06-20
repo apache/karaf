@@ -19,6 +19,7 @@
 package org.apache.felix.mosgi.console.gui;
 
 import org.apache.felix.mosgi.console.ifc.Plugin;
+import org.apache.felix.mosgi.console.ifc.CommonPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -98,6 +99,14 @@ public class NodePanel extends JTabbedPane implements PropertyChangeListener, Ch
       MBeanServerConnection mbsc = (MBeanServerConnection)event.getNewValue();
       String connString = (String) event.getOldValue();
       startMBeanTabBundles(connString, mbsc);
+    }else if (event.getPropertyName().equals(CommonPlugin.COMMON_PLUGIN_ADDED)) {
+      Iterator it = Gateway.HT_GATEWAY.values().iterator();
+      while (it.hasNext()) {
+        Gateway g = (Gateway) it.next();
+	if ( g.isConnected() ) {
+          a.firePropertyChangedEvent(Plugin.NEW_NODE_CONNECTION, g.toString(), g.getMbsc());
+        }
+      }
     }
   }
 

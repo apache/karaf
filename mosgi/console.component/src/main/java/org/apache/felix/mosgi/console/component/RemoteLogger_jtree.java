@@ -118,7 +118,7 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
       });
       jpopup.add(jmiRemove);
       if (selPath.getPath().length==3) {
-        JMenuItem jmiLogLvl=new JMenuItem("Set log lvl");
+        JMenuItem jmiLogLvl=new JMenuItem("Set log level");
         jmiLogLvl.addActionListener(new ActionListener(){
           public void actionPerformed(ActionEvent e){
             setLogLvl(selPath);
@@ -180,12 +180,6 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
   /* fin a supprimer */
  
   public void propertyChange(PropertyChangeEvent e){
-    // TODO : DEBUG
-    // Sometimes ???
-    //   *1)  when stay with "return" key pressed => JoptionPane miss getValue()
-    //   *2)  when commonPanel started after a new_node_connection event.
-    //        Slow or slowed (by a key pressed for exemple) computer.
-    //        => gui.NodesTree fireNewNodeConnection after each PCE_common_plugin_added for each connected nodes
     if (e.getPropertyName().equals(Plugin.NEW_NODE_CONNECTION)){
       try {
         MBeanServerConnection mbsc=(MBeanServerConnection)e.getNewValue();
@@ -296,22 +290,15 @@ public class RemoteLogger_jtree extends DefaultTreeModel implements CommonPlugin
       MBeanServerConnection mb=(MBeanServerConnection) ht_connectedGateway.get(connString);
       Integer curentVal=(Integer) mb.getAttribute(Activator.REMOTE_LOGGER_ON, "LogLvl");
 
-      JOptionPane jop = new JOptionPane("Select a log level for \""+connString+"\" :", JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, LOG_LVL, LOG_LVL[curentVal.intValue()-1]);
-      JDialog dialog = jop.createDialog(jp, "Log level");
-      dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-      dialog.show();
-      String choice = (String) jop.getValue();
-      Integer newVal=new Integer(4);
-      if (choice.equals("Error")) {newVal=new Integer(1);}
-      else if (choice.equals("Warning")) {newVal=new Integer(2);}
-      else if (choice.equals("Info")) {newVal=new Integer(3);}
-      else if (choice.equals("Debug")) {newVal=new Integer(4);}
+      int val = JOptionPane.showOptionDialog(jp, "Select a log level for \"..."+connString+"\" :", "Log level", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, LOG_LVL, LOG_LVL[curentVal.intValue()-1]);
+      if ( val == JOptionPane.CLOSED_OPTION ) { return; }
+      Integer newVal = new Integer(val+1);
 
       mb.setAttribute(Activator.REMOTE_LOGGER_ON, new Attribute("LogLvl", newVal));
       DefaultMutableTreeNode ddmmttnn=(DefaultMutableTreeNode) tp.getLastPathComponent();
       ht_logLvl.put(ddmmttnn, newVal);
     } catch (Exception ex) {
-      JOptionPane.showMessageDialog(jp,"Error with \""+connString+"\" :\n"+ex, "Error :", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(jp,"Error with \"..."+connString+"\" :\n"+ex, "Error :", JOptionPane.ERROR_MESSAGE);
       ex.printStackTrace();
     }
   }

@@ -62,7 +62,6 @@ public class RemoteLogger_jtable extends DefaultTableModel implements CommonPlug
 
   public RemoteLogger_jtable (){
     super(new String[]{"Date","Time", "Src", "Id", "Name", "State", "Lvl", "Msg"},1);
-    System.out.println("JTable Remote logger");
 
     jp=new JPanel();
     jp.setLayout(new BorderLayout());

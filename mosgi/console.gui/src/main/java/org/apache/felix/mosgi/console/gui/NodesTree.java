@@ -45,16 +45,16 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.apache.felix.mosgi.console.ifc.Plugin;
-import org.apache.felix.mosgi.console.ifc.CommonPlugin;
 import javax.management.NotificationListener;
 import javax.management.Notification;
 import javax.management.remote.JMXConnectionNotification;
 
-public class NodesTree extends JPanel implements TreeSelectionListener, NotificationListener, ActionListener, PropertyChangeListener {
+public class NodesTree extends JPanel implements TreeSelectionListener, NotificationListener, ActionListener {
 
   private static Hashtable PROTOCOL_PACKAGE_PROVIDER = new Hashtable();
   protected static final String TOP_NAME = "Servers";
-  private static int POOLING_TIME = 2500;
+  private static int POOLING_TIME = 3;
+  private static boolean needToRefreshPoolingTime = false;
   
   private Activator activator;
   private static BundleContext bc;
@@ -98,23 +98,6 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
     }
     (new Thread(this.pt)).start();
     tree.expandPath(new TreePath(((DefaultMutableTreeNode)(dtm.getRoot())).getPath())); // expand root node
-  }
-
-  //////////////////////////////////////////////////
-  //          PropertyChangeListener              //
-  //////////////////////////////////////////////////
-  public void propertyChange(PropertyChangeEvent event) {
-    if (event.getPropertyName().equals(CommonPlugin.COMMON_PLUGIN_ADDED)) {
-      Enumeration enu = top.breadthFirstEnumeration();
-      enu.nextElement(); // Skip top node
-      while ( enu.hasMoreElements() ) {
-        // Common plugin added after a gateway connection so firePCE(Plugin.NEW_NODE_CONNECTION, connString , mbsc) again :
-	Gateway g = (Gateway) ((DefaultMutableTreeNode) enu.nextElement()).getUserObject();
-	if ( g.isConnected() ) {
-          activator.firePropertyChangedEvent(Plugin.NEW_NODE_CONNECTION, g.toString(), g.getMbsc());
-        }
-      }
-    }
   }
 
   //////////////////////////////////////////////////////
@@ -195,12 +178,15 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
       }
     } else if ( object == jb_removeNode ) { // Remove a node from tree
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
-      if ( node != top) {
+      if ( node == null || !node.isLeaf() ) {
+        JOptionPane.showMessageDialog(null, "Please select a gateway (without child gateway) to remove.", "Warning", JOptionPane.WARNING_MESSAGE);
+      } else if ( node != top) {
         Gateway g = (Gateway) node.getUserObject();
         if ( !node.equals(top) ){
-	  if( JOptionPane.showConfirmDialog(null, "Sure we remove this gateway \""+g.getNickname()+"\" ?\n "+g.toString()) == JOptionPane.YES_OPTION ) {
+	  if( JOptionPane.showConfirmDialog(null, "Sure we remove gateway \""+g.getNickname()+"\" ?\n "+g.toString(), "Confirmation", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION ) {
             g.disconnect(this);
 	    dtm.removeNodeFromParent(node);
+	    Gateway.HT_GATEWAY.remove(g.getNickname());
 	    System.out.println("Remove node : "+g);
           }
 	}
@@ -208,22 +194,21 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
     } else if ( object == jtf_pool) {
       try {
         POOLING_TIME = Integer.parseInt(jtf_pool.getText());
-	if ( POOLING_TIME > 0 & POOLING_TIME < 500 ) {
-          POOLING_TIME = 500;
-	} else if ( POOLING_TIME < 0 ) {
+	if ( POOLING_TIME < 0 ) {
 	  POOLING_TIME = 0;
-	} else if ( POOLING_TIME > 9999 ) {
-          POOLING_TIME = 9999;
+	} else if ( POOLING_TIME > 999 ) {
+          POOLING_TIME = 999;
 	}
       } catch (Exception exep) {
         //
       }
-      if ( POOLING_TIME >= 500 ) {
+      if ( POOLING_TIME > 0 ) {
         jb_refresh.setEnabled(false);
       } else {
         jb_refresh.setEnabled(true);
       }
       jtf_pool.setText(""+POOLING_TIME);
+      needToRefreshPoolingTime = true;
     } else if ( object == jb_refresh) {
       tryToConnectAllNodes();
     }
@@ -232,7 +217,7 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
   ///////////////////////////////////////////////////
   //           Private part                        //
   ///////////////////////////////////////////////////
-  private void tryToConnectAllNodes(){
+  private void tryToConnectAllNodes() {
     isAllNodesConnected = true;
     Enumeration enu = top.breadthFirstEnumeration();
     enu.nextElement(); // Skip top node
@@ -264,11 +249,15 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
         if ( !isAllNodesConnected && POOLING_TIME > 0 ) {
 	  tryToConnectAllNodes();
         } 
-	try {
-          Thread.sleep(POOLING_TIME);
-        } catch(InterruptedException e) {
-          //e.printStackTrace();
-        }
+	int loop = POOLING_TIME;
+	while ( loop-- > 0 & !needToRefreshPoolingTime ) {
+	  try {
+            Thread.sleep(1000);
+          } catch(InterruptedException ie) {
+            //ie.printStackTrace();
+          }
+	}
+	needToRefreshPoolingTime = false;
       }
     }
   }
@@ -320,14 +309,14 @@ public class NodesTree extends JPanel implements TreeSelectionListener, Notifica
     buttonPanel.add(Box.createHorizontalGlue());
     jtf_pool = new JTextField(""+POOLING_TIME);
     jtf_pool.addActionListener(this);
-    jtf_pool.setToolTipText("<html>Pooling time in millisecond<br>Value range is 500 to 9999<br>A value of 0 means no refresh.</html>");
+    jtf_pool.setToolTipText("<html>Pooling interval in seconds<br>Value range is 1 to 999<br>A value of 0 means no refresh.</html>");
     jtf_pool.setPreferredSize(new Dimension(40,21));
     jtf_pool.setMaximumSize(new Dimension(40,21));
     buttonPanel.add(jtf_pool);
     buttonPanel.add(Box.createRigidArea(new Dimension(2,0)));
     jb_refresh = new JButton(new ImageIcon(Toolkit.getDefaultToolkit().getImage(bc.getBundle().getResource("images/"+"REFRESH.gif"))));
     jb_refresh.setOpaque(true);
-    jb_refresh.setToolTipText("<html>Try to connect gateways now.<br>Enable only if there is no pooling time.</html>");
+    jb_refresh.setToolTipText("<html>Try to connect to gateways now.<br>Enabled only if there is no pooling time.</html>");
     jb_refresh.addActionListener(this);
     jb_refresh.setPreferredSize(new Dimension(18, 18));
     jb_refresh.setEnabled(false);
