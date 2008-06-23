@@ -23,7 +23,7 @@
     <fileSets>
         <!-- Copy license and other files from root -->
         <fileSet>
-            <directory>..</directory>
+            <directory>${basedir}/..</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>BUILDING.txt</include>
@@ -35,7 +35,7 @@
 
         <!-- Binary Files -->
         <fileSet>
-            <directory>..</directory>
+            <directory>${basedir}/..</directory>
             <outputDirectory>src</outputDirectory>
             <includes>
                 <include>**/*.jpeg</include>
@@ -62,7 +62,7 @@
 
         <!-- Text Files -->
         <fileSet>
-            <directory>..</directory>
+            <directory>${basedir}/..</directory>
             <outputDirectory>src</outputDirectory>
             <includes>
                 <include>**/*</include>
@@ -109,14 +109,14 @@
             <source>${basedir}/target/maven-shared-archive-resources/META-INF/LICENSE</source>
             <outputDirectory>/</outputDirectory>
             <destName>LICENSE.txt</destName>
-            <fileMode>420</fileMode> <!-- See http://jira.codehaus.org/browse/MASSEMBLY-173 -->
+            <fileMode>0644</fileMode>
             <lineEnding>unix</lineEnding>
         </file>
         <file>
             <source>${basedir}/target/maven-shared-archive-resources/META-INF/NOTICE</source>
             <outputDirectory>/</outputDirectory>
             <destName>NOTICE.txt</destName>
-            <fileMode>420</fileMode> <!-- See http://jira.codehaus.org/browse/MASSEMBLY-173 -->
+            <fileMode>0644</fileMode>
             <lineEnding>unix</lineEnding>
         </file>
     </files>

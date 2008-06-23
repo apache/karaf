@@ -76,14 +76,14 @@
             <source>${basedir}/target/maven-shared-archive-resources/META-INF/LICENSE</source>
             <outputDirectory>/</outputDirectory>
             <destName>LICENSE.txt</destName>
-            <fileMode>420</fileMode> <!-- See http://jira.codehaus.org/browse/MASSEMBLY-173 -->
+            <fileMode>0644</fileMode>
             <lineEnding>unix</lineEnding>
         </file>
         <file>
             <source>${basedir}/target/maven-shared-archive-resources/META-INF/NOTICE</source>
             <outputDirectory>/</outputDirectory>
             <destName>NOTICE.txt</destName>
-            <fileMode>420</fileMode> <!-- See http://jira.codehaus.org/browse/MASSEMBLY-173 -->
+            <fileMode>0644</fileMode>
             <lineEnding>unix</lineEnding>
         </file>
     </files>
@@ -93,6 +93,7 @@
         <!-- Mandatory bundles for everything -->
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
+            <outputFileNameMapping>${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <unpack>false</unpack>
             <scope>runtime</scope>
             <includes>
@@ -125,14 +126,13 @@
                 <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.config</include>
                 <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.keystore</include>
 
-		        <!-- GShell -->
-                <include>org.apache.geronimo.specs:geronimo-stax-api_1.0_spec</include>
+                <!-- GShell -->
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.mina-${mina.version}</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.core</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.osgi</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.log</include>
 
-		        <!-- OBR + GShell command -->
+                <!-- OBR + GShell command -->
                 <include>org.apache.felix:org.apache.felix.bundlerepository</include>
                 <include>org.apache.felix:org.apache.felix.prefs</include>
                 <include>org.ops4j.pax.url:pax-url-mvn</include>
