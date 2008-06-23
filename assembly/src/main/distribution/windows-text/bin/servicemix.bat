@@ -118,7 +118,7 @@ if "%SERVICEMIX_PROFILER%" == "" goto :EXECUTE
 :EXECUTE
     SET OPTS=-Dservicemix.startLocalConsole=true -Dservicemix.startRemoteShell=true    
     rem Execute the Java Virtual Machine
-    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath %CLASSPATH% -Dservicemix.home="%SERVICEMIX_HOME%" -Dservicemix.base="%SERVICEMIX_BASE%" org.apache.servicemix.kernel.main.Main %*
+    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dservicemix.home="%SERVICEMIX_HOME%" -Dservicemix.base="%SERVICEMIX_BASE%" org.apache.servicemix.kernel.main.Main %*
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
