@@ -40,31 +40,15 @@
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.felix</groupId>
-                    <artifactId>org.osgi.core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
                     <artifactId>org.osgi.compendium</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--
         <dependency>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.apache.felix.bundlerepository</artifactId>
-          <version>${felix.version}</version>
-          <exclusions>
-            <exclusion>
-              <groupId>org.apache.felix</groupId>
-              <artifactId>org.osgi.core</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>net.sf.kxml</groupId>
-              <artifactId>kxml2</artifactId>
-            </exclusion>
-          </exclusions>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>${felix.osgi.version}</version>
         </dependency>
-        -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -102,6 +86,45 @@
                     </instructions>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.apache.felix:org.apache.felix.framework</include>
+                                    <include>org.apache.felix:org.osgi.core</include>
+                                    <include>${project.groupId}:${project.artifactId}</include>
+                                </includes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>org.apache.felix:org.apache.felix.framework</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/felix/**</exclude>
+                                        <exclude>org/osgi/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.felix:org.osgi.core</artifact>
+                                    <excludes>
+                                        <exclude>org/osgi/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <createSourcesJar>${createSourcesJar}</createSourcesJar>
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -110,4 +133,79 @@
             </resource>
         </resources>
     </build>
+
+    <profiles>
+        <profile>
+            <id>deploy</id>
+            <properties>
+                <createSourcesJar>true</createSourcesJar>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack-sources</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.apache.felix</groupId>
+                                            <artifactId>org.osgi.core</artifactId>
+			                                <version>${felix.osgi.version}</version>
+                                            <classifier>sources</classifier>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.apache.felix</groupId>
+                                            <artifactId>org.apache.felix.framework</artifactId>
+                                            <classifier>sources</classifier>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <outputDirectory>${project.build.directory}/sources</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>2.0.4</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>package</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <minmemory>128m</minmemory>
+                            <maxmemory>512m</maxmemory>
+                            <sourcepath>${project.build.directory}/sources</sourcepath>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
