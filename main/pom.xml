@@ -84,6 +84,7 @@
                         <Import-Package>!*</Import-Package>
                         <Include-Resource>src/main/resources/</Include-Resource>
                     </instructions>
+                    <unpackBundle>true</unpackBundle>
                 </configuration>
             </plugin>
             <plugin>

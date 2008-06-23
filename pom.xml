@@ -70,7 +70,7 @@
       <felix.main.version>1.0.4</felix.main.version>
       <felix.plugin.version>1.4.0</felix.plugin.version>
       <felix.framework.version>1.0.4</felix.framework.version>
-      <felix.osgi.version>1.0.0</felix.osgi.version>
+      <felix.osgi.version>1.0.1</felix.osgi.version>
       <felix.compendium.version>1.0.0</felix.compendium.version>
       <felix.bundlerepository.version>1.0.2</felix.bundlerepository.version>
       <felix.prefs.version>1.0.2</felix.prefs.version>
@@ -260,6 +260,11 @@
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-surefire-plugin</artifactId>
                   <version>2.3.1</version>
+              </plugin>
+              <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-shade-plugin</artifactId>
+                  <version>1.1</version>
               </plugin>
           </plugins>
       </pluginManagement>
