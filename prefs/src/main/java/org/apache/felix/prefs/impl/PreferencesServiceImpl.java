@@ -90,7 +90,7 @@ public class PreferencesServiceImpl implements PreferencesService {
     public synchronized Preferences getUserPreferences(String name) {
         PreferencesImpl result = (PreferencesImpl) this.trees.get(name);
         // if the tree does not exist yet, create it
-        if (result == null) {
+        if (result == null || !result.isValid()) {
             result = new PreferencesImpl(new PreferencesDescription(this.bundleId, name), this.storeManager);
             this.trees.put(name, result);
         }

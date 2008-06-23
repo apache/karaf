@@ -161,6 +161,10 @@ public class PreferencesImpl implements Preferences {
         }
     }
 
+    public synchronized boolean isValid() {
+        return this.valid;
+    }
+
     /**
      * @see org.osgi.service.prefs.Preferences#put(java.lang.String, java.lang.String)
      */
