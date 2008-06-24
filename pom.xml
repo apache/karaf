@@ -34,7 +34,6 @@
   <inceptionYear>2007</inceptionYear>
 
   <modules>
-    <module>bundles</module>
     <module>main</module>
     <module>filemonitor</module>
     <module>testing</module>
@@ -48,8 +47,8 @@
       <connection>scm:svn:http://svn.apache.org/repos/asf/servicemix/smx4/kernel/trunk</connection>
       <developerConnection>scm:svn:https://svn.apache.org/repos/asf/servicemix/smx4/kernel/trunk</developerConnection>
       <url>http://svn.apache.org/viewvc/servicemix/smx4/kernel/trunk/</url>
-
   </scm>
+
   <issueManagement>
       <system>jira</system>
       <url>http://issues.apache.org/activemq/browse/SMX4KNL</url>
@@ -60,11 +59,11 @@
   </prerequisites>
 
   <properties>
-      <ant.version>1.7.0</ant.version>
-      <aopalliance.version>1.0</aopalliance.version>
-      <asm.version>2.2.3</asm.version>
-      <cglib.version>2.1_3</cglib.version>
-      <commons.io.version>1.3.2</commons.io.version>
+      <ant.version>1.7.0_1-SNAPSHOT</ant.version>
+      <aopalliance.version>1.0_1-SNAPSHOT</aopalliance.version>
+      <asm.version>2.2.3_1-SNAPSHOT</asm.version>
+      <cglib.version>2.1_3_1-SNAPSHOT</cglib.version>
+      <commons.io.version>1.3.2_1-SNAPSHOT</commons.io.version>
       <commons.logging.version>1.1.1</commons.logging.version>
       <felix.configadmin.version>1.0.0</felix.configadmin.version>
       <felix.main.version>1.0.4</felix.main.version>
@@ -76,10 +75,10 @@
       <felix.prefs.version>1.0.2</felix.prefs.version>
       <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
       <gshell.version>1.0-alpha-2-r654638</gshell.version>
-      <junit.version>4.4</junit.version>
+      <junit.version>4.4_1-SNAPSHOT</junit.version>
       <jline.version>0.9.94</jline.version>
       <log4j.version>1.2.14</log4j.version>
-      <mina.version>1.1.6</mina.version>
+      <mina.version>1.1.6_1-SNAPSHOT</mina.version>
       <pax.logging.version>1.1.1</pax.logging.version>
       <pax.url.version>0.3.0</pax.url.version>
       <servicemix.legal.version>1.0</servicemix.legal.version>
@@ -174,18 +173,8 @@
           <version>${spring.version}</version>
       </dependency>
       <dependency>
-          <groupId>org.apache.mina</groupId>
-          <artifactId>mina-core</artifactId>
-          <version>${mina.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.mina</groupId>
-          <artifactId>mina-filter-ssl</artifactId>
-          <version>${mina.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
+          <groupId>org.apache.servicemix.bundles</groupId>
+          <artifactId>org.apache.servicemix.bundles.junit</artifactId>
           <version>${junit.version}</version>
       </dependency>
       <dependency>

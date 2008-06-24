@@ -106,22 +106,18 @@
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.aopalliance-1.0</artifactId>
-          <version>${pom.version}</version>
+          <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+          <version>${aopalliance.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.asm-2.2.3</artifactId>
-          <version>${pom.version}</version>
+          <artifactId>org.apache.servicemix.bundles.asm</artifactId>
+          <version>${asm.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.junit-4.4</artifactId>
-          <version>${pom.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
+          <artifactId>org.apache.servicemix.bundles.junit</artifactId>
+          <version>${junit.version}</version>
       </dependency>
   </dependencies>
 

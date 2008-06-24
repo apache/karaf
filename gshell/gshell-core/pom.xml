@@ -73,8 +73,8 @@
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.cglib-${cglib.version}</artifactId>
-            <version>${pom.version}</version>
+            <artifactId>org.apache.servicemix.bundles.cglib</artifactId>
+            <version>${cglib.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.osgi</groupId>
@@ -120,26 +120,61 @@
             <groupId>org.apache.geronimo.gshell</groupId>
             <artifactId>gshell-whisper</artifactId>
             <version>${gshell.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.gshell</groupId>
-            <artifactId>gshell-whisper</artifactId>
-            <version>${gshell.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.mina</groupId>
+					<artifactId>mina-filter-ssl</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.mina</groupId>
+					<artifactId>mina-core</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.remote</groupId>
             <artifactId>gshell-remote-client</artifactId>
             <version>${gshell.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.mina</groupId>
+					<artifactId>mina-filter-ssl</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.mina</groupId>
+					<artifactId>mina-core</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.remote</groupId>
             <artifactId>gshell-remote-common</artifactId>
             <version>${gshell.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.mina</groupId>
+					<artifactId>mina-filter-ssl</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.mina</groupId>
+					<artifactId>mina-core</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.remote</groupId>
             <artifactId>gshell-remote-server</artifactId>
             <version>${gshell.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.mina</groupId>
+					<artifactId>mina-filter-ssl</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.mina</groupId>
+					<artifactId>mina-core</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <dependency>
             <groupId>commons-jexl</groupId>
@@ -187,6 +222,11 @@
             <artifactId>slf4j-jdk14</artifactId>
             <version>1.4.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.mina</artifactId>
+            <version>${mina.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -225,7 +265,67 @@
                         <Private-Package>${gshell.osgi.private}</Private-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>
+                    <unpackBundle>true</unpackBundle>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.apache.geronimo.gshell:gshell-cli</include>
+                                    <include>org.apache.geronimo.gshell:gshell-command-api</include>
+                                    <include>org.apache.geronimo.gshell:gshell-core</include>
+                                    <include>jline:jline</include>
+                                    <include>commons-jexl:commons-jexl</include>
+                                    <include>${project.groupId}:${project.artifactId}</include>
+                                </includes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell:gshell-cli</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell:gshell-command-api</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell:gshell-core</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>jline:jline</artifact>
+                                    <excludes>
+                                        <exclude>jline/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>commons-jexl:commons-jexl</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/commons/jexl/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <createSourcesJar>${createSourcesJar}</createSourcesJar>
+                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

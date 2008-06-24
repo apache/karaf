@@ -50,8 +50,8 @@
             <version>${felix.osgi.version}</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>

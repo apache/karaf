@@ -43,8 +43,8 @@
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.ant-1.7.0</artifactId>
-      <version>${pom.version}</version>
+      <artifactId>org.apache.servicemix.bundles.ant</artifactId>
+      <version>${ant.version}</version>
     </dependency>
     <dependency>
        <groupId>commons-logging</groupId>
@@ -58,30 +58,25 @@
 
     <!-- testing -->
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.commons-io</artifactId>
       <version>${commons.io.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.junit</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.apache.ant</groupId>
-      <artifactId>ant</artifactId>
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.ant</artifactId>
       <version>${ant.version}</version>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <groupId>org.apache.ant</groupId>
-      <artifactId>ant-launcher</artifactId>
-      <version>${ant.version}</version>
-      <optional>true</optional>
-    </dependency>
+
   </dependencies>
 
   <build>
