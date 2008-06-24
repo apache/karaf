@@ -42,7 +42,7 @@ public class Felix extends FelixBundle
     ExtensionManager m_extensionManager;
 
     // Logging related member variables.
-    private Logger m_logger = null; // TODO: KARL - Why package private?
+    private Logger m_logger = null;
     // Immutable config properties.
     private Map m_configMap = null;
     // Mutable configuration properties passed into constructor.
@@ -1822,7 +1822,7 @@ ex.printStackTrace();
 
                     // If this is an update from a normal to an extension bundle
                     // then attach the extension or else if this already is
-                    // an extension bundle then dont allow it to be resolved
+                    // an extension bundle then don't allow it to be resolved
                     // again as per spec.
                     if (!bundle.getInfo().isExtension() &&
                         m_extensionManager.isExtensionBundle(bundle.getInfo().getCurrentHeader()))
@@ -1874,8 +1874,7 @@ ex.printStackTrace();
 
                 fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
 
-                // Mark previous the bundle's old module for removal since
-                // it can no longer be used to resolve other modules per the spec.
+                // Mark previous the bundle's old module for removal.
                 ((ModuleImpl) info.getModules()[info.getModules().length - 2])
                     .setRemovalPending(true);
 
