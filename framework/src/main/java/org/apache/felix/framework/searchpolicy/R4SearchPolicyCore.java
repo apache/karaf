@@ -701,14 +701,14 @@ public class R4SearchPolicyCore implements ModuleListener
                             if (candidate != null)
                             {
                                 IWire[] wires = importer.getWires();
-                                R4Wire[] newWires = null;
+                                IWire[] newWires = null;
                                 if (wires == null)
                                 {
-                                    newWires = new R4Wire[1];
+                                    newWires = new IWire[1];
                                 }
                                 else
                                 {
-                                    newWires = new R4Wire[wires.length + 1];
+                                    newWires = new IWire[wires.length + 1];
                                     System.arraycopy(wires, 0, newWires, 0, wires.length);
                                 }
 
