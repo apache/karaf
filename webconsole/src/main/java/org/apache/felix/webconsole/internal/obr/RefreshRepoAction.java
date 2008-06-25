@@ -17,10 +17,17 @@
 package org.apache.felix.webconsole.internal.obr;
 
 
+import java.net.URL;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.felix.webconsole.Action;
+import org.osgi.service.obr.Repository;
+import org.osgi.service.obr.RepositoryAdmin;
 
 
-public abstract class RefreshRepoAction extends AbstractObrPlugin implements Action
+public class RefreshRepoAction extends AbstractObrPlugin implements Action
 {
 
     public static final String NAME = "refreshOBR";
@@ -38,57 +45,86 @@ public abstract class RefreshRepoAction extends AbstractObrPlugin implements Act
     {
         return NAME;
     }
-    /*
-        public boolean performAction(HttpServletRequest request,
-                HttpServletResponse response) {
 
-            BundleRepositoryAdmin repoAdmin = getBundleRepositoryAdmin();
-            if (repoAdmin != null) {
-                String repositoryURL = request.getParameter("repository");
-                Iterator<Repository> repos = repoAdmin.getRepositories();
-                Repository repo = this.getRepository(repos, repositoryURL);
 
-                URL repoURL = null;
-                if (repo != null) {
-                    repoURL = repo.getURL();
-                } else {
-                    try {
-                        repoURL = new URL(repositoryURL);
-                    } catch (Throwable t) {
-                        // don't care, just ignore
+    public boolean performAction( HttpServletRequest request, HttpServletResponse response )
+    {
+
+        RepositoryAdmin repoAdmin = getRepositoryAdmin();
+        if ( repoAdmin != null )
+        {
+            String repositoryURL = request.getParameter( "repository" );
+            Repository[] repos = repoAdmin.listRepositories();
+            Repository repo = this.getRepository( repos, repositoryURL );
+
+            URL repoURL = null;
+            if ( repo != null )
+            {
+                repoURL = repo.getURL();
+            }
+            else
+            {
+                try
+                {
+                    repoURL = new URL( repositoryURL );
+                }
+                catch ( Throwable t )
+                {
+                    // don't care, just ignore
+                }
+            }
+
+            // log.log(LogService.LOG_DEBUG, "Refreshing " + repo.getURL());
+            if ( repoURL != null )
+            {
+                if ( request.getParameter( "remove" ) != null )
+                {
+                    try
+                    {
+                        repoAdmin.removeRepository( repoURL );
+                    }
+                    catch ( Exception e )
+                    {
+                        // TODO: log.log(LogService.LOG_ERROR, "Cannot refresh
+                        // Repository " + repo.getURL());
                     }
                 }
-
-                // log.log(LogService.LOG_DEBUG, "Refreshing " + repo.getURL());
-                if (repoURL != null) {
-                    try {
-                        repoAdmin.addRepository(repoURL);
-                    } catch (Exception e) {
+                else
+                {
+                    try
+                    {
+                        repoAdmin.addRepository( repoURL );
+                    }
+                    catch ( Exception e )
+                    {
                         // TODO: log.log(LogService.LOG_ERROR, "Cannot refresh
                         // Repository " + repo.getURL());
                     }
                 }
             }
-
-            return true;
         }
 
-        // ---------- internal -----------------------------------------------------
+        return true;
+    }
 
-        private Repository getRepository(Iterator<Repository> repos,
-                String repositoryUrl) {
-            if (repositoryUrl == null || repositoryUrl.length() == 0) {
-                return null;
-            }
 
-            while (repos.hasNext()) {
-                Repository repo = repos.next();
-                if (repositoryUrl.equals(repo.getURL().toString())) {
-                    return repo;
-                }
-            }
+    // ---------- internal -----------------------------------------------------
 
+    private Repository getRepository( Repository[] repos, String repositoryUrl )
+    {
+        if ( repositoryUrl == null || repositoryUrl.length() == 0 )
+        {
             return null;
         }
-    */
+
+        for ( int i = 0; i < repos.length; i++ )
+        {
+            if ( repositoryUrl.equals( repos[i].getURL().toString() ) )
+            {
+                return repos[i];
+            }
+        }
+
+        return null;
+    }
 }

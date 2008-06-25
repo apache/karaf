@@ -137,6 +137,7 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
                 pw.println( "<input type='hidden' name='" + RefreshRepoAction.PARAM_REPO + "' value='" + repo.getURL()
                     + "'>" );
                 pw.println( "<input class='submit' type='submit' value='Refresh'>" );
+                pw.println( "<input class='submit' type='submit' name='remove' value='Remove'>" );
                 pw.println( "</form>" );
                 pw.println( "</td>" );
                 pw.println( "</tr>" );
@@ -164,6 +165,20 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
                 pw.println( "</tr>" );
             }
         }
+
+        // entry of a new repository
+        pw.println( "<form>" );
+        pw.println( "<tr class='content'>" );
+        pw.println( "<td class='content'>&nbsp;</td>" );
+        pw.println( "<td class='content' colspan='2'>" );
+        pw.println( "  <input class='input' type='text' name='" + RefreshRepoAction.PARAM_REPO + "' value='' size='80'>" );
+        pw.println( "</td>" );
+        pw.println( "<td class='content'>" );
+        pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + RefreshRepoAction.NAME + "'>" );
+        pw.println( "<input class='submit' type='submit' value='Add'>" );
+        pw.println( "</td>" );
+        pw.println( "</tr>" );
+        pw.println( "</form>" );
 
         this.footer( pw );
 

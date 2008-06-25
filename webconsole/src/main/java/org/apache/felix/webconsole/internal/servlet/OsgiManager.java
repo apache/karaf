@@ -49,6 +49,7 @@ import org.apache.felix.webconsole.internal.core.SetStartLevelAction;
 import org.apache.felix.webconsole.internal.misc.ConfigurationRender;
 import org.apache.felix.webconsole.internal.misc.LicenseServlet;
 import org.apache.felix.webconsole.internal.obr.BundleRepositoryRender;
+import org.apache.felix.webconsole.internal.obr.RefreshRepoAction;
 import org.apache.felix.webconsole.internal.system.GCAction;
 import org.apache.felix.webconsole.internal.system.ShutdownAction;
 import org.apache.felix.webconsole.internal.system.ShutdownRender;
@@ -128,7 +129,7 @@ public class OsgiManager extends GenericServlet
         { ComponentConfigurationPrinter.class, ComponentsServlet.class, ConfigManager.class, BundlesServlet.class,
             InstallAction.class, SetStartLevelAction.class, ConfigurationRender.class, GCAction.class,
             ShutdownAction.class, ShutdownRender.class, VMStatRender.class, BundleRepositoryRender.class,
-            LicenseServlet.class };
+            LicenseServlet.class, RefreshRepoAction.class };
 
     private BundleContext bundleContext;
 
