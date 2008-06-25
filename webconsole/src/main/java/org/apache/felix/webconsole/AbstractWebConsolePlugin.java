@@ -51,6 +51,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         + "<link rel=\"icon\" href=\"{15}/res/imgs/favicon.ico\">"
         + "<title>{0} - {12}</title>"
         + "<script src=\"{15}/res/ui/admin.js\" language=\"JavaScript\"></script>"
+        + "<script src=\"{15}/res/ui/ui.js\" language=\"JavaScript\"></script>"
         + "<script language=\"JavaScript\">"
         + "ABOUT_VERSION=''{1}'';"
         + "ABOUT_JVERSION=''{2}'';"
@@ -309,5 +310,4 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         // no valid string parameter, fail
         return null;
     }
-
 }

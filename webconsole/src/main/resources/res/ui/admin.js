@@ -125,14 +125,22 @@ function sendRequest(/* String */ method, /* url */ url, /* function */ callback
   		url = document.location;
   	} else if (url.charAt(0) == '?') {
   		url = document.location + url;
-  	}
+    }
   	
+    priv_callback = callback;
+
     xmlhttp.open(method, url);
+    
+    // set If-Modified-Since way back in the past to prevent
+    // using any content from the cache
+    xmlhttp.setRequestHeader("If-Modified-Since", new Date(0));
+    
     xmlhttp.onreadystatechange = handleResult;
-    xmlhttp.priv_callback = callback;
     xmlhttp.send(null);
   	
 }
+
+var priv_callback = null;
 
 function handleResult() {
     var xmlhttp = getXmlHttp();
@@ -145,8 +153,18 @@ function handleResult() {
         return;
     }
 
-	if (xmlhttp.priv_callback) {
-	    var obj = eval('(' + result + ')');
-	    xmlhttp.priv_callback(obj);
+    var theCallBack = priv_callback;
+    priv_callback = null;
+    
+	if (theCallBack) {
+	    try
+        {
+            var obj = eval('(' + result + ')');
+	       theCallBack(obj);
+        }
+        catch (e)
+        {
+            // error evaluating response, don't care ...
+        }
 	}
 }

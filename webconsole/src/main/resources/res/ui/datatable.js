@@ -84,70 +84,115 @@ function footer( /* int */ columns )
 
 function entry( /* Object */ dataEntry )
 {
-    document.write( "<tr id='entry" + dataEntry.id + "'>" );
-    document.write( entryInternal( dataEntry ) );
-    document.write( "</tr>" );
+    var trElement = tr( null, { id: "entry" + dataEntry.id } );
+    entryInternal( trElement,  dataEntry );
+    document.write( serialize( trElement ) );
 
     // dataEntry detailed properties
-    document.write( "<tr id='entry" + dataEntry.id + "_details'>" );
+    trElement = tr( null, { id: "entry" + dataEntry.id + "_details" } );
     if (dataEntry.props)
     {
-        document.write( getDataEntryDetails( dataEntry.props ) );
+        getDataEntryDetails( trElement, dataEntry.props );
     }
-    document.write( "</tr>" );
+    document.write( serialize( trElement ) );
 }
 
 
-/* String */ function entryInternal( /* Object */ dataEntry )
+function entryInternal( /* Element */ parent, /* Object */ dataEntry )
 {
+
     var id = dataEntry.id;
     var name = dataEntry.name;
     var state = dataEntry.state;
     var icon = (dataEntry.props) ? "down" : "right";
 
-    var html = "<td class='content right'>" + id + "</td>";
-    html += "<td class='content'>";
-    html += "<img src='" + appRoot + "/res/imgs/" + icon + ".gif' onClick='showDataEntryDetails(" + id + ")' id='entry" + id + "_inline' />";
-    html += "<a href='" + pluginRoot + "/" + id + "'>" + name + "</a></td>";
+    parent.appendChild( addText( td( "content right" ), id ) );
+    
+    var tdEl = td( "content" );
+    tdEl.appendChild( createElement( "img", null, {
+            src: appRoot + "/res/imgs/" + icon + ".gif",
+            onClick: "showDataEntryDetails(" + id + ")",
+            id: "entry" + id + "_inline"
+        } ) );
+    tdEl.appendChild( addText( createElement( "a", null, {
+            href: pluginRoot + "/" + id
+        } ), name ) );
+    parent.appendChild( tdEl );
 
-    html += "<td class='content center'>" + state + "</td>";
+    parent.appendChild( addText( td( "content center" ), state ) );
 
     for ( var aidx in dataEntry.actions )
     {
         var action = dataEntry.actions[aidx];
-        html += actionButton( action.enabled, id, action.link, action.name );
+        parent.appendChild( actionButton( action.enabled, id, action.link, action.name ) );
     }
-    
-    return html;
 }
 
 
-/* String */ function actionButton( /* boolean */ enabled, /* long */ id, /* String */ op, /* String */ opLabel )
+/* Element */ function actionButton( /* boolean */ enabled, /* long */ id, /* String */ op, /* String */ opLabel )
 {
-    var theButton = "<td class='content' align='right'>";
+    var buttonTd = td( "content", { align: "right" } );
     if ( op )
     {
-        theButton += "<input class='submit' type='button' value='" + opLabel + "'" + ( enabled ? "" : "disabled" ) + " onClick='changeDataEntryState(" + id + ", \"" + op + "\");' />";
+        var input = createElement( "input", "submit", {
+                type: 'button',
+                value: opLabel,
+                onClick: 'changeDataEntryState(' + id + ', "' + op + '");'
+            });
+        if (!enabled)
+        {
+            input.setAttribute( "disabled", true );
+        }
+        buttonTd.appendChild( input );
     }
     else
     {
-        theButton += "&nbsp;";
+        addText( buttonTd, "\u00a0" );
     }
-    theButton += "</td>";
-    return theButton;
+    
+    return buttonTd;
 }
 
 
-/* String */ function getDataEntryDetails( /* Array of Object */ details )
+function getDataEntryDetails( /* Element */ parent, /* Array of Object */ details )
 {
-    var innerHtml = '<td class=\"content\">&nbsp;</td><td class=\"content\" colspan=\"4\"><table broder=\"0\">';
+    parent.appendChild( addText( td( "content"), "\u00a0" ) );
+    
+    var tdEl = td( "content", { colspan: 4 } );
+    parent.appendChild( tdEl );
+    
+    var tableEl = createElement( "table", null, { border: 0 } );
+    tdEl.appendChild( tableEl );
+    
+    var tbody = createElement( "tbody" );
+    tableEl.appendChild( tbody );
     for (var idx in details)
     {
         var prop = details[idx];
-        innerHtml += '<tr><td valign=\"top\" noWrap>' + prop.key + '</td><td valign=\"top\">' + prop.value + '</td></tr>';
+        
+        
+        var trEl = tr();
+        trEl.appendChild( addText( td( "aligntop", { noWrap: true } ), prop.key ) );
+
+        var proptd = td( "aligntop" );
+        trEl.appendChild( proptd );
+        
+        if (prop.value )
+        {
+            var values = new String( prop.value ).split( "<br />" );
+            for (var i=0; i < values.length; i++)
+            {
+                if (i > 0) { proptd.appendChild( createElement( "br" ) ); }
+                addText( proptd, values[i] );
+            }
+        }
+        else
+        {
+            addText( proptd, "\u00a0" );
+        }
+
+        tbody.appendChild( trEl );
     }
-    innerHtml += '</table></td>';
-    return innerHtml;
  }
 
  
@@ -163,7 +208,7 @@ function showDataEntryDetails( id )
     {
         if (span.innerHTML)
         {
-            span.innerHTML = '';
+            clearChildren( span );
             newLinkValue( id, appRoot + "/res/imgs/right.gif" );
         }
         else
@@ -189,12 +234,12 @@ function newLinkValue( /* long */ id, /* String */ newLinkValue )
 function displayDataEntryDetails( obj )
 {
     var span = document.getElementById('entry' + obj.id + '_details');
-    if (!span)
+    if (span)
     {
-        return;
+        clearChildren( span );
+        getDataEntryDetails( span, obj.props );
     }
     
-    span.innerHTML = getDataEntryDetails( obj.props );
 }
 
 
@@ -220,9 +265,10 @@ function dataEntryStateChanged(obj)
             if (obj.props)
             {
                 var span = document.getElementById('entry' + id + '_details');
-                if (span && span.innerHTML)
+                if (span && span.firstChild)
                 {
-                    span.innerHTML = getDataEntryDetails( obj.props );
+                    clearChildren( span );
+                    getDataEntryDetails( span, obj.props );
                 }
                 else
                 {
@@ -233,10 +279,9 @@ function dataEntryStateChanged(obj)
             var span = document.getElementById('entry' + id);
             if (span)
             {
-                span.innerHTML = entryInternal( obj );
+                clearChildren( span );
+                entryInternal( span, obj );
             }
-            
-            
         }
         else
         {

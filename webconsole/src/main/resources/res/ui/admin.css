@@ -170,6 +170,10 @@ td.content {
     padding: 5px;
 }
 
+td.aligntop {
+    vertical-align: top;
+}
+
 td.content img {
     width: 10px;
     height: 10px;
