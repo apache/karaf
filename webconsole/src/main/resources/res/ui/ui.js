@@ -93,14 +93,26 @@
     
     if (cssClass)
     {
-        element.setAttribute( "class", cssClass );
+        element.setAttribute( "class", cssClass ); // non-IE
+        element.setAttribute( "className", cssClass ); // IE
     }
     
     if (attrs)
     {
         for (var lab in attrs)
         {
-            element.setAttribute( lab, attrs[lab] );
+            if ("style" == lab)
+            {
+                var styles = attrs[lab];
+                for (var styleName in styles)
+                {
+                    element.style[styleName] = styles[styleName];
+                }
+            }
+            else
+            {
+                element.setAttribute( lab, attrs[lab] );
+            }
         }
     }
     

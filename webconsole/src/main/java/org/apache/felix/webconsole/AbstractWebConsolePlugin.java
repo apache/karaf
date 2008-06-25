@@ -44,8 +44,9 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     /** The name of the request attribute containig the map of FileItems from the POST request */
     public static final String ATTR_FILEUPLOAD = "org.apache.felix.webconsole.fileupload";
 
-    private static final String HEADER = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">"
-        + "<html>"
+    private static final String HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+        + "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"xhtml1-transitional.dtd\">"
+        + "<html xmlns=\"http://www.w3.org/1999/xhtml\">"
         + "<head>"
         + "<meta http-equiv=\"Content-Type\" content=\"text/html; utf-8\">"
         + "<link rel=\"icon\" href=\"{15}/res/imgs/favicon.ico\">"
@@ -211,7 +212,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
                     if ( linkToCurrent )
                     {
                         map.put( labelMapEntry.getValue(), "<a class='technavat' href='" + appRoot + "/"
-                            + labelMapEntry.getKey() + "'>" + labelMapEntry.getValue() + "</a></li>" );
+                            + labelMapEntry.getKey() + "'>" + labelMapEntry.getValue() + "</a>" );
                     }
                     else
                     {
@@ -222,7 +223,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
                 else
                 {
                     map.put( labelMapEntry.getValue(), "<a href='" + appRoot + "/" + labelMapEntry.getKey() + "'>"
-                        + labelMapEntry.getValue() + "</a></li>" );
+                        + labelMapEntry.getValue() + "</a>" );
                 }
             }
 
