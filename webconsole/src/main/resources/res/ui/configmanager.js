@@ -391,7 +391,6 @@ function createMultiSelect(/* Element */ parent, prop, values, options, width) {
 
 function addValue(prop, vidx)
 {
-alert("add " + prop + " to " + vidx);
     var span = document.getElementById(vidx);
     if (!span)
     {
