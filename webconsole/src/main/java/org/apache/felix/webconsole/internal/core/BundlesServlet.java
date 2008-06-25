@@ -19,43 +19,23 @@ package org.apache.felix.webconsole.internal.core;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
+import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.bundlerepository.R4Attribute;
-import org.apache.felix.bundlerepository.R4Export;
-import org.apache.felix.bundlerepository.R4Import;
-import org.apache.felix.bundlerepository.R4Package;
+import org.apache.felix.bundlerepository.*;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.json.JSONException;
 import org.json.JSONWriter;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Version;
+import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
-import org.osgi.service.obr.Repository;
-import org.osgi.service.obr.RepositoryAdmin;
-import org.osgi.service.obr.Resource;
+import org.osgi.service.obr.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -175,10 +155,11 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
         boolean success = false;
         Bundle bundle = getBundle( req.getPathInfo() );
-        long bundleId = bundle.getBundleId();
+        long bundleId = -1;
 
         if ( bundle != null )
         {
+            bundleId = bundle.getBundleId();
             if ( action == null )
             {
                 success = true;

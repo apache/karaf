@@ -17,22 +17,9 @@
 package org.apache.felix.webconsole.internal.compendium;
 
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.SortedMap;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
-import java.util.Vector;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,18 +27,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONWriter;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Version;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ManagedService;
-import org.osgi.service.cm.ManagedServiceFactory;
+import org.json.*;
+import org.osgi.framework.*;
+import org.osgi.service.cm.*;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.ObjectClassDefinition;
 
@@ -110,11 +88,8 @@ public class ConfigManager extends ConfigManagerBase
         // should actually apply the configuration before redirecting
         if ( request.getParameter( "create" ) != null )
         {
-            if ( ca != null )
-            {
-                config = new PlaceholderConfiguration( pid ); // ca.createFactoryConfiguration( pid, null );
-                pid = config.getPid();
-            }
+            config = new PlaceholderConfiguration( pid ); // ca.createFactoryConfiguration( pid, null );
+            pid = config.getPid();
         }
         else if ( request.getParameter( "apply" ) != null )
         {
@@ -622,7 +597,7 @@ public class ConfigManager extends ConfigManagerBase
 
         String factoryPid = request.getParameter( ConfigManager.factoryPID );
         Configuration config = null;
-        
+
         String propertyList = request.getParameter( "propertylist" );
         if ( propertyList == null )
         {
