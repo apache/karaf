@@ -16,7 +16,7 @@
     limitations under the License.
 -->
 <assembly>
-    <id>windows-bin</id>
+    <id></id> <!-- intentionally left blank -> http://jira.codehaus.org/browse/MASSEMBLY-301 -->
     <formats>
         <format>zip</format>
     </formats>
