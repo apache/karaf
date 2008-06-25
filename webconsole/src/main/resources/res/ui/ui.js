@@ -69,19 +69,25 @@
     return result;
 }
 
-/* Element */ function tr( /* String */ cssClass, /* Object */ attrs )
+/* Element */ function tr( /* String */ cssClass, /* Map */ attrs, /* Element[] */ children )
 {
-    return createElement( "tr", cssClass, attrs );
+    return createElement( "tr", cssClass, attrs, children );
 }
 
 
-/* Element */ function td( /* String */ cssClass, /* Object */ attrs )
+/* Element */ function td( /* String */ cssClass, /* Map */ attrs, /* Element[] */ children )
 {
-    return createElement( "td", cssClass, attrs );
+    return createElement( "td", cssClass, attrs, children );
 }
 
 
-/* Element */ function createElement( /* String */ name, /* String */ cssClass, /* Object */ attrs )
+/* Element */ function text( /* String */ textValue )
+{
+    return document.createTextNode( textValue );
+}
+
+
+/* Element */ function createElement( /* String */ name, /* String */ cssClass, /* Map */ attrs, /* Element[] */ children  )
 {
     var element = document.createElement( name );
     
@@ -98,16 +104,23 @@
         }
     }
     
+    if (children && children.length)
+    {
+        for (var i=0; i < children.length; i++)
+        {
+            element.appendChild( children[i] );
+        }
+    }
+    
     return element;
 }
 
 
-/* Element */ function addText( /* Element */ element, /* String */ text )
+/* Element */ function addText( /* Element */ element, /* String */ textValue )
 {
-    if (element && text)
+    if (element && textValue)
     {
-        var textNode = document.createTextNode( text );
-        element.appendChild( textNode );
+        element.appendChild( text( textValue ) );
     }
     
     return element;
