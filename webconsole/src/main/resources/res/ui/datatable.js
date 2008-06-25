@@ -206,7 +206,7 @@ function showDataEntryDetails( id )
     var span = document.getElementById( 'entry' + id + '_details' );
     if (span)
     {
-        if (span.innerHTML)
+        if (span.firstChild)
         {
             clearChildren( span );
             newLinkValue( id, appRoot + "/res/imgs/right.gif" );
