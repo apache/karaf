@@ -65,9 +65,15 @@ function error( /* int */ columns, /* String */ message )
 function data( /* Array of Object */ dataArray )
 {
     // render components
-    for ( var idx in dataArray )
+    if (dataArray.length == 1)
     {
-        entry( dataArray[idx] );
+        entry( dataArray[0], true );
+    }
+    else {
+        for ( var idx in dataArray )
+        {
+            entry( dataArray[idx] );
+        }
     }
 }
 
@@ -82,10 +88,10 @@ function footer( /* int */ columns )
 }
 
 
-function entry( /* Object */ dataEntry )
+function entry( /* Object */ dataEntry, /* boolean */ singleEntry )
 {
     var trElement = tr( null, { id: "entry" + dataEntry.id } );
-    entryInternal( trElement,  dataEntry );
+    entryInternal( trElement,  dataEntry, singleEntry );
     document.write( serialize( trElement ) );
 
     // dataEntry detailed properties
@@ -98,28 +104,32 @@ function entry( /* Object */ dataEntry )
 }
 
 
-function entryInternal( /* Element */ parent, /* Object */ dataEntry )
+function entryInternal( /* Element */ parent, /* Object */ dataEntry, /* boolean */ singleEntry )
 {
 
     var id = dataEntry.id;
     var name = dataEntry.name;
     var state = dataEntry.state;
-    var icon = (dataEntry.props) ? "down" : "right";
+    var icon = singleEntry ? "left" : (dataEntry.props ? "down" : "right");
+    var event = singleEntry ? "history.back()" : "showDataEntryDetails(" + id + ")"; 
 
-    parent.appendChild( addText( td( "content right" ), id ) );
+    parent.appendChild( td( "content right", null, [ text( id ) ] ) );
     
-    var tdEl = td( "content" );
-    tdEl.appendChild( createElement( "img", null, {
-            src: appRoot + "/res/imgs/" + icon + ".gif",
-            onClick: "showDataEntryDetails(" + id + ")",
-            id: "entry" + id + "_inline"
-        } ) );
-    tdEl.appendChild( addText( createElement( "a", null, {
-            href: pluginRoot + "/" + id
-        } ), name ) );
-    parent.appendChild( tdEl );
+    parent.appendChild( td( "content", null, [
+            createElement( "img", null, {
+                src: appRoot + "/res/imgs/" + icon + ".gif",
+                onClick: event,
+                id: "entry" + id + "_inline"
+            } ),
+            text( "\u00a0" ),
+            createElement( "a", null, {
+                href: pluginRoot + "/" + id
+            }, [ text( name ) ]
+            )]
+        )
+    );
 
-    parent.appendChild( addText( td( "content center" ), state ) );
+    parent.appendChild( td( "content center", null, [ text( state ) ] ) );
 
     for ( var aidx in dataEntry.actions )
     {
@@ -196,7 +206,8 @@ function getDataEntryDetails( /* Element */ parent, /* Array of Object */ detail
  }
 
  
-function showDetails(bundleId) {
+function showDetails(bundleId)
+{
     var span = document.getElementById('bundle' + bundleId + '_details');
 }
 
