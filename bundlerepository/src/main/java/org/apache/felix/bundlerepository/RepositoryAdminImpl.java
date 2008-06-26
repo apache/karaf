@@ -20,10 +20,21 @@ package org.apache.felix.bundlerepository;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
-import org.osgi.framework.*;
-import org.osgi.service.obr.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.obr.Repository;
+import org.osgi.service.obr.RepositoryAdmin;
+import org.osgi.service.obr.Resolver;
+import org.osgi.service.obr.Resource;
 
 public class RepositoryAdminImpl implements RepositoryAdmin
 {
@@ -35,8 +46,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
     // Reusable comparator for sorting resources by name.
     private Comparator m_nameComparator = new ResourceComparator();
 
-    private static final String DEFAULT_REPOSITORY_URL =
-        "http://oscar-osgi.sourceforge.net/obr2/repository.xml";
+    private static final String DEFAULT_REPOSITORY_URL = "http://oscar-osgi.sourceforge.net/obr2/repository.xml";
     public static final String REPOSITORY_URL_PROP = "obr.repository.url";
     public static final String EXTERN_REPOSITORY_TAG = "extern-repositories";
 
@@ -45,7 +55,12 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         m_context = context;
     }
 
-    public synchronized Repository addRepository(URL url) throws Exception
+    public Repository addRepository(URL url) throws Exception
+    {
+        return addRepository(url, Integer.MAX_VALUE);
+    }
+
+    public synchronized Repository addRepository(URL url, int hopCount) throws Exception
     {
         if (!m_urlList.contains(url))
         {
@@ -55,7 +70,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         // If the repository URL is a duplicate, then we will just
         // replace the existing repository object with a new one,
         // which is effectively the same as refreshing the repository.
-        Repository repo = new RepositoryImpl(url);
+        Repository repo = new RepositoryImpl(this, url, hopCount);
         m_repoMap.put(url, repo);
         return repo;
     }
@@ -98,7 +113,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
             initialize();
         }
 
-        Filter filter =  null;
+        Filter filter = null;
         try
         {
             filter = m_context.createFilter(filterExpr);
@@ -181,7 +196,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
             URL url = (URL) m_urlList.get(i);
             try
             {
-                Repository repo = new RepositoryImpl(url);
+                Repository repo = new RepositoryImpl(this, url);
                 if (repo != null)
                 {
                     m_repoMap.put(url, repo);
@@ -189,10 +204,8 @@ public class RepositoryAdminImpl implements RepositoryAdmin
             }
             catch (Exception ex)
             {
-                System.err.println(
-                    "RepositoryAdminImpl: Exception creating repository - " + ex);
-                System.err.println(
-                    "RepositoryAdminImpl: Ignoring repository " + url);
+                System.err.println("RepositoryAdminImpl: Exception creating repository - " + ex);
+                System.err.println("RepositoryAdminImpl: Ignoring repository " + url);
             }
         }
     }

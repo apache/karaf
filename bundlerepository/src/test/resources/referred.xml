@@ -1,0 +1,8 @@
+<repository lastmodified="20061215121044.644" name="referred">
+
+    <resource id="99" presentationname="1_referredSample"
+        symbolicname="org.sample.referred"
+        uri="referredSample.jar"
+        version="1.0.0" />
+        
+</repository>

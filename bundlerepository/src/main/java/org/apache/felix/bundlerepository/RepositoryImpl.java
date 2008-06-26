@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,19 +18,28 @@
  */
 package org.apache.felix.bundlerepository;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
-import java.net.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import java.security.*;
 
 import org.apache.felix.bundlerepository.metadataparser.XmlCommonHandler;
 import org.apache.felix.bundlerepository.metadataparser.kxmlsax.KXml2SAXParser;
-import org.osgi.service.obr.*;
+import org.osgi.service.obr.Capability;
+import org.osgi.service.obr.Repository;
+import org.osgi.service.obr.Requirement;
+import org.osgi.service.obr.Resource;
 
 public class RepositoryImpl implements Repository
 {
@@ -38,13 +47,20 @@ public class RepositoryImpl implements Repository
     private long m_lastmodified = 0;
     private URL m_url = null;
     private Resource[] m_resources = null;
-    private int m_hopCount = 1;
+    private Referral[] m_referrals = null;
+    private RepositoryAdminImpl m_repoAdmin = null;
 
     // Reusable comparator for sorting resources by name.
     private ResourceComparator m_nameComparator = new ResourceComparator();
 
-    public RepositoryImpl(URL url) throws Exception
+    public RepositoryImpl(RepositoryAdminImpl repoAdmin, URL url) throws Exception
     {
+        this(repoAdmin, url, Integer.MAX_VALUE);
+    }
+
+    public RepositoryImpl(RepositoryAdminImpl repoAdmin, URL url, final int hopCount) throws Exception
+    {
+        m_repoAdmin = repoAdmin;
         m_url = url;
         try
         {
@@ -52,12 +68,12 @@ public class RepositoryImpl implements Repository
             {
                 public Object run() throws Exception
                 {
-                    parseRepositoryFile(m_hopCount);
+                    parseRepositoryFile(hopCount);
                     return null;
                 }
             });
-        } 
-        catch (PrivilegedActionException ex) 
+        }
+        catch (PrivilegedActionException ex)
         {
             throw (Exception) ex.getCause();
         }
@@ -86,7 +102,8 @@ public class RepositoryImpl implements Repository
         // Add to resource array.
         if (m_resources == null)
         {
-            m_resources = new Resource[] { resource };
+            m_resources = new Resource[]
+                { resource };
         }
         else
         {
@@ -97,6 +114,28 @@ public class RepositoryImpl implements Repository
         }
 
         Arrays.sort(m_resources, m_nameComparator);
+    }
+
+    public Referral[] getReferrals()
+    {
+        return m_referrals;
+    }
+
+    public void addReferral(Referral referral) throws Exception
+    {
+        // Add to resource array.
+        if (m_referrals == null)
+        {
+            m_referrals = new Referral[]
+                { referral };
+        }
+        else
+        {
+            Referral[] newResources = new Referral[m_referrals.length + 1];
+            System.arraycopy(m_referrals, 0, newResources, 0, m_referrals.length);
+            newResources[m_referrals.length] = referral;
+            m_referrals = newResources;
+        }
     }
 
     public String getName()
@@ -128,7 +167,7 @@ public class RepositoryImpl implements Repository
 
     /**
      * Default setter method when setting parsed data from the XML file,
-     * which currently ignores everything. 
+     * which currently ignores everything.
     **/
     protected Object put(Object key, Object value)
     {
@@ -138,26 +177,23 @@ public class RepositoryImpl implements Repository
 
     private void parseRepositoryFile(int hopCount) throws Exception
     {
-// TODO: OBR - Implement hop count.
         InputStream is = null;
         BufferedReader br = null;
 
         try
         {
-            // Do it the manual way to have a chance to 
+            // Do it the manual way to have a chance to
             // set request properties as proxy auth (EW).
-            URLConnection conn = m_url.openConnection(); 
+            URLConnection conn = m_url.openConnection();
 
             // Support for http proxy authentication
             String auth = System.getProperty("http.proxyAuth");
             if ((auth != null) && (auth.length() > 0))
             {
-                if ("http".equals(m_url.getProtocol()) ||
-                    "https".equals(m_url.getProtocol()))
+                if ("http".equals(m_url.getProtocol()) || "https".equals(m_url.getProtocol()))
                 {
                     String base64 = Util.base64Encode(auth);
-                    conn.setRequestProperty(
-                        "Proxy-Authorization", "Basic " + base64);
+                    conn.setRequestProperty("Proxy-Authorization", "Basic " + base64);
                 }
             }
 
@@ -178,13 +214,14 @@ public class RepositoryImpl implements Repository
             else
             {
                 is = conn.getInputStream();
-            } 
+            }
 
             if (is != null)
             {
                 // Create the parser Kxml
                 XmlCommonHandler handler = new XmlCommonHandler();
-                Object factory = new Object() {
+                Object factory = new Object()
+                {
                     public RepositoryImpl newInstance()
                     {
                         return RepositoryImpl.this;
@@ -192,15 +229,16 @@ public class RepositoryImpl implements Repository
                 };
 
                 // Get default setter method for Repository.
-                Method repoSetter = RepositoryImpl.class.getDeclaredMethod(
-                    "put", new Class[] { Object.class, Object.class });
+                Method repoSetter = RepositoryImpl.class.getDeclaredMethod("put", new Class[]
+                    { Object.class, Object.class });
 
                 // Get default setter method for Resource.
-                Method resSetter = ResourceImpl.class.getDeclaredMethod(
-                    "put", new Class[] { Object.class, Object.class });
+                Method resSetter = ResourceImpl.class.getDeclaredMethod("put", new Class[]
+                    { Object.class, Object.class });
 
                 // Map XML tags to types.
                 handler.addType("repository", factory, Repository.class, repoSetter);
+                handler.addType("referral", Referral.class, null, null);
                 handler.addType("resource", ResourceImpl.class, Resource.class, resSetter);
                 handler.addType("category", CategoryImpl.class, null, null);
                 handler.addType("require", RequirementImpl.class, Requirement.class, null);
@@ -212,6 +250,21 @@ public class RepositoryImpl implements Repository
                 KXml2SAXParser parser;
                 parser = new KXml2SAXParser(br);
                 parser.parseXML(handler);
+
+                // resolve referrals
+                hopCount--;
+                if (hopCount > 0 && m_referrals != null)
+                {
+                    for (int i = 0; i < m_referrals.length; i++)
+                    {
+                        Referral referral = m_referrals[i];
+
+                        URL url = new URL(getURL(), referral.getUrl());
+                        hopCount = (referral.getDepth() > hopCount) ? hopCount : referral.getDepth();
+
+                        m_repoAdmin.addRepository(url, hopCount);
+                    }
+                }
             }
             else
             {
@@ -223,7 +276,8 @@ public class RepositoryImpl implements Repository
         {
             try
             {
-                if (is != null) is.close();
+                if (is != null)
+                    is.close();
             }
             catch (IOException ex)
             {
