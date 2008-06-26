@@ -55,7 +55,7 @@ function installForm( /* int */ startLevel )
     document.write( "<td class='content' align='right' colspan='5' noWrap>" );
     document.write( "<input class='submit' style='width:auto' type='submit' value='Install or Update'>" );
     document.write( "&nbsp;" );
-    document.write( "<input class='submit' style='width:auto' type='button' value='Refresh Packages' onClick='changeBundle(0, \"refreshPackages\");'>" );
+    document.write( "<input class='submit' style='width:auto' type='button' value='Refresh Packages' onClick='changeDataEntryState(0, \"refreshPackages\");'>" );
     document.write( "</td>" );
     document.write( "</tr>" );
     document.write( "</form>" );
