@@ -129,6 +129,12 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
                 pw.println( "<tr class='content'>" );
                 pw.println( "<td class='content'>" + repo.getName() + "</td>" );
                 pw.println( "<td class='content'>" + repo.getURL() + "</td>" );
+
+                pw.print ( "<td class='content'>" );
+                pw.print ( "<a href='" + repo.getURL() + "' target='_blank' title='Show Repository " + repo.getURL()
+                    + "'>" + repo.getURL() + "</a>" );
+                pw.println( "</td>" );
+
                 pw.println( "<td class='content'>" + new Date( repo.getLastModified() ) + "</td>" );
                 pw.println( "<td class='content'>" );
                 pw.println( "<form>" );
@@ -261,7 +267,7 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
         for ( int i = 0; i < repos.length; i++ )
         {
             Resource[] resources = repos[i].getResources();
-            for ( int j = 0; j < resources.length; j++ )
+            for ( int j = 0; resources != null && j < resources.length; j++ )
             {
                 Resource res = resources[j];
                 Version ver = ( Version ) bundles.get( res.getSymbolicName() );
