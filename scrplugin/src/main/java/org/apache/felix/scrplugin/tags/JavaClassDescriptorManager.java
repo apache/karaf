@@ -140,7 +140,8 @@ public class JavaClassDescriptorManager {
             final Artifact declared = (Artifact) it.next();
             this.log.debug("Checking artifact " + declared);
             if (Artifact.SCOPE_COMPILE.equals(declared.getScope())
-                || Artifact.SCOPE_RUNTIME.equals(declared.getScope())) {
+                || Artifact.SCOPE_RUNTIME.equals(declared.getScope())
+                || Artifact.SCOPE_PROVIDED.equals(declared.getScope())) {
                 this.log.debug("Resolving artifact " + declared);
                 final Artifact artifact = (Artifact) resolved.get(ArtifactUtils.versionlessKey(declared));
                 if (artifact != null) {
