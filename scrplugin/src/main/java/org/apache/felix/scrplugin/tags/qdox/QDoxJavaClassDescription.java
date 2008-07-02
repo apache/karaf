@@ -203,6 +203,28 @@ public class QDoxJavaClassDescription
     }
 
     /**
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getReferencedClass(java.lang.String)
+     */
+    public JavaClassDescription getReferencedClass(final String referencedName) {
+        String className = referencedName;
+        int pos = className.indexOf('.');
+        if ( pos == -1 ) {
+            className = this.searchImport('.' + referencedName);
+        }
+        if ( className == null ) {
+            if ( pos != -1 ) {
+                return null;
+            }
+            className = this.javaClass.getSource().getPackage() + '.' + referencedName;
+        }
+        try {
+            return this.manager.getJavaClassDescription(className);
+        } catch (MojoExecutionException mee) {
+            return null;
+        }
+    }
+
+    /**
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getImplementedInterfaces()
      */
     public JavaClassDescription[] getImplementedInterfaces()

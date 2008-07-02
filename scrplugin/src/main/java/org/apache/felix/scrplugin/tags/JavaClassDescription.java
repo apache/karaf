@@ -125,4 +125,15 @@ public interface JavaClassDescription {
      * @throws MojoExecutionException
      */
     boolean isA(String type) throws MojoExecutionException;
+
+    /**
+     * Search for the class.
+     * If the referenced name is not fully qualified, the imports
+     * of the class are searched.
+     * @param referencedName
+     * @return The java class description or null
+     * @throws MojoExecutionException
+     */
+    JavaClassDescription getReferencedClass(String referencedName)
+    throws MojoExecutionException;
 }

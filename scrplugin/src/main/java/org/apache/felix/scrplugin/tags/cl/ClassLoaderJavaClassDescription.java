@@ -88,6 +88,14 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
     }
 
     /**
+     * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getReferencedClass(java.lang.String)
+     */
+    public JavaClassDescription getReferencedClass(String referencedName)
+    throws MojoExecutionException {
+        throw new MojoExecutionException("getDescription not support for this class.");
+    }
+
+    /**
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getImplementedInterfaces()
      */
     public JavaClassDescription[] getImplementedInterfaces() throws MojoExecutionException {

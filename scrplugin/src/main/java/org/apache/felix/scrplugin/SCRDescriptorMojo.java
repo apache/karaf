@@ -346,7 +346,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
         component.setEnabled(Boolean.valueOf(getBoolean(tag, Constants.COMPONENT_ENABLED, true)));
         component.setFactory(tag.getNamedParameter(Constants.COMPONENT_FACTORY));
-        
+
         // FELIX-593: immediate attribute does not default to true all the
         // times hence we only set it if declared in the tag
         if (tag.getNamedParameter(Constants.COMPONENT_IMMEDIATE) != null) {
@@ -404,13 +404,19 @@ public class SCRDescriptorMojo extends AbstractMojo {
         component.setService(service);
         boolean serviceFactory = false;
         for (int i=0; i < services.length; i++) {
-            String name = services[i].getNamedParameter(Constants.SERVICE_INTERFACE);
+            final String name = services[i].getNamedParameter(Constants.SERVICE_INTERFACE);
             if (StringUtils.isEmpty(name)) {
 
                 this.addInterfaces(service, services[i], description);
             } else {
+                // check if the value points to a class/interface
+                // and search through the imports
+                final JavaClassDescription serviceClass = description.getReferencedClass(name);
+                if ( serviceClass == null ) {
+                    throw new MojoExecutionException("Interface '"+ name + "' in class " + description.getName() + " does not point to a valid class/interface.");
+                }
                 final Interface interf = new Interface(services[i]);
-                interf.setInterfacename(name);
+                interf.setInterfacename(serviceClass.getName());
                 service.addInterface(interf);
             }
 
