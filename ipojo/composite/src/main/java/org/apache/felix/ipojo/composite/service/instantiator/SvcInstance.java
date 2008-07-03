@@ -104,6 +104,7 @@ public class SvcInstance extends DependencyModel {
             ServiceReference ref = (ServiceReference) iterator.next();
             Object object = m_factories.get(ref);
             if (object != null) {
+                m_handler.info("Dispose a service instance when stopping the handler " + ((ComponentInstance) object).getInstanceName());
                 ((ComponentInstance) object).dispose();
             }
         }
@@ -142,6 +143,7 @@ public class SvcInstance extends DependencyModel {
         }
         ComponentInstance instance = null;
         instance = factory.createComponentInstance(props);
+        m_handler.info("Creation of a service instance " + instance.getInstanceName());
         return instance;
     }
 
@@ -234,8 +236,13 @@ public class SvcInstance extends DependencyModel {
         // The given factory matches.
         try {
             Factory fact = (Factory) getService(ref);
-            ComponentInstance instance = createInstance(fact);
-            m_factories.put(ref, instance);
+            if (m_factories.get(ref) == null) {
+            	ComponentInstance instance = createInstance(fact);
+            	m_factories.put(ref, instance);
+            } else {
+            	m_handler.info("An arriving factory is already used, ignore the creation : " + fact.getName());
+            }
+            
         } catch (UnacceptableConfiguration e) {
             m_handler.error("A matching factory refuse the actual configuration : " + e.getMessage());
             m_handler.getCompositeManager().stop();
@@ -260,6 +267,7 @@ public class SvcInstance extends DependencyModel {
         // Remove the reference is contained
         Object instance = m_factories.remove(ref);
         if (instance != null) {
+        	m_handler.info("Dispose the instance (departure of the factory) " + ((ComponentInstance) instance).getInstanceName());
             ((ComponentInstance) instance).dispose();
         }
     }
