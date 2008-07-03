@@ -41,6 +41,7 @@
 		<module>ant</module>
 		<module>white.board.pattern.handler</module>
 		<module>extender.pattern.handler</module>
+		<module>temporal.dependency.handler</module>
 	</modules>
 		
 	
