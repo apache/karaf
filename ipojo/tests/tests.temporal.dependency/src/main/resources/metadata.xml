@@ -1,0 +1,20 @@
+<ipojo xmlns:temp="org.apache.felix.ipojo.handler.temporal">
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-CheckServiceProvider">
+		<temp:requires field="fs"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-CheckServiceProviderTimeout">
+		<temp:requires field="fs" timeout="4000"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-MultipleCheckServiceProvider">
+		<temp:requires field="fs" aggregate="true"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.FooProvider" name="TEMPORAL-FooProvider">
+		<provides/>
+	</component>
+</ipojo>
