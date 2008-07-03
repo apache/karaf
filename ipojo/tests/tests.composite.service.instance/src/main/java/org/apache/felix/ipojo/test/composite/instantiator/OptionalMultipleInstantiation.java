@@ -189,15 +189,5 @@ public class OptionalMultipleInstantiation extends OSGiTestCase {
 		fact2.start();
 		fact3.start();
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
 }

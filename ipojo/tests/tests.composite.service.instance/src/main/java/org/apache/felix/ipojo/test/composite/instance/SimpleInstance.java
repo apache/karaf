@@ -183,7 +183,7 @@ public class SimpleInstance extends OSGiTestCase {
         fooFactory2.start();
 	}
 	
-	public void atestArchitecture() { //TODO : to reactive
+	public void atestArchitecture() { // TODO fix and reactivate the method.
 		Properties props = new Properties();
 		props.put("name", "under");
 		ComponentInstance under = null;

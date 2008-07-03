@@ -220,6 +220,8 @@ public class DelayTest extends OSGiTestCase {
        
        provider1.stop();
        provider2.stop();
+       provider1.dispose();
+       provider2.dispose();
        under.stop();
        under.dispose();
    }
