@@ -141,12 +141,23 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
      */
     public ComponentInstance createInstance(Dictionary config, IPojoContext context, HandlerManager[] handlers) throws org.apache.felix.ipojo.ConfigurationException {
         InstanceManager instance = new InstanceManager(this, context, handlers);
-        instance.configure(m_componentMetadata, config);
+        
         try {
+        	instance.configure(m_componentMetadata, config);
             instance.start();
             return instance;
-        } catch (IllegalStateException e) {
-            // An exception occurs during the start method.
+        } catch (ConfigurationException e) {
+            // An exception occurs while executing the configure or start methods.
+        	if (instance != null) {
+        		instance.dispose();
+        		instance = null;
+        	}
+        	throw e;
+        } catch (Throwable e) { // All others exception are handled here.
+        	if (instance != null) {
+        		instance.dispose();
+        		instance = null;
+        	}
             m_logger.log(Logger.ERROR, e.getMessage(), e);
             throw new ConfigurationException(e.getMessage());
         }
