@@ -85,9 +85,9 @@ public class ExtenderManager extends BundleTracker {
         String header = (String) headers.get(m_extension);
         if (header != null) {
             synchronized (this) {
-                m_bundleSet.add(bundle);
+                m_bundles.add(bundle);
             }
-            try {
+            try { // Call the callback outside the synchronized block.
                 m_onArrival.call(new Object[] {bundle, header});
             } catch (NoSuchMethodException e) {
                 m_handler.error("The onArrival method " + m_onArrival.getMethod() + " does not exist in the class", e);
