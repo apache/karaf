@@ -32,7 +32,8 @@ public class MultipleCheckServiceProvider implements CheckService {
 
     public boolean check() {
         boolean result = true;
-        for (int i = 0; i < fs.length; i++) {
+      
+        for (int i = 0; fs != null && i < fs.length; i++) {
             result = result && fs[i].foo();
         }
         return result;

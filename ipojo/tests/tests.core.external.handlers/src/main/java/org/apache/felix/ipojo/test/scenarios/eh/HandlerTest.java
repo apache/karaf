@@ -98,6 +98,28 @@ public class HandlerTest extends OSGiTestCase {
 		context.ungetService(sr);
 	}
 	
+
+    public void testConfiguration3() {
+        // Check the availability of CheckService
+        String name = "HandlerTest-2-empty";
+        ServiceReference sr = null;
+        ServiceReference[] refs = null;
+        String filter = "("+"instance.name"+"="+name+")";
+        try {
+            refs = context.getServiceReferences(CheckService.class.getName(), filter);
+        } catch (InvalidSyntaxException e) { System.err.println("Invalid Filter : " + filter);}
+        if(refs != null) { sr = refs[0]; }
+        assertNotNull("Check the check service availability", sr);
+        
+        CheckService cs = (CheckService) context.getService(sr);
+        Properties p = cs.getProps();
+        assertEquals("Assert 'simple' equality", p.get("Simple"), "Simple");
+        assertEquals("Size of p", 3, p.size()); // instance name, simple and changes.
+        
+        cs = null;
+        context.ungetService(sr);
+    }
+	
 	public void testLifecycle() {
 		// Check the availability of CheckService
 	    String name = "HandlerTest-1";

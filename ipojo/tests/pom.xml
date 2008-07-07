@@ -41,6 +41,7 @@
 	<module>tests.composite.service.instance</module>
 	<module>tests.composite.service.providing</module>
 	<module>tests.temporal.dependency</module>
+	<module>tests.whiteboard.pattern.handler</module>
    </modules>
    
    <profiles>

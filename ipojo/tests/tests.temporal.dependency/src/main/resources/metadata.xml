@@ -17,4 +17,78 @@
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.FooProvider" name="TEMPORAL-FooProvider">
 		<provides/>
 	</component>
+	
+	<!-- Dependencies using nullables -->
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-NullableMultipleCheckServiceProvider">
+		<temp:requires field="fs" onTimeout="nullable"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-NullableCheckServiceProvider">
+		<temp:requires field="fs" onTimeout="nullable"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-NullableCheckServiceProviderTimeout">
+		<temp:requires field="fs" timeout="4000" onTimeout="nullable"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-NullableMultipleCheckServiceProviderTimeout">
+		<temp:requires field="fs" timeout="4000" onTimeout="nullable"/>
+		<provides/>
+	</component>
+	
+	<!-- Dependencies using default implementation -->
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-DIMultipleCheckServiceProvider">
+		<temp:requires field="fs" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-DICheckServiceProvider">
+		<temp:requires field="fs" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-DICheckServiceProviderTimeout">
+		<temp:requires field="fs" timeout="4000" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-DIMultipleCheckServiceProviderTimeout">
+		<temp:requires field="fs" timeout="4000" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider"/>
+		<provides/>
+	</component>
+	
+	<!-- Dependencies using null -->
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-NullMultipleCheckServiceProvider">
+		<temp:requires field="fs" onTimeout="null"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-NullCheckServiceProvider">
+		<temp:requires field="fs" onTimeout="null"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-NullCheckServiceProviderTimeout">
+		<temp:requires field="fs" timeout="4000" onTimeout="null"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-NullMultipleCheckServiceProviderTimeout">
+		<temp:requires field="fs" timeout="4000" onTimeout="null"/>
+		<provides/>
+	</component>
+	
+		<!-- Dependencies using empty arrays -->
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-EmptyMultipleCheckServiceProvider">
+		<temp:requires field="fs" onTimeout="empty-array"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-EmptyMultipleCheckServiceProviderTimeout">
+		<temp:requires field="fs" timeout="4000" onTimeout="empty-array"/>
+		<provides/>
+	</component>
 </ipojo>

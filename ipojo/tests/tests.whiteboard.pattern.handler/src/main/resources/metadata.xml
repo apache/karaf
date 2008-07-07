@@ -1,0 +1,17 @@
+<ipojo xmlns:wbp="org.apache.felix.ipojo.white-board-pattern">
+	<component className="org.apache.felix.ipojo.test.FooProvider" name="fooprovider">
+		<provides>
+			<property field="foo" value="foo"/>
+		</provides>
+	</component>
+	
+	<component className="org.apache.felix.ipojo.test.FooWhiteBoardPattern" name="under-providers">
+		<wbp:wbp filter="(objectclass=org.apache.felix.ipojo.test.FooService)" onArrival="onArrival" onDeparture="onDeparture" onModification="onModification"/>
+		<provides/>
+	</component>
+	
+	<component className="org.apache.felix.ipojo.test.FooWhiteBoardPattern" name="under-properties">
+		<wbp:wbp filter="(foo=foo)" onArrival="onArrival" onDeparture="onDeparture" onModification="onModification"/>
+		<provides/>
+	</component>
+</ipojo>

@@ -20,5 +20,11 @@
 			<property name="c" value="c" />
 		</property>
 	</instance>
+	<instance name="HandlerTest-2-empty" component="HANDLER-HandlerTester">
+		<property name="csh.simple" value="Simple" />
+		<property name="csh.map">
+		<!-- Empty dictionary -->
+		</property>
+	</instance>
 	
 </ipojo>

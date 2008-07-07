@@ -16,26 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo.test.scenarios.temporal;
+package org.apache.felix.ipojo.test.scenarios.component;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Properties;
 
-import org.apache.felix.ipojo.junit4osgi.OSGiTestSuite;
-import org.osgi.framework.BundleContext;
+import org.apache.felix.ipojo.test.scenarios.temporal.service.FooService;
 
-public class TemporalTestSuite extends TestSuite {
+public class NullableFooProvider implements FooService {
 
-    public static Test suite(BundleContext bc) {
-        OSGiTestSuite ots = new OSGiTestSuite("Temporal Dependency Test Suite", bc);
-        ots.addTestSuite(NoDelayTest.class);
-        ots.addTestSuite(DelayTest.class);
-        ots.addTestSuite(NullableTest.class); 
-        ots.addTestSuite(DefaultImplementationTest.class);
-        ots.addTestSuite(NullTest.class);
-        ots.addTestSuite(EmptyArrayTest.class);
-        return ots;
+    public boolean foo() {
+       return false;
+    }
+
+    public Properties fooProps() {
+        return null;
+    }
+
+    public boolean getBoolean() {
+        return false;
+    }
+
+    public double getDouble() {
+        return -1;
+    }
+
+    public int getInt() {
+        return -1;
+    }
+
+    public long getLong() {
+        return -1;
+    }
+
+    public Boolean getObject() {
+        return null;
     }
 
 }
-

@@ -31,11 +31,17 @@ public class CheckServiceProvider implements CheckService {
     private FooService fs;
 
     public boolean check() {
-        return fs.foo();
+        if (fs != null) {
+            return fs.foo();
+        }
+        return false;
     }
 
     public Properties getProps() {
-        return fs.fooProps();
+        if (fs != null) {
+            return fs.fooProps();
+        }
+        return null;
     }
 
 }

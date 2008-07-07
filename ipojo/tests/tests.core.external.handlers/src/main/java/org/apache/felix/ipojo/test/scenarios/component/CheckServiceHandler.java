@@ -46,9 +46,11 @@ public class CheckServiceHandler extends PrimitiveHandler implements CheckServic
 		if(configuration.get("csh.simple") != null) { props.put("Simple", configuration.get("csh.simple")); }
 		if(configuration.get("csh.map") != null) { 
 			Dictionary m = (Dictionary) configuration.get("csh.map");
-			props.put("Map1", m.get("a"));
-			props.put("Map2", m.get("b"));
-			props.put("Map3", m.get("c"));
+            if (m.size() > 0) {
+                props.put("Map1", m.get("a"));
+                props.put("Map2", m.get("b"));
+                props.put("Map3", m.get("c"));
+            }
 		}
 		props.put("changes", new Integer(changes));
 		

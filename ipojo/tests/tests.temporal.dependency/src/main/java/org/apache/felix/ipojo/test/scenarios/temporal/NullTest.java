@@ -25,13 +25,13 @@ import org.apache.felix.ipojo.test.scenarios.temporal.service.FooService;
 import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 
-public class DelayTest extends OSGiTestCase {
+public class NullTest extends OSGiTestCase {
     
-   public void testDelay() {
+   public void testNullable() {
        String prov = "provider";
        ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
        String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-CheckServiceProvider", un);
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-NullCheckServiceProvider", un);
        
        ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
        assertNotNull("Check foo availability", ref_fs);
@@ -66,11 +66,11 @@ public class DelayTest extends OSGiTestCase {
        under.dispose();
    }
    
-   public void testTimeout() {
+   public void testNullableTimeout() {
        String prov = "provider";
        ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
        String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-CheckServiceProvider", un);
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-NullCheckServiceProvider", un);
        
        ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
        assertNotNull("Check foo availability", ref_fs);
@@ -85,29 +85,27 @@ public class DelayTest extends OSGiTestCase {
        provider.stop();
        ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
        assertNotNull("Check cs availability - 2", ref_cs);
-       DelayedProvider dp = new DelayedProvider(provider, 5000);
-       dp.start();
        cs = (CheckService) context.getService(ref_cs);
+       boolean res = false;
        try {
-           cs.check();
+           res = cs.check();
        } catch(RuntimeException e) {
-           // OK
-           dp.stop();
-           provider.stop();
-           provider.dispose();
-           under.stop();
-           under.dispose();
-           return;
+           fail("A null was expected ...");
        }   
-       
-       fail("Timeout expected");
+       assertFalse("Check null", res); // Return false when the foo service is null.
+
+       provider.stop();
+       provider.dispose();
+       under.stop();
+       under.dispose();
+       return;
    }
    
    public void testDelayTimeout() {
        String prov = "provider";
        ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
        String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-CheckServiceProviderTimeout", un);
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-NullCheckServiceProviderTimeout", un);
        
        ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
        assertNotNull("Check foo availability", ref_fs);
@@ -142,11 +140,11 @@ public class DelayTest extends OSGiTestCase {
        under.dispose();
    }
    
-   public void testSetTimeout() {
+   public void testNullableMultipleTimeout() {
        String prov = "provider";
        ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
        String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-CheckServiceProviderTimeout", un);
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-NullMultipleCheckServiceProviderTimeout", un);
        
        ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
        assertNotNull("Check foo availability", ref_fs);
@@ -164,19 +162,20 @@ public class DelayTest extends OSGiTestCase {
        DelayedProvider dp = new DelayedProvider(provider, 5000);
        dp.start();
        cs = (CheckService) context.getService(ref_cs);
+       boolean res = false;
        try {
-           cs.check();
+           res = cs.check();
        } catch(RuntimeException e) {
-           // OK
-           dp.stop();
-           provider.stop();
-           provider.dispose();
-           under.stop();
-           under.dispose();
-           return;
+           fail("A null was expected ...");
        }   
+       assertTrue("Check nullable", res);
        
-       fail("Timeout expected");
+       dp.stop();
+       provider.stop();
+       provider.dispose();
+       under.stop();
+       under.dispose();
+       return;
    }
    
    public void testDelayOnMultipleDependency() {
@@ -185,7 +184,7 @@ public class DelayTest extends OSGiTestCase {
        String prov2 = "provider2";
        ComponentInstance provider2 = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov2);
        String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-MultipleCheckServiceProvider", un);
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-NullableMultipleCheckServiceProvider", un);
        
        ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
        assertNotNull("Check foo availability", ref_fs);
@@ -213,13 +212,15 @@ public class DelayTest extends OSGiTestCase {
        dp.stop();
        dp2.stop();
        
+       provider1.stop();
+       provider2.stop();
+       
        ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
        assertNotNull("Check cs availability - 3", ref_cs);
        cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation - 3", cs.check());
        
-       provider1.stop();
-       provider2.stop();
+       assertFalse("Check invocation - 3", cs.check()); // Will return false as the contained nullable will return false to the foo method.
+
        provider1.dispose();
        provider2.dispose();
        under.stop();
