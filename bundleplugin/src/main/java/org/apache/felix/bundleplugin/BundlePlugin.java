@@ -362,7 +362,9 @@ public class BundlePlugin extends AbstractMojo
         // update BND instructions to add included Maven resources
         includeMavenResources( currentProject, properties, getLog() );
 
-        if ( !properties.containsKey( Analyzer.EXPORT_PACKAGE ) && !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
+        if ( !properties.containsKey( Analyzer.EXPORT_PACKAGE ) &&
+             !properties.containsKey( Analyzer.EXPORT_CONTENTS ) &&
+             !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
         {
             String bsn = properties.getProperty( Analyzer.BUNDLE_SYMBOLICNAME );
             String namespace = bsn.replaceAll( "\\W", "." );

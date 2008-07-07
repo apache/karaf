@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -95,14 +96,15 @@ public class ManifestPlugin extends BundlePlugin
     }
 
 
-    public Manifest getManifest( MavenProject project, Jar[] classpath ) throws IOException, MojoFailureException
+    public Manifest getManifest( MavenProject project, Jar[] classpath )
+        throws IOException, MojoFailureException, MojoExecutionException
     {
         return getManifest( project, new Properties(), new Properties(), classpath );
     }
 
 
     public Manifest getManifest( MavenProject project, Map instructions, Properties properties, Jar[] classpath )
-        throws IOException, MojoFailureException
+        throws IOException, MojoFailureException, MojoExecutionException
     {
         Analyzer analyzer = getAnalyzer( project, instructions, properties, classpath );
 
@@ -133,29 +135,16 @@ public class ManifestPlugin extends BundlePlugin
     }
 
 
-    protected Analyzer getAnalyzer( MavenProject project, Jar[] classpath ) throws IOException
+    protected Analyzer getAnalyzer( MavenProject project, Jar[] classpath )
+        throws IOException, MojoExecutionException
     {
         return getAnalyzer( project, new HashMap(), new Properties(), classpath );
     }
 
 
     protected Analyzer getAnalyzer( MavenProject project, Map instructions, Properties properties, Jar[] classpath )
-        throws IOException
+        throws IOException, MojoExecutionException
     {
-        PackageVersionAnalyzer analyzer = new PackageVersionAnalyzer();
-
-        Properties props = getDefaultProperties( project );
-        props.putAll( properties );
-
-        if ( !instructions.containsKey( Analyzer.IMPORT_PACKAGE ) )
-        {
-            props.put( Analyzer.IMPORT_PACKAGE, "*" );
-        }
-
-        props.putAll( transformDirectives( instructions ) );
-
-        analyzer.setProperties( props );
-
         File file = project.getArtifact().getFile();
         if ( file == null )
         {
@@ -167,20 +156,33 @@ public class ManifestPlugin extends BundlePlugin
             throw new FileNotFoundException( file.getPath() );
         }
 
-        analyzer.setJar( file );
+        properties.putAll( getDefaultProperties( project ) );
+        properties.putAll( transformDirectives( instructions ) );
+
+        PackageVersionAnalyzer analyzer = new PackageVersionAnalyzer();
+        analyzer.setProperties( properties );
+
+        if ( project.getBasedir() != null )
+            analyzer.setBase( project.getBasedir() );
 
         if ( classpath != null )
             analyzer.setClasspath( classpath );
 
-        if ( !instructions.containsKey( Analyzer.PRIVATE_PACKAGE )
-            && !instructions.containsKey( Analyzer.EXPORT_PACKAGE ) )
+        analyzer.setJar( file );
+
+        if ( !properties.containsKey( Analyzer.EXPORT_PACKAGE ) &&
+             !properties.containsKey( Analyzer.EXPORT_CONTENTS ) &&
+             !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
         {
             String export = analyzer.calculateExportsFromContents( analyzer.getJar() );
             analyzer.setProperty( Analyzer.EXPORT_PACKAGE, export );
         }
 
-        analyzer.mergeManifest( analyzer.getJar().getManifest() );
+        // Apply Embed-Dependency headers, even though the contents won't be changed
+        Collection embeddableArtifacts = getEmbeddableArtifacts( project, properties );
+        new DependencyEmbedder( embeddableArtifacts ).processHeaders( properties );
 
+        analyzer.mergeManifest( analyzer.getJar().getManifest() );
         analyzer.calcManifest();
 
         return analyzer;
