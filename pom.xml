@@ -67,10 +67,10 @@
       <commons.logging.version>1.1.1</commons.logging.version>
       <felix.configadmin.version>1.0.0</felix.configadmin.version>
       <felix.main.version>1.0.4</felix.main.version>
-      <felix.plugin.version>1.4.0</felix.plugin.version>
+      <felix.plugin.version>1.4.1</felix.plugin.version>
       <felix.framework.version>1.0.4</felix.framework.version>
       <felix.osgi.version>1.0.1</felix.osgi.version>
-      <felix.compendium.version>1.0.0</felix.compendium.version>
+      <felix.compendium.version>1.0.1</felix.compendium.version>
       <felix.bundlerepository.version>1.0.2</felix.bundlerepository.version>
       <felix.prefs.version>1.0.2</felix.prefs.version>
       <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
@@ -80,10 +80,10 @@
       <log4j.version>1.2.14</log4j.version>
       <mina.version>1.1.6_1-SNAPSHOT</mina.version>
       <pax.logging.version>1.1.1</pax.logging.version>
-      <pax.url.version>0.3.0</pax.url.version>
+      <pax.url.version>0.3.2</pax.url.version>
       <servicemix.legal.version>1.0</servicemix.legal.version>
-      <spring.osgi.version>1.1.0-m2</spring.osgi.version>
-      <spring.version>2.5.4</spring.version>
+      <spring.osgi.version>1.1.0</spring.osgi.version>
+      <spring.version>2.5.5</spring.version>
   </properties>
 
    <repositories>
@@ -104,20 +104,6 @@
            <id>ops4j</id>
            <name>OPS4j Repository</name>
            <url>http://repository.ops4j.org/maven2</url>
-       </repository>
-       <!-- OPS4J snapshots repo -->
-       <repository>
-           <id>ops4j-snapshots</id>
-           <name>OPS4j Snapshots Repository</name>
-           <url>http://repository.ops4j.org/mvn-snapshots</url>
-           <releases><enabled>false</enabled></releases>
-           <snapshots><enabled>true</enabled></snapshots>
-       </repository>
-       <!-- Spring OSGi milestone -->
-       <repository>
-           <id>spring-maven-milestone</id>
-           <name>Springframework Maven Repository</name>
-           <url>http://s3.amazonaws.com/maven.springframework.org/milestone</url>
        </repository>
    </repositories>
 
