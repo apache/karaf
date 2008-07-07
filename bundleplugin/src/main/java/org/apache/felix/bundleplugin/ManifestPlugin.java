@@ -24,11 +24,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.jar.Manifest;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 
 import aQute.lib.osgi.Analyzer;
@@ -68,6 +71,11 @@ public class ManifestPlugin extends BundlePlugin
         {
             throw new MojoExecutionException( "Error trying to generate Manifest", e );
         }
+        catch ( MojoFailureException e )
+        {
+            getLog().error( e.getLocalizedMessage() );
+            throw new MojoExecutionException( "Error(s) found in manifest configuration", e );
+        }
         catch ( Exception e )
         {
             getLog().error( "An internal error occurred", e );
@@ -87,16 +95,41 @@ public class ManifestPlugin extends BundlePlugin
     }
 
 
-    public Manifest getManifest( MavenProject project, Jar[] classpath ) throws IOException
+    public Manifest getManifest( MavenProject project, Jar[] classpath ) throws IOException, MojoFailureException
     {
         return getManifest( project, new Properties(), new Properties(), classpath );
     }
 
 
     public Manifest getManifest( MavenProject project, Map instructions, Properties properties, Jar[] classpath )
-        throws IOException
+        throws IOException, MojoFailureException
     {
-        return getAnalyzer( project, instructions, properties, classpath ).getJar().getManifest();
+        Analyzer analyzer = getAnalyzer( project, instructions, properties, classpath );
+
+        List errors = analyzer.getErrors();
+        List warnings = analyzer.getWarnings();
+
+        for ( Iterator w = warnings.iterator(); w.hasNext(); )
+        {
+            String msg = ( String ) w.next();
+            getLog().warn( "Warning in manifest for " + project.getArtifact() + " : " + msg );
+        }
+        for ( Iterator e = errors.iterator(); e.hasNext(); )
+        {
+            String msg = ( String ) e.next();
+            getLog().error( "Error in manifest for " + project.getArtifact() + " : " + msg );
+        }
+
+        if ( errors.size() > 0 )
+        {
+            String failok = properties.getProperty( "-failok" );
+            if ( null == failok || "false".equalsIgnoreCase( failok ) )
+            {
+                throw new MojoFailureException( "Error(s) found in manifest configuration" );
+            }
+        }
+
+        return analyzer.getJar().getManifest();
     }
 
 
