@@ -19,8 +19,12 @@
 package org.apache.felix.ipojo.handler.temporal;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Proxy;
 
 import org.apache.felix.ipojo.FieldInterceptor;
+import org.apache.felix.ipojo.Nullable;
+import org.apache.felix.ipojo.PrimitiveHandler;
+import org.apache.felix.ipojo.handlers.dependency.NullableObject;
 import org.apache.felix.ipojo.util.DependencyModel;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
@@ -38,6 +42,32 @@ public class TemporalDependency extends DependencyModel implements FieldIntercep
      * Timeout.
      */
     private long m_timeout;
+    
+    /**
+     * Default-Implementation
+     */
+    private String m_di;
+    
+    /**
+     * Nullable object / Default-Implementation instance if used
+     */
+    private Object m_nullableObject;
+    
+    /**
+     * Handler managing this dependency.
+     */
+    private PrimitiveHandler m_handler;
+    
+    /**
+     * Timetout policy.
+     * Null inject null
+     * Nullable injects a nullable object or an array with a nullable object
+     * Default-Implementation inject an object created from the specified injected
+     * implementation or an array with it
+     * Empty array inject an empty array (must be an aggregate dependency)
+     * No policy (0) throw a runtime exception when the timeout occurs     * 
+     */
+    private int m_policy;
 
     /**
      * Constructor.
@@ -48,9 +78,12 @@ public class TemporalDependency extends DependencyModel implements FieldIntercep
      * @param timeout : timeout
      * @param handler : Handler managing this dependency
      */
-    public TemporalDependency(Class spec, boolean agg, Filter filter, BundleContext context, long timeout, TemporalHandler handler) {
+    public TemporalDependency(Class spec, boolean agg, Filter filter, BundleContext context, long timeout, int policy, String defaultImpl, TemporalHandler handler) {
         super(spec, agg, true, filter, null, DependencyModel.DYNAMIC_BINDING_POLICY, context, handler);
-        this.m_timeout = timeout;
+        m_di = defaultImpl;
+        m_policy = policy;
+        m_timeout = timeout;
+        m_handler = handler;
     }
 
     /**
@@ -126,19 +159,84 @@ public class TemporalDependency extends DependencyModel implements FieldIntercep
             }
             // Check 
             if (exhausted) {
-                // Timeout, throw an exception
-                throw new RuntimeException("Service " + getSpecification().getName() + " unavailable : timeout");
+            	return onTimeout();
             } else {
                 ref = getServiceReference();
                 if (isAggregate()) {
                     Object[] svc = (Object[]) Array.newInstance(getSpecification(), 1);
-                    svc[0] = ref;
-                    return svc[0];
+                    svc[0] = getService(ref);
+                    return svc;
                 } else {
                     return getService(ref);
                 }
             }
         }
+    }
+    
+    public void start() {
+    	super.start();
+        switch(m_policy) {
+            case TemporalHandler.NULL:
+                m_nullableObject = null;
+                break;
+            case TemporalHandler.NULLABLE:
+                // To load the proxy we use the POJO class loader. Indeed, this
+                // classloader imports iPOJO (so can access to Nullable) and has
+                // access to the service specification.
+                try {
+                    m_nullableObject = Proxy.newProxyInstance(m_handler
+                            .getInstanceManager().getClazz().getClassLoader(),
+                            new Class[] { getSpecification(), Nullable.class },
+                            new NullableObject()); // NOPMD
+                    if (isAggregate()) {
+                        Object[] array = (Object[]) Array.newInstance(getSpecification(), 1);
+                        array[0] = m_nullableObject;
+                        m_nullableObject = array;                        
+                    }
+                } catch (NoClassDefFoundError e) {
+                    // A NoClassDefFoundError is thrown if the specification uses a
+                    // class not accessible by the actual instance.
+                    // It generally comes from a missing import.
+                    throw new IllegalStateException(
+                            "Cannot create the Nullable object, a referenced class cannot be loaded: "
+                                    + e.getMessage());
+                }
+
+                break;
+            case TemporalHandler.DEFAULT_IMPLEMENTATION:
+             // Create the default-implementation object.
+                try {
+                    Class clazz = m_handler.getInstanceManager().getContext()
+                            .getBundle().loadClass(m_di);
+                    m_nullableObject = clazz.newInstance();
+                } catch (IllegalAccessException e) {
+                    throw new IllegalStateException(
+                            "Cannot load the default-implementation " + m_di
+                                    + " : " + e.getMessage());
+                } catch (InstantiationException e) {
+                    throw new IllegalStateException(
+                            "Cannot load the default-implementation " + m_di
+                                    + " : " + e.getMessage());
+                } catch (ClassNotFoundException e) {
+                    throw new IllegalStateException(
+                            "Cannot load the default-implementation " + m_di
+                                    + " : " + e.getMessage());
+                }
+                if (isAggregate()) {
+                    Object[] array = (Object[]) Array.newInstance(getSpecification(), 1);
+                    array[0] = m_nullableObject;
+                    m_nullableObject = array;
+                }
+                break;
+            case TemporalHandler.EMPTY_ARRAY:
+                m_nullableObject = Array.newInstance(getSpecification(), 0);
+                break;
+        }
+	}
+    
+    public void stop() {
+    	super.stop();
+    	m_nullableObject = null;
     }
 
     /**
@@ -150,5 +248,21 @@ public class TemporalDependency extends DependencyModel implements FieldIntercep
      * @see org.apache.felix.ipojo.FieldInterceptor#onSet(java.lang.Object, java.lang.String, java.lang.Object)
      */
     public void onSet(Object arg0, String arg1, Object arg2) { }
+    
+    /**
+     * Implements the timeout policy according to the specified configuration
+     */
+    private Object onTimeout() {
+        switch(m_policy) {
+            case TemporalHandler.NULL:
+            case TemporalHandler.NULLABLE:
+            case TemporalHandler.DEFAULT_IMPLEMENTATION:
+            case TemporalHandler.EMPTY_ARRAY:
+                return m_nullableObject;
+            default: 
+                // Throws a runtime exception
+                throw new RuntimeException("Service " + getSpecification().getName() + " unavailable : timeout");
+        }
+    }
 
 }

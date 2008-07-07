@@ -45,6 +45,12 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
      */
     public static final int DEFAULT_TIMEOUT = 3000;
     
+    public static final int NO_POLICY = 0;
+    public static final int NULLABLE = 1;
+    public static final int DEFAULT_IMPLEMENTATION = 2;
+    public static final int EMPTY_ARRAY = 3;
+    public static final int NULL = 4;
+    
     /**
      * Handler namespace.
      */
@@ -125,11 +131,36 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
             
             long timeout = DEFAULT_TIMEOUT;
             if (deps[i].containsAttribute("timeout")) {
-                timeout = new Long(deps[i].getAttribute("timeout")).longValue();
+                String to = deps[i].getAttribute("timeout");
+                if (to.equalsIgnoreCase("infinite")  || to.equalsIgnoreCase("-1")) {
+                    timeout = Long.MAX_VALUE; // Infinite wait time ...
+                } else {
+                    timeout = new Long(deps[i].getAttribute("timeout")).longValue();
+                }
             }
             
+            int policy = NO_POLICY;
+            String di = null;
+            String onTimeout = deps[i].getAttribute("onTimeout");
+            if (onTimeout != null) {
+                if (onTimeout.equalsIgnoreCase("nullable")) {
+                    policy = NULLABLE;
+                } else if (onTimeout.equalsIgnoreCase("empty-array")) {
+                    policy = EMPTY_ARRAY;
+                    if (! agg) {
+                        // The empty array policy can only be used on aggregate dependencies
+                        error("Cannot use the empty array policy for " + field + " : non aggregate dependency.");
+                    }
+                } else if (onTimeout.equalsIgnoreCase("null")) {
+                    policy = NULL;
+                } else if (onTimeout.length() > 0) {
+                    di = onTimeout;
+                    policy = DEFAULT_IMPLEMENTATION;
+                }
+            }
+         
             Class specification = DependencyModel.loadSpecification(spec, getInstanceManager().getContext());
-            TemporalDependency dep = new TemporalDependency(specification, agg, filter, getInstanceManager().getContext(), timeout, this);
+            TemporalDependency dep = new TemporalDependency(specification, agg, filter, getInstanceManager().getContext(), timeout, policy, di, this);
             m_dependencies.add(dep);
             
             getInstanceManager().register(fieldmeta, dep);
