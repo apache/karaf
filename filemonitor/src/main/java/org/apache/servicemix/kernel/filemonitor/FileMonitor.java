@@ -392,11 +392,25 @@ public class FileMonitor {
         for (int i = 0; i < bundles.length; i++) {
             Bundle bundle = bundles[i];
             String location = bundle.getLocation();
-            if (location.endsWith(absoluteFilePath)) {
+            if (filePathsMatch(absoluteFilePath, location)) {
                 return bundle;
             }
         }
         return null;
+    }
+
+    protected static boolean filePathsMatch(String p1, String p2) {
+        p1 = normalizeFilePath(p1);
+        p2 = normalizeFilePath(p2);
+        return (p1 != null && p1.equalsIgnoreCase(p2));
+    }
+
+    protected static String normalizeFilePath( String path ) {
+        if (path != null) {
+            path = path.replaceFirst("file:/*", "");
+            path = path.replaceAll("[\\\\/]+", "/");
+        }
+        return path;
     }
 
     protected void updateConfiguration(File file) throws IOException, InvalidSyntaxException {
