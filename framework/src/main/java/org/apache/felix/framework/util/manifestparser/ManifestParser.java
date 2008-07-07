@@ -62,70 +62,37 @@ public class ManifestParser
         Map dupeMap = new HashMap();
 
         //
-        // Get bundle version.
-        //
-
-        if (m_headerMap.get(Constants.BUNDLE_VERSION) != null)
-        {
-            try
-            {
-                m_bundleVersion = Version.parseVersion((String) m_headerMap.get(Constants.BUNDLE_VERSION));
-            }
-            catch (RuntimeException ex)
-            {
-                // R4 bundle versions must parse, R3 bundle version may not.
-                if (getManifestVersion().equals("2"))
-                {
-                    throw ex;
-                }
-                m_bundleVersion = Version.emptyVersion;
-            }
-        }
-
-        //
         // Parse bundle symbolic name.
         //
 
-        Object[][][] clauses = parseStandardHeader(
-            (String) headerMap.get(Constants.BUNDLE_SYMBOLICNAME));
-        if (clauses.length > 0)
+        ICapability moduleCap = parseBundleSymbolicName(m_headerMap);
+        if (moduleCap != null)
         {
-            if (clauses.length > 1)
-            {
-                throw new BundleException(
-                    "Cannot have multiple symbolic names: "
-                        + headerMap.get(Constants.BUNDLE_SYMBOLICNAME));
-            }
-            else if (clauses[0][CLAUSE_PATHS_INDEX].length > 1)
-            {
-                throw new BundleException(
-                    "Cannot have multiple symbolic names: "
-                        + headerMap.get(Constants.BUNDLE_SYMBOLICNAME));
-            }
-            // Add a module capability.
+            m_bundleVersion = (Version)
+                moduleCap.getProperties().get(Constants.BUNDLE_VERSION_ATTRIBUTE);
+            m_bundleSymbolicName = (String)
+                moduleCap.getProperties().get(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
+
+            // Add the module capability to all capabilities.
             // TODO: FRAGMENT - Fragment bundles cannot be required, so we
             //       should not add this capability, but for now we are using
             //       it to get the symbolic name.
-            m_bundleSymbolicName = (String) clauses[0][CLAUSE_PATHS_INDEX][0];
-            R4Attribute[] attrs = new R4Attribute[2];
-            attrs[0] = new R4Attribute(
-                Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, m_bundleSymbolicName, false);
-            attrs[1] = new R4Attribute(
-                Constants.BUNDLE_VERSION_ATTRIBUTE, m_bundleVersion, false);
-            capList.add(new Capability(ICapability.MODULE_NAMESPACE, null, attrs));
+            capList.add(moduleCap);
             // Add a host capability if the bundle is not a fragment. A host
             // capability is the same as a module capability, but with a
             // different capability namespace.
             if (headerMap.get(Constants.FRAGMENT_HOST) == null)
             {
-                capList.add(new Capability(ICapability.HOST_NAMESPACE, null, attrs));
+                capList.add(new Capability(
+                    ICapability.HOST_NAMESPACE, null,
+                    ((Capability) moduleCap).getAttributes()));
             }
         }
 
         //
         // Parse Fragment-Host.
         //
-        clauses = parseStandardHeader(
+        Object[][][] clauses = parseStandardHeader(
             (String) headerMap.get(Constants.FRAGMENT_HOST));
         if (clauses.length > 0)
         {
@@ -781,6 +748,58 @@ public class ManifestParser
         {
             throw new BundleException("Invalid Extension Bundle Manifest");
         }
+    }
+
+    public static ICapability parseBundleSymbolicName(Map headerMap)
+        throws BundleException
+    {
+        Object[][][] clauses = parseStandardHeader(
+            (String) headerMap.get(Constants.BUNDLE_SYMBOLICNAME));
+        if (clauses.length > 0)
+        {
+            if (clauses.length > 1)
+            {
+                throw new BundleException(
+                    "Cannot have multiple symbolic names: "
+                        + headerMap.get(Constants.BUNDLE_SYMBOLICNAME));
+            }
+            else if (clauses[0][CLAUSE_PATHS_INDEX].length > 1)
+            {
+                throw new BundleException(
+                    "Cannot have multiple symbolic names: "
+                        + headerMap.get(Constants.BUNDLE_SYMBOLICNAME));
+            }
+
+            // Get bundle version.
+            Version bundleVersion = null;
+            if (headerMap.get(Constants.BUNDLE_VERSION) != null)
+            {
+                try
+                {
+                    bundleVersion = Version.parseVersion((String) headerMap.get(Constants.BUNDLE_VERSION));
+                }
+                catch (RuntimeException ex)
+                {
+                    // R4 bundle versions must parse, R3 bundle version may not.
+                    if (((String) headerMap.get(Constants.BUNDLE_MANIFESTVERSION)).equals("2"))
+                    {
+                        throw ex;
+                    }
+                    bundleVersion = Version.emptyVersion;
+                }
+            }
+
+            // Create a module capability and return it.
+            String symName = (String) clauses[0][CLAUSE_PATHS_INDEX][0];
+            R4Attribute[] attrs = new R4Attribute[2];
+            attrs[0] = new R4Attribute(
+                Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symName, false);
+            attrs[1] = new R4Attribute(
+                Constants.BUNDLE_VERSION_ATTRIBUTE, bundleVersion, false);
+            return new Capability(ICapability.MODULE_NAMESPACE, null, attrs);
+        }
+
+        return null;
     }
 
     public static ICapability[] parseExportHeader(String header)

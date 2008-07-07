@@ -39,6 +39,7 @@ import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
+import org.apache.felix.framework.util.manifestparser.R4Attribute;
 import org.apache.felix.framework.util.manifestparser.R4Directive;
 import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.moduleloader.ICapability;
@@ -146,6 +147,8 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
 
 // TODO: FRAMEWORK - Not all of this stuff really belongs here, probably only exports.
         // Populate system bundle header map.
+        // Note: This is a reference to the actual header map,
+        // so these changes are saved. Kind of hacky.
         Map map = ((SystemBundleArchive) m_systemBundleInfo.getArchive()).getManifestHeader(0);
         // Initialize header map as a case insensitive map.
         map.put(FelixConstants.BUNDLE_VERSION,
@@ -167,8 +170,10 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         // packages should be exported by the system bundle.
         try
         {
-            setCapabilities(ManifestParser.parseExportHeader(
-                (String) configMap.get(Constants.FRAMEWORK_SYSTEMPACKAGES)));
+            setCapabilities(
+                addModuleCapability(map,
+                    ManifestParser.parseExportHeader(
+                        (String) configMap.get(Constants.FRAMEWORK_SYSTEMPACKAGES))));
         }
         catch (Exception ex)
         {
@@ -177,6 +182,45 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
                 Logger.LOG_ERROR,
                 "Error parsing system bundle export statement: "
                 + configMap.get(Constants.FRAMEWORK_SYSTEMPACKAGES), ex);
+        }
+    }
+
+    private ICapability[] addModuleCapability(Map headerMap, ICapability[] caps)
+    {
+        try
+        {
+            // First parse the symbolic name header.
+            ICapability moduleCap = ManifestParser.parseBundleSymbolicName(headerMap);
+            // Create a copy of the module capability with the standard
+            // alias for the bundle symbolic name.
+            R4Directive[] dirs = ((Capability) moduleCap).getDirectives();
+            R4Attribute[] attrs = ((Capability) moduleCap).getAttributes();
+            R4Attribute[] attrsAlias = new R4Attribute[attrs.length];
+            System.arraycopy(attrs, 0, attrsAlias, 0, attrs.length);
+            // Modify the alias attributes to have the standard symbolic name.
+            for (int i = 0; i < attrsAlias.length; i++)
+            {
+                if (attrsAlias[i].getName().equalsIgnoreCase(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE))
+                {
+                    attrsAlias[i] = new R4Attribute(
+                        Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, false);
+                }
+            }
+            // Create the alias capability.
+            ICapability aliasCap = new Capability(ICapability.MODULE_NAMESPACE, dirs, attrsAlias);
+            // Finally, add the module and alias capabilities to the
+            // existing capabilities.
+            ICapability[] temp = new ICapability[caps.length + 2];
+            System.arraycopy(caps, 0, temp, 2, caps.length);
+            temp[0] = moduleCap;
+            temp[1] = aliasCap;
+            return temp;
+        }
+        catch (BundleException ex)
+        {
+            // This should not happen, but in case it does, then just
+            // return the original array of capabilities.
+            return caps;
         }
     }
 
@@ -370,9 +414,10 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
     {
         m_capabilities = capabilities;
 
+        // Note: This is a reference to the actual header map,
+        // so these changes are saved. Kind of hacky.
         Map map = ((SystemBundleArchive) m_systemBundleInfo.getArchive()).getManifestHeader(0);
         map.put(Constants.EXPORT_PACKAGE, convertCapabilitiesToHeaders(map));
-        ((SystemBundleArchive) m_systemBundleInfo.getArchive()).setManifestHeader(map);
     }
 
     public IRequirement[] getDynamicRequirements()

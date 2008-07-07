@@ -563,7 +563,7 @@ public class Felix extends FelixBundle
 
     public String getSymbolicName()
     {
-        return Constants.SYSTEM_BUNDLE_LOCATION;
+        return Constants.SYSTEM_BUNDLE_SYMBOLICNAME;
     }
 
     public boolean hasPermission(Object obj)
@@ -842,7 +842,7 @@ ex.printStackTrace();
             {
                 // This should never happen.
                 throw new BundleException(
-                    "Unresolved package in System Bundle:"
+                    "Unresolved constraint in System Bundle:"
                     + ex.getRequirement());
             }
 
@@ -1726,7 +1726,7 @@ ex.printStackTrace();
             if (ex.getModule() != null)
             {
                 throw new BundleException(
-                    "Unresolved package in bundle "
+                    "Unresolved constraint in bundle "
                     + Util.getBundleIdFromModuleId(ex.getModule().getId())
                     + ": " + ex.getRequirement());
             }

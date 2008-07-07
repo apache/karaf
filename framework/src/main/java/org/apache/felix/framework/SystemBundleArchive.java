@@ -151,9 +151,4 @@ public class SystemBundleArchive extends BundleArchive
     {
         return m_headerMap;
     }
-
-    public void setManifestHeader(Map headerMap)
-    {
-        m_headerMap = headerMap;
-    }
 }
