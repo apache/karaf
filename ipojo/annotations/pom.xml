@@ -54,7 +54,8 @@
 							iPOJO Annotations
 						</Bundle-Description>
 						<Export-Package>
-							org.apache.felix.ipojo.annotations
+							org.apache.felix.ipojo.annotations,
+							org.apache.felix.ipojo.handler.temporal
 						</Export-Package>
 						<Include-Resource>
 							META-INF/LICENCE=LICENSE,
