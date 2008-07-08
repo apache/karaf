@@ -104,7 +104,7 @@ public class ManifestMetadataParser {
      * Parse a property.
      * @param prop : the current element to parse
      * @param dict : the dictionary to populate
-     * @throws ParseException : occurs if the proeprty cannot be parsed correctly
+     * @throws ParseException : occurs if the property cannot be parsed correctly
      */
     private void parseProperty(Element prop, Dictionary dict) throws ParseException {
         // Check that the property has a name
@@ -118,13 +118,15 @@ public class ManifestMetadataParser {
             // Recursive case
             // Check if there is 'property' element
             Element[] subProps = prop.getElements("property");
-            if (subProps.length == 0) {
-                throw new ParseException("A complex property must have at least one 'property' sub-element");
-            }
-            Dictionary dict2 = new Properties();
-            for (int i = 0; i < subProps.length; i++) {
-                parseProperty(subProps[i], dict2);
-                dict.put(name, dict2);
+            if (subProps != null) {
+                Dictionary dict2 = new Properties();
+                for (int i = 0; i < subProps.length; i++) {
+                    parseProperty(subProps[i], dict2);
+                    dict.put(name, dict2);
+                }
+            } else {
+                // If the no sub-properties, inject an empty dictionary.
+                dict.put(name, new Properties());
             }
         } else {
             dict.put(prop.getAttribute("name"), prop.getAttribute("value"));
