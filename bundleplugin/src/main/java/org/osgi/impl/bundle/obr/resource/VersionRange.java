@@ -1,5 +1,5 @@
 /*
- * $Id: VersionRange.java 45 2007-10-01 12:56:02Z peter.kriens@aqute.biz $
+ * $Id: VersionRange.java 46 2008-01-17 19:05:21Z peter.kriens@aqute.biz $
  * 
  * Copyright (c) OSGi Alliance (2002, 2006, 2007). All Rights Reserved.
  * 
@@ -28,19 +28,19 @@ public class VersionRange implements Comparable {
 	char start = '[';
 	char end = ']';
 
-	static String V = "\\s*[0-9]+(\\.[0-9]+(\\.[0-9]+(\\.[a-zA-Z0-9_-]+)?)?)?\\s*";
-	static Pattern RANGE = Pattern.compile("(\\(|\\[)(" + V + "),(" + V
-			+ ")(\\)|\\])");
+	static String V = "[0-9]+(\\.[0-9]+(\\.[0-9]+(\\.[a-zA-Z0-9_-]+)?)?)?";
+	static Pattern RANGE = Pattern.compile("(\\(|\\[)\\s*(" + V + ")\\s*,\\s*(" + V
+			+ ")\\s*(\\)|\\])");
 
 	public VersionRange(String string) {
 		string = string.trim();
 		Matcher m = RANGE.matcher(string);
 		if (m.matches()) {
 			start = m.group(1).charAt(0);
-			low = new Version(m.group(2).trim());
-			high = new Version(m.group(6).trim());
+			low = new Version(m.group(2));
+			high = new Version(m.group(6));
 			end = m.group(10).charAt(0);
-			if (low.compareTo(high) >= 0)
+			if (low.compareTo(high) > 0)
 				throw new IllegalArgumentException(
 						"Low Range is higher than High Range: " + low + "-"
 								+ high);
