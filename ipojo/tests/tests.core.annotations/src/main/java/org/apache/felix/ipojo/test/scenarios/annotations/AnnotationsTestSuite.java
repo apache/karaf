@@ -40,6 +40,9 @@ public class AnnotationsTestSuite extends TestSuite {
         ots.addTestSuite(PolicyDependency.class);
         ots.addTestSuite(FilteredDependency.class);
         ots.addTestSuite(RankedDependency.class);
+        
+        // External handler annotations
+        ots.addTestSuite(TemporalDependencies.class);
         return ots;
     }
 

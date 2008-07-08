@@ -5,7 +5,7 @@
 	</component>
 	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-CheckServiceProviderTimeout">
-		<temp:requires field="fs" timeout="4000"/>
+		<temp:requires field="fs" timeout="300"/>
 		<provides/>
 	</component>
 	
@@ -30,12 +30,12 @@
 	</component>
 	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-NullableCheckServiceProviderTimeout">
-		<temp:requires field="fs" timeout="4000" onTimeout="nullable"/>
+		<temp:requires field="fs" timeout="300" onTimeout="nullable"/>
 		<provides/>
 	</component>
 	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-NullableMultipleCheckServiceProviderTimeout">
-		<temp:requires field="fs" timeout="4000" onTimeout="nullable"/>
+		<temp:requires field="fs" timeout="300" onTimeout="nullable"/>
 		<provides/>
 	</component>
 	
@@ -51,12 +51,12 @@
 	</component>
 	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-DICheckServiceProviderTimeout">
-		<temp:requires field="fs" timeout="4000" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider"/>
+		<temp:requires field="fs" timeout="300" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider"/>
 		<provides/>
 	</component>
 	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-DIMultipleCheckServiceProviderTimeout">
-		<temp:requires field="fs" timeout="4000" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider"/>
+		<temp:requires field="fs" timeout="300" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider"/>
 		<provides/>
 	</component>
 	
@@ -72,12 +72,12 @@
 	</component>
 	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-NullCheckServiceProviderTimeout">
-		<temp:requires field="fs" timeout="4000" onTimeout="null"/>
+		<temp:requires field="fs" timeout="300" onTimeout="null"/>
 		<provides/>
 	</component>
 	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-NullMultipleCheckServiceProviderTimeout">
-		<temp:requires field="fs" timeout="4000" onTimeout="null"/>
+		<temp:requires field="fs" timeout="300" onTimeout="null"/>
 		<provides/>
 	</component>
 	
@@ -88,7 +88,7 @@
 	</component>
 	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-EmptyMultipleCheckServiceProviderTimeout">
-		<temp:requires field="fs" timeout="4000" onTimeout="empty-array"/>
+		<temp:requires field="fs" timeout="300" onTimeout="empty-array"/>
 		<provides/>
 	</component>
 </ipojo>

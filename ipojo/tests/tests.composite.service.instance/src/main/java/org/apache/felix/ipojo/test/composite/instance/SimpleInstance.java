@@ -192,7 +192,7 @@ public class SimpleInstance extends OSGiTestCase {
 		} catch(Exception e) {
 			fail("Cannot instantiate under : " + e.getMessage());
 		}
-		ServiceReference ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "under");
+		ServiceReference ref = Utils.getServiceReference(context, Architecture.class.getName(), "(architecture.instance=under)");
 		assertNotNull("Check architecture availability", ref);
 		Architecture arch = (Architecture) context.getService(ref);
 		InstanceDescription id = arch.getInstanceDescription();
@@ -210,7 +210,7 @@ public class SimpleInstance extends OSGiTestCase {
 		
 		fact1.stop();
 		assertTrue("Check instance validity - 2", under.getState() == ComponentInstance.VALID);
-		ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "under");
+		ref = Utils.getServiceReference(context, Architecture.class.getName(), "(architecture.instance=under)");
 		assertNotNull("Check architecture availability", ref);
 		arch = (Architecture) context.getService(ref);
 		id = arch.getInstanceDescription();

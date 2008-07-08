@@ -101,13 +101,13 @@ public class POJOCreation extends OSGiTestCase {
         p7.put("name", compName7);
         ci_lazzy_sevM = Utils.getComponentInstance(context, factName7 ,p7);
 		
-		lazzyRef = Utils.getServiceReference(context, Architecture.class.getName(), "(instance.name="+compName+")");
-		immRef =   Utils.getServiceReference(context, Architecture.class.getName(), "(instance.name="+compName2+")");
-		immRefSing = Utils.getServiceReference(context, Architecture.class.getName(), "(instance.name="+compName3+")");
-		lazzyRefSing = Utils.getServiceReference(context, Architecture.class.getName(), "(instance.name="+compName4+")");
-		lazzyRefSev = Utils.getServiceReference(context, Architecture.class.getName(), "(instance.name="+compName5+")");
-		lazzyRefSingM = Utils.getServiceReference(context, Architecture.class.getName(), "(instance.name="+compName6+")");
-		lazzyRefSevM = Utils.getServiceReference(context, Architecture.class.getName(), "(instance.name="+compName7+")");
+		lazzyRef = Utils.getServiceReference(context, Architecture.class.getName(), "(architecture.instance="+compName+")");
+		immRef =   Utils.getServiceReference(context, Architecture.class.getName(), "(architecture.instance="+compName2+")");
+		immRefSing = Utils.getServiceReference(context, Architecture.class.getName(), "(architecture.instance="+compName3+")");
+		lazzyRefSing = Utils.getServiceReference(context, Architecture.class.getName(), "(architecture.instance="+compName4+")");
+		lazzyRefSev = Utils.getServiceReference(context, Architecture.class.getName(), "(architecture.instance="+compName5+")");
+		lazzyRefSingM = Utils.getServiceReference(context, Architecture.class.getName(), "(architecture.instance="+compName6+")");
+		lazzyRefSevM = Utils.getServiceReference(context, Architecture.class.getName(), "(architecture.instance="+compName7+")");
 		
 		lazzyArch = (Architecture) context.getService(lazzyRef);
 		immeArch = (Architecture) context.getService(immRef);

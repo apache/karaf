@@ -23,7 +23,7 @@ import org.apache.felix.ipojo.ComponentInstance;
 public class DelayedProvider implements Runnable {
     
     ComponentInstance instance;
-    long delay = 5000;
+    long delay = 400;
     Thread thread;
     
     public DelayedProvider(ComponentInstance ci) {

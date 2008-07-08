@@ -55,8 +55,8 @@ public class ExceptionTest extends OSGiTestCase {
 		p2.put("name", compName2);
 		ci_immediate = Utils.getComponentInstance(context, factName2, p2);
 		
-		lazzyRef = Utils.getServiceReference(context, Architecture.class.getName(), "(instance.name="+compName+")");
-		immRef =   Utils.getServiceReference(context, Architecture.class.getName(), "(instance.name="+compName2+")");
+		lazzyRef = Utils.getServiceReference(context, Architecture.class.getName(), "(architecture.instance="+compName+")");
+		immRef =   Utils.getServiceReference(context, Architecture.class.getName(), "(architecture.instance="+compName2+")");
 		assertNotNull("LazzyRef", lazzyRef);
 		assertNotNull("ImmRef", immRef);
 	}

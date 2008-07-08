@@ -46,7 +46,7 @@ public class EmptyArrayTest extends OSGiTestCase {
        provider.stop();
        ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
        assertNotNull("Check cs availability - 2", ref_cs);
-       DelayedProvider dp = new DelayedProvider(provider, 5000);
+       DelayedProvider dp = new DelayedProvider(provider, 400);
        dp.start();
        cs = (CheckService) context.getService(ref_cs);
        boolean res = false;
@@ -88,14 +88,14 @@ public class EmptyArrayTest extends OSGiTestCase {
        ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
        assertNotNull("Check cs availability - 2", ref_cs);
        long begin = System.currentTimeMillis();
-       DelayedProvider dp = new DelayedProvider(provider1, 2500);
-       DelayedProvider dp2 = new DelayedProvider(provider2, 1000);
+       DelayedProvider dp = new DelayedProvider(provider1, 250);
+       DelayedProvider dp2 = new DelayedProvider(provider2, 100);
        dp.start();
        dp2.start();
        cs = (CheckService) context.getService(ref_cs);
        assertTrue("Check invocation - 2", cs.check());
        long end = System.currentTimeMillis();
-       assertTrue("Assert delay", (end - begin) >= 1000  && (end - begin) <= 2500);
+       assertTrue("Assert delay", (end - begin) >= 100  && (end - begin) <= 250);
        dp.stop();
        dp2.stop();
        
