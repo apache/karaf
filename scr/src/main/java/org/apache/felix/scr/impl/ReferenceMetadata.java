@@ -18,10 +18,6 @@
  */
 package org.apache.felix.scr.impl;
 
-
-import org.osgi.service.component.ComponentException;
-
-
 /**
  * Information associated to a dependency
  *

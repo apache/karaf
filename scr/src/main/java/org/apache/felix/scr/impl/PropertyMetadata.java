@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,11 +18,7 @@
  */
 package org.apache.felix.scr.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
-
-import org.osgi.service.component.ComponentException;
+import java.util.*;
 
 /**
  * A property descriptor that contains the information for properties
@@ -30,36 +26,36 @@ import org.osgi.service.component.ComponentException;
  *
  */
 public class PropertyMetadata {
-	
+
 	// Name of the property (required)
 	private String m_name;
-	
+
 	// Type of the property (optional)
 	private String m_type = "String";
-	
+
 	// Value of the type (optional)
 	private Object m_value;
-	
+
 	// Flag that indicates if this PropertyMetadata has been validated and thus has become immutable
 	private boolean m_validated = false;
 
 	/**
 	 * Set the name
-	 * 
+	 *
 	 * @param name
 	 */
 	public void setName(String name) {
 		if (m_validated == true) {
 			return;
 		}
-		
+
 		m_name = name;
 	}
-	
+
 
 	/**
 	 * Set the type
-	 * 
+	 *
 	 * @param type
 	 */
 	public void setType(String type) {
@@ -68,24 +64,24 @@ public class PropertyMetadata {
 		}
 		m_type = type;
 	}
-		
+
 	/**
 	 * Set the value
-	 * 
+	 *
 	 * @param value
 	 */
 	public void setValue(String value) {
 		if (m_validated == true) {
 			return;
 		}
-		
+
         m_value = toType( value );
 	}
-    
+
     /**
      * Set multiple values as an array, where the values are contained in
      * the string as one value per line.
-     * 
+     *
      * @param values
      */
     public void setValues(String values) {
@@ -98,7 +94,7 @@ public class PropertyMetadata {
                 valueList.add(toType( value ));
             }
         }
-        
+
         // 112.4.5 Except for String objects, the result will be translated to an array of primitive types.
         if(m_type.equals("String")) {
             m_value = valueList.toArray( new String[valueList.size()] );
@@ -167,7 +163,7 @@ public class PropertyMetadata {
 
     /**
      * Get the name of the property
-     * 
+     *
      * @return the name of the property
      */
     public String getName() {
@@ -176,7 +172,7 @@ public class PropertyMetadata {
 
     /**
      * Get the type of the property
-     * 
+     *
      * @return the type of the property
      */
     public String getType() {
@@ -185,7 +181,7 @@ public class PropertyMetadata {
 
     /**
      * Get the value of the property
-     * 
+     *
      * @return the value of the property as an Object
      */
     public Object getValue() {
@@ -202,7 +198,7 @@ public class PropertyMetadata {
             throw componentMetadata.validationFailure( "Property name attribute is mandatory" );
         }
     }
-    
+
     private Object toType(String value) {
         // 112.4.5 Parsing of the value is done by the valueOf(String) method (P. 291)
         // Should the type accept lowercase too?
