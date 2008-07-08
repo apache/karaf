@@ -27,7 +27,7 @@ package org.apache.xerces.impl.dv.util;
  * @xerces.internal  
  * 
  * @author Jeffrey Rodriguez
- * @version $Id: HexBin.java,v 1.13 2004/10/14 15:20:18 mrglavas Exp $
+ * @version $Id$
  */
 public final class  HexBin {
     static private final int  BASELENGTH   = 128;

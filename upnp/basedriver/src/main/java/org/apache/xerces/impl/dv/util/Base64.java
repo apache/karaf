@@ -35,7 +35,7 @@ package org.apache.xerces.impl.dv.util;
  *
  * @author Jeffrey Rodriguez
  * @author Sandy Gao
- * @version $Id: Base64.java,v 1.15 2004/10/14 15:20:18 mrglavas Exp $
+ * @version $Id$
  */
 public final class  Base64 {
 
