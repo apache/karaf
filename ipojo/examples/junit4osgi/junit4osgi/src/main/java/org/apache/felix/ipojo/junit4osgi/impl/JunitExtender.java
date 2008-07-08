@@ -80,7 +80,8 @@ public class JunitExtender implements OSGiJunitRunner {
     }
 
     private synchronized void removeTestSuites(Bundle bundle) {
-        m_suites.remove(bundle);
+        List list = (List) m_suites.remove(bundle);
+        System.out.println("Unload test suites " + list);
     }
 
     void onBundleDeparture(Bundle bundle) {
