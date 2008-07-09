@@ -60,9 +60,9 @@ public final class DependencyEmbedder
     private final Collection m_dependencyArtifacts;
 
     /**
-     * Inlined artifacts.
+     * Inlined paths.
      */
-    private final Collection m_inlinedArtifacts;
+    private final Collection m_inlinedPaths;
 
     /**
      * Embedded artifacts.
@@ -74,7 +74,7 @@ public final class DependencyEmbedder
     {
         m_dependencyArtifacts = dependencyArtifacts;
 
-        m_inlinedArtifacts = new HashSet();
+        m_inlinedPaths = new HashSet();
         m_embeddedArtifacts = new HashSet();
     }
 
@@ -84,7 +84,7 @@ public final class DependencyEmbedder
         StringBuffer includeResource = new StringBuffer();
         StringBuffer bundleClassPath = new StringBuffer();
 
-        m_inlinedArtifacts.clear();
+        m_inlinedPaths.clear();
         m_embeddedArtifacts.clear();
 
         String embedDependencyHeader = properties.getProperty( EMBED_DEPENDENCY );
@@ -97,9 +97,9 @@ public final class DependencyEmbedder
             Map embedInstructions = OSGiHeader.parseHeader( embedDependencyHeader );
             processEmbedInstructions( embedInstructions );
 
-            for ( Iterator i = m_inlinedArtifacts.iterator(); i.hasNext(); )
+            for ( Iterator i = m_inlinedPaths.iterator(); i.hasNext(); )
             {
-                inlineDependency( ( Artifact ) i.next(), includeResource );
+                inlineDependency( ( String ) i.next(), includeResource );
             }
             for ( Iterator i = m_embeddedArtifacts.iterator(); i.hasNext(); )
             {
@@ -177,7 +177,7 @@ public final class DependencyEmbedder
         DependencyFilter filter;
         for ( Iterator clauseIterator = embedInstructions.entrySet().iterator(); clauseIterator.hasNext(); )
         {
-            boolean inline = false;
+            String inline = "false";
 
             // must use a fresh *modifiable* collection for each unique clause
             Collection filteredDependencies = new HashSet( m_dependencyArtifacts );
@@ -281,8 +281,7 @@ public final class DependencyEmbedder
                 }
                 else if ( "inline".equals( attr.getKey() ) )
                 {
-                    inline = Boolean.valueOf( ( String ) attr.getValue() ).booleanValue();
-
+                    inline = ( String ) attr.getValue();
                     continue;
                 }
                 else
@@ -294,18 +293,42 @@ public final class DependencyEmbedder
                 filter.filter( filteredDependencies );
             }
 
-            if ( inline )
-            {
-                m_inlinedArtifacts.addAll( filteredDependencies );
-            }
-            else
+            if ( null == inline || "false".equalsIgnoreCase( inline ) )
             {
                 m_embeddedArtifacts.addAll( filteredDependencies );
             }
+            else
+            {
+                for ( Iterator i = filteredDependencies.iterator(); i.hasNext(); )
+                {
+                    addInlinedPaths( (Artifact) i.next(), inline, m_inlinedPaths );
+                }
+            }
         }
+    }
 
-        // remove any inlined artifacts from the embedded list
-        m_embeddedArtifacts.removeAll( m_inlinedArtifacts );
+
+    private static void addInlinedPaths( Artifact dependency, String inline, Collection inlinedPaths )
+    {
+        File path = dependency.getFile();
+        if ( null != path && path.exists() )
+        {
+            if ( "true".equalsIgnoreCase( inline ) || inline.length() == 0 )
+            {
+                inlinedPaths.add( path.getPath() );
+            }
+            else
+            {
+                String[] filters = inline.split("\\|");
+                for ( int i = 0; i < filters.length; i++ )
+                {
+                    if ( filters[i].length() > 0 )
+                    {
+                        inlinedPaths.add( path + "!/" + filters[i] );
+                    }
+                }
+            }
+        }
     }
 
 
@@ -370,25 +393,21 @@ public final class DependencyEmbedder
     }
 
 
-    private void inlineDependency( Artifact dependency, StringBuffer includeResource )
+    private static void inlineDependency( String path, StringBuffer includeResource )
     {
-        File sourceFile = dependency.getFile();
-        if ( null != sourceFile && sourceFile.exists() )
+        if ( includeResource.length() > 0 )
         {
-            if ( includeResource.length() > 0 )
-            {
-                includeResource.append( ',' );
-            }
-
-            includeResource.append( '@' );
-            includeResource.append( sourceFile );
+            includeResource.append( ',' );
         }
+
+        includeResource.append( '@' );
+        includeResource.append( path );
     }
 
 
-    public Collection getInlinedArtifacts()
+    public Collection getInlinedPaths()
     {
-        return m_inlinedArtifacts;
+        return m_inlinedPaths;
     }
 
 
