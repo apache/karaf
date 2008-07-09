@@ -188,9 +188,9 @@ public class GenerateFeaturesFileMojo extends MojoSupport {
         }
         // first write the dependencies
         for (Artifact dependency : getDependencies(artifact)) {
-            if (dependency.isOptional()) {
+            if (dependency.isOptional() || "test".equals(dependency.getScope())) {
                 // omit optional dependencies
-                getLog().debug(String.format("Omitting optional dependency '%s' for '%s'", 
+                getLog().debug(String.format("Omitting optional and/or test scoped dependency '%s' for '%s'", 
                                              dependency, artifact));
                 continue;
             }
@@ -230,7 +230,7 @@ public class GenerateFeaturesFileMojo extends MojoSupport {
         }
         for (Artifact dependency : getDependencies(wrapper)) {
             //some of these wrapper bundles provide for multiple JAR files, no need to include any of them after adding the wrapper
-            getLog().debug(String.format("Adding '%s' also provides '%s'", wrapper, dependency));
+            getLog().debug(String.format("'%s' also provides '%s'", wrapper, dependency));
             currentFeature.add(dependency);
         }
         return wrapper;
