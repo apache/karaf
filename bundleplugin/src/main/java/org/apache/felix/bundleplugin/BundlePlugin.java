@@ -363,13 +363,23 @@ public class BundlePlugin extends AbstractMojo
         includeMavenResources( currentProject, properties, getLog() );
 
         if ( !properties.containsKey( Analyzer.EXPORT_PACKAGE ) &&
-             !properties.containsKey( Analyzer.EXPORT_CONTENTS ) &&
              !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
         {
-            String bsn = properties.getProperty( Analyzer.BUNDLE_SYMBOLICNAME );
-            String namespace = bsn.replaceAll( "\\W", "." );
+            if ( properties.containsKey( Analyzer.EXPORT_CONTENTS ) )
+            {
+                /*
+                 * if we have exportcontents but no export packages or private packages then we're probably embedding or
+                 * inlining one or more jars, so set private package to a non-null (but empty) value to keep Bnd happy.
+                 */
+                properties.put( Analyzer.PRIVATE_PACKAGE, "!*" );
+            }
+            else
+            {
+                String bsn = properties.getProperty( Analyzer.BUNDLE_SYMBOLICNAME );
+                String namespace = bsn.replaceAll( "\\W", "." );
 
-            properties.put( Analyzer.EXPORT_PACKAGE, namespace + ".*" );
+                properties.put( Analyzer.EXPORT_PACKAGE, namespace + ".*" );
+            }
         }
 
         // update BND instructions to embed selected Maven dependencies
