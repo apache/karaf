@@ -20,7 +20,9 @@ package org.apache.felix.ipojo.parser;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.metadata.Attribute;
@@ -111,26 +113,191 @@ public class ManifestMetadataParser {
         String name = prop.getAttribute("name");
         String value = prop.getAttribute("value");
         if (name == null) {
-            throw new ParseException("A property does not have the 'name' attribute");
+            throw new ParseException("A property does not have the 'name' attribute: " + prop);
         }
-        //case : the property element has a 'value' attribute
+        //case : the property element has no 'value' attribute
         if (value == null) {
             // Recursive case
-            // Check if there is 'property' element
-            Element[] subProps = prop.getElements("property");
-            if (subProps != null) {
-                Dictionary dict2 = new Properties();
-                for (int i = 0; i < subProps.length; i++) {
-                    parseProperty(subProps[i], dict2);
-                    dict.put(name, dict2);
+            // Get the type of the structure to create
+            String type = prop.getAttribute("type");
+            if (type == null || type.equalsIgnoreCase("dictionary")) {
+                    dict.put(name, parseDictionary(prop));
+            } else if (type.equalsIgnoreCase("map")) {
+                    dict.put(name, parseMap(prop));
+            }  else if (type.equalsIgnoreCase("list")) {
+                    dict.put(name, parseList(prop));
+            } else if (type.equalsIgnoreCase("array")) {
+                List list = parseList(prop);
+                boolean isString = true;
+                for (int i = 0; isString && i < list.size(); i++) {
+                    isString = list.get(i) instanceof String;                                              
                 }
-            } else {
-                // If the no sub-properties, inject an empty dictionary.
-                dict.put(name, new Properties());
+                Object[] obj = null; 
+                if (isString) {
+                    obj = new String[list.size()];    
+                } else {
+                    obj = new Object[list.size()];
+                }
+                dict.put(name, list.toArray(obj)); // Transform the list to array
             }
         } else {
             dict.put(prop.getAttribute("name"), prop.getAttribute("value"));
         }
+    }
+    
+    private Dictionary parseDictionary(Element prop) throws ParseException {
+     // Check if there is 'property' elements
+        Element[] subProps = prop.getElements("property");
+        if (subProps != null) {
+            Dictionary dict2 = new Properties();
+            for (int i = 0; i < subProps.length; i++) {
+                parseProperty(subProps[i], dict2);
+            }
+            return dict2;
+        } else {
+            // If the no sub-properties, inject an empty dictionary.
+            return new Properties();
+        }
+    }
+    
+    private Map parseMap(Element prop) throws ParseException {
+        // Check if there is 'property' elements
+        Element[] subProps = prop.getElements("property");
+        if (subProps != null) {
+            Map map = new HashMap(); // Create an hashmap to store elements.
+            for (int i = 0; i < subProps.length; i++) {
+                parseProperty(subProps[i], map);
+            }
+            return map;
+        } else { // if not inject an empty map
+            return new HashMap(0);
+        }
+    }
+    
+    private List parseList(Element prop) throws ParseException {
+        Element[] subProps = prop.getElements("property");
+        if (subProps != null) {
+            List list = new ArrayList(subProps.length); // Create a list to store elements.
+            for (int i = 0; i < subProps.length; i++) {
+                parseAnonymousProperty(subProps[i], list); // Anonymous properties.
+            }
+            return list;
+        } else {
+            // If no sub-properties, inject an empty list.
+            return new ArrayList(0);
+        }
+    }
+    
+    /**
+     * Parse a property.
+     * @param prop : the current element to parse
+     * @param map : the map to populate
+     * @throws ParseException : occurs if the property cannot be parsed correctly
+     */
+    private void parseProperty(Element prop, Map map) throws ParseException {
+        // Check that the property has a name
+        String name = prop.getAttribute("name");
+        String value = prop.getAttribute("value");
+        if (name == null) {
+            throw new ParseException("A property does not have the 'name' attribute");
+        }
+        //case : the property element has no 'value' attribute
+        if (value == null) {
+            // Recursive case
+            // Get the type of the structure to create
+            String type = prop.getAttribute("type");
+            if (type == null || type.equalsIgnoreCase("dictionary")) {
+                    map.put(name, parseDictionary(prop));
+            } else if (type.equalsIgnoreCase("map")) {
+                    map.put(name, parseMap(prop));
+            }  else if (type.equalsIgnoreCase("list")) {
+                    map.put(name, parseList(prop));
+            } else if (type.equalsIgnoreCase("array")) {
+                    List list = parseList(prop);
+                    boolean isString = true;
+                    for (int i = 0; isString && i < list.size(); i++) {
+                        isString = list.get(i) instanceof String;                                              
+                    }
+                    Object[] obj = null; 
+                    if (isString) {
+                        obj = new String[list.size()];    
+                    } else {
+                        obj = new Object[list.size()];
+                    }
+                    map.put(name, list.toArray(obj)); // Transform the list to array
+            }
+        } else {
+            map.put(prop.getAttribute("name"), prop.getAttribute("value"));
+        }
+    }
+
+    private void parseAnonymousProperty(Element prop, List list) throws ParseException {
+        // Check that the property has a name
+        String name = prop.getAttribute("name");
+        String value = prop.getAttribute("value");
+        if (name != null) {
+            throw new ParseException("Anonymous property expected in a list or in an array");
+        }
+        //case : the property element has no 'value' attribute
+        if (value == null) {
+            // Recursive case
+            
+            // Get the type of the structure to create
+            String type = prop.getAttribute("type");
+            if (type == null || type.equalsIgnoreCase("dictionary")) {
+                // Check if there is 'property' elements
+                Element[] subProps = prop.getElements("property");
+                if (subProps != null) {
+                    Dictionary dict2 = new Properties();
+                    for (int i = 0; i < subProps.length; i++) {
+                        parseProperty(subProps[i], dict2);
+                    }
+                    list.add(dict2);
+                } else {
+                    // If the no sub-properties, inject an empty dictionary.
+                    list.add(new Properties());
+                }
+            } else if (type.equalsIgnoreCase("map")) {
+                // Check if there is 'property' elements
+                Element[] subProps = prop.getElements("property");
+                if (subProps != null) {
+                    Map map2 = new HashMap(); // Create an hashmap to store elements.
+                    for (int i = 0; i < subProps.length; i++) {
+                        parseProperty(subProps[i], map2);
+                    }
+                    list.add(map2);
+                } else { // if not inject an empty map
+                    list.add(new HashMap(0));
+                }
+            }  else if (type.equalsIgnoreCase("list")) {
+                    Element[] subProps = prop.getElements("property");
+                    if (subProps != null) {
+                        List list2 = new ArrayList(subProps.length); // Create a list to store elements.
+                        for (int i = 0; i < subProps.length; i++) {
+                            parseAnonymousProperty(subProps[i], list2); // Anonymous properties.
+                        }
+                        list.add(list2);
+                    } else {
+                        // If no sub-properties, inject an empty list.
+                        list.add(new ArrayList(0));
+                    }
+                } else if (type.equalsIgnoreCase("array")) {
+                    // Check sub-props.
+                    Element[] subProps = prop.getElements("property");
+                    if (subProps != null) {
+                        List list2 = new ArrayList(subProps.length); // Use list as pivot type
+                        for (int i = 0; i < subProps.length; i++) {
+                            parseAnonymousProperty(subProps[i], list2);
+                        }
+                        list.add(list.toArray(new Object[list.size()])); // Transform the list to array
+                    } else {
+                        list.add(new Element[0]); // Insert an empty Element array.
+                    }
+                }
+        } else {
+            list.add(prop.getAttribute("value"));
+        }
+        
     }
 
     /**
