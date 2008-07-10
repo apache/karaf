@@ -149,11 +149,15 @@ public class GShell implements Runnable, BundleContextAware {
                 }
                 log.info("Exiting shell due to caught exception " + e, e);
             }
-            try {
-                getBundleContext().getBundle(0).stop();
-            } catch (BundleException e2) {
-                log.info("Caught exception while shutting down framework: " + e2, e2);
-            }
+            new Thread() {
+                public void run() {
+                    try {
+                        getBundleContext().getBundle(0).stop();
+                    } catch (BundleException e2) {
+                        log.info("Caught exception while shutting down framework: " + e2, e2);
+                    }
+                }
+            }.start();
         }
     }
 
