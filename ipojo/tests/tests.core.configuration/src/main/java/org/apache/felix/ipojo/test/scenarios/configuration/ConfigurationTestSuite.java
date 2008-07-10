@@ -34,7 +34,7 @@ public class ConfigurationTestSuite {
 		ots.addTestSuite(TestBothProperties.class);
 		ots.addTestSuite(TestSuperMethodProperties.class);
 		ots.addTestSuite(ManagedServiceConfigurableProperties.class);
-		
+		ots.addTestSuite(TestComplexProperties.class);
 		return ots;
 	}
 

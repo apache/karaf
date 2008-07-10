@@ -30,8 +30,8 @@
 			<property name="boolean" field="boolProp" value="false" />
 			<property name="string" field="strProp" value="foo" />
 			<property name="strAProp" field="strAProp"
-				value="{foo, bar}" />
-			<property name="intAProp" field="intAProp" value="{ 1,2,3}" />
+				value="[foo, bar]" />
+			<property name="intAProp" field="intAProp" value="[ 1,2,3]" />
 		</provides>
 	</component>
 	

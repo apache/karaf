@@ -145,4 +145,83 @@
 		</properties>
 	</component>
 	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.ComplexConfiguration">
+		<provides>
+			<property name="array" field="m_array"/>
+			<property name="complex-array" field="m_complexArray"/>
+			<property name="list" field="m_list"/>
+			<property name="complex-list" field="m_complexList"/>
+			<property name="map" field="m_map"/>
+			<property name="complex-map" field="m_complexMap"/>
+			<property name="dict" field="m_dict"/>
+			<property name="empty-array" type="String[]"/>
+			<property name="empty-map" type="java.util.HashMap"/>
+			<property name="empty-list" type="java.util.List"/>
+		</provides>
+		<properties>
+			<property name="array" field="m_array"/>
+			<property name="complex-array" field="m_complexArray"/>
+			<property name="list" field="m_list"/>
+			<property name="complex-list" field="m_complexList"/>
+			<property name="map" field="m_map"/>
+			<property name="complex-map" field="m_complexMap"/>
+			<property name="dict" field="m_dict"/>
+		</properties>
+	</component>
+	
+	<instance component="org.apache.felix.ipojo.test.scenarios.component.ComplexConfiguration" name="complex">
+		<property name="array" type="array">
+			<property value="a"/>
+			<property value="b"/>
+		</property>
+		<property name="list" type="list">
+			<property value="a"/>
+			<property value="b"/>
+		</property>
+		<property name="dict" type="dictionary">
+			<property name="a" value="a"/>
+			<property name="b" value="b"/>
+		</property>
+		<property name="map" type="map">
+			<property name="a" value="a"/>
+			<property name="b" value="b"/>
+		</property>
+		<property name="complex-array" type="array">
+			<property type="list">
+				<property value="a"/>
+				<property value="b"/>
+			</property>
+			<property type="list">
+				<property value="c"/>
+				<property value="d"/>
+			</property>
+		</property>
+		<property name="complex-list" type="list">
+			<property type="list">
+				<property value="a"/>
+				<property value="b"/>
+			</property>
+			<property type="list">
+				<property value="c"/>
+				<property value="d"/>
+			</property>
+		</property>
+		<property name="complex-map" type="map">
+			<property name="a" type="list">
+				<property value="a"/>
+				<property value="b"/>
+			</property>
+			<property name="b" type="list">
+				<property value="c"/>
+				<property value="d"/>
+			</property>
+		</property>
+		<property name="empty-array" type="array"/>
+		<property name="empty-list" type="list"/>
+		<property name="empty-map" type="map"/>
+	</instance>
+		
+		
+	
 </ipojo>
