@@ -274,6 +274,22 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
         if (arch == null || arch.equalsIgnoreCase("true")) {
             list.add(new RequiredHandler("architecture", null));
         }
+        
+        
+        // Determine if the component must be immediate.
+        // A component becomes immediate if it doesn't provide a service,
+        // and does not specified that the component is not immediate.
+        if (m_componentMetadata.getElements("provides") == null) {
+            String imm = m_componentMetadata.getAttribute("immediate");
+            if (imm == null || !imm.equalsIgnoreCase("false")) {
+                getLogger().log(
+                        Logger.WARNING,
+                        "The component " + getFactoryName()
+                                + " becomes immediate");
+                m_componentMetadata.addAttribute(new Attribute("immediate",
+                        "true"));
+            }
+        }
 
         // Add lifecycle callback if immediate = true
         RequiredHandler reqCallback = new RequiredHandler("callback", null);
@@ -281,6 +297,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
         if (!list.contains(reqCallback) && imm != null && imm.equalsIgnoreCase("true")) {
             list.add(reqCallback);
         }
+
 
         return list;
     }

@@ -18,7 +18,9 @@
  */
 package org.apache.felix.ipojo;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.List;
 
 import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.metadata.Element;
@@ -134,6 +136,39 @@ public class HandlerManagerFactory extends ComponentFactory implements HandlerFa
         HandlerManager instance = new HandlerManager(this, context, handlers);
         instance.configure(m_componentMetadata, configuration);
         return instance;
+    }
+    
+
+    /**
+     * Computes required handlers. This method does not manipulate any
+     * non-immutable fields, so does not need to be synchronized.
+     * This method is overridden to avoid to use the same detection rules
+     * than atomic components. Indeed, architecture is disable by default,
+     * and an handler is never immediate.
+     * @return the required handler list.
+     */
+    public List getRequiredHandlerList() {
+        List list = new ArrayList();
+        Element[] elems = m_componentMetadata.getElements();
+        for (int i = 0; i < elems.length; i++) {
+            Element current = elems[i];
+            if (!"manipulation".equals(current.getName())) {
+                RequiredHandler req = new RequiredHandler(current.getName(),
+                        current.getNameSpace());
+                if (!list.contains(req)) {
+                    list.add(req);
+                }
+            }
+        }
+
+        // Unlike normal components, the architecture is enable only when
+        // specified.
+        String arch = m_componentMetadata.getAttribute("architecture");
+        if (arch != null && arch.equalsIgnoreCase("true")) {
+            list.add(new RequiredHandler("architecture", null));
+        }
+
+        return list;
     }
 
     private class HandlerTypeDescription extends ComponentTypeDescription {

@@ -101,7 +101,7 @@ public abstract class PrimitiveHandler extends Handler implements FieldIntercept
      * @param value : the value passed to the field
      */
     public void onSet(Object pojo, String fieldName, Object value) {
-        // Nothing do do in the default implementation
+        // Nothing to do in the default implementation
     }
 
     /**
@@ -122,7 +122,7 @@ public abstract class PrimitiveHandler extends Handler implements FieldIntercept
      * @param args arguments array.
      */
     public void onEntry(Object pojo, Method method, Object[] args) { 
-        // Nothing do do in the default implementation
+        // Nothing to do in the default implementation
     }
 
     /**
@@ -134,7 +134,7 @@ public abstract class PrimitiveHandler extends Handler implements FieldIntercept
      * @param returnedObj : the returned object (boxed for primitive type)
      */
     public void onExit(Object pojo, Method method, Object returnedObj) { 
-        // Nothing do do in the default implementation
+        // Nothing to do in the default implementation
     }
     
     /**
@@ -144,7 +144,7 @@ public abstract class PrimitiveHandler extends Handler implements FieldIntercept
      * @param throwable : the thrown exception
      */
     public void onError(Object pojo, Method method, Throwable throwable) {
-        // Nothing do do in the default implementation
+        // Nothing to do in the default implementation
     }
     
     /**
@@ -155,7 +155,7 @@ public abstract class PrimitiveHandler extends Handler implements FieldIntercept
      * @param method : invoked method.
      */
     public void onFinally(Object pojo, Method method) {
-        // Nothing do do in the default implementation
+        // Nothing to do in the default implementation
     }
     
     /**
@@ -164,7 +164,7 @@ public abstract class PrimitiveHandler extends Handler implements FieldIntercept
      * @param instance : the created instance
      */
     public void onCreation(Object instance) { 
-        // Nothing do do in the default implementation
+        // Nothing to do in the default implementation
     }
     
     
