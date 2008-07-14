@@ -242,11 +242,8 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
      */
     public String getFactoryName() {
         String name = m_componentMetadata.getAttribute("name");
-        if (name == null) { // No factory name, try with factory attribute
-            name = m_componentMetadata.getAttribute("factory");
-            if (name == null || name.equalsIgnoreCase("true") || name.equalsIgnoreCase("false")) { // Avoid boolean case
+        if (name == null) { // No factory name, use the classname (mandatory attribute)
                 name = m_componentMetadata.getAttribute("classname");
-            }
         }
         return name;
     }
@@ -281,7 +278,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
         // and does not specified that the component is not immediate.
         if (m_componentMetadata.getElements("provides") == null) {
             String imm = m_componentMetadata.getAttribute("immediate");
-            if (imm == null || !imm.equalsIgnoreCase("false")) {
+            if (imm == null) { // immediate not specified, set the immediate attribute to true
                 getLogger().log(
                         Logger.WARNING,
                         "The component " + getFactoryName()

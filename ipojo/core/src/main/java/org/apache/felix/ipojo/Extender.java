@@ -87,6 +87,11 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      * List of unbound types.
      */
     private final List m_unboundTypes = new ArrayList();
+    
+    /**
+     * Thread analyzing arriving bundles and creating iPOJO contributions.
+     */
+    private final CreatorThread m_thread = new CreatorThread();
 
     /**
      * Bundle Listener Notification.
@@ -98,9 +103,11 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
 
         switch (event.getType()) {
             case BundleEvent.STARTED:
-                startManagementFor(event.getBundle());
+                // Put the bundle in the queue
+                m_thread.addBundle(event.getBundle());
                 break;
             case BundleEvent.STOPPING:
+                m_thread.removeBundle(event.getBundle());
                 closeManagementFor(event.getBundle());
                 break;
             default:
@@ -115,11 +122,10 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      */
     private void closeManagementFor(Bundle bundle) {
         List toRemove = new ArrayList();
+        // Delete instances declared in the leaving bundle.
+        m_creator.removeInstancesFromBundle(bundle.getBundleId());
         for (int k = 0; k < m_factoryTypes.size(); k++) {
             ManagedAbstractFactoryType mft = (ManagedAbstractFactoryType) m_factoryTypes.get(k);
-
-            // Delete instances declared in the leaving bundle.
-            m_creator.removeInstancesFromBundle(bundle.getBundleId());
 
             // Look for component type created from this bundle.
             if (mft.m_created != null) {
@@ -249,10 +255,12 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
         m_bundle = context.getBundle();
         m_creator = new InstanceCreator(context);
 
-        m_logger = new Logger(m_context, "IPOJO Extender");
+        m_logger = new Logger(m_context, "IPOJO-Extender");
 
         // Begin by initializing core handlers
         startManagementFor(m_bundle);
+        
+        new Thread(m_thread).start();
 
         synchronized (this) {
             // listen to any changes in bundles.
@@ -272,6 +280,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(BundleContext context) {
+        m_thread.stop(); // Stop the thread processing bundles.
         m_context.removeBundleListener(this);
 
         for (int k = 0; k < m_factoryTypes.size(); k++) {
@@ -367,7 +376,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      */
     private final class ManagedAbstractFactoryType {
         /**
-         * TYpe (i.e.) name of the extension.
+         * Type (i.e.) name of the extension.
          */
         String m_type;
 
@@ -500,6 +509,96 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
         }
         m_logger.log(Logger.ERROR, "Cannot find the BundleContext for " + bundle.getSymbolicName(), null);
         return null;
+    }
+    
+
+    /**
+     * The creator thread analyze arriving bundle to create iPOJO contribution.
+     */
+    private class CreatorThread implements Runnable {
+
+        /**
+         * Is the creator thread started?
+         */
+        private boolean m_started = true;
+        
+        /**
+         * List of bundle that are going to be analyzed.
+         */
+        private List m_bundles = new ArrayList();
+        
+        /**
+         * A bundle is arrived.
+         * This method is synchronized to avoid concurrent modification of the waiting list.
+         * @param bundle : new bundle
+         */
+        public synchronized void addBundle(Bundle bundle) {
+            m_bundles.add(bundle);
+            notifyAll(); // Notify the thread to force the process.
+            m_logger.log(Logger.INFO, "Creator thread is going to analyze the bundle " + bundle.getBundleId() + " List : " + m_bundles);
+        }
+        
+        /**
+         * A bundle is leaving.
+         * If the bundle was not already processed, the bundle is remove from the waiting list.
+         * This method is synchronized to avoid concurrent modification of the waiting list.
+         * @param bundle : the leaving bundle.
+         */
+        public synchronized void removeBundle(Bundle bundle) {
+            m_bundles.remove(bundle);
+        }
+        
+        /**
+         * Stop the creator thread.
+         */
+        public synchronized void stop() {
+            m_started = false;
+            m_bundles.clear();
+            notifyAll();
+        }
+
+        /**
+         * Creator thread run method.
+         * While the waiting list is not empty, the thread launch the bundle analyzing.
+         * When the list is empty, the thread sleeps until the arrival of a new bundle 
+         * or that iPOJO stops.
+         * @see java.lang.Runnable#run()
+         */
+        public void run() {
+            m_logger.log(Logger.INFO, "Creator thread is starting");
+            while (m_started) {
+                Bundle bundle;
+                synchronized (this) {
+                    while (m_started && m_bundles.isEmpty()) {
+                        try {
+                            m_logger.log(Logger.INFO, "Creator thread is waiting - Nothing to do");
+                            wait();
+                        } catch (InterruptedException e) {
+                            // Interruption, re-check the condition
+                        }
+                    }
+                    if (!m_started) {
+                        m_logger.log(Logger.INFO, "Creator thread is stopping");
+                        return; // The thread must be stopped immediately.
+                    } else {
+                        // The bundle list is not empty, get the bundle.
+                        // The bundle object is collected inside the synchronized block to avoid
+                        // concurrent modification. However the real process is made outside the
+                        // mutual exclusion area
+                        bundle = (Bundle) m_bundles.remove(0);
+                    }
+                }
+                // Process ...
+                m_logger.log(Logger.INFO, "Creator thread is processing " + bundle.getBundleId());
+                try {
+                    startManagementFor(bundle);
+                } catch (Throwable e) {
+                    // To be sure to not kill the thread, we catch all exceptions and errors
+                    m_logger.log(Logger.ERROR, "An errors occurs when analyzing the content or starting the management of " + bundle.getBundleId());
+                }
+            }
+        }
+
     }
 
 }

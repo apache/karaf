@@ -127,7 +127,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         m_context = context;
         m_componentMetadata = metadata;
         m_factoryName = getFactoryName();
-        String fac = metadata.getAttribute("factory");
+        String fac = metadata.getAttribute("public");
         m_isPublic = fac == null || !fac.equalsIgnoreCase("false");
         m_logger = new Logger(m_context, m_factoryName);
         m_requiredHandlers = getRequiredHandlerList(); // Call sub-class to get the list of required handlers.

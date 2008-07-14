@@ -310,8 +310,10 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                         // A NoClassDefFoundError is thrown if the specification uses a class not accessible by the actual instance.
                         // It generally comes from a missing import.
                         throw new IllegalStateException("Cannot create the Nullable object, a referenced class cannot be loaded: " + e.getMessage());
+                    } catch (Throwable e) { // Catch any other exception that can occurs
+                        throw new IllegalStateException("Cannot create the Nullable object, an unexpected error occurs: " + e.getMessage());
                     }
-                }
+                 }
             } else {
                 // Create the default-implementation object.
                 try {
@@ -323,6 +325,8 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                     throw new IllegalStateException("Cannot load the default-implementation " + m_di + " : " + e.getMessage());
                 } catch (ClassNotFoundException e) {
                     throw new IllegalStateException("Cannot load the default-implementation " + m_di + " : " + e.getMessage());
+                } catch(Throwable e) { // Catch any other exception
+                    throw new IllegalStateException("Cannot load the default-implementation (unexpected exception) " + m_di + " : " + e.getMessage());
                 }
             }
         }

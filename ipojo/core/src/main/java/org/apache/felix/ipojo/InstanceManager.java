@@ -520,7 +520,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Create an instance of the component. This method need to be called one time only for singleton provided service
+     * Create an instance of the component. This method need to be called one time only for singleton provided service.
      * @return a new instance
      */
     public Object createPojoObject() {
@@ -560,6 +560,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                 m_factory.getLogger().log(Logger.ERROR,
                                           "[" + m_name + "] createInstance -> The POJO constructor is not accessible : " + e.getMessage());
                 stop();
+                return null;
             } catch (SecurityException e) {
                 m_factory.getLogger().log(
                                           Logger.ERROR,
@@ -568,27 +569,28 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                                                   + "] createInstance -> The Component Instance is not accessible (security reason) : "
                                                   + e.getMessage());
                 stop();
+                return null;
             } catch (InvocationTargetException e) {
                 m_factory.getLogger().log(
                                           Logger.ERROR,
                                           "["
                                                   + m_name
-                                                  + "] createInstance -> Cannot invoke the constructor method (illegal target) : "
+                                                  + "] createInstance -> Cannot invoke the constructor method - the constructor throws an exception : "
                                                   + e.getTargetException().getMessage());
                 onError(null, m_className, e.getTargetException());
                 stop();
+                return null;
             } catch (NoSuchMethodException e) {
                 m_factory.getLogger().log(Logger.ERROR,
                                           "[" + m_name + "] createInstance -> Cannot invoke the constructor (method not found) : " + e.getMessage());
                 stop();
-            } catch (IllegalArgumentException e) {
+                return null;
+            } catch (Throwable e) {
+                // Catch every other possible error and runtime exception.
                 m_factory.getLogger().log(Logger.ERROR,
-                                          "[" + m_name + "] createInstance -> The POJO constructor invocation failed : " + e.getMessage());
+                        "[" + m_name + "] createInstance -> The POJO constructor invocation failed : " + e.getMessage());
                 stop();
-            } catch (InstantiationException e) {
-                m_factory.getLogger().log(Logger.ERROR,
-                                          "[" + m_name + "] createInstance -> The POJO constructor invocation failed : " + e.getMessage());
-                stop();
+                return null;
             }
         } else {
             try {
@@ -622,6 +624,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                                                           + "] createInstance -> Cannot invoke the factory-method (method not found) : "
                                                           + e2.getMessage());
                         stop();
+                        return null;
                     }
                 }
 
@@ -633,24 +636,13 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                 method.invoke(instance, new Object[] { this });
                 onExit(null, m_className, instance);
 
-            } catch (SecurityException e) {
-                // Error : invocation failed
-                m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the factory-method : " + e.getMessage());
-                stop();
-            } catch (IllegalArgumentException e) {
-                // Error : arguments mismatch
-                m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the factory-method : " + e.getMessage());
-                stop();
-            } catch (IllegalAccessException e) {
-                // Error : illegal access
-                m_factory.getLogger().log(Logger.ERROR, "[" + m_name + "] createInstance -> Cannot invoke the factory-method : " + e.getMessage());
-                stop();
             } catch (InvocationTargetException e) {
                 // Error : invocation failed
                 m_factory.getLogger().log(Logger.ERROR,
-                                          "[" + m_name + "] createInstance -> The factory-method returns an exception : " + e.getTargetException());
+                                          "[" + m_name + "] createInstance -> The factory-method throws an exception : " + e.getTargetException());
                 onError(null, m_className, e.getTargetException());
                 stop();
+                return null;
             } catch (NoSuchMethodException e) {
                 // Error : _setInstanceManager method is missing
                 m_factory.getLogger()
@@ -661,11 +653,15 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                                      + "] createInstance -> Cannot invoke the factory-method (the _setInstanceManager method does not exist) : "
                                      + e.getMessage());
                 stop();
+                return null;
+            } catch (Throwable e) {
+                // Catch every other possible error and runtime exception.
+                m_factory.getLogger().log(Logger.ERROR,
+                        "[" + m_name + "] createInstance -> The factory-method invocation failed : " + e.getMessage());
+                stop();
+                return null;
             }
-
         }
-        
-        
 
         // Add the new instance in the instance list.
         synchronized (this) {
