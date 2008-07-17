@@ -19,11 +19,14 @@
 package org.apache.felix.ipojo.test.scenarios.bad;
 
 import org.apache.felix.ipojo.ComponentFactory;
+import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.ConfigurationException;
+import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.HandlerManagerFactory;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
+import org.apache.felix.ipojo.test.scenarios.util.Utils;
 
 public class BadFactories extends OSGiTestCase {
     
@@ -38,7 +41,7 @@ public class BadFactories extends OSGiTestCase {
         elem.addAttribute(new Attribute("name", "noclassname"));
         return elem;        
     }
-    
+   
     private Element getElementHandlerFactoryWithNoName() {
         Element elem = new Element("handler", "");
         elem.addAttribute(new Attribute("className", "noclassname"));
@@ -69,6 +72,54 @@ public class BadFactories extends OSGiTestCase {
             fail("An handler factory with no name must be rejected");
         } catch (ConfigurationException e) {
           // OK.   
+        }
+    }
+    
+    public void testCreationOnBadConstructor() {
+            Factory factory = Utils.getFactoryByName(context, "BAD-BadConstructor");
+            ComponentInstance ci;
+            try {
+                ci = factory.createComponentInstance(null);
+                assertEquals("Check ci create error", ComponentInstance.STOPPED, ci.getState());
+                ci.dispose();
+            } catch (Throwable e) {
+               fail("Exception unexpected : " + e.getMessage());
+            }
+    }
+    
+    public void testCreationOnBadFactory() {
+        Factory factory = Utils.getFactoryByName(context, "BAD-BadFactory");
+        ComponentInstance ci;
+        try {
+            ci = factory.createComponentInstance(null);
+            assertEquals("Check ci create error", ComponentInstance.STOPPED, ci.getState());
+            ci.dispose();
+        } catch (Throwable e) {
+           fail("Exception unexpected : " + e.getMessage());
+        }
+    }
+    
+    public void testCreationOnBadFactory2() {
+        Factory factory = Utils.getFactoryByName(context, "BAD-BadFactory2");
+        ComponentInstance ci;
+        try {
+            ci = factory.createComponentInstance(null);
+            assertEquals("Check ci create error", ComponentInstance.STOPPED, ci.getState());
+            ci.dispose();
+        } catch (Throwable e) {
+           fail("Exception unexpected : " + e.getMessage());
+        }
+    }
+    
+    public void testNoManipulationMetadata() {
+        Element elem = new Element("component", "");
+        elem.addAttribute(new Attribute("classname", "org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"));
+        try {
+            ComponentFactory fact = new ComponentFactory(context, elem);
+            fact.stop();
+            fail("A factory with no manipulation metadata must be rejected");
+        } catch (ConfigurationException e) {
+          // OK.
         }
     }
     

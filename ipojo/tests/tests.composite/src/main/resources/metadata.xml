@@ -2,7 +2,7 @@
 	<!-- Used component type -->
 	<component
 		className="org.apache.felix.ipojo.test.composite.component.FooProviderType1"
-		factory="COMPO-FooProviderType-1" architecture="true">
+		name="COMPO-FooProviderType-1" architecture="true">
 		<provides />
 	</component>
 	<component
@@ -31,7 +31,7 @@
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.composite.component.FooProviderTypeDyn2"
-		name="COMPO-FooProviderType-Dyn2" factory="true" architecture="true">
+		name="COMPO-FooProviderType-Dyn2" architecture="true">
 		<provides>
 			<property name="int" field="intProp" value="4" />
 			<property name="boolean" field="boolProp" />
@@ -43,24 +43,24 @@
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.composite.component.CheckServiceProvider"
-		factory="COMPO-SimpleCheckServiceProvider" architecture="true">
+		name="COMPO-SimpleCheckServiceProvider" architecture="true">
 		<requires field="fs" />
 		<provides />
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
-		factory="COMPO-FooBarProviderType-1" architecture="true">
+		name="COMPO-FooBarProviderType-1" architecture="true">
 		<provides />
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
-		factory="COMPO-FooBarProviderType-2" architecture="true">
+		name="COMPO-FooBarProviderType-2" architecture="true">
 		<provides
 			interface="{org.apache.felix.ipojo.test.composite.service.FooService, org.apache.felix.ipojo.test.composite.service.BarService }" />
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
-		factory="COMPO-FooBarProviderType-3" architecture="true">
+		name="COMPO-FooBarProviderType-3" architecture="true">
 		<provides
 			interface="{org.apache.felix.ipojo.test.composite.service.FooService}">
 			<property name="baz" type="java.lang.String" value="foo" />
@@ -73,33 +73,33 @@
 	
 	<component
 		className="org.apache.felix.ipojo.test.composite.component.BazProviderType1"
-		factory="BazProviderType" scope="composite">
+		name="BazProviderType" scope="composite">
 		<provides />
 	</component>
 	
 	<component
 		classname="org.apache.felix.ipojo.test.composite.component.TataProvider"
-		factory="tata">
+		name="tata">
 		<provides />
 	</component>
 
 	<component
 		classname="org.apache.felix.ipojo.test.composite.component.TotoProvider"
-		factory="toto" architecture="true">
+		name="toto" architecture="true">
 		<provides />
 	</component>
 
 	<component
 		classname="org.apache.felix.ipojo.test.composite.component.TotoProviderGlue"
-		factory="totoglue">
+		name="totoglue">
 		<requires field="m_toto" scope="composite" />
 	</component>
 	
 	<!--  Composite -->
-	<composite name="composite.empty" factory="true" architecture="true">
+	<composite name="composite.empty" architecture="true">
 	</composite>
 	
-	<component className="org.apache.felix.ipojo.test.composite.component.Baz2CheckProvider" factory="Baz2CheckProvider" architecture="true">
+	<component className="org.apache.felix.ipojo.test.composite.component.Baz2CheckProvider" name="Baz2CheckProvider" architecture="true">
 		<requires field="fs" scope="composite"/>
 		<provides/>
 	</component>

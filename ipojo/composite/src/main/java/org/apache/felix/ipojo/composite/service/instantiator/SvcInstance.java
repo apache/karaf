@@ -237,10 +237,12 @@ public class SvcInstance extends DependencyModel {
         try {
             Factory fact = (Factory) getService(ref);
             if (m_factories.get(ref) == null) {
-            	ComponentInstance instance = createInstance(fact);
-            	m_factories.put(ref, instance);
+                ComponentInstance instance = createInstance(fact);
+                m_factories.put(ref, instance);
             } else {
-            	m_handler.info("An arriving factory is already used, ignore the creation : " + fact.getName());
+                m_handler
+                        .info("An arriving factory is already used, ignore the creation : "
+                                + fact.getName());
             }
             
         } catch (UnacceptableConfiguration e) {
@@ -267,7 +269,8 @@ public class SvcInstance extends DependencyModel {
         // Remove the reference is contained
         Object instance = m_factories.remove(ref);
         if (instance != null) {
-        	m_handler.info("Dispose the instance (departure of the factory) " + ((ComponentInstance) instance).getInstanceName());
+            m_handler.info("Dispose the instance (departure of the factory) "
+                    + ((ComponentInstance) instance).getInstanceName());
             ((ComponentInstance) instance).dispose();
         }
     }

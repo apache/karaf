@@ -2,7 +2,7 @@
 	<!--  Simple Filter Dependencies -->
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.service.dependency.filter.component.FilterCheckProvider"
-		factory="SimpleFilterCheckServiceProvider" architecture="true">
+		name="SimpleFilterCheckServiceProvider" architecture="true">
 		<provides>
 			<property field="m_toto" name="toto" value="A" />
 		</provides>
@@ -10,7 +10,7 @@
 
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.service.dependency.filter.component.FilterCheckSubscriber"
-		factory="SimpleFilterCheckServiceSubscriber" architecture="true">
+		name="SimpleFilterCheckServiceSubscriber" architecture="true">
 		<requires field="m_foo" filter="(toto=B)" id="id1">
 			<callback type="bind" method="Bind" />
 			<callback type="unbind" method="Unbind" />
@@ -20,7 +20,7 @@
 
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.service.dependency.filter.component.FilterCheckSubscriber"
-		factory="SimpleFilterCheckServiceSubscriber2" architecture="true">
+		name="SimpleFilterCheckServiceSubscriber2" architecture="true">
 		<requires field="m_foo" id="id2">
 			<callback type="bind" method="Bind" />
 			<callback type="unbind" method="Unbind" />
@@ -31,7 +31,7 @@
 	<!--  Optional Simple Filter Dependencies -->
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.service.dependency.filter.component.FilterCheckSubscriber"
-		factory="OptionalSimpleFilterCheckServiceSubscriber"
+		name="OptionalSimpleFilterCheckServiceSubscriber"
 		architecture="true">
 		<requires field="m_foo" filter="(toto=B)" id="id1"
 			optional="true">
@@ -43,7 +43,7 @@
 
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.service.dependency.filter.component.FilterCheckSubscriber"
-		factory="OptionalSimpleFilterCheckServiceSubscriber2"
+		name="OptionalSimpleFilterCheckServiceSubscriber2"
 		architecture="true">
 		<requires field="m_foo" id="id2" optional="true">
 			<callback type="bind" method="Bind" />
@@ -55,7 +55,7 @@
 	<!-- Aggregate filter Dependencies-->
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.service.dependency.filter.component.MultipleFilterCheckSubscriber"
-		factory="MultipleFilterCheckServiceSubscriber" architecture="true">
+		name="MultipleFilterCheckServiceSubscriber" architecture="true">
 		<requires field="m_foo" filter="(toto=B)" id="id1">
 			<callback type="bind" method="Bind" />
 			<callback type="unbind" method="Unbind" />
@@ -65,7 +65,7 @@
 
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.service.dependency.filter.component.MultipleFilterCheckSubscriber"
-		factory="MultipleFilterCheckServiceSubscriber2" architecture="true">
+		name="MultipleFilterCheckServiceSubscriber2" architecture="true">
 		<requires field="m_foo" id="id2">
 			<callback type="bind" method="Bind" />
 			<callback type="unbind" method="Unbind" />
@@ -76,7 +76,7 @@
 	<!--  Optional Aggregate Filter Dependencies -->
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.service.dependency.filter.component.MultipleFilterCheckSubscriber"
-		factory="OptionalMultipleFilterCheckServiceSubscriber"
+		name="OptionalMultipleFilterCheckServiceSubscriber"
 		architecture="true">
 		<requires field="m_foo" filter="(toto=B)" id="id1"
 			optional="true">
@@ -88,7 +88,7 @@
 
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.service.dependency.filter.component.MultipleFilterCheckSubscriber"
-		factory="OptionalMultipleFilterCheckServiceSubscriber2"
+		name="OptionalMultipleFilterCheckServiceSubscriber2"
 		architecture="true">
 		<requires field="m_foo" id="id2" optional="true">
 			<callback type="bind" method="Bind" />

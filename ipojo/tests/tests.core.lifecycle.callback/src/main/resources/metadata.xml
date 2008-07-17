@@ -1,14 +1,14 @@
 <ipojo>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
-		factory="LFCB-FooProviderType-1" architecture="true">
+		name="LFCB-FooProviderType-1" architecture="true">
 		<provides />
 	</component>
 	
 	<!-- Lifecycle Callback -->
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
-		factory="LFCB-CallbackCheckService" architecture="true">
+		name="LFCB-CallbackCheckService" architecture="true">
 		<requires field="fs" />
 		<provides />
 		<callback transition="validate" method="start" />
@@ -16,7 +16,7 @@
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
-		factory="LFCB-ParentCallbackCheckService" architecture="true">
+		name="LFCB-ParentCallbackCheckService" architecture="true">
 		<requires field="fs" />
 		<provides />
 		<callback transition="validate" method="parentStart" />
@@ -24,7 +24,7 @@
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
-		immediate="true" factory="LFCB-ImmediateCallbackCheckService"
+		immediate="true" name="LFCB-ImmediateCallbackCheckService"
 		architecture="true">
 		<requires field="fs" />
 		<provides />
@@ -33,7 +33,7 @@
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
-		immediate="true" factory="LFCB-ImmediateCallbackCheckServiceSingleton"
+		immediate="true" name="LFCB-ImmediateCallbackCheckServiceSingleton"
 		factory-method="singleton" architecture="true">
 		<requires field="fs" />
 		<provides />
@@ -42,7 +42,7 @@
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
-		immediate="true" factory="LFCB-ImmediateCallbackCheckServiceSeveral"
+		immediate="true" name="LFCB-ImmediateCallbackCheckServiceSeveral"
 		factory-method="several" architecture="true">
 		<requires field="fs" />
 		<provides />

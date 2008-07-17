@@ -313,7 +313,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
          * @see org.objectweb.asm.commons.EmptyVisitor#visit(java.lang.String, java.lang.Object)
          */
         public void visit(String arg0, Object arg1) {
-            if (arg0.equals("factory")) {
+            if (arg0.equals("public_factory")) {
                 m_factory = arg1.toString();
                 return;
             }
@@ -349,10 +349,10 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
                 m_name = m_className.replace('/', '.');
             }
             m_elem.addAttribute(new Attribute("name", m_name));
-            if (m_factory == null) {
-                m_elem.addAttribute(new Attribute("factory", "false"));
+            if (m_factory != null && m_factory.equalsIgnoreCase("false")) {
+                m_elem.addAttribute(new Attribute("public", "false"));
             } else {
-                m_elem.addAttribute(new Attribute("factory", m_factory)); 
+                m_elem.addAttribute(new Attribute("public", "true")); 
             }
             if (m_architecture != null) {
                 m_elem.addAttribute(new Attribute("architecture", m_architecture));

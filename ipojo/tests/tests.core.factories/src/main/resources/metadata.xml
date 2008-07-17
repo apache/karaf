@@ -2,14 +2,14 @@
 	<!-- Simple provider  -->
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
-		factory="Factories-FooProviderType-1" architecture="true">
+		name="Factories-FooProviderType-1" architecture="true">
 		<provides />
 	</component>
 	
 	<!-- Provider providing 2 services -->
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
-		factory="Factories-FooBarProviderType-1" architecture="true">
+		name="Factories-FooBarProviderType-1" architecture="true">
 		<provides />
 	</component>
 	
@@ -42,7 +42,7 @@
 	
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn2"
-		name="Factories-FooProviderType-Dyn2" factory="true" architecture="true">
+		name="Factories-FooProviderType-Dyn2" architecture="true">
 		<provides>
 			<property name="int" field="intProp" value="4" />
 			<property name="boolean" field="boolProp" />
@@ -55,7 +55,7 @@
 	
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
-		factory="Factories-FooProviderType-3" architecture="true">
+		name="Factories-FooProviderType-3" architecture="true">
 		<provides>
 			<property name="foo" field="m_foo" />
 			<property name="bar" field="m_bar" />

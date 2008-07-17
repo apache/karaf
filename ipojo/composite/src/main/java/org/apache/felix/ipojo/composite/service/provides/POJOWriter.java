@@ -21,6 +21,7 @@ package org.apache.felix.ipojo.composite.service.provides;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.apache.felix.ipojo.Handler;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -34,10 +35,7 @@ import org.objectweb.asm.Type;
  */
 public class POJOWriter implements Opcodes {
     
-    //TODO : consider using getOpCode
-    //TODO : fix bug on double-space
-    //TODO : use a logger
-    //TODO : merge this class with another class only static method.
+    //TODO : merge this class with another class only static methods.
 
     /**
      * Create a class.
@@ -73,6 +71,21 @@ public class POJOWriter implements Opcodes {
             }
         }
     }
+    
+    /**
+     * Generates an empty constructor.
+     * this constructor just call the java.lang.Object constructor.
+     * @param cw class writer
+     */
+    private static void generateConstructor(ClassWriter cw) {
+        // Inject a constructor <INIT>()V
+        MethodVisitor cst = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
+        cst.visitVarInsn(ALOAD, 0);
+        cst.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V");
+        cst.visitInsn(RETURN);
+        cst.visitMaxs(0, 0);
+        cst.visitEnd();
+    }
 
     /**
      * Return the proxy 'classname' for the contract 'contractname' by delegating on available service.
@@ -80,9 +93,10 @@ public class POJOWriter implements Opcodes {
      * @param className : The class name to create
      * @param fields : the list of fields on which delegate
      * @param methods : the list of method on which delegate
+     * @param handler : handler object used to access the logger
      * @return byte[] : the build class
      */
-    public static byte[] dump(Class clazz, String className, List fields, List methods) {
+    public static byte[] dump(Class clazz, String className, List fields, List methods, Handler handler) {
         Method[] itfmethods = clazz.getMethods();
 
         // Create the class
@@ -93,14 +107,8 @@ public class POJOWriter implements Opcodes {
         // Inject fields inside the POJO
         injectFields(cw, fields);
 
-        // Inject a constructor <INIT>()V
-        MethodVisitor cst = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
-        cst.visitVarInsn(ALOAD, 0);
-        cst.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V");
-        cst.visitInsn(RETURN);
-        cst.visitMaxs(0, 0);
-        cst.visitEnd();
-
+        generateConstructor(cw);
+        
         for (int i = 0; i < itfmethods.length; ++i) {
             Method method = itfmethods[i];
 
@@ -116,7 +124,7 @@ public class POJOWriter implements Opcodes {
                 }
             }
 
-            generateOneMethod(cw, className, methodDelegator, method, delegator);
+            generateMethod(cw, className, methodDelegator, method, delegator, handler);
 
         }
 
@@ -132,8 +140,9 @@ public class POJOWriter implements Opcodes {
      * @param method : the method to generate
      * @param sign : method signature to generate
      * @param delegator : the field on which delegate
+     * @param handler : the handler (used to acess the logger)
      */
-    private static void generateOneMethod(ClassWriter cw, String className, MethodMetadata method, Method sign, FieldMetadata delegator) {
+    private static void generateMethod(ClassWriter cw, String className, MethodMetadata method, Method sign, FieldMetadata delegator, Handler handler) {
         String desc = Type.getMethodDescriptor(sign);
         String name = sign.getName();
         String[] exc = new String[sign.getExceptionTypes().length];
@@ -157,24 +166,20 @@ public class POJOWriter implements Opcodes {
                 // Aggregate and One Policy
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitFieldInsn(GETFIELD, className, delegator.getName(), "[L" + delegator.getSpecification().getName().replace('.', '/') + ";");
-                mv.visitInsn(ICONST_0); // Take the first one
+                mv.visitInsn(ICONST_0); // Use the first one
                 mv.visitInsn(AALOAD);
 
-                // Loads args
-                Type[] args = Type.getArgumentTypes(desc);
-                for (int i = 0; i < args.length; i++) {
-                    writeLoad(args[i], i + 1, mv);
-                }
+                loadArgs(mv, ACC_PUBLIC, Type.getArgumentTypes(desc));
 
                 // Invoke
                 mv.visitMethodInsn(INVOKEINTERFACE, delegator.getSpecification().getName().replace('.', '/'), name, desc);
 
                 // Return
-                writeReturn(Type.getReturnType(desc), mv);
+                mv.visitInsn(Type.getReturnType(desc).getOpcode(Opcodes.IRETURN));
+
             } else { // All policy
                 if (Type.getReturnType(desc).getSort() != Type.VOID) {
-                    //TODO use logger.
-                    System.err.println("All policy cannot be used on method which does not return void");
+                    handler.error("All policy cannot be used on method which does not return void");
                 }
 
                 Type[] args = Type.getArgumentTypes(desc);
@@ -196,10 +201,7 @@ public class POJOWriter implements Opcodes {
                 mv.visitVarInsn(ILOAD, index);
                 mv.visitInsn(AALOAD);
 
-                // Loads args
-                for (int i = 0; i < args.length; i++) {
-                    writeLoad(args[i], i + 1, mv);
-                }
+                loadArgs(mv, ACC_PUBLIC, Type.getArgumentTypes(desc));
 
                 mv.visitMethodInsn(INVOKEINTERFACE, delegator.getSpecification().getName().replace('.', '/'), name, desc);
 
@@ -223,11 +225,7 @@ public class POJOWriter implements Opcodes {
             mv.visitVarInsn(ALOAD, 0);
             mv.visitFieldInsn(GETFIELD, className, delegator.getName(), "L" + delegator.getSpecification().getName().replace('.', '/') + ";");
 
-            // Loads args
-            Type[] args = Type.getArgumentTypes(desc);
-            for (int i = 0; i < args.length; i++) {
-                writeLoad(args[i], i + 1, mv);
-            }
+            loadArgs(mv, ACC_PUBLIC, Type.getArgumentTypes(desc));
 
             // Invoke
             if (delegator.getSpecification().isInterface()) {
@@ -237,7 +235,7 @@ public class POJOWriter implements Opcodes {
             }
 
             // Return
-            writeReturn(Type.getReturnType(desc), mv);
+            mv.visitInsn(Type.getReturnType(desc).getOpcode(IRETURN));
         }
 
         mv.visitMaxs(0, 0);
@@ -288,90 +286,38 @@ public class POJOWriter implements Opcodes {
         mv.visitInsn(ATHROW);
         mv.visitLabel(end);
     }
-
+    
     /**
-     * Write a return instruction according to the given type.
-     * @param t : the type
-     * @param mv : the method visitor
+     * Load on stack the method arguments.
+     * @param mv method visitor
+     * @param access access level of the method
+     * @param args argument types array
      */
-    private static void writeReturn(Type t, MethodVisitor mv) {
-        switch (t.getSort()) {
-            case Type.BOOLEAN:
-            case Type.INT:
-            case Type.BYTE:
-            case Type.CHAR:
-            case Type.SHORT:
-                // Integer or Boolean : return 0 ( false)
-                mv.visitInsn(IRETURN);
-                break;
-            case Type.LONG:
-                // mv.visitInsn(LCONST_0);
-                mv.visitInsn(LRETURN);
-                break;
-            case Type.DOUBLE:
-                // Double : return 0.0
-                // mv.visitInsn(DCONST_0);
-                mv.visitInsn(DRETURN);
-                break;
-            case Type.FLOAT:
-                // Double : return 0.0
-                // mv.visitInsn(DCONST_0);
-                mv.visitInsn(FRETURN);
-                break;
-            case Type.ARRAY:
-            case Type.OBJECT:
-                // Return always null for array and object
-                // mv.visitInsn(ACONST_NULL);
-                mv.visitInsn(ARETURN);
-                break;
-            case Type.VOID:
-                mv.visitInsn(RETURN);
-                break;
-            default:
-                System.err.println("Type not yet managed : " + t);
-                break;
+    private static void loadArgs(MethodVisitor mv, int access, Type[] args) {
+        int i = 0;
+        int j = args.length;
+        int k = getArgIndex(access, args, i);
+        for (int l = 0; l < j; l++) {
+            Type type = args[i + l];
+            mv.visitVarInsn(type.getOpcode(ILOAD), k);
+            k += type.getSize();
         }
     }
-
+    
     /**
-     * Write a load instruction according to the given type.
-     * @param t : the type
-     * @param mv : the method visitor
-     * @param index : variable name (index)
+     * Gets the index of the argument 'i'.
+     * This method manages double-spaces.
+     * @param access method access (mostly public)
+     * @param args argument type array
+     * @param i wanted index
+     * @return the real index
      */
-    private static void writeLoad(Type t, int index, MethodVisitor mv) {
-        switch (t.getSort()) {
-            case Type.BOOLEAN:
-            case Type.INT:
-            case Type.BYTE:
-            case Type.CHAR:
-            case Type.SHORT:
-                // Integer or Boolean : return 0 ( false)
-                mv.visitVarInsn(ILOAD, index);
-                break;
-            case Type.LONG:
-                // mv.visitInsn(LCONST_0);
-                mv.visitVarInsn(LLOAD, index);
-                break;
-            case Type.FLOAT:
-                // mv.visitInsn(LCONST_0);
-                mv.visitVarInsn(FLOAD, index);
-                break;
-            case Type.DOUBLE:
-                // Double : return 0.0
-                // mv.visitInsn(DCONST_0);
-                mv.visitVarInsn(DLOAD, index);
-                break;
-            case Type.ARRAY:
-            case Type.OBJECT:
-                // Return always null for array and object
-                // mv.visitInsn(ACONST_NULL);
-                mv.visitVarInsn(ALOAD, index);
-                break;
-            default:
-                System.err.println("Type not yet managed : " + t);
-                break;
+    private static int getArgIndex(int access, Type[] args, int i) {
+        int j = (access & 8) != 0 ? 0 : 1;
+        for (int k = 0; k < i; k++) {
+            j += args[k].getSize();
         }
+        return j;
     }
 
 }

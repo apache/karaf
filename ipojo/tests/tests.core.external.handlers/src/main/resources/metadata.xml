@@ -9,7 +9,7 @@
 	</handler>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
-		factory="HANDLER-HandlerTester" architecture="true">
+		name="HANDLER-HandlerTester" architecture="true">
 		<cs:check />
 	</component>
 	<instance name="HandlerTest-2" component="HANDLER-HandlerTester">

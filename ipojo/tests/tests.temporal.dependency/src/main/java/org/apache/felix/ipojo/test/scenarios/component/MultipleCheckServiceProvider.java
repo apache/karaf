@@ -32,9 +32,11 @@ public class MultipleCheckServiceProvider implements CheckService {
 
     public boolean check() {
         boolean result = true;
-      
-        for (int i = 0; fs != null && i < fs.length; i++) {
-            result = result && fs[i].foo();
+        //Use a local variable to avoid to wait at each access.
+        FooService[] array = fs;
+        for (int i = 0; array != null && i < array.length; i++) {
+            result = result && array[i].foo();
+            System.out.println("Result : " + result);
         }
         return result;
     }

@@ -143,21 +143,22 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
         InstanceManager instance = new InstanceManager(this, context, handlers);
         
         try {
-        	instance.configure(m_componentMetadata, config);
+            instance.configure(m_componentMetadata, config);
             instance.start();
             return instance;
         } catch (ConfigurationException e) {
-            // An exception occurs while executing the configure or start methods.
-        	if (instance != null) {
-        		instance.dispose();
-        		instance = null;
-        	}
-        	throw e;
+            // An exception occurs while executing the configure or start
+            // methods.
+            if (instance != null) {
+                instance.dispose();
+                instance = null;
+            }
+            throw e;
         } catch (Throwable e) { // All others exception are handled here.
-        	if (instance != null) {
-        		instance.dispose();
-        		instance = null;
-        	}
+            if (instance != null) {
+                instance.dispose();
+                instance = null;
+            }
             m_logger.log(Logger.ERROR, e.getMessage(), e);
             throw new ConfigurationException(e.getMessage());
         }
@@ -242,8 +243,9 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
      */
     public String getFactoryName() {
         String name = m_componentMetadata.getAttribute("name");
-        if (name == null) { // No factory name, use the classname (mandatory attribute)
-                name = m_componentMetadata.getAttribute("classname");
+        if (name == null) {
+            // No factory name, use the classname (mandatory attribute)
+            name = m_componentMetadata.getAttribute("classname");
         }
         return name;
     }

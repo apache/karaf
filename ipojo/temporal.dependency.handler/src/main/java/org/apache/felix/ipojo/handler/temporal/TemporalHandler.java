@@ -45,10 +45,25 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
      */
     public static final int DEFAULT_TIMEOUT = 3000;
     
+    /**
+     * No policy.
+     */
     public static final int NO_POLICY = 0;
+    /**
+     * Use a nullable object.
+     */
     public static final int NULLABLE = 1;
+    /**
+     * Use a default-implementation object.
+     */
     public static final int DEFAULT_IMPLEMENTATION = 2;
+    /**
+     * Use an empty array.
+     */
     public static final int EMPTY_ARRAY = 3;
+    /**
+     * Use null. 
+     */
     public static final int NULL = 4;
     
     /**
@@ -118,11 +133,6 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
             }
             
             boolean agg = false;
-            String aggregate = meta.getAttribute("aggregate"); 
-            if (aggregate != null) {
-                agg = aggregate.equalsIgnoreCase("true");
-            }
-
             String spec = fieldmeta.getFieldType();
             if (spec.endsWith("[]")) {
                 agg = true;

@@ -41,8 +41,8 @@ public final class ParseUtils {
         }
         
         // Remove { and } or [ and ]
-        if ((str.charAt(0) == '{' && str.charAt(str.length() - 1) == '}') ||
-                (str.charAt(0) == '[' && str.charAt(str.length() - 1) == ']')  ) {
+        if ((str.charAt(0) == '{' && str.charAt(str.length() - 1) == '}') 
+                || (str.charAt(0) == '[' && str.charAt(str.length() - 1) == ']')) {
             String internal = (str.substring(1, str.length() - 1)).trim();
             // Check empty array
             if (internal.length() == 0) {

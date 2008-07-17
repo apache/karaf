@@ -8,7 +8,7 @@ public class Factory extends OSGiTestCase {
     
     public void testArch() {
         Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.Factory");
-        String fact = meta.getAttribute("factory");
+        String fact = meta.getAttribute("public");
         String name = meta.getAttribute("name");
         assertNotNull("Factory exists ", fact);
         assertEquals("Factory value", "true", fact);
@@ -18,7 +18,7 @@ public class Factory extends OSGiTestCase {
     
     public void testNoArch() {
         Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.NoFactory");
-        String fact = meta.getAttribute("factory");
+        String fact = meta.getAttribute("public");
         String name = meta.getAttribute("name");
         assertNotNull("Factory exists ", fact);
         assertEquals("Factory value", "false", fact);

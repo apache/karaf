@@ -42,7 +42,7 @@
 	</composite>
 
     <!-- Instance of a specified component -->
-	<composite name="composite.inst.1" factory="true" architecture="true">
+	<composite name="composite.inst.1" architecture="true">
 		<instance component="COMPO-FooProviderType-1" /> <!-- name="FooProv"  -->
 		<instance component="COMPO-FooProviderType-Dyn2">
 			<property name="boolean" value="true"/>

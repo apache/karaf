@@ -168,7 +168,7 @@ public class NullableTest extends OSGiTestCase {
        } catch(RuntimeException e) {
            fail("A nullable was expected ...");
        }   
-       assertTrue("Check nullable", res);
+       assertFalse("Check nullable", res);
        
        dp.stop();
        provider.stop();
@@ -184,7 +184,7 @@ public class NullableTest extends OSGiTestCase {
        String prov2 = "provider2";
        ComponentInstance provider2 = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov2);
        String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-NullableMultipleCheckServiceProvider", un);
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-NullableMultipleCheckServiceProviderTimeout", un);
        
        ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
        assertNotNull("Check foo availability", ref_fs);
@@ -214,7 +214,7 @@ public class NullableTest extends OSGiTestCase {
        
        provider1.stop();
        provider2.stop();
-       
+      
        ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
        assertNotNull("Check cs availability - 3", ref_cs);
        cs = (CheckService) context.getService(ref_cs);

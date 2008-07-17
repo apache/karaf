@@ -121,30 +121,37 @@ public class ManifestMetadataParser {
             // Get the type of the structure to create
             String type = prop.getAttribute("type");
             if (type == null || type.equalsIgnoreCase("dictionary")) {
-                    dict.put(name, parseDictionary(prop));
+                dict.put(name, parseDictionary(prop));
             } else if (type.equalsIgnoreCase("map")) {
-                    dict.put(name, parseMap(prop));
-            }  else if (type.equalsIgnoreCase("list")) {
-                    dict.put(name, parseList(prop));
+                dict.put(name, parseMap(prop));
+            } else if (type.equalsIgnoreCase("list")) {
+                dict.put(name, parseList(prop));
             } else if (type.equalsIgnoreCase("array")) {
                 List list = parseList(prop);
                 boolean isString = true;
                 for (int i = 0; isString && i < list.size(); i++) {
-                    isString = list.get(i) instanceof String;                                              
+                    isString = list.get(i) instanceof String;
                 }
-                Object[] obj = null; 
+                Object[] obj = null;
                 if (isString) {
-                    obj = new String[list.size()];    
+                    obj = new String[list.size()];
                 } else {
                     obj = new Object[list.size()];
                 }
-                dict.put(name, list.toArray(obj)); // Transform the list to array
+                // Transform the list to array
+                dict.put(name, list.toArray(obj)); 
             }
         } else {
             dict.put(prop.getAttribute("name"), prop.getAttribute("value"));
         }
     }
     
+    /**
+     * Parses a complex property. This property will be build as a Dictionary.
+     * @param prop Element to parse.
+     * @return the resulting dictionary
+     * @throws ParseException occurs when an internal property is incorrect. 
+     */
     private Dictionary parseDictionary(Element prop) throws ParseException {
      // Check if there is 'property' elements
         Element[] subProps = prop.getElements("property");
@@ -160,6 +167,13 @@ public class ManifestMetadataParser {
         }
     }
     
+    /**
+     * Parses a complex property. This property will be built as a Map.
+     * The used Map implementation is HashMap.
+     * @param prop the property to parse
+     * @return the resulting Map
+     * @throws ParseException occurs when an internal property is incorrect.
+     */
     private Map parseMap(Element prop) throws ParseException {
         // Check if there is 'property' elements
         Element[] subProps = prop.getElements("property");
@@ -174,6 +188,13 @@ public class ManifestMetadataParser {
         }
     }
     
+    /**
+     * Parses a complex property. This property will be built as a List.
+     * The used Map implementation is ArrayList. The order or element is kept.
+     * @param prop the property to parse
+     * @return the resulting List
+     * @throws ParseException occurs when an internal property is incorrect.
+     */
     private List parseList(Element prop) throws ParseException {
         Element[] subProps = prop.getElements("property");
         if (subProps != null) {
@@ -199,38 +220,47 @@ public class ManifestMetadataParser {
         String name = prop.getAttribute("name");
         String value = prop.getAttribute("value");
         if (name == null) {
-            throw new ParseException("A property does not have the 'name' attribute");
+            throw new ParseException(
+                    "A property does not have the 'name' attribute");
         }
-        //case : the property element has no 'value' attribute
+        // case : the property element has no 'value' attribute
         if (value == null) {
             // Recursive case
             // Get the type of the structure to create
             String type = prop.getAttribute("type");
             if (type == null || type.equalsIgnoreCase("dictionary")) {
-                    map.put(name, parseDictionary(prop));
+                map.put(name, parseDictionary(prop));
             } else if (type.equalsIgnoreCase("map")) {
-                    map.put(name, parseMap(prop));
-            }  else if (type.equalsIgnoreCase("list")) {
-                    map.put(name, parseList(prop));
+                map.put(name, parseMap(prop));
+            } else if (type.equalsIgnoreCase("list")) {
+                map.put(name, parseList(prop));
             } else if (type.equalsIgnoreCase("array")) {
-                    List list = parseList(prop);
-                    boolean isString = true;
-                    for (int i = 0; isString && i < list.size(); i++) {
-                        isString = list.get(i) instanceof String;                                              
-                    }
-                    Object[] obj = null; 
-                    if (isString) {
-                        obj = new String[list.size()];    
-                    } else {
-                        obj = new Object[list.size()];
-                    }
-                    map.put(name, list.toArray(obj)); // Transform the list to array
+                List list = parseList(prop);
+                boolean isString = true;
+                for (int i = 0; isString && i < list.size(); i++) {
+                    isString = list.get(i) instanceof String;
+                }
+                Object[] obj = null;
+                if (isString) {
+                    obj = new String[list.size()];
+                } else {
+                    obj = new Object[list.size()];
+                }
+                map.put(name, list.toArray(obj)); // Transform the list to array
             }
         } else {
             map.put(prop.getAttribute("name"), prop.getAttribute("value"));
         }
     }
 
+    /**
+     * Parse an anonymous property. An anonymous property is a property with no name.
+     * An anonymous property can be simple (just a value) or complex (i.e. a map, a dictionary 
+     * a list or an array).
+     * @param prop the property to parse
+     * @param list the list to populate with the resulting property
+     * @throws ParseException occurs when an internal property cannot be parse correctly
+     */
     private void parseAnonymousProperty(Element prop, List list) throws ParseException {
         // Check that the property has a name
         String name = prop.getAttribute("name");
@@ -270,30 +300,34 @@ public class ManifestMetadataParser {
                     list.add(new HashMap(0));
                 }
             }  else if (type.equalsIgnoreCase("list")) {
-                    Element[] subProps = prop.getElements("property");
-                    if (subProps != null) {
-                        List list2 = new ArrayList(subProps.length); // Create a list to store elements.
-                        for (int i = 0; i < subProps.length; i++) {
-                            parseAnonymousProperty(subProps[i], list2); // Anonymous properties.
-                        }
-                        list.add(list2);
-                    } else {
-                        // If no sub-properties, inject an empty list.
-                        list.add(new ArrayList(0));
+                Element[] subProps = prop.getElements("property");
+                if (subProps != null) {
+                    // Create a list to store elements.
+                    List list2 = new ArrayList(subProps.length); 
+                    for (int i = 0; i < subProps.length; i++) {
+                        parseAnonymousProperty(subProps[i], list2); // Anonymous properties
                     }
-                } else if (type.equalsIgnoreCase("array")) {
-                    // Check sub-props.
-                    Element[] subProps = prop.getElements("property");
-                    if (subProps != null) {
-                        List list2 = new ArrayList(subProps.length); // Use list as pivot type
-                        for (int i = 0; i < subProps.length; i++) {
-                            parseAnonymousProperty(subProps[i], list2);
-                        }
-                        list.add(list.toArray(new Object[list.size()])); // Transform the list to array
-                    } else {
-                        list.add(new Element[0]); // Insert an empty Element array.
-                    }
+                    list.add(list2);
+                } else {
+                    // If no sub-properties, inject an empty list.
+                    list.add(new ArrayList(0));
                 }
+            } else if (type.equalsIgnoreCase("array")) {
+                // Check sub-props.
+                Element[] subProps = prop.getElements("property");
+                if (subProps != null) {
+                    List list2 = new ArrayList(subProps.length); // Use list as
+                                                                 // pivot type
+                    for (int i = 0; i < subProps.length; i++) {
+                        parseAnonymousProperty(subProps[i], list2);
+                    }
+                    list.add(list.toArray(new Object[list.size()])); // Transform
+                                                                     // the list
+                                                                     // to array
+                } else {
+                    list.add(new Element[0]); // Insert an empty Element array.
+                }
+            }
         } else {
             list.add(prop.getAttribute("value"));
         }

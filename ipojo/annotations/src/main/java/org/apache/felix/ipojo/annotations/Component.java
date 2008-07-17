@@ -31,9 +31,9 @@ public @interface Component {
     
     /**
      * Set if the component type is public.
-     * Default: false
+     * Default: true
      */
-    boolean factory() default false;
+    boolean public_factory() default true;
     
     /**
      * Set the component type name.

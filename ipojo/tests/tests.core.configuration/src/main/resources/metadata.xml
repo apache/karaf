@@ -1,7 +1,7 @@
 <ipojo>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
-		factory="CONFIG-FooProviderType-Conf" architecture="true">
+		name="CONFIG-FooProviderType-Conf" architecture="true">
 		<provides />
 		<properties propagation="false">
 			<property name="int" field="intProp" value="2" />
@@ -14,7 +14,7 @@
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
-		factory="CONFIG-FooProviderType-3" architecture="true">
+		name="CONFIG-FooProviderType-3" architecture="true">
 		<provides>
 			<property name="foo" field="m_foo" />
 			<property name="bar" field="m_bar" />
@@ -26,7 +26,7 @@
 		</properties>
 	</component>
 	<!-- Configuration Management Test -->
-	<component factory="CONFIG-FieldConfigurableCheckService"
+	<component name="CONFIG-FieldConfigurableCheckService"
 		className="org.apache.felix.ipojo.test.scenarios.component.ConfigurableCheckServiceProvider"
 		architecture="true">
 		<provides />
@@ -52,7 +52,7 @@
 		</properties>
 	</component>
 
-	<component factory="CONFIG-BothConfigurableCheckService"
+	<component name="CONFIG-BothConfigurableCheckService"
 		className="org.apache.felix.ipojo.test.scenarios.component.ConfigurableCheckServiceProvider"
 		architecture="true">
 		<provides />
@@ -78,7 +78,7 @@
 		</properties>
 	</component>
 
-	<component factory="CONFIG-MethodConfigurableCheckService"
+	<component name="CONFIG-MethodConfigurableCheckService"
 		className="org.apache.felix.ipojo.test.scenarios.component.ConfigurableCheckServiceProvider"
 		architecture="true">
 		<provides />
@@ -104,7 +104,7 @@
 		</properties>
 	</component>
 
-	<component factory="CONFIG-ParentMethodConfigurableCheckService"
+	<component name="CONFIG-ParentMethodConfigurableCheckService"
 		className="org.apache.felix.ipojo.test.scenarios.component.ParentConfigurableCheckServiceProvider"
 		architecture="true">
 		<provides />
@@ -133,7 +133,7 @@
 	
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
-		factory="CONFIG-FooProviderType-4" architecture="true">
+		name="CONFIG-FooProviderType-4" architecture="true">
 		<provides>
 			<property name="foo" field="m_foo" />
 			<property name="bar" field="m_bar" />
@@ -221,7 +221,5 @@
 		<property name="empty-list" type="list"/>
 		<property name="empty-map" type="map"/>
 	</instance>
-		
-		
 	
 </ipojo>

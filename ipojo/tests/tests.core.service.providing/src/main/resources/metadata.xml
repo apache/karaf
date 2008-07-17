@@ -2,20 +2,20 @@
 	<!-- Simple provider  -->
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
-		factory="PS-FooProviderType-1" architecture="true">
+		name="PS-FooProviderType-1" architecture="true">
 		<provides />
 	</component>
 	
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
-		factory="PS-FooProviderType-itf" architecture="true">
+		name="PS-FooProviderType-itf" architecture="true">
 		<provides
 			interface="org.apache.felix.ipojo.test.scenarios.ps.service.FooService" />
 	</component>
 	
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
-		factory="PS-FooProviderType-3" architecture="true">
+		name="PS-FooProviderType-3" architecture="true">
 		<provides>
 			<property name="foo" field="m_foo" />
 			<property name="bar" field="m_bar" />
@@ -30,18 +30,18 @@
 	<!-- Providers providing 2 services -->
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
-		factory="PS-FooBarProviderType-1" architecture="true">
+		name="PS-FooBarProviderType-1" architecture="true">
 		<provides />
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
-		factory="PS-FooBarProviderType-2" architecture="true">
+		name="PS-FooBarProviderType-2" architecture="true">
 		<provides
 			interface="{org.apache.felix.ipojo.test.scenarios.ps.service.FooService, org.apache.felix.ipojo.test.scenarios.ps.service.BarService }" />
 	</component>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
-		factory="PS-FooBarProviderType-3" architecture="true">
+		name="PS-FooBarProviderType-3" architecture="true">
 		<provides
 			interface="{org.apache.felix.ipojo.test.scenarios.ps.service.FooService}">
 			<property name="baz" type="java.lang.String" value="foo" />
@@ -82,7 +82,7 @@
 	
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn2"
-		name="PS-FooProviderType-Dyn2" factory="true" architecture="true">
+		name="PS-FooProviderType-Dyn2" architecture="true">
 		<provides>
 			<property name="int" field="intProp" value="4" />
 			<property name="boolean" field="boolProp" />

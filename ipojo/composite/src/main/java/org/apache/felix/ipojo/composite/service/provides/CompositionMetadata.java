@@ -233,7 +233,7 @@ public class CompositionMetadata {
             // The class has already be loaded.
             return null;
         }
-        byte[] pojo = POJOWriter.dump(clazz, m_name, getFieldList(), getMethodList());
+        byte[] pojo = POJOWriter.dump(clazz, m_name, getFieldList(), getMethodList(), m_handler);
         Manipulator manipulator = new Manipulator();
         try {
             byte[] newclazz = manipulator.manipulate(pojo);
@@ -253,7 +253,7 @@ public class CompositionMetadata {
     protected Element buildMetadata(String name) {
         Element elem = new Element("component", "");
         Attribute className = new Attribute("classname", m_name);
-        Attribute factory = new Attribute("factory", "false");
+        Attribute factory = new Attribute("public", "false");
         elem.addAttribute(className);
         elem.addAttribute(factory);
 

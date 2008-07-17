@@ -1,7 +1,7 @@
 <ipojo>
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
-		factory="BAD-CallbackCheckService" architecture="true">
+		name="BAD-CallbackCheckService" architecture="true">
 		<requires field="fs" />
 		<provides />
 		<callback transition="validate" method="start" />
@@ -20,7 +20,7 @@
 	
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
-		factory="BAD-BothCheckServiceProvider" architecture="true">
+		name="BAD-BothCheckServiceProvider" architecture="true">
 		<requires field="fs">
 			<callback type="bind" method="bothBind" />
 			<callback type="unbind" method="bothUnbind" />
@@ -28,4 +28,24 @@
 		<provides />
 	</component>
 	
+	<!-- Bad constructors -->
+	<component 
+		className="org.apache.felix.ipojo.test.scenarios.component.BadConstructors"
+		name="BAD-BadConstructor"
+		immediate="true"
+	/>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.BadConstructors"
+		factory-method="createBad"
+		name="BAD-BadFactory"
+		immediate="true"
+	/>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.BadConstructors"
+		factory-method="createBad2"
+		name="BAD-BadFactory2"
+		immediate="true"
+	/>
 </ipojo>

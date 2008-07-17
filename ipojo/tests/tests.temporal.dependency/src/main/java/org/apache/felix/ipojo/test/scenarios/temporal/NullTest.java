@@ -184,7 +184,7 @@ public class NullTest extends OSGiTestCase {
        String prov2 = "provider2";
        ComponentInstance provider2 = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov2);
        String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-NullableMultipleCheckServiceProvider", un);
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-NullableMultipleCheckServiceProviderTimeout", un);
        
        ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
        assertNotNull("Check foo availability", ref_fs);

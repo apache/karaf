@@ -172,7 +172,7 @@ public class CompositeFactory extends ComponentFactory implements TrackerCustomi
     }
 
     public String getFactoryName() {
-        return m_componentMetadata.getAttribute("name");
+        return m_componentMetadata.getAttribute("name"); // Mandatory attribute.
     }
 
 }
