@@ -16,6 +16,48 @@
  */
 
 
+                  Apache ServiceMix Kernel 1.0.0
+                  ==============================
+
+Overview
+--------
+
+This 1.0.0 version of Apache ServiceMix Kernel provides a stable and efficient platform to build 
+OSGi based applications.  It provides the following features:
+  * a local or remote shell console for inspecting the installed OSGi applications, viewing the logs,
+    viewing files, starting and stopping OSGi bundles and lots of other nice features.  Commands can be
+    added at runtime by deploying new bundles in the Kernel.
+  * the file deployer allows the deployment of plain Spring-DM configuration files, exploded or plain 
+    bundles.  Other types of artifacts can be handled by extending the deployer at runtime.
+  * security support for deploying keystores used for SSL connections or new user realms for securing
+    applications access.
+  * a simple, yet powerful, provisioning system that allows a whole application to be installed in a single
+    command line using a simple xml descriptor that also embeds some configuration data
+    
+Changelog
+---------
+    
+The following list shows the bug fixes and enhancements included in this release:
+
+** Bug
+    * [SMX4KNL-34] - snapshot jar name mismatch in startup.properties and in the system folder
+    * [SMX4KNL-52] - Deployment of pain spring files does not work when using xml extensions because these are not available in the classpath
+    * [SMX4KNL-53] - During starting, files are redeployed several times, one each time a new Deployer is registered in OSGi
+    * [SMX4KNL-54] - Kernel does not start if system property "felix.cache.profiledir" is not defined
+    * [SMX4KNL-56] - Kernel does not start on Windows if classpath contains spaces
+    * [SMX4KNL-58] - Hot-deploy capability of FileMonitor does not update bundles properly on Windows.
+
+** Improvement
+    * [SMX4KNL-51] - Add a configuration file for the maven url handler so that adding default repositories is easy enough
+    * [SMX4KNL-55] - Use maven shade plugin on the main module so that sources jar is correct
+
+
+** Task
+    * [SMX4KNL-57] - Extract bundles from the svn tree
+    * [SMX4KNL-59] - Upgrade to spring 2.5.5 / spring-dm 1.1.0
+
+
+
                   Apache ServiceMix Kernel 1.0-rc1
                   ================================
 
