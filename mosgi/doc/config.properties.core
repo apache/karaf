@@ -25,10 +25,10 @@ felix.auto.start.1= \
  file:../mosgi/console.ifc/target/org.apache.felix.mosgi.console.ifc-0.9.0-SNAPSHOT.jar \
  file:../mosgi/managedelements.osgiprobes/target/org.apache.felix.mosgi.managedelements.osgiprobes-0.9.0-SNAPSHOT.jar \
  file:../mosgi/managedelements.bundlesprobes/target/org.apache.felix.mosgi.managedelements.bundlesprobes-0.9.0-SNAPSHOT.jar \
- file:../mosgi/managedelements.obrprobe/target/org.apache.felix.mosgi.managedelements.obrprobe-0.9.0-SNAPSHOT.jar 
+ file:../mosgi/managedelements.obrprobe/target/org.apache.felix.mosgi.managedelements.obrprobe-0.9.0-SNAPSHOT.jar \
+ file:../mosgi/managedelements.memoryprobe/target/org.apache.felix.mosgi.managedelements.memoryprobe-0.9.0-SNAPSHOT.jar
 # http://perso.citi.insa-lyon.fr/sfrenot/devel/mosgi/managedelements/trunk/mosgi.managedelements.linuxprobes/target/org.apache.felix.mosgi.managedelements.linuxprobes-0.8.0-SNAPSHOT.jar
 
-#file:../mosgi/mosgi.managedelements.memoryprobe/target/org.apache.felix.mosgi.managedelements.memoryprobe-0.9.0-SNAPSHOT.jar \
 
 # if we need the http jmx connector
 # file:../mosgi.jmx.httpconnector/target/org.apache.felix.mosgi.jmx.httpconnector-0.8.0-SNAPSHOT.jar
@@ -37,7 +37,7 @@ felix.auto.start.1= \
 mosgi.jmxconsole.tab.url.osgiprobestab=file:../mosgi/managedelements.osgiprobes.tab/target/org.apache.felix.mosgi.managedelements.osgiprobes.tab-0.9.0-SNAPSHOT.jar
 mosgi.jmxconsole.tab.url.bundlesprobestab=file:../mosgi/managedelements.bundlesprobes.tab/target/org.apache.felix.mosgi.managedelements.bundlesprobes.tab-0.9.0-SNAPSHOT.jar
 mosgi.jmxconsole.tab.url.obrprobetab=file:../mosgi/managedelements.obrprobe.tab/target/org.apache.felix.mosgi.managedelements.obrprobe.tab-0.9.0-SNAPSHOT.jar
-mosgi.jmxconsole.tab.url.memoryprobetab=http://perso.citi.insa-lyon.fr/sfrenot/devel/mosgi/managedelements/trunk/mosgi.managedelements.memoryprobe.tab/target/org.apache.felix.mosgi.managedelements.memoryprobe.tab-0.8.0-SNAPSHOT.jar
+mosgi.jmxconsole.tab.url.memoryprobetab=http://perso.citi.insa-lyon.fr/sfrenot/devel/mosgi/managedelements/trunk/mosgi.managedelements.memoryprobe.tab/target/fr.inria.ares.mosgi.managedelements.memoryprobe.tab-0.2.jar
 mosgi.jmxconsole.tab.url.linuxprobestab=http://perso.citi.insa-lyon.fr/sfrenot/devel/mosgi/managedelements/trunk/mosgi.managedelements.linuxprobes.tab/target/org.apache.felix.mosgi.managedelements.linuxprobes.tab-0.8.0-SNAPSHOT.jar
 
 
