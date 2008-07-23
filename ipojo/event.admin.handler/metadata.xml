@@ -1,0 +1,15 @@
+<ipojo>
+	<handler
+		classname="org.apache.felix.ipojo.handlers.event.subscriber.EventAdminSubscriberHandler"
+		name="subscriber"
+		namespace="org.apache.felix.ipojo.handlers.event.EventAdminHandler">
+		<provides>
+			<property field="m_topics" name="event.topics" value=""/>
+		</provides>
+	</handler>
+	
+	<handler classname="org.apache.felix.ipojo.handlers.event.publisher.EventAdminPublisherHandler"
+		name="publisher"
+		namespace="org.apache.felix.ipojo.handlers.event.EventAdminHandler">
+	</handler>
+</ipojo>

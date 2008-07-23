@@ -16,23 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.ipojo.handler.event;
-
+package org.apache.felix.ipojo.handlers.event;
 
 /**
  * Utility methods.
+ * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class EventUtil {
 
     /**
      * Test that the given topic match with the given topic pattern.
-     * @param topic : topic to test.
-     * @param topicPattern : topic pattern
+     * 
+     * @param topic :
+     *            topic to test.
+     * @param topicPattern :
+     *            topic pattern
      * @return true if it matches.
      */
     public static boolean matches(String topic, String topicPattern) {
-        if (topicPattern.equals("*")) { return true; }
+        if (topicPattern.equals("*")) {
+            return true;
+        }
         int star;
         if ((star = topicPattern.indexOf("*")) > 0) {
             return topic.startsWith(topicPattern.substring(0, star - 1));
@@ -43,8 +48,11 @@ public class EventUtil {
 
     /**
      * Test that the given topic match with the given topic patterns.
-     * @param topic : topic to test.
-     * @param topicPatterns : topic patterns
+     * 
+     * @param topic :
+     *            topic to test.
+     * @param topicPatterns :
+     *            topic patterns
      * @return true if it matches.
      */
     public static boolean matches(String topic, String[] topicPatterns) {
