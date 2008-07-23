@@ -113,6 +113,7 @@ public class FileMonitor {
     }
 
     public void start() {
+        executor = Executors.newSingleThreadExecutor();
         if (configDir != null) {
             configDir.mkdirs();
         }
@@ -139,7 +140,11 @@ public class FileMonitor {
         }
         LOGGER.info("Will generate bundles from expanded source directories to: " + generateDir);
 
-        scanner.start();
+        executor.execute(new Runnable() {
+            public void run() {
+                scanner.start();
+            }
+        });
     }
 
     public void stop() {
@@ -291,7 +296,6 @@ public class FileMonitor {
         }
         if (listener == null) {
             try {
-                executor = Executors.newSingleThreadExecutor();
                 String filter = "(" + Constants.OBJECTCLASS + "=" + DeploymentListener.class.getName() + ")";
                 listener = new ServiceListener() {
                     public void serviceChanged(ServiceEvent event) {
