@@ -49,6 +49,7 @@ public class ManifestParser
 
         // Verify that only manifest version 2 is specified.
         String manifestVersion = (String) m_headerMap.get(Constants.BUNDLE_MANIFESTVERSION);
+        manifestVersion = (manifestVersion == null) ? null : manifestVersion.trim();
         if ((manifestVersion != null) && !manifestVersion.equals("2"))
         {
             throw new BundleException(
@@ -241,7 +242,7 @@ public class ManifestParser
     public String getManifestVersion()
     {
         String manifestVersion = (String) m_headerMap.get(Constants.BUNDLE_MANIFESTVERSION);
-        return (manifestVersion == null) ? "1" : manifestVersion;
+        return (manifestVersion == null) ? "1" : manifestVersion.trim();
     }
 
     public String getSymbolicName()
