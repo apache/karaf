@@ -20,7 +20,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>bundle</packaging>
 	<name>Apache Felix iPOJO Event Admin Handler</name>
-	<artifactId>org.apache.felix.ipojo.handler.event</artifactId>
+	<artifactId>org.apache.felix.ipojo.handler.eventadmins</artifactId>
 	<groupId>org.apache.felix</groupId>
 	<version>0.9.0-SNAPSHOT</version>
 	

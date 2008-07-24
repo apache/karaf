@@ -39,10 +39,11 @@
 		<module>composite</module>
 		<module>arch</module>
 		<module>ant</module>
-		<module>white.board.pattern.handler</module>
-		<module>extender.pattern.handler</module>
-		<module>temporal.dependency.handler</module>
-		<module>event.admin.handler</module>
+		<!--<module>white.board.pattern.handler</module>-->
+		<module>handler/extender</module>
+		<module>handler/temporal</module>
+		<module>handler/eventadmin</module>
+		<module>handler/whiteboard</module>
 	</modules>
 		
 	
