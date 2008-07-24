@@ -25,23 +25,23 @@
   <packaging>pom</packaging>
   
   <modules>
-    <module>tests.core.manipulation</module>
-	<module>tests.core.factories</module>
-	<module>tests.core.lifecycle.controller</module>
-	<module>tests.core.service.providing</module>
-	<module>tests.core.lifecycle.callback</module>
-	<module>tests.core.service.dependency</module>
-	<module>tests.core.service.dependency.bindingpolicy</module>
-	<module>tests.core.service.dependency.filter</module>
-	<module>tests.core.configuration</module>
-	<module>tests.core.external.handlers</module>
-	<module>tests.core.bad.configurations</module>
-	<module>tests.composite</module>
-	<module>tests.composite.service.import-export</module>
-	<module>tests.composite.service.instance</module>
-	<module>tests.composite.service.providing</module>
-	<module>tests.temporal.dependency</module>
-	<module>tests.whiteboard.pattern.handler</module>
+    <module>manipulator/manipulation</module>
+	<module>core/factories</module>
+	<module>core/lifecycle-controller</module>
+	<module>core/service-providing</module>
+	<module>core/lifecycle-callback</module>
+	<module>core/service-dependency</module>
+	<module>core/service-dependency-bindingpolicy</module>
+	<module>core/service-dependency-filter</module>
+	<module>core/configuration</module>
+	<module>core/external-handlers</module>
+	<module>core/bad-configurations</module>
+	<module>composite/composite.runtime</module>
+	<module>composite/import-export</module>
+	<module>composite/service-instance</module>
+	<module>composite/service-providing</module>
+	<module>handler/temporal</module>
+	<module>handler/whiteboard</module>
    </modules>
    
    <profiles>
@@ -51,7 +51,7 @@
 			<jdk>1.5</jdk>
 		</activation>
 		<modules>
-			<module>tests.core.annotations</module>
+			<module>core/annotations</module>
 		</modules>
 	</profile>
 	<profile>
@@ -60,7 +60,7 @@
 			<jdk>1.6</jdk>
 		</activation>
 		<modules>
-			<module>tests.core.annotations</module>
+			<module>core/annotations</module>
 		</modules>
 	</profile>
   </profiles>
