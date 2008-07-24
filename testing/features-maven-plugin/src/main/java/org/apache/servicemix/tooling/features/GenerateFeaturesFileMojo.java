@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.metadata.ResolutionGroup;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -216,24 +218,60 @@ public class GenerateFeaturesFileMojo extends MojoSupport {
     }
 
     private Artifact findServicemixBundle(Artifact artifact) {
-        Artifact wrapper = factory.createArtifact("org.apache.servicemix.bundles", 
+        Artifact noVersionWrapper = factory.createArtifact("org.apache.servicemix.bundles", 
                                                   "org.apache.servicemix.bundles." + artifact.getArtifactId(), 
-                                                  artifact.getVersion() + project.getProperties().getProperty("servicemix.bundle.suffix"), 
+                                                  "", 
                                                   artifact.getScope(), artifact.getType());
+        
         try {
+            List versions = artifactMetadataSource.retrieveAvailableVersions(noVersionWrapper, localRepo, remoteRepos);
+            Artifact wrapper = factory.createArtifact("org.apache.servicemix.bundles", 
+                                                      "org.apache.servicemix.bundles." + artifact.getArtifactId(), 
+                                                      getBestVersionForArtifact(artifact, versions), 
+                                                      artifact.getScope(), artifact.getType());
             // let's check if the servicemix bundle for this artifact exists
             resolver.resolve(wrapper, remoteRepos, localRepo);
+            for (Artifact dependency : getDependencies(wrapper)) {
+                //some of these wrapper bundles provide for multiple JAR files, no need to include any of them after adding the wrapper
+                getLog().debug(String.format("'%s' also provides '%s'", wrapper, dependency));
+                currentFeature.add(dependency);
+            }
+            return wrapper;
         } catch (ArtifactResolutionException e) {
-            return null;
+            getLog().debug("Couldn't find a ServiceMix bundle for " + artifact, e);
         } catch (ArtifactNotFoundException e) {
+            getLog().debug("Couldn't find a ServiceMix bundle for " + artifact, e);
+        } catch (ArtifactMetadataRetrievalException e) {
+            getLog().debug("Couldn't find a ServiceMix bundle for " + artifact, e);
+        }
+        if (artifact.getArtifactId().contains("-")) {
+            //let's try to see if we can't find a bundle wrapping multiple artifacts (e.g. mina -> mina-core, mina-codec, ...)
+            return findServicemixBundle(factory.createArtifact(artifact.getGroupId(), artifact.getArtifactId().split("-")[0], 
+                                                               artifact.getVersion(), artifact.getScope(), artifact.getType()));
+        } else {
             return null;
         }
-        for (Artifact dependency : getDependencies(wrapper)) {
-            //some of these wrapper bundles provide for multiple JAR files, no need to include any of them after adding the wrapper
-            getLog().debug(String.format("'%s' also provides '%s'", wrapper, dependency));
-            currentFeature.add(dependency);
+    }
+
+    protected String getBestVersionForArtifact(Artifact artifact, List<ArtifactVersion> versions) throws ArtifactMetadataRetrievalException {
+        if (versions.size() == 0) {
+            throw new ArtifactMetadataRetrievalException("No wrapper bundle available for " + artifact);
         }
-        return wrapper;
+        Collections.sort(versions, Collections.reverseOrder());
+        //check for same version
+        for (ArtifactVersion version : versions) {
+            if (version.toString().startsWith(artifact.getVersion())) {
+                return version.toString();
+            }
+        }
+        //check for same major/minor version
+        for (ArtifactVersion version : versions) {
+            String[] elements = version.toString().split("\\.");
+            if (elements.length >= 2 && artifact.getVersion().startsWith(elements[0] + "." + elements[1])) {
+                return version.toString();
+            }
+        }
+        throw new ArtifactMetadataRetrievalException("No suitable version found for " + artifact + " wrapper bundle");
     }
 
     private boolean isProvided(Artifact bundle) {
