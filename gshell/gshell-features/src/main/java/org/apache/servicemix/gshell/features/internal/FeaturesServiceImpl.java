@@ -72,6 +72,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     private Map<URI, RepositoryImpl> repositories = new HashMap<URI, RepositoryImpl>();
     private Map<String, Feature> features;
     private Map<String, Set<Long>> installed = new HashMap<String, Set<Long>>();
+    private String boot;
 
     public BundleContext getBundleContext() {
         return bundleContext;
@@ -103,6 +104,10 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         for (int i = 0; i < s.length; i++) {
             this.uris.add(new URI(s[i]));
         }
+    }
+
+    public void setBoot(String boot) {
+        this.boot = boot;
     }
 
     public void addRepository(URI uri) throws Exception {
@@ -250,6 +255,20 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
                 }
             }
             saveState();
+        }
+        if (boot != null) {
+            new Thread() {
+                public void run() {
+                    String[] list = boot.split(",");
+                    for (String f : list) {
+                        try {
+                            installFeature(f);
+                        } catch (Exception e) {
+                            LOGGER.error("Error installing boot feature " + f, e);
+                        }
+                    }
+                }
+            }.start();
         }
     }
 
