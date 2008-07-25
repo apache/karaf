@@ -33,8 +33,6 @@
     <name>Apache ServiceMix Kernel :: Testing</name>
 
     <modules>
-        <module>depends-maven-plugin</module>
-        <module>features-maven-plugin</module>
         <module>support</module>
     </modules>
 
