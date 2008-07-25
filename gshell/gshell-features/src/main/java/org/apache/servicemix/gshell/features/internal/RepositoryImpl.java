@@ -19,6 +19,7 @@ package org.apache.servicemix.gshell.features.internal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -42,15 +43,15 @@ import org.xml.sax.SAXException;
  */
 public class RepositoryImpl implements Repository {
 
-    private URL url;
+    private URI uri;
     private List<Feature> features;
 
-    public RepositoryImpl(URL url) {
-        this.url = url;
+    public RepositoryImpl(URI uri) {
+        this.uri = uri;
     }
 
-    public URL getURL() {
-        return url;
+    public URI getURI() {
+        return uri;
     }
 
     public Feature[] getFeatures() throws Exception {
@@ -64,7 +65,7 @@ public class RepositoryImpl implements Repository {
         try {
             features = new ArrayList<Feature>();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            Document doc = factory.newDocumentBuilder().parse(url.openStream());
+            Document doc = factory.newDocumentBuilder().parse(uri.toURL().openStream());
             NodeList nodes = doc.getDocumentElement().getChildNodes();
             for (int i = 0; i < nodes.getLength(); i++) {
                 Node node = nodes.item(i);

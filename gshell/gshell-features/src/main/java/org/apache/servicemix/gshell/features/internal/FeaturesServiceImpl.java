@@ -19,7 +19,8 @@ package org.apache.servicemix.gshell.features.internal;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -67,8 +68,8 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     private BundleContext bundleContext;
     private ConfigurationAdmin configAdmin;
     private PreferencesService preferences;
-    private Set<URL> urls;
-    private Map<URL, RepositoryImpl> repositories = new HashMap<URL, RepositoryImpl>();
+    private Set<URI> uris;
+    private Map<URI, RepositoryImpl> repositories = new HashMap<URI, RepositoryImpl>();
     private Map<String, Feature> features;
     private Map<String, Set<Long>> installed = new HashMap<String, Set<Long>>();
 
@@ -96,32 +97,32 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         this.preferences = preferences;
     }
 
-    public void setUrls(String urls) throws MalformedURLException {
-        String[] s = urls.split(",");
-        this.urls = new HashSet<URL>();
+    public void setUrls(String uris) throws URISyntaxException {
+        String[] s = uris.split(",");
+        this.uris = new HashSet<URI>();
         for (int i = 0; i < s.length; i++) {
-            this.urls.add(new URL(s[i]));
+            this.uris.add(new URI(s[i]));
         }
     }
 
-    public void addRepository(URL url) throws Exception {
-        internalAddRepository(url);
+    public void addRepository(URI uri) throws Exception {
+        internalAddRepository(uri);
         saveState();
     }
 
-    protected void internalAddRepository(URL url) throws Exception {
-        RepositoryImpl repo = new RepositoryImpl(url);
-        repositories.put(url, repo);
+    protected void internalAddRepository(URI uri) throws Exception {
+        RepositoryImpl repo = new RepositoryImpl(uri);
+        repositories.put(uri, repo);
         features = null;
     }
 
-    public void removeRepository(URL url) {
-        internalRemoveRepository(url);
+    public void removeRepository(URI uri) {
+        internalRemoveRepository(uri);
         saveState();
     }
 
-    public void internalRemoveRepository(URL url) {
-        repositories.remove(url);
+    public void internalRemoveRepository(URI uri) {
+        repositories.remove(uri);
         features = null;
     }
 
@@ -244,9 +245,9 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
 
     public void start() throws Exception {
         if (!loadState()) {
-            if (urls != null) {
-                for (URL url : urls) {
-                    internalAddRepository(url);
+            if (uris != null) {
+                for (URI uri : uris) {
+                    internalAddRepository(uri);
                 }
             }
             saveState();
@@ -254,7 +255,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public void stop() throws Exception {
-        urls = new HashSet<URL>(repositories.keySet());
+        uris = new HashSet<URI>(repositories.keySet());
         while (!repositories.isEmpty()) {
             internalRemoveRepository(repositories.keySet().iterator().next());
         }
@@ -300,8 +301,8 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         try {
             Preferences prefs = preferences.getUserPreferences("FeaturesServiceState");
             if (prefs.nodeExists("repositories")) {
-                Set<URL> repositories = loadSet(prefs.node("repositories"));
-                for (URL repo : repositories) {
+                Set<URI> repositories = loadSet(prefs.node("repositories"));
+                for (URI repo : repositories) {
                     internalAddRepository(repo);
                 }
                 installed = loadMap(prefs.node("features"));
@@ -313,8 +314,8 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         return false;
     }
 
-    protected void saveSet(Preferences node, Set<URL> set) throws BackingStoreException {
-        List<URL> l = new ArrayList<URL>(set);
+    protected void saveSet(Preferences node, Set<URI> set) throws BackingStoreException {
+        List<URI> l = new ArrayList<URI>(set);
         node.clear();
         node.putInt("count", l.size());
         for (int i = 0; i < l.size(); i++) {
@@ -322,21 +323,13 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         }
     }
 
-    protected Set<URL> loadSet(Preferences node) {
-        Set<URL> l = new HashSet<URL>();
+    protected Set<URI> loadSet(Preferences node) {
+        Set<URI> l = new HashSet<URI>();
         int count = node.getInt("count", 0);
         for (int i = 0; i < count; i++) {
-            l.add(createURL(node.get("item." + i, null)));
+            l.add(URI.create(node.get("item." + i, null)));
         }
         return l;
-    }
-
-    protected URL createURL(String url) {
-        try {
-            return new URL(url);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     protected void saveMap(Preferences node, Map<String, Set<Long>> map) throws BackingStoreException {

@@ -17,7 +17,7 @@
 package org.apache.servicemix.gshell.features.internal.commands;
 
 import java.util.List;
-import java.net.URL;
+import java.net.URI;
 
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
@@ -31,7 +31,7 @@ public class AddUrlCommand extends FeaturesCommandSupport {
 
     protected void doExecute(FeaturesService admin) throws Exception {
         for (String url : urls) {
-            admin.addRepository(new URL(url));
+            admin.addRepository(new URI(url));
         }
     }
 }

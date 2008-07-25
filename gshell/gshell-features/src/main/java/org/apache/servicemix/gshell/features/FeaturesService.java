@@ -17,15 +17,16 @@
 package org.apache.servicemix.gshell.features;
 
 import java.net.URL;
+import java.net.URI;
 
 /**
  * The service managing features repositories.
  */
 public interface FeaturesService {
 
-    void addRepository(URL url) throws Exception;
+    void addRepository(URI url) throws Exception;
 
-    void removeRepository(URL url);
+    void removeRepository(URI url);
 
     Repository[] listRepositories();
 

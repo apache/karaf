@@ -18,13 +18,14 @@ package org.apache.servicemix.gshell.features;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.URI;
 
 /**
  * A repository of features.
  */
 public interface Repository {
 
-    URL getURL();
+    URI getURI();
 
     Feature[] getFeatures() throws Exception;
 

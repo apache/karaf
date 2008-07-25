@@ -17,7 +17,7 @@
 package org.apache.servicemix.gshell.features.internal.commands;
 
 import java.util.List;
-import java.net.URL;
+import java.net.URI;
 
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.clp.Argument;
@@ -31,7 +31,7 @@ public class RemoveUrlCommand extends FeaturesCommandSupport {
 
     protected void doExecute(FeaturesService admin) throws Exception {
         for (String url : urls) {
-            admin.removeRepository(new URL(url));
+            admin.removeRepository(new URI(url));
         }
     }
 }

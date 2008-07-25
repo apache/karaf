@@ -16,7 +16,7 @@
  */
 package org.apache.servicemix.gshell.features.internal.commands;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,13 +35,13 @@ public class RefreshUrlCommand extends FeaturesCommandSupport {
         if (urls == null || urls.isEmpty()) {
             urls = new ArrayList<String>();
             for (Repository repo : admin.listRepositories()) {
-                urls.add(repo.getURL().toString());
+                urls.add(repo.getURI().toString());
             }
         }
-        for (String strUrl : urls) {
-            URL url = new URL(strUrl);
-            admin.removeRepository(url);
-            admin.addRepository(url);
+        for (String strUri : urls) {
+            URI uri = new URI(strUri);
+            admin.removeRepository(uri);
+            admin.addRepository(uri);
         }
     }
 }
