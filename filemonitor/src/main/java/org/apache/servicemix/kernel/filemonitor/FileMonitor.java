@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Enumeration;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.jar.Attributes;
@@ -430,6 +433,7 @@ public class FileMonitor {
             InputStream in = new FileInputStream(file);
             try {
                 properties.load(in);
+                interpolation(properties);
                 closeQuietly(in);
                 String[] pid = parsePid(file);
                 Hashtable<Object, Object> hashtable = new Hashtable<Object, Object>();
@@ -447,6 +451,22 @@ public class FileMonitor {
             finally {
                 closeQuietly(in);
             }
+        }
+    }
+
+    protected void interpolation(Properties properties) {
+        for (Enumeration e = properties.propertyNames(); e.hasMoreElements();) {
+            String key = (String) e.nextElement();
+            String val = properties.getProperty(key);
+            Matcher matcher = Pattern.compile( "\\$\\{([^}]+)\\}" ).matcher(val);
+            while (matcher.find()) {
+                String rep = System.getProperty(matcher.group(1));
+                if (rep != null) {
+                    val = val.replace(matcher.group(0), rep);
+                    matcher.reset(val);
+                }
+            }
+            properties.put(key, val);
         }
     }
 
