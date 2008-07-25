@@ -57,6 +57,7 @@ public class CreateCommand
         copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.features.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.shell.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.logging.cfg", true);
+        copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.url.mvn.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/startup.properties", true);
         copyResourceToDir(serviceMixBase, "etc/system.properties", true);
 
