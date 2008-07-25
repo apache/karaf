@@ -173,7 +173,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
             Version v = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
             boolean install = true;
             for (Bundle b : bundleContext.getBundles()) {
-                if (b.getSymbolicName().equals(sn)) {
+                if (b.getSymbolicName() != null && b.getSymbolicName().equals(sn)) {
                     vStr = (String) b.getHeaders().get(Constants.BUNDLE_VERSION);
                     Version bv = vStr == null ? Version.emptyVersion : Version.parseVersion(vStr);
                     if (v.equals(bv)) {
