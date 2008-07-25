@@ -184,13 +184,24 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
      * ComponentManager instances created by this method are not registered
      * with the ComponentRegistry. Therefore, any configuration update to these
      * components must be effected by this class !
+     * 
+     * @param configuration The (initial) configuration for the new
+     *      component manager
+     * @param isNewInstance <code>true</code> if this component manager is
+     *      created as per {@link #newInstance(Dictionary)}. In this case the
+     *      given configuration is used as the factory configuration and the
+     *      component is immediately enabled (synchronously). Otherwise the
+     *      component is created because a new configuration instance of
+     *      this factory has been created. In this case the configuration is
+     *      used as the normal configuration from configuration admin (not the
+     *      factory configuration) and the component is enabled asynchronously.
      */
-    private ComponentManager createComponentManager( Dictionary configuration, boolean synchronous )
+    private ComponentManager createComponentManager( Dictionary configuration, boolean isNewInstance )
     {
         long componentId = m_componentRegistry.createComponentId();
         ImmediateComponentManager cm = new ImmediateComponentManager( getActivator(), getComponentMetadata(),
             componentId );
-        
+
         // add the new component to the activators instances
         getActivator().getInstanceReferences().add( cm );
 
@@ -198,10 +209,19 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         m_createdComponents.put( cm, cm );
 
         // inject configuration
-        cm.setFactoryProperties( configuration );
+        if ( isNewInstance )
+        {
+            cm.setFactoryProperties( configuration );
+        }
+        else
+        {
+            // this should not call component reactivation because it is
+            // not active yet
+            cm.reconfigure( configuration );
+        }
 
         // enable synchronously or asynchronously depending on the flag
-        cm.enable( synchronous );
+        cm.enable( isNewInstance );
 
         return cm;
     }
