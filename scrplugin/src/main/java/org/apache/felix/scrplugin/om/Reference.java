@@ -20,9 +20,7 @@ package org.apache.felix.scrplugin.om;
 
 import java.util.List;
 
-import org.apache.felix.scrplugin.tags.JavaClassDescription;
-import org.apache.felix.scrplugin.tags.JavaMethod;
-import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.*;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -40,6 +38,10 @@ public class Reference extends AbstractObject {
     protected String bind;
     protected String unbind;
 
+    /** Is this reference already checked? */
+    protected boolean checked = false;
+
+    /** The class description containing this reference. */
     protected final JavaClassDescription javaClassDescription;
 
     /**
@@ -116,13 +118,27 @@ public class Reference extends AbstractObject {
         this.unbind = unbind;
     }
 
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
+    }
+
     /**
      * Validate the property.
      * If errors occur a message is added to the issues list,
      * warnings can be added to the warnings list.
      */
-    public void validate(List issues, List warnings)
+    public void validate(List issues, List warnings, boolean componentIsAbstract)
     throws MojoExecutionException {
+        // if this reference is already checked, return immediately
+        if ( this.checked ) {
+            return;
+        }
+        final int currentIssueCount = issues.size();
+
         // validate name
         if (StringUtils.isEmpty(this.name)) {
             issues.add(this.getMessage("Reference has no name"));
@@ -149,17 +165,35 @@ public class Reference extends AbstractObject {
         }
 
         // validate bind and unbind methods
-        this.bind = this.validateMethod(this.bind, issues, warnings);
-        this.unbind = this.validateMethod(this.unbind, issues, warnings);
+        final String oldBind = this.bind;
+        final String oldUnbind = this.unbind;
+        this.bind = this.validateMethod(this.bind, issues, warnings, componentIsAbstract);
+        this.unbind = this.validateMethod(this.unbind, issues, warnings, componentIsAbstract);
+        if ( issues.size() == currentIssueCount ) {
+            if ( this.bind != null && this.unbind != null ) {
+                // no errors, so we're checked
+                this.checked = true;
+            } else {
+                if ( this.bind == null ) {
+                    this.bind = oldBind;
+                }
+                if ( this.unbind == null ) {
+                    this.unbind = oldUnbind;
+                }
+            }
+        }
     }
 
-    protected String validateMethod(String methodName, List issues, List warnings)
+    protected String validateMethod(String  methodName,
+                                    List    issues,
+                                    List    warnings,
+                                    boolean componentIsAbstract)
     throws MojoExecutionException {
-
-        JavaMethod method = this.findMethod(methodName);
-
+        final JavaMethod method = this.findMethod(methodName);
         if (method == null) {
-            issues.add(this.getMessage("Missing method " + methodName + " for reference " + this.getName()));
+            if ( !componentIsAbstract ) {
+                issues.add(this.getMessage("Missing method " + methodName + " for reference " + this.getName()));
+            }
             return null;
         }
 

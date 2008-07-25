@@ -161,7 +161,7 @@ public class ComponentDescriptorIO {
             final Iterator i = component.getReferences().iterator();
             while ( i.hasNext() ) {
                 final Reference reference = (Reference)i.next();
-                generateXML(reference, contentHandler);
+                generateXML(reference, contentHandler, isScrPrivateFile);
             }
         }
         IOUtils.indent(contentHandler, 1);
@@ -273,7 +273,7 @@ public class ComponentDescriptorIO {
      * @param contentHandler
      * @throws SAXException
      */
-    protected static void generateXML(Reference reference, ContentHandler contentHandler)
+    protected static void generateXML(Reference reference, ContentHandler contentHandler, boolean isScrPrivateFile)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "name", reference.getName());
@@ -283,6 +283,9 @@ public class ComponentDescriptorIO {
         IOUtils.addAttribute(ai, "target", reference.getTarget());
         IOUtils.addAttribute(ai, "bind", reference.getBind());
         IOUtils.addAttribute(ai, "unbind", reference.getUnbind());
+        if ( isScrPrivateFile ) {
+            IOUtils.addAttribute(ai, "checked", String.valueOf(reference.isChecked()));
+        }
         IOUtils.indent(contentHandler, 2);
         contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.REFERENCE, ComponentDescriptorIO.REFERENCE_QNAME, ai);
         contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.REFERENCE, ComponentDescriptorIO.REFERENCE_QNAME);
@@ -403,6 +406,10 @@ public class ComponentDescriptorIO {
                     ref.setTarget(attributes.getValue("target"));
                     ref.setBind(attributes.getValue("bind"));
                     ref.setUnbind(attributes.getValue("unbind"));
+
+                    if ( attributes.getValue("checked") != null ) {
+                        ref.setChecked(Boolean.valueOf(attributes.getValue("checked")).booleanValue());
+                    }
 
                     this.currentComponent.addReference(ref);
                 }

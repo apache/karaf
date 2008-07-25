@@ -97,6 +97,8 @@ public class Constants {
 
     public static final String REFERENCE_UNDBIND = "unbind";
 
+    public static final String REFERENCE_CHECKED = "checked";
+
     public static final String ABSTRACT_DESCRIPTOR_FILENAME = "scrinfo.xml";
 
     public static final String ABSTRACT_DESCRIPTOR_RELATIVE_PATH = "OSGI-INF" + File.separator + "scr-plugin" + File.separator + ABSTRACT_DESCRIPTOR_FILENAME;

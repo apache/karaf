@@ -510,6 +510,10 @@ public class SCRDescriptorMojo extends AbstractMojo {
         if ( unbindValue != null ) {
             ref.setUnbind(unbindValue);
         }
+        final String isChecked = reference.getNamedParameter(Constants.REFERENCE_CHECKED);
+        if ( isChecked != null ) {
+            ref.setChecked(Boolean.valueOf(isChecked).booleanValue());
+        }
         // if this is a field with a single cardinality,
         // we look for the bind/unbind methods
         // and create them if they are not availabe

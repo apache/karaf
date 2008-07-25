@@ -182,6 +182,7 @@ public class Component extends AbstractObject {
      */
     public void validate(List issues, List warnings)
     throws MojoExecutionException {
+        final int currentIssueCount = issues.size();
 
         // nothing to check if this is ignored
         if (!isDs()) {
@@ -204,7 +205,7 @@ public class Component extends AbstractObject {
                 }
 
                 // no errors so far, let's continue
-                if ( issues.size() == 0 ) {
+                if ( issues.size() == currentIssueCount ) {
                     // check activate and deactivate methods
                     this.checkLifecycleMethod(javaClass, "activate", warnings);
                     this.checkLifecycleMethod(javaClass, "deactivate", warnings);
@@ -249,17 +250,18 @@ public class Component extends AbstractObject {
                     if (isServiceFactory && this.isImmediate() != null && this.isImmediate().booleanValue() && this.getFactory() != null) {
                         issues.add(this.getMessage("Component must not be a ServiceFactory, if immediate and/or component factory: " + javaClass.getName()));
                     }
-                    
+
                     // immediate must not be true for component factory
                     if (this.isImmediate() != null && this.isImmediate().booleanValue() && this.getFactory() != null) {
                         issues.add(this.getMessage("Component must not be immediate if component factory: " + javaClass.getName()));
                     }
-
-                    // verify references
-                    for (Iterator ri = this.getReferences().iterator(); ri.hasNext();) {
-                        final Reference ref = (Reference) ri.next();
-                        ref.validate(issues, warnings);
-                    }
+                }
+            }
+            if ( issues.size() == currentIssueCount ) {
+                // verify references
+                for (Iterator ri = this.getReferences().iterator(); ri.hasNext();) {
+                    final Reference ref = (Reference) ri.next();
+                    ref.validate(issues, warnings, this.isAbstract);
                 }
             }
         }
