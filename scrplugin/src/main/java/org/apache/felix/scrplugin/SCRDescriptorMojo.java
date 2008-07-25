@@ -87,6 +87,13 @@ public class SCRDescriptorMojo extends AbstractMojo {
     private String sourceExcludes;
 
     /**
+     * Predefined properties.
+     *
+     * @parameter
+     */
+    private Map properties = new HashMap();
+
+    /**
      * @see org.apache.maven.plugin.AbstractMojo#execute()
      */
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -244,6 +251,18 @@ public class SCRDescriptorMojo extends AbstractMojo {
         final Map references = new HashMap();
         // Utility handler for propertie
         final PropertyHandler propertyHandler = new PropertyHandler(component, ocd);
+
+        // pre configured properties
+        final Iterator globalPropIter = this.properties.entrySet().iterator();
+        while ( globalPropIter.hasNext() ) {
+            final Map.Entry entry = (Map.Entry)globalPropIter.next();
+            final Property p = new Property();
+            p.setName(entry.getKey().toString());
+            p.setValue(entry.getValue().toString());
+            p.setType("String");
+            p.setPrivate(true);
+            component.addProperty(p);
+        }
 
         JavaClassDescription currentDescription = description;
         do {
