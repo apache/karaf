@@ -90,55 +90,102 @@
 
     <dependencySets>
 
-        <!-- Mandatory bundles for everything -->
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
-            <outputFileNameMapping>${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <unpack>false</unpack>
-            <scope>runtime</scope>
+            <outputFileNameMapping>org/apache/felix/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <!-- Compendium -->
                 <include>org.apache.felix:org.osgi.compendium</include>
-                <include>org.apache.geronimo.specs:geronimo-servlet_2.5_spec</include>
-
-                <!-- PAX Logging -->
+                <include>org.apache.felix:org.apache.felix.configadmin</include>
+                <include>org.apache.felix:org.apache.felix.bundlerepository</include>
+                <include>org.apache.felix:org.apache.felix.prefs</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <outputFileNameMapping>org/ops4j/pax/logging/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
                 <include>org.ops4j.pax.logging:pax-logging-api</include>
                 <include>org.ops4j.pax.logging:pax-logging-service</include>
-
-                <!-- PAX config -->
-                <include>org.apache.felix:org.apache.felix.configadmin</include>
-                <include>org.apache.servicemix.kernel:org.apache.servicemix.kernel.filemonitor</include>
-                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.ant</include>
-
-                <!-- Spring OSGi -->
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <outputFileNameMapping>org/ops4j/pax/url/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>org.ops4j.pax.url:pax-url-mvn</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <outputFileNameMapping>org/springframework/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
                 <include>org.springframework:spring-aop</include>
                 <include>org.springframework:spring-beans</include>
                 <include>org.springframework:spring-context</include>
                 <include>org.springframework:spring-core</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <outputFileNameMapping>org/springframework/osgi/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
                 <include>org.springframework.osgi:spring-osgi-core</include>
                 <include>org.springframework.osgi:spring-osgi-extender</include>
                 <include>org.springframework.osgi:spring-osgi-io</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <outputFileNameMapping>org/apache/geronimo/specs/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>org.apache.geronimo.specs:geronimo-servlet_2.5_spec</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <outputFileNameMapping>org/apache/servicemix/bundles/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.ant</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.aopalliance</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.cglib</include>
-                <include>org.apache.servicemix.kernel:org.apache.servicemix.kernel.spring</include>
-
-                <!-- JAAS -->
-                <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.config</include>
-                <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.keystore</include>
-
-                <!-- GShell -->
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.mina</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <outputFileNameMapping>org/apache/servicemix/kernel/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>org.apache.servicemix.kernel:org.apache.servicemix.kernel.filemonitor</include>
+                <include>org.apache.servicemix.kernel:org.apache.servicemix.kernel.spring</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <outputFileNameMapping>org/apache/servicemix/kernel/gshell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.core</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.osgi</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.log</include>
-
-                <!-- OBR + GShell command -->
-                <include>org.apache.felix:org.apache.felix.bundlerepository</include>
-                <include>org.apache.felix:org.apache.felix.prefs</include>
-                <include>org.ops4j.pax.url:pax-url-mvn</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.obr</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.features</include>
-
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <outputFileNameMapping>org/apache/servicemix/kernel/jaas/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.config</include>
+                <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.keystore</include>
             </includes>
         </dependencySet>
 

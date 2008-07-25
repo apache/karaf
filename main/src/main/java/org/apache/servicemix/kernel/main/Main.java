@@ -104,6 +104,11 @@ public class Main implements MainService, BundleActivator {
      */
     public static final String BUNDLE_LOCATIONS = "bundle.locations";
 
+    /**
+     * Config property that indicates we want to convert bundles locations to maven style urls
+     */
+    public static final String PROPERTY_CONVERT_TO_MAVEN_URL = "servicemix.maven.convert";
+
     private File servicemixHome;
     private File servicemixBase;
     private static Properties m_configProps = null;
@@ -374,6 +379,9 @@ public class Main implements MainService, BundleActivator {
      * specified configuration properties.
      */
     private static void processAutoProperties(BundleContext context) {
+        // Check if we want to convert URLs to maven style
+        boolean convertToMavenUrls = Boolean.parseBoolean(m_configProps.getProperty(PROPERTY_CONVERT_TO_MAVEN_URL, "true"));
+
         // Retrieve the Start Level service, since it will be needed
         // to set the start level of the installed bundles.
         StartLevel sl = (StartLevel) context.getService(
@@ -412,7 +420,8 @@ public class Main implements MainService, BundleActivator {
                     location = nextLocation(st);
                     if (location != null) {
                         try {
-                            Bundle b = context.installBundle(location, null);
+                            String[] parts = convertToMavenUrlsIfNeeded(location, convertToMavenUrls);
+                            Bundle b = context.installBundle(parts[0], new URL(parts[1]).openStream());
                             sl.setBundleStartLevel(b, startLevel);
                         }
                         catch (Exception ex) {
@@ -459,7 +468,8 @@ public class Main implements MainService, BundleActivator {
                     location = nextLocation(st);
                     if (location != null) {
                         try {
-                            Bundle b = context.installBundle(location, null);
+                            String[] parts = convertToMavenUrlsIfNeeded(location, convertToMavenUrls);
+                            Bundle b = context.installBundle(parts[0], new URL(parts[1]).openStream());
                             sl.setBundleStartLevel(b, startLevel);
                         }
                         catch (Exception ex) {
@@ -483,7 +493,8 @@ public class Main implements MainService, BundleActivator {
                         if (location != null) {
                             // Installing twice just returns the same bundle.
                             try {
-                                Bundle b = context.installBundle(location, null);
+                                String[] parts = convertToMavenUrlsIfNeeded(location, convertToMavenUrls);
+                                Bundle b = context.installBundle(parts[0], new URL(parts[1]).openStream());
                                 if (b != null) {
                                     b.start();
                                 }
@@ -497,6 +508,50 @@ public class Main implements MainService, BundleActivator {
                 }
             }
         }
+    }
+
+    private static String[] convertToMavenUrlsIfNeeded(String location, boolean convertToMavenUrls) {
+        String[] parts = location.split("\\|");
+        if (convertToMavenUrls) {
+            String[] p = parts[1].split("/");
+            String groupId = null;
+            String artifactId = p[p.length-3];
+            String version = p[p.length-2];
+            String classifier;
+            String type;
+            String artifactIdVersion = artifactId + "-" + version;
+            StringBuffer sb = new StringBuffer();
+            if (p.length >= 4 && p[p.length-1].startsWith(artifactIdVersion)) {
+                if (p[p.length-1].charAt(artifactIdVersion.length()) == '-') {
+                    classifier = p[p.length-1].substring(artifactIdVersion.length() + 1, p[p.length-1].lastIndexOf('.'));
+                } else {
+                    classifier = null;
+                }
+                type = p[p.length-1].substring(p[p.length-1].lastIndexOf('.') + 1);
+                sb.append("mvn:");
+                for (int j = 0; j < p.length - 3; j++) {
+                    if (j > 0) {
+                        sb.append('.');
+                    }
+                    sb.append(p[j]);
+                }
+                sb.append('/').append(artifactId).append('/').append(version);
+                if (!"jar".equals(type) || classifier != null) {
+                    sb.append('/');
+                    if (!"jar".equals(type)) {
+                        sb.append(type);
+                    }
+                    if (classifier != null) {
+                        sb.append('/').append(classifier);
+                    }
+                }
+                parts[1] = parts[0];
+                parts[0] = sb.toString();
+            }
+        } else {
+            parts[1] = parts[0];
+        }
+        return parts;
     }
 
     private static String nextLocation(StringTokenizer st) {
@@ -627,7 +682,7 @@ public class Main implements MainService, BundleActivator {
         // installation directory.  Try to load it from one of these
         // places.
 
-        ArrayList<File> bundleDirs = new ArrayList<File>();
+            ArrayList<File> bundleDirs = new ArrayList<File>();
 
         // See if the property URL was specified as a property.
         URL configPropURL = null;
@@ -784,7 +839,7 @@ public class Main implements MainService, BundleActivator {
                         levels.put(level, sb);
                     }
                     try {
-                        sb.append("\"").append(file.toURL().toString()).append("\" ");
+                        sb.append("\"").append(file.toURL().toString()).append("|").append(name).append("\" ");
                     } catch (MalformedURLException e) {
                         System.err.print("Ignoring " + file.toString() + " (" + e + ")");
                     }
