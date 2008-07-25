@@ -762,6 +762,7 @@ public class BundleArchive
 
         BundleRevision[] tmp = new BundleRevision[m_revisions.length - 1];
         System.arraycopy(m_revisions, 0, tmp, 0, m_revisions.length - 1);
+        m_revisions = tmp;
 
         return true;
     }
