@@ -130,6 +130,12 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
         Method m = null;
         try {
             m = this.clazz.getDeclaredMethod(name, classParameters);
+        } catch (NoClassDefFoundError ncdfe) {
+            // if this occurs it usually means that a problem with the maven
+            // scopes exists.
+            throw new MojoExecutionException("Class loading error. This error usually occurs if you have a " +
+                    "service inheriting from a class coming from another bundle and that class using a " +
+                    "third library and all dependencies are specified with scope 'provided'.", ncdfe);
         } catch (NoSuchMethodException e) {
             // ignore this
         }
