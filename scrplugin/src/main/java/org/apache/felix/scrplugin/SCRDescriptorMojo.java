@@ -252,18 +252,6 @@ public class SCRDescriptorMojo extends AbstractMojo {
         // Utility handler for propertie
         final PropertyHandler propertyHandler = new PropertyHandler(component, ocd);
 
-        // pre configured properties
-        final Iterator globalPropIter = this.properties.entrySet().iterator();
-        while ( globalPropIter.hasNext() ) {
-            final Map.Entry entry = (Map.Entry)globalPropIter.next();
-            final Property p = new Property();
-            p.setName(entry.getKey().toString());
-            p.setValue(entry.getValue().toString());
-            p.setType("String");
-            p.setPrivate(true);
-            component.addProperty(p);
-        }
-
         JavaClassDescription currentDescription = description;
         do {
             // properties
@@ -293,7 +281,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         } while (inherited && currentDescription != null);
 
         // process properties
-        propertyHandler.processProperties();
+        propertyHandler.processProperties(this.properties);
 
         // process references
         final Iterator refIter = references.entrySet().iterator();

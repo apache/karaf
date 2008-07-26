@@ -332,7 +332,7 @@ public class PropertyHandler {
      * Process all found properties for the component.
      * @throws MojoExecutionException
      */
-    public void processProperties()
+    public void processProperties(final Map globalProperties)
     throws MojoExecutionException {
         final Iterator propIter = properties.entrySet().iterator();
         while ( propIter.hasNext() ) {
@@ -340,6 +340,27 @@ public class PropertyHandler {
             final String propName = entry.getKey().toString();
             final PropertyDescription desc = (PropertyDescription)entry.getValue();
             this.processProperty(desc.propertyTag, propName, desc.field);
+        }
+        // apply pre configured global properties
+        if ( globalProperties != null ) {
+            final Iterator globalPropIter = globalProperties.entrySet().iterator();
+            while ( globalPropIter.hasNext() ) {
+                final Map.Entry entry = (Map.Entry)globalPropIter.next();
+                final String name = entry.getKey().toString();
+
+                // check if the service already provides this property
+                if ( !properties.containsKey(name) ) {
+                    final String value = entry.getValue().toString();
+
+                    final Property p = new Property();
+                    p.setName(name);
+                    p.setValue(value);
+                    p.setType("String");
+                    p.setPrivate(true);
+                    component.addProperty(p);
+
+                }
+            }
         }
     }
 
