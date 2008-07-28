@@ -342,8 +342,9 @@ public class FileMonitor {
         JarFile jar = null;
         try {
             // Handle OSGi bundles with the default deployer
-            if (!file.getName().endsWith("zip") && !file.getName().endsWith("jar")) {
-                // that's file type which is not supported as bundle
+            if (file.getName().endsWith("txt") || file.getName().endsWith("xml")
+            		|| file.getName().endsWith("properties")) {
+            	// that's file type which is not supported as bundle and avoid exception in the log
                 return null;
             }
             jar = new JarFile(file);
