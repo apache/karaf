@@ -48,6 +48,7 @@ public class ConstructorCodeAdapter extends GeneratorAdapter implements Opcodes 
      */
     private Set m_fields;
 
+
     /** 
      * PropertyCodeAdapter constructor.
      * A new FiledCodeAdapter should be create for each method visit.
@@ -82,12 +83,12 @@ public class ConstructorCodeAdapter extends GeneratorAdapter implements Opcodes 
         if (m_fields.contains(name) && m_owner.equals(owner)) {
             if (opcode == GETFIELD) {
                 String gDesc = "()" + desc;
-                visitMethodInsn(INVOKESPECIAL, owner, "__get" + name, gDesc);
+                mv.visitMethodInsn(INVOKESPECIAL, owner, "__get" + name, gDesc);
                 return;
             } else
                 if (opcode == PUTFIELD) {
                     String sDesc = "(" + desc + ")V";
-                    visitMethodInsn(INVOKESPECIAL, owner, "__set" + name, sDesc);
+                    mv.visitMethodInsn(INVOKESPECIAL, owner, "__set" + name, sDesc);
                     return;
                 }
         }
@@ -104,12 +105,15 @@ public class ConstructorCodeAdapter extends GeneratorAdapter implements Opcodes 
      * @see org.objectweb.asm.MethodAdapter#visitMethodInsn(int, java.lang.String, java.lang.String, java.lang.String)
      */
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+        
+        
         // A method call is detected, check if it is the super call :
         if (!m_superDetected) {
             m_superDetected = true; 
             // The first invocation is the super call
             // 1) Visit the super constructor :
-            mv.visitVarInsn(ALOAD, 0);
+            
+            //mv.visitVarInsn(ALOAD, 0); The ALOAD 0 was already visited. This previous visit allows loading constants
             mv.visitMethodInsn(opcode, owner, name, desc); // Super constructor invocation
             
             // 2) Load the object and the component manager argument 
@@ -133,7 +137,9 @@ public class ConstructorCodeAdapter extends GeneratorAdapter implements Opcodes 
      */
     public void visitVarInsn(int opcode, int var) {
         if (!m_superDetected) { 
-            return; // Do nothing the ALOAD 0 will be injected by visitMethodInsn
+            if (var == 0) {
+                mv.visitVarInsn(opcode, var); // ALOAD 0 (THIS)
+            }
         } else { 
             if (var == 0) { 
                 mv.visitVarInsn(opcode, var); // ALOAD 0 (THIS)
@@ -188,6 +194,3 @@ public class ConstructorCodeAdapter extends GeneratorAdapter implements Opcodes 
     }
 
 }
-
-
-
