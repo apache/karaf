@@ -514,14 +514,14 @@ public class Main implements MainService, BundleActivator {
         String[] parts = location.split("\\|");
         if (convertToMavenUrls) {
             String[] p = parts[1].split("/");
-            String groupId = null;
-            String artifactId = p[p.length-3];
-            String version = p[p.length-2];
-            String classifier;
-            String type;
-            String artifactIdVersion = artifactId + "-" + version;
-            StringBuffer sb = new StringBuffer();
-            if (p.length >= 4 && p[p.length-1].startsWith(artifactIdVersion)) {
+            if (p.length >= 4 && p[p.length-1].startsWith(p[p.length-3] + "-" + p[p.length-2])) {
+                String groupId = null;
+                String artifactId = p[p.length-3];
+                String version = p[p.length-2];
+                String classifier;
+                String type;
+                String artifactIdVersion = artifactId + "-" + version;
+                StringBuffer sb = new StringBuffer();
                 if (p[p.length-1].charAt(artifactIdVersion.length()) == '-') {
                     classifier = p[p.length-1].substring(artifactIdVersion.length() + 1, p[p.length-1].lastIndexOf('.'));
                 } else {
