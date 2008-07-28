@@ -21,6 +21,7 @@ package org.apache.felix.ipojo.test.scenarios.manipulation;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
+import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.test.scenarios.component.FooProviderType1;
@@ -290,6 +291,16 @@ public class POJOCreation extends OSGiTestCase {
         assertEquals("Check bar", 0, ((Integer) props.get("bar")).intValue());
         assertEquals("Check foo", "foo", props.get("foo"));
         assertEquals("Check context", context, props.get("context"));
+    }
+    
+    public void testSuperCall() {
+        try {
+            Factory fact = Utils.getFactoryByName(context, "org.apache.felix.ipojo.test.scenarios.component.CallSuperConstructor");
+            ComponentInstance ci = fact.createComponentInstance(null);
+            ci.dispose();
+        } catch (Throwable e) {
+            fail(e.getMessage());
+        }
     }
     
     

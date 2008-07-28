@@ -91,4 +91,7 @@
 		factory-method="singleton" architecture="true">
 		<provides />
 	</component>
+	
+	<!-- Try calling super constructors -->
+	 <component className="org.apache.felix.ipojo.test.scenarios.component.CallSuperConstructor" immediate="true"/>
 </ipojo>
