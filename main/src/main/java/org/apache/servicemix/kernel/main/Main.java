@@ -547,6 +547,8 @@ public class Main implements MainService, BundleActivator {
                 }
                 parts[1] = parts[0];
                 parts[0] = sb.toString();
+            } else {
+                parts[1] = parts[0];
             }
         } else {
             parts[1] = parts[0];
