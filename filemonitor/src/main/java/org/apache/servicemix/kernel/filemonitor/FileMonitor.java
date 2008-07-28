@@ -342,6 +342,10 @@ public class FileMonitor {
         JarFile jar = null;
         try {
             // Handle OSGi bundles with the default deployer
+            if (!file.getName().endsWith("zip") && !file.getName().endsWith("jar")) {
+                // that's file type which is not supported as bundle
+                return null;
+            }
             jar = new JarFile(file);
             Manifest m = jar.getManifest();
             if (m.getMainAttributes().getValue(new Attributes.Name("Bundle-SymbolicName")) != null &&
