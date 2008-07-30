@@ -21,6 +21,7 @@ package org.apache.felix.ipojo.handlers.event.subscriber;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -85,12 +86,17 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
     /**
      * List of callbacks accessible by subscribers' names.
      */
-    private Map m_callbacks = new Hashtable();
+    private Map m_callbacksByName = new Hashtable();
 
     /**
      * iPOJO Properties representing all the topics.
      */
     private String[] m_topics;
+
+    /**
+     * Listen received events ?
+     */
+    private boolean m_isListening;
 
     /**
      * Initialize the component type.
@@ -116,6 +122,65 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
         dict = new Properties();
         cd.addProperty(new PropertyDescription(FILTER_PROPERTY,
                 Dictionary.class.getName(), dict.toString()));
+
+        // Get Metadata subscribers
+        Element[] subscribers = metadata.getElements("subscriber", NAMESPACE);
+        if (subscribers != null) {
+
+            // Maps used to check name and field are unique
+            Set nameSet = new HashSet();
+            Set callbackSet = new HashSet();
+
+            // Check all subscribers are well formed
+            for (int i = 0; i < subscribers.length; i++) {
+
+                // Check the subscriber configuration is correct by creating an
+                // unused subscriber metadata
+                EventAdminSubscriberMetadata subscriberMetadata = new EventAdminSubscriberMetadata(
+                        getFactory().getBundleContext(), subscribers[i]);
+
+                String name = subscriberMetadata.getName();
+                info(LOG_PREFIX + "checking subscriber " + name);
+
+                // Determine the event callback prototype
+                PojoMetadata pojoMetadata = getPojoMetadata();
+                String callbackType;
+                if (subscriberMetadata.getDataKey() == null) {
+                    callbackType = Event.class.getName();
+                } else {
+                    callbackType = subscriberMetadata.getDataType().getName();
+                }
+
+                // Check the event callback method is present
+                MethodMetadata methodMetadata = pojoMetadata.getMethod(
+                        subscriberMetadata.getCallback(),
+                        new String[] { callbackType });
+                String callbackSignature = subscriberMetadata.getCallback()
+                        + "(" + callbackType + ")";
+                if (methodMetadata == null) {
+                    throw new ConfigurationException(
+                            "Cannot find callback method " + callbackSignature);
+                }
+
+                // Warn if the same callback is used by several subscribers
+                if (callbackSet.contains(callbackSignature)) {
+                    warn("The callback method is already used by another subscriber : "
+                            + callbackSignature);
+                } else {
+                    callbackSet.add(callbackSignature);
+                }
+
+                // Check name is unique
+                if (nameSet.contains(name)) {
+                    throw new ConfigurationException(
+                            "A subscriber with the same name already exists : "
+                                    + name);
+                }
+                nameSet.add(name);
+            }
+        } else {
+            info(LOG_PREFIX + "no subscriber to check");
+        }
     }
 
     /**
@@ -137,64 +202,82 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
         // Store the component manager
         m_manager = getInstanceManager();
 
+        // Get the topics and filter instance configuration
+        Dictionary instanceTopics = (Dictionary) conf.get(TOPICS_PROPERTY);
+        Dictionary instanceFilter = (Dictionary) conf.get(FILTER_PROPERTY);
+
         // Get Metadata subscribers
         Element[] subscribers = metadata.getElements("subscriber", NAMESPACE);
 
+        // The topics to listen
+        Set topics = new TreeSet();
+
         if (subscribers != null) {
 
-            // then check subscribers are well formed and fill the subscriber'
-            // map
+            // Configure all subscribers
             for (int i = 0; i < subscribers.length; i++) {
 
-                try {
-                    // Extract the subscriber configuration
-                    EventAdminSubscriberMetadata subscriberMetadata = new EventAdminSubscriberMetadata(
-                            m_manager, subscribers[i], conf);
-                    String subscriberName = subscriberMetadata.getName();
-                    info(LOG_PREFIX + "configuring subscriber "
-                            + subscriberName);
+                // Extract the subscriber configuration
+                EventAdminSubscriberMetadata subscriberMetadata = new EventAdminSubscriberMetadata(
+                        m_manager.getContext(), subscribers[i]);
+                String name = subscriberMetadata.getName();
+                info(LOG_PREFIX + "configuring subscriber " + name);
 
-                    // Determine the callback prototype
-                    PojoMetadata pojoMetadata = getFactory().getPojoMetadata();
-                    String callbackType;
-                    if (subscriberMetadata.getDataKey() == null) {
-                        callbackType = Event.class.getName();
-                    } else {
-                        callbackType = subscriberMetadata.getDataType()
-                                .getName();
-                    }
-
-                    // Find the specified callback
-                    MethodMetadata methodMetadata = pojoMetadata.getMethod(
-                            subscriberMetadata.getCallback(),
-                            new String[] { callbackType });
-                    if (methodMetadata == null) {
-                        throw new ConfigurationException(
-                                "Unable to find callback "
-                                        + subscriberMetadata.getCallback()
-                                        + "(" + callbackType + ")");
-                    }
-                    Callback callback = new Callback(methodMetadata, m_manager);
-
-                    // Add the subscriber to the subscriber list and
-                    // register callback
-                    Object old;
-                    if ((old = m_subscribersByName.put(subscriberName,
-                            subscriberMetadata)) != null) {
-                        m_subscribersByName.put(subscriberName, old);
-                        throw new ConfigurationException("The subscriber "
-                                + subscriberName + "already exists");
-                    }
-                    m_callbacks.put(subscriberName, callback);
-
-                } catch (Exception e) {
-                    // Ignore invalid subscribers
-                    warn(LOG_PREFIX
-                            + "Ignoring subscriber : Error in configuration", e);
+                // Get the topics instance configuration if redefined
+                String topicsString = (instanceTopics != null) ? (String) instanceTopics
+                        .get(name)
+                        : null;
+                if (topicsString != null) {
+                    subscriberMetadata.setTopics(topicsString);
                 }
+
+                // Get the filter instance configuration if redefined
+                String filterString = (instanceFilter != null) ? (String) instanceFilter
+                        .get(name)
+                        : null;
+                if (filterString != null) {
+                    subscriberMetadata.setFilter(filterString);
+                }
+
+                // Check the publisher is correctly configured
+                subscriberMetadata.check();
+
+                // Add this subscriber's topics to the global list
+                String[] subscriberTopics = subscriberMetadata.getTopics();
+                for (int j = 0; j < subscriberTopics.length; j++) {
+                    topics.add(subscriberTopics[j]);
+                }
+
+                // Determine the event callback prototype
+                PojoMetadata pojoMetadata = getPojoMetadata();
+                String callbackType;
+                if (subscriberMetadata.getDataKey() == null) {
+                    callbackType = Event.class.getName();
+                } else {
+                    callbackType = subscriberMetadata.getDataType().getName();
+                }
+
+                // Create the specified callback and register it
+                MethodMetadata methodMetadata = pojoMetadata.getMethod(
+                        subscriberMetadata.getCallback(),
+                        new String[] { callbackType });
+                Callback callback = new Callback(methodMetadata, m_manager);
+                m_callbacksByName.put(name, callback);
+
+                // Add the subscriber list gloal map
+                m_subscribersByName.put(name, subscriberMetadata);
             }
+
+            // Construct the global topic list
+            m_topics = new String[topics.size()];
+            int i = 0;
+            for (Iterator iterator = topics.iterator(); iterator.hasNext();) {
+                String tmp = (String) iterator.next();
+                m_topics[i++] = tmp;
+            }
+
         } else {
-            info(LOG_PREFIX + "no subscriber detected !");
+            info(LOG_PREFIX + "no subscriber to configure");
         }
     }
 
@@ -204,29 +287,8 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
      * @see org.apache.felix.ipojo.Handler#start()
      */
     // @Override
-    public void start() {
-
-        Set topics = new TreeSet();
-
-        // Build the topic to listen
-        // Topics is a merge of all required topics by subscribers
-        if (!m_subscribersByName.isEmpty()) {
-            Collection subscribers = m_subscribersByName.values();
-            for (Iterator i = subscribers.iterator(); i.hasNext();) {
-                String[] subTopics = ((EventAdminSubscriberMetadata) i.next())
-                        .getTopics();
-                for (int j = 0; j < subTopics.length; j++) {
-                    topics.add(subTopics[j]);
-                }
-            }
-        }
-
-        m_topics = new String[topics.size()];
-        int i = 0;
-        for (Iterator iterator = topics.iterator(); iterator.hasNext();) {
-            String tmp = (String) iterator.next();
-            m_topics[i++] = tmp;
-        }
+    public synchronized void start() {
+        m_isListening = true;
     }
 
     /**
@@ -235,7 +297,8 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
      * @see org.apache.felix.ipojo.Handler#stop()
      */
     // @Override
-    public void stop() {
+    public synchronized void stop() {
+        m_isListening = false;
     }
 
     /***************************************************************************
@@ -269,7 +332,7 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
 
                     String name = subscriberMetadata.getName();
                     String dataKey = subscriberMetadata.getDataKey();
-                    Callback callback = (Callback) m_callbacks.get(name);
+                    Callback callback = (Callback) m_callbacksByName.get(name);
                     Object callbackParam;
 
                     try {
@@ -317,8 +380,11 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
                             }
                         }
 
-                        // Run the callback
-                        callback.call(new Object[] { callbackParam });
+                        // Run the callback (final check to avoid
+                        // NullPointerExceptions)
+                        if (m_isListening) {
+                            callback.call(new Object[] { callbackParam });
+                        }
 
                     } catch (ClassCastException e) {
                         // Ignore the data event if type doesn't match

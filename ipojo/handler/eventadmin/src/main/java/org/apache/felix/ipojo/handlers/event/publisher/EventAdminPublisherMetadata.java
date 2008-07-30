@@ -19,12 +19,12 @@
 package org.apache.felix.ipojo.handlers.event.publisher;
 
 import java.util.Dictionary;
-import java.util.Enumeration;
+import java.util.Hashtable;
 
 import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.handlers.event.subscriber.EventAdminSubscriberHandler;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ParseUtils;
+import org.osgi.service.event.Event;
 
 /**
  * Represent a publisher.
@@ -85,7 +85,7 @@ class EventAdminPublisherMetadata {
     /**
      * Topics to which events are sent.
      */
-    private final String[] m_topics;
+    private String[] m_topics;
 
     /**
      * Events sending mode.
@@ -102,14 +102,12 @@ class EventAdminPublisherMetadata {
      * 
      * @param publisher :
      *            publisher metadata description.
-     * @param instanceConf :
-     *            the configuration of the component instance
      * @throws ConfigurationException
      *             if the configuration of the component or the instance is
      *             invalid.
      */
-    public EventAdminPublisherMetadata(Element publisher,
-            Dictionary instanceConf) throws ConfigurationException {
+    public EventAdminPublisherMetadata(Element publisher)
+        throws ConfigurationException {
 
         /**
          * Setup required attributes
@@ -134,34 +132,31 @@ class EventAdminPublisherMetadata {
         }
 
         // TOPICS_ATTRIBUTE
-        String topicsString = null;
         if (publisher.containsAttribute(TOPICS_ATTRIBUTE)) {
-            topicsString = publisher.getAttribute(TOPICS_ATTRIBUTE);
-        }
-        // Check TOPICS_PROPERTY in the instance configuration
-        Dictionary instanceTopics = (Dictionary) instanceConf
-                .get(EventAdminSubscriberHandler.TOPICS_PROPERTY);
-        if (instanceTopics != null) {
-            Enumeration e = instanceTopics.keys();
-            while (e.hasMoreElements()) {
-                String myName = (String) e.nextElement(); // name
-                if (m_name.equals(myName)) {
-                    topicsString = (String) instanceTopics.get(myName);
-                    break;
+            m_topics = ParseUtils.split(publisher
+                    .getAttribute(TOPICS_ATTRIBUTE), ",");
+            // Check each topic is valid
+            Dictionary empty = new Hashtable();
+            for (int i = 0; i < m_topics.length; i++) {
+                String topic = m_topics[i];
+                try {
+                    new Event(topic, empty);
+                } catch (IllegalArgumentException e) {
+                    throw new ConfigurationException("Malformed topic : "
+                            + topic);
                 }
             }
-        }
-        if (topicsString != null) {
-            m_topics = ParseUtils.split(topicsString, ",");
+
         } else {
-            throw new ConfigurationException(
-                    "Missing required attribute in component or instance configuration : "
-                            + TOPICS_ATTRIBUTE);
+            m_topics = null;
+            // Nothing to do if TOPICS_ATTRIBUTE is not present as it can be
+            // overridden in the instance configuration.
         }
 
         /**
          * Setup optional attributes
          */
+
         // SYNCHRONOUS_ATTRIBUTE
         if (publisher.containsAttribute(SYNCHRONOUS_ATTRIBUTE)) {
             m_synchronous = "true".equalsIgnoreCase(publisher
@@ -175,6 +170,46 @@ class EventAdminPublisherMetadata {
             m_dataKey = publisher.getAttribute(DATA_KEY_ATTRIBUTE);
         } else {
             m_dataKey = DEFAULT_DATA_KEY_VALUE;
+        }
+    }
+
+    /**
+     * Set the topics attribute of the publisher.
+     * 
+     * @param topicsString
+     *            the comma separated list of the topics on which events are
+     *            sent
+     * @throws ConfigurationException
+     *             the specified topic string is malformed
+     */
+    public void setTopics(String topicsString)
+        throws ConfigurationException {
+        m_topics = ParseUtils.split(topicsString, ",");
+        // Check each topic is valid
+        Dictionary empty = new Hashtable();
+        for (int i = 0; i < m_topics.length; i++) {
+            String topic = m_topics[i];
+            try {
+                new Event(topic, empty);
+            } catch (IllegalArgumentException e) {
+                throw new ConfigurationException("Malformed topic : " + topic);
+            }
+        }
+
+    }
+
+    /**
+     * Check that the required instance configurable attributes are all set.
+     * 
+     * @throws ConfigurationException
+     *             if a required attribute is missing
+     */
+    public void check()
+        throws ConfigurationException {
+        if (m_topics == null || m_topics.length == 0) {
+            throw new ConfigurationException(
+                    "Missing required attribute in component or instance configuration : "
+                            + TOPICS_ATTRIBUTE);
         }
     }
 

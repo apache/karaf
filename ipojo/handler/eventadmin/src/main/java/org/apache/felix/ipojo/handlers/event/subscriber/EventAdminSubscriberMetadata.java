@@ -19,15 +19,15 @@
 package org.apache.felix.ipojo.handlers.event.subscriber;
 
 import java.util.Dictionary;
-import java.util.Enumeration;
+import java.util.Hashtable;
 
 import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ParseUtils;
-import org.apache.felix.ipojo.util.Logger;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.event.Event;
 
 /**
  * Represent an subscriber.
@@ -88,7 +88,7 @@ class EventAdminSubscriberMetadata {
     /**
      * Listened topics.
      */
-    private final String[] m_topics;
+    private String[] m_topics;
 
     /**
      * The key where user data are stored in the event dictionary.
@@ -103,31 +103,27 @@ class EventAdminSubscriberMetadata {
     /**
      * Event filter.
      */
-    private final Filter m_filter;
+    private Filter m_filter;
 
     /**
-     * The Instance Manager.
+     * The context of the bundle.
      */
-    private final InstanceManager m_instanceManager;
+    private final BundleContext m_bundleContext;
 
     /**
      * Constructor.
      * 
-     * @param instanceManager :
-     *            instance manager.
-     * @param subscriber :
-     *            subscriber metadata.
-     * @param instanceConf :
-     *            the configuration of the component instance
+     * @param bundleContext : bundle context of the managed instance.
+     * @param subscriber : subscriber metadata.
      * @throws ConfigurationException
      *             if the configuration of the component or the instance is
      *             invalid.
      */
-    public EventAdminSubscriberMetadata(InstanceManager instanceManager,
-            Element subscriber, Dictionary instanceConf)
+    public EventAdminSubscriberMetadata(BundleContext bundleContext,
+            Element subscriber)
         throws ConfigurationException {
 
-        m_instanceManager = instanceManager;
+        m_bundleContext = bundleContext;
 
         /**
          * Setup required attributes
@@ -152,29 +148,24 @@ class EventAdminSubscriberMetadata {
         }
 
         // TOPICS_ATTRIBUTE
-        String topicsString = null;
         if (subscriber.containsAttribute(TOPICS_ATTRIBUTE)) {
-            topicsString = subscriber.getAttribute(TOPICS_ATTRIBUTE);
-        }
-        // Check TOPICS_PROPERTY in the instance configuration
-        Dictionary instanceTopics = (Dictionary) instanceConf
-                .get(EventAdminSubscriberHandler.TOPICS_PROPERTY);
-        if (instanceTopics != null) {
-            Enumeration e = instanceTopics.keys();
-            while (e.hasMoreElements()) {
-                String myName = (String) e.nextElement(); // name
-                if (m_name.equals(myName)) {
-                    topicsString = (String) instanceTopics.get(myName);
-                    break;
+            m_topics = ParseUtils.split(subscriber
+                    .getAttribute(TOPICS_ATTRIBUTE), ",");
+            // Check each topic is valid
+            Dictionary empty = new Hashtable();
+            for (int i = 0; i < m_topics.length; i++) {
+                String topic = m_topics[i];
+                try {
+                    new Event(topic, empty);
+                } catch (IllegalArgumentException e) {
+                    throw new ConfigurationException("Malformed topic : "
+                            + topic);
                 }
             }
-        }
-        if (topicsString != null) {
-            m_topics = ParseUtils.split(topicsString, ",");
         } else {
-            throw new ConfigurationException(
-                    "Missing required attribute in component or instance configuration : "
-                            + TOPICS_ATTRIBUTE);
+            m_topics = null;
+            // Nothing to do if TOPICS_ATTRIBUTE is not present as it can be
+            // overridden in the instance configuration.
         }
 
         /**
@@ -185,18 +176,12 @@ class EventAdminSubscriberMetadata {
         m_dataKey = subscriber.getAttribute(DATA_KEY_ATTRIBUTE);
         if (subscriber.containsAttribute(DATA_TYPE_ATTRIBUTE)) {
             Class type;
+            String typeName = subscriber.getAttribute(DATA_TYPE_ATTRIBUTE);
             try {
-                type = m_instanceManager.getContext().getBundle().loadClass(
-                        subscriber.getAttribute(DATA_TYPE_ATTRIBUTE));
+                type = m_bundleContext.getBundle().loadClass(typeName);
             } catch (ClassNotFoundException e) {
-                m_instanceManager
-                        .getFactory()
-                        .getLogger()
-                        .log(
-                                Logger.WARNING,
-                                "Ignoring data-type (using default) : Malformed attribute in metadata",
-                                e);
-                type = DEFAULT_DATA_TYPE_VALUE;
+                throw new ConfigurationException("Data type class not found : "
+                        + typeName);
             }
             m_dataType = type;
         } else {
@@ -204,38 +189,68 @@ class EventAdminSubscriberMetadata {
         }
 
         // FILTER_ATTRIBUTE
-        String filterString = null;
         if (subscriber.containsAttribute(FILTER_ATTRIBUTE)) {
-            filterString = subscriber.getAttribute(FILTER_ATTRIBUTE);
-        }
-        // Check FILTER_PROPERTY in the instance configuration
-        Dictionary instanceFilter = (Dictionary) instanceConf
-                .get(EventAdminSubscriberHandler.FILTER_PROPERTY);
-        if (instanceFilter != null) {
-            Enumeration e = instanceFilter.keys();
-            while (e.hasMoreElements()) {
-                String myName = (String) e.nextElement(); // name
-                if (m_name.equals(myName)) {
-                    filterString = (String) instanceFilter.get(myName);
-                    break;
-                }
-            }
-        }
-        Filter filter;
-        if (filterString != null) {
             try {
-                filter = m_instanceManager.getContext().createFilter(
-                        filterString);
+                m_filter = m_bundleContext.createFilter(subscriber
+                        .getAttribute(FILTER_ATTRIBUTE));
             } catch (InvalidSyntaxException e) {
-                // Ignore filter if malformed
-                m_instanceManager.getFactory().getLogger().log(Logger.WARNING,
-                        "Ignoring filter : Malformed attribute in metadata", e);
-                filter = null;
+                throw new ConfigurationException("Invalid filter syntax");
             }
-        } else {
-            filter = null;
         }
-        m_filter = filter;
+    }
+
+    /**
+     * Set the topics attribute of the subscriber.
+     * 
+     * @param topicsString
+     *            the comma separated list of the topics to listen
+     * @throws ConfigurationException
+     *             the specified topic list is malformed
+     */
+    public void setTopics(String topicsString)
+        throws ConfigurationException {
+        m_topics = ParseUtils.split(topicsString, ",");
+        // Check each topic is valid
+        Dictionary empty = new Hashtable();
+        for (int i = 0; i < m_topics.length; i++) {
+            String topic = m_topics[i];
+            try {
+                new Event(topic, empty);
+            } catch (IllegalArgumentException e) {
+                throw new ConfigurationException("Malformed topic : " + topic);
+            }
+        }
+    }
+
+    /**
+     * Set the filter attribute of the subscriber.
+     * 
+     * @param filterString
+     *            the string representation of the event filter
+     * @throws ConfigurationException : the LDAP filter is malformed
+     */
+    public void setFilter(String filterString)
+        throws ConfigurationException {
+        try {
+            m_filter = m_bundleContext.createFilter(filterString);
+        } catch (InvalidSyntaxException e) {
+            throw new ConfigurationException("Invalid filter syntax");
+        }
+    }
+
+    /**
+     * Check that the required instance configurable attributes are all set.
+     * 
+     * @throws ConfigurationException
+     *             if a required attribute is missing
+     */
+    public void check()
+        throws ConfigurationException {
+        if (m_topics == null || m_topics.length == 0) {
+            throw new ConfigurationException(
+                    "Missing required attribute in component or instance configuration : "
+                            + TOPICS_ATTRIBUTE);
+        }
     }
 
     /**

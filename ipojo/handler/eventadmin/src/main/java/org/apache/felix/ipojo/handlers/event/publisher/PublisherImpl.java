@@ -79,21 +79,6 @@ public class PublisherImpl implements Publisher {
     public PublisherImpl(EventAdminPublisherHandler handler, String[] topics,
             boolean synchronous, String dataKey, String instanceName) {
 
-        // Check parameters
-        if (topics.length == 0) {
-            throw new IllegalArgumentException(
-                    "At least one topic must be specified");
-        }
-        // Test validity of each topic
-        for (int i = 0; i < topics.length; i++) {
-            try {
-                new Event(topics[i], null);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Malformed topic : "
-                        + e.getMessage());
-            }
-        }
-
         // Initialize the publisher's fields
         m_handler = handler;
         m_topics = topics;
