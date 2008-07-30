@@ -36,12 +36,13 @@
 	<module>core/configuration</module>
 	<module>core/external-handlers</module>
 	<module>core/bad-configurations</module>
-	<module>composite/composite.runtime</module>
+	<module>composite/composite-runtime</module>
 	<module>composite/import-export</module>
 	<module>composite/service-instance</module>
 	<module>composite/service-providing</module>
 	<module>handler/temporal</module>
 	<module>handler/whiteboard</module>
+	<module>handler/eventadmin</module>
    </modules>
    
    <profiles>
