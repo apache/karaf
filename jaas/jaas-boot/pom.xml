@@ -23,13 +23,13 @@
     <parent>
         <groupId>org.apache.servicemix.kernel.jaas</groupId>
         <artifactId>jaas</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0-rc2</version>
     </parent>
 
     <groupId>org.apache.servicemix.kernel.jaas</groupId>
     <artifactId>org.apache.servicemix.kernel.jaas.boot</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0-rc2</version>
     <name>Apache ServiceMix Kernel :: JAAS Boot</name>
 
     <description>
