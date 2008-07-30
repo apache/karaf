@@ -16,23 +16,16 @@
  */
 
 
-                  Apache ServiceMix Kernel 1.0.0
-                  ==============================
+                  Apache ServiceMix Kernel 1.0.0-rc2
+                  ==================================
 
 Overview
 --------
 
-This 1.0.0 version of Apache ServiceMix Kernel provides a stable and efficient platform to build 
-OSGi based applications.  It provides the following features:
-  * a local or remote shell console for inspecting the installed OSGi applications, viewing the logs,
-    viewing files, starting and stopping OSGi bundles and lots of other nice features.  Commands can be
-    added at runtime by deploying new bundles in the Kernel.
-  * the file deployer allows the deployment of plain Spring-DM configuration files, exploded or plain 
-    bundles.  Other types of artifacts can be handled by extending the deployer at runtime.
-  * security support for deploying keystores used for SSL connections or new user realms for securing
-    applications access.
-  * a simple, yet powerful, provisioning system that allows a whole application to be installed in a single
-    command line using a simple xml descriptor that also embeds some configuration data
+This second Release Candidate of Apache ServiceMix Kernel includes a few bug fixes and a few new features.
+The main change is that the system folder that contains the OSGi bundles to install in the runtime is now
+organized as a maven 2 repository, though it should not directly affect users.  A more detailed changelog
+is following. 
     
 Changelog
 ---------
@@ -46,11 +39,19 @@ The following list shows the bug fixes and enhancements included in this release
     * [SMX4KNL-54] - Kernel does not start if system property "felix.cache.profiledir" is not defined
     * [SMX4KNL-56] - Kernel does not start on Windows if classpath contains spaces
     * [SMX4KNL-58] - Hot-deploy capability of FileMonitor does not update bundles properly on Windows.
+    * [SMX4KNL-63] - Possible deadlock at startup caused by the filedeployer not running in its own thread the first time
+    * [SMX4KNL-64] - The list of repositories for the features shell is not persisted across restart
+    * [SMX4KNL-65] - After copying or moving the kernel, it does not start in a very clean way anymore
+    * [SMX4KNL-68] - failed to start smx4
 
 ** Improvement
     * [SMX4KNL-51] - Add a configuration file for the maven url handler so that adding default repositories is easy enough
     * [SMX4KNL-55] - Use maven shade plugin on the main module so that sources jar is correct
+    * [SMX4KNL-66] - When the file monitor loads configuration for the config admin, allow the use of system properties using ${xxx}
 
+** New Feature
+    * [SMX4KNL-61] - Organize the system folder as a maven 2 repository
+    * [SMX4KNL-67] - Allow the features service to obtain a list of features to install at startup
 
 ** Task
     * [SMX4KNL-57] - Extract bundles from the svn tree
