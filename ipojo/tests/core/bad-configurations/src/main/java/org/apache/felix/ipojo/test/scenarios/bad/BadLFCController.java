@@ -68,9 +68,6 @@ public class BadLFCController extends OSGiTestCase {
     private Element getManipulationForComponent(Element metadata, String comp_name) {
         Element[] comps = metadata.getElements("component");
         for(int i = 0; i < comps.length; i++) {
-            if(comps[i].containsAttribute("factory") && comps[i].getAttribute("factory").equals(comp_name)) {
-                return comps[i].getElements("manipulation")[0];
-            }
             if(comps[i].containsAttribute("name") && comps[i].getAttribute("name").equals(comp_name)) {
                 return comps[i].getElements("manipulation")[0];
             }
