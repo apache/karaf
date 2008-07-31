@@ -39,6 +39,7 @@ import org.osgi.service.obr.Resource;
 public class RepositoryAdminImpl implements RepositoryAdmin
 {
     static BundleContext m_context = null;
+    private final Logger m_logger;
     private List m_urlList = new ArrayList();
     private Map m_repoMap = new HashMap();
     private boolean m_initialized = false;
@@ -50,9 +51,10 @@ public class RepositoryAdminImpl implements RepositoryAdmin
     public static final String REPOSITORY_URL_PROP = "obr.repository.url";
     public static final String EXTERN_REPOSITORY_TAG = "extern-repositories";
 
-    public RepositoryAdminImpl(BundleContext context)
+    public RepositoryAdminImpl(BundleContext context, Logger logger)
     {
         m_context = context;
+        m_logger = logger;
     }
 
     public Repository addRepository(URL url) throws Exception
@@ -70,7 +72,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         // If the repository URL is a duplicate, then we will just
         // replace the existing repository object with a new one,
         // which is effectively the same as refreshing the repository.
-        Repository repo = new RepositoryImpl(this, url, hopCount);
+        Repository repo = new RepositoryImpl(this, url, hopCount, m_logger);
         m_repoMap.put(url, repo);
         return repo;
     }
@@ -103,7 +105,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
             initialize();
         }
 
-        return new ResolverImpl(m_context, this);
+        return new ResolverImpl(m_context, this, m_logger);
     }
 
     public synchronized Resource[] discoverResources(String filterExpr)
@@ -120,7 +122,10 @@ public class RepositoryAdminImpl implements RepositoryAdmin
         }
         catch (InvalidSyntaxException ex)
         {
-            System.err.println(ex);
+            m_logger.log(
+                Logger.LOG_WARNING,
+                "Error while discovering resources for " + filterExpr,
+                ex);
             return new Resource[0];
         }
 
@@ -163,13 +168,17 @@ public class RepositoryAdminImpl implements RepositoryAdmin
                 {
                     while (st.hasMoreTokens())
                     {
+                        final String token = st.nextToken();
                         try
                         {
-                            m_urlList.add(new URL(st.nextToken()));
+                            m_urlList.add(new URL(token));
                         }
                         catch (MalformedURLException ex)
                         {
-                            System.err.println("RepositoryAdminImpl: " + ex);
+                            m_logger.log(
+                                Logger.LOG_WARNING,
+                                "Repository url " + token + " cannot be used. Skipped.",
+                                ex);
                         }
                     }
                 }
@@ -184,7 +193,10 @@ public class RepositoryAdminImpl implements RepositoryAdmin
                 }
                 catch (MalformedURLException ex)
                 {
-                    System.err.println("RepositoryAdminImpl: " + ex);
+                    m_logger.log(
+                        Logger.LOG_WARNING,
+                        "Default repository url " + DEFAULT_REPOSITORY_URL + " cannot be used. Skipped.",
+                        ex);
                 }
             }
         }
@@ -196,7 +208,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
             URL url = (URL) m_urlList.get(i);
             try
             {
-                Repository repo = new RepositoryImpl(this, url);
+                Repository repo = new RepositoryImpl(this, url, m_logger);
                 if (repo != null)
                 {
                     m_repoMap.put(url, repo);
@@ -204,8 +216,11 @@ public class RepositoryAdminImpl implements RepositoryAdmin
             }
             catch (Exception ex)
             {
-                System.err.println("RepositoryAdminImpl: Exception creating repository - " + ex);
-                System.err.println("RepositoryAdminImpl: Ignoring repository " + url);
+                m_logger.log(
+                    Logger.LOG_WARNING,
+                    "RepositoryAdminImpl: Exception creating repository " + url.toExternalForm()
+                        + ". Repository is skipped.",
+                    ex);
             }
         }
     }

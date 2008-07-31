@@ -46,6 +46,7 @@ public class RepositoryImpl implements Repository
     private String m_name = null;
     private long m_lastmodified = 0;
     private URL m_url = null;
+    private final Logger m_logger;
     private Resource[] m_resources = null;
     private Referral[] m_referrals = null;
     private RepositoryAdminImpl m_repoAdmin = null;
@@ -53,15 +54,18 @@ public class RepositoryImpl implements Repository
     // Reusable comparator for sorting resources by name.
     private ResourceComparator m_nameComparator = new ResourceComparator();
 
-    public RepositoryImpl(RepositoryAdminImpl repoAdmin, URL url) throws Exception
+    public RepositoryImpl(RepositoryAdminImpl repoAdmin, URL url, Logger logger)
+        throws Exception
     {
-        this(repoAdmin, url, Integer.MAX_VALUE);
+        this(repoAdmin, url, Integer.MAX_VALUE, logger);
     }
 
-    public RepositoryImpl(RepositoryAdminImpl repoAdmin, URL url, final int hopCount) throws Exception
+    public RepositoryImpl(RepositoryAdminImpl repoAdmin, URL url, final int hopCount, Logger logger)
+        throws Exception
     {
         m_repoAdmin = repoAdmin;
         m_url = url;
+        m_logger = logger;
         try
         {
             AccessController.doPrivileged(new PrivilegedExceptionAction()
@@ -219,7 +223,7 @@ public class RepositoryImpl implements Repository
             if (is != null)
             {
                 // Create the parser Kxml
-                XmlCommonHandler handler = new XmlCommonHandler();
+                XmlCommonHandler handler = new XmlCommonHandler(m_logger);
                 Object factory = new Object()
                 {
                     public RepositoryImpl newInstance()

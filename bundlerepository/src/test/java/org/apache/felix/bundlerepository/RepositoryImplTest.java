@@ -38,10 +38,8 @@ import org.osgi.service.obr.Resource;
 
 public class RepositoryImplTest extends TestCase
 {
-
     public void testReferral1() throws Exception
     {
-
         URL url = getClass().getResource("/referral1_repository.xml");
 
         RepositoryAdminImpl repoAdmin = createRepositoryAdmin();
@@ -71,7 +69,6 @@ public class RepositoryImplTest extends TestCase
 
     public void testReferral2() throws Exception
     {
-
         URL url = getClass().getResource("/referral1_repository.xml");
 
         RepositoryAdminImpl repoAdmin = createRepositoryAdmin();
@@ -97,7 +94,8 @@ public class RepositoryImplTest extends TestCase
 
     private RepositoryAdminImpl createRepositoryAdmin()
     {
-        RepositoryAdminImpl repoAdmin = new RepositoryAdminImpl(new MockBundleContext());
+        final MockBundleContext bundleContext = new MockBundleContext();
+        RepositoryAdminImpl repoAdmin = new RepositoryAdminImpl(bundleContext, new Logger(bundleContext));
 
         // force initialization && remove all initial repositories
         Repository[] repos = repoAdmin.listRepositories();
@@ -111,7 +109,6 @@ public class RepositoryImplTest extends TestCase
 
     private static class MockBundleContext implements BundleContext
     {
-
         public void addBundleListener(BundleListener arg0)
         {
         }

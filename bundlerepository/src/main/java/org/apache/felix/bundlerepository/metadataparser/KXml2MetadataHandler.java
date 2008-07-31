@@ -21,6 +21,7 @@ package org.apache.felix.bundlerepository.metadataparser;
 import java.io.*;
 
 import org.apache.felix.bundlerepository.metadataparser.kxmlsax.KXml2SAXParser;
+import org.apache.felix.bundlerepository.Logger;
 
 /**
  * handles the metadata in XML format
@@ -28,7 +29,9 @@ import org.apache.felix.bundlerepository.metadataparser.kxmlsax.KXml2SAXParser;
  */
 public class KXml2MetadataHandler extends MetadataHandler {
 
-	public KXml2MetadataHandler() {}
+	public KXml2MetadataHandler(Logger logger) {
+        super(logger);
+    }
 
 	/**
 	* Called to parse the InputStream and set bundle list and package hash map

@@ -32,7 +32,7 @@ public class Activator implements BundleActivator
         m_context = context;
 
         // Register bundle repository service.
-        m_repoAdmin = new RepositoryAdminImpl(m_context);
+        m_repoAdmin = new RepositoryAdminImpl(m_context, new Logger(m_context));
         context.registerService(
             RepositoryAdmin.class.getName(),
             m_repoAdmin, null);

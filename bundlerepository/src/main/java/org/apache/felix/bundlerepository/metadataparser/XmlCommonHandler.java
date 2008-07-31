@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import org.apache.felix.bundlerepository.metadataparser.kxmlsax.KXml2SAXHandler;
+import org.apache.felix.bundlerepository.Logger;
 import org.xml.sax.SAXException;
 
 
@@ -64,8 +65,9 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 	private StringBuffer currentText;
 
 	private Map context;
+    private final Logger m_logger;
 
-	private class XmlStackElement {
+    private class XmlStackElement {
 		
 		public final String qname;
 		public Object object;
@@ -151,8 +153,9 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 		}
 	}
 	
-	public XmlCommonHandler() {
-		elementStack = new Stack();
+	public XmlCommonHandler(Logger logger) {
+        m_logger = logger;
+        elementStack = new Stack();
 		pis = new HashMap();
 		missingPIExceptionFlag = false;
 		types = new HashMap();
@@ -269,7 +272,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 			try {
 				method.invoke(object, new Object[] { context });
 			} catch (InvocationTargetException e) {
-				e.getTargetException().printStackTrace(System.err);
+                m_logger.log(Logger.LOG_ERROR, "Error parsing repository metadata", e.getTargetException());
 				throw e;
 			}
 		}
@@ -293,7 +296,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 			try {
 				method.invoke(object, null);
 			} catch (InvocationTargetException e) {
-				// e.getTargetException().printStackTrace(System.err);
+				// m_logger.log(Logger.LOG_ERROR, "Error parsing repository metadata", e.getTargetException());
 				throw e.getTargetException();
 			}
 
@@ -319,7 +322,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 			try {
 				method.invoke(object, new Object[] { parent });
 			} catch (InvocationTargetException e) {
-				e.getTargetException().printStackTrace(System.err);
+				m_logger.log(Logger.LOG_ERROR, "Error parsing repository metadata", e.getTargetException());
 				throw e;
 			}
 		}
@@ -352,9 +355,9 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 			try {
 				// enables to access to "unmuttable" method
 				type.newInstanceMethod.setAccessible(true);
-				obj = type.newInstanceMethod.invoke(type.instanceFactory, null);
-			} catch (Exception e) {
-				// do nothing
+                obj = type.newInstanceMethod.invoke(type.instanceFactory, null);
+			} catch (InvocationTargetException e) {
+				m_logger.log(Logger.LOG_ERROR, "Error parsing repository metadata", e.getTargetException());
 			}
 
 			// set parent
@@ -409,7 +412,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 					try {
 						method.invoke(obj, new String[] { value });
 					} catch (InvocationTargetException e) {
-						e.getTargetException().printStackTrace(System.err);
+						m_logger.log(Logger.LOG_ERROR, "Error parsing repository metadata", e.getTargetException());
 						throw e;
 					}
 				} else {
@@ -513,7 +516,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 				try {
 					method.invoke(element.object, new String[] { currentStr });
 				} catch (InvocationTargetException e) {
-					e.getTargetException().printStackTrace(System.err);
+					m_logger.log(Logger.LOG_ERROR, "Error parsing repository metadata", e.getTargetException());
 					throw e;
 				}
 			} else {
@@ -593,7 +596,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
                     method.setAccessible(true);
 					method.invoke(parent.object, new Object[] { element.object });
 				} catch (InvocationTargetException e) {
-					e.getTargetException().printStackTrace(System.err);
+					m_logger.log(Logger.LOG_ERROR, "Error parsing repository metadata", e.getTargetException());
 					throw e;
 				}
 			} else {
@@ -628,7 +631,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 		try {
 			invokeProcess(element);
 		} catch (Throwable e) {
-			e.printStackTrace();
+			m_logger.log(Logger.LOG_ERROR, "Error parsing repository metadata", e);
 			throw new Exception(e);
 		}
 
@@ -643,7 +646,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 
 	private void trace(String msg) {
 		if (traceFlag)
-			System.err.println(msg);
+			m_logger.log(Logger.LOG_DEBUG, msg);
 	}
 
 	/**
@@ -746,7 +749,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 				try {
 					method.invoke(object, new String[] { value });
 				} catch (InvocationTargetException e) {
-					e.getTargetException().printStackTrace(System.err);
+					m_logger.log(Logger.LOG_ERROR, "Error parsing repository metadata", e.getTargetException());
 					throw e;
 				}
 			}
@@ -757,7 +760,7 @@ public class XmlCommonHandler implements KXml2SAXHandler {
 		try {
 			invokeProcess(object);
 		} catch (Throwable e) {
-			e.printStackTrace();
+			m_logger.log(Logger.LOG_ERROR, "Error parsing repository metadata", e);
 			throw new Exception(e);
 		}
 */	}

@@ -29,6 +29,7 @@ public class ResolverImpl implements Resolver
 {
     private BundleContext m_context = null;
     private RepositoryAdmin m_admin = null;
+    private final Logger m_logger;
     private LocalRepositoryImpl m_local = null;
     private Set m_addedSet = new HashSet();
     private Set m_resolveSet = new HashSet();
@@ -38,10 +39,11 @@ public class ResolverImpl implements Resolver
     private Map m_unsatisfiedMap = new HashMap();
     private boolean m_resolved = false;
 
-    public ResolverImpl(BundleContext context, RepositoryAdmin admin)
+    public ResolverImpl(BundleContext context, RepositoryAdmin admin, Logger logger)
     {
         m_context = context;
         m_admin = admin;
+        m_logger = logger;
     }
 
     public synchronized void add(Resource resource)
@@ -116,7 +118,7 @@ public class ResolverImpl implements Resolver
         {
             m_local.dispose();
         }
-        m_local = new LocalRepositoryImpl(m_context);
+        m_local = new LocalRepositoryImpl(m_context, m_logger);
 
         // Reset instance values.
         m_resolveSet.clear();
@@ -423,8 +425,7 @@ public class ResolverImpl implements Resolver
         // Must resolve if not already resolved.
         if (!m_resolved && !resolve())
         {
-            // TODO: OBR - Use logger if possible.
-            System.err.println("Resolver: Cannot resolve target resources.");
+            m_logger.log(Logger.LOG_ERROR, "Resolver: Cannot resolve target resources.");
             return;
         }
 
@@ -495,9 +496,10 @@ public class ResolverImpl implements Resolver
                     }
                     catch (Exception ex)
                     {
-                        // TODO: OBR - Use logger if possible.
-                        System.err.println("Resolver: Update error - " + Util.getBundleName(localResource.getBundle()));
-                        ex.printStackTrace(System.err);
+                        m_logger.log(
+                            Logger.LOG_ERROR,
+                            "Resolver: Update error - " + Util.getBundleName(localResource.getBundle()),
+                            ex);
                         return;
                     }
                 }
@@ -530,10 +532,10 @@ public class ResolverImpl implements Resolver
                 }
                 catch (Exception ex)
                 {
-                    // TODO: OBR - Use logger if possible.
-                    System.err.println("Resolver: Install error - "
-                        + deployResources[i].getSymbolicName());
-                    ex.printStackTrace(System.err);
+                    m_logger.log(
+                        Logger.LOG_ERROR,
+                        "Resolver: Install error - " + deployResources[i].getSymbolicName(), 
+                        ex);
                     return;
                 }
             }
@@ -547,8 +549,10 @@ public class ResolverImpl implements Resolver
             }
             catch (BundleException ex)
             {
-                // TODO: OBR - Use logger if possible.
-                System.err.println("Resolver: Start error - " + ex);
+                m_logger.log(
+                    Logger.LOG_ERROR,
+                    "Resolver: Start error - " + ((Bundle) startList.get(i)).getSymbolicName(),
+                    ex);
             }
         }
     }
@@ -685,8 +689,7 @@ public class ResolverImpl implements Resolver
                     }
                 }
             }
-            return (Requirement[])
-                reqList.toArray(new Requirement[reqList.size()]);
+            return (Requirement[]) reqList.toArray(new Requirement[reqList.size()]);
         }
         return null;
     }

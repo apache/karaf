@@ -24,14 +24,16 @@ import java.io.InputStream;
 import javax.xml.parsers.*;
 
 import org.xml.sax.*;
+import org.apache.felix.bundlerepository.Logger;
 
 /**
  * handles the metadata in XML format
  */
 public class XmlMetadataHandler extends MetadataHandler {
 
-	public XmlMetadataHandler() {
-	}
+	public XmlMetadataHandler(Logger logger) {
+        super(logger);
+    }
 	
 	/**
 	* Called to parse the InputStream and set bundle list and package hash map

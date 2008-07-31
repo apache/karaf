@@ -18,6 +18,8 @@
  */
 package org.apache.felix.bundlerepository.metadataparser;
 
+import org.apache.felix.bundlerepository.Logger;
+
 import java.io.InputStream;
 import java.lang.reflect.Method;
 
@@ -29,8 +31,8 @@ public abstract class MetadataHandler {
 	 * constructor 
 	 *
 	 */
-	public MetadataHandler() {
-		handler = new XmlCommonHandler();
+	public MetadataHandler(Logger logger) {
+		handler = new XmlCommonHandler(logger);
 	}
 
 	/**
