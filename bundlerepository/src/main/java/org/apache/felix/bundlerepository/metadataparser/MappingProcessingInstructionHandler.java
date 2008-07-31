@@ -18,35 +18,40 @@
  */
 package org.apache.felix.bundlerepository.metadataparser;
 
-
 /**
  * this class adds type of elements to the parser
  */
-public class MappingProcessingInstructionHandler {
+public class MappingProcessingInstructionHandler
+{
+    private XmlCommonHandler m_handler;
+    private String m_name;
+    private String m_classname;
 
-	private XmlCommonHandler handler;
-	private String name;
-	private String classname;
+    public MappingProcessingInstructionHandler(XmlCommonHandler handler)
+    {
+        m_handler = handler;
+    }
 
-	public MappingProcessingInstructionHandler(XmlCommonHandler handler) {
-		this.handler = handler;
-	}
+    public void process() throws Exception
+    {
+        if (m_name == null)
+        {
+            throw new Exception("element is missing");
+        }
+        if (m_classname == null)
+        {
+            throw new Exception("class is missing");
+        }
+        m_handler.addType(m_name, getClass().getClassLoader().loadClass(m_classname), null, null);
+    }
 
-	public void process() throws Exception {
-		if(name==null) {
-			throw new Exception("element is missing");
-		}
-		if(classname==null) {
-			throw new Exception("class is missing");
-		}
-		handler.addType(name,this.getClass().getClassLoader().loadClass(classname),null,null);
-	}
+    public void setElement(String element)
+    {
+        m_name = element;
+    }
 
-	public void setElement(String element) {
-		this.name=element;
-	}
-
-	public void setClass(String classname) {
-		this.classname=classname;
-	}
+    public void setClass(String classname)
+    {
+        m_classname = classname;
+    }
 }

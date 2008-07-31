@@ -28,54 +28,66 @@ import org.xmlpull.v1.XmlPullParserException;
 /**
  * The KXml2SAXParser extends the XmlParser from kxml2 (which  does not take into account the DTD).
  */
-public class KXml2SAXParser extends KXmlParser {
-	
-	public String uri="uri";
+public class KXml2SAXParser extends KXmlParser
+{
+    public String m_uri = "uri";
 
-	/**
-	* The constructor for a parser, it receives a java.io.Reader.
-	*
-	* @param   reader  The reader
-	* @throws XmlPullParserException 
-	*/
-	public KXml2SAXParser(Reader reader) throws XmlPullParserException {
-		super();
-	    setInput(reader);
-	}
-	
-	/**
-	* parse from the reader provided in the constructor, and call
-	* the startElement and endElement in the handler
-	*
-	* @param   handler  The handler
-	* @exception   Exception thrown by the superclass
-	*/
-	public void parseXML(KXml2SAXHandler handler) throws Exception {
+    /**
+     * The constructor for a parser, it receives a java.io.Reader.
+     *
+     * @param   reader  The reader
+     * @throws XmlPullParserException 
+     */
+    public KXml2SAXParser(Reader reader) throws XmlPullParserException
+    {
+        super();
+        setInput(reader);
+    }
 
-		while (next() != XmlPullParser.END_DOCUMENT) {
-			handler.setLineNumber(getLineNumber());
-			handler.setColumnNumber(getColumnNumber());
-			if (getEventType() == XmlPullParser.START_TAG) {
-				Properties props = new Properties();
-				for (int i = 0; i < getAttributeCount(); i++) {
-					props.put(getAttributeName(i), getAttributeValue(i));
-				}
-				handler.startElement(
-					getNamespace(),
-					getName(),
-					getName(),
-					props);
-			} else if (getEventType() == XmlPullParser.END_TAG) {
-				handler.endElement(getNamespace(), getName(), getName());
-			} else if (getEventType() == XmlPullParser.TEXT) {
-				String text = getText();
-				handler.characters(text.toCharArray(),0,text.length());
-			} else if (getEventType() == XmlPullParser.PROCESSING_INSTRUCTION) {
-				// TODO extract the target from the evt.getText()
-				handler.processingInstruction(null,getText()); 
-			} else {
-				// do nothing
-			}
-		}
-	}	
+    /**
+     * parse from the reader provided in the constructor, and call
+     * the startElement and endElement in the handler
+     *
+     * @param   handler  The handler
+     * @exception   Exception thrown by the superclass
+     */
+    public void parseXML(KXml2SAXHandler handler) throws Exception
+    {
+        while (next() != XmlPullParser.END_DOCUMENT)
+        {
+            handler.setLineNumber(getLineNumber());
+            handler.setColumnNumber(getColumnNumber());
+            if (getEventType() == XmlPullParser.START_TAG)
+            {
+                Properties props = new Properties();
+                for (int i = 0; i < getAttributeCount(); i++)
+                {
+                    props.put(getAttributeName(i), getAttributeValue(i));
+                }
+                handler.startElement(
+                    getNamespace(),
+                    getName(),
+                    getName(),
+                    props);
+            }
+            else if (getEventType() == XmlPullParser.END_TAG)
+            {
+                handler.endElement(getNamespace(), getName(), getName());
+            }
+            else if (getEventType() == XmlPullParser.TEXT)
+            {
+                String text = getText();
+                handler.characters(text.toCharArray(), 0, text.length());
+            }
+            else if (getEventType() == XmlPullParser.PROCESSING_INSTRUCTION)
+            {
+                // TODO extract the target from the evt.getText()
+                handler.processingInstruction(null, getText());
+            }
+            else
+            {
+                // do nothing
+            }
+        }
+    }
 }

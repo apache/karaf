@@ -21,94 +21,116 @@ package org.apache.felix.bundlerepository.metadataparser;
 /**
  * This class provides methods to process class name
  */
+public class ClassUtility
+{
+    /**
+     * This method capitalizes the first character in the provided string.
+     * @return resulted string
+     */
+    public static String capitalize(String name)
+    {
+        int len = name.length();
+        StringBuffer sb = new StringBuffer(len);
+        boolean setCap = true;
+        for (int i = 0; i < len; i++)
+        {
+            char c = name.charAt(i);
+            if (c == '-' || c == '_')
+            {
+                setCap = true;
+            }
+            else
+            {
+                if (setCap)
+                {
+                    sb.append(Character.toUpperCase(c));
+                    setCap = false;
+                }
+                else
+                {
+                    sb.append(c);
+                }
+            }
+        }
 
-public class ClassUtility {
+        return sb.toString();
+    }
 
-	/**
-	 * This method capitalizes the first character in the provided string.
-	 * @return resulted string
-	 */
-	public static String capitalize(String name) {
+    /**
+     * This method minusculizes all characters in the provided string.
+     * @return resulted string
+     */
+    public static String toLowerCase(String name)
+    {
+        int len = name.length();
+        StringBuffer sb = new StringBuffer(len);
+        for (int i = 0; i < len; i++)
+        {
+            char c = name.charAt(i);
+            sb.append(Character.toLowerCase(c));
+        }
+        return sb.toString();
+    }
 
-		int len=name.length();
-		StringBuffer sb=new StringBuffer(len);
-		boolean setCap=true;
-		for(int i=0; i<len; i++){
-			char c=name.charAt(i);
-			if(c=='-' || c=='_') {
-				setCap=true;			
-			} else {
-				if(setCap){
-					sb.append(Character.toUpperCase(c));
-					setCap=false;
-				} else {
-					sb.append(c);
-				}
-			}
-		} 
- 
-		return sb.toString();
-	}
+    /**
+     * This method capitalizes all characters in the provided string.
+     * @return resulted string
+     */
+    public static String finalstaticOf(String membername)
+    {
+        int len = membername.length();
+        StringBuffer sb = new StringBuffer(len + 2);
+        for (int i = 0; i < len; i++)
+        {
+            char c = membername.charAt(i);
+            if (Character.isLowerCase(c))
+            {
+                sb.append(Character.toUpperCase(c));
+            }
+            else if (Character.isUpperCase(c))
+            {
+                sb.append('_').append(c);
+            }
+            else
+            {
+                sb.append(c);
+            }
+        }
 
-	/**
-	 * This method minusculizes all characters in the provided string.
-	 * @return resulted string
-	 */
-	public static String toLowerCase(String name) {
-		int len=name.length();
-		StringBuffer sb=new StringBuffer(len);
-		for(int i=0; i<len; i++){
-			char c=name.charAt(i);
-			sb.append(Character.toLowerCase(c));
-		}  
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 
+    /**
+     * This method returns the package name in a full class name
+     * @return resulted string
+     */
+    public static String packageOf(String fullclassname)
+    {
+        int index = fullclassname.lastIndexOf(".");
+        if (index > 0)
+        {
+            return fullclassname.substring(0, index);
+        }
+        else
+        {
+            return "";
+        }
+    }
 
-	/**
-	 * This method capitalizes all characters in the provided string.
-	 * @return resulted string
-	 */
-	public static String finalstaticOf(String membername) {
-		int len=membername.length();
-		StringBuffer sb=new StringBuffer(len+2);
-		for(int i=0; i<len; i++){
-			char c=membername.charAt(i);
-			if(Character.isLowerCase(c) ) {
-				sb.append(Character.toUpperCase(c));
-			} else if(Character.isUpperCase(c) ) {
-				sb.append('_').append(c);
-			} else {
-				sb.append(c);				
-			}
-		} 
- 
-		return sb.toString();
-	}
-	
-	/**
-	 * This method returns the package name in a full class name
-	 * @return resulted string
-	 */
-	public static String packageOf(String fullclassname) {
-		int index=fullclassname.lastIndexOf(".");
-		if(index>0) {
-			return fullclassname.substring(0,index);
-		} else {
-			return "";	
-		}
-	}
-
-	/**
-	 * This method returns the package name in a full class name
-	 * @return resulted string
-	 */
-	public static String classOf(String fullclassname) {
-		int index=fullclassname.lastIndexOf(".");
-		if(index>0) {
-			return fullclassname.substring(index+1);
-		} else {
-			return fullclassname;	
-		}
-	}
+    /**
+     * This method returns the package name in a full class name
+     * @return resulted string
+     */
+    public static String classOf(String fullclassname)
+    {
+        int index = fullclassname.lastIndexOf(".");
+        if (index > 0)
+        {
+            return fullclassname.substring(index + 1);
+        }
+        else
+        {
+            return fullclassname;
+        }
+    }
 }

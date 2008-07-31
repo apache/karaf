@@ -29,27 +29,29 @@ import org.apache.felix.bundlerepository.Logger;
 /**
  * handles the metadata in XML format
  */
-public class XmlMetadataHandler extends MetadataHandler {
-
-	public XmlMetadataHandler(Logger logger) {
+public class XmlMetadataHandler extends MetadataHandler
+{
+    public XmlMetadataHandler(Logger logger)
+    {
         super(logger);
     }
-	
-	/**
-	* Called to parse the InputStream and set bundle list and package hash map
-	*/
-	public void parse(InputStream istream) throws ParserConfigurationException, IOException, SAXException {
-     // Parse the Meta-Data
 
-	 	ContentHandler contenthandler = (ContentHandler) handler;
+    /**
+     * Called to parse the InputStream and set bundle list and package hash map
+     */
+    public void parse(InputStream istream) throws ParserConfigurationException, IOException, SAXException
+    {
+        // Parse the Meta-Data
 
-		InputSource is = new InputSource(istream);
+        ContentHandler contenthandler = (ContentHandler) m_handler;
+
+        InputSource is = new InputSource(istream);
 
         SAXParserFactory spf = SAXParserFactory.newInstance();
         spf.setValidating(false);
 
         SAXParser saxParser = spf.newSAXParser();
-		
+
         XMLReader xmlReader = null;
         xmlReader = saxParser.getXMLReader();
         xmlReader.setContentHandler(contenthandler);

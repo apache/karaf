@@ -23,52 +23,53 @@ import java.util.Properties;
 /**
  * Interface for SAX handler with kXML
  */
-public interface KXml2SAXHandler {
+public interface KXml2SAXHandler
+{
+    /**
+     * Method called when parsing text
+     *
+     * @param   ch
+     * @param   offset
+     * @param   length
+     * @exception   SAXException
+     */
+    public void characters(char[] ch, int offset, int length) throws Exception;
 
-	/**
-	* Method called when parsing text
-	*
-	* @param   ch
-	* @param   offset
-	* @param   length
-	* @exception   SAXException
-	*/
-	public void characters(char[] ch, int offset, int length) throws Exception;
+    /**
+     * Method called when a tag opens
+     *
+     * @param   uri
+     * @param   localName
+     * @param   qName
+     * @param   attrib
+     * @exception   SAXException
+     **/
+    public void startElement(
+        String uri,
+        String localName,
+        String qName,
+        Properties attrib)
+        throws Exception;
 
-	/**
-	* Method called when a tag opens
-	*
-	* @param   uri
-	* @param   localName
-	* @param   qName
-	* @param   attrib
-	* @exception   SAXException
-	**/
-	public void startElement(
-		String uri,
-		String localName,
-		String qName,
-		Properties attrib)
-		throws Exception;
-	/**
-	* Method called when a tag closes
-	*
-	* @param   uri
-	* @param   localName
-	* @param   qName
-	* @exception   SAXException
-	*/
-	public void endElement(
-		java.lang.String uri,
-		java.lang.String localName,
-		java.lang.String qName)
-		throws Exception;
+    /**
+     * Method called when a tag closes
+     *
+     * @param   uri
+     * @param   localName
+     * @param   qName
+     * @exception   SAXException
+     */
+    public void endElement(
+        java.lang.String uri,
+        java.lang.String localName,
+        java.lang.String qName)
+        throws Exception;
 
-	public void processingInstruction(String target,
-									  String data)
-							   throws Exception;
-		
-	public void setLineNumber(int lineNumber);
+    public void processingInstruction(String target,
+        String data)
+        throws Exception;
 
-	public void setColumnNumber(int columnNumber);
+    public void setLineNumber(int lineNumber);
+
+    public void setColumnNumber(int columnNumber);
 }
