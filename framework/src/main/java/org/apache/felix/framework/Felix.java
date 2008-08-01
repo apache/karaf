@@ -1328,7 +1328,21 @@ ex.printStackTrace();
     **/
     protected String getBundleSymbolicName(FelixBundle bundle)
     {
-        return (String) bundle.getInfo().getCurrentHeader().get(Constants.BUNDLE_SYMBOLICNAME);
+        try
+        {
+            // TODO: FRAMEWORK - Rather than reparsing every time, I wonder if
+            //       we should be caching this value some place.
+            final ICapability moduleCap = ManifestParser.parseBundleSymbolicName(bundle.getInfo().getCurrentHeader());
+            if (moduleCap != null)
+            {
+                return (String) moduleCap.getProperties().get(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
+            }
+        }
+        catch (BundleException ex)
+        {
+            // Return null.
+        }
+        return null;
     }
 
     /**
@@ -3415,8 +3429,7 @@ ex.printStackTrace();
             for (int i = 0; (bundles != null) && (i < bundles.length); i++)
             {
                 long id = ((FelixBundle) bundles[i]).getBundleId();
-                String sym = (String) ((FelixBundle) bundles[i])
-                    .getInfo().getCurrentHeader().get(Constants.BUNDLE_SYMBOLICNAME);
+                String sym = bundles[i].getSymbolicName();
                 Version ver = Version.parseVersion((String) ((FelixBundle) bundles[i])
                     .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION));
                 if (symName.equals(sym) && bundleVersion.equals(ver) && (targetId != id))

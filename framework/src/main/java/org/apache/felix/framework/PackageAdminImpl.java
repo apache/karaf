@@ -105,8 +105,7 @@ class PackageAdminImpl implements PackageAdmin, Runnable
         List list = new ArrayList();
         for (int i = 0; (bundles != null) && (i < bundles.length); i++)
         {
-            String sym = (String) ((FelixBundle) bundles[i])
-                .getInfo().getCurrentHeader().get(Constants.BUNDLE_SYMBOLICNAME);
+            String sym = bundles[i].getSymbolicName();
             if ((sym != null) && sym.equals(symbolicName))
             {
                 String s = (String) ((FelixBundle) bundles[i])
