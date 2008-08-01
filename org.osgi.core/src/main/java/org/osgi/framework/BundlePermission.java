@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundlePermission.java,v 1.15 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundlePermission.java,v 1.16 2007/02/20 00:06:02 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import java.util.Hashtable;
  * The <code>PROVIDE</code> action implies the <code>REQUIRE</code> action.
  * 
  * @since 1.3
+ * @version $Revision: 1.16 $
  */
 
 public final class BundlePermission extends BasicPermission {

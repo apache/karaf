@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServicePermission.java,v 1.14 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServicePermission.java,v 1.15 2007/02/20 00:06:02 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
- * Indicates a bundle's authority to register or get a service.
+ * A bundle's authority to register or get a service.
  * <ul>
  * <li>The <code>ServicePermission.REGISTER</code> action allows a bundle to
  * register a service on the specified names.
@@ -36,7 +36,7 @@ import java.util.Hashtable;
  * certain services unless they have the appropriate
  * <code>ServicePermission</code> to get the specific service.
  * 
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 
 final public class ServicePermission extends BasicPermission {

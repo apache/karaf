@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleSignerCondition.java,v 1.10 2006/06/16 16:31:37 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleSignerCondition.java,v 1.13 2006/10/24 17:54:27 hargrave Exp $
  * 
  * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
  * 
@@ -47,7 +47,7 @@ import org.osgi.framework.Bundle;
  * must be the first RDN and will match any number of RDNs (including zero
  * RDNs).
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.13 $
  */
 public class BundleSignerCondition {
 	/*
@@ -62,48 +62,53 @@ public class BundleSignerCondition {
 	 * by the org.osgi.vendor.condpermadmin package. This class will delegate
 	 * getCondition methods calls to the vendor BundleSignerCondition class.
 	 */
-	private static final String	packageProperty	= "org.osgi.vendor.condpermadmin";
-	private static final Method	getCondition;
-	static {
-		getCondition = (Method) AccessController
-				.doPrivileged(new PrivilegedAction() {
-					public Object run() {
-						String packageName = System
-								.getProperty(packageProperty);
-						if (packageName == null) {
-							throw new NoClassDefFoundError(packageProperty
-									+ " property not set");
-						}
+	
+	private static class ImplHolder implements PrivilegedAction {
+		private static final String	packageProperty	= "org.osgi.vendor.condpermadmin";
+		static final Method	getCondition;
+		static {
+			getCondition = (Method) AccessController.doPrivileged(new ImplHolder());
+		}
 
-						Class delegateClass;
-						try {
-							delegateClass = Class.forName(packageName
-									+ ".BundleSignerCondition");
-						}
-						catch (ClassNotFoundException e) {
-							throw new NoClassDefFoundError(e.toString());
-						}
+		private ImplHolder() {
+		}
 
-						Method result;
-						try {
-							result = delegateClass.getMethod("getCondition",
-									new Class[] {Bundle.class,
-			ConditionInfo.class		});
-						}
-						catch (NoSuchMethodException e) {
-							throw new NoSuchMethodError(e.toString());
-						}
-
-						if (!Modifier.isStatic(result.getModifiers())) {
-							throw new NoSuchMethodError(
-									"getCondition method must be static");
-						}
-
-						return result;
-					}
-				});
+		public Object run() {
+			String packageName = System
+			.getProperty(packageProperty);
+			if (packageName == null) {
+				throw new NoClassDefFoundError(packageProperty
+						+ " property not set");
+			}
+			
+			Class delegateClass;
+			try {
+				delegateClass = Class.forName(packageName
+						+ ".BundleSignerCondition");
+			}
+			catch (ClassNotFoundException e) {
+				throw new NoClassDefFoundError(e.toString());
+			}
+			
+			Method result;
+			try {
+				result = delegateClass.getMethod("getCondition",
+						new Class[] {Bundle.class,
+						ConditionInfo.class		});
+			}
+			catch (NoSuchMethodException e) {
+				throw new NoSuchMethodError(e.toString());
+			}
+			
+			if (!Modifier.isStatic(result.getModifiers())) {
+				throw new NoSuchMethodError(
+						"getCondition method must be static");
+			}
+			
+			return result;
+		}
 	}
-
+	
 	private static final String	CONDITION_TYPE	= "org.osgi.service.condpermadmin.BundleSignerCondition";
 
 	/**
@@ -117,7 +122,7 @@ public class BundleSignerCondition {
 	 *        Bundle.
 	 * @return A Condition which checks the signers of the specified bundle.        
 	 */
-	static public Condition getCondition(Bundle bundle, ConditionInfo info) {
+	public static Condition getCondition(Bundle bundle, ConditionInfo info) {
 		if (!CONDITION_TYPE.equals(info.getType()))
 			throw new IllegalArgumentException(
 					"ConditionInfo must be of type \"" + CONDITION_TYPE + "\"");
@@ -128,7 +133,7 @@ public class BundleSignerCondition {
 
 		try {
 			try {
-				return (Condition) getCondition.invoke(null, new Object[] {
+				return (Condition) ImplHolder.getCondition.invoke(null, new Object[] {
 						bundle, info});
 			}
 			catch (InvocationTargetException e) {

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/InvalidSyntaxException.java,v 1.15 2006/07/11 13:15:54 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/InvalidSyntaxException.java,v 1.16 2007/02/20 00:15:00 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,27 @@
 package org.osgi.framework;
 
 /**
- * A Framework exception.
+ * A Framework exception used to indicate that a filter string has an invalid
+ * syntax.
  * 
  * <p>
  * An <code>InvalidSyntaxException</code> object indicates that a filter
- * string parameter has an invalid syntax and cannot be parsed.
+ * string parameter has an invalid syntax and cannot be parsed. See
+ * {@link Filter} for a description of the filter string syntax.
  * 
  * <p>
- * See {@link Filter} for a description of the filter string syntax.
+ * This exception is updated to conform to the general purpose exception
+ * chaining mechanism.
  * 
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 
 public class InvalidSyntaxException extends Exception {
-	static final long	serialVersionUID	= -4295194420816491875L;
+	static final long		serialVersionUID	= -4295194420816491875L;
 	/**
 	 * The invalid filter string.
 	 */
-	private final String		filter;
+	private final String	filter;
 	/**
 	 * Nested exception.
 	 */

@@ -45,8 +45,8 @@
             <Bundle-SymbolicName>org.osgi.core</Bundle-SymbolicName>
             <Export-Package>org.osgi.framework, org.osgi.service.condpermadmin, org.osgi.service.packageadmin, org.osgi.service.permissionadmin, org.osgi.service.startlevel, org.osgi.service.url</Export-Package>
             <Import-Package>org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.startlevel,org.osgi.service.url,!org.osgi.*,*</Import-Package>
-            <Bundle-Version>4</Bundle-Version>
-            <Bundle-Copyright>Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.</Bundle-Copyright>
+            <Bundle-Version>4.1</Bundle-Version>
+            <Bundle-Copyright>Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.</Bundle-Copyright>
             <Bundle-Category>osgi</Bundle-Category>
           </instructions>
         </configuration>

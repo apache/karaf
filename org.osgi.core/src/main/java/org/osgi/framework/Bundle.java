@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.37 2006/06/27 13:13:30 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.54 2007/02/21 16:49:05 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,11 +64,12 @@ import java.util.Enumeration;
  * <code>Bundle</code> objects, and these objects are only valid within the
  * Framework that created them.
  * 
- * @version $Revision: 1.37 $
+ * @ThreadSafe
+ * @version $Revision: 1.54 $
  */
 public interface Bundle {
 	/**
-	 * This bundle is uninstalled and may not be used.
+	 * The bundle is uninstalled and may not be used.
 	 * 
 	 * <p>
 	 * The <code>UNINSTALLED</code> state is only visible after a bundle is
@@ -78,14 +79,14 @@ public interface Bundle {
 	 * <p>
 	 * The value of <code>UNINSTALLED</code> is 0x00000001.
 	 */
-	public static final int	UNINSTALLED	= 0x00000001;
+	public static final int	UNINSTALLED				= 0x00000001;
 
 	/**
-	 * This bundle is installed but not yet resolved.
+	 * The bundle is installed but not yet resolved.
 	 * 
 	 * <p>
 	 * A bundle is in the <code>INSTALLED</code> state when it has been
-	 * installed in the Framework but cannot run.
+	 * installed in the Framework but is not or cannot be resolved.
 	 * <p>
 	 * This state is visible if the bundle's code dependencies are not resolved.
 	 * The Framework may attempt to resolve an <code>INSTALLED</code> bundle's
@@ -94,14 +95,14 @@ public interface Bundle {
 	 * <p>
 	 * The value of <code>INSTALLED</code> is 0x00000002.
 	 */
-	public static final int	INSTALLED	= 0x00000002;
+	public static final int	INSTALLED				= 0x00000002;
 
 	/**
-	 * This bundle is resolved and is able to be started.
+	 * The bundle is resolved and is able to be started.
 	 * 
 	 * <p>
 	 * A bundle is in the <code>RESOLVED</code> state when the Framework has
-	 * successfully resolved the bundle's dependencies. These dependencies
+	 * successfully resolved the bundle's code dependencies. These dependencies
 	 * include:
 	 * <ul>
 	 * <li>The bundle's class path from its {@link Constants#BUNDLE_CLASSPATH}
@@ -121,45 +122,98 @@ public interface Bundle {
 	 * <p>
 	 * The value of <code>RESOLVED</code> is 0x00000004.
 	 */
-	public static final int	RESOLVED	= 0x00000004;
+	public static final int	RESOLVED				= 0x00000004;
 
 	/**
-	 * This bundle is in the process of starting.
+	 * The bundle is in the process of starting.
 	 * 
 	 * <p>
-	 * A bundle is in the <code>STARTING</code> state when the {@link #start}
-	 * method is active. A bundle must be in this state when the bundle's
-	 * {@link BundleActivator#start} is called. If this method completes without
-	 * exception, then the bundle has successfully started and must move to the
+	 * A bundle is in the <code>STARTING</code> state when its
+	 * {@link #start(int) start} method is active. A bundle must be in this
+	 * state when the bundle's {@link BundleActivator#start} is called. If the
+	 * <code>BundleActivator.start</code> method completes without exception,
+	 * then the bundle has successfully started and must move to the
 	 * <code>ACTIVE</code> state.
+	 * <p>
+	 * If the bundle has a
+	 * {@link Constants#ACTIVATION_LAZY lazy activation policy}, then the
+	 * bundle may remain in this state for some time until the activation is
+	 * triggered.
 	 * <p>
 	 * The value of <code>STARTING</code> is 0x00000008.
 	 */
-	public static final int	STARTING	= 0x00000008;
+	public static final int	STARTING				= 0x00000008;
 
 	/**
-	 * This bundle is in the process of stopping.
+	 * The bundle is in the process of stopping.
 	 * 
 	 * <p>
-	 * A bundle is in the <code>STOPPING</code> state when the {@link #stop}
-	 * method is active. A bundle must be in this state when the bundle's
-	 * {@link BundleActivator#stop} method is called. When this method completes
-	 * the bundle is stopped and must move to the <code>RESOLVED</code> state.
+	 * A bundle is in the <code>STOPPING</code> state when its
+	 * {@link #stop(int) stop} method is active. A bundle must be in this state
+	 * when the bundle's {@link BundleActivator#stop} method is called. When the
+	 * <code>BundleActivator.stop</code> method completes the bundle is
+	 * stopped and must move to the <code>RESOLVED</code> state.
 	 * <p>
 	 * The value of <code>STOPPING</code> is 0x00000010.
 	 */
-	public static final int	STOPPING	= 0x00000010;
+	public static final int	STOPPING				= 0x00000010;
 
 	/**
-	 * This bundle is now running.
+	 * The bundle is now running.
 	 * 
 	 * <p>
 	 * A bundle is in the <code>ACTIVE</code> state when it has been
-	 * successfully started.
+	 * successfully started and activated.
 	 * <p>
 	 * The value of <code>ACTIVE</code> is 0x00000020.
 	 */
-	public static final int	ACTIVE		= 0x00000020;
+	public static final int	ACTIVE					= 0x00000020;
+
+	/**
+	 * The bundle start operation is transient and the persistent autostart
+	 * setting of the bundle is not modified.
+	 * 
+	 * <p>
+	 * This bit may be set when calling {@link #start(int)} to notify the
+	 * framework that the autostart setting of the bundle must not be modified.
+	 * If this bit is not set, then the autostart setting of the bundle is
+	 * modified.
+	 * 
+	 * @since 1.4
+	 * @see #start(int)
+	 */
+	public static final int	START_TRANSIENT			= 0x00000001;
+
+	/**
+	 * The bundle start operation must activate the bundle according to the
+	 * bundle's declared
+	 * {@link Constants#BUNDLE_ACTIVATIONPOLICY activation policy}.
+	 * 
+	 * <p>
+	 * This bit may be set when calling {@link #start(int)} to notify the
+	 * framework that the bundle must be activated using the bundle's declared
+	 * activation policy.
+	 * 
+	 * @since 1.4
+	 * @see Constants#BUNDLE_ACTIVATIONPOLICY
+	 * @see #start(int)
+	 */
+	public static final int	START_ACTIVATION_POLICY	= 0x00000002;
+
+	/**
+	 * The bundle stop is transient and the persistent autostart setting of the
+	 * bundle is not modified.
+	 * 
+	 * <p>
+	 * This bit may be set when calling {@link #stop(int)} to notify the
+	 * framework that the autostart setting of the bundle must not be modified.
+	 * If this bit is not set, then the autostart setting of the bundle is
+	 * modified.
+	 * 
+	 * @since 1.4
+	 * @see #stop(int)
+	 */
+	public static final int	STOP_TRANSIENT			= 0x00000001;
 
 	/**
 	 * Returns this bundle's current state.
@@ -177,48 +231,78 @@ public interface Bundle {
 	 * Starts this bundle.
 	 * 
 	 * <p>
-	 * If the Framework implements the optional Start Level service and the
-	 * current start level is less than this bundle's start level, then the
-	 * Framework must persistently mark this bundle as started and delay the
-	 * starting of this bundle until the Framework's current start level becomes
-	 * equal or more than the bundle's start level.
-	 * <p>
-	 * Otherwise, the following steps are required to start a bundle:
-	 * <ol>
-	 * <li>If this bundle's state is <code>UNINSTALLED</code> then an
+	 * If this bundle's state is <code>UNINSTALLED</code> then an
 	 * <code>IllegalStateException</code> is thrown.
+	 * <p>
+	 * If the Framework implements the optional Start Level service and the
+	 * current start level is less than this bundle's start level:
+	 * <ul>
+	 * <li>If the {@link #START_TRANSIENT} option is set, then a
+	 * <code>BundleException</code> is thrown indicating this bundle cannot be
+	 * started due to the Framework's current start level.
 	 * 
-	 * <li>If this bundle's state is <code>STARTING</code> or
-	 * <code>STOPPING</code> then this method must wait for this bundle to
-	 * change state before continuing. If this does not occur in a reasonable
-	 * time, a <code>BundleException</code> is thrown to indicate this bundle
-	 * was unable to be started.
+	 * <li>Otherwise, the Framework must set this bundle's persistent autostart
+	 * setting to <em>Started with declared activation</em> if the
+	 * {@link #START_ACTIVATION_POLICY} option is set or
+	 * <em>Started with eager activation</em> if not set.
+	 * </ul>
+	 * <p>
+	 * When the Framework's current start level becomes equal to or more than
+	 * this bundle's start level, this bundle will be started.
+	 * <p>
+	 * Otherwise, the following steps are required to start this bundle:
+	 * <ol>
+	 * <li>If this bundle is in the process of being activated or deactivated
+	 * then this method must wait for activation or deactivation to complete
+	 * before continuing. If this does not occur in a reasonable time, a
+	 * <code>BundleException</code> is thrown to indicate this bundle was
+	 * unable to be started.
 	 * 
 	 * <li>If this bundle's state is <code>ACTIVE</code> then this method
 	 * returns immediately.
 	 * 
-	 * <li>Persistently record that this bundle has been started. When the
-	 * Framework is restarted, this bundle must be automatically started.
+	 * <li>If the {@link #START_TRANSIENT} option is not set then set this
+	 * bundle's autostart setting to <em>Started with declared activation</em>
+	 * if the {@link #START_ACTIVATION_POLICY} option is set or
+	 * <em>Started with eager activation</em> if not set. When the Framework
+	 * is restarted and this bundle's autostart setting is not <em>Stopped</em>,
+	 * this bundle must be automatically started.
 	 * 
 	 * <li>If this bundle's state is not <code>RESOLVED</code>, an attempt
-	 * is made to resolve this bundle's package dependencies. If the Framework
-	 * cannot resolve this bundle, a <code>BundleException</code> is thrown.
+	 * is made to resolve this bundle. If the Framework cannot resolve this
+	 * bundle, a <code>BundleException</code> is thrown.
 	 * 
+	 * <li>If the {@link #START_ACTIVATION_POLICY} option is set and this
+	 * bundle's declared activation policy is
+	 * {@link Constants#ACTIVATION_LAZY lazy} then:
+	 * <ul>
+	 * <li>If this bundle's state is <code>STARTING</code> then this method
+	 * returns immediately.
+	 * <li>This bundle's state is set to <code>STARTING</code>.
+	 * <li>A bundle event of type {@link BundleEvent#LAZY_ACTIVATION} is fired.
+	 * <li>This method returns immediately and the remaining steps will be
+	 * followed when this bundle's activation is later triggered.
+	 * </ul>
+	 * <i></i>
 	 * <li>This bundle's state is set to <code>STARTING</code>.
 	 * 
-	 * <li>A bundle event of type {@link BundleEvent#STARTING} is fired. This event is only delivered to
-	 * <code>SynchronousBundleListener</code>s. It is not delivered to <code>BundleListener</code>s.
+	 * <li>A bundle event of type {@link BundleEvent#STARTING} is fired.
 	 * 
 	 * <li>The {@link BundleActivator#start} method of this bundle's
 	 * <code>BundleActivator</code>, if one is specified, is called. If the
-	 * <code>BundleActivator</code> is invalid or throws an exception, this
-	 * bundle's state is set back to <code>RESOLVED</code>.<br>
-	 * Any services registered by the bundle must be unregistered. <br>
-	 * Any services used by the bundle must be released. <br>
-	 * Any listeners registered by the bundle must be removed. <br>
-	 * A <code>BundleException</code> is then thrown.
-	 * 
-	 * <li>If this bundle's state is <code>UNINSTALLED</code>, because the
+	 * <code>BundleActivator</code> is invalid or throws an exception then:
+	 * <ul>
+	 * <li>This bundle's state is set to <code>STOPPING</code>.
+	 * <li>A bundle event of type {@link BundleEvent#STOPPING} is fired.
+	 * <li>Any services registered by this bundle must be unregistered.
+	 * <li>Any services used by this bundle must be released.
+	 * <li>Any listeners registered by this bundle must be removed.
+	 * <li>This bundle's state is set to <code>RESOLVED</code>.
+	 * <li>A bundle event of type {@link BundleEvent#STOPPED} is fired.
+	 * <li>A <code>BundleException</code> is then thrown.
+	 * </ul>
+	 * <i></i>
+	 * <li>If this bundle's state is <code>UNINSTALLED</code>, because this
 	 * bundle was uninstalled while the <code>BundleActivator.start</code>
 	 * method was running, a <code>BundleException</code> is thrown.
 	 * 
@@ -229,33 +313,60 @@ public interface Bundle {
 	 * 
 	 * <b>Preconditions </b>
 	 * <ul>
-	 * <li><code>getState()</code> in {<code>INSTALLED</code>}, {
-	 * <code>RESOLVED</code>}.
+	 * <li><code>getState()</code> in {<code>INSTALLED</code>,
+	 * <code>RESOLVED</code>} or {<code>INSTALLED</code>,
+	 * <code>RESOLVED</code>, <code>STARTING</code>} if this bundle has a
+	 * lazy activation policy.
 	 * </ul>
 	 * <b>Postconditions, no exceptions thrown </b>
 	 * <ul>
-	 * <li>Bundle persistent state is marked as active.
-	 * <li><code>getState()</code> in {<code>ACTIVE</code>}.
+	 * <li>Bundle autostart setting is modified unless the
+	 * {@link #START_TRANSIENT} option was set.
+	 * <li><code>getState()</code> in {<code>ACTIVE</code>} unless the
+	 * lazy activation policy was used.
 	 * <li><code>BundleActivator.start()</code> has been called and did not
-	 * throw an exception.
+	 * throw an exception unless the lazy activation policy was used.
 	 * </ul>
 	 * <b>Postconditions, when an exception is thrown </b>
 	 * <ul>
-	 * <li>Depending on when the exception occurred, bundle persistent state is
-	 * marked as active.
-	 * <li><code>getState()</code> not in {<code>STARTING</code>}, {
+	 * <li>Depending on when the exception occurred, bundle autostart setting
+	 * is modified unless the {@link #START_TRANSIENT} option was set.
+	 * <li><code>getState()</code> not in {<code>STARTING</code>,
 	 * <code>ACTIVE</code>}.
 	 * </ul>
+	 * 
+	 * @param options The options for starting this bundle. See
+	 *        {@link #START_TRANSIENT} and {@link #START_ACTIVATION_POLICY}.
+	 *        The Framework must ignore unrecognized options.
+	 * @throws BundleException If this bundle could not be started. This could
+	 *         be because a code dependency could not be resolved or the
+	 *         specified <code>BundleActivator</code> could not be loaded or
+	 *         threw an exception or this bundle is a fragment.
+	 * @throws java.lang.IllegalStateException If this bundle has been
+	 *         uninstalled or this bundle tries to change its own state.
+	 * @throws java.lang.SecurityException If the caller does not have the
+	 *         appropriate <code>AdminPermission[this,EXECUTE]</code>, and
+	 *         the Java Runtime Environment supports permissions.
+	 * @since 1.4
+	 */
+	public void start(int options) throws BundleException;
+
+	/**
+	 * Starts this bundle with no options.
+	 * 
+	 * <p>
+	 * This method calls <code>start(0)</code>.
 	 * 
 	 * @throws BundleException If this bundle could not be started. This could
 	 *         be because a code dependency could not be resolved or the
 	 *         specified <code>BundleActivator</code> could not be loaded or
-	 *         threw an exception.
+	 *         threw an exception or this bundle is a fragment.
 	 * @throws java.lang.IllegalStateException If this bundle has been
 	 *         uninstalled or this bundle tries to change its own state.
 	 * @throws java.lang.SecurityException If the caller does not have the
-	 *         appropriate <code>AdminPermission[this,EXECUTE]</code>, and the
-	 *         Java Runtime Environment supports permissions.
+	 *         appropriate <code>AdminPermission[this,EXECUTE]</code>, and
+	 *         the Java Runtime Environment supports permissions.
+	 * @see #start(int)
 	 */
 	public void start() throws BundleException;
 
@@ -268,22 +379,22 @@ public interface Bundle {
 	 * <li>If this bundle's state is <code>UNINSTALLED</code> then an
 	 * <code>IllegalStateException</code> is thrown.
 	 * 
-	 * <li>If this bundle's state is <code>STARTING</code> or
-	 * <code>STOPPING</code> then this method must wait for this bundle to
-	 * change state before continuing. If this does not occur in a reasonable
-	 * time, a <code>BundleException</code> is thrown to indicate this bundle
-	 * was unable to be stopped.
-	 * 
-	 * <li>Persistently record that this bundle has been stopped. When the
-	 * Framework is restarted, this bundle must not be automatically started.
+	 * <li>If this bundle is in the process of being activated or deactivated
+	 * then this method must wait for activation or deactivation to complete
+	 * before continuing. If this does not occur in a reasonable time, a
+	 * <code>BundleException</code> is thrown to indicate this bundle was
+	 * unable to be stopped.
+	 * <li>If the {@link #STOP_TRANSIENT} option is not set then then set this
+	 * bundle's persistent autostart setting to to <em>Stopped</em>. When the
+	 * Framework is restarted and this bundle's autostart setting is
+	 * <em>Stopped</em>, this bundle must not be automatically started.
 	 * 
 	 * <li>If this bundle's state is not <code>ACTIVE</code> then this method
 	 * returns immediately.
 	 * 
 	 * <li>This bundle's state is set to <code>STOPPING</code>.
 	 * 
-	 * <li>A bundle event of type {@link BundleEvent#STOPPING} is fired. This event is only delivered to
-	 * <code>SynchronousBundleListener</code>s. It is not delivered to <code>BundleListener</code>s.
+	 * <li>A bundle event of type {@link BundleEvent#STOPPING} is fired.
 	 * 
 	 * <li>The {@link BundleActivator#stop} method of this bundle's
 	 * <code>BundleActivator</code>, if one is specified, is called. If that
@@ -295,7 +406,7 @@ public interface Bundle {
 	 * <li>Any services used by this bundle must be released.
 	 * <li>Any listeners registered by this bundle must be removed.
 	 * 
-	 * <li>If this bundle's state is <code>UNINSTALLED</code>, because the
+	 * <li>If this bundle's state is <code>UNINSTALLED</code>, because this
 	 * bundle was uninstalled while the <code>BundleActivator.stop</code>
 	 * method was running, a <code>BundleException</code> must be thrown.
 	 * 
@@ -310,7 +421,8 @@ public interface Bundle {
 	 * </ul>
 	 * <b>Postconditions, no exceptions thrown </b>
 	 * <ul>
-	 * <li>Bundle persistent state is marked as stopped.
+	 * <li>Bundle autostart setting is modified unless the
+	 * {@link #STOP_TRANSIENT} option was set.
 	 * <li><code>getState()</code> not in {<code>ACTIVE</code>,
 	 * <code>STOPPING</code>}.
 	 * <li><code>BundleActivator.stop</code> has been called and did not
@@ -318,16 +430,38 @@ public interface Bundle {
 	 * </ul>
 	 * <b>Postconditions, when an exception is thrown </b>
 	 * <ul>
-	 * <li>Bundle persistent state is marked as stopped.
+	 * <li>Bundle autostart setting is modified unless the
+	 * {@link #STOP_TRANSIENT} option was set.
 	 * </ul>
 	 * 
+	 * @param options The options for stoping this bundle. See
+	 *        {@link #STOP_TRANSIENT}. The Framework must ignore unrecognized
+	 *        options.
 	 * @throws BundleException If this bundle's <code>BundleActivator</code>
-	 *         could not be loaded or threw an exception.
+	 *         threw an exception or this bundle is a fragment.
 	 * @throws java.lang.IllegalStateException If this bundle has been
 	 *         uninstalled or this bundle tries to change its own state.
 	 * @throws java.lang.SecurityException If the caller does not have the
-	 *         appropriate <code>AdminPermission[this,EXECUTE]</code>, and the
-	 *         Java Runtime Environment supports permissions.
+	 *         appropriate <code>AdminPermission[this,EXECUTE]</code>, and
+	 *         the Java Runtime Environment supports permissions.
+	 * @since 1.4
+	 */
+	public void stop(int options) throws BundleException;
+
+	/**
+	 * Stops this bundle with no options.
+	 * 
+	 * <p>
+	 * This method calls <code>stop(0)</code>.
+	 * 
+	 * @throws BundleException If this bundle's <code>BundleActivator</code>
+	 *         threw an exception or this bundle is a fragment.
+	 * @throws java.lang.IllegalStateException If this bundle has been
+	 *         uninstalled or this bundle tries to change its own state.
+	 * @throws java.lang.SecurityException If the caller does not have the
+	 *         appropriate <code>AdminPermission[this,EXECUTE]</code>, and
+	 *         the Java Runtime Environment supports permissions.
+	 * @see #start(int)
 	 */
 	public void stop() throws BundleException;
 
@@ -339,10 +473,10 @@ public interface Bundle {
 	 * before the update and started after the update successfully completes.
 	 * 
 	 * <p>
-	 * If the bundle being updated has exported any packages, these packages
-	 * must not be updated. Instead, the previous package version must remain
-	 * exported until the <code>PackageAdmin.refreshPackages</code> method has
-	 * been has been called or the Framework is relaunched.
+	 * If this bundle has exported any packages, these packages must not be
+	 * updated. Instead, the previous package version must remain exported until
+	 * the <code>PackageAdmin.refreshPackages</code> method has been has been
+	 * called or the Framework is relaunched.
 	 * 
 	 * <p>
 	 * The following steps are required to update a bundle:
@@ -351,15 +485,15 @@ public interface Bundle {
 	 * <code>IllegalStateException</code> is thrown.
 	 * 
 	 * <li>If this bundle's state is <code>ACTIVE</code>,
-	 * <code>STARTING</code> or <code>STOPPING</code>, the bundle is
+	 * <code>STARTING</code> or <code>STOPPING</code>, this bundle is
 	 * stopped as described in the <code>Bundle.stop</code> method. If
 	 * <code>Bundle.stop</code> throws an exception, the exception is rethrown
 	 * terminating the update.
 	 * 
 	 * <li>The download location of the new version of this bundle is
-	 * determined from either the bundle's
+	 * determined from either this bundle's
 	 * {@link Constants#BUNDLE_UPDATELOCATION} Manifest header (if available) or
-	 * the bundle's original location.
+	 * this bundle's original location.
 	 * 
 	 * <li>The location is interpreted in an implementation dependent manner,
 	 * typically as a URL, and the new version of this bundle is obtained from
@@ -370,7 +504,7 @@ public interface Bundle {
 	 * this bundle must be restored and a <code>BundleException</code> must be
 	 * thrown after completion of the remaining steps.
 	 * 
-	 * <li>If the bundle has declared an Bundle-RequiredExecutionEnvironment
+	 * <li>If this bundle has declared an Bundle-RequiredExecutionEnvironment
 	 * header, then the listed execution environments must be verified against
 	 * the installed execution environments. If they do not all match, the
 	 * original version of this bundle must be restored and a
@@ -410,9 +544,9 @@ public interface Bundle {
 	 * @throws java.lang.IllegalStateException If this bundle has been
 	 *         uninstalled or this bundle tries to change its own state.
 	 * @throws java.lang.SecurityException If the caller does not have the
-	 *         appropriate <code>AdminPermission[this,LIFECYCLE]</code> for both
-	 *         the current bundle and the updated bundle, and the Java Runtime
-	 *         Environment supports permissions.
+	 *         appropriate <code>AdminPermission[this,LIFECYCLE]</code> for
+	 *         both the current bundle and the updated bundle, and the Java
+	 *         Runtime Environment supports permissions.
 	 * @see #stop()
 	 * @see #start()
 	 */
@@ -423,8 +557,8 @@ public interface Bundle {
 	 * 
 	 * <p>
 	 * This method performs all the steps listed in <code>Bundle.update()</code>,
-	 * except the bundle must be read from the supplied <code>InputStream</code>,
-	 * rather than a <code>URL</code>.
+	 * except the new version of this bundle must be read from the supplied
+	 * <code>InputStream</code>, rather than a <code>URL</code>.
 	 * <p>
 	 * This method must always close the <code>InputStream</code> when it is
 	 * done, even if an exception is thrown.
@@ -436,9 +570,9 @@ public interface Bundle {
 	 * @throws java.lang.IllegalStateException If this bundle has been
 	 *         uninstalled or this bundle tries to change its own state.
 	 * @throws java.lang.SecurityException If the caller does not have the
-	 *         appropriate <code>AdminPermission[this,LIFECYCLE]</code> for both
-	 *         the current bundle and the updated bundle, and the Java Runtime
-	 *         Environment supports permissions.
+	 *         appropriate <code>AdminPermission[this,LIFECYCLE]</code> for
+	 *         both the current bundle and the updated bundle, and the Java
+	 *         Runtime Environment supports permissions.
 	 * @see #update()
 	 */
 	public void update(InputStream in) throws BundleException;
@@ -494,21 +628,21 @@ public interface Bundle {
 	 * </ul>
 	 * 
 	 * @throws BundleException If the uninstall failed. This can occur if
-	 *         another thread is attempting to change the bundle's state and
+	 *         another thread is attempting to change this bundle's state and
 	 *         does not complete in a timely manner.
 	 * @throws java.lang.IllegalStateException If this bundle has been
 	 *         uninstalled or this bundle tries to change its own state.
 	 * @throws java.lang.SecurityException If the caller does not have the
-	 *         appropriate <code>AdminPermission[this,LIFECYCLE]</code>, and the
-	 *         Java Runtime Environment supports permissions.
+	 *         appropriate <code>AdminPermission[this,LIFECYCLE]</code>, and
+	 *         the Java Runtime Environment supports permissions.
 	 * @see #stop()
 	 */
 	public void uninstall() throws BundleException;
 
 	/**
 	 * Returns this bundle's Manifest headers and values. This method returns
-	 * all the Manifest headers and values from the main section of the bundle's
-	 * Manifest file; that is, all lines prior to the first blank line.
+	 * all the Manifest headers and values from the main section of this
+	 * bundle's Manifest file; that is, all lines prior to the first blank line.
 	 * 
 	 * <p>
 	 * Manifest header names are case-insensitive. The methods of the returned
@@ -523,12 +657,12 @@ public interface Bundle {
 	 * they are present in the Manifest file:
 	 * 
 	 * <pre>
-	 *          Bundle-Name
-	 *          Bundle-Vendor
-	 *          Bundle-Version
-	 *          Bundle-Description
-	 *          Bundle-DocURL
-	 *          Bundle-ContactAddress
+	 *     Bundle-Name
+	 *     Bundle-Vendor
+	 *     Bundle-Version
+	 *     Bundle-Description
+	 *     Bundle-DocURL
+	 *     Bundle-ContactAddress
 	 * </pre>
 	 * 
 	 * <p>
@@ -539,28 +673,27 @@ public interface Bundle {
 	 *         Manifest headers and values.
 	 * 
 	 * @throws java.lang.SecurityException If the caller does not have the
-	 *         appropriate <code>AdminPermission[this,METADATA]</code>, and the
-	 *         Java Runtime Environment supports permissions.
+	 *         appropriate <code>AdminPermission[this,METADATA]</code>, and
+	 *         the Java Runtime Environment supports permissions.
 	 * 
 	 * @see Constants#BUNDLE_LOCALIZATION
 	 */
 	public Dictionary getHeaders();
 
-	public BundleContext getBundleContext();
-
 	/**
-	 * Returns this bundle's identifier. The bundle is assigned a unique
-	 * identifier by the Framework when it is installed in the OSGi environment.
+	 * Returns this bundle's unique identifier. This bundle is assigned a unique
+	 * identifier by the Framework when it was installed in the OSGi
+	 * environment.
 	 * 
 	 * <p>
 	 * A bundle's unique identifier has the following attributes:
 	 * <ul>
 	 * <li>Is unique and persistent.
 	 * <li>Is a <code>long</code>.
-	 * <li>Its value is not reused for another bundle, even after the bundle is
+	 * <li>Its value is not reused for another bundle, even after a bundle is
 	 * uninstalled.
-	 * <li>Does not change while the bundle remains installed.
-	 * <li>Does not change when the bundle is updated.
+	 * <li>Does not change while a bundle remains installed.
+	 * <li>Does not change when a bundle is updated.
 	 * </ul>
 	 * 
 	 * <p>
@@ -575,10 +708,10 @@ public interface Bundle {
 	 * Returns this bundle's location identifier.
 	 * 
 	 * <p>
-	 * The bundle location identifier is the location passed to
+	 * The location identifier is the location passed to
 	 * <code>BundleContext.installBundle</code> when a bundle is installed.
-	 * The bundle location identifier does not change while the bundle remains
-	 * installed, even if the bundle is updated.
+	 * The location identifier does not change while this bundle remains
+	 * installed, even if this bundle is updated.
 	 * 
 	 * <p>
 	 * This method must continue to return this bundle's location identifier
@@ -586,8 +719,8 @@ public interface Bundle {
 	 * 
 	 * @return The string representation of this bundle's location identifier.
 	 * @throws java.lang.SecurityException If the caller does not have the
-	 *         appropriate <code>AdminPermission[this,METADATA]</code>, and the
-	 *         Java Runtime Environment supports permissions.
+	 *         appropriate <code>AdminPermission[this,METADATA]</code>, and
+	 *         the Java Runtime Environment supports permissions.
 	 */
 	public String getLocation();
 
@@ -677,13 +810,13 @@ public interface Bundle {
 	/**
 	 * Find the specified resource from this bundle.
 	 * 
-	 * This bundle's class loader is called to search for the specified resource. 
-	 * If this bundle's state is <code>INSTALLED</code>, this method must
-	 * attempt to resolve the bundle before attempting to get the specified resource.
-	 * If this bundle cannot be resolved, then only this bundle
-	 * must be searched for the specified resource. Imported packages cannot be
-	 * searched when a bundle has not been resolved. If this bundle is a
-	 * fragment bundle then <code>null</code> is returned.
+	 * This bundle's class loader is called to search for the specified
+	 * resource. If this bundle's state is <code>INSTALLED</code>, this
+	 * method must attempt to resolve this bundle before attempting to get the
+	 * specified resource. If this bundle cannot be resolved, then only this
+	 * bundle must be searched for the specified resource. Imported packages
+	 * cannot be searched when this bundle has not been resolved. If this bundle
+	 * is a fragment bundle then <code>null</code> is returned.
 	 * 
 	 * @param name The name of the resource. See
 	 *        <code>java.lang.ClassLoader.getResource</code> for a description
@@ -691,8 +824,8 @@ public interface Bundle {
 	 * @return A URL to the named resource, or <code>null</code> if the
 	 *         resource could not be found or if this bundle is a fragment
 	 *         bundle or if the caller does not have the appropriate
-	 *         <code>AdminPermission[this,RESOURCE]</code>, and the Java Runtime
-	 *         Environment supports permissions.
+	 *         <code>AdminPermission[this,RESOURCE]</code>, and the Java
+	 *         Runtime Environment supports permissions.
 	 * 
 	 * @since 1.1
 	 * @throws java.lang.IllegalStateException If this bundle has been
@@ -711,10 +844,12 @@ public interface Bundle {
 	 * <code>Bundle.getHeaders()</code> except the manifest header values are
 	 * localized to the specified locale.
 	 * 
-	 * <p>If a Manifest header value starts with &quot;%&quot;, it must be
+	 * <p>
+	 * If a Manifest header value starts with &quot;%&quot;, it must be
 	 * localized according to the specified locale. If a locale is specified and
 	 * cannot be found, then the header values must be returned using the
 	 * default locale. Localizations are searched for in the following order:
+	 * 
 	 * <pre>
 	 *   bn + "_" + Ls + "_" + Cs + "_" + Vs
      *   bn + "_" + Ls + "_" + Cs
@@ -722,12 +857,14 @@ public interface Bundle {
      *   bn + "_" + Ld + "_" + Cd + "_" + Vd
      *   bn + "_" + Ld + "_" + Cd
      *   bn + "_" + Ld
-     *   bn
+	 *     bn
 	 * </pre>
-	 * Where <code>bn</code> is the bundle localization basename, <code>Ls</code>,
-	 * <code>Cs</code> and <code>Vs</code> are the specified locale (language, 
-	 * country, variant) and <code>Ld</code>, <code>Cd</code> and <code>Vd</code>
-	 * are the default locale (language, country, variant).
+	 * 
+	 * Where <code>bn</code> is this bundle's localization basename,
+	 * <code>Ls</code>, <code>Cs</code> and <code>Vs</code> are the
+	 * specified locale (language, country, variant) and <code>Ld</code>,
+	 * <code>Cd</code> and <code>Vd</code> are the default locale (language,
+	 * country, variant).
 	 * 
 	 * If <code>null</code> is specified as the locale string, the header
 	 * values must be localized using the default locale. If the empty string
@@ -751,8 +888,8 @@ public interface Bundle {
 	 *         Manifest headers and values.
 	 * 
 	 * @throws java.lang.SecurityException If the caller does not have the
-	 *         appropriate <code>AdminPermission[this,METADATA]</code>, and the
-	 *         Java Runtime Environment supports permissions.
+	 *         appropriate <code>AdminPermission[this,METADATA]</code>, and
+	 *         the Java Runtime Environment supports permissions.
 	 * 
 	 * @see #getHeaders()
 	 * @see Constants#BUNDLE_LOCALIZATION
@@ -764,8 +901,8 @@ public interface Bundle {
 	 * Returns the symbolic name of this bundle as specified by its
 	 * <code>Bundle-SymbolicName</code> manifest header. The name must be
 	 * unique, it is recommended to use a reverse domain name naming convention
-	 * like that used for java packages. If the bundle does not have a specified
-	 * symbolic name then <code>null</code> is returned.
+	 * like that used for java packages. If this bundle does not have a
+	 * specified symbolic name then <code>null</code> is returned.
 	 * 
 	 * <p>
 	 * This method must continue to return this bundle's symbolic name while
@@ -777,21 +914,20 @@ public interface Bundle {
 	public String getSymbolicName();
 
 	/**
-	 * 
 	 * Loads the specified class using this bundle's classloader.
 	 * 
 	 * <p>
-	 * If the bundle is a fragment bundle then this method must throw a
+	 * If this bundle is a fragment bundle then this method must throw a
 	 * <code>ClassNotFoundException</code>.
 	 * 
 	 * <p>
 	 * If this bundle's state is <code>INSTALLED</code>, this method must
-	 * attempt to resolve the bundle before attempting to load the class.
+	 * attempt to resolve this bundle before attempting to load the class.
 	 * 
 	 * <p>
-	 * If the bundle cannot be resolved, a Framework event of type
+	 * If this bundle cannot be resolved, a Framework event of type
 	 * {@link FrameworkEvent#ERROR} is fired containing a
-	 * <code>BundleException</code> with details of the reason the bundle
+	 * <code>BundleException</code> with details of the reason this bundle
 	 * could not be resolved. This method must then throw a
 	 * <code>ClassNotFoundException</code>.
 	 * 
@@ -803,8 +939,8 @@ public interface Bundle {
 	 * @return The Class object for the requested class.
 	 * @throws java.lang.ClassNotFoundException If no such class can be found or
 	 *         if this bundle is a fragment bundle or if the caller does not
-	 *         have the appropriate <code>AdminPermission[this,CLASS]</code>, and
-	 *         the Java Runtime Environment supports permissions.
+	 *         have the appropriate <code>AdminPermission[this,CLASS]</code>,
+	 *         and the Java Runtime Environment supports permissions.
 	 * @throws java.lang.IllegalStateException If this bundle has been
 	 *         uninstalled.
 	 * @since 1.3
@@ -814,13 +950,13 @@ public interface Bundle {
 	/**
 	 * Find the specified resources from this bundle.
 	 * 
-	 * This bundle's class loader is called to search for the specified resources. 
-	 * If this bundle's state is <code>INSTALLED</code>, this method must
-	 * attempt to resolve the bundle before attempting to get the specified resources.
-	 * If this bundle cannot be resolved, then only this bundle
-	 * must be searched for the specified resources. Imported packages cannot be
-	 * searched when a bundle has not been resolved. If this bundle is a
-	 * fragment bundle then <code>null</code> is returned.
+	 * This bundle's class loader is called to search for the specified
+	 * resources. If this bundle's state is <code>INSTALLED</code>, this
+	 * method must attempt to resolve this bundle before attempting to get the
+	 * specified resources. If this bundle cannot be resolved, then only this
+	 * bundle must be searched for the specified resources. Imported packages
+	 * cannot be searched when a bundle has not been resolved. If this bundle is
+	 * a fragment bundle then <code>null</code> is returned.
 	 * 
 	 * @param name The name of the resource. See
 	 *        <code>java.lang.ClassLoader.getResources</code> for a
@@ -828,8 +964,8 @@ public interface Bundle {
 	 * @return An enumeration of URLs to the named resources, or
 	 *         <code>null</code> if the resource could not be found or if this
 	 *         bundle is a fragment bundle or if the caller does not have the
-	 *         appropriate <code>AdminPermission[this,RESOURCE]</code>, and the
-	 *         Java Runtime Environment supports permissions.
+	 *         appropriate <code>AdminPermission[this,RESOURCE]</code>, and
+	 *         the Java Runtime Environment supports permissions.
 	 * 
 	 * @since 1.3
 	 * @throws java.lang.IllegalStateException If this bundle has been
@@ -840,21 +976,24 @@ public interface Bundle {
 
 	/**
 	 * Returns an Enumeration of all the paths (<code>String</code> objects)
-	 * to entries within the bundle whose longest sub-path matches the supplied
-	 * path argument. The bundle's classloader is not used to search for
-	 * entries. Only the contents of the bundle is searched. A specified path of
-	 * &quot;/&quot; indicates the root of the bundle.
-	 * 
+	 * to entries within this bundle whose longest sub-path matches the
+	 * specified path. This bundle's classloader is not used to search for
+	 * entries. Only the contents of this bundle are searched.
+	 * <p>
+	 * The specified path is always relative to the root of this bundle and may
+	 * begin with a &quot;/&quot;. A path value of &quot;/&quot; indicates the
+	 * root of this bundle.
 	 * <p>
 	 * Returned paths indicating subdirectory paths end with a &quot;/&quot;.
-	 * The returned paths are all relative to the root of the bundle.
+	 * The returned paths are all relative to the root of this bundle and must
+	 * not begin with &quot;/&quot;.
 	 * 
 	 * @param path The path name for which to return entry paths.
 	 * @return An Enumeration of the entry paths (<code>String</code>
 	 *         objects) or <code>null</code> if no entry could be found or if
 	 *         the caller does not have the appropriate
-	 *         <code>AdminPermission[this,RESOURCE]</code> and the Java Runtime
-	 *         Environment supports permissions.
+	 *         <code>AdminPermission[this,RESOURCE]</code> and the Java
+	 *         Runtime Environment supports permissions.
 	 * @throws java.lang.IllegalStateException If this bundle has been
 	 *         uninstalled.
 	 * @since 1.3
@@ -862,24 +1001,25 @@ public interface Bundle {
 	public Enumeration getEntryPaths(String path);
 
 	/**
-	 * Returns a URL to the specified entry in this bundle. The bundle's
-	 * classloader is not used to search for the specified entry. Only the
-	 * contents of the bundle is searched for the specified entry. A specified
-	 * path of &quot;/&quot; indicates the root of the bundle.
+	 * Returns a URL to the entry at the specified path in this bundle. This
+	 * bundle's classloader is not used to search for the entry. Only the
+	 * contents of this bundle are searched for the entry.
+	 * <p>
+	 * The specified path is always relative to the root of this bundle and may
+	 * begin with &quot;/&quot;. A path value of &quot;/&quot; indicates the
+	 * root of this bundle.
 	 * 
-	 * @param name The name of the entry. See
-	 *        <code>java.lang.ClassLoader.getResource</code> for a description
-	 *        of the format of a resource name.
-	 * @return A URL to the specified entry, or <code>null</code> if no entry
-	 *         could be found or if the caller does not have the appropriate
-	 *         <code>AdminPermission[this,RESOURCE]</code> and the Java Runtime
-	 *         Environment supports permissions.
+	 * @param path The path name of the entry.
+	 * @return A URL to the entry, or <code>null</code> if no entry could be
+	 *         found or if the caller does not have the appropriate
+	 *         <code>AdminPermission[this,RESOURCE]</code> and the Java
+	 *         Runtime Environment supports permissions.
 	 * 
 	 * @throws java.lang.IllegalStateException If this bundle has been
 	 *         uninstalled.
 	 * @since 1.3
 	 */
-	public URL getEntry(String name);
+	public URL getEntry(String path);
 
 	/**
 	 * Returns the time when this bundle was last modified. A bundle is
@@ -895,12 +1035,12 @@ public interface Bundle {
 	public long getLastModified();
 
 	/**
-	 * Returns entries in this bundle and its attached fragments. The bundle's
-	 * classloader is not used to search for entries. Only the contents of the
+	 * Returns entries in this bundle and its attached fragments. This bundle's
+	 * classloader is not used to search for entries. Only the contents of this
 	 * bundle and its attached fragments are searched for the specified entries.
 	 * 
 	 * If this bundle's state is <code>INSTALLED</code>, this method must
-	 * attempt to resolve the bundle before attempting to find entries.
+	 * attempt to resolve this bundle before attempting to find entries.
 	 * 
 	 * <p>
 	 * This method is intended to be used to obtain configuration, setup,
@@ -931,9 +1071,9 @@ public interface Bundle {
 	 * 	return (URL) e.nextElement();
 	 * </pre>
 	 * 
-	 * @param path The path name in which to look. A specified path of
-	 *        &quot;/&quot; indicates the root of the bundle. Path is relative
-	 *        to the root of the bundle and must not be null.
+	 * @param path The path name in which to look. The path is always relative
+	 *        to the root of this bundle and may begin with &quot;/&quot;. A
+	 *        path value of &quot;/&quot; indicates the root of this bundle.
 	 * @param filePattern The file name pattern for selecting entries in the
 	 *        specified path. The pattern is only matched against the last
 	 *        element of the entry path and it supports substring matching, as
@@ -941,18 +1081,40 @@ public interface Bundle {
 	 *        character (&quot;*&quot;). If null is specified, this is
 	 *        equivalent to &quot;*&quot; and matches all files.
 	 * @param recurse If <code>true</code>, recurse into subdirectories.
-	 *        Otherwise only return entries from the given directory.
+	 *        Otherwise only return entries from the specified path.
 	 * @return An enumeration of URL objects for each matching entry, or
 	 *         <code>null</code> if an entry could not be found or if the
 	 *         caller does not have the appropriate
-	 *         <code>AdminPermission[this,RESOURCE]</code>, and the Java Runtime
-	 *         Environment supports permissions. The URLs are sorted such that
-	 *         entries from this bundle are returned first followed by the
-	 *         entries from attached fragments in ascending bundle id order. If
-	 *         this bundle is a fragment, then only matching entries in this
+	 *         <code>AdminPermission[this,RESOURCE]</code>, and the Java
+	 *         Runtime Environment supports permissions. The URLs are sorted
+	 *         such that entries from this bundle are returned first followed by
+	 *         the entries from attached fragments in ascending bundle id order.
+	 *         If this bundle is a fragment, then only matching entries in this
 	 *         fragment are returned.
 	 * @since 1.3
 	 */
 	public Enumeration findEntries(String path, String filePattern,
 			boolean recurse);
+
+	/**
+	 * Returns this bundle's {@link BundleContext}. The returned
+	 * <code>BundleContext</code> can be used by the caller to act on behalf
+	 * of this bundle.
+	 * 
+	 * <p>
+	 * If this bundle is not in the {@link #STARTING}, {@link #ACTIVE}, or
+	 * {@link #STOPPING} states or this bundle is a fragment bundle, then this
+	 * bundle has no valid <code>BundleContext</code>. This method will
+	 * return <code>null</code> if this bundle has no valid
+	 * <code>BundleContext</code>.
+	 * 
+	 * @return A <code>BundleContext</code> for this bundle or
+	 *         <code>null</code> if this bundle has no valid
+	 *         <code>BundleContext</code>.
+	 * @throws java.lang.SecurityException If the caller does not have the
+	 *         appropriate <code>AdminPermission[this,CONTEXT]</code>, and
+	 *         the Java Runtime Environment supports permissions.
+	 * @since 1.4
+	 */
+	public BundleContext getBundleContext();
 }

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceFactory.java,v 1.9 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceFactory.java,v 1.10 2007/02/20 00:16:30 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ package org.osgi.framework;
  * <code>BundleContext.getService(ServiceReference)</code> method calls the
  * <code>ServiceFactory.getService</code> method to create a service object
  * specifically for the requesting bundle. The service object returned by the
- * <code>ServiceFactory</code> object is cached by the Framework until the
- * bundle releases its use of the service.
+ * <code>ServiceFactory</code> is cached by the Framework until the bundle
+ * releases its use of the service.
  * 
  * <p>
  * When the bundle's use count for the service equals zero (including the bundle
@@ -43,10 +43,12 @@ package org.osgi.framework;
  * 
  * <p>
  * <code>ServiceFactory</code> objects are only used by the Framework and are
- * not made available to other bundles in the OSGi environment.
+ * not made available to other bundles in the OSGi environment. The Framework
+ * may concurrently call a <code>ServiceFactory</code>.
  * 
- * @version $Revision: 1.9 $
  * @see BundleContext#getService
+ * @ThreadSafe
+ * @version $Revision: 1.10 $
  */
 
 public interface ServiceFactory {
@@ -77,8 +79,7 @@ public interface ServiceFactory {
 	 *         all the classes named when the service was registered.
 	 * @see BundleContext#getService
 	 */
-	public Object getService(Bundle bundle,
-			ServiceRegistration registration);
+	public Object getService(Bundle bundle, ServiceRegistration registration);
 
 	/**
 	 * Releases a service object.
@@ -94,6 +95,6 @@ public interface ServiceFactory {
 	 *        <code>ServiceFactory.getService</code> method.
 	 * @see BundleContext#ungetService
 	 */
-	public void ungetService(Bundle bundle,
-			ServiceRegistration registration, Object service);
+	public void ungetService(Bundle bundle, ServiceRegistration registration,
+			Object service);
 }

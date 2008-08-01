@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceEvent.java,v 1.14 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceEvent.java,v 1.15 2007/02/20 00:14:12 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,29 +23,31 @@ import java.util.EventObject;
 /**
  * An event from the Framework describing a service lifecycle change.
  * <p>
- * <code>ServiceEvent</code> objects are delivered to a
- * <code>ServiceListener</code> objects when a change occurs in this service's
- * lifecycle. A type code is used to identify the event type for future
- * extendability.
+ * <code>ServiceEvent</code> objects are delivered to
+ * <code>ServiceListener</code>s and <code>AllServiceListener</code>s when
+ * a change occurs in this service's lifecycle. A type code is used to identify
+ * the event type for future extendability.
  * 
  * <p>
  * OSGi Alliance reserves the right to extend the set of types.
  * 
- * @version $Revision: 1.14 $
+ * @Immutable
  * @see ServiceListener
+ * @see AllServiceListener
+ * @version $Revision: 1.15 $
  */
 
 public class ServiceEvent extends EventObject {
-	static final long			serialVersionUID	= 8792901483909409299L;
+	static final long				serialVersionUID	= 8792901483909409299L;
 	/**
 	 * Reference to the service that had a change occur in its lifecycle.
 	 */
-	private ServiceReference	reference;
+	private final ServiceReference	reference;
 
 	/**
 	 * Type of service lifecycle change.
 	 */
-	private int					type;
+	private final int				type;
 
 	/**
 	 * This service has been registered.
@@ -58,7 +60,7 @@ public class ServiceEvent extends EventObject {
 	 * 
 	 * @see BundleContext#registerService(String[],Object,java.util.Dictionary)
 	 */
-	public final static int		REGISTERED			= 0x00000001;
+	public final static int			REGISTERED			= 0x00000001;
 
 	/**
 	 * The properties of a registered service have been modified.
@@ -71,7 +73,7 @@ public class ServiceEvent extends EventObject {
 	 * 
 	 * @see ServiceRegistration#setProperties
 	 */
-	public final static int		MODIFIED			= 0x00000002;
+	public final static int			MODIFIED			= 0x00000002;
 
 	/**
 	 * This service is in the process of being unregistered.
@@ -92,7 +94,7 @@ public class ServiceEvent extends EventObject {
 	 * @see ServiceRegistration#unregister
 	 * @see BundleContext#ungetService
 	 */
-	public final static int		UNREGISTERING		= 0x00000004;
+	public final static int			UNREGISTERING		= 0x00000004;
 
 	/**
 	 * Creates a new service event object.

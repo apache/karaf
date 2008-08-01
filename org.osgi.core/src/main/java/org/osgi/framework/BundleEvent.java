@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleEvent.java,v 1.15 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleEvent.java,v 1.19 2007/02/20 00:14:12 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,17 @@ import java.util.EventObject;
  * An event from the Framework describing a bundle lifecycle change.
  * <p>
  * <code>BundleEvent</code> objects are delivered to
- * <code>BundleListener</code> objects when a change occurs in a bundle's
- * lifecycle. A type code is used to identify the event type for future
- * extendability.
+ * <code>SynchronousBundleListener</code>s and <code>BundleListener</code>s
+ * when a change occurs in a bundle's lifecycle. A type code is used to identify
+ * the event type for future extendability.
  * 
  * <p>
  * OSGi Alliance reserves the right to extend the set of types.
  * 
- * @version $Revision: 1.15 $
+ * @Immutable
+ * @see BundleListener
+ * @see SynchronousBundleListener
+ * @version $Revision: 1.19 $
  */
 
 public class BundleEvent extends EventObject {
@@ -39,12 +42,12 @@ public class BundleEvent extends EventObject {
 	/**
 	 * Bundle that had a change occur in its lifecycle.
 	 */
-	private Bundle			bundle;
+	private final Bundle	bundle;
 
 	/**
 	 * Type of bundle lifecycle change.
 	 */
-	private int				type;
+	private final int		type;
 
 	/**
 	 * The bundle has been installed.
@@ -58,18 +61,26 @@ public class BundleEvent extends EventObject {
 	/**
 	 * The bundle has been started.
 	 * <p>
+	 * The bundle's
+	 * {@link BundleActivator#start(BundleContext) BundleActivator start} method
+	 * has been executed if the bundle has a bundle activator class.
+	 * <p>
 	 * The value of <code>STARTED</code> is 0x00000002.
 	 * 
-	 * @see Bundle#start
+	 * @see Bundle#start()
 	 */
 	public final static int	STARTED				= 0x00000002;
 
 	/**
 	 * The bundle has been stopped.
 	 * <p>
+	 * The bundle's
+	 * {@link BundleActivator#stop(BundleContext) BundleActivator stop} method
+	 * has been executed if the bundle has a bundle activator class.
+	 * <p>
 	 * The value of <code>STOPPED</code> is 0x00000004.
 	 * 
-	 * @see Bundle#stop
+	 * @see Bundle#stop()
 	 */
 	public final static int	STOPPED				= 0x00000004;
 
@@ -112,7 +123,13 @@ public class BundleEvent extends EventObject {
 	public final static int	UNRESOLVED			= 0x00000040;
 
 	/**
-	 * The bundle is about to start.
+	 * The bundle is about to be activated.
+	 * <p>
+	 * The bundle's
+	 * {@link BundleActivator#start(BundleContext) BundleActivator start} method
+	 * is about to be called if the bundle has a bundle activator class. This
+	 * event is only delivered to {@link SynchronousBundleListener}s. It is not
+	 * delivered to <code>BundleListener</code>s.
 	 * <p>
 	 * The value of <code>STARTING</code> is 0x00000080.
 	 * 
@@ -122,7 +139,13 @@ public class BundleEvent extends EventObject {
 	public final static int	STARTING			= 0x00000080;
 
 	/**
-	 * The bundle is about to stop.
+	 * The bundle is about to deactivated.
+	 * <p>
+	 * The bundle's
+	 * {@link BundleActivator#stop(BundleContext) BundleActivator stop} method
+	 * is about to be called if the bundle has a bundle activator class. This
+	 * event is only delivered to {@link SynchronousBundleListener}s. It is not
+	 * delivered to <code>BundleListener</code>s.
 	 * <p>
 	 * The value of <code>STOPPING</code> is 0x00000100.
 	 * 
@@ -130,6 +153,22 @@ public class BundleEvent extends EventObject {
 	 * @since 1.3
 	 */
 	public final static int	STOPPING			= 0x00000100;
+
+	/**
+	 * The bundle will be lazily activated.
+	 * <p>
+	 * The bundle has a {@link Constants#ACTIVATION_LAZY lazy activation policy}
+	 * and is waiting to be activated. It is now in the
+	 * {@link Bundle#STARTING STARTING} state and has a valid
+	 * <code>BundleContext</code>. This event is only delivered to
+	 * {@link SynchronousBundleListener}s. It is not delivered to
+	 * <code>BundleListener</code>s.
+	 * <p>
+	 * The value of <code>LAZY_ACTIVATION</code> is 0x00000200.
+	 * 
+	 * @since 1.4
+	 */
+	public final static int	LAZY_ACTIVATION		= 0x00000200;
 
 	/**
 	 * Creates a bundle event of the specified type.
@@ -159,6 +198,7 @@ public class BundleEvent extends EventObject {
 	 * <ul>
 	 * <li>{@link #INSTALLED}
 	 * <li>{@link #RESOLVED}
+	 * <li>{@link #LAZY_ACTIVATION}
 	 * <li>{@link #STARTING}
 	 * <li>{@link #STARTED}
 	 * <li>{@link #STOPPING}

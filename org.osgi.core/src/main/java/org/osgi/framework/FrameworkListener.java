@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkListener.java,v 1.10 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkListener.java,v 1.12 2007/02/21 16:49:05 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,23 @@ package org.osgi.framework;
 import java.util.EventListener;
 
 /**
- * A <code>FrameworkEvent</code> listener. When a <code>FrameworkEvent</code> is
- * fired, it is asynchronously delivered to a <code>FrameworkListener</code>.
+ * A <code>FrameworkEvent</code> listener. <code>FrameworkListener</code> is
+ * a listener interface that may be implemented by a bundle developer. When a
+ * <code>FrameworkEvent</code> is fired, it is asynchronously delivered to a
+ * <code>FrameworkListener</code>. The Framework delivers
+ * <code>FrameworkEvent</code> objects to a <code>FrameworkListener</code>
+ * in order and must not concurrently call a <code>FrameworkListener</code>.
  * 
  * <p>
- * <code>FrameworkListener</code> is a listener interface that may be
- * implemented by a bundle developer. A <code>FrameworkListener</code> object
- * is registered with the Framework using the
- * {@link BundleContext#addFrameworkListener} method.
+ * A <code>FrameworkListener</code> object is registered with the Framework
+ * using the {@link BundleContext#addFrameworkListener} method.
  * <code>FrameworkListener</code> objects are called with a
  * <code>FrameworkEvent</code> objects when the Framework starts and when
  * asynchronous errors occur.
  * 
- * @version $Revision: 1.10 $
  * @see FrameworkEvent
+ * @NotThreadSafe
+ * @version $Revision: 1.12 $
  */
 
 public interface FrameworkListener extends EventListener {

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkUtil.java,v 1.6 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkUtil.java,v 1.10 2007/02/21 16:49:05 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,9 @@ import java.security.PrivilegedAction;
  * This class contains utility methods which access Framework functions that may
  * be useful to bundles.
  * 
- * @version $Revision: 1.6 $
  * @since 1.3
+ * @ThreadSafe
+ * @version $Revision: 1.10 $
  */
 public class FrameworkUtil {
 	/*
@@ -45,50 +46,55 @@ public class FrameworkUtil {
 	 * instance of the vendor FrameworkUtil class will be created and this class
 	 * will delegate method calls to the vendor FrameworkUtil instance.
 	 */
-	private static final String	packageProperty	= "org.osgi.vendor.framework";
 
-	/*
-	 * This is the delegate method used by createFilter.
-	 */
-	private final static Method	createFilter;
+	private static class ImplHolder implements PrivilegedAction {
+		private static final String	packageProperty	= "org.osgi.vendor.framework";
+		
+		/*
+		 * This is the delegate method used by createFilter.
+		 */
+		static final Method	createFilter;
+		
+		static {
+			createFilter = (Method) AccessController.doPrivileged(new ImplHolder());
+		}
+		
+		private ImplHolder() {
+		}
 
-	static {
-		createFilter = (Method) AccessController
-				.doPrivileged(new PrivilegedAction() {
-					public Object run() {
-						String packageName = System
-								.getProperty(packageProperty);
-						if (packageName == null) {
-							throw new NoClassDefFoundError(packageProperty
-									+ " property not set");
-						}
-
-						Class delegateClass;
-						try {
-							delegateClass = Class.forName(packageName
-									+ ".FrameworkUtil");
-						}
-						catch (ClassNotFoundException e) {
-							throw new NoClassDefFoundError(e.toString());
-						}
-
-						Method result;
-						try {
-							result = delegateClass.getMethod("createFilter",
-									new Class[] {String.class});
-						}
-						catch (NoSuchMethodException e) {
-							throw new NoSuchMethodError(e.toString());
-						}
-
-						if (!Modifier.isStatic(result.getModifiers())) {
-							throw new NoSuchMethodError(
-									"createFilter method must be static");
-						}
-
-						return result;
-					}
-				});
+		public Object run() {
+			String packageName = System
+			.getProperty(packageProperty);
+			if (packageName == null) {
+				throw new NoClassDefFoundError(packageProperty
+						+ " property not set");
+			}
+			
+			Class delegateClass;
+			try {
+				delegateClass = Class.forName(packageName
+						+ ".FrameworkUtil");
+			}
+			catch (ClassNotFoundException e) {
+				throw new NoClassDefFoundError(e.toString());
+			}
+			
+			Method result;
+			try {
+				result = delegateClass.getMethod("createFilter",
+						new Class[] {String.class});
+			}
+			catch (NoSuchMethodException e) {
+				throw new NoSuchMethodError(e.toString());
+			}
+			
+			if (!Modifier.isStatic(result.getModifiers())) {
+				throw new NoSuchMethodError(
+				"createFilter method must be static");
+			}
+			
+			return result;
+		}
 	}
 
 	
@@ -118,7 +124,7 @@ public class FrameworkUtil {
 			throws InvalidSyntaxException {
 		try {
 			try {
-				return (Filter) createFilter
+				return (Filter) ImplHolder.createFilter
 						.invoke(null, new Object[] {filter});
 			}
 			catch (InvocationTargetException e) {

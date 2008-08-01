@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/AdminPermission.java,v 1.29 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/AdminPermission.java,v 1.34 2007/02/21 16:49:05 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,40 +23,42 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.*;
 
 /**
- * Indicates the caller's authority to perform specific privileged
- * administrative operations on or to get sensitive information about a bundle.
- * The actions for this permission are:
+ * A bundle's authority to perform specific privileged administrative operations
+ * on or to get sensitive information about a bundle. The actions for this
+ * permission are:
  * 
  * <pre>
- *  Action               Methods
- *  class                Bundle.loadClass
- *  execute              Bundle.start
- *                       Bundle.stop
- *                       StartLevel.setBundleStartLevel
- *  extensionLifecycle   BundleContext.installBundle for extension bundles
- *                       Bundle.update for extension bundles
- *                       Bundle.uninstall for extension bundles
- *  lifecycle            BundleContext.installBundle
- *                       Bundle.update
- *                       Bundle.uninstall
- *  listener             BundleContext.addBundleListener for SynchronousBundleListener
- *                       BundleContext.removeBundleListener for SynchronousBundleListener
- *  metadata             Bundle.getHeaders
- *                       Bundle.getLocation
- *  resolve              PackageAdmin.refreshPackages
- *                       PackageAdmin.resolveBundles
- *  resource             Bundle.getResource
- *                       Bundle.getResources
- *                       Bundle.getEntry
- *                       Bundle.getEntryPaths
- *                       Bundle.findEntries
- *                       Bundle resource/entry URL creation
- *  startlevel           StartLevel.setStartLevel
- *                       StartLevel.setInitialBundleStartLevel 
+ *   Action               Methods
+ *   class                Bundle.loadClass
+ *   execute              Bundle.start
+ *                        Bundle.stop
+ *                        StartLevel.setBundleStartLevel
+ *   extensionLifecycle   BundleContext.installBundle for extension bundles
+ *                        Bundle.update for extension bundles
+ *                        Bundle.uninstall for extension bundles
+ *   lifecycle            BundleContext.installBundle
+ *                        Bundle.update
+ *                        Bundle.uninstall
+ *   listener             BundleContext.addBundleListener for SynchronousBundleListener
+ *                        BundleContext.removeBundleListener for SynchronousBundleListener
+ *   metadata             Bundle.getHeaders
+ *                        Bundle.getLocation
+ *   resolve              PackageAdmin.refreshPackages
+ *                        PackageAdmin.resolveBundles
+ *   resource             Bundle.getResource
+ *                        Bundle.getResources
+ *                        Bundle.getEntry
+ *                        Bundle.getEntryPaths
+ *                        Bundle.findEntries
+ *                        Bundle resource/entry URL creation
+ *   startlevel           StartLevel.setStartLevel
+ *                        StartLevel.setInitialBundleStartLevel 
+ *   context              Bundle.getBundleContext                     
+ *                        
  * </pre>
  * 
  * <p>
- * The special action "*" will represent all actions.
+ * The special action &quot;*&quot; will represent all actions.
  * <p>
  * The name of this permission is a filter expression. The filter gives access
  * to the following parameters:
@@ -69,7 +71,8 @@ import java.security.*;
  * <li>name - The symbolic name of a bundle.</li>
  * </ul>
  * 
- * @version $Revision: 1.29 $
+ * @ThreadSafe
+ * @version $Revision: 1.34 $
  */
 
 public final class AdminPermission extends BasicPermission {
@@ -122,6 +125,12 @@ public final class AdminPermission extends BasicPermission {
 	 */
 	public final static String			STARTLEVEL			= "startlevel";
 
+	/**
+	 * The action string <code>context</code> (Value is "context").
+	 * @since 1.4
+	 */
+	public final static String			CONTEXT				= "context";
+	
 	/*
 	 * NOTE: A framework implementor may also choose to replace this class in
 	 * their distribution with a class that directly interfaces with the
@@ -135,50 +144,55 @@ public final class AdminPermission extends BasicPermission {
 	 * an instance of the vendor AdminPermission class will be created and this
 	 * class will delegate method calls to the vendor AdminPermission instance.
 	 */
-	private static final String			packageProperty		= "org.osgi.vendor.framework";
-	private static final Constructor	initStringString;
-	private static final Constructor	initBundleString;
-	static {
-		Constructor[] constructors = (Constructor[]) AccessController
-				.doPrivileged(new PrivilegedAction() {
-					public Object run() {
-						String packageName = System
-								.getProperty(packageProperty);
-						if (packageName == null) {
-							throw new NoClassDefFoundError(packageProperty
-									+ " property not set");
-						}
 
-						Class delegateClass;
-						try {
-							delegateClass = Class.forName(packageName
-									+ ".AdminPermission");
-						}
-						catch (ClassNotFoundException e) {
-							throw new NoClassDefFoundError(e.toString());
-						}
+	private static class ImplHolder implements PrivilegedAction {
+		private static final String			packageProperty		= "org.osgi.vendor.framework";
+		static final Constructor	initStringString;
+		static final Constructor	initBundleString;
+		static {
+			Constructor[] constructors = (Constructor[]) AccessController.doPrivileged(new ImplHolder());
+			
+			initStringString = constructors[0];
+			initBundleString = constructors[1];
+		}
 
-						Constructor[] result = new Constructor[2];
-						try {
-							result[0] = delegateClass
-									.getConstructor(new Class[] {String.class,
-			String.class			});
-							result[1] = delegateClass
-									.getConstructor(new Class[] {Bundle.class,
-			String.class			});
-						}
-						catch (NoSuchMethodException e) {
-							throw new NoSuchMethodError(e.toString());
-						}
-
-						return result;
-					}
-				});
-
-		initStringString = constructors[0];
-		initBundleString = constructors[1];
+		private ImplHolder() {
+		}
+		
+		public Object run() {
+			String packageName = System
+			.getProperty(packageProperty);
+			if (packageName == null) {
+				throw new NoClassDefFoundError(packageProperty
+						+ " property not set");
+			}
+			
+			Class delegateClass;
+			try {
+				delegateClass = Class.forName(packageName
+						+ ".AdminPermission");
+			}
+			catch (ClassNotFoundException e) {
+				throw new NoClassDefFoundError(e.toString());
+			}
+			
+			Constructor[] result = new Constructor[2];
+			try {
+				result[0] = delegateClass
+				.getConstructor(new Class[] {String.class,
+						String.class			});
+				result[1] = delegateClass
+				.getConstructor(new Class[] {Bundle.class,
+						String.class			});
+			}
+			catch (NoSuchMethodException e) {
+				throw new NoSuchMethodError(e.toString());
+			}
+			
+			return result;
+		}
 	}
-
+	
 	/*
 	 * This is the delegate permission created by the constructor.
 	 */
@@ -218,8 +232,8 @@ public final class AdminPermission extends BasicPermission {
 	 * @param actions <code>class</code>, <code>execute</code>,
 	 *        <code>extensionLifecycle</code>, <code>lifecycle</code>,
 	 *        <code>listener</code>, <code>metadata</code>,
-	 *        <code>resolve</code>, <code>resource</code>, or
-	 *        <code>startlevel</code>. A value of "*" or <code>null</code>
+	 *        <code>resolve</code>, <code>resource</code>, 
+	 *        <code>startlevel</code> or <code>context</code>. A value of "*" or <code>null</code>
 	 *        indicates all actions
 	 */
 	public AdminPermission(String filter, String actions) {
@@ -228,7 +242,7 @@ public final class AdminPermission extends BasicPermission {
 		super(filter == null ? "*" : filter);
 		try {
 			try {
-				delegate = (Permission) initStringString
+				delegate = (Permission) ImplHolder.initStringString
 						.newInstance(new Object[] {filter, actions});
 			}
 			catch (InvocationTargetException e) {
@@ -255,14 +269,14 @@ public final class AdminPermission extends BasicPermission {
 	 *        <code>extensionLifecycle</code>, <code>lifecycle</code>,
 	 *        <code>listener</code>, <code>metadata</code>,
 	 *        <code>resolve</code>, <code>resource</code>,
-	 *        <code>startlevel</code>
+	 *        <code>startlevel</code>, <code>context</code>.
 	 * @since 1.3
 	 */
 	public AdminPermission(Bundle bundle, String actions) {
 		super(createName(bundle));
 		try {
 			try {
-				delegate = (Permission) initBundleString
+				delegate = (Permission) ImplHolder.initBundleString
 						.newInstance(new Object[] {bundle, actions});
 			}
 			catch (InvocationTargetException e) {
@@ -333,7 +347,7 @@ public final class AdminPermission extends BasicPermission {
 	 * following order: <code>class</code>, <code>execute</code>,
 	 * <code>extensionLifecycle</code>, <code>lifecycle</code>,
 	 * <code>listener</code>, <code>metadata</code>, <code>resolve</code>,
-	 * <code>resource</code>, <code>startlevel</code>.
+	 * <code>resource</code>, <code>startlevel</code>, <code>context</code>.
 	 * 
 	 * @return Canonical string representation of the
 	 *         <code>AdminPermission</code> actions.

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkEvent.java,v 1.14 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkEvent.java,v 1.15 2007/02/20 00:14:12 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,17 @@ import java.util.EventObject;
  * A general event from the Framework.
  * 
  * <p>
- * <code>FrameworkEvent</code> is the event class used when notifying
- * listeners of general events occuring within the OSGI environment. A type code
- * is used to identify the event type for future extendability.
+ * <code>FrameworkEvent</code> objects are delivered to
+ * <code>FrameworkListener</code>s when a general event occurs within the
+ * OSGi environment. A type code is used to identify the event type for future
+ * extendability.
  * 
  * <p>
  * OSGi Alliance reserves the right to extend the set of event types.
  * 
- * @version $Revision: 1.14 $
+ * @Immutable
+ * @see FrameworkListener
+ * @version $Revision: 1.15 $
  */
 
 public class FrameworkEvent extends EventObject {
@@ -39,25 +42,25 @@ public class FrameworkEvent extends EventObject {
 	/**
 	 * Bundle related to the event.
 	 */
-	private Bundle			bundle;
+	private final Bundle	bundle;
 
 	/**
 	 * Exception related to the event.
 	 */
-	private Throwable		throwable;
+	private final Throwable	throwable;
 
 	/**
 	 * Type of event.
 	 */
-	private int				type;
+	private final int		type;
 
 	/**
 	 * The Framework has started.
 	 * 
 	 * <p>
-	 * This event is fired when the Framework has started after all
-	 * installed bundles that are marked to be started have been started and the
-	 * Framework has reached the intitial start level.
+	 * This event is fired when the Framework has started after all installed
+	 * bundles that are marked to be started have been started and the Framework
+	 * has reached the intitial start level.
 	 * 
 	 * <p>
 	 * The value of <code>STARTED</code> is 0x00000001.
@@ -81,9 +84,8 @@ public class FrameworkEvent extends EventObject {
 	 * A PackageAdmin.refreshPackage operation has completed.
 	 * 
 	 * <p>
-	 * This event is fired when the Framework has completed the refresh
-	 * packages operation initiated by a call to the
-	 * PackageAdmin.refreshPackages method.
+	 * This event is fired when the Framework has completed the refresh packages
+	 * operation initiated by a call to the PackageAdmin.refreshPackages method.
 	 * 
 	 * <p>
 	 * The value of <code>PACKAGES_REFRESHED</code> is 0x00000004.
@@ -97,9 +99,8 @@ public class FrameworkEvent extends EventObject {
 	 * A StartLevel.setStartLevel operation has completed.
 	 * 
 	 * <p>
-	 * This event is fired when the Framework has completed changing the
-	 * active start level initiated by a call to the StartLevel.setStartLevel
-	 * method.
+	 * This event is fired when the Framework has completed changing the active
+	 * start level initiated by a call to the StartLevel.setStartLevel method.
 	 * 
 	 * <p>
 	 * The value of <code>STARTLEVEL_CHANGED</code> is 0x00000008.

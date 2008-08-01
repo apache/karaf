@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/SynchronousBundleListener.java,v 1.14 2006/06/16 16:31:18 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/SynchronousBundleListener.java,v 1.15 2007/02/20 00:16:30 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@
 package org.osgi.framework;
 
 /**
- * A synchronous <code>BundleEvent</code> listener. When a <code>BundleEvent</code> is
- * fired, it is synchronously delivered to a <code>BundleListener</code>.
- * 
- * <p>
+ * A synchronous <code>BundleEvent</code> listener.
  * <code>SynchronousBundleListener</code> is a listener interface that may be
- * implemented by a bundle developer.
+ * implemented by a bundle developer. When a <code>BundleEvent</code> is
+ * fired, it is synchronously delivered to a
+ * <code>SynchronousBundleListener</code>. The Framework may deliver
+ * <code>BundleEvent</code> objects to a
+ * <code>SynchronousBundleListener</code> out of order and may concurrently
+ * call and/or reenter a <code>SynchronousBundleListener</code>.
  * <p>
  * A <code>SynchronousBundleListener</code> object is registered with the
  * Framework using the {@link BundleContext#addBundleListener} method.
@@ -39,12 +41,13 @@ package org.osgi.framework;
  * <code>SynchronousBundleListener</code> objects will be called prior to
  * <code>BundleListener</code> objects.
  * <p>
- * <code>AdminPermission[bundle,LISTENER]</code> is required to add or remove a
- * <code>SynchronousBundleListener</code> object.
+ * <code>AdminPermission[bundle,LISTENER]</code> is required to add or remove
+ * a <code>SynchronousBundleListener</code> object.
  * 
- * @version $Revision: 1.14 $
  * @since 1.1
  * @see BundleEvent
+ * @ThreadSafe
+ * @version $Revision: 1.15 $
  */
 
 public interface SynchronousBundleListener extends BundleListener {
