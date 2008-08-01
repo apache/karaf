@@ -21,6 +21,7 @@ package org.apache.felix.framework;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.naming.OperationNotSupportedException;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.service.startlevel.StartLevel;
@@ -213,6 +214,14 @@ public class StartLevelImpl implements StartLevel, Runnable
     public boolean isBundlePersistentlyStarted(Bundle bundle)
     {
         return m_felix.isBundlePersistentlyStarted(bundle);
+    }
+
+    /* (non-Javadoc)
+     * @see org.osgi.service.startlevel.StartLevel#isBundleActivationPolicyUsed(org.osgi.framework.Bundle)
+    **/
+	public boolean isBundleActivationPolicyUsed(Bundle bundle)
+    {
+        throw new UnsupportedOperationException("This feature has not yet been implemented.");
     }
 
     public void run()

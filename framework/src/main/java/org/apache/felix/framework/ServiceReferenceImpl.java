@@ -192,4 +192,9 @@ class ServiceReferenceImpl implements ServiceReference
 
         return allow;
     }
+
+    public int compareTo(Object reference)
+    {
+        throw new UnsupportedOperationException("This feature has not yet been implemented.");
+    }
 }

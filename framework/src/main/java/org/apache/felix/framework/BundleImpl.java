@@ -371,6 +371,11 @@ class BundleImpl extends FelixBundle
         m_felix.startBundle(this, true);
     }
 
+	public void start(int options) throws BundleException
+    {
+        throw new UnsupportedOperationException("This feature has not yet been implemented.");
+    }
+
     public void update() throws BundleException
     {
         update(null);
@@ -400,6 +405,11 @@ class BundleImpl extends FelixBundle
         }
 
         m_felix.stopBundle(this, true);
+    }
+
+	public void stop(int options) throws BundleException
+    {
+        throw new UnsupportedOperationException("This feature has not yet been implemented.");
     }
 
     public void uninstall() throws BundleException

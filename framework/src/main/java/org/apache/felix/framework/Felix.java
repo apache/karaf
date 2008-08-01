@@ -893,6 +893,11 @@ ex.printStackTrace();
         fireFrameworkEvent(FrameworkEvent.STARTED, this, null);
     }
 
+	public void start(int options) throws BundleException
+    {
+        throw new UnsupportedOperationException("This feature has not yet been implemented.");
+    }
+
     /**
      * This method cleanly shuts down the framework, it must be called at the
      * end of a session in order to shutdown all active bundles.
@@ -908,6 +913,11 @@ ex.printStackTrace();
         }
 
         stopBundle(this, true);
+    }
+
+	public void stop(int options) throws BundleException
+    {
+        throw new UnsupportedOperationException("This feature has not yet been implemented.");
     }
 
     public void stopAndWait()
