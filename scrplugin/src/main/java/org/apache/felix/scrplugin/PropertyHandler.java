@@ -97,7 +97,9 @@ public class PropertyHandler {
                 } else {
                     // we have no value, valueRef or values so let's try to
                     // get the value of the field if a name attribute is specified
-                    if ( tag.getNamedParameter(Constants.PROPERTY_NAME) != null && javaField != null ) {
+                    final boolean isNamedParameter = tag.getNamedParameter(Constants.PROPERTY_NAME) != null
+                                                  || tag.getNamedParameter(Constants.PROPERTY_NAME_REF) != null;
+                    if ( isNamedParameter && javaField != null ) {
                         this.setPropertyValueRef(tag, prop, javaField.getName());
                     }
                 }
